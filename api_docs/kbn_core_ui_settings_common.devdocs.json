@@ -601,16 +601,16 @@
             "trackAdoption": false,
             "references": [
               {
-                "plugin": "discover",
-                "path": "src/plugins/discover/server/ui_settings.ts"
-              },
-              {
-                "plugin": "discover",
-                "path": "src/plugins/discover/server/ui_settings.ts"
-              },
-              {
                 "plugin": "@kbn/management-settings-field-definition",
                 "path": "src/platform/packages/shared/kbn-management/settings/field_definition/get_definition.ts"
+              },
+              {
+                "plugin": "discover",
+                "path": "src/plugins/discover/server/ui_settings.ts"
+              },
+              {
+                "plugin": "discover",
+                "path": "src/plugins/discover/server/ui_settings.ts"
               }
             ]
           },

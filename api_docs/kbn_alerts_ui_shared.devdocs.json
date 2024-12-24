@@ -3333,7 +3333,7 @@
                     "text": "ControlGroupRendererProps"
                   }
                 ],
-                "path": "src/plugins/controls/public/control_group/control_group_renderer/control_group_renderer_lazy.tsx",
+                "path": "src/platform/plugins/shared/controls/public/control_group/control_group_renderer/control_group_renderer_lazy.tsx",
                 "deprecated": false,
                 "trackAdoption": false
               }

@@ -846,23 +846,11 @@
                 "text": "NavigationSection"
               },
               "[]>) => void; }; updateGlobalNavigation: ({ capabilities, deepLinks, updater$, }: { capabilities: Readonly<{ [x: string]: Readonly<{ [x: string]: boolean | Readonly<{ [x: string]: boolean; }>; }>; navLinks: Readonly<{ [x: string]: boolean; }>; management: Readonly<{ [x: string]: Readonly<{ [x: string]: boolean; }>; }>; catalogue: Readonly<{ [x: string]: boolean; }>; }>; deepLinks: ",
-              {
-                "pluginId": "@kbn/core-application-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreApplicationBrowserPluginApi",
-                "section": "def-public.AppDeepLink",
-                "text": "AppDeepLink"
-              },
+              "AppDeepLink",
               "<string>[]; updater$: ",
               "Subject",
               "<",
-              {
-                "pluginId": "@kbn/core-application-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreApplicationBrowserPluginApi",
-                "section": "def-public.AppUpdater",
-                "text": "AppUpdater"
-              },
+              "AppUpdater",
               ">; }) => void; }"
             ],
             "path": "x-pack/solutions/observability/plugins/slo/public/types.ts",

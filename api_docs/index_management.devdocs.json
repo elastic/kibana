@@ -568,13 +568,7 @@
           "description": [],
           "signature": [
             "(deps: { history: ",
-            {
-              "pluginId": "@kbn/core-application-browser",
-              "scope": "public",
-              "docId": "kibKbnCoreApplicationBrowserPluginApi",
-              "section": "def-public.ScopedHistory",
-              "text": "ScopedHistory"
-            },
+            "ScopedHistory",
             "<unknown>; }) => React.FC<",
             {
               "pluginId": "@kbn/index-management-shared-types",
@@ -608,13 +602,7 @@
                   "label": "history",
                   "description": [],
                   "signature": [
-                    {
-                      "pluginId": "@kbn/core-application-browser",
-                      "scope": "public",
-                      "docId": "kibKbnCoreApplicationBrowserPluginApi",
-                      "section": "def-public.ScopedHistory",
-                      "text": "ScopedHistory"
-                    },
+                    "ScopedHistory",
                     "<unknown>"
                   ],
                   "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
@@ -635,13 +623,7 @@
           "description": [],
           "signature": [
             "(deps: { history: ",
-            {
-              "pluginId": "@kbn/core-application-browser",
-              "scope": "public",
-              "docId": "kibKbnCoreApplicationBrowserPluginApi",
-              "section": "def-public.ScopedHistory",
-              "text": "ScopedHistory"
-            },
+            "ScopedHistory",
             "<unknown>; }) => React.FC<",
             {
               "pluginId": "@kbn/index-management-shared-types",
@@ -675,13 +657,7 @@
                   "label": "history",
                   "description": [],
                   "signature": [
-                    {
-                      "pluginId": "@kbn/core-application-browser",
-                      "scope": "public",
-                      "docId": "kibKbnCoreApplicationBrowserPluginApi",
-                      "section": "def-public.ScopedHistory",
-                      "text": "ScopedHistory"
-                    },
+                    "ScopedHistory",
                     "<unknown>"
                   ],
                   "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",

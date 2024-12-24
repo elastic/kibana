@@ -2648,7 +2648,7 @@
             "label": "type",
             "description": [],
             "signature": [
-              "\"unknown\" | \"cell\" | \"unavailable\" | \"wifi\" | \"wired\""
+              "\"unknown\" | \"cell\" | \"unavailable\" | \"wired\" | \"wifi\""
             ],
             "path": "packages/kbn-apm-synthtrace-client/src/lib/apm/mobile_device.ts",
             "deprecated": false,

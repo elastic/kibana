@@ -1173,13 +1173,7 @@
             "label": "application",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-application-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreApplicationBrowserPluginApi",
-                "section": "def-public.ApplicationStart",
-                "text": "ApplicationStart"
-              },
+              "ApplicationStart",
               " | undefined"
             ],
             "path": "packages/kbn-search-api-panels/components/select_client.tsx",

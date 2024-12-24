@@ -36,11 +36,11 @@
         "references": [
           {
             "plugin": "presentationUtil",
-            "path": "src/plugins/presentation_util/public/components/saved_object_save_modal_dashboard.tsx"
+            "path": "src/platform/plugins/shared/presentation_util/public/components/saved_object_save_modal_dashboard.tsx"
           },
           {
             "plugin": "presentationUtil",
-            "path": "src/plugins/presentation_util/public/components/saved_object_save_modal_dashboard.tsx"
+            "path": "src/platform/plugins/shared/presentation_util/public/components/saved_object_save_modal_dashboard.tsx"
           },
           {
             "plugin": "visualizations",
@@ -60,19 +60,19 @@
           },
           {
             "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/dashboard_container/embeddable/api/overlays/save_modal.tsx"
+            "path": "src/platform/plugins/shared/dashboard/public/dashboard_container/embeddable/api/overlays/save_modal.tsx"
           },
           {
             "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/dashboard_container/embeddable/api/overlays/save_modal.tsx"
+            "path": "src/platform/plugins/shared/dashboard/public/dashboard_container/embeddable/api/overlays/save_modal.tsx"
           },
           {
             "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/dashboard_actions/add_to_library_action.tsx"
+            "path": "src/platform/plugins/shared/dashboard/public/dashboard_actions/add_to_library_action.tsx"
           },
           {
             "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/dashboard_actions/add_to_library_action.tsx"
+            "path": "src/platform/plugins/shared/dashboard/public/dashboard_actions/add_to_library_action.tsx"
           },
           {
             "plugin": "discover",
@@ -92,11 +92,11 @@
           },
           {
             "plugin": "links",
-            "path": "src/plugins/links/public/content_management/save_to_library.tsx"
+            "path": "src/platform/plugins/private/links/public/content_management/save_to_library.tsx"
           },
           {
             "plugin": "links",
-            "path": "src/plugins/links/public/content_management/save_to_library.tsx"
+            "path": "src/platform/plugins/private/links/public/content_management/save_to_library.tsx"
           }
         ],
         "children": [

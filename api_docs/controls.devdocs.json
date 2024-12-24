@@ -21,7 +21,7 @@
           },
           ") => React.JSX.Element"
         ],
-        "path": "src/plugins/controls/public/control_group/control_group_renderer/control_group_renderer_lazy.tsx",
+        "path": "src/platform/plugins/shared/controls/public/control_group/control_group_renderer/control_group_renderer_lazy.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -41,7 +41,7 @@
                 "text": "ControlGroupRendererProps"
               }
             ],
-            "path": "src/plugins/controls/public/control_group/control_group_renderer/control_group_renderer_lazy.tsx",
+            "path": "src/platform/plugins/shared/controls/public/control_group/control_group_renderer/control_group_renderer_lazy.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -59,7 +59,7 @@
         "tags": [],
         "label": "ControlGroupCreationOptions",
         "description": [],
-        "path": "src/plugins/controls/public/control_group/control_group_renderer/types.ts",
+        "path": "src/platform/plugins/shared/controls/public/control_group/control_group_renderer/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -89,7 +89,7 @@
               },
               ">> | undefined"
             ],
-            "path": "src/plugins/controls/public/control_group/control_group_renderer/types.ts",
+            "path": "src/platform/plugins/shared/controls/public/control_group/control_group_renderer/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -110,7 +110,7 @@
               },
               " | undefined"
             ],
-            "path": "src/plugins/controls/public/control_group/control_group_renderer/types.ts",
+            "path": "src/platform/plugins/shared/controls/public/control_group/control_group_renderer/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -124,7 +124,7 @@
         "tags": [],
         "label": "ControlGroupRendererProps",
         "description": [],
-        "path": "src/plugins/controls/public/control_group/control_group_renderer/control_group_renderer.tsx",
+        "path": "src/platform/plugins/shared/controls/public/control_group/control_group_renderer/control_group_renderer.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -146,7 +146,7 @@
               },
               ") => void"
             ],
-            "path": "src/plugins/controls/public/control_group/control_group_renderer/control_group_renderer.tsx",
+            "path": "src/platform/plugins/shared/controls/public/control_group/control_group_renderer/control_group_renderer.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -166,7 +166,7 @@
                     "text": "ControlGroupRendererApi"
                   }
                 ],
-                "path": "src/plugins/controls/public/control_group/control_group_renderer/control_group_renderer.tsx",
+                "path": "src/platform/plugins/shared/controls/public/control_group/control_group_renderer/control_group_renderer.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -284,7 +284,7 @@
               },
               ">>) | undefined"
             ],
-            "path": "src/plugins/controls/public/control_group/control_group_renderer/control_group_renderer.tsx",
+            "path": "src/platform/plugins/shared/controls/public/control_group/control_group_renderer/control_group_renderer.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -314,7 +314,7 @@
                   },
                   ">>"
                 ],
-                "path": "src/plugins/controls/public/control_group/control_group_renderer/control_group_renderer.tsx",
+                "path": "src/platform/plugins/shared/controls/public/control_group/control_group_renderer/control_group_renderer.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -405,7 +405,7 @@
                   },
                   ">>, controlId?: string | undefined) => void; }"
                 ],
-                "path": "src/plugins/controls/public/control_group/control_group_renderer/control_group_renderer.tsx",
+                "path": "src/platform/plugins/shared/controls/public/control_group/control_group_renderer/control_group_renderer.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -430,7 +430,7 @@
               },
               " | undefined"
             ],
-            "path": "src/plugins/controls/public/control_group/control_group_renderer/control_group_renderer.tsx",
+            "path": "src/platform/plugins/shared/controls/public/control_group/control_group_renderer/control_group_renderer.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -451,7 +451,7 @@
               },
               "[] | undefined"
             ],
-            "path": "src/plugins/controls/public/control_group/control_group_renderer/control_group_renderer.tsx",
+            "path": "src/platform/plugins/shared/controls/public/control_group/control_group_renderer/control_group_renderer.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -472,7 +472,7 @@
               },
               " | undefined"
             ],
-            "path": "src/plugins/controls/public/control_group/control_group_renderer/control_group_renderer.tsx",
+            "path": "src/platform/plugins/shared/controls/public/control_group/control_group_renderer/control_group_renderer.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -493,7 +493,7 @@
               },
               " | undefined"
             ],
-            "path": "src/plugins/controls/public/control_group/control_group_renderer/control_group_renderer.tsx",
+            "path": "src/platform/plugins/shared/controls/public/control_group/control_group_renderer/control_group_renderer.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -507,7 +507,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/plugins/controls/public/control_group/control_group_renderer/control_group_renderer.tsx",
+            "path": "src/platform/plugins/shared/controls/public/control_group/control_group_renderer/control_group_renderer.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -521,7 +521,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/plugins/controls/public/control_group/control_group_renderer/control_group_renderer.tsx",
+            "path": "src/platform/plugins/shared/controls/public/control_group/control_group_renderer/control_group_renderer.tsx",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -545,7 +545,7 @@
           },
           "<State>"
         ],
-        "path": "src/plugins/controls/common/control_group/types.ts",
+        "path": "src/platform/plugins/shared/controls/common/control_group/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -559,7 +559,7 @@
             "signature": [
               "\"NONE\" | \"HIERARCHICAL\""
             ],
-            "path": "src/plugins/controls/common/control_group/types.ts",
+            "path": "src/platform/plugins/shared/controls/common/control_group/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -573,7 +573,7 @@
             "signature": [
               "\"oneLine\" | \"twoLine\""
             ],
-            "path": "src/plugins/controls/common/control_group/types.ts",
+            "path": "src/platform/plugins/shared/controls/common/control_group/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -584,7 +584,7 @@
             "tags": [],
             "label": "autoApplySelections",
             "description": [],
-            "path": "src/plugins/controls/common/control_group/types.ts",
+            "path": "src/platform/plugins/shared/controls/common/control_group/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -605,7 +605,7 @@
               },
               " | undefined"
             ],
-            "path": "src/plugins/controls/common/control_group/types.ts",
+            "path": "src/platform/plugins/shared/controls/common/control_group/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -626,7 +626,7 @@
               },
               "<State>"
             ],
-            "path": "src/plugins/controls/common/control_group/types.ts",
+            "path": "src/platform/plugins/shared/controls/common/control_group/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -647,7 +647,7 @@
               },
               " | undefined"
             ],
-            "path": "src/plugins/controls/common/control_group/types.ts",
+            "path": "src/platform/plugins/shared/controls/common/control_group/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -687,7 +687,7 @@
           },
           ">, \"initialChildControlState\">"
         ],
-        "path": "src/plugins/controls/common/control_group/types.ts",
+        "path": "src/platform/plugins/shared/controls/common/control_group/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -709,7 +709,7 @@
               },
               " & { type: string; order: number; } & { id?: string | undefined; })[]"
             ],
-            "path": "src/plugins/controls/common/control_group/types.ts",
+            "path": "src/platform/plugins/shared/controls/common/control_group/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -735,7 +735,7 @@
           },
           "<State>"
         ],
-        "path": "src/plugins/controls/common/control_group/types.ts",
+        "path": "src/platform/plugins/shared/controls/common/control_group/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -757,7 +757,7 @@
               },
               "<State>"
             ],
-            "path": "src/plugins/controls/common/control_group/types.ts",
+            "path": "src/platform/plugins/shared/controls/common/control_group/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -783,7 +783,7 @@
           "ControlFactory",
           "<State, Api>"
         ],
-        "path": "src/plugins/controls/public/controls/data_controls/types.ts",
+        "path": "src/platform/plugins/shared/controls/public/controls/data_controls/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -805,7 +805,7 @@
               },
               ") => boolean"
             ],
-            "path": "src/plugins/controls/public/controls/data_controls/types.ts",
+            "path": "src/platform/plugins/shared/controls/public/controls/data_controls/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -825,7 +825,7 @@
                     "text": "DataViewField"
                   }
                 ],
-                "path": "src/plugins/controls/public/controls/data_controls/types.ts",
+                "path": "src/platform/plugins/shared/controls/public/controls/data_controls/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -845,7 +845,7 @@
               "CustomOptionsComponentProps",
               "<State>> | undefined"
             ],
-            "path": "src/plugins/controls/public/controls/data_controls/types.ts",
+            "path": "src/platform/plugins/shared/controls/public/controls/data_controls/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -876,7 +876,7 @@
             "text": "DefaultControlState"
           }
         ],
-        "path": "src/plugins/controls/common/types.ts",
+        "path": "src/platform/plugins/shared/controls/common/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -887,7 +887,7 @@
             "tags": [],
             "label": "dataViewId",
             "description": [],
-            "path": "src/plugins/controls/common/types.ts",
+            "path": "src/platform/plugins/shared/controls/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -898,7 +898,7 @@
             "tags": [],
             "label": "fieldName",
             "description": [],
-            "path": "src/plugins/controls/common/types.ts",
+            "path": "src/platform/plugins/shared/controls/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -912,7 +912,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/controls/common/types.ts",
+            "path": "src/platform/plugins/shared/controls/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -939,7 +939,7 @@
           ",",
           "OptionsListDisplaySettings"
         ],
-        "path": "src/plugins/controls/common/options_list/types.ts",
+        "path": "src/platform/plugins/shared/controls/common/options_list/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -954,7 +954,7 @@
               "OptionsListSearchTechnique",
               " | undefined"
             ],
-            "path": "src/plugins/controls/common/options_list/types.ts",
+            "path": "src/platform/plugins/shared/controls/common/options_list/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -969,7 +969,7 @@
               "OptionsListSortingType",
               " | undefined"
             ],
-            "path": "src/plugins/controls/common/options_list/types.ts",
+            "path": "src/platform/plugins/shared/controls/common/options_list/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -984,7 +984,7 @@
               "OptionsListSelection",
               "[] | undefined"
             ],
-            "path": "src/plugins/controls/common/options_list/types.ts",
+            "path": "src/platform/plugins/shared/controls/common/options_list/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -998,7 +998,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/plugins/controls/common/options_list/types.ts",
+            "path": "src/platform/plugins/shared/controls/common/options_list/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1012,7 +1012,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/plugins/controls/common/options_list/types.ts",
+            "path": "src/platform/plugins/shared/controls/common/options_list/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1026,7 +1026,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/plugins/controls/common/options_list/types.ts",
+            "path": "src/platform/plugins/shared/controls/common/options_list/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1040,7 +1040,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/plugins/controls/common/options_list/types.ts",
+            "path": "src/platform/plugins/shared/controls/common/options_list/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1060,7 +1060,7 @@
         "signature": [
           "\"clearControl\""
         ],
-        "path": "src/plugins/controls/public/actions/index.ts",
+        "path": "src/platform/plugins/shared/controls/public/actions/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1075,7 +1075,7 @@
         "signature": [
           "\"deleteControl\""
         ],
-        "path": "src/plugins/controls/public/actions/index.ts",
+        "path": "src/platform/plugins/shared/controls/public/actions/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1090,7 +1090,7 @@
         "signature": [
           "\"editDataControl\""
         ],
-        "path": "src/plugins/controls/public/actions/index.ts",
+        "path": "src/platform/plugins/shared/controls/public/actions/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1105,7 +1105,7 @@
         "signature": [
           "\"control_group\""
         ],
-        "path": "src/plugins/controls/common/control_group/types.ts",
+        "path": "src/platform/plugins/shared/controls/common/control_group/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1365,7 +1365,7 @@
           },
           ") => void; }"
         ],
-        "path": "src/plugins/controls/public/control_group/types.ts",
+        "path": "src/platform/plugins/shared/controls/public/control_group/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1657,7 +1657,7 @@
           },
           ">>; }"
         ],
-        "path": "src/plugins/controls/public/control_group/control_group_renderer/types.ts",
+        "path": "src/platform/plugins/shared/controls/public/control_group/control_group_renderer/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1748,7 +1748,7 @@
           },
           ">>, controlId?: string | undefined) => void; }"
         ],
-        "path": "src/plugins/controls/public/control_group/utils/control_group_state_builder.ts",
+        "path": "src/platform/plugins/shared/controls/public/control_group/utils/control_group_state_builder.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1763,7 +1763,7 @@
         "signature": [
           "State & { type: string; order: number; }"
         ],
-        "path": "src/plugins/controls/common/control_group/types.ts",
+        "path": "src/platform/plugins/shared/controls/common/control_group/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1778,7 +1778,7 @@
         "signature": [
           "(newState: Partial<State>, controlType: string) => Partial<State>"
         ],
-        "path": "src/plugins/controls/public/control_group/types.ts",
+        "path": "src/platform/plugins/shared/controls/public/control_group/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -1793,7 +1793,7 @@
             "signature": [
               "{ [P in keyof State]?: State[P] | undefined; }"
             ],
-            "path": "src/plugins/controls/public/control_group/types.ts",
+            "path": "src/platform/plugins/shared/controls/public/control_group/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1804,7 +1804,7 @@
             "tags": [],
             "label": "controlType",
             "description": [],
-            "path": "src/plugins/controls/public/control_group/types.ts",
+            "path": "src/platform/plugins/shared/controls/public/control_group/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1970,7 +1970,7 @@
           },
           " & { untilFiltersReady: () => Promise<void>; }"
         ],
-        "path": "src/plugins/controls/public/controls/data_controls/types.ts",
+        "path": "src/platform/plugins/shared/controls/public/controls/data_controls/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1985,7 +1985,7 @@
         "signature": [
           "\"optionsListControl\""
         ],
-        "path": "src/plugins/controls/common/constants.ts",
+        "path": "src/platform/plugins/shared/controls/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2000,7 +2000,7 @@
         "signature": [
           "\"rangeSliderControl\""
         ],
-        "path": "src/plugins/controls/common/constants.ts",
+        "path": "src/platform/plugins/shared/controls/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2015,7 +2015,7 @@
         "signature": [
           "\"timeSlider\""
         ],
-        "path": "src/plugins/controls/common/constants.ts",
+        "path": "src/platform/plugins/shared/controls/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2029,7 +2029,7 @@
         "tags": [],
         "label": "controlGroupStateBuilder",
         "description": [],
-        "path": "src/plugins/controls/public/control_group/utils/control_group_state_builder.ts",
+        "path": "src/platform/plugins/shared/controls/public/control_group/utils/control_group_state_builder.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2067,7 +2067,7 @@
               },
               ", controlId?: string | undefined) => Promise<void>"
             ],
-            "path": "src/plugins/controls/public/control_group/utils/control_group_state_builder.ts",
+            "path": "src/platform/plugins/shared/controls/public/control_group/utils/control_group_state_builder.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2097,7 +2097,7 @@
                   },
                   ">>"
                 ],
-                "path": "src/plugins/controls/public/control_group/utils/control_group_state_builder.ts",
+                "path": "src/platform/plugins/shared/controls/public/control_group/utils/control_group_state_builder.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2118,7 +2118,7 @@
                     "text": "DefaultDataControlState"
                   }
                 ],
-                "path": "src/plugins/controls/public/control_group/utils/control_group_state_builder.ts",
+                "path": "src/platform/plugins/shared/controls/public/control_group/utils/control_group_state_builder.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2133,7 +2133,7 @@
                 "signature": [
                   "string | undefined"
                 ],
-                "path": "src/plugins/controls/public/control_group/utils/control_group_state_builder.ts",
+                "path": "src/platform/plugins/shared/controls/public/control_group/utils/control_group_state_builder.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -2169,7 +2169,7 @@
               "OptionsListControlState",
               ", controlId?: string | undefined) => void"
             ],
-            "path": "src/plugins/controls/public/control_group/utils/control_group_state_builder.ts",
+            "path": "src/platform/plugins/shared/controls/public/control_group/utils/control_group_state_builder.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2199,7 +2199,7 @@
                   },
                   ">>"
                 ],
-                "path": "src/plugins/controls/public/control_group/utils/control_group_state_builder.ts",
+                "path": "src/platform/plugins/shared/controls/public/control_group/utils/control_group_state_builder.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2214,7 +2214,7 @@
                 "signature": [
                   "OptionsListControlState"
                 ],
-                "path": "src/plugins/controls/public/control_group/utils/control_group_state_builder.ts",
+                "path": "src/platform/plugins/shared/controls/public/control_group/utils/control_group_state_builder.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2229,7 +2229,7 @@
                 "signature": [
                   "string | undefined"
                 ],
-                "path": "src/plugins/controls/public/control_group/utils/control_group_state_builder.ts",
+                "path": "src/platform/plugins/shared/controls/public/control_group/utils/control_group_state_builder.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -2265,7 +2265,7 @@
               "RangesliderControlState",
               ", controlId?: string | undefined) => void"
             ],
-            "path": "src/plugins/controls/public/control_group/utils/control_group_state_builder.ts",
+            "path": "src/platform/plugins/shared/controls/public/control_group/utils/control_group_state_builder.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2295,7 +2295,7 @@
                   },
                   ">>"
                 ],
-                "path": "src/plugins/controls/public/control_group/utils/control_group_state_builder.ts",
+                "path": "src/platform/plugins/shared/controls/public/control_group/utils/control_group_state_builder.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2310,7 +2310,7 @@
                 "signature": [
                   "RangesliderControlState"
                 ],
-                "path": "src/plugins/controls/public/control_group/utils/control_group_state_builder.ts",
+                "path": "src/platform/plugins/shared/controls/public/control_group/utils/control_group_state_builder.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2325,7 +2325,7 @@
                 "signature": [
                   "string | undefined"
                 ],
-                "path": "src/plugins/controls/public/control_group/utils/control_group_state_builder.ts",
+                "path": "src/platform/plugins/shared/controls/public/control_group/utils/control_group_state_builder.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -2359,7 +2359,7 @@
               },
               ">>, controlId?: string | undefined) => void"
             ],
-            "path": "src/plugins/controls/public/control_group/utils/control_group_state_builder.ts",
+            "path": "src/platform/plugins/shared/controls/public/control_group/utils/control_group_state_builder.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2389,7 +2389,7 @@
                   },
                   ">>"
                 ],
-                "path": "src/plugins/controls/public/control_group/utils/control_group_state_builder.ts",
+                "path": "src/platform/plugins/shared/controls/public/control_group/utils/control_group_state_builder.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2404,7 +2404,7 @@
                 "signature": [
                   "string | undefined"
                 ],
-                "path": "src/plugins/controls/public/control_group/utils/control_group_state_builder.ts",
+                "path": "src/platform/plugins/shared/controls/public/control_group/utils/control_group_state_builder.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -2433,7 +2433,7 @@
           ") => ",
           "SerializableControlGroupState"
         ],
-        "path": "src/plugins/controls/server/control_group/control_group_persistence.ts",
+        "path": "src/platform/plugins/shared/controls/server/control_group/control_group_persistence.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2447,7 +2447,7 @@
             "signature": [
               "ControlGroupSavedObjectState"
             ],
-            "path": "src/plugins/controls/server/control_group/control_group_persistence.ts",
+            "path": "src/platform/plugins/shared/controls/server/control_group/control_group_persistence.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -2473,7 +2473,7 @@
             "text": "ControlGroupTelemetry"
           }
         ],
-        "path": "src/plugins/controls/server/control_group/control_group_telemetry.ts",
+        "path": "src/platform/plugins/shared/controls/server/control_group/control_group_telemetry.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2487,7 +2487,7 @@
             "signature": [
               "Record<string, unknown>"
             ],
-            "path": "src/plugins/controls/server/control_group/control_group_telemetry.ts",
+            "path": "src/platform/plugins/shared/controls/server/control_group/control_group_telemetry.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -2515,7 +2515,7 @@
           ") => ",
           "ControlGroupSavedObjectState"
         ],
-        "path": "src/plugins/controls/server/control_group/control_group_persistence.ts",
+        "path": "src/platform/plugins/shared/controls/server/control_group/control_group_persistence.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2535,7 +2535,7 @@
                 "text": "SerializableRecord"
               }
             ],
-            "path": "src/plugins/controls/server/control_group/control_group_persistence.ts",
+            "path": "src/platform/plugins/shared/controls/server/control_group/control_group_persistence.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -2553,7 +2553,7 @@
         "tags": [],
         "label": "ControlGroupTelemetry",
         "description": [],
-        "path": "src/plugins/controls/server/control_group/types.ts",
+        "path": "src/platform/plugins/shared/controls/server/control_group/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2564,7 +2564,7 @@
             "tags": [],
             "label": "total",
             "description": [],
-            "path": "src/plugins/controls/server/control_group/types.ts",
+            "path": "src/platform/plugins/shared/controls/server/control_group/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2578,7 +2578,7 @@
             "signature": [
               "{ [key: string]: number; }"
             ],
-            "path": "src/plugins/controls/server/control_group/types.ts",
+            "path": "src/platform/plugins/shared/controls/server/control_group/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2592,7 +2592,7 @@
             "signature": [
               "{ [key: string]: number; }"
             ],
-            "path": "src/plugins/controls/server/control_group/types.ts",
+            "path": "src/platform/plugins/shared/controls/server/control_group/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2606,7 +2606,7 @@
             "signature": [
               "{ [key: string]: number; }"
             ],
-            "path": "src/plugins/controls/server/control_group/types.ts",
+            "path": "src/platform/plugins/shared/controls/server/control_group/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2620,7 +2620,7 @@
             "signature": [
               "{ [key: string]: { total: number; details: { [key: string]: number; }; }; }"
             ],
-            "path": "src/plugins/controls/server/control_group/types.ts",
+            "path": "src/platform/plugins/shared/controls/server/control_group/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2645,7 +2645,7 @@
         "description": [
           "\n----------------------------------------------------------------\nControl group state\n----------------------------------------------------------------"
         ],
-        "path": "src/plugins/controls/common/control_group/types.ts",
+        "path": "src/platform/plugins/shared/controls/common/control_group/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2659,7 +2659,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/plugins/controls/common/control_group/types.ts",
+            "path": "src/platform/plugins/shared/controls/common/control_group/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2673,7 +2673,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/plugins/controls/common/control_group/types.ts",
+            "path": "src/platform/plugins/shared/controls/common/control_group/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2687,7 +2687,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/plugins/controls/common/control_group/types.ts",
+            "path": "src/platform/plugins/shared/controls/common/control_group/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2702,7 +2702,7 @@
               "FieldFilterPredicate",
               " | undefined"
             ],
-            "path": "src/plugins/controls/common/control_group/types.ts",
+            "path": "src/platform/plugins/shared/controls/common/control_group/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2726,7 +2726,7 @@
           },
           "<State>"
         ],
-        "path": "src/plugins/controls/common/control_group/types.ts",
+        "path": "src/platform/plugins/shared/controls/common/control_group/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2740,7 +2740,7 @@
             "signature": [
               "\"NONE\" | \"HIERARCHICAL\""
             ],
-            "path": "src/plugins/controls/common/control_group/types.ts",
+            "path": "src/platform/plugins/shared/controls/common/control_group/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2754,7 +2754,7 @@
             "signature": [
               "\"oneLine\" | \"twoLine\""
             ],
-            "path": "src/plugins/controls/common/control_group/types.ts",
+            "path": "src/platform/plugins/shared/controls/common/control_group/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2765,7 +2765,7 @@
             "tags": [],
             "label": "autoApplySelections",
             "description": [],
-            "path": "src/plugins/controls/common/control_group/types.ts",
+            "path": "src/platform/plugins/shared/controls/common/control_group/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2786,7 +2786,7 @@
               },
               " | undefined"
             ],
-            "path": "src/plugins/controls/common/control_group/types.ts",
+            "path": "src/platform/plugins/shared/controls/common/control_group/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2807,7 +2807,7 @@
               },
               "<State>"
             ],
-            "path": "src/plugins/controls/common/control_group/types.ts",
+            "path": "src/platform/plugins/shared/controls/common/control_group/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2828,7 +2828,7 @@
               },
               " | undefined"
             ],
-            "path": "src/plugins/controls/common/control_group/types.ts",
+            "path": "src/platform/plugins/shared/controls/common/control_group/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2868,7 +2868,7 @@
           },
           ">, \"initialChildControlState\">"
         ],
-        "path": "src/plugins/controls/common/control_group/types.ts",
+        "path": "src/platform/plugins/shared/controls/common/control_group/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2890,7 +2890,7 @@
               },
               " & { type: string; order: number; } & { id?: string | undefined; })[]"
             ],
-            "path": "src/plugins/controls/common/control_group/types.ts",
+            "path": "src/platform/plugins/shared/controls/common/control_group/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2916,7 +2916,7 @@
           },
           "<State>"
         ],
-        "path": "src/plugins/controls/common/control_group/types.ts",
+        "path": "src/platform/plugins/shared/controls/common/control_group/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2938,7 +2938,7 @@
               },
               "<State>"
             ],
-            "path": "src/plugins/controls/common/control_group/types.ts",
+            "path": "src/platform/plugins/shared/controls/common/control_group/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2952,7 +2952,7 @@
         "tags": [],
         "label": "DefaultControlState",
         "description": [],
-        "path": "src/plugins/controls/common/types.ts",
+        "path": "src/platform/plugins/shared/controls/common/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2966,7 +2966,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/plugins/controls/common/types.ts",
+            "path": "src/platform/plugins/shared/controls/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2987,7 +2987,7 @@
               },
               " | undefined"
             ],
-            "path": "src/plugins/controls/common/types.ts",
+            "path": "src/platform/plugins/shared/controls/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3018,7 +3018,7 @@
             "text": "DefaultControlState"
           }
         ],
-        "path": "src/plugins/controls/common/types.ts",
+        "path": "src/platform/plugins/shared/controls/common/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3029,7 +3029,7 @@
             "tags": [],
             "label": "dataViewId",
             "description": [],
-            "path": "src/plugins/controls/common/types.ts",
+            "path": "src/platform/plugins/shared/controls/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3040,7 +3040,7 @@
             "tags": [],
             "label": "fieldName",
             "description": [],
-            "path": "src/plugins/controls/common/types.ts",
+            "path": "src/platform/plugins/shared/controls/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3054,7 +3054,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/controls/common/types.ts",
+            "path": "src/platform/plugins/shared/controls/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3085,7 +3085,7 @@
             "text": "SerializableRecord"
           }
         ],
-        "path": "src/plugins/controls/common/types.ts",
+        "path": "src/platform/plugins/shared/controls/common/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3099,7 +3099,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/plugins/controls/common/types.ts",
+            "path": "src/platform/plugins/shared/controls/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3113,7 +3113,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/plugins/controls/common/types.ts",
+            "path": "src/platform/plugins/shared/controls/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3127,7 +3127,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/plugins/controls/common/types.ts",
+            "path": "src/platform/plugins/shared/controls/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3141,7 +3141,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/plugins/controls/common/types.ts",
+            "path": "src/platform/plugins/shared/controls/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3172,7 +3172,7 @@
             "text": "DefaultControlState"
           }
         ],
-        "path": "src/plugins/controls/common/types.ts",
+        "path": "src/platform/plugins/shared/controls/common/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3183,7 +3183,7 @@
             "tags": [],
             "label": "type",
             "description": [],
-            "path": "src/plugins/controls/common/types.ts",
+            "path": "src/platform/plugins/shared/controls/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3197,7 +3197,7 @@
             "signature": [
               "{ id: string; } & ControlStateType"
             ],
-            "path": "src/plugins/controls/common/types.ts",
+            "path": "src/platform/plugins/shared/controls/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3217,7 +3217,7 @@
         "signature": [
           "\"control_group\""
         ],
-        "path": "src/plugins/controls/common/control_group/types.ts",
+        "path": "src/platform/plugins/shared/controls/common/control_group/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3232,7 +3232,7 @@
         "signature": [
           "\"NONE\" | \"HIERARCHICAL\""
         ],
-        "path": "src/plugins/controls/common/control_group/types.ts",
+        "path": "src/platform/plugins/shared/controls/common/control_group/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3247,7 +3247,7 @@
         "signature": [
           "\"oneLine\" | \"twoLine\""
         ],
-        "path": "src/plugins/controls/common/types.ts",
+        "path": "src/platform/plugins/shared/controls/common/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3262,7 +3262,7 @@
         "signature": [
           "State & { type: string; order: number; }"
         ],
-        "path": "src/plugins/controls/common/control_group/types.ts",
+        "path": "src/platform/plugins/shared/controls/common/control_group/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3277,7 +3277,7 @@
         "signature": [
           "\"small\" | \"medium\" | \"large\""
         ],
-        "path": "src/plugins/controls/common/types.ts",
+        "path": "src/platform/plugins/shared/controls/common/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3292,7 +3292,7 @@
         "signature": [
           "true"
         ],
-        "path": "src/plugins/controls/common/constants.ts",
+        "path": "src/platform/plugins/shared/controls/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3307,7 +3307,7 @@
         "signature": [
           "\"NONE\" | \"HIERARCHICAL\""
         ],
-        "path": "src/plugins/controls/common/constants.ts",
+        "path": "src/platform/plugins/shared/controls/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3319,7 +3319,7 @@
         "tags": [],
         "label": "DEFAULT_CONTROL_GROW",
         "description": [],
-        "path": "src/plugins/controls/common/constants.ts",
+        "path": "src/platform/plugins/shared/controls/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3334,7 +3334,7 @@
         "signature": [
           "\"oneLine\" | \"twoLine\""
         ],
-        "path": "src/plugins/controls/common/constants.ts",
+        "path": "src/platform/plugins/shared/controls/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3349,7 +3349,7 @@
         "signature": [
           "\"small\" | \"medium\" | \"large\""
         ],
-        "path": "src/plugins/controls/common/constants.ts",
+        "path": "src/platform/plugins/shared/controls/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3364,7 +3364,7 @@
         "signature": [
           "\"optionsListControl\""
         ],
-        "path": "src/plugins/controls/common/constants.ts",
+        "path": "src/platform/plugins/shared/controls/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3379,7 +3379,7 @@
         "signature": [
           "\"rangeSliderControl\""
         ],
-        "path": "src/plugins/controls/common/constants.ts",
+        "path": "src/platform/plugins/shared/controls/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3394,7 +3394,7 @@
         "signature": [
           "\"timeSlider\""
         ],
-        "path": "src/plugins/controls/common/constants.ts",
+        "path": "src/platform/plugins/shared/controls/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3411,7 +3411,7 @@
         "signature": [
           "{ readonly NONE: \"NONE\"; readonly HIERARCHICAL: \"HIERARCHICAL\"; }"
         ],
-        "path": "src/plugins/controls/common/constants.ts",
+        "path": "src/platform/plugins/shared/controls/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3426,7 +3426,7 @@
         "signature": [
           "{ readonly ONE_LINE: \"oneLine\"; readonly TWO_LINE: \"twoLine\"; }"
         ],
-        "path": "src/plugins/controls/common/constants.ts",
+        "path": "src/platform/plugins/shared/controls/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3441,7 +3441,7 @@
         "signature": [
           "{ readonly SMALL: \"small\"; readonly MEDIUM: \"medium\"; readonly LARGE: \"large\"; }"
         ],
-        "path": "src/plugins/controls/common/constants.ts",
+        "path": "src/platform/plugins/shared/controls/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3456,7 +3456,7 @@
         "signature": [
           "{ readonly ignoreFilters: false; readonly ignoreQuery: false; readonly ignoreTimerange: false; readonly ignoreValidations: false; }"
         ],
-        "path": "src/plugins/controls/common/constants.ts",
+        "path": "src/platform/plugins/shared/controls/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

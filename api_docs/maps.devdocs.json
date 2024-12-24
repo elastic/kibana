@@ -9,7 +9,7 @@
         "tags": [],
         "label": "DataRequest",
         "description": [],
-        "path": "x-pack/plugins/maps/public/classes/util/data_request.tsx",
+        "path": "x-pack/platform/plugins/shared/maps/public/classes/util/data_request.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -23,7 +23,7 @@
             "signature": [
               "any"
             ],
-            "path": "x-pack/plugins/maps/public/classes/util/data_request.tsx",
+            "path": "x-pack/platform/plugins/shared/maps/public/classes/util/data_request.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -37,7 +37,7 @@
                 "signature": [
                   "DataRequestDescriptor"
                 ],
-                "path": "x-pack/plugins/maps/public/classes/util/data_request.tsx",
+                "path": "x-pack/platform/plugins/shared/maps/public/classes/util/data_request.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -55,7 +55,7 @@
             "signature": [
               "() => object | undefined"
             ],
-            "path": "x-pack/plugins/maps/public/classes/util/data_request.tsx",
+            "path": "x-pack/platform/plugins/shared/maps/public/classes/util/data_request.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -71,7 +71,7 @@
             "signature": [
               "() => boolean"
             ],
-            "path": "x-pack/plugins/maps/public/classes/util/data_request.tsx",
+            "path": "x-pack/platform/plugins/shared/maps/public/classes/util/data_request.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -88,7 +88,7 @@
               "() => ",
               "DataRequestMeta"
             ],
-            "path": "x-pack/plugins/maps/public/classes/util/data_request.tsx",
+            "path": "x-pack/platform/plugins/shared/maps/public/classes/util/data_request.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -104,7 +104,7 @@
             "signature": [
               "() => boolean"
             ],
-            "path": "x-pack/plugins/maps/public/classes/util/data_request.tsx",
+            "path": "x-pack/platform/plugins/shared/maps/public/classes/util/data_request.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -120,7 +120,7 @@
             "signature": [
               "() => boolean"
             ],
-            "path": "x-pack/plugins/maps/public/classes/util/data_request.tsx",
+            "path": "x-pack/platform/plugins/shared/maps/public/classes/util/data_request.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -136,7 +136,7 @@
             "signature": [
               "() => string"
             ],
-            "path": "x-pack/plugins/maps/public/classes/util/data_request.tsx",
+            "path": "x-pack/platform/plugins/shared/maps/public/classes/util/data_request.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -152,7 +152,7 @@
             "signature": [
               "() => symbol | undefined"
             ],
-            "path": "x-pack/plugins/maps/public/classes/util/data_request.tsx",
+            "path": "x-pack/platform/plugins/shared/maps/public/classes/util/data_request.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -168,7 +168,7 @@
             "signature": [
               "() => Error | undefined"
             ],
-            "path": "x-pack/plugins/maps/public/classes/util/data_request.tsx",
+            "path": "x-pack/platform/plugins/shared/maps/public/classes/util/data_request.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -184,7 +184,7 @@
             "signature": [
               "() => React.ReactNode"
             ],
-            "path": "x-pack/plugins/maps/public/classes/util/data_request.tsx",
+            "path": "x-pack/platform/plugins/shared/maps/public/classes/util/data_request.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -212,7 +212,7 @@
             "text": "MapApi"
           }
         ],
-        "path": "x-pack/plugins/maps/public/react_embeddable/types.ts",
+        "path": "x-pack/platform/plugins/shared/maps/public/react_embeddable/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -226,7 +226,7 @@
             "signature": [
               "unknown"
             ],
-            "path": "x-pack/plugins/maps/public/react_embeddable/types.ts",
+            "path": "x-pack/platform/plugins/shared/maps/public/react_embeddable/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -244,7 +244,7 @@
         "tags": [],
         "label": "BoundsRequestMeta",
         "description": [],
-        "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
+        "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/vector_source/vector_source.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -255,7 +255,7 @@
             "tags": [],
             "label": "applyGlobalQuery",
             "description": [],
-            "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
+            "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/vector_source/vector_source.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -266,7 +266,7 @@
             "tags": [],
             "label": "applyGlobalTime",
             "description": [],
-            "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
+            "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/vector_source/vector_source.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -287,7 +287,7 @@
               },
               "[]"
             ],
-            "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
+            "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/vector_source/vector_source.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -308,7 +308,7 @@
               },
               " | undefined"
             ],
-            "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
+            "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/vector_source/vector_source.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -338,7 +338,7 @@
               },
               "[]; } | undefined"
             ],
-            "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
+            "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/vector_source/vector_source.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -359,7 +359,7 @@
               },
               " | undefined"
             ],
-            "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
+            "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/vector_source/vector_source.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -373,7 +373,7 @@
             "signature": [
               "{ from: string; to: string; mode?: \"absolute\" | \"relative\" | undefined; }"
             ],
-            "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
+            "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/vector_source/vector_source.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -388,7 +388,7 @@
               "Timeslice",
               " | undefined"
             ],
-            "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
+            "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/vector_source/vector_source.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -399,7 +399,7 @@
             "tags": [],
             "label": "isFeatureEditorOpenForLayer",
             "description": [],
-            "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
+            "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/vector_source/vector_source.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -420,7 +420,7 @@
               },
               " | undefined"
             ],
-            "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
+            "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/vector_source/vector_source.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -442,7 +442,7 @@
               },
               " | undefined; }"
             ],
-            "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
+            "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/vector_source/vector_source.tsx",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -456,7 +456,7 @@
         "tags": [],
         "label": "CreateLayerDescriptorParams",
         "description": [],
-        "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/create_layer_descriptor.ts",
+        "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/es_search_source/create_layer_descriptor.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -467,7 +467,7 @@
             "tags": [],
             "label": "indexPatternId",
             "description": [],
-            "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/create_layer_descriptor.ts",
+            "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/es_search_source/create_layer_descriptor.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -478,7 +478,7 @@
             "tags": [],
             "label": "geoFieldName",
             "description": [],
-            "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/create_layer_descriptor.ts",
+            "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/es_search_source/create_layer_descriptor.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -498,7 +498,7 @@
                 "text": "ES_GEO_FIELD_TYPE"
               }
             ],
-            "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/create_layer_descriptor.ts",
+            "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/es_search_source/create_layer_descriptor.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -519,7 +519,7 @@
               },
               " | undefined"
             ],
-            "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/create_layer_descriptor.ts",
+            "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/es_search_source/create_layer_descriptor.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -533,7 +533,7 @@
         "tags": [],
         "label": "EMSTermJoinConfig",
         "description": [],
-        "path": "x-pack/plugins/maps/public/ems_autosuggest/ems_autosuggest.ts",
+        "path": "x-pack/platform/plugins/shared/maps/public/ems_autosuggest/ems_autosuggest.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -544,7 +544,7 @@
             "tags": [],
             "label": "layerId",
             "description": [],
-            "path": "x-pack/plugins/maps/public/ems_autosuggest/ems_autosuggest.ts",
+            "path": "x-pack/platform/plugins/shared/maps/public/ems_autosuggest/ems_autosuggest.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -555,7 +555,7 @@
             "tags": [],
             "label": "field",
             "description": [],
-            "path": "x-pack/plugins/maps/public/ems_autosuggest/ems_autosuggest.ts",
+            "path": "x-pack/platform/plugins/shared/maps/public/ems_autosuggest/ems_autosuggest.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -566,7 +566,7 @@
             "tags": [],
             "label": "displayName",
             "description": [],
-            "path": "x-pack/plugins/maps/public/ems_autosuggest/ems_autosuggest.ts",
+            "path": "x-pack/platform/plugins/shared/maps/public/ems_autosuggest/ems_autosuggest.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -580,7 +580,7 @@
         "tags": [],
         "label": "GeoJsonWithMeta",
         "description": [],
-        "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
+        "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/vector_source/vector_source.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -594,7 +594,7 @@
             "signature": [
               "GeoJSON.FeatureCollection<GeoJSON.Geometry, GeoJSON.GeoJsonProperties>"
             ],
-            "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
+            "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/vector_source/vector_source.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -609,7 +609,7 @@
               "DataRequestMeta",
               " | undefined"
             ],
-            "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
+            "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/vector_source/vector_source.tsx",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -623,7 +623,7 @@
         "tags": [],
         "label": "GetFeatureActionsArgs",
         "description": [],
-        "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
+        "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/vector_source/vector_source.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -645,7 +645,7 @@
               },
               "[], actionId: string) => Promise<void>) | null"
             ],
-            "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
+            "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/vector_source/vector_source.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -656,7 +656,7 @@
             "tags": [],
             "label": "featureId",
             "description": [],
-            "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
+            "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/vector_source/vector_source.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -670,7 +670,7 @@
             "signature": [
               "string[]"
             ],
-            "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
+            "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/vector_source/vector_source.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -692,7 +692,7 @@
               },
               "<object>) | undefined"
             ],
-            "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
+            "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/vector_source/vector_source.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -716,7 +716,7 @@
               },
               "<object>[]>) | undefined"
             ],
-            "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
+            "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/vector_source/vector_source.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -732,7 +732,7 @@
             "signature": [
               "() => GeoJSON.Geometry | null"
             ],
-            "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
+            "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/vector_source/vector_source.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -748,7 +748,7 @@
             "signature": [
               "maplibregl.GeoJSONFeature & { layer: (Omit<maplibregl.FillLayerSpecification, \"source\"> | Omit<maplibregl.LineLayerSpecification, \"source\"> | Omit<maplibregl.SymbolLayerSpecification, \"source\"> | Omit<maplibregl.CircleLayerSpecification, \"source\"> | Omit<maplibregl.HeatmapLayerSpecification, \"source\"> | Omit<maplibregl.FillExtrusionLayerSpecification, \"source\"> | Omit<maplibregl.RasterLayerSpecification, \"source\"> | Omit<maplibregl.HillshadeLayerSpecification, \"source\"> | Omit<maplibregl.BackgroundLayerSpecification, \"source\">) & { source: string; }; source: string; sourceLayer?: string | undefined; state: { [key: string]: any; }; }"
             ],
-            "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
+            "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/vector_source/vector_source.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -762,7 +762,7 @@
             "signature": [
               "() => void"
             ],
-            "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
+            "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/vector_source/vector_source.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -778,7 +778,7 @@
         "tags": [],
         "label": "IField",
         "description": [],
-        "path": "x-pack/plugins/maps/public/classes/fields/field.ts",
+        "path": "x-pack/platform/plugins/shared/maps/public/classes/fields/field.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -792,7 +792,7 @@
             "signature": [
               "() => string"
             ],
-            "path": "x-pack/plugins/maps/public/classes/fields/field.ts",
+            "path": "x-pack/platform/plugins/shared/maps/public/classes/fields/field.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -808,7 +808,7 @@
             "signature": [
               "() => string"
             ],
-            "path": "x-pack/plugins/maps/public/classes/fields/field.ts",
+            "path": "x-pack/platform/plugins/shared/maps/public/classes/fields/field.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -824,7 +824,7 @@
             "signature": [
               "() => string"
             ],
-            "path": "x-pack/plugins/maps/public/classes/fields/field.ts",
+            "path": "x-pack/platform/plugins/shared/maps/public/classes/fields/field.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -840,7 +840,7 @@
             "signature": [
               "() => boolean"
             ],
-            "path": "x-pack/plugins/maps/public/classes/fields/field.ts",
+            "path": "x-pack/platform/plugins/shared/maps/public/classes/fields/field.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -856,7 +856,7 @@
             "signature": [
               "() => Promise<string>"
             ],
-            "path": "x-pack/plugins/maps/public/classes/fields/field.ts",
+            "path": "x-pack/platform/plugins/shared/maps/public/classes/fields/field.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -872,7 +872,7 @@
             "signature": [
               "() => Promise<string>"
             ],
-            "path": "x-pack/plugins/maps/public/classes/fields/field.ts",
+            "path": "x-pack/platform/plugins/shared/maps/public/classes/fields/field.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -896,7 +896,7 @@
               },
               ">"
             ],
-            "path": "x-pack/plugins/maps/public/classes/fields/field.ts",
+            "path": "x-pack/platform/plugins/shared/maps/public/classes/fields/field.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -910,7 +910,7 @@
                 "signature": [
                   "string | string[] | undefined"
                 ],
-                "path": "x-pack/plugins/maps/public/classes/fields/field.ts",
+                "path": "x-pack/platform/plugins/shared/maps/public/classes/fields/field.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -935,7 +935,7 @@
                 "text": "IVectorSource"
               }
             ],
-            "path": "x-pack/plugins/maps/public/classes/fields/field.ts",
+            "path": "x-pack/platform/plugins/shared/maps/public/classes/fields/field.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -958,7 +958,7 @@
                 "text": "FIELD_ORIGIN"
               }
             ],
-            "path": "x-pack/plugins/maps/public/classes/fields/field.ts",
+            "path": "x-pack/platform/plugins/shared/maps/public/classes/fields/field.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -974,7 +974,7 @@
             "signature": [
               "() => boolean"
             ],
-            "path": "x-pack/plugins/maps/public/classes/fields/field.ts",
+            "path": "x-pack/platform/plugins/shared/maps/public/classes/fields/field.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -992,7 +992,7 @@
               "AggregationsExtendedStatsAggregation",
               "; }> | null>"
             ],
-            "path": "x-pack/plugins/maps/public/classes/fields/field.ts",
+            "path": "x-pack/platform/plugins/shared/maps/public/classes/fields/field.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1010,7 +1010,7 @@
               "AggregationsPercentilesAggregation",
               "; }> | null>"
             ],
-            "path": "x-pack/plugins/maps/public/classes/fields/field.ts",
+            "path": "x-pack/platform/plugins/shared/maps/public/classes/fields/field.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1024,7 +1024,7 @@
                 "signature": [
                   "number[]"
                 ],
-                "path": "x-pack/plugins/maps/public/classes/fields/field.ts",
+                "path": "x-pack/platform/plugins/shared/maps/public/classes/fields/field.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1044,7 +1044,7 @@
               "AggregationsTermsAggregation",
               "; }> | null>"
             ],
-            "path": "x-pack/plugins/maps/public/classes/fields/field.ts",
+            "path": "x-pack/platform/plugins/shared/maps/public/classes/fields/field.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1058,7 +1058,7 @@
                 "signature": [
                   "number"
                 ],
-                "path": "x-pack/plugins/maps/public/classes/fields/field.ts",
+                "path": "x-pack/platform/plugins/shared/maps/public/classes/fields/field.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1076,7 +1076,7 @@
             "signature": [
               "() => boolean"
             ],
-            "path": "x-pack/plugins/maps/public/classes/fields/field.ts",
+            "path": "x-pack/platform/plugins/shared/maps/public/classes/fields/field.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1092,7 +1092,7 @@
             "signature": [
               "() => boolean"
             ],
-            "path": "x-pack/plugins/maps/public/classes/fields/field.ts",
+            "path": "x-pack/platform/plugins/shared/maps/public/classes/fields/field.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1116,7 +1116,7 @@
               },
               ") => boolean"
             ],
-            "path": "x-pack/plugins/maps/public/classes/fields/field.ts",
+            "path": "x-pack/platform/plugins/shared/maps/public/classes/fields/field.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1136,7 +1136,7 @@
                     "text": "IField"
                   }
                 ],
-                "path": "x-pack/plugins/maps/public/classes/fields/field.ts",
+                "path": "x-pack/platform/plugins/shared/maps/public/classes/fields/field.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1156,7 +1156,7 @@
               "TileMetaFeature",
               ") => { min: number; max: number; } | null"
             ],
-            "path": "x-pack/plugins/maps/public/classes/fields/field.ts",
+            "path": "x-pack/platform/plugins/shared/maps/public/classes/fields/field.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1170,7 +1170,7 @@
                 "signature": [
                   "TileMetaFeature"
                 ],
-                "path": "x-pack/plugins/maps/public/classes/fields/field.ts",
+                "path": "x-pack/platform/plugins/shared/maps/public/classes/fields/field.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1188,7 +1188,7 @@
             "signature": [
               "() => boolean"
             ],
-            "path": "x-pack/plugins/maps/public/classes/fields/field.ts",
+            "path": "x-pack/platform/plugins/shared/maps/public/classes/fields/field.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1221,7 +1221,7 @@
             "text": "ITMSSource"
           }
         ],
-        "path": "x-pack/plugins/maps/public/classes/sources/raster_source/index.ts",
+        "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/raster_source/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1245,7 +1245,7 @@
               "DataRequestMeta",
               ") => Promise<boolean>"
             ],
-            "path": "x-pack/plugins/maps/public/classes/sources/raster_source/index.ts",
+            "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/raster_source/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1265,7 +1265,7 @@
                     "text": "DataRequest"
                   }
                 ],
-                "path": "x-pack/plugins/maps/public/classes/sources/raster_source/index.ts",
+                "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/raster_source/index.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1280,7 +1280,7 @@
                 "signature": [
                   "DataRequestMeta"
                 ],
-                "path": "x-pack/plugins/maps/public/classes/sources/raster_source/index.ts",
+                "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/raster_source/index.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1300,7 +1300,7 @@
               "RasterTileSourceData",
               ") => boolean"
             ],
-            "path": "x-pack/plugins/maps/public/classes/sources/raster_source/index.ts",
+            "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/raster_source/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1314,7 +1314,7 @@
                 "signature": [
                   "maplibregl.RasterTileSource"
                 ],
-                "path": "x-pack/plugins/maps/public/classes/sources/raster_source/index.ts",
+                "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/raster_source/index.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1329,7 +1329,7 @@
                 "signature": [
                   "RasterTileSourceData"
                 ],
-                "path": "x-pack/plugins/maps/public/classes/sources/raster_source/index.ts",
+                "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/raster_source/index.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1347,7 +1347,7 @@
             "signature": [
               "() => Promise<boolean>"
             ],
-            "path": "x-pack/plugins/maps/public/classes/sources/raster_source/index.ts",
+            "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/raster_source/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1371,7 +1371,7 @@
               },
               " | undefined) => React.ReactElement<any, string | React.JSXElementConstructor<any>> | null"
             ],
-            "path": "x-pack/plugins/maps/public/classes/sources/raster_source/index.ts",
+            "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/raster_source/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1392,7 +1392,7 @@
                   },
                   " | undefined"
                 ],
-                "path": "x-pack/plugins/maps/public/classes/sources/raster_source/index.ts",
+                "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/raster_source/index.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -1421,7 +1421,7 @@
           " extends ",
           "ISource"
         ],
-        "path": "x-pack/plugins/maps/public/classes/sources/tms_source/index.ts",
+        "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/tms_source/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1437,7 +1437,7 @@
               "SourceRequestMeta",
               ") => Promise<string>"
             ],
-            "path": "x-pack/plugins/maps/public/classes/sources/tms_source/index.ts",
+            "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/tms_source/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1451,7 +1451,7 @@
                 "signature": [
                   "SourceRequestMeta"
                 ],
-                "path": "x-pack/plugins/maps/public/classes/sources/tms_source/index.ts",
+                "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/tms_source/index.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1469,7 +1469,7 @@
         "tags": [],
         "label": "ITooltipProperty",
         "description": [],
-        "path": "x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts",
+        "path": "x-pack/platform/plugins/shared/maps/public/classes/tooltips/tooltip_property.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1483,7 +1483,7 @@
             "signature": [
               "() => string"
             ],
-            "path": "x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts",
+            "path": "x-pack/platform/plugins/shared/maps/public/classes/tooltips/tooltip_property.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1499,7 +1499,7 @@
             "signature": [
               "() => React.ReactNode"
             ],
-            "path": "x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts",
+            "path": "x-pack/platform/plugins/shared/maps/public/classes/tooltips/tooltip_property.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1515,7 +1515,7 @@
             "signature": [
               "() => React.ReactNode"
             ],
-            "path": "x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts",
+            "path": "x-pack/platform/plugins/shared/maps/public/classes/tooltips/tooltip_property.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1531,7 +1531,7 @@
             "signature": [
               "() => string | string[] | undefined"
             ],
-            "path": "x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts",
+            "path": "x-pack/platform/plugins/shared/maps/public/classes/tooltips/tooltip_property.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1547,7 +1547,7 @@
             "signature": [
               "() => boolean"
             ],
-            "path": "x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts",
+            "path": "x-pack/platform/plugins/shared/maps/public/classes/tooltips/tooltip_property.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1571,7 +1571,7 @@
               },
               "[]>"
             ],
-            "path": "x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts",
+            "path": "x-pack/platform/plugins/shared/maps/public/classes/tooltips/tooltip_property.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1598,7 +1598,7 @@
           " extends ",
           "ISource"
         ],
-        "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
+        "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/vector_source/vector_source.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1612,7 +1612,7 @@
             "signature": [
               "() => boolean"
             ],
-            "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
+            "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/vector_source/vector_source.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1644,7 +1644,7 @@
               },
               "[]>"
             ],
-            "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
+            "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/vector_source/vector_source.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1658,7 +1658,7 @@
                 "signature": [
                   "GeoJSON.GeoJsonProperties"
                 ],
-                "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
+                "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/vector_source/vector_source.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -1679,7 +1679,7 @@
                     "text": "KibanaExecutionContext"
                   }
                 ],
-                "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
+                "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/vector_source/vector_source.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1707,7 +1707,7 @@
               "MapExtent",
               " | null>"
             ],
-            "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
+            "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/vector_source/vector_source.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1727,7 +1727,7 @@
                     "text": "BoundsRequestMeta"
                   }
                 ],
-                "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
+                "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/vector_source/vector_source.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1742,7 +1742,7 @@
                 "signature": [
                   "(callback: () => void) => void"
                 ],
-                "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
+                "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/vector_source/vector_source.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1784,7 +1784,7 @@
               },
               ">"
             ],
-            "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
+            "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/vector_source/vector_source.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1798,7 +1798,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
+                "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/vector_source/vector_source.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1819,7 +1819,7 @@
                     "text": "VectorSourceRequestMeta"
                   }
                 ],
-                "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
+                "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/vector_source/vector_source.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1834,7 +1834,7 @@
                 "signature": [
                   "(callback: () => void) => void"
                 ],
-                "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
+                "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/vector_source/vector_source.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1849,7 +1849,7 @@
                 "signature": [
                   "() => boolean"
                 ],
-                "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
+                "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/vector_source/vector_source.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1870,7 +1870,7 @@
                     "text": "Adapters"
                   }
                 ],
-                "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
+                "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/vector_source/vector_source.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1896,7 +1896,7 @@
               },
               "[]>"
             ],
-            "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
+            "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/vector_source/vector_source.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1920,7 +1920,7 @@
               },
               " | null"
             ],
-            "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
+            "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/vector_source/vector_source.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1934,7 +1934,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
+                "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/vector_source/vector_source.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1960,7 +1960,7 @@
               },
               "[]>"
             ],
-            "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
+            "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/vector_source/vector_source.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1976,7 +1976,7 @@
             "signature": [
               "() => boolean"
             ],
-            "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
+            "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/vector_source/vector_source.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -2000,7 +2000,7 @@
               },
               ") => object | null"
             ],
-            "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
+            "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/vector_source/vector_source.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2020,7 +2020,7 @@
                     "text": "DataFilters"
                   }
                 ],
-                "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
+                "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/vector_source/vector_source.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2038,7 +2038,7 @@
             "signature": [
               "() => boolean"
             ],
-            "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
+            "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/vector_source/vector_source.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -2062,7 +2062,7 @@
               },
               "[]>"
             ],
-            "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
+            "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/vector_source/vector_source.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -2078,7 +2078,7 @@
             "signature": [
               "() => boolean"
             ],
-            "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
+            "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/vector_source/vector_source.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -2109,7 +2109,7 @@
                 "text": "SourceStatus"
               }
             ],
-            "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
+            "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/vector_source/vector_source.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2130,7 +2130,7 @@
                   },
                   " | undefined"
                 ],
-                "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
+                "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/vector_source/vector_source.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -2148,7 +2148,7 @@
             "signature": [
               "() => Promise<string | null>"
             ],
-            "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
+            "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/vector_source/vector_source.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -2164,7 +2164,7 @@
             "signature": [
               "() => Promise<boolean>"
             ],
-            "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
+            "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/vector_source/vector_source.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -2180,7 +2180,7 @@
             "signature": [
               "(geometry: GeoJSON.Geometry | GeoJSON.Position[]) => Promise<void>"
             ],
-            "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
+            "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/vector_source/vector_source.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2194,7 +2194,7 @@
                 "signature": [
                   "GeoJSON.Geometry | GeoJSON.Position[]"
                 ],
-                "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
+                "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/vector_source/vector_source.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2212,7 +2212,7 @@
             "signature": [
               "(featureId: string) => Promise<void>"
             ],
-            "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
+            "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/vector_source/vector_source.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2226,7 +2226,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
+                "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/vector_source/vector_source.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2260,7 +2260,7 @@
               },
               "[]"
             ],
-            "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
+            "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/vector_source/vector_source.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2280,7 +2280,7 @@
                     "text": "GetFeatureActionsArgs"
                   }
                 ],
-                "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
+                "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/vector_source/vector_source.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2298,7 +2298,7 @@
             "signature": [
               "() => string[]"
             ],
-            "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
+            "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/vector_source/vector_source.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -2316,7 +2316,7 @@
             "signature": [
               "(() => Promise<boolean>) | undefined"
             ],
-            "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
+            "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/vector_source/vector_source.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -2336,7 +2336,7 @@
               "IVectorStyle",
               ") => React.ReactElement<any, string | React.JSXElementConstructor<any>> | null) | undefined"
             ],
-            "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
+            "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/vector_source/vector_source.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2350,7 +2350,7 @@
                 "signature": [
                   "IVectorStyle"
                 ],
-                "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
+                "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/vector_source/vector_source.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2368,7 +2368,7 @@
         "tags": [],
         "label": "RenderTooltipContentParams",
         "description": [],
-        "path": "x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts",
+        "path": "x-pack/platform/plugins/shared/maps/public/classes/tooltips/tooltip_property.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2390,7 +2390,7 @@
               },
               "[], actionId: string) => Promise<void>) | null"
             ],
-            "path": "x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts",
+            "path": "x-pack/platform/plugins/shared/maps/public/classes/tooltips/tooltip_property.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2404,7 +2404,7 @@
             "signature": [
               "() => void"
             ],
-            "path": "x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts",
+            "path": "x-pack/platform/plugins/shared/maps/public/classes/tooltips/tooltip_property.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -2427,7 +2427,7 @@
               },
               "[]"
             ],
-            "path": "x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts",
+            "path": "x-pack/platform/plugins/shared/maps/public/classes/tooltips/tooltip_property.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2449,7 +2449,7 @@
               },
               "<object>) | undefined"
             ],
-            "path": "x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts",
+            "path": "x-pack/platform/plugins/shared/maps/public/classes/tooltips/tooltip_property.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -2473,7 +2473,7 @@
               },
               "<object>[]>) | undefined"
             ],
-            "path": "x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts",
+            "path": "x-pack/platform/plugins/shared/maps/public/classes/tooltips/tooltip_property.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -2489,7 +2489,7 @@
             "signature": [
               "(layerId: string) => Promise<string | null>"
             ],
-            "path": "x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts",
+            "path": "x-pack/platform/plugins/shared/maps/public/classes/tooltips/tooltip_property.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2503,7 +2503,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts",
+                "path": "x-pack/platform/plugins/shared/maps/public/classes/tooltips/tooltip_property.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2518,7 +2518,7 @@
             "tags": [],
             "label": "isLocked",
             "description": [],
-            "path": "x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts",
+            "path": "x-pack/platform/plugins/shared/maps/public/classes/tooltips/tooltip_property.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2540,7 +2540,7 @@
               },
               "[]>"
             ],
-            "path": "x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts",
+            "path": "x-pack/platform/plugins/shared/maps/public/classes/tooltips/tooltip_property.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2551,7 +2551,7 @@
                 "tags": [],
                 "label": "{\n    layerId,\n    properties,\n  }",
                 "description": [],
-                "path": "x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts",
+                "path": "x-pack/platform/plugins/shared/maps/public/classes/tooltips/tooltip_property.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -2562,7 +2562,7 @@
                     "tags": [],
                     "label": "layerId",
                     "description": [],
-                    "path": "x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts",
+                    "path": "x-pack/platform/plugins/shared/maps/public/classes/tooltips/tooltip_property.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -2576,7 +2576,7 @@
                     "signature": [
                       "{ [name: string]: any; } | null"
                     ],
-                    "path": "x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts",
+                    "path": "x-pack/platform/plugins/shared/maps/public/classes/tooltips/tooltip_property.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -2595,7 +2595,7 @@
             "signature": [
               "({ layerId, featureId, }: { layerId: string; featureId?: string | number | undefined; }) => GeoJSON.Geometry | null"
             ],
-            "path": "x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts",
+            "path": "x-pack/platform/plugins/shared/maps/public/classes/tooltips/tooltip_property.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2606,7 +2606,7 @@
                 "tags": [],
                 "label": "{\n    layerId,\n    featureId,\n  }",
                 "description": [],
-                "path": "x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts",
+                "path": "x-pack/platform/plugins/shared/maps/public/classes/tooltips/tooltip_property.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -2617,7 +2617,7 @@
                     "tags": [],
                     "label": "layerId",
                     "description": [],
-                    "path": "x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts",
+                    "path": "x-pack/platform/plugins/shared/maps/public/classes/tooltips/tooltip_property.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -2631,7 +2631,7 @@
                     "signature": [
                       "string | number | undefined"
                     ],
-                    "path": "x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts",
+                    "path": "x-pack/platform/plugins/shared/maps/public/classes/tooltips/tooltip_property.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -2652,7 +2652,7 @@
               "RawValue",
               ") => void) | undefined"
             ],
-            "path": "x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts",
+            "path": "x-pack/platform/plugins/shared/maps/public/classes/tooltips/tooltip_property.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2666,7 +2666,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts",
+                "path": "x-pack/platform/plugins/shared/maps/public/classes/tooltips/tooltip_property.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2681,7 +2681,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts",
+                "path": "x-pack/platform/plugins/shared/maps/public/classes/tooltips/tooltip_property.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2696,7 +2696,7 @@
                 "signature": [
                   "RawValue"
                 ],
-                "path": "x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts",
+                "path": "x-pack/platform/plugins/shared/maps/public/classes/tooltips/tooltip_property.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -2714,7 +2714,7 @@
         "tags": [],
         "label": "SampleValuesConfig",
         "description": [],
-        "path": "x-pack/plugins/maps/public/ems_autosuggest/ems_autosuggest.ts",
+        "path": "x-pack/platform/plugins/shared/maps/public/ems_autosuggest/ems_autosuggest.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2728,7 +2728,7 @@
             "signature": [
               "(string | number)[] | undefined"
             ],
-            "path": "x-pack/plugins/maps/public/ems_autosuggest/ems_autosuggest.ts",
+            "path": "x-pack/platform/plugins/shared/maps/public/ems_autosuggest/ems_autosuggest.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2742,7 +2742,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/maps/public/ems_autosuggest/ems_autosuggest.ts",
+            "path": "x-pack/platform/plugins/shared/maps/public/ems_autosuggest/ems_autosuggest.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2756,7 +2756,7 @@
         "tags": [],
         "label": "SourceStatus",
         "description": [],
-        "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
+        "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/vector_source/vector_source.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2770,7 +2770,7 @@
             "signature": [
               "string | null"
             ],
-            "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
+            "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/vector_source/vector_source.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2781,7 +2781,7 @@
             "tags": [],
             "label": "areResultsTrimmed",
             "description": [],
-            "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
+            "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/vector_source/vector_source.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2795,7 +2795,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
+            "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/vector_source/vector_source.tsx",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2815,7 +2815,7 @@
         "signature": [
           "{ label: string; url: string; }"
         ],
-        "path": "x-pack/plugins/maps/common/descriptor_types/layer_descriptor_types.ts",
+        "path": "x-pack/platform/plugins/shared/maps/common/descriptor_types/layer_descriptor_types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2830,7 +2830,7 @@
         "signature": [
           "\"__kbn__feature_id__\""
         ],
-        "path": "x-pack/plugins/maps/common/constants.ts",
+        "path": "x-pack/platform/plugins/shared/maps/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2845,7 +2845,7 @@
         "signature": [
           "{ label: string; value: string; link?: string | undefined; }"
         ],
-        "path": "x-pack/plugins/maps/public/classes/sources/source.ts",
+        "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/source.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2878,7 +2878,7 @@
           "LayerWizardStep",
           "[] | undefined; disabledReason?: string | undefined; getIsDisabled?: (() => boolean | Promise<boolean>) | undefined; isBeta?: boolean | undefined; checkVisibility?: (() => Promise<boolean>) | undefined; showFeatureEditTools?: boolean | undefined; }"
         ],
-        "path": "x-pack/plugins/maps/public/classes/layers/wizards/layer_wizard_registry.ts",
+        "path": "x-pack/platform/plugins/shared/maps/public/classes/layers/wizards/layer_wizard_registry.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2893,7 +2893,7 @@
         "signature": [
           "\"map\""
         ],
-        "path": "x-pack/plugins/maps/common/constants.ts",
+        "path": "x-pack/platform/plugins/shared/maps/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3081,7 +3081,7 @@
           "Observable",
           "<void>; }"
         ],
-        "path": "x-pack/plugins/maps/public/react_embeddable/types.ts",
+        "path": "x-pack/platform/plugins/shared/maps/public/react_embeddable/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3096,7 +3096,7 @@
         "signature": [
           "\"MAPS_APP_LOCATOR\""
         ],
-        "path": "x-pack/plugins/maps/public/locators/map_locator/locator_definition.ts",
+        "path": "x-pack/platform/plugins/shared/maps/public/locators/map_locator/locator_definition.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3136,7 +3136,7 @@
           },
           " | undefined; filterByMapExtent?: boolean | undefined; isMovementSynchronized?: boolean | undefined; }"
         ],
-        "path": "x-pack/plugins/maps/public/react_embeddable/types.ts",
+        "path": "x-pack/platform/plugins/shared/maps/public/react_embeddable/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3159,7 +3159,7 @@
           },
           "[]) => void; mapColors: string[]; mostCommonDataViewId?: string | undefined; currentStepId: string | null; isOnFinalStep: boolean; enableNextBtn: () => void; disableNextBtn: () => void; startStepLoading: () => void; stopStepLoading: () => void; advanceToNextStep: () => void; }"
         ],
-        "path": "x-pack/plugins/maps/public/classes/layers/wizards/layer_wizard_registry.ts",
+        "path": "x-pack/platform/plugins/shared/maps/public/classes/layers/wizards/layer_wizard_registry.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3180,7 +3180,7 @@
           "IStyle",
           "; }"
         ],
-        "path": "x-pack/plugins/maps/public/classes/sources/source.ts",
+        "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/source.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3194,7 +3194,7 @@
       "tags": [],
       "label": "MapsSetupApi",
       "description": [],
-      "path": "x-pack/plugins/maps/public/api/setup_api.ts",
+      "path": "x-pack/platform/plugins/shared/maps/public/api/setup_api.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -3216,7 +3216,7 @@
             },
             ") => void"
           ],
-          "path": "x-pack/plugins/maps/public/api/setup_api.ts",
+          "path": "x-pack/platform/plugins/shared/maps/public/api/setup_api.ts",
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -3236,7 +3236,7 @@
                   "text": "LayerWizard"
                 }
               ],
-              "path": "x-pack/plugins/maps/public/api/setup_api.ts",
+              "path": "x-pack/platform/plugins/shared/maps/public/api/setup_api.ts",
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -3256,7 +3256,7 @@
             "SourceRegistryEntry",
             ") => void"
           ],
-          "path": "x-pack/plugins/maps/public/api/setup_api.ts",
+          "path": "x-pack/platform/plugins/shared/maps/public/api/setup_api.ts",
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -3270,7 +3270,7 @@
               "signature": [
                 "SourceRegistryEntry"
               ],
-              "path": "x-pack/plugins/maps/public/api/setup_api.ts",
+              "path": "x-pack/platform/plugins/shared/maps/public/api/setup_api.ts",
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -3289,7 +3289,7 @@
       "tags": [],
       "label": "MapsStartApi",
       "description": [],
-      "path": "x-pack/plugins/maps/public/api/start_api.ts",
+      "path": "x-pack/platform/plugins/shared/maps/public/api/start_api.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -3335,7 +3335,7 @@
             },
             ">; }"
           ],
-          "path": "x-pack/plugins/maps/public/api/start_api.ts",
+          "path": "x-pack/platform/plugins/shared/maps/public/api/start_api.ts",
           "deprecated": false,
           "trackAdoption": false
         },
@@ -3351,7 +3351,7 @@
             "Props",
             ">"
           ],
-          "path": "x-pack/plugins/maps/public/api/start_api.ts",
+          "path": "x-pack/platform/plugins/shared/maps/public/api/start_api.ts",
           "deprecated": false,
           "trackAdoption": false,
           "returnComment": [],
@@ -3398,7 +3398,7 @@
             "Props",
             ">"
           ],
-          "path": "x-pack/plugins/maps/public/api/start_api.ts",
+          "path": "x-pack/platform/plugins/shared/maps/public/api/start_api.ts",
           "deprecated": false,
           "trackAdoption": false,
           "returnComment": [],
@@ -3459,7 +3459,7 @@
             },
             " | null>"
           ],
-          "path": "x-pack/plugins/maps/public/api/start_api.ts",
+          "path": "x-pack/platform/plugins/shared/maps/public/api/start_api.ts",
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -3479,7 +3479,7 @@
                   "text": "SampleValuesConfig"
                 }
               ],
-              "path": "x-pack/plugins/maps/public/api/start_api.ts",
+              "path": "x-pack/platform/plugins/shared/maps/public/api/start_api.ts",
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -3512,7 +3512,7 @@
         "tags": [],
         "label": "AGG_TYPE",
         "description": [],
-        "path": "x-pack/plugins/maps/common/constants.ts",
+        "path": "x-pack/platform/plugins/shared/maps/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3524,7 +3524,7 @@
         "tags": [],
         "label": "COLOR_MAP_TYPE",
         "description": [],
-        "path": "x-pack/plugins/maps/common/constants.ts",
+        "path": "x-pack/platform/plugins/shared/maps/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3536,7 +3536,7 @@
         "tags": [],
         "label": "ES_GEO_FIELD_TYPE",
         "description": [],
-        "path": "x-pack/plugins/maps/common/constants.ts",
+        "path": "x-pack/platform/plugins/shared/maps/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3548,7 +3548,7 @@
         "tags": [],
         "label": "FIELD_ORIGIN",
         "description": [],
-        "path": "x-pack/plugins/maps/common/constants.ts",
+        "path": "x-pack/platform/plugins/shared/maps/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3560,7 +3560,7 @@
         "tags": [],
         "label": "INITIAL_LOCATION",
         "description": [],
-        "path": "x-pack/plugins/maps/common/constants.ts",
+        "path": "x-pack/platform/plugins/shared/maps/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3572,7 +3572,7 @@
         "tags": [],
         "label": "LABEL_BORDER_SIZES",
         "description": [],
-        "path": "x-pack/plugins/maps/common/constants.ts",
+        "path": "x-pack/platform/plugins/shared/maps/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3584,7 +3584,7 @@
         "tags": [],
         "label": "LABEL_POSITIONS",
         "description": [],
-        "path": "x-pack/plugins/maps/common/constants.ts",
+        "path": "x-pack/platform/plugins/shared/maps/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3596,7 +3596,7 @@
         "tags": [],
         "label": "LAYER_TYPE",
         "description": [],
-        "path": "x-pack/plugins/maps/common/constants.ts",
+        "path": "x-pack/platform/plugins/shared/maps/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3608,7 +3608,7 @@
         "tags": [],
         "label": "LAYER_WIZARD_CATEGORY",
         "description": [],
-        "path": "x-pack/plugins/maps/common/constants.ts",
+        "path": "x-pack/platform/plugins/shared/maps/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3620,7 +3620,7 @@
         "tags": [],
         "label": "SCALING_TYPES",
         "description": [],
-        "path": "x-pack/plugins/maps/common/constants.ts",
+        "path": "x-pack/platform/plugins/shared/maps/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3632,7 +3632,7 @@
         "tags": [],
         "label": "SOURCE_TYPES",
         "description": [],
-        "path": "x-pack/plugins/maps/common/constants.ts",
+        "path": "x-pack/platform/plugins/shared/maps/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3644,7 +3644,7 @@
         "tags": [],
         "label": "STYLE_TYPE",
         "description": [],
-        "path": "x-pack/plugins/maps/common/constants.ts",
+        "path": "x-pack/platform/plugins/shared/maps/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3656,7 +3656,7 @@
         "tags": [],
         "label": "SYMBOLIZE_AS_TYPES",
         "description": [],
-        "path": "x-pack/plugins/maps/common/constants.ts",
+        "path": "x-pack/platform/plugins/shared/maps/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3668,7 +3668,7 @@
         "tags": [],
         "label": "VECTOR_SHAPE_TYPE",
         "description": [],
-        "path": "x-pack/plugins/maps/common/constants.ts",
+        "path": "x-pack/platform/plugins/shared/maps/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3680,7 +3680,7 @@
         "tags": [],
         "label": "VECTOR_STYLES",
         "description": [],
-        "path": "x-pack/plugins/maps/common/constants.ts",
+        "path": "x-pack/platform/plugins/shared/maps/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3697,7 +3697,7 @@
         "signature": [
           "\"maps\""
         ],
-        "path": "x-pack/plugins/maps/common/constants.ts",
+        "path": "x-pack/platform/plugins/shared/maps/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3774,7 +3774,7 @@
           },
           "; }"
         ],
-        "path": "x-pack/plugins/maps/common/descriptor_types/data_request_descriptor_types.ts",
+        "path": "x-pack/platform/plugins/shared/maps/common/descriptor_types/data_request_descriptor_types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3789,7 +3789,7 @@
         "signature": [
           "5"
         ],
-        "path": "x-pack/plugins/maps/common/constants.ts",
+        "path": "x-pack/platform/plugins/shared/maps/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3805,7 +3805,7 @@
           "AbstractSourceDescriptor",
           " & { id: string; tooltipProperties: string[]; }"
         ],
-        "path": "x-pack/plugins/maps/common/descriptor_types/source_descriptor_types.ts",
+        "path": "x-pack/platform/plugins/shared/maps/common/descriptor_types/source_descriptor_types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3839,7 +3839,7 @@
           },
           ".ES_TERM_SOURCE; }"
         ],
-        "path": "x-pack/plugins/maps/common/descriptor_types/source_descriptor_types.ts",
+        "path": "x-pack/platform/plugins/shared/maps/common/descriptor_types/source_descriptor_types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3856,7 +3856,7 @@
           "RawValue",
           ") => string | number"
         ],
-        "path": "x-pack/plugins/maps/common/constants.ts",
+        "path": "x-pack/platform/plugins/shared/maps/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -3871,7 +3871,7 @@
             "signature": [
               "string | number | boolean | string[] | null | undefined"
             ],
-            "path": "x-pack/plugins/maps/common/constants.ts",
+            "path": "x-pack/platform/plugins/shared/maps/common/constants.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3916,7 +3916,7 @@
           },
           " | undefined; includeInFitToBounds?: boolean | undefined; parent?: string | undefined; }"
         ],
-        "path": "x-pack/plugins/maps/common/descriptor_types/layer_descriptor_types.ts",
+        "path": "x-pack/platform/plugins/shared/maps/common/descriptor_types/layer_descriptor_types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3931,7 +3931,7 @@
         "signature": [
           "\"map\""
         ],
-        "path": "x-pack/plugins/maps/common/constants.ts",
+        "path": "x-pack/platform/plugins/shared/maps/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3946,7 +3946,7 @@
         "signature": [
           "24"
         ],
-        "path": "x-pack/plugins/maps/common/constants.ts",
+        "path": "x-pack/platform/plugins/shared/maps/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3961,7 +3961,7 @@
         "signature": [
           "0"
         ],
-        "path": "x-pack/plugins/maps/common/constants.ts",
+        "path": "x-pack/platform/plugins/shared/maps/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3984,7 +3984,7 @@
           },
           "[]; }"
         ],
-        "path": "x-pack/plugins/maps/common/descriptor_types/map_descriptor.ts",
+        "path": "x-pack/platform/plugins/shared/maps/common/descriptor_types/map_descriptor.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3999,7 +3999,7 @@
         "signature": [
           "{ label: string; id: string; form?: React.ReactNode; onClick?: (() => void) | undefined; }"
         ],
-        "path": "x-pack/plugins/maps/common/descriptor_types/map_descriptor.ts",
+        "path": "x-pack/platform/plugins/shared/maps/common/descriptor_types/map_descriptor.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4055,7 +4055,7 @@
           },
           "; disableTooltips?: boolean | undefined; }"
         ],
-        "path": "x-pack/plugins/maps/common/descriptor_types/layer_descriptor_types.ts",
+        "path": "x-pack/platform/plugins/shared/maps/common/descriptor_types/layer_descriptor_types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4085,7 +4085,7 @@
           },
           " | undefined; isForceRefresh: boolean; } & { fieldNames: string[]; timesliceMaskField?: string | undefined; sourceMeta: object | null; isFeatureEditorOpenForLayer: boolean; }"
         ],
-        "path": "x-pack/plugins/maps/common/descriptor_types/data_request_descriptor_types.ts",
+        "path": "x-pack/platform/plugins/shared/maps/common/descriptor_types/data_request_descriptor_types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4105,7 +4105,7 @@
           "StyleMetaDescriptor",
           " | undefined; }"
         ],
-        "path": "x-pack/plugins/maps/common/descriptor_types/style_property_descriptor_types.ts",
+        "path": "x-pack/platform/plugins/shared/maps/common/descriptor_types/style_property_descriptor_types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

@@ -851,13 +851,7 @@
               "\nLocations where the link is visible in the UI"
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/core-application-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreApplicationBrowserPluginApi",
-                "section": "def-public.AppDeepLinkLocations",
-                "text": "AppDeepLinkLocations"
-              },
+              "AppDeepLinkLocations",
               "[] | undefined"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/public/common/links/types.ts",

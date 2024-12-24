@@ -258,13 +258,7 @@
             "text": "I18nStart"
           },
           "; analytics?: Pick<",
-          {
-            "pluginId": "@kbn/core-analytics-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreAnalyticsBrowserPluginApi",
-            "section": "def-public.AnalyticsServiceStart",
-            "text": "AnalyticsServiceStart"
-          },
+          "AnalyticsServiceStart",
           ", \"reportEvent\"> | undefined; theme: ",
           {
             "pluginId": "@kbn/react-kibana-context-common",

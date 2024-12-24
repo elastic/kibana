@@ -10465,11 +10465,11 @@
               },
               {
                 "plugin": "inputControlVis",
-                "path": "src/plugins/input_control_vis/public/control/list_control_factory.ts"
+                "path": "src/platform/plugins/private/input_control_vis/public/control/list_control_factory.ts"
               },
               {
                 "plugin": "inputControlVis",
-                "path": "src/plugins/input_control_vis/public/control/range_control_factory.ts"
+                "path": "src/platform/plugins/private/input_control_vis/public/control/range_control_factory.ts"
               }
             ],
             "children": [

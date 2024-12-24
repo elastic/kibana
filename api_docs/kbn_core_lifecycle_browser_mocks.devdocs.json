@@ -27,21 +27,9 @@
             "description": [],
             "signature": [
               "({ basePath, pluginStartDeps, pluginStartContract, }?: { basePath?: string | undefined; pluginStartDeps?: object | undefined; pluginStartContract?: any; }) => { analytics: jest.Mocked<",
-              {
-                "pluginId": "@kbn/core-analytics-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreAnalyticsBrowserPluginApi",
-                "section": "def-public.AnalyticsServiceSetup",
-                "text": "AnalyticsServiceSetup"
-              },
+              "AnalyticsServiceSetup",
               ">; application: jest.Mocked<",
-              {
-                "pluginId": "@kbn/core-application-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreApplicationBrowserPluginApi",
-                "section": "def-public.ApplicationSetup",
-                "text": "ApplicationSetup"
-              },
+              "ApplicationSetup",
               ">; customBranding: { customBranding$: ",
               "Observable",
               "<",
@@ -79,21 +67,9 @@
                 "text": "FeatureFlagsSetup"
               },
               ">; getStartServices: jest.Mock<Promise<[{ analytics: jest.Mocked<",
-              {
-                "pluginId": "@kbn/core-analytics-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreAnalyticsBrowserPluginApi",
-                "section": "def-public.AnalyticsServiceStart",
-                "text": "AnalyticsServiceStart"
-              },
+              "AnalyticsServiceStart",
               ">; application: jest.Mocked<",
-              {
-                "pluginId": "@kbn/core-application-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreApplicationBrowserPluginApi",
-                "section": "def-public.ApplicationStart",
-                "text": "ApplicationStart"
-              },
+              "ApplicationStart",
               ">; chrome: ",
               {
                 "pluginId": "@kbn/utility-types-jest",
@@ -364,21 +340,9 @@
             "description": [],
             "signature": [
               "({ basePath }?: { basePath?: string | undefined; }) => { analytics: jest.Mocked<",
-              {
-                "pluginId": "@kbn/core-analytics-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreAnalyticsBrowserPluginApi",
-                "section": "def-public.AnalyticsServiceStart",
-                "text": "AnalyticsServiceStart"
-              },
+              "AnalyticsServiceStart",
               ">; application: jest.Mocked<",
-              {
-                "pluginId": "@kbn/core-application-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreApplicationBrowserPluginApi",
-                "section": "def-public.ApplicationStart",
-                "text": "ApplicationStart"
-              },
+              "ApplicationStart",
               ">; chrome: ",
               {
                 "pluginId": "@kbn/utility-types-jest",

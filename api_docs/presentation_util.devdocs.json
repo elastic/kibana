@@ -15,7 +15,7 @@
           "DashboardDrilldownOptionsProps",
           " & React.RefAttributes<{}>>"
         ],
-        "path": "src/plugins/presentation_util/public/components/index.tsx",
+        "path": "src/platform/plugins/shared/presentation_util/public/components/index.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -49,7 +49,7 @@
           "FloatingActionsProps",
           ") => React.JSX.Element"
         ],
-        "path": "src/plugins/presentation_util/public/components/floating_actions/floating_actions.tsx",
+        "path": "src/platform/plugins/shared/presentation_util/public/components/floating_actions/floating_actions.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -63,7 +63,7 @@
             "signature": [
               "FloatingActionsProps"
             ],
-            "path": "src/plugins/presentation_util/public/components/floating_actions/floating_actions.tsx",
+            "path": "src/platform/plugins/shared/presentation_util/public/components/floating_actions/floating_actions.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -84,7 +84,7 @@
           "DashboardPickerProps",
           ") => React.JSX.Element>"
         ],
-        "path": "src/plugins/presentation_util/public/components/index.tsx",
+        "path": "src/platform/plugins/shared/presentation_util/public/components/index.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -128,7 +128,7 @@
           "EuiSelectableProps",
           "<{}>> | undefined; }) => React.JSX.Element>"
         ],
-        "path": "src/plugins/presentation_util/public/components/index.tsx",
+        "path": "src/platform/plugins/shared/presentation_util/public/components/index.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -170,7 +170,7 @@
           },
           ") => React.JSX.Element>"
         ],
-        "path": "src/plugins/presentation_util/public/components/index.tsx",
+        "path": "src/platform/plugins/shared/presentation_util/public/components/index.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -204,7 +204,7 @@
           "FieldPickerProps",
           ") => React.JSX.Element>"
         ],
-        "path": "src/plugins/presentation_util/public/components/index.tsx",
+        "path": "src/platform/plugins/shared/presentation_util/public/components/index.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -238,7 +238,7 @@
           "Props",
           ") => React.JSX.Element>"
         ],
-        "path": "src/plugins/presentation_util/public/components/index.tsx",
+        "path": "src/platform/plugins/shared/presentation_util/public/components/index.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -272,7 +272,7 @@
           "Props",
           ") => React.JSX.Element>"
         ],
-        "path": "src/plugins/presentation_util/public/components/index.tsx",
+        "path": "src/platform/plugins/shared/presentation_util/public/components/index.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -312,7 +312,7 @@
           },
           ") => React.JSX.Element>"
         ],
-        "path": "src/plugins/presentation_util/public/components/index.tsx",
+        "path": "src/platform/plugins/shared/presentation_util/public/components/index.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -354,7 +354,7 @@
           },
           "[]) => Promise<void>"
         ],
-        "path": "src/plugins/presentation_util/public/index.ts",
+        "path": "src/platform/plugins/shared/presentation_util/public/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -377,7 +377,7 @@
               },
               "[]"
             ],
-            "path": "src/plugins/presentation_util/public/index.ts",
+            "path": "src/platform/plugins/shared/presentation_util/public/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -398,7 +398,7 @@
         "signature": [
           "<P extends {}, R = {}>(Component: React.ComponentType<P>, fallback?: React.ReactElement<any, string | React.JSXElementConstructor<any>> | null) => React.ForwardRefExoticComponent<React.PropsWithoutRef<P> & React.RefAttributes<R>>"
         ],
-        "path": "src/plugins/presentation_util/public/components/index.tsx",
+        "path": "src/platform/plugins/shared/presentation_util/public/components/index.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -414,7 +414,7 @@
             "signature": [
               "React.ComponentType<P>"
             ],
-            "path": "src/plugins/presentation_util/public/components/index.tsx",
+            "path": "src/platform/plugins/shared/presentation_util/public/components/index.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -431,7 +431,7 @@
             "signature": [
               "React.ReactElement<any, string | React.JSXElementConstructor<any>> | null"
             ],
-            "path": "src/plugins/presentation_util/public/components/index.tsx",
+            "path": "src/platform/plugins/shared/presentation_util/public/components/index.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -461,7 +461,7 @@
           },
           " extends Pick<React.HTMLAttributes<HTMLDivElement>, \"className\" | \"style\">"
         ],
-        "path": "src/plugins/presentation_util/public/components/types.ts",
+        "path": "src/platform/plugins/shared/presentation_util/public/components/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -484,7 +484,7 @@
               },
               "[]"
             ],
-            "path": "src/plugins/presentation_util/public/components/types.ts",
+            "path": "src/platform/plugins/shared/presentation_util/public/components/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -497,7 +497,7 @@
             "description": [
               "Value of expression"
             ],
-            "path": "src/plugins/presentation_util/public/components/types.ts",
+            "path": "src/platform/plugins/shared/presentation_util/public/components/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -513,7 +513,7 @@
             "signature": [
               "(value?: string | undefined) => void"
             ],
-            "path": "src/plugins/presentation_util/public/components/types.ts",
+            "path": "src/platform/plugins/shared/presentation_util/public/components/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -527,7 +527,7 @@
                 "signature": [
                   "string | undefined"
                 ],
-                "path": "src/plugins/presentation_util/public/components/types.ts",
+                "path": "src/platform/plugins/shared/presentation_util/public/components/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -547,7 +547,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/plugins/presentation_util/public/components/types.ts",
+            "path": "src/platform/plugins/shared/presentation_util/public/components/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -564,7 +564,7 @@
               "Property",
               ".Height<string | number> | undefined"
             ],
-            "path": "src/plugins/presentation_util/public/components/types.ts",
+            "path": "src/platform/plugins/shared/presentation_util/public/components/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -587,7 +587,7 @@
               },
               " | undefined"
             ],
-            "path": "src/plugins/presentation_util/public/components/types.ts",
+            "path": "src/platform/plugins/shared/presentation_util/public/components/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -608,7 +608,7 @@
               },
               " | undefined"
             ],
-            "path": "src/plugins/presentation_util/public/components/types.ts",
+            "path": "src/platform/plugins/shared/presentation_util/public/components/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -622,7 +622,7 @@
         "tags": [],
         "label": "PresentationLabsService",
         "description": [],
-        "path": "src/plugins/presentation_util/public/services/presentation_labs_service.ts",
+        "path": "src/platform/plugins/shared/presentation_util/public/services/presentation_labs_service.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -636,7 +636,7 @@
             "signature": [
               "(id: \"labs:dashboard:deferBelowFold\" | \"labs:canvas:byValueEmbeddable\") => boolean"
             ],
-            "path": "src/plugins/presentation_util/public/services/presentation_labs_service.ts",
+            "path": "src/platform/plugins/shared/presentation_util/public/services/presentation_labs_service.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -650,7 +650,7 @@
                 "signature": [
                   "\"labs:dashboard:deferBelowFold\" | \"labs:canvas:byValueEmbeddable\""
                 ],
-                "path": "src/plugins/presentation_util/public/services/presentation_labs_service.ts",
+                "path": "src/platform/plugins/shared/presentation_util/public/services/presentation_labs_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -675,7 +675,7 @@
                 "text": "Project"
               }
             ],
-            "path": "src/plugins/presentation_util/public/services/presentation_labs_service.ts",
+            "path": "src/platform/plugins/shared/presentation_util/public/services/presentation_labs_service.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -689,7 +689,7 @@
                 "signature": [
                   "\"labs:dashboard:deferBelowFold\" | \"labs:canvas:byValueEmbeddable\""
                 ],
-                "path": "src/plugins/presentation_util/public/services/presentation_labs_service.ts",
+                "path": "src/platform/plugins/shared/presentation_util/public/services/presentation_labs_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -715,7 +715,7 @@
               },
               ">"
             ],
-            "path": "src/plugins/presentation_util/public/services/presentation_labs_service.ts",
+            "path": "src/platform/plugins/shared/presentation_util/public/services/presentation_labs_service.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -729,7 +729,7 @@
                 "signature": [
                   "(\"canvas\" | \"presentation\" | \"dashboard\")[] | undefined"
                 ],
-                "path": "src/plugins/presentation_util/public/services/presentation_labs_service.ts",
+                "path": "src/platform/plugins/shared/presentation_util/public/services/presentation_labs_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -747,7 +747,7 @@
             "signature": [
               "(id: \"labs:dashboard:deferBelowFold\" | \"labs:canvas:byValueEmbeddable\", env: \"kibana\" | \"browser\" | \"session\", status: boolean) => void"
             ],
-            "path": "src/plugins/presentation_util/public/services/presentation_labs_service.ts",
+            "path": "src/platform/plugins/shared/presentation_util/public/services/presentation_labs_service.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -761,7 +761,7 @@
                 "signature": [
                   "\"labs:dashboard:deferBelowFold\" | \"labs:canvas:byValueEmbeddable\""
                 ],
-                "path": "src/plugins/presentation_util/public/services/presentation_labs_service.ts",
+                "path": "src/platform/plugins/shared/presentation_util/public/services/presentation_labs_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -776,7 +776,7 @@
                 "signature": [
                   "\"kibana\" | \"browser\" | \"session\""
                 ],
-                "path": "src/plugins/presentation_util/public/services/presentation_labs_service.ts",
+                "path": "src/platform/plugins/shared/presentation_util/public/services/presentation_labs_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -791,7 +791,7 @@
                 "signature": [
                   "boolean"
                 ],
-                "path": "src/plugins/presentation_util/public/services/presentation_labs_service.ts",
+                "path": "src/platform/plugins/shared/presentation_util/public/services/presentation_labs_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -809,7 +809,7 @@
             "signature": [
               "() => void"
             ],
-            "path": "src/plugins/presentation_util/public/services/presentation_labs_service.ts",
+            "path": "src/platform/plugins/shared/presentation_util/public/services/presentation_labs_service.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -825,7 +825,7 @@
         "tags": [],
         "label": "SaveModalDashboardProps",
         "description": [],
-        "path": "src/plugins/presentation_util/public/components/types.ts",
+        "path": "src/platform/plugins/shared/presentation_util/public/components/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -839,7 +839,7 @@
             "signature": [
               "SaveModalDocumentInfo"
             ],
-            "path": "src/plugins/presentation_util/public/components/types.ts",
+            "path": "src/platform/plugins/shared/presentation_util/public/components/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -850,7 +850,7 @@
             "tags": [],
             "label": "canSaveByReference",
             "description": [],
-            "path": "src/plugins/presentation_util/public/components/types.ts",
+            "path": "src/platform/plugins/shared/presentation_util/public/components/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -861,7 +861,7 @@
             "tags": [],
             "label": "objectType",
             "description": [],
-            "path": "src/plugins/presentation_util/public/components/types.ts",
+            "path": "src/platform/plugins/shared/presentation_util/public/components/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -875,7 +875,7 @@
             "signature": [
               "() => void"
             ],
-            "path": "src/plugins/presentation_util/public/components/types.ts",
+            "path": "src/platform/plugins/shared/presentation_util/public/components/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -899,7 +899,7 @@
               },
               " & { dashboardId: string | null; addToLibrary: boolean; }) => void"
             ],
-            "path": "src/plugins/presentation_util/public/components/types.ts",
+            "path": "src/platform/plugins/shared/presentation_util/public/components/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -920,7 +920,7 @@
                   },
                   " & { dashboardId: string | null; addToLibrary: boolean; }"
                 ],
-                "path": "src/plugins/presentation_util/public/components/types.ts",
+                "path": "src/platform/plugins/shared/presentation_util/public/components/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -946,7 +946,7 @@
               },
               ") => React.ReactNode)"
             ],
-            "path": "src/plugins/presentation_util/public/components/types.ts",
+            "path": "src/platform/plugins/shared/presentation_util/public/components/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -960,7 +960,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/presentation_util/public/components/types.ts",
+            "path": "src/platform/plugins/shared/presentation_util/public/components/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -980,7 +980,7 @@
         "signature": [
           "{ useCurrentFilters: boolean; useCurrentDateRange: boolean; openInNewTab: boolean; }"
         ],
-        "path": "src/plugins/presentation_util/public/components/dashboard_drilldown_options/types.ts",
+        "path": "src/platform/plugins/shared/presentation_util/public/components/dashboard_drilldown_options/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -999,7 +999,7 @@
           "editor",
           ".IStandaloneCodeEditor | null>"
         ],
-        "path": "src/plugins/presentation_util/public/components/types.ts",
+        "path": "src/platform/plugins/shared/presentation_util/public/components/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1016,7 +1016,7 @@
           "editor",
           ".IStandaloneCodeEditor | null) => void"
         ],
-        "path": "src/plugins/presentation_util/public/components/types.ts",
+        "path": "src/platform/plugins/shared/presentation_util/public/components/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -1032,7 +1032,7 @@
               "editor",
               ".IStandaloneCodeEditor | null"
             ],
-            "path": "src/plugins/presentation_util/public/components/types.ts",
+            "path": "src/platform/plugins/shared/presentation_util/public/components/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1048,7 +1048,7 @@
         "tags": [],
         "label": "DEFAULT_DASHBOARD_DRILLDOWN_OPTIONS",
         "description": [],
-        "path": "src/plugins/presentation_util/public/components/dashboard_drilldown_options/types.ts",
+        "path": "src/platform/plugins/shared/presentation_util/public/components/dashboard_drilldown_options/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1062,7 +1062,7 @@
             "signature": [
               "false"
             ],
-            "path": "src/plugins/presentation_util/public/components/dashboard_drilldown_options/types.ts",
+            "path": "src/platform/plugins/shared/presentation_util/public/components/dashboard_drilldown_options/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1076,7 +1076,7 @@
             "signature": [
               "true"
             ],
-            "path": "src/plugins/presentation_util/public/components/dashboard_drilldown_options/types.ts",
+            "path": "src/platform/plugins/shared/presentation_util/public/components/dashboard_drilldown_options/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1090,7 +1090,7 @@
             "signature": [
               "true"
             ],
-            "path": "src/plugins/presentation_util/public/components/dashboard_drilldown_options/types.ts",
+            "path": "src/platform/plugins/shared/presentation_util/public/components/dashboard_drilldown_options/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1105,7 +1105,7 @@
       "tags": [],
       "label": "PresentationUtilPluginSetup",
       "description": [],
-      "path": "src/plugins/presentation_util/public/types.ts",
+      "path": "src/platform/plugins/shared/presentation_util/public/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -1119,7 +1119,7 @@
       "tags": [],
       "label": "PresentationUtilPluginStart",
       "description": [],
-      "path": "src/plugins/presentation_util/public/types.ts",
+      "path": "src/platform/plugins/shared/presentation_util/public/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -1139,7 +1139,7 @@
               "text": "PresentationLabsService"
             }
           ],
-          "path": "src/plugins/presentation_util/public/types.ts",
+          "path": "src/platform/plugins/shared/presentation_util/public/types.ts",
           "deprecated": false,
           "trackAdoption": false
         },
@@ -1161,7 +1161,7 @@
             },
             "[]) => Promise<void>"
           ],
-          "path": "src/plugins/presentation_util/public/types.ts",
+          "path": "src/platform/plugins/shared/presentation_util/public/types.ts",
           "deprecated": false,
           "trackAdoption": false,
           "returnComment": [],
@@ -1183,7 +1183,7 @@
                 },
                 "[]"
               ],
-              "path": "src/plugins/presentation_util/public/index.ts",
+              "path": "src/platform/plugins/shared/presentation_util/public/index.ts",
               "deprecated": false,
               "trackAdoption": false
             }
@@ -1210,7 +1210,7 @@
         "signature": [
           "\"Presentation Labs\""
         ],
-        "path": "src/plugins/presentation_util/server/ui_settings.ts",
+        "path": "src/platform/plugins/shared/presentation_util/server/ui_settings.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1231,7 +1231,7 @@
         "signature": [
           "(data: any, type: string) => Promise<string>"
         ],
-        "path": "src/plugins/presentation_util/common/lib/utils/dataurl.ts",
+        "path": "src/platform/plugins/shared/presentation_util/common/lib/utils/dataurl.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1245,7 +1245,7 @@
             "signature": [
               "any"
             ],
-            "path": "src/plugins/presentation_util/common/lib/utils/dataurl.ts",
+            "path": "src/platform/plugins/shared/presentation_util/common/lib/utils/dataurl.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1260,7 +1260,7 @@
             "signature": [
               "string"
             ],
-            "path": "src/plugins/presentation_util/common/lib/utils/dataurl.ts",
+            "path": "src/platform/plugins/shared/presentation_util/common/lib/utils/dataurl.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1278,10 +1278,10 @@
         "description": [],
         "signature": [
           "() => Promise<typeof ",
-          "src/plugins/presentation_util/common/lib/utils/elastic_logo",
+          "src/platform/plugins/shared/presentation_util/common/lib/utils/elastic_logo",
           ">"
         ],
-        "path": "src/plugins/presentation_util/common/lib/utils/index.ts",
+        "path": "src/platform/plugins/shared/presentation_util/common/lib/utils/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -1297,10 +1297,10 @@
         "description": [],
         "signature": [
           "() => Promise<typeof ",
-          "src/plugins/presentation_util/common/lib/utils/elastic_outline",
+          "src/platform/plugins/shared/presentation_util/common/lib/utils/elastic_outline",
           ">"
         ],
-        "path": "src/plugins/presentation_util/common/lib/utils/index.ts",
+        "path": "src/platform/plugins/shared/presentation_util/common/lib/utils/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -1317,7 +1317,7 @@
         "signature": [
           "() => readonly [\"labs:dashboard:deferBelowFold\", \"labs:canvas:byValueEmbeddable\"]"
         ],
-        "path": "src/plugins/presentation_util/common/labs.ts",
+        "path": "src/platform/plugins/shared/presentation_util/common/labs.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -1342,7 +1342,7 @@
           },
           ") => boolean"
         ],
-        "path": "src/plugins/presentation_util/common/labs.ts",
+        "path": "src/platform/plugins/shared/presentation_util/common/labs.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1356,7 +1356,7 @@
             "signature": [
               "boolean"
             ],
-            "path": "src/plugins/presentation_util/common/labs.ts",
+            "path": "src/platform/plugins/shared/presentation_util/common/labs.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1377,7 +1377,7 @@
                 "text": "EnvironmentStatus"
               }
             ],
-            "path": "src/plugins/presentation_util/common/labs.ts",
+            "path": "src/platform/plugins/shared/presentation_util/common/labs.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1396,7 +1396,7 @@
         "signature": [
           "(str: string) => boolean"
         ],
-        "path": "src/plugins/presentation_util/common/lib/utils/httpurl.ts",
+        "path": "src/platform/plugins/shared/presentation_util/common/lib/utils/httpurl.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1410,7 +1410,7 @@
             "signature": [
               "string"
             ],
-            "path": "src/plugins/presentation_util/common/lib/utils/httpurl.ts",
+            "path": "src/platform/plugins/shared/presentation_util/common/lib/utils/httpurl.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1429,7 +1429,7 @@
         "signature": [
           "(url: string) => boolean"
         ],
-        "path": "src/plugins/presentation_util/common/lib/utils/url.ts",
+        "path": "src/platform/plugins/shared/presentation_util/common/lib/utils/url.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1443,7 +1443,7 @@
             "signature": [
               "string"
             ],
-            "path": "src/plugins/presentation_util/common/lib/utils/url.ts",
+            "path": "src/platform/plugins/shared/presentation_util/common/lib/utils/url.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1462,7 +1462,7 @@
         "signature": [
           "(str: string, withData: boolean) => { mimetype: string; encoding: string; charset: string; data: string | null; isImage: boolean; extension: any; } | null"
         ],
-        "path": "src/plugins/presentation_util/common/lib/utils/dataurl.ts",
+        "path": "src/platform/plugins/shared/presentation_util/common/lib/utils/dataurl.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1476,7 +1476,7 @@
             "signature": [
               "string"
             ],
-            "path": "src/plugins/presentation_util/common/lib/utils/dataurl.ts",
+            "path": "src/platform/plugins/shared/presentation_util/common/lib/utils/dataurl.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1491,7 +1491,7 @@
             "signature": [
               "boolean"
             ],
-            "path": "src/plugins/presentation_util/common/lib/utils/dataurl.ts",
+            "path": "src/platform/plugins/shared/presentation_util/common/lib/utils/dataurl.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1510,7 +1510,7 @@
         "signature": [
           "(args: any, defaultDataurl?: string | null) => string"
         ],
-        "path": "src/plugins/presentation_util/common/lib/utils/resolve_dataurl.ts",
+        "path": "src/platform/plugins/shared/presentation_util/common/lib/utils/resolve_dataurl.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1524,7 +1524,7 @@
             "signature": [
               "any"
             ],
-            "path": "src/plugins/presentation_util/common/lib/utils/resolve_dataurl.ts",
+            "path": "src/platform/plugins/shared/presentation_util/common/lib/utils/resolve_dataurl.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1539,7 +1539,7 @@
             "signature": [
               "string | null"
             ],
-            "path": "src/plugins/presentation_util/common/lib/utils/resolve_dataurl.ts",
+            "path": "src/platform/plugins/shared/presentation_util/common/lib/utils/resolve_dataurl.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -1558,7 +1558,7 @@
         "signature": [
           "(img: string | null, alt?: string | null) => string | null"
         ],
-        "path": "src/plugins/presentation_util/common/lib/utils/resolve_dataurl.ts",
+        "path": "src/platform/plugins/shared/presentation_util/common/lib/utils/resolve_dataurl.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1572,7 +1572,7 @@
             "signature": [
               "string | null"
             ],
-            "path": "src/plugins/presentation_util/common/lib/utils/resolve_dataurl.ts",
+            "path": "src/platform/plugins/shared/presentation_util/common/lib/utils/resolve_dataurl.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -1587,7 +1587,7 @@
             "signature": [
               "string | null"
             ],
-            "path": "src/plugins/presentation_util/common/lib/utils/resolve_dataurl.ts",
+            "path": "src/platform/plugins/shared/presentation_util/common/lib/utils/resolve_dataurl.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -1605,7 +1605,7 @@
         "tags": [],
         "label": "ProjectConfig",
         "description": [],
-        "path": "src/plugins/presentation_util/common/labs.ts",
+        "path": "src/platform/plugins/shared/presentation_util/common/labs.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1619,7 +1619,7 @@
             "signature": [
               "\"labs:dashboard:deferBelowFold\" | \"labs:canvas:byValueEmbeddable\""
             ],
-            "path": "src/plugins/presentation_util/common/labs.ts",
+            "path": "src/platform/plugins/shared/presentation_util/common/labs.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1630,7 +1630,7 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "path": "src/plugins/presentation_util/common/labs.ts",
+            "path": "src/platform/plugins/shared/presentation_util/common/labs.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1641,7 +1641,7 @@
             "tags": [],
             "label": "isActive",
             "description": [],
-            "path": "src/plugins/presentation_util/common/labs.ts",
+            "path": "src/platform/plugins/shared/presentation_util/common/labs.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1652,7 +1652,7 @@
             "tags": [],
             "label": "isDisplayed",
             "description": [],
-            "path": "src/plugins/presentation_util/common/labs.ts",
+            "path": "src/platform/plugins/shared/presentation_util/common/labs.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1666,7 +1666,7 @@
             "signature": [
               "(\"kibana\" | \"browser\" | \"session\")[]"
             ],
-            "path": "src/plugins/presentation_util/common/labs.ts",
+            "path": "src/platform/plugins/shared/presentation_util/common/labs.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1677,7 +1677,7 @@
             "tags": [],
             "label": "description",
             "description": [],
-            "path": "src/plugins/presentation_util/common/labs.ts",
+            "path": "src/platform/plugins/shared/presentation_util/common/labs.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1691,7 +1691,7 @@
             "signature": [
               "(\"canvas\" | \"presentation\" | \"dashboard\")[]"
             ],
-            "path": "src/plugins/presentation_util/common/labs.ts",
+            "path": "src/platform/plugins/shared/presentation_util/common/labs.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1711,7 +1711,7 @@
         "signature": [
           "\"kibana\" | \"browser\" | \"session\""
         ],
-        "path": "src/plugins/presentation_util/common/labs.ts",
+        "path": "src/platform/plugins/shared/presentation_util/common/labs.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1726,7 +1726,7 @@
         "signature": [
           "{ kibana?: boolean | undefined; browser?: boolean | undefined; session?: boolean | undefined; }"
         ],
-        "path": "src/plugins/presentation_util/common/labs.ts",
+        "path": "src/platform/plugins/shared/presentation_util/common/labs.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1743,7 +1743,7 @@
         "signature": [
           "\"kibana-expressions\""
         ],
-        "path": "src/plugins/presentation_util/common/index.ts",
+        "path": "src/platform/plugins/shared/presentation_util/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1758,7 +1758,7 @@
         "signature": [
           "\"labs:\""
         ],
-        "path": "src/plugins/presentation_util/common/labs.ts",
+        "path": "src/platform/plugins/shared/presentation_util/common/labs.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1773,7 +1773,7 @@
         "signature": [
           "\"presentationUtil\""
         ],
-        "path": "src/plugins/presentation_util/common/index.ts",
+        "path": "src/platform/plugins/shared/presentation_util/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1788,7 +1788,7 @@
         "signature": [
           "\"presentationUtil\""
         ],
-        "path": "src/plugins/presentation_util/common/index.ts",
+        "path": "src/platform/plugins/shared/presentation_util/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1818,7 +1818,7 @@
           },
           "; }"
         ],
-        "path": "src/plugins/presentation_util/common/labs.ts",
+        "path": "src/platform/plugins/shared/presentation_util/common/labs.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1833,7 +1833,7 @@
         "signature": [
           "\"labs:dashboard:deferBelowFold\" | \"labs:canvas:byValueEmbeddable\""
         ],
-        "path": "src/plugins/presentation_util/common/labs.ts",
+        "path": "src/platform/plugins/shared/presentation_util/common/labs.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1855,7 +1855,7 @@
             "text": "EnvironmentStatus"
           }
         ],
-        "path": "src/plugins/presentation_util/common/labs.ts",
+        "path": "src/platform/plugins/shared/presentation_util/common/labs.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1870,7 +1870,7 @@
         "signature": [
           "\"canvas\" | \"presentation\" | \"dashboard\""
         ],
-        "path": "src/plugins/presentation_util/common/labs.ts",
+        "path": "src/platform/plugins/shared/presentation_util/common/labs.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1887,7 +1887,7 @@
         "signature": [
           "readonly [\"kibana\", \"browser\", \"session\"]"
         ],
-        "path": "src/plugins/presentation_util/common/labs.ts",
+        "path": "src/platform/plugins/shared/presentation_util/common/labs.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1902,7 +1902,7 @@
         "signature": [
           "readonly [\"labs:dashboard:deferBelowFold\", \"labs:canvas:byValueEmbeddable\"]"
         ],
-        "path": "src/plugins/presentation_util/common/labs.ts",
+        "path": "src/platform/plugins/shared/presentation_util/common/labs.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1916,7 +1916,7 @@
         "description": [
           "\nThis is a list of active Labs Projects for the Presentation Team.  It is the \"source of truth\" for all projects\nprovided to users of our solutions in Kibana."
         ],
-        "path": "src/plugins/presentation_util/common/labs.ts",
+        "path": "src/platform/plugins/shared/presentation_util/common/labs.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1927,7 +1927,7 @@
             "tags": [],
             "label": "[DEFER_BELOW_FOLD]",
             "description": [],
-            "path": "src/plugins/presentation_util/common/labs.ts",
+            "path": "src/platform/plugins/shared/presentation_util/common/labs.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1941,7 +1941,7 @@
                 "signature": [
                   "\"labs:dashboard:deferBelowFold\""
                 ],
-                "path": "src/plugins/presentation_util/common/labs.ts",
+                "path": "src/platform/plugins/shared/presentation_util/common/labs.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1955,7 +1955,7 @@
                 "signature": [
                   "false"
                 ],
-                "path": "src/plugins/presentation_util/common/labs.ts",
+                "path": "src/platform/plugins/shared/presentation_util/common/labs.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1969,7 +1969,7 @@
                 "signature": [
                   "true"
                 ],
-                "path": "src/plugins/presentation_util/common/labs.ts",
+                "path": "src/platform/plugins/shared/presentation_util/common/labs.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1983,7 +1983,7 @@
                 "signature": [
                   "(\"kibana\" | \"browser\" | \"session\")[]"
                 ],
-                "path": "src/plugins/presentation_util/common/labs.ts",
+                "path": "src/platform/plugins/shared/presentation_util/common/labs.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1994,7 +1994,7 @@
                 "tags": [],
                 "label": "name",
                 "description": [],
-                "path": "src/plugins/presentation_util/common/labs.ts",
+                "path": "src/platform/plugins/shared/presentation_util/common/labs.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -2005,7 +2005,7 @@
                 "tags": [],
                 "label": "description",
                 "description": [],
-                "path": "src/plugins/presentation_util/common/labs.ts",
+                "path": "src/platform/plugins/shared/presentation_util/common/labs.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -2019,7 +2019,7 @@
                 "signature": [
                   "\"dashboard\"[]"
                 ],
-                "path": "src/plugins/presentation_util/common/labs.ts",
+                "path": "src/platform/plugins/shared/presentation_util/common/labs.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -2032,7 +2032,7 @@
             "tags": [],
             "label": "[BY_VALUE_EMBEDDABLE]",
             "description": [],
-            "path": "src/plugins/presentation_util/common/labs.ts",
+            "path": "src/platform/plugins/shared/presentation_util/common/labs.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2046,7 +2046,7 @@
                 "signature": [
                   "\"labs:canvas:byValueEmbeddable\""
                 ],
-                "path": "src/plugins/presentation_util/common/labs.ts",
+                "path": "src/platform/plugins/shared/presentation_util/common/labs.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -2060,7 +2060,7 @@
                 "signature": [
                   "true"
                 ],
-                "path": "src/plugins/presentation_util/common/labs.ts",
+                "path": "src/platform/plugins/shared/presentation_util/common/labs.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -2074,7 +2074,7 @@
                 "signature": [
                   "true"
                 ],
-                "path": "src/plugins/presentation_util/common/labs.ts",
+                "path": "src/platform/plugins/shared/presentation_util/common/labs.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -2088,7 +2088,7 @@
                 "signature": [
                   "(\"kibana\" | \"browser\" | \"session\")[]"
                 ],
-                "path": "src/plugins/presentation_util/common/labs.ts",
+                "path": "src/platform/plugins/shared/presentation_util/common/labs.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -2099,7 +2099,7 @@
                 "tags": [],
                 "label": "name",
                 "description": [],
-                "path": "src/plugins/presentation_util/common/labs.ts",
+                "path": "src/platform/plugins/shared/presentation_util/common/labs.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -2110,7 +2110,7 @@
                 "tags": [],
                 "label": "description",
                 "description": [],
-                "path": "src/plugins/presentation_util/common/labs.ts",
+                "path": "src/platform/plugins/shared/presentation_util/common/labs.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -2124,7 +2124,7 @@
                 "signature": [
                   "\"canvas\"[]"
                 ],
-                "path": "src/plugins/presentation_util/common/labs.ts",
+                "path": "src/platform/plugins/shared/presentation_util/common/labs.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }

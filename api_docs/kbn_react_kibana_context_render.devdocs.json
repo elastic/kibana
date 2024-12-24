@@ -93,13 +93,7 @@
             "text": "I18nStart"
           },
           "; analytics?: Pick<",
-          {
-            "pluginId": "@kbn/core-analytics-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreAnalyticsBrowserPluginApi",
-            "section": "def-public.AnalyticsServiceStart",
-            "text": "AnalyticsServiceStart"
-          },
+          "AnalyticsServiceStart",
           ", \"reportEvent\"> | undefined; executionContext?: ",
           {
             "pluginId": "@kbn/core-execution-context-browser",

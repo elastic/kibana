@@ -1017,13 +1017,7 @@
                 "text": "I18nStart"
               },
               "; analytics: ",
-              {
-                "pluginId": "@kbn/core-analytics-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreAnalyticsBrowserPluginApi",
-                "section": "def-public.AnalyticsServiceStart",
-                "text": "AnalyticsServiceStart"
-              },
+              "AnalyticsServiceStart",
               "; theme: ",
               {
                 "pluginId": "@kbn/core-theme-browser",
@@ -1178,13 +1172,7 @@
             "text": "I18nStart"
           },
           "; analytics: ",
-          {
-            "pluginId": "@kbn/core-analytics-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreAnalyticsBrowserPluginApi",
-            "section": "def-public.AnalyticsServiceStart",
-            "text": "AnalyticsServiceStart"
-          },
+          "AnalyticsServiceStart",
           "; theme: ",
           {
             "pluginId": "@kbn/core-theme-browser",

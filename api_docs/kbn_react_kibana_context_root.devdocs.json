@@ -270,13 +270,7 @@
             ],
             "signature": [
               "Pick<",
-              {
-                "pluginId": "@kbn/core-analytics-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreAnalyticsBrowserPluginApi",
-                "section": "def-public.AnalyticsServiceStart",
-                "text": "AnalyticsServiceStart"
-              },
+              "AnalyticsServiceStart",
               ", \"reportEvent\"> | undefined"
             ],
             "path": "packages/react/kibana_context/root/root_provider.tsx",
