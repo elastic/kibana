@@ -5,6 +5,7 @@
  * 2.0.
  */
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { ClusterPutComponentTemplateRequest } from '@elastic/elasticsearch/lib/api/types';
 import { errors as EsErrors } from '@elastic/elasticsearch';
 import { createOrUpdateComponentTemplate } from './create_or_update_component_template';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
@@ -13,7 +14,7 @@ const randomDelayMultiplier = 0.01;
 const logger = loggingSystemMock.createLogger();
 const clusterClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
-const ComponentTemplate = {
+const ComponentTemplate: ClusterPutComponentTemplateRequest = {
   name: 'test-mappings',
   _meta: {
     managed: true,
@@ -176,14 +177,12 @@ describe('createOrUpdateComponentTemplate', () => {
     expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalledTimes(1);
     expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalledWith({
       name: existingIndexTemplate.name,
-      body: {
-        ...existingIndexTemplate.index_template,
-        template: {
-          ...existingIndexTemplate.index_template.template,
-          settings: {
-            ...existingIndexTemplate.index_template.template?.settings,
-            'index.mapping.total_fields.limit': 2500,
-          },
+      ...existingIndexTemplate.index_template,
+      template: {
+        ...existingIndexTemplate.index_template.template,
+        settings: {
+          ...existingIndexTemplate.index_template.template?.settings,
+          'index.mapping.total_fields.limit': 2500,
         },
       },
     });
@@ -282,14 +281,12 @@ describe('createOrUpdateComponentTemplate', () => {
     expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalledTimes(1);
     expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalledWith({
       name: existingIndexTemplate.name,
-      body: {
-        ...existingIndexTemplate.index_template,
-        template: {
-          ...existingIndexTemplate.index_template.template,
-          settings: {
-            ...existingIndexTemplate.index_template.template?.settings,
-            'index.mapping.total_fields.limit': 2500,
-          },
+      ...existingIndexTemplate.index_template,
+      template: {
+        ...existingIndexTemplate.index_template.template,
+        settings: {
+          ...existingIndexTemplate.index_template.template?.settings,
+          'index.mapping.total_fields.limit': 2500,
         },
       },
     });

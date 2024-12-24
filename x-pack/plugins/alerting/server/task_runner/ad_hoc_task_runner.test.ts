@@ -461,7 +461,7 @@ describe('Ad Hoc Task Runner', () => {
       index: '.alerts-test.alerts-default',
       refresh: 'wait_for',
       require_alias: !useDataStreamForAlerts,
-      body: [
+      operations: [
         {
           create: {
             _id: UUID,
