@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { InferenceConnectorType } from '../../../common/connectors';
+import { InferenceConnectorType } from '@kbn/inference-common';
 import type { InferenceConnectorAdapter } from '../types';
 import { openAIAdapter } from './openai';
 import { geminiAdapter } from './gemini';
 import { bedrockClaudeAdapter } from './bedrock';
+import { inferenceAdapter } from './inference';
 
 export const getInferenceAdapter = (
   connectorType: InferenceConnectorType
@@ -23,6 +24,9 @@ export const getInferenceAdapter = (
 
     case InferenceConnectorType.Bedrock:
       return bedrockClaudeAdapter;
+
+    case InferenceConnectorType.Inference:
+      return inferenceAdapter;
   }
 
   return undefined;

@@ -11,6 +11,7 @@ import { FiltersExpressionsSelect } from './filters_expression_select';
 import { render } from '../../../../lib/helper/rtl_helpers';
 import { filterAriaLabels as aria } from './translations';
 import * as Hooks from '@kbn/observability-shared-plugin/public/hooks/use_values_list';
+import { EuiThemeProvider } from '@elastic/eui';
 
 describe('FiltersExpressionSelect', () => {
   const LOCATION_FIELD_NAME = 'observer.geo.name';
@@ -114,13 +115,15 @@ describe('FiltersExpressionSelect', () => {
       const spy = jest.spyOn(Hooks, 'useValuesList');
       spy.mockReturnValue({ loading: false, values: [{ label: 'test-label', count: 3 }] });
       const { getByLabelText, getByText } = render(
-        <FiltersExpressionsSelect
-          ruleParams={{}}
-          newFilters={newFilters}
-          onRemoveFilter={jest.fn()}
-          setRuleParams={jest.fn()}
-          shouldUpdateUrl={false}
-        />
+        <EuiThemeProvider>
+          <FiltersExpressionsSelect
+            ruleParams={{}}
+            newFilters={newFilters}
+            onRemoveFilter={jest.fn()}
+            setRuleParams={jest.fn()}
+            shouldUpdateUrl={false}
+          />
+        </EuiThemeProvider>
       );
 
       const filterButton = getByLabelText(expectedFilterButtonAriaLabel);

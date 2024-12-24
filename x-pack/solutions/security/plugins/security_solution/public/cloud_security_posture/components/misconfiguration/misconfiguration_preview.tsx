@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import { css } from '@emotion/react';
 import type { EuiThemeComputed } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, useEuiTheme, EuiTitle } from '@elastic/eui';
@@ -20,8 +20,11 @@ import {
   uiMetricService,
 } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
 import { ExpandablePanel } from '../../../flyout/shared/components/expandable_panel';
-import { CspInsightLeftPanelSubTab } from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
-import { useNavigateEntityInsight } from '../../hooks/use_entity_insight';
+import type { EntityDetailsPath } from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
+import {
+  CspInsightLeftPanelSubTab,
+  EntityDetailsLeftPanelTab,
+} from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
 
 export const getFindingsStats = (passedFindingsStats: number, failedFindingsStats: number) => {
   if (passedFindingsStats === 0 && failedFindingsStats === 0) return [];
@@ -88,10 +91,14 @@ export const MisconfigurationsPreview = ({
   value,
   field,
   isPreviewMode,
+  isLinkEnabled,
+  openDetailsPanel,
 }: {
   value: string;
   field: 'host.name' | 'user.name';
   isPreviewMode?: boolean;
+  isLinkEnabled: boolean;
+  openDetailsPanel: (path: EntityDetailsPath) => void;
 }) => {
   const { hasMisconfigurationFindings, passedFindings, failedFindings } = useHasMisconfigurations(
     field,
@@ -103,15 +110,16 @@ export const MisconfigurationsPreview = ({
   }, []);
   const { euiTheme } = useEuiTheme();
 
-  const { goToEntityInsightTab } = useNavigateEntityInsight({
-    field,
-    value,
-    queryIdExtension: 'MISCONFIGURATION_PREVIEW',
-    subTab: CspInsightLeftPanelSubTab.MISCONFIGURATIONS,
-  });
+  const goToEntityInsightTab = useCallback(() => {
+    openDetailsPanel({
+      tab: EntityDetailsLeftPanelTab.CSP_INSIGHTS,
+      subTab: CspInsightLeftPanelSubTab.MISCONFIGURATIONS,
+    });
+  }, [openDetailsPanel]);
+
   const link = useMemo(
     () =>
-      !isPreviewMode
+      isLinkEnabled
         ? {
             callback: goToEntityInsightTab,
             tooltip: (
@@ -122,7 +130,7 @@ export const MisconfigurationsPreview = ({
             ),
           }
         : undefined,
-    [isPreviewMode, goToEntityInsightTab]
+    [isLinkEnabled, goToEntityInsightTab]
   );
   return (
     <ExpandablePanel
