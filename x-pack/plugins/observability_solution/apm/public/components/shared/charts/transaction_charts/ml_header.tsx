@@ -9,7 +9,7 @@ import { EuiFlexItem, EuiIconTip, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
 import React from 'react';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import styled from '@emotion/styled';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
 import { MLSingleMetricLink } from '../../links/machine_learning_links/mlsingle_metric_link';
@@ -19,14 +19,14 @@ interface Props {
   mlJobId?: string;
 }
 
-const ShiftedIconWrapper = euiStyled.span`
+const ShiftedIconWrapper = styled.span`
   padding-right: 5px;
   position: relative;
   top: -1px;
   display: inline-block;
 `;
 
-const ShiftedEuiText = euiStyled(EuiText)`
+const ShiftedEuiText = styled(EuiText)`
   position: relative;
   top: 5px;
 `;
@@ -45,7 +45,9 @@ export function MLHeader({ hasValidMlLicense, mlJobId }: Props) {
   const hasKuery = !isEmpty(kuery);
   const icon = hasKuery ? (
     <EuiIconTip
-      aria-label="Warning"
+      aria-label={i18n.translate('xpack.apm.mLHeader.euiIconTip.warningLabel', {
+        defaultMessage: 'Warning',
+      })}
       type="warning"
       color="warning"
       content={i18n.translate(

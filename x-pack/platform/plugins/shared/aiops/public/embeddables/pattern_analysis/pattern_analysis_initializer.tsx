@@ -6,6 +6,7 @@
  */
 
 import {
+  useEuiTheme,
   EuiFlyoutHeader,
   EuiTitle,
   EuiFlyoutBody,
@@ -19,7 +20,6 @@ import {
   EuiFlyoutFooter,
   EuiCallOut,
 } from '@elastic/eui';
-import { euiThemeVars } from '@kbn/ui-theme';
 import { i18n } from '@kbn/i18n';
 import type { FC } from 'react';
 import React, { useEffect, useMemo, useState, useCallback } from 'react';
@@ -62,6 +62,7 @@ export const PatternAnalysisEmbeddableInitializer: FC<PatternAnalysisInitializer
   onPreview,
   isNewPanel,
 }) => {
+  const { euiTheme } = useEuiTheme();
   const {
     data: { dataViews },
     unifiedSearch: {
@@ -128,7 +129,7 @@ export const PatternAnalysisEmbeddableInitializer: FC<PatternAnalysisInitializer
         hasBorder={true}
         css={{
           pointerEvents: 'auto',
-          backgroundColor: euiThemeVars.euiColorEmptyShade,
+          backgroundColor: euiTheme.colors.emptyShade,
         }}
       >
         <EuiTitle size="s" data-test-subj="inlineEditingFlyoutLabel">
