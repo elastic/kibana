@@ -6,7 +6,7 @@
  */
 
 import { useEffect, useMemo } from 'react';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 import { DEFAULT_ANOMALY_SCORE } from '../../../../../common/constants';
 import { anomaliesTableData } from '../api/anomalies_table_data';
 import type { InfluencerInput, Anomalies, CriteriaFields } from '../types';
