@@ -1890,7 +1890,7 @@
   resolved "https://registry.yarnpkg.com/@babel/regjsgen/-/regjsgen-0.8.0.tgz#f0ba69b075e1f05fb2825b7fad991e7adbb18310"
   integrity sha512-x/rqGMdzj+fWZvCOYForTghzbtqPDZ5gPwaoNGHdgDfF2QA/XZbCBp4Moo5scrkAMPhB7z26XM/AaHuIJdgauA==
 
-"@babel/runtime@^7.0.0", "@babel/runtime@^7.1.2", "@babel/runtime@^7.12.0", "@babel/runtime@^7.12.1", "@babel/runtime@^7.12.13", "@babel/runtime@^7.12.5", "@babel/runtime@^7.15.4", "@babel/runtime@^7.17.8", "@babel/runtime@^7.18.3", "@babel/runtime@^7.20.7", "@babel/runtime@^7.21.0", "@babel/runtime@^7.24.1", "@babel/runtime@^7.24.7", "@babel/runtime@^7.25.0", "@babel/runtime@^7.3.1", "@babel/runtime@^7.4.4", "@babel/runtime@^7.4.5", "@babel/runtime@^7.5.0", "@babel/runtime@^7.5.5", "@babel/runtime@^7.6.3", "@babel/runtime@^7.7.2", "@babel/runtime@^7.7.6", "@babel/runtime@^7.8.4", "@babel/runtime@^7.8.7", "@babel/runtime@^7.9.2":
+"@babel/runtime@^7.0.0", "@babel/runtime@^7.1.2", "@babel/runtime@^7.10.1", "@babel/runtime@^7.12.0", "@babel/runtime@^7.12.1", "@babel/runtime@^7.12.13", "@babel/runtime@^7.12.5", "@babel/runtime@^7.15.4", "@babel/runtime@^7.17.8", "@babel/runtime@^7.18.3", "@babel/runtime@^7.20.7", "@babel/runtime@^7.21.0", "@babel/runtime@^7.24.1", "@babel/runtime@^7.24.7", "@babel/runtime@^7.25.0", "@babel/runtime@^7.3.1", "@babel/runtime@^7.4.4", "@babel/runtime@^7.4.5", "@babel/runtime@^7.5.0", "@babel/runtime@^7.5.5", "@babel/runtime@^7.6.3", "@babel/runtime@^7.7.2", "@babel/runtime@^7.7.6", "@babel/runtime@^7.8.4", "@babel/runtime@^7.8.7", "@babel/runtime@^7.9.2":
   version "7.25.0"
   resolved "https://registry.yarnpkg.com/@babel/runtime/-/runtime-7.25.0.tgz#3af9a91c1b739c569d5d80cc917280919c544ecb"
   integrity sha512-7dRy4DwXwtzBrPbZflqxnvfxLF8kdZXPkhymtDeFoFqE6ldzjQFgYTtYIFARcLEYDrqfBfYcZt1WqFxRoyC9Rw==
@@ -2386,23 +2386,23 @@
   resolved "https://registry.yarnpkg.com/@elastic/numeral/-/numeral-2.5.1.tgz#96acf39c3d599950646ef8ccfd24a3f057cf4932"
   integrity sha512-Tby6TKjixRFY+atVNeYUdGr9m0iaOq8230KTwn8BbUhkh7LwozfgKq0U98HRX7n63ZL62szl+cDKTYzh5WPCFQ==
 
-"@elastic/react-search-ui-views@1.20.2", "@elastic/react-search-ui-views@^1.20.2":
-  version "1.20.2"
-  resolved "https://registry.yarnpkg.com/@elastic/react-search-ui-views/-/react-search-ui-views-1.20.2.tgz#31d9e90be0694b1259d1885463919eb7478b6511"
-  integrity sha512-nx2XOxQ9ONIrd9MhJ1/z0p7AXYYXUr4Tqx8TPUqQd6m/yTa55qrCdEcBm59+MGSBFtVCRsix8KBMiOij+/afxQ==
+"@elastic/react-search-ui-views@1.22.0", "@elastic/react-search-ui-views@^1.22.0":
+  version "1.22.0"
+  resolved "https://registry.yarnpkg.com/@elastic/react-search-ui-views/-/react-search-ui-views-1.22.0.tgz#d9ec21034f0eb89575d983eaef903ac6bc12a678"
+  integrity sha512-ys/jkOziBlk53eS+OTyiFAjYjey+24+0Cj68X8W6FZfq34wbLjtRvwNzdFPGGAWm4WATZpasWpW6rdlLlrPgEw==
   dependencies:
-    "@elastic/search-ui" "1.20.2"
+    "@elastic/search-ui" "1.22.0"
     downshift "^3.2.10"
-    rc-pagination "^1.20.1"
+    rc-pagination "^4.0.4"
     react-select "^5.0.0"
 
-"@elastic/react-search-ui@^1.20.2":
-  version "1.20.2"
-  resolved "https://registry.yarnpkg.com/@elastic/react-search-ui/-/react-search-ui-1.20.2.tgz#dc2f29c932a675de06c5df1dbc773db41c897907"
-  integrity sha512-riVo1Dja4TpI3WFuQVQUmMiRPSV+nAxdkF05UCA/4H5P2IAqzrRjEw4jVpR4vcj+4gAHJcLppYwmtjcn3h1dKw==
+"@elastic/react-search-ui@^1.22.0":
+  version "1.22.0"
+  resolved "https://registry.yarnpkg.com/@elastic/react-search-ui/-/react-search-ui-1.22.0.tgz#8ad1ff51422d044e4abc7425722fe1dfbfbe9d86"
+  integrity sha512-auGjSuOpaWamGSOEQytUUSzZc+z4tY2x2tjELv4v9ugvouMykdUu8ETYK76gasojlKsHGt6tA8dIXFKR5Dug2g==
   dependencies:
-    "@elastic/react-search-ui-views" "1.20.2"
-    "@elastic/search-ui" "1.20.2"
+    "@elastic/react-search-ui-views" "1.22.0"
+    "@elastic/search-ui" "1.22.0"
 
 "@elastic/request-converter@^8.17.0":
   version "8.17.0"
@@ -2423,26 +2423,26 @@
     "@types/node-jose" "1.1.10"
     node-jose "2.2.0"
 
-"@elastic/search-ui-app-search-connector@^1.20.2":
-  version "1.20.2"
-  resolved "https://registry.yarnpkg.com/@elastic/search-ui-app-search-connector/-/search-ui-app-search-connector-1.20.2.tgz#873acdb3ee7709374746a5d3665edb0b14606d8e"
-  integrity sha512-oKXCQV3woyPjn2A8nfsFyG0P5K83hcJlDV0UjjOe1sSM2nUw1nFZa22gYTLVczhVF54N3z6ZTW6ntSJkaqqfAw==
+"@elastic/search-ui-app-search-connector@^1.22.0":
+  version "1.22.0"
+  resolved "https://registry.yarnpkg.com/@elastic/search-ui-app-search-connector/-/search-ui-app-search-connector-1.22.0.tgz#36297648113324b31bf2affeffbe8245651476be"
+  integrity sha512-ufrMU3PEi8lewW9tEBBFlCkMEw9NT/bGsaMx+TcB6fEig8D+vkGHISDzBMl+HSpH+pvavVPNLhnpZFGGLNQVkA==
   dependencies:
     "@elastic/app-search-javascript" "^8.1.2"
-    "@elastic/search-ui" "1.20.2"
+    "@elastic/search-ui" "1.22.0"
 
-"@elastic/search-ui-engines-connector@^1.20.2":
-  version "1.20.2"
-  resolved "https://registry.yarnpkg.com/@elastic/search-ui-engines-connector/-/search-ui-engines-connector-1.20.2.tgz#7ebcb2c4d962333afc24bdd41a293888007ba58d"
-  integrity sha512-s0Q1aEpL5wzIQk9gRKFyvcdX04uBzZOmMU2lMljSvycYIw1Z9SC37q7da8Eal+WY5cAFrfWLbWETI5UwwAwhdg==
+"@elastic/search-ui-engines-connector@^1.22.0":
+  version "1.22.0"
+  resolved "https://registry.yarnpkg.com/@elastic/search-ui-engines-connector/-/search-ui-engines-connector-1.22.0.tgz#2ffd42b3b06ecbc81c85fa077a438fa04ebc68e3"
+  integrity sha512-GR6/y3bvxstI0/eTo46afWGaGquABaZMwDG+6Pi3t+RKVWaFLs7xtwmfwzE+u9NUBPGlOeDl8FR2lh14C2h/Kg==
   dependencies:
-    "@elastic/search-ui" "1.20.2"
+    "@elastic/search-ui" "1.22.0"
     "@searchkit/sdk" "^3.0.0"
 
-"@elastic/search-ui@1.20.2", "@elastic/search-ui@^1.20.2":
-  version "1.20.2"
-  resolved "https://registry.yarnpkg.com/@elastic/search-ui/-/search-ui-1.20.2.tgz#afb679b4a06ef14ce8ab4a4f3053e09c68588386"
-  integrity sha512-48O0jKeMbhohxnVB6oOxT5R+x4nrwG0UWvFTCWPZJ4hKCLsPZZOWIFHziMaxhR8f0ckZCoiif+eD6FAgDW6kwA==
+"@elastic/search-ui@1.22.0", "@elastic/search-ui@^1.22.0":
+  version "1.22.0"
+  resolved "https://registry.yarnpkg.com/@elastic/search-ui/-/search-ui-1.22.0.tgz#826e219e07fec4dbb5004f32ae29285b5aff8c94"
+  integrity sha512-ce3kOKKYQX+vsjynuRY1aMRnjDaG94CSx12jsWeO+antbVfhdPenZEdtQnjUOc0ta7nXgdOHBfXJCqhwVLgh0g==
   dependencies:
     date-fns "^1.30.1"
     deep-equal "^1.0.1"
@@ -14262,7 +14262,7 @@ babel-preset-jest@^29.6.3:
     babel-plugin-jest-hoist "^29.6.3"
     babel-preset-current-node-syntax "^1.0.0"
 
-babel-runtime@6.x, babel-runtime@^6.26.0:
+babel-runtime@^6.26.0:
   version "6.26.0"
   resolved "https://registry.yarnpkg.com/babel-runtime/-/babel-runtime-6.26.0.tgz#965c7058668e82b55d7bfe04ff2337bc8b5647fe"
   integrity sha512-ITKNuq2wKlW1fJg9sSW52eepoYgZBggvOAHC0u/CYu/qxQ9EVzThCgR69BnSXLHjy2f7SY5zaQ4yt7H9ZVxY2g==
@@ -27449,15 +27449,22 @@ rbush@^3.0.0, rbush@^3.0.1:
   dependencies:
     quickselect "^2.0.0"
 
-rc-pagination@^1.20.1:
-  version "1.21.1"
-  resolved "https://registry.yarnpkg.com/rc-pagination/-/rc-pagination-1.21.1.tgz#24206cf4be96119baae8decd3f9ffac91cc2c4d3"
-  integrity sha512-Z+iYLbrJOBKHdgoAjLhL9jOgb7nrbPzNmV31p0ikph010/Ov1+UkrauYzWhumUyR+GbRFi3mummdKW/WtlOewA==
+rc-pagination@^4.0.4:
+  version "4.3.0"
+  resolved "https://registry.yarnpkg.com/rc-pagination/-/rc-pagination-4.3.0.tgz#c6022f820aa3a45fd734ae33a2915d39597dce1d"
+  integrity sha512-UubEWA0ShnroQ1tDa291Fzw6kj0iOeF26IsUObxYTpimgj4/qPCWVFl18RLZE+0Up1IZg0IK4pMn6nB3mjvB7g==
   dependencies:
-    babel-runtime "6.x"
-    classnames "^2.2.6"
-    prop-types "^15.5.7"
-    react-lifecycles-compat "^3.0.4"
+    "@babel/runtime" "^7.10.1"
+    classnames "^2.3.2"
+    rc-util "^5.38.0"
+
+rc-util@^5.38.0:
+  version "5.44.2"
+  resolved "https://registry.yarnpkg.com/rc-util/-/rc-util-5.44.2.tgz#6bc5db0e96ebdb515eb5977a7371887e5413a6f8"
+  integrity sha512-uGSk3hpPBLa3/0QAcKhCjgl4SFnhQCJDLvvpoLdbR6KgDuXrujG+dQaUeUvBJr2ZWak1O/9n+cYbJiWmmk95EQ==
+  dependencies:
+    "@babel/runtime" "^7.18.3"
+    react-is "^18.2.0"
 
 rc@^1.2.7:
   version "1.2.8"
