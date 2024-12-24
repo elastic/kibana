@@ -651,8 +651,8 @@ x-pack/platform/packages/private/ml/validators @elastic/ml-ui
 packages/kbn-mock-idp-plugin @elastic/kibana-security
 packages/kbn-mock-idp-utils @elastic/kibana-security
 packages/kbn-monaco @elastic/appex-sharedux
-x-pack/plugins/monitoring_collection @elastic/stack-monitoring
-x-pack/plugins/monitoring @elastic/stack-monitoring
+x-pack/platform/plugins/private/monitoring_collection @elastic/stack-monitoring
+x-pack/platform/plugins/private/monitoring @elastic/stack-monitoring
 src/plugins/navigation @elastic/appex-sharedux
 src/plugins/newsfeed @elastic/kibana-core
 test/common/plugins/newsfeed @elastic/kibana-core
