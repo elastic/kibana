@@ -7,7 +7,7 @@
 
 /// <reference types="@kbn/ambient-ftr-types"/>
 
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 import { RuleResponse } from '@kbn/alerting-plugin/common/routes/rule/response/types/v1';
 import moment from 'moment';
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
@@ -99,9 +99,9 @@ describe('Alert function', () => {
   });
 
   it('summary of active alerts', async () => {
-    const conversation = await chatClient.complete(
-      'Are there any active alerts over the last 4 hours?'
-    );
+    const conversation = await chatClient.complete({
+      messages: 'Are there any active alerts over the last 4 hours?',
+    });
 
     const result = await chatClient.evaluate(conversation, [
       'Correctly uses the `alerts` function to fetch data for the current time range',
@@ -113,17 +113,17 @@ describe('Alert function', () => {
   });
 
   it('filtered alerts', async () => {
-    let conversation = await chatClient.complete(
-      'Do I have any active threshold alerts related to the AI Assistant?'
-    );
+    let conversation = await chatClient.complete({
+      messages: 'Do I have any active threshold alerts related to the AI Assistant?',
+    });
 
-    conversation = await chatClient.complete(
-      conversation.conversationId!,
-      conversation.messages.concat({
+    conversation = await chatClient.complete({
+      conversationId: conversation.conversationId!,
+      messages: conversation.messages.concat({
         content: 'Do I have any alerts on the service my-service?',
         role: MessageRole.User,
-      })
-    );
+      }),
+    });
 
     const result = await chatClient.evaluate(conversation, [
       'Uses the get_alerts_dataset_info function',

@@ -7,7 +7,7 @@
 
 /// <reference types="@kbn/ambient-ftr-types"/>
 
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 import {
   InstallationStatusResponse,
   PerformInstallResponse,
@@ -53,7 +53,7 @@ describe('Retrieve documentation function', () => {
 
   it('retrieves Elasticsearch documentation', async () => {
     const prompt = 'How can I configure HTTPS in Elasticsearch?';
-    const conversation = await chatClient.complete(prompt);
+    const conversation = await chatClient.complete({ messages: prompt });
 
     const result = await chatClient.evaluate(conversation, [
       `Uses the ${RETRIEVE_DOCUMENTATION_NAME} function before answering the question about the Elastic stack`,
@@ -67,7 +67,7 @@ describe('Retrieve documentation function', () => {
 
   it('retrieves Kibana documentation', async () => {
     const prompt = 'What is Kibana Lens and how do I create a bar chart visualization with it?';
-    const conversation = await chatClient.complete(prompt);
+    const conversation = await chatClient.complete({ messages: prompt });
 
     const result = await chatClient.evaluate(conversation, [
       `Uses the ${RETRIEVE_DOCUMENTATION_NAME} function before answering the question about Kibana`,
@@ -81,7 +81,7 @@ describe('Retrieve documentation function', () => {
   it('retrieves Observability documentation', async () => {
     const prompt =
       'How can I set up APM instrumentation for my Node.js service in Elastic Observability?';
-    const conversation = await chatClient.complete(prompt);
+    const conversation = await chatClient.complete({ messages: prompt });
 
     const result = await chatClient.evaluate(conversation, [
       `Uses the ${RETRIEVE_DOCUMENTATION_NAME} function before answering the question about Observability`,
