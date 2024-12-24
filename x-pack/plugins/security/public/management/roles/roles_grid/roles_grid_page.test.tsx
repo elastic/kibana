@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiBasicTable, EuiIcon } from '@elastic/eui';
+import { EuiIcon } from '@elastic/eui';
 import type { ReactWrapper } from 'enzyme';
 import React from 'react';
 
