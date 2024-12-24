@@ -42,11 +42,8 @@ describe('getSearchParams', () => {
       { getConfig }
     );
     expect(searchParams.index).toBe('abc');
-    // @ts-expect-error `track_total_hits` not allowed at top level for `typesWithBodyKey`
     expect(searchParams.track_total_hits).toBe(true);
-    expect(searchParams.body).toStrictEqual({
-      query: 123,
-    });
+    expect(searchParams.query).toStrictEqual(123);
   });
 
   test('sets expand_wildcards=all if data view has allowHidden=true', () => {
