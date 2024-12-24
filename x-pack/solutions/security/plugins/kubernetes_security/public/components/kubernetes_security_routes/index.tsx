@@ -11,7 +11,7 @@ import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiText, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { euiThemeVars } from '@kbn/ui-theme';
+import { euiThemeVars } from '@kbn/ui-theme'; // TODO: replace with euiTheme
 import {
   KUBERNETES_PATH,
   KUBERNETES_TITLE,
@@ -191,7 +191,7 @@ const KubernetesSecurityRoutesComponent = ({
                             }
                           ),
                           fieldName: ENTRY_LEADER_INTERACTIVE,
-                          color: euiThemeVars.euiColorVis0,
+                          color: euiThemeVars.euiColorVis0, // TODO: is it ok in Borealis theme? if yes, replace with euiTheme.colors.vis.* from useEuiTheme hook
                         },
                         false: {
                           name: i18n.translate(
@@ -201,7 +201,7 @@ const KubernetesSecurityRoutesComponent = ({
                             }
                           ),
                           fieldName: ENTRY_LEADER_INTERACTIVE,
-                          color: euiThemeVars.euiColorVis1,
+                          color: euiThemeVars.euiColorVis1, // TODO: is it ok in Borealis theme? if yes, replace with euiTheme.colors.vis.* from useEuiTheme hook
                           shouldHideFilter: true,
                         },
                       }}
@@ -241,14 +241,14 @@ const KubernetesSecurityRoutesComponent = ({
                             defaultMessage: 'Root',
                           }),
                           fieldName: ENTRY_LEADER_USER_ID,
-                          color: euiThemeVars.euiColorVis2,
+                          color: euiThemeVars.euiColorVis2, // TODO: is it ok in Borealis theme? if yes, replace with euiTheme.colors.vis.* from useEuiTheme hook
                         },
                         nonRoot: {
                           name: i18n.translate('xpack.kubernetesSecurity.entryUserChart.nonRoot', {
                             defaultMessage: 'Non-root',
                           }),
                           fieldName: ENTRY_LEADER_USER_ID,
-                          color: euiThemeVars.euiColorVis3,
+                          color: euiThemeVars.euiColorVis3, // TODO: is it ok in Borealis theme? if yes, replace with euiTheme.colors.vis.* from useEuiTheme hook
                           shouldHideFilter: true,
                         },
                       }}

@@ -10,6 +10,8 @@ import { transparentize } from '@elastic/eui';
 import { CSSObject } from '@emotion/react';
 import { useEuiTheme } from '../../hooks';
 
+// TODO: check euiColorVis in Borialis
+// TODO: replace with euiTheme.colors.vis.* from useEuiTheme hook
 export const useButtonStyles = () => {
   const { euiTheme, euiVars } = useEuiTheme();
 
@@ -28,8 +30,8 @@ export const useButtonStyles = () => {
       minWidth: 0,
       padding: `${size.s} ${size.xxs}`,
       color: euiVars.euiColorVis6_asText,
-      background: transparentize(euiVars.euiColorVis6, 0.04),
-      border: `${border.width.thin} solid ${transparentize(euiVars.euiColorVis6, 0.48)}`,
+      background: transparentize(euiVars.euiColorVis6, 0.04), // TODO: replace transparentize with color token
+      border: `${border.width.thin} solid ${transparentize(euiVars.euiColorVis6, 0.48)}`, // TODO: replace transparentize with color token
       '&& > span': {
         padding: `0px ${size.xxs}`,
         svg: {
@@ -37,7 +39,7 @@ export const useButtonStyles = () => {
         },
       },
       '&&:hover, &&:focus': {
-        background: transparentize(euiVars.euiColorVis6, 0.12),
+        background: transparentize(euiVars.euiColorVis6, 0.12), // TODO: replace transparentize with color token
         textDecoration: 'none',
       },
       '&.isExpanded > span svg:not(.alertIcon)': {
@@ -58,10 +60,10 @@ export const useButtonStyles = () => {
     const alertButton: CSSObject = {
       ...button,
       color: euiVars.euiColorDanger,
-      background: transparentize(euiVars.euiColorDanger, 0.04),
-      border: `${border.width.thin} solid ${transparentize(euiVars.euiColorDanger, 0.48)}`,
+      background: transparentize(euiVars.euiColorDanger, 0.04), // TODO: replace transparentize with color token
+      border: `${border.width.thin} solid ${transparentize(euiVars.euiColorDanger, 0.48)}`, // TODO: replace transparentize with color token
       '&&:hover, &&:focus': {
-        background: transparentize(euiVars.euiColorDanger, 0.12),
+        background: transparentize(euiVars.euiColorDanger, 0.12), // TODO: replace transparentize with color token
         textDecoration: 'none',
       },
       '&.isExpanded': {
@@ -84,10 +86,10 @@ export const useButtonStyles = () => {
     const outputButton: CSSObject = {
       ...button,
       color: euiVars.euiColorVis1,
-      background: transparentize(euiVars.euiColorVis1, 0.04),
-      border: `${border.width.thin} solid ${transparentize(euiVars.euiColorVis1, 0.48)}`,
+      background: transparentize(euiVars.euiColorVis1, 0.04), // TODO: replace transparentize with color token
+      border: `${border.width.thin} solid ${transparentize(euiVars.euiColorVis1, 0.48)}`, // TODO: replace transparentize with color token
       '&&:hover, &&:focus': {
-        background: transparentize(euiVars.euiColorVis1, 0.12),
+        background: transparentize(euiVars.euiColorVis1, 0.12), // TODO: replace transparentize with color token
         textDecoration: 'none',
       },
       '&.isExpanded': {
@@ -104,7 +106,7 @@ export const useButtonStyles = () => {
       cursor: 'default',
       color: euiVars.euiColorGhost,
       background: euiVars.euiColorVis3,
-      border: `${border.width.thin} solid ${transparentize(euiVars.euiColorVis3, 0.48)}`,
+      border: `${border.width.thin} solid ${transparentize(euiVars.euiColorVis3, 0.48)}`, // TODO: replace transparentize with color token
       '&&:hover, &&:focus': {
         color: euiVars.euiColorGhost,
         background: euiVars.euiColorVis3,

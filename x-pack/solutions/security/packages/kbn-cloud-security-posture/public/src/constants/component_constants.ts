@@ -4,12 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { euiThemeVars } from '@kbn/ui-theme';
+import { euiThemeVars } from '@kbn/ui-theme'; // TODO: replace with euiTheme
 
 export const statusColors = {
   passed: euiThemeVars.euiColorSuccess,
-  failed: euiThemeVars.euiColorVis9,
-  unknown: euiThemeVars.euiColorLightShade,
+  failed: euiThemeVars.euiColorDanger,
+  unknown: euiThemeVars.euiColorLightShade, // TODO: switch to semantic color, eg. euiColorSeverity0
 };
 
 export const HOST_NAME = 'host.name';

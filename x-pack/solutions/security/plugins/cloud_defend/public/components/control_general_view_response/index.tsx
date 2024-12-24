@@ -61,7 +61,7 @@ export const ControlGeneralViewResponse = ({
   const [isPopoverOpen, setPopoverOpen] = useState(false);
   const styles = useStyles();
   const selectorStyles = useSelectorStyles();
-  const visColorsBehindText = euiPaletteColorBlindBehindText();
+  const visColorsBehindText = euiPaletteColorBlindBehindText(); // TODO: check in Borealis. Is Cloud Defend even available in 9.0 and serverless
   const [accordionState, setAccordionState] = useState<'open' | 'closed'>(
     responses.length - 1 === index ? 'open' : 'closed'
   );

@@ -37,8 +37,8 @@ export const useStyles = () => {
       transform: `translateY(-${size.xs})`,
     };
 
-    const defaultSelected = transparentize(colors.primary, 0.008);
-    const alertSelected = transparentize(colors.danger, 0.008);
+    const defaultSelected = transparentize(colors.primary, 0.008); // TODO: replace transparentize with color token
+    const alertSelected = transparentize(colors.danger, 0.008); // TODO: replace transparentize with color token
 
     return {
       sessionViewProcessTree,

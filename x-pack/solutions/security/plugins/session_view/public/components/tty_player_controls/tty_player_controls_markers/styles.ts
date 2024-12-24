@@ -11,6 +11,7 @@ import { useEuiTheme } from '../../../hooks';
 
 import { TTYPlayerLineMarkerType } from '.';
 
+// TODO: check euiColorVis* in Borealis
 export const useStyles = (progress: number) => {
   const { euiTheme, euiVars } = useEuiTheme();
   const cached = useMemo(() => {
@@ -84,16 +85,16 @@ export const useStyles = (progress: number) => {
       "input[type='range']::-webkit-slider-thumb": customThumb,
       "input[type='range']::-moz-range-thumb": customThumb,
       '.euiRangeHighlight__progress': {
-        backgroundColor: euiVars.euiColorVis0_behindText,
+        backgroundColor: euiVars.euiColorVis0_behindText, // TODO: change to non _behindText. conditionally based on theme or in Amsterdam also ok?
         width: progress + '%!important',
         borderBottomRightRadius: 0,
         borderTopRightRadius: 0,
       },
       '.euiRangeSlider:focus ~ .euiRangeHighlight .euiRangeHighlight__progress': {
-        backgroundColor: euiVars.euiColorVis0_behindText,
+        backgroundColor: euiVars.euiColorVis0_behindText, // TODO: change to non _behindText. conditionally based on theme or in Amsterdam also ok?
       },
       '.euiRangeSlider:focus:not(:focus-visible) ~ .euiRangeHighlight .euiRangeHighlight__progress':
-        { backgroundColor: euiVars.euiColorVis0_behindText },
+        { backgroundColor: euiVars.euiColorVis0_behindText }, // TODO: change to non _behindText. conditionally based on theme or in Amsterdam also ok?
       '.euiRangeTrack::after': {
         background: euiVars.terminalOutputSliderBackground,
       },
@@ -119,7 +120,7 @@ export const useStyles = (progress: number) => {
     };
   }, [
     euiTheme,
-    euiVars.euiColorVis0_behindText,
+    euiVars.euiColorVis0_behindText, // TODO: change to non _behindText. conditionally based on theme or in Amsterdam also ok?
     euiVars.euiColorVis1,
     euiVars.terminalOutputBackground,
     euiVars.terminalOutputMarkerAccent,
