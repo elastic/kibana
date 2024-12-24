@@ -8,7 +8,7 @@
 /// <reference types="@kbn/ambient-ftr-types"/>
 
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 import moment from 'moment';
 import { chatClient, esClient, synthtraceEsClients } from '../../services';
 
@@ -23,7 +23,7 @@ async function evaluateEsqlQuery({
   execute?: boolean;
   criteria?: string[];
 }): Promise<void> {
-  const conversation = await chatClient.complete(question);
+  const conversation = await chatClient.complete({ messages: question, scope: 'all' });
 
   const evaluation = await chatClient.evaluate(conversation, [
     ...(expected
@@ -44,10 +44,6 @@ async function evaluateEsqlQuery({
 }
 
 describe('ES|QL query generation', () => {
-  before(() => {
-    chatClient.setScopes(['all']);
-  });
-
   describe('other queries', () => {
     describe('with packetbeat data', () => {
       before(async () => {
@@ -383,9 +379,5 @@ describe('ES|QL query generation', () => {
         execute: false,
       });
     });
-  });
-
-  after(() => {
-    chatClient.setScopes(['observability']);
   });
 });

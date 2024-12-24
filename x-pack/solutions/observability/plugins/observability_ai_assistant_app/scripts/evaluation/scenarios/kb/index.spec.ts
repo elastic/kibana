@@ -7,7 +7,7 @@
 
 /// <reference types="@kbn/ambient-ftr-types"/>
 
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 import { MessageRole } from '@kbn/observability-ai-assistant-plugin/common';
 import { chatClient, esClient, kibanaClient } from '../../services';
 
@@ -16,17 +16,18 @@ const KB_INDEX = '.kibana-observability-ai-assistant-kb-*';
 describe('Knowledge base', () => {
   describe('kb functions', () => {
     it('summarizes and recalls information', async () => {
-      let conversation = await chatClient.complete(
-        'Remember that this cluster is used to test the AI Assistant using the Observability AI Evaluation Framework'
-      );
+      let conversation = await chatClient.complete({
+        messages:
+          'Remember that this cluster is used to test the AI Assistant using the Observability AI Evaluation Framework',
+      });
 
-      conversation = await chatClient.complete(
-        conversation.conversationId!,
-        conversation.messages.concat({
+      conversation = await chatClient.complete({
+        conversationId: conversation.conversationId!,
+        messages: conversation.messages.concat({
           content: 'What is this cluster used for?',
           role: MessageRole.User,
-        })
-      );
+        }),
+      });
 
       const result = await chatClient.evaluate(conversation, [
         'Calls the summarize function',
@@ -92,7 +93,7 @@ describe('Knowledge base', () => {
 
     it('retrieves inventor and purpose of the QRE', async () => {
       const prompt = 'Who invented the Quantum Revectorization Engine and what does it do?';
-      const conversation = await chatClient.complete(prompt);
+      const conversation = await chatClient.complete({ messages: prompt });
 
       const result = await chatClient.evaluate(conversation, [
         'Uses KB retrieval function to find information about the Quantum Revectorization Engine',
@@ -107,7 +108,7 @@ describe('Knowledge base', () => {
     it('retrieves constraints and energy requirements of the QRE', async () => {
       const prompt =
         'What is the approximate revectorization radius of the QRE and what kind of reactor is required to power it?';
-      const conversation = await chatClient.complete(prompt);
+      const conversation = await chatClient.complete({ messages: prompt });
 
       const result = await chatClient.evaluate(conversation, [
         'Uses KB retrieval function to find the correct document about QRE constraints',

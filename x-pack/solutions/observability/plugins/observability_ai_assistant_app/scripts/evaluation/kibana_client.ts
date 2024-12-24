@@ -26,7 +26,7 @@ import { Message, MessageRole } from '@kbn/observability-ai-assistant-plugin/com
 import { streamIntoObservable } from '@kbn/observability-ai-assistant-plugin/server';
 import { ToolingLog } from '@kbn/tooling-log';
 import axios, { AxiosInstance, AxiosResponse, isAxiosError } from 'axios';
-import { isArray, omit, pick, remove } from 'lodash';
+import { omit, pick, remove } from 'lodash';
 import pRetry from 'p-retry';
 import {
   concatMap,
@@ -59,13 +59,15 @@ interface Options {
   screenContexts?: ObservabilityAIAssistantScreenContext[];
 }
 
-type CompleteFunction = (
-  ...args:
-    | [StringOrMessageList]
-    | [StringOrMessageList, Options]
-    | [string | undefined, StringOrMessageList]
-    | [string | undefined, StringOrMessageList, Options]
-) => Promise<{
+interface CompleteFunctionParams {
+  messages: StringOrMessageList;
+  conversationId?: string;
+  options?: Options;
+  scope?: AssistantScope;
+}
+
+// 2. Update the CompleteFunction type accordingly
+type CompleteFunction = (params: CompleteFunctionParams) => Promise<{
   conversationId?: string;
   messages: InnerMessage[];
   errors: ChatCompletionErrorEvent[];
@@ -80,7 +82,6 @@ export interface ChatClient {
   ) => Promise<EvaluationResult>;
   getResults: () => EvaluationResult[];
   onResult: (cb: (result: EvaluationResult) => void) => () => void;
-  setScopes: (scope: AssistantScope[]) => void;
 }
 
 export class KibanaClient {
@@ -412,37 +413,16 @@ export class KibanaClient {
         ];
         return chat('chat', { messages, functions: [] });
       },
-      complete: async (...args) => {
+      complete: async ({
+        messages: messagesArg,
+        conversationId,
+        options = {},
+        scope: newScope,
+      }: CompleteFunctionParams) => {
         that.log.info('Calling complete');
-        let messagesArg: StringOrMessageList | undefined;
-        let conversationId: string | undefined;
-        let options: Options = {};
 
-        function isMessageList(arg: any): arg is StringOrMessageList {
-          return isArray(arg) || typeof arg === 'string';
-        }
-
-        // | [StringOrMessageList]
-        // | [StringOrMessageList, Options]
-        // | [string, StringOrMessageList]
-        // | [string, StringOrMessageList, Options]
-        if (args.length === 1) {
-          messagesArg = args[0];
-        } else if (args.length === 2 && !isMessageList(args[1])) {
-          messagesArg = args[0];
-          options = args[1];
-        } else if (
-          args.length === 2 &&
-          (typeof args[0] === 'string' || typeof args[0] === 'undefined') &&
-          isMessageList(args[1])
-        ) {
-          conversationId = args[0];
-          messagesArg = args[1];
-        } else if (args.length === 3) {
-          conversationId = args[0];
-          messagesArg = args[1];
-          options = args[2];
-        }
+        // set scope
+        currentScopes = [newScope || 'observability'];
 
         const messages = [
           ...this.getMessages(messagesArg!).map((msg) => ({
@@ -655,9 +635,6 @@ export class KibanaClient {
         };
         onResultCallbacks.push({ callback, unregister });
         return unregister;
-      },
-      setScopes: (newScope: AssistantScope[]) => {
-        currentScopes = newScope;
       },
     };
   }
