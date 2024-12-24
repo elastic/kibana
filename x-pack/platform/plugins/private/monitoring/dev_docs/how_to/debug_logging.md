@@ -1,6 +1,6 @@
 When diagnosing issues with UI or alert errors, it can be useful to know the exact query being sent by kibana to elasticsearch.
 
-Rules should have a `fetchData` setup [like this one](/x-pack/plugins/monitoring/server/alerts/nodes_changed_rule.ts#L96). Tracing down will get you to `fetchNodesFromClusterStats`.
+Rules should have a `fetchData` setup [like this one](/x-pack/platform/plugins/private/monitoring/server/alerts/nodes_changed_rule.ts#L96). Tracing down will get you to `fetchNodesFromClusterStats`.
 
 Just before the `esClient.search` call you can log out the query parameters using something like:
 

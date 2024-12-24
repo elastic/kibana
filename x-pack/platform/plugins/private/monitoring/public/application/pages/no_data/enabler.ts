@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-// From x-pack/plugins/monitoring/public/lib/elasticsearch_settings/enabler.js
+// From x-pack/platform/plugins/private/monitoring/public/lib/elasticsearch_settings/enabler.js
 export class Enabler {
   http: any;
   updateModel: any;
