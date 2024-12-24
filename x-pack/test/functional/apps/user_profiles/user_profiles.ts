@@ -100,15 +100,15 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         await pageObjects.userProfiles.changeUserProfileTheme('Dark');
         const darkModeTag = await pageObjects.userProfiles.getThemeTag();
-        expect(darkModeTag).to.be('v8dark');
+        expect(darkModeTag).to.be('borealisdark');
 
         await pageObjects.userProfiles.changeUserProfileTheme('Light');
         const lightModeTag = await pageObjects.userProfiles.getThemeTag();
-        expect(lightModeTag).to.be('v8light');
+        expect(lightModeTag).to.be('borealislight');
 
         await pageObjects.userProfiles.changeUserProfileTheme('Space default');
         const spaceDefaultModeTag = await pageObjects.userProfiles.getThemeTag();
-        expect(spaceDefaultModeTag).to.be('v8light');
+        expect(spaceDefaultModeTag).to.be('borealislight');
       });
 
       it('should change theme based on the User Profile Theme control with default Adv. Settings value set to dark', async () => {
@@ -129,19 +129,19 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await pageObjects.common.navigateToApp('security_account');
 
         let spaceDefaultModeTag = await pageObjects.userProfiles.getThemeTag();
-        expect(spaceDefaultModeTag).to.be('v8dark');
+        expect(spaceDefaultModeTag).to.be('borealisdark');
 
         await pageObjects.userProfiles.changeUserProfileTheme('Light');
         const lightModeTag = await pageObjects.userProfiles.getThemeTag();
-        expect(lightModeTag).to.be('v8light');
+        expect(lightModeTag).to.be('borealislight');
 
         await pageObjects.userProfiles.changeUserProfileTheme('Dark');
         const darkModeTag = await pageObjects.userProfiles.getThemeTag();
-        expect(darkModeTag).to.be('v8dark');
+        expect(darkModeTag).to.be('borealisdark');
 
         await pageObjects.userProfiles.changeUserProfileTheme('Space default');
         spaceDefaultModeTag = await pageObjects.userProfiles.getThemeTag();
-        expect(spaceDefaultModeTag).to.be('v8dark');
+        expect(spaceDefaultModeTag).to.be('borealisdark');
 
         await pageObjects.common.navigateToUrl('management', 'kibana/settings', {
           basePath: '',

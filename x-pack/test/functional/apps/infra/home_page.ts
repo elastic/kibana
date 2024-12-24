@@ -370,11 +370,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await retry.tryForTime(5000, async () => {
           const nodesWithValue = await pageObjects.infraHome.getNodesWithValues();
           expect(nodesWithValue).to.eql([
-            { name: 'host-3', value: 90, color: '#6092c0' },
-            { name: 'host-2', value: 70, color: '#82a7cd' },
-            { name: 'host-1', value: 50, color: '#a2bcd9' },
-            { name: 'host-4', value: 30, color: '#d1ddec' },
-            { name: 'host-5', value: 10, color: '#f0f4f9' },
+            { name: 'host-3', value: 90, color: '#599dff' },
+            { name: 'host-2', value: 70, color: '#7aaeff' },
+            { name: 'host-1', value: 50, color: '#97bfff' },
+            { name: 'host-4', value: 30, color: '#bfd9ff' },
+            { name: 'host-5', value: 10, color: '#d8eaff' },
           ]);
         });
       });
@@ -387,11 +387,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await retry.tryForTime(5000, async () => {
           const nodesWithValue = await pageObjects.infraHome.getNodesWithValues();
           expect(nodesWithValue).to.eql([
-            { name: 'host-5', value: 10, color: '#f0f4f9' },
-            { name: 'host-4', value: 30, color: '#d1ddec' },
-            { name: 'host-1', value: 50, color: '#a2bcd9' },
-            { name: 'host-2', value: 70, color: '#82a7cd' },
-            { name: 'host-3', value: 90, color: '#6092c0' },
+            { name: 'host-5', value: 10, color: '#d8eaff' },
+            { name: 'host-4', value: 30, color: '#bfd9ff' },
+            { name: 'host-1', value: 50, color: '#97bfff' },
+            { name: 'host-2', value: 70, color: '#7aaeff' },
+            { name: 'host-3', value: 90, color: '#599dff' },
           ]);
         });
       });
@@ -411,7 +411,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await pageObjects.infraHome.enterSearchTerm('host.name: "host-1"');
         await retry.tryForTime(5000, async () => {
           const nodesWithValue = await pageObjects.infraHome.getNodesWithValues();
-          expect(nodesWithValue).to.eql([{ name: 'host-1', value: 50, color: '#6092c0' }]);
+          expect(nodesWithValue).to.eql([{ name: 'host-1', value: 50, color: '#599dff' }]);
         });
         await pageObjects.infraHome.clearSearchTerm();
       });
@@ -424,11 +424,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await retry.tryForTime(5000, async () => {
           const nodesWithValue = await pageObjects.infraHome.getNodesWithValues();
           expect(nodesWithValue).to.eql([
-            { name: 'host-5', value: 10, color: '#6092c0' },
-            { name: 'host-4', value: 30, color: '#9ab6d5' },
-            { name: 'host-1', value: 50, color: '#f6e0b9' },
-            { name: 'host-2', value: 70, color: '#eda77a' },
-            { name: 'host-3', value: 90, color: '#e7664c' },
+            { name: 'host-5', value: 10, color: '#599dff' },
+            { name: 'host-4', value: 30, color: '#b1d1ff' },
+            { name: 'host-1', value: 50, color: '#fbefee' },
+            { name: 'host-2', value: 70, color: '#ffb9b1' },
+            { name: 'host-3', value: 90, color: '#f66d64' },
           ]);
         });
       });
