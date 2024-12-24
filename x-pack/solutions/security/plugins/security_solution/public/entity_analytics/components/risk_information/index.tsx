@@ -144,7 +144,7 @@ export const RiskInformationFlyout = ({ handleOnClose }: { handleOnClose: () => 
               label={BETA}
               size="s"
               css={css`
-                color: ${euiTheme.colors.text};
+                color: ${euiTheme.colors.textParagraph};
                 margin-top: ${euiTheme.size.xxs};
               `}
             />

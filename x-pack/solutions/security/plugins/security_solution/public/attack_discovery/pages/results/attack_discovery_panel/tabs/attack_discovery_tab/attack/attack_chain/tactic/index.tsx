@@ -48,7 +48,7 @@ const TacticComponent: React.FC<Props> = ({ detected, rightJustify = false, tact
     []
   );
 
-  const color = detected ? euiTheme.colors.danger : euiTheme.colors.subduedText;
+  const color = detected ? euiTheme.colors.danger : euiTheme.colors.textSubdued;
   const innerCircleXOffset = rightJustify
     ? INNER_CIRCLE_RIGHT_JUSTIFY_X_OFFSET
     : INNER_CIRCLE_LEFT_JUSTIFY_X_OFFSET;

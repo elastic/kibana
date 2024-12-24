@@ -28,7 +28,7 @@ export const ConsoleText = memo<ConsoleTextProps>(
         data-test-subj={dataTestSubj}
         className={`font-family-code ${className ?? ''}`}
       >
-        <EuiTextColor color={color ?? euiTheme.colors.text}>{children}</EuiTextColor>
+        <EuiTextColor color={color ?? euiTheme.colors.textParagraph}>{children}</EuiTextColor>
       </EuiText>
     );
   }
