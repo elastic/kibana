@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ProcessingDefinition } from '@kbn/streams-plugin/common';
+import { ProcessingDefinition } from '@kbn/streams-schema';
 
 export interface ProcessorDefinition extends ProcessingDefinition {
   id: string;

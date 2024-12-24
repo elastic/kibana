@@ -7,13 +7,12 @@
 
 import React, { useCallback, useMemo, useState } from 'react';
 import { debounce } from 'lodash';
-import { EuiBasicTable, EuiBasicTableColumn } from '@elastic/eui';
+import { EuiBasicTable, EuiBasicTableColumn, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { EuiTableSortingType } from '@elastic/eui/src/components/basic_table/table_types';
 import type { Criteria } from '@elastic/eui/src/components/basic_table/basic_table';
 import { useUiTracker } from '@kbn/observability-shared-plugin/public';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
-import { useTheme } from '../../../hooks/use_theme';
 import type { FieldValuePair } from '../../../../common/correlations/types';
 
 const PAGINATION_SIZE_OPTIONS = [5, 10, 20, 50];
@@ -43,7 +42,7 @@ export function CorrelationsTable<T extends FieldValuePair>({
   sorting,
   rowHeader,
 }: CorrelationsTableProps<T>) {
-  const euiTheme = useTheme();
+  const { euiTheme } = useEuiTheme();
   const trackApmEvent = useUiTracker({ app: 'apm' });
   const trackSelectSignificantCorrelationTerm = useCallback(
     () => debounce(() => trackApmEvent({ metric: 'select_significant_term' }), 1000),
@@ -105,7 +104,7 @@ export function CorrelationsTable<T extends FieldValuePair>({
             selectedTerm.fieldValue === term.fieldValue &&
             selectedTerm.fieldName === term.fieldName
               ? {
-                  backgroundColor: euiTheme.eui.euiColorLightestShade,
+                  backgroundColor: euiTheme.colors.lightestShade,
                 }
               : null,
         };

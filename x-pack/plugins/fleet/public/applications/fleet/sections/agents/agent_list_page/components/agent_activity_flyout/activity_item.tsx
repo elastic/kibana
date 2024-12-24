@@ -16,25 +16,22 @@ import {
   EuiText,
   EuiPanel,
   EuiSpacer,
+  useEuiTheme,
 } from '@elastic/eui';
 
 import type { ActionStatus } from '../../../../../types';
 
 import { ViewErrors } from '../view_errors';
 
-import {
-  formattedTime,
-  getAction,
-  inProgressDescription,
-  inProgressTitle,
-  inProgressTitleColor,
-} from './helpers';
+import { formattedTime, getAction, inProgressDescription, inProgressTitle } from './helpers';
 import { ViewAgentsButton } from './view_agents_button';
 
 export const ActivityItem: React.FunctionComponent<{
   action: ActionStatus;
   onClickViewAgents: (action: ActionStatus) => void;
 }> = ({ action, onClickViewAgents }) => {
+  const theme = useEuiTheme();
+
   const completeTitle =
     action.type === 'POLICY_CHANGE' && action.nbAgentsActioned === 0 ? (
       <EuiText>
@@ -104,18 +101,21 @@ export const ActivityItem: React.FunctionComponent<{
     IN_PROGRESS: {
       icon: <EuiLoadingSpinner size="m" />,
       title: <EuiText>{inProgressTitle(action)}</EuiText>,
-      titleColor: inProgressTitleColor,
+      titleColor: theme.euiTheme.colors.textPrimary,
       description: <EuiText color="subdued">{inProgressDescription(action.creationTime)}</EuiText>,
     },
     ROLLOUT_PASSED: {
       icon:
         action.nbAgentsFailed > 0 ? (
-          <EuiIcon size="m" type="warning" color="red" />
+          <EuiIcon size="m" type="warning" color="danger" />
         ) : (
-          <EuiIcon size="m" type="checkInCircleFilled" color="green" />
+          <EuiIcon size="m" type="checkInCircleFilled" color="success" />
         ),
       title: completeTitle,
-      titleColor: action.nbAgentsFailed > 0 ? 'red' : 'green',
+      titleColor:
+        action.nbAgentsFailed > 0
+          ? theme.euiTheme.colors.textDanger
+          : theme.euiTheme.colors.textSuccess,
       description:
         action.nbAgentsFailed > 0 ? (
           failedDescription
@@ -124,9 +124,9 @@ export const ActivityItem: React.FunctionComponent<{
         ),
     },
     COMPLETE: {
-      icon: <EuiIcon size="m" type="checkInCircleFilled" color="green" />,
+      icon: <EuiIcon size="m" type="checkInCircleFilled" color="success" />,
       title: completeTitle,
-      titleColor: 'green',
+      titleColor: theme.euiTheme.colors.textSuccess,
       description:
         action.type === 'POLICY_REASSIGN' && action.newPolicyId ? (
           <EuiText color="subdued">
@@ -160,14 +160,14 @@ export const ActivityItem: React.FunctionComponent<{
         ),
     },
     FAILED: {
-      icon: <EuiIcon size="m" type="warning" color="red" />,
+      icon: <EuiIcon size="m" type="warning" color="danger" />,
       title: completeTitle,
-      titleColor: 'red',
+      titleColor: theme.euiTheme.colors.textDanger,
       description: failedDescription,
     },
     CANCELLED: {
-      icon: <EuiIcon size="m" type="warning" color="grey" />,
-      titleColor: 'grey',
+      icon: <EuiIcon size="m" type="warning" color="subdued" />,
+      titleColor: theme.euiTheme.colors.textSubdued,
       title: (
         <EuiText>
           <FormattedMessage
@@ -192,8 +192,8 @@ export const ActivityItem: React.FunctionComponent<{
       ),
     },
     EXPIRED: {
-      icon: <EuiIcon size="m" type="warning" color="grey" />,
-      titleColor: 'grey',
+      icon: <EuiIcon size="m" type="warning" color="subdued" />,
+      titleColor: theme.euiTheme.colors.textSubdued,
       title: (
         <EuiText>
           <FormattedMessage

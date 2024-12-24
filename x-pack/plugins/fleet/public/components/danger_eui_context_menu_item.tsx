@@ -5,9 +5,19 @@
  * 2.0.
  */
 
-import styled from 'styled-components';
-import { EuiContextMenuItem } from '@elastic/eui';
+import React from 'react';
+import { css } from '@emotion/react';
+import type { EuiContextMenuItemProps } from '@elastic/eui';
+import { EuiContextMenuItem, useEuiTheme } from '@elastic/eui';
 
-export const DangerEuiContextMenuItem = styled(EuiContextMenuItem)`
-  color: ${(props) => props.theme.eui.euiColorDangerText};
-`;
+export const DangerEuiContextMenuItem = (props: EuiContextMenuItemProps) => {
+  const theme = useEuiTheme();
+  return (
+    <EuiContextMenuItem
+      {...props}
+      css={css`
+        color: ${theme.euiTheme.colors.textDanger};
+      `}
+    />
+  );
+};

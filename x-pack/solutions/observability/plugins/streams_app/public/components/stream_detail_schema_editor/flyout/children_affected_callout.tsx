@@ -7,13 +7,13 @@
 
 import React from 'react';
 import { EuiCallOut } from '@elastic/eui';
-import { StreamDefinition } from '@kbn/streams-plugin/common/types';
 import { i18n } from '@kbn/i18n';
+import { StreamConfigDefinition } from '@kbn/streams-schema';
 
 export const ChildrenAffectedCallout = ({
   childStreams,
 }: {
-  childStreams: StreamDefinition['children'];
+  childStreams: StreamConfigDefinition['ingest']['routing'];
 }) => {
   return (
     <EuiCallOut
@@ -25,7 +25,7 @@ export const ChildrenAffectedCallout = ({
       {i18n.translate('xpack.streams.childStreamsWarning.text', {
         defaultMessage: "Editing this field will affect it's dependant streams: {affectedStreams} ",
         values: {
-          affectedStreams: childStreams.map((stream) => stream.id).join(', '),
+          affectedStreams: childStreams.map((stream) => stream.name).join(', '),
         },
       })}
     </EuiCallOut>

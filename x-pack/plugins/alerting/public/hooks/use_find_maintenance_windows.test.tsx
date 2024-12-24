@@ -11,6 +11,7 @@ import { AppMockRenderer, createAppMockRenderer } from '../lib/test_utils';
 import { useFindMaintenanceWindows } from './use_find_maintenance_windows';
 
 const mockAddDanger = jest.fn();
+const mockedHttp = jest.fn();
 
 jest.mock('../utils/kibana_react', () => {
   const originalModule = jest.requireActual('../utils/kibana_react');
@@ -21,6 +22,7 @@ jest.mock('../utils/kibana_react', () => {
       return {
         services: {
           ...services,
+          http: mockedHttp,
           notifications: { toasts: { addDanger: mockAddDanger } },
         },
       };
@@ -33,6 +35,8 @@ jest.mock('../services/maintenance_windows_api/find', () => ({
 
 const { findMaintenanceWindows } = jest.requireMock('../services/maintenance_windows_api/find');
 
+const defaultHookProps = { page: 1, perPage: 10, search: '', selectedStatus: [] };
+
 let appMockRenderer: AppMockRenderer;
 
 describe('useFindMaintenanceWindows', () => {
@@ -42,10 +46,20 @@ describe('useFindMaintenanceWindows', () => {
     appMockRenderer = createAppMockRenderer();
   });
 
+  it('should call findMaintenanceWindows with correct arguments on successful scenario', async () => {
+    renderHook(() => useFindMaintenanceWindows({ ...defaultHookProps }), {
+      wrapper: appMockRenderer.AppWrapper,
+    });
+
+    await waitFor(() =>
+      expect(findMaintenanceWindows).toHaveBeenCalledWith({ http: mockedHttp, ...defaultHookProps })
+    );
+  });
+
   it('should call onError if api fails', async () => {
     findMaintenanceWindows.mockRejectedValue('This is an error.');
 
-    renderHook(() => useFindMaintenanceWindows(), {
+    renderHook(() => useFindMaintenanceWindows({ ...defaultHookProps }), {
       wrapper: appMockRenderer.AppWrapper,
     });
 
@@ -55,7 +69,7 @@ describe('useFindMaintenanceWindows', () => {
   });
 
   it('should not try to find maintenance windows if not enabled', async () => {
-    renderHook(() => useFindMaintenanceWindows({ enabled: false }), {
+    renderHook(() => useFindMaintenanceWindows({ enabled: false, ...defaultHookProps }), {
       wrapper: appMockRenderer.AppWrapper,
     });
 

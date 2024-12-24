@@ -18,7 +18,7 @@ import {
 import type { Edge, FitViewOptions, Node, ReactFlowInstance } from '@xyflow/react';
 import { useGeneratedHtmlId } from '@elastic/eui';
 import type { CommonProps } from '@elastic/eui';
-import { SvgDefsMarker } from '../edge/styles';
+import { SvgDefsMarker } from '../edge/markers';
 import {
   HexagonNode,
   PentagonNode,
@@ -82,13 +82,7 @@ const edgeTypes = {
  *
  * @returns {JSX.Element} The rendered Graph component.
  */
-export const Graph: React.FC<GraphProps> = ({
-  nodes,
-  edges,
-  interactive,
-  isLocked = false,
-  ...rest
-}) => {
+export const Graph = ({ nodes, edges, interactive, isLocked = false, ...rest }: GraphProps) => {
   const backgroundId = useGeneratedHtmlId();
   const fitViewRef = useRef<
     ((fitViewOptions?: FitViewOptions<Node> | undefined) => Promise<boolean>) | null
@@ -243,7 +237,9 @@ const processGraph = (
         data: {
           ...edgeData,
           sourceShape: nodesById[edgeData.source].shape,
+          sourceColor: nodesById[edgeData.source].color,
           targetShape: nodesById[edgeData.target].shape,
+          targetColor: nodesById[edgeData.target].color,
         },
       };
     });
