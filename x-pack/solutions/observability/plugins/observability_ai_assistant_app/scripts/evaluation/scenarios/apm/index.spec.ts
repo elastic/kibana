@@ -7,7 +7,7 @@
 
 /// <reference types="@kbn/ambient-ftr-types"/>
 
-import expect from '@kbn/expect/expect';
+import expect from '@kbn/expect';
 import moment from 'moment';
 import { apm, timerange, serviceMap } from '@kbn/apm-synthtrace-client';
 import { RuleResponse } from '@kbn/alerting-plugin/common/routes/rule/response/types/v1';
