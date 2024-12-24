@@ -15,6 +15,7 @@ import {
   INTERNAL_BASE_ALERTING_API_PATH,
   AlertSummary,
 } from '../types';
+import { DEFAULT_ALERTING_ROUTE_SECURITY } from './constants';
 
 const paramSchema = schema.object({
   id: schema.string(),
@@ -65,6 +66,7 @@ export const getRuleAlertSummaryRoute = (
   router.get(
     {
       path: `${INTERNAL_BASE_ALERTING_API_PATH}/rule/{id}/_alert_summary`,
+      security: DEFAULT_ALERTING_ROUTE_SECURITY,
       options: {
         access: 'internal',
       },

@@ -34,6 +34,6 @@
     "@kbn/alerts-as-data-utils",
     "@kbn/core-http-browser-mocks",
     "@kbn/core-notifications-browser-mocks",
-    "@kbn/shared-ux-table-persist"
+    "@kbn/shared-ux-table-persist",
   ]
 }

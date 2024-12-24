@@ -5,16 +5,24 @@
  * 2.0.
  */
 
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFormRow } from '@elastic/eui';
+import { EuiFormRow, useEuiTheme, EuiText } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import { fetchFieldsFromESQL } from '@kbn/esql-editor';
+import { NameInput } from '@kbn/visualization-ui-components';
+import { css } from '@emotion/react';
+import { mergeLayer, updateColumnFormat, updateColumnLabel } from '../utils';
+import {
+  FormatSelector,
+  FormatSelectorProps,
+} from '../../form_based/dimension_panel/format_selector';
 import type { DatasourceDimensionEditorProps, DataType } from '../../../types';
 import { FieldSelect, type FieldOptionCompatible } from './field_select';
 import type { TextBasedPrivateState } from '../types';
 import { isNotNumeric, isNumeric } from '../utils';
+import { TextBasedLayer } from '../types';
 
 export type TextBasedDimensionEditorProps =
   DatasourceDimensionEditorProps<TextBasedPrivateState> & {
@@ -24,6 +32,17 @@ export type TextBasedDimensionEditorProps =
 export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
   const [allColumns, setAllColumns] = useState<FieldOptionCompatible[]>([]);
   const query = props.state.layers[props.layerId]?.query;
+  const { euiTheme } = useEuiTheme();
+  const {
+    isFullscreen,
+    columnId,
+    layerId,
+    state,
+    setState,
+    indexPatterns,
+    dateRange,
+    expressions,
+  } = props;
 
   useEffect(() => {
     // in case the columns are not in the cache, I refetch them
@@ -31,7 +50,12 @@ export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
       if (query) {
         const table = await fetchFieldsFromESQL(
           { esql: `${query.esql} | limit 0` },
-          props.expressions
+          expressions,
+          { from: dateRange.fromDate, to: dateRange.toDate },
+          undefined,
+          Object.values(indexPatterns).length
+            ? Object.values(indexPatterns)[0].timeFieldName
+            : undefined
         );
         if (table) {
           const hasNumberTypeColumns = table.columns?.some(isNumeric);
@@ -55,12 +79,39 @@ export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
       }
     }
     fetchColumns();
-  }, [props, props.expressions, query]);
+  }, [
+    dateRange.fromDate,
+    dateRange.toDate,
+    expressions,
+    indexPatterns,
+    props,
+    props.expressions,
+    query,
+  ]);
 
   const selectedField = useMemo(() => {
     const layerColumns = props.state.layers[props.layerId].columns;
     return layerColumns?.find((column) => column.columnId === props.columnId);
   }, [props.columnId, props.layerId, props.state.layers]);
+
+  const updateLayer = useCallback(
+    (newLayer: Partial<TextBasedLayer>) =>
+      setState((prevState) => mergeLayer({ state: prevState, layerId, newLayer })),
+    [layerId, setState]
+  );
+
+  const onFormatChange = useCallback<FormatSelectorProps['onChange']>(
+    (newFormat) => {
+      updateLayer(
+        updateColumnFormat({
+          layer: state.layers[layerId],
+          columnId,
+          value: newFormat,
+        })
+      );
+    },
+    [columnId, layerId, state.layers, updateLayer]
+  );
 
   return (
     <>
@@ -80,6 +131,7 @@ export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
             const newColumn = {
               columnId: props.columnId,
               fieldName: choice.field,
+              label: choice.field,
               meta,
             };
             return props.setState(
@@ -120,6 +172,44 @@ export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
           }}
         >
           {props.dataSectionExtra}
+        </div>
+      )}
+      {!isFullscreen && selectedField && (
+        <div className="lnsIndexPatternDimensionEditor--padded lnsIndexPatternDimensionEditor--collapseNext">
+          <EuiText
+            size="s"
+            css={css`
+              margin-bottom: ${euiTheme.size.base};
+            `}
+          >
+            <h4>
+              {i18n.translate('xpack.lens.indexPattern.dimensionEditor.headingAppearance', {
+                defaultMessage: 'Appearance',
+              })}
+            </h4>
+          </EuiText>
+
+          <NameInput
+            value={selectedField.label || ''}
+            defaultValue={''}
+            onChange={(value) => {
+              updateLayer(
+                updateColumnLabel({
+                  layer: state.layers[layerId],
+                  columnId,
+                  value,
+                })
+              );
+            }}
+          />
+
+          {selectedField.meta?.type === 'number' ? (
+            <FormatSelector
+              selectedColumn={selectedField}
+              onChange={onFormatChange}
+              docLinks={props.core.docLinks}
+            />
+          ) : null}
         </div>
       )}
     </>

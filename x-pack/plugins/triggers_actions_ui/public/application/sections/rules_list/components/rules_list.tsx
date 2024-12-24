@@ -196,8 +196,7 @@ export const RulesList = ({
     kibanaFeatures,
     notifications: { toasts },
     ruleTypeRegistry,
-    i18n: i18nStart,
-    theme,
+    ...startServices
   } = kibanaServices;
 
   const canExecuteActions = hasExecuteActionsCapability(capabilities);
@@ -715,7 +714,7 @@ export const RulesList = ({
         title: parsedError.summary,
         text: toMountPoint(
           <ToastWithCircuitBreakerContent>{parsedError.details}</ToastWithCircuitBreakerContent>,
-          { theme, i18n: i18nStart }
+          startServices
         ),
       });
     } else {

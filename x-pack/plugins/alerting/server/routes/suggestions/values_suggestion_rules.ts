@@ -25,6 +25,7 @@ import {
   AlertingAuthorizationFilterType,
 } from '../../authorization';
 import { RuleAuditAction, ruleAuditEvent } from '../../rules_client/common/audit_events';
+import { DEFAULT_ALERTING_ROUTE_SECURITY } from '../constants';
 
 const alertingAuthorizationFilterOpts: AlertingAuthorizationFilterOpts = {
   type: AlertingAuthorizationFilterType.ESDSL,
@@ -49,6 +50,7 @@ export function registerRulesValueSuggestionsRoute(
   router.post(
     {
       path: '/internal/rules/suggestions/values',
+      security: DEFAULT_ALERTING_ROUTE_SECURITY,
       options: { access: 'internal' },
       validate: RulesSuggestionsSchema,
     },

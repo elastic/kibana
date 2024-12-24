@@ -7,7 +7,6 @@
 /* Error Rate */
 
 import React from 'react';
-import chroma from 'chroma-js';
 import {
   EuiFlexItem,
   EuiPanel,
@@ -155,7 +154,7 @@ function FailedTransactionChart({
         <AlertActiveTimeRangeAnnotation
           alertStart={alertStart}
           alertEnd={alertEnd}
-          color={chroma(transparentize('#F04E981A', 0.2)).hex().toUpperCase()}
+          color={transparentize(euiTheme.colors.danger, 0.2)}
           id={'alertActiveRect'}
           key={'alertActiveRect'}
         />,

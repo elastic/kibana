@@ -92,7 +92,6 @@ interface ResultFrequency extends JsonObject {
 export interface TaskPersistenceTypes<T extends JsonValue = number> extends JsonObject {
   [TaskPersistence.Recurring]: T;
   [TaskPersistence.NonRecurring]: T;
-  [TaskPersistence.Ephemeral]: T;
 }
 
 type ResultFrequencySummary = ResultFrequency & {
@@ -247,7 +246,6 @@ export function createTaskRunAggregator(
           duration_by_persistence: {
             [TaskPersistence.Recurring]: [],
             [TaskPersistence.NonRecurring]: [],
-            [TaskPersistence.Ephemeral]: [],
           },
           result_frequency_percent_as_number: {},
           persistence: [],
@@ -401,7 +399,6 @@ export function summarizeTaskRunStat(
         persistence: {
           [TaskPersistence.Recurring]: 0,
           [TaskPersistence.NonRecurring]: 0,
-          [TaskPersistence.Ephemeral]: 0,
           ...calculateFrequency<TaskPersistence>(persistence),
         },
         result_frequency_percent_as_number: mapValues(

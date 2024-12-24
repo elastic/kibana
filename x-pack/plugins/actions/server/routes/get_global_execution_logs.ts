@@ -16,6 +16,7 @@ import {
 } from '../../common';
 import { verifyAccessAndContext } from './verify_access_and_context';
 import { rewriteNamespaces } from './rewrite_namespaces';
+import { DEFAULT_ACTION_ROUTE_SECURITY } from './constants';
 
 const sortOrderSchema = schema.oneOf([schema.literal('asc'), schema.literal('desc')]);
 
@@ -54,6 +55,7 @@ export const getGlobalExecutionLogRoute = (
   router.post(
     {
       path: `${INTERNAL_BASE_ACTION_API_PATH}/_global_connector_execution_logs`,
+      security: DEFAULT_ACTION_ROUTE_SECURITY,
       validate: {
         body: bodySchema,
       },

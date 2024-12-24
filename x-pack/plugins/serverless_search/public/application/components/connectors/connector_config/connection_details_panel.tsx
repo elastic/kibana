@@ -53,7 +53,11 @@ elasticsearch:
         />
       </EuiText>
       <EuiSpacer />
-      <EuiCodeBlock language="yaml" isCopyable>
+      <EuiCodeBlock
+        language="yaml"
+        isCopyable
+        data-test-subj="serverlessSearchConnectorConnectorDetails"
+      >
         {codeBlock}
       </EuiCodeBlock>
     </EuiPanel>

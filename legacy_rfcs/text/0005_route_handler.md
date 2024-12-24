@@ -45,7 +45,6 @@ interface KibanaRequest {
     path: string;
     method: 'get' | 'post' | ...
     options: {
-      authRequired: boolean;
       tags: string [];
     }
   }

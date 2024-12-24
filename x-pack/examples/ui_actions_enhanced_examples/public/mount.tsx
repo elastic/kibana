@@ -31,7 +31,7 @@ export const mount =
     };
     const reactElement = (
       <context.Provider value={deps}>
-        <App />
+        <App core={core} />
       </context.Provider>
     );
     render(reactElement, element);

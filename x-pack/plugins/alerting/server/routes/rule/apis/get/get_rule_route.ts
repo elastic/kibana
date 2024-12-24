@@ -22,6 +22,7 @@ import type {
   GetRuleResponseV1,
 } from '../../../../../common/routes/rule/apis/get';
 import { getRuleRequestParamsSchemaV1 } from '../../../../../common/routes/rule/apis/get';
+import { DEFAULT_ALERTING_ROUTE_SECURITY } from '../../../constants';
 
 interface BuildGetRulesRouteParams {
   licenseState: ILicenseState;
@@ -41,6 +42,7 @@ const buildGetRuleRoute = ({
     {
       path,
       options,
+      security: DEFAULT_ALERTING_ROUTE_SECURITY,
       validate: {
         request: {
           params: getRuleRequestParamsSchemaV1,

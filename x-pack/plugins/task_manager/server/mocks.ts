@@ -27,10 +27,8 @@ const createStartMock = () => {
     bulkRemove: jest.fn(),
     schedule: jest.fn(),
     runSoon: jest.fn(),
-    ephemeralRunNow: jest.fn(),
     ensureScheduled: jest.fn(),
     removeIfExists: jest.fn().mockResolvedValue(Promise.resolve()), // it's a promise and there are some places where it's followed by `.catch()`
-    supportsEphemeralTasks: jest.fn(),
     bulkUpdateSchedules: jest.fn(),
     bulkSchedule: jest.fn(),
     bulkDisable: jest.fn(),

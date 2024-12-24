@@ -97,6 +97,7 @@ import * as getExecutorServicesModule from './get_executor_services';
 import { rulesSettingsServiceMock } from '../rules_settings/rules_settings_service.mock';
 import { maintenanceWindowsServiceMock } from './maintenance_windows/maintenance_windows_service.mock';
 import { MaintenanceWindow } from '../application/maintenance_window/types';
+import { ErrorWithType } from '../lib/error_with_type';
 
 jest.mock('uuid', () => ({
   v4: () => '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
@@ -2492,85 +2493,6 @@ describe('Task Runner', () => {
     expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
   });
 
-  test('successfully executes the task with ephemeral tasks enabled', async () => {
-    const taskRunner = new TaskRunner({
-      ruleType,
-      internalSavedObjectsRepository,
-      taskInstance: {
-        ...mockedTaskInstance,
-        state: {
-          ...mockedTaskInstance.state,
-          previousStartedAt: new Date(Date.now() - 5 * 60 * 1000).toISOString(),
-        },
-      },
-      context: {
-        ...taskRunnerFactoryInitializerParams,
-      },
-      inMemoryMetrics,
-    });
-    expect(AlertingEventLogger).toHaveBeenCalled();
-
-    mockGetAlertFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
-    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
-    const runnerResult = await taskRunner.run();
-    expect(runnerResult).toEqual(generateRunnerResult({ state: true, history: [true] }));
-    expect(ruleType.executor).toHaveBeenCalledTimes(1);
-    const call = ruleType.executor.mock.calls[0][0];
-    expect(call.params).toEqual({ bar: true });
-    expect(call.startedAt).toEqual(new Date(DATE_1970));
-    expect(call.previousStartedAt).toEqual(new Date(DATE_1970_5_MIN));
-    expect(call.state).toEqual({});
-    expect(call.rule).not.toBe(null);
-    expect(call.rule.id).toBe('1');
-    expect(call.rule.name).toBe(RULE_NAME);
-    expect(call.rule.tags).toEqual(['rule-', '-tags']);
-    expect(call.rule.consumer).toBe('bar');
-    expect(call.rule.enabled).toBe(true);
-    expect(call.rule.schedule).toEqual({ interval: '10s' });
-    expect(call.rule.createdBy).toBe('rule-creator');
-    expect(call.rule.updatedBy).toBe('rule-updater');
-    expect(call.rule.createdAt).toBe(mockDate);
-    expect(call.rule.updatedAt).toBe(mockDate);
-    expect(call.rule.notifyWhen).toBe('onActiveAlert');
-    expect(call.rule.throttle).toBe(null);
-    expect(call.rule.producer).toBe('alerts');
-    expect(call.rule.ruleTypeId).toBe('test');
-    expect(call.rule.ruleTypeName).toBe('My test rule');
-    expect(call.rule.actions).toEqual(RULE_ACTIONS);
-    expect(call.services.alertFactory.create).toBeTruthy();
-    expect(call.services.scopedClusterClient).toBeTruthy();
-    expect(call.services).toBeTruthy();
-
-    expect(logger.debug).toHaveBeenCalledTimes(5);
-    expect(logger.debug).nthCalledWith(1, 'executing rule test:1 at 1970-01-01T00:00:00.000Z', {
-      tags: ['1', 'test'],
-    });
-    expect(logger.debug).nthCalledWith(
-      2,
-      'deprecated ruleRunStatus for test:1: {"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"ok"}',
-      { tags: ['1', 'test'] }
-    );
-    expect(logger.debug).nthCalledWith(
-      3,
-      'ruleRunStatus for test:1: {"outcome":"succeeded","outcomeOrder":0,"outcomeMsg":null,"warning":null,"alertsCount":{"active":0,"new":0,"recovered":0,"ignored":0}}',
-      { tags: ['1', 'test'] }
-    );
-    expect(logger.debug).nthCalledWith(
-      4,
-      'ruleRunMetrics for test:1: {"numSearches":3,"totalSearchDurationMs":23423,"esSearchDurationMs":33,"numberOfTriggeredActions":0,"numberOfGeneratedActions":0,"numberOfActiveAlerts":0,"numberOfRecoveredAlerts":0,"numberOfNewAlerts":0,"numberOfDelayedAlerts":0,"hasReachedAlertLimit":false,"hasReachedQueuedActionsLimit":false,"triggeredActionsStatus":"complete"}',
-      { tags: ['1', 'test'] }
-    );
-
-    testAlertingEventLogCalls({
-      status: 'ok',
-    });
-
-    expect(elasticsearchService.client.asInternalUser.update).toHaveBeenCalledWith(
-      ...generateRuleUpdateParams({})
-    );
-    expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
-  });
-
   test('successfully stores successful runs', async () => {
     const taskRunner = new TaskRunner({
       ruleType,
@@ -3298,6 +3220,39 @@ describe('Task Runner', () => {
     const runnerResult = await taskRunner.run();
 
     expect(getErrorSource(runnerResult.taskRunError as Error)).toBe(TaskErrorSource.USER);
+  });
+
+  test('reschedules when persistAlerts returns a cluster_block_exception', async () => {
+    const err = new ErrorWithType({
+      message: 'Index is blocked',
+      type: 'cluster_block_exception',
+    });
+
+    alertsClient.persistAlerts.mockRejectedValueOnce(err);
+    alertsService.createAlertsClient.mockImplementation(() => alertsClient);
+
+    const taskRunner = new TaskRunner({
+      ruleType,
+      taskInstance: mockedTaskInstance,
+      context: taskRunnerFactoryInitializerParams,
+      inMemoryMetrics,
+      internalSavedObjectsRepository,
+    });
+    mockGetAlertFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(mockedRawRuleSO);
+
+    const runnerResult = await taskRunner.run();
+
+    expect(getErrorSource(runnerResult.taskRunError as Error)).toBe(TaskErrorSource.FRAMEWORK);
+    expect(runnerResult.state).toEqual(mockedTaskInstance.state);
+    expect(runnerResult.schedule!.interval).toEqual('1m');
+    expect(runnerResult.taskRunError).toMatchInlineSnapshot('[Error: Index is blocked]');
+    expect(logger.debug).toHaveBeenCalledWith(
+      'Executing Rule default:test:1 has resulted in Error: Index is blocked',
+      {
+        tags: ['1', 'test', 'rule-run-failed', 'framework-error'],
+      }
+    );
   });
 
   function testAlertingEventLogCalls({

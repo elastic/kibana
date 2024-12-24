@@ -132,9 +132,8 @@ const RuleAdd = <
     http,
     notifications: { toasts },
     application: { capabilities },
-    i18n: i18nStart,
-    theme,
     isServerless,
+    ...startServices
   } = useKibana().services;
 
   const canShowActions = hasShowActionsCapability(capabilities);
@@ -284,7 +283,7 @@ const RuleAdd = <
         ...(message.details && {
           text: toMountPoint(
             <ToastWithCircuitBreakerContent>{message.details}</ToastWithCircuitBreakerContent>,
-            { i18n: i18nStart, theme }
+            startServices
           ),
         }),
       });

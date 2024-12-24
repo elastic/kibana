@@ -48,7 +48,7 @@ const mobileFiltersRoute = createApmServerRoute({
       }),
     ]),
   }),
-  options: { tags: ['access:apm'] },
+  security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (
     resources
   ): Promise<{
@@ -87,7 +87,7 @@ const mobileChartsRoute = createApmServerRoute({
       }),
     ]),
   }),
-  options: { tags: ['access:apm'] },
+  security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (
     resources
   ): Promise<{
@@ -131,7 +131,7 @@ const mobileStatsRoute = createApmServerRoute({
       }),
     ]),
   }),
-  options: { tags: ['access:apm'] },
+  security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (resources): Promise<MobilePeriodStats> => {
     const apmEventClient = await getApmEventClient(resources);
     const { params } = resources;
@@ -168,7 +168,7 @@ const mobileLocationStatsRoute = createApmServerRoute({
       }),
     ]),
   }),
-  options: { tags: ['access:apm'] },
+  security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (resources): Promise<MobileLocationStats> => {
     const apmEventClient = await getApmEventClient(resources);
     const { params } = resources;
@@ -207,7 +207,7 @@ const sessionsChartRoute = createApmServerRoute({
       }),
     ]),
   }),
-  options: { tags: ['access:apm'] },
+  security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (resources): Promise<SessionsTimeseries> => {
     const apmEventClient = await getApmEventClient(resources);
     const { params } = resources;
@@ -246,7 +246,7 @@ const httpRequestsChartRoute = createApmServerRoute({
       }),
     ]),
   }),
-  options: { tags: ['access:apm'] },
+  security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (resources): Promise<HttpRequestsTimeseries> => {
     const apmEventClient = await getApmEventClient(resources);
     const { params } = resources;
@@ -284,7 +284,7 @@ const mobileTermsByFieldRoute = createApmServerRoute({
       }),
     ]),
   }),
-  options: { tags: ['access:apm'] },
+  security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (
     resources
   ): Promise<{
@@ -324,9 +324,7 @@ const mobileMainStatisticsByField = createApmServerRoute({
       }),
     ]),
   }),
-  options: {
-    tags: ['access:apm'],
-  },
+  security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (resources): Promise<MobileMainStatisticsResponse> => {
     const apmEventClient = await getApmEventClient(resources);
     const { params } = resources;
@@ -362,9 +360,7 @@ const mobileDetailedStatisticsByField = createApmServerRoute({
       }),
     ]),
   }),
-  options: {
-    tags: ['access:apm'],
-  },
+  security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (resources): Promise<MobileDetailedStatisticsResponse> => {
     const apmEventClient = await getApmEventClient(resources);
     const { params } = resources;

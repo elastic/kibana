@@ -62,7 +62,6 @@ export interface Meta {
 }
 
 export interface ClientConfigType {
-  canDeployEntSearch: boolean;
   host?: string;
   ui: {
     enabled: boolean;

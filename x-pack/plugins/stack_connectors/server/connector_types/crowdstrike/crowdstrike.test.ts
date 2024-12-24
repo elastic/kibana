@@ -345,70 +345,185 @@ describe('CrowdstrikeConnector', () => {
       expect(mockedRequest).toHaveBeenCalledTimes(3);
     });
   });
-  describe('batchInitRTRSession', () => {
+  describe('executeRTRCommand', () => {
     it('should make a POST request to the correct URL with correct data', async () => {
-      const mockResponse = { data: { batch_id: 'testBatchId' } };
-      mockedRequest.mockResolvedValueOnce({ data: { access_token: 'testToken' } });
-      mockedRequest.mockResolvedValueOnce(mockResponse);
+      const mockResponse = { data: obfuscatedRTRResponse };
 
-      await connector.batchInitRTRSession(
-        { endpoint_ids: ['id1', 'id2'] },
+      mockedRequest.mockResolvedValueOnce({ data: { access_token: 'testToken' } });
+      mockedRequest.mockResolvedValue(mockResponse);
+
+      const result = await connector.executeRTRCommand(
+        {
+          command: 'runscript -Raw',
+          endpoint_ids: ['id1', 'id2'],
+        },
+        connectorUsageCollector
+      );
+
+      expect(mockedRequest).toHaveBeenNthCalledWith(
+        3,
+        expect.objectContaining({
+          url: 'https://api.crowdstrike.com/real-time-response/combined/batch-command/v1',
+          method: 'post',
+          data: expect.objectContaining({
+            command_string: 'runscript -Raw',
+            hosts: ['id1', 'id2'],
+          }),
+        }),
+        connectorUsageCollector
+      );
+
+      expect(result).toEqual(obfuscatedRTRResponse);
+    });
+  });
+
+  describe('batchActiveResponderExecuteRTR', () => {
+    it('should make a POST request to the correct URL with correct data', async () => {
+      const mockResponse = { data: obfuscatedRTRResponse };
+
+      mockedRequest.mockResolvedValueOnce({ data: { access_token: 'testToken' } });
+      mockedRequest.mockResolvedValue(mockResponse);
+
+      const result = await connector.batchActiveResponderExecuteRTR(
+        {
+          command: 'runscript',
+          endpoint_ids: ['id1', 'id2'],
+        },
         connectorUsageCollector
       );
 
       expect(mockedRequest).toHaveBeenNthCalledWith(
         1,
         expect.objectContaining({
-          headers: {
-            accept: 'application/json',
-            'Content-Type': 'application/x-www-form-urlencoded',
-            authorization: expect.any(String),
-          },
+          url: 'https://api.crowdstrike.com/oauth2/token',
           method: 'post',
-          responseSchema: expect.any(Object),
-          url: tokenPath,
         }),
         connectorUsageCollector
       );
+
+      expect(mockedRequest).toHaveBeenNthCalledWith(
+        3,
+        expect.objectContaining({
+          url: 'https://api.crowdstrike.com/real-time-response/combined/batch-active-responder-command/v1',
+          method: 'post',
+        }),
+        connectorUsageCollector
+      );
+
+      expect(result).toEqual(obfuscatedRTRResponse);
+    });
+  });
+
+  describe('batchAdminExecuteRTR', () => {
+    it('should make a POST request to the correct URL with correct data', async () => {
+      const mockResponse = { data: obfuscatedRTRResponse };
+
+      mockedRequest.mockResolvedValueOnce({ data: { access_token: 'testToken' } });
+      mockedRequest.mockResolvedValue(mockResponse);
+
+      const result = await connector.batchAdminExecuteRTR(
+        {
+          command: 'runscript',
+          endpoint_ids: ['id1', 'id2'],
+        },
+        connectorUsageCollector
+      );
+
+      expect(mockedRequest).toHaveBeenNthCalledWith(
+        1,
+        expect.objectContaining({
+          url: 'https://api.crowdstrike.com/oauth2/token',
+          method: 'post',
+        }),
+        connectorUsageCollector
+      );
+
+      expect(mockedRequest).toHaveBeenNthCalledWith(
+        3,
+        expect.objectContaining({
+          url: 'https://api.crowdstrike.com/real-time-response/combined/batch-admin-command/v1',
+          method: 'post',
+        }),
+        connectorUsageCollector
+      );
+
+      expect(result).toEqual(obfuscatedRTRResponse);
+    });
+  });
+
+  describe('getRTRCloudScripts', () => {
+    it('should make a GET request to the correct URL with correct params', async () => {
+      const mockResponse = { data: { scripts: [{}] } };
+
+      mockedRequest.mockResolvedValueOnce({ data: { access_token: 'testToken' } });
+      mockedRequest.mockResolvedValueOnce(mockResponse);
+
+      const result = await connector.getRTRCloudScripts(
+        { ids: ['script1', 'script2'] },
+        connectorUsageCollector
+      );
+
+      expect(mockedRequest).toHaveBeenNthCalledWith(
+        1,
+        expect.objectContaining({
+          url: 'https://api.crowdstrike.com/oauth2/token',
+          method: 'post',
+        }),
+        connectorUsageCollector
+      );
+
       expect(mockedRequest).toHaveBeenNthCalledWith(
         2,
         expect.objectContaining({
-          url: 'https://api.crowdstrike.com/real-time-response/combined/batch-init-session/v1',
-          method: 'post',
-          data: { host_ids: ['id1', 'id2'] },
-          paramsSerializer: expect.any(Function),
-          responseSchema: expect.any(Object),
+          url: 'https://api.crowdstrike.com/real-time-response/entities/scripts/v1',
+          method: 'GET',
         }),
         connectorUsageCollector
       );
-      // @ts-expect-error private static - but I still want to test it
-      expect(CrowdstrikeConnector.currentBatchId).toBe('testBatchId');
-    });
 
-    it('should handle error when fetching batch init session', async () => {
-      mockedRequest.mockResolvedValueOnce({ data: { access_token: 'testToken' } });
-      mockedRequest.mockRejectedValueOnce(new Error('Failed to fetch batch init session'));
-
-      await expect(
-        connector.batchInitRTRSession({ endpoint_ids: ['id1', 'id2'] }, connectorUsageCollector)
-      ).rejects.toThrow('Failed to fetch batch init session');
-    });
-
-    it('should retry once if token is invalid', async () => {
-      const mockResponse = { data: { batch_id: 'testBatchId' } };
-      mockedRequest.mockResolvedValueOnce({ data: { access_token: 'testToken' } });
-      mockedRequest.mockRejectedValueOnce({ code: 401 });
-      mockedRequest.mockResolvedValueOnce({ data: { access_token: 'newTestToken' } });
-      mockedRequest.mockResolvedValueOnce(mockResponse);
-
-      await connector.batchInitRTRSession(
-        { endpoint_ids: ['id1', 'id2'] },
-        connectorUsageCollector
-      );
-
-      expect(mockedRequest).toHaveBeenCalledTimes(4);
-      // @ts-expect-error private static - but I still want to test it
-      expect(CrowdstrikeConnector.currentBatchId).toBe('testBatchId');
+      expect(result).toEqual({ scripts: [{}] });
     });
   });
 });
+
+const obfuscatedRTRResponse = {
+  combined: {
+    resources: {
+      host1: {
+        session_id: 'abcdef123456',
+        task_id: 'task123',
+        complete: true,
+        stdout:
+          'bin \n boot \n dev \n etc \n home \n lib \n lib64 \n media \n mnt \n opt \n proc \n root \n run \n sbin \n srv \n sys \n tmp \n usr \n var \n',
+        stderr: '',
+        base_command: 'runscript',
+        aid: 'aid123',
+        errors: [{ message: 'Error example', code: 123 }],
+        query_time: 1234567890,
+        offline_queued: false,
+      },
+      host2: {
+        session_id: 'ghijkl789101',
+        task_id: 'task456',
+        complete: false,
+        stdout:
+          'bin \n boot \n dev \n etc \n home \n lib \n lib64 \n media \n mnt \n opt \n proc \n root \n run \n sbin \n srv \n sys \n tmp \n usr \n var \n',
+        stderr: '',
+        base_command: 'getscripts',
+        aid: 'aid456',
+        errors: null,
+        query_time: 9876543210,
+        offline_queued: true,
+      },
+    },
+  },
+  meta: {
+    query_time: 1234567890,
+    powered_by: 'CrowdStrike',
+    trace_id: 'trace-abcdef123456',
+  },
+  errors: [
+    { message: 'An example error', code: 500 },
+    { message: 'Another error example', code: 404 },
+  ],
+};
