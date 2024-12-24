@@ -507,7 +507,7 @@ class AgentPolicyService {
     return agentPolicy;
   }
 
-  public async getByIDs(
+  public async getByIds(
     soClient: SavedObjectsClientContract,
     ids: Array<string | { id: string; spaceId?: string }>,
     options: { fields?: string[]; withPackagePolicies?: boolean; ignoreMissing?: boolean } = {}
@@ -1345,7 +1345,7 @@ class AgentPolicyService {
       });
     }
 
-    const policies = await agentPolicyService.getByIDs(soClient, agentPolicyIds);
+    const policies = await agentPolicyService.getByIds(soClient, agentPolicyIds);
     const policiesMap = keyBy(policies, 'id');
     const fullPolicies = await pMap(
       agentPolicyIds,
@@ -1936,7 +1936,7 @@ class AgentPolicyService {
     return allOutputs;
   }
 
-  private checkTamperProtectionLicense(agentPolicy: { is_protected?: boolean }): void {
+  public checkTamperProtectionLicense(agentPolicy: { is_protected?: boolean }): void {
     if (agentPolicy?.is_protected && !licenseService.isPlatinum()) {
       throw new FleetUnauthorizedError('Tamper protection requires Platinum license');
     }
@@ -1959,7 +1959,7 @@ class AgentPolicyService {
       }
     }
   }
-  private checkAgentless(agentPolicy: Partial<NewAgentPolicy>) {
+  public checkAgentless(agentPolicy: Partial<NewAgentPolicy>) {
     if (!isAgentlessEnabled() && agentPolicy?.supports_agentless) {
       throw new AgentPolicyInvalidError(
         'supports_agentless is only allowed in serverless and cloud environments that support the agentless feature'
