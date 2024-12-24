@@ -22,6 +22,7 @@ import {
   AlertInstanceContext,
   AlertInstanceState,
 } from '@kbn/alerting-state-types';
+import { TaskPriority } from '@kbn/task-manager-plugin/server';
 
 const alertingEventLogger = alertingEventLoggerMock.create();
 const actionsClient = actionsClientMock.create();
@@ -91,7 +92,13 @@ const getSchedulerContext = (params = {}) => {
   return { ...defaultSchedulerContext, rule, ...params, ruleRunMetricsStore };
 };
 
-const getResult = (actionId: string, alertId: string, actionUuid: string) => ({
+const getResult = (
+  actionId: string,
+  alertId: string,
+  actionUuid: string,
+  priority?: number,
+  apiKeyId?: string
+) => ({
   actionToEnqueue: {
     actionTypeId: 'test',
     apiKey: 'MTIzOmFiYw==',
@@ -102,6 +109,8 @@ const getResult = (actionId: string, alertId: string, actionUuid: string) => ({
     relatedSavedObjects: [{ id: 'rule-id-1', namespace: 'test1', type: 'alert', typeId: 'test' }],
     source: { source: { id: 'rule-id-1', type: 'alert' }, type: 'SAVED_OBJECT' },
     spaceId: 'test1',
+    ...(priority ? { priority } : {}),
+    ...(apiKeyId ? { apiKeyId } : {}),
   },
   actionToLog: { alertGroup: 'default', alertId, id: actionId, uuid: actionUuid, typeId: 'test' },
 });
@@ -233,6 +242,64 @@ describe('Per-Alert Action Scheduler', () => {
         getResult('action-1', '2', '111-111'),
         getResult('action-2', '1', '222-222'),
         getResult('action-2', '2', '222-222'),
+      ]);
+    });
+
+    test('test should create action to schedule with priority if specified for each alert and each action', async () => {
+      // 2 per-alert actions * 2 alerts = 4 actions to schedule
+      const scheduler = new PerAlertActionScheduler({
+        ...getSchedulerContext(),
+        priority: TaskPriority.Low,
+      });
+      const results = await scheduler.getActionsToSchedule({
+        activeCurrentAlerts: alerts,
+      });
+
+      expect(alertsClient.getSummarizedAlerts).not.toHaveBeenCalled();
+      expect(logger.debug).not.toHaveBeenCalled();
+
+      expect(ruleRunMetricsStore.getNumberOfGeneratedActions()).toEqual(4);
+      expect(ruleRunMetricsStore.getNumberOfTriggeredActions()).toEqual(4);
+      expect(ruleRunMetricsStore.getStatusByConnectorType('test')).toEqual({
+        numberOfGeneratedActions: 4,
+        numberOfTriggeredActions: 4,
+      });
+
+      expect(results).toHaveLength(4);
+      expect(results).toEqual([
+        getResult('action-1', '1', '111-111', 1),
+        getResult('action-1', '2', '111-111', 1),
+        getResult('action-2', '1', '222-222', 1),
+        getResult('action-2', '2', '222-222', 1),
+      ]);
+    });
+
+    test('test should create action to schedule with apiKeyId if specified for each alert and each action', async () => {
+      // 2 per-alert actions * 2 alerts = 4 actions to schedule
+      const scheduler = new PerAlertActionScheduler({
+        ...getSchedulerContext(),
+        apiKeyId: '23534ybfsdsnsdf',
+      });
+      const results = await scheduler.getActionsToSchedule({
+        activeCurrentAlerts: alerts,
+      });
+
+      expect(alertsClient.getSummarizedAlerts).not.toHaveBeenCalled();
+      expect(logger.debug).not.toHaveBeenCalled();
+
+      expect(ruleRunMetricsStore.getNumberOfGeneratedActions()).toEqual(4);
+      expect(ruleRunMetricsStore.getNumberOfTriggeredActions()).toEqual(4);
+      expect(ruleRunMetricsStore.getStatusByConnectorType('test')).toEqual({
+        numberOfGeneratedActions: 4,
+        numberOfTriggeredActions: 4,
+      });
+
+      expect(results).toHaveLength(4);
+      expect(results).toEqual([
+        getResult('action-1', '1', '111-111', undefined, '23534ybfsdsnsdf'),
+        getResult('action-1', '2', '111-111', undefined, '23534ybfsdsnsdf'),
+        getResult('action-2', '1', '222-222', undefined, '23534ybfsdsnsdf'),
+        getResult('action-2', '2', '222-222', undefined, '23534ybfsdsnsdf'),
       ]);
     });
 
