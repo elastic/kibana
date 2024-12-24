@@ -48,14 +48,12 @@ export class Listing extends PureComponent {
             };
 
             setupModeStatus = (
-              <div className="monTableCell__setupModeStatus">
-                <SetupModeBadge
-                  setupMode={setupMode}
-                  status={status}
-                  instance={instance}
-                  productName={BEATS_SYSTEM_ID}
-                />
-              </div>
+              <SetupModeBadge
+                setupMode={setupMode}
+                status={status}
+                instance={instance}
+                productName={BEATS_SYSTEM_ID}
+              />
             );
           }
 
@@ -161,7 +159,7 @@ export class Listing extends PureComponent {
           <EuiPanel>
             {setupModeCallOut}
             <EuiMonitoringTable
-              className="beatsTable"
+              data-test-subj="beatsTable"
               rows={data}
               setupMode={setupMode}
               productName={BEATS_SYSTEM_ID}
