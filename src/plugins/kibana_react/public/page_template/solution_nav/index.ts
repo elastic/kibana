@@ -7,9 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type { KibanaPageTemplateSolutionNavProps } from './solution_nav';
-export { KibanaPageTemplateSolutionNav } from './solution_nav';
 export type { KibanaPageTemplateSolutionNavAvatarProps } from './solution_nav_avatar';
 export { KibanaPageTemplateSolutionNavAvatar } from './solution_nav_avatar';
-export type { KibanaPageTemplateSolutionNavCollapseButtonProps } from './solution_nav_collapse_button';
-export { KibanaPageTemplateSolutionNavCollapseButton } from './solution_nav_collapse_button';
