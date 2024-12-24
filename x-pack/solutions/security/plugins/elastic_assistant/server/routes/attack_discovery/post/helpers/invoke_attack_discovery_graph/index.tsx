@@ -30,25 +30,31 @@ export const invokeAttackDiscoveryGraph = async ({
   anonymizationFields,
   apiConfig,
   connectorTimeout,
+  end,
   esClient,
+  filter,
   langSmithProject,
   langSmithApiKey,
   latestReplacements,
   logger,
   onNewReplacements,
   size,
+  start,
 }: {
   actionsClient: PublicMethodsOf<ActionsClient>;
   alertsIndexPattern: string;
   anonymizationFields: AnonymizationFieldResponse[];
   apiConfig: ApiConfig;
   connectorTimeout: number;
+  end?: string;
   esClient: ElasticsearchClient;
+  filter?: Record<string, unknown>;
   langSmithProject?: string;
   langSmithApiKey?: string;
   latestReplacements: Replacements;
   logger: Logger;
   onNewReplacements: (newReplacements: Replacements) => void;
+  start?: string;
   size: number;
 }): Promise<{
   anonymizedAlerts: Document[];
@@ -86,12 +92,15 @@ export const invokeAttackDiscoveryGraph = async ({
   const graph = getDefaultAttackDiscoveryGraph({
     alertsIndexPattern,
     anonymizationFields,
+    end,
     esClient,
+    filter,
     llm,
     logger,
     onNewReplacements,
     replacements: latestReplacements,
     size,
+    start,
   });
 
   logger?.debug(() => 'invokeAttackDiscoveryGraph: invoking the Attack discovery graph');

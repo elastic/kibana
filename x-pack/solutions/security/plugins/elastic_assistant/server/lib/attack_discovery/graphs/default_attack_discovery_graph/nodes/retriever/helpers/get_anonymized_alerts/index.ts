@@ -21,17 +21,23 @@ import { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/s
 export const getAnonymizedAlerts = async ({
   alertsIndexPattern,
   anonymizationFields,
+  end,
   esClient,
+  filter,
   onNewReplacements,
   replacements,
   size,
+  start,
 }: {
   alertsIndexPattern?: string;
   anonymizationFields?: AnonymizationFieldResponse[];
+  end?: string | null;
   esClient: ElasticsearchClient;
+  filter?: Record<string, unknown> | null;
   onNewReplacements?: (replacements: Replacements) => void;
   replacements?: Replacements;
   size?: number;
+  start?: string | null;
 }): Promise<string[]> => {
   if (alertsIndexPattern == null || size == null || sizeIsOutOfRange(size)) {
     return [];
@@ -40,7 +46,10 @@ export const getAnonymizedAlerts = async ({
   const query = getOpenAndAcknowledgedAlertsQuery({
     alertsIndexPattern,
     anonymizationFields: anonymizationFields ?? [],
+    end,
+    filter,
     size,
+    start,
   });
 
   const result = await esClient.search<SearchResponse>(query);
