@@ -97,6 +97,7 @@ export const initializeSearchEmbeddableApi = async (
   const density$ = new BehaviorSubject<DataGridDensity | undefined>(initialState.density);
   const sort$ = new BehaviorSubject<SortOrder[] | undefined>(initialState.sort);
   const savedSearchViewMode$ = new BehaviorSubject<VIEW_MODE | undefined>(initialState.viewMode);
+  const breakdownField$ = new BehaviorSubject<string | undefined>(initialState.breakdownField);
 
   /**
    * This is the state that comes from the search source that needs individual publishing subjects for the API
@@ -136,6 +137,7 @@ export const initializeSearchEmbeddableApi = async (
     viewMode: savedSearchViewMode$,
     density: density$,
     inspectorAdapters: inspectorAdapters$,
+    breakdownField: breakdownField$,
   };
 
   /** The saved search should be the source of truth for all state  */
@@ -228,6 +230,7 @@ export const initializeSearchEmbeddableApi = async (
       ],
       viewMode: [savedSearchViewMode$, (value) => savedSearchViewMode$.next(value)],
       density: [density$, (value) => density$.next(value)],
+      breakdownField: [breakdownField$, (value) => breakdownField$.next(value)],
     },
   };
 };
