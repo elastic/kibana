@@ -32,6 +32,7 @@ import { ObservabilityApmAlert } from '@kbn/alerts-as-data-utils';
 import { getParsedFilterQuery, termQuery } from '@kbn/observability-plugin/server';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
 import { asyncForEach } from '@kbn/std';
+import { errorCountParamsSchema } from '@kbn/response-ops-rule-params/error_count';
 import { getEnvironmentEsField } from '../../../../../common/environment_filter_values';
 import {
   ERROR_GROUP_ID,
@@ -41,11 +42,11 @@ import {
 } from '../../../../../common/es_fields/apm';
 import {
   APM_SERVER_FEATURE_ID,
+  ApmRuleParamsType,
   formatErrorCountReason,
   RULE_TYPES_CONFIG,
   THRESHOLD_MET_GROUP,
 } from '../../../../../common/rules/apm_rule_types';
-import { errorCountParamsSchema, ApmRuleParamsType } from '../../../../../common/rules/schema';
 import { environmentQuery } from '../../../../../common/utils/environment_query';
 import { getAlertUrlErrorCount } from '../../../../../common/utils/formatters';
 import { apmActionVariables } from '../../action_variables';
