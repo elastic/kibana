@@ -1,0 +1,29 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+import { ReadStreamDefinition } from '@kbn/streams-plugin/common';
+import React from 'react';
+import { dynamic } from '@kbn/shared-ux-utility';
+
+const StreamDetailEnrichmentContent = dynamic(() =>
+  import(/* webpackChunkName: "management_enrichment" */ './page_content').then((mod) => ({
+    default: mod.StreamDetailEnrichmentContent,
+  }))
+);
+
+export function StreamDetailEnrichment({
+  definition,
+  refreshDefinition,
+}: {
+  definition?: ReadStreamDefinition;
+  refreshDefinition: () => void;
+}) {
+  if (!definition) return null;
+
+  return (
+    <StreamDetailEnrichmentContent definition={definition} refreshDefinition={refreshDefinition} />
+  );
+}
