@@ -55,7 +55,7 @@ const baseNavItems = [
         href: '/app/enterprise_search/content/crawlers',
         id: 'crawlers',
         items: undefined,
-        name: 'Web crawlers',
+        name: 'Web Crawlers',
       },
     ],
     name: 'Content',
