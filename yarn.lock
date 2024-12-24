@@ -2286,14 +2286,14 @@
     apache-arrow "^18.0.0"
     tslib "^2.4.0"
 
-"@elastic/ems-client@8.6.1":
-  version "8.6.1"
-  resolved "https://registry.yarnpkg.com/@elastic/ems-client/-/ems-client-8.6.1.tgz#df3010960cf61ede363146a6693d5d193b7946f6"
-  integrity sha512-Xn0rYfqKxOVmxmZ8FzuQpM6wA1wqBmTx0tFfMyG5OqCRRe6M6M2ISAi5+RrOWIQly4auECCa8v+/C1W/hbsgzA==
+"@elastic/ems-client@8.6.2":
+  version "8.6.2"
+  resolved "https://registry.yarnpkg.com/@elastic/ems-client/-/ems-client-8.6.2.tgz#cdca0a063756391705492f1d301a33a314464d8e"
+  integrity sha512-bhbR6BmrA5pNEDI/ais9V3612KPimx6NLacViOc1QpRw9oNGfQPRQVSOwd7IXzCn2eJKgBJoTWBgJGu6sjvZ4g==
   dependencies:
     "@types/geojson" "7946.0.15"
     "@types/topojson-client" "3.1.5"
-    chroma-js "^2.6.0"
+    chroma-js "2.4.2"
     lodash "^4.17.21"
     lru-cache "^4.1.5"
     maplibre-gl "3.1.0"
@@ -15227,15 +15227,10 @@ chownr@^3.0.0:
   resolved "https://registry.yarnpkg.com/chownr/-/chownr-3.0.0.tgz#9855e64ecd240a9cc4267ce8a4aa5d24a1da15e4"
   integrity sha512-+IxzY9BZOQd/XuYPRmrvEVjF/nqj5kgT4kEq7VofrDoM1MxoRjEWkrCC3EtLi59TVawxTAn+orJwFQcrqEN1+g==
 
-chroma-js@^2.1.0, chroma-js@^2.4.2:
+chroma-js@2.4.2, chroma-js@^2.1.0, chroma-js@^2.4.2:
   version "2.4.2"
   resolved "https://registry.yarnpkg.com/chroma-js/-/chroma-js-2.4.2.tgz#dffc214ed0c11fa8eefca2c36651d8e57cbfb2b0"
   integrity sha512-U9eDw6+wt7V8z5NncY2jJfZa+hUH8XEj8FQHgFJTrUFnJfXYf4Ml4adI2vXZOjqRDpFWtYVWypDfZwnJ+HIR4A==
-
-chroma-js@^2.6.0:
-  version "2.6.0"
-  resolved "https://registry.yarnpkg.com/chroma-js/-/chroma-js-2.6.0.tgz#578743dd359698a75067a19fa5571dec54d0b70b"
-  integrity sha512-BLHvCB9s8Z1EV4ethr6xnkl/P2YRFOGqfgvuMG/MyCbZPrTA+NeiByY6XvgF0zP4/2deU2CXnWyMa3zu1LqQ3A==
 
 chrome-trace-event@^1.0.2:
   version "1.0.2"
