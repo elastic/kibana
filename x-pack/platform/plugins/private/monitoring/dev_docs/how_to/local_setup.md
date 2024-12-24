@@ -49,7 +49,7 @@ docker run --name metricbeat \
   --pull always --rm \
   --hostname=metricbeat \
   --publish=5066:5066 \
-  --volume="$(pwd)/x-pack/plugins/monitoring/dev_docs/reference/metricbeat.yarn.yml:/usr/share/metricbeat/metricbeat.yml:ro" \
+  --volume="$(pwd)/x-pack/platform/plugins/private/monitoring/dev_docs/reference/metricbeat.yarn.yml:/usr/share/metricbeat/metricbeat.yml:ro" \
   docker.elastic.co/beats/metricbeat:master-SNAPSHOT
 ```
 
@@ -65,7 +65,7 @@ docker run --name filebeat \
   --hostname=filebeat \
   --publish=5067:5067 \
   --volume="$(pwd)/.es:/es:ro" \
-  --volume="$(pwd)/x-pack/plugins/monitoring/dev_docs/reference/filebeat.yarn.yml:/usr/share/filebeat/filebeat.yml:ro" \
+  --volume="$(pwd)/x-pack/platform/plugins/private/monitoring/dev_docs/reference/filebeat.yarn.yml:/usr/share/filebeat/filebeat.yml:ro" \
   docker.elastic.co/beats/filebeat:master-SNAPSHOT
 ```
 
@@ -80,8 +80,8 @@ docker run --name logstash \
   --pull always --rm \
   --hostname=logstash \
   --publish=9600:9600 \
-  --volume="$(pwd)/x-pack/plugins/monitoring/dev_docs/reference/logstash.yml:/usr/share/logstash/config/logstash.yml:ro" \
-  --volume="$(pwd)/x-pack/plugins/monitoring/dev_docs/reference/pipelines.yml:/usr/share/logstash/config/pipelines.yml:ro" \
+  --volume="$(pwd)/x-pack/platform/plugins/private/monitoring/dev_docs/reference/logstash.yml:/usr/share/logstash/config/logstash.yml:ro" \
+  --volume="$(pwd)/x-pack/platform/plugins/private/monitoring/dev_docs/reference/pipelines.yml:/usr/share/logstash/config/pipelines.yml:ro" \
   docker.elastic.co/logstash/logstash:master-SNAPSHOT
 ```
 

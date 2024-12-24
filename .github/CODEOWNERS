@@ -847,6 +847,8 @@ x-pack/platform/plugins/private/grokdebugger @elastic/kibana-management
 x-pack/platform/plugins/private/index_lifecycle_management @elastic/kibana-management
 x-pack/platform/plugins/private/license_api_guard @elastic/kibana-management
 x-pack/platform/plugins/private/logstash @elastic/logstash
+x-pack/platform/plugins/private/monitoring @elastic/stack-monitoring
+x-pack/platform/plugins/private/monitoring_collection @elastic/stack-monitoring
 x-pack/platform/plugins/private/painless_lab @elastic/kibana-management
 x-pack/platform/plugins/private/remote_clusters @elastic/kibana-management
 x-pack/platform/plugins/private/rollup @elastic/kibana-management
@@ -900,8 +902,6 @@ x-pack/plugins/global_search_providers @elastic/appex-sharedux
 x-pack/plugins/graph @elastic/kibana-visualizations
 x-pack/plugins/lens @elastic/kibana-visualizations
 x-pack/plugins/licensing @elastic/kibana-core
-x-pack/plugins/monitoring @elastic/stack-monitoring
-x-pack/plugins/monitoring_collection @elastic/stack-monitoring
 x-pack/plugins/notifications @elastic/appex-sharedux
 x-pack/plugins/observability_solution/apm @elastic/obs-ux-infra_services-team
 x-pack/plugins/observability_solution/apm_data_access @elastic/obs-ux-infra_services-team
@@ -2544,7 +2544,7 @@ x-pack/solutions/security/plugins/security_solution/server/lib/security_integrat
 
 # Observability design
 /x-pack/plugins/fleet/**/*.scss @elastic/observability-design
-/x-pack/plugins/monitoring/**/*.scss @elastic/observability-design
+/x-pack/platform/plugins/private/monitoring/**/*.scss @elastic/observability-design
 
 # Ent. Search design
 /x-pack/plugins/enterprise_search/**/*.scss @elastic/search-design

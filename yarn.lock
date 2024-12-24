@@ -6413,11 +6413,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/monitoring-collection-plugin@link:x-pack/plugins/monitoring_collection":
+"@kbn/monitoring-collection-plugin@link:x-pack/platform/plugins/private/monitoring_collection":
   version "0.0.0"
   uid ""
 
-"@kbn/monitoring-plugin@link:x-pack/plugins/monitoring":
+"@kbn/monitoring-plugin@link:x-pack/platform/plugins/private/monitoring":
   version "0.0.0"
   uid ""
 
