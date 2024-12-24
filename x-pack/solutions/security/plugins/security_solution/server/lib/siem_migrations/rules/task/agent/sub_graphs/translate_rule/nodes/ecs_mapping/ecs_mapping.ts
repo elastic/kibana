@@ -12,6 +12,7 @@ import { getEsqlKnowledgeBase } from '../../../../../util/esql_knowledge_base_ca
 import type { GraphNode } from '../../types';
 import { SIEM_RULE_MIGRATION_CIM_ECS_MAP } from './cim_ecs_map';
 import { ESQL_TRANSLATE_ECS_MAPPING_PROMPT } from './prompts';
+import { cleanMarkdown } from '../../../../../util/comments';
 
 interface GetEcsMappingNodeParams {
   inferenceClient: InferenceClient;
@@ -47,7 +48,7 @@ export const getEcsMappingNode = ({
 
     return {
       response,
-      comments: [ecsSummary],
+      comments: [cleanMarkdown(ecsSummary)],
       translation_finalized: true,
       translation_result: translationResult,
       elastic_rule: {
@@ -59,7 +60,7 @@ export const getEcsMappingNode = ({
 };
 
 const getTranslationResult = (esqlQuery: string): RuleTranslationResult => {
-  if (esqlQuery.match(/\[(macro):[\s\S]*\]/)) {
+  if (esqlQuery.match(/\[(macro|lookup):[\s\S]*\]/)) {
     return RuleTranslationResult.PARTIAL;
   }
   return RuleTranslationResult.FULL;

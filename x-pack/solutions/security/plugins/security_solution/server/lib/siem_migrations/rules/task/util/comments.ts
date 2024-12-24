@@ -4,4 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-export { getFilterIndexPatternsNode } from './filter_index_patterns';
+
+export const cleanMarkdown = (markdown: string): string => {
+  // Use languages known by the code block plugin
+  return markdown.replaceAll('```esql', '```sql').replaceAll('```spl', '```splunk-spl');
+};

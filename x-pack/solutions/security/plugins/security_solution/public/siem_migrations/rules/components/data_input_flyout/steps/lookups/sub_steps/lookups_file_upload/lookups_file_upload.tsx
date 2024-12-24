@@ -77,7 +77,7 @@ export const LookupsFileUpload = React.memo<LookupsFileUploadProps>(
                 }
 
                 const name = file.name.replace(/\.[^/.]+$/, '').trim();
-                resolve({ type: 'list', name, content });
+                resolve({ type: 'lookup', name, content });
               };
 
               const handleReaderError = function () {
