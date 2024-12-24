@@ -124,6 +124,16 @@ const basicCase: Case = {
       value: 3,
     },
   ],
+  observables: [
+    {
+      value: 'test',
+      typeKey: '9b557398-0289-4e00-b696-5b277608789c',
+      id: 'df927ab8-54ed-47d6-be07-9948c255c097',
+      createdAt: '2024-11-14',
+      updatedAt: '2024-11-14',
+      description: null,
+    },
+  ],
 };
 
 describe('CasePostRequestRt', () => {
