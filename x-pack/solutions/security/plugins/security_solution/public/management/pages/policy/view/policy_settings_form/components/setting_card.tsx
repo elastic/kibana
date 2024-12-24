@@ -6,7 +6,7 @@
  */
 
 import type { FC, ReactNode } from 'react';
-import React, { memo, useContext } from 'react';
+import React, { memo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -22,7 +22,6 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-import { ThemeContext } from 'styled-components';
 import type { OperatingSystem } from '@kbn/securitysolution-utils';
 import { useTestIdGenerator } from '../../../../../hooks/use_test_id_generator';
 import { OS_TITLES } from '../../../../../common/translations';
@@ -73,7 +72,6 @@ export const SettingCard: FC<SettingCardProps> = memo(
     selected = true,
     mode = 'edit',
   }) => {
-    const paddingSize = useContext(ThemeContext).eui.euiPanelPaddingModifiers.paddingMedium;
     const getTestId = useTestIdGenerator(dataTestSubj);
 
     return (
@@ -82,7 +80,9 @@ export const SettingCard: FC<SettingCardProps> = memo(
           direction="row"
           gutterSize="none"
           alignItems="center"
-          style={{ padding: `${paddingSize} ${paddingSize} 0 ${paddingSize}` }}
+          css={({ euiTheme }) => ({
+            padding: `${euiTheme.size.base} ${euiTheme.size.base} 0 ${euiTheme.size.base}`,
+          })}
         >
           <EuiFlexItem grow={1}>
             <SettingCardHeader>{TITLES.type}</SettingCardHeader>
@@ -146,7 +146,11 @@ export const SettingCard: FC<SettingCardProps> = memo(
         {mode === 'edit' || selected ? (
           <>
             <EuiHorizontalRule margin="m" />
-            <div style={{ padding: `0 ${paddingSize} ${paddingSize} ${paddingSize}` }}>
+            <div
+              css={({ euiTheme }) => ({
+                padding: `${euiTheme.size.base} ${euiTheme.size.base} 0 ${euiTheme.size.base}`,
+              })}
+            >
               {children}
             </div>
           </>
