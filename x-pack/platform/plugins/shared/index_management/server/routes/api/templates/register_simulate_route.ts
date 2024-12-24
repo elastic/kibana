@@ -16,6 +16,12 @@ export function registerSimulateRoute({ router, lib: { handleEsError } }: RouteD
   router.post(
     {
       path: addBasePath('/index_templates/simulate/{templateName?}'),
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Relies on es client for authorization',
+        },
+      },
       validate: {
         body: schema.nullable(bodySchema),
         params: schema.object({ templateName: schema.maybe(schema.string()) }),

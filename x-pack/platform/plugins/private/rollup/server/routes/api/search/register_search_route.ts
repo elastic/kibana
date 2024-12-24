@@ -17,6 +17,12 @@ export const registerSearchRoute = ({
   router.post(
     {
       path: addBasePath('/search'),
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Relies on es client for authorization',
+        },
+      },
       validate: {
         body: schema.arrayOf(
           schema.object({

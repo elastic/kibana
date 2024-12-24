@@ -11,7 +11,16 @@ import { addBasePath } from '..';
 export function registerNodesRoute({ router, lib: { handleEsError } }: RouteDependencies) {
   // Retrieve the es plugins installed on the cluster nodes
   router.get(
-    { path: addBasePath('/nodes/plugins'), validate: {} },
+    {
+      path: addBasePath('/nodes/plugins'),
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Relies on es client for authorization',
+        },
+      },
+      validate: {},
+    },
     async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
 
