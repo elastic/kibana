@@ -4,13 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import type { Client } from '@elastic/elasticsearch';
-import type { SuperTest } from 'supertest';
+import type { Agent as SuperTestAgent } from 'supertest';
 
 import { ALL_SAVED_OBJECT_INDICES } from '@kbn/core-saved-objects-server';
 import expect from '@kbn/expect';
 
+import type {
+  DeploymentAgnosticFtrProviderContext,
+  SupertestWithRoleScopeType,
+} from '../../deployment_agnostic/ftr_provider_context';
+import { getRoleDefinitionForUser, isBuiltInRole } from '../lib/authentication';
 import { MULTI_NAMESPACE_SAVED_OBJECT_TEST_CASES as CASES } from '../lib/saved_object_test_cases';
 import { getAggregatedSpaceData, getTestScenariosForSpace } from '../lib/space_test_utils';
 import type { DescribeFn, TestDefinitionAuthentication } from '../lib/types';
@@ -32,7 +35,13 @@ interface DeleteTestDefinition {
   tests: DeleteTests;
 }
 
-export function deleteTestSuiteFactory(es: Client, esArchiver: any, supertest: SuperTest<any>) {
+export function deleteTestSuiteFactory({ getService }: DeploymentAgnosticFtrProviderContext) {
+  const roleScopedSupertest = getService('roleScopedSupertest');
+  const samlAuth = getService('samlAuth');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
+  const esArchiver = getService('esArchiver');
+  const es = getService('es');
+
   const createExpectResult = (expectedResult: any) => (resp: { [key: string]: any }) => {
     expect(resp.body).to.eql(expectedResult);
   };
@@ -64,40 +73,86 @@ export function deleteTestSuiteFactory(es: Client, esArchiver: any, supertest: S
     const expectedBuckets = [
       {
         key: 'default',
+        doc_count: 20,
+        countByType: {
+          doc_count_error_upper_bound: 0,
+          sum_other_doc_count: 0,
+          buckets: [
+            {
+              key: 'index-pattern',
+              doc_count: 11,
+            },
+            {
+              key: 'space',
+              doc_count: 3,
+            },
+            {
+              key: 'visualization',
+              doc_count: 3,
+            },
+            {
+              key: 'legacy-url-alias',
+              doc_count: 2,
+            },
+            {
+              key: 'dashboard',
+              doc_count: 1,
+            },
+          ],
+        },
+      },
+      {
+        key: 'space_1',
         doc_count: 10,
         countByType: {
           doc_count_error_upper_bound: 0,
           sum_other_doc_count: 0,
           buckets: [
-            { key: 'space', doc_count: 3 }, // since space objects are namespace-agnostic, they appear in the "default" agg bucket
-            { key: 'visualization', doc_count: 3 },
-            { key: 'legacy-url-alias', doc_count: 2 }, // aliases (1)
-            { key: 'dashboard', doc_count: 1 },
-            { key: 'index-pattern', doc_count: 1 },
+            {
+              key: 'index-pattern',
+              doc_count: 6,
+            },
+            {
+              key: 'visualization',
+              doc_count: 3,
+            },
+            {
+              key: 'dashboard',
+              doc_count: 1,
+            },
           ],
         },
       },
       {
-        doc_count: 5,
-        key: 'space_1',
+        key: '*',
+        doc_count: 3,
         countByType: {
           doc_count_error_upper_bound: 0,
           sum_other_doc_count: 0,
           buckets: [
-            { key: 'visualization', doc_count: 3 },
-            { key: 'dashboard', doc_count: 1 },
-            { key: 'index-pattern', doc_count: 1 },
-            // no legacy url alias objects exist in space_1
+            {
+              key: 'index-pattern',
+              doc_count: 3,
+            },
           ],
         },
       },
       {
-        doc_count: 2,
         key: 'other_space',
+        doc_count: 3,
         countByType: {
           doc_count_error_upper_bound: 0,
           sum_other_doc_count: 0,
-          buckets: [{ key: 'legacy-url-alias', doc_count: 2 }], // aliases (3)
+          buckets: [
+            {
+              key: 'legacy-url-alias',
+              doc_count: 2,
+            },
+            {
+              key: 'index-pattern',
+              doc_count: 1,
+            },
+          ],
         },
       },
     ];
@@ -110,11 +165,11 @@ export function deleteTestSuiteFactory(es: Client, esArchiver: any, supertest: S
     const multiNamespaceResponse = await es.search<Record<string, any>>({
       index: ALL_SAVED_OBJECT_INDICES,
       size: 100,
-      body: { query: { terms: { type: ['sharedtype'] } } },
+      body: { query: { terms: { type: ['index-pattern'] } } },
     });
     const docs = multiNamespaceResponse.hits.hits;
-    // Just 19 results, since spaces_2_only, conflict_1a_space_2, conflict_1b_space_2, conflict_1c_space_2, and conflict_2_space_2 got deleted.
-    expect(docs).length(19);
+    // Just 21 results, since spaces_2_only, conflict_1a_space_2, conflict_1b_space_2, conflict_1c_space_2, and conflict_2_space_2 got deleted.
+    expect(docs).length(21);
     docs.forEach((doc) => () => {
       const containsSpace2 = doc?._source?.namespaces.includes('space_2');
       expect(containsSpace2).to.eql(false);
@@ -149,8 +204,33 @@ export function deleteTestSuiteFactory(es: Client, esArchiver: any, supertest: S
 
   const makeDeleteTest =
     (describeFn: DescribeFn) =>
-    (description: string, { user = {}, spaceId, tests }: DeleteTestDefinition) => {
+    (description: string, { user, spaceId, tests }: DeleteTestDefinition) => {
       describeFn(description, () => {
+        let supertest: SupertestWithRoleScopeType | SuperTestAgent;
+
+        before(async () => {
+          if (user) {
+            const isBuiltIn = isBuiltInRole(user.role);
+            if (!isBuiltIn) {
+              await samlAuth.setCustomRole(getRoleDefinitionForUser(user));
+            }
+            supertest = await roleScopedSupertest.getSupertestWithRoleScope(
+              isBuiltIn ? user.role : 'customRole',
+              {
+                useCookieHeader: true,
+                withInternalHeaders: true,
+              }
+            );
+          } else {
+            supertest = supertestWithoutAuth;
+          }
+        });
+        after(async () => {
+          if (user) {
+            await (supertest as SupertestWithRoleScopeType).destroy();
+          }
+        });
+
         beforeEach(async () => {
           await esArchiver.load(
             'x-pack/test/spaces_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
@@ -166,7 +246,6 @@ export function deleteTestSuiteFactory(es: Client, esArchiver: any, supertest: S
           it(`should return ${tests.exists.statusCode} ${scenario}`, async () => {
             return supertest
               .delete(`${urlPrefix}/api/spaces/space/space_2`)
-              .auth(user.username, user.password)
               .expect(tests.exists.statusCode)
               .then(tests.exists.response);
           });
@@ -175,7 +254,6 @@ export function deleteTestSuiteFactory(es: Client, esArchiver: any, supertest: S
             it(`should return ${tests.reservedSpace.statusCode} ${scenario}`, async () => {
               return supertest
                 .delete(`${urlPrefix}/api/spaces/space/default`)
-                .auth(user.username, user.password)
                 .expect(tests.reservedSpace.statusCode)
                 .then(tests.reservedSpace.response);
             });
@@ -185,7 +263,6 @@ export function deleteTestSuiteFactory(es: Client, esArchiver: any, supertest: S
             it(`should return ${tests.doesntExist.statusCode} ${scenario}`, async () => {
               return supertest
                 .delete(`${urlPrefix}/api/spaces/space/space_7`)
-                .auth(user.username, user.password)
                 .expect(tests.doesntExist.statusCode)
                 .then(tests.doesntExist.response);
             });
