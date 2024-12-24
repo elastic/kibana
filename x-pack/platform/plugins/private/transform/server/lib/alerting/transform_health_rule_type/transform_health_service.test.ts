@@ -45,44 +45,6 @@ describe('transformHealthServiceProvider', () => {
             },
           ],
         } as unknown as TransformGetTransformResponse;
-
-        if (transformId === 'transform4,transform6,transform6*') {
-          // arrangement for exclude transforms
-          return {
-            transforms: [
-              {
-                id: `transform4`,
-                sync: true,
-              },
-              {
-                id: `transform6`,
-                sync: true,
-              },
-              ...new Array(10).fill(null).map((_, i) => ({
-                id: `transform6${i}`,
-                sync: true,
-              })),
-            ],
-          } as unknown as TransformGetTransformResponse;
-        } else {
-          return {
-            transforms: [
-              // Mock continuous transforms
-              ...new Array(102).fill(null).map((_, i) => ({
-                id: `transform${i}`,
-                sync: {
-                  time: {
-                    field: 'order_date',
-                    delay: '60s',
-                  },
-                },
-              })),
-              {
-                id: 'transform102',
-              },
-            ],
-          } as unknown as TransformGetTransformResponse;
-        }
       }
     );
 
@@ -121,6 +83,7 @@ describe('transformHealthServiceProvider', () => {
       basic: true,
       transform_id:
         'transform0,transform1,transform2,transform3,transform5,transform7,transform8,transform9,transform10,transform11,transform12,transform13,transform14,transform15,transform16,transform17,transform18,transform19,transform20,transform21,transform22,transform23,transform24,transform25,transform26,transform27,transform28,transform29,transform30,transform31,transform32,transform33,transform34,transform35,transform36,transform37,transform38,transform39,transform40,transform41,transform42,transform43,transform44,transform45,transform46,transform47,transform48,transform49,transform50,transform51,transform52,transform53,transform54,transform55,transform56,transform57,transform58,transform59,transform70,transform71,transform72,transform73,transform74,transform75,transform76,transform77,transform78,transform79,transform80,transform81,transform82,transform83,transform84,transform85,transform86,transform87,transform88,transform89,transform90,transform91,transform92,transform93,transform94,transform95,transform96,transform97,transform98,transform99,transform100,transform101',
+      size: 90,
     });
 
     expect(result).toBeDefined();
@@ -169,12 +132,13 @@ describe('transformHealthServiceProvider', () => {
     expect(esClient.transform.getTransformStats).toHaveBeenNthCalledWith(1, {
       basic: true,
       transform_id: '_all',
+      size: 1000,
     });
 
     const notStarted = result[0];
 
     expect(notStarted.context.message).toEqual(
-      'Transform transform_with_a_very_long_id_that_result_in_long_url_for_sure_0, transform_with_a_very_long_id_that_result_in_long_url_for_sure_1, transform_with_a_very_long_id_that_result_in_long_url_for_sure_2, transform_with_a_very_long_id_that_result_in_long_url_for_sure_3, transform_with_a_very_long_id_that_result_in_long_url_for_sure_4, transform_with_a_very_long_id_that_result_in_long_url_for_sure_5, transform_with_a_very_long_id_that_result_in_long_url_for_sure_6, transform_with_a_very_long_id_that_result_in_long_url_for_sure_7, transform_with_a_very_long_id_that_result_in_long_url_for_sure_8, transform_with_a_very_long_id_that_result_in_long_url_for_sure_9, transform_with_a_very_long_id_that_result_in_long_url_for_sure_10, transform_with_a_very_long_id_that_result_in_long_url_for_sure_11, transform_with_a_very_long_id_that_result_in_long_url_for_sure_12, transform_with_a_very_long_id_that_result_in_long_url_for_sure_13, transform_with_a_very_long_id_that_result_in_long_url_for_sure_14, transform_with_a_very_long_id_that_result_in_long_url_for_sure_15, transform_with_a_very_long_id_that_result_in_long_url_for_sure_16, transform_with_a_very_long_id_that_result_in_long_url_for_sure_17, transform_with_a_very_long_id_that_result_in_long_url_for_sure_18, transform_with_a_very_long_id_that_result_in_long_url_for_sure_19, transform_with_a_very_long_id_that_result_in_long_url_for_sure_20, transform_with_a_very_long_id_that_result_in_long_url_for_sure_21, transform_with_a_very_long_id_that_result_in_long_url_for_sure_22, transform_with_a_very_long_id_that_result_in_long_url_for_sure_23, transform_with_a_very_long_id_that_result_in_long_url_for_sure_24, transform_with_a_very_long_id_that_result_in_long_url_for_sure_25, transform_with_a_very_long_id_that_result_in_long_url_for_sure_26, transform_with_a_very_long_id_that_result_in_long_url_for_sure_27, transform_with_a_very_long_id_that_result_in_long_url_for_sure_28, transform_with_a_very_long_id_that_result_in_long_url_for_sure_29, transform_with_a_very_long_id_that_result_in_long_url_for_sure_30, transform_with_a_very_long_id_that_result_in_long_url_for_sure_31, transform_with_a_very_long_id_that_result_in_long_url_for_sure_32, transform_with_a_very_long_id_that_result_in_long_url_for_sure_33, transform_with_a_very_long_id_that_result_in_long_url_for_sure_34, transform_with_a_very_long_id_that_result_in_long_url_for_sure_35, transform_with_a_very_long_id_that_result_in_long_url_for_sure_36, transform_with_a_very_long_id_that_result_in_long_url_for_sure_37, transform_with_a_very_long_id_that_result_in_long_url_for_sure_38, transform_with_a_very_long_id_that_result_in_long_url_for_sure_39, transform_with_a_very_long_id_that_result_in_long_url_for_sure_40, transform_with_a_very_long_id_that_result_in_long_url_for_sure_41, transform_with_a_very_long_id_that_result_in_long_url_for_sure_42, transform_with_a_very_long_id_that_result_in_long_url_for_sure_43, transform_with_a_very_long_id_that_result_in_long_url_for_sure_44, transform_with_a_very_long_id_that_result_in_long_url_for_sure_45, transform_with_a_very_long_id_that_result_in_long_url_for_sure_46, transform_with_a_very_long_id_that_result_in_long_url_for_sure_47, transform_with_a_very_long_id_that_result_in_long_url_for_sure_48, transform_with_a_very_long_id_that_result_in_long_url_for_sure_49, transform_with_a_very_long_id_that_result_in_long_url_for_sure_50, transform_with_a_very_long_id_that_result_in_long_url_for_sure_51, transform_with_a_very_long_id_that_result_in_long_url_for_sure_52, transform_with_a_very_long_id_that_result_in_long_url_for_sure_53, transform_with_a_very_long_id_that_result_in_long_url_for_sure_54, transform_with_a_very_long_id_that_result_in_long_url_for_sure_55, transform_with_a_very_long_id_that_result_in_long_url_for_sure_56, transform_with_a_very_long_id_that_result_in_long_url_for_sure_57, transform_with_a_very_long_id_that_result_in_long_url_for_sure_58, transform_with_a_very_long_id_that_result_in_long_url_for_sure_59 are not started.'
+      '60 transforms are not started: transform_with_a_very_long_id_that_result_in_long_url_for_sure_0, transform_with_a_very_long_id_that_result_in_long_url_for_sure_1, transform_with_a_very_long_id_that_result_in_long_url_for_sure_2, transform_with_a_very_long_id_that_result_in_long_url_for_sure_3, transform_with_a_very_long_id_that_result_in_long_url_for_sure_4, transform_with_a_very_long_id_that_result_in_long_url_for_sure_5, transform_with_a_very_long_id_that_result_in_long_url_for_sure_6, transform_with_a_very_long_id_that_result_in_long_url_for_sure_7, transform_with_a_very_long_id_that_result_in_long_url_for_sure_8, transform_with_a_very_long_id_that_result_in_long_url_for_sure_9, transform_with_a_very_long_id_that_result_in_long_url_for_sure_10, transform_with_a_very_long_id_that_result_in_long_url_for_sure_11, transform_with_a_very_long_id_that_result_in_long_url_for_sure_12, transform_with_a_very_long_id_that_result_in_long_url_for_sure_13, transform_with_a_very_long_id_that_result_in_long_url_for_sure_14, transform_with_a_very_long_id_that_result_in_long_url_for_sure_15, transform_with_a_very_long_id_that_result_in_long_url_for_sure_16, transform_with_a_very_long_id_that_result_in_long_url_for_sure_17, transform_with_a_very_long_id_that_result_in_long_url_for_sure_18, transform_with_a_very_long_id_that_result_in_long_url_for_sure_19, transform_with_a_very_long_id_that_result_in_long_url_for_sure_20, transform_with_a_very_long_id_that_result_in_long_url_for_sure_21, transform_with_a_very_long_id_that_result_in_long_url_for_sure_22, transform_with_a_very_long_id_that_result_in_long_url_for_sure_23, transform_with_a_very_long_id_that_result_in_long_url_for_sure_24, transform_with_a_very_long_id_that_result_in_long_url_for_sure_25, transform_with_a_very_long_id_that_result_in_long_url_for_sure_26, transform_with_a_very_long_id_that_result_in_long_url_for_sure_27, transform_with_a_very_long_id_that_result_in_long_url_for_sure_28, transform_with_a_very_long_id_that_result_in_long_url_for_sure_29, transform_with_a_very_long_id_that_result_in_long_url_for_sure_30, transform_with_a_very_long_id_that_result_in_long_url_for_sure_31, transform_with_a_very_long_id_that_result_in_long_url_for_sure_32, transform_with_a_very_long_id_that_result_in_long_url_for_sure_33, transform_with_a_very_long_id_that_result_in_long_url_for_sure_34, transform_with_a_very_long_id_that_result_in_long_url_for_sure_35, transform_with_a_very_long_id_that_result_in_long_url_for_sure_36, transform_with_a_very_long_id_that_result_in_long_url_for_sure_37, transform_with_a_very_long_id_that_result_in_long_url_for_sure_38, transform_with_a_very_long_id_that_result_in_long_url_for_sure_39, transform_with_a_very_long_id_that_result_in_long_url_for_sure_40, transform_with_a_very_long_id_that_result_in_long_url_for_sure_41, transform_with_a_very_long_id_that_result_in_long_url_for_sure_42, transform_with_a_very_long_id_that_result_in_long_url_for_sure_43, transform_with_a_very_long_id_that_result_in_long_url_for_sure_44, transform_with_a_very_long_id_that_result_in_long_url_for_sure_45, transform_with_a_very_long_id_that_result_in_long_url_for_sure_46, transform_with_a_very_long_id_that_result_in_long_url_for_sure_47, transform_with_a_very_long_id_that_result_in_long_url_for_sure_48, transform_with_a_very_long_id_that_result_in_long_url_for_sure_49, transform_with_a_very_long_id_that_result_in_long_url_for_sure_50, transform_with_a_very_long_id_that_result_in_long_url_for_sure_51, transform_with_a_very_long_id_that_result_in_long_url_for_sure_52, transform_with_a_very_long_id_that_result_in_long_url_for_sure_53, transform_with_a_very_long_id_that_result_in_long_url_for_sure_54, transform_with_a_very_long_id_that_result_in_long_url_for_sure_55, transform_with_a_very_long_id_that_result_in_long_url_for_sure_56, transform_with_a_very_long_id_that_result_in_long_url_for_sure_57, transform_with_a_very_long_id_that_result_in_long_url_for_sure_58, transform_with_a_very_long_id_that_result_in_long_url_for_sure_59.'
     );
   });
 

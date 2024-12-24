@@ -44,6 +44,8 @@ type TransformWithAlertingRules = Transform & { alerting_rules: TransformHealthA
 
 const maxPathComponentLength = 2000;
 
+const TRANSFORM_PAGE_SIZE = 1000;
+
 export function transformHealthServiceProvider({
   esClient,
   rulesClient,
@@ -100,6 +102,7 @@ export function transformHealthServiceProvider({
             transform_id: transformIdsString,
             // @ts-expect-error `basic` query option not yet in @elastic/elasticsearch
             basic: true,
+            size: transformIds.size,
           })
         ).transforms as TransformStats[];
       } else {
@@ -110,6 +113,7 @@ export function transformHealthServiceProvider({
               // @ts-expect-error `basic` query option not yet in @elastic/elasticsearch
               basic: true,
               transform_id: '_all',
+              size: TRANSFORM_PAGE_SIZE,
             })
           ).transforms as TransformStats[]
         ).filter((t) => transformIds.has(t.id));
@@ -263,7 +267,7 @@ export function transformHealthServiceProvider({
         await esClient.transform.getTransform({
           ...(includeAll ? {} : { transform_id: params.includeTransforms.join(',') }),
           allow_no_match: true,
-          size: 1000,
+          size: TRANSFORM_PAGE_SIZE,
         })
       ).transforms as Transform[];
 
@@ -299,13 +303,13 @@ export function transformHealthServiceProvider({
                   'xpack.transform.alertTypes.transformHealth.notStartedRecoveryMessage',
                   {
                     defaultMessage:
-                      '{count, plural, one {Transform} other {Transform}} {transformsString} {count, plural, one {is} other {are}} started.',
+                      '{count, plural, one {# transform is} other {# transforms are}} started: {transformsString}.',
                     values: { count, transformsString },
                   }
                 )
               : i18n.translate('xpack.transform.alertTypes.transformHealth.notStartedMessage', {
                   defaultMessage:
-                    '{count, plural, one {Transform} other {Transform}} {transformsString} {count, plural, one {is} other {are}} not started.',
+                    '{count, plural, one {# transform is} other {# transforms are}} not started: {transformsString}.',
                   values: { count, transformsString },
                 }),
           },
@@ -357,13 +361,13 @@ export function transformHealthServiceProvider({
                   'xpack.transform.alertTypes.transformHealth.healthCheckRecoveryMessage',
                   {
                     defaultMessage:
-                      '{count, plural, one {Transform} other {Transforms}} {transformsString} {count, plural, one {is} other {are}} healthy.',
+                      '{count, plural, one {# transform is} other {# transforms are}} healthy: {transformsString}.',
                     values: { count, transformsString },
                   }
                 )
               : i18n.translate('xpack.transform.alertTypes.transformHealth.healthCheckMessage', {
                   defaultMessage:
-                    '{count, plural, one {Transform} other {Transforms}} {transformsString} {count, plural, one {is} other {are}} unhealthy.',
+                    '{count, plural, one {# transform is} other {# transforms are}} unhealthy: {transformsString}.',
                   values: { count, transformsString },
                 }),
           },
