@@ -5744,13 +5744,7 @@
             "label": "history",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-application-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreApplicationBrowserPluginApi",
-                "section": "def-public.ScopedHistory",
-                "text": "ScopedHistory"
-              },
+              "ScopedHistory",
               "<unknown>"
             ],
             "path": "x-pack/plugins/triggers_actions_ui/public/application/rules_app.tsx",
@@ -6493,7 +6487,7 @@
         "signature": [
           "\"observability\" | \"stackAlerts\" | \"alerts\" | \"logs\" | \"infrastructure\""
         ],
-        "path": "packages/kbn-rule-data-utils/src/rule_types/index.ts",
+        "path": "src/platform/packages/shared/kbn-rule-data-utils/src/rule_types/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

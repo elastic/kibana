@@ -18,8 +18,8 @@ import moment from 'moment';
 import { Moment } from 'moment-timezone';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
-import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { EuiThemeProvider } from '@elastic/eui';
 import { MockApmPluginContextWrapper } from '../context/apm_plugin/mock_apm_plugin_context';
 import { UrlParamsProvider } from '../context/url_params_context/url_params_context';
 
@@ -112,17 +112,13 @@ export function expectTextsInDocument(output: any, texts: string[]) {
   });
 }
 
-export function renderWithTheme(
-  component: React.ReactNode,
-  params?: any,
-  { darkMode = false } = {}
-) {
-  return render(<EuiThemeProvider darkMode={darkMode}>{component}</EuiThemeProvider>, params);
+export function renderWithTheme(component: React.ReactNode, params?: any) {
+  return render(<EuiThemeProvider>{component}</EuiThemeProvider>, params);
 }
 
-export function mountWithTheme(tree: React.ReactElement<any>, { darkMode = false } = {}) {
+export function mountWithTheme(tree: React.ReactElement<any>) {
   function WrappingThemeProvider(props: any) {
-    return <EuiThemeProvider darkMode={darkMode}>{props.children}</EuiThemeProvider>;
+    return <EuiThemeProvider>{props.children}</EuiThemeProvider>;
   }
 
   return mount(tree, {

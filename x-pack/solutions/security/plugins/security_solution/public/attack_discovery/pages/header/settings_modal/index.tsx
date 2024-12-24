@@ -28,7 +28,7 @@ import useLocalStorage from 'react-use/lib/useLocalStorage';
 
 import { AlertsSettings } from './alerts_settings';
 import { useSpaceId } from '../../../../common/hooks/use_space_id';
-import { Footer } from './footer';
+import { Footer } from '../../settings_flyout/footer';
 import { getIsTourEnabled } from './is_tour_enabled';
 import * as i18n from './translations';
 

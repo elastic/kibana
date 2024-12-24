@@ -11,6 +11,7 @@ export enum SecurityPageName {
   administration = 'administration',
   alerts = 'alerts',
   assets = 'assets',
+  assetInventory = 'asset_inventory',
   attackDiscovery = 'attack_discovery',
   blocklist = 'blocklist',
   /*

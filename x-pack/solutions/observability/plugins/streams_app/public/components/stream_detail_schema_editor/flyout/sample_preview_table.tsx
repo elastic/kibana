@@ -7,11 +7,10 @@
 
 import React, { useMemo } from 'react';
 import { StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
-import { ReadStreamDefinition } from '@kbn/streams-plugin/common';
-import { FieldDefinition } from '@kbn/streams-plugin/common/types';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { EuiCallOut } from '@elastic/eui';
+import { FieldDefinitionConfigWithName, ReadStreamDefinition } from '@kbn/streams-schema';
 import { getFormattedError } from '../../../util/errors';
 import { useStreamsAppFetch } from '../../../hooks/use_streams_app_fetch';
 import { PreviewTable } from '../../preview_table';
@@ -20,7 +19,7 @@ import { LoadingPanel } from '../../loading_panel';
 
 interface SamplePreviewTableProps {
   definition: ReadStreamDefinition;
-  nextFieldDefinition?: Partial<FieldDefinition>;
+  nextFieldDefinition?: Partial<FieldDefinitionConfigWithName>;
   streamsRepositoryClient: StreamsRepositoryClient;
 }
 
@@ -39,14 +38,14 @@ const SamplePreviewTableContent = ({
   definition,
   nextFieldDefinition,
   streamsRepositoryClient,
-}: SamplePreviewTableProps & { nextFieldDefinition: FieldDefinition }) => {
+}: SamplePreviewTableProps & { nextFieldDefinition: FieldDefinitionConfigWithName }) => {
   const { value, loading, error } = useStreamsAppFetch(
     ({ signal }) => {
       return streamsRepositoryClient.fetch('POST /api/streams/{id}/schema/fields_simulation', {
         signal,
         params: {
           path: {
-            id: definition.id,
+            id: definition.name,
           },
           body: {
             field_definitions: [nextFieldDefinition],
@@ -54,7 +53,7 @@ const SamplePreviewTableContent = ({
         },
       });
     },
-    [definition.id, nextFieldDefinition, streamsRepositoryClient],
+    [definition.name, nextFieldDefinition, streamsRepositoryClient],
     {
       disableToastOnError: true,
     }

@@ -110,7 +110,7 @@ If you created the panel from the *Visualize Library*:
 
 To add unsaved dashboard panels to the *Visualize Library*:
 
-. Open the panel menu, then select *More > Save to library*.
+. Open the panel menu and select *Save to library*.
 
 . Enter the panel title, then click *Save*.
 
@@ -155,7 +155,7 @@ There are three types of *Discover* interactions you can add to dashboard panels
 +
 To enable panel interactions, configure <<settings-explore-data-in-context,`xpack.discoverEnhanced.actions.exploreDataInContextMenu.enabled`>> in kibana.yml. If you are using 7.13.0 and earlier, panel interactions are enabled by default.
 +
-To use panel interactions, open the panel menu, then click *Explore underlying data*.
+To use panel interactions, open the panel menu and click *Explore underlying data*.
 
 * *Series data interactions* &mdash; Opens the series data in *Discover*.
 +
@@ -165,7 +165,7 @@ To use series data interactions, click a data series in the panel.
 
 * *Discover session interactions* &mdash; Opens <<save-your-search,saved Discover session>> data in *Discover*.
 +
-To use saved Discover session interactions, open the panel menu, then click *More > View Discover session*.
+To use saved Discover session interactions, open the panel menu and click *View Discover session*.
 
 [[edit-panels]]
 === Edit panels
@@ -178,15 +178,13 @@ To make changes to the panel, use the panel menu options.
 
 * *Edit visualization* &mdash; Opens the editor so you can make changes to the panel. 
 +
-To make changes without changing the original version, open the panel menu, then click *More > Unlink from library*.
+To make changes without changing the original version, open the panel menu and click *Unlink from library*.
 
 * *Convert to Lens* &mdash; Opens *TSVB* and aggregation-based visualizations in *Lens*.
 
 * *Settings* &mdash; Opens the *Settings* window to change the *title*, *description*, and *time range*.
 
-* *More > Replace panel* &mdash; Opens the *Visualize Library* so you can select a new panel to replace the existing panel.
-
-* *More > Delete from dashboard* &mdash; Removes the panel from the dashboard. 
+* *Remove* &mdash; Removes the panel from the dashboard. 
 +
 If you want to use the panel later, make sure that you save the panel to the *Visualize Library*.  
 

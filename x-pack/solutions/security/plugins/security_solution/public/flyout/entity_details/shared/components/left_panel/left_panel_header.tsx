@@ -31,6 +31,11 @@ export enum CspInsightLeftPanelSubTab {
   ALERTS = 'alertsTabId',
 }
 
+export interface EntityDetailsPath {
+  tab: EntityDetailsLeftPanelTab;
+  subTab?: CspInsightLeftPanelSubTab;
+}
+
 export interface PanelHeaderProps {
   /**
    * Id of the tab selected in the parent component to display its content

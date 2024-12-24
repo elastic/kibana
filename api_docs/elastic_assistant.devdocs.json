@@ -1713,13 +1713,7 @@
             "label": "telemetry",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-analytics-server",
-                "scope": "server",
-                "docId": "kibKbnCoreAnalyticsServerPluginApi",
-                "section": "def-server.AnalyticsServiceSetup",
-                "text": "AnalyticsServiceSetup"
-              },
+              "AnalyticsServiceSetup",
               " | undefined"
             ],
             "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",

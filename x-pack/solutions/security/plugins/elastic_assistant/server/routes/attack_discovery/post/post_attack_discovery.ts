@@ -91,10 +91,13 @@ export const postAttackDiscoveryRoute = (
           const {
             apiConfig,
             anonymizationFields,
+            end,
+            filter,
             langSmithApiKey,
             langSmithProject,
             replacements,
             size,
+            start,
           } = request.body;
 
           if (
@@ -133,13 +136,16 @@ export const postAttackDiscoveryRoute = (
             anonymizationFields,
             apiConfig,
             connectorTimeout: CONNECTOR_TIMEOUT,
+            end,
             esClient,
+            filter,
             langSmithProject,
             langSmithApiKey,
             latestReplacements,
             logger,
             onNewReplacements,
             size,
+            start,
           })
             .then(({ anonymizedAlerts, attackDiscoveries }) =>
               updateAttackDiscoveries({

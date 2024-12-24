@@ -8,7 +8,7 @@
 import type { FC } from 'react';
 import { useMemo } from 'react';
 import React, { useState } from 'react';
-import { EuiPopover, EuiButtonEmpty, EuiPanel } from '@elastic/eui';
+import { EuiPopover, EuiPanel, EuiButton } from '@elastic/eui';
 
 import useObservable from 'react-use/lib/useObservable';
 import type { RandomSampler } from './random_sampler';
@@ -34,14 +34,16 @@ export const SamplingMenu: FC<Props> = ({ randomSampler, reload }) => {
       data-test-subj="aiopsRandomSamplerOptionsPopover"
       id="aiopsSamplingOptions"
       button={
-        <EuiButtonEmpty
+        <EuiButton
           data-test-subj="aiopsLogPatternAnalysisShowSamplingOptionsButton"
           onClick={() => setShowSamplingOptionsPopover(!showSamplingOptionsPopover)}
+          color="text"
           iconSide="right"
-          iconType="arrowDown"
+          isSelected={showSamplingOptionsPopover}
+          iconType={showSamplingOptionsPopover ? 'arrowUp' : 'arrowDown'}
         >
           {buttonText}
-        </EuiButtonEmpty>
+        </EuiButton>
       }
       isOpen={showSamplingOptionsPopover}
       closePopover={() => setShowSamplingOptionsPopover(false)}

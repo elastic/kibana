@@ -146,7 +146,9 @@
                 "section": "def-common.AuthenticatedUser",
                 "text": "AuthenticatedUser"
               },
-              ", \"roles\"> & { roles: string[]; }>) => { username: string; enabled: boolean; metadata: { _reserved: boolean; _deprecated?: boolean | undefined; _deprecated_reason?: string | undefined; }; email: string; operator?: boolean | undefined; full_name: string; profile_uid: string; authentication_provider: ",
+              ", \"roles\"> & { roles: string[]; }>) => { username: string; enabled: boolean; metadata: { _reserved: boolean; _deprecated?: boolean | undefined; _deprecated_reason?: string | undefined; }; email: string; operator?: boolean | undefined; full_name: string; profile_uid: string; api_key?: ",
+              "ApiKeyDescriptor",
+              " | undefined; authentication_provider: ",
               {
                 "pluginId": "@kbn/core-security-common",
                 "scope": "common",

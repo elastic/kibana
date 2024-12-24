@@ -112,5 +112,42 @@ describe('Other (OpenAI Compatible Service) Utils', () => {
       const sanitizedBodyString = getRequestWithStreamOption(bodyString, false);
       expect(sanitizedBodyString).toEqual(bodyString);
     });
+
+    it('sets model parameter if specified and not present in the body', () => {
+      const body = {
+        messages: [
+          {
+            role: 'user',
+            content: 'This is a test',
+          },
+        ],
+      };
+
+      const sanitizedBodyString = getRequestWithStreamOption(JSON.stringify(body), true, 'llama-3');
+      expect(JSON.parse(sanitizedBodyString)).toEqual({
+        messages: [{ content: 'This is a test', role: 'user' }],
+        model: 'llama-3',
+        stream: true,
+      });
+    });
+
+    it('does not overrides model parameter if present in the body', () => {
+      const body = {
+        model: 'mistral',
+        messages: [
+          {
+            role: 'user',
+            content: 'This is a test',
+          },
+        ],
+      };
+
+      const sanitizedBodyString = getRequestWithStreamOption(JSON.stringify(body), true, 'llama-3');
+      expect(JSON.parse(sanitizedBodyString)).toEqual({
+        messages: [{ content: 'This is a test', role: 'user' }],
+        model: 'mistral',
+        stream: true,
+      });
+    });
   });
 });

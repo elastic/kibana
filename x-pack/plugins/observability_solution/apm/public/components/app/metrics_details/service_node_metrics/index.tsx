@@ -20,7 +20,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import styled from '@emotion/styled';
 import React from 'react';
 import { ApmDocumentType } from '../../../../../common/document_type';
 import { getServiceNodeName, SERVICE_NODE_NAME_MISSING } from '../../../../../common/service_nodes';
@@ -42,7 +42,7 @@ const INITIAL_DATA = {
   containerId: '',
 };
 
-const Truncate = euiStyled.span`
+const Truncate = styled.span`
   display: block;
   ${truncate(unit * 12)}
 `;

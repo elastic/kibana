@@ -840,13 +840,7 @@
             "label": "application",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-application-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreApplicationBrowserPluginApi",
-                "section": "def-public.ApplicationStart",
-                "text": "ApplicationStart"
-              }
+              "ApplicationStart"
             ],
             "path": "src/plugins/discover/public/build_services.ts",
             "deprecated": false,
@@ -1090,13 +1084,7 @@
             "description": [],
             "signature": [
               "<T>() => ",
-              {
-                "pluginId": "@kbn/core-application-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreApplicationBrowserPluginApi",
-                "section": "def-public.ScopedHistory",
-                "text": "ScopedHistory"
-              },
+              "ScopedHistory",
               "<T | undefined> | undefined"
             ],
             "path": "src/plugins/discover/public/build_services.ts",
@@ -1145,7 +1133,7 @@
                   },
                   "<HTMLElement> | undefined"
                 ],
-                "path": "packages/core/application/core-application-browser/src/app_mount.ts",
+                "path": "src/core/packages/application/browser/src/app_mount.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -3384,13 +3372,7 @@
             "text": "DiscoverServices"
           },
           ">; scopedHistory: ",
-          {
-            "pluginId": "@kbn/core-application-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreApplicationBrowserPluginApi",
-            "section": "def-public.ScopedHistory",
-            "text": "ScopedHistory"
-          },
+          "ScopedHistory",
           "<unknown>; customizationCallbacks: ",
           {
             "pluginId": "discover",

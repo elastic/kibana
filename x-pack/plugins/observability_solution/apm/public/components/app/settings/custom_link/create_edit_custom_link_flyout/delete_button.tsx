@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import { EuiButtonEmpty } from '@elastic/eui';
+import { EuiButtonEmpty, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { NotificationsStart } from '@kbn/core/public';
 import React, { useState } from 'react';
 import { callApmApi } from '../../../../../services/rest/create_call_apm_api';
 import { useApmPluginContext } from '../../../../../context/apm_plugin/use_apm_plugin_context';
-import { useTheme } from '../../../../../hooks/use_theme';
 
 interface Props {
   onDelete: () => void;
@@ -21,7 +20,7 @@ interface Props {
 export function DeleteButton({ onDelete, customLinkId }: Props) {
   const [isDeleting, setIsDeleting] = useState(false);
   const { toasts } = useApmPluginContext().core.notifications;
-  const theme = useTheme();
+  const { euiTheme } = useEuiTheme();
 
   return (
     <EuiButtonEmpty
@@ -35,7 +34,7 @@ export function DeleteButton({ onDelete, customLinkId }: Props) {
         setIsDeleting(false);
         onDelete();
       }}
-      style={{ marginRight: theme.eui.euiSize }}
+      style={{ marginRight: euiTheme.size.base }}
     >
       {i18n.translate('xpack.apm.settings.customLink.delete', {
         defaultMessage: 'Delete',

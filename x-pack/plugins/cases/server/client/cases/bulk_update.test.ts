@@ -794,6 +794,7 @@ describe('update', () => {
             "duration": null,
             "external_service": null,
             "id": "mock-id-1",
+            "observables": Array [],
             "owner": "securitySolution",
             "settings": Object {
               "syncAlerts": true,
@@ -837,6 +838,7 @@ describe('update', () => {
             "duration": null,
             "external_service": null,
             "id": "mock-id-2",
+            "observables": Array [],
             "owner": "securitySolution",
             "settings": Object {
               "syncAlerts": true,

@@ -6,9 +6,8 @@
  */
 import { MetricDatum, MetricTrendShape } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLoadingSpinner, useEuiTheme } from '@elastic/eui';
 import React, { useCallback } from 'react';
-import { useTheme } from '@kbn/observability-shared-plugin/public';
 import { NOT_AVAILABLE_LABEL } from '../../../../../../common/i18n';
 import { useAnyOfApmParams } from '../../../../../hooks/use_apm_params';
 import { FETCH_STATUS, isPending, useFetcher } from '../../../../../hooks/use_fetcher';
@@ -20,7 +19,7 @@ const valueFormatter = (value: number, suffix = '') => {
 };
 
 export function MobileStats({ start, end, kuery }: { start: string; end: string; kuery: string }) {
-  const euiTheme = useTheme();
+  const { euiTheme } = useEuiTheme();
 
   const {
     path: { serviceName },
@@ -77,7 +76,7 @@ export function MobileStats({ start, end, kuery }: { start: string; end: string;
 
   const metrics: MetricDatum[] = [
     {
-      color: euiTheme.eui.euiColorLightestShade,
+      color: euiTheme.colors.lightestShade,
       title: i18n.translate('xpack.apm.mobile.metrics.crash.rate', {
         defaultMessage: 'Crash rate',
       }),
@@ -92,7 +91,7 @@ export function MobileStats({ start, end, kuery }: { start: string; end: string;
       trendShape: MetricTrendShape.Area,
     },
     {
-      color: euiTheme.eui.euiColorLightestShade,
+      color: euiTheme.colors.lightestShade,
       title: i18n.translate('xpack.apm.mobile.metrics.load.time', {
         defaultMessage: 'Average app load time',
       }),
@@ -105,7 +104,7 @@ export function MobileStats({ start, end, kuery }: { start: string; end: string;
       trendShape: MetricTrendShape.Area,
     },
     {
-      color: euiTheme.eui.euiColorLightestShade,
+      color: euiTheme.colors.lightestShade,
       title: i18n.translate('xpack.apm.mobile.metrics.sessions', {
         defaultMessage: 'Sessions',
       }),
@@ -118,7 +117,7 @@ export function MobileStats({ start, end, kuery }: { start: string; end: string;
       trendShape: MetricTrendShape.Area,
     },
     {
-      color: euiTheme.eui.euiColorLightestShade,
+      color: euiTheme.colors.lightestShade,
       title: i18n.translate('xpack.apm.mobile.metrics.http.requests', {
         defaultMessage: 'HTTP requests',
       }),

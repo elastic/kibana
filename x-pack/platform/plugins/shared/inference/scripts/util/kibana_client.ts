@@ -25,9 +25,9 @@ import {
   withoutOutputUpdateEvents,
   type ToolOptions,
   ChatCompleteOptions,
+  type InferenceConnector,
 } from '@kbn/inference-common';
 import type { ChatCompleteRequestBody } from '../../common/http_apis';
-import type { InferenceConnector } from '../../common/connectors';
 import { createOutputApi } from '../../common/output/create_output_api';
 import { eventSourceStreamIntoObservable } from '../../server/util/event_source_stream_into_observable';
 

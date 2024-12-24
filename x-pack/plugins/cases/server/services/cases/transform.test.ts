@@ -582,5 +582,49 @@ describe('case transforms', () => {
         transformSavedObjectToExternalModel(CaseSOResponseWithoutCategory).attributes.category
       ).toBe('foobar');
     });
+
+    it('returns observables array when it is defined', () => {
+      const CaseSOResponseWithObservables = createCaseSavedObjectResponse({
+        overrides: {
+          observables: [
+            {
+              id: '27318f00-334b-44b1-b29c-0cfaefbeeb8a',
+              value: 'test',
+              typeKey: 'c661b01e-24f5-44aa-a172-d5d219cd1bd4',
+              createdAt: '2024-11-07',
+              updatedAt: '2024-11-07',
+              description: '',
+            },
+          ],
+        },
+      });
+
+      expect(
+        transformSavedObjectToExternalModel(CaseSOResponseWithObservables).attributes.observables
+      ).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "createdAt": "2024-11-07",
+            "description": "",
+            "id": "27318f00-334b-44b1-b29c-0cfaefbeeb8a",
+            "typeKey": "c661b01e-24f5-44aa-a172-d5d219cd1bd4",
+            "updatedAt": "2024-11-07",
+            "value": "test",
+          },
+        ]
+      `);
+    });
+
+    it('returns observables array when it is not defined', () => {
+      const CaseSOResponseWithObservables = createCaseSavedObjectResponse({
+        overrides: {
+          observables: undefined,
+        },
+      });
+
+      expect(
+        transformSavedObjectToExternalModel(CaseSOResponseWithObservables).attributes.observables
+      ).toMatchInlineSnapshot(`Array []`);
+    });
   });
 });

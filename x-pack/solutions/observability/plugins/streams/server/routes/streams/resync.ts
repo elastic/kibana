@@ -22,20 +22,15 @@ export const resyncStreamsRoute = createServerRoute({
     },
   },
   params: z.object({}),
-  handler: async ({
-    response,
-    logger,
-    request,
-    getScopedClients,
-  }): Promise<{ acknowledged: true }> => {
+  handler: async ({ logger, request, getScopedClients }): Promise<{ acknowledged: true }> => {
     const { scopedClusterClient } = await getScopedClients({ request });
 
-    const { definitions: streams } = await listStreams({ scopedClusterClient });
+    const { streams } = await listStreams({ scopedClusterClient });
 
     for (const stream of streams) {
-      const { definition } = await readStream({
+      const definition = await readStream({
         scopedClusterClient,
-        id: stream.id,
+        id: stream.name,
       });
 
       await syncStream({

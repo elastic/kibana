@@ -32,7 +32,7 @@
         "signature": [
           "\"link\""
         ],
-        "path": "src/plugins/links/common/constants.ts",
+        "path": "src/platform/plugins/private/links/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -44,7 +44,7 @@
         "tags": [],
         "label": "APP_NAME",
         "description": [],
-        "path": "src/plugins/links/common/constants.ts",
+        "path": "src/platform/plugins/private/links/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -59,7 +59,7 @@
         "signature": [
           "\"links\""
         ],
-        "path": "src/plugins/links/common/constants.ts",
+        "path": "src/platform/plugins/private/links/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -71,7 +71,7 @@
         "tags": [],
         "label": "DISPLAY_NAME",
         "description": [],
-        "path": "src/plugins/links/common/constants.ts",
+        "path": "src/platform/plugins/private/links/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -86,7 +86,7 @@
         "signature": [
           "1"
         ],
-        "path": "src/plugins/links/common/constants.ts",
+        "path": "src/platform/plugins/private/links/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
