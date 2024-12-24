@@ -11,6 +11,7 @@ import { ANALYTICS_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { SavedObjectsType } from '@kbn/core/server';
 import { MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
 import { getAllMigrations } from './search_migrations';
+import { SavedSearchTypeDisplayName } from '../../common/constants';
 import {
   SCHEMA_SEARCH_V8_8_0,
   SCHEMA_SEARCH_MODEL_VERSION_1,
@@ -32,6 +33,7 @@ export function getSavedSearchObjectType(
     management: {
       icon: 'discoverApp',
       defaultSearchField: 'title',
+      displayName: SavedSearchTypeDisplayName,
       importableAndExportable: true,
       getTitle(obj) {
         return obj.attributes.title;

@@ -5,10 +5,21 @@
  * 2.0.
  */
 
-import { EuiFlyout } from '@elastic/eui';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import React from 'react';
+import { EuiFlyout, EuiFlyoutProps } from '@elastic/eui';
+import styled, { type StyledComponent } from '@emotion/styled';
 
-export const ResponsiveFlyout = euiStyled(EuiFlyout)`
+// The return type of this component needs to be specified because the inferred
+// return type depends on types that are not exported from EUI. You get a TS4023
+// error if the return type is not specified.
+export const ResponsiveFlyout: StyledComponent<EuiFlyoutProps> = styled(
+  ({
+    className,
+    ...flyoutProps
+  }: {
+    className?: string;
+  } & EuiFlyoutProps) => <EuiFlyout {...flyoutProps} className={className} />
+)`
   width: 100%;
 
   @media (min-width: 800px) {

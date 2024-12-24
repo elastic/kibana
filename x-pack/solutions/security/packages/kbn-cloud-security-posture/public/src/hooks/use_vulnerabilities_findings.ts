@@ -13,7 +13,7 @@ import {
   SearchResponse,
   AggregationsMultiBucketAggregateBase,
   AggregationsStringRareTermsBucketKeys,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+} from '@elastic/elasticsearch/lib/api/types';
 import type {
   CspVulnerabilityFinding,
   Vulnerability,
@@ -73,7 +73,7 @@ export const useVulnerabilitiesFindings = (options: UseCspOptions) => {
         rawResponse: { aggregations, hits },
       } = await lastValueFrom(
         data.search.search<LatestFindingsRequest, LatestFindingsResponse>({
-          params: getVulnerabilitiesQuery(options, pageParam),
+          params: getVulnerabilitiesQuery(options, pageParam) as LatestFindingsRequest['params'],
         })
       );
 

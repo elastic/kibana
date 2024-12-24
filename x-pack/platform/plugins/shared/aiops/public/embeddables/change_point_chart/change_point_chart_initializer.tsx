@@ -211,7 +211,7 @@ export const FormControls: FC<{
   onChange: (update: FormControlsProps) => void;
   onValidationChange: (isValid: boolean) => void;
 }> = ({ formInput, onChange, onValidationChange }) => {
-  const { charts, data, fieldFormats, theme, uiSettings } = useAiopsAppContext();
+  const { charts, data, fieldFormats, uiSettings } = useAiopsAppContext();
   const { dataView } = useDataSource();
   const { combinedQuery } = useChangePointDetectionContext();
   const { metricFieldOptions, splitFieldsOptions } = useChangePointDetectionControlsContext();
@@ -290,7 +290,6 @@ export const FormControls: FC<{
             }
           : undefined
       }
-      theme={theme}
     >
       <EuiFormRow
         fullWidth
