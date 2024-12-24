@@ -2670,6 +2670,66 @@
             "path": "src/core/server/index.ts"
           },
           {
+            "plugin": "actions",
+            "path": "x-pack/plugins/actions/server/application/connector/methods/update/types/types.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/plugins/actions/server/application/connector/methods/update/types/types.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/plugins/actions/server/application/connector/methods/update/types/types.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/plugins/actions/server/application/connector/methods/update/update.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/plugins/actions/server/application/connector/methods/update/update.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/plugins/actions/server/application/connector/methods/update/update.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/plugins/actions/server/application/connector/methods/create/types/types.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/plugins/actions/server/application/connector/methods/create/types/types.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/plugins/actions/server/application/connector/methods/create/types/types.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/plugins/actions/server/application/connector/methods/create/create.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/plugins/actions/server/application/connector/methods/create/create.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/plugins/actions/server/application/connector/methods/create/create.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/plugins/actions/server/types.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/plugins/actions/server/types.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/plugins/actions/server/types.ts"
+          },
+          {
             "plugin": "@kbn/alerting-types",
             "path": "packages/kbn-alerting-types/rule_types.ts"
           },
@@ -2730,64 +2790,12 @@
             "path": "x-pack/plugins/alerting/common/rule.ts"
           },
           {
-            "plugin": "actions",
-            "path": "x-pack/plugins/actions/server/application/connector/methods/create/types/types.ts"
+            "plugin": "alerting",
+            "path": "x-pack/plugins/alerting/server/saved_objects/geo_containment/migrations.ts"
           },
           {
-            "plugin": "actions",
-            "path": "x-pack/plugins/actions/server/application/connector/methods/create/types/types.ts"
-          },
-          {
-            "plugin": "actions",
-            "path": "x-pack/plugins/actions/server/application/connector/methods/create/types/types.ts"
-          },
-          {
-            "plugin": "actions",
-            "path": "x-pack/plugins/actions/server/types.ts"
-          },
-          {
-            "plugin": "actions",
-            "path": "x-pack/plugins/actions/server/types.ts"
-          },
-          {
-            "plugin": "actions",
-            "path": "x-pack/plugins/actions/server/types.ts"
-          },
-          {
-            "plugin": "actions",
-            "path": "x-pack/plugins/actions/server/application/connector/methods/update/types/types.ts"
-          },
-          {
-            "plugin": "actions",
-            "path": "x-pack/plugins/actions/server/application/connector/methods/update/types/types.ts"
-          },
-          {
-            "plugin": "actions",
-            "path": "x-pack/plugins/actions/server/application/connector/methods/update/types/types.ts"
-          },
-          {
-            "plugin": "actions",
-            "path": "x-pack/plugins/actions/server/application/connector/methods/update/update.ts"
-          },
-          {
-            "plugin": "actions",
-            "path": "x-pack/plugins/actions/server/application/connector/methods/update/update.ts"
-          },
-          {
-            "plugin": "actions",
-            "path": "x-pack/plugins/actions/server/application/connector/methods/update/update.ts"
-          },
-          {
-            "plugin": "actions",
-            "path": "x-pack/plugins/actions/server/application/connector/methods/create/create.ts"
-          },
-          {
-            "plugin": "actions",
-            "path": "x-pack/plugins/actions/server/application/connector/methods/create/create.ts"
-          },
-          {
-            "plugin": "actions",
-            "path": "x-pack/plugins/actions/server/application/connector/methods/create/create.ts"
+            "plugin": "alerting",
+            "path": "x-pack/plugins/alerting/server/saved_objects/geo_containment/migrations.ts"
           },
           {
             "plugin": "alerting",
@@ -2806,12 +2814,16 @@
             "path": "x-pack/plugins/alerting/server/types.ts"
           },
           {
-            "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/server/saved_objects/geo_containment/migrations.ts"
+            "plugin": "enterpriseSearch",
+            "path": "x-pack/plugins/enterprise_search/server/collectors/lib/telemetry.ts"
           },
           {
-            "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/server/saved_objects/geo_containment/migrations.ts"
+            "plugin": "enterpriseSearch",
+            "path": "x-pack/plugins/enterprise_search/server/collectors/lib/telemetry.ts"
+          },
+          {
+            "plugin": "enterpriseSearch",
+            "path": "x-pack/plugins/enterprise_search/server/collectors/lib/telemetry.ts"
           },
           {
             "plugin": "savedSearch",
@@ -2822,42 +2834,6 @@
             "path": "src/plugins/saved_search/server/saved_objects/search_migrations.ts"
           },
           {
-            "plugin": "canvas",
-            "path": "x-pack/plugins/canvas/server/routes/custom_elements/find.ts"
-          },
-          {
-            "plugin": "canvas",
-            "path": "x-pack/plugins/canvas/server/routes/custom_elements/find.ts"
-          },
-          {
-            "plugin": "canvas",
-            "path": "x-pack/plugins/canvas/server/routes/workpad/find.ts"
-          },
-          {
-            "plugin": "canvas",
-            "path": "x-pack/plugins/canvas/server/routes/workpad/find.ts"
-          },
-          {
-            "plugin": "canvas",
-            "path": "x-pack/plugins/canvas/server/routes/workpad/has_workpads.ts"
-          },
-          {
-            "plugin": "canvas",
-            "path": "x-pack/plugins/canvas/server/routes/workpad/has_workpads.ts"
-          },
-          {
-            "plugin": "enterpriseSearch",
-            "path": "x-pack/plugins/enterprise_search/server/collectors/lib/telemetry.ts"
-          },
-          {
-            "plugin": "enterpriseSearch",
-            "path": "x-pack/plugins/enterprise_search/server/collectors/lib/telemetry.ts"
-          },
-          {
-            "plugin": "enterpriseSearch",
-            "path": "x-pack/plugins/enterprise_search/server/collectors/lib/telemetry.ts"
-          },
-          {
             "plugin": "taskManager",
             "path": "x-pack/plugins/task_manager/server/task_store.test.ts"
           },
@@ -2868,6 +2844,30 @@
           {
             "plugin": "taskManager",
             "path": "x-pack/plugins/task_manager/server/task_store.test.ts"
+          },
+          {
+            "plugin": "canvas",
+            "path": "x-pack/platform/plugins/private/canvas/server/routes/custom_elements/find.ts"
+          },
+          {
+            "plugin": "canvas",
+            "path": "x-pack/platform/plugins/private/canvas/server/routes/custom_elements/find.ts"
+          },
+          {
+            "plugin": "canvas",
+            "path": "x-pack/platform/plugins/private/canvas/server/routes/workpad/find.ts"
+          },
+          {
+            "plugin": "canvas",
+            "path": "x-pack/platform/plugins/private/canvas/server/routes/workpad/find.ts"
+          },
+          {
+            "plugin": "canvas",
+            "path": "x-pack/platform/plugins/private/canvas/server/routes/workpad/has_workpads.ts"
+          },
+          {
+            "plugin": "canvas",
+            "path": "x-pack/platform/plugins/private/canvas/server/routes/workpad/has_workpads.ts"
           },
           {
             "plugin": "securitySolution",
@@ -6157,7 +6157,7 @@
               },
               {
                 "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/server/workpad_route_context.ts"
+                "path": "x-pack/platform/plugins/private/canvas/server/workpad_route_context.ts"
               },
               {
                 "plugin": "@kbn/core-saved-objects-api-server-internal",

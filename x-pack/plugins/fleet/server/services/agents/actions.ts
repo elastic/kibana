@@ -81,7 +81,7 @@ export async function createAgentAction(
   await esClient.create({
     index: AGENT_ACTIONS_INDEX,
     id: uuidv4(),
-    body,
+    document: body,
     refresh: 'wait_for',
   });
 
@@ -153,7 +153,7 @@ export async function bulkCreateAgentActions(
 
   await esClient.bulk({
     index: AGENT_ACTIONS_INDEX,
-    body: fleetServerAgentActions,
+    operations: fleetServerAgentActions,
   });
 
   for (const action of actions) {
@@ -231,7 +231,7 @@ export async function bulkCreateAgentActionResults(
 
   await esClient.bulk({
     index: AGENT_ACTIONS_RESULTS_INDEX,
-    body: bulkBody,
+    operations: bulkBody,
     refresh: 'wait_for',
   });
 }

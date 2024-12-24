@@ -772,13 +772,7 @@
         "description": [],
         "signature": [
           "(history: ",
-          {
-            "pluginId": "@kbn/core-application-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreApplicationBrowserPluginApi",
-            "section": "def-public.ScopedHistory",
-            "text": "ScopedHistory"
-          },
+          "ScopedHistory",
           "<unknown> | ",
           "History",
           "<unknown>, to: string | LocationObject, onClickCallback?: Function | undefined) => { href: string; onClick: (event: React.MouseEvent<Element, MouseEvent>) => void; }"
@@ -795,13 +789,7 @@
             "label": "history",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-application-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreApplicationBrowserPluginApi",
-                "section": "def-public.ScopedHistory",
-                "text": "ScopedHistory"
-              },
+              "ScopedHistory",
               "<unknown> | ",
               "History",
               "<unknown>"
@@ -854,13 +842,7 @@
         "description": [],
         "signature": [
           "(history: ",
-          {
-            "pluginId": "@kbn/core-application-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreApplicationBrowserPluginApi",
-            "section": "def-public.ScopedHistory",
-            "text": "ScopedHistory"
-          },
+          "ScopedHistory",
           "<unknown> | ",
           "History",
           "<unknown>, to: string | LocationObject, onClickCallback?: Function | undefined) => (event: React.MouseEvent<Element, MouseEvent>) => void"
@@ -877,13 +859,7 @@
             "label": "history",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-application-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreApplicationBrowserPluginApi",
-                "section": "def-public.ScopedHistory",
-                "text": "ScopedHistory"
-              },
+              "ScopedHistory",
               "<unknown> | ",
               "History",
               "<unknown>"
@@ -2216,13 +2192,7 @@
             "label": "analytics",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-analytics-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreAnalyticsBrowserPluginApi",
-                "section": "def-public.AnalyticsServiceStart",
-                "text": "AnalyticsServiceStart"
-              },
+              "AnalyticsServiceStart",
               " | undefined"
             ],
             "path": "src/plugins/kibana_react/public/util/index.tsx",
@@ -2553,21 +2523,9 @@
         "description": [],
         "signature": [
           "{ analytics?: ",
-          {
-            "pluginId": "@kbn/core-analytics-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreAnalyticsBrowserPluginApi",
-            "section": "def-public.AnalyticsServiceStart",
-            "text": "AnalyticsServiceStart"
-          },
+          "AnalyticsServiceStart",
           " | undefined; application?: ",
-          {
-            "pluginId": "@kbn/core-application-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreApplicationBrowserPluginApi",
-            "section": "def-public.ApplicationStart",
-            "text": "ApplicationStart"
-          },
+          "ApplicationStart",
           " | undefined; chrome?: ",
           {
             "pluginId": "@kbn/core-chrome-browser",

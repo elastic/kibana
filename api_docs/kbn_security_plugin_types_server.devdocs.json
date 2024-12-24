@@ -4899,23 +4899,15 @@
               },
               {
                 "plugin": "entityManager",
+                "path": "x-pack/platform/plugins/shared/entity_manager/server/lib/entities/uninstall_entity_definition.ts"
+              },
+              {
+                "plugin": "entityManager",
                 "path": "x-pack/platform/plugins/shared/entity_manager/server/routes/enablement/enable.ts"
               },
               {
                 "plugin": "entityManager",
                 "path": "x-pack/platform/plugins/shared/entity_manager/server/routes/enablement/disable.ts"
-              },
-              {
-                "plugin": "apm",
-                "path": "x-pack/plugins/observability_solution/apm/server/lib/helpers/get_random_sampler/index.ts"
-              },
-              {
-                "plugin": "apm",
-                "path": "x-pack/plugins/observability_solution/apm/server/routes/agent_keys/get_agent_keys_privileges.ts"
-              },
-              {
-                "plugin": "apm",
-                "path": "x-pack/plugins/observability_solution/apm/server/routes/fleet/is_superuser.ts"
               },
               {
                 "plugin": "fleet",
