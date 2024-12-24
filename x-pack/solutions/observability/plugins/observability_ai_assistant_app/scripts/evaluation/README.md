@@ -41,7 +41,7 @@ E.g.: `node x-pack/solutions/observability/plugins/observability_ai_assistant_ap
 The `--kibana` and `--es` flags override the default credentials. Only basic auth is supported.
 
 ## Other (optional) configuration flags
-- `--connectorId` - Specify a `.gen-ai` or `.bedrock` connector to use. If none are given, it will prompt you to select a connector based on the ones that are available. If only a single supported connector is found, it will be used without prompting.
+- `--connectorId` - Specify a generative AI connector to use. If none are given, it will prompt you to select a connector based on the ones that are available. If only a single supported connector is found, it will be used without prompting.
 - `--evaluateWith`: The connector ID to evaluate with. Leave empty to use the same connector, use "other" to get a selection menu.
 - `--spaceId` - Specify the space ID if you want to use a specific space.
 - `--persist` - By default, completed conversations are not persisted. If you want to persist them, for instance for reviewing purposes, include this flag when running the evaluation script. This will also generate a clickable link in the output of the evaluation that takes you to the conversation in Kibana.

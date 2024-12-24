@@ -23,7 +23,7 @@ async function discoverAuth(parsedTarget: Url, log: ToolingLog) {
       const response = await fetch(url);
       status = response.status;
     } catch (err) {
-      log.error(`${url} resulted in ${err.message}`);
+      log.debug(`${url} resulted in ${err.message}`);
       status = 0;
     }
 
