@@ -22,9 +22,8 @@ export const INSTALL_ALL_MIGRATION_RULES_MUTATION_KEY = [
 export const useInstallTranslatedMigrationRules = (migrationId: string) => {
   const { addError } = useAppToasts();
 
-  const invalidateGetRuleMigrations = useInvalidateGetMigrationRules(migrationId);
-  const invalidateGetMigrationTranslationStats =
-    useInvalidateGetMigrationTranslationStats(migrationId);
+  const invalidateGetRuleMigrations = useInvalidateGetMigrationRules();
+  const invalidateGetMigrationTranslationStats = useInvalidateGetMigrationTranslationStats();
 
   return useMutation<InstallTranslatedMigrationRulesResponse, Error>(
     () => installTranslatedMigrationRules({ migrationId }),
@@ -34,8 +33,8 @@ export const useInstallTranslatedMigrationRules = (migrationId: string) => {
         addError(error, { title: i18n.INSTALL_MIGRATION_RULES_FAILURE });
       },
       onSettled: () => {
-        invalidateGetRuleMigrations();
-        invalidateGetMigrationTranslationStats();
+        invalidateGetRuleMigrations(migrationId);
+        invalidateGetMigrationTranslationStats(migrationId);
       },
     }
   );
