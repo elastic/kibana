@@ -50,7 +50,7 @@ import { DataTableToolbar } from './components/toolbar';
 import {
   DEFAULT_HEADER_ROW_HEIGHT,
   DEFAULT_HEADER_ROW_HEIGHT_LINES,
-  DEFAULT_ROW_HEIGHT,
+  DEFAULT_ROW_HEIGHT_LINES,
 } from './components/constants';
 import {
   defaultPaletteParams,
@@ -639,12 +639,8 @@ export const getDatatableVisualization = ({
       sortingDirection: state.sorting?.direction || 'none',
       fitRowToContent: state.rowHeight === RowHeightMode.auto,
       headerRowHeight: state.headerRowHeight ?? DEFAULT_HEADER_ROW_HEIGHT,
-      rowHeightLines:
-        !state.rowHeight || state.rowHeight === DEFAULT_ROW_HEIGHT ? 1 : state.rowHeightLines ?? 2,
-      headerRowHeightLines:
-        state.headerRowHeight === RowHeightMode.single
-          ? 1
-          : state.headerRowHeightLines ?? DEFAULT_HEADER_ROW_HEIGHT_LINES,
+      rowHeightLines: state.rowHeightLines ?? DEFAULT_ROW_HEIGHT_LINES,
+      headerRowHeightLines: state.headerRowHeightLines ?? DEFAULT_HEADER_ROW_HEIGHT_LINES,
       pageSize: state.paging?.enabled ? state.paging.size : undefined,
     }).toAst();
 
