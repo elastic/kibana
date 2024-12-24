@@ -15,7 +15,16 @@ export function registerCloudBackupStatusRoutes({
 }: RouteDependencies) {
   // GET most recent Cloud snapshot
   router.get(
-    { path: `${API_BASE_PATH}/cloud_backup_status`, validate: false },
+    {
+      path: `${API_BASE_PATH}/cloud_backup_status`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Relies on es client for authorization',
+        },
+      },
+      validate: false,
+    },
     versionCheckHandlerWrapper(async (context, request, response) => {
       const { client: clusterClient } = (await context.core).elasticsearch;
 

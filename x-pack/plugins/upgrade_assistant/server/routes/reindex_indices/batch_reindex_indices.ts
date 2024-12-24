@@ -36,6 +36,12 @@ export function registerBatchReindexIndicesRoutes(
   router.get(
     {
       path: `${BASE_PATH}/batch/queue`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Relies on es client for authorization',
+        },
+      },
       options: {
         access: 'public',
         summary: `Get the batch reindex queue`,
@@ -75,6 +81,12 @@ export function registerBatchReindexIndicesRoutes(
   router.post(
     {
       path: `${BASE_PATH}/batch`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Relies on es client for authorization',
+        },
+      },
       options: {
         access: 'public',
         summary: `Batch start or resume reindex`,

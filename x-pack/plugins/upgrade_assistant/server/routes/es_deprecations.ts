@@ -22,6 +22,12 @@ export function registerESDeprecationRoutes({
   router.get(
     {
       path: `${API_BASE_PATH}/es_deprecations`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Relies on es and saved object clients for authorization',
+        },
+      },
       validate: false,
     },
     versionCheckHandlerWrapper(async ({ core }, request, response) => {
