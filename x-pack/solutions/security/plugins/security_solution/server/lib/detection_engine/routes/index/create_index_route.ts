@@ -6,7 +6,7 @@
  */
 
 import { chunk, get } from 'lodash';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient, IKibanaResponse } from '@kbn/core/server';
 import {
   transformError,
