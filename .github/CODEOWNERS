@@ -848,6 +848,7 @@ x-pack/platform/plugins/private/index_lifecycle_management @elastic/kibana-manag
 x-pack/platform/plugins/private/license_api_guard @elastic/kibana-management
 x-pack/platform/plugins/private/monitoring @elastic/stack-monitoring
 x-pack/platform/plugins/private/monitoring_collection @elastic/stack-monitoring
+x-pack/platform/plugins/private/logstash @elastic/logstash
 x-pack/platform/plugins/private/painless_lab @elastic/kibana-management
 x-pack/platform/plugins/private/remote_clusters @elastic/kibana-management
 x-pack/platform/plugins/private/rollup @elastic/kibana-management
@@ -902,6 +903,8 @@ x-pack/plugins/graph @elastic/kibana-visualizations
 x-pack/plugins/lens @elastic/kibana-visualizations
 x-pack/plugins/licensing @elastic/kibana-core
 x-pack/plugins/logstash @elastic/logstash
+x-pack/plugins/monitoring @elastic/stack-monitoring
+x-pack/plugins/monitoring_collection @elastic/stack-monitoring
 x-pack/plugins/notifications @elastic/appex-sharedux
 x-pack/plugins/observability_solution/apm @elastic/obs-ux-infra_services-team
 x-pack/plugins/observability_solution/apm_data_access @elastic/obs-ux-infra_services-team
@@ -2562,7 +2565,7 @@ x-pack/solutions/security/plugins/security_solution/server/lib/security_integrat
 /x-pack/test/functional/page_objects/logstash_page.ts @elastic/logstash
 /x-pack/test/functional/apps/logstash @elastic/logstash
 /x-pack/test/api_integration/apis/logstash @elastic/logstash
-#CC# /x-pack/plugins/logstash/ @elastic/logstash
+#CC# /x-pack/platform/plugins/private/logstash/ @elastic/logstash
 
 # EUI team
 /src/plugins/kibana_react/public/page_template/ @elastic/eui-team @elastic/appex-sharedux

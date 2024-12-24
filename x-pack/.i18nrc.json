@@ -77,7 +77,7 @@
     "xpack.licensing": "plugins/licensing",
     "xpack.lists": "solutions/security/plugins/lists",
     "xpack.logstash": [
-      "plugins/logstash"
+      "platform/plugins/private/logstash"
     ],
     "xpack.main": "legacy/plugins/xpack_main",
     "xpack.maps": [
