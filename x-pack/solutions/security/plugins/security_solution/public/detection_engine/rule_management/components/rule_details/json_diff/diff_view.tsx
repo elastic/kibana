@@ -265,7 +265,7 @@ interface DiffViewProps extends Partial<DiffProps> {
 export const DiffView = ({
   oldSource,
   newSource,
-  diffMethod = DiffMethod.WORDS,
+  diffMethod = DiffMethod.WORDS_WITH_SPACE,
   viewType = 'split',
 }: DiffViewProps) => {
   /*
