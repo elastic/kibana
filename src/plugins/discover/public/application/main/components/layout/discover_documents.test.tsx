@@ -9,6 +9,7 @@
 
 import React from 'react';
 import { act } from 'react-dom/test-utils';
+import { EuiProvider } from '@elastic/eui';
 import { BehaviorSubject } from 'rxjs';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
@@ -59,7 +60,9 @@ async function mountComponent(fetchStatus: FetchStatus, hits: EsHitRecord[]) {
     <KibanaContextProvider services={services}>
       <DiscoverCustomizationProvider value={customisationService}>
         <DiscoverMainProvider value={stateContainer}>
-          <DiscoverDocuments {...props} />
+          <EuiProvider>
+            <DiscoverDocuments {...props} />
+          </EuiProvider>
         </DiscoverMainProvider>
       </DiscoverCustomizationProvider>
     </KibanaContextProvider>

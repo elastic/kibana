@@ -8,6 +8,7 @@
  */
 
 import React from 'react';
+import { EuiProvider } from '@elastic/eui';
 import { render, screen } from '@testing-library/react';
 import { LogsOverview } from './logs_overview';
 import { DataView } from '@kbn/data-views-plugin/common';
@@ -131,11 +132,17 @@ setUnifiedDocViewerServices(
 
 const renderLogsOverview = (props: Partial<DocViewRenderProps> = {}) => {
   const { rerender: baseRerender, ...tools } = render(
-    <LogsOverview dataView={dataView} hit={fullHit} {...props} />
+    <EuiProvider>
+      <LogsOverview dataView={dataView} hit={fullHit} {...props} />
+    </EuiProvider>
   );
 
   const rerender = (rerenderProps: Partial<DocViewRenderProps>) =>
-    baseRerender(<LogsOverview dataView={dataView} hit={fullHit} {...props} {...rerenderProps} />);
+    baseRerender(
+      <EuiProvider>
+        <LogsOverview dataView={dataView} hit={fullHit} {...props} {...rerenderProps} />
+      </EuiProvider>
+    );
 
   return { rerender, ...tools };
 };
