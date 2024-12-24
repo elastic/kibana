@@ -82,7 +82,7 @@ const AlertSelectionQueryComponent: React.FC<Props> = ({
   // 2) The user clicks the refresh button
   //
   // Also to match the behavior of Discover, we must NOT call `setQuery` with
-  // the `unSubmittedQuery` query when the user clicks the `Save` button button.
+  // the `unSubmittedQuery` query when the user clicks the `Save` button.
   const [unSubmittedQuery, setUnSubmittedQuery] = React.useState<Query['query'] | undefined>(
     undefined
   );

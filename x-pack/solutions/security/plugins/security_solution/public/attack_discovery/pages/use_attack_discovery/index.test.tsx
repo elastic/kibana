@@ -159,7 +159,6 @@ describe('useAttackDiscovery', () => {
       '/internal/elastic_assistant/attack_discovery',
       {
         body: `{"alertsIndexPattern":"alerts-index-pattern","anonymizationFields":[],"replacements":{},"size":${SIZE},"subAction":"invokeAI","apiConfig":{"connectorId":"test-id","actionTypeId":".gen-ai"}}`,
-        method: 'POST',
         version: '1',
       }
     );
