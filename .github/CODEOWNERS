@@ -590,7 +590,7 @@ packages/kbn-logging-mocks @elastic/kibana-core
 x-pack/plugins/observability_solution/logs_data_access @elastic/obs-ux-logs-team
 x-pack/plugins/observability_solution/logs_explorer @elastic/obs-ux-logs-team
 x-pack/plugins/observability_solution/logs_shared @elastic/obs-ux-logs-team
-x-pack/plugins/logstash @elastic/logstash
+x-pack/platform/plugins/private/logstash @elastic/logstash
 packages/kbn-managed-content-badge @elastic/kibana-visualizations
 packages/kbn-managed-vscode-config @elastic/kibana-operations
 packages/kbn-managed-vscode-config-cli @elastic/kibana-operations
@@ -1938,7 +1938,7 @@ x-pack/solutions/security/plugins/security_solution/server/lib/security_integrat
 /x-pack/solutions/security/plugins/security_solution_serverless/**/*.scss @elastic/security-design
 
 # Logstash
-#CC# /x-pack/plugins/logstash/ @elastic/logstash
+#CC# /x-pack/platform/plugins/private/logstash/ @elastic/logstash
 
 # EUI team
 /src/plugins/kibana_react/public/page_template/ @elastic/eui-team @elastic/appex-sharedux
