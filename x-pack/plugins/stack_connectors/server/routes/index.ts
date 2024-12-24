@@ -7,3 +7,4 @@
 
 export { getWellKnownEmailServiceRoute } from './get_well_known_email_service';
 export { validSlackApiChannelsRoute } from './valid_slack_api_channels';
+export { getInferenceServicesRoute } from './get_inference_services';
