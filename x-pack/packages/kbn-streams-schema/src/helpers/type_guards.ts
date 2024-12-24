@@ -10,7 +10,7 @@ import {
   AndCondition,
   conditionSchema,
   dissectProcessingDefinitionSchema,
-  DissectProcssingDefinition,
+  DissectProcessingDefinition,
   FilterCondition,
   filterConditionSchema,
   GrokProcessingDefinition,
@@ -91,7 +91,7 @@ export function isGrokProcessor(subject: any): subject is GrokProcessingDefiniti
   return isSchema(grokProcessingDefinitionSchema, subject);
 }
 
-export function isDissectProcessor(subject: any): subject is DissectProcssingDefinition {
+export function isDissectProcessor(subject: any): subject is DissectProcessingDefinition {
   return isSchema(dissectProcessingDefinitionSchema, subject);
 }
 
