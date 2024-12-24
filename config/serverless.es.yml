@@ -132,3 +132,7 @@ aiAssistantManagementSelection.preferredAIAssistantType: "observability"
 xpack.observabilityAiAssistantManagement.logSourcesEnabled: false
 xpack.observabilityAiAssistantManagement.spacesEnabled: false
 xpack.observabilityAiAssistantManagement.visibilityEnabled: false
+
+
+# Synonyms UI
+xpack.searchSynonyms.enabled: false
