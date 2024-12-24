@@ -478,6 +478,38 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
       });
     });
 
+    it('should return 400 if the timezone of an action is not valid', async () => {
+      const response = await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+        .set('kbn-xsrf', 'foo')
+        .send(
+          getTestRuleData({
+            actions: [
+              {
+                id: 'test-id',
+                group: 'default',
+                params: {},
+                alerts_filter: {
+                  timeframe: {
+                    days: [1, 2, 3, 4, 5, 6, 7],
+                    timezone: 'invalid',
+                    hours: { start: '00:00', end: '01:00' },
+                  },
+                },
+              },
+            ],
+          })
+        );
+
+      expect(response.status).to.eql(400);
+      expect(response.body).to.eql({
+        statusCode: 400,
+        error: 'Bad Request',
+        message:
+          '[request body.actions.0.alerts_filter.timeframe.timezone]: string is not a valid timezone: invalid',
+      });
+    });
+
     describe('system actions', () => {
       const systemAction = {
         id: 'system-connector-test.system-action',
