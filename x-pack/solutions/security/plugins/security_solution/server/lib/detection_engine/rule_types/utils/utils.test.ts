@@ -593,14 +593,16 @@ describe('utils', () => {
       expect(from).toEqual('now-540s');
     });
 
-    test('should return formatted `from` value from rule schedule fields with no lookback', () => {
-      const from = calculateFromValue('5m', '0m');
-      expect(from).toEqual('now-300s');
-    });
+    describe('when lookback is invalid', () => {
+      test('should return formatted `from` value from rule schedule fields with default lookback', () => {
+        const from = calculateFromValue('5m', '0m');
+        expect(from).toEqual('now-360s');
+      });
 
-    test('should return formatted `from` value from rule schedule fields with invalid moment fields', () => {
-      const from = calculateFromValue('5', '5');
-      expect(from).toEqual('now-0s');
+      test('should return formatted `from` value from rule schedule fields with invalid moment fields with default lookback', () => {
+        const from = calculateFromValue('5', '5');
+        expect(from).toEqual('now-60s');
+      });
     });
   });
 

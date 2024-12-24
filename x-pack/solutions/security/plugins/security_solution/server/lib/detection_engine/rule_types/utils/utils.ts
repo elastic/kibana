@@ -577,7 +577,7 @@ export const getCatchupTuples = ({
  */
 export const calculateFromValue = (interval: string, lookback: string) => {
   const parsedInterval = parseInterval(interval) ?? moment.duration(0);
-  const parsedFrom = parseInterval(lookback) ?? moment.duration(0);
+  const parsedFrom = parseInterval(lookback) ?? moment.duration(1, 'm');
   const duration = parsedFrom.asSeconds() + parsedInterval.asSeconds();
   return `now-${duration}s`;
 };
