@@ -5,364 +5,258 @@
  * 2.0.
  */
 
-import { RecoveredActionGroup } from '../../common';
 import {
   AlertingAuthorizationFilterType,
   asFiltersByRuleTypeAndConsumer,
   ensureFieldIsSafeForQuery,
   asFiltersBySpaceId,
 } from './alerting_authorization_kuery';
-import { fromKueryExpression } from '@kbn/es-query';
+import { KueryNode, toKqlExpression } from '@kbn/es-query';
 
 describe('asKqlFiltersByRuleTypeAndConsumer', () => {
   test('constructs KQL filter for single rule type with single authorized consumer', async () => {
-    expect(
-      asFiltersByRuleTypeAndConsumer(
-        new Set([
-          {
-            actionGroups: [],
-            defaultActionGroupId: 'default',
-            recoveryActionGroup: RecoveredActionGroup,
-            id: 'myAppAlertType',
-            name: 'myAppAlertType',
-            category: 'test',
-            producer: 'myApp',
-            minimumLicenseRequired: 'basic',
-            isExportable: true,
-            authorizedConsumers: {
-              myApp: { read: true, all: true },
-            },
-            enabledInLicense: true,
-            hasAlertsMappings: false,
-            hasFieldsForAAD: false,
-            validLegacyConsumers: [],
-          },
-        ]),
+    const authorizedRuleTypes = new Map([
+      [
+        'myAppAlertType',
         {
-          type: AlertingAuthorizationFilterType.KQL,
-          fieldNames: {
-            ruleTypeId: 'path.to.rule_type_id',
-            consumer: 'consumer-field',
+          authorizedConsumers: {
+            myApp: { read: true, all: true },
           },
         },
-        'space1'
+      ],
+    ]);
+
+    expect(
+      toKqlExpression(
+        asFiltersByRuleTypeAndConsumer(
+          authorizedRuleTypes,
+          {
+            type: AlertingAuthorizationFilterType.KQL,
+            fieldNames: {
+              ruleTypeId: 'path.to.rule_type_id',
+              consumer: 'consumer-field',
+            },
+          },
+          'space1'
+        ) as KueryNode
       )
-    ).toEqual(
-      fromKueryExpression(`((path.to.rule_type_id:myAppAlertType and consumer-field:(myApp)))`)
-    );
+    ).toMatchInlineSnapshot(`"(path.to.rule_type_id: myAppAlertType AND consumer-field: myApp)"`);
   });
 
   test('constructs KQL filter for single rule type with multiple authorized consumers', async () => {
-    expect(
-      asFiltersByRuleTypeAndConsumer(
-        new Set([
-          {
-            actionGroups: [],
-            defaultActionGroupId: 'default',
-            minimumLicenseRequired: 'basic',
-            isExportable: true,
-            recoveryActionGroup: RecoveredActionGroup,
-            id: 'myAppAlertType',
-            name: 'myAppAlertType',
-            category: 'test',
-            producer: 'myApp',
-            authorizedConsumers: {
-              alerts: { read: true, all: true },
-              myApp: { read: true, all: true },
-              myOtherApp: { read: true, all: true },
-            },
-            enabledInLicense: true,
-            hasAlertsMappings: false,
-            hasFieldsForAAD: false,
-            validLegacyConsumers: [],
-          },
-        ]),
+    const authorizedRuleTypes = new Map([
+      [
+        'myAppAlertType',
         {
-          type: AlertingAuthorizationFilterType.KQL,
-          fieldNames: {
-            ruleTypeId: 'path.to.rule_type_id',
-            consumer: 'consumer-field',
+          authorizedConsumers: {
+            alerts: { read: true, all: true },
+            myApp: { read: true, all: true },
+            myOtherApp: { read: true, all: true },
           },
         },
-        'space1'
+      ],
+    ]);
+
+    expect(
+      toKqlExpression(
+        asFiltersByRuleTypeAndConsumer(
+          authorizedRuleTypes,
+          {
+            type: AlertingAuthorizationFilterType.KQL,
+            fieldNames: {
+              ruleTypeId: 'path.to.rule_type_id',
+              consumer: 'consumer-field',
+            },
+          },
+          'space1'
+        ) as KueryNode
       )
-    ).toEqual(
-      fromKueryExpression(
-        `((path.to.rule_type_id:myAppAlertType and consumer-field:(alerts or myApp or myOtherApp)))`
-      )
+    ).toMatchInlineSnapshot(
+      `"(path.to.rule_type_id: myAppAlertType AND (consumer-field: alerts OR consumer-field: myApp OR consumer-field: myOtherApp))"`
     );
   });
 
   test('constructs KQL filter for multiple rule types across authorized consumer', async () => {
-    expect(
-      asFiltersByRuleTypeAndConsumer(
-        new Set([
-          {
-            actionGroups: [],
-            defaultActionGroupId: 'default',
-            minimumLicenseRequired: 'basic',
-            isExportable: true,
-            recoveryActionGroup: RecoveredActionGroup,
-            id: 'myAppAlertType',
-            name: 'myAppAlertType',
-            category: 'test',
-            producer: 'myApp',
-            authorizedConsumers: {
-              alerts: { read: true, all: true },
-              myApp: { read: true, all: true },
-              myOtherApp: { read: true, all: true },
-              myAppWithSubFeature: { read: true, all: true },
-            },
-            enabledInLicense: true,
-            hasAlertsMappings: false,
-            hasFieldsForAAD: false,
-            validLegacyConsumers: [],
-          },
-          {
-            actionGroups: [],
-            defaultActionGroupId: 'default',
-            minimumLicenseRequired: 'basic',
-            isExportable: true,
-            recoveryActionGroup: RecoveredActionGroup,
-            id: 'myOtherAppAlertType',
-            name: 'myOtherAppAlertType',
-            category: 'test',
-            producer: 'alerts',
-            authorizedConsumers: {
-              alerts: { read: true, all: true },
-              myApp: { read: true, all: true },
-              myOtherApp: { read: true, all: true },
-              myAppWithSubFeature: { read: true, all: true },
-            },
-            enabledInLicense: true,
-            hasAlertsMappings: false,
-            hasFieldsForAAD: false,
-            validLegacyConsumers: [],
-          },
-          {
-            actionGroups: [],
-            defaultActionGroupId: 'default',
-            minimumLicenseRequired: 'basic',
-            isExportable: true,
-            recoveryActionGroup: RecoveredActionGroup,
-            id: 'mySecondAppAlertType',
-            name: 'mySecondAppAlertType',
-            category: 'test',
-            producer: 'myApp',
-            authorizedConsumers: {
-              alerts: { read: true, all: true },
-              myApp: { read: true, all: true },
-              myOtherApp: { read: true, all: true },
-              myAppWithSubFeature: { read: true, all: true },
-            },
-            enabledInLicense: true,
-            hasAlertsMappings: false,
-            hasFieldsForAAD: false,
-            validLegacyConsumers: [],
-          },
-        ]),
+    const authorizedRuleTypes = new Map([
+      [
+        'myAppAlertType',
         {
-          type: AlertingAuthorizationFilterType.KQL,
-          fieldNames: {
-            ruleTypeId: 'path.to.rule_type_id',
-            consumer: 'consumer-field',
+          authorizedConsumers: {
+            alerts: { read: true, all: true },
+            myApp: { read: true, all: true },
+            myOtherApp: { read: true, all: true },
+            myAppWithSubFeature: { read: true, all: true },
           },
         },
-        'space1'
+      ],
+      [
+        'myOtherAppAlertType',
+        {
+          authorizedConsumers: {
+            alerts: { read: true, all: true },
+            myApp: { read: true, all: true },
+            myOtherApp: { read: true, all: true },
+            myAppWithSubFeature: { read: true, all: true },
+          },
+        },
+      ],
+    ]);
+
+    expect(
+      toKqlExpression(
+        asFiltersByRuleTypeAndConsumer(
+          authorizedRuleTypes,
+          {
+            type: AlertingAuthorizationFilterType.KQL,
+            fieldNames: {
+              ruleTypeId: 'path.to.rule_type_id',
+              consumer: 'consumer-field',
+            },
+          },
+          'space1'
+        ) as KueryNode
       )
-    ).toEqual(
-      fromKueryExpression(
-        `((path.to.rule_type_id:myAppAlertType and consumer-field:(alerts or myApp or myOtherApp or myAppWithSubFeature)) or (path.to.rule_type_id:myOtherAppAlertType and consumer-field:(alerts or myApp or myOtherApp or myAppWithSubFeature)) or (path.to.rule_type_id:mySecondAppAlertType and consumer-field:(alerts or myApp or myOtherApp or myAppWithSubFeature)))`
-      )
+    ).toMatchInlineSnapshot(
+      `"((path.to.rule_type_id: myAppAlertType AND (consumer-field: alerts OR consumer-field: myApp OR consumer-field: myOtherApp OR consumer-field: myAppWithSubFeature)) OR (path.to.rule_type_id: myOtherAppAlertType AND (consumer-field: alerts OR consumer-field: myApp OR consumer-field: myOtherApp OR consumer-field: myAppWithSubFeature)))"`
     );
   });
 
   test('constructs KQL filter with spaceId filter when spaceIds field path exists', async () => {
-    expect(
-      asFiltersByRuleTypeAndConsumer(
-        new Set([
-          {
-            actionGroups: [],
-            defaultActionGroupId: 'default',
-            minimumLicenseRequired: 'basic',
-            isExportable: true,
-            recoveryActionGroup: RecoveredActionGroup,
-            id: 'myAppAlertType',
-            name: 'myAppAlertType',
-            category: 'test',
-            producer: 'myApp',
-            authorizedConsumers: {
-              alerts: { read: true, all: true },
-              myApp: { read: true, all: true },
-              myOtherApp: { read: true, all: true },
-              myAppWithSubFeature: { read: true, all: true },
-            },
-            enabledInLicense: true,
-            hasAlertsMappings: false,
-            hasFieldsForAAD: false,
-            validLegacyConsumers: [],
-          },
-          {
-            actionGroups: [],
-            defaultActionGroupId: 'default',
-            minimumLicenseRequired: 'basic',
-            isExportable: true,
-            recoveryActionGroup: RecoveredActionGroup,
-            id: 'myOtherAppAlertType',
-            name: 'myOtherAppAlertType',
-            category: 'test',
-            producer: 'alerts',
-            authorizedConsumers: {
-              alerts: { read: true, all: true },
-              myApp: { read: true, all: true },
-              myOtherApp: { read: true, all: true },
-              myAppWithSubFeature: { read: true, all: true },
-            },
-            enabledInLicense: true,
-            hasAlertsMappings: false,
-            hasFieldsForAAD: false,
-            validLegacyConsumers: [],
-          },
-        ]),
+    const authorizedRuleTypes = new Map([
+      [
+        'myAppAlertType',
         {
-          type: AlertingAuthorizationFilterType.KQL,
-          fieldNames: {
-            ruleTypeId: 'path.to.rule_type_id',
-            consumer: 'consumer-field',
-            spaceIds: 'path.to.spaceIds',
+          authorizedConsumers: {
+            alerts: { read: true, all: true },
+            myApp: { read: true, all: true },
+            myOtherApp: { read: true, all: true },
+            myAppWithSubFeature: { read: true, all: true },
           },
         },
-        'space1'
+      ],
+      [
+        'myOtherAppAlertType',
+        {
+          authorizedConsumers: {
+            alerts: { read: true, all: true },
+            myApp: { read: true, all: true },
+            myOtherApp: { read: true, all: true },
+            myAppWithSubFeature: { read: true, all: true },
+          },
+        },
+      ],
+    ]);
+
+    expect(
+      toKqlExpression(
+        asFiltersByRuleTypeAndConsumer(
+          authorizedRuleTypes,
+          {
+            type: AlertingAuthorizationFilterType.KQL,
+            fieldNames: {
+              ruleTypeId: 'path.to.rule_type_id',
+              consumer: 'consumer-field',
+              spaceIds: 'path.to.spaceIds',
+            },
+          },
+          'space1'
+        ) as KueryNode
       )
-    ).toEqual(
-      fromKueryExpression(
-        `((path.to.rule_type_id:myAppAlertType and consumer-field:(alerts or myApp or myOtherApp or myAppWithSubFeature) and path.to.spaceIds:space1) or (path.to.rule_type_id:myOtherAppAlertType and consumer-field:(alerts or myApp or myOtherApp or myAppWithSubFeature) and path.to.spaceIds:space1))`
-      )
+    ).toMatchInlineSnapshot(
+      `"((path.to.rule_type_id: myAppAlertType AND (consumer-field: alerts OR consumer-field: myApp OR consumer-field: myOtherApp OR consumer-field: myAppWithSubFeature) AND path.to.spaceIds: space1) OR (path.to.rule_type_id: myOtherAppAlertType AND (consumer-field: alerts OR consumer-field: myApp OR consumer-field: myOtherApp OR consumer-field: myAppWithSubFeature) AND path.to.spaceIds: space1))"`
     );
   });
 
   test('constructs KQL filter without spaceId filter when spaceIds path is specified, but spaceId is undefined', async () => {
+    const authorizedRuleTypes = new Map([
+      [
+        'myAppAlertType',
+        {
+          authorizedConsumers: {
+            alerts: { read: true, all: true },
+            myApp: { read: true, all: true },
+            myOtherApp: { read: true, all: true },
+            myAppWithSubFeature: { read: true, all: true },
+          },
+        },
+      ],
+      [
+        'myOtherAppAlertType',
+        {
+          authorizedConsumers: {
+            alerts: { read: true, all: true },
+            myApp: { read: true, all: true },
+            myOtherApp: { read: true, all: true },
+            myAppWithSubFeature: { read: true, all: true },
+          },
+        },
+      ],
+    ]);
+
     expect(
+      toKqlExpression(
+        asFiltersByRuleTypeAndConsumer(
+          authorizedRuleTypes,
+          {
+            type: AlertingAuthorizationFilterType.KQL,
+            fieldNames: {
+              ruleTypeId: 'path.to.rule_type_id',
+              consumer: 'consumer-field',
+              spaceIds: 'path.to.spaceIds',
+            },
+          },
+          undefined
+        ) as KueryNode
+      )
+    ).toMatchInlineSnapshot(
+      `"((path.to.rule_type_id: myAppAlertType AND (consumer-field: alerts OR consumer-field: myApp OR consumer-field: myOtherApp OR consumer-field: myAppWithSubFeature)) OR (path.to.rule_type_id: myOtherAppAlertType AND (consumer-field: alerts OR consumer-field: myApp OR consumer-field: myOtherApp OR consumer-field: myAppWithSubFeature)))"`
+    );
+  });
+
+  test('constructs KQL filter for single rule type with no authorized consumer', async () => {
+    const authorizedRuleTypes = new Map([
+      [
+        'myAppAlertType',
+        {
+          authorizedConsumers: {},
+        },
+      ],
+    ]);
+
+    const result = toKqlExpression(
       asFiltersByRuleTypeAndConsumer(
-        new Set([
-          {
-            actionGroups: [],
-            defaultActionGroupId: 'default',
-            minimumLicenseRequired: 'basic',
-            isExportable: true,
-            recoveryActionGroup: RecoveredActionGroup,
-            id: 'myAppAlertType',
-            name: 'myAppAlertType',
-            category: 'test',
-            producer: 'myApp',
-            authorizedConsumers: {
-              alerts: { read: true, all: true },
-              myApp: { read: true, all: true },
-              myOtherApp: { read: true, all: true },
-              myAppWithSubFeature: { read: true, all: true },
-            },
-            enabledInLicense: true,
-            hasAlertsMappings: false,
-            hasFieldsForAAD: false,
-            validLegacyConsumers: [],
-          },
-          {
-            actionGroups: [],
-            defaultActionGroupId: 'default',
-            minimumLicenseRequired: 'basic',
-            isExportable: true,
-            recoveryActionGroup: RecoveredActionGroup,
-            id: 'myOtherAppAlertType',
-            name: 'myOtherAppAlertType',
-            category: 'test',
-            producer: 'alerts',
-            authorizedConsumers: {
-              alerts: { read: true, all: true },
-              myApp: { read: true, all: true },
-              myOtherApp: { read: true, all: true },
-              myAppWithSubFeature: { read: true, all: true },
-            },
-            enabledInLicense: true,
-            hasAlertsMappings: false,
-            hasFieldsForAAD: false,
-            validLegacyConsumers: [],
-          },
-        ]),
+        authorizedRuleTypes,
         {
           type: AlertingAuthorizationFilterType.KQL,
           fieldNames: {
             ruleTypeId: 'path.to.rule_type_id',
             consumer: 'consumer-field',
-            spaceIds: 'path.to.spaceIds',
           },
         },
-        undefined
-      )
-    ).toEqual(
-      fromKueryExpression(
-        `((path.to.rule_type_id:myAppAlertType and consumer-field:(alerts or myApp or myOtherApp or myAppWithSubFeature)) or (path.to.rule_type_id:myOtherAppAlertType and consumer-field:(alerts or myApp or myOtherApp or myAppWithSubFeature)))`
-      )
-    );
-  });
-
-  test('constructs KQL filter for single rule type with no authorized consumer', async () => {
-    const result = asFiltersByRuleTypeAndConsumer(
-      new Set([
-        {
-          actionGroups: [],
-          defaultActionGroupId: 'default',
-          recoveryActionGroup: RecoveredActionGroup,
-          id: 'myAppAlertType',
-          name: 'myAppAlertType',
-          category: 'test',
-          producer: 'myApp',
-          minimumLicenseRequired: 'basic',
-          isExportable: true,
-          authorizedConsumers: {},
-          enabledInLicense: true,
-          hasAlertsMappings: false,
-          hasFieldsForAAD: false,
-          validLegacyConsumers: [],
-        },
-      ]),
-      {
-        type: AlertingAuthorizationFilterType.KQL,
-        fieldNames: {
-          ruleTypeId: 'path.to.rule_type_id',
-          consumer: 'consumer-field',
-        },
-      },
-      'space1'
+        'space1'
+      ) as KueryNode
     );
 
-    expect(result).toEqual(fromKueryExpression(`path.to.rule_type_id:myAppAlertType`));
+    expect(result).toMatchInlineSnapshot(`"path.to.rule_type_id: myAppAlertType"`);
   });
 });
 
 describe('asEsDslFiltersByRuleTypeAndConsumer', () => {
   test('constructs ES DSL filter for single rule type with single authorized consumer', async () => {
+    const authorizedRuleTypes = new Map([
+      [
+        'myAppAlertType',
+        {
+          authorizedConsumers: {
+            myApp: { read: true, all: true },
+          },
+        },
+      ],
+    ]);
+
     expect(
       asFiltersByRuleTypeAndConsumer(
-        new Set([
-          {
-            actionGroups: [],
-            defaultActionGroupId: 'default',
-            recoveryActionGroup: RecoveredActionGroup,
-            id: 'myAppAlertType',
-            name: 'myAppAlertType',
-            category: 'test',
-            producer: 'myApp',
-            minimumLicenseRequired: 'basic',
-            isExportable: true,
-            authorizedConsumers: {
-              myApp: { read: true, all: true },
-            },
-            enabledInLicense: true,
-            hasAlertsMappings: false,
-            hasFieldsForAAD: false,
-            validLegacyConsumers: [],
-          },
-        ]),
+        authorizedRuleTypes,
         {
           type: AlertingAuthorizationFilterType.ESDSL,
           fieldNames: {
@@ -405,30 +299,22 @@ describe('asEsDslFiltersByRuleTypeAndConsumer', () => {
   });
 
   test('constructs ES DSL filter for single rule type with multiple authorized consumers', async () => {
+    const authorizedRuleTypes = new Map([
+      [
+        'myAppAlertType',
+        {
+          authorizedConsumers: {
+            alerts: { read: true, all: true },
+            myApp: { read: true, all: true },
+            myOtherApp: { read: true, all: true },
+          },
+        },
+      ],
+    ]);
+
     expect(
       asFiltersByRuleTypeAndConsumer(
-        new Set([
-          {
-            actionGroups: [],
-            defaultActionGroupId: 'default',
-            minimumLicenseRequired: 'basic',
-            isExportable: true,
-            recoveryActionGroup: RecoveredActionGroup,
-            id: 'myAppAlertType',
-            name: 'myAppAlertType',
-            category: 'test',
-            producer: 'myApp',
-            authorizedConsumers: {
-              alerts: { read: true, all: true },
-              myApp: { read: true, all: true },
-              myOtherApp: { read: true, all: true },
-            },
-            enabledInLicense: true,
-            hasAlertsMappings: false,
-            hasFieldsForAAD: false,
-            validLegacyConsumers: [],
-          },
-        ]),
+        authorizedRuleTypes,
         {
           type: AlertingAuthorizationFilterType.ESDSL,
           fieldNames: {
@@ -478,73 +364,34 @@ describe('asEsDslFiltersByRuleTypeAndConsumer', () => {
   });
 
   test('constructs ES DSL filter for multiple rule types across authorized consumer', async () => {
+    const authorizedRuleTypes = new Map([
+      [
+        'myAppAlertType',
+        {
+          authorizedConsumers: {
+            alerts: { read: true, all: true },
+            myApp: { read: true, all: true },
+            myOtherApp: { read: true, all: true },
+            myAppWithSubFeature: { read: true, all: true },
+          },
+        },
+      ],
+      [
+        'myOtherAppAlertType',
+        {
+          authorizedConsumers: {
+            alerts: { read: true, all: true },
+            myApp: { read: true, all: true },
+            myOtherApp: { read: true, all: true },
+            myAppWithSubFeature: { read: true, all: true },
+          },
+        },
+      ],
+    ]);
+
     expect(
       asFiltersByRuleTypeAndConsumer(
-        new Set([
-          {
-            actionGroups: [],
-            defaultActionGroupId: 'default',
-            minimumLicenseRequired: 'basic',
-            isExportable: true,
-            recoveryActionGroup: RecoveredActionGroup,
-            id: 'myAppAlertType',
-            name: 'myAppAlertType',
-            category: 'test',
-            producer: 'myApp',
-            authorizedConsumers: {
-              alerts: { read: true, all: true },
-              myApp: { read: true, all: true },
-              myOtherApp: { read: true, all: true },
-              myAppWithSubFeature: { read: true, all: true },
-            },
-            enabledInLicense: true,
-            hasAlertsMappings: false,
-            hasFieldsForAAD: false,
-            validLegacyConsumers: [],
-          },
-          {
-            actionGroups: [],
-            defaultActionGroupId: 'default',
-            minimumLicenseRequired: 'basic',
-            isExportable: true,
-            recoveryActionGroup: RecoveredActionGroup,
-            id: 'myOtherAppAlertType',
-            name: 'myOtherAppAlertType',
-            category: 'test',
-            producer: 'alerts',
-            authorizedConsumers: {
-              alerts: { read: true, all: true },
-              myApp: { read: true, all: true },
-              myOtherApp: { read: true, all: true },
-              myAppWithSubFeature: { read: true, all: true },
-            },
-            enabledInLicense: true,
-            hasAlertsMappings: false,
-            hasFieldsForAAD: false,
-            validLegacyConsumers: [],
-          },
-          {
-            actionGroups: [],
-            defaultActionGroupId: 'default',
-            minimumLicenseRequired: 'basic',
-            isExportable: true,
-            recoveryActionGroup: RecoveredActionGroup,
-            id: 'mySecondAppAlertType',
-            name: 'mySecondAppAlertType',
-            category: 'test',
-            producer: 'myApp',
-            authorizedConsumers: {
-              alerts: { read: true, all: true },
-              myApp: { read: true, all: true },
-              myOtherApp: { read: true, all: true },
-              myAppWithSubFeature: { read: true, all: true },
-            },
-            enabledInLicense: true,
-            hasAlertsMappings: false,
-            hasFieldsForAAD: false,
-            validLegacyConsumers: [],
-          },
-        ]),
+        authorizedRuleTypes,
         {
           type: AlertingAuthorizationFilterType.ESDSL,
           fieldNames: {
@@ -554,164 +401,175 @@ describe('asEsDslFiltersByRuleTypeAndConsumer', () => {
         },
         'space1'
       )
-    ).toEqual({
-      bool: {
-        should: [
-          {
-            bool: {
-              filter: [
-                {
-                  bool: {
-                    should: [{ match: { 'path.to.rule_type_id': 'myAppAlertType' } }],
-                    minimum_should_match: 1,
+    ).toMatchInlineSnapshot(`
+      Object {
+        "bool": Object {
+          "minimum_should_match": 1,
+          "should": Array [
+            Object {
+              "bool": Object {
+                "filter": Array [
+                  Object {
+                    "bool": Object {
+                      "minimum_should_match": 1,
+                      "should": Array [
+                        Object {
+                          "match": Object {
+                            "path.to.rule_type_id": "myAppAlertType",
+                          },
+                        },
+                      ],
+                    },
                   },
-                },
-                {
-                  bool: {
-                    should: [
-                      {
-                        bool: {
-                          should: [{ match: { 'consumer-field': 'alerts' } }],
-                          minimum_should_match: 1,
+                  Object {
+                    "bool": Object {
+                      "minimum_should_match": 1,
+                      "should": Array [
+                        Object {
+                          "bool": Object {
+                            "minimum_should_match": 1,
+                            "should": Array [
+                              Object {
+                                "match": Object {
+                                  "consumer-field": "alerts",
+                                },
+                              },
+                            ],
+                          },
                         },
-                      },
-                      {
-                        bool: {
-                          should: [{ match: { 'consumer-field': 'myApp' } }],
-                          minimum_should_match: 1,
+                        Object {
+                          "bool": Object {
+                            "minimum_should_match": 1,
+                            "should": Array [
+                              Object {
+                                "match": Object {
+                                  "consumer-field": "myApp",
+                                },
+                              },
+                            ],
+                          },
                         },
-                      },
-                      {
-                        bool: {
-                          should: [{ match: { 'consumer-field': 'myOtherApp' } }],
-                          minimum_should_match: 1,
+                        Object {
+                          "bool": Object {
+                            "minimum_should_match": 1,
+                            "should": Array [
+                              Object {
+                                "match": Object {
+                                  "consumer-field": "myOtherApp",
+                                },
+                              },
+                            ],
+                          },
                         },
-                      },
-                      {
-                        bool: {
-                          should: [{ match: { 'consumer-field': 'myAppWithSubFeature' } }],
-                          minimum_should_match: 1,
+                        Object {
+                          "bool": Object {
+                            "minimum_should_match": 1,
+                            "should": Array [
+                              Object {
+                                "match": Object {
+                                  "consumer-field": "myAppWithSubFeature",
+                                },
+                              },
+                            ],
+                          },
                         },
-                      },
-                    ],
-                    minimum_should_match: 1,
+                      ],
+                    },
                   },
-                },
-              ],
+                ],
+              },
             },
-          },
-          {
-            bool: {
-              filter: [
-                {
-                  bool: {
-                    should: [{ match: { 'path.to.rule_type_id': 'myOtherAppAlertType' } }],
-                    minimum_should_match: 1,
+            Object {
+              "bool": Object {
+                "filter": Array [
+                  Object {
+                    "bool": Object {
+                      "minimum_should_match": 1,
+                      "should": Array [
+                        Object {
+                          "match": Object {
+                            "path.to.rule_type_id": "myOtherAppAlertType",
+                          },
+                        },
+                      ],
+                    },
                   },
-                },
-                {
-                  bool: {
-                    should: [
-                      {
-                        bool: {
-                          should: [{ match: { 'consumer-field': 'alerts' } }],
-                          minimum_should_match: 1,
+                  Object {
+                    "bool": Object {
+                      "minimum_should_match": 1,
+                      "should": Array [
+                        Object {
+                          "bool": Object {
+                            "minimum_should_match": 1,
+                            "should": Array [
+                              Object {
+                                "match": Object {
+                                  "consumer-field": "alerts",
+                                },
+                              },
+                            ],
+                          },
                         },
-                      },
-                      {
-                        bool: {
-                          should: [{ match: { 'consumer-field': 'myApp' } }],
-                          minimum_should_match: 1,
+                        Object {
+                          "bool": Object {
+                            "minimum_should_match": 1,
+                            "should": Array [
+                              Object {
+                                "match": Object {
+                                  "consumer-field": "myApp",
+                                },
+                              },
+                            ],
+                          },
                         },
-                      },
-                      {
-                        bool: {
-                          should: [{ match: { 'consumer-field': 'myOtherApp' } }],
-                          minimum_should_match: 1,
+                        Object {
+                          "bool": Object {
+                            "minimum_should_match": 1,
+                            "should": Array [
+                              Object {
+                                "match": Object {
+                                  "consumer-field": "myOtherApp",
+                                },
+                              },
+                            ],
+                          },
                         },
-                      },
-                      {
-                        bool: {
-                          should: [{ match: { 'consumer-field': 'myAppWithSubFeature' } }],
-                          minimum_should_match: 1,
+                        Object {
+                          "bool": Object {
+                            "minimum_should_match": 1,
+                            "should": Array [
+                              Object {
+                                "match": Object {
+                                  "consumer-field": "myAppWithSubFeature",
+                                },
+                              },
+                            ],
+                          },
                         },
-                      },
-                    ],
-                    minimum_should_match: 1,
+                      ],
+                    },
                   },
-                },
-              ],
+                ],
+              },
             },
-          },
-          {
-            bool: {
-              filter: [
-                {
-                  bool: {
-                    should: [{ match: { 'path.to.rule_type_id': 'mySecondAppAlertType' } }],
-                    minimum_should_match: 1,
-                  },
-                },
-                {
-                  bool: {
-                    should: [
-                      {
-                        bool: {
-                          should: [{ match: { 'consumer-field': 'alerts' } }],
-                          minimum_should_match: 1,
-                        },
-                      },
-                      {
-                        bool: {
-                          should: [{ match: { 'consumer-field': 'myApp' } }],
-                          minimum_should_match: 1,
-                        },
-                      },
-                      {
-                        bool: {
-                          should: [{ match: { 'consumer-field': 'myOtherApp' } }],
-                          minimum_should_match: 1,
-                        },
-                      },
-                      {
-                        bool: {
-                          should: [{ match: { 'consumer-field': 'myAppWithSubFeature' } }],
-                          minimum_should_match: 1,
-                        },
-                      },
-                    ],
-                    minimum_should_match: 1,
-                  },
-                },
-              ],
-            },
-          },
-        ],
-        minimum_should_match: 1,
-      },
-    });
+          ],
+        },
+      }
+    `);
   });
 
   test('constructs KQL filter for single rule type with no authorized consumer', async () => {
-    const result = asFiltersByRuleTypeAndConsumer(
-      new Set([
+    const authorizedRuleTypes = new Map([
+      [
+        'myAppAlertType',
         {
-          actionGroups: [],
-          defaultActionGroupId: 'default',
-          recoveryActionGroup: RecoveredActionGroup,
-          id: 'myAppAlertType',
-          name: 'myAppAlertType',
-          category: 'test',
-          producer: 'myApp',
-          minimumLicenseRequired: 'basic',
-          isExportable: true,
           authorizedConsumers: {},
-          enabledInLicense: true,
-          hasAlertsMappings: false,
-          hasFieldsForAAD: false,
-          validLegacyConsumers: [],
         },
-      ]),
+      ],
+    ]);
+
+    const result = asFiltersByRuleTypeAndConsumer(
+      authorizedRuleTypes,
       {
         type: AlertingAuthorizationFilterType.ESDSL,
         fieldNames: {
@@ -760,18 +618,20 @@ describe('asFiltersBySpaceId', () => {
 
   test('returns KQL filter of spaceId', () => {
     expect(
-      asFiltersBySpaceId(
-        {
-          type: AlertingAuthorizationFilterType.KQL,
-          fieldNames: {
-            ruleTypeId: 'path.to.rule_type_id',
-            consumer: 'consumer-field',
-            spaceIds: 'path.to.space.id',
+      toKqlExpression(
+        asFiltersBySpaceId(
+          {
+            type: AlertingAuthorizationFilterType.KQL,
+            fieldNames: {
+              ruleTypeId: 'path.to.rule_type_id',
+              consumer: 'consumer-field',
+              spaceIds: 'path.to.space.id',
+            },
           },
-        },
-        'space1'
+          'space1'
+        ) as KueryNode
       )
-    ).toEqual(fromKueryExpression('(path.to.space.id: space1)'));
+    ).toMatchInlineSnapshot(`"path.to.space.id: space1"`);
   });
 
   test('returns undefined if no path to spaceIds is provided', () => {

@@ -15,7 +15,10 @@ import {
   EuiProgress,
   EuiText,
   EuiTextBlockTruncate,
+  EuiThemeComputed,
   EuiToolTip,
+  makeHighContrastColor,
+  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
@@ -53,6 +56,7 @@ const FieldTopValuesBucket: React.FC<FieldTopValuesBucketProps> = ({
   overrideFieldTopValueBar,
   ...fieldTopValuesBucketOverridableProps
 }) => {
+  const { euiTheme } = useEuiTheme();
   const overrides = overrideFieldTopValueBar
     ? overrideFieldTopValueBar(fieldTopValuesBucketOverridableProps)
     : ({} as FieldTopValuesBucketParams);
@@ -141,7 +145,7 @@ const FieldTopValuesBucket: React.FC<FieldTopValuesBucketProps> = ({
               })}
               delay="long"
             >
-              <EuiText size="xs" textAlign="left" color={color}>
+              <EuiText size="xs" textAlign="left" color={getPercentageColor(euiTheme, color)}>
                 {formattedPercentage}
               </EuiText>
             </EuiToolTip>
@@ -206,6 +210,17 @@ const FieldTopValuesBucket: React.FC<FieldTopValuesBucketProps> = ({
     </EuiFlexGroup>
   );
 };
+
+// copied from x-pack/plugins/banners/server/utils.ts
+const hexColorRegexp = /^#([0-9a-f]{6}|[0-9a-f]{3})$/i;
+const isHexColor = (color: string) => {
+  return hexColorRegexp.test(color);
+};
+
+const getPercentageColor = (euiTheme: EuiThemeComputed, color: string) =>
+  euiTheme.themeName?.toLowerCase().includes('borealis') && isHexColor(color)
+    ? makeHighContrastColor(color)(euiTheme)
+    : color; // FIXME: remove in 9.x when Borealis becomes the default theme
 
 // Necessary for React.lazy
 // eslint-disable-next-line import/no-default-export

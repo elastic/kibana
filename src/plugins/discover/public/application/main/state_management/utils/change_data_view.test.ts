@@ -81,6 +81,7 @@ describe('changeDataView', () => {
     expect(params.internalState.transitions.setResetDefaultProfileState).toHaveBeenCalledWith({
       columns: true,
       rowHeight: true,
+      breakdownField: true,
     });
   });
 });

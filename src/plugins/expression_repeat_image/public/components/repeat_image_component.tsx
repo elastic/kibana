@@ -94,7 +94,7 @@ export function RepeatImageComponent({
   }
 
   return (
-    <div className="repeatImage" style={{ pointerEvents: 'none' }}>
+    <div className="repeatImage" css={{ pointerEvents: 'none' }}>
       {imagesToRender}
     </div>
   );

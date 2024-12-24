@@ -14,7 +14,7 @@ import {
 } from '@kbn/alerting-plugin/common';
 import { AlertingFrameworkHealth } from '@kbn/alerting-types';
 import { fetchAlertingFrameworkHealth as alertingFrameworkHealth } from '@kbn/alerts-ui-shared/src/common/apis/fetch_alerting_framework_health';
-import { resolveRule } from '@kbn/alerts-ui-shared/src/common/apis/resolve_rule';
+import { resolveRule } from '@kbn/response-ops-rule-form';
 import {
   Rule,
   RuleType,

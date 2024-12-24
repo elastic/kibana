@@ -31,7 +31,11 @@ it('Provides a feature declaration ', () => {
         "order": 1000,
       },
       "id": "canvas",
-      "management": Object {},
+      "management": Object {
+        "insightsAndAlerting": Array [
+          "reporting",
+        ],
+      },
       "name": "Canvas",
       "order": 300,
       "privileges": Object {
@@ -82,13 +86,44 @@ it('Provides a feature declaration ', () => {
         "spaces",
         "security",
       ],
-      "subFeatures": Array [],
+      "subFeatures": Array [
+        Object {
+          "name": "Reporting",
+          "privilegeGroups": Array [
+            Object {
+              "groupType": "independent",
+              "privileges": Array [
+                Object {
+                  "api": Array [
+                    "generateReport",
+                  ],
+                  "id": "generate_report",
+                  "includeIn": "all",
+                  "management": Object {
+                    "insightsAndAlerting": Array [
+                      "reporting",
+                    ],
+                  },
+                  "minimumLicense": "gold",
+                  "name": "Generate PDF reports",
+                  "savedObject": Object {
+                    "all": Array [],
+                    "read": Array [],
+                  },
+                  "ui": Array [
+                    "generatePdf",
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+      ],
     }
   `);
 });
 
 it(`Calls on Reporting whether to include Generate PDF as a sub-feature`, () => {
-  mockReportingPlugin.usesUiCapabilities = () => true;
   expect(getCanvasFeature({ reporting: mockReportingPlugin })).toMatchInlineSnapshot(`
     Object {
       "app": Array [

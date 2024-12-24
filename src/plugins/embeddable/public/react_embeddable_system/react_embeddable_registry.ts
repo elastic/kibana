@@ -40,8 +40,6 @@ export const registerReactEmbeddableFactory = <
   registry[type] = getFactory;
 };
 
-export const reactEmbeddableRegistryHasKey = (key: string) => registry[key] !== undefined;
-
 export const getReactEmbeddableFactory = async <
   SerializedState extends object = object,
   RuntimeState extends object = SerializedState,

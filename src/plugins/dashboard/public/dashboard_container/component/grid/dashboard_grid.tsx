@@ -15,15 +15,14 @@ import classNames from 'classnames';
 import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { Layout, Responsive as ResponsiveReactGridLayout } from 'react-grid-layout';
 
-import { ViewMode } from '@kbn/embeddable-plugin/public';
-
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import { useAppFixedViewport } from '@kbn/core-rendering-browser';
 import { DashboardPanelState } from '../../../../common';
 import { DashboardGridItem } from './dashboard_grid_item';
 import { useDashboardGridSettings } from './use_dashboard_grid_settings';
 import { useDashboardApi } from '../../../dashboard_api/use_dashboard_api';
-import { getPanelLayoutsAreEqual } from '../../state/diffing/dashboard_diffing_utils';
+import { arePanelLayoutsEqual } from '../../../dashboard_api/are_panel_layouts_equal';
+import { useDashboardInternalApi } from '../../../dashboard_api/use_dashboard_internal_api';
 import { DASHBOARD_GRID_HEIGHT, DASHBOARD_MARGIN_SIZE } from '../../../dashboard_constants';
 
 export const DashboardGrid = ({
@@ -34,14 +33,15 @@ export const DashboardGrid = ({
   viewportWidth: number;
 }) => {
   const dashboardApi = useDashboardApi();
+  const dashboardInternalApi = useDashboardInternalApi();
 
   const [animatePanelTransforms, expandedPanelId, focusedPanelId, panels, useMargins, viewMode] =
     useBatchedPublishingSubjects(
-      dashboardApi.animatePanelTransforms$,
+      dashboardInternalApi.animatePanelTransforms$,
       dashboardApi.expandedPanelId,
       dashboardApi.focusedPanelId$,
       dashboardApi.panels$,
-      dashboardApi.useMargins$,
+      dashboardApi.settings.useMargins$,
       dashboardApi.viewMode
     );
 
@@ -104,7 +104,7 @@ export const DashboardGrid = ({
 
   const onLayoutChange = useCallback(
     (newLayout: Array<Layout & { i: string }>) => {
-      if (viewMode !== ViewMode.EDIT) return;
+      if (viewMode !== 'edit') return;
 
       const updatedPanels: { [key: string]: DashboardPanelState } = newLayout.reduce(
         (updatedPanelsAcc, panelLayout) => {
@@ -116,7 +116,7 @@ export const DashboardGrid = ({
         },
         {} as { [key: string]: DashboardPanelState }
       );
-      if (!getPanelLayoutsAreEqual(panels, updatedPanels)) {
+      if (!arePanelLayoutsEqual(panels, updatedPanels)) {
         dashboardApi.setPanels(updatedPanels);
       }
     },
@@ -125,8 +125,8 @@ export const DashboardGrid = ({
 
   const classes = classNames({
     'dshLayout-withoutMargins': !useMargins,
-    'dshLayout--viewing': viewMode === ViewMode.VIEW,
-    'dshLayout--editing': viewMode !== ViewMode.VIEW,
+    'dshLayout--viewing': viewMode === 'view',
+    'dshLayout--editing': viewMode !== 'view',
     'dshLayout--noAnimation': !animatePanelTransforms || delayedIsPanelExpanded,
     'dshLayout-isMaximizedPanel': expandedPanelId !== undefined,
   });
@@ -134,7 +134,7 @@ export const DashboardGrid = ({
   const { layouts, breakpoints, columns } = useDashboardGridSettings(panelsInOrder, panels);
 
   // in print mode, dashboard layout is not controlled by React Grid Layout
-  if (viewMode === ViewMode.PRINT) {
+  if (viewMode === 'print') {
     return <>{panelComponents}</>;
   }
 

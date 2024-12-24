@@ -22,6 +22,7 @@ import { Rule } from '../../../../application/rule/types';
 import { transformRuleToRuleResponseV1 } from '../../transforms';
 import { validateRequiredGroupInDefaultActionsV1 } from '../../validation';
 import { transformOperationsV1 } from './transforms';
+import { DEFAULT_ALERTING_ROUTE_SECURITY } from '../../../constants';
 
 interface BuildBulkEditRulesRouteParams {
   licenseState: ILicenseState;
@@ -33,6 +34,7 @@ const buildBulkEditRulesRoute = ({ licenseState, path, router }: BuildBulkEditRu
   router.post(
     {
       path,
+      security: DEFAULT_ALERTING_ROUTE_SECURITY,
       options: { access: 'internal' },
       validate: {
         body: bulkEditRulesRequestBodySchemaV1,
@@ -41,7 +43,8 @@ const buildBulkEditRulesRoute = ({ licenseState, path, router }: BuildBulkEditRu
     handleDisabledApiKeysError(
       router.handleLegacyErrors(
         verifyAccessAndContext(licenseState, async function (context, req, res) {
-          const rulesClient = (await context.alerting).getRulesClient();
+          const alertingContext = await context.alerting;
+          const rulesClient = await alertingContext.getRulesClient();
           const actionsClient = (await context.actions).getActionsClient();
 
           const bulkEditData: BulkEditRulesRequestBodyV1 = req.body;

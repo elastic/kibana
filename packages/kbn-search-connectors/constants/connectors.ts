@@ -15,6 +15,8 @@ import {
 
 import { docLinks } from './doc_links';
 
+export const MANAGED_CONNECTOR_INDEX_PREFIX = 'content-';
+
 // needs to be a function because, docLinks are only populated with actual
 // documentation links in browser after SearchConnectorsPlugin starts
 export const getConnectorsDict = (): Record<string, ConnectorClientSideDefinition> => ({

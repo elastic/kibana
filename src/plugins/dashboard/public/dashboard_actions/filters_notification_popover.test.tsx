@@ -18,6 +18,8 @@ import { FiltersNotificationActionApi } from './filters_notification_action';
 import { FiltersNotificationPopover } from './filters_notification_popover';
 import { ViewMode } from '@kbn/presentation-publishing';
 
+const canEditUnifiedSearch = jest.fn().mockReturnValue(true);
+
 const getMockPhraseFilter = (key: string, value: string): Filter => {
   return {
     meta: {
@@ -67,6 +69,7 @@ describe('filters notification popover', () => {
       parentApi: {
         viewMode: viewModeSubject,
       },
+      canEditUnifiedSearch,
     };
   });
 
@@ -94,6 +97,14 @@ describe('filters notification popover', () => {
 
   it('does not render an edit button when not in edit mode', async () => {
     await renderAndOpenPopover();
+    expect(
+      await screen.queryByTestId('filtersNotificationModal__editButton')
+    ).not.toBeInTheDocument();
+  });
+
+  it('does not render an edit button when canEditUnifiedSearch returns false', async () => {
+    await renderAndOpenPopover();
+    canEditUnifiedSearch.mockReturnValueOnce(false);
     expect(
       await screen.queryByTestId('filtersNotificationModal__editButton')
     ).not.toBeInTheDocument();

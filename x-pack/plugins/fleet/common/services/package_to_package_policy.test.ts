@@ -469,6 +469,45 @@ describe('Fleet - packageToPackagePolicy', () => {
       });
     });
 
+    it('returns package policy with inputs variables', () => {
+      const mockPackageWithPolicyTemplates = {
+        ...mockPackage,
+        policy_templates: [
+          { inputs: [{ type: 'foo' }] },
+          { inputs: [{ type: 'bar', vars: [{ default: 'bar-var-value', name: 'var-name' }] }] },
+        ],
+      } as unknown as PackageInfo;
+
+      expect(
+        packageToPackagePolicy(
+          mockPackageWithPolicyTemplates,
+          'policy-id-1',
+          'default',
+          'pkgPolicy-1'
+        )
+      ).toEqual({
+        policy_id: 'policy-id-1',
+        policy_ids: ['policy-id-1'],
+        namespace: 'default',
+        enabled: true,
+        inputs: [
+          { type: 'foo', enabled: true, streams: [] },
+          {
+            type: 'bar',
+            enabled: true,
+            streams: [],
+            vars: { 'var-name': { value: 'bar-var-value' } },
+          },
+        ],
+        name: 'pkgPolicy-1',
+        package: {
+          name: 'mock-package',
+          title: 'Mock package',
+          version: '0.0.0',
+        },
+      });
+    });
+
     it('returns package policy with multiple policy templates (aka has integrations', () => {
       expect(
         packageToPackagePolicy(

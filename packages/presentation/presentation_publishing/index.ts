@@ -39,6 +39,7 @@ export {
   initializeTimeRange,
   type SerializedTimeRange,
 } from './interfaces/fetch/initialize_time_range';
+export { apiPublishesReload, type PublishesReload } from './interfaces/fetch/publishes_reload';
 export {
   apiPublishesFilters,
   apiPublishesPartialUnifiedSearch,
@@ -97,7 +98,11 @@ export {
   apiPublishesDataLoading,
   type PublishesDataLoading,
 } from './interfaces/publishes_data_loading';
-export { apiPublishesDataViews, type PublishesDataViews } from './interfaces/publishes_data_views';
+export {
+  apiPublishesDataViews,
+  type PublishesDataViews,
+  type PublishesWritableDataViews,
+} from './interfaces/publishes_data_views';
 export {
   apiPublishesDisabledActionIds,
   type PublishesDisabledActionIds,

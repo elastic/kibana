@@ -13,7 +13,11 @@ import type {
 import { omit } from 'lodash';
 import pMap from 'p-map';
 
-import { FLEET_PROXY_SAVED_OBJECT_TYPE, SO_SEARCH_LIMIT } from '../constants';
+import {
+  FLEET_PROXY_SAVED_OBJECT_TYPE,
+  SO_SEARCH_LIMIT,
+  MAX_CONCURRENT_FLEET_PROXIES_OPERATIONS,
+} from '../constants';
 import { FleetProxyUnauthorizedError } from '../errors';
 import type {
   DownloadSource,
@@ -206,7 +210,7 @@ async function updateRelatedSavedObject(
         ...omit(fleetServerHost, 'id'),
         proxy_id: null,
       }),
-    { concurrency: 20 }
+    { concurrency: MAX_CONCURRENT_FLEET_PROXIES_OPERATIONS }
   );
 
   await pMap(
@@ -216,7 +220,7 @@ async function updateRelatedSavedObject(
         ...omit(output, 'id'),
         proxy_id: null,
       } as Partial<Output>),
-    { concurrency: 20 }
+    { concurrency: MAX_CONCURRENT_FLEET_PROXIES_OPERATIONS }
   );
 
   await pMap(downloadSources, (downloadSource) =>

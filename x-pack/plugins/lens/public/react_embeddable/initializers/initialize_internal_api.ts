@@ -6,21 +6,26 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
+import { initializeTitles } from '@kbn/presentation-publishing';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { buildObservableVariable, createEmptyLensState } from '../helper';
 import type {
   ExpressionWrapperProps,
+  LensEmbeddableStartServices,
   LensInternalApi,
   LensOverrides,
   LensRuntimeState,
+  VisualizationContext,
 } from '../types';
-import { apiHasAbortController } from '../type_guards';
+import { apiHasAbortController, apiHasLensComponentProps } from '../type_guards';
 import type { UserMessage } from '../../types';
 
 export function initializeInternalApi(
   initialState: LensRuntimeState,
-  parentApi: unknown
+  parentApi: unknown,
+  { visualizationMap }: LensEmbeddableStartServices
 ): LensInternalApi {
+  const { titlesApi } = initializeTitles(initialState);
   const [hasRenderCompleted$] = buildObservableVariable<boolean>(false);
   const [expressionParams$] = buildObservableVariable<ExpressionWrapperProps | null>(null);
   const expressionAbortController$ = new BehaviorSubject<AbortController | undefined>(undefined);
@@ -48,6 +53,18 @@ export function initializeInternalApi(
   // the isNewPanel won't be serialized so it will be always false after the edit panel closes applying the changes
   const isNewlyCreated$ = new BehaviorSubject<boolean>(initialState.isNewPanel || false);
 
+  const visualizationContext$ = new BehaviorSubject<VisualizationContext>({
+    // doc can point to a different set of attributes for the visualization
+    // i.e. when inline editing or applying a suggestion
+    activeAttributes: initialState.attributes,
+    mergedSearchContext: {},
+    indexPatterns: {},
+    indexPatternRefs: [],
+    activeVisualizationState: undefined,
+    activeDatasourceState: undefined,
+    activeData: undefined,
+  });
+
   // No need to expose anything at public API right now, that would happen later on
   // where each initializer will pick what it needs and publish it
   return {
@@ -61,6 +78,8 @@ export function initializeInternalApi(
     renderCount$,
     isNewlyCreated$,
     dataViews: dataViews$,
+    messages$,
+    validationMessages$,
     dispatchError: () => {
       hasRenderCompleted$.next(true);
       renderCount$.next(renderCount$.getValue() + 1);
@@ -78,14 +97,44 @@ export function initializeInternalApi(
     updateAbortController: (abortController: AbortController | undefined) =>
       expressionAbortController$.next(abortController),
     updateDataViews: (dataViews: DataView[] | undefined) => dataViews$.next(dataViews),
-    messages$,
     updateMessages: (newMessages: UserMessage[]) => messages$.next(newMessages),
-    validationMessages$,
     updateValidationMessages: (newMessages: UserMessage[]) => validationMessages$.next(newMessages),
     resetAllMessages: () => {
       messages$.next([]);
       validationMessages$.next([]);
     },
     setAsCreated: () => isNewlyCreated$.next(false),
+    getDisplayOptions: () => {
+      const latestAttributes = attributes$.getValue();
+      if (!latestAttributes.visualizationType) {
+        return {};
+      }
+
+      let displayOptions =
+        visualizationMap[latestAttributes.visualizationType]?.getDisplayOptions?.() ?? {};
+
+      if (apiHasLensComponentProps(parentApi) && parentApi.noPadding != null) {
+        displayOptions = {
+          ...displayOptions,
+          noPadding: parentApi.noPadding,
+        };
+      }
+
+      if (displayOptions.noPanelTitle == null && titlesApi.hidePanelTitle?.getValue()) {
+        displayOptions = {
+          ...displayOptions,
+          noPanelTitle: true,
+        };
+      }
+
+      return displayOptions;
+    },
+    getVisualizationContext: () => visualizationContext$.getValue(),
+    updateVisualizationContext: (newVisualizationContext: Partial<VisualizationContext>) => {
+      visualizationContext$.next({
+        ...visualizationContext$.getValue(),
+        ...newVisualizationContext,
+      });
+    },
   };
 }

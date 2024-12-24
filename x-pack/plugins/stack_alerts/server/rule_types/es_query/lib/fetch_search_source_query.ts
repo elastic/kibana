@@ -121,7 +121,6 @@ export async function fetchSearchSourceQuery({
       termField: params.termField,
     }),
     index: [index.name],
-    query: searchRequestBody,
   };
 }
 

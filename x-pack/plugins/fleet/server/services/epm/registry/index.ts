@@ -46,6 +46,7 @@ import {
   RegistryResponseError,
   PackageFailedVerificationError,
   PackageUnsupportedMediaTypeError,
+  ArchiveNotFoundError,
 } from '../../../errors';
 
 import { getBundledPackageByName } from '../packages/bundled_packages';
@@ -55,6 +56,8 @@ import { resolveDataStreamFields, resolveDataStreamsMap, withPackageSpan } from 
 import { verifyPackageArchiveSignature } from '../packages/package_verification';
 
 import type { ArchiveIterator } from '../../../../common/types';
+
+import { airGappedUtils } from '../airgapped';
 
 import { fetchUrl, getResponse, getResponseStream } from './requests';
 import { getRegistryUrl } from './registry_url';
@@ -67,6 +70,15 @@ export const pkgToPkgKey = ({ name, version }: { name: string; version: string }
 export async function fetchList(
   params?: GetPackagesRequest['query']
 ): Promise<RegistrySearchResults> {
+  if (airGappedUtils().shouldSkipRegistryRequests) {
+    appContextService
+      .getLogger()
+      .debug(
+        'fetchList: isAirGapped enabled and no registryUrl or RegistryProxyUrl configured, skipping registry requests'
+      );
+    return [];
+  }
+
   const registryUrl = getRegistryUrl();
   const url = new URL(`${registryUrl}/search`);
   if (params) {
@@ -106,16 +118,24 @@ async function _fetchFindLatestPackage(
     }
 
     try {
-      const res = await fetchUrl(url.toString(), 1);
-      const searchResults: RegistryPackage[] = JSON.parse(res);
+      if (!airGappedUtils().shouldSkipRegistryRequests) {
+        const res = await fetchUrl(url.toString(), 1);
+        const searchResults: RegistryPackage[] = JSON.parse(res);
 
-      const latestPackageFromRegistry = searchResults[0] ?? null;
+        const latestPackageFromRegistry = searchResults[0] ?? null;
 
-      if (bundledPackage && semverGte(bundledPackage.version, latestPackageFromRegistry.version)) {
+        if (
+          bundledPackage &&
+          semverGte(bundledPackage.version, latestPackageFromRegistry.version)
+        ) {
+          return bundledPackage;
+        }
+        return latestPackageFromRegistry;
+      } else if (airGappedUtils().shouldSkipRegistryRequests && bundledPackage) {
         return bundledPackage;
+      } else {
+        return null;
       }
-
-      return latestPackageFromRegistry;
     } catch (error) {
       logger.error(
         `Failed to fetch latest version of ${packageName} from registry: ${error.message}`
@@ -169,6 +189,13 @@ export async function fetchInfo(
   pkgVersion: string
 ): Promise<RegistryPackage | ArchivePackage> {
   const registryUrl = getRegistryUrl();
+  // if isAirGapped config enabled and bundled package, use the bundled version
+  if (airGappedUtils().shouldSkipRegistryRequests) {
+    const archivePackage = await getBundledArchive(pkgName, pkgVersion);
+    if (archivePackage) {
+      return archivePackage.packageInfo;
+    }
+  }
   try {
     // Trailing slash avoids 301 redirect / extra hop
     const res = await fetchUrl(`${registryUrl}/package/${pkgName}/${pkgVersion}/`).then(JSON.parse);
@@ -208,12 +235,20 @@ export async function getFile(
   pkgName: string,
   pkgVersion: string,
   relPath: string
-): Promise<Response> {
+): Promise<Response | null> {
   const filePath = `/package/${pkgName}/${pkgVersion}/${relPath}`;
   return fetchFile(filePath);
 }
 
-export async function fetchFile(filePath: string): Promise<Response> {
+export async function fetchFile(filePath: string): Promise<Response | null> {
+  if (airGappedUtils().shouldSkipRegistryRequests) {
+    appContextService
+      .getLogger()
+      .debug(
+        'fetchFile: isAirGapped enabled and no registryUrl or RegistryProxyUrl configured, skipping registry requests'
+      );
+    return null;
+  }
   const registryUrl = getRegistryUrl();
   return getResponse(`${registryUrl}${filePath}`);
 }
@@ -264,6 +299,15 @@ function setConstraints(url: URL) {
 export async function fetchCategories(
   params?: GetCategoriesRequest['query']
 ): Promise<CategorySummaryList> {
+  if (airGappedUtils().shouldSkipRegistryRequests) {
+    appContextService
+      .getLogger()
+      .debug(
+        'fetchCategories: isAirGapped enabled and no registryUrl or RegistryProxyUrl configured, skipping registry requests'
+      );
+    return [];
+  }
+
   const registryUrl = getRegistryUrl();
   const url = new URL(`${registryUrl}/categories`);
   if (params) {
@@ -319,42 +363,52 @@ export async function getPackage(
   archiveIterator: ArchiveIterator;
   verificationResult?: PackageVerificationResult;
 }> {
+  const logger = appContextService.getLogger();
   const verifyPackage = appContextService.getExperimentalFeatures().packageVerification;
   let packageInfo: ArchivePackage | undefined = getPackageInfo({ name, version });
   let verificationResult: PackageVerificationResult | undefined = verifyPackage
     ? getVerificationResult({ name, version })
     : undefined;
+  try {
+    const {
+      archiveBuffer,
+      archivePath,
+      verificationResult: latestVerificationResult,
+    } = await withPackageSpan('Fetch package archive from archive buffer', () =>
+      fetchArchiveBuffer({
+        pkgName: name,
+        pkgVersion: version,
+        shouldVerify: verifyPackage,
+        ignoreUnverified: options?.ignoreUnverified,
+      })
+    );
 
-  const {
-    archiveBuffer,
-    archivePath,
-    verificationResult: latestVerificationResult,
-  } = await withPackageSpan('Fetch package archive from archive buffer', () =>
-    fetchArchiveBuffer({
-      pkgName: name,
-      pkgVersion: version,
-      shouldVerify: verifyPackage,
-      ignoreUnverified: options?.ignoreUnverified,
-    })
-  );
+    if (latestVerificationResult) {
+      verificationResult = latestVerificationResult;
+      setVerificationResult({ name, version }, latestVerificationResult);
+    }
 
-  if (latestVerificationResult) {
-    verificationResult = latestVerificationResult;
-    setVerificationResult({ name, version }, latestVerificationResult);
+    const contentType = ensureContentType(archivePath);
+    const { paths, assetsMap, archiveIterator } = await unpackBufferToAssetsMap({
+      archiveBuffer,
+      contentType,
+      useStreaming: options?.useStreaming,
+    });
+
+    if (!packageInfo) {
+      packageInfo = await getPackageInfoFromArchiveOrCache(
+        name,
+        version,
+        archiveBuffer,
+        archivePath
+      );
+    }
+
+    return { paths, packageInfo, assetsMap, archiveIterator, verificationResult };
+  } catch (error) {
+    logger.warn(`getPackage failed with error: ${error}`);
+    throw error;
   }
-
-  const contentType = ensureContentType(archivePath);
-  const { paths, assetsMap, archiveIterator } = await unpackBufferToAssetsMap({
-    archiveBuffer,
-    contentType,
-    useStreaming: options?.useStreaming,
-  });
-
-  if (!packageInfo) {
-    packageInfo = await getPackageInfoFromArchiveOrCache(name, version, archiveBuffer, archivePath);
-  }
-
-  return { paths, packageInfo, assetsMap, archiveIterator, verificationResult };
 }
 
 export async function getPackageFieldsMetadata(
@@ -367,36 +421,40 @@ export async function getPackageFieldsMetadata(
   // Attempt retrieving latest package name and version
   const latestPackage = await fetchFindLatestPackageOrThrow(packageName);
   const { name, version } = latestPackage;
+  try {
+    // Attempt retrieving latest package
+    const resolvedPackage = await getPackage(name, version);
 
-  // Attempt retrieving latest package
-  const resolvedPackage = await getPackage(name, version);
+    // We need to collect all the available data streams for the package.
+    // In case a dataset is specified from the parameter, it will load the fields only for that specific dataset.
+    // As a fallback case, we'll try to read the fields for all the data streams in the package.
+    const dataStreamsMap = resolveDataStreamsMap(resolvedPackage.packageInfo.data_streams);
 
-  // We need to collect all the available data streams for the package.
-  // In case a dataset is specified from the parameter, it will load the fields only for that specific dataset.
-  // As a fallback case, we'll try to read the fields for all the data streams in the package.
-  const dataStreamsMap = resolveDataStreamsMap(resolvedPackage.packageInfo.data_streams);
+    const assetsMap = resolvedPackage.assetsMap;
 
-  const { assetsMap } = resolvedPackage;
+    const dataStream = datasetName ? dataStreamsMap.get(datasetName) : null;
 
-  const dataStream = datasetName ? dataStreamsMap.get(datasetName) : null;
-
-  if (dataStream) {
-    // Resolve a single data stream fields when the `datasetName` parameter is specified
-    return resolveDataStreamFields({ dataStream, assetsMap, excludedFieldsAssets });
-  } else {
-    // Resolve and merge all the integration data streams fields otherwise
-    return [...dataStreamsMap.values()].reduce(
-      (packageDataStreamsFields, currentDataStream) =>
-        Object.assign(
-          packageDataStreamsFields,
-          resolveDataStreamFields({
-            dataStream: currentDataStream,
-            assetsMap,
-            excludedFieldsAssets,
-          })
-        ),
-      {}
-    );
+    if (dataStream) {
+      // Resolve a single data stream fields when the `datasetName` parameter is specified
+      return resolveDataStreamFields({ dataStream, assetsMap, excludedFieldsAssets });
+    } else {
+      // Resolve and merge all the integration data streams fields otherwise
+      return [...dataStreamsMap.values()].reduce(
+        (packageDataStreamsFields, currentDataStream) =>
+          Object.assign(
+            packageDataStreamsFields,
+            resolveDataStreamFields({
+              dataStream: currentDataStream,
+              assetsMap,
+              excludedFieldsAssets,
+            })
+          ),
+        {}
+      );
+    }
+  } catch (error) {
+    appContextService.getLogger().warn(`getPackageFieldsMetadata error: ${error}`);
+    throw error;
   }
 }
 
@@ -436,22 +494,31 @@ export async function fetchArchiveBuffer({
   }
   const registryUrl = getRegistryUrl();
   const archiveUrl = `${registryUrl}${archivePath}`;
-  const archiveBuffer = await getResponseStream(archiveUrl).then(streamToBuffer);
-
-  if (shouldVerify) {
-    const verificationResult = await verifyPackageArchiveSignature({
-      pkgName,
-      pkgVersion,
-      pkgArchiveBuffer: archiveBuffer,
-      logger,
-    });
-
-    if (verificationResult.verificationStatus === 'unverified' && !ignoreUnverified) {
-      throw new PackageFailedVerificationError(pkgName, pkgVersion);
+  try {
+    const archiveBuffer = await getResponseStream(archiveUrl).then(streamToBuffer);
+    if (!archiveBuffer) {
+      logger.warn(`Archive Buffer not found`);
+      throw new ArchiveNotFoundError('Archive Buffer not found');
     }
-    return { archiveBuffer, archivePath, verificationResult };
+
+    if (shouldVerify) {
+      const verificationResult = await verifyPackageArchiveSignature({
+        pkgName,
+        pkgVersion,
+        pkgArchiveBuffer: archiveBuffer,
+        logger,
+      });
+
+      if (verificationResult.verificationStatus === 'unverified' && !ignoreUnverified) {
+        throw new PackageFailedVerificationError(pkgName, pkgVersion);
+      }
+      return { archiveBuffer, archivePath, verificationResult };
+    }
+    return { archiveBuffer, archivePath };
+  } catch (error) {
+    logger.warn(`fetchArchiveBuffer failed with error: ${error}`);
+    throw error;
   }
-  return { archiveBuffer, archivePath };
 }
 
 export async function getPackageArchiveSignatureOrUndefined({
@@ -473,9 +540,10 @@ export async function getPackageArchiveSignatureOrUndefined({
   }
 
   try {
-    const { body } = await fetchFile(signaturePath);
+    const res = await fetchFile(signaturePath);
 
-    return streamToString(body);
+    if (res?.body) return streamToString(res.body);
+    return undefined;
   } catch (e) {
     logger.error(`Error retrieving package signature at '${signaturePath}' : ${e}`);
     return undefined;

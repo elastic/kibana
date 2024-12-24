@@ -13,7 +13,7 @@ import useResizeObserver from 'use-resize-observer/polyfilled';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { EuiPortal } from '@elastic/eui';
-import { ReactEmbeddableRenderer, ViewMode } from '@kbn/embeddable-plugin/public';
+import { ReactEmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import { ExitFullScreenButton } from '@kbn/shared-ux-button-exit-full-screen';
 
 import {
@@ -25,6 +25,7 @@ import { CONTROL_GROUP_TYPE } from '@kbn/controls-plugin/common';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import { DashboardGrid } from '../grid';
 import { useDashboardApi } from '../../../dashboard_api/use_dashboard_api';
+import { useDashboardInternalApi } from '../../../dashboard_api/use_dashboard_internal_api';
 import { DashboardEmptyScreen } from '../empty_screen/dashboard_empty_screen';
 
 export const useDebouncedWidthObserver = (skipDebounce = false, wait = 100) => {
@@ -43,6 +44,7 @@ export const useDebouncedWidthObserver = (skipDebounce = false, wait = 100) => {
 
 export const DashboardViewport = ({ dashboardContainer }: { dashboardContainer?: HTMLElement }) => {
   const dashboardApi = useDashboardApi();
+  const dashboardInternalApi = useDashboardInternalApi();
   const [hasControls, setHasControls] = useState(false);
   const [
     controlGroupApi,
@@ -53,7 +55,6 @@ export const DashboardViewport = ({ dashboardContainer }: { dashboardContainer?:
     panels,
     viewMode,
     useMargins,
-    uuid,
     fullScreenMode,
   ] = useBatchedPublishingSubjects(
     dashboardApi.controlGroupApi$,
@@ -63,8 +64,7 @@ export const DashboardViewport = ({ dashboardContainer }: { dashboardContainer?:
     dashboardApi.focusedPanelId$,
     dashboardApi.panels$,
     dashboardApi.viewMode,
-    dashboardApi.useMargins$,
-    dashboardApi.uuid$,
+    dashboardApi.settings.useMargins$,
     dashboardApi.fullScreenMode$
   );
   const onExit = useCallback(() => {
@@ -119,14 +119,14 @@ export const DashboardViewport = ({ dashboardContainer }: { dashboardContainer?:
         'dshDashboardViewportWrapper--isFullscreen': fullScreenMode,
       })}
     >
-      {viewMode !== ViewMode.PRINT ? (
+      {viewMode !== 'print' ? (
         <div className={hasControls ? 'dshDashboardViewport-controls' : ''}>
           <ReactEmbeddableRenderer<
             ControlGroupSerializedState,
             ControlGroupRuntimeState,
             ControlGroupApi
           >
-            key={uuid}
+            key={dashboardApi.uuid}
             hidePanelChrome={true}
             panelProps={{ hideLoader: true }}
             type={CONTROL_GROUP_TYPE}
@@ -134,11 +134,12 @@ export const DashboardViewport = ({ dashboardContainer }: { dashboardContainer?:
             getParentApi={() => {
               return {
                 ...dashboardApi,
-                getSerializedStateForChild: dashboardApi.getSerializedStateForControlGroup,
-                getRuntimeStateForChild: dashboardApi.getRuntimeStateForControlGroup,
+                reload$: dashboardInternalApi.controlGroupReload$,
+                getSerializedStateForChild: dashboardInternalApi.getSerializedStateForControlGroup,
+                getRuntimeStateForChild: dashboardInternalApi.getRuntimeStateForControlGroup,
               };
             }}
-            onApiAvailable={(api) => dashboardApi.setControlGroupApi(api)}
+            onApiAvailable={(api) => dashboardInternalApi.setControlGroupApi(api)}
           />
         </div>
       ) : null}

@@ -8,7 +8,7 @@
 import './agent_enrollment_flyout.test.mocks';
 
 import React from 'react';
-import { act, cleanup, fireEvent, waitFor } from '@testing-library/react';
+import { fireEvent, waitFor } from '@testing-library/react';
 import type { RenderResult } from '@testing-library/react';
 
 import { createFleetTestRendererMock } from '../../mock';
@@ -23,11 +23,8 @@ import type { FlyOutProps } from './types';
 import { AgentEnrollmentFlyout } from '.';
 
 const render = (props?: Partial<FlyOutProps>) => {
-  cleanup();
   const renderer = createFleetTestRendererMock();
-  const results = renderer.render(<AgentEnrollmentFlyout onClose={jest.fn()} {...props} />);
-
-  return results;
+  return renderer.render(<AgentEnrollmentFlyout onClose={jest.fn()} {...props} />);
 };
 
 const testAgentPolicy: AgentPolicy = {
@@ -46,7 +43,7 @@ const testAgentPolicy: AgentPolicy = {
 describe('<AgentEnrollmentFlyout />', () => {
   let results: RenderResult;
 
-  beforeEach(async () => {
+  beforeEach(() => {
     jest.mocked(useAuthz).mockReturnValue({
       fleet: {
         readAgentPolicies: true,
@@ -88,10 +85,6 @@ describe('<AgentEnrollmentFlyout />', () => {
       agentPolicies: [{ id: 'fleet-server-policy' } as AgentPolicy],
       refreshAgentPolicies: jest.fn(),
     });
-
-    act(() => {
-      results = render();
-    });
   });
 
   afterEach(() => {
@@ -113,6 +106,8 @@ describe('<AgentEnrollmentFlyout />', () => {
 
   describe('managed instructions', () => {
     it('uses the agent policy selection step', () => {
+      results = render();
+
       expect(results.queryByTestId('agentEnrollmentFlyout')).not.toBeNull();
       expect(results.queryByTestId('agent-policy-selection-step')).not.toBeNull();
       expect(results.queryByTestId('agent-enrollment-key-selection-step')).toBeNull();
@@ -154,24 +149,22 @@ describe('<AgentEnrollmentFlyout />', () => {
 
     describe('standalone instructions', () => {
       function goToStandaloneTab() {
-        act(() => {
-          fireEvent.click(results.getByTestId('standaloneTab'));
-        });
+        fireEvent.click(results.getByTestId('standaloneTab'));
       }
 
-      beforeEach(() => {
+      it('uses the agent policy selection step', async () => {
         results = render({
           isIntegrationFlow: true,
         });
-      });
 
-      it('uses the agent policy selection step', async () => {
         goToStandaloneTab();
 
-        expect(results.queryByTestId('agentEnrollmentFlyout')).not.toBeNull();
-        expect(results.queryByTestId('agent-policy-selection-step')).not.toBeNull();
-        expect(results.queryByTestId('agent-enrollment-key-selection-step')).toBeNull();
-        expect(results.queryByTestId('configure-standalone-step')).not.toBeNull();
+        await waitFor(() => {
+          expect(results.queryByTestId('agentEnrollmentFlyout')).not.toBeNull();
+          expect(results.queryByTestId('agent-policy-selection-step')).not.toBeNull();
+          expect(results.queryByTestId('agent-enrollment-key-selection-step')).toBeNull();
+          expect(results.queryByTestId('configure-standalone-step')).not.toBeNull();
+        });
       });
 
       describe('with a specific policy', () => {
@@ -185,13 +178,15 @@ describe('<AgentEnrollmentFlyout />', () => {
           });
         });
 
-        it('does not use either of the agent policy selection or enrollment key steps', () => {
+        it('does not use either of the agent policy selection or enrollment key steps', async () => {
           goToStandaloneTab();
 
-          expect(results.queryByTestId('agentEnrollmentFlyout')).not.toBeNull();
-          expect(results.queryByTestId('agent-policy-selection-step')).toBeNull();
-          expect(results.queryByTestId('agent-enrollment-key-selection-step')).toBeNull();
-          expect(results.queryByTestId('configure-standalone-step')).not.toBeNull();
+          await waitFor(() => {
+            expect(results.queryByTestId('agentEnrollmentFlyout')).not.toBeNull();
+            expect(results.queryByTestId('agent-policy-selection-step')).toBeNull();
+            expect(results.queryByTestId('agent-enrollment-key-selection-step')).toBeNull();
+            expect(results.queryByTestId('configure-standalone-step')).not.toBeNull();
+          });
         });
       });
     });

@@ -26,6 +26,7 @@ DEPS = [
   "@npm//tslib",
   "@npm//@elastic/eui",
   "//packages/core/base/core-base-common",
+  "//packages/shared-ux/router/impl:shared-ux-router",
 ]
 
 js_library(

@@ -44,7 +44,6 @@ export const updateSearchSource = (
   dataView: DataView | undefined,
   sort: (SortOrder[] & string[][]) | undefined,
   sampleSize: number,
-  useNewFieldsApi: boolean,
   fetchContext: FetchContext,
   defaults: {
     sortDir: string;
@@ -62,12 +61,9 @@ export const updateSearchSource = (
       includeTieBreaker: true,
     })
   );
-  if (useNewFieldsApi) {
-    searchSource.removeField('fieldsFromSource');
-    searchSource.setField('fields', [{ field: '*', include_unmapped: true }]);
-  } else {
-    searchSource.removeField('fields');
-  }
+
+  searchSource.removeField('fieldsFromSource');
+  searchSource.setField('fields', [{ field: '*', include_unmapped: true }]);
 
   // if the search source has a parent, update that too based on fetch context
   const parentSearchSource = searchSource.getParent();

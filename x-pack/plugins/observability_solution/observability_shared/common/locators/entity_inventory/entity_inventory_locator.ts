@@ -16,8 +16,8 @@ export class EntitiesInventoryLocatorDefinition implements LocatorDefinition<Ser
 
   public readonly getLocation = async () => {
     return {
-      app: 'observability',
-      path: `/inventory`,
+      app: 'inventory',
+      path: `/`,
       state: {},
     };
   };

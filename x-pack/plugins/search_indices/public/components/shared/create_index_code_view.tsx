@@ -44,15 +44,15 @@ export const CreateIndexCodeView = ({
   const selectedCodeExamples = useCreateIndexCodingExamples();
 
   const elasticsearchUrl = useElasticsearchUrl();
-  const { apiKey, apiKeyIsVisible } = useSearchApiKey();
+  const { apiKey } = useSearchApiKey();
 
   const codeParams = useMemo(() => {
     return {
       indexName: indexName || undefined,
       elasticsearchURL: elasticsearchUrl,
-      apiKey: apiKeyIsVisible && apiKey ? apiKey : undefined,
+      apiKey: apiKey || undefined,
     };
-  }, [indexName, elasticsearchUrl, apiKeyIsVisible, apiKey]);
+  }, [indexName, elasticsearchUrl, apiKey]);
   const selectedCodeExample = useMemo(() => {
     return selectedCodeExamples[selectedLanguage];
   }, [selectedLanguage, selectedCodeExamples]);

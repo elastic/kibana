@@ -6,14 +6,14 @@
  */
 
 import { composeStories } from '@storybook/testing-react';
-import { render } from '@testing-library/react';
 import React from 'react';
 import * as stories from './crash_group_list.stories';
+import { renderWithTheme } from '../../../../../utils/test_helpers';
 
 const { Example } = composeStories(stories);
 
 describe('MobileCrashGroupList', () => {
   it('renders', () => {
-    expect(() => render(<Example />)).not.toThrowError();
+    expect(() => renderWithTheme(<Example />)).not.toThrowError();
   });
 });

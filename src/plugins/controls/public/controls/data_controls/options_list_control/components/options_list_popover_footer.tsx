@@ -56,7 +56,7 @@ export const OptionsListPopoverFooter = () => {
         `}
       >
         {loading && (
-          <div style={{ position: 'absolute', width: '100%' }}>
+          <div css={{ position: 'absolute', width: '100%' }}>
             <EuiProgress
               data-test-subj="optionsList-control-popover-loading"
               size="xs"

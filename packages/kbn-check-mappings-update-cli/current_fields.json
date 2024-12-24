@@ -61,10 +61,6 @@
     "monitoring.run.last_run.metrics.total_alerts_detected",
     "monitoring.run.last_run.metrics.total_indexing_duration_ms",
     "monitoring.run.last_run.metrics.total_search_duration_ms",
-    "monitoring.run.last_run.metrics.unfilled_gaps_ms",
-    "monitoring.run.last_run.metrics.unfilled_gaps_ms.last_1d",
-    "monitoring.run.last_run.metrics.unfilled_gaps_ms.last_3d",
-    "monitoring.run.last_run.metrics.unfilled_gaps_ms.last_7d",
     "monitoring.run.last_run.timestamp",
     "muteAll",
     "mutedInstanceIds",
@@ -173,6 +169,9 @@
     "external_service.pushed_by.full_name",
     "external_service.pushed_by.profile_uid",
     "external_service.pushed_by.username",
+    "observables",
+    "observables.typeKey",
+    "observables.value",
     "owner",
     "settings",
     "settings.syncAlerts",
@@ -766,7 +765,10 @@
   ],
   "maintenance-window": [
     "enabled",
-    "events"
+    "events",
+    "expirationDate",
+    "title",
+    "updatedAt"
   ],
   "map": [
     "bounds",

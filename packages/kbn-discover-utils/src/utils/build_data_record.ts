@@ -17,7 +17,7 @@ import type { DataTableRecord, EsHitRecord } from '../types';
 import { getDocId } from './get_doc_id';
 
 /**
- * Build a record for data table, explorer + classic one
+ * Build a record for data grid
  * @param doc the document returned from Elasticsearch
  * @param dataView this current data view
  * @param isAnchor determines if the given doc is the anchor doc when viewing surrounding documents

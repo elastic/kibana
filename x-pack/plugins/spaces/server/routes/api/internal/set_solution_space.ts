@@ -21,6 +21,7 @@ const spaceSolutionSchema = schema.oneOf([
       schema.literal('security'),
       schema.literal('observability'),
       schema.literal('elasticsearch'),
+      schema.literal('search'),
     ]),
   }),
 ]);

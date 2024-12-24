@@ -44,13 +44,13 @@ export const EnvironmentSwitch = ({ env, isChecked, onChange, name }: Props) => 
   const canSet = env === 'kibana' ? canSetAdvancedSettings : true;
 
   return (
-    <EuiFlexItem grow={false} style={{ marginBottom: '.25rem' }}>
+    <EuiFlexItem grow={false} css={{ marginBottom: '.25rem' }}>
       <EuiFlexGroup gutterSize="xs" alignItems="flexEnd" responsive={false}>
         <EuiFlexItem grow={false}>
           <EuiSwitch
             disabled={!canSet}
             checked={isChecked}
-            style={{ marginTop: 1 }}
+            css={{ marginTop: 1 }}
             label={
               <EuiFlexItem grow={false}>
                 <EuiScreenReaderOnly>
@@ -63,7 +63,7 @@ export const EnvironmentSwitch = ({ env, isChecked, onChange, name }: Props) => 
             compressed
           />
         </EuiFlexItem>
-        <EuiFlexItem style={{ textAlign: 'right' }}>
+        <EuiFlexItem css={{ textAlign: 'right' }}>
           <EuiIconTip content={switchText[env].help} position="left" />
         </EuiFlexItem>
       </EuiFlexGroup>

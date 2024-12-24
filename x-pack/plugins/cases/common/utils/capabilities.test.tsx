@@ -17,7 +17,6 @@ describe('createUICapabilities', () => {
           "update_cases",
           "push_cases",
           "cases_connectors",
-          "cases_settings",
         ],
         "createComment": Array [
           "create_comment",

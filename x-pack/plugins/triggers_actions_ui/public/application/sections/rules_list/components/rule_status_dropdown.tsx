@@ -63,6 +63,7 @@ export const RuleStatusDropdown: React.FunctionComponent<ComponentOpts> = ({
     notifications: { toasts },
     i18n: i18nStart,
     theme,
+    userProfile,
   } = useKibana().services;
 
   const [isUpdating, setIsUpdating] = useState<boolean>(false);
@@ -86,12 +87,12 @@ export const RuleStatusDropdown: React.FunctionComponent<ComponentOpts> = ({
       ...(message.details && {
         text: toMountPoint(
           <ToastWithCircuitBreakerContent>{message.details}</ToastWithCircuitBreakerContent>,
-          { i18n: i18nStart, theme }
+          { i18n: i18nStart, theme, userProfile }
         ),
       }),
     });
     throw new Error();
-  }, [i18nStart, theme, enableRule, toasts]);
+  }, [i18nStart, theme, userProfile, enableRule, toasts]);
 
   const onEnable = useCallback(async () => {
     setIsUpdating(true);

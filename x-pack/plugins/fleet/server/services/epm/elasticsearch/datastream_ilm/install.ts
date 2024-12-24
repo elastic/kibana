@@ -6,6 +6,7 @@
  */
 
 import type { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
+import pMap from 'p-map';
 
 import {
   ElasticsearchAssetType,
@@ -17,6 +18,8 @@ import { getAssetFromAssetsMap } from '../../archive';
 
 import { getESAssetMetadata } from '../meta';
 import { retryTransientEsErrors } from '../retry';
+
+import { MAX_CONCURRENT_DATASTREAMS_ILM_OPERATIONS } from '../../../../constants';
 
 import { deleteIlms } from './remove';
 
@@ -111,11 +114,15 @@ export const installIlmForDataStream = async (
       }
     );
 
-    const installationPromises = ilmInstallations.map(async (ilmInstallation) => {
-      return handleIlmInstall({ esClient, ilmInstallation, logger });
-    });
-
-    installedIlms = await Promise.all(installationPromises).then((results) => results.flat());
+    installedIlms = await pMap(
+      ilmInstallations,
+      async (ilmInstallation) => {
+        return handleIlmInstall({ esClient, ilmInstallation, logger });
+      },
+      {
+        concurrency: MAX_CONCURRENT_DATASTREAMS_ILM_OPERATIONS,
+      }
+    ).then((results) => results.flat());
   }
 
   return { installedIlms, esReferences };

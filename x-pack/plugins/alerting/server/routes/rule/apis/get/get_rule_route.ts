@@ -22,6 +22,7 @@ import type {
   GetRuleResponseV1,
 } from '../../../../../common/routes/rule/apis/get';
 import { getRuleRequestParamsSchemaV1 } from '../../../../../common/routes/rule/apis/get';
+import { DEFAULT_ALERTING_ROUTE_SECURITY } from '../../../constants';
 
 interface BuildGetRulesRouteParams {
   licenseState: ILicenseState;
@@ -41,6 +42,7 @@ const buildGetRuleRoute = ({
     {
       path,
       options,
+      security: DEFAULT_ALERTING_ROUTE_SECURITY,
       validate: {
         request: {
           params: getRuleRequestParamsSchemaV1,
@@ -64,7 +66,8 @@ const buildGetRuleRoute = ({
     },
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
-        const rulesClient = (await context.alerting).getRulesClient();
+        const alertingContext = await context.alerting;
+        const rulesClient = await alertingContext.getRulesClient();
         const params: GetRuleRequestParamsV1 = req.params;
 
         // TODO (http-versioning): Remove this cast, this enables us to move forward

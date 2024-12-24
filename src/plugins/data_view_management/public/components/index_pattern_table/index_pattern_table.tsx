@@ -411,7 +411,7 @@ export const IndexPatternTable = ({
   return (
     <div data-test-subj="indexPatternTable" role="region" aria-label={title}>
       {isLoadingDataState ? (
-        <div style={{ display: 'flex', justifyContent: 'center' }}>
+        <div css={{ display: 'flex', justifyContent: 'center' }}>
           <EuiLoadingSpinner size="xxl" />
         </div>
       ) : (

@@ -7,7 +7,6 @@
 
 import React, { FunctionComponent } from 'react';
 import { EuiDataGridColumn } from '@elastic/eui';
-import { AlertConsumers } from '@kbn/rule-data-utils';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { act, waitFor, renderHook } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -76,7 +75,7 @@ mockFetchAlertsFields.mockResolvedValue({ browserFields, fields: [] });
 
 describe('useColumns', () => {
   const id = 'useColumnTest';
-  const featureIds: AlertConsumers[] = [AlertConsumers.LOGS, AlertConsumers.APM];
+  const ruleTypeIds: string[] = ['apm', 'logs'];
   let storage = { current: new Storage(mockStorage) };
 
   const getStorageAlertsTableByDefaultColumns = (defaultColumns: EuiDataGridColumn[]) => {
@@ -155,7 +154,7 @@ describe('useColumns', () => {
       () =>
         useColumns({
           defaultColumns,
-          featureIds,
+          ruleTypeIds,
           id,
           storageAlertsTable: localStorageAlertsTable,
           storage,
@@ -187,7 +186,7 @@ describe('useColumns', () => {
       () =>
         useColumns({
           defaultColumns,
-          featureIds,
+          ruleTypeIds,
           id,
           storageAlertsTable: localStorageAlertsTable,
           storage,
@@ -213,7 +212,7 @@ describe('useColumns', () => {
         useColumns({
           alertsFields,
           defaultColumns,
-          featureIds,
+          ruleTypeIds,
           id,
           storageAlertsTable: localStorageAlertsTable,
           storage,
@@ -232,7 +231,7 @@ describe('useColumns', () => {
         () =>
           useColumns({
             defaultColumns,
-            featureIds,
+            ruleTypeIds,
             id,
             storageAlertsTable: localStorageAlertsTable,
             storage,
@@ -254,7 +253,7 @@ describe('useColumns', () => {
         () =>
           useColumns({
             defaultColumns,
-            featureIds,
+            ruleTypeIds,
             id,
             storageAlertsTable: localStorageAlertsTable,
             storage,
@@ -283,7 +282,7 @@ describe('useColumns', () => {
         () =>
           useColumns({
             defaultColumns,
-            featureIds,
+            ruleTypeIds,
             id,
             storageAlertsTable: localStorageAlertsTable,
             storage,
@@ -301,7 +300,7 @@ describe('useColumns', () => {
         () =>
           useColumns({
             defaultColumns: localDefaultColumns,
-            featureIds,
+            ruleTypeIds,
             id,
             storageAlertsTable: localStorageAlertsTable,
             storage,
@@ -338,7 +337,7 @@ describe('useColumns', () => {
         () =>
           useColumns({
             defaultColumns,
-            featureIds,
+            ruleTypeIds,
             id,
             storageAlertsTable: localStorageAlertsTable,
             storage,
@@ -357,7 +356,7 @@ describe('useColumns', () => {
         () =>
           useColumns({
             defaultColumns,
-            featureIds,
+            ruleTypeIds,
             id,
             storageAlertsTable: localStorageAlertsTable,
             storage,
@@ -378,7 +377,7 @@ describe('useColumns', () => {
         () =>
           useColumns({
             defaultColumns,
-            featureIds,
+            ruleTypeIds,
             id,
             storageAlertsTable: localStorageAlertsTable,
             storage,
@@ -407,7 +406,7 @@ describe('useColumns', () => {
         () =>
           useColumns({
             defaultColumns,
-            featureIds,
+            ruleTypeIds,
             id,
             storageAlertsTable: localStorageAlertsTable,
             storage,
@@ -440,7 +439,7 @@ describe('useColumns', () => {
         () =>
           useColumns({
             defaultColumns,
-            featureIds,
+            ruleTypeIds,
             id,
             storageAlertsTable: localStorageAlertsTable,
             storage,

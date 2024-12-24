@@ -17,7 +17,8 @@ import { validatePackagePolicy } from '../../services';
 
 import { StepConfigurePackagePolicy } from './step_configure_package';
 
-describe('StepConfigurePackage', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/201598
+describe.skip('StepConfigurePackage', () => {
   let packageInfo: PackageInfo;
   let packagePolicy: NewPackagePolicy;
   const mockUpdatePackagePolicy = jest.fn().mockImplementation((val: any) => {

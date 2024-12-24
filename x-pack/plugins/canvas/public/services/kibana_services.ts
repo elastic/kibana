@@ -11,7 +11,7 @@ import type { ContentManagementPublicStart } from '@kbn/content-management-plugi
 import type { CoreStart, PluginInitializerContext } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import type { EmbeddableStart } from '@kbn/embeddable-plugin/public/plugin';
+import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
 import type { ReportingStart } from '@kbn/reporting-plugin/public';
@@ -51,11 +51,9 @@ export const setKibanaServices = (
   embeddableService = deps.embeddable;
   expressionsService = deps.expressions;
   presentationUtilService = deps.presentationUtil;
-  reportingService = Boolean(
-    deps.reporting?.usesUiCapabilities() && !kibanaCore.application.capabilities.canvas?.generatePdf
-  )
-    ? undefined
-    : deps.reporting;
+  reportingService = Boolean(kibanaCore.application.capabilities.canvas?.generatePdf)
+    ? deps.reporting
+    : undefined;
   spacesService = deps.spaces;
   uiActionsService = deps.uiActions;
   visualizationsService = deps.visualizations;

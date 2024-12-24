@@ -11,13 +11,13 @@ exports[`Apply and Cancel change btns enabled when there are changes 1`] = `
       wrap={true}
     >
       <EuiFlexItem
-        data-test-subj="inputControlItem"
-        key="mock-list-control"
-        style={
+        css={
           Object {
             "minWidth": "250px",
           }
         }
+        data-test-subj="inputControlItem"
+        key="mock-list-control"
       >
         <injectIntl(ListControlUi)
           controlIndex={0}
@@ -99,13 +99,13 @@ exports[`Clear btns enabled when there are values 1`] = `
       wrap={true}
     >
       <EuiFlexItem
-        data-test-subj="inputControlItem"
-        key="mock-list-control"
-        style={
+        css={
           Object {
             "minWidth": "250px",
           }
         }
+        data-test-subj="inputControlItem"
+        key="mock-list-control"
       >
         <injectIntl(ListControlUi)
           controlIndex={0}
@@ -187,13 +187,13 @@ exports[`Renders list control 1`] = `
       wrap={true}
     >
       <EuiFlexItem
-        data-test-subj="inputControlItem"
-        key="mock-list-control"
-        style={
+        css={
           Object {
             "minWidth": "250px",
           }
         }
+        data-test-subj="inputControlItem"
+        key="mock-list-control"
       >
         <injectIntl(ListControlUi)
           controlIndex={0}
@@ -275,13 +275,13 @@ exports[`Renders range control 1`] = `
       wrap={true}
     >
       <EuiFlexItem
-        data-test-subj="inputControlItem"
-        key="mock-range-control"
-        style={
+        css={
           Object {
             "minWidth": "250px",
           }
         }
+        data-test-subj="inputControlItem"
+        key="mock-range-control"
       >
         <RangeControl
           control={

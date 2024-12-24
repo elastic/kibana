@@ -339,6 +339,16 @@ exports.EcsCustomPropertyMappings = {
           },
         },
       },
+      user_api_key: {
+        properties: {
+          id: {
+            type: 'keyword',
+          },
+          name: {
+            type: 'keyword',
+          },
+        },
+      },
     },
   },
 };

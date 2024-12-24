@@ -146,6 +146,8 @@ export const PROFILE_ALLOC_SPACE = 'profile.alloc_space.bytes';
 export const PROFILE_INUSE_OBJECTS = 'profile.inuse_objects.count';
 export const PROFILE_INUSE_SPACE = 'profile.inuse_space.bytes';
 
+export const DATA_STREAM_TYPE = 'data_stream.type';
+
 export const ENTITY = 'entity';
 export const ENTITY_ID = 'entity.id';
 export const ENTITY_TYPE = 'entity.type';

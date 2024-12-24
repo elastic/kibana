@@ -13,6 +13,7 @@ import { BehaviorSubject, debounceTime, first, map } from 'rxjs';
 import { EuiInputPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import {
+  PublishingSubject,
   ViewMode,
   apiHasParentApi,
   apiPublishesDataLoading,
@@ -57,6 +58,7 @@ export const getTimesliderControlFactory = (): ControlFactory<
       const timeslice$ = new BehaviorSubject<[number, number] | undefined>(undefined);
       const isAnchored$ = new BehaviorSubject<boolean | undefined>(initialState.isAnchored);
       const isPopoverOpen$ = new BehaviorSubject(false);
+      const hasTimeSliceSelection$ = new BehaviorSubject<boolean>(Boolean(timeslice$));
 
       const timeRangePercentage = initTimeRangePercentage(
         initialState,
@@ -102,6 +104,7 @@ export const getTimesliderControlFactory = (): ControlFactory<
       }
 
       function onChange(timeslice?: Timeslice) {
+        hasTimeSliceSelection$.next(Boolean(timeslice));
         setTimeslice(timeslice);
         const nextSelectedRange = timeslice
           ? timeslice[TO_INDEX] - timeslice[FROM_INDEX]
@@ -224,7 +227,9 @@ export const getTimesliderControlFactory = (): ControlFactory<
           },
           clearSelections: () => {
             setTimeslice(undefined);
+            hasTimeSliceSelection$.next(false);
           },
+          hasSelections$: hasTimeSliceSelection$ as PublishingSubject<boolean | undefined>,
           CustomPrependComponent: () => {
             const [autoApplySelections, viewMode] = useBatchedPublishingSubjects(
               controlGroupApi.autoApplySelections$,
@@ -265,7 +270,6 @@ export const getTimesliderControlFactory = (): ControlFactory<
         Component: (controlPanelClassNames) => {
           const [isAnchored, isPopoverOpen, timeRangeMeta, timeslice] =
             useBatchedPublishingSubjects(isAnchored$, isPopoverOpen$, timeRangeMeta$, timeslice$);
-
           useEffect(() => {
             return () => {
               cleanupTimeRangeSubscription();
@@ -279,6 +283,9 @@ export const getTimesliderControlFactory = (): ControlFactory<
           const to = useMemo(() => {
             return timeslice ? timeslice[TO_INDEX] : timeRangeMeta.timeRangeMax;
           }, [timeslice, timeRangeMeta.timeRangeMax]);
+          const value: Timeslice = useMemo(() => {
+            return [from, to];
+          }, [from, to]);
 
           return (
             <EuiInputPopover
@@ -301,7 +308,7 @@ export const getTimesliderControlFactory = (): ControlFactory<
               <TimeSliderPopoverContent
                 isAnchored={typeof isAnchored === 'boolean' ? isAnchored : false}
                 setIsAnchored={setIsAnchored}
-                value={[from, to]}
+                value={value}
                 onChange={onChange}
                 stepSize={timeRangeMeta.stepSize}
                 ticks={timeRangeMeta.ticks}

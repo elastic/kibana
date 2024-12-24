@@ -349,7 +349,7 @@ export class AlertingEventLogger {
   }
 
   public done({ status, metrics, timings, backfill }: DoneOpts) {
-    if (!this.isInitialized || !this.event || !this.context || !this.ruleData) {
+    if (!this.isInitialized || !this.event || !this.context) {
       throw new Error('AlertingEventLogger not initialized');
     }
 
@@ -363,16 +363,15 @@ export class AlertingEventLogger {
       updateEvent(this.event, { status: status.status });
 
       if (status.error) {
+        const message = this.ruleData
+          ? `${this.ruleData.type?.id}:${this.context.savedObjectId}: execution failed`
+          : `${this.context.savedObjectId}: execution failed`;
         updateEvent(this.event, {
           outcome: 'failure',
           alertingOutcome: 'failure',
           reason: status.error?.reason || 'unknown',
           error: this.event?.error?.message || status.error.message,
-          ...(this.event.message && this.event.event?.outcome === 'failure'
-            ? {}
-            : {
-                message: `${this.ruleData.type?.id}:${this.context.savedObjectId}: execution failed`,
-              }),
+          ...(this.event.message && this.event.event?.outcome === 'failure' ? {} : { message }),
         });
       } else {
         if (status.warning) {

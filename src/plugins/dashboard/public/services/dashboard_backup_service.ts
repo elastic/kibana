@@ -10,15 +10,15 @@
 import { isEqual } from 'lodash';
 import { firstValueFrom } from 'rxjs';
 
-import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { set } from '@kbn/safer-lodash-set';
 
-import type { DashboardContainerInput } from '../../common';
+import { ViewMode } from '@kbn/presentation-publishing';
 import { backupServiceStrings } from '../dashboard_container/_dashboard_container_strings';
 import { UnsavedPanelState } from '../dashboard_container/types';
 import { coreServices, spacesService } from './kibana_services';
-import { SavedDashboardInput } from './dashboard_content_management_service/types';
+import { DashboardState } from '../dashboard_api/types';
+import { DEFAULT_DASHBOARD_INPUT } from '../dashboard_constants';
 
 export const DASHBOARD_PANELS_UNSAVED_ID = 'unsavedDashboard';
 export const PANELS_CONTROL_GROUP_KEY = 'controlGroup';
@@ -32,13 +32,13 @@ interface DashboardBackupServiceType {
   clearState: (id?: string) => void;
   getState: (id: string | undefined) =>
     | {
-        dashboardState?: Partial<SavedDashboardInput>;
+        dashboardState?: Partial<DashboardState>;
         panels?: UnsavedPanelState;
       }
     | undefined;
   setState: (
     id: string | undefined,
-    dashboardState: Partial<SavedDashboardInput>,
+    dashboardState: Partial<DashboardState>,
     panels: UnsavedPanelState
   ) => void;
   getViewMode: () => ViewMode;
@@ -67,7 +67,7 @@ class DashboardBackupService implements DashboardBackupServiceType {
   }
 
   public getViewMode = (): ViewMode => {
-    return this.localStorage.get(DASHBOARD_VIEWMODE_LOCAL_KEY);
+    return this.localStorage.get(DASHBOARD_VIEWMODE_LOCAL_KEY) ?? DEFAULT_DASHBOARD_INPUT.viewMode;
   };
 
   public storeViewMode = (viewMode: ViewMode) => {
@@ -112,7 +112,7 @@ class DashboardBackupService implements DashboardBackupServiceType {
     try {
       const dashboardState = this.sessionStorage.get(DASHBOARD_STATE_SESSION_KEY)?.[
         this.activeSpaceId
-      ]?.[id] as Partial<DashboardContainerInput> | undefined;
+      ]?.[id] as Partial<DashboardState> | undefined;
       const panels = this.sessionStorage.get(DASHBOARD_PANELS_SESSION_KEY)?.[this.activeSpaceId]?.[
         id
       ] as UnsavedPanelState | undefined;
@@ -128,7 +128,7 @@ class DashboardBackupService implements DashboardBackupServiceType {
 
   public setState(
     id = DASHBOARD_PANELS_UNSAVED_ID,
-    newState: Partial<DashboardContainerInput>,
+    newState: Partial<DashboardState>,
     unsavedPanels: UnsavedPanelState
   ) {
     try {
@@ -159,7 +159,7 @@ class DashboardBackupService implements DashboardBackupServiceType {
       [...Object.keys(panelStatesInSpace), ...Object.keys(dashboardStatesInSpace)].map(
         (dashboardId) => {
           if (
-            dashboardStatesInSpace[dashboardId].viewMode === ViewMode.EDIT &&
+            dashboardStatesInSpace[dashboardId].viewMode === 'edit' &&
             (Object.keys(dashboardStatesInSpace[dashboardId]).some(
               (stateKey) => stateKey !== 'viewMode'
             ) ||

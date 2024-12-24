@@ -31,7 +31,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { DashboardContainerInput } from '../../../../common';
+import { DashboardSettings } from '../../../dashboard_api/types';
 import { useDashboardApi } from '../../../dashboard_api/use_dashboard_api';
 import { getDashboardContentManagementService } from '../../../services/dashboard_content_management_service';
 import { savedObjectsTaggingService } from '../../../services/kibana_services';
@@ -42,7 +42,7 @@ interface DashboardSettingsProps {
 
 const DUPLICATE_TITLE_CALLOUT_ID = 'duplicateTitleCallout';
 
-export const DashboardSettings = ({ onClose }: DashboardSettingsProps) => {
+export const DashboardSettingsFlyout = ({ onClose }: DashboardSettingsProps) => {
   const dashboardApi = useDashboardApi();
 
   const [localSettings, setLocalSettings] = useState(dashboardApi.getSettings());
@@ -81,7 +81,7 @@ export const DashboardSettings = ({ onClose }: DashboardSettingsProps) => {
     }
   };
 
-  const updateDashboardSetting = useCallback((newSettings: Partial<DashboardContainerInput>) => {
+  const updateDashboardSetting = useCallback((newSettings: Partial<DashboardSettings>) => {
     setLocalSettings((prevSettings) => {
       return {
         ...prevSettings,

@@ -45,6 +45,12 @@ export const registerHasDataViewsRoute = (router: IRouter): void => {
     .addVersion(
       {
         version: '1',
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'Authorization provided by saved objects client',
+          },
+        },
         validate: {
           response: {
             200: {

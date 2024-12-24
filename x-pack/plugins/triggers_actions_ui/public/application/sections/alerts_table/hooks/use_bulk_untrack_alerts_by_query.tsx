@@ -9,7 +9,6 @@ import { i18n } from '@kbn/i18n';
 import { useMutation } from '@tanstack/react-query';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { INTERNAL_BASE_ALERTING_API_PATH } from '@kbn/alerting-plugin/common';
-import { ValidFeatureId } from '@kbn/rule-data-utils';
 import { AlertsQueryContext } from '@kbn/alerts-ui-shared/src/common/contexts/alerts_query_context';
 import { useKibana } from '../../../../common';
 
@@ -22,14 +21,14 @@ export const useBulkUntrackAlertsByQuery = () => {
   const untrackAlertsByQuery = useMutation<
     string,
     string,
-    { query: Pick<QueryDslQueryContainer, 'bool' | 'ids'>; featureIds: ValidFeatureId[] }
+    { query: Pick<QueryDslQueryContainer, 'bool' | 'ids'>; ruleTypeIds: string[] }
   >(
     ['untrackAlerts'],
-    ({ query, featureIds }) => {
+    ({ query, ruleTypeIds }) => {
       try {
         const body = JSON.stringify({
           query: Array.isArray(query) ? query : [query],
-          feature_ids: featureIds,
+          rule_type_ids: ruleTypeIds,
         });
         return http.post(`${INTERNAL_BASE_ALERTING_API_PATH}/alerts/_bulk_untrack_by_query`, {
           body,

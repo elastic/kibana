@@ -10,13 +10,13 @@
 import { pick } from 'lodash';
 import deepEqual from 'react-fast-compare';
 import { BehaviorSubject, combineLatest, map, Observable, skip } from 'rxjs';
-
+import type { Adapters } from '@kbn/inspector-plugin/common';
 import { ISearchSource, SerializedSearchSourceFields } from '@kbn/data-plugin/common';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { DataTableRecord } from '@kbn/discover-utils/types';
 import type {
-  PublishesDataViews,
-  PublishesUnifiedSearch,
+  PublishesWritableUnifiedSearch,
+  PublishesWritableDataViews,
   StateComparators,
 } from '@kbn/presentation-publishing';
 import { DiscoverGridSettings, SavedSearch } from '@kbn/saved-search-plugin/common';
@@ -71,7 +71,7 @@ export const initializeSearchEmbeddableApi = async (
     discoverServices: DiscoverServices;
   }
 ): Promise<{
-  api: PublishesSavedSearch & PublishesDataViews & Partial<PublishesUnifiedSearch>;
+  api: PublishesSavedSearch & PublishesWritableDataViews & Partial<PublishesWritableUnifiedSearch>;
   stateManager: SearchEmbeddableStateManager;
   comparators: StateComparators<SearchEmbeddableSerializedAttributes>;
   cleanup: () => void;
@@ -110,10 +110,13 @@ export const initializeSearchEmbeddableApi = async (
     searchSource.getField('query')
   );
 
+  const canEditUnifiedSearch = () => false;
+
   /** This is the state that has to be fetched */
   const rows$ = new BehaviorSubject<DataTableRecord[]>([]);
   const columnsMeta$ = new BehaviorSubject<DataTableColumnsMeta | undefined>(undefined);
   const totalHitCount$ = new BehaviorSubject<number | undefined>(undefined);
+  const inspectorAdapters$ = new BehaviorSubject<Adapters>({});
 
   /**
    * The state manager is used to modify the state of the saved search - this should never be
@@ -132,6 +135,7 @@ export const initializeSearchEmbeddableApi = async (
     totalHitCount: totalHitCount$,
     viewMode: savedSearchViewMode$,
     density: density$,
+    inspectorAdapters: inspectorAdapters$,
   };
 
   /** The saved search should be the source of truth for all state  */
@@ -143,6 +147,25 @@ export const initializeSearchEmbeddableApi = async (
   const onAnyStateChange: Observable<Partial<SearchEmbeddableSerializedAttributes>> = combineLatest(
     pick(stateManager, EDITABLE_SAVED_SEARCH_KEYS)
   );
+
+  /** APIs for updating search source properties */
+  const setDataViews = (nextDataViews: DataView[]) => {
+    searchSource.setField('index', nextDataViews[0]);
+    dataViews.next(nextDataViews);
+    searchSource$.next(searchSource);
+  };
+
+  const setFilters = (filters: Filter[] | undefined) => {
+    searchSource.setField('filter', filters);
+    filters$.next(filters);
+    searchSource$.next(searchSource);
+  };
+
+  const setQuery = (query: Query | AggregateQuery | undefined) => {
+    searchSource.setField('query', query);
+    query$.next(query);
+    searchSource$.next(searchSource);
+  };
 
   /** Keep the saved search in sync with any state changes */
   const syncSavedSearch = combineLatest([onAnyStateChange, searchSource$])
@@ -163,10 +186,14 @@ export const initializeSearchEmbeddableApi = async (
       syncSavedSearch.unsubscribe();
     },
     api: {
+      setDataViews,
       dataViews,
       savedSearch$,
       filters$,
+      setFilters,
       query$,
+      setQuery,
+      canEditUnifiedSearch,
     },
     stateManager,
     comparators: {

@@ -11,14 +11,14 @@ import { omit } from 'lodash';
 import moment from 'moment';
 import React, { ReactElement, useState } from 'react';
 
-import { EuiCheckboxGroup } from '@elastic/eui';
+import { EuiCallOut, EuiCheckboxGroup } from '@elastic/eui';
 import type { Capabilities } from '@kbn/core/public';
 import { QueryState } from '@kbn/data-plugin/common';
 import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
-import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { getStateFromKbnUrl, setStateToKbnUrl, unhashUrl } from '@kbn/kibana-utils-plugin/public';
 
+import { FormattedMessage } from '@kbn/i18n-react';
 import { convertPanelMapToPanelsArray, DashboardPanelMap } from '../../../../common';
 import { DashboardLocatorParams } from '../../../dashboard_container';
 import {
@@ -122,7 +122,7 @@ export function ShowShareModal({
   const allUnsavedPanels = (() => {
     if (
       Object.keys(unsavedDashboardState?.panels ?? {}).length === 0 &&
-      Object.keys(panelModifications ?? {}).length === 0
+      Object.keys(omit(panelModifications ?? {}, PANELS_CONTROL_GROUP_KEY)).length === 0
     ) {
       // if this dashboard has no modifications or unsaved panels return early. No overrides needed.
       return;
@@ -176,7 +176,7 @@ export function ShowShareModal({
     dashboardId: savedObjectId,
     preserveSavedFilters: true,
     refreshInterval: undefined, // We don't share refresh interval externally
-    viewMode: ViewMode.VIEW, // For share locators we always load the dashboard in view mode
+    viewMode: 'view', // For share locators we always load the dashboard in view mode
     useHash: false,
     timeRange: dataService.query.timefilter.timefilter.getTime(),
     ...unsavedStateForLocator,
@@ -195,11 +195,13 @@ export function ShowShareModal({
     unhashUrl(baseUrl)
   );
 
+  const allowShortUrl = getDashboardCapabilities().createShortUrl;
+
   shareService.toggleShareContextMenu({
     isDirty,
     anchorElement,
     allowEmbed: true,
-    allowShortUrl: getDashboardCapabilities().createShortUrl,
+    allowShortUrl,
     shareableUrl,
     objectId: savedObjectId,
     objectType: 'dashboard',
@@ -207,6 +209,44 @@ export function ShowShareModal({
       title: i18n.translate('dashboard.share.shareModal.title', {
         defaultMessage: 'Share this dashboard',
       }),
+      config: {
+        link: {
+          draftModeCallOut: (
+            <EuiCallOut
+              color="warning"
+              data-test-subj="DashboardDraftModeCopyLinkCallOut"
+              title={
+                <FormattedMessage
+                  id="dashboard.share.shareModal.draftModeCallout.title"
+                  defaultMessage="Unsaved changes"
+                />
+              }
+            >
+              {Boolean(unsavedDashboardState?.panels)
+                ? shareModalStrings.getDraftSharePanelChangesWarning()
+                : shareModalStrings.getDraftShareWarning('link')}
+            </EuiCallOut>
+          ),
+        },
+        embed: {
+          draftModeCallOut: (
+            <EuiCallOut
+              color="warning"
+              data-test-subj="DashboardDraftModeEmbedCallOut"
+              title={
+                <FormattedMessage
+                  id="dashboard.share.shareModal.draftModeCallout.title"
+                  defaultMessage="Unsaved changes"
+                />
+              }
+            >
+              {Boolean(unsavedDashboardState?.panels)
+                ? shareModalStrings.getEmbedSharePanelChangesWarning()
+                : shareModalStrings.getDraftShareWarning('embed')}
+            </EuiCallOut>
+          ),
+        },
+      },
     },
     sharingData: {
       title:

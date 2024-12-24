@@ -10,10 +10,12 @@ import { CASES_INTERNAL_URL } from '../../../../common/constants';
 import { createCaseError } from '../../../common/error';
 import { createCasesRoute } from '../create_cases_route';
 import type { caseApiV1 } from '../../../../common/types/api';
+import { DEFAULT_CASES_ROUTE_SECURITY } from '../constants';
 
 export const searchCasesRoute = createCasesRoute({
   method: 'post',
   path: `${CASES_INTERNAL_URL}/_search`,
+  security: DEFAULT_CASES_ROUTE_SECURITY,
   routerOptions: {
     access: 'internal',
   },

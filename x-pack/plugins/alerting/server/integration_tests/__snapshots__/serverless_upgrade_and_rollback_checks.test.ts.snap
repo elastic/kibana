@@ -5737,7 +5737,6 @@ Object {
                 "field_names": Object {
                   "items": Object {
                     "minLength": 1,
-                    "pattern": "^(?! *$).+$",
                     "type": "string",
                   },
                   "minItems": 1,
@@ -6405,7 +6404,6 @@ Object {
                 "field_names": Object {
                   "items": Object {
                     "minLength": 1,
-                    "pattern": "^(?! *$).+$",
                     "type": "string",
                   },
                   "minItems": 1,
@@ -7136,7 +7134,6 @@ Object {
                 "field_names": Object {
                   "items": Object {
                     "minLength": 1,
-                    "pattern": "^(?! *$).+$",
                     "type": "string",
                   },
                   "minItems": 1,
@@ -7785,7 +7782,6 @@ Object {
                 "field_names": Object {
                   "items": Object {
                     "minLength": 1,
-                    "pattern": "^(?! *$).+$",
                     "type": "string",
                   },
                   "minItems": 1,
@@ -8489,7 +8485,6 @@ Object {
                 "field_names": Object {
                   "items": Object {
                     "minLength": 1,
-                    "pattern": "^(?! *$).+$",
                     "type": "string",
                   },
                   "minItems": 1,
@@ -9195,7 +9190,6 @@ Object {
                 "field_names": Object {
                   "items": Object {
                     "minLength": 1,
-                    "pattern": "^(?! *$).+$",
                     "type": "string",
                   },
                   "minItems": 1,
@@ -9901,7 +9895,6 @@ Object {
                 "field_names": Object {
                   "items": Object {
                     "minLength": 1,
-                    "pattern": "^(?! *$).+$",
                     "type": "string",
                   },
                   "minItems": 1,

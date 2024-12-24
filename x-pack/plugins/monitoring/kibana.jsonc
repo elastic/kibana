@@ -4,7 +4,7 @@
   "owner": [
     "@elastic/stack-monitoring"
   ],
-  "group": "observability",
+  "group": "platform",
   "visibility": "private",
   "plugin": {
     "id": "monitoring",
@@ -18,15 +18,11 @@
       "features",
       "data",
       "navigation",
-      "observability",
-      "observabilityShared",
       "dataViews",
       "unifiedSearch",
       "share"
     ],
     "optionalPlugins": [
-      "infra",
-      "logsShared",
       "usageCollection",
       "home",
       "cloud",
@@ -41,7 +37,6 @@
       "kibanaUtils",
       "alerting",
       "kibanaReact",
-      "logsShared"
     ]
   }
 }

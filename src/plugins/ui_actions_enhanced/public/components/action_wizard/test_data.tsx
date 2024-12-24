@@ -263,7 +263,7 @@ export function Demo({
         getTriggerInfo={mockGetTriggerInfo}
         triggers={[VALUE_CLICK_TRIGGER, APPLY_FILTER_TRIGGER, SELECT_RANGE_TRIGGER]}
       />
-      <div style={{ marginTop: '44px' }} />
+      <div css={{ marginTop: '44px' }} />
       <hr />
       <div>Action Factory Id: {state.currentActionFactory?.id}</div>
       <div>Action Factory Config: {JSON.stringify(state.config)}</div>

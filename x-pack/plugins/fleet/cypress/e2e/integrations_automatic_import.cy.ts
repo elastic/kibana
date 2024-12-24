@@ -45,19 +45,19 @@ describe('Add Integration - Automatic Import', () => {
     deleteConnectors();
     createBedrockConnector();
     // Mock API Responses
-    cy.intercept('POST', '/api/integration_assistant/ecs', {
+    cy.intercept('POST', '/internal/automatic_import/ecs', {
       statusCode: 200,
       body: {
         results: ecsResultsForJson,
       },
     });
-    cy.intercept('POST', '/api/integration_assistant/categorization', {
+    cy.intercept('POST', '/internal/automatic_import/categorization', {
       statusCode: 200,
       body: {
         results: categorizationResultsForJson,
       },
     });
-    cy.intercept('POST', '/api/integration_assistant/related', {
+    cy.intercept('POST', '/internal/automatic_import/related', {
       statusCode: 200,
       body: {
         results: relatedResultsForJson,

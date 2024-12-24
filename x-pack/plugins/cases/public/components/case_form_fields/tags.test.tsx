@@ -47,9 +47,12 @@ describe('Tags', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
     useGetTagsMock.mockReturnValue({ data: ['test'] });
     appMockRender = createAppMockRenderer();
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
   });
 
   it('it renders', async () => {

@@ -25,6 +25,7 @@ export interface RuleType<
     | 'ruleTaskTimeout'
     | 'defaultScheduleInterval'
     | 'doesSetRecoveryContext'
+    | 'category'
   > {
   actionVariables: ActionVariables;
   authorizedConsumers: Record<string, { read: boolean; all: boolean }>;
@@ -34,3 +35,7 @@ export interface RuleType<
 }
 
 export type RuleTypeIndex = Map<string, RuleType>;
+
+export type RuleTypeWithDescription = RuleType<string, string> & { description?: string };
+
+export type RuleTypeIndexWithDescriptions = Map<string, RuleTypeWithDescription>;

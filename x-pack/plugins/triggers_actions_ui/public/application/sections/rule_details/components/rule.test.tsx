@@ -602,6 +602,7 @@ function mockRuleType(overloads: Partial<RuleType> = {}): RuleType {
     producer: 'rules',
     minimumLicenseRequired: 'basic',
     enabledInLicense: true,
+    category: 'my-category',
     ...overloads,
   };
 }

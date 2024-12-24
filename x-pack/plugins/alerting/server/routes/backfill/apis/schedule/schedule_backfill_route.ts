@@ -14,6 +14,7 @@ import { ILicenseState } from '../../../../lib';
 import { verifyAccessAndContext } from '../../../lib';
 import { AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '../../../../types';
 import { transformRequestV1, transformResponseV1 } from './transforms';
+import { DEFAULT_ALERTING_ROUTE_SECURITY } from '../../../constants';
 
 export const scheduleBackfillRoute = (
   router: IRouter<AlertingRequestHandlerContext>,
@@ -22,6 +23,7 @@ export const scheduleBackfillRoute = (
   router.post(
     {
       path: `${INTERNAL_BASE_ALERTING_API_PATH}/rules/backfill/_schedule`,
+      security: DEFAULT_ALERTING_ROUTE_SECURITY,
       options: { access: 'internal' },
       validate: {
         body: scheduleBodySchemaV1,
@@ -29,7 +31,8 @@ export const scheduleBackfillRoute = (
     },
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
-        const rulesClient = (await context.alerting).getRulesClient();
+        const alertingContext = await context.alerting;
+        const rulesClient = await alertingContext.getRulesClient();
         const body: ScheduleBackfillRequestBodyV1 = req.body;
 
         const result = await rulesClient.scheduleBackfill(transformRequestV1(body));

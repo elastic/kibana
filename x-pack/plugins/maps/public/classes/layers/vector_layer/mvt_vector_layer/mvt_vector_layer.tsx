@@ -426,6 +426,12 @@ export class MvtVectorLayer extends AbstractVectorLayer {
     this._setMbPointsProperties(mbMap, sourceData.tileSourceLayer);
     this._setMbLinePolygonProperties(mbMap, sourceData.tileSourceLayer);
     this._syncTooManyFeaturesProperties(mbMap);
+    (this.getSource() as IMvtVectorSource).syncSourceStyle?.(mbMap, () =>
+      mbMap
+        .getStyle()
+        .layers.filter((mbLayer) => this.ownsMbLayerId(mbLayer.id))
+        .map((layer) => layer.id)
+    );
   }
 
   // TODO ES MVT specific - move to es_tiled_vector_layer implementation

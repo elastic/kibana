@@ -128,4 +128,31 @@ describe('trackPerformanceMeasureEntries', () => {
       value1: 'value1',
     });
   });
+
+  test('reports an analytics event with query metadata', () => {
+    setupMockPerformanceObserver([
+      {
+        name: '/',
+        entryType: 'measure',
+        startTime: 100,
+        duration: 1000,
+        detail: {
+          eventName: 'kibana:plugin_render_time',
+          type: 'kibana:performance',
+          meta: {
+            queryRangeSecs: 86400,
+            queryOffsetSecs: 0,
+          },
+        },
+      },
+    ]);
+    trackPerformanceMeasureEntries(analyticsClientMock, true);
+
+    expect(analyticsClientMock.reportEvent).toHaveBeenCalledTimes(1);
+    expect(analyticsClientMock.reportEvent).toHaveBeenCalledWith('performance_metric', {
+      duration: 1000,
+      eventName: 'kibana:plugin_render_time',
+      meta: { target: '/', query_range_secs: 86400, query_offset_secs: 0 },
+    });
+  });
 });

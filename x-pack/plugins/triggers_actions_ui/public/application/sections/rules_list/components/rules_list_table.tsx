@@ -720,7 +720,7 @@ export const RulesListTable = (props: RulesListTableProps) => {
         ),
         sortable: true,
         truncateText: false,
-        width: '10%',
+        width: '100px',
         'data-test-subj': 'rulesTableCell-status',
         render: (_enabled: boolean | undefined, rule: RuleTableItem) => {
           return renderRuleStatusDropdown(rule);

@@ -23,7 +23,6 @@ import { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { IEventLogClient, IEventLogger } from '@kbn/event-log-plugin/server';
 import { AuditLogger } from '@kbn/security-plugin/server';
 import { DistributiveOmit } from '@elastic/eui';
-import { RegistryRuleType } from '../rule_type_registry';
 import {
   RuleTypeRegistry,
   IntervalSchedule,
@@ -108,9 +107,6 @@ export type NormalizedAlertActionWithGeneratedValues =
   | NormalizedAlertDefaultActionWithGeneratedValues
   | NormalizedAlertSystemActionWithGeneratedValues;
 
-export interface RegistryAlertTypeWithAuth extends RegistryRuleType {
-  authorizedConsumers: string[];
-}
 export type CreateAPIKeyResult =
   | { apiKeysEnabled: false }
   | { apiKeysEnabled: true; result: SecurityPluginGrantAPIKeyResult };

@@ -17,6 +17,7 @@ import { ILicenseState } from '../../../../lib';
 import { verifyAccessAndContext } from '../../../lib';
 import { AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '../../../../types';
 import { transformResolveResponseV1 } from './transforms';
+import { DEFAULT_ALERTING_ROUTE_SECURITY } from '../../../constants';
 
 export type ResolveRuleRequestParamsV1 = TypeOf<typeof resolveParamsSchemaV1>;
 
@@ -27,6 +28,7 @@ export const resolveRuleRoute = (
   router.get(
     {
       path: `${INTERNAL_BASE_ALERTING_API_PATH}/rule/{id}/_resolve`,
+      security: DEFAULT_ALERTING_ROUTE_SECURITY,
       options: { access: 'internal' },
       validate: {
         params: resolveParamsSchemaV1,
@@ -34,7 +36,8 @@ export const resolveRuleRoute = (
     },
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
-        const rulesClient = (await context.alerting).getRulesClient();
+        const alertingContext = await context.alerting;
+        const rulesClient = await alertingContext.getRulesClient();
         const params: ResolveRuleRequestParamsV1 = req.params;
         const { id } = params;
         // TODO (http-versioning): Remove this cast, this enables us to move forward

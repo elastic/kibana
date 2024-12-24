@@ -20,6 +20,8 @@ import {
   SearchDashboardsArgs,
   SearchDashboardsResponse,
 } from './lib/find_dashboards';
+import { DashboardState } from '../../dashboard_api/types';
+import { UpdateDashboardMetaProps } from './lib/update_dashboard_meta';
 
 export interface DashboardContentManagementService {
   findDashboards: FindDashboardsService;
@@ -27,9 +29,7 @@ export interface DashboardContentManagementService {
   loadDashboardState: (props: { id?: string }) => Promise<LoadDashboardReturn>;
   saveDashboardState: (props: SaveDashboardProps) => Promise<SaveDashboardReturn>;
   checkForDuplicateDashboardTitle: (meta: DashboardDuplicateTitleCheckProps) => Promise<boolean>;
-  updateDashboardMeta: (
-    props: Pick<DashboardContainerInput, 'id' | 'title' | 'description' | 'tags'>
-  ) => Promise<void>;
+  updateDashboardMeta: (props: UpdateDashboardMetaProps) => Promise<void>;
 }
 
 /**
@@ -66,7 +66,6 @@ export interface LoadDashboardReturn {
   managed?: boolean;
   resolveMeta?: DashboardResolveMeta;
   dashboardInput: SavedDashboardInput;
-  anyMigrationRun?: boolean;
 
   /**
    * Raw references returned directly from the Dashboard saved object. These
@@ -82,10 +81,16 @@ export type SavedDashboardSaveOpts = SavedObjectSaveOpts & { saveAsCopy?: boolea
 
 export interface SaveDashboardProps {
   controlGroupReferences?: Reference[];
-  currentState: SavedDashboardInput;
+  dashboardState: DashboardState;
   saveOptions: SavedDashboardSaveOpts;
   panelReferences?: Reference[];
+  searchSourceReferences?: Reference[];
   lastSavedId?: string;
+}
+
+export interface GetDashboardStateReturn {
+  attributes: DashboardAttributes;
+  references: Reference[];
 }
 
 export interface SaveDashboardReturn {

@@ -33,10 +33,10 @@ export async function getRuleTags(
 
   let authorizationTuple;
   try {
-    authorizationTuple = await context.authorization.getFindAuthorizationFilter(
-      AlertingAuthorizationEntity.Rule,
-      alertingAuthorizationFilterOpts
-    );
+    authorizationTuple = await context.authorization.getFindAuthorizationFilter({
+      authorizationEntity: AlertingAuthorizationEntity.Rule,
+      filterOpts: alertingAuthorizationFilterOpts,
+    });
   } catch (error) {
     context.auditLogger?.log(
       ruleAuditEvent({

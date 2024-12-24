@@ -19,7 +19,11 @@ import { HTTPAuthorizationHeader } from '../../../common/http_authorization_head
 import { fullAgentPolicyToYaml } from '../../../common/services';
 import { appContextService, agentPolicyService } from '../../services';
 import { type AgentClient, getLatestAvailableAgentVersion } from '../../services/agents';
-import { AGENTS_PREFIX, UNPRIVILEGED_AGENT_KUERY } from '../../constants';
+import {
+  AGENTS_PREFIX,
+  MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS_10,
+  UNPRIVILEGED_AGENT_KUERY,
+} from '../../constants';
 import type {
   GetAgentPoliciesRequestSchema,
   GetOneAgentPolicyRequestSchema,
@@ -82,7 +86,7 @@ export async function populateAssignedAgentsCount(
         .then(({ total }) => (agentPolicy.unprivileged_agents = total));
       return Promise.all([totalAgents, unprivilegedAgents]);
     },
-    { concurrency: 10 }
+    { concurrency: MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS_10 }
   );
 }
 
