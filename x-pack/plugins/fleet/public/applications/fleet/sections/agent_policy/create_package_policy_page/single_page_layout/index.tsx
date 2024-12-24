@@ -490,7 +490,6 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
   }
 
   const rootPrivilegedDataStreams = packageInfo ? getRootPrivilegedDataStreams(packageInfo) : [];
-  const { isValid: customUIValid } = useFleetForm();
 
   return (
     <CreatePackagePolicySinglePageLayout {...layoutProps} data-test-subj="createPackagePolicy">

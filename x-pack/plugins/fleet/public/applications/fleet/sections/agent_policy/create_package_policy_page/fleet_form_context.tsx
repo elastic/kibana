@@ -15,9 +15,10 @@ interface ValidationRule {
 interface FleetFormContextValue {
   addValidationRules: (rules: ValidationRule[]) => void;
   // resetValidationRules: () => void;
-  validate: () => boolean;
-  isValid: boolean;
-  setIsValid: (isValid: boolean) => void;
+  validate: () => string[] | undefined;
+  validationRules: ValidationRule[];
+  // isValid: boolean;
+  // setIsValid: (isValid: boolean) => void;
 }
 
 interface FleetFormProviderProps {
@@ -28,7 +29,6 @@ const FleetFormContext = createContext<FleetFormContextValue | undefined>(undefi
 
 export function FleetFormProvider({ children }: FleetFormProviderProps) {
   const [validationRules, setValidationRules] = React.useState<ValidationRule[]>([]);
-  const [isValid, setIsValid] = React.useState<boolean>(true);
 
   const addValidationRules = (rules: ValidationRule[]) => {
     console.log('request to add rules', rules);
@@ -39,9 +39,18 @@ export function FleetFormProvider({ children }: FleetFormProviderProps) {
     }
 
     const newRules = rules.filter((rule) => !validationRules.some((r) => r.id === rule.id));
-    if (newRules.length > 0) {
-      console.log('adding new validation rules', newRules);
-      setValidationRules([...validationRules, ...newRules]);
+    const existingRulesWithNewValues = rules.filter((rule) =>
+      validationRules.some((r) => r.id === rule.id && r.value !== rule.value)
+    );
+
+    const newAndExistingRules = [...newRules, ...existingRulesWithNewValues];
+    if (newAndExistingRules.length > 0) {
+      // remove the dupes
+      const removedDupes = validationRules.filter(
+        (rule) => !newAndExistingRules.some((r) => r.id === rule.id)
+      );
+      console.log('adding new validation rules', [...removedDupes, ...newAndExistingRules]);
+      setValidationRules([...removedDupes, ...newAndExistingRules]);
     }
   };
 
@@ -51,19 +60,24 @@ export function FleetFormProvider({ children }: FleetFormProviderProps) {
   //   }
   // };
 
-  const validate = () => {
+  const validate = (): string[] | undefined => {
     if (validationRules.length === 0) {
       console.log('no validation rules to validate');
-      return true;
+      return undefined;
     }
 
-    // implies all rules are reuired
-    console.log('validating rules', validationRules);
-    return validationRules.every((rule) => !!rule.value);
+    // implies all inputs are required
+    const invalidInputs = validationRules.filter((rule) => !rule.value).map((rule) => rule.id);
+    console.log('validate: invalid inputs', invalidInputs);
+    if (invalidInputs.length > 0) {
+      return invalidInputs;
+    }
+
+    return undefined;
   };
 
   return (
-    <FleetFormContext.Provider value={{ addValidationRules, validate, isValid, setIsValid }}>
+    <FleetFormContext.Provider value={{ addValidationRules, validate, validationRules }}>
       {children}
     </FleetFormContext.Provider>
   );
@@ -77,8 +91,9 @@ export const useFleetForm = () => {
   return {
     validate: context.validate,
     addValidationRules: context.addValidationRules,
+    validationRules: context.validationRules,
     // resetValidationRules: context.resetValidationRules,
-    isValid: context.isValid,
-    setIsValid: context.setIsValid,
+    // isValid: context.isValid,
+    // setIsValid: context.setIsValid,
   };
 };

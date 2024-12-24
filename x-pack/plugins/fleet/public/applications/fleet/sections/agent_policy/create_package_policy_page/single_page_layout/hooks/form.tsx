@@ -180,22 +180,17 @@ export function useOnSubmit({
   const [validationResults, setValidationResults] = useState<PackagePolicyValidationResults>();
   const [hasAgentPolicyError, setHasAgentPolicyError] = useState<boolean>(false);
   const hasErrors = validationResults ? validationHasErrors(validationResults) : false;
-  const isCustomUIValid = customUIValidation();
 
   const { isAgentlessIntegration, isAgentlessAgentPolicy } = useAgentless();
 
   const setFormState = (state: PackagePolicyFormState) => {
+    console.log('setFormState state', state);
     setFormStatus((prevState) => {
       if (prevState === state) {
+        console.log('setFormState state', state);
         return prevState;
       }
-      const customUIValidationResult = customUIValidation();
-
-      console.log('setFormState customUIValidationResult', customUIValidationResult);
-      console.log('setFormState state', state);
-      console.log('setFormState returned', customUIValidationResult ? state : 'INVALID');
-      console.log('------------------');
-      return customUIValidationResult ? state : 'INVALID';
+      return state;
     });
   };
 
@@ -226,14 +221,25 @@ export function useOnSubmit({
           load,
           spaceSettings
         );
-        setValidationResults(newValidationResult);
-        // eslint-disable-next-line no-console
-        console.debug('Package policy validation results', newValidationResult);
+
+        // Custom UI validation
+        const customUIValidationResults = customUIValidation();
+        console.log('Custom UI validation results', customUIValidationResults);
+        if (customUIValidationResults && customUIValidationResults.length > 0) {
+          const combinedValidationResults = {
+            ...newValidationResult,
+            name: [...(newValidationResult.name || []), ...(customUIValidationResults || [])],
+          };
+          console.log('Package policy combined validation results', combinedValidationResults);
+          setValidationResults(combinedValidationResults);
+        } else {
+          setValidationResults(newValidationResult);
+        }
 
         return newValidationResult;
       }
     },
-    [packagePolicy, packageInfo, spaceSettings]
+    [packagePolicy, packageInfo, spaceSettings, customUIValidation]
   );
   // Update package policy method
   const updatePackagePolicy = useCallback(
@@ -256,24 +262,13 @@ export function useOnSubmit({
         selectedPolicyTab === SelectedPolicyTab.NEW;
       const isOrphaningPolicy =
         canUseMultipleAgentPolicies && newPackagePolicy.policy_ids.length === 0;
-      if (
-        hasPackage &&
-        (hasAgentPolicy || isOrphaningPolicy) &&
-        !hasValidationErrors &&
-        isCustomUIValid
-      ) {
+      if (hasPackage && (hasAgentPolicy || isOrphaningPolicy) && !hasValidationErrors) {
         setFormState('VALID');
       } else {
         setFormState('INVALID');
       }
     },
-    [
-      packagePolicy,
-      updatePackagePolicyValidation,
-      selectedPolicyTab,
-      canUseMultipleAgentPolicies,
-      isCustomUIValid,
-    ]
+    [packagePolicy, updatePackagePolicyValidation, selectedPolicyTab, canUseMultipleAgentPolicies]
   );
 
   // Initial loading of package info
@@ -337,7 +332,7 @@ export function useOnSubmit({
       force,
       overrideCreatedAgentPolicy,
     }: { overrideCreatedAgentPolicy?: AgentPolicy; force?: boolean } = {}) => {
-      if (formState === 'VALID' && (hasErrors || !isCustomUIValid)) {
+      if (formState === 'VALID' && hasErrors) {
         setFormState('INVALID');
         return;
       }
@@ -511,7 +506,6 @@ export function useOnSubmit({
       agentPolicies,
       onSaveNavigate,
       confirmForceInstall,
-      isCustomUIValid,
     ]
   );
 
