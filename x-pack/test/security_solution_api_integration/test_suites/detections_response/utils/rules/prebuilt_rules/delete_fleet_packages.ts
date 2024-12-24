@@ -58,7 +58,7 @@ async function deleteFleetPackage(params: DeleteFleetPackageArgs): Promise<void>
       log.debug(`Deleting ${packageName} package`);
 
       const response = await supertest
-        .delete(epmRouteService.getRemovePath(packageName))
+        .delete(epmRouteService.getRemovePath(packageName, ''))
         .set('kbn-xsrf', 'true')
         .set('elastic-api-version', '2023-10-31')
         .send({ force: true });
