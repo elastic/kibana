@@ -28,6 +28,7 @@ export enum ReindexStep {
   newIndexCreated = 30,
   reindexStarted = 40,
   reindexCompleted = 50,
+  indexSettingsRestored = 55,
   aliasCreated = 60,
   originalIndexDeleted = 70,
   existingAliasesUpdated = 80,
@@ -108,6 +109,16 @@ export interface ReindexOperation {
   errorMessage: string | null;
   // This field is only used for the singleton IndexConsumerType documents.
   runningReindexCount: number | null;
+
+  /**
+   * The original index settings to set after reindex is completed.
+   * The target index is created with other defaults to improve reindexing performance.
+   * https://github.com/elastic/kibana/issues/201605
+   */
+  backupSettings?: {
+    'index.number_of_replicas'?: number;
+    'index.refresh_interval'?: number;
+  };
 
   /**
    * Options for the reindexing strategy.
