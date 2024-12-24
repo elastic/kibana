@@ -89,7 +89,9 @@
       "platform/packages/private/ml/ui_actions",
       "platform/plugins/shared/ml"
     ],
-    "xpack.monitoring": ["plugins/monitoring"],
+    "xpack.monitoring": [
+      "platform/plugins/private/monitoring"
+    ],
     "xpack.observability": "solutions/observability/plugins/observability",
     "xpack.observabilityAiAssistant": [
       "platform/plugins/shared/observability_solution/observability_ai_assistant",

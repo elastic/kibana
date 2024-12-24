@@ -6,9 +6,9 @@ When trying to debug why a CPU metric doesn't look the way you expect it to in a
 
 At the time of writing, the code path to get from a system level CPU metric to a utilization percentage looks like this:
 
-1. `node_cpu_metric` set to `node_cgroup_quota_as_cpu_utilization` when cgroup is enabled: [node_detail.js](/x-pack/plugins/monitoring/server/routes/api/v1/elasticsearch/node_detail.js#L61-65)
-1. `node_cgroup_quota_as_cpu_utilization` defined as a `QuotaMetric` against `cpu.cfs_quota_micros`: [metrics.ts](/x-pack/plugins/monitoring/server/lib/metrics/elasticsearch/metrics.ts#L798-801)
-1. `QuotaMetric` tries to produce a ratio of usage to quota, but returns null when quota isn't a positive number: [quota_metric.ts](/x-pack/plugins/monitoring/server/lib/metrics/classes/quota_metric.ts#L79-80)
+1. `node_cpu_metric` set to `node_cgroup_quota_as_cpu_utilization` when cgroup is enabled: [node_detail.js](/x-pack/platform/plugins/private/monitoring/server/routes/api/v1/elasticsearch/node_detail.js#L61-65)
+1. `node_cgroup_quota_as_cpu_utilization` defined as a `QuotaMetric` against `cpu.cfs_quota_micros`: [metrics.ts](/x-pack/platform/plugins/private/monitoring/server/lib/metrics/elasticsearch/metrics.ts#L798-801)
+1. `QuotaMetric` tries to produce a ratio of usage to quota, but returns null when quota isn't a positive number: [quota_metric.ts](/x-pack/platform/plugins/private/monitoring/server/lib/metrics/classes/quota_metric.ts#L79-80)
 
 So it's important to be aware of the `monitoring.ui.container.elasticsearch.enabled` setting, which defaults to `true` on cloud.elastic.co.
 
