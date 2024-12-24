@@ -221,6 +221,17 @@
         }
       }
     },
+    "kibana_settings": {
+      "properties": {
+        "xpack": {
+          "properties": {
+            "default_admin_email": {
+              "type": "text"
+            }
+          }
+        }
+      }
+    },
     "logs_data": {
       "properties": {
         "data": {
