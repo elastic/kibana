@@ -46,8 +46,9 @@ export const FpsTrendline: React.FC<CommonProps> = (props: CommonProps) => {
 
   return (
     <div {...props}>
+      <strong>{'FPS:'}</strong> {Math.round(fpsSamples[fpsSamples.length - 1])} <br />
       <div
-        style={{
+        css={{
           display: 'flex',
           alignItems: 'flex-end',
           height: '30px',
@@ -57,7 +58,7 @@ export const FpsTrendline: React.FC<CommonProps> = (props: CommonProps) => {
         {fpsSamples.map((fps, index) => (
           <div
             key={index}
-            style={{
+            css={{
               height: `${Math.min(fps, 60) * (100 / 60)}%`,
               width: '5%',
               backgroundColor: getBarColor(fps),
@@ -66,7 +67,7 @@ export const FpsTrendline: React.FC<CommonProps> = (props: CommonProps) => {
             title={`${fps.toFixed(2)} FPS`}
           >
             <div
-              style={{
+              css={{
                 fontSize: '8px',
                 padding: '2px',
                 left: `${index * 5 + 5}%`,

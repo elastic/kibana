@@ -16,7 +16,7 @@ import { ExpandButtonClickCallback } from '../types';
 import { useGraphPopover } from './use_graph_popover';
 import { ExpandPopoverListItem } from '../styles';
 import largeGraph from '../mock/large_graph.json';
-import { FpsMonitor } from './fps_monitor';
+import { GraphPerfMonitor } from './graph_perf_monitor';
 
 export default {
   title: 'Graph Benchmark',
@@ -38,22 +38,17 @@ const useExpandButtonPopover = () => {
 
   const onNodeExpandButtonClick: ExpandButtonClickCallback = useCallback(
     (e, node, unToggleCallback) => {
-      if (selectedNode.current?.id === node.id) {
-        // If the same node is clicked again, close the popover
-        selectedNode.current = null;
-        unToggleCallbackRef.current?.();
-        unToggleCallbackRef.current = null;
-        closePopover();
-      } else {
-        // Close the current popover if open
-        selectedNode.current = null;
-        unToggleCallbackRef.current?.();
-        unToggleCallbackRef.current = null;
+      const lastPopoverId = selectedNode.current?.id;
 
+      // If the same node is clicked again, close the popover
+      selectedNode.current = null;
+      unToggleCallbackRef.current?.();
+      unToggleCallbackRef.current = null;
+      closePopover();
+
+      if (lastPopoverId !== node.id) {
         // Set the pending open state
         setPendingOpen({ node, el: e.currentTarget, unToggleCallback });
-
-        closePopover();
       }
     },
     [closePopover]
@@ -199,7 +194,7 @@ const Template: Story = () => {
 
   return (
     <ThemeProvider theme={{ darkMode: false }}>
-      <FpsMonitor />
+      <GraphPerfMonitor />
       <Graph
         css={css`
           height: 100%;

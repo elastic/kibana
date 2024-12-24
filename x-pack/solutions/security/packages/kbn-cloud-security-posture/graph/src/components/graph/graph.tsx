@@ -31,9 +31,9 @@ import {
 import { layoutGraph } from './layout_graph';
 import { DefaultEdge } from '../edge';
 import type { EdgeViewModel, NodeViewModel } from '../types';
+import { ONLY_RENDER_VISIBLE_ELEMENTS } from './constants';
 
 import '@xyflow/react/dist/style.css';
-import { ONLY_RENDER_VISIBLE_ELEMENTS } from './constants';
 
 export interface GraphProps extends CommonProps {
   /**

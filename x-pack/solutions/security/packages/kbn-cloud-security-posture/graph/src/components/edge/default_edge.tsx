@@ -31,7 +31,7 @@ export const DefaultEdge = memo(
     data,
   }: EdgeProps) => {
     const { euiTheme } = useEuiTheme();
-    const color: EdgeColor = data?.color ?? 'primary';
+    const color: EdgeColor = data?.color || 'primary';
     const sourceMargin = getShapeHandlePosition(data?.sourceShape);
     const targetMargin = getShapeHandlePosition(data?.targetShape);
     const markerStart =
@@ -68,6 +68,7 @@ export const DefaultEdge = memo(
           interactionWidth={0}
           style={{
             stroke: euiTheme.colors[color],
+            // Defaults to dashed when type is not available
             ...(!data?.type || data?.type === 'dashed' ? dashedStyle : {}),
           }}
           markerStart={markerStart}
