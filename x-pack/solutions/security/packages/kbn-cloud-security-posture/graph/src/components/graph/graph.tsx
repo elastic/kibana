@@ -33,6 +33,7 @@ import { DefaultEdge } from '../edge';
 import type { EdgeViewModel, NodeViewModel } from '../types';
 
 import '@xyflow/react/dist/style.css';
+import { ONLY_RENDER_VISIBLE_ELEMENTS } from './constants';
 
 export interface GraphProps extends CommonProps {
   /**
@@ -158,7 +159,7 @@ export const Graph = memo<GraphProps>(
           edges={edgesState}
           nodesConnectable={false}
           edgesFocusable={false}
-          onlyRenderVisibleElements={true}
+          onlyRenderVisibleElements={ONLY_RENDER_VISIBLE_ELEMENTS}
           snapToGrid={true} // Snap to grid is enabled to avoid sub-pixel positioning
           snapGrid={[1, 1]}
           onNodesChange={onNodesChange}
