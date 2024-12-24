@@ -6,10 +6,13 @@
  */
 
 import { decodeCloudIdMock, parseDeploymentIdFromDeploymentUrlMock } from './plugin.test.mocks';
-import { coreMock } from '@kbn/core/server/mocks';
+import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
 import type { CloudConfigType } from './config';
 import { CloudPlugin } from './plugin';
 import type { DecodedCloudId } from '../common/decode_cloud_id';
+import { persistTokenCloudData } from './cloud_data';
+import type { KibanaRequestRouteOptions } from '@kbn/core/server';
+import type { LifecycleResponseFactory, OnPostAuthToolkit } from '@kbn/core-http-server';
 
 const baseConfig = {
   base_url: 'https://cloud.elastic.co',
@@ -159,6 +162,93 @@ describe('Cloud Plugin', () => {
           },
         });
         expect(setup.serverless.projectType).toBe('security');
+      });
+    });
+
+    describe('core.http.registerOnPostAuth', () => {
+      let coreSetup = coreMock.createSetup();
+      const initContext = coreMock.createPluginInitializerContext({
+        ...baseConfig,
+        id: 'cloudId',
+        cname: 'cloud.elastic.co',
+        csp: 'aws',
+        onboarding: { default_solution: 'search' },
+      });
+      const persistTokenCloudDataMock = persistTokenCloudData as jest.Mock;
+      beforeEach(() => {
+        coreSetup = coreMock.createSetup();
+        persistTokenCloudDataMock.mockClear();
+      });
+
+      it('registers an onPostAuth handler and handles onboarding token persistence', async () => {
+        const plugin = new CloudPlugin(initContext);
+        plugin.setup(coreSetup, {});
+
+        // Extract the onPostAuth handler
+        expect(coreSetup.http.registerOnPostAuth).toHaveBeenCalledTimes(1);
+        const [onPostAuthHandler] = coreSetup.http.registerOnPostAuth.mock.calls[0];
+
+        // Create mocks for request and toolkit
+        let requestMock = httpServerMock.createKibanaRequest({
+          path: 'http://localhost:5601/app/some_id?onboarding_token=test_token',
+        });
+        requestMock = {
+          ...requestMock,
+          route: {
+            routePath: '/app/{id}/{any*}',
+            path: 'app/some_id?onboarding_token=test_token',
+            method: 'get',
+            options: {} as unknown as KibanaRequestRouteOptions<'get'>,
+          },
+        };
+
+        const responseMock = { continue: jest.fn() } as unknown as LifecycleResponseFactory;
+        const toolkitMock = { next: jest.fn() } as unknown as OnPostAuthToolkit;
+
+        await onPostAuthHandler(requestMock, responseMock, toolkitMock);
+
+        expect(persistTokenCloudDataMock).toHaveBeenCalledTimes(1);
+        expect(JSON.stringify(persistTokenCloudDataMock.mock.calls[0])).toEqual(
+          '[{},{"logger":{"context":[]},"onboardingToken":"test_token","solutionType":"search"}]'
+        );
+
+        // Check if toolkit.next is called
+        expect(toolkitMock.next).toHaveBeenCalled();
+      });
+
+      it('does not persist if no onboarding token is present', async () => {
+        const plugin = new CloudPlugin(initContext);
+        plugin.setup(coreSetup, {});
+
+        // Extract the onPostAuth handler
+        expect(coreSetup.http.registerOnPostAuth).toHaveBeenCalledTimes(1);
+        const [onPostAuthHandler] = coreSetup.http.registerOnPostAuth.mock.calls[0];
+
+        // Create mocks for request and toolkit
+        let requestMock = httpServerMock.createKibanaRequest({
+          path: 'http://localhost:5601/app/some_id',
+        });
+        requestMock = {
+          ...requestMock,
+          route: {
+            routePath: '/app/{id}/{any*}',
+            path: 'app/some_id',
+            method: 'get',
+            options: {} as unknown as KibanaRequestRouteOptions<'get'>,
+          },
+        };
+
+        const responseMock = { continue: jest.fn() } as unknown as LifecycleResponseFactory;
+        const toolkitMock = { next: jest.fn() } as unknown as OnPostAuthToolkit;
+
+        await onPostAuthHandler(requestMock, responseMock, toolkitMock);
+
+        await onPostAuthHandler(requestMock, responseMock, toolkitMock);
+
+        expect(persistTokenCloudDataMock).not.toHaveBeenCalled();
+
+        // Check if toolkit.next is called
+        expect(toolkitMock.next).toHaveBeenCalled();
       });
     });
   });
