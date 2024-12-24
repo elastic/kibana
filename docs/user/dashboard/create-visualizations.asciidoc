@@ -33,6 +33,11 @@ Use one of the editors to create visualizations of your data. Each editor offers
 | <<add-image,Image>>
 | Personalize your dashboard with custom images
 
+[IMPORTANT]
+====
+Image uploads are limited to 10 MiB. 
+====
+
 | <<dashboard-links,Links>>
 | Add links to other dashboards or to external websites
 
