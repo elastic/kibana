@@ -19,7 +19,7 @@ const mappingFilePath = 'packages/kbn-babel-preset/styled_components_files.js';
 const mappingFileAbsolutePath = path.join(REPO_ROOT, mappingFilePath);
 
 run(
-  async ({ log, flagsReader, flags }) => {
+  async ({ log }) => {
     log.info(`Looking for source files importing 'styled-components'...`);
 
     const files = await findFiles(REPO_ROOT);
