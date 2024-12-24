@@ -7,10 +7,6 @@
 
 import React from 'react';
 import {
-  DragDropContextProps,
-  EuiDroppableProps,
-  EuiDragDropContext,
-  EuiDroppable,
   EuiDraggable,
   EuiPanelProps,
   EuiPanel,
@@ -21,8 +17,8 @@ import {
   EuiButtonIcon,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { ReadStreamDefinition, isDissectProcessor, isGrokProcessor } from '@kbn/streams-schema';
 import { useBoolean } from '@kbn/react-hooks';
-import { ReadStreamDefinition } from '@kbn/streams-plugin/common';
 import { EditProcessorFlyout } from './flyout';
 import { ProcessorDefinition } from './types';
 
@@ -58,10 +54,9 @@ const ProcessorListItem = ({
   definition,
   hasShadow = false,
 }: ProcessorListItemProps) => {
-  const { type } = processor.config;
-
   const [isEditProcessorOpen, { on: openEditProcessor, off: closeEditProcessor }] = useBoolean();
 
+  const type = getProcessorType(processor);
   const description = getProcessorDescription(processor);
 
   return (
@@ -99,11 +94,21 @@ const ProcessorListItem = ({
   );
 };
 
+const getProcessorType = (processor: ProcessorDefinition) => {
+  if (isGrokProcessor(processor.config)) {
+    return 'grok';
+  } else if (isDissectProcessor(processor.config)) {
+    return 'dissect';
+  }
+
+  return '';
+};
+
 const getProcessorDescription = (processor: ProcessorDefinition) => {
-  if (processor.config.type === 'grok') {
-    return processor.config.patterns.join(' • ');
-  } else if (processor.config.type === 'dissect') {
-    return processor.config.pattern;
+  if (isGrokProcessor(processor.config)) {
+    return processor.config.grok.patterns.join(' • ');
+  } else if (isDissectProcessor(processor.config)) {
+    return processor.config.dissect.pattern;
   }
 
   return '';

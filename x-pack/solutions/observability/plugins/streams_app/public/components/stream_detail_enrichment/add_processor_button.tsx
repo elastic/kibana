@@ -15,9 +15,7 @@ export function AddProcessorButton(props: EuiButtonPropsForButton) {
     <EuiButton iconType="plusInCircle" {...props}>
       {i18n.translate(
         'xpack.streams.streamDetailView.managementTab.enrichmentEmptyPrompt.addProcessorAction',
-        {
-          defaultMessage: 'Add a processor',
-        }
+        { defaultMessage: 'Add a processor' }
       )}
     </EuiButton>
   );

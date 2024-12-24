@@ -11,4 +11,8 @@ export interface ProcessorDefinition extends ProcessingDefinition {
   id: string;
 }
 
-export type ProcessorType = ProcessingDefinition['config']['type'];
+export type ProcessorType = ProcessingDefinition['config'] extends infer U
+  ? U extends { [key: string]: any }
+    ? keyof U
+    : never
+  : never;

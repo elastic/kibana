@@ -64,7 +64,7 @@ export const dissectProcessingDefinitionSchema = z.object({
   }),
 });
 
-export type DissectProcssingDefinition = z.infer<typeof dissectProcessingDefinitionSchema>;
+export type DissectProcessingDefinition = z.infer<typeof dissectProcessingDefinitionSchema>;
 
 export const processingConfigSchema = z.union([
   grokProcessingDefinitionSchema,

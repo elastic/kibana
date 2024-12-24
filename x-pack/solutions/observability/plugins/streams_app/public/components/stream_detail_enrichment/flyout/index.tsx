@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 import {
   FormProvider,
   UseControllerProps,
-  UseFormReturn,
   useController,
   useFieldArray,
   useForm,
@@ -32,15 +31,21 @@ import {
   DragDropContextProps,
   EuiDraggable,
   EuiSpacer,
+  EuiAccordion,
+  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FieldIcon } from '@kbn/react-field';
 import {
-  FieldDefinition,
+  DissectProcessingDefinition,
+  FieldDefinitionConfig,
+  GrokProcessingDefinition,
   ProcessingDefinition,
   ReadStreamDefinition,
-} from '@kbn/streams-plugin/common';
-import { ProcessorType } from '../types';
+  isWiredReadStream,
+} from '@kbn/streams-schema';
+import { css } from '@emotion/react';
+import { CodeEditor } from '@kbn/code-editor';
 import { ProcessorTypeSelector } from './processor_type_selector';
 import { SortableList } from '../sortable_list';
 import { ProcessorFlyoutTemplate } from './processor_flyout_template';
@@ -54,15 +59,18 @@ interface BaseProcessingDefinition {
   condition?: ProcessingDefinition['condition'];
 }
 interface ProcessingDefinitionGrok extends BaseProcessingDefinition {
-  config: Extract<ProcessingDefinition['config'], { type: 'grok' }>;
+  config: GrokProcessingDefinition;
 }
 
 interface ProcessingDefinitionDissect extends BaseProcessingDefinition {
-  config: Extract<ProcessingDefinition['config'], { type: 'dissect' }>;
+  config: DissectProcessingDefinition;
 }
 
-type GrokFormState = ProcessingDefinitionGrok['config'];
-type DissectFormState = ProcessingDefinitionDissect['config'];
+type GrokFormState = Omit<GrokProcessingDefinition['grok'], 'patterns'> & {
+  type: 'grok';
+  patterns: Array<{ value: string }>;
+};
+type DissectFormState = { type: 'dissect' } & DissectProcessingDefinition['dissect'];
 
 type ProcessorFormState = GrokFormState | DissectFormState;
 
@@ -71,6 +79,8 @@ export function AddProcessorFlyout({ definition, onClose }: ProcessorFlyoutProps
     defaultValues: {
       type: 'grok',
       field: 'message',
+      patterns: [{ value: '' }],
+      pattern_definitions: '{}',
     },
   });
 
@@ -78,8 +88,8 @@ export function AddProcessorFlyout({ definition, onClose }: ProcessorFlyoutProps
   const all = useWatch({ control: methods.control });
   console.log(all);
 
-  const handleSubmit = (event) => {
-    console.log('submit');
+  const handleSubmit = (data) => {
+    console.log(data);
   };
 
   return (
@@ -90,7 +100,7 @@ export function AddProcessorFlyout({ definition, onClose }: ProcessorFlyoutProps
         { defaultMessage: 'Add processor' }
       )}
       confirmButton={
-        <EuiButton onClick={handleSubmit}>
+        <EuiButton onClick={methods.handleSubmit(handleSubmit)}>
           {i18n.translate(
             'xpack.streams.streamDetailView.managementTab.enrichment.processorFlyout.confirmAddProcessor',
             { defaultMessage: 'Add processor' }
@@ -99,7 +109,7 @@ export function AddProcessorFlyout({ definition, onClose }: ProcessorFlyoutProps
       }
     >
       <FormProvider {...methods}>
-        <EuiForm component="form" fullWidth onSubmit={methods.handleSubmit(handleSubmit)}>
+        <EuiForm component="form" fullWidth>
           <ProcessorTypeSelector />
           <EuiSpacer />
           {processorType === 'grok' && <GrokProcessorForm definition={definition} />}
@@ -151,24 +161,50 @@ interface GrokProcessorFormProps {
 }
 
 const GrokProcessorForm = ({ definition, processor, onChange }: GrokProcessorFormProps) => {
-  const { control } = useFormContext();
-  const mergedFields = [...definition.fields, ...definition.inheritedFields];
+  const { euiTheme } = useEuiTheme();
+
+  const mappedFields = useMemo(() => {
+    if (isWiredReadStream(definition)) {
+      return Object.entries({
+        ...definition.stream.ingest.wired.fields,
+        ...definition.inherited_fields,
+      }).map(([name, { type }]) => ({ name, type }));
+    }
+
+    return [];
+  }, [definition]);
 
   return (
     <>
-      <ProcessorFieldSelector
-        name="field"
-        control={control}
-        rules={{ required: true }}
-        fields={mergedFields}
-      />
-      <GrokEditor />
+      <ProcessorFieldSelector name="field" rules={{ required: true }} fields={mappedFields} />
+      <GrokPatternsEditor />
+      <EuiSpacer size="s" />
+      <EuiAccordion
+        element="fieldset"
+        id="optionalFieldsAccordion"
+        paddingSize="none"
+        buttonContent={i18n.translate(
+          'xpack.streams.streamDetailView.managementTab.enrichment.processorFlyout.optionalFields',
+          { defaultMessage: 'Optional fields' }
+        )}
+      >
+        <div
+          css={css`
+            border-left: ${euiTheme.border.thin};
+            margin-left: ${euiTheme.size.m};
+            margin-top: ${euiTheme.size.m};
+            padding-left: calc(${euiTheme.size.m} + ${euiTheme.size.xs});
+          `}
+        >
+          <GrokPatternDefinition />
+        </div>
+      </EuiAccordion>
     </>
   );
 };
 
 interface ProcessorFieldSelectorProps extends UseControllerProps<GrokFormState> {
-  fields: FieldDefinition[];
+  fields: Array<{ name: string; type: FieldDefinitionConfig['type'] }>;
 }
 
 const ProcessorFieldSelector = ({ fields, ...props }: ProcessorFieldSelectorProps) => {
@@ -216,17 +252,12 @@ const ProcessorFieldSelector = ({ fields, ...props }: ProcessorFieldSelectorProp
   );
 };
 
-const GrokEditor = () => {
-  const { control, register, watch } = useFormContext();
-  const {
-    fields: patterns,
-    append,
-    remove,
-    move,
-  } = useFieldArray({
-    control,
+const GrokPatternsEditor = () => {
+  const { register } = useFormContext();
+  const { fields, append, remove, move } = useFieldArray({
     name: 'patterns',
   });
+
   const handlerPatternDrag: DragDropContextProps['onDragEnd'] = ({ source, destination }) => {
     if (source && destination) {
       move(source.index, destination.index);
@@ -237,7 +268,7 @@ const GrokEditor = () => {
     append({ value: '' });
   };
 
-  const getRemovePatternHandler = (id: number) => (patterns.length > 1 ? () => remove(id) : null);
+  const getRemovePatternHandler = (id: number) => (fields.length > 1 ? () => remove(id) : null);
 
   return (
     <EuiFormRow
@@ -248,10 +279,10 @@ const GrokEditor = () => {
     >
       <EuiPanel color="subdued" paddingSize="m">
         <SortableList onDragItem={handlerPatternDrag}>
-          {patterns.map((pattern, idx) => (
+          {fields.map((field, idx) => (
             <DraggablePatternInput
-              key={pattern.id}
-              pattern={pattern}
+              key={field.id}
+              pattern={field}
               idx={idx}
               onRemove={getRemovePatternHandler(idx)}
               inputProps={register(`patterns.${idx}.value`)}
@@ -293,7 +324,7 @@ const DraggablePatternInput = ({ pattern, onRemove, idx, inputProps }) => {
           >
             <EuiIcon type="grab" />
           </EuiPanel>
-          <EuiFieldText {...inputProps} compressed />
+          <EuiFieldText {...inputProps} inputRef={inputProps.ref} compressed />
           {onRemove && (
             <EuiButtonIcon
               iconType="minusInCircle"
@@ -311,5 +342,37 @@ const DraggablePatternInput = ({ pattern, onRemove, idx, inputProps }) => {
         </EuiFlexGroup>
       )}
     </EuiDraggable>
+  );
+};
+
+const GrokPatternDefinition = () => {
+  const { field } = useController({ name: 'pattern_definitions' });
+
+  return (
+    <EuiFormRow
+      label={i18n.translate(
+        'xpack.streams.streamDetailView.managementTab.enrichment.processorFlyout.patternDefinitionsLabel',
+        { defaultMessage: 'Pattern definitions' }
+      )}
+      helpText={i18n.translate(
+        'xpack.streams.streamDetailView.managementTab.enrichment.processorFlyout.patternDefinitionsHelpText',
+        {
+          defaultMessage:
+            'A map of pattern-name and pattern tuples defining custom patterns. Patterns matching existing names will override the pre-existing definition.',
+        }
+      )}
+      fullWidth
+    >
+      <CodeEditor
+        value={field.value}
+        onChange={(_value, event) => field.onChange(event)}
+        languageId="xjson"
+        height={200}
+        aria-label={i18n.translate(
+          'xpack.streams.streamDetailView.managementTab.enrichment.processorFlyout.patternDefinitionsAriaLabel',
+          { defaultMessage: 'Pattern definitions editor' }
+        )}
+      />
+    </EuiFormRow>
   );
 };

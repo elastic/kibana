@@ -7,7 +7,6 @@
 
 import React, { useEffect, useMemo, useState } from 'react';
 import deepEqual from 'fast-deep-equal';
-import { ProcessingDefinition, ReadStreamDefinition } from '@kbn/streams-plugin/common';
 import {
   DragDropContextProps,
   EuiPanel,
@@ -18,8 +17,9 @@ import {
   htmlIdGenerator,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useBoolean } from '@kbn/react-hooks';
 import { useAbortController } from '@kbn/observability-utils-browser/hooks/use_abort_controller';
+import { ProcessingDefinition, ReadStreamDefinition } from '@kbn/streams-schema';
+import { useBoolean } from '@kbn/react-hooks';
 import { EnrichmentEmptyPrompt } from './enrichment_empty_prompt';
 import { AddProcessorButton } from './add_processor_button';
 import { AddProcessorFlyout } from './flyout';
@@ -132,21 +132,23 @@ const useProcessorsList = (definition: ReadStreamDefinition, refreshDefinition: 
   const { toasts } = core.notifications;
   const { streamsRepositoryClient } = dependencies.start.streams;
 
-  const [processors, setProcessors] = useState(() => createProcessorsList(definition.processing));
+  const { processing } = definition.stream.ingest;
+
+  const [processors, setProcessors] = useState(() => createProcessorsList(processing));
 
   const httpProcessing = useMemo(() => processors.map(removeIdFromProcessor), [processors]);
 
   const hasChanges = useMemo(
-    () => !deepEqual(definition.processing, httpProcessing),
-    [definition.processing, httpProcessing]
+    () => !deepEqual(processing, httpProcessing),
+    [processing, httpProcessing]
   );
 
-  const addProcessor = (processor: ProcessingDefinition) => {
-    setProcessors(processors.concat(createProcessorWithId(processor)));
+  const addProcessor = (newProcessing: ProcessingDefinition) => {
+    setProcessors(processors.concat(createProcessorWithId(newProcessing)));
   };
 
   const resetChanges = () => {
-    setProcessors(createProcessorsList(definition.processing));
+    setProcessors(createProcessorsList(processing));
   };
 
   const saveChanges = async () => {
@@ -155,12 +157,12 @@ const useProcessorsList = (definition: ReadStreamDefinition, refreshDefinition: 
         signal: abortController.signal,
         params: {
           path: {
-            id: definition.id,
+            id: definition.name,
           },
           body: {
-            processing: httpProcessing,
-            children: definition.children,
-            fields: definition.fields,
+            ingest: {
+              processing: httpProcessing,
+            },
           },
         },
       });
