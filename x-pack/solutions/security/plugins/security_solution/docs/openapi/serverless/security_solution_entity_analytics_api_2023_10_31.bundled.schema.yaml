@@ -1061,6 +1061,7 @@ components:
         - user
         - host
         - service
+        - universal
       type: string
     HostEntity:
       type: object
