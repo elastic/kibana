@@ -14,6 +14,7 @@ import webpack, { Configuration, Stats } from 'webpack';
 import webpackMerge from 'webpack-merge';
 import { REPO_ROOT } from './lib/constants';
 import { IgnoreNotFoundExportPlugin } from './ignore_not_found_export_plugin';
+import 'webpack-dev-server'; // Extends webpack configuration with `devServer` property
 
 type Preset = string | [string, Record<string, unknown>] | Record<string, unknown>;
 
@@ -70,9 +71,11 @@ function isDesiredPreset(preset: Preset) {
 // Extend the Storybook Webpack config with some customizations
 /* eslint-disable import/no-default-export */
 export default ({ config: storybookConfig }: { config: Configuration }) => {
-  const config = {
+  const config: Configuration = {
     devServer: {
-      stats,
+      devMiddleware: {
+        stats,
+      },
     },
     externals,
     module: {
