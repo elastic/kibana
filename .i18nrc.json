@@ -14,7 +14,7 @@
     "console": "src/platform/plugins/shared/console",
     "contentManagement": "packages/content-management",
     "core": ["src/core", "packages/core"],
-    "customIntegrations": "src/plugins/custom_integrations",
+    "customIntegrations": "src/platform/plugins/shared/custom_integrations",
     "customIntegrationsPackage": "x-pack/solutions/observability/packages/kbn-custom-integrations",
     "dashboard": "src/platform/plugins/shared/dashboard",
     "cloud": "packages/cloud",

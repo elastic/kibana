@@ -77,7 +77,7 @@ paths-ignore:
   - x-pack/solutions/security/plugins/cloud_security_posture/common/scripts
   - x-pack/solutions/security/plugins/elastic_assistant/scripts
   - x-pack/plugins/event_log/scripts
-  - x-pack/plugins/fleet/scripts
+  - x-pack/platform/plugins/shared/fleet/scripts
   - x-pack/solutions/security/plugins/lists/scripts
   - x-pack/solutions/security/plugins/lists/server/scripts
   - x-pack/plugins/observability_solution/*/scripts

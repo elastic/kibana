@@ -48,7 +48,7 @@ as uiSettings within the code.
 |The Controls plugin contains Embeddables which can be used to add user-friendly interactivity to apps.
 
 
-|{kib-repo}blob/{branch}/src/plugins/custom_integrations/README.md[customIntegrations]
+|{kib-repo}blob/{branch}/src/platform/plugins/shared/custom_integrations/README.md[customIntegrations]
 |Register add-data cards
 
 
@@ -605,7 +605,7 @@ activities.
 |WARNING: Missing README.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/fleet/README.md[fleet]
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/shared/fleet/README.md[fleet]
 |Fleet provides a web-based UI in Kibana for centrally managing Elastic Agents and their policies.
 
 

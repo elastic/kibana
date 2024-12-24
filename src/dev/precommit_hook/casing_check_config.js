@@ -31,7 +31,7 @@ export const IGNORE_FILE_GLOBS = [
   'x-pack/platform/plugins/private/canvas/server/templates/assets/*.{png,jpg,svg}',
   'x-pack/plugins/cases/docs/**/*',
   'x-pack/platform/plugins/private/monitoring/public/lib/jquery_flot/**/*',
-  'x-pack/plugins/fleet/cypress/packages/*.zip',
+  'x-pack/platform/plugins/shared/fleet/cypress/packages/*.zip',
   '**/apm-diagnostics-*.json',
   '**/.*',
   '**/__mocks__/**/*',

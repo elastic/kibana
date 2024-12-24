@@ -250,7 +250,6 @@ packages/core/user-settings/core-user-settings-server @elastic/kibana-security
 packages/core/user-settings/core-user-settings-server-internal @elastic/kibana-security
 packages/core/user-settings/core-user-settings-server-mocks @elastic/kibana-security
 packages/deeplinks/analytics @elastic/kibana-data-discovery @elastic/kibana-presentation @elastic/kibana-visualizations
-packages/deeplinks/fleet @elastic/fleet
 packages/deeplinks/search @elastic/search-kibana
 packages/deeplinks/shared @elastic/appex-sharedux
 packages/default-nav/analytics @elastic/kibana-data-discovery @elastic/kibana-presentation @elastic/kibana-visualizations
@@ -564,6 +563,7 @@ src/platform/packages/private/kbn-management/settings/components/form @elastic/k
 src/platform/packages/private/kbn-mapbox-gl @elastic/kibana-presentation
 src/platform/packages/private/kbn-panel-loader @elastic/kibana-presentation
 src/platform/packages/shared/deeplinks/devtools @elastic/kibana-management
+src/platform/packages/shared/deeplinks/fleet @elastic/fleet
 src/platform/packages/shared/deeplinks/management @elastic/kibana-management
 src/platform/packages/shared/deeplinks/ml @elastic/ml-ui
 src/platform/packages/shared/deeplinks/observability @elastic/obs-ux-management-team
@@ -617,6 +617,7 @@ src/platform/plugins/private/vis_type_markdown @elastic/kibana-presentation
 src/platform/plugins/shared/ai_assistant_management/selection @elastic/obs-ai-assistant
 src/platform/plugins/shared/console @elastic/kibana-management
 src/platform/plugins/shared/controls @elastic/kibana-presentation
+src/platform/plugins/shared/custom_integrations @elastic/fleet
 src/platform/plugins/shared/dashboard @elastic/kibana-presentation
 src/platform/plugins/shared/dev_tools @elastic/kibana-management
 src/platform/plugins/shared/embeddable @elastic/kibana-presentation
@@ -643,7 +644,6 @@ src/plugins/chart_expressions/expression_tagcloud @elastic/kibana-visualizations
 src/plugins/chart_expressions/expression_xy @elastic/kibana-visualizations
 src/plugins/charts @elastic/kibana-visualizations
 src/plugins/content_management @elastic/appex-sharedux
-src/plugins/custom_integrations @elastic/fleet
 src/plugins/data @elastic/kibana-visualizations @elastic/kibana-data-discovery
 src/plugins/data_view_editor @elastic/kibana-data-discovery
 src/plugins/data_view_field_editor @elastic/kibana-data-discovery
@@ -866,6 +866,7 @@ x-pack/platform/plugins/shared/dataset_quality @elastic/obs-ux-logs-team
 x-pack/platform/plugins/shared/embeddable_enhanced @elastic/kibana-presentation
 x-pack/platform/plugins/shared/entity_manager @elastic/obs-entities
 x-pack/platform/plugins/shared/fields_metadata @elastic/obs-ux-logs-team
+x-pack/platform/plugins/shared/fleet @elastic/fleet
 x-pack/platform/plugins/shared/index_management @elastic/kibana-management
 x-pack/platform/plugins/shared/inference @elastic/appex-ai-infra
 x-pack/platform/plugins/shared/ingest_pipelines @elastic/kibana-management
@@ -895,7 +896,6 @@ x-pack/plugins/encrypted_saved_objects @elastic/kibana-security
 x-pack/plugins/enterprise_search @elastic/search-kibana
 x-pack/plugins/event_log @elastic/response-ops
 x-pack/plugins/features @elastic/kibana-core
-x-pack/plugins/fleet @elastic/fleet
 x-pack/plugins/global_search @elastic/appex-sharedux
 x-pack/plugins/global_search_bar @elastic/appex-sharedux
 x-pack/plugins/global_search_providers @elastic/appex-sharedux
@@ -1384,7 +1384,7 @@ packages/kbn-monaco/src/esql @elastic/kibana-esql
 /x-pack/test/fleet_cypress @elastic/fleet
 /x-pack/test/fleet_functional @elastic/fleet
 /src/dev/build/tasks/bundle_fleet_packages.ts @elastic/fleet @elastic/kibana-operations
-/x-pack/plugins/fleet/server/services/elastic_agent_manifest.ts @elastic/fleet @elastic/obs-cloudnative-monitoring
+/x-pack/platform/plugins/shared/fleet/server/services/elastic_agent_manifest.ts @elastic/fleet @elastic/obs-cloudnative-monitoring
 /x-pack/test_serverless/**/test_suites/**/fleet/ @elastic/fleet
 
 # APM
@@ -2507,10 +2507,10 @@ x-pack/solutions/security/plugins/security_solution/public/cloud_defend @elastic
 x-pack/solutions/security/plugins/security_solution/public/cloud_security_posture @elastic/kibana-cloud-security-posture
 x-pack/solutions/security/plugins/security_solution/public/kubernetes @elastic/kibana-cloud-security-posture
 ## Fleet plugin (co-owned with Fleet team)
-x-pack/plugins/fleet/public/components/cloud_security_posture @elastic/fleet @elastic/kibana-cloud-security-posture
-x-pack/plugins/fleet/public/applications/fleet/sections/agent_policy/create_package_policy_page/single_page_layout/components/cloud_security_posture @elastic/fleet @elastic/kibana-cloud-security-posture
-x-pack/plugins/fleet/public/applications/fleet/sections/agent_policy/create_package_policy_page/single_page_layout/hooks/setup_technology.* @elastic/fleet @elastic/kibana-cloud-security-posture
-x-pack/plugins/fleet/public/applications/integrations/sections/epm/screens/detail/components/cloud_posture_third_party_support_callout.* @elastic/fleet @elastic/kibana-cloud-security-posture
+x-pack/platform/plugins/shared/fleet/public/components/cloud_security_posture @elastic/fleet @elastic/kibana-cloud-security-posture
+x-pack/platform/plugins/shared/fleet/public/applications/fleet/sections/agent_policy/create_package_policy_page/single_page_layout/components/cloud_security_posture @elastic/fleet @elastic/kibana-cloud-security-posture
+x-pack/platform/plugins/shared/fleet/public/applications/fleet/sections/agent_policy/create_package_policy_page/single_page_layout/hooks/setup_technology.* @elastic/fleet @elastic/kibana-cloud-security-posture
+x-pack/platform/plugins/shared/fleet/public/applications/integrations/sections/epm/screens/detail/components/cloud_posture_third_party_support_callout.* @elastic/fleet @elastic/kibana-cloud-security-posture
 ## Kubernetes Security tests
 x-pack/test/functional/es_archives/kubernetes_security @elastic/kibana-cloud-security-posture
 x-pack/test/kubernetes_security @elastic/kibana-cloud-security-posture
@@ -2543,7 +2543,7 @@ x-pack/solutions/security/plugins/security_solution/server/lib/security_integrat
 **/*.scss @elastic/kibana-design
 
 # Observability design
-/x-pack/plugins/fleet/**/*.scss @elastic/observability-design
+/x-pack/platform/plugins/shared/fleet/**/*.scss @elastic/observability-design
 /x-pack/platform/plugins/private/monitoring/**/*.scss @elastic/observability-design
 
 # Ent. Search design
@@ -2654,7 +2654,7 @@ oas_docs/kibana.info.yaml                     @elastic/platform-docs
 # maintaining ESOs has been documented and consuming teams have acclimated to ZDT changes.
 x-pack/plugins/actions/server/saved_objects/index.ts @elastic/response-ops @elastic/kibana-security
 x-pack/plugins/alerting/server/saved_objects/index.ts @elastic/response-ops @elastic/kibana-security
-x-pack/plugins/fleet/server/saved_objects/index.ts @elastic/fleet @elastic/kibana-security
+x-pack/platform/plugins/shared/fleet/server/saved_objects/index.ts @elastic/fleet @elastic/kibana-security
 x-pack/plugins/observability_solution/synthetics/server/saved_objects/saved_objects.ts @elastic/obs-ux-management-team @elastic/kibana-security
 x-pack/plugins/observability_solution/synthetics/server/saved_objects/synthetics_monitor.ts @elastic/obs-ux-management-team @elastic/kibana-security
 x-pack/plugins/observability_solution/synthetics/server/saved_objects/synthetics_param.ts @elastic/obs-ux-management-team @elastic/kibana-security
