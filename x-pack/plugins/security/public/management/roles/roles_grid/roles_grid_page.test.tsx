@@ -305,9 +305,13 @@ describe('<RolesGridPage />', () => {
 
     findTestSubject(wrapper, 'showReservedRolesSwitch').simulate('click');
 
+    await waitForRender(wrapper, (updatedWrapper) => {
+      return updatedWrapper.find(EuiIcon).length > initialIconCount;
+    });
+
     expect(apiClientMock.queryRoles).toHaveBeenCalledWith({
       filters: {
-        showReserved: true,
+        showReservedRoles: true,
       },
       from: 0,
       size: 25,
