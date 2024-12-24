@@ -6169,7 +6169,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/logstash-plugin@link:x-pack/plugins/logstash":
+"@kbn/logstash-plugin@link:x-pack/platform/plugins/private/logstash":
   version "0.0.0"
   uid ""
 
