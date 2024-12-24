@@ -5,10 +5,5 @@
  * 2.0.
  */
 
-export * from './alerts';
-export * from './count_down_test';
-export * from './delete_all_anomalies';
-export * from './route_with_namespace';
-export * from './rules';
-export * from './tasks';
-export * from './wait_for';
+export * from './indices_metadata';
+export * from './task_manager';
