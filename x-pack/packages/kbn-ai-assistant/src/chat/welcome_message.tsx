@@ -10,7 +10,7 @@ import { css } from '@emotion/css';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, useCurrentEuiBreakpoint } from '@elastic/eui';
 import type { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public';
 import { GenerativeAIForObservabilityConnectorFeatureId } from '@kbn/actions-plugin/common';
-import { isSupportedConnectorType } from '@kbn/observability-ai-assistant-plugin/public';
+import { isSupportedConnectorType } from '@kbn/inference-common';
 import { AssistantBeacon } from '@kbn/ai-assistant-icon';
 import type { UseKnowledgeBaseResult } from '../hooks/use_knowledge_base';
 import type { UseGenAIConnectorsResult } from '../hooks/use_genai_connectors';
