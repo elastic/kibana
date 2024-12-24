@@ -44,6 +44,7 @@ export const PLI_PRODUCT_FEATURES: PliProductFeatures = {
       ProductFeatureKey.endpointAgentTamperProtection,
       ProductFeatureKey.endpointCustomNotification,
       ProductFeatureKey.endpointProtectionUpdates,
+      ProductFeatureKey.securityWorkflowInsights,
     ],
   },
   cloud: {

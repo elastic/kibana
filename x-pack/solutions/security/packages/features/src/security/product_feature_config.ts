@@ -121,6 +121,9 @@ export const securityDefaultProductFeaturesConfig: DefaultSecurityProductFeature
     ],
   },
 
+  [ProductFeatureSecurityKey.securityWorkflowInsights]: {
+    subFeatureIds: [SecuritySubFeatureId.workflowInsights],
+  },
   // Product features without RBAC
   // Endpoint/Osquery PLIs
   [ProductFeatureSecurityKey.osqueryAutomatedResponseActions]: {},
