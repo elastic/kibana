@@ -48,3 +48,31 @@ export const EDIT = i18n.translate(
     defaultMessage: 'Edit',
   }
 );
+
+export const READONLY_MODE_ERROR_FALLBACK_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.upgradeRules.readonlyModeErrorFallbackTitle',
+  {
+    defaultMessage: 'Unable to load readonly mode',
+  }
+);
+
+export const READONLY_MODE_ERROR_FALLBACK_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.upgradeRules.readonlyModeErrorFallbackDescription',
+  {
+    defaultMessage: 'An error happened in readonly mode view.',
+  }
+);
+
+export const EDIT_MODE_ERROR_FALLBACK_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.upgradeRules.editModeErrorFallbackTitle',
+  {
+    defaultMessage: 'Unable to load edit mode',
+  }
+);
+
+export const EDIT_MODE_ERROR_FALLBACK_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.upgradeRules.editModeErrorFallbackDescription',
+  {
+    defaultMessage: 'An error happened in edit mode view.',
+  }
+);

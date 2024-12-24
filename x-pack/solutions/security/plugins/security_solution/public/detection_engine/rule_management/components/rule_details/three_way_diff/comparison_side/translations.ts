@@ -93,3 +93,17 @@ export const MY_ORIGINAL_CHANGES_EXPLANATION = i18n.translate(
     },
   }
 );
+
+export const COMPARISON_SIDE_ERROR_FALLBACK_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.upgradeRules.comparisonSideErrorFallbackTitle',
+  {
+    defaultMessage: 'Unable to load diff view',
+  }
+);
+
+export const COMPARISON_SIDE_ERROR_FALLBACK_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.upgradeRules.comparisonSideErrorFallbackDescription',
+  {
+    defaultMessage: 'An error happened in comparison side.',
+  }
+);
