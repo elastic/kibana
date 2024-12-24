@@ -39,15 +39,16 @@ const getPipeline = (filename: string, removeSteps = true) => {
       return;
     }
 
+    pipeline.push(getAgentImageConfig({ returnYaml: true }));
+
     const onlyRunQuickChecks = await areChangesSkippable([/^renovate\.json$/], REQUIRED_PATHS);
     if (onlyRunQuickChecks) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/renovate.yml', false));
-      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/post_build.yml'));
-      console.log('Isolated changes to renovate.json. Skipping main PR pipeline.');
+
+      console.log([...new Set(pipeline)].join('\n'));
       return;
     }
 
-    pipeline.push(getAgentImageConfig({ returnYaml: true }));
     pipeline.push(getPipeline('.buildkite/pipelines/pull_request/base.yml', false));
 
     if (await doAnyChangesMatch([/^packages\/kbn-handlebars/])) {
@@ -98,7 +99,7 @@ const getPipeline = (filename: string, removeSteps = true) => {
     if (
       (await doAnyChangesMatch([
         /^x-pack\/solutions\/observability\/plugins\/observability_onboarding/,
-        /^x-pack\/plugins\/fleet/,
+        /^x-pack\/platform\/plugins\/shared\/fleet/,
       ])) ||
       GITHUB_PR_LABELS.includes('ci:all-cypress-suites')
     ) {
@@ -115,7 +116,10 @@ const getPipeline = (filename: string, removeSteps = true) => {
     }
 
     if (
-      (await doAnyChangesMatch([/^x-pack\/plugins\/fleet/, /^x-pack\/test\/fleet_cypress/])) ||
+      (await doAnyChangesMatch([
+        /^x-pack\/platform\/plugins\/shared\/fleet/,
+        /^x-pack\/test\/fleet_cypress/,
+      ])) ||
       GITHUB_PR_LABELS.includes('ci:all-cypress-suites')
     ) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/fleet_cypress.yml'));
@@ -301,7 +305,7 @@ const getPipeline = (filename: string, removeSteps = true) => {
         /^packages\/kbn-grouping/,
         /^packages\/kbn-resizable-layout/,
         /^packages\/kbn-rison/,
-        /^packages\/kbn-rule-data-utils/,
+        /^src\/platform\/packages\/shared\/kbn-rule-data-utils/,
         /^packages\/kbn-safer-lodash-set/,
         /^packages\/kbn-search-types/,
         /^packages\/kbn-securitysolution-.*/,
@@ -316,12 +320,12 @@ const getPipeline = (filename: string, removeSteps = true) => {
         /^packages\/shared-ux/,
         /^src\/core/,
         /^src\/plugins\/charts/,
-        /^src\/plugins\/controls/,
+        /^src\/platform\/plugins\/shared\/controls/,
         /^src\/plugins\/data/,
         /^src\/plugins\/data_views/,
         /^src\/plugins\/discover/,
         /^src\/plugins\/field_formats/,
-        /^src\/plugins\/inspector/,
+        /^src\/platform\/plugins\/shared\/inspector/,
         /^src\/plugins\/kibana_react/,
         /^src\/plugins\/kibana_utils/,
         /^src\/plugins\/saved_search/,

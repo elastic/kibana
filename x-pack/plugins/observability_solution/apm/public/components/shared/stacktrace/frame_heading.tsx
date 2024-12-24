@@ -6,7 +6,8 @@
  */
 
 import React, { ComponentType } from 'react';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import styled from '@emotion/styled';
+import { useEuiFontSize } from '@elastic/eui';
 import { Stackframe } from '../../../../typings/es_schemas/raw/fields/stackframe';
 import {
   CSharpFrameHeadingRenderer,
@@ -18,21 +19,21 @@ import {
   PhpFrameHeadingRenderer,
 } from './frame_heading_renderers';
 
-const FileDetails = euiStyled.div`
-  color: ${({ theme }) => theme.eui.euiColorDarkShade};
+const FileDetails = styled.div`
+  color: ${({ theme }) => theme.euiTheme.colors.darkShade};
   line-height: 1.5; /* matches the line-hight of the accordion container button */
   padding: 2px 0;
-  font-family: ${({ theme }) => theme.eui.euiCodeFontFamily};
-  font-size: ${({ theme }) => theme.eui.euiFontSizeS};
+  font-family: ${({ theme }) => theme.euiTheme.font.familyCode};
+  font-size: ${({ theme }) => useEuiFontSize('s').fontSize};
 `;
 
-const LibraryFrameFileDetail = euiStyled.span`
-  color: ${({ theme }) => theme.eui.euiColorDarkShade};
+const LibraryFrameFileDetail = styled.span`
+  color: ${({ theme }) => theme.euiTheme.colors.darkShade};
   word-break: break-word;
 `;
 
-const AppFrameFileDetail = euiStyled.span`
-  color: ${({ theme }) => theme.eui.euiColorFullShade};
+const AppFrameFileDetail = styled.span`
+  color: ${({ theme }) => theme.euiTheme.colors.fullShade};
   word-break: break-word;
 `;
 

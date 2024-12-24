@@ -35,7 +35,7 @@ export const useSavedSearchAliasMatchRedirect = ({
             path: `${getSavedSearchUrl(aliasTargetId)}${history.location.search}`,
             aliasPurpose,
             objectNoun: i18n.translate('discover.savedSearchAliasMatchRedirect.objectNoun', {
-              defaultMessage: '{savedSearch} search',
+              defaultMessage: `''{savedSearch}'' Discover session`,
               values: {
                 savedSearch: savedSearch.title,
               },
