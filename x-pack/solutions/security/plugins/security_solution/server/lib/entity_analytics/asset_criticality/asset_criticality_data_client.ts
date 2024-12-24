@@ -23,6 +23,10 @@ import { CRITICALITY_VALUES, assetCriticalityFieldMap } from './constants';
 import { AssetCriticalityAuditActions } from './audit';
 import { AUDIT_CATEGORY, AUDIT_OUTCOME, AUDIT_TYPE } from '../audit';
 import { getImplicitEntityFields } from './helpers';
+import {
+  getIngestPipelineName,
+  createIngestTimestampPipeline,
+} from '../utils/create_ingest_pipeline';
 
 interface AssetCriticalityClientOpts {
   logger: Logger;
@@ -59,6 +63,7 @@ export class AssetCriticalityDataClient {
    * Initialize asset criticality resources.
    */
   public async init() {
+    await createIngestTimestampPipeline(this.options.esClient, this.options.namespace);
     await this.createOrUpdateIndex();
 
     this.options.auditLogger?.log({
@@ -82,6 +87,9 @@ export class AssetCriticalityDataClient {
       options: {
         index: this.getIndex(),
         mappings: mappingFromFieldMap(assetCriticalityFieldMap, 'strict'),
+        settings: {
+          default_pipeline: getIngestPipelineName(this.options.namespace),
+        },
       },
     });
   }
