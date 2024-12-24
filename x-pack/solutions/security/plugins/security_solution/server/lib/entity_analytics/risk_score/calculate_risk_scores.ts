@@ -16,6 +16,7 @@ import {
   ALERT_WORKFLOW_STATUS,
   ALERT_WORKFLOW_TAGS,
 } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
+import type { ExperimentalFeatures } from '../../../../common';
 import type {
   AssetCriticalityRecord,
   RiskScoresPreviewResponse,
@@ -220,11 +221,13 @@ export const calculateRiskScores = async ({
   weights,
   alertSampleSizePerShard = 10_000,
   excludeAlertStatuses = [],
+  experimentalFeatures,
   excludeAlertTags = [],
 }: {
   assetCriticalityService: AssetCriticalityService;
   esClient: ElasticsearchClient;
   logger: Logger;
+  experimentalFeatures: ExperimentalFeatures;
 } & CalculateScoresParams): Promise<RiskScoresPreviewResponse> =>
   withSecuritySpan('calculateRiskScores', async () => {
     const now = new Date().toISOString();
@@ -243,7 +246,12 @@ export const calculateRiskScores = async ({
         bool: { must_not: { terms: { [ALERT_WORKFLOW_TAGS]: excludeAlertTags } } },
       });
     }
-    const identifierTypes: IdentifierType[] = identifierType ? [identifierType] : ['host', 'user'];
+    const identifierTypes: IdentifierType[] = identifierType
+      ? [identifierType]
+      : experimentalFeatures.serviceEntityStoreEnabled
+      ? ['host', 'user', 'service']
+      : ['host', 'user'];
+
     const request = {
       size: 0,
       _source: false,
@@ -297,16 +305,21 @@ export const calculateRiskScores = async ({
         scores: {
           host: [],
           user: [],
+          service: [],
         },
       };
     }
 
     const userBuckets = response.aggregations.user?.buckets ?? [];
     const hostBuckets = response.aggregations.host?.buckets ?? [];
+    const serviceBuckets = experimentalFeatures.serviceEntityStoreEnabled
+      ? response.aggregations.service?.buckets ?? []
+      : [];
 
     const afterKeys = {
       host: response.aggregations.host?.after_key,
       user: response.aggregations.user?.after_key,
+      service: experimentalFeatures ? response.aggregations.service?.after_key : undefined,
     };
 
     const hostScores = await processScores({
@@ -323,6 +336,13 @@ export const calculateRiskScores = async ({
       logger,
       now,
     });
+    const serviceScores = await processScores({
+      assetCriticalityService,
+      buckets: serviceBuckets,
+      identifierField: 'service.name',
+      logger,
+      now,
+    });
 
     return {
       ...(debug ? { request, response } : {}),
@@ -330,6 +350,7 @@ export const calculateRiskScores = async ({
       scores: {
         host: hostScores,
         user: userScores,
+        service: serviceScores,
       },
     };
   });

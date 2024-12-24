@@ -7,6 +7,6 @@
 
 import * as t from 'io-ts';
 
-export const identifierTypeSchema = t.keyof({ user: null, host: null });
+export const identifierTypeSchema = t.keyof({ user: null, host: null, service: null });
 export type IdentifierTypeSchema = t.TypeOf<typeof identifierTypeSchema>;
 export type IdentifierType = IdentifierTypeSchema;
