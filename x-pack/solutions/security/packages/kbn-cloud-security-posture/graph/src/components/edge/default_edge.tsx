@@ -18,6 +18,8 @@ const dashedStyle = {
   strokeDasharray: '2 2',
 };
 
+const NODES_WITHOUT_MARKER = ['label', 'group'];
+
 export const DefaultEdge = memo(
   ({
     id,
@@ -35,11 +37,11 @@ export const DefaultEdge = memo(
     const sourceMargin = getShapeHandlePosition(data?.sourceShape);
     const targetMargin = getShapeHandlePosition(data?.targetShape);
     const markerStart =
-      data?.sourceShape !== 'label' && data?.sourceShape !== 'group'
+      !data?.sourceShape || !NODES_WITHOUT_MARKER.includes(data?.sourceShape)
         ? getMarkerStart(color)
         : undefined;
     const markerEnd =
-      data?.targetShape !== 'label' && data?.targetShape !== 'group'
+      !data?.targetShape || !NODES_WITHOUT_MARKER.includes(data?.targetShape)
         ? getMarkerEnd(color)
         : undefined;
 
