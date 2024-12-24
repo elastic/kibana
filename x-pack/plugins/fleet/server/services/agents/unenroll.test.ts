@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 
 import { AGENT_ACTIONS_INDEX, AGENT_ACTIONS_RESULTS_INDEX } from '../../../common';
 
@@ -48,9 +48,7 @@ describe('unenroll', () => {
       expect(esClient.update).toBeCalledTimes(1);
       const calledWith = esClient.update.mock.calls[0];
       expect(calledWith[0]?.id).toBe(agentInRegularDoc._id);
-      expect((calledWith[0] as estypes.UpdateRequest)?.body).toHaveProperty(
-        'doc.unenrollment_started_at'
-      );
+      expect(calledWith[0] as estypes.UpdateRequest).toHaveProperty('doc.unenrollment_started_at');
     });
 
     it('cannot unenroll from hosted agent policy by default', async () => {
@@ -78,9 +76,7 @@ describe('unenroll', () => {
       expect(esClient.update).toBeCalledTimes(1);
       const calledWith = esClient.update.mock.calls[0];
       expect(calledWith[0]?.id).toBe(agentInHostedDoc._id);
-      expect((calledWith[0] as estypes.UpdateRequest)?.body).toHaveProperty(
-        'doc.unenrollment_started_at'
-      );
+      expect(calledWith[0] as estypes.UpdateRequest).toHaveProperty('doc.unenrollment_started_at');
     });
 
     it('can unenroll from hosted agent policy with force=true and revoke=true', async () => {
@@ -90,7 +86,7 @@ describe('unenroll', () => {
       expect(esClient.update).toBeCalledTimes(1);
       const calledWith = esClient.update.mock.calls[0];
       expect(calledWith[0]?.id).toBe(agentInHostedDoc._id);
-      expect((calledWith[0] as estypes.UpdateRequest)?.body).toHaveProperty('doc.unenrolled_at');
+      expect(calledWith[0] as estypes.UpdateRequest).toHaveProperty('doc.unenrolled_at');
     });
   });
 
@@ -102,10 +98,10 @@ describe('unenroll', () => {
 
       // calls ES update with correct values
       const calledWith = esClient.bulk.mock.calls[0][0];
-      const ids = (calledWith as estypes.BulkRequest)?.body
+      const ids = (calledWith as estypes.BulkRequest)?.operations
         ?.filter((i: any) => i.update !== undefined)
         .map((i: any) => i.update._id);
-      const docs = (calledWith as estypes.BulkRequest)?.body
+      const docs = (calledWith as estypes.BulkRequest)?.operations
         ?.filter((i: any) => i.doc)
         .map((i: any) => i.doc);
       expect(ids).toEqual(idsToUnenroll);
@@ -123,10 +119,10 @@ describe('unenroll', () => {
       // calls ES update with correct values
       const onlyRegular = [agentInRegularDoc._id, agentInRegularDoc2._id];
       const calledWith = esClient.bulk.mock.calls[0][0];
-      const ids = (calledWith as estypes.BulkRequest)?.body
+      const ids = (calledWith as estypes.BulkRequest)?.operations
         ?.filter((i: any) => i.update !== undefined)
         .map((i: any) => i.update._id);
-      const docs = (calledWith as estypes.BulkRequest)?.body
+      const docs = (calledWith as estypes.BulkRequest)?.operations
         ?.filter((i: any) => i.doc)
         .map((i: any) => i.doc);
       expect(ids).toEqual(onlyRegular);
@@ -137,7 +133,7 @@ describe('unenroll', () => {
       // hosted policy is updated in action results with error
       const calledWithActionResults = esClient.bulk.mock.calls[1][0] as estypes.BulkRequest;
       // bulk write two line per create
-      expect(calledWithActionResults.body?.length).toBe(2);
+      expect(calledWithActionResults.operations?.length).toBe(2);
       const expectedObject = expect.objectContaining({
         '@timestamp': expect.anything(),
         action_id: expect.anything(),
@@ -145,7 +141,7 @@ describe('unenroll', () => {
         error:
           'Cannot unenroll agent-in-hosted-policy from a hosted agent policy hosted-agent-policy in Fleet because the agent policy is managed by an external orchestration solution, such as Elastic Cloud, Kubernetes, etc. Please make changes using your orchestration solution.',
       });
-      expect(calledWithActionResults.body?.[1] as any).toEqual(expectedObject);
+      expect(calledWithActionResults.operations?.[1]).toEqual(expectedObject);
     });
 
     it('force unenroll updates in progress unenroll actions', async () => {
@@ -186,7 +182,8 @@ describe('unenroll', () => {
       });
 
       expect(esClient.bulk.mock.calls.length).toEqual(3);
-      const bulkBody = (esClient.bulk.mock.calls[2][0] as estypes.BulkRequest)?.body?.[1] as any;
+      const bulkBody = (esClient.bulk.mock.calls[2][0] as estypes.BulkRequest)
+        ?.operations?.[1] as any;
       expect(bulkBody.agent_id).toEqual(agentInRegularDoc._id);
       expect(bulkBody.action_id).toEqual('other-action');
     });
@@ -248,10 +245,10 @@ describe('unenroll', () => {
       // calls ES update with correct values
       const onlyRegular = [agentInRegularDoc._id, agentInRegularDoc2._id];
       const calledWith = esClient.bulk.mock.calls[0][0];
-      const ids = (calledWith as estypes.BulkRequest)?.body
+      const ids = (calledWith as estypes.BulkRequest)?.operations
         ?.filter((i: any) => i.update !== undefined)
         .map((i: any) => i.update._id);
-      const docs = (calledWith as estypes.BulkRequest)?.body
+      const docs = (calledWith as estypes.BulkRequest)?.operations
         ?.filter((i: any) => i.doc)
         .map((i: any) => i.doc);
       expect(ids).toEqual(onlyRegular);
@@ -260,19 +257,19 @@ describe('unenroll', () => {
       }
 
       const errorResults = esClient.bulk.mock.calls[2][0];
-      const errorIds = (errorResults as estypes.BulkRequest)?.body
+      const errorIds = (errorResults as estypes.BulkRequest)?.operations
         ?.filter((i: any) => i.agent_id)
         .map((i: any) => i.agent_id);
       expect(errorIds).toEqual([agentInHostedDoc._id]);
 
       const actionResults = esClient.bulk.mock.calls[1][0];
-      const resultIds = (actionResults as estypes.BulkRequest)?.body
+      const resultIds = (actionResults as estypes.BulkRequest)?.operations
         ?.filter((i: any) => i.agent_id)
         .map((i: any) => i.agent_id);
       expect(resultIds).toEqual(onlyRegular);
 
       const action = esClient.create.mock.calls[0][0] as any;
-      expect(action.body.type).toEqual('FORCE_UNENROLL');
+      expect(action.document.type).toEqual('FORCE_UNENROLL');
     });
 
     it('can unenroll from hosted agent policy with force=true', async () => {
@@ -283,10 +280,10 @@ describe('unenroll', () => {
 
       // calls ES update with correct values
       const calledWith = esClient.bulk.mock.calls[0][0];
-      const ids = (calledWith as estypes.BulkRequest)?.body
+      const ids = (calledWith as estypes.BulkRequest)?.operations
         ?.filter((i: any) => i.update !== undefined)
         .map((i: any) => i.update._id);
-      const docs = (calledWith as estypes.BulkRequest)?.body
+      const docs = (calledWith as estypes.BulkRequest)?.operations
         ?.filter((i: any) => i.doc)
         .map((i: any) => i.doc);
       expect(ids).toEqual(idsToUnenroll);
@@ -311,10 +308,10 @@ describe('unenroll', () => {
 
       // calls ES update with correct values
       const calledWith = esClient.bulk.mock.calls[0][0];
-      const ids = (calledWith as estypes.BulkRequest)?.body
+      const ids = (calledWith as estypes.BulkRequest)?.operations
         ?.filter((i: any) => i.update !== undefined)
         .map((i: any) => i.update._id);
-      const docs = (calledWith as estypes.BulkRequest)?.body
+      const docs = (calledWith as estypes.BulkRequest)?.operations
         ?.filter((i: any) => i.doc)
         .map((i: any) => i.doc);
       expect(ids).toEqual(idsToUnenroll);
@@ -323,13 +320,13 @@ describe('unenroll', () => {
       }
 
       const actionResults = esClient.bulk.mock.calls[1][0];
-      const resultIds = (actionResults as estypes.BulkRequest)?.body
+      const resultIds = (actionResults as estypes.BulkRequest)?.operations
         ?.filter((i: any) => i.agent_id)
         .map((i: any) => i.agent_id);
       expect(resultIds).toEqual(idsToUnenroll);
 
       const action = esClient.create.mock.calls[0][0] as any;
-      expect(action.body.type).toEqual('FORCE_UNENROLL');
+      expect(action.document.type).toEqual('FORCE_UNENROLL');
     });
   });
 

@@ -186,3 +186,17 @@ export const CREATE_TEMPLATE = i18n.translate('xpack.cases.configureCases.templa
 export const EDIT_TEMPLATE = i18n.translate('xpack.cases.configureCases.templates.editTemplate', {
   defaultMessage: 'Edit template',
 });
+
+export const ADD_OBSERVABLE_TYPE = i18n.translate(
+  'xpack.cases.configureCases.observableTypes.addObservableType',
+  {
+    defaultMessage: 'Add observable type',
+  }
+);
+
+export const EDIT_OBSERVABLE_TYPE = i18n.translate(
+  'xpack.cases.configureCases.observableTypes.editObservableType',
+  {
+    defaultMessage: 'Edit observable type',
+  }
+);

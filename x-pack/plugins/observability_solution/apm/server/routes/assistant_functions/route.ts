@@ -55,15 +55,12 @@ const getDownstreamDependenciesRoute = createApmServerRoute({
   }),
   security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (resources): Promise<{ content: APMDownstreamDependency[] }> => {
-    const {
-      params,
-      request,
-      plugins: { security },
-    } = resources;
+    const { params, request, core } = resources;
 
+    const coreStart = await core.start();
     const [apmEventClient, randomSampler] = await Promise.all([
       getApmEventClient(resources),
-      getRandomSampler({ security, request, probability: 1 }),
+      getRandomSampler({ coreStart, request, probability: 1 }),
     ]);
 
     const { query } = params;

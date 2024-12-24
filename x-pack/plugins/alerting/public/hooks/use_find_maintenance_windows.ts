@@ -9,13 +9,18 @@ import { i18n } from '@kbn/i18n';
 import { useQuery } from '@tanstack/react-query';
 import { useKibana } from '../utils/kibana_react';
 import { findMaintenanceWindows } from '../services/maintenance_windows_api/find';
+import { type MaintenanceWindowStatus } from '../../common';
 
 interface UseFindMaintenanceWindowsProps {
   enabled?: boolean;
+  page: number;
+  perPage: number;
+  search: string;
+  selectedStatus: MaintenanceWindowStatus[];
 }
 
-export const useFindMaintenanceWindows = (props?: UseFindMaintenanceWindowsProps) => {
-  const { enabled = true } = props || {};
+export const useFindMaintenanceWindows = (params: UseFindMaintenanceWindowsProps) => {
+  const { enabled = true, page, perPage, search, selectedStatus } = params;
 
   const {
     http,
@@ -23,7 +28,13 @@ export const useFindMaintenanceWindows = (props?: UseFindMaintenanceWindowsProps
   } = useKibana().services;
 
   const queryFn = () => {
-    return findMaintenanceWindows({ http });
+    return findMaintenanceWindows({
+      http,
+      page,
+      perPage,
+      search,
+      selectedStatus,
+    });
   };
 
   const onErrorFn = (error: Error) => {
@@ -36,24 +47,22 @@ export const useFindMaintenanceWindows = (props?: UseFindMaintenanceWindowsProps
     }
   };
 
-  const {
-    isLoading,
-    isFetching,
-    isInitialLoading,
-    data = [],
-    refetch,
-  } = useQuery({
-    queryKey: ['findMaintenanceWindows'],
+  const queryKey = ['findMaintenanceWindows', page, perPage, search, selectedStatus];
+
+  const { isLoading, isFetching, isInitialLoading, data, refetch } = useQuery({
+    queryKey,
     queryFn,
     onError: onErrorFn,
     refetchOnWindowFocus: false,
     retry: false,
     cacheTime: 0,
     enabled,
+    placeholderData: { maintenanceWindows: [], total: 0 },
+    keepPreviousData: true,
   });
 
   return {
-    maintenanceWindows: data,
+    data,
     isLoading: enabled && (isLoading || isFetching),
     isInitialLoading,
     refetch,

@@ -24,7 +24,9 @@ export const findMaintenanceWindowSo = <MaintenanceWindowAggregation = Record<st
   const { savedObjectsClient, savedObjectsFindOptions } = params;
 
   return savedObjectsClient.find<MaintenanceWindowAttributes, MaintenanceWindowAggregation>({
-    ...(savedObjectsFindOptions ? savedObjectsFindOptions : {}),
+    ...(savedObjectsFindOptions
+      ? { ...savedObjectsFindOptions, sortField: 'updatedAt', sortOrder: 'desc' }
+      : {}),
     type: MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
   });
 };
