@@ -17,6 +17,8 @@ const GRAPH_NODE_EXPAND_POPOVER_TEST_ID = `${GRAPH_INVESTIGATION_TEST_ID}GraphNo
 const GRAPH_NODE_POPOVER_EXPLORE_RELATED_TEST_ID = `${GRAPH_INVESTIGATION_TEST_ID}ExploreRelatedEntities`;
 const GRAPH_NODE_POPOVER_SHOW_ACTIONS_BY_TEST_ID = `${GRAPH_INVESTIGATION_TEST_ID}ShowActionsByEntity`;
 const GRAPH_NODE_POPOVER_SHOW_ACTIONS_ON_TEST_ID = `${GRAPH_INVESTIGATION_TEST_ID}ShowActionsOnEntity`;
+const GRAPH_LABEL_EXPAND_POPOVER_TEST_ID = `${GRAPH_INVESTIGATION_TEST_ID}GraphLabelExpandPopover`;
+const GRAPH_LABEL_EXPAND_POPOVER_SHOW_EVENTS_WITH_THIS_ACTION_ITEM_ID = `${GRAPH_INVESTIGATION_TEST_ID}ShowEventsWithThisAction`;
 type Filter = Parameters<FilterBarService['addFilter']>[0];
 
 export class ExpandedFlyout extends FtrService {
@@ -52,11 +54,14 @@ export class ExpandedFlyout extends FtrService {
     return nodes[0];
   }
 
-  async clickOnNodeExpandButton(nodeId: string): Promise<void> {
+  async clickOnNodeExpandButton(
+    nodeId: string,
+    popoverId: string = GRAPH_NODE_EXPAND_POPOVER_TEST_ID
+  ): Promise<void> {
     const node = await this.selectNode(nodeId);
     const expandButton = await node.findByTestSubject(NODE_EXPAND_BUTTON_TEST_ID);
     await expandButton.click();
-    await this.testSubjects.existOrFail(GRAPH_NODE_EXPAND_POPOVER_TEST_ID);
+    await this.testSubjects.existOrFail(popoverId);
   }
 
   async showActionsByEntity(nodeId: string): Promise<void> {
@@ -74,6 +79,12 @@ export class ExpandedFlyout extends FtrService {
   async exploreRelatedEntities(nodeId: string): Promise<void> {
     await this.clickOnNodeExpandButton(nodeId);
     await this.testSubjects.click(GRAPH_NODE_POPOVER_EXPLORE_RELATED_TEST_ID);
+    await this.pageObjects.header.waitUntilLoadingHasFinished();
+  }
+
+  async showEventsOfSameAction(nodeId: string): Promise<void> {
+    await this.clickOnNodeExpandButton(nodeId, GRAPH_LABEL_EXPAND_POPOVER_TEST_ID);
+    await this.testSubjects.click(GRAPH_LABEL_EXPAND_POPOVER_SHOW_EVENTS_WITH_THIS_ACTION_ITEM_ID);
     await this.pageObjects.header.waitUntilLoadingHasFinished();
   }
 
