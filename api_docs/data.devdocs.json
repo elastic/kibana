@@ -3917,11 +3917,11 @@
               },
               {
                 "plugin": "inputControlVis",
-                "path": "src/plugins/input_control_vis/public/control/list_control_factory.ts"
+                "path": "src/platform/plugins/private/input_control_vis/public/control/list_control_factory.ts"
               },
               {
                 "plugin": "inputControlVis",
-                "path": "src/plugins/input_control_vis/public/control/range_control_factory.ts"
+                "path": "src/platform/plugins/private/input_control_vis/public/control/range_control_factory.ts"
               }
             ],
             "children": [
@@ -11746,15 +11746,15 @@
             },
             {
               "plugin": "inputControlVis",
-              "path": "src/plugins/input_control_vis/public/control/list_control_factory.ts"
+              "path": "src/platform/plugins/private/input_control_vis/public/control/list_control_factory.ts"
             },
             {
               "plugin": "inputControlVis",
-              "path": "src/plugins/input_control_vis/public/control/range_control_factory.ts"
+              "path": "src/platform/plugins/private/input_control_vis/public/control/range_control_factory.ts"
             },
             {
               "plugin": "inputControlVis",
-              "path": "src/plugins/input_control_vis/public/components/editor/controls_tab.tsx"
+              "path": "src/platform/plugins/private/input_control_vis/public/components/editor/controls_tab.tsx"
             },
             {
               "plugin": "securitySolution",
@@ -12326,11 +12326,11 @@
               },
               {
                 "plugin": "maps",
-                "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/es_search_source.tsx"
+                "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/es_search_source/es_search_source.tsx"
               },
               {
                 "plugin": "maps",
-                "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/es_search_source.tsx"
+                "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/es_search_source/es_search_source.tsx"
               }
             ],
             "returnComment": [],
@@ -18861,11 +18861,11 @@
               },
               {
                 "plugin": "maps",
-                "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/es_search_source.tsx"
+                "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/es_search_source/es_search_source.tsx"
               },
               {
                 "plugin": "maps",
-                "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/es_search_source.tsx"
+                "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/es_search_source/es_search_source.tsx"
               }
             ],
             "returnComment": [],

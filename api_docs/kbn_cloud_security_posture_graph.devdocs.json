@@ -34,7 +34,7 @@
             "id": "def-public.Graph.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  nodes,\n  edges,\n  interactive,\n  isLocked = false,\n  ...rest\n}",
+            "label": "{ nodes, edges, interactive, isLocked = false, ...rest }",
             "description": [],
             "signature": [
               {
@@ -66,7 +66,7 @@
           "\nGraph investigation view allows the user to expand nodes and view related entities."
         ],
         "signature": [
-          "React.FunctionComponent<GraphInvestigationProps>"
+          "React.NamedExoticComponent<GraphInvestigationProps>"
         ],
         "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/graph/src/components/graph_investigation/graph_investigation.tsx",
         "deprecated": false,
@@ -82,20 +82,6 @@
             "description": [],
             "signature": [
               "P"
-            ],
-            "path": "node_modules/@types/react/ts5.0/index.d.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/cloud-security-posture-graph",
-            "id": "def-public.GraphInvestigation.$2",
-            "type": "Any",
-            "tags": [],
-            "label": "context",
-            "description": [],
-            "signature": [
-              "any"
             ],
             "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
@@ -131,6 +117,53 @@
               "GraphPopoverProps"
             ],
             "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/graph/src/components/graph/graph_popover.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cloud-security-posture-graph",
+        "id": "def-public.isEntityNode",
+        "type": "Function",
+        "tags": [],
+        "label": "isEntityNode",
+        "description": [],
+        "signature": [
+          "(node: ",
+          {
+            "pluginId": "@kbn/cloud-security-posture-graph",
+            "scope": "public",
+            "docId": "kibKbnCloudSecurityPostureGraphPluginApi",
+            "section": "def-public.NodeViewModel",
+            "text": "NodeViewModel"
+          },
+          ") => boolean"
+        ],
+        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/graph/src/components/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/cloud-security-posture-graph",
+            "id": "def-public.isEntityNode.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "node",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/cloud-security-posture-graph",
+                "scope": "public",
+                "docId": "kibKbnCloudSecurityPostureGraphPluginApi",
+                "section": "def-public.NodeViewModel",
+                "text": "NodeViewModel"
+              }
+            ],
+            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/graph/src/components/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -445,6 +478,21 @@
             "description": [],
             "signature": [
               "ExpandButtonClickCallback",
+              " | undefined"
+            ],
+            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/graph/src/components/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/cloud-security-posture-graph",
+            "id": "def-public.LabelNodeViewModel.nodeClick",
+            "type": "Function",
+            "tags": [],
+            "label": "nodeClick",
+            "description": [],
+            "signature": [
+              "NodeClickCallback",
               " | undefined"
             ],
             "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/graph/src/components/types.ts",

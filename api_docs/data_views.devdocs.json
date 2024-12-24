@@ -89,11 +89,11 @@
             "references": [
               {
                 "plugin": "maps",
-                "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/es_search_source.tsx"
+                "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/es_search_source/es_search_source.tsx"
               },
               {
                 "plugin": "maps",
-                "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/es_search_source.tsx"
+                "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/es_search_source/es_search_source.tsx"
               }
             ],
             "returnComment": [],
@@ -7963,11 +7963,11 @@
             "references": [
               {
                 "plugin": "maps",
-                "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/es_search_source.tsx"
+                "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/es_search_source/es_search_source.tsx"
               },
               {
                 "plugin": "maps",
-                "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/es_search_source.tsx"
+                "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/es_search_source/es_search_source.tsx"
               }
             ],
             "returnComment": [],
@@ -12148,7 +12148,9 @@
               "\nA record of capabilities (aggregations) for an index rollup job"
             ],
             "signature": [
-              "[index: string]:  { aggs?: _.Dictionary<",
+              "[index: string]:  { aggs?: ",
+              "Dictionary",
+              "<",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -13976,10 +13978,6 @@
             "references": [
               {
                 "plugin": "data",
-                "path": "src/plugins/data/public/query/filter_manager/lib/get_display_value.ts"
-              },
-              {
-                "plugin": "data",
                 "path": "src/plugins/data/common/search/search_source/fetch/get_search_params.ts"
               },
               {
@@ -13991,12 +13989,16 @@
                 "path": "src/plugins/data/common/search/tabify/response_writer.ts"
               },
               {
-                "plugin": "@kbn/search-errors",
-                "path": "packages/kbn-search-errors/src/painless_error.tsx"
+                "plugin": "data",
+                "path": "src/plugins/data/common/search/aggs/param_types/field.ts"
               },
               {
                 "plugin": "data",
-                "path": "src/plugins/data/common/search/aggs/param_types/field.ts"
+                "path": "src/plugins/data/public/query/filter_manager/lib/get_display_value.ts"
+              },
+              {
+                "plugin": "@kbn/search-errors",
+                "path": "packages/kbn-search-errors/src/painless_error.tsx"
               },
               {
                 "plugin": "savedObjectsManagement",
@@ -14019,6 +14021,10 @@
                 "path": "src/plugins/unified_search/public/dataview_picker/change_dataview.tsx"
               },
               {
+                "plugin": "controls",
+                "path": "src/platform/plugins/shared/controls/public/controls/data_controls/options_list_control/options_list_fetch_cache.ts"
+              },
+              {
                 "plugin": "@kbn/unified-field-list",
                 "path": "packages/kbn-unified-field-list/src/services/field_stats/load_field_stats.ts"
               },
@@ -14029,10 +14035,6 @@
               {
                 "plugin": "@kbn/unified-field-list",
                 "path": "packages/kbn-unified-field-list/src/hooks/use_existing_fields.ts"
-              },
-              {
-                "plugin": "controls",
-                "path": "src/plugins/controls/public/controls/data_controls/options_list_control/options_list_fetch_cache.ts"
               },
               {
                 "plugin": "lens",
@@ -14053,10 +14055,6 @@
               {
                 "plugin": "dataVisualizer",
                 "path": "x-pack/platform/plugins/private/data_visualizer/public/application/index_data_visualizer/hooks/use_data_visualizer_grid_data.ts"
-              },
-              {
-                "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/public/components/datasource/datasource_component.js"
               },
               {
                 "plugin": "ml",
@@ -14195,12 +14193,12 @@
                 "path": "x-pack/solutions/observability/plugins/exploratory_view/public/components/shared/exploratory_view/series_editor/columns/filter_value_btn.tsx"
               },
               {
-                "plugin": "maps",
-                "path": "x-pack/plugins/maps/public/classes/tooltips/es_tooltip_property.test.ts"
-              },
-              {
                 "plugin": "enterpriseSearch",
                 "path": "x-pack/plugins/enterprise_search/public/applications/analytics/utils/find_or_create_data_view.test.ts"
+              },
+              {
+                "plugin": "canvas",
+                "path": "x-pack/platform/plugins/private/canvas/public/components/datasource/datasource_component.js"
               },
               {
                 "plugin": "transform",
@@ -14225,6 +14223,10 @@
               {
                 "plugin": "timelines",
                 "path": "x-pack/solutions/security/plugins/timelines/server/search_strategy/index_fields/index.ts"
+              },
+              {
+                "plugin": "maps",
+                "path": "x-pack/platform/plugins/shared/maps/public/classes/tooltips/es_tooltip_property.test.ts"
               },
               {
                 "plugin": "ml",
@@ -14319,14 +14321,6 @@
                 "path": "src/plugins/event_annotation_listing/public/components/table_list.tsx"
               },
               {
-                "plugin": "inputControlVis",
-                "path": "src/plugins/input_control_vis/public/control/list_control_factory.ts"
-              },
-              {
-                "plugin": "inputControlVis",
-                "path": "src/plugins/input_control_vis/public/control/range_control_factory.ts"
-              },
-              {
                 "plugin": "visDefaultEditor",
                 "path": "src/plugins/vis_default_editor/public/components/controls/field.tsx"
               },
@@ -14337,10 +14331,6 @@
               {
                 "plugin": "visDefaultEditor",
                 "path": "src/plugins/vis_default_editor/public/components/agg_select.tsx"
-              },
-              {
-                "plugin": "inputControlVis",
-                "path": "src/plugins/input_control_vis/public/test_utils/get_index_pattern_mock.ts"
               },
               {
                 "plugin": "visTypeTimelion",
@@ -14421,6 +14411,18 @@
               {
                 "plugin": "visTypeTimeseries",
                 "path": "src/plugins/vis_types/timeseries/server/lib/search_strategies/lib/cached_index_pattern_fetcher.test.ts"
+              },
+              {
+                "plugin": "inputControlVis",
+                "path": "src/platform/plugins/private/input_control_vis/public/control/list_control_factory.ts"
+              },
+              {
+                "plugin": "inputControlVis",
+                "path": "src/platform/plugins/private/input_control_vis/public/control/range_control_factory.ts"
+              },
+              {
+                "plugin": "inputControlVis",
+                "path": "src/platform/plugins/private/input_control_vis/public/test_utils/get_index_pattern_mock.ts"
               }
             ]
           },
@@ -16486,11 +16488,11 @@
             "references": [
               {
                 "plugin": "maps",
-                "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/es_search_source.tsx"
+                "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/es_search_source/es_search_source.tsx"
               },
               {
                 "plugin": "maps",
-                "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/es_search_source.tsx"
+                "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/es_search_source/es_search_source.tsx"
               }
             ],
             "returnComment": [],
