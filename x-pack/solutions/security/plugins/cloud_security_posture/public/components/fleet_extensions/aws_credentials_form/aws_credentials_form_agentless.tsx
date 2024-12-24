@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { EuiAccordion, EuiButton, EuiCallOut, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import semverCompare from 'semver/functions/compare';
@@ -179,6 +179,8 @@ export const AwsCredentialsFormAgentless = ({
   newPolicy,
   packageInfo,
   updatePolicy,
+  onChange,
+  setIsValid,
 }: AwsFormProps) => {
   const awsCredentialsType = getAwsCredentialsType(input) || DEFAULT_AGENTLESS_AWS_CREDENTIALS_TYPE;
   const options = getAwsCredentialsFormOptions();
@@ -199,6 +201,16 @@ export const AwsCredentialsFormAgentless = ({
   )?.replace(TEMPLATE_URL_ACCOUNT_TYPE_ENV_VAR, accountType);
 
   const isOrganization = accountType === ORGANIZATION_ACCOUNT;
+
+  useEffect(() => {
+    setIsValid(false);
+
+    onChange({
+      isValid: false,
+      updatedPolicy: newPolicy,
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [input.type]);
 
   return (
     <>

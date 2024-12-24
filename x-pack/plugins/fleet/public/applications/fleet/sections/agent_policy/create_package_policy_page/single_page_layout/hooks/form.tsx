@@ -484,6 +484,11 @@ export function useOnSubmit({
     ]
   );
 
+  console.log({
+    formState,
+    disableSaveAndContinue: formState !== 'VALID' || hasAgentPolicyError || !validationResults,
+  });
+
   return {
     agentPolicies,
     updateAgentPolicies,
@@ -498,6 +503,7 @@ export function useOnSubmit({
     setValidationResults,
     hasAgentPolicyError,
     setHasAgentPolicyError,
+    disableSaveAndContinue: formState !== 'VALID' || hasAgentPolicyError || !validationResults,
     isInitialized,
     // TODO check
     navigateAddAgent,

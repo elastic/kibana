@@ -175,6 +175,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     setHasAgentPolicyError,
     validationResults,
     hasAgentPolicyError,
+    disableSaveAndContinue,
     isInitialized,
   } = useOnSubmit({
     agentCount,
@@ -261,7 +262,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     ({ isValid, updatedPolicy }) => {
       updatePackagePolicy(updatedPolicy);
       setFormState((prevState) => {
-        if (prevState === 'VALID' && !isValid) {
+        if (!isValid) {
           return 'INVALID';
         }
         return prevState;
@@ -425,14 +426,14 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
           )}
 
           {/* If a package has been loaded, then show UI extension (if any) */}
-          {extensionView && packagePolicy.package?.name && (
+          {/* {extensionView && packagePolicy.package?.name && (
             <ExtensionWrapper>
               <extensionView.Component
                 newPolicy={packagePolicy}
                 onChange={handleExtensionViewOnChange}
               />
             </ExtensionWrapper>
-          )}
+          )} */}
         </>
       ) : (
         <div />
@@ -448,7 +449,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
       formState,
       integrationInfo?.name,
       extensionView,
-      handleExtensionViewOnChange,
+      // handleExtensionViewOnChange,
       spaceSettings?.allowedNamespacePrefixes,
       handleSetupTechnologyChange,
       isAgentlessIntegration,
@@ -644,9 +645,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
                       <EuiButton
                         onClick={() => onSubmit()}
                         isLoading={formState === 'LOADING'}
-                        disabled={
-                          formState !== 'VALID' || hasAgentPolicyError || !validationResults
-                        }
+                        disabled={disableSaveAndContinue}
                         iconType="save"
                         color="primary"
                         fill
