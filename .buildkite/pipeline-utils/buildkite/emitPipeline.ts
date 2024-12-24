@@ -7,6 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './client';
-export * from './types';
-export * from './emitPipeline';
+export function emitPipeline(pipelineStr: string) {
+  console.log(pipelineStr);
+}
