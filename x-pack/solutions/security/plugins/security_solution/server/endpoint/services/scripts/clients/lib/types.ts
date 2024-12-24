@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-export * from './artifacts';
-export * from './actions';
-export * from './agent';
-export * from './scripts';
-export * from './artifacts_exception_list';
-export * from './workflow_insights';
-export type { FeatureKeys } from './feature_usage';
+import type { AgentStatusRecords } from '../../../../../../common/endpoint/types';
+
+export interface CustomScriptsClientInterface {
+  getCustomScripts: (agentIds: string[]) => Promise<AgentStatusRecords>;
+}
