@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SecurityRoleDescriptor } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { SecurityRoleDescriptor } from '@elastic/elasticsearch/lib/api/types';
 
 import type { agentPolicyStatuses } from '../../constants';
 import type { MonitoringType, PolicySecretReference, ValueOf } from '..';

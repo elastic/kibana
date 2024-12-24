@@ -7,7 +7,7 @@
 
 import { EuiFieldText } from '@elastic/eui';
 import React from 'react';
-import { FieldDefinition } from '@kbn/streams-plugin/common/types';
+import { FieldDefinitionConfig } from '@kbn/streams-schema';
 import { SchemaEditorEditingState } from '../hooks/use_editing_state';
 
 type FieldFormFormatProps = Pick<
@@ -15,7 +15,7 @@ type FieldFormFormatProps = Pick<
   'nextFieldType' | 'nextFieldFormat' | 'setNextFieldFormat'
 >;
 
-export const typeSupportsFormat = (type?: FieldDefinition['type']) => {
+export const typeSupportsFormat = (type?: FieldDefinitionConfig['type']) => {
   if (!type) return false;
   return ['date'].includes(type);
 };
