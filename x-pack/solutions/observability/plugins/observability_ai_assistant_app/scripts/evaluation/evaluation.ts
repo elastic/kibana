@@ -26,7 +26,17 @@ import { setupSynthtrace } from './setup_synthtrace';
 import { EvaluationResult } from './types';
 import { selectConnector } from './select_connector';
 
-function runEvaluations() {
+export function runEvaluations<KibanaClientType extends KibanaClient>(
+  {
+    testDirectory,
+    kbnClient,
+  }: {
+    testDirectory: string;
+    kbnClient?: new (...params: ConstructorParameters<typeof KibanaClient>) => KibanaClientType;
+  } = {
+    testDirectory: Path.join(__dirname, './scenarios/**/*.spec.ts'),
+  }
+) {
   yargs(process.argv.slice(2))
     .command('*', 'Run AI Assistant evaluations', options, (argv) => {
       run(
@@ -37,7 +47,9 @@ function runEvaluations() {
             kibana: argv.kibana,
           });
 
-          const kibanaClient = new KibanaClient(log, serviceUrls.kibanaUrl, argv.spaceId);
+          const kibanaClient = kbnClient
+            ? new kbnClient(log, serviceUrls.kibanaUrl, argv.spaceId)
+            : new KibanaClient(log, serviceUrls.kibanaUrl, argv.spaceId);
           const esClient = new Client({
             node: serviceUrls.esUrl,
           });
@@ -76,7 +88,7 @@ function runEvaluations() {
           const scenarios =
             (argv.files !== undefined &&
               castArray(argv.files).map((file) => Path.join(process.cwd(), file))) ||
-            fastGlob.sync(Path.join(__dirname, './scenarios/**/*.spec.ts'));
+            fastGlob.sync(testDirectory);
 
           if (!scenarios.length) {
             throw new Error('No scenarios to run');
@@ -306,5 +318,3 @@ function runEvaluations() {
     })
     .parse();
 }
-
-runEvaluations();
