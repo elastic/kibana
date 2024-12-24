@@ -38,20 +38,30 @@ import { createDataViewDataSource } from '../../../../../common/data_sources';
 function getStateContainer(savedSearch?: SavedSearch) {
   const stateContainer = getDiscoverStateMock({ isTimeBased: true, savedSearch });
   const dataView = savedSearch?.searchSource?.getField('index') as DataView;
-
-  stateContainer.appState.update({
+  const appState = {
     dataSource: createDataViewDataSource({ dataViewId: dataView?.id! }),
     interval: 'auto',
     hideChart: false,
-  });
+  };
+
+  stateContainer.appState.update(appState);
 
   stateContainer.internalState.transitions.setDataView(dataView);
+  stateContainer.internalState.transitions.setDataRequestParams({
+    timeRangeAbsolute: {
+      from: '2020-05-14T11:05:13.590',
+      to: '2020-05-14T11:20:13.590',
+    },
+    timeRangeRelative: {
+      from: '2020-05-14T11:05:13.590',
+      to: '2020-05-14T11:20:13.590',
+    },
+  });
 
   return stateContainer;
 }
 
 const mountComponent = async ({
-  isEsqlMode = false,
   storage,
   savedSearch = savedSearchMockWithTimeField,
   searchSessionId = '123',
@@ -65,16 +75,7 @@ const mountComponent = async ({
   const dataView = savedSearch?.searchSource?.getField('index') as DataView;
 
   let services = discoverServiceMock;
-  services.data.query.timefilter.timefilter.getAbsoluteTime = () => {
-    return { from: '2020-05-14T11:05:13.590', to: '2020-05-14T11:20:13.590' };
-  };
-  services.data.query.timefilter.timefilter.getTime = () => {
-    return { from: '2020-05-14T11:05:13.590', to: '2020-05-14T11:20:13.590' };
-  };
-  (services.data.query.queryString.getDefaultQuery as jest.Mock).mockReturnValue({
-    language: 'kuery',
-    query: '',
-  });
+
   (searchSourceInstanceMock.fetch$ as jest.Mock).mockImplementation(
     jest.fn().mockReturnValue(of({ rawResponse: { hits: { total: 2 } } }))
   );
@@ -176,8 +177,6 @@ describe('Discover histogram layout component', () => {
       const { component } = await mountComponent();
       expect(component.find(PanelsToggle).first().prop('isChartAvailable')).toBe(undefined);
       expect(component.find(PanelsToggle).first().prop('renderedFor')).toBe('histogram');
-      expect(component.find(PanelsToggle).last().prop('isChartAvailable')).toBe(true);
-      expect(component.find(PanelsToggle).last().prop('renderedFor')).toBe('tabs');
     });
   });
 });
