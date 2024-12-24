@@ -66,7 +66,6 @@ interface CompleteFunctionParams {
   scope?: AssistantScope;
 }
 
-// 2. Update the CompleteFunction type accordingly
 type CompleteFunction = (params: CompleteFunctionParams) => Promise<{
   conversationId?: string;
   messages: InnerMessage[];
