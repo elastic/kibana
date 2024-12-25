@@ -6513,7 +6513,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/observability-shared-plugin@link:x-pack/plugins/observability_solution/observability_shared":
+"@kbn/observability-shared-plugin@link:x-pack/solutions/observability/plugins/observability_shared":
   version "0.0.0"
   uid ""
 
@@ -6521,15 +6521,15 @@
   version "0.0.0"
   uid ""
 
-"@kbn/observability-utils-browser@link:x-pack/packages/observability/observability_utils/observability_utils_browser":
+"@kbn/observability-utils-browser@link:x-pack/solutions/observability/packages/utils_browser":
   version "0.0.0"
   uid ""
 
-"@kbn/observability-utils-common@link:x-pack/packages/observability/observability_utils/observability_utils_common":
+"@kbn/observability-utils-common@link:x-pack/solutions/observability/packages/utils_common":
   version "0.0.0"
   uid ""
 
-"@kbn/observability-utils-server@link:x-pack/packages/observability/observability_utils/observability_utils_server":
+"@kbn/observability-utils-server@link:x-pack/solutions/observability/packages/utils_server":
   version "0.0.0"
   uid ""
 

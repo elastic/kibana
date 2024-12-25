@@ -765,9 +765,6 @@ x-pack/packages/kbn-alerting-state-types @elastic/response-ops
 x-pack/packages/kbn-random-sampling @elastic/kibana-visualizations
 x-pack/packages/kbn-streams-schema @elastic/streams-program-team
 x-pack/packages/kbn-synthetics-private-location @elastic/obs-ux-management-team
-x-pack/packages/observability/observability_utils/observability_utils_browser @elastic/observability-ui
-x-pack/packages/observability/observability_utils/observability_utils_common @elastic/observability-ui
-x-pack/packages/observability/observability_utils/observability_utils_server @elastic/observability-ui
 x-pack/packages/search/shared_ui @elastic/search-kibana
 x-pack/packages/security/api_key_management @elastic/kibana-security
 x-pack/packages/security/authorization_core @elastic/kibana-security
@@ -910,7 +907,6 @@ x-pack/plugins/observability_solution/apm/ftr_e2e @elastic/obs-ux-infra_services
 x-pack/plugins/observability_solution/inventory @elastic/obs-ux-infra_services-team
 x-pack/plugins/observability_solution/inventory/e2e @elastic/obs-ux-infra_services-team
 x-pack/plugins/observability_solution/metrics_data_access @elastic/obs-ux-infra_services-team
-x-pack/plugins/observability_solution/observability_shared @elastic/observability-ui
 x-pack/plugins/observability_solution/profiling @elastic/obs-ux-infra_services-team
 x-pack/plugins/observability_solution/profiling_data_access @elastic/obs-ux-infra_services-team
 x-pack/plugins/reporting @elastic/appex-sharedux
@@ -942,6 +938,9 @@ x-pack/solutions/observability/packages/kbn-investigation-shared @elastic/obs-ux
 x-pack/solutions/observability/packages/observability_ai/observability_ai_common @elastic/obs-ai-assistant
 x-pack/solutions/observability/packages/observability_ai/observability_ai_server @elastic/obs-ai-assistant
 x-pack/solutions/observability/packages/synthetics_test_data @elastic/obs-ux-management-team
+x-pack/solutions/observability/packages/utils_browser @elastic/observability-ui
+x-pack/solutions/observability/packages/utils_common @elastic/observability-ui
+x-pack/solutions/observability/packages/utils_server @elastic/observability-ui
 x-pack/solutions/observability/plugins/exploratory_view @elastic/obs-ux-management-team
 x-pack/solutions/observability/plugins/infra @elastic/obs-ux-logs-team @elastic/obs-ux-infra_services-team
 x-pack/solutions/observability/plugins/investigate @elastic/obs-ux-management-team
@@ -953,6 +952,7 @@ x-pack/solutions/observability/plugins/observability_ai_assistant_management @el
 x-pack/solutions/observability/plugins/observability_logs_explorer @elastic/obs-ux-logs-team
 x-pack/solutions/observability/plugins/observability_onboarding @elastic/obs-ux-logs-team
 x-pack/solutions/observability/plugins/observability_onboarding/e2e @elastic/obs-ux-logs-team
+x-pack/solutions/observability/plugins/observability_shared @elastic/observability-ui
 x-pack/solutions/observability/plugins/observability_solution/entities_data_access @elastic/obs-entities
 x-pack/solutions/observability/plugins/observability_solution/entity_manager_app @elastic/obs-entities
 x-pack/solutions/observability/plugins/serverless_observability @elastic/obs-ux-management-team
@@ -1447,7 +1447,7 @@ packages/kbn-monaco/src/esql @elastic/kibana-esql
 /x-pack/test_serverless/**/test_suites/observability/config.ts @elastic/observability-ui
 
 # Observability onboarding tour
-/x-pack/plugins/observability_solution/observability_shared/public/components/tour @elastic/appex-sharedux
+/x-pack/solutions/observability/plugins/observability_shared/public/components/tour @elastic/appex-sharedux
 /x-pack/test/functional/apps/infra/tour.ts @elastic/appex-sharedux
 
 # Observability settings
@@ -2578,7 +2578,7 @@ x-pack/platform/plugins/private/translations/translations
 x-pack/test/profiling_api_integration @elastic/obs-ux-infra_services-team
 
 # Observability shared profiling
-x-pack/plugins/observability_solution/observability_shared/public/components/profiling @elastic/obs-ux-infra_services-team
+x-pack/solutions/observability/plugins/observability_shared/public/components/profiling @elastic/obs-ux-infra_services-team
 
 # Shared UX
 /x-pack/test_serverless/api_integration/test_suites/common/favorites @elastic/appex-sharedux # Assigned per https://github.com/elastic/kibana/pull/200985
