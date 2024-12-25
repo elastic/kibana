@@ -7,22 +7,27 @@
 import React from 'react';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
 import { EuiPageTemplate, EuiTitle } from '@elastic/eui';
+import { ExpandableFlyoutProvider } from '@kbn/expandable-flyout';
+import { UniversalEntityFlyout } from './universal_entity_flyout/universal_entity_flyout';
 
 const AssetInventoryApp = () => {
   return (
     <I18nProvider>
-      <>
-        <EuiPageTemplate restrictWidth="1000px">
-          <EuiPageTemplate.Header>
-            <EuiTitle size="l">
-              <h1>
-                <FormattedMessage id="assetInventory.allAssets" defaultMessage="All Assets" />
-              </h1>
-            </EuiTitle>
-          </EuiPageTemplate.Header>
-          <EuiPageTemplate.Section />
-        </EuiPageTemplate>
-      </>
+      <ExpandableFlyoutProvider urlKey={'AssetInventoryExpandableFlyoutUrlKey'}>
+        <>
+          <EuiPageTemplate restrictWidth="1000px">
+            <EuiPageTemplate.Header>
+              <EuiTitle size="l">
+                <h1>
+                  <FormattedMessage id="assetInventory.allAssets" defaultMessage="All Assets" />
+                </h1>
+              </EuiTitle>
+            </EuiPageTemplate.Header>
+            <EuiPageTemplate.Section />
+            <UniversalEntityFlyout />
+          </EuiPageTemplate>
+        </>
+      </ExpandableFlyoutProvider>
     </I18nProvider>
   );
 };

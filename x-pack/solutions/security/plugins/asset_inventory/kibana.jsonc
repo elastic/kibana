@@ -10,7 +10,7 @@
     "browser": true,
     "server": true,
     "configPath": ["xpack", "assetInventory"],
-    "requiredPlugins": [],
+    "requiredPlugins": ["kibanaUtils"],
     "requiredBundles": [],
     "optionalPlugins": []
   }
