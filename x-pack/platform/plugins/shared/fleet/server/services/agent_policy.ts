@@ -1936,7 +1936,7 @@ class AgentPolicyService {
     return allOutputs;
   }
 
-  public checkTamperProtectionLicense(agentPolicy: { is_protected?: boolean }): void {
+  private checkTamperProtectionLicense(agentPolicy: { is_protected?: boolean }): void {
     if (agentPolicy?.is_protected && !licenseService.isPlatinum()) {
       throw new FleetUnauthorizedError('Tamper protection requires Platinum license');
     }
@@ -1959,7 +1959,7 @@ class AgentPolicyService {
       }
     }
   }
-  public checkAgentless(agentPolicy: Partial<NewAgentPolicy>) {
+  private checkAgentless(agentPolicy: Partial<NewAgentPolicy>) {
     if (!isAgentlessEnabled() && agentPolicy?.supports_agentless) {
       throw new AgentPolicyInvalidError(
         'supports_agentless is only allowed in serverless and cloud environments that support the agentless feature'
