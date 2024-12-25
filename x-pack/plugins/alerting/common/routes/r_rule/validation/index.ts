@@ -7,8 +7,12 @@
 
 export { validateStartDate } from './validate_start_date/latest';
 export { validateEndDate } from './validate_end_date/latest';
-export { createValidateRecurrenceBy } from './validate_recurrence_by/latest';
+export { validateByWeekDay } from './validate_by_week_day/latest';
+export { validateByMonthDay } from './validate_by_month_day/latest';
+export { validateByMonth } from './validate_by_month/latest';
 
 export { validateStartDate as validateStartDateV1 } from './validate_start_date/v1';
 export { validateEndDate as validateEndDateV1 } from './validate_end_date/v1';
-export { createValidateRecurrenceBy as createValidateRecurrenceByV1 } from './validate_recurrence_by/v1';
+export { validateByWeekDay as validateByWeekDayV1 } from './validate_by_week_day/v1';
+export { validateByMonthDay as validateByMonthDayV1 } from './validate_by_month_day/v1';
+export { validateByMonth as validateByMonthV1 } from './validate_by_month/v1';
