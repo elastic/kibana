@@ -144,7 +144,7 @@ export class AgentlessConnectorsInfraService {
 
     const createdPolicy = await this.agentPolicyService.create(this.soClient, this.esClient, {
       name: `${connector.service_type} connector: ${connector.id}`,
-      description: `Automatically generated on ${Date.now()}`,
+      description: `Automatically generated on ${new Date(Date.now()).toISOString()}`,
       namespace: 'default',
       monitoring_enabled: ['logs', 'metrics'],
       inactivity_timeout: 1209600,
