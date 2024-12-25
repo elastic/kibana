@@ -82,7 +82,7 @@ export class SearchConnectorsPlugin
       this.agentlessConnectorDeploymentsSyncService
         .scheduleInfraSyncTask(this.config, plugins.taskManager)
         .catch((err) => {
-          this.log.debug(`Error scheduling saved objects sync task`, err);
+          this.log.error(`Error scheduling agentless connectors infra sync task`, err);
         });
     } else {
       this.log.info(
