@@ -57,11 +57,8 @@ export class SearchConnectorsPlugin
     this.connectors = getConnectorTypes(http.staticAssets);
     const coreStartServices = coreSetup.getStartServices();
 
-    // const coreStartServices = coreSetup.getStartServices().then(services => {
-    //   this.agentlessConnectorDeploymentsSyncService.registerSyncTask
-    // });
     // There seems to be no way to check for agentless here
-    // So we register a task, but do not execute it
+    // So we register a task, but do not execute it in `start` method
     this.log.debug('Registering agentless connectors infra sync task');
 
     coreStartServices.then(([coreStart, searchConnectorsPluginStartDependencies]) => {
