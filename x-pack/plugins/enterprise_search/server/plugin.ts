@@ -47,6 +47,8 @@ import {
   AI_SEARCH_PLUGIN,
   APPLICATIONS_PLUGIN,
   SEARCH_PRODUCT_NAME,
+  SEARCH_INDICES_INDICES_APP_ID,
+  SEARCH_INDICES_START_APP_ID,
 } from '../common/constants';
 
 import {
@@ -175,6 +177,8 @@ export class EnterpriseSearchPlugin implements Plugin {
       VECTOR_SEARCH_PLUGIN.ID,
       SEMANTIC_SEARCH_PLUGIN.ID,
       AI_SEARCH_PLUGIN.ID,
+      SEARCH_INDICES_INDICES_APP_ID,
+      SEARCH_INDICES_START_APP_ID,
     ];
     const isCloud = !!cloud?.cloudId;
 
