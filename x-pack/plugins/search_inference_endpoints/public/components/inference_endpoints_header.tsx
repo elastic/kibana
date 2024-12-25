@@ -5,13 +5,18 @@
  * 2.0.
  */
 
-import { EuiPageTemplate, EuiButtonEmpty } from '@elastic/eui';
+import { EuiPageTemplate, EuiButtonEmpty, EuiButton } from '@elastic/eui';
 import React from 'react';
 import * as i18n from '../../common/translations';
 import { docLinks } from '../../common/doc_links';
 import { useTrainedModelPageUrl } from '../hooks/use_trained_model_page_url';
 
-export const InferenceEndpointsHeader: React.FC = () => {
+interface InferenceEndpointsHeaderProps {
+  setIsAddInferenceFlyoutOpen: (state: boolean) => void;
+}
+export const InferenceEndpointsHeader: React.FC<InferenceEndpointsHeaderProps> = ({
+  setIsAddInferenceFlyoutOpen,
+}) => {
   const trainedModelPageUrl = useTrainedModelPageUrl();
 
   return (
@@ -21,6 +26,15 @@ export const InferenceEndpointsHeader: React.FC = () => {
       description={i18n.MANAGE_INFERENCE_ENDPOINTS_LABEL}
       bottomBorder={true}
       rightSideItems={[
+        <EuiButton
+          iconType="plusInCircle"
+          fill
+          iconSize="m"
+          data-test-subj="add-inference-endpoint-header-button"
+          onClick={() => setIsAddInferenceFlyoutOpen(true)}
+        >
+          {i18n.ADD_ENDPOINT_LABEL}
+        </EuiButton>,
         <EuiButtonEmpty
           iconType="popout"
           iconSide="right"

@@ -21,3 +21,17 @@ export const DELETE_SUCCESS = i18n.translate(
     defaultMessage: 'The inference endpoint has been deleted sucessfully.',
   }
 );
+
+export const ENDPOINT_CREATION_FAILED = i18n.translate(
+  'xpack.searchInferenceEndpoints.addEndpoint.endpointCreationFailed',
+  {
+    defaultMessage: 'Endpoint creation failed',
+  }
+);
+
+export const GET_PROVIDERS_FAILED = i18n.translate(
+  'xpack.searchInferenceEndpoints.addEndpoint.unableToFindProvidersQueryMessage',
+  {
+    defaultMessage: 'Unable to find providers',
+  }
+);
