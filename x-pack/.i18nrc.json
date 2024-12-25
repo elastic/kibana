@@ -109,7 +109,7 @@
     "xpack.observabilityAiAssistantManagement": "solutions/observability/plugins/observability_ai_assistant_management",
     "xpack.observabilityLogsExplorer": "solutions/observability/plugins/observability_logs_explorer",
     "xpack.observability_onboarding": "solutions/observability/plugins/observability_onboarding",
-    "xpack.observabilityShared": "plugins/observability_solution/observability_shared",
+    "xpack.observabilityShared": "solutions/observability/plugins/observability_shared",
     "xpack.observabilityLogsOverview": [
       "platform/packages/shared/observability/logs_overview/src/components"
     ],

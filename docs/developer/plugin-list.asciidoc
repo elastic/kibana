@@ -764,7 +764,7 @@ Elastic.
 |This plugin provides an onboarding framework for observability solutions: Logs and APM.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/observability_shared/README.md[observabilityShared]
+|{kib-repo}blob/{branch}/x-pack/solutions/observability/plugins/observability_shared/README.md[observabilityShared]
 |A plugin that contains components and utilities shared by all Observability plugins.
 
 
