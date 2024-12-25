@@ -20,7 +20,10 @@ export interface UseCasesFeatures {
 }
 
 export const useCasesFeatures = (): UseCasesFeatures => {
-  const { features } = useCasesContext();
+  const {
+    features,
+    permissions: { assignCase },
+  } = useCasesContext();
   const { isAtLeastPlatinum } = useLicense();
   const hasLicenseGreaterThanPlatinum = isAtLeastPlatinum();
 
@@ -37,11 +40,17 @@ export const useCasesFeatures = (): UseCasesFeatures => {
        */
       isSyncAlertsEnabled: !features.alerts.enabled ? false : features.alerts.sync,
       metricsFeatures: features.metrics,
-      caseAssignmentAuthorized: hasLicenseGreaterThanPlatinum,
+      caseAssignmentAuthorized: hasLicenseGreaterThanPlatinum && assignCase,
       pushToServiceAuthorized: hasLicenseGreaterThanPlatinum,
       observablesAuthorized: hasLicenseGreaterThanPlatinum,
     }),
-    [features.alerts.enabled, features.alerts.sync, features.metrics, hasLicenseGreaterThanPlatinum]
+    [
+      features.alerts.enabled,
+      features.alerts.sync,
+      features.metrics,
+      hasLicenseGreaterThanPlatinum,
+      assignCase,
+    ]
   );
 
   return casesFeatures;
