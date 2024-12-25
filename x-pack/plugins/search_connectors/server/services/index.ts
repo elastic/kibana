@@ -18,13 +18,15 @@ export interface ConnectorMetadata {
 }
 
 export interface PackagePolicyMetadata {
-  packagePolicyId: string;
-  agentPolicyIds: string[];
-  connectorMetadata: ConnectorMetadata;
+  package_policy_id: string;
+  agent_policy_ids: string[];
+  connector_metadata: ConnectorMetadata;
 }
 
 const connectorsInputName = 'connectors-py';
 const pkgName = 'elastic_connectors';
+const pkgVersion = '0.0.4';
+const pkgTitle = 'Elastic Connectors';
 
 export class AgentlessConnectorsInfraService {
   private logger: Logger;
@@ -98,10 +100,15 @@ export class AgentlessConnectorsInfraService {
                 // No need to skip, that's fine
               }
 
+              if (policy.supports_agentless !== true) {
+                this.logger.debug(`Policy ${policy.id} does not support agentless, skipping`);
+                continue;
+              }
+
               policiesMetadata.push({
-                packagePolicyId: policy.id,
-                agentPolicyIds: policy.policy_ids,
-                connectorMetadata: {
+                package_policy_id: policy.id,
+                agent_policy_ids: policy.policy_ids,
+                connector_metadata: {
                   id: input.compiled_input.connector_id,
                   name: input.compiled_input.connector_name || '',
                   service_type: input.compiled_input.service_type,
@@ -137,7 +144,7 @@ export class AgentlessConnectorsInfraService {
 
     const createdPolicy = await this.agentPolicyService.create(this.soClient, this.esClient, {
       name: `${connector.service_type} connector: ${connector.id}`,
-      description: 'Automatically generated',
+      description: `Automatically generated on ${Date.now()}`,
       namespace: 'default',
       monitoring_enabled: ['logs', 'metrics'],
       inactivity_timeout: 1209600,
@@ -153,9 +160,9 @@ export class AgentlessConnectorsInfraService {
     const packagePolicy = await this.packagePolicyService.create(this.soClient, this.esClient, {
       policy_ids: [createdPolicy.id],
       package: {
-        title: 'Elastic Connectors',
-        name: 'elastic_connectors',
-        version: '0.0.4',
+        title: pkgTitle,
+        name: pkgName,
+        version: pkgVersion,
       },
       name: `${connector.service_type} connector ${connector.id}`,
       description: '',
@@ -163,7 +170,7 @@ export class AgentlessConnectorsInfraService {
       enabled: true,
       inputs: [
         {
-          type: 'connectors-py',
+          type: connectorsInputName,
           enabled: true,
           vars: {
             connector_id: { type: 'string', value: connector.id },
@@ -182,13 +189,22 @@ export class AgentlessConnectorsInfraService {
     return packagePolicy;
   };
 
-  public removeDeployment = async (policy: PackagePolicyMetadata): Promise<void> => {
-    this.logger.info(`Deleting package policy ${policy.packagePolicyId}`);
-    await this.packagePolicyService.delete(this.soClient, this.esClient, [policy.packagePolicyId]);
+  public removeDeployment = async (packagePolicyId: string): Promise<void> => {
+    this.logger.info(`Deleting package policy ${packagePolicyId}`);
+
+    const policy = await this.packagePolicyService.get(this.soClient, packagePolicyId);
+
+    if (policy == null) {
+      throw new Error(`Failed to delete policy ${packagePolicyId}: not found`);
+    }
+
+    await this.packagePolicyService.delete(this.soClient, this.esClient, [policy.id]);
+
+    this.logger.debug(`Deleting package policies with ids ${policy.policy_ids}`);
 
     // TODO: can we do it in one go?
     // Why not use deleteFleetServerPoliciesForPolicyId?
-    for (const agentPolicyId of policy.agentPolicyIds) {
+    for (const agentPolicyId of policy.policy_ids) {
       this.logger.info(`Deleting agent policy ${agentPolicyId}`);
       await this.agentPolicyService.delete(this.soClient, this.esClient, agentPolicyId);
     }
@@ -200,7 +216,7 @@ export const getConnectorsWithoutPolicies = (
   connectors: ConnectorMetadata[]
 ): ConnectorMetadata[] => {
   return connectors.filter(
-    (x) => packagePolicies.filter((y) => y.connectorMetadata.id === x.id).length === 0
+    (x) => packagePolicies.filter((y) => y.connector_metadata.id === x.id).length === 0
   );
 };
 
@@ -209,6 +225,6 @@ export const getPoliciesWithoutConnectors = (
   connectors: ConnectorMetadata[]
 ): PackagePolicyMetadata[] => {
   return packagePolicies.filter(
-    (x) => connectors.filter((y) => y.id === x.connectorMetadata.id).length === 0
+    (x) => connectors.filter((y) => y.id === x.connector_metadata.id).length === 0
   );
 };

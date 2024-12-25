@@ -13,9 +13,9 @@ import type {
   TaskInstance,
 } from '@kbn/task-manager-plugin/server';
 
+import { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import type {
   SearchConnectorsPluginStartDependencies,
-  SearchConnectorsPluginStart,
   SearchConnectorsPluginSetupDependencies,
 } from './types';
 import {
@@ -39,6 +39,95 @@ const AGENTLESS_CONNECTOR_DEPLOYMENTS_SYNC_TASK_TYPE = 'search:agentless-connect
 
 const SCHEDULE = { interval: '10s' };
 
+export function infraSyncTaskRunner(
+  logger: Logger,
+  service: AgentlessConnectorsInfraService,
+  licensingPluginStart: LicensingPluginStart
+) {
+  return ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => {
+    return {
+      run: async () => {
+        try {
+          // We fetch some info even if license does not permit actual operations.
+          // This is done so that we could give a warning to the user only
+          // if they are actually using the feature.
+          logger.debug('Checking state of connectors and agentless policies');
+
+          // Fetch connectors
+          const nativeConnectors = await service.getNativeConnectors();
+
+          const policiesMetadata = await service.getConnectorPackagePolicies();
+
+          // Check license if any native connectors or agentless policies found
+          if (nativeConnectors.length > 0 || policiesMetadata.length > 0) {
+            const license = await licensingPluginStart.getLicense();
+
+            if (license.check('fleet', 'platinum').state !== 'valid') {
+              logger.warn(
+                'Current license is not compatible with agentless connectors. Please upgrade the license to at least platinum'
+              );
+              return;
+            }
+          }
+
+          // Deploy Policies
+          const connectorsWithoutPolicies = getConnectorsWithoutPolicies(
+            policiesMetadata,
+            nativeConnectors
+          );
+
+          let agentlessConnectorsDeployed = 0;
+          for (const connectorMetadata of connectorsWithoutPolicies) {
+            // We try-catch to still be able to deploy other connectors if some fail
+            try {
+              await service.deployConnector(connectorMetadata);
+
+              agentlessConnectorsDeployed += 1;
+            } catch (e) {
+              logger.warn(
+                `Error creating an agentless deployment for connector ${connectorMetadata.id}: ${e.message}`
+              );
+            }
+          }
+
+          // Delete policies
+          const policiesWithoutConnectors = getPoliciesWithoutConnectors(
+            policiesMetadata,
+            nativeConnectors
+          );
+          let agentlessConnectorsRemoved = 0;
+
+          for (const policyMetadata of policiesWithoutConnectors) {
+            // We try-catch to still be able to deploy other connectors if some fail
+            try {
+              await service.removeDeployment(policyMetadata.package_policy_id);
+
+              agentlessConnectorsRemoved += 1;
+            } catch (e) {
+              logger.warn(
+                `Error when deleting a package policy ${policyMetadata.package_policy_id}: ${e.message}`
+              );
+            }
+          }
+          return {
+            state: {},
+            schedule: SCHEDULE,
+          };
+        } catch (e) {
+          logger.warn(`Error executing agentless deployment sync task: ${e.message}`);
+          return {
+            state: {},
+            schedule: SCHEDULE,
+          };
+        }
+      },
+      cancel: async () => {
+        logger.warn('timed out');
+      },
+    };
+  };
+}
+
 export class AgentlessConnectorDeploymentsSyncService {
   private logger: Logger;
 
@@ -46,13 +135,27 @@ export class AgentlessConnectorDeploymentsSyncService {
     this.logger = logger;
   }
   public registerInfraSyncTask(
-    config: SearchConnectorsConfig,
     plugins: SearchConnectorsPluginSetupDependencies,
-    coreStartServicesPromise: Promise<
-      [CoreStart, SearchConnectorsPluginStartDependencies, SearchConnectorsPluginStart]
-    >
+    coreStart: CoreStart,
+    searchConnectorsPluginStartDependencies: SearchConnectorsPluginStartDependencies
   ) {
     const taskManager = plugins.taskManager;
+
+    const esClient = coreStart.elasticsearch.client.asInternalUser;
+    const savedObjects = coreStart.savedObjects;
+
+    const agentPolicyService = searchConnectorsPluginStartDependencies.fleet.agentPolicyService;
+    const packagePolicyService = searchConnectorsPluginStartDependencies.fleet.packagePolicyService;
+
+    const soClient = new SavedObjectsClient(savedObjects.createInternalRepository());
+
+    const service = new AgentlessConnectorsInfraService(
+      soClient,
+      esClient,
+      packagePolicyService,
+      agentPolicyService,
+      this.logger
+    );
 
     taskManager.registerTaskDefinitions({
       [AGENTLESS_CONNECTOR_DEPLOYMENTS_SYNC_TASK_TYPE]: {
@@ -61,89 +164,11 @@ export class AgentlessConnectorDeploymentsSyncService {
           'This task peridocally checks native connectors, agent policies and syncs them if they are out of sync',
         timeout: '1m',
         maxAttempts: 3,
-        createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => {
-          return {
-            run: async () => {
-              // TODO: not run if no license
-
-              this.logger.debug('Checking state of connectors and agentless policies');
-              const startServices = await coreStartServicesPromise;
-
-              const esClient = startServices[0].elasticsearch.client.asInternalUser;
-              const savedObjects = startServices[0].savedObjects;
-
-              const agentPolicyService = startServices[1].fleet.agentPolicyService;
-              const packagePolicyService = startServices[1].fleet.packagePolicyService;
-
-              const soClient = new SavedObjectsClient(savedObjects.createInternalRepository());
-
-              const service = new AgentlessConnectorsInfraService(
-                soClient,
-                esClient,
-                packagePolicyService,
-                agentPolicyService,
-                this.logger
-              );
-
-              // Fetch connectors
-              const nativeConnectors = await service.getNativeConnectors();
-
-              const policiesMetadata = await service.getConnectorPackagePolicies();
-
-              const connectorsWithoutPolicies = getConnectorsWithoutPolicies(
-                policiesMetadata,
-                nativeConnectors
-              );
-
-              // Check license if any native connectors or agentless policies found
-              if (nativeConnectors.length > 0 || policiesMetadata.length > 0) {
-                const license = await startServices[1].licensing.getLicense();
-
-                if (license.check('fleet', 'platinum').state !== 'valid') {
-                  this.logger.warn(
-                    'Current license is not compatible with agentless connectors. Please upgrade the license to at least platinum'
-                  );
-                  return;
-                }
-              }
-
-              let agentlessConnectorsDeployed = 0;
-              for (const connectorMetadata of connectorsWithoutPolicies) {
-                await service.deployConnector(connectorMetadata);
-
-                agentlessConnectorsDeployed += 1;
-              }
-
-              const policiesWithoutConnectors = getPoliciesWithoutConnectors(
-                policiesMetadata,
-                nativeConnectors
-              );
-              let agentlessConnectorsRemoved = 0;
-
-              for (const policyMetadata of policiesWithoutConnectors) {
-                await service.removeDeployment(policyMetadata);
-
-                agentlessConnectorsRemoved += 1;
-              }
-
-              try {
-                return {
-                  state: {},
-                  schedule: SCHEDULE,
-                };
-              } catch (e) {
-                this.logger.warn(`Error executing agentless deployment sync task: ${e.message}`);
-                return {
-                  state: {},
-                  schedule: SCHEDULE,
-                };
-              }
-            },
-            cancel: async () => {
-              this.logger.warn('timed out');
-            },
-          };
-        },
+        createTaskRunner: infraSyncTaskRunner(
+          this.logger,
+          service,
+          searchConnectorsPluginStartDependencies.licensing
+        ),
       },
     });
   }

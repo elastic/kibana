@@ -63,11 +63,14 @@ export class SearchConnectorsPlugin
     // There seems to be no way to check for agentless here
     // So we register a task, but do not execute it
     this.log.debug('Registering agentless connectors infra sync task');
-    this.agentlessConnectorDeploymentsSyncService.registerInfraSyncTask(
-      this.config,
-      plugins,
-      coreStartServices
-    );
+
+    coreStartServices.then(([coreStart, searchConnectorsPluginStartDependencies]) => {
+      this.agentlessConnectorDeploymentsSyncService.registerInfraSyncTask(
+        plugins,
+        coreStart,
+        searchConnectorsPluginStartDependencies
+      );
+    });
 
     return {
       getConnectorTypes: () => this.connectors,
