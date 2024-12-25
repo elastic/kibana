@@ -48,7 +48,7 @@ export class SearchConnectorsPlugin
     );
   }
 
-  public setup(
+  public async setup(
     coreSetup: CoreSetup<SearchConnectorsPluginStartDependencies, SearchConnectorsPluginStart>,
     plugins: SearchConnectorsPluginSetupDependencies
   ) {
@@ -61,20 +61,24 @@ export class SearchConnectorsPlugin
     // So we register a task, but do not execute it in `start` method
     this.log.debug('Registering agentless connectors infra sync task');
 
-    coreStartServices.then(([coreStart, searchConnectorsPluginStartDependencies]) => {
-      this.agentlessConnectorDeploymentsSyncService.registerInfraSyncTask(
-        plugins,
-        coreStart,
-        searchConnectorsPluginStartDependencies
-      );
-    });
+    coreStartServices
+      .then(([coreStart, searchConnectorsPluginStartDependencies]) => {
+        this.agentlessConnectorDeploymentsSyncService.registerInfraSyncTask(
+          plugins,
+          coreStart,
+          searchConnectorsPluginStartDependencies
+        );
+      })
+      .catch((err) => {
+        this.log.error(`Error registering agentless connectors infra sync task`, err);
+      });
 
     return {
       getConnectorTypes: () => this.connectors,
     };
   }
 
-  public start(coreStart: CoreStart, plugins: SearchConnectorsPluginStartDependencies) {
+  public async start(coreStart: CoreStart, plugins: SearchConnectorsPluginStartDependencies) {
     if (isAgentlessEnabled()) {
       this.log.info(
         'Agentless is supported, scheduling initial agentless connectors infrastructure watcher task'

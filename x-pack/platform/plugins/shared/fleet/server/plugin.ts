@@ -231,7 +231,7 @@ export interface FleetStartContract {
    * Services for Fleet's package policies
    */
   packagePolicyService: typeof packagePolicyService;
-  agentPolicyService: typeof agentPolicyService;
+  agentPolicyService: AgentPolicyServiceInterface;
   /**
    * Register callbacks for inclusion in fleet API processing
    * @param args
