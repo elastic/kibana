@@ -6,10 +6,8 @@
  */
 import * as t from 'io-ts';
 import { environmentQuery } from '../../../../common/utils/environment_query';
-import { createEntitiesESClient } from '../../../lib/helpers/create_es_client/create_entities_es_client/create_entities_es_client';
 import { createApmServerRoute } from '../../apm_routes/create_apm_server_route';
 import { environmentRt, kueryRt, rangeRt } from '../../default_api_types';
-import { getServiceEntities } from './get_service_entities';
 import { getServiceEntitySummary } from './get_service_entity_summary';
 
 const serviceEntitiesSummaryRoute = createApmServerRoute({
@@ -20,52 +18,20 @@ const serviceEntitiesSummaryRoute = createApmServerRoute({
   }),
   security: { authz: { requiredPrivileges: ['apm'] } },
   async handler(resources) {
-    const { context, params, request } = resources;
-    const coreContext = await context.core;
+    const { params, request, plugins } = resources;
+    const entityManagerStart = await plugins.entityManager.start();
 
-    const entitiesESClient = await createEntitiesESClient({
-      request,
-      esClient: coreContext.elasticsearch.client.asCurrentUser,
-    });
-
+    const entityManagerClient = await entityManagerStart.getScopedClient({ request });
     const { serviceName } = params.path;
     const { environment } = params.query;
 
-    return getServiceEntitySummary({
-      entitiesESClient,
+    const serviceEntitySummary = await getServiceEntitySummary({
+      entityManagerClient,
       serviceName,
       environment,
     });
-  },
-});
 
-const servicesEntitiesRoute = createApmServerRoute({
-  endpoint: 'GET /internal/apm/entities/services',
-  params: t.type({
-    query: t.intersection([environmentRt, kueryRt, rangeRt]),
-  }),
-  security: { authz: { requiredPrivileges: ['apm'] } },
-  async handler(resources) {
-    const { context, params, request } = resources;
-    const coreContext = await context.core;
-
-    const entitiesESClient = await createEntitiesESClient({
-      request,
-      esClient: coreContext.elasticsearch.client.asCurrentUser,
-    });
-
-    const { start, end, kuery, environment } = params.query;
-
-    const services = await getServiceEntities({
-      entitiesESClient,
-      start,
-      end,
-      kuery,
-      environment,
-      logger: resources.logger,
-    });
-
-    return { services };
+    return serviceEntitySummary;
   },
 });
 
@@ -137,7 +103,6 @@ const serviceLogErrorRateTimeseriesRoute = createApmServerRoute({
 });
 
 export const servicesEntitiesRoutesRepository = {
-  ...servicesEntitiesRoute,
   ...serviceLogRateTimeseriesRoute,
   ...serviceLogErrorRateTimeseriesRoute,
   ...serviceEntitiesSummaryRoute,
