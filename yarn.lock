@@ -6977,7 +6977,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/search-connectors-plugin@link:x-pack/plugins/search_connectors":
+"@kbn/search-connectors-plugin@link:x-pack/solutions/search/plugins/search_connectors":
   version "0.0.0"
   uid ""
 
