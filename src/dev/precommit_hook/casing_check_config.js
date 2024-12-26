@@ -29,7 +29,7 @@ export const IGNORE_FILE_GLOBS = [
   'x-pack/platform/plugins/private/canvas/tasks/**/*',
   'x-pack/platform/plugins/private/canvas/canvas_plugin_src/**/*',
   'x-pack/platform/plugins/private/canvas/server/templates/assets/*.{png,jpg,svg}',
-  'x-pack/plugins/cases/docs/**/*',
+  'x-pack/platform/plugins/shared/cases/docs/**/*',
   'x-pack/platform/plugins/private/monitoring/public/lib/jquery_flot/**/*',
   'x-pack/platform/plugins/shared/fleet/cypress/packages/*.zip',
   '**/apm-diagnostics-*.json',

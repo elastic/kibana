@@ -1721,30 +1721,30 @@ x-pack/test/security_solution_cypress/cypress/tasks/expandable_flyout  @elastic/
 
 ## Generative AI owner connectors
 # OpenAI
-/x-pack/plugins/stack_connectors/public/connector_types/openai @elastic/security-generative-ai @elastic/obs-ai-assistant @elastic/appex-ai-infra
-/x-pack/plugins/stack_connectors/server/connector_types/openai @elastic/security-generative-ai @elastic/obs-ai-assistant @elastic/appex-ai-infra
-/x-pack/plugins/stack_connectors/common/openai @elastic/security-generative-ai @elastic/obs-ai-assistant @elastic/appex-ai-infra
+/x-pack/platform/plugins/shared/stack_connectors/public/connector_types/openai @elastic/security-generative-ai @elastic/obs-ai-assistant @elastic/appex-ai-infra
+/x-pack/platform/plugins/shared/stack_connectors/server/connector_types/openai @elastic/security-generative-ai @elastic/obs-ai-assistant @elastic/appex-ai-infra
+/x-pack/platform/plugins/shared/stack_connectors/common/openai @elastic/security-generative-ai @elastic/obs-ai-assistant @elastic/appex-ai-infra
 # Bedrock
-/x-pack/plugins/stack_connectors/public/connector_types/bedrock @elastic/security-generative-ai @elastic/obs-ai-assistant @elastic/appex-ai-infra
-/x-pack/plugins/stack_connectors/server/connector_types/bedrock @elastic/security-generative-ai @elastic/obs-ai-assistant @elastic/appex-ai-infra
-/x-pack/plugins/stack_connectors/common/bedrock @elastic/security-generative-ai @elastic/obs-ai-assistant @elastic/appex-ai-infra
+/x-pack/platform/plugins/shared/stack_connectors/public/connector_types/bedrock @elastic/security-generative-ai @elastic/obs-ai-assistant @elastic/appex-ai-infra
+/x-pack/platform/plugins/shared/stack_connectors/server/connector_types/bedrock @elastic/security-generative-ai @elastic/obs-ai-assistant @elastic/appex-ai-infra
+/x-pack/platform/plugins/shared/stack_connectors/common/bedrock @elastic/security-generative-ai @elastic/obs-ai-assistant @elastic/appex-ai-infra
 
 # Gemini
-/x-pack/plugins/stack_connectors/public/connector_types/gemini @elastic/security-generative-ai @elastic/obs-ai-assistant @elastic/appex-ai-infra
-/x-pack/plugins/stack_connectors/server/connector_types/gemini @elastic/security-generative-ai @elastic/obs-ai-assistant @elastic/appex-ai-infra
-/x-pack/plugins/stack_connectors/common/gemini @elastic/security-generative-ai @elastic/obs-ai-assistant @elastic/appex-ai-infra
+/x-pack/platform/plugins/shared/stack_connectors/public/connector_types/gemini @elastic/security-generative-ai @elastic/obs-ai-assistant @elastic/appex-ai-infra
+/x-pack/platform/plugins/shared/stack_connectors/server/connector_types/gemini @elastic/security-generative-ai @elastic/obs-ai-assistant @elastic/appex-ai-infra
+/x-pack/platform/plugins/shared/stack_connectors/common/gemini @elastic/security-generative-ai @elastic/obs-ai-assistant @elastic/appex-ai-infra
 
 # Inference API
-/x-pack/plugins/stack_connectors/public/connector_types/inference @elastic/appex-ai-infra @elastic/security-generative-ai @elastic/obs-ai-assistant
-/x-pack/plugins/stack_connectors/server/connector_types/inference @elastic/appex-ai-infra @elastic/security-generative-ai @elastic/obs-ai-assistant
-/x-pack/plugins/stack_connectors/common/inference @elastic/appex-ai-infra @elastic/security-generative-ai @elastic/obs-ai-assistant
+/x-pack/platform/plugins/shared/stack_connectors/public/connector_types/inference @elastic/appex-ai-infra @elastic/security-generative-ai @elastic/obs-ai-assistant
+/x-pack/platform/plugins/shared/stack_connectors/server/connector_types/inference @elastic/appex-ai-infra @elastic/security-generative-ai @elastic/obs-ai-assistant
+/x-pack/platform/plugins/shared/stack_connectors/common/inference @elastic/appex-ai-infra @elastic/security-generative-ai @elastic/obs-ai-assistant
 
 ## Defend Workflows owner connectors
-/x-pack/plugins/stack_connectors/public/connector_types/sentinelone @elastic/security-defend-workflows
-/x-pack/plugins/stack_connectors/server/connector_types/sentinelone @elastic/security-defend-workflows
-/x-pack/plugins/stack_connectors/common/sentinelone @elastic/security-defend-workflows
-/x-pack/plugins/stack_connectors/server/connector_types/crowdstrike @elastic/security-defend-workflows
-/x-pack/plugins/stack_connectors/common/crowdstrike @elastic/security-defend-workflows
+/x-pack/platform/plugins/shared/stack_connectors/public/connector_types/sentinelone @elastic/security-defend-workflows
+/x-pack/platform/plugins/shared/stack_connectors/server/connector_types/sentinelone @elastic/security-defend-workflows
+/x-pack/platform/plugins/shared/stack_connectors/common/sentinelone @elastic/security-defend-workflows
+/x-pack/platform/plugins/shared/stack_connectors/server/connector_types/crowdstrike @elastic/security-defend-workflows
+/x-pack/platform/plugins/shared/stack_connectors/common/crowdstrike @elastic/security-defend-workflows
 
 ## Security Solution shared OAS schemas
 /x-pack/solutions/security/plugins/security_solution/common/api/model @elastic/security-detection-rule-management @elastic/security-detection-engine
@@ -1980,8 +1980,8 @@ oas_docs/kibana.info.yaml                     @elastic/platform-docs
 # when an encrypted saved object is changed. Very careful review is necessary to ensure any changes are compatible
 # with serverless zero downtime upgrades (ZDT). This section should be removed only when proper guidance for
 # maintaining ESOs has been documented and consuming teams have acclimated to ZDT changes.
-x-pack/plugins/actions/server/saved_objects/index.ts @elastic/response-ops @elastic/kibana-security
-x-pack/plugins/alerting/server/saved_objects/index.ts @elastic/response-ops @elastic/kibana-security
+x-pack/platform/plugins/shared/actions/server/saved_objects/index.ts @elastic/response-ops @elastic/kibana-security
+x-pack/platform/plugins/shared/alerting/server/saved_objects/index.ts @elastic/response-ops @elastic/kibana-security
 x-pack/platform/plugins/shared/fleet/server/saved_objects/index.ts @elastic/fleet @elastic/kibana-security
 x-pack/plugins/observability_solution/synthetics/server/saved_objects/saved_objects.ts @elastic/obs-ux-management-team @elastic/kibana-security
 x-pack/plugins/observability_solution/synthetics/server/saved_objects/synthetics_monitor.ts @elastic/obs-ux-management-team @elastic/kibana-security
