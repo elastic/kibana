@@ -101,7 +101,12 @@ import { registerEncryptedSavedObjects, registerSavedObjects } from './saved_obj
 import { registerRoutes } from './routes';
 
 import type { ExternalCallback, FleetRequestHandlerContext } from './types';
-import type { AgentService, ArtifactsClientInterface, PackageService } from './services';
+import type {
+  AgentPolicyServiceInterface,
+  AgentService,
+  ArtifactsClientInterface,
+  PackageService,
+} from './services';
 import {
   agentPolicyService,
   AgentServiceImpl,
