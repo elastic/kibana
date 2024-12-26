@@ -814,7 +814,7 @@
     "@kbn/search-notebooks": "link:x-pack/solutions/search/plugins/search_notebooks",
     "@kbn/search-playground": "link:x-pack/solutions/search/plugins/search_playground",
     "@kbn/search-response-warnings": "link:packages/kbn-search-response-warnings",
-    "@kbn/search-shared-ui": "link:x-pack/packages/search/shared_ui",
+    "@kbn/search-shared-ui": "link:x-pack/solutions/search/packages/search/shared_ui",
     "@kbn/search-types": "link:packages/kbn-search-types",
     "@kbn/searchprofiler-plugin": "link:x-pack/platform/plugins/shared/searchprofiler",
     "@kbn/security-api-key-management": "link:x-pack/packages/security/api_key_management",
