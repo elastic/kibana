@@ -6,29 +6,37 @@
  */
 
 import React, { MouseEvent } from 'react';
-import { EuiFlexItem, EuiFlexGroup, EuiIcon, UseEuiTheme } from '@elastic/eui';
+import {
+  EuiFlexItem,
+  EuiFlexGroup,
+  EuiIcon,
+  UseEuiTheme,
+  euiFontSize,
+  logicalCSS,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 import { includes, isFunction } from 'lodash';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
-const legendItemStyles = (isDisabled: boolean) => (theme: UseEuiTheme) =>
+const legendItemStyle = (isDisabled: boolean) => (theme: UseEuiTheme) =>
   css`
-  font-size: ${theme.euiTheme.font.scale.xs}
-  cursor: pointer;
-  color: var(--euiTextColor);
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  ${isDisabled ? 'opacity: 0.5;' : ''}
+    display: flex;
+    font-size: ${euiFontSize(theme, 'xs').fontSize};
+    cursor: pointer;
+    color: ${theme.euiTheme.colors.textParagraph};
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    ${isDisabled ? 'opacity: 0.5;' : ''}
+  `;
+
+const legendHorizontalStyle = ({ euiTheme }: UseEuiTheme) => css`
+  ${logicalCSS('margin-top', euiTheme.size.xs)}
 `;
 
-const legendHorizontalStyles = (theme: UseEuiTheme) => css`
-  margin-top: var(--euiSizeXS);
-`;
-
-const legendLabelStyles = css`
+const legendLabelStyle = css`
   overflow: hidden;
   white-space: nowrap;
   display: flex;
@@ -36,10 +44,10 @@ const legendLabelStyles = css`
   align-items: center;
 `;
 
-const legendValueStyles = (theme: UseEuiTheme) => css`
+const legendValueStyle = ({ euiTheme }: UseEuiTheme) => css`
   overflow: hidden;
   white-space: nowrap;
-  margin-left: var(--euiSizeXS);
+  ${logicalCSS('margin-left', euiTheme.size.xs)}
 `;
 
 interface Row {
@@ -66,14 +74,25 @@ export class HorizontalLegend extends React.Component<Props> {
     this.createSeries = this.createSeries.bind(this);
   }
 
+  /**
+   * @param {Number} value Final value to display
+   */
   displayValue(value: number) {
-    return <span css={legendValueStyles}>{value}</span>;
+    return <span css={legendValueStyle}>{value}</span>;
   }
 
+  /**
+   * @param {Number} value True if value is falsy and/or not a number
+   */
   validValue(value: number) {
     return value !== null && value !== undefined && (typeof value === 'string' || !isNaN(value));
   }
 
+  /**
+   * @param {Number} value The value to format and show in the horizontallegend.
+   * A null means no data for the time bucket and will be formatted as 'N/A'
+   * @param {Object} row Props passed form a parent by row index
+   */
   formatter(value: number, row: Row) {
     if (!this.validValue(value)) {
       return (
@@ -104,10 +123,10 @@ export class HorizontalLegend extends React.Component<Props> {
     return (
       <EuiFlexItem grow={false} key={rowIdx}>
         <button
-          css={legendItemStyles(!includes(this.props.seriesFilter, row.id))}
+          css={legendItemStyle(!includes(this.props.seriesFilter, row.id))}
           onClick={(event) => this.props.onToggle(event, row.id)}
         >
-          <span css={legendLabelStyles}>
+          <span css={legendLabelStyle}>
             <EuiIcon
               aria-label={i18n.translate(
                 'xpack.monitoring.chart.horizontalLegend.toggleButtonAriaLabel',
@@ -129,7 +148,7 @@ export class HorizontalLegend extends React.Component<Props> {
     const rows = this.props.series.map(this.createSeries);
 
     return (
-      <div css={legendHorizontalStyles}>
+      <div css={legendHorizontalStyle}>
         <EuiFlexGroup wrap={true} gutterSize="s">
           {rows}
         </EuiFlexGroup>

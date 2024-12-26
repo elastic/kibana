@@ -7,7 +7,14 @@
 
 import React from 'react';
 import { css } from '@emotion/react';
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiBadge, UseEuiTheme } from '@elastic/eui';
+import {
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiBadge,
+  UseEuiTheme,
+  logicalCSS,
+} from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
@@ -15,12 +22,12 @@ import { formatMetric } from '../../../../lib/format_number';
 import { Metric } from './metric';
 import { Vertex } from './types';
 
-const pluginStyle = (theme: UseEuiTheme) => css`
-  margin-left: ${theme.euiTheme.size.xs};
+const pluginStyle = ({ euiTheme }: UseEuiTheme) => css`
+  ${logicalCSS('margin-left', euiTheme.size.xs)}
 `;
 
-const pluginStatementStyle = (theme: UseEuiTheme) => css`
-  padding-left: ${theme.euiTheme.size.m};
+const pluginStatementStyle = ({ euiTheme }: UseEuiTheme) => css`
+  ${logicalCSS('padding-left', euiTheme.size.m)}
 `;
 
 function getInputStatementMetrics({ latestEventsPerSecond }: Vertex) {
