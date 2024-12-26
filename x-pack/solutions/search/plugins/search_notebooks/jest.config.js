@@ -9,7 +9,8 @@ module.exports = {
   preset: '@kbn/test',
   rootDir: '../../../../..',
   roots: ['<rootDir>/x-pack/solutions/search/plugins/search_notebooks'],
-  coverageDirectory: '<rootDir>/target/kibana-coverage/jest/x-pack/solutions/search/plugins/search_notebooks',
+  coverageDirectory:
+    '<rootDir>/target/kibana-coverage/jest/x-pack/solutions/search/plugins/search_notebooks',
   coverageReporters: ['text', 'html'],
   collectCoverageFrom: [
     '<rootDir>/x-pack/solutions/search/plugins/search_notebooks/{common,public,server}/**/*.{ts,tsx}',

@@ -8,7 +8,9 @@
 module.exports = {
   preset: '@kbn/test',
   rootDir: '../../../../../../../..',
-  roots: ['<rootDir>/x-pack/solutions/search/plugins/enterprise_search/public/applications/ai_search'],
+  roots: [
+    '<rootDir>/x-pack/solutions/search/plugins/enterprise_search/public/applications/ai_search',
+  ],
   collectCoverage: true,
   coverageReporters: ['text', 'html'],
   collectCoverageFrom: [
