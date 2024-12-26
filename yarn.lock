@@ -6969,7 +6969,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/search-api-panels@link:packages/kbn-search-api-panels":
+"@kbn/search-api-panels@link:src/platform/packages/shared/kbn-search-api-panels":
   version "0.0.0"
   uid ""
 
