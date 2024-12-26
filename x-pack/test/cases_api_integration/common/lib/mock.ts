@@ -183,6 +183,7 @@ export const postCaseResp = (
   updated_by: null,
   category: null,
   customFields: [],
+  observables: [],
 });
 
 interface CommentRequestWithID {

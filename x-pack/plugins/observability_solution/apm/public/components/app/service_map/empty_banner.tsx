@@ -6,26 +6,22 @@
  */
 
 import React, { useContext, useEffect, useState } from 'react';
-import { EuiCallOut, EuiLink } from '@elastic/eui';
+import { EuiCallOut, EuiLink, useEuiTheme } from '@elastic/eui';
+import styled from '@emotion/styled';
 import { i18n } from '@kbn/i18n';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { CytoscapeContext } from './cytoscape';
-import { useTheme } from '../../../hooks/use_theme';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 
-const EmptyBannerContainer = euiStyled.div`
-  margin: ${({ theme }) => theme.eui.euiSizeS};
+const EmptyBannerContainer = styled.div`
+  margin: ${({ theme }) => theme.euiTheme.size.s};
   /* Add some extra margin so it displays to the right of the controls. */
-  left: calc(
-    ${({ theme }) => theme.eui.euiSizeXXL} +
-      ${({ theme }) => theme.eui.euiSizeS}
-  );
+  left: calc(${({ theme }) => theme.euiTheme.size.xxl} + ${({ theme }) => theme.euiTheme.size.s});
   position: absolute;
   z-index: 1;
 `;
 
 export function EmptyBanner() {
-  const theme = useTheme();
+  const { euiTheme } = useEuiTheme();
   const cy = useContext(CytoscapeContext);
   const [nodeCount, setNodeCount] = useState(0);
   const { docLinks } = useApmPluginContext().core;
@@ -51,7 +47,7 @@ export function EmptyBanner() {
 
   // Since we're absolutely positioned, we need to get the full width and
   // subtract the space for controls and margins.
-  const width = cy.width() - parseInt(theme.eui.euiSizeXXL, 10) - parseInt(theme.eui.euiSizeL, 10);
+  const width = cy.width() - parseInt(euiTheme.size.xxl, 10) - parseInt(euiTheme.size.l, 10);
 
   return (
     <EmptyBannerContainer style={{ width }}>
