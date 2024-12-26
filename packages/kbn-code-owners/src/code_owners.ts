@@ -13,11 +13,13 @@ import path from 'node:path';
 
 import ignore, { Ignore } from 'ignore';
 import { CODE_OWNERS_FILE, throwIfPathIsMissing, throwIfPathNotInRepo } from './path';
+import { CodeOwnerArea, findAreaForCodeOwner } from './code_owner_areas';
 
 export interface CodeOwnersEntry {
   pattern: string;
   matcher: Ignore;
   teams: string[];
+  areas: CodeOwnerArea[];
   comment?: string;
 }
 
@@ -64,9 +66,19 @@ export function getCodeOwnersEntries(): CodeOwnersEntry[] {
 
     const pathPattern = rawPathPattern.replace(/\/$/, '');
 
+    const teams = rawTeams.map((team) => team.replace('@', '')).filter((team) => team.length > 0);
+    const areas: CodeOwnerArea[] = [];
+
+    for (const team of teams) {
+      const area = findAreaForCodeOwner(team);
+      if (area === undefined || areas.includes(area)) continue;
+      areas.push(area);
+    }
+
     entries.push({
       pattern: pathPattern,
-      teams: rawTeams.map((t) => t.replace('@', '')).filter((t) => t.length > 0),
+      teams,
+      areas,
       comment,
 
       // Register code owner entry with the `ignores` lib for easy pattern matching later on
@@ -85,7 +97,7 @@ export function getCodeOwnersEntries(): CodeOwnersEntry[] {
  *
  * Tip:
  *   If you're making a lot of calls to this function, fetch the code owner paths once using
- *   `getCodeOwnersEntries` and pass it in the `getCodeOwnersEntries` parameter to speed up your queries..
+ *   `getCodeOwnersEntries` and pass it in the `getCodeOwnersEntries` parameter to speed up your queries.
  *
  * @param searchPath The path to find code owners for
  * @param codeOwnersEntries Pre-defined list of code owner paths to search in

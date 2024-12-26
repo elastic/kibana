@@ -84,6 +84,7 @@ export const ESQLEditor = memo(function ESQLEditor({
   hideQueryHistory,
   hasOutline,
   displayDocumentationAsFlyout,
+  disableAutoFocus,
 }: ESQLEditorProps) {
   const popoverRef = useRef<HTMLDivElement>(null);
   const datePickerOpenStatusRef = useRef<boolean>(false);
@@ -727,8 +728,10 @@ export const ESQLEditor = memo(function ESQLEditor({
                     editor.onDidChangeModelContent(showSuggestionsIfEmptyQuery);
 
                     // Auto-focus the editor and move the cursor to the end.
-                    editor.focus();
-                    editor.setPosition({ column: Infinity, lineNumber: Infinity });
+                    if (!disableAutoFocus) {
+                      editor.focus();
+                      editor.setPosition({ column: Infinity, lineNumber: Infinity });
+                    }
                   }}
                 />
               </div>

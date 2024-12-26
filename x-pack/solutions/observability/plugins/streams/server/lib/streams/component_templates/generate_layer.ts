@@ -10,7 +10,7 @@ import {
   MappingDateProperty,
   MappingProperty,
 } from '@elastic/elasticsearch/lib/api/types';
-import { StreamDefinition } from '../../../../common/types';
+import { WiredStreamDefinition } from '@kbn/streams-schema';
 import { ASSET_VERSION } from '../../../../common/constants';
 import { logsSettings } from './logs_layer';
 import { isRoot } from '../helpers/hierarchy';
@@ -18,26 +18,26 @@ import { getComponentTemplateName } from './name';
 
 export function generateLayer(
   id: string,
-  definition: StreamDefinition
+  definition: WiredStreamDefinition
 ): ClusterPutComponentTemplateRequest {
   const properties: Record<string, MappingProperty> = {};
-  definition.fields.forEach((field) => {
+  Object.entries(definition.stream.ingest.wired.fields).forEach(([field, props]) => {
     const property: MappingProperty = {
-      type: field.type,
+      type: props.type,
     };
-    if (field.name === '@timestamp') {
+    if (field === '@timestamp') {
       // @timestamp can't ignore malformed dates as it's used for sorting in logsdb
       (property as MappingDateProperty).ignore_malformed = false;
     }
-    if (field.type === 'date' && field.format) {
-      (property as MappingDateProperty).format = field.format;
+    if (props.type === 'date' && props.format) {
+      (property as MappingDateProperty).format = props.format;
     }
-    properties[field.name] = property;
+    properties[field] = property;
   });
   return {
     name: getComponentTemplateName(id),
     template: {
-      settings: isRoot(definition.id) ? logsSettings : {},
+      settings: isRoot(definition.name) ? logsSettings : {},
       mappings: {
         subobjects: false,
         dynamic: false,
