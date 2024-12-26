@@ -13,7 +13,7 @@
     "xpack.alerting": "platform/plugins/shared/alerting",
     "xpack.eventLog": "platform/plugins/shared/event_log",
     "xpack.stackAlerts": "platform/plugins/shared/stack_alerts",
-    "xpack.stackConnectors": "plugins/stack_connectors",
+    "xpack.stackConnectors": "platform/plugins/shared/stack_connectors",
     "xpack.apm": "plugins/observability_solution/apm",
     "xpack.apmDataAccess": "plugins/observability_solution/apm_data_access",
     "xpack.banners": "plugins/banners",

@@ -169,9 +169,9 @@ const getPipeline = (filename: string, removeSteps = true) => {
         /^x-pack\/platform\/packages\/shared\/ai-infra/,
         /^x-pack\/platform\/plugins\/shared\/ai_infra/,
         /^x-pack\/platform\/plugins\/shared\/inference/,
-        /^x-pack\/plugins\/stack_connectors\/server\/connector_types\/bedrock/,
-        /^x-pack\/plugins\/stack_connectors\/server\/connector_types\/gemini/,
-        /^x-pack\/plugins\/stack_connectors\/server\/connector_types\/openai/,
+        /^x-pack\/platform\/plugins\/shared\/stack_connectors\/server\/connector_types\/bedrock/,
+        /^x-pack\/platform\/plugins\/shared\/stack_connectors\/server\/connector_types\/gemini/,
+        /^x-pack\/platform\/plugins\/shared\/stack_connectors\/server\/connector_types\/openai/,
       ])) ||
       GITHUB_PR_LABELS.includes('ci:all-gen-ai-suites')
     ) {
