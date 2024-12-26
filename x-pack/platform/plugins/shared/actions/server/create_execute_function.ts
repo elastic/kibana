@@ -235,7 +235,7 @@ export function createEphemeralExecutionEnqueuerFunction({
         actionId: id,
         consumer,
         // Saved Objects won't allow us to enforce unknown rather than any
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
         params: params as Record<string, any>,
         ...(apiKey ? { apiKey } : {}),
         ...(executionId ? { executionId } : {}),
