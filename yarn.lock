@@ -6993,7 +6993,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/search-homepage@link:x-pack/plugins/search_homepage":
+"@kbn/search-homepage@link:x-pack/solutions/search/plugins/search_homepage":
   version "0.0.0"
   uid ""
 
