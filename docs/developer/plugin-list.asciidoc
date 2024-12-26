@@ -903,7 +903,7 @@ This plugin is only enabled when the application is built for serverless project
 |See Configuring Kibana Spaces.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/stack_alerts/README.md[stackAlerts]
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/shared/stack_alerts/README.md[stackAlerts]
 |This plugin provides alertTypes shipped with Kibana for use with the
 the alerting plugin.  When enabled, it will register
 the alertTypes by the Stack in the alerting plugin, register associated HTTP
