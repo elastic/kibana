@@ -525,26 +525,24 @@ const navigationTree: NavigationTreeDefinitionUI = {
   ],
 };
 
-export const ComplexObjectDefinition = {
-  render: (args: NavigationServices) => {
-    const services = storybookMock.getServices({
-      ...args,
-      recentlyAccessed$: of([
-        { label: 'This is an example', link: '/app/example/39859', id: '39850' },
-        { label: 'Another example', link: '/app/example/5235', id: '5235' },
-      ]),
-    });
+export const ComplexObjectDefinition = (args: NavigationServices) => {
+  const services = storybookMock.getServices({
+    ...args,
+    recentlyAccessed$: of([
+      { label: 'This is an example', link: '/app/example/39859', id: '39850' },
+      { label: 'Another example', link: '/app/example/5235', id: '5235' },
+    ]),
+  });
 
-    return (
-      <NavigationWrapper>
-        {({ isCollapsed }) => (
-          <NavigationProvider {...services} isSideNavCollapsed={isCollapsed}>
-            <Navigation navigationTree$={of(navigationTree)} />
-          </NavigationProvider>
-        )}
-      </NavigationWrapper>
-    );
-  },
+  return (
+    <NavigationWrapper>
+      {({ isCollapsed }) => (
+        <NavigationProvider {...services} isSideNavCollapsed={isCollapsed}>
+          <Navigation navigationTree$={of(navigationTree)} />
+        </NavigationProvider>
+      )}
+    </NavigationWrapper>
+  );
 };
 
 const panelContentProvider: ContentProvider = (id: string) => {
