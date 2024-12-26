@@ -6845,7 +6845,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/rrule@link:packages/kbn-rrule":
+"@kbn/rrule@link:src/platform/packages/shared/kbn-rrule":
   version "0.0.0"
   uid ""
 
