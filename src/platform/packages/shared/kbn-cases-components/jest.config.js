@@ -9,7 +9,7 @@
 
 module.exports = {
   preset: '@kbn/test',
-  rootDir: '../..',
-  roots: ['<rootDir>/packages/kbn-cases-components'],
-  setupFilesAfterEnv: ['<rootDir>/packages/kbn-cases-components/setup_tests.ts'],
+  rootDir: '../../../../..',
+  roots: ['<rootDir>/src/platform/packages/shared/kbn-cases-components'],
+  setupFilesAfterEnv: ['<rootDir>/src/platform/packages/shared/kbn-cases-components/setup_tests.ts'],
 };

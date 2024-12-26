@@ -15,7 +15,7 @@ export const storybookAliases = {
   ai_assistant: 'x-pack/packages/kbn-ai-assistant/.storybook',
   apm: 'x-pack/plugins/observability_solution/apm/.storybook',
   canvas: 'x-pack/platform/plugins/private/canvas/storybook',
-  cases: 'packages/kbn-cases-components/.storybook',
+  cases: 'src/platform/packages/shared/kbn-cases-components/.storybook',
   cell_actions: 'src/platform/packages/shared/kbn-cell-actions/.storybook',
   cloud_security_posture_packages:
     'x-pack/solutions/security/packages/kbn-cloud-security-posture/.storybook',
