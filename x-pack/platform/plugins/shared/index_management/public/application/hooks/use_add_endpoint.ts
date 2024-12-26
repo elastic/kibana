@@ -6,12 +6,10 @@
  */
 
 import { useCallback } from 'react';
-import { i18n } from '@kbn/i18n';
-import { KibanaServerError } from '@kbn/kibana-utils-plugin/common';
 import { useKibana } from '..';
 import { InferenceEndpoint } from '../../../common/types/inference';
 import { useMLModelNotificationToasts } from '../../hooks/use_ml_model_status_toasts';
-import { createInferenceEndpoint, useCreateInferenceEndpoint } from '../services';
+import { createInferenceEndpoint } from '../services';
 
 export const useAddEndpoint = (onSuccess?: () => void, onError?: () => void) => {
   const { services } = useKibana();

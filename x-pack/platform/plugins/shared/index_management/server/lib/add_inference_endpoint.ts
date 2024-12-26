@@ -8,7 +8,7 @@
 import { ElasticsearchClient } from '@kbn/core/server';
 
 import { InferenceTaskType } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { Config, Secrets } from '../../../../../packages/shared/kbn-inference-endpoint-ui-common';
+import type { Config, Secrets } from '@kbn/inference-endpoint-ui-common';
 import { unflattenObject } from '../services/unflatten_object';
 
 export const addInferenceEndpoint = async (

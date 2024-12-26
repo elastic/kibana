@@ -11,11 +11,9 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { InferenceProvider, InferenceServiceFormFields } from '@kbn/inference-endpoint-ui-common';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 
-// import { useAddEndpoint } from '../../hooks/use_add_endpoint';
 import { InferenceEndpoint } from '../../../../../../../../common/types/inference';
 import { useProviders } from '../../../../../../hooks/use_providers';
 import { useAddEndpoint } from '../../../../../../hooks/use_add_endpoint';
-import { useLoadInferenceEndpoints } from '../../../../../../services';
 
 interface InferenceFormProps {
   onSubmitSuccess: () => void;
@@ -44,13 +42,8 @@ export const InferenceForm: React.FC<InferenceFormProps> = ({ onSubmitSuccess, r
     const { isValid, data } = await form.submit();
 
     if (isValid) {
-      console.log('form is valid', data);
-      // addEndpoint({
-      //   inferenceEndpoint: data as InferenceEndpoint,
-      // });
       addInferenceEndpoint(data as InferenceEndpoint);
     } else {
-      console.log('form in not valid');
       setIsLoading(false);
     }
   }, [addInferenceEndpoint, form]);

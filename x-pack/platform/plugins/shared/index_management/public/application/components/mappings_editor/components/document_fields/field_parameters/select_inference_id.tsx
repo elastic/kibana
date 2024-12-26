@@ -29,7 +29,6 @@ import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { SUPPORTED_PYTORCH_TASKS, TRAINED_MODEL_TYPE } from '@kbn/ml-trained-models-utils';
 import { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 import { ModelConfig } from '@kbn/inference_integration_flyout/types';
-import { InferenceFlyoutWrapper } from '@kbn/inference_integration_flyout/components/inference_flyout_wrapper';
 import { TrainedModelConfigResponse } from '@kbn/ml-plugin/common/types/trained_models';
 import { getFieldConfig } from '../../../lib';
 import { useAppContext } from '../../../../../app_context';
@@ -37,6 +36,7 @@ import { useLoadInferenceEndpoints } from '../../../../../services/api';
 import { useMLModelNotificationToasts } from '../../../../../../hooks/use_ml_model_status_toasts';
 import { CustomInferenceEndpointConfig } from '../../../types';
 import { UseField } from '../../../shared_imports';
+import { AddInferenceFlyoutWrapper } from './add_inference_flyout/add_inference_flyout_wrapper';
 
 export interface SelectInferenceIdProps {
   createInferenceEndpoint: (
@@ -234,8 +234,26 @@ const SelectInferenceIdContent: React.FC<SelectInferenceIdContentProps> = ({
       panelPaddingSize="m"
       closePopover={() => setIsInferencePopoverVisible(!isInferencePopoverVisible)}
     >
-      {inferenceEndpointsPageLink && (
-        <EuiContextMenuPanel>
+      <EuiContextMenuPanel>
+        <EuiContextMenuItem
+          key="createInferenceEndpointButton"
+          icon="plusInCircle"
+          size="s"
+          data-test-subj="createInferenceEndpointButton"
+          onClick={(e) => {
+            e.preventDefault();
+            setIsInferenceFlyoutVisible(true);
+            setIsInferencePopoverVisible(!isInferencePopoverVisible);
+          }}
+        >
+          {i18n.translate(
+            'xpack.idxMgmt.mappingsEditor.parameters.inferenceId.popover.createInferenceEndpointButton',
+            {
+              defaultMessage: 'Add inference endpoint',
+            }
+          )}
+        </EuiContextMenuItem>
+        {inferenceEndpointsPageLink && (
           <EuiContextMenuItem
             key="manageInferenceEndpointButton"
             icon="gear"
@@ -254,8 +272,8 @@ const SelectInferenceIdContent: React.FC<SelectInferenceIdContentProps> = ({
               }
             )}
           </EuiContextMenuItem>
-        </EuiContextMenuPanel>
-      )}
+        )}
+      </EuiContextMenuPanel>
       <EuiHorizontalRule margin="none" />
       <EuiPanel color="transparent" paddingSize="s">
         <EuiTitle size="xxxs">
@@ -327,22 +345,12 @@ const SelectInferenceIdContent: React.FC<SelectInferenceIdContentProps> = ({
       <EuiFlexGroup data-test-subj="selectInferenceId">
         <EuiFlexItem grow={false}>
           {inferencePopover()}
-          {isInferenceFlyoutVisible && (
-            <InferenceFlyoutWrapper
-              elserv2documentationUrl={docLinks.links.ml.nlpElser}
-              e5documentationUrl={docLinks.links.ml.nlpE5}
-              onInferenceEndpointChange={onInferenceEndpointChange}
-              inferenceEndpointError={inferenceEndpointError}
-              trainedModels={trainedModels}
-              onSaveInferenceEndpoint={onSaveInferenceCallback}
+          {isInferenceFlyoutVisible ? (
+            <AddInferenceFlyoutWrapper
               onFlyoutClose={onFlyoutClose}
-              isInferenceFlyoutVisible={isInferenceFlyoutVisible}
-              supportedNlpModels={docLinks.links.enterpriseSearch.supportedNlpModels}
-              nlpImportModel={docLinks.links.ml.nlpImportModel}
-              setInferenceEndpointError={setInferenceEndpointError}
-              isCreateInferenceApiLoading={isSaveInferenceLoading}
+              resendRequest={resendRequest}
             />
-          )}
+          ) : null}
         </EuiFlexItem>
         <EuiFlexItem grow={true}>
           <EuiCallOut

@@ -6,7 +6,7 @@
  */
 
 import { FieldType } from '@kbn/search-connectors/types';
-import { InferenceProvider } from '../../../../../packages/shared/kbn-inference-endpoint-ui-common';
+import type { InferenceProvider } from '@kbn/inference-endpoint-ui-common';
 
 export const fetchInferenceServices = (): InferenceProvider[] => [
   {
