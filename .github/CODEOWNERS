@@ -675,11 +675,11 @@ x-pack/packages/observability/logs_overview @elastic/obs-ux-logs-team
 x-pack/plugins/observability_solution/observability_onboarding/e2e @elastic/obs-ux-logs-team
 x-pack/plugins/observability_solution/observability_onboarding @elastic/obs-ux-logs-team
 x-pack/solutions/observability/plugins/observability @elastic/obs-ux-management-team
-x-pack/plugins/observability_solution/observability_shared @elastic/observability-ui
+x-pack/solutions/observability/plugins/observability_shared @elastic/observability-ui
 x-pack/solutions/observability/packages/synthetics_test_data @elastic/obs-ux-management-team
-x-pack/packages/observability/observability_utils/observability_utils_browser @elastic/observability-ui
-x-pack/packages/observability/observability_utils/observability_utils_common @elastic/observability-ui
-x-pack/packages/observability/observability_utils/observability_utils_server @elastic/observability-ui
+x-pack/solutions/observability/packages/utils_browser @elastic/observability-ui
+x-pack/solutions/observability/packages/utils_common @elastic/observability-ui
+x-pack/solutions/observability/packages/utils_server @elastic/observability-ui
 x-pack/test/security_api_integration/plugins/oidc_provider @elastic/kibana-security
 test/common/plugins/otel_metrics @elastic/obs-ux-infra_services-team
 packages/kbn-openapi-bundler @elastic/security-detection-rule-management
