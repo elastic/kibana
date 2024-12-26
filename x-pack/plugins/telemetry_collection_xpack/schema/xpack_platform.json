@@ -221,6 +221,150 @@
         }
       }
     },
+    "fleet": {
+      "properties": {
+        "agents_enabled": {
+          "type": "boolean"
+        },
+        "agents": {
+          "properties": {
+            "total_enrolled": {
+              "type": "long",
+              "_meta": {
+                "description": "The total number of enrolled agents, in any state"
+              }
+            },
+            "healthy": {
+              "type": "long",
+              "_meta": {
+                "description": "The total number of enrolled agents in a healthy state"
+              }
+            },
+            "unhealthy": {
+              "type": "long",
+              "_meta": {
+                "description": "The total number of enrolled agents in an unhealthy state"
+              }
+            },
+            "updating": {
+              "type": "long",
+              "_meta": {
+                "description": "The total number of enrolled agents in an updating state"
+              }
+            },
+            "offline": {
+              "type": "long",
+              "_meta": {
+                "description": "The total number of enrolled agents currently offline"
+              }
+            },
+            "inactive": {
+              "type": "long",
+              "_meta": {
+                "description": "The total number of of enrolled agents currently inactive"
+              }
+            },
+            "unenrolled": {
+              "type": "long",
+              "_meta": {
+                "description": "The total number of agents currently unenrolled"
+              }
+            },
+            "total_all_statuses": {
+              "type": "long",
+              "_meta": {
+                "description": "The total number of agents in any state, both enrolled and inactive"
+              }
+            }
+          }
+        },
+        "fleet_server": {
+          "properties": {
+            "total_enrolled": {
+              "type": "long",
+              "_meta": {
+                "description": "The total number of enrolled Fleet Server agents, in any state"
+              }
+            },
+            "total_all_statuses": {
+              "type": "long",
+              "_meta": {
+                "description": "The total number of Fleet Server agents in any state, both enrolled and inactive."
+              }
+            },
+            "healthy": {
+              "type": "long",
+              "_meta": {
+                "description": "The total number of enrolled Fleet Server agents in a healthy state."
+              }
+            },
+            "unhealthy": {
+              "type": "long",
+              "_meta": {
+                "description": "The total number of enrolled Fleet Server agents in an unhealthy state"
+              }
+            },
+            "updating": {
+              "type": "long",
+              "_meta": {
+                "description": "The total number of enrolled Fleet Server agents in an updating state"
+              }
+            },
+            "offline": {
+              "type": "long",
+              "_meta": {
+                "description": "The total number of enrolled Fleet Server agents currently offline"
+              }
+            },
+            "inactive": {
+              "type": "long",
+              "_meta": {
+                "description": "The total number of enrolled Fleet Server agents currently inactive"
+              }
+            },
+            "unenrolled": {
+              "type": "long",
+              "_meta": {
+                "description": "The total number of unenrolled Fleet Server agents"
+              }
+            },
+            "num_host_urls": {
+              "type": "long",
+              "_meta": {
+                "description": "The number of Fleet Server hosts configured in Fleet settings."
+              }
+            }
+          }
+        },
+        "packages": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "name": {
+                "type": "keyword"
+              },
+              "version": {
+                "type": "keyword"
+              },
+              "enabled": {
+                "type": "boolean"
+              }
+            }
+          }
+        }
+      }
+    },
+    "kibana_settings": {
+      "properties": {
+        "xpack": {
+          "properties": {
+            "default_admin_email": {
+              "type": "text"
+            }
+          }
+        }
+      }
+    },
     "logs_data": {
       "properties": {
         "data": {
@@ -1370,6 +1514,343 @@
                     }
                   }
                 }
+              }
+            }
+          }
+        }
+      }
+    },
+    "monitoring": {
+      "properties": {
+        "hasMonitoringData": {
+          "type": "boolean"
+        },
+        "clusters": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "license": {
+                "type": "keyword"
+              },
+              "clusterUuid": {
+                "type": "keyword"
+              },
+              "metricbeatUsed": {
+                "type": "boolean"
+              },
+              "elasticsearch": {
+                "properties": {
+                  "enabled": {
+                    "type": "boolean"
+                  },
+                  "count": {
+                    "type": "long"
+                  },
+                  "metricbeatUsed": {
+                    "type": "boolean"
+                  }
+                }
+              },
+              "kibana": {
+                "properties": {
+                  "enabled": {
+                    "type": "boolean"
+                  },
+                  "count": {
+                    "type": "long"
+                  },
+                  "metricbeatUsed": {
+                    "type": "boolean"
+                  }
+                }
+              },
+              "logstash": {
+                "properties": {
+                  "enabled": {
+                    "type": "boolean"
+                  },
+                  "count": {
+                    "type": "long"
+                  },
+                  "metricbeatUsed": {
+                    "type": "boolean"
+                  }
+                }
+              },
+              "beats": {
+                "properties": {
+                  "enabled": {
+                    "type": "boolean"
+                  },
+                  "count": {
+                    "type": "long"
+                  },
+                  "metricbeatUsed": {
+                    "type": "boolean"
+                  }
+                }
+              },
+              "apm": {
+                "properties": {
+                  "enabled": {
+                    "type": "boolean"
+                  },
+                  "count": {
+                    "type": "long"
+                  },
+                  "metricbeatUsed": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "monitoringTelemetry": {
+      "properties": {
+        "stats": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "timestamp": {
+                "type": "date"
+              },
+              "cluster_uuid": {
+                "type": "keyword"
+              },
+              "cluster_name": {
+                "type": "keyword"
+              },
+              "version": {
+                "type": "keyword"
+              },
+              "cluster_stats": {
+                "properties": {}
+              },
+              "stack_stats": {
+                "properties": {
+                  "logstash": {
+                    "properties": {
+                      "versions": {
+                        "type": "array",
+                        "items": {
+                          "properties": {
+                            "version": {
+                              "type": "keyword"
+                            },
+                            "count": {
+                              "type": "long"
+                            }
+                          }
+                        }
+                      },
+                      "count": {
+                        "type": "long"
+                      },
+                      "cluster_stats": {
+                        "properties": {
+                          "monitoringClusterUuid": {
+                            "type": "keyword"
+                          },
+                          "collection_types": {
+                            "properties": {
+                              "DYNAMIC_KEY": {
+                                "type": "long"
+                              }
+                            }
+                          },
+                          "queues": {
+                            "properties": {
+                              "DYNAMIC_KEY": {
+                                "type": "long"
+                              }
+                            }
+                          },
+                          "plugins": {
+                            "type": "array",
+                            "items": {
+                              "properties": {
+                                "name": {
+                                  "type": "keyword"
+                                },
+                                "count": {
+                                  "type": "long"
+                                }
+                              }
+                            }
+                          },
+                          "pipelines": {
+                            "properties": {
+                              "count": {
+                                "type": "long"
+                              },
+                              "batch_size_max": {
+                                "type": "long"
+                              },
+                              "batch_size_avg": {
+                                "type": "long"
+                              },
+                              "batch_size_min": {
+                                "type": "long"
+                              },
+                              "batch_size_total": {
+                                "type": "long"
+                              },
+                              "workers_max": {
+                                "type": "long"
+                              },
+                              "workers_avg": {
+                                "type": "long"
+                              },
+                              "workers_min": {
+                                "type": "long"
+                              },
+                              "workers_total": {
+                                "type": "long"
+                              },
+                              "sources": {
+                                "properties": {
+                                  "DYNAMIC_KEY": {
+                                    "type": "boolean"
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "beats": {
+                    "properties": {
+                      "versions": {
+                        "properties": {
+                          "DYNAMIC_KEY": {
+                            "type": "long"
+                          }
+                        }
+                      },
+                      "types": {
+                        "properties": {
+                          "DYNAMIC_KEY": {
+                            "type": "long"
+                          }
+                        }
+                      },
+                      "outputs": {
+                        "properties": {
+                          "DYNAMIC_KEY": {
+                            "type": "long"
+                          }
+                        }
+                      },
+                      "queue": {
+                        "properties": {
+                          "DYNAMIC_KEY": {
+                            "type": "long"
+                          }
+                        }
+                      },
+                      "count": {
+                        "type": "long"
+                      },
+                      "eventsPublished": {
+                        "type": "long"
+                      },
+                      "hosts": {
+                        "type": "long"
+                      },
+                      "input": {
+                        "properties": {
+                          "count": {
+                            "type": "long"
+                          },
+                          "names": {
+                            "type": "array",
+                            "items": {
+                              "type": "keyword"
+                            }
+                          }
+                        }
+                      },
+                      "module": {
+                        "properties": {
+                          "count": {
+                            "type": "long"
+                          },
+                          "names": {
+                            "type": "array",
+                            "items": {
+                              "type": "keyword"
+                            }
+                          }
+                        }
+                      },
+                      "architecture": {
+                        "properties": {
+                          "count": {
+                            "type": "long"
+                          },
+                          "architectures": {
+                            "type": "array",
+                            "items": {
+                              "properties": {
+                                "name": {
+                                  "type": "keyword"
+                                },
+                                "architecture": {
+                                  "type": "keyword"
+                                },
+                                "count": {
+                                  "type": "long"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      },
+                      "heartbeat": {
+                        "properties": {
+                          "monitors": {
+                            "type": "long"
+                          },
+                          "endpoints": {
+                            "type": "long"
+                          },
+                          "DYNAMIC_KEY": {
+                            "properties": {
+                              "monitors": {
+                                "type": "long"
+                              },
+                              "endpoints": {
+                                "type": "long"
+                              }
+                            }
+                          }
+                        }
+                      },
+                      "functionbeat": {
+                        "properties": {
+                          "functions": {
+                            "properties": {
+                              "count": {
+                                "type": "long"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "collection": {
+                "type": "keyword"
+              },
+              "collectionSource": {
+                "type": "keyword"
               }
             }
           }

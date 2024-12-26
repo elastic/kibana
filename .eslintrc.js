@@ -1029,7 +1029,7 @@ module.exports = {
      * Fleet overrides
      */
     {
-      files: ['x-pack/plugins/fleet/**/*.{js,mjs,ts,tsx}'],
+      files: ['x-pack/platform/plugins/shared/fleet/**/*.{js,mjs,ts,tsx}'],
       plugins: ['testing-library'],
       rules: {
         'testing-library/await-async-utils': 'error',
