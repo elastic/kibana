@@ -5837,7 +5837,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/grouping@link:packages/kbn-grouping":
+"@kbn/grouping@link:src/platform/packages/shared/kbn-grouping":
   version "0.0.0"
   uid ""
 

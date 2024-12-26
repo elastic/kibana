@@ -302,7 +302,7 @@ const getPipeline = (filename: string, removeSteps = true) => {
         /^packages\/kbn-es-query/,
         /^packages\/kbn-i18n/,
         /^packages\/kbn-i18n-react/,
-        /^packages\/kbn-grouping/,
+        /^src\/platform\/packages\/shared\/kbn-grouping/,
         /^packages\/kbn-resizable-layout/,
         /^packages\/kbn-rison/,
         /^src\/platform\/packages\/shared\/kbn-rule-data-utils/,
