@@ -36,7 +36,7 @@ export const isConnectorDeprecated = (
      * If the usesTableApi is not defined it means that the connector is created
      * before the introduction of the usesTableApi property. In that case, the connector is assumed
      * to be deprecated because all connectors prior 7.16 where using the Table API.
-     * Migrations x-pack/plugins/actions/server/saved_objects/actions_migrations.ts set
+     * Migrations x-pack/platform/plugins/shared/actions/server/saved_objects/actions_migrations.ts set
      * the usesTableApi property to true to all connectors prior 7.16. Pre configured connectors
      * cannot be migrated. This check ensures that pre configured connectors without the
      * usesTableApi property explicitly in the kibana.yml file are considered deprecated.

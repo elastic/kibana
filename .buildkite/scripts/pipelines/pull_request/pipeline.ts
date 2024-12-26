@@ -58,7 +58,7 @@ const getPipeline = (filename: string, removeSteps = true) => {
     if (
       (await doAnyChangesMatch([
         /^src\/plugins\/data/,
-        /^x-pack\/plugins\/actions/,
+        /^x-pack\/platform\/plugins\/shared\/actions/,
         /^x-pack\/plugins\/alerting/,
         /^x-pack\/plugins\/event_log/,
         /^x-pack\/plugins\/rule_registry/,

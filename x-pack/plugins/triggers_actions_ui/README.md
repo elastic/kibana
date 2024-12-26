@@ -1208,7 +1208,7 @@ triggersActionsUi.actionTypeRegistry.register(getSomeNewActionType());
 
 ## Create and register new action type UI
 
-Before starting the UI implementation, the [server side registration](https://github.com/elastic/kibana/tree/main/x-pack/plugins/actions#action-types) should be done first.
+Before starting the UI implementation, the [server side registration](https://github.com/elastic/kibana/tree/main/x-pack/platform/plugins/shared/actions#action-types) should be done first.
 
 Action type UI is expected to be defined as `ActionTypeModel` object.
 
@@ -1504,7 +1504,7 @@ interface ActionAccordionFormProps {
 | actionTypeRegistry      | Registry for action types.                                                                                                                                                                                                                                        |
 | toastNotifications      | Toast messages Plugin Setup Contract.                                                                                                                                                                                                                             |
 | docLinks                | Documentation links Plugin Start Contract.                                                                                                                                                                                                                        |
-| featureId               | Property that filters which action types are loaded when the flyout is opened. Each action type configures the feature ids it is available in during [server side registration](https://github.com/elastic/kibana/tree/main/x-pack/plugins/actions#action-types). |
+| featureId               | Property that filters which action types are loaded when the flyout is opened. Each action type configures the feature ids it is available in during [server side registration](https://github.com/elastic/kibana/tree/main/x-pack/platform/plugins/shared/actions#action-types). |
 | messageVariables        | Optional property, which allows to define a list of variables for action 'message' property. Set `useWithTripleBracesInTemplates` to true if you don't want the variable escaped when rendering.                                                                  |
 | defaultActionMessage    | Optional property, which allows to define a message value for action with 'message' property.                                                                                                                                                                     |
 | capabilities            | Kibana core's Capabilities ApplicationStart['capabilities'].                                                                                                                                                                                                      |
@@ -1601,7 +1601,7 @@ export interface ConnectorAddFlyoutProps {
 | ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | actionTypeRegistry | The action type registry.                                                                                                                                                                                                                                                  |
 | onClose            | Called when closing the flyout                                                                                                                                                                                                                                             |
-| featureId          | Optional property that filters which action types are loaded when the flyout is opened. Each action type configures the feature ids it is available in during [server side registration](https://github.com/elastic/kibana/tree/main/x-pack/plugins/actions#action-types). |
+| featureId          | Optional property that filters which action types are loaded when the flyout is opened. Each action type configures the feature ids it is available in during [server side registration](https://github.com/elastic/kibana/tree/main/x-pack/platform/plugins/shared/actions#action-types). |
 | onConnectorCreated | Optional property. Function to be called after the creation of the connector.                                                                                                                                                                                              |
 | onTestConnector    | Optional property. Function to be called when the user press the Save & Test button.                                                                                                                                                                                       |
 

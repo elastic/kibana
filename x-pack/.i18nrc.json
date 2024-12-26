@@ -1,7 +1,7 @@
 {
   "prefix": "xpack",
   "paths": {
-    "xpack.actions": "plugins/actions",
+    "xpack.actions": "platform/plugins/shared/actions",
     "xpack.aiops": [
       "platform/packages/shared/ml/aiops_common",
       "platform/packages/private/ml/aiops_components",

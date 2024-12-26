@@ -14,7 +14,7 @@ work as expected.
 
 # start 4 proxies:
 
-node x-pack/plugins/actions/server/manual_tests/forward_proxy.js http-8080-open http-8081-auth https-8443-open https-8444-auth
+node x-pack/platform/plugins/shared/actions/server/manual_tests/forward_proxy.js http-8080-open http-8081-auth https-8443-open https-8444-auth
 
 # issue some requests through the proxies
 
@@ -43,7 +43,7 @@ const https = require('https');
 const proxy = require('proxy');
 
 const PROGRAM = path.basename(__filename).replace(/.js$/, '');
-const CertDir = path.resolve(__dirname, '../../../../../packages/kbn-dev-utils/certs');
+const CertDir = path.resolve(__dirname, '../../../../../../../packages/kbn-dev-utils/certs');
 
 const Auth = 'elastic:changeme';
 const AuthB64 = Buffer.from(Auth).toString('base64');

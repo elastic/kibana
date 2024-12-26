@@ -3829,7 +3829,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/actions-plugin@link:x-pack/plugins/actions":
+"@kbn/actions-plugin@link:x-pack/platform/plugins/shared/actions":
   version "0.0.0"
   uid ""
 
