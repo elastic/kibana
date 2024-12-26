@@ -7,13 +7,12 @@
 
 import { i18n } from '@kbn/i18n';
 import { monaco } from '@kbn/monaco';
-import { getPanelTitle, type PublishesPanelTitle } from '@kbn/presentation-publishing';
+import { getPanelTitle, isEmbeddableApiContext, type PublishesPanelTitle } from '@kbn/presentation-publishing';
 import {
   ChartActionContext,
   isRangeSelectTriggerContext,
   isValueClickTriggerContext,
   isRowClickTriggerContext,
-  isContextMenuTriggerContext,
   RangeSelectContext,
   SELECT_RANGE_TRIGGER,
   ValueClickContext,
@@ -131,7 +130,7 @@ export const getEventScopeValues = (context: ChartActionContext): UrlDrilldownEv
     return getEventScopeFromValueClickTriggerContext(context);
   } else if (isRowClickTriggerContext(context)) {
     return getEventScopeFromRowClickTriggerContext(context);
-  } else if (isContextMenuTriggerContext(context)) {
+  } else if (isEmbeddableApiContext(context)) {
     return {};
   } else {
     throw new Error("UrlDrilldown [getEventScope] can't build scope from not supported trigger");
