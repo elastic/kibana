@@ -170,8 +170,6 @@ export type DashboardApi = CanExpandPanels &
     setTags: (tags: string[]) => void;
     setTimeRange: (timeRange?: TimeRange | undefined) => void;
     unifiedSearchFilters$: PublishesUnifiedSearch['filters$'];
-
-    // TODO remove types below this line - from legacy embeddable system
     untilEmbeddableLoaded: (id: string) => Promise<unknown | undefined>;
   };
 

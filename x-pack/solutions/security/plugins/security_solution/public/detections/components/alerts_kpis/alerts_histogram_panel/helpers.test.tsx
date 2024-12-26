@@ -39,7 +39,7 @@ describe('helpers', () => {
 describe('createResetGroupByFieldAction', () => {
   let action: Action;
   const embeddable = {
-    getInput: () => ({
+    getInput: jest.fn().mockReturnValue({
       attributes: {
         title: 'test',
         description: '',
@@ -68,7 +68,7 @@ describe('createResetGroupByFieldAction', () => {
         },
       },
     }),
-    updateInput: () => {},
+    updateInput: jest.fn(),
   };
 
   const context = {
