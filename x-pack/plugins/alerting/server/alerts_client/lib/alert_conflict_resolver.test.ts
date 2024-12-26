@@ -110,7 +110,7 @@ describe('alert_conflict_resolver', () => {
     });
 
     test('no errors in bulk results', async () => {
-      const { bulkRequest, bulkResponse } = getReqRes('c is is c is');
+      const { bulkRequest, bulkResponse } = getReqRes('cs is is cs is');
       await resolveAlertConflicts({
         logger,
         esClient,
@@ -163,18 +163,42 @@ describe('alert_conflict_resolver', () => {
       );
     });
 
-    test('one conflicted doc amonst other successes and errors', async () => {
-      const { bulkRequest, bulkResponse } = getReqRes('is c ic ie');
+    test('one conflicted index doc amonst other successes and errors', async () => {
+      const { bulkRequest, bulkResponse } = getReqRes('is cs ic ie');
+      esClient.mget.mockResolvedValueOnce({ docs: [getMGetResDoc(2, alertDoc)] });
+      esClient.bulk.mockResolvedValueOnce({ errors: false, took: 0, items: [getBulkResItem(2)] });
 
-      esClient.mget.mockResolvedValueOnce({
-        docs: [getMGetResDoc(2, alertDoc)],
+      await resolveAlertConflicts({
+        logger,
+        esClient,
+        bulkRequest,
+        bulkResponse,
+        ruleId,
+        ruleName,
+        ruleType,
       });
 
-      esClient.bulk.mockResolvedValueOnce({
-        errors: false,
-        took: 0,
-        items: [getBulkResItem(2)],
-      });
+      expect(logger.error).toHaveBeenNthCalledWith(
+        1,
+        `Error writing alerts ${ruleInfo}: 2 successful, 1 conflicts, 1 errors: hallo`,
+        logTags
+      );
+      expect(logger.info).toHaveBeenNthCalledWith(
+        1,
+        `Retrying bulk update of 1 conflicted alerts ${ruleInfo}`,
+        logTags
+      );
+      expect(logger.info).toHaveBeenNthCalledWith(
+        2,
+        `Retried bulk update of 1 conflicted alerts succeeded ${ruleInfo}`,
+        logTags
+      );
+    });
+
+    test('one conflicted create doc amonst other successes and errors', async () => {
+      const { bulkRequest, bulkResponse } = getReqRes('is cs cc ie');
+      esClient.mget.mockResolvedValueOnce({ docs: [getMGetResDoc(2, alertDoc)] });
+      esClient.bulk.mockResolvedValueOnce({ errors: false, took: 0, items: [getBulkResItem(2)] });
 
       await resolveAlertConflicts({
         logger,
@@ -204,7 +228,7 @@ describe('alert_conflict_resolver', () => {
     });
 
     test('multiple conflicted doc amonst other successes and errors', async () => {
-      const { bulkRequest, bulkResponse } = getReqRes('is c ic ic ie ic');
+      const { bulkRequest, bulkResponse } = getReqRes('is cs ic cc ie ic');
 
       esClient.mget.mockResolvedValueOnce({
         docs: [getMGetResDoc(2, alertDoc), getMGetResDoc(3, alertDoc), getMGetResDoc(5, alertDoc)],
@@ -276,7 +300,9 @@ interface GetReqResResult {
 /**
  * takes as input a string of c, is, ic, ie tokens and builds appropriate
  * bulk request and response objects to use in the tests:
- * - c: create, ignored by the resolve logic
+ * - cs: create with success
+ * - cc: create with conflict
+ * - ce: create with error but not conflict
  * - is: index with success
  * - ic: index with conflict
  * - ie: index with error but not conflict
@@ -293,16 +319,28 @@ function getReqRes(bulkOps: string): GetReqResResult {
 
   if (ops[0] === '') return { bulkRequest, bulkResponse };
 
-  const createOp = { create: {} };
-
   let id = 0;
   for (const op of ops) {
     id++;
     switch (op) {
-      // create, ignored by the resolve logic
-      case 'c':
-        bulkRequest.operations.push(createOp, alertDoc);
+      // create with success
+      case 'cs':
+        bulkRequest.operations.push(getCreateOp(id), alertDoc);
         bulkResponse.items.push(getResponseItem('create', id, false, 200));
+        break;
+
+      // index with conflict
+      case 'cc':
+        bulkResponse.errors = true;
+        bulkRequest.operations.push(getCreateOp(id), alertDoc);
+        bulkResponse.items.push(getResponseItem('create', id, true, 409));
+        break;
+
+      // index with error but not conflict
+      case 'ce':
+        bulkResponse.errors = true;
+        bulkRequest.operations.push(getCreateOp(id), alertDoc);
+        bulkResponse.items.push(getResponseItem('create', id, true, 418)); // I'm a teapot
         break;
 
       // index with success
@@ -350,6 +388,16 @@ function getIndexOp(id: number) {
       _index: `index-${id}`,
       if_seq_no: 17,
       if_primary_term: 1,
+      require_alias: false,
+    },
+  };
+}
+
+function getCreateOp(id: number) {
+  return {
+    create: {
+      _id: `id-${id}`,
+      _index: `index-${id}`,
       require_alias: false,
     },
   };
