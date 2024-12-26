@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import type { StoryFn } from '@storybook/react';
 import {
   EuiButton,
   EuiFlexGroup,
@@ -99,7 +98,7 @@ const registeredPanels = [
   },
 ];
 
-export const Right: StoryFn<void> = () => {
+export const Right = () => {
   const state: State = {
     panels: {
       byId: {
@@ -126,7 +125,7 @@ export const Right: StoryFn<void> = () => {
   );
 };
 
-export const Left: StoryFn<void> = () => {
+export const Left = () => {
   const state: State = {
     panels: {
       byId: {
@@ -155,7 +154,7 @@ export const Left: StoryFn<void> = () => {
   );
 };
 
-export const Preview: StoryFn<void> = () => {
+export const Preview = () => {
   const state: State = {
     panels: {
       byId: {
@@ -188,7 +187,7 @@ export const Preview: StoryFn<void> = () => {
   );
 };
 
-export const MultiplePreviews: StoryFn<void> = () => {
+export const MultiplePreviews = () => {
   const state: State = {
     panels: {
       byId: {
@@ -224,7 +223,7 @@ export const MultiplePreviews: StoryFn<void> = () => {
   );
 };
 
-export const CollapsedPushMode: StoryFn<void> = () => {
+export const CollapsedPushMode = () => {
   const state: State = {
     panels: {
       byId: {
@@ -251,7 +250,7 @@ export const CollapsedPushMode: StoryFn<void> = () => {
   );
 };
 
-export const ExpandedPushMode: StoryFn<void> = () => {
+export const ExpandedPushMode = () => {
   const state: State = {
     panels: {
       byId: {
@@ -280,7 +279,7 @@ export const ExpandedPushMode: StoryFn<void> = () => {
   );
 };
 
-export const DisableTypeSelection: StoryFn<void> = () => {
+export const DisableTypeSelection = () => {
   const state: State = {
     panels: {
       byId: {
@@ -311,7 +310,7 @@ export const DisableTypeSelection: StoryFn<void> = () => {
   );
 };
 
-export const ResetWidths: StoryFn<void> = () => {
+export const ResetWidths = () => {
   const state: State = {
     panels: {
       byId: {
@@ -337,7 +336,7 @@ export const ResetWidths: StoryFn<void> = () => {
   );
 };
 
-export const DisableResizeWidthSelection: StoryFn<void> = () => {
+export const DisableResizeWidthSelection = () => {
   const state: State = {
     panels: {
       byId: {
