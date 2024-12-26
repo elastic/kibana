@@ -58,11 +58,11 @@ const getPipeline = (filename: string, removeSteps = true) => {
     if (
       (await doAnyChangesMatch([
         /^src\/plugins\/data/,
-        /^x-pack\/plugins\/actions/,
-        /^x-pack\/plugins\/alerting/,
-        /^x-pack\/plugins\/event_log/,
-        /^x-pack\/plugins\/rule_registry/,
-        /^x-pack\/plugins\/task_manager/,
+        /^x-pack\/platform\/plugins\/shared\/actions/,
+        /^x-pack\/platform\/plugins\/shared\/alerting/,
+        /^x-pack\/platform\/plugins\/shared\/event_log/,
+        /^x-pack\/platform\/plugins\/shared\/rule_registry/,
+        /^x-pack\/platform\/plugins\/shared\/task_manager/,
       ])) ||
       GITHUB_PR_LABELS.includes('ci:all-cypress-suites')
     ) {
@@ -70,7 +70,7 @@ const getPipeline = (filename: string, removeSteps = true) => {
     }
 
     if (
-      (await doAnyChangesMatch([/^x-pack\/plugins\/cases/])) ||
+      (await doAnyChangesMatch([/^x-pack\/platform\/plugins\/shared\/cases/])) ||
       GITHUB_PR_LABELS.includes('ci:all-cypress-suites')
     ) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/response_ops_cases.yml'));
@@ -169,9 +169,9 @@ const getPipeline = (filename: string, removeSteps = true) => {
         /^x-pack\/platform\/packages\/shared\/ai-infra/,
         /^x-pack\/platform\/plugins\/shared\/ai_infra/,
         /^x-pack\/platform\/plugins\/shared\/inference/,
-        /^x-pack\/plugins\/stack_connectors\/server\/connector_types\/bedrock/,
-        /^x-pack\/plugins\/stack_connectors\/server\/connector_types\/gemini/,
-        /^x-pack\/plugins\/stack_connectors\/server\/connector_types\/openai/,
+        /^x-pack\/platform\/plugins\/shared\/stack_connectors\/server\/connector_types\/bedrock/,
+        /^x-pack\/platform\/plugins\/shared\/stack_connectors\/server\/connector_types\/gemini/,
+        /^x-pack\/platform\/plugins\/shared\/stack_connectors\/server\/connector_types\/openai/,
       ])) ||
       GITHUB_PR_LABELS.includes('ci:all-gen-ai-suites')
     ) {
@@ -252,19 +252,19 @@ const getPipeline = (filename: string, removeSteps = true) => {
       (await doAnyChangesMatch([
         /^package.json/,
         /^packages\/kbn-securitysolution-.*/,
-        /^x-pack\/plugins\/alerting/,
+        /^x-pack\/platform\/plugins\/shared\/alerting/,
         /^x-pack\/plugins\/data_views\/common/,
         /^x-pack\/solutions\/security\/plugins\/lists/,
-        /^x-pack\/plugins\/rule_registry\/common/,
+        /^x-pack\/platform\/plugins\/shared\/rule_registry\/common/,
         /^x-pack\/solutions\/security\/plugins\/security_solution/,
         /^x-pack\/solutions\/security\/plugins\/security_solution_ess/,
         /^x-pack\/solutions\/security\/plugins\/security_solution_serverless/,
-        /^x-pack\/plugins\/task_manager/,
+        /^x-pack\/platform\/plugins\/shared\/task_manager/,
         /^x-pack\/solutions\/security\/plugins\/timelines/,
-        /^x-pack\/plugins\/triggers_actions_ui\/public\/application\/sections\/action_connector_form/,
-        /^x-pack\/plugins\/triggers_actions_ui\/public\/application\/context\/actions_connectors_context\.tsx/,
-        /^x-pack\/plugins\/triggers_actions_ui\/server\/connector_types\/openai/,
-        /^x-pack\/plugins\/triggers_actions_ui\/server\/connector_types\/bedrock/,
+        /^x-pack\/platform\/plugins\/shared\/triggers_actions_ui\/public\/application\/sections\/action_connector_form/,
+        /^x-pack\/platform\/plugins\/shared\/triggers_actions_ui\/public\/application\/context\/actions_connectors_context\.tsx/,
+        /^x-pack\/platform\/plugins\/shared\/triggers_actions_ui\/server\/connector_types\/openai/,
+        /^x-pack\/platform\/plugins\/shared\/triggers_actions_ui\/server\/connector_types\/bedrock/,
         /^x-pack\/plugins\/usage_collection\/public/,
         /^x-pack\/solutions\/security\/plugins\/elastic_assistant/,
         /^x-pack\/solutions\/security\/packages/,
@@ -302,7 +302,7 @@ const getPipeline = (filename: string, removeSteps = true) => {
         /^packages\/kbn-es-query/,
         /^packages\/kbn-i18n/,
         /^packages\/kbn-i18n-react/,
-        /^packages\/kbn-grouping/,
+        /^src\/platform\/packages\/shared\/kbn-grouping/,
         /^packages\/kbn-resizable-layout/,
         /^packages\/kbn-rison/,
         /^src\/platform\/packages\/shared\/kbn-rule-data-utils/,
@@ -335,19 +335,19 @@ const getPipeline = (filename: string, removeSteps = true) => {
         /^x-pack\/platform\/packages\/shared\/kbn-elastic-assistant/,
         /^x-pack\/platform\/packages\/shared\/kbn-elastic-assistant-common/,
         /^x-pack\/solutions\/security\/packages/,
-        /^x-pack\/plugins\/alerting/,
-        /^x-pack\/plugins\/cases/,
+        /^x-pack\/platform\/plugins\/shared\/alerting/,
+        /^x-pack\/platform\/plugins\/shared\/cases/,
         /^x-pack\/plugins\/data_views\/common/,
         /^x-pack\/solutions\/security\/plugins\/elastic_assistant/,
         /^x-pack\/solutions\/security\/plugins\/lists/,
-        /^x-pack\/plugins\/rule_registry\/common/,
+        /^x-pack\/platform\/plugins\/shared\/rule_registry\/common/,
         /^x-pack\/solutions\/security\/plugins\/security_solution/,
         /^x-pack\/solutions\/security\/plugins\/security_solution_ess/,
         /^x-pack\/solutions\/security\/plugins\/security_solution_serverless/,
-        /^x-pack\/plugins\/task_manager/,
+        /^x-pack\/platform\/plugins\/shared\/task_manager/,
         /^x-pack\/solutions\/security\/plugins\/threat_intelligence/,
         /^x-pack\/solutions\/security\/plugins\/timelines/,
-        /^x-pack\/plugins\/triggers_actions_ui/,
+        /^x-pack\/platform\/plugins\/shared\/triggers_actions_ui/,
         /^x-pack\/plugins\/usage_collection\/public/,
         /^x-pack\/test\/functional\/es_archives\/security_solution/,
         /^x-pack\/test\/security_solution_cypress/,
