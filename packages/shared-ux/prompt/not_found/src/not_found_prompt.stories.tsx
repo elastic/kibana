@@ -47,7 +47,7 @@ export const PageWithSidebar: StoryFn = () => {
   );
 };
 
-export const CustomActions: StoryObj = {
+export const CustomActions: StoryObj<{ onClick: () => void }> = {
   render: (args) => {
     return (
       <EuiPageTemplate>
