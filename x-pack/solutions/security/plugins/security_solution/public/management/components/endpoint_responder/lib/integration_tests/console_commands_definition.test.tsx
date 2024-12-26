@@ -183,4 +183,40 @@ describe('When displaying Endpoint Response Actions', () => {
       expect(commandsInPanel).toEqual(['isolate', 'release', 'runscript --Raw']);
     });
   });
+
+  describe('for agent type microsoft defender for endpoint', () => {
+    beforeEach(() => {
+      (ExperimentalFeaturesService.get as jest.Mock).mockReturnValue({
+        responseActionsMSDefenderEndpointEnabled: true,
+      });
+
+      commands = getEndpointConsoleCommands({
+        agentType: 'microsoft_defender_endpoint',
+        endpointAgentId: '123',
+        endpointCapabilities: endpointMetadata.Endpoint.capabilities ?? [],
+        endpointPrivileges: getEndpointPrivilegesInitialStateMock(),
+        platform: 'linux',
+      });
+    });
+
+    it('should display expected help groups', () => {
+      render({ commands });
+      consoleSelectors.openHelpPanel();
+
+      expect(helpPanelSelectors.getHelpGroupLabels()).toEqual([
+        ...sortBy(Object.values(HELP_GROUPS), 'position').map((group) => group.label),
+        'Supporting commands & parameters',
+      ]);
+    });
+
+    it('should display response action commands in the help panel in expected order', () => {
+      render({ commands });
+      consoleSelectors.openHelpPanel();
+      const commandsInPanel = helpPanelSelectors.getHelpCommandNames(
+        HELP_GROUPS.responseActions.label
+      );
+
+      expect(commandsInPanel).toEqual(['isolate', 'release']);
+    });
+  });
 });
