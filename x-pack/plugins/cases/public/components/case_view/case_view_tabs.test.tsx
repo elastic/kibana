@@ -8,6 +8,7 @@
 import React from 'react';
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 
 import type { AppMockRenderer } from '../../common/mock';
 import type { UseGetCase } from '../../containers/use_get_case';
@@ -20,15 +21,18 @@ import { useGetCase } from '../../containers/use_get_case';
 import { CaseViewTabs } from './case_view_tabs';
 import { caseData, defaultGetCase } from './mocks';
 import { useGetCaseFileStats } from '../../containers/use_get_case_file_stats';
+import { useCaseObservables } from './use_case_observables';
 
 jest.mock('../../containers/use_get_case');
 jest.mock('../../common/navigation/hooks');
 jest.mock('../../common/hooks');
 jest.mock('../../containers/use_get_case_file_stats');
+jest.mock('./use_case_observables');
 
 const useFetchCaseMock = useGetCase as jest.Mock;
 const useCaseViewNavigationMock = useCaseViewNavigation as jest.Mock;
 const useGetCaseFileStatsMock = useGetCaseFileStats as jest.Mock;
+const useGetCaseObservablesMock = useCaseObservables as jest.Mock;
 
 const mockGetCase = (props: Partial<UseGetCase> = {}) => {
   const data = {
@@ -57,10 +61,15 @@ describe('CaseViewTabs', () => {
   const data = { total: 3 };
 
   beforeEach(() => {
+    useGetCaseObservablesMock.mockReturnValue({ isLoading: false, observables: [] });
     useGetCaseFileStatsMock.mockReturnValue({ data });
     mockGetCase();
 
-    appMockRenderer = createAppMockRenderer();
+    const license = licensingMock.createLicense({
+      license: { type: 'basic' },
+    });
+
+    appMockRenderer = createAppMockRenderer({ license });
   });
 
   afterEach(() => {
@@ -229,5 +238,75 @@ describe('CaseViewTabs', () => {
     expect(
       await screen.findByTestId('case-view-alerts-table-experimental-badge')
     ).toBeInTheDocument();
+  });
+
+  it('should not show observable tabs in non-platinum tiers', async () => {
+    appMockRenderer = createAppMockRenderer();
+
+    appMockRenderer.render(
+      <CaseViewTabs {...casePropsWithAlerts} activeTab={CASE_VIEW_PAGE_TABS.OBSERVABLES} />
+    );
+
+    expect(screen.queryByTestId('case-view-tab-title-observables')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('case-view-tab-title-similar_cases')).not.toBeInTheDocument();
+  });
+
+  describe('show observable tabs in platinum tier or higher', () => {
+    beforeEach(() => {
+      const license = licensingMock.createLicense({
+        license: { type: 'platinum' },
+      });
+      appMockRenderer = createAppMockRenderer({ license });
+    });
+
+    it('should show the observables tab', async () => {
+      appMockRenderer.render(
+        <CaseViewTabs {...casePropsWithAlerts} activeTab={CASE_VIEW_PAGE_TABS.OBSERVABLES} />
+      );
+
+      expect(await screen.findByTestId('case-view-tab-title-observables')).toBeInTheDocument();
+    });
+
+    it('should show the similar cases tab', async () => {
+      appMockRenderer.render(
+        <CaseViewTabs {...casePropsWithAlerts} activeTab={CASE_VIEW_PAGE_TABS.SIMILAR_CASES} />
+      );
+
+      expect(await screen.findByTestId('case-view-tab-title-similar_cases')).toBeInTheDocument();
+    });
+
+    it('navigates to the similar cases tab when the similar cases tab is clicked', async () => {
+      const navigateToCaseViewMock = useCaseViewNavigationMock().navigateToCaseView;
+      appMockRenderer.render(<CaseViewTabs {...caseProps} />);
+
+      await userEvent.click(await screen.findByTestId('case-view-tab-title-similar_cases'));
+
+      await waitFor(() => {
+        expect(navigateToCaseViewMock).toHaveBeenCalledWith({
+          detailName: caseData.id,
+          tabId: CASE_VIEW_PAGE_TABS.SIMILAR_CASES,
+        });
+      });
+    });
+
+    it('shows the observables tab with the correct count', async () => {
+      appMockRenderer.render(
+        <CaseViewTabs {...caseProps} activeTab={CASE_VIEW_PAGE_TABS.OBSERVABLES} />
+      );
+
+      const badge = await screen.findByTestId('case-view-observables-stats-badge');
+
+      expect(badge).toHaveTextContent('0');
+    });
+
+    it('do not show count on the observables tab if the call isLoading', async () => {
+      useGetCaseObservablesMock.mockReturnValue({ isLoading: true, observables: [] });
+
+      appMockRenderer.render(
+        <CaseViewTabs {...caseProps} activeTab={CASE_VIEW_PAGE_TABS.OBSERVABLES} />
+      );
+
+      expect(screen.queryByTestId('case-view-observables-stats-badge')).not.toBeInTheDocument();
+    });
   });
 });

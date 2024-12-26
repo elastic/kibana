@@ -232,6 +232,11 @@ function transformToExternalModel(
     ? []
     : (configuration.attributes.templates as ConfigurationTransformedAttributes['templates']);
 
+  const observableTypes = !configuration.attributes.observableTypes
+    ? []
+    : (configuration.attributes
+        .observableTypes as ConfigurationTransformedAttributes['observableTypes']);
+
   return {
     ...configuration,
     attributes: {
@@ -239,6 +244,7 @@ function transformToExternalModel(
       connector,
       customFields,
       templates,
+      observableTypes,
     },
   };
 }

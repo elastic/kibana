@@ -187,6 +187,14 @@ export const FILES_TAB = i18n.translate('xpack.cases.caseView.tabs.files', {
   defaultMessage: 'Files',
 });
 
+export const OBSERVABLES_TAB = i18n.translate('xpack.cases.caseView.tabs.observables', {
+  defaultMessage: 'Observables',
+});
+
+export const SIMILAR_CASES_TAB = i18n.translate('xpack.cases.caseView.tabs.similar', {
+  defaultMessage: 'Similar cases',
+});
+
 export const ALERTS_EMPTY_DESCRIPTION = i18n.translate(
   'xpack.cases.caseView.tabs.alerts.emptyDescription',
   {
