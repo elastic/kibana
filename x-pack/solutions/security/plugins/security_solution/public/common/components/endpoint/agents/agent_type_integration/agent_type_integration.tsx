@@ -43,7 +43,11 @@ export const AgentTypeIntegration = memo<AgentTypeIntegrationProps>(
     const testId = useTestIdGenerator(dataTestSubj);
 
     const isTechPreview = useMemo(() => {
-      return agentType === 'sentinel_one' || agentType === 'crowdstrike';
+      return (
+        agentType === 'sentinel_one' ||
+        agentType === 'crowdstrike' ||
+        agentType === 'microsoft_defender_endpoint'
+      );
     }, [agentType]);
 
     return (

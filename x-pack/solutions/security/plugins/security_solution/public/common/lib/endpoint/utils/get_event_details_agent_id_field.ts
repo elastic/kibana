@@ -51,7 +51,7 @@ export const getEventDetailsAgentIdField = (
     return false;
   });
 
-  // ensure a `field` is always returned since we know the `agentType`. The field is sometime used
+  // ensure a `field` is always returned since we know the `agentType`. The field is sometimes used
   // to show the user what might have been missing in the data that prevented it from displaying
   // response actions options.
   if (!result.found) {

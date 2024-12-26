@@ -212,8 +212,7 @@ export const RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELDS: Readonly<
     'sentinel_one.agent.agent.id',
   ],
   crowdstrike: ['device.id'],
-  // FIXME:PT temporary change. Tests for MS defender will be in PR https://github.com/elastic/kibana/pull/205012
-  microsoft_defender_endpoint: ['some.id'],
+  microsoft_defender_endpoint: ['cloud.instance.id'],
 });
 
 export const SUPPORTED_AGENT_ID_ALERT_FIELDS: Readonly<string[]> = Object.values(

@@ -106,6 +106,10 @@ export const useAlertResponseActionsSupport = (
       return 'crowdstrike';
     }
 
+    if (eventModuleValues.includes('microsoft_defender_endpoint')) {
+      return 'microsoft_defender_endpoint';
+    }
+
     return undefined;
   }, [eventData]);
 
