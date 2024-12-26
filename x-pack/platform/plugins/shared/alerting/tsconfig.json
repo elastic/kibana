@@ -77,6 +77,9 @@
     "@kbn/core-security-server-mocks",
     "@kbn/response-ops-rule-params",
     "@kbn/core-http-server-utils",
+    "@kbn/es-types",
+    "@kbn/core-deprecations-common",
+    "@kbn/core-deprecations-server",
   ],
   "exclude": [
     "target/**/*"
