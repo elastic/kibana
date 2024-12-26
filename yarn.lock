@@ -7245,7 +7245,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/serverless-search@link:x-pack/plugins/serverless_search":
+"@kbn/serverless-search@link:x-pack/solutions/search/plugins/serverless_search":
   version "0.0.0"
   uid ""
 

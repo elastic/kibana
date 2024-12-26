@@ -908,7 +908,6 @@ x-pack/plugins/rule_registry @elastic/response-ops @elastic/obs-ux-management-te
 x-pack/plugins/saved_objects_tagging @elastic/appex-sharedux
 x-pack/plugins/security @elastic/kibana-security
 x-pack/plugins/serverless @elastic/appex-sharedux
-x-pack/plugins/serverless_search @elastic/search-kibana
 x-pack/plugins/spaces @elastic/kibana-security
 x-pack/plugins/stack_alerts @elastic/response-ops
 x-pack/plugins/stack_connectors @elastic/response-ops
@@ -963,6 +962,7 @@ x-pack/solutions/search/plugins/search_inference_endpoints @elastic/search-kiban
 x-pack/solutions/search/plugins/search_notebooks @elastic/search-kibana
 x-pack/solutions/search/plugins/search_playground @elastic/search-kibana
 x-pack/solutions/search/plugins/search_solution/search_navigation @elastic/search-kibana
+x-pack/solutions/search/plugins/serverless_search @elastic/search-kibana
 x-pack/solutions/security/packages/data_table @elastic/security-threat-hunting-investigations
 x-pack/solutions/security/packages/data-stream-adapter @elastic/security-threat-hunting
 x-pack/solutions/security/packages/distribution_bar @elastic/kibana-cloud-security-posture
@@ -3350,7 +3350,7 @@ x-pack/solutions/search/solutions/search/plugins/search_inference_endpoints @ela
 x-pack/solutions/search/solutions/search/plugins/search_notebooks @elastic/search-kibana
 x-pack/solutions/search/solutions/search/plugins/search_playground @elastic/search-kibana
 x-pack/solutions/search/solutions/search/plugins/search_solution/search_navigation @elastic/search-kibana
-x-pack/solutions/search/plugins/serverless_search @elastic/search-kibana
+x-pack/solutions/search/solutions/search/plugins/serverless_search @elastic/search-kibana
 x-pack/solutions/security/packages/data_table @elastic/security-threat-hunting-investigations
 x-pack/solutions/security/packages/distribution_bar @elastic/kibana-cloud-security-posture
 x-pack/solutions/security/packages/ecs_data_quality_dashboard @elastic/security-threat-hunting-explore

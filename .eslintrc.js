@@ -1682,7 +1682,7 @@ module.exports = {
      */
     {
       // All files
-      files: ['x-pack/plugins/serverless_search/**/*.{ts,tsx}', 'packages/kbn-search-*'],
+      files: ['x-pack/solutions/search/plugins/serverless_search/**/*.{ts,tsx}', 'packages/kbn-search-*'],
       rules: {
         '@kbn/telemetry/event_generating_elements_should_be_instrumented': 'error',
       },

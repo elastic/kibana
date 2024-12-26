@@ -145,7 +145,7 @@
     ],
     "xpack.server": "legacy/server",
     "xpack.serverless": "plugins/serverless",
-    "xpack.serverlessSearch": "plugins/serverless_search",
+    "xpack.serverlessSearch": "solutions/search/plugins/serverless_search",
     "xpack.serverlessObservability": "solutions/observability/plugins/serverless_observability",
     "xpack.securitySolution": "solutions/security/plugins/security_solution",
     "xpack.securitySolutionEss": "solutions/security/plugins/security_solution_ess",
