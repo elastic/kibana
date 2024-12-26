@@ -59,11 +59,12 @@
     "xpack.idxMgmt": "platform/plugins/shared/index_management",
     "xpack.idxMgmtPackage": "packages/index-management",
     "xpack.indexLifecycleMgmt": "platform/plugins/private/index_lifecycle_management",
+    "xpack.inferenceEndpointUICommon": "platform/packages/shared/kbn-inference-endpoint-ui-common",
     "xpack.infra": "solutions/observability/plugins/infra",
     "xpack.logsDataAccess": "platform/plugins/shared/logs_data_access",
     "xpack.logsExplorer": "solutions/observability/plugins/logs_explorer",
     "xpack.logsShared": "platform/plugins/shared/logs_shared",
-    "xpack.fleet": "plugins/fleet",
+    "xpack.fleet": "platform/plugins/shared/fleet",
     "xpack.ingestPipelines": "platform/plugins/shared/ingest_pipelines",
     "xpack.integrationAssistant": "platform/plugins/shared/integration_assistant",
     "xpack.inference": "platform/plugins/shared/inference",
@@ -77,7 +78,7 @@
     "xpack.licensing": "plugins/licensing",
     "xpack.lists": "solutions/security/plugins/lists",
     "xpack.logstash": [
-      "plugins/logstash"
+      "platform/plugins/private/logstash"
     ],
     "xpack.main": "legacy/plugins/xpack_main",
     "xpack.maps": [
@@ -98,7 +99,7 @@
       "platform/plugins/shared/ml"
     ],
     "xpack.monitoring": [
-      "plugins/monitoring"
+      "platform/plugins/private/monitoring"
     ],
     "xpack.observability": "solutions/observability/plugins/observability",
     "xpack.observabilityAiAssistant": [
@@ -108,7 +109,7 @@
     "xpack.observabilityAiAssistantManagement": "solutions/observability/plugins/observability_ai_assistant_management",
     "xpack.observabilityLogsExplorer": "solutions/observability/plugins/observability_logs_explorer",
     "xpack.observability_onboarding": "solutions/observability/plugins/observability_onboarding",
-    "xpack.observabilityShared": "plugins/observability_solution/observability_shared",
+    "xpack.observabilityShared": "solutions/observability/plugins/observability_shared",
     "xpack.observabilityLogsOverview": [
       "platform/packages/shared/observability/logs_overview/src/components"
     ],

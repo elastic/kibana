@@ -48,7 +48,7 @@ as uiSettings within the code.
 |The Controls plugin contains Embeddables which can be used to add user-friendly interactivity to apps.
 
 
-|{kib-repo}blob/{branch}/src/plugins/custom_integrations/README.md[customIntegrations]
+|{kib-repo}blob/{branch}/src/platform/plugins/shared/custom_integrations/README.md[customIntegrations]
 |Register add-data cards
 
 
@@ -605,7 +605,7 @@ activities.
 |WARNING: Missing README.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/fleet/README.md[fleet]
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/shared/fleet/README.md[fleet]
 |Fleet provides a web-based UI in Kibana for centrally managing Elastic Agents and their policies.
 
 
@@ -711,7 +711,7 @@ using the CURL scripts in the scripts folder.
 |Exposes the shared components and APIs to access and visualize logs.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/logstash[logstash]
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/private/logstash[logstash]
 |WARNING: Missing README.
 
 
@@ -728,11 +728,11 @@ using the CURL scripts in the scripts folder.
 Elastic.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/monitoring/readme.md[monitoring]
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/private/monitoring/readme.md[monitoring]
 |This plugin provides the Stack Monitoring kibana application.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/monitoring_collection/README.md[monitoringCollection]
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/private/monitoring_collection/README.md[monitoringCollection]
 |This plugin allows for other plugins to add data to Kibana stack monitoring documents.
 
 
@@ -764,7 +764,7 @@ Elastic.
 |This plugin provides an onboarding framework for observability solutions: Logs and APM.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/observability_shared/README.md[observabilityShared]
+|{kib-repo}blob/{branch}/x-pack/solutions/observability/plugins/observability_shared/README.md[observabilityShared]
 |A plugin that contains components and utilities shared by all Observability plugins.
 
 
