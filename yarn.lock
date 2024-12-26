@@ -3917,7 +3917,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/alerting-types@link:packages/kbn-alerting-types":
+"@kbn/alerting-types@link:src/platform/packages/shared/kbn-alerting-types":
   version "0.0.0"
   uid ""
 
