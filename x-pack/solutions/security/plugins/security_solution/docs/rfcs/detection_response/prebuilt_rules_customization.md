@@ -381,7 +381,7 @@ The endpoints should be updated to include a custom response header, using the [
 
 **Alert (rule objects) mapping**
 
-No changes will be needed for the [mapping of rule saved objects](https://github.com/elastic/kibana/blob/main/x-pack/plugins/alerting/common/saved_objects/rules/mappings.ts) (of type `alert`), since the new fields introduced will be part of the `params` field, which is a `flattened` field.
+No changes will be needed for the [mapping of rule saved objects](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/alerting/common/saved_objects/rules/mappings.ts) (of type `alert`), since the new fields introduced will be part of the `params` field, which is a `flattened` field.
 
 **Security Rules (prebuilt rule assets) mapping**
 
@@ -391,7 +391,7 @@ No changes will be needed either for the `security-rule` [mapping](https://githu
 
 ### Context
 
-Historically, migrations to Elasticsearch saved objects were carried out by a procedure in which the changes in the SO were described in a migration operation that would be carried out **during an upgrade to a specific Kibana version**. See `x-pack/plugins/alerting/server/saved_objects/migrations/index.ts` for a list of migrations of SO that take place when a user updates Kibana to a specific version.
+Historically, migrations to Elasticsearch saved objects were carried out by a procedure in which the changes in the SO were described in a migration operation that would be carried out **during an upgrade to a specific Kibana version**. See `x-pack/platform/plugins/shared/alerting/server/saved_objects/migrations/index.ts` for a list of migrations of SO that take place when a user updates Kibana to a specific version.
 
 However, this mechanism is no longer supported by the Alerting Framework team - which maintained it -, and the new migration mechanism introduced to replace that, the [Model Version API](https://github.com/elastic/kibana/blob/main/packages/core/saved-objects/core-saved-objects-server/docs/model_versions.md), which is Serverless-compatible, doesn't support migrating encrypted saved objects.
 
@@ -817,7 +817,7 @@ That means that updating a rule's actions should not be considered a customizati
 Secondly, in order to migrate the `is_customized` value for rule edits, we can follow two approaches:
 
 1. Calculate it in the `paramsModifier` callback that is passed to the `rulesClient.bulkEdit` method. This will need to modify the parameters of the callback to take as parameter the whole rule and the operations on the attributes, in order to have access to the values of the rule's field before and after of the edit.
-2. Calculate it as part of the `validateMutatedRuleTypeParams` method in `x-pack/plugins/alerting/server/lib/validate_mutated_rule_type_params.ts` where we have access to the original params and the modified params.
+2. Calculate it as part of the `validateMutatedRuleTypeParams` method in `x-pack/platform/plugins/shared/alerting/server/lib/validate_mutated_rule_type_params.ts` where we have access to the original params and the modified params.
 
 ----
 

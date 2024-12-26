@@ -152,8 +152,8 @@ logging.events:
 ```
 
 See these two README.md's pages for more references on the alerting and actions API:
-https://github.com/elastic/kibana/blob/main/x-pack/plugins/alerting/README.md
-https://github.com/elastic/kibana/tree/main/x-pack/plugins/actions
+https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/alerting/README.md
+https://github.com/elastic/kibana/tree/main/x-pack/platform/plugins/shared/actions
 
 ### Signals API
 

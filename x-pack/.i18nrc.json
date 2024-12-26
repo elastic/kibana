@@ -1,7 +1,7 @@
 {
   "prefix": "xpack",
   "paths": {
-    "xpack.actions": "plugins/actions",
+    "xpack.actions": "platform/plugins/shared/actions",
     "xpack.aiops": [
       "platform/packages/shared/ml/aiops_common",
       "platform/packages/private/ml/aiops_components",
@@ -10,15 +10,15 @@
       "platform/plugins/shared/aiops"
     ],
     "xpack.aiAssistant": "packages/kbn-ai-assistant",
-    "xpack.alerting": "plugins/alerting",
-    "xpack.eventLog": "plugins/event_log",
-    "xpack.stackAlerts": "plugins/stack_alerts",
-    "xpack.stackConnectors": "plugins/stack_connectors",
+    "xpack.alerting": "platform/plugins/shared/alerting",
+    "xpack.eventLog": "platform/plugins/shared/event_log",
+    "xpack.stackAlerts": "platform/plugins/shared/stack_alerts",
+    "xpack.stackConnectors": "platform/plugins/shared/stack_connectors",
     "xpack.apm": "plugins/observability_solution/apm",
     "xpack.apmDataAccess": "plugins/observability_solution/apm_data_access",
     "xpack.banners": "plugins/banners",
     "xpack.canvas": "platform/plugins/private/canvas",
-    "xpack.cases": "plugins/cases",
+    "xpack.cases": "platform/plugins/shared/cases",
     "xpack.cloud": "plugins/cloud",
     "xpack.cloudDefend": "solutions/security/plugins/cloud_defend",
     "xpack.cloudLinks": "plugins/cloud_integrations/cloud_links",
@@ -160,11 +160,11 @@
     "xpack.savedObjectsTagging": [
       "plugins/saved_objects_tagging"
     ],
-    "xpack.taskManager": "legacy/plugins/task_manager",
+    "xpack.taskManager": "legacy/platform/plugins/shared/task_manager",
     "xpack.threatIntelligence": "solutions/security/plugins/threat_intelligence",
     "xpack.timelines": "solutions/security/plugins/timelines",
     "xpack.transform": "platform/plugins/private/transform",
-    "xpack.triggersActionsUI": "plugins/triggers_actions_ui",
+    "xpack.triggersActionsUI": "platform/plugins/shared/triggers_actions_ui",
     "xpack.upgradeAssistant": "plugins/upgrade_assistant",
     "xpack.uptime": [
       "solutions/observability/plugins/uptime"

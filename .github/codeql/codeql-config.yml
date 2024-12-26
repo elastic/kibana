@@ -76,13 +76,13 @@ paths-ignore:
   - x-pack/platform/plugins/private/canvas/scripts
   - x-pack/solutions/security/plugins/cloud_security_posture/common/scripts
   - x-pack/solutions/security/plugins/elastic_assistant/scripts
-  - x-pack/plugins/event_log/scripts
+  - x-pack/platform/plugins/shared/event_log/scripts
   - x-pack/platform/plugins/shared/fleet/scripts
   - x-pack/solutions/security/plugins/lists/scripts
   - x-pack/solutions/security/plugins/lists/server/scripts
   - x-pack/plugins/observability_solution/*/scripts
   - x-pack/platform/plugins/shared/osquery/scripts
-  - x-pack/plugins/rule_registry/scripts
+  - x-pack/platform/plugins/shared/rule_registry/scripts
   - x-pack/solutions/security/plugins/security_solution/scripts
   - x-pack/solutions/security/plugins/threat_intelligence/scripts
   - x-pack/scripts
