@@ -10,7 +10,7 @@ import {
   SearchRequest,
   SearchTotalHits,
   AggregationsAggregationContainer,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+} from '@elastic/elasticsearch/lib/api/types';
 import { BoolQuery } from '@kbn/es-query';
 import {
   ALERT_END,
@@ -53,7 +53,7 @@ const getLifecycleAlertsQueryByExecutionUuid = ({
   ruleId,
   excludedAlertInstanceIds,
   alertsFilter,
-}: GetLifecycleAlertsQueryByExecutionUuidParams): Array<SearchRequest['body']> => {
+}: GetLifecycleAlertsQueryByExecutionUuidParams): SearchRequest[] => {
   // lifecycle alerts assign a different action to an alert depending
   // on whether it is new/ongoing/recovered. query for each action in order
   // to get the count of each action type as well as up to the maximum number
@@ -89,7 +89,7 @@ const getLifecycleAlertsQueryByTimeRange = ({
   ruleId,
   excludedAlertInstanceIds,
   alertsFilter,
-}: GetLifecycleAlertsQueryByTimeRangeParams): Array<SearchRequest['body']> => {
+}: GetLifecycleAlertsQueryByTimeRangeParams): SearchRequest[] => {
   return [
     getQueryByTimeRange({
       start,
@@ -124,7 +124,7 @@ const getQueryByExecutionUuid = ({
   excludedAlertInstanceIds,
   action,
   alertsFilter,
-}: GetQueryByExecutionUuidParams): SearchRequest['body'] => {
+}: GetQueryByExecutionUuidParams): SearchRequest => {
   const filter: QueryDslQueryContainer[] = [
     {
       term: {
@@ -187,7 +187,7 @@ const getQueryByTimeRange = ({
   excludedAlertInstanceIds,
   type,
   alertsFilter,
-}: GetQueryByTimeRangeParams<AlertTypes>): SearchRequest['body'] => {
+}: GetQueryByTimeRangeParams<AlertTypes>): SearchRequest => {
   // base query filters the alert documents for a rule by the given time range
   let filter: QueryDslQueryContainer[] = [
     {
@@ -282,7 +282,7 @@ export const getQueryByScopedQueries = ({
   ruleId,
   action,
   maintenanceWindows,
-}: GetQueryByScopedQueriesParams): SearchRequest['body'] => {
+}: GetQueryByScopedQueriesParams): SearchRequest => {
   const filters: QueryDslQueryContainer[] = [
     {
       term: {
@@ -460,7 +460,7 @@ const getLifecycleAlertsQueries = ({
   ruleId,
   excludedAlertInstanceIds,
   alertsFilter,
-}: GetAlertsQueryParams): Array<SearchRequest['body']> => {
+}: GetAlertsQueryParams): SearchRequest[] => {
   let queryBodies;
   if (!!executionUuid) {
     queryBodies = getLifecycleAlertsQueryByExecutionUuid({
@@ -489,7 +489,7 @@ const getContinualAlertsQuery = ({
   ruleId,
   excludedAlertInstanceIds,
   alertsFilter,
-}: GetAlertsQueryParams): SearchRequest['body'] => {
+}: GetAlertsQueryParams): SearchRequest => {
   let queryBody;
   if (!!executionUuid) {
     queryBody = getQueryByExecutionUuid({
@@ -516,7 +516,7 @@ const getMaintenanceWindowAlertsQuery = ({
   ruleId,
   action,
   maintenanceWindows,
-}: GetMaintenanceWindowAlertsQueryParams): SearchRequest['body'] => {
+}: GetMaintenanceWindowAlertsQueryParams): SearchRequest => {
   return getQueryByScopedQueries({
     executionUuid,
     ruleId,
