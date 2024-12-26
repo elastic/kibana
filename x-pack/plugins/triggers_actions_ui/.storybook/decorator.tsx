@@ -24,7 +24,7 @@ import { getActionTypeRegistry } from './context/action_type_registry';
 import { getDefaultServicesApplication } from './context/application';
 
 interface StorybookContextDecoratorProps {
-  context: Parameters<Decorator1];
+  context: Parameters<Decorator>;
   servicesApplicationOverride?: Partial<ApplicationStart>;
   servicesOverride?: Partial<KibanaServices>;
 }

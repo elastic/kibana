@@ -10,6 +10,6 @@ import type { Decorator } from '@storybook/react';
 
 import { StorybookContext } from './context';
 
-export const decorator: Decorator (story, storybook) => {
+export const decorator: Decorator = (story, storybook) => {
   return <StorybookContext storyContext={storybook}>{story()}</StorybookContext>;
 };

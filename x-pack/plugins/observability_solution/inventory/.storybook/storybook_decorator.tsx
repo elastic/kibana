@@ -9,7 +9,7 @@ import { Decorator } from '@storybook/react';
 import { InventoryContextProvider } from '../public/context/inventory_context_provider';
 import { getMockInventoryContext } from './get_mock_inventory_context';
 
-export const KibanaReactStorybookDecorator: Decorator (story) => {
+export const KibanaReactStorybookDecorator: Decorator = (story) => {
   const context = useMemo(() => getMockInventoryContext(), []);
   return <InventoryContextProvider context={context}>{story()}</InventoryContextProvider>;
 };

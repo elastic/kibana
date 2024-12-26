@@ -304,7 +304,7 @@ const rulesListIds = [
   'app-ruleslist--with-paginated-rules',
 ];
 
-export const getHttp = (context: Parameters<Decorator1]) => {
+export const getHttp = (context: Parameters<Decorator>) => {
   return {
     get: (async (path: string, options: HttpFetchOptions) => {
       const { id } = context;

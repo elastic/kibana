@@ -52,7 +52,7 @@ import { getCustomBranding } from './custom_branding';
 // Expect this to grow as components that are given Stories need access to mocked services.
 export const StorybookContext: React.FC<{
   children: React.ReactNode;
-  storyContext?: Parameters<Decorator1];
+  storyContext?: Parameters<Decorator>;
 }> = ({ storyContext, children: storyChildren }) => {
   const basepath = '';
   const browserHistory = createBrowserHistory();

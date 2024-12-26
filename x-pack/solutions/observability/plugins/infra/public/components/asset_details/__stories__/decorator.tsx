@@ -44,7 +44,7 @@ const mockDataView = {
   getFieldByName: () => 'hostname' as unknown as DataViewField,
 } as unknown as DataView;
 
-export const DecorateWithKibanaContext: Decorator (story) => {
+export const DecorateWithKibanaContext: Decorator = (story) => {
   const initialProcesses = useParameter<{ mock: string }>('apiResponse', {
     mock: 'default',
   })!;
@@ -216,7 +216,7 @@ export const DecorateWithKibanaContext: Decorator (story) => {
   );
 };
 
-export const DecorateWithAssetDetailsStateContext: Decorator (story) => {
+export const DecorateWithAssetDetailsStateContext: Decorator = (story) => {
   return (
     <ContextProviders
       {...assetDetailsProps}

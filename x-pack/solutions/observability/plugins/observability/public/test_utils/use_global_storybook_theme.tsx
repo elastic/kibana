@@ -12,7 +12,7 @@ import type { CoreTheme } from '@kbn/core/public';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 
-type StoryContext = Parameters<Decorator1];
+type StoryContext = Parameters<Decorator>;
 
 export const useGlobalStorybookTheme = ({ globals: { euiTheme } }: StoryContext) => {
   const theme = useMemo(() => euiThemeFromId(euiTheme), [euiTheme]);
@@ -43,7 +43,7 @@ export function GlobalStorybookThemeProviders({
   );
 }
 
-export const decorateWithGlobalStorybookThemeProviders: Decorator (
+export const decorateWithGlobalStorybookThemeProviders: Decorator = (
   wrappedStory,
   storyContext
 ) => (
