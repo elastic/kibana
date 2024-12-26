@@ -8,7 +8,7 @@
 import React, { useEffect, useMemo, useCallback } from 'react';
 
 import { EMPTY } from 'rxjs';
-import type { DecoratorFn } from '@storybook/react';
+import type { Decorator } from '@storybook/react';
 import { createBrowserHistory } from 'history';
 
 import { I18nProvider } from '@kbn/i18n-react';
@@ -52,7 +52,7 @@ import { getCustomBranding } from './custom_branding';
 // Expect this to grow as components that are given Stories need access to mocked services.
 export const StorybookContext: React.FC<{
   children: React.ReactNode;
-  storyContext?: Parameters<DecoratorFn>[1];
+  storyContext?: Parameters<Decorator1];
 }> = ({ storyContext, children: storyChildren }) => {
   const basepath = '';
   const browserHistory = createBrowserHistory();
