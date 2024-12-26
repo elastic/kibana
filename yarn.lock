@@ -5597,7 +5597,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/event-log-plugin@link:x-pack/plugins/event_log":
+"@kbn/event-log-plugin@link:x-pack/platform/plugins/shared/event_log":
   version "0.0.0"
   uid ""
 

@@ -584,7 +584,7 @@ security and spaces filtering.
 |This plugin provides a user interface to interact with the Entity Manager.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/event_log/README.md[eventLog]
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/shared/event_log/README.md[eventLog]
 |The event log plugin provides a persistent history of alerting and action
 activities.
 

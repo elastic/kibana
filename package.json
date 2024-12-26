@@ -502,7 +502,7 @@
     "@kbn/event-annotation-listing-plugin": "link:src/plugins/event_annotation_listing",
     "@kbn/event-annotation-plugin": "link:src/plugins/event_annotation",
     "@kbn/event-log-fixture-plugin": "link:x-pack/test/plugin_api_integration/plugins/event_log",
-    "@kbn/event-log-plugin": "link:x-pack/plugins/event_log",
+    "@kbn/event-log-plugin": "link:x-pack/platform/plugins/shared/event_log",
     "@kbn/expandable-flyout": "link:x-pack/solutions/security/packages/expandable-flyout",
     "@kbn/exploratory-view-example-plugin": "link:x-pack/examples/exploratory_view_example",
     "@kbn/exploratory-view-plugin": "link:x-pack/solutions/observability/plugins/exploratory_view",
