@@ -7725,7 +7725,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/try-in-console@link:packages/kbn-try-in-console":
+"@kbn/try-in-console@link:src/platform/packages/shared/kbn-try-in-console":
   version "0.0.0"
   uid ""
 

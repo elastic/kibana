@@ -9,8 +9,8 @@
 
 module.exports = {
   preset: '@kbn/test',
-  rootDir: '../..',
-  roots: ['<rootDir>/packages/kbn-try-in-console'],
+  rootDir: '../../../../..',
+  roots: ['<rootDir>/src/platform/packages/shared/kbn-try-in-console'],
   coverageReporters: ['text', 'html'],
-  setupFilesAfterEnv: ['<rootDir>/packages/kbn-try-in-console/setup_test.ts'],
+  setupFilesAfterEnv: ['<rootDir>/src/platform/packages/shared/kbn-try-in-console/setup_test.ts'],
 };
