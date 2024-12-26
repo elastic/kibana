@@ -94,9 +94,9 @@ const buildIngestPipeline = ({
   ];
 
   const extraSteps =
-    typeof description.pipeline === 'function'
+    (typeof description.pipeline === 'function'
       ? description.pipeline(processors)
-      : description.pipeline;
+      : description.pipeline) ?? [];
 
   return [...(debugMode ? [debugDeepCopyContextStep()] : []), ...processors, ...extraSteps];
 };

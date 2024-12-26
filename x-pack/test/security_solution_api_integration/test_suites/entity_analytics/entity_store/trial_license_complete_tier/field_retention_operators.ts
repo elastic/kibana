@@ -32,6 +32,13 @@ export default ({ getService }: FtrProviderContext) => {
         const op: FieldDescription = {
           retention: { operation: 'collect_values', maxLength: 10 },
           destination: 'test_field',
+          source: 'test_field',
+          aggregation: {
+            type: 'terms',
+            limit: 10,
+            lookbackPeriod: undefined,
+          },
+          mapping: { type: 'keyword' },
         };
 
         const doc = {
@@ -47,6 +54,13 @@ export default ({ getService }: FtrProviderContext) => {
         const op: FieldDescription = {
           retention: { operation: 'collect_values', maxLength: 1 },
           destination: 'test_field',
+          source: 'test_field',
+          aggregation: {
+            type: 'terms',
+            limit: 10,
+            lookbackPeriod: undefined,
+          },
+          mapping: { type: 'keyword' },
         };
 
         const doc = {
@@ -65,6 +79,13 @@ export default ({ getService }: FtrProviderContext) => {
         const op: FieldDescription = {
           retention: { operation: 'collect_values', maxLength: 10 },
           destination: 'test_field',
+          source: 'test_field',
+          aggregation: {
+            type: 'terms',
+            limit: 10,
+            lookbackPeriod: undefined,
+          },
+          mapping: { type: 'keyword' },
         };
 
         const doc = {
@@ -83,6 +104,13 @@ export default ({ getService }: FtrProviderContext) => {
         const op: FieldDescription = {
           retention: { operation: 'collect_values', maxLength: 2 },
           destination: 'test_field',
+          source: 'test_field',
+          aggregation: {
+            type: 'terms',
+            limit: 10,
+            lookbackPeriod: undefined,
+          },
+          mapping: { type: 'keyword' },
         };
 
         const doc = {
@@ -101,6 +129,13 @@ export default ({ getService }: FtrProviderContext) => {
         const op: FieldDescription = {
           retention: { operation: 'collect_values', maxLength: 2 },
           destination: 'test_field',
+          source: 'test_field',
+          aggregation: {
+            type: 'terms',
+            limit: 10,
+            lookbackPeriod: undefined,
+          },
+          mapping: { type: 'keyword' },
         };
         const doc = {
           test_field: 'foo',
@@ -118,6 +153,13 @@ export default ({ getService }: FtrProviderContext) => {
         const op: FieldDescription = {
           retention: { operation: 'collect_values', maxLength: 2 },
           destination: 'test_field',
+          source: 'test_field',
+          aggregation: {
+            type: 'terms',
+            limit: 10,
+            lookbackPeriod: undefined,
+          },
+          mapping: { type: 'keyword' },
         };
         const doc = {};
 
@@ -131,6 +173,13 @@ export default ({ getService }: FtrProviderContext) => {
         const op: FieldDescription = {
           retention: { operation: 'prefer_newest_value' },
           destination: 'test_field',
+          source: 'test_field',
+          aggregation: {
+            type: 'terms',
+            limit: 10,
+            lookbackPeriod: undefined,
+          },
+          mapping: { type: 'keyword' },
         };
 
         const doc = {
@@ -145,6 +194,13 @@ export default ({ getService }: FtrProviderContext) => {
         const op: FieldDescription = {
           retention: { operation: 'prefer_newest_value' },
           destination: 'test_field',
+          source: 'test_field',
+          aggregation: {
+            type: 'terms',
+            limit: 10,
+            lookbackPeriod: undefined,
+          },
+          mapping: { type: 'keyword' },
         };
 
         const doc = {
@@ -161,6 +217,13 @@ export default ({ getService }: FtrProviderContext) => {
         const op: FieldDescription = {
           retention: { operation: 'prefer_newest_value' },
           destination: 'test_field',
+          source: 'test_field',
+          aggregation: {
+            type: 'terms',
+            limit: 10,
+            lookbackPeriod: undefined,
+          },
+          mapping: { type: 'keyword' },
         };
 
         const doc = {
@@ -178,6 +241,13 @@ export default ({ getService }: FtrProviderContext) => {
         const op: FieldDescription = {
           retention: { operation: 'prefer_newest_value' },
           destination: 'test_field',
+          source: 'test_field',
+          aggregation: {
+            type: 'terms',
+            limit: 10,
+            lookbackPeriod: undefined,
+          },
+          mapping: { type: 'keyword' },
         };
 
         const doc = {
@@ -195,6 +265,13 @@ export default ({ getService }: FtrProviderContext) => {
         const op: FieldDescription = {
           retention: { operation: 'prefer_newest_value' },
           destination: 'test_field',
+          source: 'test_field',
+          aggregation: {
+            type: 'terms',
+            limit: 10,
+            lookbackPeriod: undefined,
+          },
+          mapping: { type: 'keyword' },
         };
 
         const doc = {
@@ -212,6 +289,13 @@ export default ({ getService }: FtrProviderContext) => {
         const op: FieldDescription = {
           retention: { operation: 'prefer_newest_value' },
           destination: 'test_field',
+          source: 'test_field',
+          aggregation: {
+            type: 'terms',
+            limit: 10,
+            lookbackPeriod: undefined,
+          },
+          mapping: { type: 'keyword' },
         };
 
         const doc = {
@@ -230,6 +314,13 @@ export default ({ getService }: FtrProviderContext) => {
         const op: FieldDescription = {
           retention: { operation: 'prefer_newest_value' },
           destination: 'test_field',
+          source: 'test_field',
+          aggregation: {
+            type: 'terms',
+            limit: 10,
+            lookbackPeriod: undefined,
+          },
+          mapping: { type: 'keyword' },
         };
         const doc = {};
 
@@ -243,6 +334,13 @@ export default ({ getService }: FtrProviderContext) => {
         const op: FieldDescription = {
           retention: { operation: 'prefer_oldest_value' },
           destination: 'test_field',
+          source: 'test_field',
+          aggregation: {
+            type: 'terms',
+            limit: 10,
+            lookbackPeriod: undefined,
+          },
+          mapping: { type: 'keyword' },
         };
 
         const doc = {
@@ -259,6 +357,13 @@ export default ({ getService }: FtrProviderContext) => {
         const op: FieldDescription = {
           retention: { operation: 'prefer_oldest_value' },
           destination: 'test_field',
+          source: 'test_field',
+          aggregation: {
+            type: 'terms',
+            limit: 10,
+            lookbackPeriod: undefined,
+          },
+          mapping: { type: 'keyword' },
         };
 
         const doc = {
@@ -276,6 +381,13 @@ export default ({ getService }: FtrProviderContext) => {
         const op: FieldDescription = {
           retention: { operation: 'prefer_oldest_value' },
           destination: 'test_field',
+          source: 'test_field',
+          aggregation: {
+            type: 'terms',
+            limit: 10,
+            lookbackPeriod: undefined,
+          },
+          mapping: { type: 'keyword' },
         };
 
         const doc = {
@@ -293,6 +405,13 @@ export default ({ getService }: FtrProviderContext) => {
         const op: FieldDescription = {
           retention: { operation: 'prefer_oldest_value' },
           destination: 'test_field',
+          source: 'test_field',
+          aggregation: {
+            type: 'terms',
+            limit: 10,
+            lookbackPeriod: undefined,
+          },
+          mapping: { type: 'keyword' },
         };
 
         const doc = {
@@ -310,6 +429,13 @@ export default ({ getService }: FtrProviderContext) => {
         const op: FieldDescription = {
           retention: { operation: 'prefer_oldest_value' },
           destination: 'test_field',
+          source: 'test_field',
+          aggregation: {
+            type: 'terms',
+            limit: 10,
+            lookbackPeriod: undefined,
+          },
+          mapping: { type: 'keyword' },
         };
 
         const doc = {
@@ -327,6 +453,13 @@ export default ({ getService }: FtrProviderContext) => {
         const op: FieldDescription = {
           retention: { operation: 'prefer_oldest_value' },
           destination: 'test_field',
+          source: 'test_field',
+          aggregation: {
+            type: 'terms',
+            limit: 10,
+            lookbackPeriod: undefined,
+          },
+          mapping: { type: 'keyword' },
         };
 
         const doc = {
