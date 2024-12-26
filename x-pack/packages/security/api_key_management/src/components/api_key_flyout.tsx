@@ -237,7 +237,6 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
         (accumulator, roleName) => {
           const role = roles.find((r) => r.name === roleName);
           if (role) {
-            // @ts-expect-error
             accumulator[role.name] = role.elasticsearch;
           }
           return accumulator;
