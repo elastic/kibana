@@ -891,7 +891,6 @@ x-pack/plugins/custom_branding @elastic/appex-sharedux
 x-pack/plugins/discover_enhanced @elastic/kibana-data-discovery
 x-pack/plugins/drilldowns/url_drilldown @elastic/appex-sharedux
 x-pack/plugins/encrypted_saved_objects @elastic/kibana-security
-x-pack/plugins/enterprise_search @elastic/search-kibana
 x-pack/plugins/event_log @elastic/response-ops
 x-pack/plugins/features @elastic/kibana-core
 x-pack/plugins/global_search @elastic/appex-sharedux
@@ -963,6 +962,7 @@ x-pack/solutions/observability/plugins/synthetics @elastic/obs-ux-management-tea
 x-pack/solutions/observability/plugins/synthetics/e2e @elastic/obs-ux-management-team
 x-pack/solutions/observability/plugins/uptime @elastic/obs-ux-management-team
 x-pack/solutions/observability/plugins/ux @elastic/obs-ux-management-team
+x-pack/solutions/search/plugins/enterprise_search @elastic/search-kibana
 x-pack/solutions/security/packages/data_table @elastic/security-threat-hunting-investigations
 x-pack/solutions/security/packages/data-stream-adapter @elastic/security-threat-hunting
 x-pack/solutions/security/packages/distribution_bar @elastic/kibana-cloud-security-posture
@@ -2005,7 +2005,7 @@ x-pack/plugins/cloud_integrations/cloud_full_story/server/config.ts @elastic/kib
 /x-pack/test/functional/apps/ingest_pipelines/feature_controls/ingest_pipelines_security.ts @elastic/search-kibana
 /x-pack/test/functional/page_objects/embedded_console.ts @elastic/search-kibana
 /x-pack/test/functional_enterprise_search/ @elastic/search-kibana
-/x-pack/plugins/enterprise_search/public/applications/shared/doc_links @elastic/platform-docs
+/x-pack/solutions/search/plugins/enterprise_search/public/applications/shared/doc_links @elastic/platform-docs
 /x-pack/test_serverless/api_integration/test_suites/search/serverless_search @elastic/search-kibana
 /x-pack/test_serverless/functional/test_suites/search/ @elastic/search-kibana
 /x-pack/test_serverless/functional/test_suites/search/config.ts @elastic/search-kibana  @elastic/appex-qa
@@ -2548,7 +2548,7 @@ x-pack/solutions/security/plugins/security_solution/server/lib/security_integrat
 /x-pack/platform/plugins/private/monitoring/**/*.scss @elastic/observability-design
 
 # Ent. Search design
-/x-pack/plugins/enterprise_search/**/*.scss @elastic/search-design
+/x-pack/solutions/search/plugins/enterprise_search/**/*.scss @elastic/search-design
 /x-pack/test/accessibility/apps/group3/enterprise_search.ts @elastic/search-kibana
 
 # Security design
@@ -3341,7 +3341,7 @@ x-pack/solutions/search/packages/kbn-search-api-keys-components @elastic/search-
 x-pack/solutions/search/packages/kbn-search-api-keys-server @elastic/search-kibana
 x-pack/solutions/search/packages/kbn-search-index-documents @elastic/search-kibana
 x-pack/solutions/search/packages/search/shared_ui @elastic/search-kibana
-x-pack/solutions/search/plugins/enterprise_search @elastic/search-kibana
+x-pack/solutions/search/solutions/search/plugins/enterprise_search @elastic/search-kibana
 x-pack/solutions/search/plugins/search_assistant @elastic/search-kibana
 x-pack/solutions/search/plugins/search_connectors @elastic/search-kibana
 x-pack/solutions/search/plugins/search_homepage @elastic/search-kibana

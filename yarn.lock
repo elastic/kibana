@@ -5453,7 +5453,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/enterprise-search-plugin@link:x-pack/plugins/enterprise_search":
+"@kbn/enterprise-search-plugin@link:x-pack/solutions/search/plugins/enterprise_search":
   version "0.0.0"
   uid ""
 
