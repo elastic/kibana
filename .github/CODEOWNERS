@@ -675,11 +675,11 @@ x-pack/packages/observability/logs_overview @elastic/obs-ux-logs-team
 x-pack/plugins/observability_solution/observability_onboarding/e2e @elastic/obs-ux-logs-team
 x-pack/plugins/observability_solution/observability_onboarding @elastic/obs-ux-logs-team
 x-pack/solutions/observability/plugins/observability @elastic/obs-ux-management-team
-x-pack/plugins/observability_solution/observability_shared @elastic/observability-ui
+x-pack/solutions/observability/plugins/observability_shared @elastic/observability-ui
 x-pack/solutions/observability/packages/synthetics_test_data @elastic/obs-ux-management-team
-x-pack/packages/observability/observability_utils/observability_utils_browser @elastic/observability-ui
-x-pack/packages/observability/observability_utils/observability_utils_common @elastic/observability-ui
-x-pack/packages/observability/observability_utils/observability_utils_server @elastic/observability-ui
+x-pack/solutions/observability/packages/utils_browser @elastic/observability-ui
+x-pack/solutions/observability/packages/utils_common @elastic/observability-ui
+x-pack/solutions/observability/packages/utils_server @elastic/observability-ui
 x-pack/test/security_api_integration/plugins/oidc_provider @elastic/kibana-security
 test/common/plugins/otel_metrics @elastic/obs-ux-infra_services-team
 packages/kbn-openapi-bundler @elastic/security-detection-rule-management
@@ -1290,7 +1290,7 @@ x-pack/test_serverless/**/test_suites/observability/ai_assistant @elastic/obs-ai
 /src/plugins/unified_doc_viewer/public/components/doc_viewer_logs_overview @elastic/obs-ux-logs-team
 
 # Observability onboarding tour
-/x-pack/plugins/observability_solution/observability_shared/public/components/tour @elastic/appex-sharedux
+/x-pack/solutions/observability/plugins/observability_shared/public/components/tour @elastic/appex-sharedux
 /x-pack/test/functional/apps/infra/tour.ts @elastic/appex-sharedux
 
 # Observability settings
@@ -1954,7 +1954,7 @@ x-pack/plugins/translations/translations
 x-pack/test/profiling_api_integration @elastic/obs-ux-infra_services-team
 
 # Observability shared profiling
-x-pack/plugins/observability_solution/observability_shared/public/components/profiling @elastic/obs-ux-infra_services-team
+x-pack/solutions/observability/plugins/observability_shared/public/components/profiling @elastic/obs-ux-infra_services-team
 
 # Shared UX
 /x-pack/test_serverless/functional/test_suites/common/spaces/spaces_selection.ts @elastic/appex-sharedux
