@@ -18,7 +18,7 @@ yarn global add typedoc typedoc-plugin-markdown
 ## Generate the docs
 
 ```bash
-cd x-pack/plugins/rule_registry/docs
+cd x-pack/platform/plugins/shared/rule_registry/docs
 npx typedoc --gitRemote upstream --options alerts_client_typedoc.json
 ```
 
