@@ -6981,7 +6981,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/search-connectors@link:packages/kbn-search-connectors":
+"@kbn/search-connectors@link:src/platform/packages/shared/kbn-search-connectors":
   version "0.0.0"
   uid ""
 

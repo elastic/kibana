@@ -420,7 +420,6 @@ packages/kbn-scout @elastic/appex-qa
 packages/kbn-scout-info @elastic/appex-qa
 packages/kbn-scout-reporting @elastic/appex-qa
 packages/kbn-screenshotting-server @elastic/appex-sharedux
-packages/kbn-search-connectors @elastic/search-kibana
 packages/kbn-search-errors @elastic/kibana-data-discovery
 packages/kbn-search-index-documents @elastic/search-kibana
 packages/kbn-search-response-warnings @elastic/kibana-data-discovery
@@ -587,6 +586,7 @@ src/platform/packages/shared/kbn-react-hooks @elastic/obs-ux-logs-team
 src/platform/packages/shared/kbn-router-utils @elastic/obs-ux-logs-team
 src/platform/packages/shared/kbn-rule-data-utils @elastic/security-detections-response @elastic/response-ops @elastic/obs-ux-management-team
 src/platform/packages/shared/kbn-search-api-panels @elastic/search-kibana
+src/platform/packages/shared/kbn-search-connectors @elastic/search-kibana
 src/platform/packages/shared/kbn-securitysolution-ecs @elastic/security-threat-hunting-explore
 src/platform/packages/shared/kbn-securitysolution-es-utils @elastic/security-detection-engine
 src/platform/packages/shared/kbn-securitysolution-io-ts-types @elastic/security-detection-engine
