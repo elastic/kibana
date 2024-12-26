@@ -81,7 +81,7 @@ export const AdditionalOptionsFields: React.FC<AdditionalOptionsFieldsProps> = (
           <EuiText
             css={css`
               font-size: ${xsFontSize};
-              color: ${euiTheme.colors.textSubdued};
+              color: ${euiTheme.colors.subduedText};
             `}
           >
             <FormattedMessage
@@ -190,7 +190,7 @@ export const AdditionalOptionsFields: React.FC<AdditionalOptionsFieldsProps> = (
             <EuiText
               css={css`
                 font-size: ${xsFontSize};
-                color: ${euiTheme.colors.textSubdued};
+                color: ${euiTheme.colors.subduedText};
               `}
             >
               <FormattedMessage
@@ -222,7 +222,7 @@ export const AdditionalOptionsFields: React.FC<AdditionalOptionsFieldsProps> = (
         <EuiText
           css={css`
             font-size: ${xsFontSize};
-            color: ${euiTheme.colors.textSubdued};
+            color: ${euiTheme.colors.subduedText};
           `}
         >
           <FormattedMessage
