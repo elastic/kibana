@@ -49,7 +49,10 @@ import type { MappingsArgs, CreateMappingsArgs, UpdateMappingsArgs } from './typ
 import { createMappings } from './create_mappings';
 import { updateMappings } from './update_mappings';
 import { ConfigurationRt, ConfigurationsRt } from '../../../common/types/domain';
-import { validateDuplicatedKeysInRequest } from '../validators';
+import {
+  validateDuplicatedKeysInRequest,
+  validateDuplicatedObservableTypesInRequest,
+} from '../validators';
 import {
   validateCustomFieldTypesInRequest,
   validateTemplatesCustomFieldsInRequest,
@@ -308,6 +311,10 @@ export async function update(
       fieldName: 'customFields',
     });
 
+    validateDuplicatedObservableTypesInRequest({
+      requestFields: request.observableTypes,
+    });
+
     const { version, templates, ...queryWithoutVersion } = request;
 
     const configuration = await caseConfigureService.get({
@@ -442,6 +449,10 @@ export async function create(
       customFields: validatedConfigurationRequest.customFields,
     });
 
+    validateDuplicatedObservableTypesInRequest({
+      requestFields: validatedConfigurationRequest.observableTypes,
+    });
+
     let error = null;
 
     const { filter: authorizationFilter, ensureSavedObjectsAreAuthorized } =
@@ -521,6 +532,7 @@ export async function create(
         created_by: user,
         updated_at: null,
         updated_by: null,
+        observableTypes: validatedConfigurationRequest.observableTypes ?? [],
       },
       id: savedObjectID,
     });

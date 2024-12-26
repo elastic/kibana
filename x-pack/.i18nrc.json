@@ -17,7 +17,7 @@
     "xpack.apm": "plugins/observability_solution/apm",
     "xpack.apmDataAccess": "plugins/observability_solution/apm_data_access",
     "xpack.banners": "plugins/banners",
-    "xpack.canvas": "plugins/canvas",
+    "xpack.canvas": "platform/plugins/private/canvas",
     "xpack.cases": "plugins/cases",
     "xpack.cloud": "plugins/cloud",
     "xpack.cloudDefend": "solutions/security/plugins/cloud_defend",
@@ -29,9 +29,9 @@
       "packages/kbn-cloud-security-posture"
     ],
     "xpack.customBranding": "plugins/custom_branding",
-    "xpack.dashboard": "plugins/dashboard_enhanced",
-    "xpack.dataQuality": "plugins/data_quality",
-    "xpack.datasetQuality": "plugins/observability_solution/dataset_quality",
+    "xpack.dashboard": "platform/plugins/shared/dashboard_enhanced",
+    "xpack.dataQuality": "platform/plugins/shared/data_quality",
+    "xpack.datasetQuality": "platform/plugins/shared/dataset_quality",
     "xpack.dataUsage": "platform/plugins/private/data_usage",
     "xpack.discover": "plugins/discover_enhanced",
     "xpack.crossClusterReplication": "platform/plugins/private/cross_cluster_replication",
@@ -39,13 +39,13 @@
     "xpack.elasticAssistantCommon": "platform/packages/shared/kbn-elastic-assistant-common",
     "xpack.elasticAssistantPlugin": "solutions/security/plugins/elastic_assistant",
     "xpack.ecsDataQualityDashboard": "solutions/security/plugins/ecs_data_quality_dashboard",
-    "xpack.embeddableEnhanced": "plugins/embeddable_enhanced",
+    "xpack.embeddableEnhanced": "platform/plugins/shared/embeddable_enhanced",
     "xpack.endpoint": "plugins/endpoint",
     "xpack.enterpriseSearch": "plugins/enterprise_search",
     "xpack.features": "plugins/features",
     "xpack.dataVisualizer": "platform/plugins/private/data_visualizer",
     "xpack.exploratoryView": "solutions/observability/plugins/exploratory_view",
-    "xpack.fileUpload": "plugins/file_upload",
+    "xpack.fileUpload": "platform/plugins/private/file_upload",
     "xpack.globalSearch": [
       "plugins/global_search"
     ],
@@ -59,11 +59,12 @@
     "xpack.idxMgmt": "platform/plugins/shared/index_management",
     "xpack.idxMgmtPackage": "packages/index-management",
     "xpack.indexLifecycleMgmt": "platform/plugins/private/index_lifecycle_management",
-    "xpack.infra": "plugins/observability_solution/infra",
-    "xpack.logsDataAccess": "plugins/observability_solution/logs_data_access",
-    "xpack.logsExplorer": "plugins/observability_solution/logs_explorer",
-    "xpack.logsShared": "plugins/observability_solution/logs_shared",
-    "xpack.fleet": "plugins/fleet",
+    "xpack.inferenceEndpointUICommon": "platform/packages/shared/kbn-inference-endpoint-ui-common",
+    "xpack.infra": "solutions/observability/plugins/infra",
+    "xpack.logsDataAccess": "platform/plugins/shared/logs_data_access",
+    "xpack.logsExplorer": "solutions/observability/plugins/logs_explorer",
+    "xpack.logsShared": "platform/plugins/shared/logs_shared",
+    "xpack.fleet": "platform/plugins/shared/fleet",
     "xpack.ingestPipelines": "platform/plugins/shared/ingest_pipelines",
     "xpack.integrationAssistant": "platform/plugins/shared/integration_assistant",
     "xpack.inference": "platform/plugins/shared/inference",
@@ -77,11 +78,11 @@
     "xpack.licensing": "plugins/licensing",
     "xpack.lists": "solutions/security/plugins/lists",
     "xpack.logstash": [
-      "plugins/logstash"
+      "platform/plugins/private/logstash"
     ],
     "xpack.main": "legacy/plugins/xpack_main",
     "xpack.maps": [
-      "plugins/maps"
+      "platform/plugins/shared/maps"
     ],
     "xpack.metricsData": "plugins/observability_solution/metrics_data_access",
     "xpack.ml": [
@@ -98,7 +99,7 @@
       "platform/plugins/shared/ml"
     ],
     "xpack.monitoring": [
-      "plugins/monitoring"
+      "platform/plugins/private/monitoring"
     ],
     "xpack.observability": "solutions/observability/plugins/observability",
     "xpack.observabilityAiAssistant": [
@@ -106,11 +107,11 @@
       "solutions/observability/plugins/observability_ai_assistant_app"
     ],
     "xpack.observabilityAiAssistantManagement": "solutions/observability/plugins/observability_ai_assistant_management",
-    "xpack.observabilityLogsExplorer": "plugins/observability_solution/observability_logs_explorer",
-    "xpack.observability_onboarding": "plugins/observability_solution/observability_onboarding",
-    "xpack.observabilityShared": "plugins/observability_solution/observability_shared",
+    "xpack.observabilityLogsExplorer": "solutions/observability/plugins/observability_logs_explorer",
+    "xpack.observability_onboarding": "solutions/observability/plugins/observability_onboarding",
+    "xpack.observabilityShared": "solutions/observability/plugins/observability_shared",
     "xpack.observabilityLogsOverview": [
-      "packages/observability/logs_overview/src/components"
+      "platform/packages/shared/observability/logs_overview/src/components"
     ],
     "xpack.osquery": [
       "platform/plugins/shared/osquery"
