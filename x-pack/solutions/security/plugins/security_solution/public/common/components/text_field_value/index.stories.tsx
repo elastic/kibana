@@ -7,19 +7,21 @@
 
 import React from 'react';
 import { ThemeProvider } from 'styled-components';
-import { addDecorator } from '@storybook/react';
 import { euiLightVars } from '@kbn/ui-theme';
 
 import { TextFieldValue } from '.';
-
-addDecorator((storyFn) => (
-  <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>{storyFn()}</ThemeProvider>
-));
 
 const longText = [...new Array(20).keys()].map((i) => ` super long text part ${i}`).join(' ');
 
 export default {
   title: 'Components/TextFieldValue',
+  decorators: [
+    (storyFn) => (
+      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
+        {storyFn()}
+      </ThemeProvider>
+    ),
+  ],
 };
 
 export const ShortTextNoLimit = {

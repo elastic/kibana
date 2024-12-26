@@ -7,17 +7,19 @@
 
 import React from 'react';
 import { ThemeProvider } from 'styled-components';
-import { addDecorator } from '@storybook/react';
 import { euiLightVars } from '@kbn/ui-theme';
 
 import { ItemDetailsAction, ItemDetailsCard, ItemDetailsPropertySummary } from '.';
 
-addDecorator((storyFn) => (
-  <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>{storyFn()}</ThemeProvider>
-));
-
 export default {
   title: 'Components/ItemDetailsCard',
+  decorators: [
+    (storyFn) => (
+      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
+        {storyFn()}
+      </ThemeProvider>
+    ),
+  ],
 };
 
 export const Default = {

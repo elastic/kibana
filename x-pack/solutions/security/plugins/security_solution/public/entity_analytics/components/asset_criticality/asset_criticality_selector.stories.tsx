@@ -6,7 +6,6 @@
  */
 
 import type { StoryFn } from '@storybook/react';
-import { addDecorator } from '@storybook/react';
 import React from 'react';
 import { ThemeProvider } from 'styled-components';
 import { euiLightVars } from '@kbn/ui-theme';
@@ -16,9 +15,6 @@ import { StorybookProviders } from '../../../common/mock/storybook_providers';
 import { AssetCriticalitySelector } from './asset_criticality_selector';
 import type { State } from './use_asset_criticality';
 
-addDecorator((storyFn) => (
-  <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>{storyFn()}</ThemeProvider>
-));
 const criticality = {
   status: 'create',
   query: {},
@@ -34,6 +30,13 @@ const criticalityLoading = {
 export default {
   component: AssetCriticalitySelector,
   title: 'Components/AssetCriticalitySelector',
+  decorators: [
+    (storyFn) => (
+      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
+        {storyFn()}
+      </ThemeProvider>
+    ),
+  ],
 };
 
 export const Default: StoryFn<void> = () => {

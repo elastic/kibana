@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { addDecorator } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import React from 'react';
 import { ThemeProvider } from 'styled-components';
@@ -13,12 +12,15 @@ import { euiLightVars } from '@kbn/ui-theme';
 
 import { LogicButtons } from './logic_buttons';
 
-addDecorator((storyFn) => (
-  <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>{storyFn()}</ThemeProvider>
-));
-
 export default {
   title: 'ThreatMatching|LogicButtons',
+  decorators: [
+    (storyFn) => (
+      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
+        {storyFn()}
+      </ThemeProvider>
+    ),
+  ],
 };
 
 export const AndOrButtons = {

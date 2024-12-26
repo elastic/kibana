@@ -7,18 +7,20 @@
 
 import React from 'react';
 import { ThemeProvider } from 'styled-components';
-import { addDecorator } from '@storybook/react';
 import { euiLightVars } from '@kbn/ui-theme';
 
 import { createItems, TEST_COLUMNS } from './test_utils';
 import { ConditionsTable } from '.';
 
-addDecorator((storyFn) => (
-  <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>{storyFn()}</ThemeProvider>
-));
-
 export default {
   title: 'Components/ConditionsTable',
+  decorators: [
+    (storyFn) => (
+      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
+        {storyFn()}
+      </ThemeProvider>
+    ),
+  ],
 };
 
 export const SingleItem = {

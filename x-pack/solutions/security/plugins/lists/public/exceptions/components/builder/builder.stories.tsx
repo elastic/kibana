@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { addDecorator } from '@storybook/react';
 import React from 'react';
 import { HttpStart } from '@kbn/core/public';
 import type { AutocompleteStart } from '@kbn/unified-search-plugin/public';
@@ -56,8 +55,6 @@ const mockAutocompleteService = {
       }, 300);
     }),
 } as unknown as AutocompleteStart;
-
-addDecorator((storyFn) => <EuiThemeProvider>{storyFn()}</EuiThemeProvider>);
 
 export default {
   argTypes: {
@@ -201,6 +198,13 @@ export default {
     },
   },
   component: ExceptionBuilderComponent,
+  decorators: [
+    (Story) => (
+      <EuiThemeProvider>
+        <Story />
+      </EuiThemeProvider>
+    ),
+  ],
   title: 'ExceptionBuilderComponent',
 };
 
