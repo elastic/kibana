@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { ComponentMeta, ComponentStory } from '@storybook/react';
+import { Meta, StoryFn } from '@storybook/react';
 
 import { AssistantBeacon as Component } from '../beacon';
 
@@ -20,6 +20,6 @@ export default {
       defaultValue: 'xxl',
     },
   },
-} as ComponentMeta<typeof Component>;
+} as Meta<typeof Component>;
 
-export const Beacon: ComponentStory<typeof Component> = (args) => <Component {...args} />;
+export const Beacon: StoryFn<typeof Component> = (args) => <Component {...args} />;
