@@ -475,7 +475,6 @@ packages/react/kibana_context/theme @elastic/appex-sharedux
 packages/react/kibana_mount @elastic/appex-sharedux
 packages/response-ops/feature_flag_service @elastic/response-ops
 packages/response-ops/rule_form @elastic/response-ops
-packages/response-ops/rule_params @elastic/response-ops
 packages/serverless/project_switcher @elastic/appex-sharedux
 packages/serverless/settings/common @elastic/appex-sharedux @elastic/kibana-management
 packages/serverless/settings/observability_project @elastic/appex-sharedux @elastic/kibana-management @elastic/obs-ux-management-team
@@ -555,6 +554,7 @@ src/platform/packages/private/kbn-management/settings/components/field_category 
 src/platform/packages/private/kbn-management/settings/components/form @elastic/kibana-management
 src/platform/packages/private/kbn-mapbox-gl @elastic/kibana-presentation
 src/platform/packages/private/kbn-panel-loader @elastic/kibana-presentation
+src/platform/packages/private/response-ops/rule_params @elastic/response-ops
 src/platform/packages/shared/deeplinks/devtools @elastic/kibana-management
 src/platform/packages/shared/deeplinks/fleet @elastic/fleet
 src/platform/packages/shared/deeplinks/management @elastic/kibana-management
