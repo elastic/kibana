@@ -181,6 +181,7 @@ export function transformSavedObjectToExternalModel(
   const customFields = !caseSavedObjectAttributes.customFields
     ? []
     : (caseSavedObjectAttributes.customFields as CaseCustomFields);
+  const observables = caseSavedObjectAttributes.observables ?? [];
 
   return {
     ...caseSavedObject,
@@ -192,6 +193,7 @@ export function transformSavedObjectToExternalModel(
       external_service: externalService,
       category,
       customFields,
+      observables,
     },
   };
 }
