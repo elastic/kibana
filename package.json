@@ -801,7 +801,7 @@
     "@kbn/search-api-keys-components": "link:x-pack/solutions/search/packages/kbn-search-api-keys-components",
     "@kbn/search-api-keys-server": "link:x-pack/solutions/search/packages/kbn-search-api-keys-server",
     "@kbn/search-api-panels": "link:src/platform/packages/shared/kbn-search-api-panels",
-    "@kbn/search-assistant": "link:x-pack/plugins/search_assistant",
+    "@kbn/search-assistant": "link:x-pack/solutions/search/plugins/search_assistant",
     "@kbn/search-connectors": "link:packages/kbn-search-connectors",
     "@kbn/search-connectors-plugin": "link:x-pack/plugins/search_connectors",
     "@kbn/search-errors": "link:packages/kbn-search-errors",
