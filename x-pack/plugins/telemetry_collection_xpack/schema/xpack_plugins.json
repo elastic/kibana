@@ -7088,40 +7088,6 @@
         }
       }
     },
-    "app_search": {
-      "properties": {
-        "ui_viewed": {
-          "properties": {
-            "setup_guide": {
-              "type": "long"
-            },
-            "engines_overview": {
-              "type": "long"
-            }
-          }
-        },
-        "ui_error": {
-          "properties": {
-            "cannot_connect": {
-              "type": "long"
-            },
-            "not_found": {
-              "type": "long"
-            }
-          }
-        },
-        "ui_clicked": {
-          "properties": {
-            "create_first_engine_button": {
-              "type": "long"
-            },
-            "engine_table_link": {
-              "type": "long"
-            }
-          }
-        }
-      }
-    },
     "cloud": {
       "properties": {
         "isCloudEnabled": {
