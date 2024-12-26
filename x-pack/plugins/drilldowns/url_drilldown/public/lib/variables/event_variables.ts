@@ -7,7 +7,11 @@
 
 import { i18n } from '@kbn/i18n';
 import { monaco } from '@kbn/monaco';
-import { getPanelTitle, isEmbeddableApiContext, type PublishesPanelTitle } from '@kbn/presentation-publishing';
+import {
+  getPanelTitle,
+  isEmbeddableApiContext,
+  type PublishesPanelTitle,
+} from '@kbn/presentation-publishing';
 import {
   ChartActionContext,
   isRangeSelectTriggerContext,

@@ -7,10 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export {
-  isEmbeddableApiContext,
-  type EmbeddableApiContext,
-} from './embeddable_api_context';
+export { isEmbeddableApiContext, type EmbeddableApiContext } from './embeddable_api_context';
 
 export {
   getInitialValuesFromComparators,
