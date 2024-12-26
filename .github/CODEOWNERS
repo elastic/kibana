@@ -859,6 +859,7 @@ x-pack/platform/plugins/shared/actions @elastic/response-ops
 x-pack/platform/plugins/shared/ai_infra/llm_tasks @elastic/appex-ai-infra
 x-pack/platform/plugins/shared/ai_infra/product_doc_base @elastic/appex-ai-infra
 x-pack/platform/plugins/shared/aiops @elastic/ml-ui
+x-pack/platform/plugins/shared/alerting @elastic/response-ops
 x-pack/platform/plugins/shared/dashboard_enhanced @elastic/kibana-presentation
 x-pack/platform/plugins/shared/data_quality @elastic/obs-ux-logs-team
 x-pack/platform/plugins/shared/dataset_quality @elastic/obs-ux-logs-team
@@ -879,7 +880,6 @@ x-pack/platform/plugins/shared/observability_solution/observability_ai_assistant
 x-pack/platform/plugins/shared/osquery @elastic/security-defend-workflows
 x-pack/platform/plugins/shared/screenshotting @elastic/kibana-reporting-services
 x-pack/platform/plugins/shared/searchprofiler @elastic/kibana-management
-x-pack/plugins/alerting @elastic/response-ops
 x-pack/plugins/banners @elastic/appex-sharedux
 x-pack/plugins/cases @elastic/response-ops
 x-pack/plugins/cloud @elastic/kibana-core
@@ -2654,7 +2654,7 @@ oas_docs/kibana.info.yaml                     @elastic/platform-docs
 # with serverless zero downtime upgrades (ZDT). This section should be removed only when proper guidance for
 # maintaining ESOs has been documented and consuming teams have acclimated to ZDT changes.
 x-pack/platform/plugins/shared/actions/server/saved_objects/index.ts @elastic/response-ops @elastic/kibana-security
-x-pack/plugins/alerting/server/saved_objects/index.ts @elastic/response-ops @elastic/kibana-security
+x-pack/platform/plugins/shared/alerting/server/saved_objects/index.ts @elastic/response-ops @elastic/kibana-security
 x-pack/platform/plugins/shared/fleet/server/saved_objects/index.ts @elastic/fleet @elastic/kibana-security
 x-pack/plugins/observability_solution/synthetics/server/saved_objects/saved_objects.ts @elastic/obs-ux-management-team @elastic/kibana-security
 x-pack/plugins/observability_solution/synthetics/server/saved_objects/synthetics_monitor.ts @elastic/obs-ux-management-team @elastic/kibana-security

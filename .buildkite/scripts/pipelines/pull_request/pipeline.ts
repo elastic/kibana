@@ -59,7 +59,7 @@ const getPipeline = (filename: string, removeSteps = true) => {
       (await doAnyChangesMatch([
         /^src\/plugins\/data/,
         /^x-pack\/platform\/plugins\/shared\/actions/,
-        /^x-pack\/plugins\/alerting/,
+        /^x-pack\/platform\/plugins\/shared\/alerting/,
         /^x-pack\/plugins\/event_log/,
         /^x-pack\/plugins\/rule_registry/,
         /^x-pack\/plugins\/task_manager/,
@@ -252,7 +252,7 @@ const getPipeline = (filename: string, removeSteps = true) => {
       (await doAnyChangesMatch([
         /^package.json/,
         /^packages\/kbn-securitysolution-.*/,
-        /^x-pack\/plugins\/alerting/,
+        /^x-pack\/platform\/plugins\/shared\/alerting/,
         /^x-pack\/plugins\/data_views\/common/,
         /^x-pack\/solutions\/security\/plugins\/lists/,
         /^x-pack\/plugins\/rule_registry\/common/,
@@ -335,7 +335,7 @@ const getPipeline = (filename: string, removeSteps = true) => {
         /^x-pack\/platform\/packages\/shared\/kbn-elastic-assistant/,
         /^x-pack\/platform\/packages\/shared\/kbn-elastic-assistant-common/,
         /^x-pack\/solutions\/security\/packages/,
-        /^x-pack\/plugins\/alerting/,
+        /^x-pack\/platform\/plugins\/shared\/alerting/,
         /^x-pack\/plugins\/cases/,
         /^x-pack\/plugins\/data_views\/common/,
         /^x-pack\/solutions\/security\/plugins\/elastic_assistant/,

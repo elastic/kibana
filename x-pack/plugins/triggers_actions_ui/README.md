@@ -259,7 +259,7 @@ Each alert type should be defined as `RuleTypeModel` object with the these prope
 | requiresAppContext     | Define if alert type is enabled for create and edit in the alerting management UI.                                                    |
 
 IMPORTANT: The current UI supports a single action group only.
-Action groups are mapped from the server API result for [GET /api/alerts/list_alert_types: List alert types](https://github.com/elastic/kibana/tree/main/x-pack/plugins/alerting#get-apialerttypes-list-alert-types).
+Action groups are mapped from the server API result for [GET /api/alerts/list_alert_types: List alert types](https://github.com/elastic/kibana/tree/main/x-pack/platform/plugins/shared/alerting#get-apialerttypes-list-alert-types).
 Server side alert type model:
 
 ```
@@ -299,7 +299,7 @@ triggersActionsUi.ruleTypeRegistry.register(getSomeNewAlertType());
 
 ## Create and register new alert type UI example
 
-Before registering a UI for a new Alert Type, you should first register the type on the server-side by following the Alerting guide: https://github.com/elastic/kibana/tree/main/x-pack/plugins/alerting#example
+Before registering a UI for a new Alert Type, you should first register the type on the server-side by following the Alerting guide: https://github.com/elastic/kibana/tree/main/x-pack/platform/plugins/shared/alerting#example
 
 Alert type UI is expected to be defined as `RuleTypeModel` object.
 
