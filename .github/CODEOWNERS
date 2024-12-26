@@ -6,9 +6,9 @@
 ####
 
 x-pack/test/alerting_api_integration/common/plugins/aad @elastic/response-ops
-x-pack/plugins/actions @elastic/response-ops
+x-pack/platform/plugins/shared/actions @elastic/response-ops
 x-pack/test/alerting_api_integration/common/plugins/actions_simulators @elastic/response-ops
-packages/kbn-actions-types @elastic/response-ops
+src/platform/packages/shared/kbn-actions-types @elastic/response-ops
 src/plugins/advanced_settings @elastic/appex-sharedux @elastic/kibana-management
 x-pack/packages/kbn-ai-assistant @elastic/search-kibana
 x-pack/platform/packages/shared/ai-assistant/common @elastic/search-kibana
@@ -23,16 +23,16 @@ x-pack/platform/plugins/shared/aiops @elastic/ml-ui
 x-pack/platform/packages/private/ml/aiops_test_utils @elastic/ml-ui
 x-pack/test/alerting_api_integration/packages/helpers @elastic/response-ops
 x-pack/test/alerting_api_integration/common/plugins/alerts @elastic/response-ops
-x-pack/packages/kbn-alerting-comparators @elastic/response-ops
+x-pack/platform/packages/shared/kbn-alerting-comparators @elastic/response-ops
 x-pack/examples/alerting_example @elastic/response-ops
 x-pack/test/functional_with_es_ssl/plugins/alerts @elastic/response-ops
-x-pack/plugins/alerting @elastic/response-ops
-x-pack/packages/kbn-alerting-state-types @elastic/response-ops
-packages/kbn-alerting-types @elastic/response-ops
-packages/kbn-alerts-as-data-utils @elastic/response-ops
-packages/kbn-alerts-grouping @elastic/response-ops
+x-pack/platform/plugins/shared/alerting @elastic/response-ops
+x-pack/platform/packages/private/kbn-alerting-state-types @elastic/response-ops
+src/platform/packages/shared/kbn-alerting-types @elastic/response-ops
+src/platform/packages/shared/kbn-alerts-as-data-utils @elastic/response-ops
+x-pack/solutions/observability/packages/kbn-alerts-grouping @elastic/response-ops
 x-pack/test/alerting_api_integration/common/plugins/alerts_restricted @elastic/response-ops
-packages/kbn-alerts-ui-shared @elastic/response-ops
+src/platform/packages/shared/kbn-alerts-ui-shared @elastic/response-ops
 packages/kbn-ambient-common-types @elastic/kibana-operations
 packages/kbn-ambient-ftr-types @elastic/kibana-operations @elastic/appex-qa
 packages/kbn-ambient-storybook-types @elastic/kibana-operations
@@ -68,8 +68,8 @@ packages/kbn-calculate-width-from-char-count @elastic/kibana-visualizations
 x-pack/platform/plugins/private/canvas @elastic/kibana-presentation
 packages/kbn-capture-oas-snapshot-cli @elastic/kibana-core
 x-pack/test/cases_api_integration/common/plugins/cases @elastic/response-ops
-packages/kbn-cases-components @elastic/response-ops
-x-pack/plugins/cases @elastic/response-ops
+src/platform/packages/shared/kbn-cases-components @elastic/response-ops
+x-pack/platform/plugins/shared/cases @elastic/response-ops
 packages/kbn-cbor @elastic/kibana-operations
 src/platform/packages/shared/kbn-cell-actions @elastic/security-threat-hunting-explore
 src/plugins/chart_expressions/common @elastic/kibana-visualizations
@@ -448,7 +448,7 @@ packages/kbn-event-annotation-components @elastic/kibana-visualizations
 src/plugins/event_annotation_listing @elastic/kibana-visualizations
 src/plugins/event_annotation @elastic/kibana-visualizations
 x-pack/test/plugin_api_integration/plugins/event_log @elastic/response-ops
-x-pack/plugins/event_log @elastic/response-ops
+x-pack/platform/plugins/shared/event_log @elastic/response-ops
 x-pack/solutions/security/packages/expandable-flyout @elastic/security-threat-hunting-investigations
 packages/kbn-expect @elastic/kibana-operations @elastic/appex-qa
 x-pack/examples/exploratory_view_example @elastic/obs-ux-infra_services-team
@@ -508,7 +508,7 @@ x-pack/plugins/graph @elastic/kibana-visualizations
 examples/grid_example @elastic/kibana-presentation
 packages/kbn-grid-layout @elastic/kibana-presentation
 x-pack/platform/plugins/private/grokdebugger @elastic/kibana-management
-packages/kbn-grouping @elastic/response-ops
+src/platform/packages/shared/kbn-grouping @elastic/response-ops
 packages/kbn-guided-onboarding @elastic/appex-sharedux
 examples/guided_onboarding_example @elastic/appex-sharedux
 src/plugins/guided_onboarding @elastic/appex-sharedux
@@ -749,7 +749,7 @@ examples/resizable_layout_examples @elastic/kibana-data-discovery
 x-pack/test/plugin_functional/plugins/resolver_test @elastic/security-solution
 packages/response-ops/feature_flag_service @elastic/response-ops
 packages/response-ops/rule_form @elastic/response-ops
-packages/response-ops/rule_params @elastic/response-ops
+src/platform/packages/private/response-ops/rule_params @elastic/response-ops
 examples/response_stream @elastic/ml-ui
 packages/kbn-rison @elastic/kibana-operations
 x-pack/platform/packages/private/rollup @elastic/kibana-management
@@ -757,9 +757,9 @@ x-pack/platform/plugins/private/rollup @elastic/kibana-management
 packages/kbn-router-to-openapispec @elastic/kibana-core
 packages/kbn-router-utils @elastic/obs-ux-logs-team
 examples/routing_example @elastic/kibana-core
-packages/kbn-rrule @elastic/response-ops
+src/platform/packages/shared/kbn-rrule @elastic/response-ops
 src/platform/packages/shared/kbn-rule-data-utils @elastic/security-detections-response @elastic/response-ops @elastic/obs-ux-management-team
-x-pack/plugins/rule_registry @elastic/response-ops @elastic/obs-ux-management-team
+x-pack/platform/plugins/shared/rule_registry @elastic/response-ops @elastic/obs-ux-management-team
 x-pack/platform/plugins/private/runtime_fields @elastic/kibana-management
 packages/kbn-safer-lodash-set @elastic/kibana-security
 x-pack/test/security_api_integration/plugins/saml_provider @elastic/kibana-security
@@ -930,8 +930,8 @@ packages/kbn-spec-to-console @elastic/kibana-management
 src/platform/packages/shared/kbn-sse-utils @elastic/obs-knowledge-team
 src/platform/packages/shared/kbn-sse-utils-client @elastic/obs-knowledge-team
 src/platform/packages/shared/kbn-sse-utils-server @elastic/obs-knowledge-team
-x-pack/plugins/stack_alerts @elastic/response-ops
-x-pack/plugins/stack_connectors @elastic/response-ops
+x-pack/platform/plugins/shared/stack_alerts @elastic/response-ops
+x-pack/platform/plugins/shared/stack_connectors @elastic/response-ops
 x-pack/test/usage_collection/plugins/stack_management_usage_test @elastic/kibana-management
 examples/state_containers_examples @elastic/appex-sharedux
 test/server_integration/plugins/status_plugin_a @elastic/kibana-core
@@ -947,7 +947,7 @@ x-pack/solutions/observability/plugins/synthetics @elastic/obs-ux-management-tea
 x-pack/packages/kbn-synthetics-private-location @elastic/obs-ux-management-team
 x-pack/test/alerting_api_integration/common/plugins/task_manager_fixture @elastic/response-ops
 x-pack/test/plugin_api_perf/plugins/task_manager_performance @elastic/response-ops
-x-pack/plugins/task_manager @elastic/response-ops
+x-pack/platform/plugins/shared/task_manager @elastic/response-ops
 src/plugins/telemetry_collection_manager @elastic/kibana-core
 x-pack/plugins/telemetry_collection_xpack @elastic/kibana-core
 src/plugins/telemetry_management_section @elastic/kibana-core
@@ -976,8 +976,8 @@ x-pack/platform/plugins/private/transform @elastic/ml-ui
 x-pack/platform/plugins/private/translations @elastic/kibana-localization
 packages/kbn-transpose-utils @elastic/kibana-visualizations
 x-pack/examples/triggers_actions_ui_example @elastic/response-ops
-x-pack/plugins/triggers_actions_ui @elastic/response-ops
-packages/kbn-triggers-actions-ui-types @elastic/response-ops
+x-pack/platform/plugins/shared/triggers_actions_ui @elastic/response-ops
+src/platform/packages/shared/kbn-triggers-actions-ui-types @elastic/response-ops
 packages/kbn-try-in-console @elastic/search-kibana
 packages/kbn-ts-projects @elastic/kibana-operations
 packages/kbn-ts-type-check-cli @elastic/kibana-operations
