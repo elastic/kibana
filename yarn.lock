@@ -3921,7 +3921,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/alerts-as-data-utils@link:packages/kbn-alerts-as-data-utils":
+"@kbn/alerts-as-data-utils@link:src/platform/packages/shared/kbn-alerts-as-data-utils":
   version "0.0.0"
   uid ""
 
