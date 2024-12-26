@@ -256,7 +256,6 @@ packages/default-nav/analytics @elastic/kibana-data-discovery @elastic/kibana-pr
 packages/home/sample_data_card @elastic/appex-sharedux
 packages/home/sample_data_tab @elastic/appex-sharedux
 packages/home/sample_data_types @elastic/appex-sharedux
-packages/kbn-alerts-ui-shared @elastic/response-ops
 packages/kbn-ambient-common-types @elastic/kibana-operations
 packages/kbn-ambient-ftr-types @elastic/kibana-operations @elastic/appex-qa
 packages/kbn-ambient-storybook-types @elastic/kibana-operations
@@ -567,6 +566,7 @@ src/platform/packages/shared/deeplinks/security @elastic/security-solution
 src/platform/packages/shared/kbn-actions-types @elastic/response-ops
 src/platform/packages/shared/kbn-alerting-types @elastic/response-ops
 src/platform/packages/shared/kbn-alerts-as-data-utils @elastic/response-ops
+src/platform/packages/shared/kbn-alerts-ui-shared @elastic/response-ops
 src/platform/packages/shared/kbn-avc-banner @elastic/security-defend-workflows
 src/platform/packages/shared/kbn-cell-actions @elastic/security-threat-hunting-explore
 src/platform/packages/shared/kbn-custom-icons @elastic/obs-ux-logs-team

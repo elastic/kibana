@@ -3933,7 +3933,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/alerts-ui-shared@link:packages/kbn-alerts-ui-shared":
+"@kbn/alerts-ui-shared@link:src/platform/packages/shared/kbn-alerts-ui-shared":
   version "0.0.0"
   uid ""
 
