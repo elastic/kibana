@@ -43,7 +43,7 @@ export default ({ getService }: FtrProviderContext): void => {
    * is to test the bulkCreate method of the cases client in
    * x-pack/platform/plugins/shared/cases/server/client/cases/bulk_create.ts
    *
-   * The test route is configured here x-pack/test/cases_api_integration/common/platform/plugins/shared/cases/server/routes.ts
+   * The test route is configured here x-pack/test/cases_api_integration/common/plugins/cases/server/routes.ts
    */
   describe('bulk_create_cases', () => {
     const bulkCreateCases = async ({
