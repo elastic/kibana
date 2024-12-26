@@ -87,12 +87,6 @@ export const registerAutocompleteEntitiesRoute = (deps: RouteDependencies) => {
   deps.router.get(
     {
       path: '/api/console/autocomplete_entities',
-      security: {
-        authz: {
-          enabled: false,
-          reason: 'Relies on es client for authorization',
-        },
-      },
       options: {
         tags: ['access:console'],
       },
