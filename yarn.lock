@@ -6013,7 +6013,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/ipynb@link:packages/kbn-ipynb":
+"@kbn/ipynb@link:x-pack/solutions/search/packages/kbn-ipynb":
   version "0.0.0"
   uid ""
 
