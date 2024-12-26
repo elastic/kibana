@@ -97,13 +97,13 @@ actions:
                     # APM transaction error rate rule (apm.transaction_error_rate)
                     - $ref: '../../x-pack/plugins/observability_solution/apm/server/routes/alerts/rule_types/docs/params_property_apm_transaction_error_rate.yaml'
                     # Elasticsearch DSL query rule (.es-query)
-                    - $ref: '../../x-pack/plugins/alerting/docs/openapi/components/schemas/params_es_query_dsl_rule.yaml'
+                    - $ref: '../../x-pack/platform/plugins/shared/alerting/docs/openapi/components/schemas/params_es_query_dsl_rule.yaml'
                     # Elasticsearch ES|QL query rule (.es-query)
-                    - $ref: '../../x-pack/plugins/alerting/docs/openapi/components/schemas/params_es_query_esql_rule.yaml'
+                    - $ref: '../../x-pack/platform/plugins/shared/alerting/docs/openapi/components/schemas/params_es_query_esql_rule.yaml'
                     # Elasticsearch KQL query rule (.es-query)
-                    - $ref: '../../x-pack/plugins/alerting/docs/openapi/components/schemas/params_es_query_kql_rule.yaml'
+                    - $ref: '../../x-pack/platform/plugins/shared/alerting/docs/openapi/components/schemas/params_es_query_kql_rule.yaml'
                     # Index threshold rule ()
-                    - $ref: '../../x-pack/plugins/alerting/docs/openapi/components/schemas/params_index_threshold_rule.yaml'
+                    - $ref: '../../x-pack/platform/plugins/shared/alerting/docs/openapi/components/schemas/params_index_threshold_rule.yaml'
                     # Infra inventory rule (metrics.alert.inventory.threshold)
                     - $ref: '../../x-pack/solutions/observability/plugins/infra/server/lib/alerting/docs/params_property_infra_inventory.yaml'
                     # Log threshold rule (logs.alert.document.count)
