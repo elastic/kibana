@@ -3897,7 +3897,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/alerting-comparators@link:x-pack/packages/kbn-alerting-comparators":
+"@kbn/alerting-comparators@link:x-pack/platform/packages/shared/kbn-alerting-comparators":
   version "0.0.0"
   uid ""
 
