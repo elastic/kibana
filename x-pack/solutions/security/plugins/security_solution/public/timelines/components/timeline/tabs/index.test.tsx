@@ -108,7 +108,6 @@ describe('Timeline', () => {
           expect(screen.queryByTestId(esqlTabSubj)).toBeVisible();
         });
       });
-
     });
   });
 
