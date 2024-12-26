@@ -7721,7 +7721,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/triggers-actions-ui-types@link:packages/kbn-triggers-actions-ui-types":
+"@kbn/triggers-actions-ui-types@link:src/platform/packages/shared/kbn-triggers-actions-ui-types":
   version "0.0.0"
   uid ""
 

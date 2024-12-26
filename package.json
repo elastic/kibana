@@ -971,7 +971,7 @@
     "@kbn/transpose-utils": "link:packages/kbn-transpose-utils",
     "@kbn/triggers-actions-ui-example-plugin": "link:x-pack/examples/triggers_actions_ui_example",
     "@kbn/triggers-actions-ui-plugin": "link:x-pack/platform/plugins/shared/triggers_actions_ui",
-    "@kbn/triggers-actions-ui-types": "link:packages/kbn-triggers-actions-ui-types",
+    "@kbn/triggers-actions-ui-types": "link:src/platform/packages/shared/kbn-triggers-actions-ui-types",
     "@kbn/try-in-console": "link:packages/kbn-try-in-console",
     "@kbn/typed-react-router-config": "link:src/platform/packages/shared/kbn-typed-react-router-config",
     "@kbn/ui-actions-browser": "link:packages/kbn-ui-actions-browser",
