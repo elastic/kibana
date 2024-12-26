@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { Meta } from '@storybook/react';
+import { Meta, StoryObj } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import { FileKindBrowser, BaseFilesClient as FilesClient } from '@kbn/shared-ux-file-types';
 import { FilesContext } from '@kbn/shared-ux-file-context';
@@ -75,7 +75,7 @@ export const AllowRepeatedUploads = {
   },
 };
 
-export const LongErrorUX = {
+export const LongErrorUX: StoryObj = {
   decorators: [
     (Story) => (
       <FilesContext
@@ -97,7 +97,7 @@ export const LongErrorUX = {
   ],
 };
 
-export const Abort = {
+export const Abort: StoryObj = {
   decorators: [
     (Story) => (
       <FilesContext
@@ -142,7 +142,7 @@ export const ImmediateUpload = {
   },
 };
 
-export const ImmediateUploadError = {
+export const ImmediateUploadError: StoryObj = {
   args: {
     immediate: true,
   },
@@ -168,7 +168,7 @@ export const ImmediateUploadError = {
   ],
 };
 
-export const ImmediateUploadAbort = {
+export const ImmediateUploadAbort: StoryObj = {
   decorators: [
     (Story) => (
       <FilesContext
@@ -199,7 +199,7 @@ export const Compressed = {
   },
 };
 
-export const CompressedError = {
+export const CompressedError: StoryObj = {
   args: {
     compressed: true,
   },
