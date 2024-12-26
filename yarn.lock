@@ -7001,7 +7001,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/search-indices@link:x-pack/plugins/search_indices":
+"@kbn/search-indices@link:x-pack/solutions/search/plugins/search_indices":
   version "0.0.0"
   uid ""
 

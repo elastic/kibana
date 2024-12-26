@@ -7,9 +7,9 @@
 
 module.exports = {
   preset: '@kbn/test',
-  rootDir: '../../..',
-  roots: ['<rootDir>/x-pack/plugins/search_indices'],
-  coverageDirectory: '<rootDir>/target/kibana-coverage/jest/x-pack/plugins/search_indices',
+  rootDir: '../../../../..',
+  roots: ['<rootDir>/x-pack/solutions/search/plugins/search_indices'],
+  coverageDirectory: '<rootDir>/target/kibana-coverage/jest/x-pack/solutions/search/plugins/search_indices',
   coverageReporters: ['text', 'html'],
-  collectCoverageFrom: ['<rootDir>/x-pack/plugins/search_indices/{public,server}/**/*.{ts,tsx}'],
+  collectCoverageFrom: ['<rootDir>/x-pack/solutions/search/plugins/search_indices/{public,server}/**/*.{ts,tsx}'],
 };

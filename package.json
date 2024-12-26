@@ -808,7 +808,7 @@
     "@kbn/search-examples-plugin": "link:examples/search_examples",
     "@kbn/search-homepage": "link:x-pack/solutions/search/plugins/search_homepage",
     "@kbn/search-index-documents": "link:x-pack/solutions/search/packages/kbn-search-index-documents",
-    "@kbn/search-indices": "link:x-pack/plugins/search_indices",
+    "@kbn/search-indices": "link:x-pack/solutions/search/plugins/search_indices",
     "@kbn/search-inference-endpoints": "link:x-pack/plugins/search_inference_endpoints",
     "@kbn/search-navigation": "link:x-pack/plugins/search_solution/search_navigation",
     "@kbn/search-notebooks": "link:x-pack/plugins/search_notebooks",
