@@ -17,6 +17,7 @@ import { FilesContext } from '@kbn/shared-ux-file-context';
 import { FilePicker, Props as FilePickerProps } from './file_picker';
 
 type ListResponse = ReturnType<FilesClient['list']>;
+type MetaDecorators = Pick<Meta, 'decorators'>;
 
 const kind = 'filepicker';
 const getFileKind = (id: string) =>
@@ -84,7 +85,7 @@ function createFileJSON(file?: Partial<FileJSON<FileImageMetadata>>): FileJSON<F
   };
 }
 
-export const BasicOne = {
+export const BasicOne: MetaDecorators = {
   decorators: [
     (Story) => (
       <FilesContext
@@ -105,7 +106,7 @@ export const BasicOne = {
   ],
 };
 
-export const BasicMany = {
+export const BasicMany: MetaDecorators = {
   decorators: [
     (Story) => {
       const files = [
@@ -138,7 +139,7 @@ export const BasicMany = {
   ],
 };
 
-export const BasicManyMany = {
+export const BasicManyMany: MetaDecorators = {
   decorators: [
     (Story) => {
       const array = new Array(102);
@@ -163,7 +164,7 @@ export const BasicManyMany = {
   ],
 };
 
-export const ErrorLoading = {
+export const ErrorLoading: MetaDecorators = {
   decorators: [
     (Story) => {
       const array = new Array(102);
@@ -187,7 +188,7 @@ export const ErrorLoading = {
   ],
 };
 
-export const TryFilter = {
+export const TryFilter: MetaDecorators = {
   decorators: [
     (Story) => {
       const array = { files: [createFileJSON()], total: 1 };
@@ -216,7 +217,7 @@ export const TryFilter = {
   ],
 };
 
-export const SingleSelect = {
+export const SingleSelect: Partial<Meta> = {
   decorators: [
     (Story) => (
       <FilesContext
