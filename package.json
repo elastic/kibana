@@ -811,7 +811,7 @@
     "@kbn/search-indices": "link:x-pack/solutions/search/plugins/search_indices",
     "@kbn/search-inference-endpoints": "link:x-pack/solutions/search/plugins/search_inference_endpoints",
     "@kbn/search-navigation": "link:x-pack/solutions/search/plugins/search_solution/search_navigation",
-    "@kbn/search-notebooks": "link:x-pack/plugins/search_notebooks",
+    "@kbn/search-notebooks": "link:x-pack/solutions/search/plugins/search_notebooks",
     "@kbn/search-playground": "link:x-pack/plugins/search_playground",
     "@kbn/search-response-warnings": "link:packages/kbn-search-response-warnings",
     "@kbn/search-shared-ui": "link:x-pack/packages/search/shared_ui",

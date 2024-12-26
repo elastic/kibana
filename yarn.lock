@@ -7013,7 +7013,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/search-notebooks@link:x-pack/plugins/search_notebooks":
+"@kbn/search-notebooks@link:x-pack/solutions/search/plugins/search_notebooks":
   version "0.0.0"
   uid ""
 
