@@ -23,6 +23,12 @@ export const registerProxyRoute = (deps: RouteDependencies) => {
           parse: false,
         },
       },
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Relies on es for authorization',
+        },
+      },
       validate: routeValidationConfig,
     },
     createHandler(deps)
