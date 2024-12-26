@@ -7717,7 +7717,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/triggers-actions-ui-plugin@link:x-pack/plugins/triggers_actions_ui":
+"@kbn/triggers-actions-ui-plugin@link:x-pack/platform/plugins/shared/triggers_actions_ui":
   version "0.0.0"
   uid ""
 

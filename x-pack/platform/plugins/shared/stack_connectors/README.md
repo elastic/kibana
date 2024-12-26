@@ -426,4 +426,4 @@ Instead of `schema.maybe()`, use `schema.nullable()`, which is the same as `sche
 
 ## User interface
 
-To make this connector usable in the Kibana UI, you will need to provide all the UI editing aspects of the connector. The existing connector type user interfaces are defined in [`x-pack/plugins/triggers_actions_ui/public/application/components/builtin_action_types`](../triggers_actions_ui/public/application/components/builtin_action_types). For more information, see the [UI documentation](../triggers_actions_ui/README.md#create-and-register-new-action-type-ui).
+To make this connector usable in the Kibana UI, you will need to provide all the UI editing aspects of the connector. The existing connector type user interfaces are defined in [`x-pack/platform/plugins/shared/triggers_actions_ui/public/application/components/builtin_action_types`](../triggers_actions_ui/public/application/components/builtin_action_types). For more information, see the [UI documentation](../triggers_actions_ui/README.md#create-and-register-new-action-type-ui).
