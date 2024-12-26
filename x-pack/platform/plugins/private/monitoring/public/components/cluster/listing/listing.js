@@ -208,11 +208,7 @@ const getColumns = (
         const license = cluster.license;
 
         if (!licenseType) {
-          return (
-            <div>
-              <div css={clusterCellLicenseStyle}>N/A</div>
-            </div>
-          );
+          return <div css={clusterCellLicenseStyle}>N/A</div>;
         }
 
         if (license) {

@@ -110,15 +110,13 @@ const getColumns = (showCgroupMetricsElasticsearch, setupMode, clusterUuid, aler
         };
 
         setupModeStatus = (
-          <div>
-            <SetupModeBadge
-              setupMode={setupMode}
-              status={status}
-              instance={instance}
-              productName={ELASTICSEARCH_SYSTEM_ID}
-              clusterUuid={clusterUuid}
-            />
-          </div>
+          <SetupModeBadge
+            setupMode={setupMode}
+            status={status}
+            instance={instance}
+            productName={ELASTICSEARCH_SYSTEM_ID}
+            clusterUuid={clusterUuid}
+          />
         );
         if (status.isNetNewUser) {
           nameLink = value;
