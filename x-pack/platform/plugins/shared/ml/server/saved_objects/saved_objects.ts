@@ -11,6 +11,8 @@ import { mlJob, mlTrainedModel, mlModule } from './mappings';
 
 import { migrations } from './migrations';
 import {
+  AD_SAVED_OBJECT_TYPE,
+  DFA_SAVED_OBJECT_TYPE,
   ML_JOB_SAVED_OBJECT_TYPE,
   ML_MODULE_SAVED_OBJECT_TYPE,
   ML_TRAINED_MODEL_SAVED_OBJECT_TYPE,
@@ -27,6 +29,9 @@ interface MlModuleAttributes {
   datafeeds: object[];
 }
 
+const AD_PREFIX = `${AD_SAVED_OBJECT_TYPE}-`;
+const DFA_PREFIX = `${DFA_SAVED_OBJECT_TYPE}-`;
+
 export function setupSavedObjects(savedObjects: SavedObjectsServiceSetup) {
   savedObjects.registerType({
     name: ML_JOB_SAVED_OBJECT_TYPE,
@@ -34,6 +39,28 @@ export function setupSavedObjects(savedObjects: SavedObjectsServiceSetup) {
     namespaceType: 'multiple',
     migrations,
     mappings: mlJob,
+    management: {
+      importableAndExportable: true,
+      getTitle(obj) {
+        return obj.id;
+      },
+      getInAppUrl(obj) {
+        if (obj.id.startsWith(AD_PREFIX)) {
+          const jobId = obj.id.slice(AD_PREFIX.length);
+          return {
+            path: `/app/management/insightsAndAlerting/jobsListLink/${jobId}`,
+            uiCapabilitiesPath: 'ml.canGetJobs',
+          };
+        }
+        if (obj.id.startsWith(DFA_PREFIX)) {
+          // @TODO: Temporarily hide link until new management link is ready
+          return undefined;
+        }
+        return undefined;
+      },
+      icon: 'machineLearningApp',
+      displayName: 'ml',
+    },
   });
   savedObjects.registerType({
     name: ML_TRAINED_MODEL_SAVED_OBJECT_TYPE,
