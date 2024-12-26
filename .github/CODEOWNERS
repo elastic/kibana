@@ -256,7 +256,6 @@ packages/default-nav/analytics @elastic/kibana-data-discovery @elastic/kibana-pr
 packages/home/sample_data_card @elastic/appex-sharedux
 packages/home/sample_data_tab @elastic/appex-sharedux
 packages/home/sample_data_types @elastic/appex-sharedux
-packages/kbn-alerts-grouping @elastic/response-ops
 packages/kbn-alerts-ui-shared @elastic/response-ops
 packages/kbn-ambient-common-types @elastic/kibana-operations
 packages/kbn-ambient-ftr-types @elastic/kibana-operations @elastic/appex-qa
@@ -933,6 +932,7 @@ x-pack/plugins/upgrade_assistant @elastic/kibana-core
 x-pack/solutions/observability/packages/alert_details @elastic/obs-ux-management-team
 x-pack/solutions/observability/packages/alerting_test_data @elastic/obs-ux-management-team
 x-pack/solutions/observability/packages/get_padded_alert_time_range_util @elastic/obs-ux-management-team
+x-pack/solutions/observability/packages/kbn-alerts-grouping @elastic/response-ops
 x-pack/solutions/observability/packages/kbn-custom-integrations @elastic/obs-ux-logs-team
 x-pack/solutions/observability/packages/kbn-investigation-shared @elastic/obs-ux-management-team
 x-pack/solutions/observability/packages/observability_ai/observability_ai_common @elastic/obs-ai-assistant
@@ -3295,7 +3295,7 @@ x-pack/platform/plugins/shared/triggers_actions_ui @elastic/response-ops
 x-pack/solutions/observability/packages/alert_details @elastic/obs-ux-management-team
 x-pack/solutions/observability/packages/alerting_test_data @elastic/obs-ux-management-team
 x-pack/solutions/observability/packages/get_padded_alert_time_range_util @elastic/obs-ux-management-team
-x-pack/solutions/observability/packages/kbn-alerts-grouping @elastic/response-ops
+x-pack/solutions/observability/x-pack/solutions/observability/packages/kbn-alerts-grouping @elastic/response-ops
 x-pack/solutions/observability/packages/kbn-apm-types @elastic/obs-ux-infra_services-team
 x-pack/solutions/observability/x-pack/solutions/observability/packages/kbn-custom-integrations @elastic/obs-ux-logs-team
 x-pack/solutions/observability/packages/kbn-investigation-shared @elastic/obs-ux-management-team
