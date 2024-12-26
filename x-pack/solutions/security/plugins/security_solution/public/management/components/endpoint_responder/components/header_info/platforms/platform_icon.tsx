@@ -7,6 +7,7 @@
 
 import { EuiIcon, type EuiIconProps } from '@elastic/eui';
 import React, { memo, useMemo } from 'react';
+import { i18n } from '@kbn/i18n';
 import type { SupportedHostOsType } from '../../../../../../../common/endpoint/constants';
 import linuxSvg from './logos/linux.svg';
 import windowsSvg from './logos/windows.svg';
@@ -36,11 +37,18 @@ export interface PlatformIconProps {
 export const PlatformIcon = memo<PlatformIconProps>(
   ({ platform, size = 'xl', 'data-test-subj': dataTestSubj }) => {
     const platformIcon = useMemo(() => getPlatformIcon(platform), [platform]);
+    const iconTitle = useMemo(() => {
+      return !platformIcon
+        ? i18n.translate('xpack.securitySolution.platformIcon.platformIconTitle', {
+            defaultMessage: 'Unable to determine host platform type',
+          })
+        : platform;
+    }, [platform, platformIcon]);
 
     return (
       <EuiIcon
-        type={!platformIcon ? 'empty' : platformIcon}
-        title={platform}
+        type={!platformIcon ? 'desktop' : platformIcon}
+        title={iconTitle}
         size={size}
         data-test-subj={dataTestSubj}
       />

@@ -596,6 +596,8 @@ export const getEndpointConsoleCommands = ({
       return adjustCommandsForSentinelOne({ commandList: consoleCommands, platform });
     case 'crowdstrike':
       return adjustCommandsForCrowdstrike({ commandList: consoleCommands });
+    case 'microsoft_defender_endpoint':
+      return adjustCommandsForMicrosoftDefenderEndpoint({ commandList: consoleCommands });
     default:
       // agentType === endpoint: just returns the defined command list
       return consoleCommands;
@@ -696,6 +698,31 @@ const adjustCommandsForCrowdstrike = ({
       )
     ) {
       disableCommand(command, 'crowdstrike');
+    }
+
+    return command;
+  });
+};
+
+const adjustCommandsForMicrosoftDefenderEndpoint = ({
+  commandList,
+}: {
+  commandList: CommandDefinition[];
+}): CommandDefinition[] => {
+  const featureFlags = ExperimentalFeaturesService.get();
+  const isMicrosoftDefenderEndpointEnabled = featureFlags.responseActionsMSDefenderEndpointEnabled;
+
+  return commandList.map((command) => {
+    if (
+      !isMicrosoftDefenderEndpointEnabled ||
+      command.name === 'status' ||
+      !isAgentTypeAndActionSupported(
+        'microsoft_defender_endpoint',
+        RESPONSE_CONSOLE_COMMAND_TO_API_COMMAND_MAP[command.name as ConsoleResponseActionCommands],
+        'manual'
+      )
+    ) {
+      disableCommand(command, 'microsoft_defender_endpoint');
     }
 
     return command;

@@ -212,7 +212,7 @@ export const RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELDS: Readonly<
     'sentinel_one.agent.agent.id',
   ],
   crowdstrike: ['device.id'],
-  microsoft_defender_endpoint: ['agent.id'],
+  microsoft_defender_endpoint: ['cloud.instance.id'],
 });
 
 export const SUPPORTED_AGENT_ID_ALERT_FIELDS: Readonly<string[]> = Object.values(
