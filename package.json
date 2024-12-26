@@ -799,7 +799,7 @@
     "@kbn/screenshotting-plugin": "link:x-pack/platform/plugins/shared/screenshotting",
     "@kbn/screenshotting-server": "link:packages/kbn-screenshotting-server",
     "@kbn/search-api-keys-components": "link:x-pack/solutions/search/packages/kbn-search-api-keys-components",
-    "@kbn/search-api-keys-server": "link:packages/kbn-search-api-keys-server",
+    "@kbn/search-api-keys-server": "link:x-pack/solutions/search/packages/kbn-search-api-keys-server",
     "@kbn/search-api-panels": "link:packages/kbn-search-api-panels",
     "@kbn/search-assistant": "link:x-pack/plugins/search_assistant",
     "@kbn/search-connectors": "link:packages/kbn-search-connectors",

@@ -6965,7 +6965,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/search-api-keys-server@link:packages/kbn-search-api-keys-server":
+"@kbn/search-api-keys-server@link:x-pack/solutions/search/packages/kbn-search-api-keys-server":
   version "0.0.0"
   uid ""
 
