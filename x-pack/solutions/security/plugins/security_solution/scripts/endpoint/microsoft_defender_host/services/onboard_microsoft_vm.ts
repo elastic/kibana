@@ -25,6 +25,18 @@ export const onboardVmHostWithMicrosoftDefender = async ({
   log = createToolingLogger(),
 }: OnboardVmHostWithMicrosoftDefenderOptions) => {
   // FIXME:PT implement creation of new VM and connect it to MS Defender managment system
+  // --------------------------------------------
+  //  Steps needed:
+  //
+  //  1. create VM with at least 4gb of memory
+  //  2. Call MS API and get a device onboarding script download URL
+  //  3. Download onboarding script to VM
+  //  4. Download GIT hub script for running enrollment
+  //  5. Run onboarding
+  //  6. Ensure real_time_protections is enabled on VM
+  //  7. Run tests to generate an alert
+  //
+  // --------------------------------------------
 
   log?.warning(`
   Creation of a VM host running Microsoft Defender for Endpoint is not yet implemented. However, an event

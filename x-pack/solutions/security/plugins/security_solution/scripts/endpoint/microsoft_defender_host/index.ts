@@ -8,6 +8,11 @@
 import { run, type RunFn } from '@kbn/dev-cli-runner';
 import { ok } from 'assert';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import {
+  DEFAULT_API_URL,
+  DEFAULT_OAUTH_SCOPE,
+  DEFAULT_OAUTH_SERVER_URL,
+} from './services/constants';
 import { createDetectionEngineMicrosoftDefenderRuleIfNeeded } from './services/create_detection_engine_microsoft_defend_rule';
 import type { HostVm } from '../common/types';
 import { onboardVmHostWithMicrosoftDefender } from './services/onboard_microsoft_vm';
@@ -56,9 +61,9 @@ console and pushes the data to Elasticsearch.`,
       ],
       boolean: ['forceFleetServer', 'forceNewHost'],
       default: {
-        oAuthServerUrl: 'https://login.microsoftonline.com',
-        oAuthScope: 'https://securitycenter.onmicrosoft.com/windowsatpservice/.default',
-        apiUrl: 'https://api.securitycenter.windows.com',
+        oAuthServerUrl: DEFAULT_OAUTH_SERVER_URL,
+        oAuthScope: DEFAULT_OAUTH_SCOPE,
+        apiUrl: DEFAULT_API_URL,
         kibanaUrl: 'http://127.0.0.1:5601',
         username: 'elastic',
         password: 'changeme',
