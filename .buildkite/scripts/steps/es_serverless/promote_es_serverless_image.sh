@@ -72,7 +72,7 @@ EOT
 
 cat << EOF | buildkite-agent pipeline upload
 steps:
-  - label: "Builds Kibana VM images for cache update"
+  - label: "Update cache for ES serverless image"
     trigger: kibana-vm-images
     async: true
     build:
