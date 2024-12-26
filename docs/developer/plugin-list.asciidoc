@@ -837,7 +837,7 @@ It uses Chromium and Puppeteer underneath to run the browser in headless mode.
 |The Inference Endpoints is a tool used to manage inference endpoints
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/search_solution/search_navigation/README.mdx[searchNavigation]
+|{kib-repo}blob/{branch}/x-pack/solutions/search/plugins/search_solution/search_navigation/README.mdx[searchNavigation]
 |The Search Navigation plugin is used to handle navigation for search solution plugins across both stack and serverless.
 
 
