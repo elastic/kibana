@@ -7601,7 +7601,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/task-manager-plugin@link:x-pack/plugins/task_manager":
+"@kbn/task-manager-plugin@link:x-pack/platform/plugins/shared/task_manager":
   version "0.0.0"
   uid ""
 

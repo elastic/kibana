@@ -7,9 +7,9 @@
 
 module.exports = {
   preset: '@kbn/test',
-  rootDir: '../../..',
-  roots: ['<rootDir>/x-pack/plugins/task_manager'],
-  coverageDirectory: '<rootDir>/target/kibana-coverage/jest/x-pack/plugins/task_manager',
+  rootDir: '../../../../..',
+  roots: ['<rootDir>/x-pack/platform/plugins/shared/task_manager'],
+  coverageDirectory: '<rootDir>/target/kibana-coverage/jest/x-pack/platform/plugins/shared/task_manager',
   coverageReporters: ['text', 'html'],
-  collectCoverageFrom: ['<rootDir>/x-pack/plugins/task_manager/server/**/*.{ts,tsx}'],
+  collectCoverageFrom: ['<rootDir>/x-pack/platform/plugins/shared/task_manager/server/**/*.{ts,tsx}'],
 };

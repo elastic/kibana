@@ -927,7 +927,7 @@ routes, etc.
 in their infrastructure.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/task_manager/README.md[taskManager]
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/shared/task_manager/README.md[taskManager]
 |The task manager is a generic system for running background tasks.
 
 

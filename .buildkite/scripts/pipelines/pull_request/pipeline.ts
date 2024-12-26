@@ -62,7 +62,7 @@ const getPipeline = (filename: string, removeSteps = true) => {
         /^x-pack\/platform\/plugins\/shared\/alerting/,
         /^x-pack\/platform\/plugins\/shared\/event_log/,
         /^x-pack\/platform\/plugins\/shared\/rule_registry/,
-        /^x-pack\/plugins\/task_manager/,
+        /^x-pack\/platform\/plugins\/shared\/task_manager/,
       ])) ||
       GITHUB_PR_LABELS.includes('ci:all-cypress-suites')
     ) {
@@ -259,7 +259,7 @@ const getPipeline = (filename: string, removeSteps = true) => {
         /^x-pack\/solutions\/security\/plugins\/security_solution/,
         /^x-pack\/solutions\/security\/plugins\/security_solution_ess/,
         /^x-pack\/solutions\/security\/plugins\/security_solution_serverless/,
-        /^x-pack\/plugins\/task_manager/,
+        /^x-pack\/platform\/plugins\/shared\/task_manager/,
         /^x-pack\/solutions\/security\/plugins\/timelines/,
         /^x-pack\/plugins\/triggers_actions_ui\/public\/application\/sections\/action_connector_form/,
         /^x-pack\/plugins\/triggers_actions_ui\/public\/application\/context\/actions_connectors_context\.tsx/,
@@ -344,7 +344,7 @@ const getPipeline = (filename: string, removeSteps = true) => {
         /^x-pack\/solutions\/security\/plugins\/security_solution/,
         /^x-pack\/solutions\/security\/plugins\/security_solution_ess/,
         /^x-pack\/solutions\/security\/plugins\/security_solution_serverless/,
-        /^x-pack\/plugins\/task_manager/,
+        /^x-pack\/platform\/plugins\/shared\/task_manager/,
         /^x-pack\/solutions\/security\/plugins\/threat_intelligence/,
         /^x-pack\/solutions\/security\/plugins\/timelines/,
         /^x-pack\/plugins\/triggers_actions_ui/,
