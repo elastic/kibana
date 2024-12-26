@@ -13,7 +13,7 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { LegacyServicesProvider } from '../../public/services/legacy';
 import { setStubKibanaServices } from '../../public/services/mocks';
 
-export const servicesContextDecorator = (): Decorator> {
+export const servicesContextDecorator: Decorator = () => {
   return (story: Function, storybook) => {
     if (process.env.JEST_WORKER_ID !== undefined) {
       storybook.args.useStaticData = true;
