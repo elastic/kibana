@@ -10,54 +10,8 @@
 import { execSync } from 'child_process';
 import fs from 'fs';
 import path from 'path';
+import { storybookAliases } from '../../../../src/dev/storybook/aliases';
 import { getKibanaDir } from '#pipeline-utils';
-
-// TODO - how to generate this dynamically?
-const STORYBOOKS = [
-  'ai_assistant',
-  'apm',
-  'canvas',
-  'cases',
-  'cell_actions',
-  'chart_icons',
-  'cloud_security_posture_packages',
-  'coloring',
-  'content_management_examples',
-  'custom_integrations',
-  'dashboard_enhanced',
-  'dashboard',
-  'data',
-  'esql_editor',
-  'expression_error',
-  'expression_image',
-  'expression_metric',
-  'expression_repeat_image',
-  'expression_reveal_image',
-  'expression_shape',
-  'expression_tagcloud',
-  'fleet',
-  'grouping',
-  'home',
-  'infra',
-  'kibana_react',
-  'language_documentation_popover',
-  'lists',
-  'logs_explorer',
-  'management',
-  'observability_ai_assistant',
-  'observability_inventory',
-  'observability_shared',
-  'observability',
-  'presentation',
-  'random_sampling',
-  'security_solution_packages',
-  'security_solution',
-  'serverless',
-  'shared_ux',
-  'triggers_actions_ui',
-  'ui_actions_enhanced',
-  'unified_search',
-];
 
 const GITHUB_CONTEXT = 'Build and Publish Storybooks';
 
@@ -84,7 +38,7 @@ const ghStatus = (state: string, description: string) =>
 const build = () => {
   console.log('--- Building Storybooks');
 
-  for (const storybook of STORYBOOKS) {
+  for (const storybook of Object.keys(storybookAliases)) {
     exec(`STORYBOOK_BASE_URL=${STORYBOOK_BASE_URL}`, `yarn storybook --site ${storybook}`);
   }
 };
