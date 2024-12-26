@@ -13,11 +13,11 @@ test('allows valid duration', () => {
   expect(validateDuration('10m')).toBeUndefined();
   expect(validateDuration('30000000h')).toBeUndefined();
   expect(validateDuration('3245d')).toBeUndefined();
+  expect(validateDuration('PT1M')).toBeUndefined();
 });
 
 test('returns error message for invalid duration', () => {
   expect(validateDuration('10x')).toBe('string is not a valid duration: 10x');
-  expect(validateDuration('PT1M')).toBe('string is not a valid duration: PT1M');
   expect(validateDuration('foo')).toBe('string is not a valid duration: foo');
   expect(validateDuration('1 minute')).toBe('string is not a valid duration: 1 minute');
   expect(validateDuration('1hr')).toBe('string is not a valid duration: 1hr');

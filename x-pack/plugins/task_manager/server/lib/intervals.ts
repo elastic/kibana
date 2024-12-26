@@ -20,9 +20,11 @@ export enum IntervalCadence {
 export type Interval = string;
 
 export function isInterval(interval: Interval | string): interval is Interval {
-  const numericAsStr: string = interval.slice(0, -1);
+  const hasPTprefix = interval.toUpperCase().startsWith('PT');
+  const normalizedStr = hasPTprefix ? interval.slice(2) : interval;
+  const numericAsStr: string = normalizedStr.slice(0, -1);
   const numeric: number = parseInt(numericAsStr, 10);
-  const cadence: IntervalCadence | string = interval.slice(-1);
+  const cadence: IntervalCadence | string = interval.slice(-1).toLowerCase();
   return !(!isCadence(cadence) || isNaN(numeric) || numeric <= 0 || !isNumeric(numericAsStr));
 }
 
@@ -115,9 +117,11 @@ export const parseIntervalAsSecond = memoize((interval: Interval): number => {
 });
 
 export const parseIntervalAsMillisecond = memoize((interval: Interval): number => {
-  const numericAsStr: string = interval.slice(0, -1);
+  const hasPTprefix = interval.toUpperCase().startsWith('PT');
+  const normalizedStr = hasPTprefix ? interval.slice(2) : interval;
+  const numericAsStr: string = normalizedStr.slice(0, -1);
   const numeric: number = parseInt(numericAsStr, 10);
-  const cadence: IntervalCadence | string = interval.slice(-1);
+  const cadence: IntervalCadence | string = interval.slice(-1).toLowerCase();
   if (!isCadence(cadence) || isNaN(numeric) || numeric <= 0 || !isNumeric(numericAsStr)) {
     throw new Error(
       `Invalid interval "${interval}". Intervals must be of the form {number}m. Example: 5m.`
