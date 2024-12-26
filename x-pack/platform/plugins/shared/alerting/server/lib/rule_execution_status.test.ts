@@ -444,7 +444,6 @@ describe('RuleExecutionStatus', () => {
   });
 });
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function checkDateIsNearNow(date: any) {
   expect(date instanceof Date).toBe(true);
   // allow for lots of slop in the time difference

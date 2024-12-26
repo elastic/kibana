@@ -23,7 +23,7 @@ describe('getEntitiesAndGenerateAlerts', () => {
         instanceId: id,
       });
     },
-  } as any; // eslint-disable-line @typescript-eslint/no-explicit-any
+  } as any;
 
   beforeEach(() => {
     alerts.length = 0;

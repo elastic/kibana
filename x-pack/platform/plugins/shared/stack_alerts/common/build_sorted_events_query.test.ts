@@ -18,7 +18,6 @@ const DefaultQuery: Writable<Partial<BuildSortedEventsQuery>> = {
 };
 
 describe('buildSortedEventsQuery', () => {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let query: any;
   beforeEach(() => {
     query = { ...DefaultQuery };

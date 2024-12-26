@@ -22,7 +22,6 @@ const DefaultParams: Writable<Partial<TimeSeriesQuery>> = {
 describe('TimeSeriesParams validate()', () => {
   runTests(TimeSeriesQuerySchema, DefaultParams);
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let params: any;
   beforeEach(() => {
     params = { ...DefaultParams };

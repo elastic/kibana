@@ -236,7 +236,7 @@ describe('InferenceConnector', () => {
         streamMock.write(chunk);
       });
       streamMock.complete();
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
       mockEsClient.inference.inference.mockResolvedValue(streamMock.transform as any);
     };
 

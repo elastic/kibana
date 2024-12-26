@@ -236,7 +236,7 @@ function getTransportConfig(
   hasAuth: boolean
 ) {
   const { service, host, port, secure, user, password } = transport;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
   const transportConfig: Record<string, any> = {};
   const proxySettings = configurationUtilities.getProxySettings();
   const generalSSLSettings = configurationUtilities.getSSLSettings();

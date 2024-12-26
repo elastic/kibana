@@ -33,11 +33,10 @@ jest.mock('@kbn/code-editor', () => {
   return {
     ...original,
     // Mocking CodeEditor
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
     CodeEditor: (props: any) => (
       <input
         data-test-subj="mockCodeEditor"
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         onChange={(syntheticEvent: any) => {
           props.onChange(syntheticEvent.jsonString);
         }}

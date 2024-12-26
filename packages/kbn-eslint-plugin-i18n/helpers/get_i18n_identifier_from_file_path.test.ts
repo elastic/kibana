@@ -26,7 +26,10 @@ const testMap = [
     'xpack.synthetics',
   ],
   ['src/plugins/vis_types/gauge/public/editor/collections.ts', 'visTypeGauge'],
-  ['src/platform/packages/shared/kbn-alerts-ui-shared/src/alert_lifecycle_status_badge/index.tsx', 'alertsUIShared'],
+  [
+    'src/platform/packages/shared/kbn-alerts-ui-shared/src/alert_lifecycle_status_badge/index.tsx',
+    'alertsUIShared',
+  ],
 ];
 
 describe('Get i18n Identifier for file', () => {

@@ -36,7 +36,7 @@ const taskPartitioner = new TaskPartitioner({
 beforeEach(() => jest.clearAllMocks());
 
 const mockedDate = new Date('2019-02-12T21:01:22.479Z');
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+
 (global as any).Date = class Date {
   constructor() {
     return mockedDate;
@@ -71,7 +71,7 @@ describe('TaskClaiming', () => {
     jest.clearAllMocks();
     jest
       .spyOn(apm, 'startTransaction')
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
       .mockImplementation(() => mockApmTrans as any);
   });
 

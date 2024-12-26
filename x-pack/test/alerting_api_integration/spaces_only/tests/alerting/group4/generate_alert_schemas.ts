@@ -92,7 +92,9 @@ export default function checkAlertSchemasTest({ getService }: FtrProviderContext
         '--exclude-standard',
       ]);
 
-      expect(stdout).not.to.contain('src/platform/packages/shared/kbn-alerts-as-data-utils/src/schemas/generated');
+      expect(stdout).not.to.contain(
+        'src/platform/packages/shared/kbn-alerts-as-data-utils/src/schemas/generated'
+      );
     });
   });
 }

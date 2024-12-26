@@ -177,7 +177,7 @@ export const getDefaultSchedulerContext = <
   actionsPluginMock: jest.Mocked<PluginStartContract>,
   alertingEventLoggerMock: jest.Mocked<AlertingEventLogger>,
   actionsClientMock: jest.Mocked<PublicMethodsOf<ActionsClient>>,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
   alertsClientMock: jest.Mocked<any>
 ) => ({
   rule: getRule(),
