@@ -52,7 +52,11 @@ describe('AgentTypeIntegration component', () => {
       expect(getByTestId('test-tooltipAnchor'));
     });
 
-    if (agentType === 'sentinel_one' || agentType === 'crowdstrike') {
+    if (
+      agentType === 'sentinel_one' ||
+      agentType === 'crowdstrike' ||
+      agentType === 'microsoft_defender_endpoint'
+    ) {
       it('should display tech preview badge', () => {
         const { getByTestId } = render();
 
