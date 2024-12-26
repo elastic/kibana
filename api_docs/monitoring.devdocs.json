@@ -19,7 +19,7 @@
         "tags": [],
         "label": "IBulkUploader",
         "description": [],
-        "path": "x-pack/plugins/monitoring/server/types.ts",
+        "path": "x-pack/platform/plugins/private/monitoring/server/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -33,7 +33,7 @@
             "signature": [
               "() => any"
             ],
-            "path": "x-pack/plugins/monitoring/server/types.ts",
+            "path": "x-pack/platform/plugins/private/monitoring/server/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -49,7 +49,7 @@
             "signature": [
               "() => void"
             ],
-            "path": "x-pack/plugins/monitoring/server/types.ts",
+            "path": "x-pack/platform/plugins/private/monitoring/server/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -73,7 +73,7 @@
               },
               ") => void"
             ],
-            "path": "x-pack/plugins/monitoring/server/types.ts",
+            "path": "x-pack/platform/plugins/private/monitoring/server/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -93,7 +93,7 @@
                     "text": "ElasticsearchClient"
                   }
                 ],
-                "path": "x-pack/plugins/monitoring/server/types.ts",
+                "path": "x-pack/platform/plugins/private/monitoring/server/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -111,7 +111,7 @@
             "signature": [
               "() => void"
             ],
-            "path": "x-pack/plugins/monitoring/server/types.ts",
+            "path": "x-pack/platform/plugins/private/monitoring/server/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -139,7 +139,7 @@
           },
           " extends MonitoringConfigTypeOverriddenUI"
         ],
-        "path": "x-pack/plugins/monitoring/server/config.ts",
+        "path": "x-pack/platform/plugins/private/monitoring/server/config.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -155,7 +155,7 @@
             "signature": [
               "MonitoringConfigTypeOverriddenUIElasticsearch"
             ],
-            "path": "x-pack/plugins/monitoring/server/config.ts",
+            "path": "x-pack/platform/plugins/private/monitoring/server/config.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -183,7 +183,7 @@
           "<EmailSettingData | undefined, {}> & ",
           "KibanaSettingsCollectorExtraOptions"
         ],
-        "path": "x-pack/plugins/monitoring/server/kibana_monitoring/collectors/get_settings_collector.ts",
+        "path": "x-pack/platform/plugins/private/monitoring/server/kibana_monitoring/collectors/get_settings_collector.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -197,7 +197,7 @@
       "tags": [],
       "label": "MonitoringPluginSetup",
       "description": [],
-      "path": "x-pack/plugins/monitoring/server/types.ts",
+      "path": "x-pack/platform/plugins/private/monitoring/server/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -211,7 +211,7 @@
           "signature": [
             "() => any"
           ],
-          "path": "x-pack/plugins/monitoring/server/types.ts",
+          "path": "x-pack/platform/plugins/private/monitoring/server/types.ts",
           "deprecated": false,
           "trackAdoption": false,
           "returnComment": [],
@@ -235,7 +235,7 @@
         "signature": [
           "(timestamp: any, calculationFlag: any, initialTime: any) => string"
         ],
-        "path": "x-pack/plugins/monitoring/common/format_timestamp_to_duration.js",
+        "path": "x-pack/platform/plugins/private/monitoring/common/format_timestamp_to_duration.js",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -249,7 +249,7 @@
             "signature": [
               "any"
             ],
-            "path": "x-pack/plugins/monitoring/common/format_timestamp_to_duration.js",
+            "path": "x-pack/platform/plugins/private/monitoring/common/format_timestamp_to_duration.js",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -264,7 +264,7 @@
             "signature": [
               "any"
             ],
-            "path": "x-pack/plugins/monitoring/common/format_timestamp_to_duration.js",
+            "path": "x-pack/platform/plugins/private/monitoring/common/format_timestamp_to_duration.js",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -279,7 +279,7 @@
             "signature": [
               "any"
             ],
-            "path": "x-pack/plugins/monitoring/common/format_timestamp_to_duration.js",
+            "path": "x-pack/platform/plugins/private/monitoring/common/format_timestamp_to_duration.js",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true

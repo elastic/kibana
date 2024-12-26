@@ -1047,7 +1047,7 @@
               },
               {
                 "plugin": "fleet",
-                "path": "x-pack/plugins/fleet/public/applications/integrations/index.tsx"
+                "path": "x-pack/platform/plugins/shared/fleet/public/applications/integrations/index.tsx"
               },
               {
                 "plugin": "security",

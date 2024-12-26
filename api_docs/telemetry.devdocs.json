@@ -805,15 +805,7 @@
           "references": [
             {
               "plugin": "fleet",
-              "path": "x-pack/plugins/fleet/server/telemetry/sender.ts"
-            },
-            {
-              "plugin": "fleet",
-              "path": "x-pack/plugins/fleet/server/telemetry/sender.test.ts"
-            },
-            {
-              "plugin": "fleet",
-              "path": "x-pack/plugins/fleet/server/telemetry/sender.test.ts"
+              "path": "x-pack/platform/plugins/shared/fleet/server/telemetry/sender.ts"
             },
             {
               "plugin": "datasetQuality",
@@ -826,6 +818,14 @@
             {
               "plugin": "securitySolution",
               "path": "x-pack/solutions/security/plugins/security_solution/server/lib/telemetry/sender_helpers.ts"
+            },
+            {
+              "plugin": "fleet",
+              "path": "x-pack/platform/plugins/shared/fleet/server/telemetry/sender.test.ts"
+            },
+            {
+              "plugin": "fleet",
+              "path": "x-pack/platform/plugins/shared/fleet/server/telemetry/sender.test.ts"
             },
             {
               "plugin": "synthetics",

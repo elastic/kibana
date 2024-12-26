@@ -2158,11 +2158,11 @@
         "references": [
           {
             "plugin": "monitoring",
-            "path": "x-pack/plugins/monitoring/public/url_state.ts"
+            "path": "x-pack/platform/plugins/private/monitoring/public/url_state.ts"
           },
           {
             "plugin": "monitoring",
-            "path": "x-pack/plugins/monitoring/public/url_state.ts"
+            "path": "x-pack/platform/plugins/private/monitoring/public/url_state.ts"
           }
         ],
         "returnComment": [],
