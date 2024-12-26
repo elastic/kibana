@@ -13,7 +13,7 @@ export const useCasesContext = () => {
 
   if (!casesContext) {
     throw new Error(
-      'useCasesContext must be used within a CasesProvider and have a defined value. See https://github.com/elastic/kibana/blob/main/x-pack/plugins/cases/README.md#cases-ui'
+      'useCasesContext must be used within a CasesProvider and have a defined value. See https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/cases/README.md#cases-ui'
     );
   }
 

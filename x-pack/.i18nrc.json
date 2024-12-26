@@ -18,7 +18,7 @@
     "xpack.apmDataAccess": "plugins/observability_solution/apm_data_access",
     "xpack.banners": "plugins/banners",
     "xpack.canvas": "platform/plugins/private/canvas",
-    "xpack.cases": "plugins/cases",
+    "xpack.cases": "platform/plugins/shared/cases",
     "xpack.cloud": "plugins/cloud",
     "xpack.cloudDefend": "solutions/security/plugins/cloud_defend",
     "xpack.cloudLinks": "plugins/cloud_integrations/cloud_links",

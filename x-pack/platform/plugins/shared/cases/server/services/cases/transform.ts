@@ -199,7 +199,7 @@ export function transformSavedObjectToExternalModel(
 }
 
 function transformESExternalService(
-  // this type needs to match that of CaseFullExternalService except that it does not include the connector_id, see: x-pack/plugins/cases/common/api/cases/case.ts
+  // this type needs to match that of CaseFullExternalService except that it does not include the connector_id, see: x-pack/platform/plugins/shared/cases/common/api/cases/case.ts
   // that's why it can be null here
   externalService: ExternalServicePersisted | null | undefined,
   references: SavedObjectReference[] | undefined

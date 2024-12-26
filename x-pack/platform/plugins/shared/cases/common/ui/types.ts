@@ -179,7 +179,7 @@ export type SingleCaseMetricsFeature = Exclude<CaseMetricsFeature, CaseMetricsFe
 
 /**
  * If you add a new value here and you want to support it on the URL
- * you have to also add it here x-pack/plugins/cases/public/components/all_cases/schema.ts
+ * you have to also add it here x-pack/platform/plugins/shared/cases/public/components/all_cases/schema.ts
  */
 export enum SortFieldCase {
   closedAt = 'closedAt',

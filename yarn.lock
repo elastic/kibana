@@ -4073,7 +4073,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/cases-plugin@link:x-pack/plugins/cases":
+"@kbn/cases-plugin@link:x-pack/platform/plugins/shared/cases":
   version "0.0.0"
   uid ""
 

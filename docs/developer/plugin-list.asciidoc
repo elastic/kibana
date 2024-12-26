@@ -479,7 +479,7 @@ The plugin exposes the static DefaultEditorController class to consume.
 |"Never look back. The past is done. The future is a blank canvas." ― Suzy Kassem, Rise Up and Salute the Sun
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/cases/README.md[cases]
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/shared/cases/README.md[cases]
 |This plugin provides cases management in Kibana
 
 
