@@ -371,7 +371,7 @@ const fetchTotalHitsSearchSource = async ({
         title: i18n.translate('discover.inspectorRequestDataTitleTotalHits', {
           defaultMessage: 'Total hits',
         }),
-        description: i18n.translate('discove.inspectorRequestDescriptionTotalHits', {
+        description: i18n.translate('discover.inspectorRequestDescriptionTotalHits', {
           defaultMessage: 'This request queries Elasticsearch to fetch the total hits.',
         }),
       }
