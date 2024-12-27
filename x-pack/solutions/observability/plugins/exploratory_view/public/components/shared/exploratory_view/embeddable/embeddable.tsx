@@ -17,7 +17,7 @@ import {
 } from '@kbn/lens-plugin/public';
 import { ViewMode } from '@kbn/embeddable-plugin/common';
 import { observabilityFeatureId } from '@kbn/observability-shared-plugin/public';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 import { AnalyticsServiceSetup } from '@kbn/core-analytics-browser';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { useEBTTelemetry } from '../hooks/use_ebt_telemetry';

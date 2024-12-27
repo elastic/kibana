@@ -11,7 +11,7 @@ import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import type { AnalyticsServiceSetup, CoreStart } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { EuiErrorBoundary } from '@elastic/eui';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { FormulaPublicApi } from '@kbn/lens-plugin/public';
 import { i18n } from '@kbn/i18n';
