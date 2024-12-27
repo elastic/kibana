@@ -24,25 +24,6 @@ export const errorMessageStrings = {
         i18n.translate('sharedUXPackages.error_boundary.fatal.prompt.detailButton', {
           defaultMessage: 'Show details',
         }),
-      details: {
-        title: () =>
-          i18n.translate('sharedUXPackages.error_boundary.fatal.prompt.details.title', {
-            defaultMessage: 'Error details',
-          }),
-        componentName: (errorComponentName: string) =>
-          i18n.translate('sharedUXPackages.error_boundary.fatal.prompt.details', {
-            defaultMessage: 'The above error occurred in {name}:',
-            values: { name: errorComponentName },
-          }),
-        closeButton: () =>
-          i18n.translate('sharedUXPackages.error_boundary.fatal.prompt.details.close', {
-            defaultMessage: 'Close',
-          }),
-        copyToClipboardButton: () =>
-          i18n.translate('sharedUXPackages.error_boundary.fatal.prompt.details.copyToClipboard', {
-            defaultMessage: 'Copy error to clipboard',
-          }),
-      },
       pageReloadButton: () =>
         i18n.translate('sharedUXPackages.error_boundary.fatal.prompt.pageReloadButton', {
           defaultMessage: 'Refresh page',
@@ -64,5 +45,42 @@ export const errorMessageStrings = {
           defaultMessage: 'Refresh page',
         }),
     },
+  },
+  section: {
+    callout: {
+      title: (sectionName: string) =>
+        i18n.translate('sharedUXPackages.section_error_boundary.prompt.title', {
+          defaultMessage: 'Unable to load {sectionName}',
+          values: { sectionName },
+        }),
+      body: (sectionName: string) =>
+        i18n.translate('sharedUXPackages.section_error_boundary.prompt.body', {
+          defaultMessage: 'An error happened while rendering {sectionName}.',
+          values: { sectionName },
+        }),
+      showDetailsButton: () =>
+        i18n.translate('sharedUXPackages.section_error_boundary.prompt.detailButton', {
+          defaultMessage: 'Show details',
+        }),
+    },
+  },
+  details: {
+    title: () =>
+      i18n.translate('sharedUXPackages.error_boundary.fatal.prompt.details.title', {
+        defaultMessage: 'Error details',
+      }),
+    componentName: (errorComponentName: string) =>
+      i18n.translate('sharedUXPackages.error_boundary.fatal.prompt.details', {
+        defaultMessage: 'The above error occurred in {name}:',
+        values: { name: errorComponentName },
+      }),
+    closeButton: () =>
+      i18n.translate('sharedUXPackages.error_boundary.fatal.prompt.details.close', {
+        defaultMessage: 'Close',
+      }),
+    copyToClipboardButton: () =>
+      i18n.translate('sharedUXPackages.error_boundary.fatal.prompt.details.copyToClipboard', {
+        defaultMessage: 'Copy error to clipboard',
+      }),
   },
 };

@@ -25,74 +25,18 @@ import {
   EuiButtonEmpty,
   EuiCopy,
   EuiPanel,
+  EuiCallOut,
 } from '@elastic/eui';
 
 import { errorMessageStrings as strings } from './message_strings';
 
-export interface ErrorCalloutProps {
-  error: Error;
-  errorInfo: Partial<React.ErrorInfo> | null;
-  name: string | null;
-  onClickRefresh: () => void;
+interface FatalPromptProps {
+  showErrorDetails: () => void;
+  onRecoverAttempt: () => void;
 }
 
-const CodePanel: React.FC<ErrorCalloutProps & { onClose: () => void }> = (props) => {
-  const { error, errorInfo, name: errorComponentName, onClose } = props;
-  const simpleFlyoutTitleId = useGeneratedHtmlId({
-    prefix: 'simpleFlyoutTitle',
-  });
-
-  const errorName =
-    errorComponentName && strings.fatal.callout.details.componentName(errorComponentName);
-  const errorTrace = errorInfo?.componentStack ?? error.stack ?? error.toString();
-
-  return (
-    <EuiFlyout onClose={onClose} aria-labelledby={simpleFlyoutTitleId} paddingSize="none">
-      <EuiFlyoutHeader hasBorder>
-        <EuiPanel paddingSize="m" hasBorder={false} hasShadow={false}>
-          <EuiTitle size="m">
-            <h2>{strings.fatal.callout.details.title()}</h2>
-          </EuiTitle>
-        </EuiPanel>
-      </EuiFlyoutHeader>
-      <EuiFlyoutBody>
-        <EuiCodeBlock data-test-subj="errorBoundaryFatalDetailsErrorString">
-          <p>{(error.stack ?? error.toString()) + '\n\n'}</p>
-          <p>
-            {errorName}
-            {errorTrace}
-          </p>
-        </EuiCodeBlock>
-      </EuiFlyoutBody>
-      <EuiFlyoutFooter>
-        <EuiPanel paddingSize="m" hasBorder={false} hasShadow={false}>
-          <EuiFlexGroup justifyContent="spaceBetween">
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty onClick={onClose} flush="left">
-                {strings.fatal.callout.details.closeButton()}
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiCopy textToCopy={errorName + '\n\n' + errorTrace}>
-                {(copy) => (
-                  <EuiButton onClick={copy} fill iconType="copyClipboard">
-                    {strings.fatal.callout.details.copyToClipboardButton()}
-                  </EuiButton>
-                )}
-              </EuiCopy>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiPanel>
-      </EuiFlyoutFooter>
-    </EuiFlyout>
-  );
-};
-
-export const FatalPrompt: React.FC<ErrorCalloutProps> = (props) => {
-  const { onClickRefresh } = props;
-  const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
-
-  return (
+export const FatalPrompt = withErrorDetails(
+  ({ showErrorDetails, onRecoverAttempt }: FatalPromptProps): JSX.Element => (
     <EuiEmptyPrompt
       title={<h2 data-test-subj="errorBoundaryFatalHeader">{strings.fatal.callout.title()}</h2>}
       color="danger"
@@ -105,7 +49,7 @@ export const FatalPrompt: React.FC<ErrorCalloutProps> = (props) => {
               color="danger"
               iconType="refresh"
               fill={true}
-              onClick={onClickRefresh}
+              onClick={onRecoverAttempt}
               data-test-subj="errorBoundaryFatalPromptReloadBtn"
             >
               {strings.fatal.callout.pageReloadButton()}
@@ -114,23 +58,23 @@ export const FatalPrompt: React.FC<ErrorCalloutProps> = (props) => {
           <p>
             <EuiLink
               color="danger"
-              onClick={() => setIsFlyoutVisible(true)}
+              onClick={showErrorDetails}
               data-test-subj="errorBoundaryFatalShowDetailsBtn"
             >
               {strings.fatal.callout.showDetailsButton()}
             </EuiLink>
-            {isFlyoutVisible ? (
-              <CodePanel {...props} onClose={() => setIsFlyoutVisible(false)} />
-            ) : null}
           </p>
         </>
       }
     />
-  );
-};
+  )
+);
 
-export const RecoverablePrompt = (props: ErrorCalloutProps) => {
-  const { onClickRefresh } = props;
+interface RecoverablePromptProps {
+  onRecoverAttempt: () => void;
+}
+
+export const RecoverablePrompt = ({ onRecoverAttempt }: RecoverablePromptProps) => {
   return (
     <EuiEmptyPrompt
       title={
@@ -150,12 +94,130 @@ export const RecoverablePrompt = (props: ErrorCalloutProps) => {
           color="warning"
           iconType="refresh"
           fill={true}
-          onClick={onClickRefresh}
+          onClick={onRecoverAttempt}
           data-test-subj="errorBoundaryRecoverablePromptReloadBtn"
         >
           {strings.recoverable.callout.pageReloadButton()}
         </EuiButton>
       }
     />
+  );
+};
+
+interface SectionErrorPromptProps {
+  sectionName: string;
+  showErrorDetails: () => void;
+}
+
+export const SectionErrorPrompt = withErrorDetails(
+  ({ sectionName, showErrorDetails }: SectionErrorPromptProps): JSX.Element => {
+    return (
+      <EuiCallOut
+        title={strings.section.callout.title(sectionName)}
+        color="danger"
+        iconType="warning"
+      >
+        <>
+          <p>{strings.section.callout.body(sectionName)}</p>
+          {showErrorDetails && (
+            <p>
+              <EuiButton color="danger" onClick={showErrorDetails}>
+                {strings.section.callout.showDetailsButton()}
+              </EuiButton>
+            </p>
+          )}
+        </>
+      </EuiCallOut>
+    );
+  }
+);
+
+interface ErrorDetailsProps {
+  error: Error;
+  errorInfo: Partial<React.ErrorInfo> | null;
+  name: string | null;
+}
+
+interface ErrorPromptProps {
+  showErrorDetails: () => void;
+}
+
+function withErrorDetails<PromptComponentProps extends ErrorPromptProps = ErrorPromptProps>(
+  PromptComponent: React.FC<PromptComponentProps>
+): React.FC<ErrorDetailsProps & Omit<PromptComponentProps, 'showErrorDetails'>> {
+  return ({ error, errorInfo, name, ...rest }) => {
+    const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
+
+    return (
+      <>
+        <PromptComponent {...(rest as any)} showErrorDetails={() => setIsFlyoutVisible(true)} />
+        {isFlyoutVisible ? (
+          <CodePanel
+            error={error}
+            errorInfo={errorInfo}
+            name={name}
+            onClose={() => setIsFlyoutVisible(false)}
+          />
+        ) : null}
+      </>
+    );
+  };
+}
+
+interface CodePanelProps {
+  error: Error;
+  errorInfo: Partial<React.ErrorInfo> | null;
+  name: string | null;
+  onClose: () => void;
+}
+
+const CodePanel: React.FC<CodePanelProps> = (props) => {
+  const { error, errorInfo, name: errorComponentName, onClose } = props;
+  const simpleFlyoutTitleId = useGeneratedHtmlId({
+    prefix: 'simpleFlyoutTitle',
+  });
+
+  const errorName = errorComponentName && strings.details.componentName(errorComponentName);
+  const errorTrace = errorInfo?.componentStack ?? error.stack ?? error.toString();
+
+  return (
+    <EuiFlyout onClose={onClose} aria-labelledby={simpleFlyoutTitleId} paddingSize="none">
+      <EuiFlyoutHeader hasBorder>
+        <EuiPanel paddingSize="m" hasBorder={false} hasShadow={false}>
+          <EuiTitle size="m">
+            <h2>{strings.details.title()}</h2>
+          </EuiTitle>
+        </EuiPanel>
+      </EuiFlyoutHeader>
+      <EuiFlyoutBody>
+        <EuiCodeBlock data-test-subj="errorBoundaryFatalDetailsErrorString">
+          <p>{(error.stack ?? error.toString()) + '\n\n'}</p>
+          <p>
+            {errorName}
+            {errorTrace}
+          </p>
+        </EuiCodeBlock>
+      </EuiFlyoutBody>
+      <EuiFlyoutFooter>
+        <EuiPanel paddingSize="m" hasBorder={false} hasShadow={false}>
+          <EuiFlexGroup justifyContent="spaceBetween">
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty onClick={onClose} flush="left">
+                {strings.details.closeButton()}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiCopy textToCopy={errorName + '\n\n' + errorTrace}>
+                {(copy) => (
+                  <EuiButton onClick={copy} fill iconType="copyClipboard">
+                    {strings.details.copyToClipboardButton()}
+                  </EuiButton>
+                )}
+              </EuiCopy>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiPanel>
+      </EuiFlyoutFooter>
+    </EuiFlyout>
   );
 };
