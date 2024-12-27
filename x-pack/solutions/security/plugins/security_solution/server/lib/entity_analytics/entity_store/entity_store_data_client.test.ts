@@ -27,7 +27,7 @@ const definition: EntityDefinition = convertToEntityManagerDefinition(
     pipeline: [],
     version: '0.0.1',
     fields: [],
-    identityFields: ['host.name'],
+    identityField: 'host.name',
     indexMappings: {},
     indexPatterns: [],
     settings: {

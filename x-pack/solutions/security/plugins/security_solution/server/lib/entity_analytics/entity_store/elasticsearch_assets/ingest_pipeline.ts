@@ -59,7 +59,7 @@ const buildIngestPipeline = ({
     {
       enrich: {
         policy_name: enrichPolicyName,
-        field: description.identityFields[0], // TODO figure out what happens when there are multiple identity fields
+        field: description.identityField,
         target_field: ENRICH_FIELD,
       },
     },
@@ -72,7 +72,7 @@ const buildIngestPipeline = ({
     {
       set: {
         field: 'entity.name',
-        value: `{{${description.identityFields[0]}}}`,
+        value: `{{${description.identityField}}}`,
       },
     },
     ...getDotExpanderSteps(allEntityFields),

@@ -26,7 +26,7 @@ export const createEntityIndexComponentTemplate = (
   description: EntityEngineInstallationDescriptor,
   esClient: ElasticsearchClient
 ) => {
-  const { id = '', indexMappings } = description;
+  const { id, indexMappings } = description;
   const name = getComponentTemplateName(id);
   return esClient.cluster.putComponentTemplate({
     name,

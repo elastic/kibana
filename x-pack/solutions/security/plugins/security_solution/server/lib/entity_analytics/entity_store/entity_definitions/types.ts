@@ -18,7 +18,7 @@ export type EntityDescription = PickPartial<
   | 'version'
   | 'entityType'
   | 'fields'
-  | 'identityFields'
+  | 'identityField'
   | 'indexPatterns'
   | 'indexMappings'
   | 'settings'

@@ -13,7 +13,7 @@ export const USER_IDENTITY_FIELD = 'user.name';
 export const userEntityEngineDescription: EntityDescription = {
   entityType: 'user',
   version: USER_DEFINITION_VERSION,
-  identityFields: [USER_IDENTITY_FIELD],
+  identityField: USER_IDENTITY_FIELD,
   settings: {
     timestampField: '@timestamp',
   },

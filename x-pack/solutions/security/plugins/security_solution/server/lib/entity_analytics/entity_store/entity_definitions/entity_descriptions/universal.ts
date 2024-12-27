@@ -30,7 +30,7 @@ const entityMetadataExtractorProcessor = {
 
       for (meta in ctx.collected.metadata) {
         Object json = Processors.json(meta);
-          
+
         if (((Map)json)[id] == null) {
           continue;
         }
@@ -41,7 +41,7 @@ const entityMetadataExtractorProcessor = {
           merged.put(key, value);
         }
       }
-      
+
       merged.entity.id = id;
       ctx = merged;
     `,
@@ -51,7 +51,7 @@ const entityMetadataExtractorProcessor = {
 export const universalEntityEngineDescription: EntityDescription = {
   version: UNIVERSAL_DEFINITION_VERSION,
   entityType: 'universal',
-  identityFields: [UNIVERSAL_IDENTITY_FIELD],
+  identityField: UNIVERSAL_IDENTITY_FIELD,
   fields: [collect({ source: 'entities.keyword', destination: 'collected.metadata' })],
   settings: {
     timestampField: 'event.ingested',

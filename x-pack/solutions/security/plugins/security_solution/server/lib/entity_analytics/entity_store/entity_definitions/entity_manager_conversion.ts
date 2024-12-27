@@ -21,8 +21,8 @@ export const convertToEntityManagerDefinition = (
     name: `Security '${description.entityType}' Entity Store Definition`,
     type: description.entityType,
     indexPatterns: description.indexPatterns,
-    identityFields: description.identityFields,
-    displayNameTemplate: `{{${description.identityFields.join('_')}}}`,
+    identityFields: [description.identityField],
+    displayNameTemplate: `{{${description.identityField}}}`,
     metadata,
     latest: {
       timestampField: description.settings.timestampField,
