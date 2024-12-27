@@ -9,7 +9,8 @@ import { METRIC_TYPE } from '@kbn/analytics';
 import type { SerializedEnrichPolicy } from '@kbn/index-management-shared-types';
 import { IndicesStatsResponse } from '@elastic/elasticsearch/lib/api/types';
 import { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
-import { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
+import { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { InferenceProvider } from '@kbn/inference-endpoint-ui-common';
 import {
   API_BASE_PATH,
   INTERNAL_API_BASE_PATH,
@@ -45,7 +46,7 @@ import {
 import { useRequest, sendRequest } from './use_request';
 import { httpService } from './http';
 import { UiMetricService } from './ui_metric';
-import type { FieldFromIndicesRequest } from '../../../common';
+import type { FieldFromIndicesRequest, InferenceEndpoint } from '../../../common';
 import { Fields } from '../components/mappings_editor/types';
 
 interface ReloadIndicesOptions {
@@ -457,6 +458,25 @@ export function getInferenceEndpoints() {
   return sendRequest<InferenceAPIConfigResponse[]>({
     path: `${API_BASE_PATH}/inference/all`,
     method: 'get',
+  });
+}
+
+export function getInferenceServices() {
+  return sendRequest<InferenceProvider[]>({
+    path: `${API_BASE_PATH}/inference/services`,
+    method: 'get',
+  });
+}
+
+export function createInferenceEndpoint(
+  taskType: string,
+  inferenceId: string,
+  inferenceEndpoint: InferenceEndpoint
+) {
+  return sendRequest<InferenceAPIConfigResponse>({
+    path: `${API_BASE_PATH}/inference/${taskType}/${inferenceId}`,
+    method: 'put',
+    body: JSON.stringify(inferenceEndpoint),
   });
 }
 

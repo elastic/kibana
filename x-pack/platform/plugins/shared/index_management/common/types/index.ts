@@ -25,3 +25,5 @@ export type {
 export * from './component_templates';
 
 export * from './enrich_policies';
+
+export * from './inference';

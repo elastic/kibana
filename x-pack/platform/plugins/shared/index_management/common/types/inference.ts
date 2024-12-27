@@ -5,6 +5,9 @@
  * 2.0.
  */
 
-export type { Enricher } from './index_data_enricher';
-export { IndexDataEnricher } from './index_data_enricher';
-export { unflattenObject } from './unflatten_object';
+import type { Config, Secrets } from '@kbn/inference-endpoint-ui-common';
+
+export interface InferenceEndpoint {
+  config: Config;
+  secrets: Secrets;
+}
