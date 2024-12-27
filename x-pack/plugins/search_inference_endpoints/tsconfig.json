@@ -35,7 +35,12 @@
     "@kbn/utility-types",
     "@kbn/search-navigation",
     "@kbn/shared-ux-page-kibana-template",
-    "@kbn/licensing-plugin"
+    "@kbn/licensing-plugin",
+    "@kbn/inference-endpoint-ui-common",
+    "@kbn/es-ui-shared-plugin",
+    "@kbn/search-connectors",
+    "@kbn/core-http-browser",
+    "@kbn/safer-lodash-set"
   ],
   "exclude": [
     "target/**/*",
