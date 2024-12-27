@@ -40,7 +40,7 @@ export const cli = async () => {
 It will first setup a host VM that runs the Microsoft Defender agent on it. This VM will ensure that data is being
 created in Microsoft Defender's system.
 
-It will then also setup a second VM (if necessary) that runs Elastic Agent along with the Microsoft Defender for Endpiont integration
+It will then also setup a second VM (if necessary) that runs Elastic Agent along with the Microsoft Defender for Endpoint integration
 policy (an agent-less integration) - this is the process that then connects to the Microsoft's management
 console and pushes the data to Elasticsearch.`,
     flags: {
