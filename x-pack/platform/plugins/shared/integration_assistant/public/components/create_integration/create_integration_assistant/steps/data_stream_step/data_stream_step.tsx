@@ -16,6 +16,7 @@ import {
   EuiPanel,
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { NAME_REGEX_PATTERN } from '../../../../../../common/constants';
 import type { InputType } from '../../../../../../common';
 import { useActions, type State } from '../../state';
 import type { IntegrationSettings } from '../../types';
@@ -43,7 +44,7 @@ export const InputTypeOptions: Array<EuiComboBoxOptionOption<InputType>> = [
   { value: 'udp', label: 'UDP' },
 ];
 
-const isValidName = (name: string) => /^[a-z0-9_]+$/.test(name);
+const isValidName = (name: string) => NAME_REGEX_PATTERN.test(name);
 const getNameFromTitle = (title: string) => title.toLowerCase().replaceAll(/[^a-z0-9]/g, '_');
 
 interface DataStreamStepProps {
