@@ -20,6 +20,13 @@ export function registerV1PrometheusRoute({
   router.get(
     {
       path: PROMETHEUS_PATH,
+      security: {
+        authz: {
+          enabled: false,
+          reason:
+            'This route is opted out from authorization because it is not interacting with ES at all',
+        },
+      },
       options: {
         authRequired: true,
         tags: ['api'], // ensures that unauthenticated calls receive a 401 rather than a 302 redirect to login page
