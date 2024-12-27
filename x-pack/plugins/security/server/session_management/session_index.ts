@@ -632,14 +632,9 @@ export class SessionIndex {
     // Check if required index exists.
     let indexExists = false;
     try {
-      const result = await this.options.elasticsearchClient.search({
+      indexExists = await this.options.elasticsearchClient.indices.exists({
         index: this.aliasName,
-        size: 0,
       });
-      const totalHits =
-        typeof result.hits?.total === 'object' ? result.hits.total.value : result.hits?.total ?? 0;
-
-      indexExists = totalHits > 0;
     } catch (err) {
       this.options.logger.error(`Failed to check if session index exists: ${err.message}`);
       throw err;
@@ -693,9 +688,8 @@ export class SessionIndex {
       const indexMappings = await this.options.elasticsearchClient.indices.getMapping({
         index: this.aliasName,
       });
-
       indexMappingsVersion =
-        indexMappings[this.aliasName]?.mappings?._meta?.[
+        indexMappings[this.indexName]?.mappings?._meta?.[
           SESSION_INDEX_MAPPINGS_VERSION_META_FIELD_NAME
         ];
     } catch (err) {

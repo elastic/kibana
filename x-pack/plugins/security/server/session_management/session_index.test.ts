@@ -65,9 +65,8 @@ describe('Session index', () => {
       expect(mockElasticsearchClient.indices.existsIndexTemplate).toHaveBeenCalledWith({
         name: indexTemplateName,
       });
-      expect(mockElasticsearchClient.search).toHaveBeenCalledWith({
+      expect(mockElasticsearchClient.indices.exists).toHaveBeenCalledWith({
         index: aliasName,
-        size: 0,
       });
     }
 
@@ -248,10 +247,10 @@ describe('Session index', () => {
         name: aliasName,
       });
       expect(mockElasticsearchClient.indices.getMapping).toHaveBeenCalledTimes(1);
-      expect(mockElasticsearchClient.indices.getMapping).toHaveBeenCalledWith({ index: indexName });
+      expect(mockElasticsearchClient.indices.getMapping).toHaveBeenCalledWith({ index: aliasName });
       expect(mockElasticsearchClient.indices.putMapping).toHaveBeenCalledTimes(1);
       expect(mockElasticsearchClient.indices.putMapping).toHaveBeenCalledWith({
-        index: indexName,
+        index: aliasName,
         ...getSessionIndexSettings({ indexName, aliasName }).mappings,
       });
     });
@@ -280,10 +279,10 @@ describe('Session index', () => {
         name: aliasName,
       });
       expect(mockElasticsearchClient.indices.getMapping).toHaveBeenCalledTimes(1);
-      expect(mockElasticsearchClient.indices.getMapping).toHaveBeenCalledWith({ index: indexName });
+      expect(mockElasticsearchClient.indices.getMapping).toHaveBeenCalledWith({ index: aliasName });
       expect(mockElasticsearchClient.indices.putMapping).toHaveBeenCalledTimes(1);
       expect(mockElasticsearchClient.indices.putMapping).toHaveBeenCalledWith({
-        index: indexName,
+        index: aliasName,
         ...getSessionIndexSettings({ indexName, aliasName }).mappings,
       });
     });
@@ -312,7 +311,7 @@ describe('Session index', () => {
         name: aliasName,
       });
       expect(mockElasticsearchClient.indices.getMapping).toHaveBeenCalledTimes(1);
-      expect(mockElasticsearchClient.indices.getMapping).toHaveBeenCalledWith({ index: indexName });
+      expect(mockElasticsearchClient.indices.getMapping).toHaveBeenCalledWith({ index: aliasName });
       expect(mockElasticsearchClient.indices.putMapping).not.toHaveBeenCalled();
     });
 
@@ -424,15 +423,7 @@ describe('Session index', () => {
     });
 
     it('creates the index/alias if missing', async () => {
-      mockElasticsearchClient.search.mockResponse({
-        hits: {
-          total: 0,
-          hits: [],
-        },
-        took: 1,
-        timed_out: false,
-        _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
-      });
+      mockElasticsearchClient.indices.exists.mockResponse(false);
 
       let callCount = 0;
       mockElasticsearchClient.openPointInTime.mockResponseImplementation(() => {
@@ -469,7 +460,7 @@ describe('Session index', () => {
         { meta: true }
       );
 
-      expect(mockElasticsearchClient.search).toHaveBeenCalledTimes(1);
+      expect(mockElasticsearchClient.indices.exists).toHaveBeenCalledTimes(1);
       expect(mockElasticsearchClient.indices.create).toHaveBeenCalledTimes(1);
       expect(mockElasticsearchClient.indices.putAlias).not.toHaveBeenCalled();
       expect(mockElasticsearchClient.search).toHaveBeenCalledTimes(1);
