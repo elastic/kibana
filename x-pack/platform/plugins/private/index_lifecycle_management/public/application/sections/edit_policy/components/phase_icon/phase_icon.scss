@@ -23,7 +23,7 @@
     }
 
     &--amsterdam {
-      fill: $euiColorVis9;
+      fill: $euiColorVis9_behindText;
     }
   }
 
@@ -33,7 +33,7 @@
     }
 
     &--amsterdam {
-      fill: $euiColorVis5;
+      fill: $euiColorVis5_behindText;
     }
   }
 
@@ -43,15 +43,18 @@
     }
 
     &--amsterdam {
-      fill: $euiColorVis1;
+      fill: $euiColorVis1_behindText;
     }
   }
 
   &__inner--frozen {
 
-    &--borealis,
-    &--amsterdam {
+    &--borealis {
       fill: $euiColorVis4;
+    }
+
+    &--amsterdam {
+      fill: $euiColorVis4_behindText;
     }
   }
 
