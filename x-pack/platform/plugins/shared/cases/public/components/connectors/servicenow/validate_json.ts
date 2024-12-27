@@ -6,7 +6,7 @@
  */
 
 import type { ValidationFunc } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import { isEmpty } from 'lodash';
+import { isEmpty, isObject } from 'lodash';
 import * as i18n from './translations';
 
 const MAX_ADDITIONAL_FIELDS_LENGTH = 10;
@@ -16,9 +16,16 @@ export const validateJSON = (...args: Parameters<ValidationFunc>): ReturnType<Va
 
   try {
     if (typeof value === 'string' && !isEmpty(value)) {
-      const parsedOtherFields = JSON.parse(value);
+      const parsedJSON = JSON.parse(value);
 
-      if (Object.keys(parsedOtherFields).length > MAX_ADDITIONAL_FIELDS_LENGTH) {
+      if (!isObject(parsedJSON)) {
+        return {
+          code: 'ERR_JSON_FORMAT',
+          message: i18n.INVALID_JSON_FORMAT,
+        };
+      }
+
+      if (Object.keys(parsedJSON).length > MAX_ADDITIONAL_FIELDS_LENGTH) {
         return {
           code: 'ERR_JSON_FORMAT',
           message: i18n.MAX_ATTRIBUTES_ERROR(MAX_ADDITIONAL_FIELDS_LENGTH),

@@ -53,4 +53,18 @@ describe('validateJSON', () => {
       message: 'A maximum of 10 additional fields can be defined at a time.',
     });
   });
+
+  it('throws when a non object string is found', () => {
+    expect(validateJSON({ ...formData, value: '"foobar"' })).toEqual({
+      code: 'ERR_JSON_FORMAT',
+      message: 'Invalid JSON.',
+    });
+  });
+
+  it('throws when a non object empty string is found', () => {
+    expect(validateJSON({ ...formData, value: '""' })).toEqual({
+      code: 'ERR_JSON_FORMAT',
+      message: 'Invalid JSON.',
+    });
+  });
 });
