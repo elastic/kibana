@@ -7178,37 +7178,6 @@
         }
       }
     },
-    "enterprise_search": {
-      "properties": {
-        "ui_viewed": {
-          "properties": {
-            "overview": {
-              "type": "long"
-            },
-            "setup_guide": {
-              "type": "long"
-            }
-          }
-        },
-        "ui_error": {
-          "properties": {
-            "cannot_connect": {
-              "type": "long"
-            }
-          }
-        },
-        "ui_clicked": {
-          "properties": {
-            "app_search": {
-              "type": "long"
-            },
-            "workplace_search": {
-              "type": "long"
-            }
-          }
-        }
-      }
-    },
     "infraops": {
       "properties": {
         "last_24_hours": {
