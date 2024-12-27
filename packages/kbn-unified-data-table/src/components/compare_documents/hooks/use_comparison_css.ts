@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { tint, useEuiBackgroundColor, useEuiTheme } from '@elastic/eui';
+import { useEuiBackgroundColor, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { CELL_CLASS } from '../../../utils/get_render_cell_value';
 import { DocumentDiffMode } from '../types';
@@ -120,7 +120,7 @@ export const useComparisonCss = ({
         .${REMOVED_SEGMENT_CLASS}:before {
           content: '-';
           ${indicatorCss}
-          background-color: ${tint(euiTheme.colors.danger, 0.25)};
+          background-color: ${euiTheme.colors.backgroundFilledDanger};
           color: ${euiTheme.colors.lightestShade};
         }
       `}

@@ -13,7 +13,6 @@ import {
   EuiText,
   useEuiTheme,
   EuiSplitPanel,
-  transparentize,
 } from '@elastic/eui';
 import React, { memo, useMemo } from 'react';
 import { css } from '@emotion/react';
@@ -137,7 +136,7 @@ export const PreviewSection: React.FC<PreviewSectionProps> = memo(
         <EuiSplitPanel.Outer
           css={css`
             margin: ${euiTheme.size.xs};
-            box-shadow: 0 0 16px 0 ${transparentize(euiTheme.colors.mediumShade, 0.5)};
+            box-shadow: 0 0 ${euiTheme.size.base} 0 ${euiTheme.colors.lightShade};
           `}
           data-test-subj={PREVIEW_SECTION_TEST_ID}
           className="eui-fullHeight"
