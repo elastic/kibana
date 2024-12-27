@@ -28,13 +28,14 @@ import { AgentPolicy, PackagePolicy, PackagePolicyInput } from '@kbn/fleet-plugi
 import { createAgentPolicyMock, createPackagePolicyMock } from '@kbn/fleet-plugin/common/mocks';
 
 describe('AgentlessConnectorsInfraService', () => {
-  let soClient: SavedObjectsClientContract;
+  let soClient: jest.Mocked<SavedObjectsClientContract>;
   let esClient: ElasticsearchClientMock;
   let packagePolicyService: jest.Mocked<PackagePolicyClient>;
   let agentPolicyInterface: jest.Mocked<AgentPolicyServiceInterface>;
   let logger: MockedLogger;
   let service: AgentlessConnectorsInfraService;
-  beforeAll(async () => {
+
+  beforeEach(async () => {
     soClient = savedObjectsClientMock.create();
     esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
     packagePolicyService = createPackagePolicyServiceMock();
