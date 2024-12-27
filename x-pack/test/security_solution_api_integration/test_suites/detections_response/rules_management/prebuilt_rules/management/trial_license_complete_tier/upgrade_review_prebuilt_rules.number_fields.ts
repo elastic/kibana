@@ -10,18 +10,348 @@ import {
   ThreeWayDiffOutcome,
   ThreeWayMergeOutcome,
 } from '@kbn/security-solution-plugin/common/api/detection_engine';
+import { NUMBER_FIELDS } from '@kbn/security-solution-plugin/server/lib/detection_engine/prebuilt_rules/logic/diff/calculation/calculate_rule_fields_diff';
+import { Client } from '@elastic/elasticsearch';
+import TestAgent from 'supertest/lib/agent';
+import { ToolingLog } from '@kbn/tooling-log';
 import { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import {
   deleteAllTimelines,
   deleteAllPrebuiltRuleAssets,
-  createRuleAssetSavedObject,
   installPrebuiltRules,
   createPrebuiltRuleAssetSavedObjects,
   reviewPrebuiltRulesToUpgrade,
-  patchRule,
   createHistoricalPrebuiltRuleAssetSavedObjects,
+  createRuleAssetSavedObjectOfType,
+  fetchRule,
+  updateRule,
 } from '../../../../utils';
 import { deleteAllRules } from '../../../../../../../common/utils/security_solution';
+
+interface NumberFieldTestValues {
+  baseValue: number;
+  customValue: number;
+  updatedValue: number;
+}
+
+const NUMBER_FIELDS_MAP: Record<NUMBER_FIELDS, NumberFieldTestValues> = {
+  risk_score: {
+    baseValue: 1,
+    customValue: 2,
+    updatedValue: 3,
+  },
+  max_signals: {
+    baseValue: 100,
+    customValue: 200,
+    updatedValue: 300,
+  },
+  anomaly_threshold: {
+    baseValue: 50,
+    customValue: 75,
+    updatedValue: 90,
+  },
+};
+
+const RULE_TYPE_FIELD_MAPPING = {
+  query: ['risk_score', 'max_signals'],
+  machine_learning: ['anomaly_threshold'],
+} as const;
+
+type RuleTypeToFields = typeof RULE_TYPE_FIELD_MAPPING;
+
+type FieldDiffs = Record<NUMBER_FIELDS, unknown>;
+
+const createTestSuite = (
+  ruleType: keyof RuleTypeToFields,
+  field: NUMBER_FIELDS,
+  testValues: NumberFieldTestValues,
+  services: { es: Client; supertest: TestAgent; log: ToolingLog }
+) => {
+  const { es, supertest, log } = services;
+  const { baseValue, customValue, updatedValue } = testValues;
+
+  describe(`testing field: ${field}`, () => {
+    const getRuleAssetSavedObjects = () => [
+      createRuleAssetSavedObjectOfType(ruleType, {
+        rule_id: 'rule-1',
+        version: 1,
+        [field]: baseValue,
+      }),
+    ];
+
+    describe("when rule field doesn't have an update and has no custom value - scenario AAA", () => {
+      it('should not show in the upgrade/_review API response', async () => {
+        await createHistoricalPrebuiltRuleAssetSavedObjects(es, getRuleAssetSavedObjects());
+        await installPrebuiltRules(es, supertest);
+
+        const updatedRuleAssetSavedObjects = [
+          createRuleAssetSavedObjectOfType(ruleType, {
+            rule_id: 'rule-1',
+            [field]: baseValue,
+            version: 2,
+          }),
+        ];
+        await createHistoricalPrebuiltRuleAssetSavedObjects(es, updatedRuleAssetSavedObjects);
+
+        const reviewResponse = await reviewPrebuiltRulesToUpgrade(supertest);
+        expect((reviewResponse.rules[0].diff.fields as FieldDiffs)[field]).toBeUndefined();
+
+        expect(reviewResponse.rules[0].diff.num_fields_with_updates).toBe(1);
+        expect(reviewResponse.rules[0].diff.num_fields_with_conflicts).toBe(0);
+        expect(reviewResponse.rules[0].diff.num_fields_with_non_solvable_conflicts).toBe(0);
+
+        expect(reviewResponse.stats.num_rules_to_upgrade_total).toBe(1);
+        expect(reviewResponse.stats.num_rules_with_conflicts).toBe(0);
+        expect(reviewResponse.stats.num_rules_with_non_solvable_conflicts).toBe(0);
+      });
+    });
+
+    describe("when rule field doesn't have an update but has a custom value - scenario ABA", () => {
+      it('should show in the upgrade/_review API response', async () => {
+        await createHistoricalPrebuiltRuleAssetSavedObjects(es, getRuleAssetSavedObjects());
+        await installPrebuiltRules(es, supertest);
+
+        const rule = await fetchRule(supertest, { ruleId: 'rule-1' });
+        await updateRule(supertest, {
+          ...rule,
+          id: undefined,
+          [field]: customValue,
+        });
+
+        const updatedRuleAssetSavedObjects = [
+          createRuleAssetSavedObjectOfType(ruleType, {
+            rule_id: 'rule-1',
+            [field]: baseValue,
+            version: 2,
+          }),
+        ];
+        await createHistoricalPrebuiltRuleAssetSavedObjects(es, updatedRuleAssetSavedObjects);
+
+        const reviewResponse = await reviewPrebuiltRulesToUpgrade(supertest);
+        expect((reviewResponse.rules[0].diff.fields as FieldDiffs)[field]).toEqual({
+          base_version: baseValue,
+          current_version: customValue,
+          target_version: baseValue,
+          merged_version: customValue,
+          diff_outcome: ThreeWayDiffOutcome.CustomizedValueNoUpdate,
+          merge_outcome: ThreeWayMergeOutcome.Current,
+          conflict: ThreeWayDiffConflict.NONE,
+          has_update: false,
+          has_base_version: true,
+        });
+
+        expect(reviewResponse.rules[0].diff.num_fields_with_updates).toBe(1);
+        expect(reviewResponse.rules[0].diff.num_fields_with_conflicts).toBe(0);
+        expect(reviewResponse.rules[0].diff.num_fields_with_non_solvable_conflicts).toBe(0);
+
+        expect(reviewResponse.stats.num_rules_to_upgrade_total).toBe(1);
+        expect(reviewResponse.stats.num_rules_with_conflicts).toBe(0);
+        expect(reviewResponse.stats.num_rules_with_non_solvable_conflicts).toBe(0);
+      });
+    });
+
+    describe('when rule field has an update but does not have a custom value - scenario AAB', () => {
+      it('should show in the upgrade/_review API response', async () => {
+        await createHistoricalPrebuiltRuleAssetSavedObjects(es, getRuleAssetSavedObjects());
+        await installPrebuiltRules(es, supertest);
+
+        const updatedRuleAssetSavedObjects = [
+          createRuleAssetSavedObjectOfType(ruleType, {
+            rule_id: 'rule-1',
+            version: 2,
+            [field]: updatedValue,
+          }),
+        ];
+        await createHistoricalPrebuiltRuleAssetSavedObjects(es, updatedRuleAssetSavedObjects);
+
+        const reviewResponse = await reviewPrebuiltRulesToUpgrade(supertest);
+        expect((reviewResponse.rules[0].diff.fields as FieldDiffs)[field]).toEqual({
+          base_version: baseValue,
+          current_version: baseValue,
+          target_version: updatedValue,
+          merged_version: updatedValue,
+          diff_outcome: ThreeWayDiffOutcome.StockValueCanUpdate,
+          merge_outcome: ThreeWayMergeOutcome.Target,
+          conflict: ThreeWayDiffConflict.NONE,
+          has_update: true,
+          has_base_version: true,
+        });
+
+        expect(reviewResponse.rules[0].diff.num_fields_with_updates).toBe(2);
+        expect(reviewResponse.rules[0].diff.num_fields_with_conflicts).toBe(0);
+        expect(reviewResponse.rules[0].diff.num_fields_with_non_solvable_conflicts).toBe(0);
+
+        expect(reviewResponse.stats.num_rules_to_upgrade_total).toBe(1);
+        expect(reviewResponse.stats.num_rules_with_conflicts).toBe(0);
+        expect(reviewResponse.stats.num_rules_with_non_solvable_conflicts).toBe(0);
+      });
+    });
+
+    describe('when rule field has an update and a custom value that are the same - scenario ABB', () => {
+      it('should show in the upgrade/_review API response', async () => {
+        await createHistoricalPrebuiltRuleAssetSavedObjects(es, getRuleAssetSavedObjects());
+        await installPrebuiltRules(es, supertest);
+
+        const rule = await fetchRule(supertest, { ruleId: 'rule-1' });
+        await updateRule(supertest, {
+          ...rule,
+          id: undefined,
+          [field]: customValue,
+        });
+
+        const updatedRuleAssetSavedObjects = [
+          createRuleAssetSavedObjectOfType(ruleType, {
+            rule_id: 'rule-1',
+            version: 2,
+            [field]: customValue,
+          }),
+        ];
+        await createHistoricalPrebuiltRuleAssetSavedObjects(es, updatedRuleAssetSavedObjects);
+
+        const reviewResponse = await reviewPrebuiltRulesToUpgrade(supertest);
+        expect((reviewResponse.rules[0].diff.fields as FieldDiffs)[field]).toEqual({
+          base_version: baseValue,
+          current_version: customValue,
+          target_version: customValue,
+          merged_version: customValue,
+          diff_outcome: ThreeWayDiffOutcome.CustomizedValueSameUpdate,
+          merge_outcome: ThreeWayMergeOutcome.Current,
+          conflict: ThreeWayDiffConflict.NONE,
+          has_update: false,
+          has_base_version: true,
+        });
+
+        expect(reviewResponse.rules[0].diff.num_fields_with_updates).toBe(1);
+        expect(reviewResponse.rules[0].diff.num_fields_with_conflicts).toBe(0);
+        expect(reviewResponse.rules[0].diff.num_fields_with_non_solvable_conflicts).toBe(0);
+
+        expect(reviewResponse.stats.num_rules_to_upgrade_total).toBe(1);
+        expect(reviewResponse.stats.num_rules_with_conflicts).toBe(0);
+        expect(reviewResponse.stats.num_rules_with_non_solvable_conflicts).toBe(0);
+      });
+    });
+
+    describe('when rule field has an update and a custom value that are different - scenario ABC', () => {
+      it('should show in the upgrade/_review API response', async () => {
+        await createHistoricalPrebuiltRuleAssetSavedObjects(es, getRuleAssetSavedObjects());
+        await installPrebuiltRules(es, supertest);
+
+        const rule = await fetchRule(supertest, { ruleId: 'rule-1' });
+        await updateRule(supertest, {
+          ...rule,
+          id: undefined,
+          [field]: customValue,
+        });
+
+        const updatedRuleAssetSavedObjects = [
+          createRuleAssetSavedObjectOfType(ruleType, {
+            rule_id: 'rule-1',
+            version: 2,
+            [field]: updatedValue,
+          }),
+        ];
+        await createHistoricalPrebuiltRuleAssetSavedObjects(es, updatedRuleAssetSavedObjects);
+
+        const reviewResponse = await reviewPrebuiltRulesToUpgrade(supertest);
+        expect((reviewResponse.rules[0].diff.fields as FieldDiffs)[field]).toEqual({
+          base_version: baseValue,
+          current_version: customValue,
+          target_version: updatedValue,
+          merged_version: customValue,
+          diff_outcome: ThreeWayDiffOutcome.CustomizedValueCanUpdate,
+          merge_outcome: ThreeWayMergeOutcome.Current,
+          conflict: ThreeWayDiffConflict.NON_SOLVABLE,
+          has_update: true,
+          has_base_version: true,
+        });
+
+        expect(reviewResponse.rules[0].diff.num_fields_with_updates).toBe(2);
+        expect(reviewResponse.rules[0].diff.num_fields_with_conflicts).toBe(1);
+        expect(reviewResponse.rules[0].diff.num_fields_with_non_solvable_conflicts).toBe(1);
+
+        expect(reviewResponse.stats.num_rules_to_upgrade_total).toBe(1);
+        expect(reviewResponse.stats.num_rules_with_conflicts).toBe(1);
+        expect(reviewResponse.stats.num_rules_with_non_solvable_conflicts).toBe(1);
+      });
+    });
+
+    describe('when rule base version does not exist', () => {
+      describe('when rule field has an update and a custom value that are the same - scenario -AA', () => {
+        it('should not show in the upgrade/_review API response', async () => {
+          await createPrebuiltRuleAssetSavedObjects(es, getRuleAssetSavedObjects());
+          await installPrebuiltRules(es, supertest);
+
+          await deleteAllPrebuiltRuleAssets(es, log);
+
+          const updatedRuleAssetSavedObjects = [
+            createRuleAssetSavedObjectOfType(ruleType, {
+              rule_id: 'rule-1',
+              version: 2,
+              [field]: baseValue,
+            }),
+          ];
+          await createPrebuiltRuleAssetSavedObjects(es, updatedRuleAssetSavedObjects);
+
+          const reviewResponse = await reviewPrebuiltRulesToUpgrade(supertest);
+          expect((reviewResponse.rules[0].diff.fields as FieldDiffs)[field]).toBeUndefined();
+
+          expect(reviewResponse.rules[0].diff.num_fields_with_updates).toBe(1);
+          expect(reviewResponse.rules[0].diff.num_fields_with_conflicts).toBe(0);
+          expect(reviewResponse.rules[0].diff.num_fields_with_non_solvable_conflicts).toBe(0);
+
+          expect(reviewResponse.stats.num_rules_to_upgrade_total).toBe(1);
+          expect(reviewResponse.stats.num_rules_with_conflicts).toBe(0);
+          expect(reviewResponse.stats.num_rules_with_non_solvable_conflicts).toBe(0);
+        });
+      });
+
+      describe('when rule field has an update and a custom value that are different - scenario -AB', () => {
+        it('should show in the upgrade/_review API response', async () => {
+          await createPrebuiltRuleAssetSavedObjects(es, getRuleAssetSavedObjects());
+          await installPrebuiltRules(es, supertest);
+
+          await deleteAllPrebuiltRuleAssets(es, log);
+
+          const rule = await fetchRule(supertest, { ruleId: 'rule-1' });
+          await updateRule(supertest, {
+            ...rule,
+            id: undefined,
+            [field]: customValue,
+          });
+
+          const updatedRuleAssetSavedObjects = [
+            createRuleAssetSavedObjectOfType(ruleType, {
+              rule_id: 'rule-1',
+              version: 2,
+              [field]: updatedValue,
+            }),
+          ];
+          await createPrebuiltRuleAssetSavedObjects(es, updatedRuleAssetSavedObjects);
+
+          const reviewResponse = await reviewPrebuiltRulesToUpgrade(supertest);
+          expect((reviewResponse.rules[0].diff.fields as FieldDiffs)[field]).toEqual({
+            current_version: customValue,
+            target_version: updatedValue,
+            merged_version: updatedValue,
+            diff_outcome: ThreeWayDiffOutcome.MissingBaseCanUpdate,
+            merge_outcome: ThreeWayMergeOutcome.Target,
+            conflict: ThreeWayDiffConflict.SOLVABLE,
+            has_update: true,
+            has_base_version: false,
+          });
+
+          expect(reviewResponse.rules[0].diff.num_fields_with_updates).toBe(2);
+          expect(reviewResponse.rules[0].diff.num_fields_with_conflicts).toBe(1);
+          expect(reviewResponse.rules[0].diff.num_fields_with_non_solvable_conflicts).toBe(0);
+
+          expect(reviewResponse.stats.num_rules_to_upgrade_total).toBe(1);
+          expect(reviewResponse.stats.num_rules_with_conflicts).toBe(1);
+          expect(reviewResponse.stats.num_rules_with_non_solvable_conflicts).toBe(0);
+        });
+      });
+    });
+  });
+};
 
 export default ({ getService }: FtrProviderContext): void => {
   const es = getService('es');
@@ -35,299 +365,14 @@ export default ({ getService }: FtrProviderContext): void => {
       await deleteAllPrebuiltRuleAssets(es, log);
     });
 
-    describe(`number fields`, () => {
-      const getRuleAssetSavedObjects = () => [
-        createRuleAssetSavedObject({ rule_id: 'rule-1', version: 1, risk_score: 1 }),
-      ];
-
-      describe("when rule field doesn't have an update and has no custom value - scenario AAA", () => {
-        it('should not show in the upgrade/_review API response', async () => {
-          // Install base prebuilt detection rule
-          await createHistoricalPrebuiltRuleAssetSavedObjects(es, getRuleAssetSavedObjects());
-          await installPrebuiltRules(es, supertest);
-
-          // Increment the version of the installed rule, do NOT update the related number field, and create the new rule assets
-          const updatedRuleAssetSavedObjects = [
-            createRuleAssetSavedObject({
-              rule_id: 'rule-1',
-              risk_score: 1,
-              version: 2,
-            }),
-          ];
-          await createHistoricalPrebuiltRuleAssetSavedObjects(es, updatedRuleAssetSavedObjects);
-
-          // Call the upgrade review prebuilt rules endpoint and check that there is 1 rule eligible
-          // for update but number field (risk_score) is NOT returned
-          const reviewResponse = await reviewPrebuiltRulesToUpgrade(supertest);
-          expect(reviewResponse.rules[0].diff.fields.risk_score).toBeUndefined();
-
-          expect(reviewResponse.rules[0].diff.num_fields_with_updates).toBe(1); // version
-          expect(reviewResponse.rules[0].diff.num_fields_with_conflicts).toBe(0);
-          expect(reviewResponse.rules[0].diff.num_fields_with_non_solvable_conflicts).toBe(0);
-
-          expect(reviewResponse.stats.num_rules_to_upgrade_total).toBe(1);
-          expect(reviewResponse.stats.num_rules_with_conflicts).toBe(0);
-          expect(reviewResponse.stats.num_rules_with_non_solvable_conflicts).toBe(0);
-        });
-      });
-
-      describe("when rule field doesn't have an update but has a custom value - scenario ABA", () => {
-        it('should show in the upgrade/_review API response', async () => {
-          // Install base prebuilt detection rule
-          await createHistoricalPrebuiltRuleAssetSavedObjects(es, getRuleAssetSavedObjects());
-          await installPrebuiltRules(es, supertest);
-
-          // Customize a number field on the installed rule
-          await patchRule(supertest, log, {
-            rule_id: 'rule-1',
-            risk_score: 2,
-          });
-
-          // Increment the version of the installed rule, do NOT update the related number field, and create the new rule assets
-          const updatedRuleAssetSavedObjects = [
-            createRuleAssetSavedObject({
-              rule_id: 'rule-1',
-              risk_score: 1,
-              version: 2,
-            }),
-          ];
-          await createHistoricalPrebuiltRuleAssetSavedObjects(es, updatedRuleAssetSavedObjects);
-
-          // Call the upgrade review prebuilt rules endpoint and check that number diff field is returned but field does not have an update
-          const reviewResponse = await reviewPrebuiltRulesToUpgrade(supertest);
-          expect(reviewResponse.rules[0].diff.fields.risk_score).toEqual({
-            base_version: 1,
-            current_version: 2,
-            target_version: 1,
-            merged_version: 2,
-            diff_outcome: ThreeWayDiffOutcome.CustomizedValueNoUpdate,
-            merge_outcome: ThreeWayMergeOutcome.Current,
-            conflict: ThreeWayDiffConflict.NONE,
-            has_update: false,
-            has_base_version: true,
-          });
-          expect(reviewResponse.rules[0].diff.num_fields_with_updates).toBe(1);
-          expect(reviewResponse.rules[0].diff.num_fields_with_conflicts).toBe(0);
-          expect(reviewResponse.rules[0].diff.num_fields_with_non_solvable_conflicts).toBe(0);
-
-          expect(reviewResponse.stats.num_rules_to_upgrade_total).toBe(1);
-          expect(reviewResponse.stats.num_rules_with_conflicts).toBe(0);
-          expect(reviewResponse.stats.num_rules_with_non_solvable_conflicts).toBe(0);
-        });
-      });
-
-      describe('when rule field has an update but does not have a custom value - scenario AAB', () => {
-        it('should show in the upgrade/_review API response', async () => {
-          // Install base prebuilt detection rule
-          await createHistoricalPrebuiltRuleAssetSavedObjects(es, getRuleAssetSavedObjects());
-          await installPrebuiltRules(es, supertest);
-
-          // Increment the version of the installed rule, update a number field, and create the new rule assets
-          const updatedRuleAssetSavedObjects = [
-            createRuleAssetSavedObject({
-              rule_id: 'rule-1',
-              version: 2,
-              risk_score: 2,
-            }),
-          ];
-          await createHistoricalPrebuiltRuleAssetSavedObjects(es, updatedRuleAssetSavedObjects);
-
-          // Call the upgrade review prebuilt rules endpoint and check that one rule is eligible for update
-          const reviewResponse = await reviewPrebuiltRulesToUpgrade(supertest);
-          expect(reviewResponse.rules[0].diff.fields.risk_score).toEqual({
-            base_version: 1,
-            current_version: 1,
-            target_version: 2,
-            merged_version: 2,
-            diff_outcome: ThreeWayDiffOutcome.StockValueCanUpdate,
-            merge_outcome: ThreeWayMergeOutcome.Target,
-            conflict: ThreeWayDiffConflict.NONE,
-            has_update: true,
-            has_base_version: true,
-          });
-
-          expect(reviewResponse.rules[0].diff.num_fields_with_updates).toBe(2);
-          expect(reviewResponse.rules[0].diff.num_fields_with_conflicts).toBe(0);
-          expect(reviewResponse.rules[0].diff.num_fields_with_non_solvable_conflicts).toBe(0);
-
-          expect(reviewResponse.stats.num_rules_to_upgrade_total).toBe(1);
-          expect(reviewResponse.stats.num_rules_with_conflicts).toBe(0);
-          expect(reviewResponse.stats.num_rules_with_non_solvable_conflicts).toBe(0);
-        });
-      });
-
-      describe('when rule field has an update and a custom value that are the same - scenario ABB', () => {
-        it('should show in the upgrade/_review API response', async () => {
-          // Install base prebuilt detection rule
-          await createHistoricalPrebuiltRuleAssetSavedObjects(es, getRuleAssetSavedObjects());
-          await installPrebuiltRules(es, supertest);
-
-          // Customize a number field on the installed rule
-          await patchRule(supertest, log, {
-            rule_id: 'rule-1',
-            risk_score: 2,
-          });
-
-          // Increment the version of the installed rule, update a number field, and create the new rule assets
-          const updatedRuleAssetSavedObjects = [
-            createRuleAssetSavedObject({
-              rule_id: 'rule-1',
-              version: 2,
-              risk_score: 2,
-            }),
-          ];
-          await createHistoricalPrebuiltRuleAssetSavedObjects(es, updatedRuleAssetSavedObjects);
-
-          // Call the upgrade review prebuilt rules endpoint and check that one rule is eligible for update and contains number field
-          const reviewResponse = await reviewPrebuiltRulesToUpgrade(supertest);
-          expect(reviewResponse.rules[0].diff.fields.risk_score).toEqual({
-            base_version: 1,
-            current_version: 2,
-            target_version: 2,
-            merged_version: 2,
-            diff_outcome: ThreeWayDiffOutcome.CustomizedValueSameUpdate,
-            merge_outcome: ThreeWayMergeOutcome.Current,
-            conflict: ThreeWayDiffConflict.NONE,
-            has_update: false,
-            has_base_version: true,
-          });
-          expect(reviewResponse.rules[0].diff.num_fields_with_updates).toBe(1);
-          expect(reviewResponse.rules[0].diff.num_fields_with_conflicts).toBe(0);
-          expect(reviewResponse.rules[0].diff.num_fields_with_non_solvable_conflicts).toBe(0);
-
-          expect(reviewResponse.stats.num_rules_to_upgrade_total).toBe(1);
-          expect(reviewResponse.stats.num_rules_with_conflicts).toBe(0);
-          expect(reviewResponse.stats.num_rules_with_non_solvable_conflicts).toBe(0);
-        });
-      });
-
-      describe('when rule field has an update and a custom value that are different - scenario ABC', () => {
-        it('should show in the upgrade/_review API response', async () => {
-          // Install base prebuilt detection rule
-          await createHistoricalPrebuiltRuleAssetSavedObjects(es, getRuleAssetSavedObjects());
-          await installPrebuiltRules(es, supertest);
-
-          // Customize a number field on the installed rule
-          await patchRule(supertest, log, {
-            rule_id: 'rule-1',
-            risk_score: 2,
-          });
-
-          // Increment the version of the installed rule, update a number field, and create the new rule assets
-          const updatedRuleAssetSavedObjects = [
-            createRuleAssetSavedObject({
-              rule_id: 'rule-1',
-              version: 2,
-              risk_score: 3,
-            }),
-          ];
-          await createHistoricalPrebuiltRuleAssetSavedObjects(es, updatedRuleAssetSavedObjects);
-
-          // Call the upgrade review prebuilt rules endpoint and check that one rule is eligible for update
-          // and number field update has conflict
-          const reviewResponse = await reviewPrebuiltRulesToUpgrade(supertest);
-          expect(reviewResponse.rules[0].diff.fields.risk_score).toEqual({
-            base_version: 1,
-            current_version: 2,
-            target_version: 3,
-            merged_version: 2,
-            diff_outcome: ThreeWayDiffOutcome.CustomizedValueCanUpdate,
-            merge_outcome: ThreeWayMergeOutcome.Current,
-            conflict: ThreeWayDiffConflict.NON_SOLVABLE,
-            has_update: true,
-            has_base_version: true,
-          });
-
-          expect(reviewResponse.rules[0].diff.num_fields_with_updates).toBe(2);
-          expect(reviewResponse.rules[0].diff.num_fields_with_conflicts).toBe(1);
-          expect(reviewResponse.rules[0].diff.num_fields_with_non_solvable_conflicts).toBe(1);
-
-          expect(reviewResponse.stats.num_rules_to_upgrade_total).toBe(1);
-          expect(reviewResponse.stats.num_rules_with_conflicts).toBe(1);
-          expect(reviewResponse.stats.num_rules_with_non_solvable_conflicts).toBe(1);
-        });
-      });
-
-      describe('when rule base version does not exist', () => {
-        describe('when rule field has an update and a custom value that are the same - scenario -AA', () => {
-          it('should not show in the upgrade/_review API response', async () => {
-            // Install base prebuilt detection rule
-            await createPrebuiltRuleAssetSavedObjects(es, getRuleAssetSavedObjects());
-            await installPrebuiltRules(es, supertest);
-
-            // Clear previous rule assets
-            await deleteAllPrebuiltRuleAssets(es, log);
-
-            // Increment the version of the installed rule with the number field maintained
-            const updatedRuleAssetSavedObjects = [
-              createRuleAssetSavedObject({
-                rule_id: 'rule-1',
-                version: 2,
-                risk_score: 1,
-              }),
-            ];
-            await createPrebuiltRuleAssetSavedObjects(es, updatedRuleAssetSavedObjects);
-
-            // Call the upgrade review prebuilt rules endpoint and check that one rule is eligible for update
-            // but does NOT contain the risk_score number field, since -AA is treated as AAA
-            const reviewResponse = await reviewPrebuiltRulesToUpgrade(supertest);
-            expect(reviewResponse.rules[0].diff.fields.risk_score).toBeUndefined();
-
-            expect(reviewResponse.rules[0].diff.num_fields_with_updates).toBe(1);
-            expect(reviewResponse.rules[0].diff.num_fields_with_conflicts).toBe(0);
-            expect(reviewResponse.rules[0].diff.num_fields_with_non_solvable_conflicts).toBe(0);
-
-            expect(reviewResponse.stats.num_rules_to_upgrade_total).toBe(1);
-            expect(reviewResponse.stats.num_rules_with_conflicts).toBe(0);
-            expect(reviewResponse.stats.num_rules_with_non_solvable_conflicts).toBe(0);
-          });
-        });
-
-        describe('when rule field has an update and a custom value that are different - scenario -AB', () => {
-          it('should show in the upgrade/_review API response', async () => {
-            // Install base prebuilt detection rule
-            await createPrebuiltRuleAssetSavedObjects(es, getRuleAssetSavedObjects());
-            await installPrebuiltRules(es, supertest);
-
-            // Clear previous rule assets
-            await deleteAllPrebuiltRuleAssets(es, log);
-
-            // Customize a number field on the installed rule
-            await patchRule(supertest, log, {
-              rule_id: 'rule-1',
-              risk_score: 2,
-            });
-
-            // Increment the version of the installed rule, update a number field, and create the new rule assets
-            const updatedRuleAssetSavedObjects = [
-              createRuleAssetSavedObject({
-                rule_id: 'rule-1',
-                version: 2,
-                risk_score: 3,
-              }),
-            ];
-            await createPrebuiltRuleAssetSavedObjects(es, updatedRuleAssetSavedObjects);
-
-            // Call the upgrade review prebuilt rules endpoint and check that one rule is eligible for update
-            // and number field update does not have a conflict
-            const reviewResponse = await reviewPrebuiltRulesToUpgrade(supertest);
-            expect(reviewResponse.rules[0].diff.fields.risk_score).toEqual({
-              current_version: 2,
-              target_version: 3,
-              merged_version: 3,
-              diff_outcome: ThreeWayDiffOutcome.MissingBaseCanUpdate,
-              merge_outcome: ThreeWayMergeOutcome.Target,
-              conflict: ThreeWayDiffConflict.SOLVABLE,
-              has_update: true,
-              has_base_version: false,
-            });
-            expect(reviewResponse.rules[0].diff.num_fields_with_updates).toBe(2);
-            expect(reviewResponse.rules[0].diff.num_fields_with_conflicts).toBe(1);
-            expect(reviewResponse.rules[0].diff.num_fields_with_non_solvable_conflicts).toBe(0);
-
-            expect(reviewResponse.stats.num_rules_to_upgrade_total).toBe(1);
-            expect(reviewResponse.stats.num_rules_with_conflicts).toBe(1);
-            expect(reviewResponse.stats.num_rules_with_non_solvable_conflicts).toBe(0);
+    Object.entries(RULE_TYPE_FIELD_MAPPING).forEach(([ruleType, fields]) => {
+      describe(`${ruleType} rule number fields`, () => {
+        fields.forEach((field) => {
+          const testValues = NUMBER_FIELDS_MAP[field];
+          createTestSuite(ruleType as keyof RuleTypeToFields, field as NUMBER_FIELDS, testValues, {
+            es,
+            supertest,
+            log,
           });
         });
       });
