@@ -134,6 +134,10 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
               'Error 1'
             );
           });
+
+          it('displays correct language name', () => {
+            expect(errorSampleDetailsResponse.error.service.language?.name).to.equal('swift');
+          });
         });
       });
 
