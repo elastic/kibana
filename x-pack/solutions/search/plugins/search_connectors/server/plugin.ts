@@ -48,7 +48,7 @@ export class SearchConnectorsPlugin
     );
   }
 
-  public async setup(
+  public setup(
     coreSetup: CoreSetup<SearchConnectorsPluginStartDependencies, SearchConnectorsPluginStart>,
     plugins: SearchConnectorsPluginSetupDependencies
   ) {
@@ -78,7 +78,7 @@ export class SearchConnectorsPlugin
     };
   }
 
-  public async start(coreStart: CoreStart, plugins: SearchConnectorsPluginStartDependencies) {
+  public start(coreStart: CoreStart, plugins: SearchConnectorsPluginStartDependencies) {
     if (isAgentlessEnabled()) {
       this.log.info(
         'Agentless is supported, scheduling initial agentless connectors infrastructure watcher task'
