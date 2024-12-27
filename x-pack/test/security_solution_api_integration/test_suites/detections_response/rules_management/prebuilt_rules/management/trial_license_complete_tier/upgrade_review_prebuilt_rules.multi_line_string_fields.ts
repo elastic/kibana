@@ -335,6 +335,50 @@ const createTestSuite = (
           expect(reviewResponse.stats.num_rules_with_non_solvable_conflicts).toBe(0);
         });
       }
+
+      describe('when all versions are not mergeable - scenario ABC with non-solvable conflict', () => {
+        it('should show in the upgrade/_review API response with a non-solvable conflict', async () => {
+          await createHistoricalPrebuiltRuleAssetSavedObjects(es, getRuleAssetSavedObjects());
+          await installPrebuiltRules(es, supertest);
+
+          const rule = await fetchRule(supertest, { ruleId: 'rule-1' });
+          await updateRule(supertest, {
+            ...rule,
+            id: undefined,
+            [field]: `${customValue}\nThis is a third line.`,
+          });
+
+          const updatedRuleAssetSavedObjects = [
+            createRuleAssetSavedObjectOfType('query', {
+              rule_id: 'rule-1',
+              version: 2,
+              [field]: `My EXCELLENT ${field}.\nThis is a fourth line.`,
+            }),
+          ];
+          await createHistoricalPrebuiltRuleAssetSavedObjects(es, updatedRuleAssetSavedObjects);
+
+          const reviewResponse = await reviewPrebuiltRulesToUpgrade(supertest);
+          expect((reviewResponse.rules[0].diff.fields as Record<string, unknown>)[field]).toEqual({
+            base_version: baseValue,
+            current_version: `${customValue}\nThis is a third line.`,
+            target_version: `My EXCELLENT ${field}.\nThis is a fourth line.`,
+            merged_version: `${customValue}\nThis is a third line.`,
+            diff_outcome: ThreeWayDiffOutcome.CustomizedValueCanUpdate,
+            merge_outcome: ThreeWayMergeOutcome.Current,
+            conflict: ThreeWayDiffConflict.NON_SOLVABLE,
+            has_update: true,
+            has_base_version: true,
+          });
+
+          expect(reviewResponse.rules[0].diff.num_fields_with_updates).toBe(2);
+          expect(reviewResponse.rules[0].diff.num_fields_with_conflicts).toBe(1);
+          expect(reviewResponse.rules[0].diff.num_fields_with_non_solvable_conflicts).toBe(1);
+
+          expect(reviewResponse.stats.num_rules_to_upgrade_total).toBe(1);
+          expect(reviewResponse.stats.num_rules_with_conflicts).toBe(1);
+          expect(reviewResponse.stats.num_rules_with_non_solvable_conflicts).toBe(1);
+        });
+      });
     });
 
     describe('when rule base version does not exist', () => {
