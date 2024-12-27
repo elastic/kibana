@@ -20,6 +20,12 @@ export function registerUpdateRoute({ router, lib: { handleEsError } }: RouteDep
   router.put(
     {
       path: addBasePath('/settings/{indexName}'),
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Relies on es client for authorization',
+        },
+      },
       validate: { body: bodySchema, params: paramsSchema },
     },
     async (context, request, response) => {

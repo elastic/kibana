@@ -22,6 +22,12 @@ export const registerDocumentsRoute = ({
   router.get(
     {
       path: `${API_BASE_PATH}/documents/{index}/{id}`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Relies on es client for authorization',
+        },
+      },
       validate: {
         params: paramsSchema,
       },

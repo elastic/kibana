@@ -12,7 +12,16 @@ import { enrichPoliciesActions } from '../../../lib/enrich_policies';
 
 export function registerListRoute({ router, lib: { handleEsError } }: RouteDependencies) {
   router.get(
-    { path: addInternalBasePath('/enrich_policies'), validate: false },
+    {
+      path: addInternalBasePath('/enrich_policies'),
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Relies on es client for authorization',
+        },
+      },
+      validate: false,
+    },
     async (context, request, response) => {
       const client = (await context.core).elasticsearch.client as IScopedClusterClient;
       try {

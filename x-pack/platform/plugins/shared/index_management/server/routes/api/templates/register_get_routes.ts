@@ -19,7 +19,16 @@ import { addBasePath } from '..';
 
 export function registerGetAllRoute({ router, config, lib: { handleEsError } }: RouteDependencies) {
   router.get(
-    { path: addBasePath('/index_templates'), validate: false },
+    {
+      path: addBasePath('/index_templates'),
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Relies on es client for authorization',
+        },
+      },
+      validate: false,
+    },
     async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
 
@@ -70,6 +79,12 @@ export function registerGetOneRoute({ router, config, lib: { handleEsError } }: 
   router.get(
     {
       path: addBasePath('/index_templates/{name}'),
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Relies on es client for authorization',
+        },
+      },
       validate: { params: paramsSchema, query: querySchema },
     },
     async (context, request, response) => {

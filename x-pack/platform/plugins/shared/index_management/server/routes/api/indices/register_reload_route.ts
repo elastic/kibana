@@ -26,7 +26,16 @@ export function registerReloadRoute({
   config,
 }: RouteDependencies) {
   router.post(
-    { path: addBasePath('/indices/reload'), validate: { body: bodySchema } },
+    {
+      path: addBasePath('/indices/reload'),
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Relies on es client for authorization',
+        },
+      },
+      validate: { body: bodySchema },
+    },
     async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
       const { indexNames = [] } = (request.body as typeof bodySchema.type) ?? {};

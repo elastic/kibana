@@ -38,6 +38,12 @@ export function registerLoadHistoryRoute({
   router.get(
     {
       path: '/api/watcher/history/{id}',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Relies on es client for authorization',
+        },
+      },
       validate: {
         params: paramsSchema,
       },
