@@ -18,7 +18,7 @@ import {
   deleteKnowledgeBaseModel,
   TINY_ELSER,
 } from '@kbn/test-suites-xpack/observability_ai_assistant_api_integration/tests/knowledge_base/helpers';
-import { getConversationCreatedEvent } from '@kbn/test-suites-xpack/observability_ai_assistant_api_integration/tests/conversations/helpers';
+import { getConversationCreatedEvent } from '@kbn/test-suites-xpack/observability_ai_assistant_api_integration/tests/helpers';
 import {
   LlmProxy,
   createLlmProxy,

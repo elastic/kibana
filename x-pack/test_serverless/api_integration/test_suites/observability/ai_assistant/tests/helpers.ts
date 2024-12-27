@@ -13,7 +13,7 @@ import {
   StreamingChatResponseEvent,
   StreamingChatResponseEventType,
 } from '@kbn/observability-ai-assistant-plugin/common/conversation_complete';
-import { ObservabilityAIAssistantApiClient } from '../../common/observability_ai_assistant_api_client';
+import { ObservabilityAIAssistantApiClient } from '../common/observability_ai_assistant_api_client';
 
 export function decodeEvents(body: Readable | string) {
   return String(body)

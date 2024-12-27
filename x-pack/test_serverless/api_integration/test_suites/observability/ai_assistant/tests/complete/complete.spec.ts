@@ -27,11 +27,7 @@ import {
 import { createOpenAiChunk } from '@kbn/test-suites-xpack/observability_ai_assistant_api_integration/common/create_openai_chunk';
 import { SupertestWithRoleScope } from '@kbn/test-suites-xpack/api_integration/deployment_agnostic/services/role_scoped_supertest';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
-import {
-  decodeEvents,
-  getConversationCreatedEvent,
-  getConversationUpdatedEvent,
-} from '../conversations/helpers';
+import { decodeEvents, getConversationCreatedEvent, getConversationUpdatedEvent } from '../helpers';
 import { createProxyActionConnector, deleteActionConnector } from '../../common/action_connectors';
 import type { InternalRequestHeader, RoleCredentials } from '../../../../../../shared/services';
 

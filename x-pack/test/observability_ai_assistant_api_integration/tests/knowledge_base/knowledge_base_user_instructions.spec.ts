@@ -19,7 +19,7 @@ import {
   deleteInferenceEndpoint,
   deleteKnowledgeBaseModel,
 } from './helpers';
-import { getConversationCreatedEvent } from '../conversations/helpers';
+import { getConversationCreatedEvent } from '../helpers';
 import { LlmProxy, createLlmProxy } from '../../common/create_llm_proxy';
 import { createProxyActionConnector, deleteActionConnector } from '../../common/action_connectors';
 import { User } from '../../common/users/users';
