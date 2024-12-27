@@ -33,7 +33,7 @@ export const useDashboardsApi = (id?: string) => {
           },
           body: {
             operations: dashboards.map((dashboard) => {
-              return { create: { id: dashboard.id } };
+              return { index: { id: dashboard.id } };
             }),
           },
         },

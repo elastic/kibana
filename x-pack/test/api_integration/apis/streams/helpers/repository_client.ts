@@ -6,8 +6,13 @@
  */
 import type { StreamsRouteRepository } from '@kbn/streams-plugin/server';
 import supertest from 'supertest';
-import { getApiClientFromSupertest } from '../../../../common/utils/server_route_repository/create_supertest_service_from_repository';
+import {
+  RepositorySupertestClient,
+  getApiClientFromSupertest,
+} from '../../../../common/utils/server_route_repository/create_supertest_service_from_repository';
 
-export function createStreamsRepositorySupertestClient(st: supertest.Agent) {
+export function createStreamsRepositorySupertestClient(
+  st: supertest.Agent
+): RepositorySupertestClient<StreamsRouteRepository> {
   return getApiClientFromSupertest<StreamsRouteRepository>(st);
 }

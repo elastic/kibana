@@ -31,7 +31,6 @@ type MockedElasticsearchClient = jest.Mocked<ElasticsearchClient> & {
   indices: jest.Mocked<ElasticsearchClient['indices']>;
 };
 
-// Mock implementations for the ES Client and Logger
 const createEsClientMock = (): MockedElasticsearchClient => {
   return {
     indices: {
@@ -77,7 +76,7 @@ function getIndexName(counter: number) {
 describe('StorageIndexAdapter', () => {
   let esClientMock: MockedElasticsearchClient;
   let loggerMock: jest.Mocked<Logger>;
-  let adapter: StorageIndexAdapter<typeof storageSettings>; // or a more specific type
+  let adapter: StorageIndexAdapter<typeof storageSettings>;
 
   const storageSettings = {
     name: TEST_INDEX_NAME,
@@ -119,7 +118,6 @@ describe('StorageIndexAdapter', () => {
   });
 
   it('does not install index templates or backing indices after searching', async () => {
-    // Mock an ES search response
     const mockSearchResponse = {
       hits: {
         hits: [{ _id: 'doc1', _source: { foo: 'bar' } }],
@@ -154,7 +152,6 @@ describe('StorageIndexAdapter', () => {
 
   describe('when writing/bootstrapping without an existing index', () => {
     function verifyResources() {
-      // We expect that the adapter vaidates the components before writing
       expect(esClientMock.indices.putIndexTemplate).toHaveBeenCalled();
       expect(esClientMock.indices.create).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -216,11 +213,9 @@ describe('StorageIndexAdapter', () => {
     it('does not recreate or update index template', async () => {
       await adapter.index({ id: 'doc2', document: { foo: 'bar' } });
 
-      // confirm we did not create or update the template
       expect(esClientMock.indices.putIndexTemplate).not.toHaveBeenCalled();
       expect(esClientMock.indices.create).not.toHaveBeenCalled();
 
-      // confirm we did index
       expect(esClientMock.index).toHaveBeenCalledWith(
         expect.objectContaining({
           index: 'test_index',
@@ -309,7 +304,6 @@ describe('StorageIndexAdapter', () => {
       it('deletes the dangling item from non-write indices', async () => {
         await adapter.index({ id: 'doc_1', document: { foo: 'bar' } });
 
-        // Doc in prev index is deleted
         expect(esClientMock.delete).toHaveBeenCalledWith(
           expect.objectContaining({
             index: 'test_index-000001',
@@ -317,7 +311,6 @@ describe('StorageIndexAdapter', () => {
           })
         );
 
-        // Doc is in write index now
         expect(esClientMock.index).toHaveBeenCalledWith(
           expect.objectContaining({
             index: 'test_index',
@@ -363,7 +356,6 @@ describe('StorageIndexAdapter', () => {
           ],
         });
 
-        // delete operation is inserted
         expect(esClientMock.bulk).toHaveBeenLastCalledWith(
           expect.objectContaining({
             index: 'test_index',

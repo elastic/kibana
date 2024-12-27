@@ -21,7 +21,7 @@ type MaybeOptional<TArgs extends Record<string, any>> = RequiredKeys<TArgs> exte
   ? [TArgs] | []
   : [TArgs];
 
-interface RepositorySupertestClient<TServerRouteRepository extends ServerRouteRepository> {
+export interface RepositorySupertestClient<TServerRouteRepository extends ServerRouteRepository> {
   fetch: <TEndpoint extends EndpointOf<TServerRouteRepository>>(
     endpoint: TEndpoint,
     ...options: MaybeOptional<
