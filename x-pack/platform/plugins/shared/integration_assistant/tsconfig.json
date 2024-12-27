@@ -10,7 +10,8 @@
     "common/**/*.ts",
     "scripts/**/*.ts",
     "__jest__/**/*",
-    "../../../../typings/**/*"
+    "../../typings/**/*",
+    "server/graphs/cel/validation/wasm/wasm_exec.js"
   ],
   "exclude": [
     "target/**/*"
@@ -43,6 +44,8 @@
     "@kbn/kibana-utils-plugin",
     "@kbn/utils",
     "@kbn/zod",
-    "@kbn/tooling-log"
+    "@kbn/tooling-log",
+    "@kbn/task-manager-plugin",
+    "@kbn/logging"
   ]
 }
