@@ -31,7 +31,6 @@ import type {
 
 export interface InferenceQueryParams {
   from?: number;
-  include_model_definition?: boolean;
   size?: number;
   tags?: string;
   include?: 'total_feature_importance' | 'feature_importance_baseline' | string;

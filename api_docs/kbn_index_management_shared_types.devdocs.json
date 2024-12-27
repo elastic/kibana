@@ -1002,7 +1002,7 @@
                         "tags": [],
                         "label": "appId",
                         "description": [],
-                        "path": "packages/core/application/core-application-browser/src/contracts.ts",
+                        "path": "src/core/packages/application/browser/src/contracts.ts",
                         "deprecated": false,
                         "trackAdoption": false
                       },
@@ -1016,7 +1016,7 @@
                         "signature": [
                           "{ path?: string | undefined; absolute?: boolean | undefined; deepLinkId?: string | undefined; } | undefined"
                         ],
-                        "path": "packages/core/application/core-application-browser/src/contracts.ts",
+                        "path": "src/core/packages/application/browser/src/contracts.ts",
                         "deprecated": false,
                         "trackAdoption": false
                       }
@@ -1202,7 +1202,7 @@
                         "tags": [],
                         "label": "appId",
                         "description": [],
-                        "path": "packages/core/application/core-application-browser/src/contracts.ts",
+                        "path": "src/core/packages/application/browser/src/contracts.ts",
                         "deprecated": false,
                         "trackAdoption": false
                       },
@@ -1216,7 +1216,7 @@
                         "signature": [
                           "{ path?: string | undefined; absolute?: boolean | undefined; deepLinkId?: string | undefined; } | undefined"
                         ],
-                        "path": "packages/core/application/core-application-browser/src/contracts.ts",
+                        "path": "src/core/packages/application/browser/src/contracts.ts",
                         "deprecated": false,
                         "trackAdoption": false
                       }
@@ -1429,13 +1429,7 @@
             "description": [],
             "signature": [
               "(deps: { history: ",
-              {
-                "pluginId": "@kbn/core-application-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreApplicationBrowserPluginApi",
-                "section": "def-public.ScopedHistory",
-                "text": "ScopedHistory"
-              },
+              "ScopedHistory",
               "<unknown>; }) => React.FC<",
               {
                 "pluginId": "@kbn/index-management-shared-types",
@@ -1469,13 +1463,7 @@
                     "label": "history",
                     "description": [],
                     "signature": [
-                      {
-                        "pluginId": "@kbn/core-application-browser",
-                        "scope": "public",
-                        "docId": "kibKbnCoreApplicationBrowserPluginApi",
-                        "section": "def-public.ScopedHistory",
-                        "text": "ScopedHistory"
-                      },
+                      "ScopedHistory",
                       "<unknown>"
                     ],
                     "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
@@ -1496,13 +1484,7 @@
             "description": [],
             "signature": [
               "(deps: { history: ",
-              {
-                "pluginId": "@kbn/core-application-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreApplicationBrowserPluginApi",
-                "section": "def-public.ScopedHistory",
-                "text": "ScopedHistory"
-              },
+              "ScopedHistory",
               "<unknown>; }) => React.FC<",
               {
                 "pluginId": "@kbn/index-management-shared-types",
@@ -1536,13 +1518,7 @@
                     "label": "history",
                     "description": [],
                     "signature": [
-                      {
-                        "pluginId": "@kbn/core-application-browser",
-                        "scope": "public",
-                        "docId": "kibKbnCoreApplicationBrowserPluginApi",
-                        "section": "def-public.ScopedHistory",
-                        "text": "ScopedHistory"
-                      },
+                      "ScopedHistory",
                       "<unknown>"
                     ],
                     "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",

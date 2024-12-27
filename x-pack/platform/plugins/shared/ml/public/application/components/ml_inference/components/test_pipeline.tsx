@@ -8,10 +8,10 @@
 import type { FC } from 'react';
 import React, { memo, useEffect, useCallback, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
-import { euiThemeVars } from '@kbn/ui-theme';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import {
+  useEuiTheme,
   EuiAccordion,
   EuiButton,
   EuiButtonEmpty,
@@ -58,6 +58,7 @@ interface Props {
 }
 
 export const TestPipeline: FC<Props> = memo(({ state, sourceIndex, mode }) => {
+  const { euiTheme } = useEuiTheme();
   const [simulatePipelineResult, setSimulatePipelineResult] = useState<
     undefined | estypes.IngestSimulateResponse
   >();
@@ -391,7 +392,7 @@ export const TestPipeline: FC<Props> = memo(({ state, sourceIndex, mode }) => {
             <EuiResizableContainer
               direction={isSmallerViewport ? 'vertical' : 'horizontal'}
               css={css`
-                min-height: calc(${euiThemeVars.euiSizeXL} * 10);
+                min-height: calc(${euiTheme.size.xl} * 10);
               `}
             >
               {(EuiResizablePanel, EuiResizableButton) => (

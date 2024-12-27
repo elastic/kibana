@@ -13,8 +13,7 @@ interface Props {
   children?: React.ReactNode;
 }
 
-/** A utility for wrapping children in the providers required to run most tests */
-export const TestProvidersComponent: React.FC<Props> = ({ children }) => {
+export const TestProvidersComponent = ({ children }: Props) => {
   return (
     <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>{children}</ThemeProvider>
   );

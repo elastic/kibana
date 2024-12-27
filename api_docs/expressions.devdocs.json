@@ -8665,31 +8665,31 @@
             "references": [
               {
                 "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/server/demodata/index.ts"
+                "path": "x-pack/platform/plugins/private/canvas/canvas_plugin_src/functions/server/demodata/index.ts"
               },
               {
                 "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/external/embeddable.ts"
+                "path": "x-pack/platform/plugins/private/canvas/canvas_plugin_src/functions/external/embeddable.ts"
               },
               {
                 "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/browser/escount.ts"
+                "path": "x-pack/platform/plugins/private/canvas/canvas_plugin_src/functions/browser/escount.ts"
               },
               {
                 "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/browser/esdocs.ts"
+                "path": "x-pack/platform/plugins/private/canvas/canvas_plugin_src/functions/browser/esdocs.ts"
               },
               {
                 "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/common/functions/filters.ts"
+                "path": "x-pack/platform/plugins/private/canvas/common/functions/filters.ts"
               },
               {
                 "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/common/neq.ts"
+                "path": "x-pack/platform/plugins/private/canvas/canvas_plugin_src/functions/common/neq.ts"
               },
               {
                 "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/server/pointseries/index.ts"
+                "path": "x-pack/platform/plugins/private/canvas/canvas_plugin_src/functions/server/pointseries/index.ts"
               }
             ]
           }
@@ -13023,7 +13023,7 @@
           "references": [
             {
               "plugin": "canvas",
-              "path": "x-pack/plugins/canvas/public/setup_expressions.ts"
+              "path": "x-pack/platform/plugins/private/canvas/public/setup_expressions.ts"
             }
           ],
           "children": [
@@ -13088,15 +13088,15 @@
           "references": [
             {
               "plugin": "canvas",
-              "path": "x-pack/plugins/canvas/server/routes/functions/functions.ts"
+              "path": "x-pack/platform/plugins/private/canvas/server/routes/functions/functions.ts"
             },
             {
               "plugin": "canvas",
-              "path": "x-pack/plugins/canvas/server/routes/functions/functions.ts"
+              "path": "x-pack/platform/plugins/private/canvas/server/routes/functions/functions.ts"
             },
             {
               "plugin": "canvas",
-              "path": "x-pack/plugins/canvas/server/routes/functions/functions.test.ts"
+              "path": "x-pack/platform/plugins/private/canvas/server/routes/functions/functions.test.ts"
             }
           ],
           "children": [
@@ -13146,15 +13146,15 @@
           "references": [
             {
               "plugin": "canvas",
-              "path": "x-pack/plugins/canvas/public/setup_expressions.ts"
+              "path": "x-pack/platform/plugins/private/canvas/public/setup_expressions.ts"
             },
             {
               "plugin": "canvas",
-              "path": "x-pack/plugins/canvas/public/application.tsx"
+              "path": "x-pack/platform/plugins/private/canvas/public/application.tsx"
             },
             {
               "plugin": "canvas",
-              "path": "x-pack/plugins/canvas/server/routes/functions/functions.ts"
+              "path": "x-pack/platform/plugins/private/canvas/server/routes/functions/functions.ts"
             }
           ],
           "children": [],
@@ -20142,31 +20142,31 @@
             "references": [
               {
                 "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/server/demodata/index.ts"
+                "path": "x-pack/platform/plugins/private/canvas/canvas_plugin_src/functions/server/demodata/index.ts"
               },
               {
                 "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/external/embeddable.ts"
+                "path": "x-pack/platform/plugins/private/canvas/canvas_plugin_src/functions/external/embeddable.ts"
               },
               {
                 "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/browser/escount.ts"
+                "path": "x-pack/platform/plugins/private/canvas/canvas_plugin_src/functions/browser/escount.ts"
               },
               {
                 "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/browser/esdocs.ts"
+                "path": "x-pack/platform/plugins/private/canvas/canvas_plugin_src/functions/browser/esdocs.ts"
               },
               {
                 "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/common/functions/filters.ts"
+                "path": "x-pack/platform/plugins/private/canvas/common/functions/filters.ts"
               },
               {
                 "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/common/neq.ts"
+                "path": "x-pack/platform/plugins/private/canvas/canvas_plugin_src/functions/common/neq.ts"
               },
               {
                 "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/server/pointseries/index.ts"
+                "path": "x-pack/platform/plugins/private/canvas/canvas_plugin_src/functions/server/pointseries/index.ts"
               }
             ]
           }
@@ -33208,31 +33208,31 @@
             "references": [
               {
                 "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/server/demodata/index.ts"
+                "path": "x-pack/platform/plugins/private/canvas/canvas_plugin_src/functions/server/demodata/index.ts"
               },
               {
                 "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/external/embeddable.ts"
+                "path": "x-pack/platform/plugins/private/canvas/canvas_plugin_src/functions/external/embeddable.ts"
               },
               {
                 "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/browser/escount.ts"
+                "path": "x-pack/platform/plugins/private/canvas/canvas_plugin_src/functions/browser/escount.ts"
               },
               {
                 "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/browser/esdocs.ts"
+                "path": "x-pack/platform/plugins/private/canvas/canvas_plugin_src/functions/browser/esdocs.ts"
               },
               {
                 "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/common/functions/filters.ts"
+                "path": "x-pack/platform/plugins/private/canvas/common/functions/filters.ts"
               },
               {
                 "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/common/neq.ts"
+                "path": "x-pack/platform/plugins/private/canvas/canvas_plugin_src/functions/common/neq.ts"
               },
               {
                 "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/server/pointseries/index.ts"
+                "path": "x-pack/platform/plugins/private/canvas/canvas_plugin_src/functions/server/pointseries/index.ts"
               }
             ]
           }
@@ -34121,7 +34121,7 @@
             "references": [
               {
                 "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/public/setup_expressions.ts"
+                "path": "x-pack/platform/plugins/private/canvas/public/setup_expressions.ts"
               }
             ],
             "children": [
@@ -34186,15 +34186,15 @@
             "references": [
               {
                 "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/server/routes/functions/functions.ts"
+                "path": "x-pack/platform/plugins/private/canvas/server/routes/functions/functions.ts"
               },
               {
                 "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/server/routes/functions/functions.ts"
+                "path": "x-pack/platform/plugins/private/canvas/server/routes/functions/functions.ts"
               },
               {
                 "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/server/routes/functions/functions.test.ts"
+                "path": "x-pack/platform/plugins/private/canvas/server/routes/functions/functions.test.ts"
               }
             ],
             "children": [
@@ -34244,15 +34244,15 @@
             "references": [
               {
                 "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/public/setup_expressions.ts"
+                "path": "x-pack/platform/plugins/private/canvas/public/setup_expressions.ts"
               },
               {
                 "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/public/application.tsx"
+                "path": "x-pack/platform/plugins/private/canvas/public/application.tsx"
               },
               {
                 "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/server/routes/functions/functions.ts"
+                "path": "x-pack/platform/plugins/private/canvas/server/routes/functions/functions.ts"
               }
             ],
             "children": [],
@@ -38233,51 +38233,51 @@
         "references": [
           {
             "plugin": "canvas",
-            "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/browser/markdown.ts"
+            "path": "x-pack/platform/plugins/private/canvas/canvas_plugin_src/functions/browser/markdown.ts"
           },
           {
             "plugin": "canvas",
-            "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/browser/markdown.ts"
+            "path": "x-pack/platform/plugins/private/canvas/canvas_plugin_src/functions/browser/markdown.ts"
           },
           {
             "plugin": "canvas",
-            "path": "x-pack/plugins/canvas/types/state.ts"
+            "path": "x-pack/platform/plugins/private/canvas/types/state.ts"
           },
           {
             "plugin": "canvas",
-            "path": "x-pack/plugins/canvas/types/state.ts"
+            "path": "x-pack/platform/plugins/private/canvas/types/state.ts"
           },
           {
             "plugin": "canvas",
-            "path": "x-pack/plugins/canvas/public/functions/plot/index.ts"
+            "path": "x-pack/platform/plugins/private/canvas/public/functions/plot/index.ts"
           },
           {
             "plugin": "canvas",
-            "path": "x-pack/plugins/canvas/public/functions/plot/index.ts"
+            "path": "x-pack/platform/plugins/private/canvas/public/functions/plot/index.ts"
           },
           {
             "plugin": "canvas",
-            "path": "x-pack/plugins/canvas/public/functions/pie.ts"
+            "path": "x-pack/platform/plugins/private/canvas/public/functions/pie.ts"
           },
           {
             "plugin": "canvas",
-            "path": "x-pack/plugins/canvas/public/functions/pie.ts"
+            "path": "x-pack/platform/plugins/private/canvas/public/functions/pie.ts"
           },
           {
             "plugin": "canvas",
-            "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/common/table.ts"
+            "path": "x-pack/platform/plugins/private/canvas/canvas_plugin_src/functions/common/table.ts"
           },
           {
             "plugin": "canvas",
-            "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/common/table.ts"
+            "path": "x-pack/platform/plugins/private/canvas/canvas_plugin_src/functions/common/table.ts"
           },
           {
             "plugin": "canvas",
-            "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/common/timefilterControl.ts"
+            "path": "x-pack/platform/plugins/private/canvas/canvas_plugin_src/functions/common/timefilterControl.ts"
           },
           {
             "plugin": "canvas",
-            "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/common/timefilterControl.ts"
+            "path": "x-pack/platform/plugins/private/canvas/canvas_plugin_src/functions/common/timefilterControl.ts"
           }
         ],
         "initialIsOpen": false
@@ -39782,7 +39782,9 @@
                 "section": "def-common.SerializedDatatable",
                 "text": "SerializedDatatable"
               },
-              ") => { rows: _.Dictionary<string>[]; type: \"datatable\"; columns: ",
+              ") => { rows: ",
+              "Dictionary",
+              "<string>[]; type: \"datatable\"; columns: ",
               {
                 "pluginId": "expressions",
                 "scope": "common",

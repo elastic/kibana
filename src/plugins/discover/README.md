@@ -16,7 +16,7 @@ One folder for every "route", each folder contains files and folders related onl
   * **[/not_found](./public/application/not_found)** (Rendered when a route can't be found)
   * **[/view_alert](./public/application/view_alert)** (Forwarding links in alert notifications)
 * **[/components](./public/components)** (All React components used in more than just one app)
-* **[/embeddable](./public/embeddable)** (Code related to the saved search embeddable, rendered on dashboards)
+* **[/embeddable](./public/embeddable)** (Code related to the Discover session embeddable, rendered on dashboards)
 * **[/hooks](./public/hooks)** (Code containing React hooks)
 * **[/services](./public/services)** (Services either for external or internal use)
 * **[/utils](./public/utils)** (All utility functions used across more than one application)

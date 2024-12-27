@@ -8,7 +8,7 @@
 import { EuiSelect } from '@elastic/eui';
 import React, { FormEvent, useCallback } from 'react';
 import { useHistory } from 'react-router-dom';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 import { useApmServiceContext } from '../../context/apm_service/use_apm_service_context';
 import { useBreakpoints } from '../../hooks/use_breakpoints';
 import * as urlHelpers from './links/url_helpers';

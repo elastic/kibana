@@ -13,6 +13,7 @@ describe('getOpenAndAcknowledgedAlertsQuery', () => {
     const anonymizationFields = [
       { id: 'field1', field: 'field1', allowed: true, anonymized: false },
       { id: 'field2', field: 'field2', allowed: true, anonymized: false },
+      { id: 'field3', field: 'field3', allowed: false, anonymized: false },
     ];
     const size = 10;
 

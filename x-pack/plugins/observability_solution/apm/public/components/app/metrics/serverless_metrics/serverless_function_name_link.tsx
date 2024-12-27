@@ -5,14 +5,16 @@
  * 2.0.
  */
 import { EuiLink } from '@elastic/eui';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import styled from '@emotion/styled';
 import React from 'react';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { useApmRouter } from '../../../../hooks/use_apm_router';
 import { truncate } from '../../../../utils/style';
 
-const StyledLink = euiStyled(EuiLink)`${truncate('100%')};`;
+const StyledLink = styled(EuiLink)`
+  ${truncate('100%')};
+`;
 
 interface Props {
   serverlessFunctionName: string;

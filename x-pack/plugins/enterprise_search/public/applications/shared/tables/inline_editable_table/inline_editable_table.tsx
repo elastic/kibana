@@ -140,7 +140,7 @@ export const InlineEditableTableContents = <Item extends ItemWithAnID>({
             iconType="plusInCircle"
             disabled={isEditing}
             onClick={editNewItem}
-            color="success"
+            color="primary"
             data-test-subj="inlineEditableTableActionButton"
           >
             {addButtonText ||

@@ -12,7 +12,7 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 import React, { Fragment } from 'react';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import styled from '@emotion/styled';
 import { NodeDataDefinition } from 'cytoscape';
 import { ContentsProps } from '.';
 import {
@@ -22,7 +22,7 @@ import {
 } from '../../../../../common/es_fields/apm';
 import { ExternalConnectionNode } from '../../../../../common/service_map';
 
-const ExternalResourcesList = euiStyled.section`
+const ExternalResourcesList = styled.section`
   max-height: 360px;
   overflow: auto;
 `;

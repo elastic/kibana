@@ -14,7 +14,7 @@
           "() => ",
           "EditPanelAction"
         ],
-        "path": "src/plugins/presentation_panel/public/panel_actions/panel_actions.ts",
+        "path": "src/platform/plugins/private/presentation_panel/public/panel_actions/panel_actions.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -47,7 +47,7 @@
           "PanelCompatibleComponent",
           "<ApiType, PropsType> | null>; } & { hidePanelChrome?: boolean | undefined; }) => React.JSX.Element | null"
         ],
-        "path": "src/plugins/presentation_panel/public/panel_component/presentation_panel.tsx",
+        "path": "src/platform/plugins/private/presentation_panel/public/panel_component/presentation_panel.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -73,7 +73,7 @@
               "PanelCompatibleComponent",
               "<ApiType, PropsType> | null>; } & { hidePanelChrome?: boolean | undefined; }"
             ],
-            "path": "src/plugins/presentation_panel/public/panel_component/presentation_panel.tsx",
+            "path": "src/platform/plugins/private/presentation_panel/public/panel_component/presentation_panel.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -102,7 +102,7 @@
           "DefaultPresentationPanelApi",
           " | undefined; }) => React.JSX.Element"
         ],
-        "path": "src/plugins/presentation_panel/public/panel_component/presentation_panel_error.tsx",
+        "path": "src/platform/plugins/private/presentation_panel/public/panel_component/presentation_panel_error.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -113,7 +113,7 @@
             "tags": [],
             "label": "{\n  api,\n  error,\n}",
             "description": [],
-            "path": "src/plugins/presentation_panel/public/panel_component/presentation_panel_error.tsx",
+            "path": "src/platform/plugins/private/presentation_panel/public/panel_component/presentation_panel_error.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -142,7 +142,7 @@
                   },
                   " | undefined; }"
                 ],
-                "path": "src/plugins/presentation_panel/public/panel_component/presentation_panel_error.tsx",
+                "path": "src/platform/plugins/private/presentation_panel/public/panel_component/presentation_panel_error.tsx",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -157,7 +157,7 @@
                   "DefaultPresentationPanelApi",
                   " | undefined"
                 ],
-                "path": "src/plugins/presentation_panel/public/panel_component/presentation_panel_error.tsx",
+                "path": "src/platform/plugins/private/presentation_panel/public/panel_component/presentation_panel_error.tsx",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -181,7 +181,7 @@
         "signature": [
           "\"ACTION_CUSTOMIZE_PANEL\""
         ],
-        "path": "src/plugins/presentation_panel/public/panel_actions/customize_panel_action/customize_panel_action.tsx",
+        "path": "src/platform/plugins/private/presentation_panel/public/panel_actions/customize_panel_action/customize_panel_action.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -208,7 +208,7 @@
           "PanelCompatibleComponent",
           "<ApiType, PropsType> | null>; }"
         ],
-        "path": "src/plugins/presentation_panel/public/panel_component/types.ts",
+        "path": "src/platform/plugins/private/presentation_panel/public/panel_component/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -240,7 +240,7 @@
         "signature": [
           "\"presentationPanel\""
         ],
-        "path": "src/plugins/presentation_panel/common/index.ts",
+        "path": "src/platform/plugins/private/presentation_panel/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -255,7 +255,7 @@
         "signature": [
           "\"presentationPanel\""
         ],
-        "path": "src/plugins/presentation_panel/common/index.ts",
+        "path": "src/platform/plugins/private/presentation_panel/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

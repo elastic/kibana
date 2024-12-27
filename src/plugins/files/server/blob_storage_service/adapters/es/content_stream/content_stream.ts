@@ -15,7 +15,7 @@ import { ByteSizeValue } from '@kbn/config-schema';
 import { defaults } from 'lodash';
 import { Duplex, Writable, Readable } from 'stream';
 
-import { GetResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { GetResponse } from '@elastic/elasticsearch/lib/api/types';
 import { inspect } from 'util';
 import { wrapErrorAndReThrow } from '../../../../file_client/utils';
 import type { FileChunkDocument } from '../mappings';

@@ -9,7 +9,6 @@ import { render, screen } from '@testing-library/react';
 import React from 'react';
 import type { FieldSpec } from '@kbn/data-plugin/common';
 import { DocumentDetailsContext } from '../../shared/context';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import type { EventFieldsData } from '../../../../common/components/event_details/types';
 import { TableFieldValueCell } from './table_field_value_cell';
@@ -34,9 +33,6 @@ jest.mock('../../../../common/lib/kibana', () => {
     }),
   };
 });
-
-jest.mock('../../../../common/hooks/use_experimental_features');
-const mockUseIsExperimentalFeatureEnabled = useIsExperimentalFeatureEnabled as jest.Mock;
 
 const panelContextValue = {
   eventId: 'event id',
@@ -66,7 +62,6 @@ describe('TableFieldValueCell', () => {
   beforeAll(() => {
     jest.clearAllMocks();
     jest.mocked(useExpandableFlyoutApi).mockReturnValue(mockFlyoutApi);
-    mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
   });
 
   describe('common behavior', () => {
@@ -213,7 +208,7 @@ describe('TableFieldValueCell', () => {
       });
     });
 
-    it('should open preview when preview is not disabled', () => {
+    it('should open preview', () => {
       screen.getByTestId(`${FLYOUT_TABLE_PREVIEW_LINK_FIELD_TEST_ID}-0`).click();
 
       expect(mockFlyoutApi.openPreviewPanel).toHaveBeenCalledWith({

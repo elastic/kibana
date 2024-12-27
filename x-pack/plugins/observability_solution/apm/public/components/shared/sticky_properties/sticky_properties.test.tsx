@@ -56,7 +56,7 @@ describe('StickyProperties', () => {
 
       const wrapper = shallow(<StickyProperties stickyProperties={stickyProperties} />)
         .find('PropertyValue')
-        .dive()
+        .render()
         .text();
 
       expect(wrapper).toEqual('1337');
