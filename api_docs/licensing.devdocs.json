@@ -495,22 +495,6 @@
             "trackAdoption": false,
             "references": [
               {
-                "plugin": "fleet",
-                "path": "x-pack/plugins/fleet/common/services/agent_policy_config.test.ts"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/plugins/fleet/common/services/agent_policy_config.test.ts"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/plugins/fleet/server/services/agent_policy_watch.test.ts"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/plugins/fleet/server/services/agent_policy_watch.test.ts"
-              },
-              {
                 "plugin": "apm",
                 "path": "x-pack/plugins/observability_solution/apm/common/license_check.test.ts"
               },
@@ -569,6 +553,22 @@
               {
                 "plugin": "security",
                 "path": "x-pack/plugins/security/common/licensing/license_service.test.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/platform/plugins/shared/fleet/common/services/agent_policy_config.test.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/platform/plugins/shared/fleet/common/services/agent_policy_config.test.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/platform/plugins/shared/fleet/server/services/agent_policy_watch.test.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/platform/plugins/shared/fleet/server/services/agent_policy_watch.test.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -819,12 +819,12 @@
               "path": "x-pack/platform/plugins/shared/ml/public/plugin.ts"
             },
             {
-              "plugin": "logstash",
-              "path": "x-pack/plugins/logstash/public/plugin.ts"
-            },
-            {
               "plugin": "crossClusterReplication",
               "path": "x-pack/platform/plugins/private/cross_cluster_replication/public/plugin.ts"
+            },
+            {
+              "plugin": "logstash",
+              "path": "x-pack/platform/plugins/private/logstash/public/plugin.ts"
             },
             {
               "plugin": "painlessLab",
@@ -1816,22 +1816,6 @@
             "trackAdoption": false,
             "references": [
               {
-                "plugin": "fleet",
-                "path": "x-pack/plugins/fleet/common/services/agent_policy_config.test.ts"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/plugins/fleet/common/services/agent_policy_config.test.ts"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/plugins/fleet/server/services/agent_policy_watch.test.ts"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/plugins/fleet/server/services/agent_policy_watch.test.ts"
-              },
-              {
                 "plugin": "apm",
                 "path": "x-pack/plugins/observability_solution/apm/common/license_check.test.ts"
               },
@@ -1890,6 +1874,22 @@
               {
                 "plugin": "security",
                 "path": "x-pack/plugins/security/common/licensing/license_service.test.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/platform/plugins/shared/fleet/common/services/agent_policy_config.test.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/platform/plugins/shared/fleet/common/services/agent_policy_config.test.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/platform/plugins/shared/fleet/server/services/agent_policy_watch.test.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/platform/plugins/shared/fleet/server/services/agent_policy_watch.test.ts"
               },
               {
                 "plugin": "securitySolution",
