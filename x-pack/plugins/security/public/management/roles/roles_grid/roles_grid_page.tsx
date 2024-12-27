@@ -505,7 +505,7 @@ export const RolesGridPage: FC<Props> = ({
           </>
         )}
         <EuiBasicTable
-          data-test-subj="rolesTable"
+          data-test-subj={`${!isLoading ? 'rolesTable' : 'rolesTableLoading'}`}
           itemId="name"
           columns={getColumnConfig()}
           selection={
