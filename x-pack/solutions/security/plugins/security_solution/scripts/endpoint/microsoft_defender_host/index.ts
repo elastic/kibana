@@ -7,6 +7,7 @@
 
 import { run, type RunFn } from '@kbn/dev-cli-runner';
 import { ok } from 'assert';
+import { existsSync as fileExistsSync } from 'fs';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import {
   DEFAULT_API_URL,
@@ -51,6 +52,7 @@ console and pushes the data to Elasticsearch.`,
         'oAuthServerUrl',
         'oAuthScope',
         'apiUrl,',
+        'onboardingPackage',
         'kibanaUrl',
         'username',
         'password',
@@ -72,6 +74,11 @@ console and pushes the data to Elasticsearch.`,
         apiKey: '',
       },
       help: `
+      --onboardingPackage Required. The local path to the Microsoft device onboarding package zip file. This file must be
+                          downloaded from the Microsoft Defender management system under "Settings > Endpoints > Onboarding"
+                          ( link: https://security.microsoft.com/securitysettings/endpoints/onboarding ). Select
+                          "linux Server" for operating system, "Streamlined" for connectivity type and "Local Script (Python)"
+                          for the deployment method.
       --tenantId          Required. The tenantId having access to Microsoft Defender for Endpoint management system.
       --clientId          Required. The azure application having privileges to access Microsoft Defender for Endpoint system
       --clientSecret      Required. The client secret created for the registered application's API access.
@@ -95,9 +102,9 @@ console and pushes the data to Elasticsearch.`,
                           kibana (Default: elastic).
       --password          Optional. Password associated with the username (Default: changeme)
       --apiKey            Optional. A Kibana API key to use for authz. When defined, 'username'
-                            and 'password' arguments are ignored.
+                          and 'password' arguments are ignored.
       --spaceId           Optional. The space id where the host should be added to in kibana. The
-                            space will be created if it does not exist. Default: default space.
+                          space will be created if it does not exist. Default: default space.
       --kibanaUrl         Optional. The url to Kibana (Default: http://127.0.0.1:5601)
 `,
     },
@@ -105,6 +112,7 @@ console and pushes the data to Elasticsearch.`,
 };
 
 const runCli: RunFn = async ({ log, flags }) => {
+  const onboardingPackage = flags.onboardingPackage as string;
   const tenantId = flags.tenantId as string;
   const clientId = flags.clientId as string;
   const clientSecret = flags.clientSecret as string;
@@ -131,6 +139,11 @@ const runCli: RunFn = async ({ log, flags }) => {
   ok(oAuthServerUrl, getRequiredArgMessage('oAuthServerUrl'));
   ok(oAuthScope, getRequiredArgMessage('oAuthScope'));
   ok(apiUrl, getRequiredArgMessage('apiUrl'));
+  ok(onboardingPackage, getRequiredArgMessage('onboardingPackage'));
+  ok(
+    fileExistsSync(onboardingPackage),
+    `onboardingPackage file path does not exist! [${onboardingPackage}]`
+  );
 
   const kbnClient = createKbnClient({
     log,
