@@ -13,10 +13,7 @@ import type {
   UsageCollectionSetup,
   UsageCollectionStart,
 } from '@kbn/usage-collection-plugin/public';
-import type {
-  MappingProperty,
-  MappingPropertyBase,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { MappingProperty, MappingPropertyBase } from '@elastic/elasticsearch/lib/api/types';
 import type {
   IndexManagementPluginSetup,
   IndexManagementPluginStart,
