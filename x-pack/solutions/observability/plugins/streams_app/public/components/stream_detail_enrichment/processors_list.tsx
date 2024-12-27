@@ -17,7 +17,12 @@ import {
   EuiButtonIcon,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ReadStreamDefinition, isDissectProcessor, isGrokProcessor } from '@kbn/streams-schema';
+import {
+  ReadStreamDefinition,
+  getProcessorType,
+  isDissectProcessor,
+  isGrokProcessor,
+} from '@kbn/streams-schema';
 import { useBoolean } from '@kbn/react-hooks';
 import { EditProcessorFlyout } from './flyout';
 import { ProcessorDefinition } from './types';
@@ -92,16 +97,6 @@ const ProcessorListItem = ({
       )}
     </EuiPanel>
   );
-};
-
-const getProcessorType = (processor: ProcessorDefinition) => {
-  if (isGrokProcessor(processor.config)) {
-    return 'grok';
-  } else if (isDissectProcessor(processor.config)) {
-    return 'dissect';
-  }
-
-  return '';
 };
 
 const getProcessorDescription = (processor: ProcessorDefinition) => {

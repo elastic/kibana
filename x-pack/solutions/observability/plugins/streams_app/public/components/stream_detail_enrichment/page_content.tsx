@@ -36,10 +36,8 @@ export function StreamDetailEnrichmentContent({
   definition: ReadStreamDefinition;
   refreshDefinition: () => void;
 }) {
-  const { processors, setProcessors, hasChanges, resetChanges, saveChanges } = useProcessorsList(
-    definition,
-    refreshDefinition
-  );
+  const { processors, addProcessor, setProcessors, hasChanges, resetChanges, saveChanges } =
+    useProcessorsList(definition, refreshDefinition);
 
   const [isAddProcessorOpen, { on: openAddProcessor, off: closeAddProcessor }] = useBoolean();
   const [isBottomBarOpen, { on: openBottomBar, off: closeBottomBar }] = useBoolean();
@@ -69,7 +67,12 @@ export function StreamDetailEnrichmentContent({
   const hasProcessors = processors.length > 0;
 
   const addProcessorFlyout = isAddProcessorOpen && (
-    <AddProcessorFlyout key="add-processor" definition={definition} onClose={closeAddProcessor} />
+    <AddProcessorFlyout
+      key="add-processor"
+      definition={definition}
+      onClose={closeAddProcessor}
+      onAddProcessor={addProcessor}
+    />
   );
 
   if (!hasProcessors) {
@@ -160,7 +163,9 @@ const useProcessorsList = (definition: ReadStreamDefinition, refreshDefinition: 
             id: definition.name,
           },
           body: {
+            ...definition.stream,
             ingest: {
+              ...definition.stream.ingest,
               processing: httpProcessing,
             },
           },

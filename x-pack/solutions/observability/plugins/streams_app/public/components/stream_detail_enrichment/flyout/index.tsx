@@ -5,8 +5,10 @@
  * 2.0.
  */
 
+/* eslint-disable @typescript-eslint/naming-convention */
+
 import React, { useMemo } from 'react';
-import { FormProvider, useController, useForm, useWatch } from 'react-hook-form';
+import { FormProvider, SubmitHandler, useController, useForm, useWatch } from 'react-hook-form';
 import { EuiCallOut, EuiForm, EuiButton, EuiSpacer, EuiAccordion, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ProcessingDefinition, ReadStreamDefinition, isWiredReadStream } from '@kbn/streams-schema';
@@ -15,7 +17,7 @@ import { ProcessorTypeSelector } from './processor_type_selector';
 import { ProcessorFlyoutTemplate } from './processor_flyout_template';
 import { ConditionEditor } from '../../condition_editor';
 import { GrokPatternDefinition } from './grok_pattern_definition';
-import { ProcessingDefinitionGrok, ProcessorFormState } from '../types';
+import { GrokFormState, ProcessingDefinitionGrok, ProcessorFormState } from '../types';
 import { ProcessorFieldSelector } from './processor_field_selector';
 import { GrokPatternsEditor } from './grok_patterns_editor';
 import { ToggleField } from './toggle_field';
@@ -28,10 +30,11 @@ const defaultCondition: ProcessingDefinition['condition'] = {
 
 export interface ProcessorFlyoutProps {
   definition: ReadStreamDefinition;
+  onAddProcessor: (_newProcessing: ProcessingDefinition) => void;
   onClose: () => void;
 }
 
-export function AddProcessorFlyout({ definition, onClose }: ProcessorFlyoutProps) {
+export function AddProcessorFlyout({ definition, onClose, onAddProcessor }: ProcessorFlyoutProps) {
   const methods = useForm<ProcessorFormState>({
     defaultValues: {
       type: 'grok',
@@ -45,8 +48,23 @@ export function AddProcessorFlyout({ definition, onClose }: ProcessorFlyoutProps
 
   const processorType = useWatch({ name: 'type', control: methods.control });
 
-  const handleSubmit = (data) => {
-    console.log(data);
+  const handleSubmit: SubmitHandler<ProcessorFormState> = (data) => {
+    if (data.type === 'grok') {
+      const { condition, field, patterns, pattern_definitions, ignore_failure } = data;
+
+      onAddProcessor({
+        condition,
+        config: {
+          grok: {
+            patterns: patterns.map(({ value }) => value),
+            field,
+            pattern_definitions,
+            ignore_failure,
+          },
+        },
+      });
+      onClose();
+    }
   };
 
   return (
@@ -68,7 +86,7 @@ export function AddProcessorFlyout({ definition, onClose }: ProcessorFlyoutProps
       <FormProvider {...methods}>
         <EuiForm component="form" fullWidth onSubmit={methods.handleSubmit(handleSubmit)}>
           <ProcessorTypeSelector />
-          <EuiSpacer />
+          <EuiSpacer size="m" />
           {processorType === 'grok' && <GrokProcessorForm definition={definition} />}
         </EuiForm>
       </FormProvider>

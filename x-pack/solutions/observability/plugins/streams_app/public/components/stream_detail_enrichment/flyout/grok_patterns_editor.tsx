@@ -25,7 +25,7 @@ import { GrokFormState } from '../types';
 
 export const GrokPatternsEditor = () => {
   const { register } = useFormContext();
-  const { fields, append, remove, move } = useFieldArray<GrokFormState>({
+  const { fields, append, remove, move } = useFieldArray<Pick<GrokFormState, 'patterns'>>({
     name: 'patterns',
   });
 
@@ -75,8 +75,8 @@ export const GrokPatternsEditor = () => {
 interface DraggablePatternInputProps {
   idx: number;
   inputProps: UseFormRegisterReturn<`patterns.${number}.value`>;
-  onRemove: (() => void) | null;
-  pattern: GrokFormState['patterns'][number];
+  onRemove: ((idx: number) => void) | null;
+  pattern: GrokFormState['patterns'][number] & { id: string };
 }
 
 const DraggablePatternInput = ({
@@ -115,10 +115,7 @@ const DraggablePatternInput = ({
               onClick={() => onRemove(idx)}
               aria-label={i18n.translate(
                 'xpack.streams.streamDetailView.managementTab.enrichment.processorFlyout.grokEditor.removePattern',
-                {
-                  defaultMessage: 'Remove pattern {pattern}',
-                  values: { pattern: inputProps.value },
-                }
+                { defaultMessage: 'Remove grok pattern' }
               )}
             />
           )}

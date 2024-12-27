@@ -36,11 +36,13 @@ export interface ProcessingDefinitionDissect extends BaseProcessingDefinition {
   config: DissectProcessingDefinition;
 }
 
-export type GrokFormState = Omit<GrokProcessingDefinition['grok'], 'patterns'> & {
-  type: 'grok';
-  patterns: Array<{ value: string }>;
-};
+export type GrokFormState = BaseFormState &
+  Omit<GrokProcessingDefinition['grok'], 'patterns'> & {
+    type: 'grok';
+    patterns: Array<{ value: string }>;
+  };
 
-export type DissectFormState = { type: 'dissect' } & DissectProcessingDefinition['dissect'];
+export type DissectFormState = DissectProcessingDefinition['dissect'] &
+  BaseFormState & { type: 'dissect' };
 
-export type ProcessorFormState = BaseFormState & (GrokFormState | DissectFormState);
+export type ProcessorFormState = GrokFormState | DissectFormState;
