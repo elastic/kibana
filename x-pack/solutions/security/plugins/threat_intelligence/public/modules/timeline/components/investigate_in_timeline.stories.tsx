@@ -21,7 +21,7 @@ export default {
 
 const mockIndicator = generateMockUrlIndicator();
 
-export const ContextMenu: StoryFn<void> = () => {
+export const ContextMenu: StoryFn = () => {
   const items = [<InvestigateInTimelineContextMenu data={mockIndicator} />];
 
   return (
@@ -31,7 +31,7 @@ export const ContextMenu: StoryFn<void> = () => {
   );
 };
 
-export const ButtonIcon: StoryFn<void> = () => {
+export const ButtonIcon: StoryFn = () => {
   return (
     <StoryProvidersComponent>
       <InvestigateInTimelineButtonIcon data={mockIndicator} />

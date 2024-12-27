@@ -15,7 +15,7 @@ export default {
   title: 'IndicatorEmptyPrompt',
 };
 
-export const Default: StoryFn<void> = () => {
+export const Default: StoryFn = () => {
   return (
     <StoryProvidersComponent>
       <IndicatorEmptyPrompt />

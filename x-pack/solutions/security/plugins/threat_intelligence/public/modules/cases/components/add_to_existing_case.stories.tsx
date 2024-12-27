@@ -18,7 +18,7 @@ export default {
 
 const mockIndicator = generateMockUrlIndicator();
 
-export const Default: StoryFn<void> = () => {
+export const Default: StoryFn = () => {
   const items = [
     <AddToExistingCase indicator={mockIndicator} onClick={() => window.alert('Clicked')} />,
   ];
@@ -30,7 +30,7 @@ export const Default: StoryFn<void> = () => {
   );
 };
 
-export const Disabled: StoryFn<void> = () => {
+export const Disabled: StoryFn = () => {
   const fields = { ...mockIndicator.fields };
   delete fields['threat.indicator.name'];
   const mockIndicatorMissingName = {

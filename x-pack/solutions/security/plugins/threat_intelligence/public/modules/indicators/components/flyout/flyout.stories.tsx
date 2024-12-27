@@ -16,7 +16,7 @@ export default {
   title: 'IndicatorsFlyout',
 };
 
-export const Default: StoryFn<void> = () => {
+export const Default: StoryFn = () => {
   const mockIndicator: Indicator = generateMockIndicator();
 
   return (
@@ -29,7 +29,7 @@ export const Default: StoryFn<void> = () => {
   );
 };
 
-export const EmptyIndicator: StoryFn<void> = () => {
+export const EmptyIndicator: StoryFn = () => {
   return (
     <StoryProvidersComponent>
       <IndicatorsFlyout

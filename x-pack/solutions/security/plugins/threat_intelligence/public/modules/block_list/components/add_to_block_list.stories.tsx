@@ -18,7 +18,7 @@ export default {
   title: 'AddToBlocklist',
 };
 
-export const ContextMenu: StoryFn<void> = () => {
+export const ContextMenu: StoryFn = () => {
   const mockSecurityContext: SecuritySolutionPluginContext = getSecuritySolutionContextMock();
 
   const mockIndicatorFileHashValue: string = 'abc';
@@ -36,7 +36,7 @@ export const ContextMenu: StoryFn<void> = () => {
   );
 };
 
-export const Disabled: StoryFn<void> = () => {
+export const Disabled: StoryFn = () => {
   const mockSecurityContext: SecuritySolutionPluginContext = getSecuritySolutionContextMock();
   mockSecurityContext.blockList.canWriteBlocklist = false;
 

@@ -24,7 +24,7 @@ export default {
   },
 };
 
-export const Default: StoryFn<void> = () => {
+export const Default: StoryFn = () => {
   const mockIndicator: Indicator = generateMockIndicator();
   const context = {
     kqlBarIntegration: false,

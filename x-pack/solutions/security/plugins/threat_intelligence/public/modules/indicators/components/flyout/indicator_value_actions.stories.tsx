@@ -19,7 +19,7 @@ export default {
 const indicator: Indicator = generateMockFileIndicator();
 const field: string = 'threat.indicator.name';
 
-export const Default: StoryFn<void> = () => {
+export const Default: StoryFn = () => {
   const context = {
     kqlBarIntegration: true,
   };
@@ -32,7 +32,7 @@ export const Default: StoryFn<void> = () => {
   );
 };
 
-export const WithoutFilterInOut: StoryFn<void> = () => {
+export const WithoutFilterInOut: StoryFn = () => {
   const context = {
     kqlBarIntegration: false,
   };

@@ -18,7 +18,7 @@ export default {
   title: 'FilterOut',
 };
 
-export const ButtonIcon: StoryFn<void> = () => {
+export const ButtonIcon: StoryFn = () => {
   const mockIndicator: Indicator = generateMockIndicator();
   const mockField: string = 'threat.feed.name';
 
@@ -29,7 +29,7 @@ export const ButtonIcon: StoryFn<void> = () => {
   );
 };
 
-export const ContextMenu: StoryFn<void> = () => {
+export const ContextMenu: StoryFn = () => {
   const mockIndicator: Indicator = generateMockIndicator();
   const mockField: string = 'threat.feed.name';
   const items = [<FilterOutContextMenu data={mockIndicator} field={mockField} />];
@@ -41,7 +41,7 @@ export const ContextMenu: StoryFn<void> = () => {
   );
 };
 
-export const DataGrid: StoryFn<void> = () => {
+export const DataGrid: StoryFn = () => {
   const mockIndicator: Indicator = generateMockIndicator();
   const mockField: string = 'threat.feed.name';
   const columnId: string = '1';

@@ -20,16 +20,16 @@ export default {
 
 const mockValue: string = 'Text copied!';
 
-export const ButtonEmpty: StoryFn<void> = () => {
+export const ButtonEmpty: StoryFn = () => {
   return <CopyToClipboardButtonEmpty value={mockValue} />;
 };
 
-export const ContextMenu: StoryFn<void> = () => {
+export const ContextMenu: StoryFn = () => {
   const items = [<CopyToClipboardContextMenu value={mockValue} />];
 
   return <EuiContextMenuPanel items={items} />;
 };
 
-export const ButtonIcon: StoryFn<void> = () => {
+export const ButtonIcon: StoryFn = () => {
   return <CopyToClipboardButtonIcon value={mockValue} />;
 };

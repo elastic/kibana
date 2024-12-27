@@ -17,7 +17,7 @@ export default {
   title: 'Components/FlyoutRiskSummary',
 };
 
-export const Default: StoryFn<void> = () => {
+export const Default: StoryFn = () => {
   return (
     <StorybookProviders>
       <TestProvider>

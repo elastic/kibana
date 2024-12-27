@@ -30,7 +30,7 @@ export default {
   title: 'IndicatorsFieldSelector',
 };
 
-export const Default: StoryFn<void> = () => {
+export const Default: StoryFn = () => {
   return (
     <IndicatorsFieldSelector
       indexPattern={mockIndexPattern}
@@ -41,7 +41,7 @@ export const Default: StoryFn<void> = () => {
   );
 };
 
-export const WithDefaultValue: StoryFn<void> = () => {
+export const WithDefaultValue: StoryFn = () => {
   return (
     <IndicatorsFieldSelector
       indexPattern={mockIndexPattern}
@@ -53,6 +53,6 @@ export const WithDefaultValue: StoryFn<void> = () => {
   );
 };
 
-export const NoData: StoryFn<void> = () => {
+export const NoData: StoryFn = () => {
   return <IndicatorsFieldSelector indexPattern={{ fields: [] } as any} valueChange={() => {}} />;
 };

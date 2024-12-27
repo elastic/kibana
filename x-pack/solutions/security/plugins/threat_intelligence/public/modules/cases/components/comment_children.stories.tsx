@@ -18,7 +18,7 @@ export default {
   title: 'CommentChildren',
 };
 
-export const Default: StoryFn<void> = () => {
+export const Default: StoryFn = () => {
   const id: string = '123';
   const metadata: AttachmentMetadata = {
     indicatorName: 'indicatorName',
@@ -50,7 +50,7 @@ export const Default: StoryFn<void> = () => {
   );
 };
 
-export const Loading: StoryFn<void> = () => {
+export const Loading: StoryFn = () => {
   const id: string = '123';
   const metadata: AttachmentMetadata = {
     indicatorName: 'indicatorName',

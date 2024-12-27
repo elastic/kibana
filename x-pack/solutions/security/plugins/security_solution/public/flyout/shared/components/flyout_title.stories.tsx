@@ -24,7 +24,7 @@ export default {
   title: 'Flyout/Title',
 };
 
-export const Default: StoryFn<void> = () => {
+export const Default: StoryFn = () => {
   return (
     <FixWidthWrapper>
       <FlyoutTitle title={'Title'} iconType={'warning'} data-test-subj={'test-title'} />
@@ -32,7 +32,7 @@ export const Default: StoryFn<void> = () => {
   );
 };
 
-export const WithoutIcon: StoryFn<void> = () => {
+export const WithoutIcon: StoryFn = () => {
   return (
     <FixWidthWrapper>
       <FlyoutTitle title={'Title'} data-test-subj={'test-title'} />
@@ -40,7 +40,7 @@ export const WithoutIcon: StoryFn<void> = () => {
   );
 };
 
-export const MultipleLines: StoryFn<void> = () => {
+export const MultipleLines: StoryFn = () => {
   return (
     <FixWidthWrapper>
       <FlyoutTitle
@@ -52,7 +52,7 @@ export const MultipleLines: StoryFn<void> = () => {
   );
 };
 
-export const MoreThanThreeLines: StoryFn<void> = () => {
+export const MoreThanThreeLines: StoryFn = () => {
   return (
     <FixWidthWrapper>
       <FlyoutTitle
@@ -66,7 +66,7 @@ export const MoreThanThreeLines: StoryFn<void> = () => {
   );
 };
 
-export const TitleInLink: StoryFn<void> = () => {
+export const TitleInLink: StoryFn = () => {
   return (
     <FixWidthLinkWrapper>
       <FlyoutTitle title={'Title'} iconType={'warning'} data-test-subj={'test-title'} isLink />
@@ -74,7 +74,7 @@ export const TitleInLink: StoryFn<void> = () => {
   );
 };
 
-export const MultipleLinesInLink: StoryFn<void> = () => {
+export const MultipleLinesInLink: StoryFn = () => {
   return (
     <FixWidthLinkWrapper>
       <FlyoutTitle
@@ -87,7 +87,7 @@ export const MultipleLinesInLink: StoryFn<void> = () => {
   );
 };
 
-export const MoreThanThreeLinesInLink: StoryFn<void> = () => {
+export const MoreThanThreeLinesInLink: StoryFn = () => {
   return (
     <FixWidthLinkWrapper>
       <FlyoutTitle

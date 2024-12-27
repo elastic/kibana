@@ -24,7 +24,7 @@ const KibanaReactContext = createKibanaReactContext({
   timelines: mockKibanaTimelinesService,
 } as unknown as CoreStart);
 
-export const ButtonIcon: StoryFn<void> = () => {
+export const ButtonIcon: StoryFn = () => {
   const mockData: Indicator = generateMockIndicator();
 
   return (
@@ -34,7 +34,7 @@ export const ButtonIcon: StoryFn<void> = () => {
   );
 };
 
-export const ContextMenu: StoryFn<void> = () => {
+export const ContextMenu: StoryFn = () => {
   const mockData: Indicator = generateMockIndicator();
   const items = [<AddToTimelineContextMenu data={mockData} field={mockField} />];
 

@@ -18,7 +18,7 @@ export default {
   title: 'Flyout/Navigation',
 };
 
-export const Expand: StoryFn<void> = () => {
+export const Expand: StoryFn = () => {
   return (
     <TestProvider>
       <FlyoutNavigation flyoutIsExpandable={true} expandDetails={expandDetails} />
@@ -26,14 +26,14 @@ export const Expand: StoryFn<void> = () => {
   );
 };
 
-export const Collapse: StoryFn<void> = () => {
+export const Collapse: StoryFn = () => {
   return (
     <TestProvider>
       <FlyoutNavigation flyoutIsExpandable={true} expandDetails={expandDetails} />
     </TestProvider>
   );
 };
-export const CollapsableWithAction: StoryFn<void> = () => {
+export const CollapsableWithAction: StoryFn = () => {
   return (
     <TestProvider>
       <FlyoutNavigation
@@ -45,7 +45,7 @@ export const CollapsableWithAction: StoryFn<void> = () => {
   );
 };
 
-export const NonCollapsableWithAction: StoryFn<void> = () => {
+export const NonCollapsableWithAction: StoryFn = () => {
   return (
     <TestProvider>
       <FlyoutNavigation flyoutIsExpandable={false} actions={<EuiButtonIcon iconType="share" />} />
@@ -53,7 +53,7 @@ export const NonCollapsableWithAction: StoryFn<void> = () => {
   );
 };
 
-export const Empty: StoryFn<void> = () => {
+export const Empty: StoryFn = () => {
   return (
     <TestProvider>
       <FlyoutNavigation flyoutIsExpandable={false} />

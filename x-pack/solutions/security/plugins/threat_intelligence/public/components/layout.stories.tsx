@@ -16,7 +16,7 @@ export default {
   component: DefaultPageLayout,
 };
 
-export const Default: StoryFn<void> = () => {
+export const Default: StoryFn = () => {
   const title = 'Title with border below';
   const children = <EuiText>Content with border above</EuiText>;
 
@@ -27,7 +27,7 @@ export const Default: StoryFn<void> = () => {
   );
 };
 
-export const NoBorder: StoryFn<void> = () => {
+export const NoBorder: StoryFn = () => {
   const title = 'Title without border';
   const border = false;
   const children = <EuiText>Content without border</EuiText>;

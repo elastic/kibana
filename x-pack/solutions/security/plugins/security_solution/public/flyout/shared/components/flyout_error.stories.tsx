@@ -14,6 +14,6 @@ export default {
   title: 'Flyout/FlyoutError',
 };
 
-export const Default: StoryFn<void> = () => {
+export const Default: StoryFn = () => {
   return <FlyoutError />;
 };

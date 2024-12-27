@@ -25,7 +25,7 @@ const context = {
   kqlBarIntegration: false,
 };
 
-export const Default: StoryFn<void> = () => {
+export const Default: StoryFn = () => {
   const mockIndicator: Indicator = generateMockIndicator();
   const KibanaReactContext = createKibanaReactContext({
     uiSettings: mockUiSettingsService(),
@@ -43,7 +43,7 @@ export const Default: StoryFn<void> = () => {
   );
 };
 
-export const EmptyIndicator: StoryFn<void> = () => {
+export const EmptyIndicator: StoryFn = () => {
   return (
     <IndicatorsFlyoutContext.Provider value={context}>
       <IndicatorsFlyoutTable indicator={{ fields: {} } as unknown as Indicator} />

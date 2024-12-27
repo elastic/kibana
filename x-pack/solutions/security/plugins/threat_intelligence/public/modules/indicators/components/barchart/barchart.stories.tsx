@@ -62,19 +62,19 @@ export default {
   title: 'IndicatorsBarChart',
 };
 
-export const Default: StoryFn<void> = () => (
+export const Default: StoryFn = () => (
   <StoryProvidersComponent kibana={{ timelines: mockKibanaTimelinesService }}>
     <IndicatorsBarChart indicators={mockIndicators} field={mockField} dateRange={mockDateRange} />
   </StoryProvidersComponent>
 );
 
-export const NoData: StoryFn<void> = () => (
+export const NoData: StoryFn = () => (
   <StoryProvidersComponent kibana={{ timelines: mockKibanaTimelinesService }}>
     <IndicatorsBarChart indicators={[]} field={mockField} dateRange={mockDateRange} />
   </StoryProvidersComponent>
 );
 
-export const CustomHeight: StoryFn<void> = () => {
+export const CustomHeight: StoryFn = () => {
   const mockHeight = '500px';
 
   return (

@@ -25,16 +25,16 @@ const headerContent = <EuiIcon type="expand" />;
 
 const children = <p>{'test content'}</p>;
 
-export const Default: StoryFn<void> = () => {
+export const Default: StoryFn = () => {
   return <ExpandablePanel {...defaultProps}>{children}</ExpandablePanel>;
 };
 
-export const DefaultWithoutIcon: StoryFn<void> = () => {
+export const DefaultWithoutIcon: StoryFn = () => {
   const props = { header: { title: 'title' } };
   return <ExpandablePanel {...props}>{children}</ExpandablePanel>;
 };
 
-export const DefaultWithHeaderContent: StoryFn<void> = () => {
+export const DefaultWithHeaderContent: StoryFn = () => {
   const props = {
     ...defaultProps,
     header: { ...defaultProps.header, headerContent },
@@ -42,7 +42,7 @@ export const DefaultWithHeaderContent: StoryFn<void> = () => {
   return <ExpandablePanel {...props}>{children}</ExpandablePanel>;
 };
 
-export const Expandable: StoryFn<void> = () => {
+export const Expandable: StoryFn = () => {
   const props = {
     ...defaultProps,
     expand: { expandable: true },
@@ -50,7 +50,7 @@ export const Expandable: StoryFn<void> = () => {
   return <ExpandablePanel {...props}>{children}</ExpandablePanel>;
 };
 
-export const ExpandableDefaultOpen: StoryFn<void> = () => {
+export const ExpandableDefaultOpen: StoryFn = () => {
   const props = {
     ...defaultProps,
     expand: { expandable: true, expandedOnFirstRender: true },
@@ -58,11 +58,11 @@ export const ExpandableDefaultOpen: StoryFn<void> = () => {
   return <ExpandablePanel {...props}>{children}</ExpandablePanel>;
 };
 
-export const EmptyDefault: StoryFn<void> = () => {
+export const EmptyDefault: StoryFn = () => {
   return <ExpandablePanel {...defaultProps} />;
 };
 
-export const EmptyDefaultExpanded: StoryFn<void> = () => {
+export const EmptyDefaultExpanded: StoryFn = () => {
   const props = {
     ...defaultProps,
     expand: { expandable: true },

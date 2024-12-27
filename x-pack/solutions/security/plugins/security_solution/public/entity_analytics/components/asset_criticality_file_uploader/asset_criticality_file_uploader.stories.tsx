@@ -32,7 +32,7 @@ export default {
   ],
 };
 
-export const Default: StoryFn<void> = () => {
+export const Default: StoryFn = () => {
   return (
     <StorybookProviders>
       <TestProvider>
@@ -46,7 +46,7 @@ export const Default: StoryFn<void> = () => {
   );
 };
 
-export const FilePickerStep: StoryFn<void> = () => {
+export const FilePickerStep: StoryFn = () => {
   return (
     <StorybookProviders>
       <TestProvider>
@@ -75,7 +75,7 @@ export const FilePickerStep: StoryFn<void> = () => {
   );
 };
 
-export const ValidationStep: StoryFn<void> = () => {
+export const ValidationStep: StoryFn = () => {
   return (
     <StorybookProviders>
       <TestProvider>
@@ -160,7 +160,7 @@ export const ValidationStep: StoryFn<void> = () => {
   );
 };
 
-export const ResultsStep: StoryFn<void> = () => {
+export const ResultsStep: StoryFn = () => {
   return (
     <StorybookProviders>
       <TestProvider>

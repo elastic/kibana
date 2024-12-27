@@ -15,12 +15,12 @@ export default {
   title: 'IndicatorsFlyoutJson',
 };
 
-export const Default: StoryFn<void> = () => {
+export const Default: StoryFn = () => {
   const mockIndicator: Indicator = generateMockIndicator();
 
   return <IndicatorsFlyoutJson indicator={mockIndicator} />;
 };
 
-export const EmptyIndicator: StoryFn<void> = () => {
+export const EmptyIndicator: StoryFn = () => {
   return <IndicatorsFlyoutJson indicator={{} as unknown as Indicator} />;
 };

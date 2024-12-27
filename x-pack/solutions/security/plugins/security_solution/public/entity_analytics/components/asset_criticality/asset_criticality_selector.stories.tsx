@@ -39,7 +39,7 @@ export default {
   ],
 };
 
-export const Default: StoryFn<void> = () => {
+export const Default: StoryFn = () => {
   return (
     <StorybookProviders>
       <TestProvider>
@@ -54,7 +54,7 @@ export const Default: StoryFn<void> = () => {
   );
 };
 
-export const Compressed: StoryFn<void> = () => {
+export const Compressed: StoryFn = () => {
   return (
     <StorybookProviders>
       <TestProvider>
@@ -70,7 +70,7 @@ export const Compressed: StoryFn<void> = () => {
   );
 };
 
-export const Loading: StoryFn<void> = () => {
+export const Loading: StoryFn = () => {
   return (
     <StorybookProviders>
       <TestProvider>

@@ -17,7 +17,7 @@ export default {
   title: 'Flyout/ExpandableSection',
 };
 
-export const Expand: StoryFn<void> = () => {
+export const Expand: StoryFn = () => {
   return (
     <ExpandableSection expanded={false} title={title}>
       {children}
@@ -25,7 +25,7 @@ export const Expand: StoryFn<void> = () => {
   );
 };
 
-export const Collapse: StoryFn<void> = () => {
+export const Collapse: StoryFn = () => {
   return (
     <ExpandableSection expanded={true} title={title}>
       {children}
