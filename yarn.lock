@@ -2206,10 +2206,10 @@
   dependencies:
     object-hash "^1.3.0"
 
-"@elastic/charts@68.0.3":
-  version "68.0.3"
-  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-68.0.3.tgz#dc4aaeb4cdc8751d5759b58dc9958efb3c2639da"
-  integrity sha512-U+NCTo2LCDDSVkV5kGinhzbiAvfEcVAZ4D2YM/0RZQFRvJfJBvelbG+jDkt6N2mEauJ4ECDDcb33995fbs71TA==
+"@elastic/charts@68.0.4":
+  version "68.0.4"
+  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-68.0.4.tgz#b35a4734e4e36ef894432a3ff882a0e4329ffe4c"
+  integrity sha512-kn9FEm2osJBitbbqCRcuZ3ygrLHelUm9i9bCAcY/t3vXfT7tDjhvgueAjm5gQas7/NcASN8LWEykLktGo3mrxQ==
   dependencies:
     "@popperjs/core" "^2.11.8"
     bezier-easing "^2.1.0"
@@ -2305,25 +2305,25 @@
   resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-0.0.2.tgz#56b9ef03984a05cc213772ae3713ea8ef47b0314"
   integrity sha512-IoxURM5zraoQ7C8f+mJb9HYSENiZGgRVcG4tLQxE61yHNNRDXtGDWTZh8N1KIHcsqN1CEPETjuzBXkJYF/fDiQ==
 
-"@elastic/eui-theme-borealis@0.0.4":
-  version "0.0.4"
-  resolved "https://registry.yarnpkg.com/@elastic/eui-theme-borealis/-/eui-theme-borealis-0.0.4.tgz#5a1e8d5cd02f25634928106c9845389f6b8568bb"
-  integrity sha512-6RV49J0saf2zjcf1uXYpoU9AgRlWs+ot+GszZz6iCBavPl7MdMlR13x5WdT7ewtx7cju9taEWhS1YDVfGVCFSA==
+"@elastic/eui-theme-borealis@0.0.7":
+  version "0.0.7"
+  resolved "https://registry.yarnpkg.com/@elastic/eui-theme-borealis/-/eui-theme-borealis-0.0.7.tgz#a6c4600d61a29a96078afbc8003a14f792842d32"
+  integrity sha512-N1bo++X+aI4k4CiykdqKiV9ihfSifS3AScQXeeD5I9FunljsNVTk5f+502VIJKx/1knLidplsXmBv4n6iXf1tQ==
 
-"@elastic/eui-theme-common@0.0.4":
-  version "0.0.4"
-  resolved "https://registry.yarnpkg.com/@elastic/eui-theme-common/-/eui-theme-common-0.0.4.tgz#83db50a46251c75e6a3c07df0dee3eedb5d49e17"
-  integrity sha512-IDQ15ytDwlB5OO2UlPKccUR37QnRp1xZE8zPy8LoCPQAX8hgDYjikk8gjA2eixCuTm9+t6Suz+Xuha69VcMMZg==
+"@elastic/eui-theme-common@0.0.7":
+  version "0.0.7"
+  resolved "https://registry.yarnpkg.com/@elastic/eui-theme-common/-/eui-theme-common-0.0.7.tgz#0e57b5325d52fd5813832a77f47f294204f3dc72"
+  integrity sha512-U9ii4Bl+S5zdbIH3WP01vebJboalhZ/ULlyZxc7zHmyA9Z2pONGOauUZUKE7v3nSmN6f53toNoa2pvn4ZqB+Yw==
   dependencies:
     "@types/lodash" "^4.14.202"
     lodash "^4.17.21"
 
-"@elastic/eui@98.1.0-borealis.0":
-  version "98.1.0-borealis.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-98.1.0-borealis.0.tgz#b0db1416d81863816939ae4dc067cc089a9f9789"
-  integrity sha512-DMu+H0j5WrByhJr3Xc3strmsIiwKHLYCOKsTWOqv9CS8tcRFaYa2zHhwhgVhRuBE7XdX++uCsV4vVGrd8qJMVw==
+"@elastic/eui@98.2.1-borealis.2":
+  version "98.2.1-borealis.2"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-98.2.1-borealis.2.tgz#f45308483f343e2b19dfa4bcfa4090bae226395f"
+  integrity sha512-ogTsvGqi4f2eiwzm/z7vLAEAQlw8ZiBpLTLFusFt9sawha7nmaLLitleKvJHZqBA117x71nhlM3CrWYczNmG0A==
   dependencies:
-    "@elastic/eui-theme-common" "0.0.4"
+    "@elastic/eui-theme-common" "0.0.7"
     "@hello-pangea/dnd" "^16.6.0"
     "@types/lodash" "^4.14.202"
     "@types/numeral" "^2.0.5"
@@ -3829,7 +3829,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/actions-plugin@link:x-pack/plugins/actions":
+"@kbn/actions-plugin@link:x-pack/platform/plugins/shared/actions":
   version "0.0.0"
   uid ""
 
@@ -3837,7 +3837,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/actions-types@link:packages/kbn-actions-types":
+"@kbn/actions-types@link:src/platform/packages/shared/kbn-actions-types":
   version "0.0.0"
   uid ""
 
@@ -3897,7 +3897,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/alerting-comparators@link:x-pack/packages/kbn-alerting-comparators":
+"@kbn/alerting-comparators@link:x-pack/platform/packages/shared/kbn-alerting-comparators":
   version "0.0.0"
   uid ""
 
@@ -3909,23 +3909,23 @@
   version "0.0.0"
   uid ""
 
-"@kbn/alerting-plugin@link:x-pack/plugins/alerting":
+"@kbn/alerting-plugin@link:x-pack/platform/plugins/shared/alerting":
   version "0.0.0"
   uid ""
 
-"@kbn/alerting-state-types@link:x-pack/packages/kbn-alerting-state-types":
+"@kbn/alerting-state-types@link:x-pack/platform/packages/private/kbn-alerting-state-types":
   version "0.0.0"
   uid ""
 
-"@kbn/alerting-types@link:packages/kbn-alerting-types":
+"@kbn/alerting-types@link:src/platform/packages/shared/kbn-alerting-types":
   version "0.0.0"
   uid ""
 
-"@kbn/alerts-as-data-utils@link:packages/kbn-alerts-as-data-utils":
+"@kbn/alerts-as-data-utils@link:src/platform/packages/shared/kbn-alerts-as-data-utils":
   version "0.0.0"
   uid ""
 
-"@kbn/alerts-grouping@link:packages/kbn-alerts-grouping":
+"@kbn/alerts-grouping@link:x-pack/solutions/observability/packages/kbn-alerts-grouping":
   version "0.0.0"
   uid ""
 
@@ -3933,7 +3933,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/alerts-ui-shared@link:packages/kbn-alerts-ui-shared":
+"@kbn/alerts-ui-shared@link:src/platform/packages/shared/kbn-alerts-ui-shared":
   version "0.0.0"
   uid ""
 
@@ -4049,14 +4049,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/bfetch-error@link:packages/kbn-bfetch-error":
-  version "0.0.0"
-  uid ""
-
-"@kbn/bfetch-plugin@link:src/plugins/bfetch":
-  version "0.0.0"
-  uid ""
-
 "@kbn/calculate-auto@link:packages/kbn-calculate-auto":
   version "0.0.0"
   uid ""
@@ -4065,7 +4057,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/canvas-plugin@link:x-pack/plugins/canvas":
+"@kbn/canvas-plugin@link:x-pack/platform/plugins/private/canvas":
   version "0.0.0"
   uid ""
 
@@ -4077,11 +4069,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/cases-components@link:packages/kbn-cases-components":
+"@kbn/cases-components@link:src/platform/packages/shared/kbn-cases-components":
   version "0.0.0"
   uid ""
 
-"@kbn/cases-plugin@link:x-pack/plugins/cases":
+"@kbn/cases-plugin@link:x-pack/platform/plugins/shared/cases":
   version "0.0.0"
   uid ""
 
@@ -4102,6 +4094,10 @@
   uid ""
 
 "@kbn/charts-plugin@link:src/plugins/charts":
+  version "0.0.0"
+  uid ""
+
+"@kbn/charts-theme@link:packages/kbn-charts-theme":
   version "0.0.0"
   uid ""
 
@@ -4277,11 +4273,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/controls-plugin@link:src/plugins/controls":
+"@kbn/controls-plugin@link:src/platform/plugins/shared/controls":
   version "0.0.0"
   uid ""
 
-"@kbn/core-analytics-browser-internal@link:packages/core/analytics/core-analytics-browser-internal":
+"@kbn/core-analytics-browser-internal@link:src/core/packages/analytics/browser-internal":
   version "0.0.0"
   uid ""
 
@@ -4289,11 +4285,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-analytics-browser@link:packages/core/analytics/core-analytics-browser":
+"@kbn/core-analytics-browser@link:src/core/packages/analytics/browser":
   version "0.0.0"
   uid ""
 
-"@kbn/core-analytics-server-internal@link:packages/core/analytics/core-analytics-server-internal":
+"@kbn/core-analytics-server-internal@link:src/core/packages/analytics/server-internal":
   version "0.0.0"
   uid ""
 
@@ -4301,7 +4297,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-analytics-server@link:packages/core/analytics/core-analytics-server":
+"@kbn/core-analytics-server@link:src/core/packages/analytics/server":
   version "0.0.0"
   uid ""
 
@@ -4309,7 +4305,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-application-browser-internal@link:packages/core/application/core-application-browser-internal":
+"@kbn/core-application-browser-internal@link:src/core/packages/application/browser-internal":
   version "0.0.0"
   uid ""
 
@@ -4317,15 +4313,15 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-application-browser@link:packages/core/application/core-application-browser":
+"@kbn/core-application-browser@link:src/core/packages/application/browser":
   version "0.0.0"
   uid ""
 
-"@kbn/core-application-common@link:packages/core/application/core-application-common":
+"@kbn/core-application-common@link:src/core/packages/application/common":
   version "0.0.0"
   uid ""
 
-"@kbn/core-apps-browser-internal@link:packages/core/apps/core-apps-browser-internal":
+"@kbn/core-apps-browser-internal@link:src/core/packages/apps/browser-internal":
   version "0.0.0"
   uid ""
 
@@ -4333,11 +4329,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-apps-server-internal@link:packages/core/apps/core-apps-server-internal":
+"@kbn/core-apps-server-internal@link:src/core/packages/apps/server-internal":
   version "0.0.0"
   uid ""
 
-"@kbn/core-base-browser-internal@link:packages/core/base/core-base-browser-internal":
+"@kbn/core-base-browser-internal@link:src/core/packages/base/browser-internal":
   version "0.0.0"
   uid ""
 
@@ -4349,7 +4345,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-base-common@link:packages/core/base/core-base-common":
+"@kbn/core-base-common@link:src/core/packages/base/common":
   version "0.0.0"
   uid ""
 
@@ -5193,15 +5189,15 @@
   version "0.0.0"
   uid ""
 
-"@kbn/custom-icons@link:packages/kbn-custom-icons":
+"@kbn/custom-icons@link:src/platform/packages/shared/kbn-custom-icons":
   version "0.0.0"
   uid ""
 
-"@kbn/custom-integrations-plugin@link:src/plugins/custom_integrations":
+"@kbn/custom-integrations-plugin@link:src/platform/plugins/shared/custom_integrations":
   version "0.0.0"
   uid ""
 
-"@kbn/custom-integrations@link:packages/kbn-custom-integrations":
+"@kbn/custom-integrations@link:x-pack/solutions/observability/packages/kbn-custom-integrations":
   version "0.0.0"
   uid ""
 
@@ -5209,11 +5205,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/dashboard-enhanced-plugin@link:x-pack/plugins/dashboard_enhanced":
+"@kbn/dashboard-enhanced-plugin@link:x-pack/platform/plugins/shared/dashboard_enhanced":
   version "0.0.0"
   uid ""
 
-"@kbn/dashboard-plugin@link:src/plugins/dashboard":
+"@kbn/dashboard-plugin@link:src/platform/plugins/shared/dashboard":
   version "0.0.0"
   uid ""
 
@@ -5225,7 +5221,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/data-quality-plugin@link:x-pack/plugins/data_quality":
+"@kbn/data-quality-plugin@link:x-pack/platform/plugins/shared/data_quality":
   version "0.0.0"
   uid ""
 
@@ -5273,7 +5269,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/dataset-quality-plugin@link:x-pack/plugins/observability_solution/dataset_quality":
+"@kbn/dataset-quality-plugin@link:x-pack/platform/plugins/shared/dataset_quality":
   version "0.0.0"
   uid ""
 
@@ -5289,7 +5285,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/deeplinks-fleet@link:packages/deeplinks/fleet":
+"@kbn/deeplinks-fleet@link:src/platform/packages/shared/deeplinks/fleet":
   version "0.0.0"
   uid ""
 
@@ -5309,7 +5305,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/deeplinks-security@link:packages/deeplinks/security":
+"@kbn/deeplinks-security@link:src/platform/packages/shared/deeplinks/security":
   version "0.0.0"
   uid ""
 
@@ -5365,7 +5361,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/discover-contextual-components@link:packages/kbn-discover-contextual-components":
+"@kbn/discover-contextual-components@link:src/platform/packages/shared/kbn-discover-contextual-components":
   version "0.0.0"
   uid ""
 
@@ -5413,7 +5409,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/elastic-agent-utils@link:packages/kbn-elastic-agent-utils":
+"@kbn/elastic-agent-utils@link:src/platform/packages/shared/kbn-elastic-agent-utils":
   version "0.0.0"
   uid ""
 
@@ -5437,7 +5433,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/embeddable-enhanced-plugin@link:x-pack/plugins/embeddable_enhanced":
+"@kbn/embeddable-enhanced-plugin@link:x-pack/platform/plugins/shared/embeddable_enhanced":
   version "0.0.0"
   uid ""
 
@@ -5445,7 +5441,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/embeddable-plugin@link:src/plugins/embeddable":
+"@kbn/embeddable-plugin@link:src/platform/plugins/shared/embeddable":
   version "0.0.0"
   uid ""
 
@@ -5601,7 +5597,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/event-log-plugin@link:x-pack/plugins/event_log":
+"@kbn/event-log-plugin@link:x-pack/platform/plugins/shared/event_log":
   version "0.0.0"
   uid ""
 
@@ -5621,7 +5617,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/expression-error-plugin@link:src/plugins/expression_error":
+"@kbn/expression-error-plugin@link:src/platform/plugins/shared/expression_error":
   version "0.0.0"
   uid ""
 
@@ -5633,7 +5629,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/expression-image-plugin@link:src/plugins/expression_image":
+"@kbn/expression-image-plugin@link:src/platform/plugins/shared/expression_image":
   version "0.0.0"
   uid ""
 
@@ -5641,7 +5637,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/expression-metric-plugin@link:src/plugins/expression_metric":
+"@kbn/expression-metric-plugin@link:src/platform/plugins/shared/expression_metric":
   version "0.0.0"
   uid ""
 
@@ -5653,15 +5649,15 @@
   version "0.0.0"
   uid ""
 
-"@kbn/expression-repeat-image-plugin@link:src/plugins/expression_repeat_image":
+"@kbn/expression-repeat-image-plugin@link:src/platform/plugins/shared/expression_repeat_image":
   version "0.0.0"
   uid ""
 
-"@kbn/expression-reveal-image-plugin@link:src/plugins/expression_reveal_image":
+"@kbn/expression-reveal-image-plugin@link:src/platform/plugins/shared/expression_reveal_image":
   version "0.0.0"
   uid ""
 
-"@kbn/expression-shape-plugin@link:src/plugins/expression_shape":
+"@kbn/expression-shape-plugin@link:src/platform/plugins/shared/expression_shape":
   version "0.0.0"
   uid ""
 
@@ -5725,11 +5721,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/fields-metadata-plugin@link:x-pack/plugins/fields_metadata":
+"@kbn/fields-metadata-plugin@link:x-pack/platform/plugins/shared/fields_metadata":
   version "0.0.0"
   uid ""
 
-"@kbn/file-upload-plugin@link:x-pack/plugins/file_upload":
+"@kbn/file-upload-plugin@link:x-pack/platform/plugins/private/file_upload":
   version "0.0.0"
   uid ""
 
@@ -5749,11 +5745,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/fleet-plugin@link:x-pack/plugins/fleet":
+"@kbn/fleet-plugin@link:x-pack/platform/plugins/shared/fleet":
   version "0.0.0"
   uid ""
 
-"@kbn/flot-charts@link:packages/kbn-flot-charts":
+"@kbn/flot-charts@link:src/platform/packages/shared/kbn-flot-charts":
   version "0.0.0"
   uid ""
 
@@ -5841,7 +5837,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/grouping@link:packages/kbn-grouping":
+"@kbn/grouping@link:src/platform/packages/shared/kbn-grouping":
   version "0.0.0"
   uid ""
 
@@ -5929,7 +5925,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/index-management-plugin@link:x-pack/plugins/index_management":
+"@kbn/index-management-plugin@link:x-pack/platform/plugins/shared/index_management":
   version "0.0.0"
   uid ""
 
@@ -5945,6 +5941,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/inference-endpoint-ui-common@link:x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common":
+  version "0.0.0"
+  uid ""
+
 "@kbn/inference-plugin@link:x-pack/platform/plugins/shared/inference":
   version "0.0.0"
   uid ""
@@ -5957,19 +5957,19 @@
   version "0.0.0"
   uid ""
 
-"@kbn/infra-plugin@link:x-pack/plugins/observability_solution/infra":
+"@kbn/infra-plugin@link:x-pack/solutions/observability/plugins/infra":
   version "0.0.0"
   uid ""
 
-"@kbn/ingest-pipelines-plugin@link:x-pack/plugins/ingest_pipelines":
+"@kbn/ingest-pipelines-plugin@link:x-pack/platform/plugins/shared/ingest_pipelines":
   version "0.0.0"
   uid ""
 
-"@kbn/input-control-vis-plugin@link:src/plugins/input_control_vis":
+"@kbn/input-control-vis-plugin@link:src/platform/plugins/private/input_control_vis":
   version "0.0.0"
   uid ""
 
-"@kbn/inspector-plugin@link:src/plugins/inspector":
+"@kbn/inspector-plugin@link:src/platform/plugins/shared/inspector":
   version "0.0.0"
   uid ""
 
@@ -6125,7 +6125,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/links-plugin@link:src/plugins/links":
+"@kbn/links-plugin@link:src/platform/plugins/private/links":
   version "0.0.0"
   uid ""
 
@@ -6137,7 +6137,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/lists-plugin@link:x-pack/plugins/lists":
+"@kbn/lists-plugin@link:x-pack/solutions/security/plugins/lists":
   version "0.0.0"
   uid ""
 
@@ -6161,19 +6161,19 @@
   version "0.0.0"
   uid ""
 
-"@kbn/logs-data-access-plugin@link:x-pack/plugins/observability_solution/logs_data_access":
+"@kbn/logs-data-access-plugin@link:x-pack/platform/plugins/shared/logs_data_access":
   version "0.0.0"
   uid ""
 
-"@kbn/logs-explorer-plugin@link:x-pack/plugins/observability_solution/logs_explorer":
+"@kbn/logs-explorer-plugin@link:x-pack/solutions/observability/plugins/logs_explorer":
   version "0.0.0"
   uid ""
 
-"@kbn/logs-shared-plugin@link:x-pack/plugins/observability_solution/logs_shared":
+"@kbn/logs-shared-plugin@link:x-pack/platform/plugins/shared/logs_shared":
   version "0.0.0"
   uid ""
 
-"@kbn/logstash-plugin@link:x-pack/plugins/logstash":
+"@kbn/logstash-plugin@link:x-pack/platform/plugins/private/logstash":
   version "0.0.0"
   uid ""
 
@@ -6249,7 +6249,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/mapbox-gl@link:packages/kbn-mapbox-gl":
+"@kbn/mapbox-gl@link:src/platform/packages/private/kbn-mapbox-gl":
   version "0.0.0"
   uid ""
 
@@ -6257,15 +6257,15 @@
   version "0.0.0"
   uid ""
 
-"@kbn/maps-ems-plugin@link:src/plugins/maps_ems":
+"@kbn/maps-ems-plugin@link:src/platform/plugins/private/maps_ems":
   version "0.0.0"
   uid ""
 
-"@kbn/maps-plugin@link:x-pack/plugins/maps":
+"@kbn/maps-plugin@link:x-pack/platform/plugins/shared/maps":
   version "0.0.0"
   uid ""
 
-"@kbn/maps-vector-tile-utils@link:x-pack/packages/maps/vector_tile_utils":
+"@kbn/maps-vector-tile-utils@link:x-pack/platform/packages/private/maps/vector_tile_utils":
   version "0.0.0"
   uid ""
 
@@ -6417,11 +6417,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/monitoring-collection-plugin@link:x-pack/plugins/monitoring_collection":
+"@kbn/monitoring-collection-plugin@link:x-pack/platform/plugins/private/monitoring_collection":
   version "0.0.0"
   uid ""
 
-"@kbn/monitoring-plugin@link:x-pack/plugins/monitoring":
+"@kbn/monitoring-plugin@link:x-pack/platform/plugins/private/monitoring":
   version "0.0.0"
   uid ""
 
@@ -6493,19 +6493,19 @@
   version "0.0.0"
   uid ""
 
-"@kbn/observability-logs-explorer-plugin@link:x-pack/plugins/observability_solution/observability_logs_explorer":
+"@kbn/observability-logs-explorer-plugin@link:x-pack/solutions/observability/plugins/observability_logs_explorer":
   version "0.0.0"
   uid ""
 
-"@kbn/observability-logs-overview@link:x-pack/packages/observability/logs_overview":
+"@kbn/observability-logs-overview@link:x-pack/platform/packages/shared/observability/logs_overview":
   version "0.0.0"
   uid ""
 
-"@kbn/observability-onboarding-e2e@link:x-pack/plugins/observability_solution/observability_onboarding/e2e":
+"@kbn/observability-onboarding-e2e@link:x-pack/solutions/observability/plugins/observability_onboarding/e2e":
   version "0.0.0"
   uid ""
 
-"@kbn/observability-onboarding-plugin@link:x-pack/plugins/observability_solution/observability_onboarding":
+"@kbn/observability-onboarding-plugin@link:x-pack/solutions/observability/plugins/observability_onboarding":
   version "0.0.0"
   uid ""
 
@@ -6513,7 +6513,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/observability-shared-plugin@link:x-pack/plugins/observability_solution/observability_shared":
+"@kbn/observability-shared-plugin@link:x-pack/solutions/observability/plugins/observability_shared":
   version "0.0.0"
   uid ""
 
@@ -6521,15 +6521,15 @@
   version "0.0.0"
   uid ""
 
-"@kbn/observability-utils-browser@link:x-pack/packages/observability/observability_utils/observability_utils_browser":
+"@kbn/observability-utils-browser@link:x-pack/solutions/observability/packages/utils_browser":
   version "0.0.0"
   uid ""
 
-"@kbn/observability-utils-common@link:x-pack/packages/observability/observability_utils/observability_utils_common":
+"@kbn/observability-utils-common@link:x-pack/solutions/observability/packages/utils_common":
   version "0.0.0"
   uid ""
 
-"@kbn/observability-utils-server@link:x-pack/packages/observability/observability_utils/observability_utils_server":
+"@kbn/observability-utils-server@link:x-pack/solutions/observability/packages/utils_server":
   version "0.0.0"
   uid ""
 
@@ -6545,7 +6545,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/openapi-common@link:packages/kbn-openapi-common":
+"@kbn/openapi-common@link:src/platform/packages/shared/kbn-openapi-common":
   version "0.0.0"
   uid ""
 
@@ -6581,7 +6581,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/panel-loader@link:packages/kbn-panel-loader":
+"@kbn/panel-loader@link:src/platform/packages/private/kbn-panel-loader":
   version "0.0.0"
   uid ""
 
@@ -6621,19 +6621,19 @@
   version "0.0.0"
   uid ""
 
-"@kbn/presentation-containers@link:packages/presentation/presentation_containers":
+"@kbn/presentation-containers@link:src/platform/packages/shared/presentation/presentation_containers":
   version "0.0.0"
   uid ""
 
-"@kbn/presentation-panel-plugin@link:src/plugins/presentation_panel":
+"@kbn/presentation-panel-plugin@link:src/platform/plugins/private/presentation_panel":
   version "0.0.0"
   uid ""
 
-"@kbn/presentation-publishing@link:packages/presentation/presentation_publishing":
+"@kbn/presentation-publishing@link:src/platform/packages/shared/presentation/presentation_publishing":
   version "0.0.0"
   uid ""
 
-"@kbn/presentation-util-plugin@link:src/plugins/presentation_util":
+"@kbn/presentation-util-plugin@link:src/platform/plugins/shared/presentation_util":
   version "0.0.0"
   uid ""
 
@@ -6669,7 +6669,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/react-hooks@link:packages/kbn-react-hooks":
+"@kbn/react-hooks@link:src/platform/packages/shared/kbn-react-hooks":
   version "0.0.0"
   uid ""
 
@@ -6813,7 +6813,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/response-ops-rule-params@link:packages/response-ops/rule_params":
+"@kbn/response-ops-rule-params@link:src/platform/packages/private/response-ops/rule_params":
   version "0.0.0"
   uid ""
 
@@ -6837,7 +6837,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/router-utils@link:packages/kbn-router-utils":
+"@kbn/router-utils@link:src/platform/packages/shared/kbn-router-utils":
   version "0.0.0"
   uid ""
 
@@ -6845,15 +6845,15 @@
   version "0.0.0"
   uid ""
 
-"@kbn/rrule@link:packages/kbn-rrule":
+"@kbn/rrule@link:src/platform/packages/shared/kbn-rrule":
   version "0.0.0"
   uid ""
 
-"@kbn/rule-data-utils@link:packages/kbn-rule-data-utils":
+"@kbn/rule-data-utils@link:src/platform/packages/shared/kbn-rule-data-utils":
   version "0.0.0"
   uid ""
 
-"@kbn/rule-registry-plugin@link:x-pack/plugins/rule_registry":
+"@kbn/rule-registry-plugin@link:x-pack/platform/plugins/shared/rule_registry":
   version "0.0.0"
   uid ""
 
@@ -6953,7 +6953,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/screenshotting-plugin@link:x-pack/plugins/screenshotting":
+"@kbn/screenshotting-plugin@link:x-pack/platform/plugins/shared/screenshotting":
   version "0.0.0"
   uid ""
 
@@ -7085,7 +7085,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/security-solution-ess@link:x-pack/plugins/security_solution_ess":
+"@kbn/security-solution-ess@link:x-pack/solutions/security/plugins/security_solution_ess":
   version "0.0.0"
   uid ""
 
@@ -7101,11 +7101,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/security-solution-plugin@link:x-pack/plugins/security_solution":
+"@kbn/security-solution-plugin@link:x-pack/solutions/security/plugins/security_solution":
   version "0.0.0"
   uid ""
 
-"@kbn/security-solution-serverless@link:x-pack/plugins/security_solution_serverless":
+"@kbn/security-solution-serverless@link:x-pack/solutions/security/plugins/security_solution_serverless":
   version "0.0.0"
   uid ""
 
@@ -7129,7 +7129,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/securitysolution-autocomplete@link:packages/kbn-securitysolution-autocomplete":
+"@kbn/securitysolution-autocomplete@link:x-pack/solutions/security/packages/kbn-securitysolution-autocomplete":
   version "0.0.0"
   uid ""
 
@@ -7141,71 +7141,71 @@
   version "0.0.0"
   uid ""
 
-"@kbn/securitysolution-endpoint-exceptions-common@link:packages/kbn-securitysolution-endpoint-exceptions-common":
+"@kbn/securitysolution-endpoint-exceptions-common@link:x-pack/solutions/security/packages/kbn-securitysolution-endpoint-exceptions-common":
   version "0.0.0"
   uid ""
 
-"@kbn/securitysolution-es-utils@link:packages/kbn-securitysolution-es-utils":
+"@kbn/securitysolution-es-utils@link:src/platform/packages/shared/kbn-securitysolution-es-utils":
   version "0.0.0"
   uid ""
 
-"@kbn/securitysolution-exception-list-components@link:packages/kbn-securitysolution-exception-list-components":
+"@kbn/securitysolution-exception-list-components@link:x-pack/solutions/security/packages/kbn-securitysolution-exception-list-components":
   version "0.0.0"
   uid ""
 
-"@kbn/securitysolution-exceptions-common@link:packages/kbn-securitysolution-exceptions-common":
+"@kbn/securitysolution-exceptions-common@link:x-pack/solutions/security/packages/kbn-securitysolution-exceptions-common":
   version "0.0.0"
   uid ""
 
-"@kbn/securitysolution-hook-utils@link:packages/kbn-securitysolution-hook-utils":
+"@kbn/securitysolution-hook-utils@link:x-pack/solutions/security/packages/kbn-securitysolution-hook-utils":
   version "0.0.0"
   uid ""
 
-"@kbn/securitysolution-io-ts-alerting-types@link:packages/kbn-securitysolution-io-ts-alerting-types":
+"@kbn/securitysolution-io-ts-alerting-types@link:x-pack/solutions/security/packages/kbn-securitysolution-io-ts-alerting-types":
   version "0.0.0"
   uid ""
 
-"@kbn/securitysolution-io-ts-list-types@link:packages/kbn-securitysolution-io-ts-list-types":
+"@kbn/securitysolution-io-ts-list-types@link:x-pack/solutions/security/packages/kbn-securitysolution-io-ts-list-types":
   version "0.0.0"
   uid ""
 
-"@kbn/securitysolution-io-ts-types@link:packages/kbn-securitysolution-io-ts-types":
+"@kbn/securitysolution-io-ts-types@link:src/platform/packages/shared/kbn-securitysolution-io-ts-types":
   version "0.0.0"
   uid ""
 
-"@kbn/securitysolution-io-ts-utils@link:packages/kbn-securitysolution-io-ts-utils":
+"@kbn/securitysolution-io-ts-utils@link:src/platform/packages/shared/kbn-securitysolution-io-ts-utils":
   version "0.0.0"
   uid ""
 
-"@kbn/securitysolution-list-api@link:packages/kbn-securitysolution-list-api":
+"@kbn/securitysolution-list-api@link:x-pack/solutions/security/packages/kbn-securitysolution-list-api":
   version "0.0.0"
   uid ""
 
-"@kbn/securitysolution-list-constants@link:packages/kbn-securitysolution-list-constants":
+"@kbn/securitysolution-list-constants@link:x-pack/solutions/security/packages/kbn-securitysolution-list-constants":
   version "0.0.0"
   uid ""
 
-"@kbn/securitysolution-list-hooks@link:packages/kbn-securitysolution-list-hooks":
+"@kbn/securitysolution-list-hooks@link:x-pack/solutions/security/packages/kbn-securitysolution-list-hooks":
   version "0.0.0"
   uid ""
 
-"@kbn/securitysolution-list-utils@link:packages/kbn-securitysolution-list-utils":
+"@kbn/securitysolution-list-utils@link:x-pack/solutions/security/packages/kbn-securitysolution-list-utils":
   version "0.0.0"
   uid ""
 
-"@kbn/securitysolution-lists-common@link:packages/kbn-securitysolution-lists-common":
+"@kbn/securitysolution-lists-common@link:x-pack/solutions/security/packages/kbn-securitysolution-lists-common":
   version "0.0.0"
   uid ""
 
-"@kbn/securitysolution-rules@link:packages/kbn-securitysolution-rules":
+"@kbn/securitysolution-rules@link:src/platform/packages/shared/kbn-securitysolution-rules":
   version "0.0.0"
   uid ""
 
-"@kbn/securitysolution-t-grid@link:packages/kbn-securitysolution-t-grid":
+"@kbn/securitysolution-t-grid@link:x-pack/solutions/security/packages/kbn-securitysolution-t-grid":
   version "0.0.0"
   uid ""
 
-"@kbn/securitysolution-utils@link:packages/kbn-securitysolution-utils":
+"@kbn/securitysolution-utils@link:x-pack/solutions/security/packages/kbn-securitysolution-utils":
   version "0.0.0"
   uid ""
 
@@ -7249,7 +7249,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/serverless-security-settings@link:packages/serverless/settings/security_project":
+"@kbn/serverless-security-settings@link:src/platform/packages/shared/serverless/settings/security_project":
   version "0.0.0"
   uid ""
 
@@ -7533,11 +7533,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/stack-alerts-plugin@link:x-pack/plugins/stack_alerts":
+"@kbn/stack-alerts-plugin@link:x-pack/platform/plugins/shared/stack_alerts":
   version "0.0.0"
   uid ""
 
-"@kbn/stack-connectors-plugin@link:x-pack/plugins/stack_connectors":
+"@kbn/stack-connectors-plugin@link:x-pack/platform/plugins/shared/stack_connectors":
   version "0.0.0"
   uid ""
 
@@ -7577,6 +7577,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/streams-schema@link:x-pack/packages/kbn-streams-schema":
+  version "0.0.0"
+  uid ""
+
 "@kbn/synthetics-e2e@link:x-pack/solutions/observability/plugins/synthetics/e2e":
   version "0.0.0"
   uid ""
@@ -7597,7 +7601,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/task-manager-plugin@link:x-pack/plugins/task_manager":
+"@kbn/task-manager-plugin@link:x-pack/platform/plugins/shared/task_manager":
   version "0.0.0"
   uid ""
 
@@ -7685,7 +7689,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/timerange@link:packages/kbn-timerange":
+"@kbn/timerange@link:src/platform/packages/shared/kbn-timerange":
   version "0.0.0"
   uid ""
 
@@ -7713,11 +7717,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/triggers-actions-ui-plugin@link:x-pack/plugins/triggers_actions_ui":
+"@kbn/triggers-actions-ui-plugin@link:x-pack/platform/plugins/shared/triggers_actions_ui":
   version "0.0.0"
   uid ""
 
-"@kbn/triggers-actions-ui-types@link:packages/kbn-triggers-actions-ui-types":
+"@kbn/triggers-actions-ui-types@link:src/platform/packages/shared/kbn-triggers-actions-ui-types":
   version "0.0.0"
   uid ""
 
@@ -7893,7 +7897,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/vis-type-markdown-plugin@link:src/plugins/vis_type_markdown":
+"@kbn/vis-type-markdown-plugin@link:src/platform/plugins/private/vis_type_markdown":
   version "0.0.0"
   uid ""
 
@@ -7957,7 +7961,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/xstate-utils@link:packages/kbn-xstate-utils":
+"@kbn/xstate-utils@link:src/platform/packages/shared/kbn-xstate-utils":
   version "0.0.0"
   uid ""
 
@@ -7965,7 +7969,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/zod-helpers@link:packages/kbn-zod-helpers":
+"@kbn/zod-helpers@link:src/platform/packages/shared/kbn-zod-helpers":
   version "0.0.0"
   uid ""
 
@@ -9184,12 +9188,12 @@
     require-from-string "^2.0.2"
     uri-js-replace "^1.0.1"
 
-"@redocly/cli@^1.25.15":
-  version "1.25.15"
-  resolved "https://registry.yarnpkg.com/@redocly/cli/-/cli-1.25.15.tgz#12e487dd7a45ceda38655f2a93721ac15868f4e6"
-  integrity sha512-ZD743CJX4FpMJvGNE9Cm3gNn8LNRzRjyrYNVPi1C4iIEtrFkr5Zq791qv6gUFehWns71svbVyzWD9ftVTdfqYg==
+"@redocly/cli@^1.26.0":
+  version "1.26.0"
+  resolved "https://registry.yarnpkg.com/@redocly/cli/-/cli-1.26.0.tgz#0f5707f55d833993ffc9644fed7d85fcafe37877"
+  integrity sha512-yUsrTmEPHaBDQf16jSFGi2n+AJabHacLpr7La92Dseo0tRkgLKsUWiaVEEyqm79POBytD87mVTi3THitqnSyZQ==
   dependencies:
-    "@redocly/openapi-core" "1.25.15"
+    "@redocly/openapi-core" "1.26.0"
     abort-controller "^3.0.0"
     chokidar "^3.5.1"
     colorette "^1.2.0"
@@ -9214,10 +9218,10 @@
   resolved "https://registry.yarnpkg.com/@redocly/config/-/config-0.17.1.tgz#2def04cecf440dd78c0f102f53f3444fac050768"
   integrity sha512-CEmvaJuG7pm2ylQg53emPmtgm4nW2nxBgwXzbVEHpGas/lGnMyN8Zlkgiz6rPw0unASg6VW3wlz27SOL5XFHYQ==
 
-"@redocly/openapi-core@1.25.15", "@redocly/openapi-core@^1.4.0":
-  version "1.25.15"
-  resolved "https://registry.yarnpkg.com/@redocly/openapi-core/-/openapi-core-1.25.15.tgz#61d82b054340e080998efc3f701ca55c20f7fdb8"
-  integrity sha512-/dpr5zpGj2t1Bf7EIXEboRZm1hsJZBQfv3Q1pkivtdAEg3if2khv+b9gY68aquC6cM/2aQY2kMLy8LlY2tn+Og==
+"@redocly/openapi-core@1.26.0", "@redocly/openapi-core@^1.4.0":
+  version "1.26.0"
+  resolved "https://registry.yarnpkg.com/@redocly/openapi-core/-/openapi-core-1.26.0.tgz#ffd6c3d9f7e98c4b61584d5c0511cf953d1cfade"
+  integrity sha512-8Ofu6WpBp7eoLmf1qQ4+T0W4LRr8es+4Drw/RJG+acPXmaT2TmHk2B2v+3+1R9GqSIj6kx3N7JmQkxAPCnvDLw==
   dependencies:
     "@redocly/ajv" "^8.11.2"
     "@redocly/config" "^0.17.0"

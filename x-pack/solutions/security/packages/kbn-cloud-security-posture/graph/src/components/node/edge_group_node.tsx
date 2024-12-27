@@ -6,34 +6,28 @@
  */
 
 import React, { memo } from 'react';
-import { Handle, NodeResizeControl, Position } from '@xyflow/react';
+import { Handle, Position } from '@xyflow/react';
 import { HandleStyleOverride } from './styles';
 import type { NodeProps } from '../types';
 
-// eslint-disable-next-line react/display-name
-export const EdgeGroupNode: React.FC<NodeProps> = memo((props: NodeProps) => {
+export const EdgeGroupNode = memo<NodeProps>((props: NodeProps) => {
   // Handles order horizontally is: in > inside > out > outside
   return (
     <>
-      <NodeResizeControl
-        position="right"
-        css={{ borderColor: 'transparent', background: 'transparent' }}
-      >
-        <Handle
-          type="target"
-          isConnectable={false}
-          position={Position.Right}
-          id="out"
-          style={HandleStyleOverride}
-        />
-        <Handle
-          type="source"
-          isConnectable={false}
-          position={Position.Right}
-          id="outside"
-          style={HandleStyleOverride}
-        />
-      </NodeResizeControl>
+      <Handle
+        type="target"
+        isConnectable={false}
+        position={Position.Right}
+        id="out"
+        style={HandleStyleOverride}
+      />
+      <Handle
+        type="source"
+        isConnectable={false}
+        position={Position.Right}
+        id="outside"
+        style={HandleStyleOverride}
+      />
       <Handle
         type="source"
         isConnectable={false}
@@ -51,3 +45,5 @@ export const EdgeGroupNode: React.FC<NodeProps> = memo((props: NodeProps) => {
     </>
   );
 });
+
+EdgeGroupNode.displayName = 'EdgeGroupNode';

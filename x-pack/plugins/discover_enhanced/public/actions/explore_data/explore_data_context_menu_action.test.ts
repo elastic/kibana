@@ -8,14 +8,9 @@
 import { coreMock } from '@kbn/core/public/mocks';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { DiscoverAppLocator } from '@kbn/discover-plugin/common';
-import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { ViewMode as ViewModeType } from '@kbn/presentation-publishing';
+import { ViewMode } from '@kbn/presentation-publishing';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
-import {
-  VisualizeEmbeddableContract,
-  VISUALIZE_EMBEDDABLE_TYPE,
-} from '@kbn/visualizations-plugin/public';
 import { BehaviorSubject } from 'rxjs';
 import { Params, PluginDeps } from './abstract_explore_data_action';
 import { ExploreDataContextMenuAction } from './explore_data_context_menu_action';
@@ -60,18 +55,17 @@ const setup = () => {
   };
   const action = new ExploreDataContextMenuAction(params);
 
-  const embeddable: VisualizeEmbeddableContract = {
-    type: VISUALIZE_EMBEDDABLE_TYPE,
-    dataViews: new BehaviorSubject([
+  const embeddable = {
+    type: 'anyEmbeddable',
+    dataViews: new BehaviorSubject<undefined | DataView[]>([
       {
         id: 'index-ptr-foo',
-      },
+      } as DataView,
     ]),
     parentApi: {
-      viewMode: new BehaviorSubject(ViewMode.VIEW),
-      localFilters: new BehaviorSubject([]),
+      viewMode: new BehaviorSubject<ViewMode>('view'),
     },
-  } as unknown as VisualizeEmbeddableContract;
+  };
 
   const context = {
     embeddable,
@@ -126,11 +120,11 @@ describe('"Explore underlying data" panel action', () => {
       embeddable.dataViews = new BehaviorSubject<undefined | DataView[]>([
         {
           id: 'index-ptr-foo',
-        },
+        } as DataView,
         {
           id: 'index-ptr-bar',
-        },
-      ] as any as DataView[]);
+        } as DataView,
+      ]);
 
       const isCompatible = await action.isCompatible(context);
 
@@ -159,7 +153,7 @@ describe('"Explore underlying data" panel action', () => {
     test('returns false if dashboard is in edit mode', async () => {
       const { action, embeddable, context } = setup();
       if (embeddable.parentApi) {
-        embeddable.parentApi.viewMode = new BehaviorSubject<ViewModeType>(ViewMode.EDIT);
+        embeddable.parentApi.viewMode = new BehaviorSubject<ViewMode>('edit');
       }
 
       const isCompatible = await action.isCompatible(context);

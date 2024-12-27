@@ -24,10 +24,10 @@ const { REPO_ROOT } = require('@kbn/repo-info');
       `${REPO_ROOT}/x-pack/solutions/observability/plugins/slo/docs/openapi/slo/bundled.yaml`,
 
       // Security solution
-      `${REPO_ROOT}/x-pack/plugins/security_solution/docs/openapi/serverless/*.schema.yaml`,
-      `${REPO_ROOT}/packages/kbn-securitysolution-lists-common/docs/openapi/serverless/*.schema.yaml`,
-      `${REPO_ROOT}/packages/kbn-securitysolution-exceptions-common/docs/openapi/serverless/*.schema.yaml`,
-      `${REPO_ROOT}/packages/kbn-securitysolution-endpoint-exceptions-common/docs/openapi/serverless/*.schema.yaml`,
+      `${REPO_ROOT}/x-pack/solutions/security/plugins/security_solution/docs/openapi/serverless/*.schema.yaml`,
+      `${REPO_ROOT}/x-pack/solutions/security/packages/kbn-securitysolution-lists-common/docs/openapi/serverless/*.schema.yaml`,
+      `${REPO_ROOT}/x-pack/solutions/security/packages/kbn-securitysolution-exceptions-common/docs/openapi/serverless/*.schema.yaml`,
+      `${REPO_ROOT}/x-pack/solutions/security/packages/kbn-securitysolution-endpoint-exceptions-common/docs/openapi/serverless/*.schema.yaml`,
       `${REPO_ROOT}/x-pack/platform/packages/shared/kbn-elastic-assistant-common/docs/openapi/serverless/*.schema.yaml`,
       `${REPO_ROOT}/x-pack/platform/plugins/shared/osquery/docs/openapi/serverless/*.schema.yaml`,
     ],

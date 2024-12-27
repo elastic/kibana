@@ -21,7 +21,7 @@ import { PipelinesLogic } from './pipelines_logic';
 
 const DEFAULT_PIPELINE_VALUES = {
   extract_binary_content: true,
-  name: 'ent-search-generic-ingestion',
+  name: 'search-default-ingestion',
   reduce_whitespace: true,
   run_ml_inference: true,
 };

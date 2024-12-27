@@ -6,8 +6,8 @@
  */
 
 import React from 'react';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import { useTheme } from '../../../../hooks/use_theme';
+import styled from '@emotion/styled';
+import { useEuiFontSize, useEuiTheme } from '@elastic/eui';
 
 export enum Shape {
   circle = 'circle',
@@ -20,11 +20,11 @@ interface ContainerProps {
   disabled: boolean;
 }
 
-const Container = euiStyled.div<ContainerProps>`
+const Container = styled.div<ContainerProps>`
   display: flex;
   align-items: center;
-  font-size: ${({ theme }) => theme.eui.euiFontSizeS};
-  color: ${({ theme }) => theme.eui.euiColorDarkShade};
+  font-size: ${() => useEuiFontSize('s').fontSize};
+  color: ${({ theme }) => theme.euiTheme.colors.darkShade};
   cursor: ${(props) => (props.clickable ? 'pointer' : 'initial')};
   opacity: ${(props) => (props.disabled ? 0.4 : 1)};
   user-select: none;
@@ -38,7 +38,7 @@ interface IndicatorProps {
 
 const radius = 11;
 
-export const Indicator = euiStyled.span<IndicatorProps>`
+export const Indicator = styled.span<IndicatorProps>`
   width: ${radius}px;
   height: ${radius}px;
   margin-right: ${(props) => (props.withMargin ? `${radius / 2}px` : 0)};
@@ -68,8 +68,8 @@ export function Legend({
   indicator,
   ...rest
 }: Props) {
-  const theme = useTheme();
-  const indicatorColor = color || theme.eui.euiColorVis1;
+  const { euiTheme } = useEuiTheme();
+  const indicatorColor = color || euiTheme.colors.vis.euiColorVis1;
 
   return (
     <Container

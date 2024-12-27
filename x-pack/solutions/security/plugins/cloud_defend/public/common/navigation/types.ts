@@ -18,6 +18,6 @@ export type CloudDefendPage = 'policies' | 'dashboard';
 
 /**
  * All the IDs for the cloud defend pages.
- * This needs to match the cloud defend page entries in `SecurityPageName` in `x-pack/plugins/security_solution/common/constants.ts`.
+ * This needs to match the cloud defend page entries in `SecurityPageName` in `x-pack/solutions/security/plugins/security_solution/common/constants.ts`.
  */
 export type CloudDefendPageId = 'cloud_defend-policies' | 'kubernetes_security-dashboard';
