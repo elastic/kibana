@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ViewMode } from '..';
+import { ViewMode } from '../../../common/types';
 import { KibanaExecutionContext } from '@kbn/core/types';
 import { EmbeddableInput } from '.';
 import { omitGenericEmbeddableInput, genericEmbeddableInputIsEqual } from './diff_embeddable_input';

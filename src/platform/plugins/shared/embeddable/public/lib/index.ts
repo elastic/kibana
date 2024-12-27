@@ -9,6 +9,5 @@
 
 export * from './errors';
 export * from './embeddables';
-export * from './types';
 export * from './triggers';
 export * from './state_transfer';

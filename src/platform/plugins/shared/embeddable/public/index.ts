@@ -36,8 +36,8 @@ export {
   PANEL_NOTIFICATION_TRIGGER,
   SELECT_RANGE_TRIGGER,
   VALUE_CLICK_TRIGGER,
-  ViewMode,
 } from './lib';
+export { ViewMode } from '../common/types';
 export type {
   CellValueContext,
   ChartActionContext,
@@ -48,7 +48,6 @@ export type {
   EmbeddablePackageState,
   IEmbeddable,
   MultiValueClickContext,
-  PropertySpec,
   RangeSelectContext,
   ValueClickContext,
 } from './lib';
