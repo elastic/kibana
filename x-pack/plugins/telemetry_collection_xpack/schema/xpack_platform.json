@@ -5060,16 +5060,6 @@
         }
       }
     },
-    "reporting": {
-      "properties": {
-        "available": {
-          "type": "boolean"
-        },
-        "enabled": {
-          "type": "boolean"
-        }
-      }
-    },
     "monitoring": {
       "properties": {
         "hasMonitoringData": {
@@ -5407,6 +5397,16 @@
         }
       }
     },
+    "reporting": {
+      "properties": {
+        "available": {
+          "type": "boolean"
+        },
+        "enabled": {
+          "type": "boolean"
+        }
+      }
+    },
     "rollups": {
       "properties": {
         "index_patterns": {
@@ -5460,42 +5460,6 @@
               }
             }
           }
-        }
-      }
-    },
-    "task_manager": {
-      "properties": {
-        "task_type_exclusion": {
-          "type": "array",
-          "items": {
-            "type": "keyword"
-          }
-        },
-        "failed_tasks": {
-          "type": "long"
-        },
-        "recurring_tasks": {
-          "properties": {
-            "actual_service_time": {
-              "type": "long"
-            },
-            "adjusted_service_time": {
-              "type": "long"
-            }
-          }
-        },
-        "adhoc_tasks": {
-          "properties": {
-            "actual_service_time": {
-              "type": "long"
-            },
-            "adjusted_service_time": {
-              "type": "long"
-            }
-          }
-        },
-        "capacity": {
-          "type": "long"
         }
       }
     },
@@ -5590,6 +5554,42 @@
               }
             }
           }
+        }
+      }
+    },
+    "task_manager": {
+      "properties": {
+        "task_type_exclusion": {
+          "type": "array",
+          "items": {
+            "type": "keyword"
+          }
+        },
+        "failed_tasks": {
+          "type": "long"
+        },
+        "recurring_tasks": {
+          "properties": {
+            "actual_service_time": {
+              "type": "long"
+            },
+            "adjusted_service_time": {
+              "type": "long"
+            }
+          }
+        },
+        "adhoc_tasks": {
+          "properties": {
+            "actual_service_time": {
+              "type": "long"
+            },
+            "adjusted_service_time": {
+              "type": "long"
+            }
+          }
+        },
+        "capacity": {
+          "type": "long"
         }
       }
     },
