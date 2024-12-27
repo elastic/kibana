@@ -77,7 +77,7 @@ export const CreateField = React.memo(function CreateFieldComponent({
   semanticTextInfo,
   createFieldFormRef,
 }: Props) {
-  const { isSemanticTextEnabled, ml, setErrorsInTrainedModelDeployment } = semanticTextInfo ?? {};
+  const { isSemanticTextEnabled, setErrorsInTrainedModelDeployment } = semanticTextInfo ?? {};
   const dispatch = useDispatch();
   const fieldTypeInputRef = useRef<HTMLInputElement>(null);
 
@@ -105,12 +105,6 @@ export const CreateField = React.memo(function CreateFieldComponent({
       dispatch({ type: 'documentField.changeStatus', value: 'idle' });
     }
   };
-
-  const { createInferenceEndpoint } = useSemanticText({
-    form,
-    setErrorsInTrainedModelDeployment,
-    ml,
-  });
 
   const isSemanticText = form.getFormData().type === 'semantic_text';
 
@@ -247,11 +241,11 @@ export const CreateField = React.memo(function CreateFieldComponent({
         >
           {isMultiField
             ? i18n.translate('xpack.idxMgmt.mappingsEditor.createField.addMultiFieldButtonLabel', {
-                defaultMessage: 'Add multi-field',
-              })
+              defaultMessage: 'Add multi-field',
+            })
             : i18n.translate('xpack.idxMgmt.mappingsEditor.createField.addFieldButtonLabel', {
-                defaultMessage: 'Add field',
-              })}
+              defaultMessage: 'Add field',
+            })}
         </EuiButton>
       </EuiFlexItem>
     </EuiFlexGroup>
@@ -273,11 +267,10 @@ export const CreateField = React.memo(function CreateFieldComponent({
               'mappingsEditor__createFieldWrapper--multiField': isMultiField,
             })}
             style={{
-              paddingLeft: `${
-                isMultiField
+              paddingLeft: `${isMultiField
                   ? paddingLeft! - EUI_SIZE * 1.5 // As there are no "L" bullet list we need to substract some indent
                   : paddingLeft
-              }px`,
+                }px`,
             }}
             ref={createFieldFormRef}
             tabIndex={0}
@@ -287,9 +280,7 @@ export const CreateField = React.memo(function CreateFieldComponent({
 
               {renderRequiredParametersForm()}
 
-              {isSemanticText && (
-                <SelectInferenceId createInferenceEndpoint={createInferenceEndpoint} />
-              )}
+              {isSemanticText && <SelectInferenceId />}
               {renderFormActions()}
             </div>
           </div>

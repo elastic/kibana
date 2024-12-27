@@ -43,11 +43,32 @@ export function useMLModelNotificationToasts() {
       }),
     });
   };
-  const showErrorToasts = (error: ErrorType, errorTitle: string = 'Model deployment failed') => {
+  const showErrorToasts = (error: ErrorType) => {
     const errorObj = extractErrorProperties(error);
     return toasts.addError(new MLRequestFailure(errorObj, error), {
       title: i18n.translate('xpack.idxMgmt.mappingsEditor.createField.inferenceErrorTitle', {
-        defaultMessage: errorTitle,
+        defaultMessage: 'Model deployment failed',
+      }),
+    });
+  };
+
+  const showInferenceCreationErrorToasts = (error: ErrorType) => {
+    const errorObj = extractErrorProperties(error);
+    return toasts.addError(new MLRequestFailure(errorObj, error), {
+      title: i18n.translate(
+        'xpack.idxMgmt.mappingsEditor.createField.inferenceCreationErrorTitle',
+        {
+          defaultMessage: 'Endpoint creation failed',
+        }
+      ),
+    });
+  };
+
+  const showProviderFetchErrorToasts = (error: ErrorType) => {
+    const errorObj = extractErrorProperties(error);
+    return toasts.addError(new MLRequestFailure(errorObj, error), {
+      title: i18n.translate('xpack.idxMgmt.mappingsEditor.createField.fetchProviderErrorTitle', {
+        defaultMessage: 'Unable to find providers',
       }),
     });
   };
@@ -63,6 +84,8 @@ export function useMLModelNotificationToasts() {
     showSuccessToasts,
     showErrorToasts,
     showSuccessfullyDeployedToast,
+    showInferenceCreationErrorToasts,
+    showProviderFetchErrorToasts,
     showInferenceSuccessToast,
   };
 }

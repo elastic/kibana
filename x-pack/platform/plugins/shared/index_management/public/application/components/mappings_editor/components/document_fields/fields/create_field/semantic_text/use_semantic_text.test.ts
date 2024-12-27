@@ -6,7 +6,7 @@
  */
 
 import { renderHook } from '@testing-library/react';
-import { CustomInferenceEndpointConfig, SemanticTextField } from '../../../../../types';
+import { SemanticTextField } from '../../../../../types';
 import { useSemanticText } from './use_semantic_text';
 import { act } from 'react-dom/test-utils';
 
@@ -37,14 +37,6 @@ jest.mock('../../../../../../../../hooks/use_details_page_mappings_model_managem
   }),
 }));
 
-const mlMock: any = {
-  mlApi: {
-    inferenceModels: {
-      createInferenceEndpoint: jest.fn().mockResolvedValue({}),
-    },
-  },
-};
-
 const mockField: Record<string, SemanticTextField> = {
   elser_model_2: {
     name: 'name',
@@ -69,29 +61,6 @@ const mockField: Record<string, SemanticTextField> = {
     type: 'semantic_text',
     inference_id: 'my_elser_endpoint',
     reference_field: 'title',
-  },
-};
-
-const mockConfig: Record<string, CustomInferenceEndpointConfig> = {
-  openai: {
-    taskType: 'text_embedding',
-    modelConfig: {
-      service: 'openai',
-      service_settings: {
-        api_key: 'test',
-        model_id: 'text-embedding-ada-002',
-      },
-    },
-  },
-  elser: {
-    taskType: 'sparse_embedding',
-    modelConfig: {
-      service: 'elser',
-      service_settings: {
-        num_allocations: 1,
-        num_threads: 1,
-      },
-    },
   },
 };
 
@@ -191,34 +160,12 @@ describe('useSemanticText', () => {
       },
     };
   });
-  it('should handle semantic text with third party model correctly', async () => {
-    const { result } = renderHook(() =>
-      useSemanticText({
-        form: mockForm.thirdPartyModel,
-        setErrorsInTrainedModelDeployment: jest.fn(),
-        ml: mlMock,
-      })
-    );
-    await act(async () => {
-      result.current.handleSemanticText(mockField.openai, mockConfig.openai);
-    });
-    expect(mockDispatch).toHaveBeenCalledWith({
-      type: 'field.add',
-      value: mockField.openai,
-    });
-    expect(mlMock.mlApi.inferenceModels.createInferenceEndpoint).toHaveBeenCalledWith(
-      'openai',
-      'text_embedding',
-      mockConfig.openai.modelConfig
-    );
-  });
 
   it('should handle semantic text correctly', async () => {
     const { result } = renderHook(() =>
       useSemanticText({
         form: mockForm.form,
         setErrorsInTrainedModelDeployment: jest.fn(),
-        ml: mlMock,
       })
     );
 
@@ -231,37 +178,12 @@ describe('useSemanticText', () => {
       value: mockField.elser_model_2,
     });
   });
-  it('does not call create inference endpoint api, if default endpoint already exists', async () => {
-    const { result } = renderHook(() =>
-      useSemanticText({
-        form: mockForm.form,
-        setErrorsInTrainedModelDeployment: jest.fn(),
-        ml: mlMock,
-      })
-    );
-
-    await act(async () => {
-      result.current.handleSemanticText(mockField.e5);
-    });
-
-    expect(mockDispatch).toHaveBeenCalledWith({
-      type: 'field.add',
-      value: mockField.e5,
-    });
-
-    expect(mlMock.mlApi.inferenceModels.createInferenceEndpoint).not.toBeCalled();
-  });
 
   it('handles errors correctly', async () => {
-    const mockError = new Error('Test error');
-    mlMock.mlApi?.inferenceModels.createInferenceEndpoint.mockImplementationOnce(() => {
-      throw mockError;
-    });
-
     const setErrorsInTrainedModelDeployment = jest.fn();
 
     const { result } = renderHook(() =>
-      useSemanticText({ form: mockForm.form, setErrorsInTrainedModelDeployment, ml: mlMock })
+      useSemanticText({ form: mockForm.form, setErrorsInTrainedModelDeployment })
     );
 
     await act(async () => {
