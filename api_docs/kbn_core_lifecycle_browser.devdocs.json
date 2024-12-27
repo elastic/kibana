@@ -69,13 +69,7 @@
               "{@link ApplicationSetup}"
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/core-application-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreApplicationBrowserPluginApi",
-                "section": "def-public.ApplicationSetup",
-                "text": "ApplicationSetup"
-              }
+              "ApplicationSetup"
             ],
             "path": "packages/core/lifecycle/core-lifecycle-browser/src/core_setup.ts",
             "deprecated": false,
@@ -421,13 +415,7 @@
               "{@link ApplicationStart}"
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/core-application-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreApplicationBrowserPluginApi",
-                "section": "def-public.ApplicationStart",
-                "text": "ApplicationStart"
-              }
+              "ApplicationStart"
             ],
             "path": "packages/core/lifecycle/core-lifecycle-browser/src/core_start.ts",
             "deprecated": false,
@@ -615,19 +603,19 @@
               },
               {
                 "plugin": "fileUpload",
-                "path": "x-pack/plugins/file_upload/public/kibana_services.ts"
-              },
-              {
-                "plugin": "dashboardEnhanced",
-                "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/components/collect_config_container.tsx"
-              },
-              {
-                "plugin": "dashboardEnhanced",
-                "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/components/collect_config_container.tsx"
+                "path": "x-pack/platform/plugins/private/file_upload/public/kibana_services.ts"
               },
               {
                 "plugin": "transform",
                 "path": "x-pack/platform/plugins/private/transform/public/app/mount_management_section.ts"
+              },
+              {
+                "plugin": "dashboardEnhanced",
+                "path": "x-pack/platform/plugins/shared/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/components/collect_config_container.tsx"
+              },
+              {
+                "plugin": "dashboardEnhanced",
+                "path": "x-pack/platform/plugins/shared/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/components/collect_config_container.tsx"
               },
               {
                 "plugin": "discover",

@@ -8,7 +8,7 @@
 import { z } from '@kbn/zod';
 import { notFound, internal } from '@hapi/boom';
 import { getFlattenedObject } from '@kbn/std';
-import { fieldDefinitionSchema } from '../../../../common/types';
+import { fieldDefinitionConfigSchema } from '@kbn/streams-schema';
 import { createServerRoute } from '../../create_server_route';
 import { DefinitionNotFound } from '../../../lib/streams/errors';
 import { checkReadAccess } from '../../../lib/streams/stream_crud';
@@ -30,14 +30,12 @@ export const schemaFieldsSimulationRoute = createServerRoute({
   params: z.object({
     path: z.object({ id: z.string() }),
     body: z.object({
-      field_definitions: z.array(fieldDefinitionSchema),
+      field_definitions: z.array(fieldDefinitionConfigSchema.extend({ name: z.string() })),
     }),
   }),
   handler: async ({
-    response,
     params,
     request,
-    logger,
     getScopedClients,
   }): Promise<{
     status: 'unknown' | 'success' | 'failure';

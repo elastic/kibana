@@ -110,11 +110,13 @@ const findModules = ({ teams, paths, included, excluded }: FindModulesParams, lo
       .filter(({ manifest }) => !manifest.devOnly)
       // explicit exclusions
       .filter(({ id }) => !EXCLUDED_MODULES.includes(id) && !excluded.includes(id))
-      // we don't want to move test modules (just yet)
+      // we don't want to move test and example modules (just yet)
       .filter(
         ({ directory }) =>
           !directory.includes(`/${KIBANA_FOLDER}/test/`) &&
-          !directory.includes(`/${KIBANA_FOLDER}/x-pack/test/`)
+          !directory.includes(`/${KIBANA_FOLDER}/x-pack/test/`) &&
+          !directory.includes(`/${KIBANA_FOLDER}/examples/`) &&
+          !directory.includes(`/${KIBANA_FOLDER}/x-pack/examples/`)
       )
       // the module is under the umbrella specified by the user
       .filter(
