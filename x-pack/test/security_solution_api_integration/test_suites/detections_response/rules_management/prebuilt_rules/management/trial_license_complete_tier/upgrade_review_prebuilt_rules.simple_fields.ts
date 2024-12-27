@@ -567,7 +567,7 @@ export default ({ getService }: FtrProviderContext): void => {
     Object.entries(RULE_TYPE_FIELD_MAPPING).forEach(([ruleType, fields]) => {
       describe(`${ruleType} rule simple fields`, () => {
         fields.forEach((field) => {
-          const testValues = SIMPLE_FIELDS_MAP[field as SIMPLE_FIELDS];
+          const testValues = SIMPLE_FIELDS_MAP[field];
           createTestSuite(ruleType as keyof RuleTypeToFields, field as SIMPLE_FIELDS, testValues, {
             es,
             supertest,
