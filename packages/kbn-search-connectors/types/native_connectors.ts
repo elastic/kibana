@@ -107,6 +107,9 @@ const PERSONAL_ACCESS_TOKEN = 'personal_access_token';
 
 const GITHUB_APP = 'github_app';
 
+const BOX_FREE = 'box_free';
+const BOX_ENTERPRISE = 'box_enterprise';
+
 export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | undefined> = {
   azure_blob_storage: {
     configuration: {
@@ -246,31 +249,42 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
   },
   box: {
     configuration: {
-      path: {
-        default_value: null,
+      is_enterprise: {
+        default_value: BOX_FREE,
         depends_on: [],
-        display: TEXTBOX,
-        label: translate('searchConnectors.nativeConnectors.box.pathLabel', {
-          defaultMessage: 'Path to fetch files/folders',
+        display: DROPDOWN,
+        label: translate('searchConnectors.nativeConnectors.box.accountType', {
+          defaultMessage: 'Box Account',
         }),
-        options: [],
-        order: 1,
-        required: false,
+        options: [
+          {
+            label: translate('searchConnectors.nativeConnectors.box.boxFreeAccount', {
+              defaultMessage: 'Box Free Account',
+            }),
+            value: BOX_FREE,
+          },
+          {
+            label: translate('searchConnectors.nativeConnectors.box.boxEnterpriseAccount', {
+              defaultMessage: 'Box Enterprise Account',
+            }),
+            value: BOX_ENTERPRISE,
+          },
+        ],
+        required: true,
         sensitive: false,
-        tooltip: translate('searchConnectors.nativeConnectors.box.pathTooltip', {
-          defaultMessage: 'Path is ignored when Advanced Sync Rules are used. ',
-        }),
+        tooltip: null,
+        order: 1,
         type: STRING,
         ui_restrictions: [],
         validations: [],
-        value: '',
+        value: BOX_FREE,
       },
-      app_key: {
+      client_id: {
         default_value: null,
         depends_on: [],
         display: TEXTBOX,
-        label: translate('searchConnectors.nativeConnectors.box.appKeyLabel', {
-          defaultMessage: 'App Key',
+        label: translate('searchConnectors.nativeConnectors.box.clientIdLabel', {
+          defaultMessage: 'Client ID',
         }),
         options: [],
         order: 2,
@@ -282,12 +296,12 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         validations: [],
         value: '',
       },
-      app_secret: {
+      client_secret: {
         default_value: null,
         depends_on: [],
         display: TEXTBOX,
-        label: translate('searchConnectors.nativeConnectors.box.appSecretLabel', {
-          defaultMessage: 'App secret',
+        label: translate('searchConnectors.nativeConnectors.box.clientSecretLabel', {
+          defaultMessage: 'Client Secret',
         }),
         options: [],
         order: 3,
@@ -316,18 +330,20 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         validations: [],
         value: '',
       },
-      retry_count: {
-        default_value: 3,
-        depends_on: [],
-        display: NUMERIC,
-        label: RETRIES_PER_REQUEST_LABEL,
+      enterprise_id: {
+        default_value: null,
+        depends_on: [{ field: 'is_enterprise', value: BOX_ENTERPRISE }],
+        display: TEXTBOX,
+        label: translate('searchConnectors.nativeConnectors.box.enterpriseIdLabel', {
+          defaultMessage: 'Enterprise ID',
+        }),
         options: [],
         order: 5,
         required: false,
         sensitive: false,
         tooltip: null,
         type: INTEGER,
-        ui_restrictions: ['advanced'],
+        ui_restrictions: [],
         validations: [],
         value: '',
       },
@@ -345,65 +361,6 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         ui_restrictions: ['advanced'],
         validations: [],
         value: '',
-      },
-      use_text_extraction_service: {
-        default_value: null,
-        depends_on: [],
-        display: TOGGLE,
-        label: USE_TEXT_EXTRACTION_SERVICE_LABEL,
-        options: [],
-        order: 7,
-        required: true,
-        sensitive: false,
-        tooltip: USE_TEXT_EXTRACTION_SERVICE_TOOLTIP,
-        type: BOOLEAN,
-        ui_restrictions: ['advanced'],
-        validations: [],
-        value: false,
-      },
-      use_document_level_security: {
-        default_value: null,
-        depends_on: [],
-        display: TOGGLE,
-        label: ENABLE_DOCUMENT_LEVEL_SECURITY_LABEL,
-        options: [],
-        order: 8,
-        required: true,
-        sensitive: false,
-        tooltip: getEnableDocumentLevelSecurityTooltip(
-          translate('searchConnectors.nativeConnectors.boxTooltip.name', {
-            defaultMessage: 'Box',
-          })
-        ),
-        type: BOOLEAN,
-        ui_restrictions: [],
-        validations: [],
-        value: false,
-      },
-      include_inherited_users_and_groups: {
-        default_value: null,
-        depends_on: [
-          {
-            field: 'use_document_level_security',
-            value: true,
-          },
-        ],
-        display: TOGGLE,
-        label: translate('searchConnectors.nativeConnectors.box.includeInheritedUsersLabel', {
-          defaultMessage: 'Include groups and inherited users',
-        }),
-        options: [],
-        order: 9,
-        required: true,
-        sensitive: false,
-        tooltip: translate('searchConnectors.nativeConnectors.box.includeInheritedUsersTooltip', {
-          defaultMessage:
-            'Include groups and inherited users when indexing permissions. Enabling this configurable field will cause a significant performance degradation.',
-        }),
-        type: BOOLEAN,
-        ui_restrictions: [],
-        validations: [],
-        value: false,
       },
     },
     features: {},

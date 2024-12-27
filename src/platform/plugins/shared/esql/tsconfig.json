@@ -26,6 +26,7 @@
     "@kbn/usage-collection-plugin",
     "@kbn/content-management-plugin",
     "@kbn/kibana-utils-plugin",
+    "@kbn/core-test-helpers-kbn-server",
   ],
   "exclude": [
     "target/**/*",

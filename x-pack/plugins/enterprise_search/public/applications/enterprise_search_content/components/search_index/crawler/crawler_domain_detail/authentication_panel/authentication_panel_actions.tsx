@@ -61,7 +61,7 @@ export const AuthenticationPanelActions: React.FC = () => {
   ) : currentAuth === null ? (
     <EuiButton
       data-telemetry-id="entSearchContent-crawler-domainDetail-authentication-addCredentials"
-      color="success"
+      color="primary"
       iconType="plusInCircle"
       size="s"
       onClick={() => enableEditing(currentAuth)}
