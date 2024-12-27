@@ -53,6 +53,7 @@
     "xpack.idxMgmt": "platform/plugins/shared/index_management",
     "xpack.idxMgmtPackage": "packages/index-management",
     "xpack.indexLifecycleMgmt": "platform/plugins/private/index_lifecycle_management",
+    "xpack.inferenceEndpointUICommon": "platform/packages/shared/kbn-inference-endpoint-ui-common",
     "xpack.infra": "plugins/observability_solution/infra",
     "xpack.logsDataAccess": "plugins/observability_solution/logs_data_access",
     "xpack.logsExplorer": "plugins/observability_solution/logs_explorer",
