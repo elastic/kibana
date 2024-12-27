@@ -5,7 +5,14 @@
  * 2.0.
  */
 
-import { EuiPanel, EuiTitle, EuiFlexGroup, EuiFlexItem, EuiIconTip } from '@elastic/eui';
+import {
+  EuiPanel,
+  EuiTitle,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIconTip,
+  useEuiTheme,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { usePreviousPeriodLabel } from '../../../../hooks/use_previous_period_text';
@@ -13,7 +20,6 @@ import { isTimeComparison } from '../../time_comparison/get_comparison_options';
 import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { asPercent } from '../../../../../common/utils/formatters';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
-import { useTheme } from '../../../../hooks/use_theme';
 import { TimeseriesChartWithContext } from '../timeseries_chart_with_context';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { getComparisonChartTheme } from '../../time_comparison/get_comparison_chart_theme';
@@ -57,7 +63,7 @@ export function TransactionColdstartRateChart({
   comparisonEnabled,
   offset,
 }: Props) {
-  const theme = useTheme();
+  const { euiTheme } = useEuiTheme();
 
   const {
     query: { rangeFrom, rangeTo },
@@ -117,7 +123,7 @@ export function TransactionColdstartRateChart({
     {
       data: data?.currentPeriod?.transactionColdstartRate ?? [],
       type: 'linemark',
-      color: theme.eui.euiColorVis5,
+      color: euiTheme.colors.vis.euiColorVis5,
       title: i18n.translate('xpack.apm.coldstartRate.chart.coldstartRate', {
         defaultMessage: 'Cold start rate (avg.)',
       }),
@@ -127,7 +133,7 @@ export function TransactionColdstartRateChart({
           {
             data: data?.previousPeriod?.transactionColdstartRate ?? [],
             type: 'area',
-            color: theme.eui.euiColorMediumShade,
+            color: euiTheme.colors.mediumShade,
             title: previousPeriodLabel,
           },
         ]
