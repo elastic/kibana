@@ -43,13 +43,26 @@ export function useMLModelNotificationToasts() {
       }),
     });
   };
-  const showErrorToasts = (error: ErrorType) => {
+  const showErrorToasts = (error: ErrorType, errorTitle: string = 'Model deployment failed') => {
     const errorObj = extractErrorProperties(error);
     return toasts.addError(new MLRequestFailure(errorObj, error), {
-      title: i18n.translate('xpack.idxMgmt.mappingsEditor.createField.modelDeploymentErrorTitle', {
-        defaultMessage: 'Model deployment failed',
+      title: i18n.translate('xpack.idxMgmt.mappingsEditor.createField.inferenceErrorTitle', {
+        defaultMessage: errorTitle,
       }),
     });
   };
-  return { showSuccessToasts, showErrorToasts, showSuccessfullyDeployedToast };
+
+  const showInferenceSuccessToast = () => {
+    return toasts.addSuccess({
+      title: i18n.translate('xpack.idxMgmt.mappingsEditor.createField.endpointAddedSuccess', {
+        defaultMessage: 'Endpoint added',
+      }),
+    });
+  };
+  return {
+    showSuccessToasts,
+    showErrorToasts,
+    showSuccessfullyDeployedToast,
+    showInferenceSuccessToast,
+  };
 }
