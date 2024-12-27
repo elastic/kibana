@@ -4713,12 +4713,12 @@
             "trackAdoption": false,
             "references": [
               {
-                "plugin": "fleet",
-                "path": "x-pack/plugins/fleet/public/applications/fleet/sections/agent_policy/create_package_policy_page/multi_page_layout/hooks/use_get_logs_discover_link.tsx"
-              },
-              {
                 "plugin": "exploratoryView",
                 "path": "x-pack/solutions/observability/plugins/exploratory_view/public/components/shared/exploratory_view/hooks/use_discover_link.tsx"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/platform/plugins/shared/fleet/public/applications/fleet/sections/agent_policy/create_package_policy_page/multi_page_layout/hooks/use_get_logs_discover_link.tsx"
               },
               {
                 "plugin": "osquery",
