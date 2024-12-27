@@ -39,7 +39,8 @@ export function registerDynamicRoute({
       security: {
         authz: {
           enabled: false,
-          reason: 'This route is opted out from authorization because it is only retrieving the ES cluster UUID',
+          reason:
+            'This route is opted out from authorization because it is only retrieving the ES cluster UUID',
         },
       },
       options: {

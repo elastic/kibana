@@ -23,7 +23,8 @@ export function registerV1PrometheusRoute({
       security: {
         authz: {
           enabled: false,
-          reason: 'This route is opted out from authorization because it is not interacting with ES at all',
+          reason:
+            'This route is opted out from authorization because it is not interacting with ES at all',
         },
       },
       options: {
