@@ -5,11 +5,15 @@
  * 2.0.
  */
 
-import { BulkRequest } from '@elastic/elasticsearch/lib/api/types';
 import { withSpan } from '@kbn/apm-utils';
 import { Logger } from '@kbn/core/server';
 import { compact } from 'lodash';
-import { IStorageAdapter, StorageDocumentOf, StorageSettings } from '.';
+import {
+  IStorageAdapter,
+  StorageAdapterBulkOperation,
+  StorageDocumentOf,
+  StorageSettings,
+} from '.';
 import { ObservabilityESSearchRequest } from '../client/create_observability_es_client';
 
 type StorageBulkOperation<TDocument extends { _id?: string }> =
@@ -76,7 +80,7 @@ export class StorageClient<TStorageSettings extends StorageSettings> {
   async bulk(operations: Array<StorageBulkOperation<StorageDocumentOf<TStorageSettings>>>) {
     const result = await this.storage.bulk({
       refresh: 'wait_for',
-      operations: operations.flatMap((operation): BulkRequest<unknown, unknown>['operations'] => {
+      operations: operations.flatMap((operation): StorageAdapterBulkOperation[] => {
         if ('index' in operation) {
           return [
             {

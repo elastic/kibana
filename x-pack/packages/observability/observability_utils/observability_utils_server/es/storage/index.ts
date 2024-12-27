@@ -5,6 +5,7 @@
  * 2.0.
  */
 import type {
+  BulkOperationContainer,
   BulkRequest,
   BulkResponse,
   DeleteRequest,
@@ -40,7 +41,14 @@ export type StorageAdapterSearchResponse<
   TSearchRequest extends Omit<SearchRequest, 'index'>
 > = InferSearchResponseOf<TDocument, TSearchRequest>;
 
-export type StorageAdapterBulkRequest<TDocument = unknown> = Omit<BulkRequest<TDocument>, 'index'>;
+export type StorageAdapterBulkOperation = Pick<BulkOperationContainer, 'delete' | 'index'>;
+
+export type StorageAdapterBulkRequest<TDocument extends Record<string, any>> = Omit<
+  BulkRequest,
+  'operations' | 'index'
+> & {
+  operations: Array<StorageAdapterBulkOperation | TDocument>;
+};
 export type StorageAdapterBulkResponse = BulkResponse;
 
 export type StorageAdapterDeleteRequest = DeleteRequest;
@@ -53,7 +61,7 @@ export type StorageAdapterIndexRequest<TDocument = unknown> = Omit<
 export type StorageAdapterIndexResponse = IndexResponse;
 
 export interface IStorageAdapter<TStorageSettings extends StorageSettings = never> {
-  bulk<TDocument>(
+  bulk<TDocument extends Record<string, any>>(
     request: StorageAdapterBulkRequest<TDocument>
   ): Promise<StorageAdapterBulkResponse>;
   search<TDocument, TSearchRequest extends Omit<SearchRequest, 'index'>>(
