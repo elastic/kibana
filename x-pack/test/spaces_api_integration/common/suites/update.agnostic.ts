@@ -11,11 +11,8 @@
  * 2.0.
  */
 
-import type { Agent as SuperTestAgent } from 'supertest';
+import expect from '@kbn/expect/expect';
 
-import expect from '@kbn/expect';
-
-import { getSupertest, maybeDestroySupertest } from './common';
 import type {
   DeploymentAgnosticFtrProviderContext,
   SupertestWithRoleScopeType,
@@ -42,6 +39,7 @@ interface UpdateTestDefinition {
 
 export function updateTestSuiteFactory(context: DeploymentAgnosticFtrProviderContext) {
   const esArchiver = context.getService('esArchiver');
+  const roleScopedSupertest = context.getService('roleScopedSupertest');
 
   const expectRbacForbidden = (resp: { [key: string]: any }) => {
     expect(resp.body).to.eql({
@@ -84,15 +82,15 @@ export function updateTestSuiteFactory(context: DeploymentAgnosticFtrProviderCon
     (describeFn: DescribeFn) =>
     (description: string, { user, spaceId, tests }: UpdateTestDefinition) => {
       describeFn(description, () => {
-        let supertest: SupertestWithRoleScopeType | SuperTestAgent;
+        let supertest: SupertestWithRoleScopeType;
         before(async () => {
-          supertest = await getSupertest(context, user);
+          supertest = await roleScopedSupertest.getSupertestWithRoleScope(user!);
           await esArchiver.load(
             'x-pack/test/spaces_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
           );
         });
         after(async () => {
-          await maybeDestroySupertest(supertest);
+          await supertest.destroy();
           await esArchiver.unload(
             'x-pack/test/spaces_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
           );

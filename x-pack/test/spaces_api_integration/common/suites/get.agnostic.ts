@@ -7,7 +7,7 @@
 
 import type { Agent as SuperTestAgent } from 'supertest';
 
-import expect from '@kbn/expect/expect';
+import expect from '@kbn/expect';
 
 import { getSupertest, maybeDestroySupertest } from './common';
 import type {
@@ -96,7 +96,10 @@ export function getTestSuiteFactory(context: DeploymentAgnosticFtrProviderContex
           'securitySolutionAttackDiscovery',
           'securitySolutionCases',
           'securitySolutionCasesV2',
+          'securitySolutionNotes',
+          'securitySolutionTimeline',
           'siem',
+          'siemV2',
           'slo',
           'uptime',
         ],
@@ -117,16 +120,17 @@ export function getTestSuiteFactory(context: DeploymentAgnosticFtrProviderContex
     (describeFn: DescribeFn) =>
     (description: string, { user, currentSpaceId, spaceId, tests }: GetTestDefinition) => {
       describeFn(description, () => {
-        let supertest: SupertestWithRoleScopeType | SuperTestAgent;
+        const roleScopedSupertest = context.getService('roleScopedSupertest');
+        let supertest: SupertestWithRoleScopeType;
 
         before(async () => {
-          supertest = await getSupertest(context, user);
+          supertest = await roleScopedSupertest.getSupertestWithRoleScope(user!);
           await esArchiver.load(
             'x-pack/test/spaces_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
           );
         });
         after(async () => {
-          await maybeDestroySupertest(supertest);
+          await supertest.destroy();
           await esArchiver.unload(
             'x-pack/test/spaces_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
           );

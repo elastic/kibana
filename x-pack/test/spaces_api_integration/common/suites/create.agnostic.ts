@@ -5,15 +5,12 @@
  * 2.0.
  */
 
-import type { Agent as SuperTestAgent } from 'supertest';
-
-import expect from '@kbn/expect/expect';
+import expect from '@kbn/expect';
 
 import type {
   DeploymentAgnosticFtrProviderContext,
   SupertestWithRoleScopeType,
 } from '../../deployment_agnostic/ftr_provider_context';
-import { getRoleDefinitionForUser, isBuiltInRole } from '../lib/authentication';
 import { getTestScenariosForSpace } from '../lib/space_test_utils';
 import type { DescribeFn, TestDefinitionAuthentication } from '../lib/types';
 
@@ -38,8 +35,6 @@ interface CreateTestDefinition {
 export function createTestSuiteFactory({ getService }: DeploymentAgnosticFtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const roleScopedSupertest = getService('roleScopedSupertest');
-  const samlAuth = getService('samlAuth');
-  const supertestWithoutAuth = getService('supertestWithoutAuth');
 
   const expectConflictResponse = (resp: { [key: string]: any }) => {
     expect(resp.body).to.only.have.keys(['error', 'message', 'statusCode']);
@@ -96,7 +91,10 @@ export function createTestSuiteFactory({ getService }: DeploymentAgnosticFtrProv
         'securitySolutionAttackDiscovery',
         'securitySolutionCases',
         'securitySolutionCasesV2',
+        'securitySolutionNotes',
+        'securitySolutionTimeline',
         'siem',
+        'siemV2',
         'slo',
         'uptime',
       ],
@@ -110,30 +108,14 @@ export function createTestSuiteFactory({ getService }: DeploymentAgnosticFtrProv
     (describeFn: DescribeFn) =>
     (description: string, { user, spaceId, tests }: CreateTestDefinition) => {
       describeFn(description, () => {
-        let supertest: SupertestWithRoleScopeType | SuperTestAgent;
+        let supertest: SupertestWithRoleScopeType;
 
         before(async () => {
-          if (user) {
-            const isBuiltIn = isBuiltInRole(user.role);
-            if (!isBuiltIn) {
-              await samlAuth.setCustomRole(getRoleDefinitionForUser(user));
-            }
-            supertest = await roleScopedSupertest.getSupertestWithRoleScope(
-              isBuiltIn ? user.role : 'customRole',
-              {
-                useCookieHeader: true,
-                withInternalHeaders: true,
-              }
-            );
-          } else {
-            supertest = supertestWithoutAuth;
-          }
+          supertest = await roleScopedSupertest.getSupertestWithRoleScope(user!);
         });
 
         after(async () => {
-          if (user) {
-            await (supertest as SupertestWithRoleScopeType).destroy();
-          }
+          await supertest.destroy();
         });
 
         beforeEach(() =>

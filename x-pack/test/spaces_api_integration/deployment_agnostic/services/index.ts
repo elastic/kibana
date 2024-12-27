@@ -5,12 +5,16 @@
  * 2.0.
  */
 
+import { RoleScopedSupertestProvider } from './role_scoped_supertest';
 import { services as deploymentAgnosticServices } from '../../../api_integration/deployment_agnostic/services';
 import { services as apiIntegrationServices } from '../../../api_integration/services';
 import { services as commonServices } from '../../../common/services';
+
+export type { SupertestWithRoleScopeType } from './role_scoped_supertest';
 
 export const services = {
   ...deploymentAgnosticServices,
   ...commonServices,
   usageAPI: apiIntegrationServices.usageAPI,
+  roleScopedSupertest: RoleScopedSupertestProvider,
 };
