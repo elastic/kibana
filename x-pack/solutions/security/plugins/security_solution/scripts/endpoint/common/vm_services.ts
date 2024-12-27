@@ -49,6 +49,8 @@ interface CreateMultipassVmOptions extends BaseVmCreateOptions {
   type: SupportedVmManager & 'multipass';
   name: string;
   log?: ToolingLog;
+  /** Image to use for creating the VM */
+  image?: string;
 }
 
 const createMultipassVm = async ({
@@ -56,12 +58,15 @@ const createMultipassVm = async ({
   disk = '8G',
   cpus = 1,
   memory = '1G',
+  image = '',
   log = createToolingLogger(),
 }: CreateMultipassVmOptions): Promise<HostVm> => {
   log.info(`Creating VM [${name}] using multipass`);
 
   const createResponse = await execa.command(
-    `multipass launch --name ${name} --disk ${disk} --cpus ${cpus} --memory ${memory}`
+    `multipass launch --name ${name} --disk ${disk} --cpus ${cpus} --memory ${memory}${
+      image ? ` ${image}` : ''
+    }`
   );
 
   log.verbose(`VM [${name}] created successfully using multipass.`, createResponse);
