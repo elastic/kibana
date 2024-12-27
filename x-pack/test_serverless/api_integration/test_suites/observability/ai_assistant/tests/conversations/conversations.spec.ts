@@ -296,9 +296,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 },
               },
             });
-            // throw new ForbiddenApiError(
-            //   'Expected slsUnauthorized() to throw a 403 Forbidden error'
-            // );
+            throw new ForbiddenApiError(
+              'Expected slsUnauthorized() to throw a 403 Forbidden error'
+            );
           } catch (e) {
             expect(e.status).to.be(403);
           }
@@ -309,9 +309,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             await observabilityAIAssistantAPIClient.slsUnauthorized({
               endpoint: 'POST /internal/observability_ai_assistant/conversations',
             });
-            // throw new ForbiddenApiError(
-            //   'Expected slsUnauthorized() to throw a 403 Forbidden error'
-            // );
+            throw new ForbiddenApiError(
+              'Expected slsUnauthorized() to throw a 403 Forbidden error'
+            );
           } catch (e) {
             expect(e.status).to.be(403);
           }
@@ -332,9 +332,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 },
               },
             });
-            // throw new ForbiddenApiError(
-            //   'Expected slsUnauthorized() to throw a 403 Forbidden error'
-            // );
+            throw new ForbiddenApiError(
+              'Expected slsUnauthorized() to throw a 403 Forbidden error'
+            );
           } catch (e) {
             expect(e.status).to.be(403);
           }
@@ -350,9 +350,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 },
               },
             });
-            // throw new ForbiddenApiError(
-            //   'Expected slsUnauthorized() to throw a 403 Forbidden error'
-            // );
+            throw new ForbiddenApiError(
+              'Expected slsUnauthorized() to throw a 403 Forbidden error'
+            );
           } catch (e) {
             expect(e.status).to.be(403);
           }
