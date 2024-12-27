@@ -18,6 +18,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const toasts = getService('toasts');
   const browser = getService('browser');
   const security = getService('security');
+  const esVersion = getService('esVersion');
 
   function isCloudEnvironment() {
     return config.get('servers.elasticsearch.hostname') !== 'localhost';
@@ -111,8 +112,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(roles.apm_system.reserved).to.be(true);
       expect(roles.apm_system.deprecated).to.be(false);
 
-      expect(roles.apm_user.reserved).to.be(true);
-      expect(roles.apm_user.deprecated).to.be(true);
+      log.debug(`Checking ES version: ${esVersion}`);
+
+      if (esVersion.matchRange('<9.0.0')) {
+        expect(roles.apm_user.reserved).to.be(true);
+        expect(roles.apm_user.deprecated).to.be(true);
+      } else {
+        log.debug('The `apm_user` role no longer exists in 9.0.0+.');
+      }
 
       expect(roles.beats_admin.reserved).to.be(true);
       expect(roles.beats_admin.deprecated).to.be(false);
