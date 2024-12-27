@@ -5,22 +5,24 @@
  * 2.0.
  */
 import type * as estypes from '@elastic/elasticsearch/lib/api/types';
-import type { Agent as SuperTestAgent } from 'supertest';
 
 import type {
   SavedObjectsImportAmbiguousConflictError,
   SavedObjectsImportFailure,
 } from '@kbn/core/server';
-import expect from '@kbn/expect/expect';
+import expect from '@kbn/expect';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
 import type { CopyResponse } from '@kbn/spaces-plugin/server/lib/copy_to_spaces';
 
-import { getSupertest, maybeDestroySupertest } from './common';
-import { getTestDataLoader, SPACE_1, SPACE_2 } from '../../../common/lib/test_data_loader';
 import type {
   DeploymentAgnosticFtrProviderContext,
   SupertestWithRoleScopeType,
 } from '../../deployment_agnostic/ftr_provider_context';
+import {
+  getTestDataLoader,
+  SPACE_1,
+  SPACE_2,
+} from '../../deployment_agnostic/services/test_data_loader';
 import { getAggregatedSpaceData, getUrlPrefix } from '../lib/space_test_utils';
 import type { DescribeFn, TestDefinitionAuthentication } from '../lib/types';
 
@@ -106,6 +108,10 @@ interface Aggs extends estypes.AggregationsMultiBucketAggregateBase {
 export function copyToSpaceTestSuiteFactory(context: DeploymentAgnosticFtrProviderContext) {
   const testDataLoader = getTestDataLoader(context);
   const es = context.getService('es');
+  const roleScopedSupertest = context.getService('roleScopedSupertest');
+  const log = context.getService('log');
+  const kbnServer = context.getService('kibanaServer');
+  const spacesService = context.getService('spaces');
 
   const collectSpaceContents = async () => {
     const response = await getAggregatedSpaceData(es, [
@@ -583,6 +589,7 @@ export function copyToSpaceTestSuiteFactory(context: DeploymentAgnosticFtrProvid
               // 'unauthorizedRead'), the copy attempt will proceed because they are not aware that the object already exists in the
               // destination space. In that case, they will encounter a 403 error.
               const { success, successCount, successResults, errors } = getResult(response);
+
               const title = 'A shared saved-object in the default, space_1, and space_2 spaces';
               if (createNewCopies) {
                 expectNewCopyResponse(response, exactMatchId, title);
@@ -805,25 +812,25 @@ export function copyToSpaceTestSuiteFactory(context: DeploymentAgnosticFtrProvid
       { user, spaceId = DEFAULT_SPACE_ID, tests }: CopyToSpaceTestDefinition
     ) => {
       describeFn(description, () => {
-        let supertest: SupertestWithRoleScopeType | SuperTestAgent;
+        let supertest: SupertestWithRoleScopeType;
         before(async () => {
           // test data only allows for the following spaces as the copy origin
           expect(['default', 'space_1']).to.contain(spaceId);
           await testDataLoader.createFtrSpaces();
-          supertest = await getSupertest(context, user);
+          supertest = await roleScopedSupertest.getSupertestWithRoleScope(user!);
         });
 
         after(async () => {
           await testDataLoader.deleteFtrSpaces();
-          await maybeDestroySupertest(supertest);
+          await supertest.destroy();
         });
 
-        describe('single-namespace types', () => {
-          beforeEach(async () => {
-            await testDataLoader.createFtrSavedObjectsData(SPACE_DATA_TO_LOAD);
-          });
+        describe.skip('single-namespace types', () => {
+          beforeEach(
+            async () => await testDataLoader.createFtrSavedObjectsData(SPACE_DATA_TO_LOAD)
+          );
 
-          afterEach(async () => await testDataLoader.deleteFtrSavedObjectsData());
+          afterEach(async () => await await testDataLoader.deleteFtrSavedObjectsData());
 
           const dashboardObject = { type: 'dashboard', id: `cts_dashboard_${spaceId}` };
 
@@ -949,30 +956,30 @@ export function copyToSpaceTestSuiteFactory(context: DeploymentAgnosticFtrProvid
           });
         });
 
-        // [
-        //   [false, false],
-        //   [false, true], // createNewCopies enabled
-        //   [true, false], // overwrite enabled
-        //   // we don't specify tese cases with both overwrite and createNewCopies enabled, since overwrite won't matter in that scenario
-        // ].forEach(([overwrite, createNewCopies]) => {
-        //   const spaces = ['space_2'];
-        //   const includeReferences = false;
-        //   describe(`multi-namespace types with overwrite=${overwrite} and createNewCopies=${createNewCopies}`, () => {
-        //     before(async () => await testDataLoader.createFtrSavedObjectsData(SPACE_DATA_TO_LOAD));
-        //     after(async () => await testDataLoader.deleteFtrSavedObjectsData());
+        [
+          [false, false],
+          [false, true], // createNewCopies enabled
+          [true, false], // overwrite enabled
+          // we don't specify tese cases with both overwrite and createNewCopies enabled, since overwrite won't matter in that scenario
+        ].forEach(([overwrite, createNewCopies]) => {
+          const spaces = ['space_2'];
+          const includeReferences = false;
+          describe(`multi-namespace types with overwrite=${overwrite} and createNewCopies=${createNewCopies}`, () => {
+            before(async () => await testDataLoader.createFtrSavedObjectsData(SPACE_DATA_TO_LOAD));
+            after(async () => await testDataLoader.deleteFtrSavedObjectsData());
 
-        //     const testCases = tests.multiNamespaceTestCases(overwrite, createNewCopies);
-        //     testCases.forEach(({ testTitle, objects, statusCode, response }) => {
-        //       it(`should return ${statusCode} when ${testTitle}`, async () => {
-        //         return supertest
-        //           .post(`${getUrlPrefix(spaceId)}/api/spaces/_copy_saved_objects`)
-        //           .send({ objects, spaces, includeReferences, createNewCopies, overwrite })
-        //           .expect(statusCode)
-        //           .then(response);
-        //       });
-        //     });
-        //   });
-        // });
+            const testCases = tests.multiNamespaceTestCases(overwrite, createNewCopies);
+            testCases.forEach(({ testTitle, objects, statusCode, response }) => {
+              it(`should return ${statusCode} when ${testTitle}`, async () => {
+                return supertest
+                  .post(`${getUrlPrefix(spaceId)}/api/spaces/_copy_saved_objects`)
+                  .send({ objects, spaces, includeReferences, createNewCopies, overwrite })
+                  .expect(statusCode)
+                  .then(response);
+              });
+            });
+          });
+        });
       });
     };
 

@@ -51,7 +51,6 @@ export function createTestConfig({
       junit: {
         reportName: 'X-Pack Spaces API Integration Tests -- ',
       },
-      // esServerArgs: [`xpack.license.self_generated.type=${license}`],
     })(context);
 
     return {
@@ -62,14 +61,6 @@ export function createTestConfig({
           ...testConfig.kbnTestServer.serverArgs,
           '--status.allowAnonymous=false',
           '--server.xsrf.disableProtection=true',
-          // `--plugin-path=${path.resolve(__dirname, '../common/plugins/spaces_test_plugin')}`,
-        ],
-      },
-      esTestCluster: {
-        ...testConfig.esTestCluster,
-        serverArgs: [
-          ...testConfig.esTestCluster.serverArgs,
-          `xpack.license.self_generated.type=${license}`,
         ],
       },
     };

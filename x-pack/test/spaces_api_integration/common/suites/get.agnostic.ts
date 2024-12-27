@@ -5,11 +5,8 @@
  * 2.0.
  */
 
-import type { Agent as SuperTestAgent } from 'supertest';
-
 import expect from '@kbn/expect';
 
-import { getSupertest, maybeDestroySupertest } from './common';
 import type {
   DeploymentAgnosticFtrProviderContext,
   SupertestWithRoleScopeType,
