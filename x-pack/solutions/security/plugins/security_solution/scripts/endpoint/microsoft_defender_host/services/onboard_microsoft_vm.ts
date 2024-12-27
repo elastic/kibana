@@ -7,14 +7,24 @@
 
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { KbnClient } from '@kbn/test';
-import type { IndexResponse } from '@elastic/elasticsearch/lib/api/types';
-import { MicrosoftDefenderDataGenerator } from '../../../../common/endpoint/data_generators/microsoft_defender_data_generator';
-import { MICROSOFT_DEFENDER_INTEGRATION_PACKAGE_NAME } from './constants';
-import { installIntegration } from '../../common/fleet_services';
+import pRetry, { AbortError } from 'p-retry';
+import { userInfo } from 'os';
+import {
+  createMultipassHostVmClient,
+  createVm,
+  findVm,
+  generateVmName,
+} from '../../common/vm_services';
 import { createToolingLogger } from '../../../../common/endpoint/data_loaders/utils';
+import type { HostVm } from '../../common/types';
+import { dump } from '../../common/utils';
+
+const MDE_INSTALLER_FILE_URL =
+  'https://raw.githubusercontent.com/microsoft/mdatp-xplat/refs/heads/master/linux/installation/mde_installer.sh';
 
 export interface OnboardVmHostWithMicrosoftDefenderOptions {
   kbnClient: KbnClient;
+  onboardingPackage: string;
   log?: ToolingLog;
   vmName?: string;
   forceNewHost?: boolean;
@@ -23,46 +33,100 @@ export interface OnboardVmHostWithMicrosoftDefenderOptions {
 export const onboardVmHostWithMicrosoftDefender = async ({
   kbnClient,
   log = createToolingLogger(),
-}: OnboardVmHostWithMicrosoftDefenderOptions) => {
-  // FIXME:PT implement creation of new VM and connect it to MS Defender managment system
-  // --------------------------------------------
-  //  Steps needed:
-  //
-  //  1. create VM with at least 4gb of memory
-  //  2. Call MS API and get a device onboarding script download URL
-  //  3. Download onboarding script to VM
-  //  4. Download GIT hub script for running enrollment
-  //  5. Run onboarding
-  //  6. Ensure real_time_protections is enabled on VM
-  //  7. Run tests to generate an alert
-  //
-  // --------------------------------------------
+  vmName: _vmName,
+  forceNewHost,
+  onboardingPackage,
+}: OnboardVmHostWithMicrosoftDefenderOptions): Promise<HostVm> => {
+  const vmName = _vmName || generateVmName('msdefender');
+  const hostVmNameAlreadyRunning = (
+    await findVm(
+      'multipass',
+      _vmName ? _vmName : new RegExp(`^${vmName.substring(0, vmName.lastIndexOf('-'))}`)
+    )
+  ).data[0];
 
-  log?.warning(`
-  Creation of a VM host running Microsoft Defender for Endpoint is not yet implemented. However, an event
-  will be indexed that will enable testing within Kibana only.
-  `);
+  if (!forceNewHost && hostVmNameAlreadyRunning) {
+    log?.info(
+      `A host VM with Microsoft Defender for Endpoint is already running - will reuse it.\nTIP: Use 'forceNewHost' to force the creation of a new one if desired`
+    );
 
-  await installIntegration(kbnClient, MICROSOFT_DEFENDER_INTEGRATION_PACKAGE_NAME);
+    return createMultipassHostVmClient(hostVmNameAlreadyRunning, log);
+  }
 
-  const indexName = 'logs-microsoft_defender_endpoint.log-default';
-  const docToCreate = new MicrosoftDefenderDataGenerator().generateEndpointLog();
+  const hostVm = await createVm({
+    type: 'multipass',
+    name: vmName,
+    log,
+    memory: '4G',
+    image: 'release:22.04',
+  });
 
-  log.verbose(`Creating event in [${indexName}]:\n ${JSON.stringify(docToCreate, null, 2)}`);
+  const vmOnboardingFile = await hostVm.upload(
+    onboardingPackage,
+    '/home/ubuntu/GatewayWindowsDefenderATPOnboardingPackage.zip'
+  );
 
-  const indexedDoc = await kbnClient
-    .request<IndexResponse>({
-      method: 'POST',
-      path: 'api/console/proxy',
-      headers: { 'elastic-api-version': '2023-10-31' },
-      query: {
-        path: `${indexName}/_doc`,
-        method: 'POST',
+  log.debug(`installing zip utility on VM`);
+  await hostVm.exec('sudo apt -y install zip');
+
+  log.debug(`Extracting contents of [${vmOnboardingFile.filePath}]`);
+  await hostVm.exec(`unzip ${vmOnboardingFile.filePath}`);
+
+  log.debug(`Downloading installer script from GitHub onto VM [${MDE_INSTALLER_FILE_URL}]`);
+  await hostVm.exec(`curl -o /home/ubuntu/mde_installer.sh -X GET ${MDE_INSTALLER_FILE_URL}`);
+
+  log.debug(`Adding execute permission to file [/home/ubuntu/mde_installer.sh]`);
+  await hostVm.exec(`chmod +x /home/ubuntu/mde_installer.sh`);
+
+  log.info(`Running Microsoft installer and onboarding scripts`);
+  await hostVm.exec(
+    'sudo OPT_FOR_MDE_ARM_PREVIEW=true /home/ubuntu/mde_installer.sh ' +
+      '--install ' +
+      '--channel prod ' +
+      '--onboard /home/ubuntu/MicrosoftDefenderATPOnboardingLinuxServer.py ' +
+      `--tag GROUP ElasticDev-${userInfo().username.toLowerCase().replaceAll('.', '-')} ` +
+      '--min_req -y'
+  );
+
+  log.info('Enabling real time protections on host');
+  await hostVm.exec('sudo mdatp config real-time-protection --value enabled');
+
+  await waitForMicrosoftDefenderOnVmToReportHealthy(hostVm, log);
+
+  await hostVm.exec('sudo mdatp health');
+
+  log.info(`Done. A VM [${vmName}] was created and onboarded to Microsoft Defender for Endpoint`);
+
+  return hostVm;
+};
+
+const waitForMicrosoftDefenderOnVmToReportHealthy = async (vm: HostVm, log: ToolingLog) => {
+  log.info(
+    `Waiting for Microsoft Defender to report healthy status (this could take a bit of time)`
+  );
+
+  return log.indent(4, async () => {
+    const command = 'sudo mdatp health --field healthy';
+
+    await pRetry(
+      async (attempts) => {
+        const healthyFieldValue = (
+          await vm.exec(command).catch((err) => {
+            log.verbose(dump(err));
+
+            throw new AbortError(`Received error while running [${command}]: err.message`);
+          })
+        ).stdout;
+
+        if (healthyFieldValue !== 'true') {
+          if (attempts % 5 === 0) {
+            log.info('Still waiting...');
+          }
+
+          throw new Error(`Healthy field is not reporting 'true' after ${attempts} attempts`);
+        }
       },
-      body: docToCreate,
-    })
-    .then((response) => response.data);
-
-  log.verbose(`event create response:\n ${JSON.stringify(indexedDoc, null, 2)}`);
-  log.info(`A host log event with id [${indexedDoc._id}] has been indexed in [${indexName}]`);
+      { retries: 30 }
+    );
+  });
 };

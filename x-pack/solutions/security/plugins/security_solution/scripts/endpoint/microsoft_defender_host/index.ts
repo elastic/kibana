@@ -127,7 +127,7 @@ const runCli: RunFn = async ({ log, flags }) => {
   const apiKey = flags.apiKey as string;
   const forceFleetServer = flags.forceFleetServer as boolean;
   const forceNewHost = flags.forceNewHost as boolean;
-  const vmName = (flags.vmName as string) || generateVmName('msdefender');
+  const vmName = flags.vmName as string;
 
   const getRequiredArgMessage = (argName: string) => `${argName} argument is required`;
 
@@ -161,7 +161,13 @@ const runCli: RunFn = async ({ log, flags }) => {
 
   const activeSpaceId = (await fetchActiveSpace(kbnClient)).id;
 
-  await onboardVmHostWithMicrosoftDefender({ kbnClient, log, vmName, forceNewHost });
+  await onboardVmHostWithMicrosoftDefender({
+    kbnClient,
+    log,
+    vmName,
+    forceNewHost,
+    onboardingPackage,
+  });
 
   const {
     id: agentPolicyId,
