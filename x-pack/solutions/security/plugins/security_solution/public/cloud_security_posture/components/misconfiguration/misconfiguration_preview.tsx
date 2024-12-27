@@ -13,7 +13,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { DistributionBar } from '@kbn/security-solution-distribution-bar';
 import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/use_has_misconfigurations';
 import { i18n } from '@kbn/i18n';
-import { statusColors } from '@kbn/cloud-security-posture';
+import { getMisconfigurationStatusColor } from '@kbn/cloud-security-posture';
+import { MISCONFIGURATION_STATUS } from '@kbn/cloud-security-posture-common';
 import { METRIC_TYPE } from '@kbn/analytics';
 import {
   ENTITY_FLYOUT_WITH_MISCONFIGURATION_VISIT,
@@ -26,7 +27,11 @@ import {
   EntityDetailsLeftPanelTab,
 } from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
 
-export const getFindingsStats = (passedFindingsStats: number, failedFindingsStats: number) => {
+export const getFindingsStats = (
+  passedFindingsStats: number,
+  failedFindingsStats: number,
+  euiTheme: EuiThemeComputed
+) => {
   if (passedFindingsStats === 0 && failedFindingsStats === 0) return [];
   return [
     {
@@ -37,7 +42,7 @@ export const getFindingsStats = (passedFindingsStats: number, failedFindingsStat
         }
       ),
       count: passedFindingsStats,
-      color: statusColors.passed,
+      color: getMisconfigurationStatusColor(MISCONFIGURATION_STATUS.PASSED, euiTheme),
     },
     {
       key: i18n.translate(
@@ -47,7 +52,7 @@ export const getFindingsStats = (passedFindingsStats: number, failedFindingsStat
         }
       ),
       count: failedFindingsStats,
-      color: statusColors.failed,
+      color: getMisconfigurationStatusColor(MISCONFIGURATION_STATUS.FAILED, euiTheme),
     },
   ];
 };
@@ -165,7 +170,7 @@ export const MisconfigurationsPreview = ({
             <EuiFlexItem />
             <EuiFlexItem>
               <EuiSpacer />
-              <DistributionBar stats={getFindingsStats(passedFindings, failedFindings)} />
+              <DistributionBar stats={getFindingsStats(passedFindings, failedFindings, euiTheme)} />
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>

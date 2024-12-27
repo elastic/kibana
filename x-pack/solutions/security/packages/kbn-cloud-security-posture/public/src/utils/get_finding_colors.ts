@@ -8,7 +8,10 @@
 import { EuiThemeComputed } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme'; // TODO: replace with euiTheme
 import type { VulnSeverity } from '@kbn/cloud-security-posture-common';
-import { VULNERABILITIES_SEVERITY } from '@kbn/cloud-security-posture-common';
+import {
+  VULNERABILITIES_SEVERITY,
+  MISCONFIGURATION_STATUS,
+} from '@kbn/cloud-security-posture-common';
 
 const isBorealis = (euiThemeName: string) => {
   return euiThemeName?.toLowerCase().includes('borealis');
@@ -81,5 +84,20 @@ export const getCvsScoreColor = (score: number, euiTheme: EuiThemeComputed): str
     return getSeverityStatusColor(VULNERABILITIES_SEVERITY.CRITICAL, euiTheme);
   } else {
     return getSeverityStatusColor(VULNERABILITIES_SEVERITY.UNKNOWN, euiTheme);
+  }
+};
+
+export const getMisconfigurationStatusColor = (
+  status: 'passed' | 'failed' | 'unknown',
+  euiTheme: EuiThemeComputed
+): string => {
+  switch (status) {
+    case MISCONFIGURATION_STATUS.PASSED:
+      return euiTheme.colors.success;
+    case MISCONFIGURATION_STATUS.FAILED:
+      return euiTheme.colors.danger;
+    case MISCONFIGURATION_STATUS.UNKNOWN:
+    default:
+      return euiTheme.colors.vis.euiColorSeverity0;
   }
 };

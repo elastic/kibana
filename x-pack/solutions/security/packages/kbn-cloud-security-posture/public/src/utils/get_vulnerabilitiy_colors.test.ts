@@ -6,7 +6,7 @@
  */
 
 import { euiThemeVars } from '@kbn/ui-theme';
-import { getCvsScoreColor, getSeverityStatusColor } from './get_vulnerability_colors';
+import { getCvsScoreColor, getSeverityStatusColor } from './get_finding_colors';
 
 // TODO: fix tests
 describe('getSeverityStatusColor', () => {
