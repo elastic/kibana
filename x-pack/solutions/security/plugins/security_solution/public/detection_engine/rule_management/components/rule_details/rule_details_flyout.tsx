@@ -24,6 +24,7 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import type { EuiTabbedContentTab, EuiTabbedContentProps, EuiFlyoutProps } from '@elastic/eui';
+import { KibanaSectionErrorBoundary } from '@kbn/shared-ux-error-boundary';
 
 import type { RuleResponse } from '../../../../../common/api/detection_engine/model/rule_schema';
 import { RuleOverviewTab, useOverviewTabSections } from './rule_overview_tab';
@@ -219,23 +220,25 @@ export function RuleDetailsFlyout({
           </>
         )}
       </EuiFlyoutHeader>
-      <StyledEuiFlyoutBody>
-        <ScrollableFlyoutTabbedContent
-          tabs={tabs}
-          selectedTab={selectedTab}
-          onTabClick={onTabClick}
-        />
-      </StyledEuiFlyoutBody>
-      <EuiFlyoutFooter>
-        <EuiFlexGroup justifyContent="spaceBetween">
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty onClick={closeFlyout} flush="left">
-              {i18n.DISMISS_BUTTON_LABEL}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>{ruleActions}</EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlyoutFooter>
+      <KibanaSectionErrorBoundary sectionName={rule.name}>
+        <StyledEuiFlyoutBody>
+          <ScrollableFlyoutTabbedContent
+            tabs={tabs}
+            selectedTab={selectedTab}
+            onTabClick={onTabClick}
+          />
+        </StyledEuiFlyoutBody>
+        <EuiFlyoutFooter>
+          <EuiFlexGroup justifyContent="spaceBetween">
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty onClick={closeFlyout} flush="left">
+                {i18n.DISMISS_BUTTON_LABEL}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>{ruleActions}</EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlyoutFooter>
+      </KibanaSectionErrorBoundary>
     </EuiFlyout>
   );
 }
