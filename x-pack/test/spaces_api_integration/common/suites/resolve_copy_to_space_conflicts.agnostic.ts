@@ -5,19 +5,20 @@
  * 2.0.
  */
 
-import type { Agent as SuperTestAgent } from 'supertest';
-
 import type { SavedObject } from '@kbn/core/server';
-import expect from '@kbn/expect/expect';
+import expect from '@kbn/expect';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
 import type { CopyResponse } from '@kbn/spaces-plugin/server/lib/copy_to_spaces';
 
-import { getSupertest, maybeDestroySupertest } from './common';
-import { getTestDataLoader, SPACE_1, SPACE_2 } from '../../../common/lib/test_data_loader';
 import type {
   DeploymentAgnosticFtrProviderContext,
   SupertestWithRoleScopeType,
 } from '../../deployment_agnostic/ftr_provider_context';
+import {
+  getTestDataLoader,
+  SPACE_1,
+  SPACE_2,
+} from '../../deployment_agnostic/services/test_data_loader';
 import { getUrlPrefix } from '../lib/space_test_utils';
 import type { DescribeFn, TestDefinitionAuthentication } from '../lib/types';
 
@@ -344,7 +345,7 @@ export function resolveCopyToSpaceConflictsSuite(context: DeploymentAgnosticFtrP
       // the status code of the HTTP response differs depending on the error type
       // a 403 error actually comes back as an HTTP 200 response
       const statusCode = outcome === 'noAccess' ? 403 : 200;
-      const type = 'index-pattern';
+      const type = 'event-annotation-group';
       const exactMatchId = 'each_space';
       const inexactMatchIdA = `conflict_1a_${spaceId}`;
       const inexactMatchIdB = `conflict_1b_${spaceId}`;
@@ -364,7 +365,7 @@ export function resolveCopyToSpaceConflictsSuite(context: DeploymentAgnosticFtrP
               {
                 statusCode: 403,
                 error: 'Forbidden',
-                message: `Unable to bulk_create index-pattern`,
+                message: `Unable to bulk_create event-annotation-group`,
               },
             ],
           },
@@ -393,7 +394,7 @@ export function resolveCopyToSpaceConflictsSuite(context: DeploymentAgnosticFtrP
               return 'A shared saved-object in one space';
           }
         })();
-        const meta = { title, icon: 'beaker' };
+        const meta = { title, icon: 'flag' };
         expect(successResults).to.eql([
           {
             type,

@@ -6,7 +6,7 @@
  */
 
 import { ALL_SAVED_OBJECT_INDICES } from '@kbn/core-saved-objects-server';
-import expect from '@kbn/expect/expect';
+import expect from '@kbn/expect';
 
 import type {
   DeploymentAgnosticFtrProviderContext,
