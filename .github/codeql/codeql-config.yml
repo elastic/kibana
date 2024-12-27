@@ -1,25 +1,88 @@
 paths-ignore:
+  - '**/*-mocks/**'
+  - '**/*.cy.*'
+  - '**/*.mock.*'
+  - '**/*.mocks.*'
   - '**/*.test.*'
-  - packages/elastic-datemath/npm_module_types
-  - packages/kbn-babel-code-parser
-  - packages/kbn-babel-preset
+  - '**/.storybook/**'
+  - '**/__fixtures__/**'
+  - '**/__jest__/**'
+  - '**/__mocks__/**'
+  - '**/__snapshots__/**'
+  - '**/__stories__/**'
+  - '**/__tests__/**'
+  - '**/cypress/**'
+  - '**/e2e/**'
+  - '**/ftr_e2e/**'
+  - '**/integration_tests/**'
+  - '**/jest.config.*'
+  - '**/jest.integration.config.*'
+  - '**/mocks.*'
+  - '**/mocks/**'
+  - '**/storybook/**'
+  - '**/test_helpers/**'
+  - '**/test_utils/**'
+  - api_docs
+  - dev_docs
+  - docs
+  - examples
+  - kbn_pm
+  - rfcs
+  - packages/*/scripts
+  - packages/core/test-helpers/core-test-helpers-kbn-server
+  - packages/kbn-ambient-*-types
+  - packages/kbn-apm-synthtrace
+  - packages/kbn-axe-config
+  - packages/kbn-babel-*
+  - packages/kbn-bazel-*
+  - packages/kbn-ci-*
   - packages/kbn-cli-dev-mode
+  - packages/kbn-cypress-*
+  - packages/kbn-dev-cli-errors
+  - packages/kbn-dev-cli-runner
+  - packages/kbn-dev-proc-runner
   - packages/kbn-dev-utils
   - packages/kbn-docs-utils
   - packages/kbn-es
   - packages/kbn-es-archiver
-  - packages/kbn-eslint-config
-  - packages/kbn-eslint-import-resolver-kibana
-  - packages/kbn-eslint-plugin-eslint
+  - packages/kbn-eslint-*
   - packages/kbn-expect
+  - packages/kbn-failed-test-reporter-cli
+  - packages/kbn-find-used-node-modules
+  - packages/kbn-ftr-*
+  - packages/kbn-generate
+  - packages/kbn-get-repo-files
+  - packages/kbn-import-resolver
+  - packages/kbn-jest-*
+  - packages/kbn-journeys
+  - packages/kbn-kibana-manifest-schema
+  - packages/kbn-managed-vscode-config
+  - packages/kbn-managed-vscode-config-cli
   - packages/kbn-optimizer
+  - packages/kbn-optimizer-*
+  - packages/kbn-peggy
+  - packages/kbn-peggy-loader
+  - packages/kbn-performance-testing-dataset-extractor
   - packages/kbn-plugin-generator
   - packages/kbn-plugin-helpers
-  - packages/kbn-pm
+  - packages/kbn-repo-path
+  - packages/kbn-repo-source-classifier
+  - packages/kbn-repo-source-classifier-cli
+  - packages/kbn-some-dev-log
+  - packages/kbn-sort-package-json
   - packages/kbn-spec-to-console
+  - packages/kbn-stdio-dev-helpers
   - packages/kbn-storybook
   - packages/kbn-telemetry-tools
   - packages/kbn-test
-  - packages/kbn-test-subj-selector
+  - packages/kbn-test-*
+  - packages/kbn-tooling-log
+  - packages/kbn-ts-*
+  - packages/kbn-web-worker-stub
+  - packages/kbn-yarn-lock-validator
+  - scripts
   - test
+  - typings
+  - x-pack/examples
+  - x-pack/scripts
   - x-pack/test
