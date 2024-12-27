@@ -36,7 +36,7 @@ export type LogDocument = Fields &
     'error.message'?: string;
     'event.original'?: string;
     'event.dataset': string;
-    'event.ingested'?: string;
+    'event.ingested': string;
     'log.level'?: string;
     'host.name'?: string;
     'container.id'?: string;
