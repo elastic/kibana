@@ -479,14 +479,6 @@
             "trackAdoption": true,
             "references": [
               {
-                "plugin": "@kbn/core-notifications-browser-internal",
-                "path": "packages/core/notifications/core-notifications-browser-internal/src/toasts/telemetry/event_reporter.ts"
-              },
-              {
-                "plugin": "@kbn/core-notifications-browser-internal",
-                "path": "packages/core/notifications/core-notifications-browser-internal/src/toasts/telemetry/event_reporter.ts"
-              },
-              {
                 "plugin": "@kbn/ebt-tools",
                 "path": "packages/kbn-ebt-tools/src/performance_metric_events/helpers.ts"
               },
@@ -513,6 +505,14 @@
               {
                 "plugin": "@kbn/core",
                 "path": "src/core/packages/analytics/browser-internal/src/analytics_service.ts"
+              },
+              {
+                "plugin": "@kbn/core-notifications-browser-internal",
+                "path": "packages/core/notifications/core-notifications-browser-internal/src/toasts/telemetry/event_reporter.ts"
+              },
+              {
+                "plugin": "@kbn/core-notifications-browser-internal",
+                "path": "packages/core/notifications/core-notifications-browser-internal/src/toasts/telemetry/event_reporter.ts"
               },
               {
                 "plugin": "@kbn/core-root-browser-internal",
@@ -575,22 +575,6 @@
                 "path": "packages/core/root/core-root-server-internal/src/events/kibana_started.ts"
               },
               {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/server/analytics/analytics_service.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/server/analytics/analytics_service.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/server/analytics/analytics_service.ts"
-              },
-              {
-                "plugin": "actions",
-                "path": "x-pack/plugins/actions/server/lib/action_executor.ts"
-              },
-              {
                 "plugin": "@kbn/cloud",
                 "path": "packages/cloud/connection_details/kibana/kibana_connection_details_provider.tsx"
               },
@@ -637,6 +621,22 @@
               {
                 "plugin": "spaces",
                 "path": "x-pack/plugins/spaces/public/analytics/event_tracker.ts"
+              },
+              {
+                "plugin": "security",
+                "path": "x-pack/plugins/security/server/analytics/analytics_service.ts"
+              },
+              {
+                "plugin": "security",
+                "path": "x-pack/plugins/security/server/analytics/analytics_service.ts"
+              },
+              {
+                "plugin": "security",
+                "path": "x-pack/plugins/security/server/analytics/analytics_service.ts"
+              },
+              {
+                "plugin": "actions",
+                "path": "x-pack/platform/plugins/shared/actions/server/lib/action_executor.ts"
               },
               {
                 "plugin": "observabilityAIAssistant",
@@ -1480,11 +1480,11 @@
               },
               {
                 "plugin": "actions",
-                "path": "x-pack/plugins/actions/server/lib/action_executor.test.ts"
+                "path": "x-pack/platform/plugins/shared/actions/server/lib/action_executor.test.ts"
               },
               {
                 "plugin": "actions",
-                "path": "x-pack/plugins/actions/server/lib/action_executor.test.ts"
+                "path": "x-pack/platform/plugins/shared/actions/server/lib/action_executor.test.ts"
               },
               {
                 "plugin": "@kbn/core",
@@ -1861,12 +1861,12 @@
                 "path": "src/core/packages/analytics/server-internal/src/analytics_service.ts"
               },
               {
-                "plugin": "cloud",
-                "path": "x-pack/plugins/cloud/common/register_cloud_deployment_id_analytics_context.ts"
-              },
-              {
                 "plugin": "licensing",
                 "path": "x-pack/plugins/licensing/common/register_analytics_context_provider.ts"
+              },
+              {
+                "plugin": "cloud",
+                "path": "x-pack/plugins/cloud/common/register_cloud_deployment_id_analytics_context.ts"
               },
               {
                 "plugin": "spaces",

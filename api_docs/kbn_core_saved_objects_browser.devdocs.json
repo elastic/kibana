@@ -42,6 +42,14 @@
             "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_service.ts"
           },
           {
+            "plugin": "@kbn/core-saved-objects-browser-mocks",
+            "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/saved_objects_service.mock.ts"
+          },
+          {
+            "plugin": "@kbn/core-saved-objects-browser-mocks",
+            "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/saved_objects_service.mock.ts"
+          },
+          {
             "plugin": "@kbn/core",
             "path": "src/core/public/index.ts"
           },
@@ -68,14 +76,6 @@
           {
             "plugin": "transform",
             "path": "x-pack/platform/plugins/private/transform/public/app/app_dependencies.tsx"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-browser-mocks",
-            "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/saved_objects_service.mock.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-browser-mocks",
-            "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/saved_objects_service.mock.ts"
           },
           {
             "plugin": "@kbn/core",

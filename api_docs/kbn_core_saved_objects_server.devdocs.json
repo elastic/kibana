@@ -5943,26 +5943,6 @@
                 "path": "x-pack/platform/plugins/shared/fleet/server/services/epm/kibana/assets/install.ts"
               },
               {
-                "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/rules_client/lib/siem_legacy_actions/retrieve_migrated_legacy_actions.mock.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/rules_client/lib/siem_legacy_actions/retrieve_migrated_legacy_actions.mock.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/rules_client/lib/siem_legacy_actions/retrieve_migrated_legacy_actions.mock.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/rules_client/lib/siem_legacy_actions/retrieve_migrated_legacy_actions.mock.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/rules_client/lib/siem_legacy_actions/retrieve_migrated_legacy_actions.mock.ts"
-              },
-              {
                 "plugin": "osquery",
                 "path": "x-pack/platform/plugins/shared/osquery/server/routes/pack/read_pack_route.ts"
               },
@@ -6049,6 +6029,26 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/platform/plugins/shared/alerting/server/rules_client/lib/siem_legacy_actions/retrieve_migrated_legacy_actions.mock.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/platform/plugins/shared/alerting/server/rules_client/lib/siem_legacy_actions/retrieve_migrated_legacy_actions.mock.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/platform/plugins/shared/alerting/server/rules_client/lib/siem_legacy_actions/retrieve_migrated_legacy_actions.mock.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/platform/plugins/shared/alerting/server/rules_client/lib/siem_legacy_actions/retrieve_migrated_legacy_actions.mock.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/platform/plugins/shared/alerting/server/rules_client/lib/siem_legacy_actions/retrieve_migrated_legacy_actions.mock.ts"
               },
               {
                 "plugin": "fleet",
@@ -6199,148 +6199,148 @@
             "path": "src/core/server/index.ts"
           },
           {
-            "plugin": "actions",
-            "path": "x-pack/plugins/actions/server/application/connector/methods/update/types/types.ts"
-          },
-          {
-            "plugin": "actions",
-            "path": "x-pack/plugins/actions/server/application/connector/methods/update/types/types.ts"
-          },
-          {
-            "plugin": "actions",
-            "path": "x-pack/plugins/actions/server/application/connector/methods/update/types/types.ts"
-          },
-          {
-            "plugin": "actions",
-            "path": "x-pack/plugins/actions/server/application/connector/methods/update/update.ts"
-          },
-          {
-            "plugin": "actions",
-            "path": "x-pack/plugins/actions/server/application/connector/methods/update/update.ts"
-          },
-          {
-            "plugin": "actions",
-            "path": "x-pack/plugins/actions/server/application/connector/methods/update/update.ts"
-          },
-          {
-            "plugin": "actions",
-            "path": "x-pack/plugins/actions/server/application/connector/methods/create/types/types.ts"
-          },
-          {
-            "plugin": "actions",
-            "path": "x-pack/plugins/actions/server/application/connector/methods/create/types/types.ts"
-          },
-          {
-            "plugin": "actions",
-            "path": "x-pack/plugins/actions/server/application/connector/methods/create/types/types.ts"
-          },
-          {
-            "plugin": "actions",
-            "path": "x-pack/plugins/actions/server/application/connector/methods/create/create.ts"
-          },
-          {
-            "plugin": "actions",
-            "path": "x-pack/plugins/actions/server/application/connector/methods/create/create.ts"
-          },
-          {
-            "plugin": "actions",
-            "path": "x-pack/plugins/actions/server/application/connector/methods/create/create.ts"
-          },
-          {
-            "plugin": "actions",
-            "path": "x-pack/plugins/actions/server/types.ts"
-          },
-          {
-            "plugin": "actions",
-            "path": "x-pack/plugins/actions/server/types.ts"
-          },
-          {
-            "plugin": "actions",
-            "path": "x-pack/plugins/actions/server/types.ts"
+            "plugin": "@kbn/alerting-types",
+            "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts"
           },
           {
             "plugin": "@kbn/alerting-types",
-            "path": "packages/kbn-alerting-types/rule_types.ts"
+            "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts"
           },
           {
             "plugin": "@kbn/alerting-types",
-            "path": "packages/kbn-alerting-types/rule_types.ts"
+            "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts"
           },
           {
             "plugin": "@kbn/alerting-types",
-            "path": "packages/kbn-alerting-types/rule_types.ts"
+            "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts"
           },
           {
             "plugin": "@kbn/alerting-types",
-            "path": "packages/kbn-alerting-types/rule_types.ts"
+            "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts"
           },
           {
             "plugin": "@kbn/alerting-types",
-            "path": "packages/kbn-alerting-types/rule_types.ts"
+            "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts"
           },
           {
             "plugin": "@kbn/alerting-types",
-            "path": "packages/kbn-alerting-types/rule_types.ts"
+            "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts"
           },
           {
             "plugin": "@kbn/alerting-types",
-            "path": "packages/kbn-alerting-types/rule_types.ts"
+            "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts"
           },
           {
             "plugin": "@kbn/alerting-types",
-            "path": "packages/kbn-alerting-types/rule_types.ts"
+            "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts"
           },
           {
             "plugin": "@kbn/alerting-types",
-            "path": "packages/kbn-alerting-types/rule_types.ts"
+            "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts"
           },
           {
             "plugin": "@kbn/alerting-types",
-            "path": "packages/kbn-alerting-types/rule_types.ts"
+            "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts"
           },
           {
             "plugin": "@kbn/alerting-types",
-            "path": "packages/kbn-alerting-types/rule_types.ts"
+            "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts"
           },
           {
             "plugin": "@kbn/alerting-types",
-            "path": "packages/kbn-alerting-types/rule_types.ts"
-          },
-          {
-            "plugin": "@kbn/alerting-types",
-            "path": "packages/kbn-alerting-types/rule_types.ts"
+            "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts"
           },
           {
             "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/common/rule.ts"
+            "path": "x-pack/platform/plugins/shared/alerting/common/rule.ts"
           },
           {
             "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/common/rule.ts"
+            "path": "x-pack/platform/plugins/shared/alerting/common/rule.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/create/types/types.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/create/types/types.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/create/types/types.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/platform/plugins/shared/actions/server/types.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/platform/plugins/shared/actions/server/types.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/platform/plugins/shared/actions/server/types.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/update/types/types.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/update/types/types.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/update/types/types.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/update/update.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/update/update.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/update/update.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/create/create.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/create/create.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/create/create.ts"
           },
           {
             "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/server/saved_objects/geo_containment/migrations.ts"
+            "path": "x-pack/platform/plugins/shared/alerting/server/rules_client/common/inject_references.ts"
           },
           {
             "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/server/saved_objects/geo_containment/migrations.ts"
+            "path": "x-pack/platform/plugins/shared/alerting/server/rules_client/common/inject_references.ts"
           },
           {
             "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/server/rules_client/common/inject_references.ts"
+            "path": "x-pack/platform/plugins/shared/alerting/server/types.ts"
           },
           {
             "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/server/rules_client/common/inject_references.ts"
+            "path": "x-pack/platform/plugins/shared/alerting/server/types.ts"
           },
           {
             "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/server/types.ts"
+            "path": "x-pack/platform/plugins/shared/alerting/server/saved_objects/geo_containment/migrations.ts"
           },
           {
             "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/server/types.ts"
+            "path": "x-pack/platform/plugins/shared/alerting/server/saved_objects/geo_containment/migrations.ts"
           },
           {
             "plugin": "enterpriseSearch",
@@ -6361,18 +6361,6 @@
           {
             "plugin": "savedSearch",
             "path": "src/plugins/saved_search/server/saved_objects/search_migrations.ts"
-          },
-          {
-            "plugin": "taskManager",
-            "path": "x-pack/plugins/task_manager/server/task_store.test.ts"
-          },
-          {
-            "plugin": "taskManager",
-            "path": "x-pack/plugins/task_manager/server/task_store.test.ts"
-          },
-          {
-            "plugin": "taskManager",
-            "path": "x-pack/plugins/task_manager/server/task_store.test.ts"
           },
           {
             "plugin": "canvas",
@@ -6415,20 +6403,32 @@
             "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_actions_legacy/logic/rule_actions/legacy_migrations.ts"
           },
           {
-            "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/server/saved_objects/migrations/7.11/index.ts"
+            "plugin": "taskManager",
+            "path": "x-pack/platform/plugins/shared/task_manager/server/task_store.test.ts"
+          },
+          {
+            "plugin": "taskManager",
+            "path": "x-pack/platform/plugins/shared/task_manager/server/task_store.test.ts"
+          },
+          {
+            "plugin": "taskManager",
+            "path": "x-pack/platform/plugins/shared/task_manager/server/task_store.test.ts"
           },
           {
             "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/server/saved_objects/migrations/7.11/index.ts"
+            "path": "x-pack/platform/plugins/shared/alerting/server/saved_objects/migrations/7.11/index.ts"
           },
           {
             "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/server/saved_objects/migrations/7.15/index.ts"
+            "path": "x-pack/platform/plugins/shared/alerting/server/saved_objects/migrations/7.11/index.ts"
           },
           {
             "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/server/saved_objects/migrations/7.15/index.ts"
+            "path": "x-pack/platform/plugins/shared/alerting/server/saved_objects/migrations/7.15/index.ts"
+          },
+          {
+            "plugin": "alerting",
+            "path": "x-pack/platform/plugins/shared/alerting/server/saved_objects/migrations/7.15/index.ts"
           },
           {
             "plugin": "@kbn/core-saved-objects-server-internal",
@@ -10663,26 +10663,6 @@
                 "path": "packages/core/usage-data/core-usage-data-server-internal/src/saved_objects/core_usage_stats.ts"
               },
               {
-                "plugin": "taskManager",
-                "path": "x-pack/plugins/task_manager/server/saved_objects/index.ts"
-              },
-              {
-                "plugin": "spaces",
-                "path": "x-pack/plugins/spaces/server/saved_objects/saved_objects_service.ts"
-              },
-              {
-                "plugin": "spaces",
-                "path": "x-pack/plugins/spaces/server/saved_objects/saved_objects_service.ts"
-              },
-              {
-                "plugin": "actions",
-                "path": "x-pack/plugins/actions/server/saved_objects/index.ts"
-              },
-              {
-                "plugin": "actions",
-                "path": "x-pack/plugins/actions/server/saved_objects/index.ts"
-              },
-              {
                 "plugin": "@kbn/core-saved-objects-migration-server-mocks",
                 "path": "packages/core/saved-objects/core-saved-objects-migration-server-mocks/src/kibana_migrator.mock.ts"
               },
@@ -10691,8 +10671,28 @@
                 "path": "src/plugins/data_views/server/saved_objects/data_views.ts"
               },
               {
+                "plugin": "spaces",
+                "path": "x-pack/plugins/spaces/server/saved_objects/saved_objects_service.ts"
+              },
+              {
+                "plugin": "spaces",
+                "path": "x-pack/plugins/spaces/server/saved_objects/saved_objects_service.ts"
+              },
+              {
+                "plugin": "taskManager",
+                "path": "x-pack/platform/plugins/shared/task_manager/server/saved_objects/index.ts"
+              },
+              {
                 "plugin": "share",
                 "path": "src/plugins/share/server/url_service/saved_objects/register_url_service_saved_object_type.ts"
+              },
+              {
+                "plugin": "actions",
+                "path": "x-pack/platform/plugins/shared/actions/server/saved_objects/index.ts"
+              },
+              {
+                "plugin": "actions",
+                "path": "x-pack/platform/plugins/shared/actions/server/saved_objects/index.ts"
               },
               {
                 "plugin": "data",
@@ -10708,11 +10708,23 @@
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/saved_objects/index.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/saved_objects/index.ts"
               },
               {
                 "plugin": "dashboard",
                 "path": "src/platform/plugins/shared/dashboard/server/dashboard_saved_object/dashboard_saved_object.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/platform/plugins/shared/ml/server/saved_objects/saved_objects.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/platform/plugins/shared/ml/server/saved_objects/saved_objects.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/platform/plugins/shared/ml/server/saved_objects/saved_objects.ts"
               },
               {
                 "plugin": "lens",
@@ -10720,35 +10732,23 @@
               },
               {
                 "plugin": "cases",
-                "path": "x-pack/plugins/cases/server/saved_object_types/cases/cases.ts"
+                "path": "x-pack/platform/plugins/shared/cases/server/saved_object_types/cases/cases.ts"
               },
               {
                 "plugin": "cases",
-                "path": "x-pack/plugins/cases/server/saved_object_types/configure.ts"
+                "path": "x-pack/platform/plugins/shared/cases/server/saved_object_types/configure.ts"
               },
               {
                 "plugin": "cases",
-                "path": "x-pack/plugins/cases/server/saved_object_types/comments.ts"
+                "path": "x-pack/platform/plugins/shared/cases/server/saved_object_types/comments.ts"
               },
               {
                 "plugin": "cases",
-                "path": "x-pack/plugins/cases/server/saved_object_types/user_actions.ts"
+                "path": "x-pack/platform/plugins/shared/cases/server/saved_object_types/user_actions.ts"
               },
               {
                 "plugin": "cases",
-                "path": "x-pack/plugins/cases/server/saved_object_types/connector_mappings.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/platform/plugins/shared/ml/server/saved_objects/saved_objects.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/platform/plugins/shared/ml/server/saved_objects/saved_objects.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/platform/plugins/shared/ml/server/saved_objects/saved_objects.ts"
+                "path": "x-pack/platform/plugins/shared/cases/server/saved_object_types/connector_mappings.ts"
               },
               {
                 "plugin": "graph",
@@ -11522,16 +11522,16 @@
                 "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/document_migrator/validate_migrations.ts"
               },
               {
-                "plugin": "actions",
-                "path": "x-pack/plugins/actions/server/saved_objects/index.ts"
-              },
-              {
-                "plugin": "actions",
-                "path": "x-pack/plugins/actions/server/saved_objects/index.ts"
-              },
-              {
                 "plugin": "dataViews",
                 "path": "src/plugins/data_views/server/saved_objects/data_views.ts"
+              },
+              {
+                "plugin": "actions",
+                "path": "x-pack/platform/plugins/shared/actions/server/saved_objects/index.ts"
+              },
+              {
+                "plugin": "actions",
+                "path": "x-pack/platform/plugins/shared/actions/server/saved_objects/index.ts"
               },
               {
                 "plugin": "data",
@@ -11539,7 +11539,7 @@
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/saved_objects/index.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/saved_objects/index.ts"
               },
               {
                 "plugin": "dashboard",
@@ -11551,23 +11551,23 @@
               },
               {
                 "plugin": "cases",
-                "path": "x-pack/plugins/cases/server/saved_object_types/cases/cases.ts"
+                "path": "x-pack/platform/plugins/shared/cases/server/saved_object_types/cases/cases.ts"
               },
               {
                 "plugin": "cases",
-                "path": "x-pack/plugins/cases/server/saved_object_types/configure.ts"
+                "path": "x-pack/platform/plugins/shared/cases/server/saved_object_types/configure.ts"
               },
               {
                 "plugin": "cases",
-                "path": "x-pack/plugins/cases/server/saved_object_types/comments.ts"
+                "path": "x-pack/platform/plugins/shared/cases/server/saved_object_types/comments.ts"
               },
               {
                 "plugin": "cases",
-                "path": "x-pack/plugins/cases/server/saved_object_types/user_actions.ts"
+                "path": "x-pack/platform/plugins/shared/cases/server/saved_object_types/user_actions.ts"
               },
               {
                 "plugin": "cases",
-                "path": "x-pack/plugins/cases/server/saved_object_types/connector_mappings.ts"
+                "path": "x-pack/platform/plugins/shared/cases/server/saved_object_types/connector_mappings.ts"
               },
               {
                 "plugin": "graph",

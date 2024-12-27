@@ -4715,23 +4715,23 @@
               },
               {
                 "plugin": "actions",
-                "path": "x-pack/plugins/actions/server/plugin.ts"
+                "path": "x-pack/platform/plugins/shared/actions/server/plugin.ts"
               },
               {
                 "plugin": "actions",
-                "path": "x-pack/plugins/actions/server/plugin.ts"
+                "path": "x-pack/platform/plugins/shared/actions/server/plugin.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/rules_client_factory.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/rules_client_factory.ts"
               },
               {
                 "plugin": "ruleRegistry",
-                "path": "x-pack/plugins/rule_registry/server/alert_data_client/alerts_client_factory.ts"
+                "path": "x-pack/platform/plugins/shared/rule_registry/server/alert_data_client/alerts_client_factory.ts"
               },
               {
                 "plugin": "ruleRegistry",
-                "path": "x-pack/plugins/rule_registry/server/search_strategy/search_strategy.ts"
+                "path": "x-pack/platform/plugins/shared/rule_registry/server/search_strategy/search_strategy.ts"
               },
               {
                 "plugin": "files",
@@ -4743,7 +4743,7 @@
               },
               {
                 "plugin": "cases",
-                "path": "x-pack/plugins/cases/server/client/factory.ts"
+                "path": "x-pack/platform/plugins/shared/cases/server/client/factory.ts"
               },
               {
                 "plugin": "fleet",
@@ -4835,19 +4835,19 @@
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/rules_client_factory.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/rules_client_factory.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/invalidate_pending_api_keys/task.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/invalidate_pending_api_keys/task.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/plugin.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/plugin.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/plugin.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/plugin.ts"
               },
               {
                 "plugin": "observabilityAIAssistant",
@@ -5015,19 +5015,19 @@
               },
               {
                 "plugin": "cases",
-                "path": "x-pack/plugins/cases/server/services/notifications/email_notification_service.ts"
+                "path": "x-pack/platform/plugins/shared/cases/server/services/notifications/email_notification_service.ts"
               },
               {
                 "plugin": "cases",
-                "path": "x-pack/plugins/cases/server/client/factory.ts"
+                "path": "x-pack/platform/plugins/shared/cases/server/client/factory.ts"
               },
               {
                 "plugin": "cases",
-                "path": "x-pack/plugins/cases/server/client/cases/utils.ts"
+                "path": "x-pack/platform/plugins/shared/cases/server/client/cases/utils.ts"
               },
               {
                 "plugin": "cases",
-                "path": "x-pack/plugins/cases/server/services/user_profiles/index.ts"
+                "path": "x-pack/platform/plugins/shared/cases/server/services/user_profiles/index.ts"
               },
               {
                 "plugin": "securitySolution",

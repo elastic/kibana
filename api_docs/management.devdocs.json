@@ -618,7 +618,7 @@
             "references": [
               {
                 "plugin": "triggersActionsUi",
-                "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts"
+                "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/plugin.ts"
               }
             ]
           }

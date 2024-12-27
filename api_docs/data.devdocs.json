@@ -3571,7 +3571,7 @@
             "references": [
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/lib/wrap_search_source_client.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/lib/wrap_search_source_client.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -3849,55 +3849,55 @@
             "references": [
               {
                 "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/server/rule_types/es_query/lib/fetch_search_source_query.ts"
+                "path": "x-pack/platform/plugins/shared/stack_alerts/server/rule_types/es_query/lib/fetch_search_source_query.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/lib/wrap_search_source_client.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/lib/wrap_search_source_client.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/lib/wrap_search_source_client.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/lib/wrap_search_source_client.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/lib/wrap_search_source_client.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/lib/wrap_search_source_client.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/lib/wrap_search_source_client.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/lib/wrap_search_source_client.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/lib/wrap_search_source_client.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/lib/wrap_search_source_client.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/lib/wrap_search_source_client.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/lib/wrap_search_source_client.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/lib/wrap_search_source_client.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/lib/wrap_search_source_client.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/lib/wrap_search_source_client.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/lib/wrap_search_source_client.test.ts"
               },
               {
                 "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/server/rule_types/es_query/rule_type.test.ts"
+                "path": "x-pack/platform/plugins/shared/stack_alerts/server/rule_types/es_query/rule_type.test.ts"
               },
               {
                 "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/server/rule_types/es_query/rule_type.test.ts"
+                "path": "x-pack/platform/plugins/shared/stack_alerts/server/rule_types/es_query/rule_type.test.ts"
               },
               {
                 "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/server/rule_types/es_query/lib/fetch_search_source_query.test.ts"
+                "path": "x-pack/platform/plugins/shared/stack_alerts/server/rule_types/es_query/lib/fetch_search_source_query.test.ts"
               },
               {
                 "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/server/rule_types/es_query/lib/fetch_search_source_query.test.ts"
+                "path": "x-pack/platform/plugins/shared/stack_alerts/server/rule_types/es_query/lib/fetch_search_source_query.test.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -8114,26 +8114,6 @@
                 "path": "x-pack/platform/plugins/shared/fleet/server/services/epm/kibana/assets/install.ts"
               },
               {
-                "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/rules_client/lib/siem_legacy_actions/retrieve_migrated_legacy_actions.mock.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/rules_client/lib/siem_legacy_actions/retrieve_migrated_legacy_actions.mock.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/rules_client/lib/siem_legacy_actions/retrieve_migrated_legacy_actions.mock.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/rules_client/lib/siem_legacy_actions/retrieve_migrated_legacy_actions.mock.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/rules_client/lib/siem_legacy_actions/retrieve_migrated_legacy_actions.mock.ts"
-              },
-              {
                 "plugin": "osquery",
                 "path": "x-pack/platform/plugins/shared/osquery/server/routes/pack/read_pack_route.ts"
               },
@@ -8220,6 +8200,26 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/platform/plugins/shared/alerting/server/rules_client/lib/siem_legacy_actions/retrieve_migrated_legacy_actions.mock.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/platform/plugins/shared/alerting/server/rules_client/lib/siem_legacy_actions/retrieve_migrated_legacy_actions.mock.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/platform/plugins/shared/alerting/server/rules_client/lib/siem_legacy_actions/retrieve_migrated_legacy_actions.mock.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/platform/plugins/shared/alerting/server/rules_client/lib/siem_legacy_actions/retrieve_migrated_legacy_actions.mock.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/platform/plugins/shared/alerting/server/rules_client/lib/siem_legacy_actions/retrieve_migrated_legacy_actions.mock.ts"
               },
               {
                 "plugin": "fleet",
@@ -11726,23 +11726,23 @@
             },
             {
               "plugin": "stackAlerts",
-              "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/rule_form/data_view_select.tsx"
+              "path": "x-pack/platform/plugins/shared/stack_alerts/public/rule_types/geo_containment/rule_form/data_view_select.tsx"
             },
             {
               "plugin": "stackAlerts",
-              "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/rule_form/boundary_form.tsx"
+              "path": "x-pack/platform/plugins/shared/stack_alerts/public/rule_types/geo_containment/rule_form/boundary_form.tsx"
             },
             {
               "plugin": "stackAlerts",
-              "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/rule_form/boundary_form.tsx"
+              "path": "x-pack/platform/plugins/shared/stack_alerts/public/rule_types/geo_containment/rule_form/boundary_form.tsx"
             },
             {
               "plugin": "stackAlerts",
-              "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/rule_form/entity_form.tsx"
+              "path": "x-pack/platform/plugins/shared/stack_alerts/public/rule_types/geo_containment/rule_form/entity_form.tsx"
             },
             {
               "plugin": "stackAlerts",
-              "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/rule_form/entity_form.tsx"
+              "path": "x-pack/platform/plugins/shared/stack_alerts/public/rule_types/geo_containment/rule_form/entity_form.tsx"
             },
             {
               "plugin": "inputControlVis",
@@ -11846,7 +11846,7 @@
             },
             {
               "plugin": "stackAlerts",
-              "path": "x-pack/plugins/stack_alerts/public/rule_types/threshold/expression.tsx"
+              "path": "x-pack/platform/plugins/shared/stack_alerts/public/rule_types/threshold/expression.tsx"
             },
             {
               "plugin": "expressionPartitionVis",
@@ -24679,26 +24679,6 @@
                 "path": "x-pack/platform/plugins/shared/fleet/server/services/epm/kibana/assets/install.ts"
               },
               {
-                "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/rules_client/lib/siem_legacy_actions/retrieve_migrated_legacy_actions.mock.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/rules_client/lib/siem_legacy_actions/retrieve_migrated_legacy_actions.mock.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/rules_client/lib/siem_legacy_actions/retrieve_migrated_legacy_actions.mock.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/rules_client/lib/siem_legacy_actions/retrieve_migrated_legacy_actions.mock.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/rules_client/lib/siem_legacy_actions/retrieve_migrated_legacy_actions.mock.ts"
-              },
-              {
                 "plugin": "osquery",
                 "path": "x-pack/platform/plugins/shared/osquery/server/routes/pack/read_pack_route.ts"
               },
@@ -24785,6 +24765,26 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/platform/plugins/shared/alerting/server/rules_client/lib/siem_legacy_actions/retrieve_migrated_legacy_actions.mock.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/platform/plugins/shared/alerting/server/rules_client/lib/siem_legacy_actions/retrieve_migrated_legacy_actions.mock.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/platform/plugins/shared/alerting/server/rules_client/lib/siem_legacy_actions/retrieve_migrated_legacy_actions.mock.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/platform/plugins/shared/alerting/server/rules_client/lib/siem_legacy_actions/retrieve_migrated_legacy_actions.mock.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/platform/plugins/shared/alerting/server/rules_client/lib/siem_legacy_actions/retrieve_migrated_legacy_actions.mock.ts"
               },
               {
                 "plugin": "fleet",

@@ -2188,11 +2188,11 @@
             },
             {
               "plugin": "actions",
-              "path": "x-pack/plugins/actions/server/plugin.ts"
+              "path": "x-pack/platform/plugins/shared/actions/server/plugin.ts"
             },
             {
               "plugin": "alerting",
-              "path": "x-pack/plugins/alerting/server/plugin.ts"
+              "path": "x-pack/platform/plugins/shared/alerting/server/plugin.ts"
             },
             {
               "plugin": "ml",
@@ -2284,19 +2284,19 @@
             },
             {
               "plugin": "actions",
-              "path": "x-pack/plugins/actions/server/lib/license_state.test.ts"
+              "path": "x-pack/platform/plugins/shared/actions/server/lib/license_state.test.ts"
             },
             {
               "plugin": "actions",
-              "path": "x-pack/plugins/actions/server/lib/license_state.test.ts"
+              "path": "x-pack/platform/plugins/shared/actions/server/lib/license_state.test.ts"
             },
             {
               "plugin": "alerting",
-              "path": "x-pack/plugins/alerting/server/lib/license_state.test.ts"
+              "path": "x-pack/platform/plugins/shared/alerting/server/lib/license_state.test.ts"
             },
             {
               "plugin": "alerting",
-              "path": "x-pack/plugins/alerting/server/lib/license_state.test.ts"
+              "path": "x-pack/platform/plugins/shared/alerting/server/lib/license_state.test.ts"
             }
           ]
         },

@@ -35,7 +35,7 @@
           },
           ", void, object, object>"
         ],
-        "path": "x-pack/plugins/actions/public/plugin.ts",
+        "path": "x-pack/platform/plugins/shared/actions/public/plugin.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -49,7 +49,7 @@
             "signature": [
               "any"
             ],
-            "path": "x-pack/plugins/actions/public/plugin.ts",
+            "path": "x-pack/platform/plugins/shared/actions/public/plugin.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -72,7 +72,7 @@
                   "Config",
                   ">"
                 ],
-                "path": "x-pack/plugins/actions/public/plugin.ts",
+                "path": "x-pack/platform/plugins/shared/actions/public/plugin.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -97,7 +97,7 @@
                 "text": "ActionsPublicPluginSetup"
               }
             ],
-            "path": "x-pack/plugins/actions/public/plugin.ts",
+            "path": "x-pack/platform/plugins/shared/actions/public/plugin.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -113,7 +113,7 @@
             "signature": [
               "() => void"
             ],
-            "path": "x-pack/plugins/actions/public/plugin.ts",
+            "path": "x-pack/platform/plugins/shared/actions/public/plugin.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -135,7 +135,7 @@
       "tags": [],
       "label": "ActionsPublicPluginSetup",
       "description": [],
-      "path": "x-pack/plugins/actions/public/plugin.ts",
+      "path": "x-pack/platform/plugins/shared/actions/public/plugin.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -165,7 +165,7 @@
             },
             "[]"
           ],
-          "path": "x-pack/plugins/actions/public/plugin.ts",
+          "path": "x-pack/platform/plugins/shared/actions/public/plugin.ts",
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -179,7 +179,7 @@
               "signature": [
                 "string[]"
               ],
-              "path": "x-pack/plugins/actions/public/plugin.ts",
+              "path": "x-pack/platform/plugins/shared/actions/public/plugin.ts",
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -201,7 +201,7 @@
                 },
                 " | undefined"
               ],
-              "path": "x-pack/plugins/actions/public/plugin.ts",
+              "path": "x-pack/platform/plugins/shared/actions/public/plugin.ts",
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": false
@@ -243,7 +243,7 @@
           "CaseConnectorInterface",
           "<Incident, GetIncidentResponse>"
         ],
-        "path": "x-pack/plugins/actions/server/sub_action_framework/case.ts",
+        "path": "x-pack/platform/plugins/shared/actions/server/sub_action_framework/case.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -257,7 +257,7 @@
             "signature": [
               "any"
             ],
-            "path": "x-pack/plugins/actions/server/sub_action_framework/case.ts",
+            "path": "x-pack/platform/plugins/shared/actions/server/sub_action_framework/case.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -278,7 +278,7 @@
                   },
                   "<Config, Secrets>"
                 ],
-                "path": "x-pack/plugins/actions/server/sub_action_framework/case.ts",
+                "path": "x-pack/platform/plugins/shared/actions/server/sub_action_framework/case.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -301,7 +301,7 @@
                   },
                   "<unknown>>"
                 ],
-                "path": "x-pack/plugins/actions/server/sub_action_framework/case.ts",
+                "path": "x-pack/platform/plugins/shared/actions/server/sub_action_framework/case.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -321,7 +321,7 @@
               "ConnectorUsageCollector",
               ") => Promise<void>"
             ],
-            "path": "x-pack/plugins/actions/server/sub_action_framework/case.ts",
+            "path": "x-pack/platform/plugins/shared/actions/server/sub_action_framework/case.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -332,7 +332,7 @@
                 "tags": [],
                 "label": "{\n      incidentId,\n      comment,\n    }",
                 "description": [],
-                "path": "x-pack/plugins/actions/server/sub_action_framework/case.ts",
+                "path": "x-pack/platform/plugins/shared/actions/server/sub_action_framework/case.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -343,7 +343,7 @@
                     "tags": [],
                     "label": "incidentId",
                     "description": [],
-                    "path": "x-pack/plugins/actions/server/sub_action_framework/case.ts",
+                    "path": "x-pack/platform/plugins/shared/actions/server/sub_action_framework/case.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -354,7 +354,7 @@
                     "tags": [],
                     "label": "comment",
                     "description": [],
-                    "path": "x-pack/plugins/actions/server/sub_action_framework/case.ts",
+                    "path": "x-pack/platform/plugins/shared/actions/server/sub_action_framework/case.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -370,7 +370,7 @@
                 "signature": [
                   "ConnectorUsageCollector"
                 ],
-                "path": "x-pack/plugins/actions/server/sub_action_framework/case.ts",
+                "path": "x-pack/platform/plugins/shared/actions/server/sub_action_framework/case.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -392,7 +392,7 @@
               "ExternalServiceIncidentResponse",
               ">"
             ],
-            "path": "x-pack/plugins/actions/server/sub_action_framework/case.ts",
+            "path": "x-pack/platform/plugins/shared/actions/server/sub_action_framework/case.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -406,7 +406,7 @@
                 "signature": [
                   "Incident"
                 ],
-                "path": "x-pack/plugins/actions/server/sub_action_framework/case.ts",
+                "path": "x-pack/platform/plugins/shared/actions/server/sub_action_framework/case.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -421,7 +421,7 @@
                 "signature": [
                   "ConnectorUsageCollector"
                 ],
-                "path": "x-pack/plugins/actions/server/sub_action_framework/case.ts",
+                "path": "x-pack/platform/plugins/shared/actions/server/sub_action_framework/case.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -443,7 +443,7 @@
               "ExternalServiceIncidentResponse",
               ">"
             ],
-            "path": "x-pack/plugins/actions/server/sub_action_framework/case.ts",
+            "path": "x-pack/platform/plugins/shared/actions/server/sub_action_framework/case.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -454,7 +454,7 @@
                 "tags": [],
                 "label": "{\n      incidentId,\n      incident,\n    }",
                 "description": [],
-                "path": "x-pack/plugins/actions/server/sub_action_framework/case.ts",
+                "path": "x-pack/platform/plugins/shared/actions/server/sub_action_framework/case.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -465,7 +465,7 @@
                     "tags": [],
                     "label": "incidentId",
                     "description": [],
-                    "path": "x-pack/plugins/actions/server/sub_action_framework/case.ts",
+                    "path": "x-pack/platform/plugins/shared/actions/server/sub_action_framework/case.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -479,7 +479,7 @@
                     "signature": [
                       "Incident"
                     ],
-                    "path": "x-pack/plugins/actions/server/sub_action_framework/case.ts",
+                    "path": "x-pack/platform/plugins/shared/actions/server/sub_action_framework/case.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -495,7 +495,7 @@
                 "signature": [
                   "ConnectorUsageCollector"
                 ],
-                "path": "x-pack/plugins/actions/server/sub_action_framework/case.ts",
+                "path": "x-pack/platform/plugins/shared/actions/server/sub_action_framework/case.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -515,7 +515,7 @@
               "ConnectorUsageCollector",
               ") => Promise<GetIncidentResponse>"
             ],
-            "path": "x-pack/plugins/actions/server/sub_action_framework/case.ts",
+            "path": "x-pack/platform/plugins/shared/actions/server/sub_action_framework/case.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -526,7 +526,7 @@
                 "tags": [],
                 "label": "{ id }",
                 "description": [],
-                "path": "x-pack/plugins/actions/server/sub_action_framework/case.ts",
+                "path": "x-pack/platform/plugins/shared/actions/server/sub_action_framework/case.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -537,7 +537,7 @@
                     "tags": [],
                     "label": "id",
                     "description": [],
-                    "path": "x-pack/plugins/actions/server/sub_action_framework/case.ts",
+                    "path": "x-pack/platform/plugins/shared/actions/server/sub_action_framework/case.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -553,7 +553,7 @@
                 "signature": [
                   "ConnectorUsageCollector"
                 ],
-                "path": "x-pack/plugins/actions/server/sub_action_framework/case.ts",
+                "path": "x-pack/platform/plugins/shared/actions/server/sub_action_framework/case.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -575,7 +575,7 @@
               "PushToServiceResponse",
               ">"
             ],
-            "path": "x-pack/plugins/actions/server/sub_action_framework/case.ts",
+            "path": "x-pack/platform/plugins/shared/actions/server/sub_action_framework/case.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -586,7 +586,7 @@
                 "tags": [],
                 "label": "params",
                 "description": [],
-                "path": "x-pack/plugins/actions/server/sub_action_framework/case.ts",
+                "path": "x-pack/platform/plugins/shared/actions/server/sub_action_framework/case.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -600,7 +600,7 @@
                     "signature": [
                       "{ externalId: string | null; } & Incident"
                     ],
-                    "path": "x-pack/plugins/actions/server/sub_action_framework/case.ts",
+                    "path": "x-pack/platform/plugins/shared/actions/server/sub_action_framework/case.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -614,7 +614,7 @@
                     "signature": [
                       "{ commentId: string; comment: string; }[]"
                     ],
-                    "path": "x-pack/plugins/actions/server/sub_action_framework/case.ts",
+                    "path": "x-pack/platform/plugins/shared/actions/server/sub_action_framework/case.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -630,7 +630,7 @@
                 "signature": [
                   "ConnectorUsageCollector"
                 ],
-                "path": "x-pack/plugins/actions/server/sub_action_framework/case.ts",
+                "path": "x-pack/platform/plugins/shared/actions/server/sub_action_framework/case.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -658,7 +658,7 @@
           },
           "<Config, Secrets>"
         ],
-        "path": "x-pack/plugins/actions/server/sub_action_framework/sub_action_connector.ts",
+        "path": "x-pack/platform/plugins/shared/actions/server/sub_action_framework/sub_action_connector.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -679,7 +679,7 @@
               },
               "<unknown, unknown, unknown, any> | undefined"
             ],
-            "path": "x-pack/plugins/actions/server/sub_action_framework/sub_action_connector.ts",
+            "path": "x-pack/platform/plugins/shared/actions/server/sub_action_framework/sub_action_connector.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -699,7 +699,7 @@
                 "text": "Logger"
               }
             ],
-            "path": "x-pack/plugins/actions/server/sub_action_framework/sub_action_connector.ts",
+            "path": "x-pack/platform/plugins/shared/actions/server/sub_action_framework/sub_action_connector.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1967,7 +1967,7 @@
               "default",
               "; }"
             ],
-            "path": "x-pack/plugins/actions/server/sub_action_framework/sub_action_connector.ts",
+            "path": "x-pack/platform/plugins/shared/actions/server/sub_action_framework/sub_action_connector.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1987,7 +1987,7 @@
                 "text": "SavedObjectsClientContract"
               }
             ],
-            "path": "x-pack/plugins/actions/server/sub_action_framework/sub_action_connector.ts",
+            "path": "x-pack/platform/plugins/shared/actions/server/sub_action_framework/sub_action_connector.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2001,7 +2001,7 @@
             "signature": [
               "{ id: string; type: string; }"
             ],
-            "path": "x-pack/plugins/actions/server/sub_action_framework/sub_action_connector.ts",
+            "path": "x-pack/platform/plugins/shared/actions/server/sub_action_framework/sub_action_connector.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2015,7 +2015,7 @@
             "signature": [
               "Config"
             ],
-            "path": "x-pack/plugins/actions/server/sub_action_framework/sub_action_connector.ts",
+            "path": "x-pack/platform/plugins/shared/actions/server/sub_action_framework/sub_action_connector.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2029,7 +2029,7 @@
             "signature": [
               "Secrets"
             ],
-            "path": "x-pack/plugins/actions/server/sub_action_framework/sub_action_connector.ts",
+            "path": "x-pack/platform/plugins/shared/actions/server/sub_action_framework/sub_action_connector.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2043,7 +2043,7 @@
             "signature": [
               "any"
             ],
-            "path": "x-pack/plugins/actions/server/sub_action_framework/sub_action_connector.ts",
+            "path": "x-pack/platform/plugins/shared/actions/server/sub_action_framework/sub_action_connector.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2064,7 +2064,7 @@
                   },
                   "<Config, Secrets>"
                 ],
-                "path": "x-pack/plugins/actions/server/sub_action_framework/sub_action_connector.ts",
+                "path": "x-pack/platform/plugins/shared/actions/server/sub_action_framework/sub_action_connector.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2084,7 +2084,7 @@
               "SubAction",
               ") => void"
             ],
-            "path": "x-pack/plugins/actions/server/sub_action_framework/sub_action_connector.ts",
+            "path": "x-pack/platform/plugins/shared/actions/server/sub_action_framework/sub_action_connector.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2098,7 +2098,7 @@
                 "signature": [
                   "SubAction"
                 ],
-                "path": "x-pack/plugins/actions/server/sub_action_framework/sub_action_connector.ts",
+                "path": "x-pack/platform/plugins/shared/actions/server/sub_action_framework/sub_action_connector.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2116,7 +2116,7 @@
             "signature": [
               "(data: unknown) => unknown"
             ],
-            "path": "x-pack/plugins/actions/server/sub_action_framework/sub_action_connector.ts",
+            "path": "x-pack/platform/plugins/shared/actions/server/sub_action_framework/sub_action_connector.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2130,7 +2130,7 @@
                 "signature": [
                   "unknown"
                 ],
-                "path": "x-pack/plugins/actions/server/sub_action_framework/sub_action_connector.ts",
+                "path": "x-pack/platform/plugins/shared/actions/server/sub_action_framework/sub_action_connector.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2150,7 +2150,7 @@
               "SubAction",
               ">"
             ],
-            "path": "x-pack/plugins/actions/server/sub_action_framework/sub_action_connector.ts",
+            "path": "x-pack/platform/plugins/shared/actions/server/sub_action_framework/sub_action_connector.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -2168,7 +2168,7 @@
               "AxiosError",
               "<unknown, any>) => string"
             ],
-            "path": "x-pack/plugins/actions/server/sub_action_framework/sub_action_connector.ts",
+            "path": "x-pack/platform/plugins/shared/actions/server/sub_action_framework/sub_action_connector.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2183,7 +2183,7 @@
                   "AxiosError",
                   "<unknown, any>"
                 ],
-                "path": "x-pack/plugins/actions/server/sub_action_framework/sub_action_connector.ts",
+                "path": "x-pack/platform/plugins/shared/actions/server/sub_action_framework/sub_action_connector.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2207,7 +2207,7 @@
               "AxiosResponse",
               "<R, any>>"
             ],
-            "path": "x-pack/plugins/actions/server/sub_action_framework/sub_action_connector.ts",
+            "path": "x-pack/platform/plugins/shared/actions/server/sub_action_framework/sub_action_connector.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2222,7 +2222,7 @@
                   "SubActionRequestParams",
                   "<R>"
                 ],
-                "path": "x-pack/plugins/actions/server/sub_action_framework/sub_action_connector.ts",
+                "path": "x-pack/platform/plugins/shared/actions/server/sub_action_framework/sub_action_connector.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2237,7 +2237,7 @@
                 "signature": [
                   "ConnectorUsageCollector"
                 ],
-                "path": "x-pack/plugins/actions/server/sub_action_framework/sub_action_connector.ts",
+                "path": "x-pack/platform/plugins/shared/actions/server/sub_action_framework/sub_action_connector.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2255,7 +2255,7 @@
         "tags": [],
         "label": "UnsecuredActionsClient",
         "description": [],
-        "path": "x-pack/plugins/actions/server/unsecured_actions_client/unsecured_actions_client.ts",
+        "path": "x-pack/platform/plugins/shared/actions/server/unsecured_actions_client/unsecured_actions_client.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2269,7 +2269,7 @@
             "signature": [
               "any"
             ],
-            "path": "x-pack/plugins/actions/server/unsecured_actions_client/unsecured_actions_client.ts",
+            "path": "x-pack/platform/plugins/shared/actions/server/unsecured_actions_client/unsecured_actions_client.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2283,7 +2283,7 @@
                 "signature": [
                   "UnsecuredActionsClientOpts"
                 ],
-                "path": "x-pack/plugins/actions/server/unsecured_actions_client/unsecured_actions_client.ts",
+                "path": "x-pack/platform/plugins/shared/actions/server/unsecured_actions_client/unsecured_actions_client.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2309,7 +2309,7 @@
               },
               "<unknown>>"
             ],
-            "path": "x-pack/plugins/actions/server/unsecured_actions_client/unsecured_actions_client.ts",
+            "path": "x-pack/platform/plugins/shared/actions/server/unsecured_actions_client/unsecured_actions_client.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2323,7 +2323,7 @@
                 "signature": [
                   "UnsecuredExecuteOptions"
                 ],
-                "path": "x-pack/plugins/actions/server/unsecured_actions_client/unsecured_actions_client.ts",
+                "path": "x-pack/platform/plugins/shared/actions/server/unsecured_actions_client/unsecured_actions_client.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2345,7 +2345,7 @@
               "ExecutionResponse",
               ">"
             ],
-            "path": "x-pack/plugins/actions/server/unsecured_actions_client/unsecured_actions_client.ts",
+            "path": "x-pack/platform/plugins/shared/actions/server/unsecured_actions_client/unsecured_actions_client.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2359,7 +2359,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "x-pack/plugins/actions/server/unsecured_actions_client/unsecured_actions_client.ts",
+                "path": "x-pack/platform/plugins/shared/actions/server/unsecured_actions_client/unsecured_actions_client.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2375,7 +2375,7 @@
                   "ExecuteOptions",
                   "[]"
                 ],
-                "path": "x-pack/plugins/actions/server/unsecured_actions_client/unsecured_actions_client.ts",
+                "path": "x-pack/platform/plugins/shared/actions/server/unsecured_actions_client/unsecured_actions_client.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2401,7 +2401,7 @@
               },
               "[]>"
             ],
-            "path": "x-pack/plugins/actions/server/unsecured_actions_client/unsecured_actions_client.ts",
+            "path": "x-pack/platform/plugins/shared/actions/server/unsecured_actions_client/unsecured_actions_client.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2415,7 +2415,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "x-pack/plugins/actions/server/unsecured_actions_client/unsecured_actions_client.ts",
+                "path": "x-pack/platform/plugins/shared/actions/server/unsecured_actions_client/unsecured_actions_client.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2447,7 +2447,7 @@
           "<unknown, unknown, unknown, any>) => ",
           "HttpRequestExecutionSource"
         ],
-        "path": "x-pack/plugins/actions/server/lib/action_execution_source.ts",
+        "path": "x-pack/platform/plugins/shared/actions/server/lib/action_execution_source.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2468,7 +2468,7 @@
               },
               "<unknown, unknown, unknown, any>"
             ],
-            "path": "x-pack/plugins/actions/server/lib/action_execution_source.ts",
+            "path": "x-pack/platform/plugins/shared/actions/server/lib/action_execution_source.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -2490,7 +2490,7 @@
           ") => ",
           "NotificationExecutionSource"
         ],
-        "path": "x-pack/plugins/actions/server/lib/action_execution_source.ts",
+        "path": "x-pack/platform/plugins/shared/actions/server/lib/action_execution_source.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2504,7 +2504,7 @@
             "signature": [
               "NotificationSource"
             ],
-            "path": "x-pack/plugins/actions/server/lib/action_execution_source.ts",
+            "path": "x-pack/platform/plugins/shared/actions/server/lib/action_execution_source.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -2532,7 +2532,7 @@
           ", \"name\">) => ",
           "SavedObjectExecutionSource"
         ],
-        "path": "x-pack/plugins/actions/server/lib/action_execution_source.ts",
+        "path": "x-pack/platform/plugins/shared/actions/server/lib/action_execution_source.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2554,7 +2554,7 @@
               },
               ", \"name\">"
             ],
-            "path": "x-pack/plugins/actions/server/lib/action_execution_source.ts",
+            "path": "x-pack/platform/plugins/shared/actions/server/lib/action_execution_source.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -2573,7 +2573,7 @@
         "signature": [
           "({ username, password }: GetBasicAuthHeaderArgs) => { Authorization: string; }"
         ],
-        "path": "x-pack/plugins/actions/server/lib/get_basic_auth_header.ts",
+        "path": "x-pack/platform/plugins/shared/actions/server/lib/get_basic_auth_header.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2587,7 +2587,7 @@
             "signature": [
               "GetBasicAuthHeaderArgs"
             ],
-            "path": "x-pack/plugins/actions/server/lib/get_basic_auth_header.ts",
+            "path": "x-pack/platform/plugins/shared/actions/server/lib/get_basic_auth_header.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -2608,7 +2608,7 @@
           "ValidatorServices",
           ") => void"
         ],
-        "path": "x-pack/plugins/actions/server/sub_action_framework/helpers/validators.ts",
+        "path": "x-pack/platform/plugins/shared/actions/server/sub_action_framework/helpers/validators.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2622,7 +2622,7 @@
             "signature": [
               "string"
             ],
-            "path": "x-pack/plugins/actions/server/sub_action_framework/helpers/validators.ts",
+            "path": "x-pack/platform/plugins/shared/actions/server/sub_action_framework/helpers/validators.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -2640,7 +2640,7 @@
         "tags": [],
         "label": "ActionsApiRequestHandlerContext",
         "description": [],
-        "path": "x-pack/plugins/actions/server/types.ts",
+        "path": "x-pack/platform/plugins/shared/actions/server/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2661,7 +2661,7 @@
                 "text": "ActionsClient"
               }
             ],
-            "path": "x-pack/plugins/actions/server/types.ts",
+            "path": "x-pack/platform/plugins/shared/actions/server/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -2685,7 +2685,7 @@
               },
               "[]"
             ],
-            "path": "x-pack/plugins/actions/server/types.ts",
+            "path": "x-pack/platform/plugins/shared/actions/server/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -2700,7 +2700,7 @@
                 "signature": [
                   "string | undefined"
                 ],
-                "path": "x-pack/plugins/actions/server/action_type_registry.ts",
+                "path": "x-pack/platform/plugins/shared/actions/server/action_type_registry.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -2716,7 +2716,7 @@
         "tags": [],
         "label": "ActionsPlugin",
         "description": [],
-        "path": "x-pack/plugins/actions/server/types.ts",
+        "path": "x-pack/platform/plugins/shared/actions/server/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2736,7 +2736,7 @@
                 "text": "PluginSetupContract"
               }
             ],
-            "path": "x-pack/plugins/actions/server/types.ts",
+            "path": "x-pack/platform/plugins/shared/actions/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2756,7 +2756,7 @@
                 "text": "PluginStartContract"
               }
             ],
-            "path": "x-pack/plugins/actions/server/types.ts",
+            "path": "x-pack/platform/plugins/shared/actions/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2780,7 +2780,7 @@
           },
           "<Config, Secrets, Params, ExecutorResultData>"
         ],
-        "path": "x-pack/plugins/actions/server/types.ts",
+        "path": "x-pack/platform/plugins/shared/actions/server/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2791,7 +2791,7 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "path": "x-pack/plugins/actions/server/types.ts",
+            "path": "x-pack/platform/plugins/shared/actions/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2802,7 +2802,7 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "path": "x-pack/plugins/actions/server/types.ts",
+            "path": "x-pack/platform/plugins/shared/actions/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2816,7 +2816,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "x-pack/plugins/actions/server/types.ts",
+            "path": "x-pack/platform/plugins/shared/actions/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2830,7 +2830,7 @@
             "signature": [
               "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\""
             ],
-            "path": "x-pack/plugins/actions/server/types.ts",
+            "path": "x-pack/platform/plugins/shared/actions/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2844,7 +2844,7 @@
             "signature": [
               "string[]"
             ],
-            "path": "x-pack/plugins/actions/server/types.ts",
+            "path": "x-pack/platform/plugins/shared/actions/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2864,7 +2864,7 @@
               "ValidatorType",
               "<Secrets>; connector?: ((config: Config, secrets: Secrets) => string | null) | undefined; }"
             ],
-            "path": "x-pack/plugins/actions/server/types.ts",
+            "path": "x-pack/platform/plugins/shared/actions/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2878,7 +2878,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "x-pack/plugins/actions/server/types.ts",
+            "path": "x-pack/platform/plugins/shared/actions/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2894,7 +2894,7 @@
             "signature": [
               "((args?: { params?: Params | undefined; } | undefined) => string[]) | undefined"
             ],
-            "path": "x-pack/plugins/actions/server/types.ts",
+            "path": "x-pack/platform/plugins/shared/actions/server/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2905,7 +2905,7 @@
                 "tags": [],
                 "label": "args",
                 "description": [],
-                "path": "x-pack/plugins/actions/server/types.ts",
+                "path": "x-pack/platform/plugins/shared/actions/server/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -2919,7 +2919,7 @@
                     "signature": [
                       "Params | undefined"
                     ],
-                    "path": "x-pack/plugins/actions/server/types.ts",
+                    "path": "x-pack/platform/plugins/shared/actions/server/types.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -2939,7 +2939,7 @@
               "RenderParameterTemplates",
               "<Params> | undefined"
             ],
-            "path": "x-pack/plugins/actions/server/types.ts",
+            "path": "x-pack/platform/plugins/shared/actions/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2969,7 +2969,7 @@
               },
               "<ExecutorResultData>>"
             ],
-            "path": "x-pack/plugins/actions/server/types.ts",
+            "path": "x-pack/platform/plugins/shared/actions/server/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -2991,7 +2991,7 @@
                   },
                   "<Config, Secrets, Params>"
                 ],
-                "path": "x-pack/plugins/actions/server/types.ts",
+                "path": "x-pack/platform/plugins/shared/actions/server/types.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -3023,7 +3023,7 @@
               },
               "<Config, Secrets>) | undefined"
             ],
-            "path": "x-pack/plugins/actions/server/types.ts",
+            "path": "x-pack/platform/plugins/shared/actions/server/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -3044,7 +3044,7 @@
                   },
                   "<Config, Secrets>"
                 ],
-                "path": "x-pack/plugins/actions/server/types.ts",
+                "path": "x-pack/platform/plugins/shared/actions/server/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -3064,7 +3064,7 @@
               "PreSaveConnectorHookParams",
               "<Config, Secrets>) => Promise<void>) | undefined"
             ],
-            "path": "x-pack/plugins/actions/server/types.ts",
+            "path": "x-pack/platform/plugins/shared/actions/server/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -3079,7 +3079,7 @@
                   "PreSaveConnectorHookParams",
                   "<Config, Secrets>"
                 ],
-                "path": "x-pack/plugins/actions/server/types.ts",
+                "path": "x-pack/platform/plugins/shared/actions/server/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -3099,7 +3099,7 @@
               "PostSaveConnectorHookParams",
               "<Config, Secrets>) => Promise<void>) | undefined"
             ],
-            "path": "x-pack/plugins/actions/server/types.ts",
+            "path": "x-pack/platform/plugins/shared/actions/server/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -3114,7 +3114,7 @@
                   "PostSaveConnectorHookParams",
                   "<Config, Secrets>"
                 ],
-                "path": "x-pack/plugins/actions/server/types.ts",
+                "path": "x-pack/platform/plugins/shared/actions/server/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -3134,7 +3134,7 @@
               "PostDeleteConnectorHookParams",
               "<Config, Secrets>) => Promise<void>) | undefined"
             ],
-            "path": "x-pack/plugins/actions/server/types.ts",
+            "path": "x-pack/platform/plugins/shared/actions/server/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -3149,7 +3149,7 @@
                   "PostDeleteConnectorHookParams",
                   "<Config, Secrets>"
                 ],
-                "path": "x-pack/plugins/actions/server/types.ts",
+                "path": "x-pack/platform/plugins/shared/actions/server/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -3177,7 +3177,7 @@
           },
           "<Config, Secrets, Params>"
         ],
-        "path": "x-pack/plugins/actions/server/types.ts",
+        "path": "x-pack/platform/plugins/shared/actions/server/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3188,7 +3188,7 @@
             "tags": [],
             "label": "actionId",
             "description": [],
-            "path": "x-pack/plugins/actions/server/types.ts",
+            "path": "x-pack/platform/plugins/shared/actions/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3204,7 +3204,7 @@
               " | ",
               "UnsecuredServices"
             ],
-            "path": "x-pack/plugins/actions/server/types.ts",
+            "path": "x-pack/platform/plugins/shared/actions/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3218,7 +3218,7 @@
             "signature": [
               "Config"
             ],
-            "path": "x-pack/plugins/actions/server/types.ts",
+            "path": "x-pack/platform/plugins/shared/actions/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3232,7 +3232,7 @@
             "signature": [
               "Secrets"
             ],
-            "path": "x-pack/plugins/actions/server/types.ts",
+            "path": "x-pack/platform/plugins/shared/actions/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3246,7 +3246,7 @@
             "signature": [
               "Params"
             ],
-            "path": "x-pack/plugins/actions/server/types.ts",
+            "path": "x-pack/platform/plugins/shared/actions/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3266,7 +3266,7 @@
                 "text": "Logger"
               }
             ],
-            "path": "x-pack/plugins/actions/server/types.ts",
+            "path": "x-pack/platform/plugins/shared/actions/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3281,7 +3281,7 @@
               "TaskInfo",
               " | undefined"
             ],
-            "path": "x-pack/plugins/actions/server/types.ts",
+            "path": "x-pack/platform/plugins/shared/actions/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3295,7 +3295,7 @@
             "signature": [
               "ActionsConfigurationUtilities"
             ],
-            "path": "x-pack/plugins/actions/server/types.ts",
+            "path": "x-pack/platform/plugins/shared/actions/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3310,7 +3310,7 @@
               "ActionExecutionSource",
               "<unknown> | undefined"
             ],
-            "path": "x-pack/plugins/actions/server/types.ts",
+            "path": "x-pack/platform/plugins/shared/actions/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3331,7 +3331,7 @@
               },
               "<unknown, unknown, unknown, any> | undefined"
             ],
-            "path": "x-pack/plugins/actions/server/types.ts",
+            "path": "x-pack/platform/plugins/shared/actions/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3345,7 +3345,7 @@
             "signature": [
               "ConnectorUsageCollector"
             ],
-            "path": "x-pack/plugins/actions/server/types.ts",
+            "path": "x-pack/platform/plugins/shared/actions/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3370,7 +3370,7 @@
           " extends ",
           "Connector"
         ],
-        "path": "x-pack/plugins/actions/server/application/connector/types/connector.ts",
+        "path": "x-pack/platform/plugins/shared/actions/server/application/connector/types/connector.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3381,7 +3381,7 @@
             "tags": [],
             "label": "referencedByCount",
             "description": [],
-            "path": "x-pack/plugins/actions/server/application/connector/types/connector.ts",
+            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/types/connector.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3406,7 +3406,7 @@
           "<Config, Secrets> extends ",
           "Connector"
         ],
-        "path": "x-pack/plugins/actions/server/types.ts",
+        "path": "x-pack/platform/plugins/shared/actions/server/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3420,7 +3420,7 @@
             "signature": [
               "Secrets"
             ],
-            "path": "x-pack/plugins/actions/server/types.ts",
+            "path": "x-pack/platform/plugins/shared/actions/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3434,7 +3434,7 @@
             "signature": [
               "Config"
             ],
-            "path": "x-pack/plugins/actions/server/types.ts",
+            "path": "x-pack/platform/plugins/shared/actions/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3448,7 +3448,7 @@
         "tags": [],
         "label": "IUnsecuredActionsClient",
         "description": [],
-        "path": "x-pack/plugins/actions/server/unsecured_actions_client/unsecured_actions_client.ts",
+        "path": "x-pack/platform/plugins/shared/actions/server/unsecured_actions_client/unsecured_actions_client.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3470,7 +3470,7 @@
               },
               "[]>"
             ],
-            "path": "x-pack/plugins/actions/server/unsecured_actions_client/unsecured_actions_client.ts",
+            "path": "x-pack/platform/plugins/shared/actions/server/unsecured_actions_client/unsecured_actions_client.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -3484,7 +3484,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "x-pack/plugins/actions/server/unsecured_actions_client/unsecured_actions_client.ts",
+                "path": "x-pack/platform/plugins/shared/actions/server/unsecured_actions_client/unsecured_actions_client.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -3510,7 +3510,7 @@
               },
               "<unknown>>"
             ],
-            "path": "x-pack/plugins/actions/server/unsecured_actions_client/unsecured_actions_client.ts",
+            "path": "x-pack/platform/plugins/shared/actions/server/unsecured_actions_client/unsecured_actions_client.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -3524,7 +3524,7 @@
                 "signature": [
                   "UnsecuredExecuteOptions"
                 ],
-                "path": "x-pack/plugins/actions/server/unsecured_actions_client/unsecured_actions_client.ts",
+                "path": "x-pack/platform/plugins/shared/actions/server/unsecured_actions_client/unsecured_actions_client.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -3546,7 +3546,7 @@
               "ExecutionResponse",
               ">"
             ],
-            "path": "x-pack/plugins/actions/server/unsecured_actions_client/unsecured_actions_client.ts",
+            "path": "x-pack/platform/plugins/shared/actions/server/unsecured_actions_client/unsecured_actions_client.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -3560,7 +3560,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "x-pack/plugins/actions/server/unsecured_actions_client/unsecured_actions_client.ts",
+                "path": "x-pack/platform/plugins/shared/actions/server/unsecured_actions_client/unsecured_actions_client.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -3576,7 +3576,7 @@
                   "ExecuteOptions",
                   "[]"
                 ],
-                "path": "x-pack/plugins/actions/server/unsecured_actions_client/unsecured_actions_client.ts",
+                "path": "x-pack/platform/plugins/shared/actions/server/unsecured_actions_client/unsecured_actions_client.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -3604,7 +3604,7 @@
           },
           "<Config, Secrets>"
         ],
-        "path": "x-pack/plugins/actions/server/sub_action_framework/types.ts",
+        "path": "x-pack/platform/plugins/shared/actions/server/sub_action_framework/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3620,7 +3620,7 @@
             "signature": [
               "{ id: string; type: string; }"
             ],
-            "path": "x-pack/plugins/actions/server/sub_action_framework/types.ts",
+            "path": "x-pack/platform/plugins/shared/actions/server/sub_action_framework/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3634,7 +3634,7 @@
             "signature": [
               "Config"
             ],
-            "path": "x-pack/plugins/actions/server/sub_action_framework/types.ts",
+            "path": "x-pack/platform/plugins/shared/actions/server/sub_action_framework/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3648,7 +3648,7 @@
             "signature": [
               "ActionsConfigurationUtilities"
             ],
-            "path": "x-pack/plugins/actions/server/sub_action_framework/types.ts",
+            "path": "x-pack/platform/plugins/shared/actions/server/sub_action_framework/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3668,7 +3668,7 @@
                 "text": "Logger"
               }
             ],
-            "path": "x-pack/plugins/actions/server/sub_action_framework/types.ts",
+            "path": "x-pack/platform/plugins/shared/actions/server/sub_action_framework/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3682,7 +3682,7 @@
             "signature": [
               "Secrets"
             ],
-            "path": "x-pack/plugins/actions/server/sub_action_framework/types.ts",
+            "path": "x-pack/platform/plugins/shared/actions/server/sub_action_framework/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3696,7 +3696,7 @@
             "signature": [
               "Services"
             ],
-            "path": "x-pack/plugins/actions/server/sub_action_framework/types.ts",
+            "path": "x-pack/platform/plugins/shared/actions/server/sub_action_framework/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3717,7 +3717,7 @@
               },
               "<unknown, unknown, unknown, any> | undefined"
             ],
-            "path": "x-pack/plugins/actions/server/sub_action_framework/types.ts",
+            "path": "x-pack/platform/plugins/shared/actions/server/sub_action_framework/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3737,7 +3737,7 @@
         "signature": [
           "\"action\""
         ],
-        "path": "x-pack/plugins/actions/server/constants/saved_objects.ts",
+        "path": "x-pack/platform/plugins/shared/actions/server/constants/saved_objects.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3752,7 +3752,7 @@
         "signature": [
           "Connector"
         ],
-        "path": "x-pack/plugins/actions/server/types.ts",
+        "path": "x-pack/platform/plugins/shared/actions/server/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3767,7 +3767,7 @@
         "signature": [
           "{ ensureAuthorized: ({ operation, actionTypeId, additionalPrivileges, }: { operation: string; actionTypeId?: string | undefined; additionalPrivileges?: string[] | undefined; }) => Promise<void>; }"
         ],
-        "path": "x-pack/plugins/actions/server/index.ts",
+        "path": "x-pack/platform/plugins/shared/actions/server/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3854,7 +3854,7 @@
           },
           ") => Promise<{ success: number; unknown: number; failure: number; warning: number; }>; }"
         ],
-        "path": "x-pack/plugins/actions/server/index.ts",
+        "path": "x-pack/platform/plugins/shared/actions/server/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3868,7 +3868,7 @@
       "tags": [],
       "label": "PluginSetupContract",
       "description": [],
-      "path": "x-pack/plugins/actions/server/plugin.ts",
+      "path": "x-pack/platform/plugins/shared/actions/server/plugin.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -3902,7 +3902,7 @@
             },
             "<Config, Secrets, Params, ExecutorResultData>) => void"
           ],
-          "path": "x-pack/plugins/actions/server/plugin.ts",
+          "path": "x-pack/platform/plugins/shared/actions/server/plugin.ts",
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -3923,7 +3923,7 @@
                 },
                 "<Config, Secrets, Params, ExecutorResultData>"
               ],
-              "path": "x-pack/plugins/actions/server/plugin.ts",
+              "path": "x-pack/platform/plugins/shared/actions/server/plugin.ts",
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -3951,7 +3951,7 @@
             "SubActionConnectorType",
             "<Config, Secrets>) => void"
           ],
-          "path": "x-pack/plugins/actions/server/plugin.ts",
+          "path": "x-pack/platform/plugins/shared/actions/server/plugin.ts",
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -3966,7 +3966,7 @@
                 "SubActionConnectorType",
                 "<Config, Secrets>"
               ],
-              "path": "x-pack/plugins/actions/server/plugin.ts",
+              "path": "x-pack/platform/plugins/shared/actions/server/plugin.ts",
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -3984,7 +3984,7 @@
           "signature": [
             "(connectorId: string) => boolean"
           ],
-          "path": "x-pack/plugins/actions/server/plugin.ts",
+          "path": "x-pack/platform/plugins/shared/actions/server/plugin.ts",
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -3998,7 +3998,7 @@
               "signature": [
                 "string"
               ],
-              "path": "x-pack/plugins/actions/server/plugin.ts",
+              "path": "x-pack/platform/plugins/shared/actions/server/plugin.ts",
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -4018,7 +4018,7 @@
             "IServiceAbstract",
             "<Config, Secrets>"
           ],
-          "path": "x-pack/plugins/actions/server/plugin.ts",
+          "path": "x-pack/platform/plugins/shared/actions/server/plugin.ts",
           "deprecated": false,
           "trackAdoption": false,
           "children": [],
@@ -4036,7 +4036,7 @@
             "ICaseServiceAbstract",
             "<Config, Secrets, Incident, GetIncidentResponse>"
           ],
-          "path": "x-pack/plugins/actions/server/plugin.ts",
+          "path": "x-pack/platform/plugins/shared/actions/server/plugin.ts",
           "deprecated": false,
           "trackAdoption": false,
           "children": [],
@@ -4052,7 +4052,7 @@
           "signature": [
             "() => { hasPermanentEncryptionKey: boolean; }"
           ],
-          "path": "x-pack/plugins/actions/server/plugin.ts",
+          "path": "x-pack/platform/plugins/shared/actions/server/plugin.ts",
           "deprecated": false,
           "trackAdoption": false,
           "children": [],
@@ -4069,7 +4069,7 @@
             "() => ",
             "ActionsConfigurationUtilities"
           ],
-          "path": "x-pack/plugins/actions/server/plugin.ts",
+          "path": "x-pack/platform/plugins/shared/actions/server/plugin.ts",
           "deprecated": false,
           "trackAdoption": false,
           "children": [],
@@ -4085,7 +4085,7 @@
           "signature": [
             "(connectorTypes: string[]) => void"
           ],
-          "path": "x-pack/plugins/actions/server/plugin.ts",
+          "path": "x-pack/platform/plugins/shared/actions/server/plugin.ts",
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -4099,7 +4099,7 @@
               "signature": [
                 "string[]"
               ],
-              "path": "x-pack/plugins/actions/server/plugin.ts",
+              "path": "x-pack/platform/plugins/shared/actions/server/plugin.ts",
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -4117,7 +4117,7 @@
           "signature": [
             "(id: string, options?: { notifyUsage: boolean; } | undefined) => boolean"
           ],
-          "path": "x-pack/plugins/actions/server/plugin.ts",
+          "path": "x-pack/platform/plugins/shared/actions/server/plugin.ts",
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -4131,7 +4131,7 @@
               "signature": [
                 "string"
               ],
-              "path": "x-pack/plugins/actions/server/plugin.ts",
+              "path": "x-pack/platform/plugins/shared/actions/server/plugin.ts",
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -4143,7 +4143,7 @@
               "tags": [],
               "label": "options",
               "description": [],
-              "path": "x-pack/plugins/actions/server/plugin.ts",
+              "path": "x-pack/platform/plugins/shared/actions/server/plugin.ts",
               "deprecated": false,
               "trackAdoption": false,
               "children": [
@@ -4154,7 +4154,7 @@
                   "tags": [],
                   "label": "notifyUsage",
                   "description": [],
-                  "path": "x-pack/plugins/actions/server/plugin.ts",
+                  "path": "x-pack/platform/plugins/shared/actions/server/plugin.ts",
                   "deprecated": false,
                   "trackAdoption": false
                 }
@@ -4174,7 +4174,7 @@
       "tags": [],
       "label": "PluginStartContract",
       "description": [],
-      "path": "x-pack/plugins/actions/server/plugin.ts",
+      "path": "x-pack/platform/plugins/shared/actions/server/plugin.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -4188,7 +4188,7 @@
           "signature": [
             "(id: string, options?: { notifyUsage: boolean; } | undefined) => boolean"
           ],
-          "path": "x-pack/plugins/actions/server/plugin.ts",
+          "path": "x-pack/platform/plugins/shared/actions/server/plugin.ts",
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -4202,7 +4202,7 @@
               "signature": [
                 "string"
               ],
-              "path": "x-pack/plugins/actions/server/plugin.ts",
+              "path": "x-pack/platform/plugins/shared/actions/server/plugin.ts",
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -4214,7 +4214,7 @@
               "tags": [],
               "label": "options",
               "description": [],
-              "path": "x-pack/plugins/actions/server/plugin.ts",
+              "path": "x-pack/platform/plugins/shared/actions/server/plugin.ts",
               "deprecated": false,
               "trackAdoption": false,
               "children": [
@@ -4225,7 +4225,7 @@
                   "tags": [],
                   "label": "notifyUsage",
                   "description": [],
-                  "path": "x-pack/plugins/actions/server/plugin.ts",
+                  "path": "x-pack/platform/plugins/shared/actions/server/plugin.ts",
                   "deprecated": false,
                   "trackAdoption": false
                 }
@@ -4244,7 +4244,7 @@
           "signature": [
             "(actionId: string, actionTypeId: string, options?: { notifyUsage: boolean; } | undefined) => boolean"
           ],
-          "path": "x-pack/plugins/actions/server/plugin.ts",
+          "path": "x-pack/platform/plugins/shared/actions/server/plugin.ts",
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -4258,7 +4258,7 @@
               "signature": [
                 "string"
               ],
-              "path": "x-pack/plugins/actions/server/plugin.ts",
+              "path": "x-pack/platform/plugins/shared/actions/server/plugin.ts",
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -4273,7 +4273,7 @@
               "signature": [
                 "string"
               ],
-              "path": "x-pack/plugins/actions/server/plugin.ts",
+              "path": "x-pack/platform/plugins/shared/actions/server/plugin.ts",
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -4285,7 +4285,7 @@
               "tags": [],
               "label": "options",
               "description": [],
-              "path": "x-pack/plugins/actions/server/plugin.ts",
+              "path": "x-pack/platform/plugins/shared/actions/server/plugin.ts",
               "deprecated": false,
               "trackAdoption": false,
               "children": [
@@ -4296,7 +4296,7 @@
                   "tags": [],
                   "label": "notifyUsage",
                   "description": [],
-                  "path": "x-pack/plugins/actions/server/plugin.ts",
+                  "path": "x-pack/platform/plugins/shared/actions/server/plugin.ts",
                   "deprecated": false,
                   "trackAdoption": false
                 }
@@ -4315,7 +4315,7 @@
           "signature": [
             "() => string[]"
           ],
-          "path": "x-pack/plugins/actions/server/plugin.ts",
+          "path": "x-pack/platform/plugins/shared/actions/server/plugin.ts",
           "deprecated": false,
           "trackAdoption": false,
           "returnComment": [],
@@ -4355,7 +4355,7 @@
             },
             ">>"
           ],
-          "path": "x-pack/plugins/actions/server/plugin.ts",
+          "path": "x-pack/platform/plugins/shared/actions/server/plugin.ts",
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -4376,7 +4376,7 @@
                 },
                 "<unknown, unknown, unknown, any>"
               ],
-              "path": "x-pack/plugins/actions/server/plugin.ts",
+              "path": "x-pack/platform/plugins/shared/actions/server/plugin.ts",
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -4418,7 +4418,7 @@
             },
             ">"
           ],
-          "path": "x-pack/plugins/actions/server/plugin.ts",
+          "path": "x-pack/platform/plugins/shared/actions/server/plugin.ts",
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -4439,7 +4439,7 @@
                 },
                 "<unknown, unknown, unknown, any>"
               ],
-              "path": "x-pack/plugins/actions/server/plugin.ts",
+              "path": "x-pack/platform/plugins/shared/actions/server/plugin.ts",
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -4468,7 +4468,7 @@
             "ActionTypeSecrets",
             ">[]"
           ],
-          "path": "x-pack/plugins/actions/server/plugin.ts",
+          "path": "x-pack/platform/plugins/shared/actions/server/plugin.ts",
           "deprecated": false,
           "trackAdoption": false
         },
@@ -4489,7 +4489,7 @@
               "text": "IUnsecuredActionsClient"
             }
           ],
-          "path": "x-pack/plugins/actions/server/plugin.ts",
+          "path": "x-pack/platform/plugins/shared/actions/server/plugin.ts",
           "deprecated": false,
           "trackAdoption": false,
           "children": [],
@@ -4509,7 +4509,7 @@
             "ActionTypeParams",
             ">(actionTypeId: string, actionId: string, params: Params, variables: Record<string, unknown>) => Params"
           ],
-          "path": "x-pack/plugins/actions/server/plugin.ts",
+          "path": "x-pack/platform/plugins/shared/actions/server/plugin.ts",
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -4523,7 +4523,7 @@
               "signature": [
                 "string"
               ],
-              "path": "x-pack/plugins/actions/server/plugin.ts",
+              "path": "x-pack/platform/plugins/shared/actions/server/plugin.ts",
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -4538,7 +4538,7 @@
               "signature": [
                 "string"
               ],
-              "path": "x-pack/plugins/actions/server/plugin.ts",
+              "path": "x-pack/platform/plugins/shared/actions/server/plugin.ts",
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -4553,7 +4553,7 @@
               "signature": [
                 "Params"
               ],
-              "path": "x-pack/plugins/actions/server/plugin.ts",
+              "path": "x-pack/platform/plugins/shared/actions/server/plugin.ts",
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -4568,7 +4568,7 @@
               "signature": [
                 "Record<string, unknown>"
               ],
-              "path": "x-pack/plugins/actions/server/plugin.ts",
+              "path": "x-pack/platform/plugins/shared/actions/server/plugin.ts",
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -4586,7 +4586,7 @@
           "signature": [
             "(connectorId: string) => boolean"
           ],
-          "path": "x-pack/plugins/actions/server/plugin.ts",
+          "path": "x-pack/platform/plugins/shared/actions/server/plugin.ts",
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -4600,7 +4600,7 @@
               "signature": [
                 "string"
               ],
-              "path": "x-pack/plugins/actions/server/plugin.ts",
+              "path": "x-pack/platform/plugins/shared/actions/server/plugin.ts",
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -4626,7 +4626,7 @@
         "signature": [
           "(ids: string[]) => boolean"
         ],
-        "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
+        "path": "x-pack/platform/plugins/shared/actions/common/connector_feature_config.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -4640,7 +4640,7 @@
             "signature": [
               "string[]"
             ],
-            "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
+            "path": "x-pack/platform/plugins/shared/actions/common/connector_feature_config.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -4659,7 +4659,7 @@
         "signature": [
           "(variables: Record<string, unknown>) => { event: { kind: string; }; kibana?: { alert: { actionGroupName?: string | undefined; actionGroup?: string | undefined; context?: { [x: string]: Record<string, unknown>; } | undefined; id?: string | undefined; }; } | undefined; rule?: { type?: string | undefined; space?: string | undefined; params?: { [x: string]: Record<string, unknown>; } | undefined; name?: string | undefined; id?: string | undefined; } | undefined; message?: unknown; tags?: string[] | undefined; '@timestamp': string; } | null"
         ],
-        "path": "x-pack/plugins/actions/common/alert_history_schema.ts",
+        "path": "x-pack/platform/plugins/shared/actions/common/alert_history_schema.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -4673,7 +4673,7 @@
             "signature": [
               "Record<string, unknown>"
             ],
-            "path": "x-pack/plugins/actions/common/alert_history_schema.ts",
+            "path": "x-pack/platform/plugins/shared/actions/common/alert_history_schema.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -4692,7 +4692,7 @@
         "signature": [
           "(featureIds: string[] | undefined) => string[]"
         ],
-        "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
+        "path": "x-pack/platform/plugins/shared/actions/common/connector_feature_config.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -4706,7 +4706,7 @@
             "signature": [
               "string[] | undefined"
             ],
-            "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
+            "path": "x-pack/platform/plugins/shared/actions/common/connector_feature_config.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -4725,7 +4725,7 @@
         "signature": [
           "(id: string) => string"
         ],
-        "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
+        "path": "x-pack/platform/plugins/shared/actions/common/connector_feature_config.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -4739,7 +4739,7 @@
             "signature": [
               "string"
             ],
-            "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
+            "path": "x-pack/platform/plugins/shared/actions/common/connector_feature_config.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -4760,7 +4760,7 @@
         "signature": [
           "(string: string) => boolean"
         ],
-        "path": "x-pack/plugins/actions/common/mustache_template.ts",
+        "path": "x-pack/platform/plugins/shared/actions/common/mustache_template.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -4774,7 +4774,7 @@
             "signature": [
               "string"
             ],
-            "path": "x-pack/plugins/actions/common/mustache_template.ts",
+            "path": "x-pack/platform/plugins/shared/actions/common/mustache_template.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -4801,7 +4801,7 @@
           },
           "[]) => string | undefined"
         ],
-        "path": "x-pack/plugins/actions/common/validate_email_addresses.ts",
+        "path": "x-pack/platform/plugins/shared/actions/common/validate_email_addresses.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -4822,7 +4822,7 @@
               },
               "[]"
             ],
-            "path": "x-pack/plugins/actions/common/validate_email_addresses.ts",
+            "path": "x-pack/platform/plugins/shared/actions/common/validate_email_addresses.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -4841,7 +4841,7 @@
         "signature": [
           "(result: unknown) => boolean"
         ],
-        "path": "x-pack/plugins/actions/common/types.ts",
+        "path": "x-pack/platform/plugins/shared/actions/common/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -4855,7 +4855,7 @@
             "signature": [
               "unknown"
             ],
-            "path": "x-pack/plugins/actions/common/types.ts",
+            "path": "x-pack/platform/plugins/shared/actions/common/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -4890,7 +4890,7 @@
           },
           "[]"
         ],
-        "path": "x-pack/plugins/actions/common/validate_email_addresses.ts",
+        "path": "x-pack/platform/plugins/shared/actions/common/validate_email_addresses.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -4904,7 +4904,7 @@
             "signature": [
               "string[] | null"
             ],
-            "path": "x-pack/plugins/actions/common/validate_email_addresses.ts",
+            "path": "x-pack/platform/plugins/shared/actions/common/validate_email_addresses.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -4919,7 +4919,7 @@
             "signature": [
               "string[]"
             ],
-            "path": "x-pack/plugins/actions/common/validate_email_addresses.ts",
+            "path": "x-pack/platform/plugins/shared/actions/common/validate_email_addresses.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -4940,7 +4940,7 @@
                 "text": "ValidateEmailAddressesOptions"
               }
             ],
-            "path": "x-pack/plugins/actions/common/validate_email_addresses.ts",
+            "path": "x-pack/platform/plugins/shared/actions/common/validate_email_addresses.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -4967,7 +4967,7 @@
           },
           "[]"
         ],
-        "path": "x-pack/plugins/actions/common/validate_email_addresses.ts",
+        "path": "x-pack/platform/plugins/shared/actions/common/validate_email_addresses.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -4981,7 +4981,7 @@
             "signature": [
               "string[]"
             ],
-            "path": "x-pack/plugins/actions/common/validate_email_addresses.ts",
+            "path": "x-pack/platform/plugins/shared/actions/common/validate_email_addresses.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -5000,7 +5000,7 @@
         "signature": [
           "(value: unknown) => void"
         ],
-        "path": "x-pack/plugins/actions/common/validate_empty_strings.ts",
+        "path": "x-pack/platform/plugins/shared/actions/common/validate_empty_strings.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -5014,7 +5014,7 @@
             "signature": [
               "unknown"
             ],
-            "path": "x-pack/plugins/actions/common/validate_empty_strings.ts",
+            "path": "x-pack/platform/plugins/shared/actions/common/validate_empty_strings.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -5035,7 +5035,7 @@
         "signature": [
           "(strings: string[]) => string[]"
         ],
-        "path": "x-pack/plugins/actions/common/mustache_template.ts",
+        "path": "x-pack/platform/plugins/shared/actions/common/mustache_template.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -5049,7 +5049,7 @@
             "signature": [
               "string[]"
             ],
-            "path": "x-pack/plugins/actions/common/mustache_template.ts",
+            "path": "x-pack/platform/plugins/shared/actions/common/mustache_template.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -5067,7 +5067,7 @@
         "tags": [],
         "label": "ActionsPublicConfigType",
         "description": [],
-        "path": "x-pack/plugins/actions/common/types.ts",
+        "path": "x-pack/platform/plugins/shared/actions/common/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -5081,7 +5081,7 @@
             "signature": [
               "string[]"
             ],
-            "path": "x-pack/plugins/actions/common/types.ts",
+            "path": "x-pack/platform/plugins/shared/actions/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -5095,7 +5095,7 @@
         "tags": [],
         "label": "ActionType",
         "description": [],
-        "path": "x-pack/plugins/actions/common/types.ts",
+        "path": "x-pack/platform/plugins/shared/actions/common/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -5106,7 +5106,7 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "path": "x-pack/plugins/actions/common/types.ts",
+            "path": "x-pack/platform/plugins/shared/actions/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -5117,7 +5117,7 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "path": "x-pack/plugins/actions/common/types.ts",
+            "path": "x-pack/platform/plugins/shared/actions/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -5128,7 +5128,7 @@
             "tags": [],
             "label": "enabled",
             "description": [],
-            "path": "x-pack/plugins/actions/common/types.ts",
+            "path": "x-pack/platform/plugins/shared/actions/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -5139,7 +5139,7 @@
             "tags": [],
             "label": "enabledInConfig",
             "description": [],
-            "path": "x-pack/plugins/actions/common/types.ts",
+            "path": "x-pack/platform/plugins/shared/actions/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -5150,7 +5150,7 @@
             "tags": [],
             "label": "enabledInLicense",
             "description": [],
-            "path": "x-pack/plugins/actions/common/types.ts",
+            "path": "x-pack/platform/plugins/shared/actions/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -5164,7 +5164,7 @@
             "signature": [
               "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\""
             ],
-            "path": "x-pack/plugins/actions/common/types.ts",
+            "path": "x-pack/platform/plugins/shared/actions/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -5178,7 +5178,7 @@
             "signature": [
               "string[]"
             ],
-            "path": "x-pack/plugins/actions/common/types.ts",
+            "path": "x-pack/platform/plugins/shared/actions/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -5189,7 +5189,7 @@
             "tags": [],
             "label": "isSystemActionType",
             "description": [],
-            "path": "x-pack/plugins/actions/common/types.ts",
+            "path": "x-pack/platform/plugins/shared/actions/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -5213,7 +5213,7 @@
           },
           "<Data>"
         ],
-        "path": "x-pack/plugins/actions/common/types.ts",
+        "path": "x-pack/platform/plugins/shared/actions/common/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -5224,7 +5224,7 @@
             "tags": [],
             "label": "actionId",
             "description": [],
-            "path": "x-pack/plugins/actions/common/types.ts",
+            "path": "x-pack/platform/plugins/shared/actions/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -5238,7 +5238,7 @@
             "signature": [
               "\"ok\" | \"error\""
             ],
-            "path": "x-pack/plugins/actions/common/types.ts",
+            "path": "x-pack/platform/plugins/shared/actions/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -5252,7 +5252,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/actions/common/types.ts",
+            "path": "x-pack/platform/plugins/shared/actions/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -5266,7 +5266,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/actions/common/types.ts",
+            "path": "x-pack/platform/plugins/shared/actions/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -5280,7 +5280,7 @@
             "signature": [
               "Data | undefined"
             ],
-            "path": "x-pack/plugins/actions/common/types.ts",
+            "path": "x-pack/platform/plugins/shared/actions/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -5294,7 +5294,7 @@
             "signature": [
               "boolean | Date | null | undefined"
             ],
-            "path": "x-pack/plugins/actions/common/types.ts",
+            "path": "x-pack/platform/plugins/shared/actions/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -5315,7 +5315,7 @@
               },
               " | undefined"
             ],
-            "path": "x-pack/plugins/actions/common/types.ts",
+            "path": "x-pack/platform/plugins/shared/actions/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -5329,7 +5329,7 @@
         "tags": [],
         "label": "GetGlobalExecutionKPIParams",
         "description": [],
-        "path": "x-pack/plugins/actions/common/execution_log_types.ts",
+        "path": "x-pack/platform/plugins/shared/actions/common/execution_log_types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -5340,7 +5340,7 @@
             "tags": [],
             "label": "dateStart",
             "description": [],
-            "path": "x-pack/plugins/actions/common/execution_log_types.ts",
+            "path": "x-pack/platform/plugins/shared/actions/common/execution_log_types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -5354,7 +5354,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/actions/common/execution_log_types.ts",
+            "path": "x-pack/platform/plugins/shared/actions/common/execution_log_types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -5368,7 +5368,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/actions/common/execution_log_types.ts",
+            "path": "x-pack/platform/plugins/shared/actions/common/execution_log_types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -5382,7 +5382,7 @@
             "signature": [
               "(string | undefined)[] | undefined"
             ],
-            "path": "x-pack/plugins/actions/common/execution_log_types.ts",
+            "path": "x-pack/platform/plugins/shared/actions/common/execution_log_types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -5396,7 +5396,7 @@
         "tags": [],
         "label": "GetGlobalExecutionLogParams",
         "description": [],
-        "path": "x-pack/plugins/actions/common/execution_log_types.ts",
+        "path": "x-pack/platform/plugins/shared/actions/common/execution_log_types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -5407,7 +5407,7 @@
             "tags": [],
             "label": "dateStart",
             "description": [],
-            "path": "x-pack/plugins/actions/common/execution_log_types.ts",
+            "path": "x-pack/platform/plugins/shared/actions/common/execution_log_types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -5421,7 +5421,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/actions/common/execution_log_types.ts",
+            "path": "x-pack/platform/plugins/shared/actions/common/execution_log_types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -5435,7 +5435,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/actions/common/execution_log_types.ts",
+            "path": "x-pack/platform/plugins/shared/actions/common/execution_log_types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -5446,7 +5446,7 @@
             "tags": [],
             "label": "page",
             "description": [],
-            "path": "x-pack/plugins/actions/common/execution_log_types.ts",
+            "path": "x-pack/platform/plugins/shared/actions/common/execution_log_types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -5457,7 +5457,7 @@
             "tags": [],
             "label": "perPage",
             "description": [],
-            "path": "x-pack/plugins/actions/common/execution_log_types.ts",
+            "path": "x-pack/platform/plugins/shared/actions/common/execution_log_types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -5474,7 +5474,7 @@
               "SortCombinations",
               "[]"
             ],
-            "path": "x-pack/plugins/actions/common/execution_log_types.ts",
+            "path": "x-pack/platform/plugins/shared/actions/common/execution_log_types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -5488,7 +5488,7 @@
             "signature": [
               "(string | undefined)[] | undefined"
             ],
-            "path": "x-pack/plugins/actions/common/execution_log_types.ts",
+            "path": "x-pack/platform/plugins/shared/actions/common/execution_log_types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -5502,7 +5502,7 @@
         "tags": [],
         "label": "IExecutionLog",
         "description": [],
-        "path": "x-pack/plugins/actions/common/execution_log_types.ts",
+        "path": "x-pack/platform/plugins/shared/actions/common/execution_log_types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -5513,7 +5513,7 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "path": "x-pack/plugins/actions/common/execution_log_types.ts",
+            "path": "x-pack/platform/plugins/shared/actions/common/execution_log_types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -5524,7 +5524,7 @@
             "tags": [],
             "label": "timestamp",
             "description": [],
-            "path": "x-pack/plugins/actions/common/execution_log_types.ts",
+            "path": "x-pack/platform/plugins/shared/actions/common/execution_log_types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -5535,7 +5535,7 @@
             "tags": [],
             "label": "duration_ms",
             "description": [],
-            "path": "x-pack/plugins/actions/common/execution_log_types.ts",
+            "path": "x-pack/platform/plugins/shared/actions/common/execution_log_types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -5546,7 +5546,7 @@
             "tags": [],
             "label": "status",
             "description": [],
-            "path": "x-pack/plugins/actions/common/execution_log_types.ts",
+            "path": "x-pack/platform/plugins/shared/actions/common/execution_log_types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -5557,7 +5557,7 @@
             "tags": [],
             "label": "message",
             "description": [],
-            "path": "x-pack/plugins/actions/common/execution_log_types.ts",
+            "path": "x-pack/platform/plugins/shared/actions/common/execution_log_types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -5568,7 +5568,7 @@
             "tags": [],
             "label": "version",
             "description": [],
-            "path": "x-pack/plugins/actions/common/execution_log_types.ts",
+            "path": "x-pack/platform/plugins/shared/actions/common/execution_log_types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -5579,7 +5579,7 @@
             "tags": [],
             "label": "schedule_delay_ms",
             "description": [],
-            "path": "x-pack/plugins/actions/common/execution_log_types.ts",
+            "path": "x-pack/platform/plugins/shared/actions/common/execution_log_types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -5593,7 +5593,7 @@
             "signature": [
               "string[]"
             ],
-            "path": "x-pack/plugins/actions/common/execution_log_types.ts",
+            "path": "x-pack/platform/plugins/shared/actions/common/execution_log_types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -5604,7 +5604,7 @@
             "tags": [],
             "label": "connector_name",
             "description": [],
-            "path": "x-pack/plugins/actions/common/execution_log_types.ts",
+            "path": "x-pack/platform/plugins/shared/actions/common/execution_log_types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -5615,7 +5615,7 @@
             "tags": [],
             "label": "connector_id",
             "description": [],
-            "path": "x-pack/plugins/actions/common/execution_log_types.ts",
+            "path": "x-pack/platform/plugins/shared/actions/common/execution_log_types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -5626,7 +5626,7 @@
             "tags": [],
             "label": "timed_out",
             "description": [],
-            "path": "x-pack/plugins/actions/common/execution_log_types.ts",
+            "path": "x-pack/platform/plugins/shared/actions/common/execution_log_types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -5637,7 +5637,7 @@
             "tags": [],
             "label": "source",
             "description": [],
-            "path": "x-pack/plugins/actions/common/execution_log_types.ts",
+            "path": "x-pack/platform/plugins/shared/actions/common/execution_log_types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -5651,7 +5651,7 @@
         "tags": [],
         "label": "IExecutionLogResult",
         "description": [],
-        "path": "x-pack/plugins/actions/common/execution_log_types.ts",
+        "path": "x-pack/platform/plugins/shared/actions/common/execution_log_types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -5662,7 +5662,7 @@
             "tags": [],
             "label": "total",
             "description": [],
-            "path": "x-pack/plugins/actions/common/execution_log_types.ts",
+            "path": "x-pack/platform/plugins/shared/actions/common/execution_log_types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -5683,7 +5683,7 @@
               },
               "[]"
             ],
-            "path": "x-pack/plugins/actions/common/execution_log_types.ts",
+            "path": "x-pack/platform/plugins/shared/actions/common/execution_log_types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -5697,7 +5697,7 @@
         "tags": [],
         "label": "ValidatedEmail",
         "description": [],
-        "path": "x-pack/plugins/actions/common/types.ts",
+        "path": "x-pack/platform/plugins/shared/actions/common/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -5708,7 +5708,7 @@
             "tags": [],
             "label": "address",
             "description": [],
-            "path": "x-pack/plugins/actions/common/types.ts",
+            "path": "x-pack/platform/plugins/shared/actions/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -5719,7 +5719,7 @@
             "tags": [],
             "label": "valid",
             "description": [],
-            "path": "x-pack/plugins/actions/common/types.ts",
+            "path": "x-pack/platform/plugins/shared/actions/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -5740,7 +5740,7 @@
               },
               " | undefined"
             ],
-            "path": "x-pack/plugins/actions/common/types.ts",
+            "path": "x-pack/platform/plugins/shared/actions/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -5756,7 +5756,7 @@
         "description": [
           "Options that can be used when validating email addresses"
         ],
-        "path": "x-pack/plugins/actions/common/validate_email_addresses.ts",
+        "path": "x-pack/platform/plugins/shared/actions/common/validate_email_addresses.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -5772,7 +5772,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "x-pack/plugins/actions/common/validate_email_addresses.ts",
+            "path": "x-pack/platform/plugins/shared/actions/common/validate_email_addresses.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -5788,7 +5788,7 @@
         "tags": [],
         "label": "InvalidEmailReason",
         "description": [],
-        "path": "x-pack/plugins/actions/common/types.ts",
+        "path": "x-pack/platform/plugins/shared/actions/common/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5805,7 +5805,7 @@
         "signature": [
           "\"actions\""
         ],
-        "path": "x-pack/plugins/actions/common/index.ts",
+        "path": "x-pack/platform/plugins/shared/actions/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5827,7 +5827,7 @@
           },
           "<Data> & { error?: Error | undefined; }"
         ],
-        "path": "x-pack/plugins/actions/common/types.ts",
+        "path": "x-pack/platform/plugins/shared/actions/common/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5842,7 +5842,7 @@
         "signature": [
           "\"kibana-alert-history-\""
         ],
-        "path": "x-pack/plugins/actions/common/alert_history_schema.ts",
+        "path": "x-pack/platform/plugins/shared/actions/common/alert_history_schema.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5854,7 +5854,7 @@
         "tags": [],
         "label": "AlertHistoryDefaultIndexName",
         "description": [],
-        "path": "x-pack/plugins/actions/common/alert_history_schema.ts",
+        "path": "x-pack/platform/plugins/shared/actions/common/alert_history_schema.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5869,7 +5869,7 @@
         "signature": [
           "Readonly<{ event: { kind: string; }; kibana?: { alert: { actionGroupName?: string | undefined; actionGroup?: string | undefined; context?: { [x: string]: Record<string, unknown>; } | undefined; id?: string | undefined; }; } | undefined; rule?: { type?: string | undefined; space?: string | undefined; params?: { [x: string]: Record<string, unknown>; } | undefined; name?: string | undefined; id?: string | undefined; } | undefined; message?: unknown; tags?: string[] | undefined; '@timestamp': string; }> | null"
         ],
-        "path": "x-pack/plugins/actions/common/alert_history_schema.ts",
+        "path": "x-pack/platform/plugins/shared/actions/common/alert_history_schema.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5884,7 +5884,7 @@
         "signature": [
           "\"preconfigured-alert-history-es-index\""
         ],
-        "path": "x-pack/plugins/actions/common/alert_history_schema.ts",
+        "path": "x-pack/platform/plugins/shared/actions/common/alert_history_schema.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5899,7 +5899,7 @@
         "signature": [
           "\"alerting\""
         ],
-        "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
+        "path": "x-pack/platform/plugins/shared/actions/common/connector_feature_config.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5922,7 +5922,7 @@
           },
           "<T[K]> : T[K]; }"
         ],
-        "path": "packages/kbn-actions-types/rewrite_request_case_types.ts",
+        "path": "src/platform/packages/shared/kbn-actions-types/rewrite_request_case_types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5937,7 +5937,7 @@
         "signature": [
           "\"/api/actions\""
         ],
-        "path": "x-pack/plugins/actions/common/index.ts",
+        "path": "x-pack/platform/plugins/shared/actions/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5952,7 +5952,7 @@
         "signature": [
           "\"cases\""
         ],
-        "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
+        "path": "x-pack/platform/plugins/shared/actions/common/connector_feature_config.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5967,7 +5967,7 @@
         "signature": [
           "\"https://login.microsoftonline.com\""
         ],
-        "path": "x-pack/plugins/actions/common/index.ts",
+        "path": "x-pack/platform/plugins/shared/actions/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5982,7 +5982,7 @@
         "signature": [
           "\"https://graph.microsoft.com/.default\""
         ],
-        "path": "x-pack/plugins/actions/common/index.ts",
+        "path": "x-pack/platform/plugins/shared/actions/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5997,7 +5997,7 @@
         "signature": [
           "\"https://graph.microsoft.com/v1.0\""
         ],
-        "path": "x-pack/plugins/actions/common/index.ts",
+        "path": "x-pack/platform/plugins/shared/actions/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -6012,7 +6012,7 @@
         "signature": [
           "\"timestamp\" | \"execution_duration\" | \"schedule_delay\""
         ],
-        "path": "x-pack/plugins/actions/common/execution_log_types.ts",
+        "path": "x-pack/platform/plugins/shared/actions/common/execution_log_types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -6027,7 +6027,7 @@
         "signature": [
           "\"generativeAIForObservability\""
         ],
-        "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
+        "path": "x-pack/platform/plugins/shared/actions/common/connector_feature_config.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -6042,7 +6042,7 @@
         "signature": [
           "\"generativeAIForSearchPlayground\""
         ],
-        "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
+        "path": "x-pack/platform/plugins/shared/actions/common/connector_feature_config.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -6057,7 +6057,7 @@
         "signature": [
           "\"generativeAIForSecurity\""
         ],
-        "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
+        "path": "x-pack/platform/plugins/shared/actions/common/connector_feature_config.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -6072,7 +6072,7 @@
         "signature": [
           "{ success: number; unknown: number; failure: number; warning: number; }"
         ],
-        "path": "x-pack/plugins/actions/common/execution_log_types.ts",
+        "path": "x-pack/platform/plugins/shared/actions/common/execution_log_types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -6087,7 +6087,7 @@
         "signature": [
           "\"/internal/actions\""
         ],
-        "path": "x-pack/plugins/actions/common/index.ts",
+        "path": "x-pack/platform/plugins/shared/actions/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -6110,7 +6110,7 @@
           },
           "<T>) => T"
         ],
-        "path": "packages/kbn-actions-types/rewrite_request_case_types.ts",
+        "path": "src/platform/packages/shared/kbn-actions-types/rewrite_request_case_types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -6133,7 +6133,7 @@
               },
               "<T[K]> : T[K]; }"
             ],
-            "path": "packages/kbn-actions-types/rewrite_request_case_types.ts",
+            "path": "src/platform/packages/shared/kbn-actions-types/rewrite_request_case_types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -6166,7 +6166,7 @@
           },
           "<T>"
         ],
-        "path": "packages/kbn-actions-types/rewrite_request_case_types.ts",
+        "path": "src/platform/packages/shared/kbn-actions-types/rewrite_request_case_types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -6181,7 +6181,7 @@
             "signature": [
               "T"
             ],
-            "path": "packages/kbn-actions-types/rewrite_request_case_types.ts",
+            "path": "src/platform/packages/shared/kbn-actions-types/rewrite_request_case_types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -6198,7 +6198,7 @@
         "signature": [
           "\"siem\""
         ],
-        "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
+        "path": "x-pack/platform/plugins/shared/actions/common/connector_feature_config.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -6213,7 +6213,7 @@
         "signature": [
           "\"uptime\""
         ],
-        "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
+        "path": "x-pack/platform/plugins/shared/actions/common/connector_feature_config.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -6227,7 +6227,7 @@
         "tags": [],
         "label": "AlertingConnectorFeature",
         "description": [],
-        "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
+        "path": "x-pack/platform/plugins/shared/actions/common/connector_feature_config.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -6238,7 +6238,7 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
+            "path": "x-pack/platform/plugins/shared/actions/common/connector_feature_config.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -6249,7 +6249,7 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
+            "path": "x-pack/platform/plugins/shared/actions/common/connector_feature_config.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -6260,7 +6260,7 @@
             "tags": [],
             "label": "compatibility",
             "description": [],
-            "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
+            "path": "x-pack/platform/plugins/shared/actions/common/connector_feature_config.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -6274,7 +6274,7 @@
         "tags": [],
         "label": "CasesConnectorFeature",
         "description": [],
-        "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
+        "path": "x-pack/platform/plugins/shared/actions/common/connector_feature_config.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -6285,7 +6285,7 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
+            "path": "x-pack/platform/plugins/shared/actions/common/connector_feature_config.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -6296,7 +6296,7 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
+            "path": "x-pack/platform/plugins/shared/actions/common/connector_feature_config.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -6307,7 +6307,7 @@
             "tags": [],
             "label": "compatibility",
             "description": [],
-            "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
+            "path": "x-pack/platform/plugins/shared/actions/common/connector_feature_config.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -6321,7 +6321,7 @@
         "tags": [],
         "label": "EMPTY_EXECUTION_KPI_RESULT",
         "description": [],
-        "path": "x-pack/plugins/actions/common/execution_log_types.ts",
+        "path": "x-pack/platform/plugins/shared/actions/common/execution_log_types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -6332,7 +6332,7 @@
             "tags": [],
             "label": "success",
             "description": [],
-            "path": "x-pack/plugins/actions/common/execution_log_types.ts",
+            "path": "x-pack/platform/plugins/shared/actions/common/execution_log_types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -6343,7 +6343,7 @@
             "tags": [],
             "label": "unknown",
             "description": [],
-            "path": "x-pack/plugins/actions/common/execution_log_types.ts",
+            "path": "x-pack/platform/plugins/shared/actions/common/execution_log_types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -6354,7 +6354,7 @@
             "tags": [],
             "label": "failure",
             "description": [],
-            "path": "x-pack/plugins/actions/common/execution_log_types.ts",
+            "path": "x-pack/platform/plugins/shared/actions/common/execution_log_types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -6365,7 +6365,7 @@
             "tags": [],
             "label": "warning",
             "description": [],
-            "path": "x-pack/plugins/actions/common/execution_log_types.ts",
+            "path": "x-pack/platform/plugins/shared/actions/common/execution_log_types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -6382,7 +6382,7 @@
         "signature": [
           "readonly [\"timestamp\", \"execution_duration\", \"schedule_delay\"]"
         ],
-        "path": "x-pack/plugins/actions/common/execution_log_types.ts",
+        "path": "x-pack/platform/plugins/shared/actions/common/execution_log_types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -6394,7 +6394,7 @@
         "tags": [],
         "label": "GenerativeAIForObservabilityFeature",
         "description": [],
-        "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
+        "path": "x-pack/platform/plugins/shared/actions/common/connector_feature_config.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -6405,7 +6405,7 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
+            "path": "x-pack/platform/plugins/shared/actions/common/connector_feature_config.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -6416,7 +6416,7 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
+            "path": "x-pack/platform/plugins/shared/actions/common/connector_feature_config.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -6427,7 +6427,7 @@
             "tags": [],
             "label": "compatibility",
             "description": [],
-            "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
+            "path": "x-pack/platform/plugins/shared/actions/common/connector_feature_config.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -6441,7 +6441,7 @@
         "tags": [],
         "label": "GenerativeAIForSearchPlaygroundFeature",
         "description": [],
-        "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
+        "path": "x-pack/platform/plugins/shared/actions/common/connector_feature_config.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -6452,7 +6452,7 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
+            "path": "x-pack/platform/plugins/shared/actions/common/connector_feature_config.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -6463,7 +6463,7 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
+            "path": "x-pack/platform/plugins/shared/actions/common/connector_feature_config.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -6474,7 +6474,7 @@
             "tags": [],
             "label": "compatibility",
             "description": [],
-            "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
+            "path": "x-pack/platform/plugins/shared/actions/common/connector_feature_config.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -6488,7 +6488,7 @@
         "tags": [],
         "label": "GenerativeAIForSecurityFeature",
         "description": [],
-        "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
+        "path": "x-pack/platform/plugins/shared/actions/common/connector_feature_config.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -6499,7 +6499,7 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
+            "path": "x-pack/platform/plugins/shared/actions/common/connector_feature_config.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -6510,7 +6510,7 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
+            "path": "x-pack/platform/plugins/shared/actions/common/connector_feature_config.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -6521,7 +6521,7 @@
             "tags": [],
             "label": "compatibility",
             "description": [],
-            "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
+            "path": "x-pack/platform/plugins/shared/actions/common/connector_feature_config.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -6538,7 +6538,7 @@
         "signature": [
           "RegExp"
         ],
-        "path": "x-pack/plugins/actions/common/mustache_template.ts",
+        "path": "x-pack/platform/plugins/shared/actions/common/mustache_template.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -6550,7 +6550,7 @@
         "tags": [],
         "label": "SecuritySolutionFeature",
         "description": [],
-        "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
+        "path": "x-pack/platform/plugins/shared/actions/common/connector_feature_config.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -6561,7 +6561,7 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
+            "path": "x-pack/platform/plugins/shared/actions/common/connector_feature_config.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -6572,7 +6572,7 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
+            "path": "x-pack/platform/plugins/shared/actions/common/connector_feature_config.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -6583,7 +6583,7 @@
             "tags": [],
             "label": "compatibility",
             "description": [],
-            "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
+            "path": "x-pack/platform/plugins/shared/actions/common/connector_feature_config.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -6597,7 +6597,7 @@
         "tags": [],
         "label": "UptimeConnectorFeature",
         "description": [],
-        "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
+        "path": "x-pack/platform/plugins/shared/actions/common/connector_feature_config.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -6608,7 +6608,7 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
+            "path": "x-pack/platform/plugins/shared/actions/common/connector_feature_config.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -6619,7 +6619,7 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
+            "path": "x-pack/platform/plugins/shared/actions/common/connector_feature_config.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -6630,7 +6630,7 @@
             "tags": [],
             "label": "compatibility",
             "description": [],
-            "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
+            "path": "x-pack/platform/plugins/shared/actions/common/connector_feature_config.ts",
             "deprecated": false,
             "trackAdoption": false
           }
