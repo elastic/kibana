@@ -49,3 +49,10 @@ This will still allow the test to run as part of regular CI, but will skip the t
 Errors that are related to FIPS/OpenSSL are more serious and should be addressed immediately. These will require code changes to switch to FIPS compliant crypto functionality.
 
 Please reach out to the Security team for guidance at `#kibana-security` in Slack immediately.
+
+
+### Further debugging
+
+If you are still unsure about the nature of the failure, or, your want to run tests in your own dev environment, you can setup a Node-FIPS environment locally.
+
+For more details about this setup, please refer to the [Node-FIPS documentation](https://github.com/elastic/FIPSGuide/blob/main/node/README.md).
