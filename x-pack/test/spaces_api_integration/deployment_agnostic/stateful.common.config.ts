@@ -38,6 +38,7 @@ export function createTestConfig({
       services: {
         ...services,
         es: config.kibana.api.get('services.es'),
+        // @ts-expect-error
         esSupertestWithoutAuth: config.xpack.api.get('services.esSupertestWithoutAuth'),
         supertest: config.kibana.api.get('services.supertest'),
         supertestWithoutAuth: config.xpack.api.get('services.supertestWithoutAuth'),

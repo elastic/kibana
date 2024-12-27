@@ -109,9 +109,6 @@ export function copyToSpaceTestSuiteFactory(context: DeploymentAgnosticFtrProvid
   const testDataLoader = getTestDataLoader(context);
   const es = context.getService('es');
   const roleScopedSupertest = context.getService('roleScopedSupertest');
-  const log = context.getService('log');
-  const kbnServer = context.getService('kibanaServer');
-  const spacesService = context.getService('spaces');
 
   const collectSpaceContents = async () => {
     const response = await getAggregatedSpaceData(es, [
