@@ -3829,7 +3829,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/actions-plugin@link:x-pack/plugins/actions":
+"@kbn/actions-plugin@link:x-pack/platform/plugins/shared/actions":
   version "0.0.0"
   uid ""
 
@@ -3837,7 +3837,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/actions-types@link:packages/kbn-actions-types":
+"@kbn/actions-types@link:src/platform/packages/shared/kbn-actions-types":
   version "0.0.0"
   uid ""
 
@@ -3897,7 +3897,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/alerting-comparators@link:x-pack/packages/kbn-alerting-comparators":
+"@kbn/alerting-comparators@link:x-pack/platform/packages/shared/kbn-alerting-comparators":
   version "0.0.0"
   uid ""
 
@@ -3909,23 +3909,23 @@
   version "0.0.0"
   uid ""
 
-"@kbn/alerting-plugin@link:x-pack/plugins/alerting":
+"@kbn/alerting-plugin@link:x-pack/platform/plugins/shared/alerting":
   version "0.0.0"
   uid ""
 
-"@kbn/alerting-state-types@link:x-pack/packages/kbn-alerting-state-types":
+"@kbn/alerting-state-types@link:x-pack/platform/packages/private/kbn-alerting-state-types":
   version "0.0.0"
   uid ""
 
-"@kbn/alerting-types@link:packages/kbn-alerting-types":
+"@kbn/alerting-types@link:src/platform/packages/shared/kbn-alerting-types":
   version "0.0.0"
   uid ""
 
-"@kbn/alerts-as-data-utils@link:packages/kbn-alerts-as-data-utils":
+"@kbn/alerts-as-data-utils@link:src/platform/packages/shared/kbn-alerts-as-data-utils":
   version "0.0.0"
   uid ""
 
-"@kbn/alerts-grouping@link:packages/kbn-alerts-grouping":
+"@kbn/alerts-grouping@link:x-pack/solutions/observability/packages/kbn-alerts-grouping":
   version "0.0.0"
   uid ""
 
@@ -3933,7 +3933,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/alerts-ui-shared@link:packages/kbn-alerts-ui-shared":
+"@kbn/alerts-ui-shared@link:src/platform/packages/shared/kbn-alerts-ui-shared":
   version "0.0.0"
   uid ""
 
@@ -4069,11 +4069,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/cases-components@link:packages/kbn-cases-components":
+"@kbn/cases-components@link:src/platform/packages/shared/kbn-cases-components":
   version "0.0.0"
   uid ""
 
-"@kbn/cases-plugin@link:x-pack/plugins/cases":
+"@kbn/cases-plugin@link:x-pack/platform/plugins/shared/cases":
   version "0.0.0"
   uid ""
 
@@ -5193,7 +5193,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/custom-integrations-plugin@link:src/plugins/custom_integrations":
+"@kbn/custom-integrations-plugin@link:src/platform/plugins/shared/custom_integrations":
   version "0.0.0"
   uid ""
 
@@ -5285,7 +5285,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/deeplinks-fleet@link:packages/deeplinks/fleet":
+"@kbn/deeplinks-fleet@link:src/platform/packages/shared/deeplinks/fleet":
   version "0.0.0"
   uid ""
 
@@ -5597,7 +5597,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/event-log-plugin@link:x-pack/plugins/event_log":
+"@kbn/event-log-plugin@link:x-pack/platform/plugins/shared/event_log":
   version "0.0.0"
   uid ""
 
@@ -5745,7 +5745,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/fleet-plugin@link:x-pack/plugins/fleet":
+"@kbn/fleet-plugin@link:x-pack/platform/plugins/shared/fleet":
   version "0.0.0"
   uid ""
 
@@ -5837,7 +5837,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/grouping@link:packages/kbn-grouping":
+"@kbn/grouping@link:src/platform/packages/shared/kbn-grouping":
   version "0.0.0"
   uid ""
 
@@ -5938,6 +5938,10 @@
   uid ""
 
 "@kbn/inference-common@link:x-pack/platform/packages/shared/ai-infra/inference-common":
+  version "0.0.0"
+  uid ""
+
+"@kbn/inference-endpoint-ui-common@link:x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common":
   version "0.0.0"
   uid ""
 
@@ -6169,7 +6173,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/logstash-plugin@link:x-pack/plugins/logstash":
+"@kbn/logstash-plugin@link:x-pack/platform/plugins/private/logstash":
   version "0.0.0"
   uid ""
 
@@ -6413,11 +6417,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/monitoring-collection-plugin@link:x-pack/plugins/monitoring_collection":
+"@kbn/monitoring-collection-plugin@link:x-pack/platform/plugins/private/monitoring_collection":
   version "0.0.0"
   uid ""
 
-"@kbn/monitoring-plugin@link:x-pack/plugins/monitoring":
+"@kbn/monitoring-plugin@link:x-pack/platform/plugins/private/monitoring":
   version "0.0.0"
   uid ""
 
@@ -6509,7 +6513,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/observability-shared-plugin@link:x-pack/plugins/observability_solution/observability_shared":
+"@kbn/observability-shared-plugin@link:x-pack/solutions/observability/plugins/observability_shared":
   version "0.0.0"
   uid ""
 
@@ -6517,15 +6521,15 @@
   version "0.0.0"
   uid ""
 
-"@kbn/observability-utils-browser@link:x-pack/packages/observability/observability_utils/observability_utils_browser":
+"@kbn/observability-utils-browser@link:x-pack/solutions/observability/packages/utils_browser":
   version "0.0.0"
   uid ""
 
-"@kbn/observability-utils-common@link:x-pack/packages/observability/observability_utils/observability_utils_common":
+"@kbn/observability-utils-common@link:x-pack/solutions/observability/packages/utils_common":
   version "0.0.0"
   uid ""
 
-"@kbn/observability-utils-server@link:x-pack/packages/observability/observability_utils/observability_utils_server":
+"@kbn/observability-utils-server@link:x-pack/solutions/observability/packages/utils_server":
   version "0.0.0"
   uid ""
 
@@ -6809,7 +6813,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/response-ops-rule-params@link:packages/response-ops/rule_params":
+"@kbn/response-ops-rule-params@link:src/platform/packages/private/response-ops/rule_params":
   version "0.0.0"
   uid ""
 
@@ -6841,7 +6845,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/rrule@link:packages/kbn-rrule":
+"@kbn/rrule@link:src/platform/packages/shared/kbn-rrule":
   version "0.0.0"
   uid ""
 
@@ -6849,7 +6853,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/rule-registry-plugin@link:x-pack/plugins/rule_registry":
+"@kbn/rule-registry-plugin@link:x-pack/platform/plugins/shared/rule_registry":
   version "0.0.0"
   uid ""
 
@@ -7529,11 +7533,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/stack-alerts-plugin@link:x-pack/plugins/stack_alerts":
+"@kbn/stack-alerts-plugin@link:x-pack/platform/plugins/shared/stack_alerts":
   version "0.0.0"
   uid ""
 
-"@kbn/stack-connectors-plugin@link:x-pack/plugins/stack_connectors":
+"@kbn/stack-connectors-plugin@link:x-pack/platform/plugins/shared/stack_connectors":
   version "0.0.0"
   uid ""
 
@@ -7597,7 +7601,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/task-manager-plugin@link:x-pack/plugins/task_manager":
+"@kbn/task-manager-plugin@link:x-pack/platform/plugins/shared/task_manager":
   version "0.0.0"
   uid ""
 
@@ -7713,11 +7717,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/triggers-actions-ui-plugin@link:x-pack/plugins/triggers_actions_ui":
+"@kbn/triggers-actions-ui-plugin@link:x-pack/platform/plugins/shared/triggers_actions_ui":
   version "0.0.0"
   uid ""
 
-"@kbn/triggers-actions-ui-types@link:packages/kbn-triggers-actions-ui-types":
+"@kbn/triggers-actions-ui-types@link:src/platform/packages/shared/kbn-triggers-actions-ui-types":
   version "0.0.0"
   uid ""
 
