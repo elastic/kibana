@@ -359,7 +359,7 @@ const createTestSuite = (
         await installPrebuiltRules(es, supertest);
 
         const rule = await fetchRule(supertest, { ruleId: 'rule-1' });
-        const test = await updateRule(supertest, {
+        await updateRule(supertest, {
           ...rule,
           id: undefined,
           [field]: [],
