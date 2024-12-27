@@ -12,7 +12,7 @@ import type { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plu
 import { ValidationResult } from '@kbn/triggers-actions-ui-plugin/public';
 import { TlsTranslations } from '../../../../../common/rules/synthetics/translations';
 import { CERTIFICATES_ROUTE } from '../../../../../common/constants/ui';
-import type { TLSParams } from '../../../../../common/runtime_types/alerts/tls';
+import type { TLSRuleParams } from '@kbn/response-ops-rule-params/synthetics_tls/latest';
 
 import type { AlertTypeInitializer } from './types';
 
@@ -30,7 +30,7 @@ export const initTlsAlertType: AlertTypeInitializer = ({
   documentationUrl(docLinks) {
     return `${docLinks.links.observability.syntheticsAlerting}`;
   },
-  ruleParamsExpression: (params: RuleTypeParamsExpressionProps<TLSParams>) => (
+  ruleParamsExpression: (params: RuleTypeParamsExpressionProps<TLSRuleParams>) => (
     <TLSAlert
       coreStart={core}
       plugins={plugins}
