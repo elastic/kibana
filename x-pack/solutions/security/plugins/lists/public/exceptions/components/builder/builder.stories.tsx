@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import type { Decorator } from '@storybook/react';
 import { HttpStart } from '@kbn/core/public';
 import type { AutocompleteStart } from '@kbn/unified-search-plugin/public';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
@@ -199,12 +200,12 @@ export default {
   },
   component: ExceptionBuilderComponent,
   decorators: [
-    (Story) => (
+    (Story): JSX.Element => (
       <EuiThemeProvider>
         <Story />
       </EuiThemeProvider>
     ),
-  ],
+  ] as Decorator[],
   title: 'ExceptionBuilderComponent',
 };
 
