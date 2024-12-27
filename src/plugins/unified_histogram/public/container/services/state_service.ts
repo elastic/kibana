@@ -8,15 +8,13 @@
  */
 
 import type { RequestAdapter } from '@kbn/inspector-plugin/common';
-import type { LensEmbeddableOutput } from '@kbn/lens-plugin/public';
 import { BehaviorSubject, Observable } from 'rxjs';
+import { PublishingSubject } from '@kbn/presentation-publishing';
 import { UnifiedHistogramFetchStatus } from '../..';
 import type { UnifiedHistogramServices, UnifiedHistogramChartLoadEvent } from '../../types';
 import {
-  getBreakdownField,
   getChartHidden,
   getTopPanelHeight,
-  setBreakdownField,
   setChartHidden,
   setTopPanelHeight,
 } from '../utils/local_storage_utils';
@@ -26,10 +24,6 @@ import type { UnifiedHistogramSuggestionContext } from '../../types';
  * The current state of the container
  */
 export interface UnifiedHistogramState {
-  /**
-   * The current field used for the breakdown
-   */
-  breakdownField: string | undefined;
   /**
    * The current Lens suggestion
    */
@@ -49,7 +43,7 @@ export interface UnifiedHistogramState {
   /**
    * Lens embeddable output observable
    */
-  lensEmbeddableOutput$?: Observable<LensEmbeddableOutput>;
+  dataLoading$?: PublishingSubject<boolean | undefined>;
   /**
    * The current time interval of the chart
    */
@@ -109,10 +103,6 @@ export interface UnifiedHistogramStateService {
    */
   setTopPanelHeight: (topPanelHeight: number | undefined) => void;
   /**
-   * Sets the current breakdown field
-   */
-  setBreakdownField: (breakdownField: string | undefined) => void;
-  /**
    * Sets the current time interval
    */
   setTimeInterval: (timeInterval: string) => void;
@@ -124,9 +114,7 @@ export interface UnifiedHistogramStateService {
    * Sets the current Lens adapters
    */
   setLensAdapters: (lensAdapters: UnifiedHistogramChartLoadEvent['adapters'] | undefined) => void;
-  setLensEmbeddableOutput$: (
-    lensEmbeddableOutput$: Observable<LensEmbeddableOutput> | undefined
-  ) => void;
+  setLensDataLoading$: (dataLoading$: PublishingSubject<boolean | undefined> | undefined) => void;
   /**
    * Sets the current total hits status and result
    */
@@ -143,16 +131,13 @@ export const createStateService = (
 
   let initialChartHidden = false;
   let initialTopPanelHeight: number | undefined;
-  let initialBreakdownField: string | undefined;
 
   if (localStorageKeyPrefix) {
     initialChartHidden = getChartHidden(services.storage, localStorageKeyPrefix) ?? false;
     initialTopPanelHeight = getTopPanelHeight(services.storage, localStorageKeyPrefix);
-    initialBreakdownField = getBreakdownField(services.storage, localStorageKeyPrefix);
   }
 
   const state$ = new BehaviorSubject<UnifiedHistogramState>({
-    breakdownField: initialBreakdownField,
     chartHidden: initialChartHidden,
     currentSuggestionContext: undefined,
     lensRequestAdapter: undefined,
@@ -189,14 +174,6 @@ export const createStateService = (
       updateState({ topPanelHeight });
     },
 
-    setBreakdownField: (breakdownField: string | undefined) => {
-      if (localStorageKeyPrefix) {
-        setBreakdownField(services.storage, localStorageKeyPrefix, breakdownField);
-      }
-
-      updateState({ breakdownField });
-    },
-
     setCurrentSuggestionContext: (
       suggestionContext: UnifiedHistogramSuggestionContext | undefined
     ) => {
@@ -214,10 +191,8 @@ export const createStateService = (
     setLensAdapters: (lensAdapters: UnifiedHistogramChartLoadEvent['adapters'] | undefined) => {
       updateState({ lensAdapters });
     },
-    setLensEmbeddableOutput$: (
-      lensEmbeddableOutput$: Observable<LensEmbeddableOutput> | undefined
-    ) => {
-      updateState({ lensEmbeddableOutput$ });
+    setLensDataLoading$: (dataLoading$: PublishingSubject<boolean | undefined> | undefined) => {
+      updateState({ dataLoading$ });
     },
 
     setTotalHits: (totalHits: {

@@ -13,7 +13,7 @@ import {
   TimelineKpiStrategyResponse,
 } from '@kbn/security-solution-plugin/common/search_strategy';
 import TestAgent from 'supertest/lib/agent';
-import { BsearchService } from '@kbn/ftr-common-functional-services';
+import { SearchService } from '@kbn/ftr-common-functional-services';
 import { FtrProviderContextWithSpaces } from '../../../../ftr_provider_context_with_spaces';
 import { timelineDetailsFilebeatExpectedResults as EXPECTED_DATA } from '../mocks/timeline_details';
 
@@ -33,12 +33,12 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
   const esArchiver = getService('esArchiver');
   const utils = getService('securitySolutionUtils');
   let supertest: TestAgent;
-  let bsearch: BsearchService;
+  let search: SearchService;
 
   describe('@skipInServerless Timeline Details', () => {
     before(async () => {
       supertest = await utils.createSuperTest();
-      bsearch = await utils.createBsearch();
+      search = await utils.createSearch();
       await esArchiver.load('x-pack/test/functional/es_archives/filebeat/default');
     });
 
@@ -47,7 +47,7 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
     );
 
     it('Make sure that we get Event Details data', async () => {
-      const { data: detailsData } = await bsearch.send<TimelineEventsDetailsStrategyResponse>({
+      const { data: detailsData } = await search.send<TimelineEventsDetailsStrategyResponse>({
         supertest,
         options: {
           factoryQueryType: TimelineEventsQueries.details,
@@ -62,7 +62,7 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
 
     it('Make sure that we get kpi data', async () => {
       const { destinationIpCount, hostCount, processCount, sourceIpCount, userCount } =
-        await bsearch.send<TimelineKpiStrategyResponse>({
+        await search.send<TimelineKpiStrategyResponse>({
           supertest,
           options: {
             factoryQueryType: TimelineEventsQueries.kpi,

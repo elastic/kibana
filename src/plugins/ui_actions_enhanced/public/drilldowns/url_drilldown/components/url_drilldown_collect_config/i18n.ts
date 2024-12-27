@@ -9,23 +9,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const txtUrlTemplatePlaceholder = i18n.translate(
-  'uiActionsEnhanced.drilldowns.urlDrilldownCollectConfig.urlTemplatePlaceholderText',
-  {
-    defaultMessage: 'Example: {exampleUrl}',
-    values: {
-      exampleUrl: 'https://www.my-url.com/?{{event.key}}={{event.value}}',
-    },
-  }
-);
-
-export const txtUrlPreviewHelpText = i18n.translate(
-  'uiActionsEnhanced.drilldowns.urlDrilldownCollectConfig.urlPreviewHelpText',
-  {
-    defaultMessage: `Please note that in preview '{{event.*}}' variables are substituted with dummy values.`,
-  }
-);
-
 export const txtUrlTemplateLabel = i18n.translate(
   'uiActionsEnhanced.drilldowns.urlDrilldownCollectConfig.urlTemplateLabel',
   {
@@ -33,24 +16,43 @@ export const txtUrlTemplateLabel = i18n.translate(
   }
 );
 
+export const txtEmptyErrorMessage = i18n.translate(
+  'uiActionsEnhanced.drilldowns.urlDrilldownCollectConfig.urlTemplateEmptyErrorMessage',
+  {
+    defaultMessage: 'URL template is required.',
+  }
+);
+
+export const txtInvalidFormatErrorMessage = ({
+  error,
+  example,
+}: {
+  error: string;
+  example: string;
+}) =>
+  i18n.translate(
+    'uiActionsEnhanced.drilldowns.urlDrilldownCollectConfig.urlTemplateInvalidFormatErrorMessage',
+    {
+      defaultMessage: '{error} Example: {example}',
+      values: {
+        error,
+        example,
+      },
+    }
+  );
+
+export const txtUrlTemplateSyntaxTestingHelpText = i18n.translate(
+  'uiActionsEnhanced.drilldowns.urlDrilldownCollectConfig.urlTemplateSyntaxTestingHelpText',
+  {
+    defaultMessage:
+      'To validate and test the URL template, save the configuration and use this drilldown from the panel.',
+  }
+);
+
 export const txtUrlTemplateSyntaxHelpLinkText = i18n.translate(
   'uiActionsEnhanced.drilldowns.urlDrilldownCollectConfig.urlTemplateSyntaxHelpLinkText',
   {
     defaultMessage: 'Syntax help',
-  }
-);
-
-export const txtUrlTemplatePreviewLabel = i18n.translate(
-  'uiActionsEnhanced.drilldowns.urlDrilldownCollectConfig.urlPreviewLabel',
-  {
-    defaultMessage: 'URL preview:',
-  }
-);
-
-export const txtUrlTemplatePreviewLinkText = i18n.translate(
-  'uiActionsEnhanced.drilldowns.urlDrilldownCollectConfig.urlPreviewLinkText',
-  {
-    defaultMessage: 'Preview',
   }
 );
 

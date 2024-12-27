@@ -58,10 +58,12 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = ({
   return (
     <UnifiedDataTable
       showColumnTokens
+      canDragAndDropColumns
       enableComparisonMode
       renderCustomToolbar={renderCustomToolbar}
       getRowIndicator={getRowIndicator}
       rowAdditionalLeadingControls={rowAdditionalLeadingControls}
+      visibleCellActions={3} // this allows to show up to 3 actions on cell hover if available (filter in, filter out, and copy)
       {...props}
     />
   );

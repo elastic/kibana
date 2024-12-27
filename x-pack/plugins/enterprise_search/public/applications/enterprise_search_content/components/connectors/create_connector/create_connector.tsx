@@ -65,12 +65,15 @@ export const CreateConnector: React.FC = () => {
   const { setCurrentStep } = useActions(NewConnectorLogic);
   const stepStates = generateStepState(currentStep);
 
+  const { config } = useValues(KibanaLogic);
+  const isRunningLocally = (config.host ?? '').includes('localhost');
+
   useEffect(() => {
-    // TODO: separate this to ability and preference
-    if (!selectedConnector?.isNative || !selfManagePreference) {
+    if (
+      (selectedConnector && !selectedConnector.isNative && selfManagePreference === 'native') ||
+      isRunningLocally
+    ) {
       setSelfManagePreference('selfManaged');
-    } else {
-      setSelfManagePreference('native');
     }
   }, [selectedConnector]);
 
@@ -143,6 +146,7 @@ export const CreateConnector: React.FC = () => {
           setSelfManagePreference(preference);
         }}
         error={errorToText(error)}
+        isRunningLocally={isRunningLocally}
       />
     ),
   };
@@ -276,11 +280,11 @@ export const CreateConnector: React.FC = () => {
                 </EuiFormRow>
                 <EuiSpacer size="s" />
                 <EuiBadge color="hollow">
-                  {selfManagePreference
+                  {selfManagePreference === 'selfManaged'
                     ? i18n.translate(
                         'xpack.enterpriseSearch.createConnector.badgeType.selfManaged',
                         {
-                          defaultMessage: 'Self managed',
+                          defaultMessage: 'Self-managed',
                         }
                       )
                     : i18n.translate(

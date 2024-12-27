@@ -20,9 +20,9 @@ steps:
   - wait
 
   - command: .buildkite/scripts/steps/build_kibana.sh
-    label: Build Kibana Distribution and Plugins
+    label: Build Kibana Distribution
     agents:
-      machineType: n2-standard-16
+      machineType: n2-standard-8
       preemptible: true
     key: build
     timeout_in_minutes: 60
@@ -317,8 +317,6 @@ steps:
     label: 'Defend Workflows Cypress Tests'
     agents:
       enableNestedVirtualization: true
-      localSsds: 1
-      localSsdInterface: nvme
       machineType: n2-standard-4
     depends_on:
       - build
@@ -333,8 +331,6 @@ steps:
     label: 'Defend Workflows Cypress Tests on Serverless'
     agents:
       enableNestedVirtualization: true
-      localSsds: 1
-      localSsdInterface: nvme
       machineType: n2-standard-4
     depends_on:
       - build

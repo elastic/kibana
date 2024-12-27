@@ -19,7 +19,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/css';
-import { AssistantAvatar } from '@kbn/observability-ai-assistant-plugin/public';
+import { AssistantIcon } from '@kbn/ai-assistant-icon';
 import { ChatActionsMenu } from './chat_actions_menu';
 import type { UseGenAIConnectorsResult } from '../hooks/use_genai_connectors';
 import { FlyoutPositionMode } from './chat_flyout';
@@ -94,7 +94,7 @@ export function ChatHeader({
           {loading ? (
             <EuiLoadingSpinner size={breakpoint === 'xs' ? 'm' : 'l'} />
           ) : (
-            <AssistantAvatar size={breakpoint === 'xs' ? 'xs' : 's'} />
+            <AssistantIcon size={breakpoint === 'xs' ? 'm' : 'l'} />
           )}
         </EuiFlexItem>
 
@@ -104,7 +104,9 @@ export function ChatHeader({
             size={breakpoint === 'xs' ? 'xs' : 's'}
             value={newTitle}
             className={css`
-              color: ${!!title ? theme.euiTheme.colors.text : theme.euiTheme.colors.subduedText};
+              color: ${!!title
+                ? theme.euiTheme.colors.textParagraph
+                : theme.euiTheme.colors.textSubdued};
             `}
             inputAriaLabel={i18n.translate('xpack.aiAssistant.chatHeader.editConversationInput', {
               defaultMessage: 'Edit conversation',
@@ -142,11 +144,11 @@ export function ChatHeader({
                           flyoutPositionMode === 'overlay'
                             ? i18n.translate(
                                 'xpack.aiAssistant.chatHeader.euiToolTip.flyoutModeLabel.dock',
-                                { defaultMessage: 'Dock chat' }
+                                { defaultMessage: 'Dock conversation' }
                               )
                             : i18n.translate(
                                 'xpack.aiAssistant.chatHeader.euiToolTip.flyoutModeLabel.undock',
-                                { defaultMessage: 'Undock chat' }
+                                { defaultMessage: 'Undock conversation' }
                               )
                         }
                         display="block"

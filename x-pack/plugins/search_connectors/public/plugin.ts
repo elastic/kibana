@@ -6,7 +6,7 @@
  */
 
 import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
-import { docLinks } from '../common/doc_links';
+import { docLinks } from '@kbn/search-connectors';
 import { getConnectorFullTypes, getConnectorTypes } from '../common/lib/connector_types';
 import {
   SearchConnectorsPluginSetup,

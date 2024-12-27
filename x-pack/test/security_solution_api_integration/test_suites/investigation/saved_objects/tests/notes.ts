@@ -35,8 +35,7 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
             note: { note: myNote, timelineId: 'testTimelineId' },
           });
 
-        const { note, noteId, timelineId, version } =
-          response.body.data && response.body.data.persistNote.note;
+        const { note, noteId, timelineId, version } = response.body && response.body.note;
 
         expect(note).to.be(myNote);
         expect(noteId).to.not.be.empty();
@@ -56,8 +55,7 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
             note: { note: myNote, timelineId: 'testTimelineId' },
           });
 
-        const { noteId, timelineId, version } =
-          response.body.data && response.body.data.persistNote.note;
+        const { noteId, timelineId, version } = response.body && response.body.note;
 
         const myNewNote = 'new world test';
         const responseToTest = await supertest
@@ -70,9 +68,9 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
             note: { note: myNewNote, timelineId },
           });
 
-        expect(responseToTest.body.data!.persistNote.note.note).to.be(myNewNote);
-        expect(responseToTest.body.data!.persistNote.note.noteId).to.be(noteId);
-        expect(responseToTest.body.data!.persistNote.note.version).to.not.be.eql(version);
+        expect(responseToTest.body.note.note).to.be(myNewNote);
+        expect(responseToTest.body.note.noteId).to.be(noteId);
+        expect(responseToTest.body.note.version).to.not.be.eql(version);
       });
     });
 

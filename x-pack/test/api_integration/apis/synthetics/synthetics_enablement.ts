@@ -48,6 +48,15 @@ export default function ({ getService }: FtrProviderContext) {
       );
     };
 
+    before(async () => {
+      // clean up all api keys
+      const { body } = await esSupertest.get(`/_security/api_key`).query({ with_limited_by: true });
+      const apiKeys = body.api_keys || [];
+      for (const apiKey of apiKeys) {
+        await esSupertest.delete(`/_security/api_key`).send({ ids: [apiKey.id] });
+      }
+    });
+
     describe('[PUT] /internal/uptime/service/enablement', () => {
       beforeEach(async () => {
         const apiKeys = await getApiKeys();

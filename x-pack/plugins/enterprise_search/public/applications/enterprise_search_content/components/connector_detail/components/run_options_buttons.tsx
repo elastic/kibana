@@ -42,6 +42,11 @@ export const RunOptionsButtons: React.FC<RunOptionsButtonsProps> = ({
               onChange={() => selectDeploymentMethod('docker')}
               id="xpack.enterpriseSearch.content.connector_detail.configurationConnector.steps.runConnectorService.docker"
               checked={selectedDeploymentMethod === 'docker'}
+              aria-label={i18n.translate(
+                'xpack.enterpriseSearch.connectorConfiguration.dockerTextLabel.ariaLabel',
+                { defaultMessage: 'Run with Docker' }
+              )}
+              name="deployment-method-run-connector"
               label={
                 <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
                   <EuiFlexItem grow={false}>
@@ -64,6 +69,11 @@ export const RunOptionsButtons: React.FC<RunOptionsButtonsProps> = ({
               onChange={() => selectDeploymentMethod('source')}
               id="xpack.enterpriseSearch.content.connector_detail.configurationConnector.steps.runConnectorService.source"
               checked={selectedDeploymentMethod === 'source'}
+              aria-label={i18n.translate(
+                'xpack.enterpriseSearch.connectorConfiguration.sourceTextLabel.ariaLabel',
+                { defaultMessage: 'Run from source' }
+              )}
+              name="deployment-method-run-connector"
               label={
                 <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
                   <EuiFlexItem grow={false}>

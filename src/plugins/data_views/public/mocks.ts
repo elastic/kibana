@@ -43,6 +43,7 @@ const createStartContract = (): Start => {
     create: jest.fn().mockReturnValue(Promise.resolve({})),
     toDataView: jest.fn().mockReturnValue(Promise.resolve({})),
     toDataViewLazy: jest.fn().mockReturnValue(Promise.resolve({})),
+    clearInstanceCache: jest.fn(),
   } as unknown as jest.Mocked<DataViewsContract>;
 };
 

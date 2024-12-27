@@ -17,10 +17,14 @@ import {
   txtUrlTemplateSyntaxHelpLinkText,
   txtUrlTemplateLabel,
   txtUrlTemplateAdditionalOptions,
+  txtEmptyErrorMessage,
+  txtInvalidFormatErrorMessage,
+  txtUrlTemplateSyntaxTestingHelpText,
 } from './i18n';
 import { VariablePopover } from '../variable_popover';
 import { UrlDrilldownOptionsComponent } from './lazy';
 import { DEFAULT_URL_DRILLDOWN_OPTIONS } from '../../constants';
+import { validateUrl } from '../../url_validation';
 
 export interface UrlDrilldownCollectConfigProps {
   config: UrlDrilldownConfig;
@@ -69,7 +73,16 @@ export const UrlDrilldownCollectConfig: React.FC<UrlDrilldownCollectConfigProps>
     }
   }
   const isEmpty = !urlTemplate;
-  const isInvalid = !isPristine && isEmpty;
+
+  const isValidUrlFormat = validateUrl(urlTemplate);
+  const isInvalid = !isPristine && (isEmpty || !isValidUrlFormat.isValid);
+
+  const invalidErrorMessage = isInvalid
+    ? isEmpty
+      ? txtEmptyErrorMessage
+      : txtInvalidFormatErrorMessage({ error: isValidUrlFormat.error!, example: exampleUrl })
+    : undefined;
+
   const variablesDropdown = (
     <VariablePopover
       variables={variables}
@@ -91,14 +104,18 @@ export const UrlDrilldownCollectConfig: React.FC<UrlDrilldownCollectConfigProps>
       <EuiFormRow
         fullWidth
         isInvalid={isInvalid}
+        error={invalidErrorMessage}
         className={'uaeUrlDrilldownCollectConfig__urlTemplateFormRow'}
         label={txtUrlTemplateLabel}
         helpText={
-          syntaxHelpDocsLink && (
-            <EuiLink external target={'_blank'} href={syntaxHelpDocsLink}>
-              {txtUrlTemplateSyntaxHelpLinkText}
-            </EuiLink>
-          )
+          <>
+            {txtUrlTemplateSyntaxTestingHelpText}{' '}
+            {syntaxHelpDocsLink ? (
+              <EuiLink external target={'_blank'} href={syntaxHelpDocsLink}>
+                {txtUrlTemplateSyntaxHelpLinkText}
+              </EuiLink>
+            ) : null}
+          </>
         }
         labelAppend={variablesDropdown}
       >
@@ -120,7 +137,7 @@ export const UrlDrilldownCollectConfig: React.FC<UrlDrilldownCollectConfigProps>
         data-test-subj="urlDrilldownAdditionalOptions"
       >
         <EuiSpacer size={'s'} />
-        <EuiPanel color="subdued" borderRadius="none" hasShadow={false} style={{ border: 'none' }}>
+        <EuiPanel color="subdued" borderRadius="none" hasShadow={false} css={{ border: 'none' }}>
           <UrlDrilldownOptionsComponent
             options={{ ...DEFAULT_URL_DRILLDOWN_OPTIONS, ...config }}
             onOptionChange={(change) => {

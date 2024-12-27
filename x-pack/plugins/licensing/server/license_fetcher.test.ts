@@ -12,7 +12,8 @@ import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 
 type EsLicense = estypes.XpackInfoMinimalLicenseInformation;
 
-const delay = (ms: number) => new Promise((res) => setTimeout(res, ms));
+const maxRetryDelay = 30 * 1000;
+const sumOfRetryTimes = (1 + 2 + 4 + 8 + 16) * 1000;
 
 function buildRawLicense(options: Partial<EsLicense> = {}): EsLicense {
   return {
@@ -33,6 +34,9 @@ describe('LicenseFetcher', () => {
     logger = loggerMock.create();
     clusterClient = elasticsearchServiceMock.createClusterClient();
   });
+  afterEach(() => {
+    jest.useRealTimers();
+  });
 
   it('returns the license for successful calls', async () => {
     clusterClient.asInternalUser.xpack.info.mockResponse({
@@ -46,6 +50,7 @@ describe('LicenseFetcher', () => {
       logger,
       clusterClient,
       cacheDurationMs: 50_000,
+      maxRetryDelay,
     });
 
     const license = await fetcher();
@@ -71,6 +76,7 @@ describe('LicenseFetcher', () => {
       logger,
       clusterClient,
       cacheDurationMs: 50_000,
+      maxRetryDelay,
     });
 
     let license = await fetcher();
@@ -81,6 +87,7 @@ describe('LicenseFetcher', () => {
   });
 
   it('returns an error license in case of error', async () => {
+    jest.useFakeTimers();
     clusterClient.asInternalUser.xpack.info.mockResponseImplementation(() => {
       throw new Error('woups');
     });
@@ -89,13 +96,20 @@ describe('LicenseFetcher', () => {
       logger,
       clusterClient,
       cacheDurationMs: 50_000,
+      maxRetryDelay,
     });
 
-    const license = await fetcher();
+    const licensePromise = fetcher();
+    await jest.advanceTimersByTimeAsync(sumOfRetryTimes);
+    const license = await licensePromise;
+
     expect(license.error).toEqual('woups');
+    // should be called once to start and then in the retries after 1s, 2s, 4s, 8s and 16s
+    expect(clusterClient.asInternalUser.xpack.info).toHaveBeenCalledTimes(6);
   });
 
   it('returns a license successfully fetched after an error', async () => {
+    jest.useFakeTimers();
     clusterClient.asInternalUser.xpack.info
       .mockResponseImplementationOnce(() => {
         throw new Error('woups');
@@ -111,15 +125,20 @@ describe('LicenseFetcher', () => {
       logger,
       clusterClient,
       cacheDurationMs: 50_000,
+      maxRetryDelay,
     });
 
-    let license = await fetcher();
-    expect(license.error).toEqual('woups');
-    license = await fetcher();
+    const licensePromise = fetcher();
+    // wait one minute since we mocked only one error
+    await jest.advanceTimersByTimeAsync(1000);
+    const license = await licensePromise;
+
     expect(license.uid).toEqual('license-1');
+    expect(clusterClient.asInternalUser.xpack.info).toBeCalledTimes(2);
   });
 
   it('returns the latest fetched license after an error within the cache duration period', async () => {
+    jest.useFakeTimers();
     clusterClient.asInternalUser.xpack.info
       .mockResponseOnce({
         license: buildRawLicense({
@@ -127,7 +146,7 @@ describe('LicenseFetcher', () => {
         }),
         features: {},
       } as any)
-      .mockResponseImplementationOnce(() => {
+      .mockResponseImplementation(() => {
         throw new Error('woups');
       });
 
@@ -135,15 +154,24 @@ describe('LicenseFetcher', () => {
       logger,
       clusterClient,
       cacheDurationMs: 50_000,
+      maxRetryDelay,
     });
 
     let license = await fetcher();
     expect(license.uid).toEqual('license-1');
-    license = await fetcher();
+    expect(clusterClient.asInternalUser.xpack.info).toBeCalledTimes(1);
+
+    const licensePromise = fetcher();
+    await jest.advanceTimersByTimeAsync(sumOfRetryTimes);
+    license = await licensePromise;
     expect(license.uid).toEqual('license-1');
+    // should be called once in the successful mock, once in the error mock
+    // and then in the retries after 1s, 2s, 4s, 8s and 16s
+    expect(clusterClient.asInternalUser.xpack.info).toBeCalledTimes(7);
   });
 
   it('returns an error license after an error exceeding the cache duration period', async () => {
+    jest.useFakeTimers();
     clusterClient.asInternalUser.xpack.info
       .mockResponseOnce({
         license: buildRawLicense({
@@ -151,7 +179,7 @@ describe('LicenseFetcher', () => {
         }),
         features: {},
       } as any)
-      .mockResponseImplementationOnce(() => {
+      .mockResponseImplementation(() => {
         throw new Error('woups');
       });
 
@@ -159,14 +187,15 @@ describe('LicenseFetcher', () => {
       logger,
       clusterClient,
       cacheDurationMs: 1,
+      maxRetryDelay,
     });
 
     let license = await fetcher();
     expect(license.uid).toEqual('license-1');
 
-    await delay(50);
-
-    license = await fetcher();
+    const licensePromise = fetcher();
+    await jest.advanceTimersByTimeAsync(sumOfRetryTimes);
+    license = await licensePromise;
     expect(license.error).toEqual('woups');
   });
 
@@ -180,6 +209,7 @@ describe('LicenseFetcher', () => {
       logger,
       clusterClient,
       cacheDurationMs: 50_000,
+      maxRetryDelay,
     });
 
     const license = await fetcher();
@@ -203,6 +233,7 @@ describe('LicenseFetcher', () => {
       logger,
       clusterClient,
       cacheDurationMs: 50_000,
+      maxRetryDelay,
     });
 
     const license = await fetcher();
@@ -212,5 +243,28 @@ describe('LicenseFetcher', () => {
         "License information fetched from Elasticsearch, but no license is available",
       ]
     `);
+  });
+
+  it('testing the fetcher retry with a different maxRetryDelay using only errors', async () => {
+    jest.useFakeTimers();
+    clusterClient.asInternalUser.xpack.info.mockResponseImplementation(() => {
+      throw new Error('woups');
+    });
+
+    const fetcher = getLicenseFetcher({
+      logger,
+      clusterClient,
+      cacheDurationMs: 50_000,
+      maxRetryDelay: 10 * 1000,
+    });
+    const sumOfRetryTimesUntilTen = (1 + 2 + 4 + 8) * 1000;
+
+    const licensePromise = fetcher();
+    await jest.advanceTimersByTimeAsync(sumOfRetryTimesUntilTen);
+    const license = await licensePromise;
+
+    expect(license.error).toEqual('woups');
+    // should be called once to start and then in the retries after 1s, 2s, 4s and 8s
+    expect(clusterClient.asInternalUser.xpack.info).toHaveBeenCalledTimes(5);
   });
 });

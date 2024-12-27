@@ -40,6 +40,11 @@ exports[`StaticLookupFormatEditor should render multiple lookup entries and unkn
         },
       ]
     }
+    css={
+      Object {
+        "maxWidth": "400px",
+      }
+    }
     items={
       Array [
         Object {
@@ -58,11 +63,6 @@ exports[`StaticLookupFormatEditor should render multiple lookup entries and unkn
         default="No items found"
         token="euiBasicTable.noItemsMessage"
       />
-    }
-    style={
-      Object {
-        "maxWidth": "400px",
-      }
     }
     tableLayout="fixed"
   />
@@ -144,6 +144,11 @@ exports[`StaticLookupFormatEditor should render normally 1`] = `
         },
       ]
     }
+    css={
+      Object {
+        "maxWidth": "400px",
+      }
+    }
     items={
       Array [
         Object {
@@ -156,11 +161,6 @@ exports[`StaticLookupFormatEditor should render normally 1`] = `
         default="No items found"
         token="euiBasicTable.noItemsMessage"
       />
-    }
-    style={
-      Object {
-        "maxWidth": "400px",
-      }
     }
     tableLayout="fixed"
   />

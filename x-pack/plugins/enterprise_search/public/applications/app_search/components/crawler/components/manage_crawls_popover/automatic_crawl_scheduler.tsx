@@ -36,8 +36,8 @@ import {
   MONTHS_UNIT_LABEL,
   WEEKS_UNIT_LABEL,
 } from '../../../../../shared/constants/units';
+import { docLinks } from '../../../../../shared/doc_links';
 
-import { WEB_CRAWLER_DOCS_URL } from '../../../../routes';
 import { CrawlUnits } from '../../types';
 
 import { AutomaticCrawlSchedulerLogic } from './automatic_crawl_scheduler_logic';
@@ -81,7 +81,7 @@ export const AutomaticCrawlScheduler: React.FC = () => {
           defaultMessage="Don't worry about it, we'll start a crawl for you. {readMoreMessage}."
           values={{
             readMoreMessage: (
-              <EuiLink href={WEB_CRAWLER_DOCS_URL} target="_blank">
+              <EuiLink href={docLinks.appSearchWebCrawler} target="_blank">
                 {i18n.translate(
                   'xpack.enterpriseSearch.appSearch.crawler.automaticCrawlSchedule.readMoreLink',
                   {

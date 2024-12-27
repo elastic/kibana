@@ -5,30 +5,30 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 
 import { EuiPageTemplate } from '@elastic/eui';
 
 import { useQueryInferenceEndpoints } from '../hooks/use_inference_endpoints';
 import { TabularPage } from './all_inference_endpoints/tabular_page';
-import { AddEmptyPrompt } from './empty_prompt/add_empty_prompt';
 import { InferenceEndpointsHeader } from './inference_endpoints_header';
+import { AddInferenceFlyoutWrapper } from './add_inference_endpoints/add_inference_flyout_wrapper';
 
 export const InferenceEndpoints: React.FC = () => {
   const { data } = useQueryInferenceEndpoints();
+  const [isAddInferenceFlyoutOpen, setIsAddInferenceFlyoutOpen] = useState<boolean>(false);
 
   const inferenceEndpoints = data || [];
 
   return (
     <>
-      {inferenceEndpoints.length > 0 && <InferenceEndpointsHeader />}
-      <EuiPageTemplate.Section className="eui-yScroll">
-        {inferenceEndpoints.length === 0 ? (
-          <AddEmptyPrompt />
-        ) : (
-          <TabularPage inferenceEndpoints={inferenceEndpoints} />
-        )}
+      <InferenceEndpointsHeader setIsAddInferenceFlyoutOpen={setIsAddInferenceFlyoutOpen} />
+      <EuiPageTemplate.Section className="eui-yScroll" data-test-subj="inferenceManagementPage">
+        <TabularPage inferenceEndpoints={inferenceEndpoints} />
       </EuiPageTemplate.Section>
+      {isAddInferenceFlyoutOpen && (
+        <AddInferenceFlyoutWrapper onClose={setIsAddInferenceFlyoutOpen} />
+      )}
     </>
   );
 };

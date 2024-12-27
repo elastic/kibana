@@ -43,7 +43,7 @@ export const useJsonEditorModel = ({
 
     const initialJsonString = initialJsonValue
       ? JSON.stringify(safeJsonParse(initialJsonValue), null, 4) // prettify the json
-      : functionDefinition.parameters.properties
+      : functionDefinition.parameters?.properties
       ? JSON.stringify(createInitializedObject(functionDefinition.parameters), null, 4)
       : '';
 

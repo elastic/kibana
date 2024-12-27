@@ -40,20 +40,20 @@ describe('Delete Action', () => {
   it('renders', () => {
     render(<Wrapper item={mockItem} />);
 
-    expect(screen.getByTestId('inferenceUIDeleteAction')).toBeEnabled();
+    expect(screen.getByTestId(/inferenceUIDeleteAction/)).toBeEnabled();
   });
 
   it('disable the delete action for preconfigured endpoint', () => {
     const preconfiguredMockItem = { ...mockItem, endpoint: '.multilingual-e5-small-elasticsearch' };
     render(<Wrapper item={preconfiguredMockItem} />);
 
-    expect(screen.getByTestId('inferenceUIDeleteAction')).toBeDisabled();
+    expect(screen.getByTestId(/inferenceUIDeleteAction/)).toBeDisabled();
   });
 
   it('loads confirm delete modal', () => {
     render(<Wrapper item={mockItem} />);
 
-    fireEvent.click(screen.getByTestId('inferenceUIDeleteAction'));
+    fireEvent.click(screen.getByTestId(/inferenceUIDeleteAction/));
     expect(screen.getByTestId('deleteModalForInferenceUI')).toBeInTheDocument();
   });
 });

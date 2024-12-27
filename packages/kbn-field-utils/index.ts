@@ -25,6 +25,7 @@ export {
   comboBoxFieldOptionMatcher,
   getFieldSearchMatchingHighlight,
 } from './src/utils/field_name_wildcard_matcher';
+export { fieldSupportsBreakdown } from './src/utils/field_supports_breakdown';
 
 export { FieldIcon, type FieldIconProps, getFieldIconProps } from './src/components/field_icon';
 export { FieldDescription, type FieldDescriptionProps } from './src/components/field_description';

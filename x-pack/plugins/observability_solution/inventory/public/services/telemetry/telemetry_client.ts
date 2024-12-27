@@ -34,13 +34,13 @@ export class TelemetryClient implements ITelemetryClient {
     this.analytics.reportEvent(TelemetryEventTypes.ENTITY_INVENTORY_SEARCH_QUERY_SUBMITTED, params);
   };
 
+  public reportEntityViewClicked = (params: EntityViewClickedParams) => {
+    this.analytics.reportEvent(TelemetryEventTypes.ENTITY_VIEW_CLICKED, params);
+  };
+
   public reportEntityInventoryEntityTypeFiltered = (
     params: EntityInventoryEntityTypeFilteredParams
   ) => {
     this.analytics.reportEvent(TelemetryEventTypes.ENTITY_INVENTORY_ENTITY_TYPE_FILTERED, params);
-  };
-
-  public reportEntityViewClicked = (params: EntityViewClickedParams) => {
-    this.analytics.reportEvent(TelemetryEventTypes.ENTITY_VIEW_CLICKED, params);
   };
 }

@@ -17,12 +17,13 @@ import {
   HasSupportedTriggers,
   PublishesDataLoading,
   PublishesDataViews,
+  PublishesRendered,
   PublishesTimeRange,
   SerializedTimeRange,
   SerializedTitles,
 } from '@kbn/presentation-publishing';
 import { DeepPartial } from '@kbn/utility-types';
-import { HasVisualizeConfig } from '../legacy/embeddable';
+import type { HasVisualizeConfig } from './interfaces/has_visualize_config';
 import type { Vis, VisParams, VisSavedObject } from '../types';
 import type { SerializedVis } from '../vis';
 
@@ -92,6 +93,7 @@ export const isVisualizeRuntimeState = (state: unknown): state is VisualizeRunti
 export type VisualizeApi = Partial<HasEditCapabilities> &
   PublishesDataViews &
   PublishesDataLoading &
+  PublishesRendered &
   HasVisualizeConfig &
   HasInspectorAdapters &
   HasSupportedTriggers &

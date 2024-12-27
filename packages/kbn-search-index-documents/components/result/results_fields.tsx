@@ -9,19 +9,39 @@
 
 import React from 'react';
 
-import { EuiTable, EuiTableBody } from '@elastic/eui';
+import { EuiTable, EuiTableBody, EuiTableHeader, EuiTableHeaderCell } from '@elastic/eui';
 
+import { i18n } from '@kbn/i18n';
 import { ResultField } from './result_field';
 import { ResultFieldProps } from './result_types';
 
 interface Props {
+  documentId: string;
   fields: ResultFieldProps[];
   isExpanded: boolean;
 }
 
-export const ResultFields: React.FC<Props> = ({ fields, isExpanded }) => {
+export const ResultFields: React.FC<Props> = ({ documentId, fields, isExpanded }) => {
   return (
-    <EuiTable>
+    <EuiTable
+      aria-label={i18n.translate('searchIndexDocuments.resultFields.tableLabel', {
+        defaultMessage: 'Fields for the document with ID {documentId}',
+        values: { documentId },
+      })}
+    >
+      <EuiTableHeader>
+        <EuiTableHeaderCell width="20%">
+          {i18n.translate('searchIndexDocuments.resultFields.fieldTypeHeaderLabel', {
+            defaultMessage: 'Field',
+          })}
+        </EuiTableHeaderCell>
+        <EuiTableHeaderCell>
+          {i18n.translate('searchIndexDocuments.resultFields.contentstableHeaderLabel', {
+            defaultMessage: 'Contents',
+          })}
+        </EuiTableHeaderCell>
+      </EuiTableHeader>
+
       <EuiTableBody>
         {fields.map((field) => (
           <ResultField

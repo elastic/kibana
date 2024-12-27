@@ -17,6 +17,7 @@ const createEncryptionExtension = (): jest.Mocked<ISavedObjectsEncryptionExtensi
   isEncryptableType: jest.fn(),
   decryptOrStripResponseAttributes: jest.fn(),
   encryptAttributes: jest.fn(),
+  shouldEnforceRandomId: jest.fn(),
 });
 
 const createSecurityExtension = (): jest.Mocked<ISavedObjectsSecurityExtension> => ({
@@ -46,6 +47,7 @@ const createSecurityExtension = (): jest.Mocked<ISavedObjectsSecurityExtension> 
 const createSpacesExtension = (): jest.Mocked<ISavedObjectsSpacesExtension> => ({
   getCurrentNamespace: jest.fn(),
   getSearchableNamespaces: jest.fn(),
+  asScopedToNamespace: jest.fn().mockImplementation(createSpacesExtension),
 });
 
 const create = () => ({

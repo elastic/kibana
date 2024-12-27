@@ -1,0 +1,29 @@
+{
+  "type": "plugin",
+  "id": "@kbn/logstash-plugin",
+  "owner": [
+    "@elastic/logstash"
+  ],
+  "group": "platform",
+  "visibility": "private",
+  "plugin": {
+    "id": "logstash",
+    "browser": true,
+    "server": true,
+    "configPath": [
+      "xpack",
+      "logstash"
+    ],
+    "requiredPlugins": [
+      "licensing",
+      "management",
+      "features"
+    ],
+    "optionalPlugins": [
+      "home",
+      "monitoring",
+      "security"
+    ],
+    "requiredBundles": []
+  }
+}

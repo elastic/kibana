@@ -21,6 +21,12 @@ export function defineInvalidateApiKeysRoutes({ router }: RouteDefinitionParams)
   router.post(
     {
       path: '/internal/security/api_key/invalidate',
+      security: {
+        authz: {
+          enabled: false,
+          reason: `This route delegates authorization to Core's ES client`,
+        },
+      },
       validate: {
         body: schema.object({
           apiKeys: schema.arrayOf(schema.object({ id: schema.string(), name: schema.string() })),

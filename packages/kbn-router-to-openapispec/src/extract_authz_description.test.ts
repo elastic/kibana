@@ -33,7 +33,9 @@ describe('extractAuthzDescription', () => {
       },
     };
     const description = extractAuthzDescription(routeSecurity);
-    expect(description).toBe('[Authz] Route required privileges: ALL of [manage_spaces].');
+    expect(description).toBe(
+      '[Required authorization] Route required privileges: ALL of [manage_spaces].'
+    );
   });
 
   it('should return route authz description for privilege groups', () => {
@@ -44,7 +46,9 @@ describe('extractAuthzDescription', () => {
         },
       };
       const description = extractAuthzDescription(routeSecurity);
-      expect(description).toBe('[Authz] Route required privileges: ALL of [console].');
+      expect(description).toBe(
+        '[Required authorization] Route required privileges: ALL of [console].'
+      );
     }
     {
       const routeSecurity: RouteSecurity = {
@@ -58,7 +62,7 @@ describe('extractAuthzDescription', () => {
       };
       const description = extractAuthzDescription(routeSecurity);
       expect(description).toBe(
-        '[Authz] Route required privileges: ANY of [manage_spaces OR taskmanager].'
+        '[Required authorization] Route required privileges: ANY of [manage_spaces OR taskmanager].'
       );
     }
     {
@@ -74,7 +78,7 @@ describe('extractAuthzDescription', () => {
       };
       const description = extractAuthzDescription(routeSecurity);
       expect(description).toBe(
-        '[Authz] Route required privileges: ALL of [console, filesManagement] AND ANY of [manage_spaces OR taskmanager].'
+        '[Required authorization] Route required privileges: ALL of [console, filesManagement] AND ANY of [manage_spaces OR taskmanager].'
       );
     }
   });

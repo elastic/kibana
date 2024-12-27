@@ -7,15 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { renderHook, act } from '@testing-library/react-hooks';
+import { waitFor, renderHook, act } from '@testing-library/react';
 import { type EsDocSearchProps, buildSearchBody, useEsDocSearch } from './use_es_doc_search';
 import { Subject } from 'rxjs';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { ElasticRequestState } from '@kbn/unified-doc-viewer';
-import {
-  SEARCH_FIELDS_FROM_SOURCE as mockSearchFieldsFromSource,
-  buildDataTableRecord,
-} from '@kbn/discover-utils';
+import { buildDataTableRecord } from '@kbn/discover-utils';
 import { setUnifiedDocViewerServices } from '../plugin';
 import { UnifiedDocViewerServices } from '../types';
 
@@ -29,102 +26,14 @@ setUnifiedDocViewerServices({
       }),
     },
   },
-  uiSettings: {
-    get: (key: string) => {
-      if (key === mockSearchFieldsFromSource) {
-        return false;
-      }
-    },
-  },
 } as unknown as UnifiedDocViewerServices);
 
 describe('Test of <Doc /> helper / hook', () => {
-  test('buildSearchBody given useNewFieldsApi is false', () => {
+  test('buildSearchBody with _source', () => {
     const dataView = {
       getComputedFields: () => ({ scriptFields: [], docvalueFields: [] }),
     } as unknown as DataView;
-    const actual = buildSearchBody('1', index, dataView, false);
-    expect(actual).toMatchInlineSnapshot(`
-      Object {
-        "body": Object {
-          "_source": true,
-          "fields": Array [],
-          "query": Object {
-            "bool": Object {
-              "filter": Array [
-                Object {
-                  "ids": Object {
-                    "values": Array [
-                      "1",
-                    ],
-                  },
-                },
-                Object {
-                  "term": Object {
-                    "_index": "test-index",
-                  },
-                },
-              ],
-            },
-          },
-          "script_fields": Array [],
-          "stored_fields": Array [
-            "*",
-          ],
-          "version": true,
-        },
-      }
-    `);
-  });
-
-  test('buildSearchBody useNewFieldsApi is true', () => {
-    const dataView = {
-      getComputedFields: () => ({ scriptFields: [], docvalueFields: [] }),
-    } as unknown as DataView;
-    const actual = buildSearchBody('1', index, dataView, true);
-    expect(actual).toMatchInlineSnapshot(`
-      Object {
-        "body": Object {
-          "fields": Array [
-            Object {
-              "field": "*",
-              "include_unmapped": true,
-            },
-          ],
-          "query": Object {
-            "bool": Object {
-              "filter": Array [
-                Object {
-                  "ids": Object {
-                    "values": Array [
-                      "1",
-                    ],
-                  },
-                },
-                Object {
-                  "term": Object {
-                    "_index": "test-index",
-                  },
-                },
-              ],
-            },
-          },
-          "runtime_mappings": Object {},
-          "script_fields": Array [],
-          "stored_fields": Array [
-            "*",
-          ],
-          "version": true,
-        },
-      }
-    `);
-  });
-
-  test('buildSearchBody with requestSource', () => {
-    const dataView = {
-      getComputedFields: () => ({ scriptFields: [], docvalueFields: [] }),
-    } as unknown as DataView;
-    const actual = buildSearchBody('1', index, dataView, true, true);
+    const actual = buildSearchBody('1', index, dataView);
     expect(actual).toMatchInlineSnapshot(`
       Object {
         "body": Object {
@@ -179,10 +88,11 @@ describe('Test of <Doc /> helper / hook', () => {
         },
       }),
     } as unknown as DataView;
-    const actual = buildSearchBody('1', index, dataView, true);
+    const actual = buildSearchBody('1', index, dataView);
     expect(actual).toMatchInlineSnapshot(`
       Object {
         "body": Object {
+          "_source": true,
           "fields": Array [
             Object {
               "field": "*",
@@ -281,13 +191,14 @@ describe('Test of <Doc /> helper / hook', () => {
         },
       });
       mockSearchResult.complete();
-      await hook.waitForNextUpdate();
     });
 
-    expect(hook.result.current.slice(0, 2)).toEqual([
-      ElasticRequestState.Found,
-      buildDataTableRecord(record),
-    ]);
+    await waitFor(() =>
+      expect(hook.result.current.slice(0, 2)).toEqual([
+        ElasticRequestState.Found,
+        buildDataTableRecord(record),
+      ])
+    );
   });
 
   test('useEsDocSearch for text based languages', async () => {

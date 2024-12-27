@@ -40,7 +40,7 @@ export const AISearchGuide: React.FC = () => {
       bottomBorder={false}
       pageHeader={{
         pageTitle: i18n.translate('xpack.enterpriseSearch.aiSearch.guide.pageTitle', {
-          defaultMessage: 'Improve search revelance with AI',
+          defaultMessage: 'Improve search relevance with AI',
         }),
       }}
     >

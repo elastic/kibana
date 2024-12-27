@@ -7,11 +7,17 @@
 import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/public';
 import type { AggregateQuery } from '@kbn/es-query';
 import type { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
+import { ValueFormatConfig } from '../form_based/operations/definitions/column_types';
 import type { VisualizeEditorContext } from '../../types';
 
 export interface TextBasedLayerColumn {
   columnId: string;
   fieldName: string;
+  label?: string;
+  customLabel?: boolean;
+  params?: {
+    format?: ValueFormatConfig;
+  };
   meta?: DatatableColumn['meta'];
   inMetricDimension?: boolean;
 }

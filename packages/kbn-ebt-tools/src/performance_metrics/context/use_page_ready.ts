@@ -8,18 +8,22 @@
  */
 
 import { useEffect, useState } from 'react';
-import { CustomMetrics } from './performance_context';
+import type { CustomMetrics, Meta } from './performance_context';
 import { usePerformanceContext } from '../../..';
 
-export const usePageReady = (state: { customMetrics?: CustomMetrics; isReady: boolean }) => {
+export const usePageReady = (state: {
+  customMetrics?: CustomMetrics;
+  isReady: boolean;
+  meta?: Meta;
+}) => {
   const { onPageReady } = usePerformanceContext();
 
   const [isReported, setIsReported] = useState(false);
 
   useEffect(() => {
     if (state.isReady && !isReported) {
-      onPageReady(state.customMetrics);
+      onPageReady({ customMetrics: state.customMetrics, meta: state.meta });
       setIsReported(true);
     }
-  }, [isReported, onPageReady, state.customMetrics, state.isReady]);
+  }, [isReported, onPageReady, state.customMetrics, state.isReady, state.meta]);
 };

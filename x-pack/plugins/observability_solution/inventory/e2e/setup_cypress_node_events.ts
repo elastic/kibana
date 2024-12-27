@@ -8,8 +8,9 @@ import {
   ApmSynthtraceEsClient,
   EntitiesSynthtraceEsClient,
   LogLevel,
-  LogsSynthtraceEsClient,
   createLogger,
+  InfraSynthtraceEsClient,
+  LogsSynthtraceEsClient,
 } from '@kbn/apm-synthtrace';
 import { createEsClientForTesting } from '@kbn/test';
 // eslint-disable-next-line @kbn/imports/no_unresolvable_imports
@@ -46,6 +47,12 @@ export function setupNodeEvents(on: Cypress.PluginEvents, config: Cypress.Plugin
     refreshAfterIndex: true,
   });
 
+  const infraSynthtraceEsClient = new InfraSynthtraceEsClient({
+    client,
+    logger,
+    refreshAfterIndex: true,
+  });
+
   entitiesSynthtraceEsClient.pipeline(
     entitiesSynthtraceEsClient.getDefaultPipeline({ includeSerialization: false })
   );
@@ -56,6 +63,10 @@ export function setupNodeEvents(on: Cypress.PluginEvents, config: Cypress.Plugin
 
   logsSynthtraceEsClient.pipeline(
     logsSynthtraceEsClient.getDefaultPipeline({ includeSerialization: false })
+  );
+
+  infraSynthtraceEsClient.pipeline(
+    infraSynthtraceEsClient.getDefaultPipeline({ includeSerialization: false })
   );
 
   initPlugin(on, config);
@@ -92,6 +103,14 @@ export function setupNodeEvents(on: Cypress.PluginEvents, config: Cypress.Plugin
     },
     async 'logsSynthtrace:clean'() {
       await logsSynthtraceEsClient.clean();
+      return null;
+    },
+    async 'infraSynthtrace:index'(events: Array<Record<string, any>>) {
+      await infraSynthtraceEsClient.index(Readable.from(events));
+      return null;
+    },
+    async 'infraSynthtrace:clean'() {
+      await infraSynthtraceEsClient.clean();
       return null;
     },
   });

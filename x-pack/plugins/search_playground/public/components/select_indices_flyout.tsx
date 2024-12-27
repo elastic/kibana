@@ -35,7 +35,7 @@ interface SelectIndicesFlyout {
 
 export const SelectIndicesFlyout: React.FC<SelectIndicesFlyout> = ({ onClose }) => {
   const [query, setQuery] = useState<string>('');
-  const { indices, isLoading: isIndicesLoading } = useQueryIndices(query);
+  const { indices, isLoading: isIndicesLoading } = useQueryIndices({ query });
   const { indices: selectedIndices, setIndices: setSelectedIndices } = useSourceIndicesFields();
   const [selectedTempIndices, setSelectedTempIndices] = useState<string[]>(selectedIndices);
   const handleSelectOptions = (options: EuiSelectableOption[]) => {

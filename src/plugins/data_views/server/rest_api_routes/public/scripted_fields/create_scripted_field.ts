@@ -31,6 +31,11 @@ export const registerCreateScriptedFieldRoute = (
     .addVersion(
       {
         version: INITIAL_REST_VERSION,
+        security: {
+          authz: {
+            requiredPrivileges: ['indexPatterns:manage'],
+          },
+        },
         validate: {
           request: {
             params: schema.object(

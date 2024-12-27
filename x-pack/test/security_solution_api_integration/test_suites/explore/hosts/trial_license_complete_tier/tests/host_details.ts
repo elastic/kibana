@@ -11,7 +11,7 @@ import {
   HostsQueries,
 } from '@kbn/security-solution-plugin/common/search_strategy';
 import TestAgent from 'supertest/lib/agent';
-import { BsearchService } from '@kbn/ftr-common-functional-services';
+import { SearchService } from '@kbn/ftr-common-functional-services';
 import { FtrProviderContextWithSpaces } from '../../../../../ftr_provider_context_with_spaces';
 import { hostDetailsFilebeatExpectedResult } from '../mocks/host_details';
 
@@ -21,11 +21,11 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
 
   describe('Host Details', () => {
     let supertest: TestAgent;
-    let bsearch: BsearchService;
+    let search: SearchService;
     describe('With filebeat', () => {
       before(async () => {
         supertest = await utils.createSuperTest();
-        bsearch = await utils.createBsearch();
+        search = await utils.createSearch();
         await esArchiver.load('x-pack/test/functional/es_archives/filebeat/default');
       });
       after(
@@ -36,7 +36,7 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
       const TO = '3000-01-01T00:00:00.000Z';
 
       it('Make sure that we get HostDetails data', async () => {
-        const { hostDetails } = await bsearch.send<HostDetailsStrategyResponse>({
+        const { hostDetails } = await search.send<HostDetailsStrategyResponse>({
           supertest,
           options: {
             factoryQueryType: HostsQueries.details,

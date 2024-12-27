@@ -27,6 +27,13 @@ export function defineUpdateUserProfileDataRoute({
   router.post(
     {
       path: '/internal/security/user_profile/_data',
+      security: {
+        authz: {
+          enabled: false,
+          reason:
+            'This route delegates authorization to the internal authorization service; an authenticated user and valid session are required',
+        },
+      },
       validate: {
         body: schema.recordOf(schema.string(), schema.any()),
       },

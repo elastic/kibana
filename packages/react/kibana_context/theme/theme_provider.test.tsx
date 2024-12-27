@@ -16,14 +16,19 @@ import { BehaviorSubject } from 'rxjs';
 
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 
+import type { UserProfileService } from '@kbn/core-user-profile-browser';
+import { userProfileServiceMock } from '@kbn/core-user-profile-browser-mocks';
+
 import type { KibanaTheme } from '@kbn/react-kibana-context-common';
 import { KibanaThemeProvider } from './theme_provider';
 
 describe('KibanaThemeProvider', () => {
   let euiTheme: ReturnType<typeof useEuiTheme> | undefined;
+  let userProfile: UserProfileService;
 
   beforeEach(() => {
     euiTheme = undefined;
+    userProfile = userProfileServiceMock.createStart();
   });
 
   const flushPromises = async () => {
@@ -52,10 +57,10 @@ describe('KibanaThemeProvider', () => {
   };
 
   it('exposes the EUI theme provider', async () => {
-    const coreTheme$ = new BehaviorSubject<KibanaTheme>({ darkMode: true });
+    const coreTheme$ = new BehaviorSubject<KibanaTheme>({ darkMode: true, name: 'amsterdam' });
 
     const wrapper = mountWithIntl(
-      <KibanaThemeProvider theme={{ theme$: coreTheme$ }}>
+      <KibanaThemeProvider theme={{ theme$: coreTheme$ }} userProfile={userProfile}>
         <InnerComponent />
       </KibanaThemeProvider>
     );
@@ -66,10 +71,13 @@ describe('KibanaThemeProvider', () => {
   });
 
   it('propagates changes of the coreTheme observable', async () => {
-    const coreTheme$ = new BehaviorSubject<KibanaTheme>({ darkMode: true });
+    const coreTheme$ = new BehaviorSubject<KibanaTheme>({
+      darkMode: true,
+      name: 'amsterdam',
+    });
 
     const wrapper = mountWithIntl(
-      <KibanaThemeProvider theme={{ theme$: coreTheme$ }}>
+      <KibanaThemeProvider theme={{ theme$: coreTheme$ }} userProfile={userProfile}>
         <InnerComponent />
       </KibanaThemeProvider>
     );
@@ -79,7 +87,7 @@ describe('KibanaThemeProvider', () => {
     expect(euiTheme!.colorMode).toEqual('DARK');
 
     await act(async () => {
-      coreTheme$.next({ darkMode: false });
+      coreTheme$.next({ darkMode: false, name: 'amsterdam' });
     });
 
     await refresh(wrapper);

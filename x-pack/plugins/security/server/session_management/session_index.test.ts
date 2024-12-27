@@ -446,6 +446,7 @@ describe('Session index', () => {
         {
           index: aliasName,
           keep_alive: '5m',
+          allow_partial_search_results: true,
         },
         { ignore: [404], meta: true }
       );
@@ -454,6 +455,7 @@ describe('Session index', () => {
         {
           index: aliasName,
           keep_alive: '5m',
+          allow_partial_search_results: true,
         },
         { meta: true }
       );

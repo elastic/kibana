@@ -203,6 +203,8 @@ export const EVENT_SUMMARY_ALERT_RENDERER_CONTENT = '[data-test-subj="alertRende
 
 export const ALERT_TABLE_EVENT_RENDERED_VIEW_OPTION = '[data-test-subj="eventRenderedView"]';
 
+export const ALERT_TABLE_SUMMARY_VIEW_SELECTOR = '[data-test-subj="summary-view-selector"]';
+
 export const ALERT_RENDERER_HOST_NAME =
   '[data-test-subj="alertFieldBadge"] [data-test-subj="render-content-host.name"]';
 

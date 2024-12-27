@@ -87,8 +87,7 @@ export default function createBackfillTaskRunnerTests({ getService }: FtrProvide
     moment().utc().startOf('day').subtract(9, 'days').add(41, 'minutes').toISOString(),
   ];
 
-  // FLAKY: https://github.com/elastic/kibana/issues/192144
-  describe.skip('ad hoc backfill task', () => {
+  describe('ad hoc backfill task', () => {
     beforeEach(async () => {
       await esTestIndexTool.destroy();
       await esTestIndexTool.setup();
@@ -167,7 +166,7 @@ export default function createBackfillTaskRunnerTests({ getService }: FtrProvide
       objectRemover.add(spaceId, ruleId, 'rule', 'alerting');
 
       const start = moment(originalDocTimestamps[1]).utc().startOf('day').toISOString();
-      const end = moment().utc().startOf('day').subtract(9, 'days').toISOString();
+      const end = moment(originalDocTimestamps[11]).utc().startOf('day').toISOString();
 
       // Schedule backfill for this rule
       const response2 = await supertestWithoutAuth

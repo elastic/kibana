@@ -18,6 +18,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
+import type { UserProfileService } from '@kbn/core-user-profile-browser';
 import type { I18nStart } from '@kbn/core-i18n-browser';
 import type { ThemeServiceStart } from '@kbn/core-theme-browser';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
@@ -26,6 +27,7 @@ interface StartServices {
   analytics: Pick<AnalyticsServiceStart, 'reportEvent'>;
   i18n: I18nStart;
   theme: Pick<ThemeServiceStart, 'theme$'>;
+  userProfile: UserProfileService;
 }
 
 import { AppMountParameters } from '@kbn/core/public';

@@ -20,7 +20,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiButtonIcon,
-  EuiIcon,
+  EuiIconTip,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -110,7 +110,7 @@ export const ConfigSensitiveTextArea: React.FC<ConfigInputFieldProps> = ({
               <p>{label}</p>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiIcon type="questionInCircle" />
+              <EuiIconTip content={tooltip} />
             </EuiFlexItem>
           </EuiFlexGroup>
         ) : (
@@ -228,7 +228,7 @@ export const ConnectorConfigurationField: React.FC<ConnectorConfigurationFieldPr
                   <EuiSwitch
                     checked={ensureBooleanType(value)}
                     disabled={isLoading || !hasPlatinumLicense}
-                    label={<p>{label}</p>}
+                    label={label}
                     onChange={(event) => {
                       validateAndSetConfigValue(event.target.checked);
                     }}
@@ -263,27 +263,21 @@ export const ConnectorConfigurationField: React.FC<ConnectorConfigurationFieldPr
         );
       }
       return (
-        <EuiSwitch
-          checked={ensureBooleanType(value)}
-          disabled={isLoading}
-          label={
-            tooltip ? (
-              <EuiFlexGroup gutterSize="xs">
-                <EuiFlexItem>
-                  <p>{label}</p>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiIcon type="questionInCircle" />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            ) : (
-              <p>{label}</p>
-            )
-          }
-          onChange={(event) => {
-            validateAndSetConfigValue(event.target.checked);
-          }}
-        />
+        <EuiFlexGroup direction="row" gutterSize="xs">
+          <EuiSwitch
+            checked={ensureBooleanType(value)}
+            disabled={isLoading}
+            label={label}
+            onChange={(event) => {
+              validateAndSetConfigValue(event.target.checked);
+            }}
+          />
+          {tooltip && (
+            <EuiFlexItem grow={false}>
+              <EuiIconTip content={tooltip} />
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
       );
 
     default:

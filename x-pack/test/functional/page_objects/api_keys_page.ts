@@ -157,5 +157,34 @@ export function ApiKeysPageProvider({ getService }: FtrProviderContext) {
       const toast = await testSubjects.find('updateApiKeySuccessToast');
       return toast.getVisibleText();
     },
+
+    async clickExpiryFilters(type: 'active' | 'expired') {
+      const button = await testSubjects.find(
+        type === 'active' ? 'activeFilterButton' : 'expiredFilterButton'
+      );
+      return button.click();
+    },
+
+    async clickTypeFilters(type: 'personal' | 'managed' | 'cross_cluster') {
+      const buttonMap = {
+        personal: 'personalFilterButton',
+        managed: 'managedFilterButton',
+        cross_cluster: 'crossClusterFilterButton',
+      };
+
+      const button = await testSubjects.find(buttonMap[type]);
+      return button.click();
+    },
+
+    async clickUserNameDropdown() {
+      const button = await testSubjects.find('ownerFilterButton');
+      return button.click();
+    },
+
+    async setSearchBarValue(query: string) {
+      const searchBar = await testSubjects.find('apiKeysSearchBar');
+      await searchBar.clearValue();
+      return searchBar.type(query);
+    },
   };
 }

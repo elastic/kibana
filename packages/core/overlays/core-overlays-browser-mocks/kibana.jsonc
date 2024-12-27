@@ -1,6 +1,10 @@
 {
   "type": "shared-browser",
   "id": "@kbn/core-overlays-browser-mocks",
-  "devOnly": true,
-  "owner": "@elastic/kibana-core"
+  "owner": [
+    "@elastic/kibana-core"
+  ],
+  "group": "platform",
+  "visibility": "shared",
+  "devOnly": true
 }

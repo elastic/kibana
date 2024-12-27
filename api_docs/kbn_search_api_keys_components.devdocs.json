@@ -110,9 +110,9 @@
         "label": "useSearchApiKey",
         "description": [],
         "signature": [
-          "() => { displayedApiKey: string | null; apiKey: string | null; toggleApiKeyVisibility: () => void; updateApiKey: ({ id, encoded }: { id: string; encoded: string; }) => void; status: ",
+          "() => { apiKey: string | null; toggleApiKeyVisibility: () => void; updateApiKey: ({ id, encoded }: { id: string; encoded: string; }) => void; status: ",
           "Status",
-          "; apiKeyIsVisible: boolean; }"
+          "; }"
         ],
         "path": "packages/kbn-search-api-keys-components/src/hooks/use_search_api_key.ts",
         "deprecated": false,

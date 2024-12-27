@@ -8,6 +8,7 @@
  */
 
 import { useEffect } from 'react';
+import { isOfAggregateQueryType } from '@kbn/es-query';
 import { DiscoverSavedSearchContainer } from '../state_management/discover_saved_search_container';
 import { useDiscoverServices } from '../../../hooks/use_discover_services';
 
@@ -23,7 +24,12 @@ export function useUrlTracking(savedSearchContainer: DiscoverSavedSearchContaine
       if (!dataView) {
         return;
       }
-      const trackingEnabled = Boolean(dataView.isPersisted() || savedSearch.id);
+      const trackingEnabled =
+        // Disable for ad-hoc data views as it can't be restored after a page refresh
+        Boolean(dataView.isPersisted() || savedSearch.id) ||
+        // Enable for ES|QL, although it uses ad-hoc data views
+        isOfAggregateQueryType(savedSearch.searchSource.getField('query'));
+
       urlTracker.setTrackingEnabled(trackingEnabled);
     });
 

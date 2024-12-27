@@ -32,6 +32,8 @@ const SAVED_OBJECT_WITH_MIGRATION_TYPE = 'saved-object-with-migration';
 
 const SAVED_OBJECT_MV_TYPE = 'saved-object-mv';
 
+const TYPE_WITH_PREDICTABLE_ID = 'type-with-predictable-ids';
+
 interface MigratedTypePre790 {
   nonEncryptedAttribute: string;
   encryptedAttribute: string;
@@ -82,6 +84,30 @@ export const plugin: PluginInitializer<void, void, PluginsSetup, PluginsStart> =
         attributesToIncludeInAAD: new Set(['publicProperty']),
       });
     }
+
+    core.savedObjects.registerType({
+      name: TYPE_WITH_PREDICTABLE_ID,
+      hidden: false,
+      namespaceType: 'single',
+      mappings: deepFreeze({
+        properties: {
+          publicProperty: { type: 'keyword' },
+          publicPropertyExcludedFromAAD: { type: 'keyword' },
+          publicPropertyStoredEncrypted: { type: 'binary' },
+          privateProperty: { type: 'binary' },
+        },
+      }),
+    });
+
+    deps.encryptedSavedObjects.registerType({
+      type: TYPE_WITH_PREDICTABLE_ID,
+      attributesToEncrypt: new Set([
+        'privateProperty',
+        { key: 'publicPropertyStoredEncrypted', dangerouslyExposeValue: true },
+      ]),
+      attributesToIncludeInAAD: new Set(['publicProperty']),
+      enforceRandomId: false,
+    });
 
     core.savedObjects.registerType({
       name: SAVED_OBJECT_WITHOUT_SECRET_TYPE,

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import type { History } from 'history';
 
 import { useSavedSearchAliasMatchRedirect } from './saved_search_alias_match_redirect';
@@ -44,7 +44,7 @@ describe('useSavedSearchAliasMatchRedirect', () => {
     expect(spaces.ui.redirectLegacyUrl).toHaveBeenCalledWith({
       path: '#/view/aliasTargetId?_g=foo',
       aliasPurpose: 'savedObjectConversion',
-      objectNoun: 'my-title search',
+      objectNoun: `'my-title' Discover session`,
     });
   });
 

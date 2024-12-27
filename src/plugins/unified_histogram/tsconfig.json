@@ -33,6 +33,7 @@
     "@kbn/discover-utils",
     "@kbn/visualization-utils",
     "@kbn/search-types",
+    "@kbn/presentation-publishing",
     "@kbn/data-view-utils",
   ],
   "exclude": [

@@ -6,9 +6,8 @@
  */
 import { MetricDatum, MetricTrendShape } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
-import { EuiIcon, EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiIcon, EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, useEuiTheme } from '@elastic/eui';
 import React, { useCallback } from 'react';
-import { useTheme } from '@kbn/observability-shared-plugin/public';
 import { useFetcher, isPending, FETCH_STATUS } from '../../../../../hooks/use_fetcher';
 import { CLIENT_GEO_COUNTRY_NAME } from '../../../../../../common/es_fields/apm';
 import { NOT_AVAILABLE_LABEL } from '../../../../../../common/i18n';
@@ -45,7 +44,7 @@ export function MobileLocationStats({
   environment: string;
   comparisonEnabled: boolean;
 }) {
-  const euiTheme = useTheme();
+  const { euiTheme } = useEuiTheme();
 
   const previousPeriodLabel = usePreviousPeriodLabel();
 
@@ -107,7 +106,7 @@ export function MobileLocationStats({
 
   const metrics: MetricDatum[] = [
     {
-      color: euiTheme.eui.euiColorLightestShade,
+      color: euiTheme.colors.lightestShade,
       title: i18n.translate('xpack.apm.mobile.location.metrics.http.requests.title', {
         defaultMessage: 'Most used in',
       }),
@@ -121,7 +120,7 @@ export function MobileLocationStats({
       trendShape: MetricTrendShape.Area,
     },
     {
-      color: euiTheme.eui.euiColorLightestShade,
+      color: euiTheme.colors.lightestShade,
       title: i18n.translate('xpack.apm.mobile.location.metrics.mostCrashes', {
         defaultMessage: 'Most crashes',
       }),
@@ -135,7 +134,7 @@ export function MobileLocationStats({
       trendShape: MetricTrendShape.Area,
     },
     {
-      color: euiTheme.eui.euiColorLightestShade,
+      color: euiTheme.colors.lightestShade,
       title: i18n.translate('xpack.apm.mobile.location.metrics.sessions', {
         defaultMessage: 'Most sessions',
       }),
@@ -149,7 +148,7 @@ export function MobileLocationStats({
       trendShape: MetricTrendShape.Area,
     },
     {
-      color: euiTheme.eui.euiColorLightestShade,
+      color: euiTheme.colors.lightestShade,
       title: i18n.translate('xpack.apm.mobile.location.metrics.launches', {
         defaultMessage: 'Most launches',
       }),

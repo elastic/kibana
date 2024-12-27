@@ -19,7 +19,7 @@ import {
 
 const agentExplorerRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/get_agents_per_service',
-  options: { tags: ['access:apm'] },
+  security: { authz: { requiredPrivileges: ['apm'] } },
   params: t.type({
     query: t.intersection([
       environmentRt,
@@ -33,18 +33,16 @@ const agentExplorerRoute = createApmServerRoute({
     ]),
   }),
   async handler(resources): Promise<AgentExplorerAgentsResponse> {
-    const {
-      params,
-      request,
-      plugins: { security },
-    } = resources;
+    const { params, request, core } = resources;
 
     const { environment, kuery, start, end, probability, serviceName, agentLanguage } =
       params.query;
 
+    const coreStart = await core.start();
+
     const [apmEventClient, randomSampler] = await Promise.all([
       getApmEventClient(resources),
-      getRandomSampler({ security, request, probability }),
+      getRandomSampler({ coreStart, request, probability }),
     ]);
 
     return getAgents({
@@ -62,7 +60,7 @@ const agentExplorerRoute = createApmServerRoute({
 
 const latestAgentVersionsRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/get_latest_agent_versions',
-  options: { tags: ['access:apm'] },
+  security: { authz: { requiredPrivileges: ['apm'] } },
   async handler(resources): Promise<AgentLatestVersionsResponse> {
     const { logger, config } = resources;
 
@@ -72,7 +70,7 @@ const latestAgentVersionsRoute = createApmServerRoute({
 
 const agentExplorerInstanceRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/services/{serviceName}/agent_instances',
-  options: { tags: ['access:apm'] },
+  security: { authz: { requiredPrivileges: ['apm'] } },
   params: t.type({
     path: t.type({ serviceName: t.string }),
     query: t.intersection([environmentRt, kueryRt, rangeRt, probabilityRt]),

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { ReactNode } from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { waitFor } from '@testing-library/react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
@@ -50,6 +50,7 @@ jest.mock('../../context_awareness', () => {
     ...originalModule,
     useRootProfile: () => ({
       rootProfileLoading: mockRootProfileLoading,
+      AppWrapper: ({ children }: { children: ReactNode }) => <>{children}</>,
     }),
   };
 });

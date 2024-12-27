@@ -82,7 +82,7 @@ export const CloudDetailsPanel = ({
       <EuiSpacer size="l" />
       <EuiCheckableCard
         id={CloudDetail.ElasticsearchEndpoint}
-        name={CloudDetail.ElasticsearchEndpoint}
+        name="copy-connection-details-choices"
         label={
           <EuiFlexGroup alignItems="center">
             <EuiFlexItem>
@@ -97,7 +97,7 @@ export const CloudDetailsPanel = ({
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <span>
-                <EuiBadge color="success">
+                <EuiBadge color="accent">
                   <FormattedMessage
                     id="searchApiPanels.cloudIdDetails.elasticsearchEndpoint.recommendedBadge"
                     defaultMessage="Recommended"
@@ -123,7 +123,7 @@ export const CloudDetailsPanel = ({
       {Boolean(cloudId) && (
         <EuiCheckableCard
           id={CloudDetail.CloudId}
-          name={CloudDetail.CloudId}
+          name="copy-connection-details-choices"
           label={
             <EuiTitle size="xxs">
               <h5>

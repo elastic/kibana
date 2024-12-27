@@ -33,112 +33,75 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader']);
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
       await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover');
+      await timePicker.setDefaultAbsoluteRangeViaUiSettings();
+      await kibanaServer.uiSettings.update(defaultSettings);
+      await common.navigateToApp('discover');
+      await discover.waitUntilSearchingHasFinished();
     });
 
     after(async () => {
       await kibanaServer.importExport.unload('test/functional/fixtures/kbn_archiver/discover');
       await esArchiver.unload('test/functional/fixtures/es_archiver/logstash_functional');
       await kibanaServer.savedObjects.cleanStandardList();
+      await kibanaServer.uiSettings.replace({});
     });
 
-    [true, false].forEach((useLegacyTable) => {
-      describe(`isLegacy: ${useLegacyTable}`, function () {
-        before(async function () {
-          await timePicker.setDefaultAbsoluteRangeViaUiSettings();
-          await kibanaServer.uiSettings.update({
-            ...defaultSettings,
-            'doc_table:legacy': useLegacyTable,
-          });
-          await common.navigateToApp('discover');
-          await discover.waitUntilSearchingHasFinished();
-        });
+    it('should show Documents tab', async () => {
+      await testSubjects.existOrFail('dscViewModeToggle');
+      await testSubjects.existOrFail('unifiedDataTableToolbar');
 
-        after(async () => {
-          await kibanaServer.uiSettings.replace({});
-        });
+      const documentsTab = await testSubjects.find('dscViewModeDocumentButton');
+      expect(await documentsTab.getAttribute('aria-selected')).to.be('true');
+    });
 
-        it('should show Documents tab', async () => {
-          await testSubjects.existOrFail('dscViewModeToggle');
+    it('should show an error callout', async () => {
+      await queryBar.setQuery('@message::'); // invalid
+      await queryBar.submitQuery();
+      await header.waitUntilLoadingHasFinished();
 
-          if (!useLegacyTable) {
-            await testSubjects.existOrFail('unifiedDataTableToolbar');
-          }
+      await discover.showsErrorCallout();
 
-          const documentsTab = await testSubjects.find('dscViewModeDocumentButton');
-          expect(await documentsTab.getAttribute('aria-selected')).to.be('true');
-        });
+      await queryBar.clearQuery();
+      await queryBar.submitQuery();
+      await header.waitUntilLoadingHasFinished();
 
-        it('should show legacy Document Explorer info callout', async () => {
-          if (useLegacyTable) {
-            await testSubjects.existOrFail('dscDocumentExplorerLegacyCallout');
-          } else {
-            await testSubjects.missingOrFail('dscDocumentExplorerLegacyCallout');
-          }
-        });
+      await testSubjects.missingOrFail('discoverErrorCalloutTitle');
+    });
 
-        it('should show an error callout', async () => {
-          await queryBar.setQuery('@message::'); // invalid
-          await queryBar.submitQuery();
-          await header.waitUntilLoadingHasFinished();
+    describe('Patterns tab (basic license)', function () {
+      this.tags('skipFIPS');
 
-          await discover.showsErrorCallout();
-
-          await queryBar.clearQuery();
-          await queryBar.submitQuery();
-          await header.waitUntilLoadingHasFinished();
-
-          await testSubjects.missingOrFail('discoverErrorCalloutTitle');
-        });
-
-        describe('Patterns tab (basic license)', function () {
-          this.tags('skipFIPS');
-
-          it('should not show', async function () {
-            await testSubjects.missingOrFail('dscViewModePatternAnalysisButton');
-            await retry.try(async () => {
-              const documentTab = await testSubjects.find('dscViewModeDocumentButton');
-              expect(await documentTab.getAttribute('aria-selected')).to.be('true');
-            });
-          });
-        });
-
-        it('should show Field Statistics tab', async () => {
-          await testSubjects.click('dscViewModeFieldStatsButton');
-
-          await retry.try(async () => {
-            const fieldStatsTab = await testSubjects.find('dscViewModeFieldStatsButton');
-            expect(await fieldStatsTab.getAttribute('aria-selected')).to.be('true');
-          });
-
-          await testSubjects.existOrFail('dscViewModeToggle');
-        });
-
-        it('should still show view mode toggle for ES|QL searches', async () => {
-          await testSubjects.click('dscViewModeDocumentButton');
-
-          await retry.try(async () => {
-            const documentsTab = await testSubjects.find('dscViewModeDocumentButton');
-            expect(await documentsTab.getAttribute('aria-selected')).to.be('true');
-          });
-
-          await testSubjects.existOrFail('dscViewModeToggle');
-
-          await discover.selectTextBaseLang();
-
-          await testSubjects.existOrFail('dscViewModeToggle');
-
-          if (!useLegacyTable) {
-            await testSubjects.existOrFail('unifiedDataTableToolbar');
-          }
-        });
-
-        it('should show ES|QL columns callout', async () => {
-          await testSubjects.missingOrFail('dscSelectedColumnsCallout');
-          await unifiedFieldList.clickFieldListItemAdd('extension');
-          await header.waitUntilLoadingHasFinished();
-          await testSubjects.existOrFail('dscSelectedColumnsCallout');
-        });
+      it('should not show', async function () {
+        await testSubjects.missingOrFail('dscViewModePatternAnalysisButton');
       });
+    });
+
+    it('should not show Field Statistics tab', async () => {
+      await testSubjects.existOrFail('dscViewModeToggle');
+    });
+
+    it('should not show view mode toggle for ES|QL searches', async () => {
+      await testSubjects.click('dscViewModeDocumentButton');
+
+      await retry.try(async () => {
+        const documentsTab = await testSubjects.find('dscViewModeDocumentButton');
+        expect(await documentsTab.getAttribute('aria-selected')).to.be('true');
+      });
+
+      await testSubjects.existOrFail('dscViewModeToggle');
+
+      await discover.selectTextBaseLang();
+
+      await testSubjects.missingOrFail('dscViewModeToggle');
+      await testSubjects.existOrFail('discoverQueryTotalHits');
+      await testSubjects.existOrFail('unifiedDataTableToolbar');
+    });
+
+    it('should show ES|QL columns callout', async () => {
+      await testSubjects.missingOrFail('dscSelectedColumnsCallout');
+      await unifiedFieldList.clickFieldListItemAdd('extension');
+      await header.waitUntilLoadingHasFinished();
+      await testSubjects.existOrFail('dscSelectedColumnsCallout');
     });
   });
 }

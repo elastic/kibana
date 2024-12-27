@@ -8,7 +8,7 @@
  */
 
 import { useState, useCallback } from 'react';
-import { Criteria } from '@elastic/eui';
+import type { CriteriaWithPagination } from '@elastic/eui';
 import { DEFAULT_INITIAL_PAGE_SIZE, DEFAULT_PAGE_SIZE_OPTIONS } from './constants';
 import { createStorage } from './storage';
 import { validatePersistData } from './validate_persist_data';
@@ -18,7 +18,7 @@ export interface EuiTablePersistProps<T> {
   /** A unique id that will be included in the local storage variable for this table. */
   tableId: string;
   /** (Optional) Specifies a custom onTableChange handler. */
-  customOnTableChange?: (change: Criteria<T>) => void;
+  customOnTableChange?: (change: CriteriaWithPagination<T>) => void;
   /** (Optional) Specifies a custom initial table sorting. */
   initialSort?: PropertySort<T>;
   /** (Optional) Specifies a custom initial page size for the table. Defaults to 50. */
@@ -33,13 +33,37 @@ export interface EuiTablePersistProps<T> {
  * Returns the persisting page size and sort and the onTableChange handler that should be passed
  * as props to an Eui table component.
  */
-export const useEuiTablePersist = <T extends object>({
+export function useEuiTablePersist<T extends object>(
+  props: EuiTablePersistProps<T> & { initialSort: PropertySort<T> }
+): {
+  sorting: { sort: PropertySort<T> };
+  pageSize: number;
+  onTableChange: (nextValues: CriteriaWithPagination<T>) => void;
+};
+
+export function useEuiTablePersist<T extends object>(
+  props: EuiTablePersistProps<T> & { initialSort?: undefined }
+): {
+  sorting: true;
+  pageSize: number;
+  onTableChange: (nextValues: CriteriaWithPagination<T>) => void;
+};
+
+export function useEuiTablePersist<T extends object>(
+  props: EuiTablePersistProps<T>
+): {
+  sorting: true | { sort: PropertySort<T> };
+  pageSize: number;
+  onTableChange: (nextValues: CriteriaWithPagination<T>) => void;
+};
+
+export function useEuiTablePersist<T extends object>({
   tableId,
   customOnTableChange,
   initialSort,
   initialPageSize,
   pageSizeOptions,
-}: EuiTablePersistProps<T>) => {
+}: EuiTablePersistProps<T>) {
   const storage = createStorage();
   const storedPersistData = storage.get(tableId, undefined);
 
@@ -55,7 +79,7 @@ export const useEuiTablePersist = <T extends object>({
   const sorting = sort ? { sort } : true; // If sort is undefined, return true to allow sorting
 
   const onTableChange = useCallback(
-    (nextValues: Criteria<T>) => {
+    (nextValues: CriteriaWithPagination<T>) => {
       if (customOnTableChange) {
         customOnTableChange(nextValues);
       }
@@ -92,4 +116,4 @@ export const useEuiTablePersist = <T extends object>({
   );
 
   return { pageSize, sorting, onTableChange };
-};
+}

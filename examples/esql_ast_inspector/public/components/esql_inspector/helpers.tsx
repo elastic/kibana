@@ -82,6 +82,8 @@ export const highlight = (query: EsqlQuery): Annotation[] => {
   });
 
   Walker.visitComments(query.ast, (comment) => {
+    if (!comment.location) return;
+
     annotations.push([
       comment.location.min,
       comment.location.max,

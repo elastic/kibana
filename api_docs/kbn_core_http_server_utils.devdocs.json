@@ -1,0 +1,186 @@
+{
+  "id": "@kbn/core-http-server-utils",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/core-http-server-utils",
+        "id": "def-server.isCoreKibanaRequest",
+        "type": "Function",
+        "tags": [],
+        "label": "isCoreKibanaRequest",
+        "description": [],
+        "signature": [
+          "(req: ",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "server",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-server.KibanaRequest",
+            "text": "KibanaRequest"
+          },
+          "<P, Q, B, any>) => boolean"
+        ],
+        "path": "packages/core/http/core-http-server-utils/src/request.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-http-server-utils",
+            "id": "def-server.isCoreKibanaRequest.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "req",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "server",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-server.KibanaRequest",
+                "text": "KibanaRequest"
+              },
+              "<P, Q, B, any>"
+            ],
+            "path": "packages/core/http/core-http-server-utils/src/request.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-http-server-utils",
+        "id": "def-server.kibanaRequestFactory",
+        "type": "Function",
+        "tags": [],
+        "label": "kibanaRequestFactory",
+        "description": [
+          "\nAllows building a KibanaRequest from a RawRequest, leveraging internal CoreKibanaRequest."
+        ],
+        "signature": [
+          "(req: ",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "server",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-server.RawRequest",
+            "text": "RawRequest"
+          },
+          ", routeSchemas: ",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "server",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-server.RouteValidator",
+            "text": "RouteValidator"
+          },
+          "<P, Q, B> | undefined, withoutSecretHeaders: boolean) => ",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "server",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-server.KibanaRequest",
+            "text": "KibanaRequest"
+          },
+          "<P, Q, B, any>"
+        ],
+        "path": "packages/core/http/core-http-server-utils/src/request.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-http-server-utils",
+            "id": "def-server.kibanaRequestFactory.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "req",
+            "description": [
+              "The raw request to build from"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "server",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-server.RawRequest",
+                "text": "RawRequest"
+              }
+            ],
+            "path": "packages/core/http/core-http-server-utils/src/request.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/core-http-server-utils",
+            "id": "def-server.kibanaRequestFactory.$2",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "routeSchemas",
+            "description": [
+              "The route schemas"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "server",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-server.RouteValidator",
+                "text": "RouteValidator"
+              },
+              "<P, Q, B> | undefined"
+            ],
+            "path": "packages/core/http/core-http-server-utils/src/request.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "@kbn/core-http-server-utils",
+            "id": "def-server.kibanaRequestFactory.$3",
+            "type": "boolean",
+            "tags": [],
+            "label": "withoutSecretHeaders",
+            "description": [
+              "Whether we want to exclude secret headers"
+            ],
+            "signature": [
+              "boolean"
+            ],
+            "path": "packages/core/http/core-http-server-utils/src/request.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "A KibanaRequest object"
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

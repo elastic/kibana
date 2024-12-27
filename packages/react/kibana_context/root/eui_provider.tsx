@@ -13,14 +13,21 @@ import createCache from '@emotion/cache';
 
 import { EuiProvider, EuiProviderProps, euiStylisPrefixer } from '@elastic/eui';
 import { EUI_STYLES_GLOBAL, EUI_STYLES_UTILS } from '@kbn/core-base-common';
-import { getColorMode, defaultTheme } from '@kbn/react-kibana-context-common';
-import { ThemeServiceStart } from '@kbn/react-kibana-context-common';
+import {
+  getColorMode,
+  defaultTheme,
+  getThemeConfigByName,
+  DEFAULT_THEME_CONFIG,
+} from '@kbn/react-kibana-context-common';
+import type { UserProfileService } from '@kbn/core-user-profile-browser';
+import type { ThemeServiceStart } from '@kbn/react-kibana-context-common';
 
 /**
  * Props for the KibanaEuiProvider.
  */
 export interface KibanaEuiProviderProps extends Pick<EuiProviderProps<{}>, 'modify' | 'colorMode'> {
   theme: ThemeServiceStart;
+  userProfile?: Pick<UserProfileService, 'getUserProfile$'>; // TODO: use this to access a "high contrast mode" flag from user settings. Pass the flag to EuiProvider, when it is supported in EUI.
   globalStyles?: boolean;
 }
 
@@ -58,14 +65,25 @@ const cache = { default: emotionCache, global: globalCache, utility: utilitiesCa
  * should not be used.  Instead, refer to `KibanaRootContextProvider` to set up the root of Kibana.
  */
 export const KibanaEuiProvider: FC<PropsWithChildren<KibanaEuiProviderProps>> = ({
-  theme: { theme$ },
+  theme,
   globalStyles: globalStylesProp,
   colorMode: colorModeProp,
   modify,
   children,
 }) => {
-  const theme = useObservable(theme$, defaultTheme);
-  const themeColorMode = useMemo(() => getColorMode(theme), [theme]);
+  const { theme$ } = theme;
+
+  // use the selected theme if available before using the defaultTheme; this ensures that
+  // Kibana loads with the currently selected theme without additional updates from default to selected
+  const initialTheme = theme.getTheme?.() ?? defaultTheme;
+
+  const kibanaTheme = useObservable(theme$, initialTheme);
+  const themeColorMode = useMemo(() => getColorMode(kibanaTheme), [kibanaTheme]);
+
+  const _theme = useMemo(() => {
+    const config = getThemeConfigByName(kibanaTheme.name) || DEFAULT_THEME_CONFIG;
+    return config.euiTheme;
+  }, [kibanaTheme.name]);
 
   // In some cases-- like in Storybook or testing-- we want to explicitly override the
   // colorMode provided by the `theme`.
@@ -76,7 +94,16 @@ export const KibanaEuiProvider: FC<PropsWithChildren<KibanaEuiProviderProps>> = 
   const globalStyles = globalStylesProp === false ? false : undefined;
 
   return (
-    <EuiProvider {...{ cache, modify, colorMode, globalStyles, utilityClasses: globalStyles }}>
+    <EuiProvider
+      {...{
+        cache,
+        modify,
+        colorMode,
+        globalStyles,
+        utilityClasses: globalStyles,
+        theme: _theme,
+      }}
+    >
       {children}
     </EuiProvider>
   );

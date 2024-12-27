@@ -15,7 +15,7 @@ The service is always enabled, however, it will return the fallback value if a f
 Kibana only registers a provider when running on Elastic Cloud Hosted/Serverless. And even in those scenarios, we expect that some customers might 
 have network restrictions that might not allow the flags to evaluate. The fallback value must provide a non-broken experience to users.
 
-:warning: Feature Flags are considered dynamic configuration and cannot be used for settings that require restarting Kibana.
+⚠️Feature Flags are considered dynamic configuration and cannot be used for settings that require restarting Kibana.
 One example of invalid use cases are settings used during the `setup` lifecycle of the plugin, such as settings that define 
 if an HTTP route is registered or not. Instead, you should always register the route, and return `404 - Not found` in the route 
 handler if the feature flag returns a _disabled_ state.  

@@ -61,7 +61,7 @@ export function ReactExpressionRenderer({
     <div {...dataAttrs} className={classes}>
       {isEmpty && <PanelLoader />}
       {isLoading && (
-        <EuiProgress size="xs" color="accent" position="absolute" style={{ zIndex: 1 }} />
+        <EuiProgress size="xs" color="accent" position="absolute" css={{ zIndex: 1 }} />
       )}
       {!isLoading && error && renderError?.(error.message, error)}
       <div className="expExpressionRenderer__expression" style={expressionStyles} ref={nodeRef} />

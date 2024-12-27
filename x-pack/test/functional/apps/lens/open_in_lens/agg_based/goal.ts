@@ -9,28 +9,24 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const { visualize, lens, visChart, timePicker, visEditor } = getPageObjects([
+  const { visualize, lens, visChart, visEditor } = getPageObjects([
     'visualize',
     'lens',
     'visChart',
-    'timePicker',
     'visEditor',
   ]);
 
   const testSubjects = getService('testSubjects');
 
   describe('Goal', function describeIndexTests() {
-    const isNewChartsLibraryEnabled = true;
-
     before(async () => {
-      await visualize.initTests(isNewChartsLibraryEnabled);
+      await visualize.initTests();
     });
 
     beforeEach(async () => {
       await visualize.navigateToNewAggBasedVisualization();
       await visualize.clickGoal();
       await visualize.clickNewSearch();
-      await timePicker.setDefaultAbsoluteRange();
     });
 
     it('should show the "Edit Visualization in Lens" menu item', async () => {

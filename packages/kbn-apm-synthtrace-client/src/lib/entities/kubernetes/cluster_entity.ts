@@ -23,6 +23,7 @@ export function k8sClusterJobEntity({
 }) {
   if (schema === 'ecs') {
     return new K8sEntity(schema, {
+      'entity.definition_id': 'cluster',
       'entity.type': 'cluster',
       'orchestrator.cluster.name': name,
       'entity.id': entityId,
@@ -31,6 +32,7 @@ export function k8sClusterJobEntity({
   }
 
   return new K8sEntity(schema, {
+    'entity.definition_id': 'cluster',
     'entity.type': 'cluster',
     'k8s.cluster.uid': name,
     'entity.id': entityId,

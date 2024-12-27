@@ -2,15 +2,22 @@
 
 exports[`Loading indicator default renders correctly 1`] = `
 <div
-  class="euiFlexGroup emotion-euiFlexGroup-responsive-none-spaceAround-center-row"
+  class="euiPanel euiPanel--transparent euiEmptyPrompt emotion-euiPanel-m-transparent-euiEmptyPrompt-vertical"
 >
   <div
-    class="euiFlexItem emotion-euiFlexItem-growZero"
+    class="euiEmptyPrompt__main emotion-euiEmptyPrompt__main-vertical-l"
   >
-    <span
-      aria-label="Loading"
-      class="euiLoadingSpinner emotion-euiLoadingSpinner-l"
-      role="progressbar"
+    <div
+      class="euiEmptyPrompt__icon emotion-euiEmptyPrompt__icon-vertical"
+    >
+      <span
+        aria-label="Loading"
+        class="euiLoadingSpinner emotion-euiLoadingSpinner-l"
+        role="progressbar"
+      />
+    </div>
+    <div
+      class="euiEmptyPrompt__content emotion-euiEmptyPrompt__content-vertical"
     />
   </div>
 </div>
@@ -18,20 +25,27 @@ exports[`Loading indicator default renders correctly 1`] = `
 
 exports[`Loading indicator elastic renders correctly 1`] = `
 <div
-  class="euiFlexGroup emotion-euiFlexGroup-responsive-none-spaceAround-center-row"
+  class="euiPanel euiPanel--transparent euiEmptyPrompt emotion-euiPanel-m-transparent-euiEmptyPrompt-vertical"
 >
   <div
-    class="euiFlexItem emotion-euiFlexItem-growZero"
+    class="euiEmptyPrompt__main emotion-euiEmptyPrompt__main-vertical-l"
   >
-    <span
-      aria-label="Loading"
-      class="euiLoadingElastic emotion-euiLoadingElastic"
-      role="progressbar"
+    <div
+      class="euiEmptyPrompt__icon emotion-euiEmptyPrompt__icon-vertical"
     >
       <span
-        data-euiicon-type="logoElastic"
-      />
-    </span>
+        aria-label="Loading"
+        class="euiLoadingElastic emotion-euiLoadingElastic"
+        role="progressbar"
+      >
+        <span
+          data-euiicon-type="logoElastic"
+        />
+      </span>
+    </div>
+    <div
+      class="euiEmptyPrompt__content emotion-euiEmptyPrompt__content-vertical"
+    />
   </div>
 </div>
 `;

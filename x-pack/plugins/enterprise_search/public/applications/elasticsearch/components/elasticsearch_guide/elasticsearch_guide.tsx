@@ -40,7 +40,7 @@ export const ElasticsearchGuide = () => {
   }, []);
 
   return (
-    <EnterpriseSearchElasticsearchPageTemplate>
+    <EnterpriseSearchElasticsearchPageTemplate pageChrome={[]}>
       {isFlyoutOpen && <CreateApiKeyFlyout onClose={() => setIsFlyoutOpen(false)} />}
       <EuiTitle size="l" data-test-subj="elasticsearchGuide">
         <h1>

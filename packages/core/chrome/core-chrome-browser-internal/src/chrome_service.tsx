@@ -36,6 +36,7 @@ import type {
   ChromeSetProjectBreadcrumbsParams,
   NavigationTreeDefinition,
   AppDeepLinkId,
+  SolutionId,
 } from '@kbn/core-chrome-browser';
 import type { CustomBrandingStart } from '@kbn/core-custom-branding-browser';
 import type {
@@ -181,6 +182,7 @@ export class ChromeService {
   };
 
   // Ensure developers are notified if working in a context that lacks the EUI Provider.
+  // @ts-expect-error
   private handleEuiDevProviderWarning = (notifications: NotificationsStart) => {
     const isDev = this.params.coreContext.env.mode.name === 'development';
     if (isDev) {
@@ -239,7 +241,8 @@ export class ChromeService {
   }: StartDeps): Promise<InternalChromeStart> {
     this.initVisibility(application);
     this.handleEuiFullScreenChanges();
-    this.handleEuiDevProviderWarning(notifications);
+    // commented out until https://github.com/elastic/kibana/issues/201805 can be fixed
+    // this.handleEuiDevProviderWarning(notifications);
 
     const globalHelpExtensionMenuLinks$ = new BehaviorSubject<ChromeGlobalHelpExtensionMenuLink[]>(
       []
@@ -343,7 +346,10 @@ export class ChromeService {
       LinkId extends AppDeepLinkId = AppDeepLinkId,
       Id extends string = string,
       ChildrenId extends string = Id
-    >(id: string, navigationTree$: Observable<NavigationTreeDefinition<LinkId, Id, ChildrenId>>) {
+    >(
+      id: SolutionId,
+      navigationTree$: Observable<NavigationTreeDefinition<LinkId, Id, ChildrenId>>
+    ) {
       validateChromeStyle();
       projectNavigation.initNavigation(id, navigationTree$);
     }

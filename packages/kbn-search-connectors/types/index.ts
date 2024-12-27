@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+export * from './connector_definition';
 export * from './connectors';
 export * from './connectors_api';
 export * from './connector_stats';

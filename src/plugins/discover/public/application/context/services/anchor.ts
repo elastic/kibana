@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { firstValueFrom, lastValueFrom } from 'rxjs';
+import { lastValueFrom } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import { ISearchSource, EsQuerySortValue } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
@@ -23,23 +23,18 @@ export async function fetchAnchor(
   dataView: DataView,
   searchSource: ISearchSource,
   sort: EsQuerySortValue[],
-  useNewFieldsApi: boolean = false,
   services: DiscoverServices
 ): Promise<{
   anchorRow: DataTableRecord;
   interceptedWarnings: SearchResponseWarning[];
 }> {
-  const { core, profilesManager } = services;
-
-  const solutionNavId = await firstValueFrom(core.chrome.getActiveSolutionNavId$());
-  await profilesManager.resolveRootProfile({ solutionNavId });
-  await profilesManager.resolveDataSourceProfile({
+  await services.profilesManager.resolveDataSourceProfile({
     dataSource: createDataSource({ dataView, query: undefined }),
     dataView,
     query: { query: '', language: 'kuery' },
   });
 
-  updateSearchSource(searchSource, anchorId, sort, useNewFieldsApi, dataView);
+  updateSearchSource(searchSource, anchorId, sort, dataView);
 
   const adapter = new RequestAdapter();
   const { rawResponse } = await lastValueFrom(
@@ -68,7 +63,7 @@ export async function fetchAnchor(
   });
 
   return {
-    anchorRow: profilesManager.resolveDocumentProfile({
+    anchorRow: services.profilesManager.resolveDocumentProfile({
       record: buildDataTableRecord(doc, dataView, true),
     }),
     interceptedWarnings,
@@ -79,7 +74,6 @@ export function updateSearchSource(
   searchSource: ISearchSource,
   anchorId: string,
   sort: EsQuerySortValue[],
-  useNewFieldsApi: boolean,
   dataView: DataView
 ) {
   searchSource
@@ -101,9 +95,9 @@ export function updateSearchSource(
     })
     .setField('sort', sort)
     .setField('trackTotalHits', false);
-  if (useNewFieldsApi) {
-    searchSource.removeField('fieldsFromSource');
-    searchSource.setField('fields', [{ field: '*', include_unmapped: true }]);
-  }
+
+  searchSource.removeField('fieldsFromSource');
+  searchSource.setField('fields', [{ field: '*', include_unmapped: true }]);
+
   return searchSource;
 }

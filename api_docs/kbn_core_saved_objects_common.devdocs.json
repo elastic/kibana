@@ -1214,6 +1214,18 @@
             "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_client.ts"
           },
           {
+            "plugin": "@kbn/core-saved-objects-browser-mocks",
+            "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/simple_saved_object.mock.ts"
+          },
+          {
+            "plugin": "@kbn/core-saved-objects-browser-mocks",
+            "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/simple_saved_object.mock.ts"
+          },
+          {
+            "plugin": "@kbn/core-saved-objects-browser-mocks",
+            "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/simple_saved_object.mock.ts"
+          },
+          {
             "plugin": "@kbn/core",
             "path": "src/core/public/index.ts"
           },
@@ -1243,35 +1255,83 @@
           },
           {
             "plugin": "canvas",
-            "path": "x-pack/plugins/canvas/shareable_runtime/types.ts"
+            "path": "x-pack/platform/plugins/private/canvas/shareable_runtime/types.ts"
           },
           {
             "plugin": "canvas",
-            "path": "x-pack/plugins/canvas/shareable_runtime/types.ts"
+            "path": "x-pack/platform/plugins/private/canvas/shareable_runtime/types.ts"
           },
           {
             "plugin": "canvas",
-            "path": "x-pack/plugins/canvas/public/services/canvas_workpad_service.ts"
+            "path": "x-pack/platform/plugins/private/canvas/public/services/canvas_workpad_service.ts"
           },
           {
             "plugin": "canvas",
-            "path": "x-pack/plugins/canvas/public/services/canvas_workpad_service.ts"
+            "path": "x-pack/platform/plugins/private/canvas/public/services/canvas_workpad_service.ts"
           },
           {
             "plugin": "canvas",
-            "path": "x-pack/plugins/canvas/public/components/home/hooks/use_upload_workpad.ts"
+            "path": "x-pack/platform/plugins/private/canvas/public/components/home/hooks/use_upload_workpad.ts"
           },
           {
             "plugin": "canvas",
-            "path": "x-pack/plugins/canvas/public/components/home/hooks/use_upload_workpad.ts"
+            "path": "x-pack/platform/plugins/private/canvas/public/components/home/hooks/use_upload_workpad.ts"
           },
           {
-            "plugin": "savedObjects",
-            "path": "src/plugins/saved_objects/public/saved_object/helpers/find_object_by_title.test.ts"
+            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
+            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/errors.ts"
           },
           {
-            "plugin": "savedObjects",
-            "path": "src/plugins/saved_objects/public/saved_object/helpers/find_object_by_title.test.ts"
+            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
+            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/errors.ts"
+          },
+          {
+            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
+            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/lib/regenerate_ids.ts"
+          },
+          {
+            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
+            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/lib/regenerate_ids.ts"
+          },
+          {
+            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
+            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/apply_export_transforms.ts"
+          },
+          {
+            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
+            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/apply_export_transforms.ts"
+          },
+          {
+            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
+            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/apply_export_transforms.ts"
+          },
+          {
+            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
+            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/apply_export_transforms.ts"
+          },
+          {
+            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
+            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/apply_export_transforms.ts"
+          },
+          {
+            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
+            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/apply_export_transforms.ts"
+          },
+          {
+            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
+            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/apply_export_transforms.ts"
+          },
+          {
+            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
+            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/apply_export_transforms.ts"
+          },
+          {
+            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
+            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/apply_export_transforms.ts"
+          },
+          {
+            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
+            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/apply_export_transforms.ts"
           },
           {
             "plugin": "@kbn/core",
@@ -1306,42 +1366,6 @@
             "path": "x-pack/plugins/saved_objects_tagging/public/utils.ts"
           },
           {
-            "plugin": "lists",
-            "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.mock.ts"
-          },
-          {
-            "plugin": "lists",
-            "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.mock.ts"
-          },
-          {
-            "plugin": "lists",
-            "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.mock.ts"
-          },
-          {
-            "plugin": "lists",
-            "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.mock.ts"
-          },
-          {
-            "plugin": "lists",
-            "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.mock.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/host_risk_score_dashboards.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/host_risk_score_dashboards.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
-          },
-          {
             "plugin": "savedObjectsTagging",
             "path": "x-pack/plugins/saved_objects_tagging/public/utils.test.ts"
           },
@@ -1374,8 +1398,40 @@
             "path": "x-pack/plugins/saved_objects_tagging/common/test_utils/index.ts"
           },
           {
-            "plugin": "savedObjectsManagement",
-            "path": "src/plugins/saved_objects_management/server/lib/find_relationships.test.ts"
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/host_risk_score_dashboards.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/host_risk_score_dashboards.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
+          },
+          {
+            "plugin": "lists",
+            "path": "x-pack/solutions/security/plugins/lists/server/services/exception_lists/exception_list_client.mock.ts"
+          },
+          {
+            "plugin": "lists",
+            "path": "x-pack/solutions/security/plugins/lists/server/services/exception_lists/exception_list_client.mock.ts"
+          },
+          {
+            "plugin": "lists",
+            "path": "x-pack/solutions/security/plugins/lists/server/services/exception_lists/exception_list_client.mock.ts"
+          },
+          {
+            "plugin": "lists",
+            "path": "x-pack/solutions/security/plugins/lists/server/services/exception_lists/exception_list_client.mock.ts"
+          },
+          {
+            "plugin": "lists",
+            "path": "x-pack/solutions/security/plugins/lists/server/services/exception_lists/exception_list_client.mock.ts"
           },
           {
             "plugin": "savedObjectsManagement",
@@ -1390,72 +1446,8 @@
             "path": "src/plugins/saved_objects_management/server/lib/find_relationships.test.ts"
           },
           {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/errors.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/errors.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/lib/regenerate_ids.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/lib/regenerate_ids.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/apply_export_transforms.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/apply_export_transforms.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/apply_export_transforms.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/apply_export_transforms.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/apply_export_transforms.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/apply_export_transforms.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/apply_export_transforms.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/apply_export_transforms.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/apply_export_transforms.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/apply_export_transforms.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-browser-mocks",
-            "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/simple_saved_object.mock.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-browser-mocks",
-            "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/simple_saved_object.mock.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-browser-mocks",
-            "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/simple_saved_object.mock.ts"
+            "plugin": "savedObjectsManagement",
+            "path": "src/plugins/saved_objects_management/server/lib/find_relationships.test.ts"
           },
           {
             "plugin": "@kbn/core-saved-objects-browser-internal",
@@ -1549,55 +1541,55 @@
           },
           {
             "plugin": "triggersActionsUi",
-            "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/rule_form/rule_reducer.ts"
+            "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/sections/rule_form/rule_reducer.ts"
           },
           {
             "plugin": "triggersActionsUi",
-            "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/rule_form/rule_reducer.ts"
+            "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/sections/rule_form/rule_reducer.ts"
           },
           {
             "plugin": "triggersActionsUi",
-            "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/rule_form/rule_reducer.ts"
+            "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/sections/rule_form/rule_reducer.ts"
           },
           {
             "plugin": "triggersActionsUi",
-            "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/rule_form/rule_reducer.ts"
+            "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/sections/rule_form/rule_reducer.ts"
           },
           {
             "plugin": "@kbn/core",
             "path": "src/core/types/index.ts"
           },
           {
-            "plugin": "@kbn/alerts-ui-shared",
-            "path": "packages/kbn-alerts-ui-shared/src/rule_form/rule_actions/rule_actions_item.tsx"
+            "plugin": "@kbn/response-ops-rule-form",
+            "path": "packages/response-ops/rule_form/src/rule_actions/rule_actions_item.tsx"
           },
           {
-            "plugin": "@kbn/alerts-ui-shared",
-            "path": "packages/kbn-alerts-ui-shared/src/rule_form/rule_actions/rule_actions_item.tsx"
+            "plugin": "@kbn/response-ops-rule-form",
+            "path": "packages/response-ops/rule_form/src/rule_actions/rule_actions_item.tsx"
           },
           {
-            "plugin": "@kbn/alerts-ui-shared",
-            "path": "packages/kbn-alerts-ui-shared/src/rule_form/rule_actions/rule_actions_item.tsx"
+            "plugin": "@kbn/response-ops-rule-form",
+            "path": "packages/response-ops/rule_form/src/rule_actions/rule_actions_item.tsx"
           },
           {
-            "plugin": "@kbn/alerts-ui-shared",
-            "path": "packages/kbn-alerts-ui-shared/src/rule_form/rule_actions/rule_actions_item.tsx"
+            "plugin": "@kbn/response-ops-rule-form",
+            "path": "packages/response-ops/rule_form/src/rule_actions/rule_actions_item.tsx"
           },
           {
-            "plugin": "@kbn/alerts-ui-shared",
-            "path": "packages/kbn-alerts-ui-shared/src/rule_form/rule_actions/rule_actions_system_actions_item.tsx"
+            "plugin": "@kbn/response-ops-rule-form",
+            "path": "packages/response-ops/rule_form/src/rule_actions/rule_actions_system_actions_item.tsx"
           },
           {
-            "plugin": "@kbn/alerts-ui-shared",
-            "path": "packages/kbn-alerts-ui-shared/src/rule_form/rule_actions/rule_actions_system_actions_item.tsx"
+            "plugin": "@kbn/response-ops-rule-form",
+            "path": "packages/response-ops/rule_form/src/rule_actions/rule_actions_system_actions_item.tsx"
           },
           {
-            "plugin": "@kbn/alerts-ui-shared",
-            "path": "packages/kbn-alerts-ui-shared/src/rule_form/rule_actions/rule_actions_system_actions_item.tsx"
+            "plugin": "@kbn/response-ops-rule-form",
+            "path": "packages/response-ops/rule_form/src/rule_actions/rule_actions_system_actions_item.tsx"
           },
           {
-            "plugin": "@kbn/alerts-ui-shared",
-            "path": "packages/kbn-alerts-ui-shared/src/rule_form/rule_actions/rule_actions_system_actions_item.tsx"
+            "plugin": "@kbn/response-ops-rule-form",
+            "path": "packages/response-ops/rule_form/src/rule_actions/rule_actions_system_actions_item.tsx"
           }
         ],
         "initialIsOpen": false
@@ -1620,22 +1612,6 @@
             "path": "src/core/public/index.ts"
           },
           {
-            "plugin": "embeddable",
-            "path": "src/plugins/embeddable/public/lib/embeddables/default_embeddable_factory_provider.ts"
-          },
-          {
-            "plugin": "embeddable",
-            "path": "src/plugins/embeddable/public/lib/embeddables/default_embeddable_factory_provider.ts"
-          },
-          {
-            "plugin": "embeddable",
-            "path": "src/plugins/embeddable/public/types.ts"
-          },
-          {
-            "plugin": "embeddable",
-            "path": "src/plugins/embeddable/public/types.ts"
-          },
-          {
             "plugin": "savedObjects",
             "path": "src/plugins/saved_objects/public/types.ts"
           },
@@ -1654,30 +1630,6 @@
           {
             "plugin": "savedObjects",
             "path": "src/plugins/saved_objects/public/types.ts"
-          },
-          {
-            "plugin": "savedObjects",
-            "path": "src/plugins/saved_objects/public/saved_object/helpers/find_object_by_title.ts"
-          },
-          {
-            "plugin": "savedObjects",
-            "path": "src/plugins/saved_objects/public/saved_object/helpers/find_object_by_title.ts"
-          },
-          {
-            "plugin": "savedObjects",
-            "path": "src/plugins/saved_objects/public/saved_object/helpers/save_with_confirmation.ts"
-          },
-          {
-            "plugin": "savedObjects",
-            "path": "src/plugins/saved_objects/public/saved_object/helpers/save_with_confirmation.ts"
-          },
-          {
-            "plugin": "savedObjects",
-            "path": "src/plugins/saved_objects/public/saved_object/helpers/create_source.ts"
-          },
-          {
-            "plugin": "savedObjects",
-            "path": "src/plugins/saved_objects/public/saved_object/helpers/create_source.ts"
           },
           {
             "plugin": "visualizations",
@@ -1696,22 +1648,6 @@
             "path": "src/plugins/visualizations/public/legacy/embeddable/visualize_embeddable.tsx"
           },
           {
-            "plugin": "visualizations",
-            "path": "src/plugins/visualizations/public/legacy/embeddable/visualize_embeddable_factory.tsx"
-          },
-          {
-            "plugin": "visualizations",
-            "path": "src/plugins/visualizations/public/legacy/embeddable/visualize_embeddable_factory.tsx"
-          },
-          {
-            "plugin": "canvas",
-            "path": "x-pack/plugins/canvas/shareable_runtime/types.ts"
-          },
-          {
-            "plugin": "canvas",
-            "path": "x-pack/plugins/canvas/shareable_runtime/types.ts"
-          },
-          {
             "plugin": "graph",
             "path": "x-pack/plugins/graph/public/services/persistence/saved_workspace_references.ts"
           },
@@ -1728,16 +1664,12 @@
             "path": "x-pack/plugins/graph/public/helpers/saved_workspace_utils.ts"
           },
           {
-            "plugin": "savedObjects",
-            "path": "src/plugins/saved_objects/public/saved_object/helpers/save_with_confirmation.test.ts"
+            "plugin": "canvas",
+            "path": "x-pack/platform/plugins/private/canvas/shareable_runtime/types.ts"
           },
           {
-            "plugin": "savedObjects",
-            "path": "src/plugins/saved_objects/public/saved_object/helpers/save_with_confirmation.test.ts"
-          },
-          {
-            "plugin": "savedObjects",
-            "path": "src/plugins/saved_objects/public/saved_object/helpers/save_with_confirmation.test.ts"
+            "plugin": "canvas",
+            "path": "x-pack/platform/plugins/private/canvas/shareable_runtime/types.ts"
           },
           {
             "plugin": "@kbn/core",
@@ -1745,11 +1677,11 @@
           },
           {
             "plugin": "ml",
-            "path": "x-pack/plugins/ml/common/types/modules.ts"
+            "path": "x-pack/platform/plugins/shared/ml/common/types/modules.ts"
           },
           {
             "plugin": "ml",
-            "path": "x-pack/plugins/ml/common/types/modules.ts"
+            "path": "x-pack/platform/plugins/shared/ml/common/types/modules.ts"
           }
         ],
         "initialIsOpen": false
@@ -1900,14 +1832,6 @@
           },
           {
             "plugin": "visualizations",
-            "path": "src/plugins/visualizations/public/legacy/embeddable/visualize_embeddable_factory.tsx"
-          },
-          {
-            "plugin": "visualizations",
-            "path": "src/plugins/visualizations/public/legacy/embeddable/visualize_embeddable_factory.tsx"
-          },
-          {
-            "plugin": "visualizations",
             "path": "src/plugins/visualizations/public/visualize_app/components/visualize_listing.tsx"
           },
           {
@@ -1949,18 +1873,6 @@
           {
             "plugin": "lens",
             "path": "x-pack/plugins/lens/public/persistence/saved_object_store.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/state_management/selectors.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/state_management/selectors.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/state_management/selectors.ts"
           },
           {
             "plugin": "lens",
@@ -2092,6 +2004,14 @@
           },
           {
             "plugin": "lens",
+            "path": "x-pack/plugins/lens/public/react_embeddable/types.ts"
+          },
+          {
+            "plugin": "lens",
+            "path": "x-pack/plugins/lens/public/react_embeddable/types.ts"
+          },
+          {
+            "plugin": "lens",
             "path": "x-pack/plugins/lens/public/types.ts"
           },
           {
@@ -2136,19 +2056,19 @@
           },
           {
             "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/routes/map_page/saved_map/load_from_library.ts"
+            "path": "x-pack/platform/plugins/shared/maps/public/routes/map_page/saved_map/load_from_library.ts"
           },
           {
             "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/routes/map_page/saved_map/load_from_library.ts"
+            "path": "x-pack/platform/plugins/shared/maps/public/routes/map_page/saved_map/load_from_library.ts"
           },
           {
             "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/routes/map_page/saved_map/save_to_library.ts"
+            "path": "x-pack/platform/plugins/shared/maps/public/routes/map_page/saved_map/save_to_library.ts"
           },
           {
             "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/routes/map_page/saved_map/save_to_library.ts"
+            "path": "x-pack/platform/plugins/shared/maps/public/routes/map_page/saved_map/save_to_library.ts"
           },
           {
             "plugin": "graph",
@@ -2184,11 +2104,11 @@
           },
           {
             "plugin": "dashboard",
-            "path": "src/plugins/dashboard/common/bwc/types.ts"
+            "path": "src/platform/plugins/shared/dashboard/common/bwc/types.ts"
           },
           {
             "plugin": "dashboard",
-            "path": "src/plugins/dashboard/common/bwc/types.ts"
+            "path": "src/platform/plugins/shared/dashboard/common/bwc/types.ts"
           },
           {
             "plugin": "@kbn/core",
@@ -2296,23 +2216,23 @@
           },
           {
             "plugin": "embeddable",
-            "path": "src/plugins/embeddable/common/lib/migrate_base_input.ts"
+            "path": "src/platform/plugins/shared/embeddable/common/lib/migrate_base_input.ts"
           },
           {
             "plugin": "embeddable",
-            "path": "src/plugins/embeddable/common/lib/migrate_base_input.ts"
+            "path": "src/platform/plugins/shared/embeddable/common/lib/migrate_base_input.ts"
           },
           {
             "plugin": "embeddable",
-            "path": "src/plugins/embeddable/common/lib/migrate_base_input.ts"
+            "path": "src/platform/plugins/shared/embeddable/common/lib/migrate_base_input.ts"
           },
           {
             "plugin": "embeddable",
-            "path": "src/plugins/embeddable/common/lib/inject.ts"
+            "path": "src/platform/plugins/shared/embeddable/common/lib/inject.ts"
           },
           {
             "plugin": "embeddable",
-            "path": "src/plugins/embeddable/common/lib/inject.ts"
+            "path": "src/platform/plugins/shared/embeddable/common/lib/inject.ts"
           },
           {
             "plugin": "uiActionsEnhanced",
@@ -2432,95 +2352,91 @@
           },
           {
             "plugin": "lens",
-            "path": "x-pack/plugins/lens/common/embeddable_factory/index.ts"
+            "path": "x-pack/plugins/lens/public/react_embeddable/helper.ts"
           },
           {
             "plugin": "lens",
-            "path": "x-pack/plugins/lens/common/embeddable_factory/index.ts"
+            "path": "x-pack/plugins/lens/public/react_embeddable/helper.ts"
+          },
+          {
+            "plugin": "lens",
+            "path": "x-pack/plugins/lens/public/lens_attribute_service.ts"
+          },
+          {
+            "plugin": "lens",
+            "path": "x-pack/plugins/lens/public/lens_attribute_service.ts"
+          },
+          {
+            "plugin": "lens",
+            "path": "x-pack/plugins/lens/public/lens_attribute_service.ts"
+          },
+          {
+            "plugin": "controls",
+            "path": "src/platform/plugins/shared/controls/server/control_group/control_group_persistable_state.ts"
+          },
+          {
+            "plugin": "controls",
+            "path": "src/platform/plugins/shared/controls/server/control_group/control_group_persistable_state.ts"
+          },
+          {
+            "plugin": "controls",
+            "path": "src/platform/plugins/shared/controls/server/control_group/control_group_persistable_state.ts"
+          },
+          {
+            "plugin": "controls",
+            "path": "src/platform/plugins/shared/controls/server/options_list/options_list_persistable_state.ts"
+          },
+          {
+            "plugin": "controls",
+            "path": "src/platform/plugins/shared/controls/server/options_list/options_list_persistable_state.ts"
+          },
+          {
+            "plugin": "controls",
+            "path": "src/platform/plugins/shared/controls/server/options_list/options_list_persistable_state.ts"
+          },
+          {
+            "plugin": "controls",
+            "path": "src/platform/plugins/shared/controls/server/range_slider/range_slider_persistable_state.ts"
+          },
+          {
+            "plugin": "controls",
+            "path": "src/platform/plugins/shared/controls/server/range_slider/range_slider_persistable_state.ts"
+          },
+          {
+            "plugin": "controls",
+            "path": "src/platform/plugins/shared/controls/server/range_slider/range_slider_persistable_state.ts"
+          },
+          {
+            "plugin": "controls",
+            "path": "src/platform/plugins/shared/controls/server/time_slider/time_slider_persistable_state.ts"
+          },
+          {
+            "plugin": "controls",
+            "path": "src/platform/plugins/shared/controls/server/time_slider/time_slider_persistable_state.ts"
+          },
+          {
+            "plugin": "controls",
+            "path": "src/platform/plugins/shared/controls/server/time_slider/time_slider_persistable_state.ts"
           },
           {
             "plugin": "maps",
-            "path": "x-pack/plugins/maps/common/migrations/references.ts"
+            "path": "x-pack/platform/plugins/shared/maps/common/migrations/references.ts"
           },
           {
             "plugin": "maps",
-            "path": "x-pack/plugins/maps/common/migrations/references.ts"
+            "path": "x-pack/platform/plugins/shared/maps/common/migrations/references.ts"
           },
           {
             "plugin": "maps",
-            "path": "x-pack/plugins/maps/common/migrations/references.ts"
+            "path": "x-pack/platform/plugins/shared/maps/common/migrations/references.ts"
           },
           {
             "plugin": "maps",
-            "path": "x-pack/plugins/maps/common/migrations/references.ts"
+            "path": "x-pack/platform/plugins/shared/maps/common/migrations/references.ts"
           },
           {
             "plugin": "maps",
-            "path": "x-pack/plugins/maps/common/migrations/references.ts"
-          },
-          {
-            "plugin": "canvas",
-            "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/external/saved_lens.ts"
-          },
-          {
-            "plugin": "canvas",
-            "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/external/saved_lens.ts"
-          },
-          {
-            "plugin": "canvas",
-            "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/external/saved_map.ts"
-          },
-          {
-            "plugin": "canvas",
-            "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/external/saved_map.ts"
-          },
-          {
-            "plugin": "canvas",
-            "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/external/saved_search.ts"
-          },
-          {
-            "plugin": "canvas",
-            "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/external/saved_search.ts"
-          },
-          {
-            "plugin": "canvas",
-            "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/external/saved_visualization.ts"
-          },
-          {
-            "plugin": "canvas",
-            "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/external/saved_visualization.ts"
-          },
-          {
-            "plugin": "canvas",
-            "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/external/embeddable.ts"
-          },
-          {
-            "plugin": "canvas",
-            "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/external/embeddable.ts"
-          },
-          {
-            "plugin": "dashboardEnhanced",
-            "path": "x-pack/plugins/dashboard_enhanced/common/drilldowns/dashboard_drilldown/dashboard_drilldown_persistable_state.ts"
-          },
-          {
-            "plugin": "dashboardEnhanced",
-            "path": "x-pack/plugins/dashboard_enhanced/common/drilldowns/dashboard_drilldown/dashboard_drilldown_persistable_state.ts"
-          },
-          {
-            "plugin": "dashboardEnhanced",
-            "path": "x-pack/plugins/dashboard_enhanced/common/drilldowns/dashboard_drilldown/dashboard_drilldown_persistable_state.ts"
-          },
-          {
-            "plugin": "uiActionsEnhanced",
-            "path": "src/plugins/ui_actions_enhanced/server/dynamic_action_enhancement.ts"
-          },
-          {
-            "plugin": "uiActionsEnhanced",
-            "path": "src/plugins/ui_actions_enhanced/server/dynamic_action_enhancement.ts"
-          },
-          {
-            "plugin": "uiActionsEnhanced",
-            "path": "src/plugins/ui_actions_enhanced/server/dynamic_action_enhancement.ts"
+            "path": "x-pack/platform/plugins/shared/maps/common/migrations/references.ts"
           },
           {
             "plugin": "savedObjectsTagging",
@@ -2559,52 +2475,68 @@
             "path": "x-pack/plugins/global_search_providers/server/providers/saved_objects/map_object_to_result.test.ts"
           },
           {
-            "plugin": "controls",
-            "path": "src/plugins/controls/server/control_group/control_group_persistable_state.ts"
+            "plugin": "canvas",
+            "path": "x-pack/platform/plugins/private/canvas/canvas_plugin_src/functions/external/saved_lens.ts"
           },
           {
-            "plugin": "controls",
-            "path": "src/plugins/controls/server/control_group/control_group_persistable_state.ts"
+            "plugin": "canvas",
+            "path": "x-pack/platform/plugins/private/canvas/canvas_plugin_src/functions/external/saved_lens.ts"
           },
           {
-            "plugin": "controls",
-            "path": "src/plugins/controls/server/control_group/control_group_persistable_state.ts"
+            "plugin": "canvas",
+            "path": "x-pack/platform/plugins/private/canvas/canvas_plugin_src/functions/external/saved_map.ts"
           },
           {
-            "plugin": "controls",
-            "path": "src/plugins/controls/server/options_list/options_list_persistable_state.ts"
+            "plugin": "canvas",
+            "path": "x-pack/platform/plugins/private/canvas/canvas_plugin_src/functions/external/saved_map.ts"
           },
           {
-            "plugin": "controls",
-            "path": "src/plugins/controls/server/options_list/options_list_persistable_state.ts"
+            "plugin": "canvas",
+            "path": "x-pack/platform/plugins/private/canvas/canvas_plugin_src/functions/external/saved_search.ts"
           },
           {
-            "plugin": "controls",
-            "path": "src/plugins/controls/server/options_list/options_list_persistable_state.ts"
+            "plugin": "canvas",
+            "path": "x-pack/platform/plugins/private/canvas/canvas_plugin_src/functions/external/saved_search.ts"
           },
           {
-            "plugin": "controls",
-            "path": "src/plugins/controls/server/range_slider/range_slider_persistable_state.ts"
+            "plugin": "canvas",
+            "path": "x-pack/platform/plugins/private/canvas/canvas_plugin_src/functions/external/saved_visualization.ts"
           },
           {
-            "plugin": "controls",
-            "path": "src/plugins/controls/server/range_slider/range_slider_persistable_state.ts"
+            "plugin": "canvas",
+            "path": "x-pack/platform/plugins/private/canvas/canvas_plugin_src/functions/external/saved_visualization.ts"
           },
           {
-            "plugin": "controls",
-            "path": "src/plugins/controls/server/range_slider/range_slider_persistable_state.ts"
+            "plugin": "canvas",
+            "path": "x-pack/platform/plugins/private/canvas/canvas_plugin_src/functions/external/embeddable.ts"
           },
           {
-            "plugin": "controls",
-            "path": "src/plugins/controls/server/time_slider/time_slider_persistable_state.ts"
+            "plugin": "canvas",
+            "path": "x-pack/platform/plugins/private/canvas/canvas_plugin_src/functions/external/embeddable.ts"
           },
           {
-            "plugin": "controls",
-            "path": "src/plugins/controls/server/time_slider/time_slider_persistable_state.ts"
+            "plugin": "dashboardEnhanced",
+            "path": "x-pack/platform/plugins/shared/dashboard_enhanced/common/drilldowns/dashboard_drilldown/dashboard_drilldown_persistable_state.ts"
           },
           {
-            "plugin": "controls",
-            "path": "src/plugins/controls/server/time_slider/time_slider_persistable_state.ts"
+            "plugin": "dashboardEnhanced",
+            "path": "x-pack/platform/plugins/shared/dashboard_enhanced/common/drilldowns/dashboard_drilldown/dashboard_drilldown_persistable_state.ts"
+          },
+          {
+            "plugin": "dashboardEnhanced",
+            "path": "x-pack/platform/plugins/shared/dashboard_enhanced/common/drilldowns/dashboard_drilldown/dashboard_drilldown_persistable_state.ts"
+          },
+          {
+            "plugin": "uiActionsEnhanced",
+            "path": "src/plugins/ui_actions_enhanced/server/dynamic_action_enhancement.ts"
+          },
+          {
+            "plugin": "uiActionsEnhanced",
+            "path": "src/plugins/ui_actions_enhanced/server/dynamic_action_enhancement.ts"
+          },
+          {
+            "plugin": "uiActionsEnhanced",
+            "path": "src/plugins/ui_actions_enhanced/server/dynamic_action_enhancement.ts"
           },
           {
             "plugin": "expressions",

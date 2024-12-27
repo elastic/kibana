@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiBadge, EuiFlyout } from '@elastic/eui';
+import { EuiBadge, EuiLink, EuiFlyout, EuiPanel } from '@elastic/eui';
 import {
   AppMenuActionId,
   AppMenuActionType,
@@ -21,8 +21,11 @@ import { capitalize } from 'lodash';
 import React from 'react';
 import { DataSourceType, isDataSourceType } from '../../../../../common/data_sources';
 import { DataSourceCategory, DataSourceProfileProvider } from '../../../profiles';
+import { useExampleContext } from '../example_context';
 
-export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvider => ({
+export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvider<{
+  formatRecord: (flattenedRecord: Record<string, unknown>) => string;
+}> => ({
   profileId: 'example-data-source-profile',
   isExperimental: true,
   profile: {
@@ -58,26 +61,47 @@ export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvi
           </EuiBadge>
         );
       },
-    }),
-    getDocViewer: (prev) => (params) => {
-      const recordId = params.record.id;
-      const prevValue = prev(params);
-      return {
-        title: `Record #${recordId}`,
-        docViewsRegistry: (registry) => {
-          registry.add({
-            id: 'doc_view_example',
-            title: 'Example',
-            order: 0,
-            component: () => (
-              <div data-test-subj="exampleDataSourceProfileDocView">Example Doc View</div>
-            ),
-          });
+      message: function Message(props) {
+        const { currentMessage, setCurrentMessage } = useExampleContext();
+        const message = getFieldValue(props.row, 'message') as string;
 
-          return prevValue.docViewsRegistry(registry);
-        },
-      };
-    },
+        return (
+          <EuiLink
+            onClick={() => setCurrentMessage(message)}
+            css={{ fontWeight: currentMessage === message ? 'bold' : undefined }}
+            data-test-subj="exampleDataSourceProfileMessage"
+          >
+            {message}
+          </EuiLink>
+        );
+      },
+    }),
+    getDocViewer:
+      (prev, { context }) =>
+      (params) => {
+        const recordId = params.record.id;
+        const prevValue = prev(params);
+        return {
+          title: `Record #${recordId}`,
+          docViewsRegistry: (registry) => {
+            registry.add({
+              id: 'doc_view_example',
+              title: 'Example',
+              order: 0,
+              component: () => (
+                <EuiPanel color="transparent" hasShadow={false}>
+                  <div data-test-subj="exampleDataSourceProfileDocView">Example Doc View</div>
+                  <pre data-test-subj="exampleDataSourceProfileDocViewRecord">
+                    {context.formatRecord(params.record.flattened)}
+                  </pre>
+                </EuiPanel>
+              ),
+            });
+
+            return prevValue.docViewsRegistry(registry);
+          },
+        };
+      },
     /**
      * The `getAppMenu` extension point gives access to AppMenuRegistry with methods registerCustomAction and registerCustomActionUnderSubmenu.
      * The extension also provides the essential params like current dataView, adHocDataViews etc when defining a custom action implementation.
@@ -196,6 +220,7 @@ export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvi
       ];
     },
     getDefaultAppState: () => () => ({
+      breakdownField: 'log.level',
       columns: [
         {
           name: '@timestamp',
@@ -252,7 +277,10 @@ export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvi
 
     return {
       isMatch: true,
-      context: { category: DataSourceCategory.Logs },
+      context: {
+        category: DataSourceCategory.Logs,
+        formatRecord: (record) => JSON.stringify(record, null, 2),
+      },
     };
   },
 });

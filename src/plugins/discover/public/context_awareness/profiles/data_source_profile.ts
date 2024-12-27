@@ -10,7 +10,11 @@
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { AggregateQuery, Query } from '@kbn/es-query';
 import type { DiscoverDataSource } from '../../../common/data_sources';
-import { AsyncProfileProvider, AsyncProfileService } from '../profile_service';
+import {
+  AsyncProfileProvider,
+  AsyncProfileService,
+  ContextWithProfileId,
+} from '../profile_service';
 import type { Profile } from '../types';
 import type { RootContext } from './root_profile';
 
@@ -25,7 +29,7 @@ export enum DataSourceCategory {
 /**
  * The data source profile interface
  */
-export type DataSourceProfile = Profile;
+export type DataSourceProfile = Omit<Profile, 'getRenderAppWrapper'>;
 
 /**
  * Parameters for the data source profile provider `resolve` method
@@ -34,7 +38,7 @@ export interface DataSourceProfileProviderParams {
   /**
    * The current root context
    */
-  rootContext: RootContext;
+  rootContext: ContextWithProfileId<RootContext>;
   /**
    * The current data source
    */
@@ -59,17 +63,13 @@ export interface DataSourceContext {
   category: DataSourceCategory;
 }
 
-export type DataSourceProfileProvider = AsyncProfileProvider<
+export type DataSourceProfileProvider<TProviderContext = {}> = AsyncProfileProvider<
   DataSourceProfile,
   DataSourceProfileProviderParams,
-  DataSourceContext
+  DataSourceContext & TProviderContext
 >;
 
-export class DataSourceProfileService extends AsyncProfileService<
-  DataSourceProfile,
-  DataSourceProfileProviderParams,
-  DataSourceContext
-> {
+export class DataSourceProfileService extends AsyncProfileService<DataSourceProfileProvider> {
   constructor() {
     super({
       profileId: 'default-data-source-profile',

@@ -8,10 +8,10 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
-import { renderHook, WrapperComponent } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { dataViewMock, esHitsMockWithSort } from '@kbn/discover-utils/src/__mocks__';
-import { useFetchMoreRecords, UseFetchMoreRecordsParams } from './use_fetch_more_records';
+import { useFetchMoreRecords } from './use_fetch_more_records';
 import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
 import {
   DataDocuments$,
@@ -47,10 +47,8 @@ describe('useFetchMoreRecords', () => {
     return stateContainer;
   };
 
-  const getWrapper = (
-    stateContainer: DiscoverStateContainer
-  ): WrapperComponent<React.PropsWithChildren<UseFetchMoreRecordsParams>> => {
-    return ({ children }) => (
+  const getWrapper = (stateContainer: DiscoverStateContainer) => {
+    return ({ children }: React.PropsWithChildren<unknown>) => (
       <DiscoverMainProvider value={stateContainer}>
         <>{children}</>
       </DiscoverMainProvider>

@@ -11,7 +11,7 @@ import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
-import { API_DOCS_URL } from '../../../routes';
+import { docLinks } from '../../../../shared/doc_links';
 
 export const EmptyState: React.FC = () => (
   <EuiEmptyPrompt
@@ -31,7 +31,7 @@ export const EmptyState: React.FC = () => (
       </p>
     }
     actions={
-      <EuiButton size="s" target="_blank" iconType="popout" href={API_DOCS_URL}>
+      <EuiButton size="s" target="_blank" iconType="popout" href={docLinks.appSearchApis}>
         {i18n.translate('xpack.enterpriseSearch.appSearch.engine.apiLogs.empty.buttonLabel', {
           defaultMessage: 'View the API reference',
         })}

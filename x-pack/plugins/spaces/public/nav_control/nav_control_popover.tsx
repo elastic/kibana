@@ -97,7 +97,7 @@ class NavControlPopoverUI extends Component<Props, State> {
     const isTourOpen = Boolean(activeSpace) && this.state.showTour && !this.state.showSpaceSelector;
 
     let element: React.ReactNode;
-    if (this.state.loading || this.state.spaces.length < 2) {
+    if (this.state.loading) {
       element = (
         <SpacesDescription
           id={popoutContentId}

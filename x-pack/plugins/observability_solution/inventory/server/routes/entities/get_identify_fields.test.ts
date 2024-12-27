@@ -5,52 +5,60 @@
  * 2.0.
  */
 
-import type { Entity } from '../../../common/entities';
-import {
-  ENTITY_DEFINITION_ID,
-  ENTITY_DISPLAY_NAME,
-  ENTITY_ID,
-  ENTITY_IDENTITY_FIELDS,
-  ENTITY_LAST_SEEN,
-} from '@kbn/observability-shared-plugin/common';
+import type { InventoryEntity } from '../../../common/entities';
 import { getIdentityFieldsPerEntityType } from './get_identity_fields_per_entity_type';
 
-const commonEntityFields = {
-  [ENTITY_LAST_SEEN]: '2023-10-09T00:00:00Z',
-  [ENTITY_ID]: '1',
-  [ENTITY_DISPLAY_NAME]: 'entity_name',
-  [ENTITY_DEFINITION_ID]: 'entity_definition_id',
-  alertCount: 3,
+const commonEntityFields: Partial<InventoryEntity> = {
+  entityLastSeenTimestamp: '2023-10-09T00:00:00Z',
+  entityId: '1',
+  entityDisplayName: 'entity_name',
+  entityDefinitionId: 'entity_definition_id',
+  alertsCount: 3,
 };
+
 describe('getIdentityFields', () => {
   it('should return an empty Map when no entities are provided', () => {
     const result = getIdentityFieldsPerEntityType([]);
     expect(result.size).toBe(0);
   });
   it('should return a Map with unique entity types and their respective identity fields', () => {
-    const serviceEntity: Entity = {
-      'agent.name': 'node',
-      'entity.identity_fields': ['service.name', 'service.environment'],
-      'service.name': 'my-service',
-      'entity.type': 'service',
-      ...commonEntityFields,
+    const serviceEntity: InventoryEntity = {
+      ...(commonEntityFields as InventoryEntity),
+      entityIdentityFields: ['service.name', 'service.environment'],
+      entityType: 'service',
+      agent: {
+        name: 'node',
+      },
+      service: {
+        name: 'my-service',
+      },
     };
 
-    const hostEntity: Entity = {
-      [ENTITY_IDENTITY_FIELDS]: ['host.name'],
-      'host.name': 'my-host',
-      'entity.type': 'host',
-      'cloud.provider': null,
-      ...commonEntityFields,
+    const hostEntity: InventoryEntity = {
+      ...(commonEntityFields as InventoryEntity),
+      entityIdentityFields: ['host.name'],
+      entityType: 'host',
+      cloud: {
+        provider: null,
+      },
+      host: {
+        name: 'my-host',
+      },
     };
 
-    const containerEntity: Entity = {
-      [ENTITY_IDENTITY_FIELDS]: 'container.id',
-      'host.name': 'my-host',
-      'entity.type': 'container',
-      'cloud.provider': null,
-      'container.id': '123',
-      ...commonEntityFields,
+    const containerEntity: InventoryEntity = {
+      ...(commonEntityFields as InventoryEntity),
+      entityIdentityFields: ['container.id'],
+      entityType: 'container',
+      host: {
+        name: 'my-host',
+      },
+      cloud: {
+        provider: null,
+      },
+      container: {
+        id: '123',
+      },
     };
 
     const mockEntities = [serviceEntity, hostEntity, containerEntity];

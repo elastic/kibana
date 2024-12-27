@@ -165,7 +165,6 @@ GET connector-${rawName}/_search
       onClick={() => {
         setFlyoutContent('manual_config');
         setIsFlyoutVisible(true);
-        closePopover();
       }}
     >
       {i18n.translate(
@@ -206,7 +205,6 @@ GET connector-${rawName}/_search
       onClick={() => {
         setFlyoutContent('client');
         setIsFlyoutVisible(true);
-        closePopover();
       }}
     >
       {i18n.translate(

@@ -457,7 +457,11 @@ function getTsProject(repoPath: string, overridePath?: string) {
   if (!overridePath) {
     project.addSourceFilesAtPaths([`${repoPath}/x-pack/plugins/**/*.ts`, '!**/*.d.ts']);
     project.addSourceFilesAtPaths([`${repoPath}/x-pack/packages/**/*.ts`, '!**/*.d.ts']);
+    project.addSourceFilesAtPaths([`${repoPath}/x-pack/platform/**/*.ts`, '!**/*.d.ts']);
+    project.addSourceFilesAtPaths([`${repoPath}/x-pack/solutions/**/*.ts`, '!**/*.d.ts']);
     project.addSourceFilesAtPaths([`${repoPath}/src/plugins/**/*.ts`, '!**/*.d.ts']);
+    project.addSourceFilesAtPaths([`${repoPath}/src/platform/**/*.ts`, '!**/*.d.ts']);
+    project.addSourceFilesAtPaths([`${repoPath}/src/core/packages/**/*.ts`, '!**/*.d.ts']);
     project.addSourceFilesAtPaths([`${repoPath}/packages/**/*.ts`, '!**/*.d.ts']);
   } else {
     project.addSourceFilesAtPaths([`${overridePath}/**/*.ts`, '!**/*.d.ts']);

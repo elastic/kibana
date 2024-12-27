@@ -19,6 +19,7 @@ import { euiThemeVars } from '@kbn/ui-theme';
 import { css } from '@emotion/react';
 import { ENTERPRISE_SEARCH_CONTENT_APP_ID } from '@kbn/deeplinks-search';
 
+import { SEARCH_INDICES } from '@kbn/deeplinks-search/constants';
 import { InferenceUsageInfo } from '../../../../types';
 import { useKibana } from '../../../../../../hooks/use_kibana';
 import { RenderMessageWithIcon } from './render_message_with_icon';
@@ -37,13 +38,19 @@ export const ScanUsageResults: React.FC<ScanUsageResultsProps> = ({
   onIgnoreWarningCheckboxChange,
 }) => {
   const {
-    services: { application },
+    services: { application, serverless },
   } = useKibana();
   const handleNavigateToIndexManagement = () => {
-    application?.navigateToApp(ENTERPRISE_SEARCH_CONTENT_APP_ID, {
-      path: 'search_indices',
-      openInNewTab: true,
-    });
+    if (serverless) {
+      application?.navigateToApp(SEARCH_INDICES, {
+        openInNewTab: true,
+      });
+    } else {
+      application?.navigateToApp(ENTERPRISE_SEARCH_CONTENT_APP_ID, {
+        path: `search_indices`,
+        openInNewTab: true,
+      });
+    }
   };
 
   return (

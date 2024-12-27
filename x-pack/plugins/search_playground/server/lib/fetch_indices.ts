@@ -21,11 +21,12 @@ function isClosed(index: IndicesIndexState): boolean {
 
 export const fetchIndices = async (
   client: ElasticsearchClient,
-  searchQuery: string | undefined
+  searchQuery: string | undefined,
+  { exact }: { exact?: boolean } = { exact: false }
 ): Promise<{
   indexNames: string[];
 }> => {
-  const indexPattern = searchQuery ? `*${searchQuery}*` : '*';
+  const indexPattern = exact && searchQuery ? searchQuery : searchQuery ? `*${searchQuery}*` : '*';
   const allIndexMatches = await client.indices.get({
     expand_wildcards: ['open'],
     // for better performance only compute aliases and settings of indices but not mappings

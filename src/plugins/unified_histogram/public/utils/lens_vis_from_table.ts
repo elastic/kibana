@@ -10,6 +10,7 @@
 import type { Datatable } from '@kbn/expressions-plugin/common';
 import type { LensAttributes } from '@kbn/lens-embeddable-utils';
 import type { TextBasedPersistedState } from '@kbn/lens-plugin/public/datasources/text_based/types';
+import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 
 export const enrichLensAttributesWithTablesData = ({
   attributes,
@@ -53,6 +54,8 @@ export const enrichLensAttributesWithTablesData = ({
   return updatedAttributes;
 };
 
-export const removeTablesFromLensAttributes = (attributes: LensAttributes): LensAttributes => {
-  return enrichLensAttributesWithTablesData({ attributes, table: undefined });
+export const removeTablesFromLensAttributes = (
+  attributes: LensAttributes
+): TypedLensByValueInput => {
+  return { attributes: enrichLensAttributesWithTablesData({ attributes, table: undefined }) };
 };

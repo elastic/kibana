@@ -8,6 +8,7 @@
 import Path from 'path';
 import { Client } from '@elastic/elasticsearch';
 import { ToolingLog } from '@kbn/tooling-log';
+import type { ProductName } from '@kbn/product-doc-common';
 import {
   // checkConnectivity,
   createTargetIndex,
@@ -18,6 +19,7 @@ import {
   createArtifact,
   cleanupFolders,
   deleteIndex,
+  processDocuments,
 } from './tasks';
 import type { TaskConfig } from './types';
 
@@ -93,7 +95,7 @@ const buildArtifact = async ({
   sourceClient,
   log,
 }: {
-  productName: string;
+  productName: ProductName;
   stackVersion: string;
   buildFolder: string;
   targetFolder: string;
@@ -105,13 +107,15 @@ const buildArtifact = async ({
 
   const targetIndex = getTargetIndexName({ productName, stackVersion });
 
-  const documents = await extractDocumentation({
+  let documents = await extractDocumentation({
     client: sourceClient,
     index: 'search-docs-1',
     log,
     productName,
     stackVersion,
   });
+
+  documents = await processDocuments({ documents, log });
 
   await createTargetIndex({
     client: embeddingClient,

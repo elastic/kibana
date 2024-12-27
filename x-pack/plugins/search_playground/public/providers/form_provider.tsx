@@ -7,6 +7,7 @@
 import { FormProvider as ReactHookFormProvider, useForm } from 'react-hook-form';
 import React, { useEffect, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom-v5-compat';
+import { useIndicesValidation } from '../hooks/use_indices_validation';
 import { useLoadFieldsByIndices } from '../hooks/use_load_fields_by_indices';
 import { ChatForm, ChatFormFields } from '../types';
 import { useLLMsModels } from '../hooks/use_llms_models';
@@ -53,16 +54,27 @@ export const FormProvider: React.FC<React.PropsWithChildren<FormProviderProps>> 
 }) => {
   const models = useLLMsModels();
   const [searchParams] = useSearchParams();
-  const index = useMemo(() => searchParams.get('default-index'), [searchParams]);
+  const defaultIndex = useMemo(() => {
+    const index = searchParams.get('default-index');
+
+    return index ? [index] : null;
+  }, [searchParams]);
   const sessionState = useMemo(() => getLocalSession(storage), [storage]);
   const form = useForm<ChatForm>({
     defaultValues: {
       ...sessionState,
-      indices: index ? [index] : sessionState.indices,
+      indices: [],
       search_query: '',
     },
   });
-  useLoadFieldsByIndices({ watch: form.watch, setValue: form.setValue, getValues: form.getValues });
+  const { isValidated: isValidatedIndices, validIndices } = useIndicesValidation(
+    defaultIndex || sessionState.indices || []
+  );
+  useLoadFieldsByIndices({
+    watch: form.watch,
+    setValue: form.setValue,
+    getValues: form.getValues,
+  });
 
   useEffect(() => {
     const subscription = form.watch((values) =>
@@ -79,6 +91,12 @@ export const FormProvider: React.FC<React.PropsWithChildren<FormProviderProps>> 
       form.setValue(ChatFormFields.summarizationModel, defaultModel);
     }
   }, [form, models]);
+
+  useEffect(() => {
+    if (isValidatedIndices) {
+      form.setValue(ChatFormFields.indices, validIndices);
+    }
+  }, [form, isValidatedIndices, validIndices]);
 
   return <ReactHookFormProvider {...form}>{children}</ReactHookFormProvider>;
 };

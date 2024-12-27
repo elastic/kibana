@@ -8,7 +8,7 @@
  */
 
 import React, { type ComponentProps, type ComponentType } from 'react';
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook, act } from '@testing-library/react';
 import { useModalContext, ModalContextProvider } from '.';
 
 type ModalContextProviderProps = ComponentProps<typeof ModalContextProvider>;

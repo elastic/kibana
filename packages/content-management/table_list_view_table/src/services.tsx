@@ -24,7 +24,7 @@ import type { I18nStart } from '@kbn/core-i18n-browser';
 import type { MountPoint, OverlayRef } from '@kbn/core-mount-utils-browser';
 import type { OverlayFlyoutOpenOptions } from '@kbn/core-overlays-browser';
 import type { ThemeServiceStart } from '@kbn/core-theme-browser';
-import type { UserProfileServiceStart } from '@kbn/core-user-profile-browser';
+import type { UserProfileService, UserProfileServiceStart } from '@kbn/core-user-profile-browser';
 import type { FormattedRelative } from '@kbn/i18n-react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { RedirectAppLinksKibanaProvider } from '@kbn/shared-ux-link-redirect-app';
@@ -79,6 +79,9 @@ export interface Services {
   /** Handler to return the url to navigate to the kibana tags management */
   getTagManagementUrl: () => string;
   getTagIdsFromReferences: (references: SavedObjectsReference[]) => string[];
+  /** Whether versioning is enabled for the current kibana instance. (aka is Serverless)
+   This is used to determine if we should show the version mentions in the help text.*/
+  isKibanaVersioningEnabled: boolean;
 }
 
 const TableListViewContext = React.createContext<Services | null>(null);
@@ -100,6 +103,7 @@ interface TableListViewStartServices {
   analytics: Pick<AnalyticsServiceStart, 'reportEvent'>;
   i18n: I18nStart;
   theme: Pick<ThemeServiceStart, 'theme$'>;
+  userProfile: UserProfileService;
 }
 
 /**
@@ -184,6 +188,12 @@ export interface TableListViewKibanaDependencies {
    * Content insights client to enable content insights features.
    */
   contentInsightsClient?: ContentInsightsClientPublic;
+
+  /**
+   * Flag to indicate if Kibana versioning is enabled. (aka not Serverless)
+   * Used to determine if we should show the version mentions in the help text.
+   */
+  isKibanaVersioningEnabled?: boolean;
 }
 
 /**
@@ -250,7 +260,10 @@ export const TableListViewKibanaProvider: FC<
     <RedirectAppLinksKibanaProvider coreStart={core}>
       <UserProfilesKibanaProvider core={core}>
         <ContentEditorKibanaProvider core={core} savedObjectsTagging={savedObjectsTagging}>
-          <ContentInsightsProvider contentInsightsClient={services.contentInsightsClient}>
+          <ContentInsightsProvider
+            contentInsightsClient={services.contentInsightsClient}
+            isKibanaVersioningEnabled={services.isKibanaVersioningEnabled}
+          >
             <FavoritesContextProvider
               favoritesClient={services.favorites}
               notifyError={(title, text) => {
@@ -281,6 +294,7 @@ export const TableListViewKibanaProvider: FC<
                 itemHasTags={itemHasTags}
                 getTagIdsFromReferences={getTagIdsFromReferences}
                 getTagManagementUrl={() => core.http.basePath.prepend(TAG_MANAGEMENT_APP_URL)}
+                isKibanaVersioningEnabled={services.isKibanaVersioningEnabled ?? false}
               >
                 {children}
               </TableListViewProvider>

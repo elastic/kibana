@@ -28,7 +28,7 @@ export const openImageEditor = async ({
 }): Promise<ImageConfig> => {
   const { ImageEditorFlyout } = await import('./image_editor_flyout');
 
-  const { overlays, theme, i18n, http, security } = coreServices;
+  const { overlays, http, security, ...startServices } = coreServices;
   const user = await security.authc.getCurrentUser();
   const filesClient = filesService.filesClientFactory.asUnscoped<FileImageMetadata>();
 
@@ -73,12 +73,15 @@ export const openImageEditor = async ({
             />
           </ImageViewerContext.Provider>
         </FilesContext>,
-        { theme, i18n }
+        startServices
       ),
       {
         onClose: () => {
           onCancel();
         },
+        size: 'm',
+        maxWidth: 500,
+        paddingSize: 'm',
         ownFocus: true,
         'data-test-subj': 'createImageEmbeddableFlyout',
       }
