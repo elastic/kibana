@@ -15,26 +15,26 @@ describe('sort', () => {
 
   it('handles single strings', () => {
     const pipeline = source.pipe(sort('@timestamp', 'log.level'));
-    expect(pipeline.asString()).toEqual('FROM `logs-*`\n\t| SORT @timestamp ASC, log.level ASC');
+    expect(pipeline.asQuery()).toEqual('FROM `logs-*`\n\t| SORT @timestamp ASC, log.level ASC');
     expect(pipeline.getBindings()).toEqual([]);
   });
 
   it('handles SORT with SortOrder', () => {
     const pipeline = source.pipe(sort({ '@timestamp': SortOrder.Desc }));
-    expect(pipeline.asString()).toEqual('FROM `logs-*`\n\t| SORT @timestamp DESC');
+    expect(pipeline.asQuery()).toEqual('FROM `logs-*`\n\t| SORT @timestamp DESC');
     expect(pipeline.getBindings()).toEqual([]);
   });
 
   it('handles a mix of strings and SortOrder instructions', () => {
     const pipeline = source.pipe(sort('@timestamp', { 'log.level': SortOrder.Desc }));
 
-    expect(pipeline.asString()).toEqual('FROM `logs-*`\n\t| SORT @timestamp ASC, log.level DESC');
+    expect(pipeline.asQuery()).toEqual('FROM `logs-*`\n\t| SORT @timestamp ASC, log.level DESC');
     expect(pipeline.getBindings()).toEqual([]);
   });
 
   it('handles nested sort arrays', () => {
     const pipeline = source.pipe(sort(['@timestamp', { 'log.level': SortOrder.Asc }]));
-    expect(pipeline.asString()).toEqual('FROM `logs-*`\n\t| SORT @timestamp ASC, log.level ASC');
+    expect(pipeline.asQuery()).toEqual('FROM `logs-*`\n\t| SORT @timestamp ASC, log.level ASC');
     expect(pipeline.getBindings()).toEqual([]);
   });
 
@@ -50,7 +50,7 @@ describe('sort', () => {
       })
     );
 
-    expect(pipeline.asString()).toEqual('FROM `logs-*`\n\t| SORT ?timestamp DESC, ?logLevel ASC');
+    expect(pipeline.asQuery()).toEqual('FROM `logs-*`\n\t| SORT ?timestamp DESC, ?logLevel ASC');
     expect(pipeline.getBindings()).toEqual([
       {
         env: {

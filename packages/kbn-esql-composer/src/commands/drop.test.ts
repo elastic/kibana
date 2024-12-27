@@ -13,13 +13,13 @@ import { from } from './from';
 describe('drop', () => {
   const source = from('logs-*');
   it('handles single strings', () => {
-    expect(source.pipe(drop('log.level', 'service.name')).asString()).toEqual(
+    expect(source.pipe(drop('log.level', 'service.name')).asQuery()).toEqual(
       'FROM `logs-*`\n\t| DROP `log.level`, `service.name`'
     );
   });
 
   it('handles arrays of strings', () => {
-    expect(source.pipe(drop(['log.level', 'service.name'])).asString()).toEqual(
+    expect(source.pipe(drop(['log.level', 'service.name'])).asQuery()).toEqual(
       'FROM `logs-*`\n\t| DROP `log.level`, `service.name`'
     );
   });

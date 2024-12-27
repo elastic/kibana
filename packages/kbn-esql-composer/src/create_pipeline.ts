@@ -16,7 +16,58 @@ function isQueryBuilderOperator(
   return (value as QueryBuilderToOperator).toQueryOperator !== undefined;
 }
 
+const formatValue = (value: any) => {
+  return typeof value === 'string' ? `"${value}"` : value;
+};
+
 export function createPipeline(source: Query): QueryPipeline {
+  const asQuery = () => {
+    return source.commands.map((command) => command.body).join('\n\t| ');
+  };
+  const getBindings = () => {
+    return source.bindings.flatMap((binding) => {
+      if (isObject(binding)) {
+        return Object.entries(binding).map(([key, value]) => ({
+          [key]: value,
+        }));
+      }
+      if (Array.isArray(binding)) {
+        return binding.map((p) => p);
+      }
+
+      return binding;
+    });
+  };
+
+  const asString = () => {
+    const query = asQuery();
+    const bindings = getBindings();
+
+    let index = 0;
+    return query.replace(/\\?\?([a-zA-Z0-9_]+)?/g, (match, namedParam) => {
+      if (match === '\\?') {
+        return '?';
+      }
+
+      if (index < bindings.length) {
+        if (namedParam) {
+          const value = bindings[index++];
+          if (typeof value === 'object') {
+            return 'identifier' in value[namedParam]
+              ? value[namedParam].identifier
+              : formatValue(value[namedParam]);
+          }
+          return value;
+        }
+
+        const value = bindings[index++];
+        return formatValue(value);
+      }
+
+      return match;
+    });
+  };
+
   return {
     pipe: (...operators) => {
       const nextSource = operators.reduce((previousQuery, operator) => {
@@ -29,22 +80,8 @@ export function createPipeline(source: Query): QueryPipeline {
 
       return createPipeline(nextSource);
     },
-    asString: () => {
-      return source.commands.map((command) => command.body).join('\n\t| ');
-    },
-    getBindings: () => {
-      return source.bindings.flatMap((binding) => {
-        if (isObject(binding)) {
-          return Object.entries(binding).map(([key, value]) => ({
-            [key]: value,
-          }));
-        }
-        if (Array.isArray(binding)) {
-          return binding.map((p) => p);
-        }
-
-        return binding;
-      });
-    },
+    asQuery,
+    asString,
+    getBindings,
   };
 }

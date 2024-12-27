@@ -24,8 +24,9 @@ export type NamedParameter = Record<string, string> | NamedParameterWithIdentifi
 export type Params = NamedParameter | FieldValue | Array<FieldValue | NamedParameter>;
 export interface QueryPipeline {
   pipe: (...args: Array<QueryOperator | QueryBuilderToOperator>) => QueryPipeline;
-  asString: () => string;
+  asQuery: () => string;
   getBindings: () => Params[];
+  asString: () => string;
 }
 export interface Query {
   commands: Command[];

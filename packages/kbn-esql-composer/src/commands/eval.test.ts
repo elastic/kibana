@@ -17,7 +17,7 @@ describe('evaluate', () => {
     const pipeline = source.pipe(
       evaluate('type = CASE(languages <= 1, "monolingual",languages <= 2, "bilingual","polyglot")')
     );
-    expect(pipeline.asString()).toEqual(
+    expect(pipeline.asQuery()).toEqual(
       'FROM `logs-*`\n\t| EVAL type = CASE(languages <= 1, "monolingual",languages <= 2, "bilingual","polyglot")'
     );
     expect(pipeline.getBindings()).toEqual([]);
@@ -30,7 +30,7 @@ describe('evaluate', () => {
         .concat('entity.display_name = COALESCE(?, entity.id)', 'some_host')
         .concat(`entity.id = CONCAT(${ids.map(() => '?').join()})`, ids)
     );
-    expect(pipeline.asString()).toEqual(
+    expect(pipeline.asQuery()).toEqual(
       'FROM `logs-*`\n\t| EVAL entity.type = ?, entity.display_name = COALESCE(?, entity.id), entity.id = CONCAT(?,?,?)'
     );
     expect(pipeline.getBindings()).toEqual(['host', 'some_host', 'host1', 'host2', 'host3']);
@@ -45,7 +45,7 @@ describe('evaluate', () => {
       })
     );
 
-    expect(pipeline.asString()).toEqual('FROM `logs-*`\n\t| EVAL hour = DATE_TRUNC(1 hour, ?ts)');
+    expect(pipeline.asQuery()).toEqual('FROM `logs-*`\n\t| EVAL hour = DATE_TRUNC(1 hour, ?ts)');
     expect(pipeline.getBindings()).toEqual([
       {
         ts: {

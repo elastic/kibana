@@ -13,13 +13,13 @@ import { keep } from './keep';
 describe('keep', () => {
   const source = from('logs-*');
   it('handles single strings', () => {
-    expect(source.pipe(keep('log.level', 'service.name')).asString()).toEqual(
+    expect(source.pipe(keep('log.level', 'service.name')).asQuery()).toEqual(
       'FROM `logs-*`\n\t| KEEP `log.level`, `service.name`'
     );
   });
 
   it('handles arrays of strings', () => {
-    expect(source.pipe(keep(['log.level', 'service.name'])).asString()).toEqual(
+    expect(source.pipe(keep(['log.level', 'service.name'])).asQuery()).toEqual(
       'FROM `logs-*`\n\t| KEEP `log.level`, `service.name`'
     );
   });

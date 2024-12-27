@@ -17,7 +17,7 @@ describe('where', () => {
       where(`@timestamp <= NOW() AND @timestamp > NOW() - 24 hours`),
       where('log.level', '==', 'error')
     );
-    expect(pipeline.asString()).toEqual(
+    expect(pipeline.asQuery()).toEqual(
       'FROM `logs-*`\n\t| WHERE @timestamp <= NOW() AND @timestamp > NOW() - 24 hours\n\t| WHERE log.level == ?'
     );
     expect(pipeline.getBindings()).toEqual(['error']);
@@ -25,7 +25,7 @@ describe('where', () => {
 
   it('appends a WHERE clause with positional parameters', () => {
     const pipeline = source.pipe(where('host.id == ?', 'host'));
-    expect(pipeline.asString()).toEqual('FROM `logs-*`\n\t| WHERE host.id == ?');
+    expect(pipeline.asQuery()).toEqual('FROM `logs-*`\n\t| WHERE host.id == ?');
     expect(pipeline.getBindings()).toEqual(['host']);
   });
 
@@ -34,16 +34,19 @@ describe('where', () => {
     const pipeline = source.pipe(
       where('host.name = ?hostName AND service.name = ?serviceName', params)
     );
-    expect(pipeline.asString()).toEqual(
+    expect(pipeline.asQuery()).toEqual(
       'FROM `logs-*`\n\t| WHERE host.name = ?hostName AND service.name = ?serviceName'
     );
     expect(pipeline.getBindings()).toEqual([{ hostName: 'host' }, { serviceName: 'service' }]);
+    expect(pipeline.asString()).toEqual(
+      'FROM `logs-*`\n\t| WHERE host.name = "host" AND service.name = "service"'
+    );
   });
 
   it('handles WHERE clause with IN operator and positional parameters', () => {
     const hosts = ['host1', 'host2', 'host3'];
     const pipeline = source.pipe(where(`host.name IN (${hosts.map(() => '?').join(',')})`, hosts));
-    expect(pipeline.asString()).toEqual('FROM `logs-*`\n\t| WHERE host.name IN (?,?,?)');
+    expect(pipeline.asQuery()).toEqual('FROM `logs-*`\n\t| WHERE host.name IN (?,?,?)');
     expect(pipeline.getBindings()).toEqual(['host1', 'host2', 'host3']);
   });
 
@@ -51,7 +54,7 @@ describe('where', () => {
     const pipeline = source.pipe(
       where(() => where('host.name == ?', 'host4').or('host.name', '==', 'host5'))
     );
-    expect(pipeline.asString()).toEqual(
+    expect(pipeline.asQuery()).toEqual(
       'FROM `logs-*`\n\t| WHERE (host.name == ? OR host.name == ?)'
     );
     expect(pipeline.getBindings()).toEqual(['host4', 'host5']);
@@ -65,7 +68,7 @@ describe('where', () => {
         hosts
       )
     );
-    expect(pipeline.asString()).toEqual(
+    expect(pipeline.asQuery()).toEqual(
       'FROM `logs-*`\n\t| WHERE (host.name == ? OR host.name == ?) AND host.name IN (?,?,?)'
     );
     expect(pipeline.getBindings()).toEqual(['host4', 'host5', 'host1', 'host2', 'host3']);
@@ -78,7 +81,7 @@ describe('where', () => {
         'service1'
       )
     );
-    expect(pipeline.asString()).toEqual(
+    expect(pipeline.asQuery()).toEqual(
       'FROM `logs-*`\n\t| WHERE (host.name == ? OR host.name == ?) AND service.name == ?'
     );
     expect(pipeline.getBindings()).toEqual(['host4', 'host5', 'service1']);
@@ -86,7 +89,7 @@ describe('where', () => {
 
   it('handles empty parameters gracefully', () => {
     const pipeline = source.pipe(where('host.name == ?', ''));
-    expect(pipeline.asString()).toEqual('FROM `logs-*`\n\t| WHERE host.name == ?');
+    expect(pipeline.asQuery()).toEqual('FROM `logs-*`\n\t| WHERE host.name == ?');
     expect(pipeline.getBindings()).toEqual(['']);
   });
 
@@ -96,7 +99,7 @@ describe('where', () => {
         where('service.name == ?', 'service1').or('service.name == ?', 'service2')
       )
     );
-    expect(pipeline.asString()).toEqual(
+    expect(pipeline.asQuery()).toEqual(
       'FROM `logs-*`\n\t| WHERE (host.name == ? OR host.name == ?) AND (service.name == ? OR service.name == ?)'
     );
     expect(pipeline.getBindings()).toEqual(['host1', 'host2', 'service1', 'service2']);
@@ -104,7 +107,7 @@ describe('where', () => {
 
   it('handles WHERE clause with object', () => {
     const pipeline = source.pipe(where({ 'host.name': 'host', 'service.name': 'service' }));
-    expect(pipeline.asString()).toEqual(
+    expect(pipeline.asQuery()).toEqual(
       'FROM `logs-*`\n\t| WHERE host.name == ? AND service.name == ?'
     );
     expect(pipeline.getBindings()).toEqual(['host', 'service']);
@@ -120,7 +123,7 @@ describe('where', () => {
           'log.message': 'error message',
         })
     );
-    expect(pipeline.asString()).toEqual(
+    expect(pipeline.asQuery()).toEqual(
       'FROM `logs-*`\n\t| WHERE log.level == ? AND (host.name == ? OR host.name == ?) AND log.message == ?'
     );
     expect(pipeline.getBindings()).toEqual(['error', 'host4', 'host5', 'error message']);
@@ -141,7 +144,7 @@ describe('where', () => {
           )
         )
     );
-    expect(pipeline.asString()).toEqual(
+    expect(pipeline.asQuery()).toEqual(
       'FROM `logs-*`\n\t| WHERE host.name == ? AND (log.level == ? OR log.message == ? OR log.message == ? OR log.level == ?) OR ((host.name == ? OR host.name == ?) AND (service.name == ? OR service.name == ?))'
     );
     expect(pipeline.getBindings()).toEqual([

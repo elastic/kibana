@@ -17,7 +17,7 @@ describe('stats', () => {
     const pipeline = source.pipe(
       stats('avg_duration = AVG(transaction.duration.us) BY service.name')
     );
-    expect(pipeline.asString()).toEqual(
+    expect(pipeline.asQuery()).toEqual(
       'FROM `logs-*`\n\t| STATS avg_duration = AVG(transaction.duration.us) BY service.name'
     );
     expect(pipeline.getBindings()).toEqual([]);
@@ -37,7 +37,7 @@ describe('stats', () => {
         },
       })
     );
-    expect(pipeline.asString()).toEqual(
+    expect(pipeline.asQuery()).toEqual(
       'FROM `logs-*`\n\t| STATS AVG(?duration), COUNT(?svcName) BY ?env'
     );
     expect(pipeline.getBindings()).toEqual([
@@ -67,7 +67,7 @@ describe('stats', () => {
         })
         .by('service.name')
     );
-    expect(pipeline.asString()).toEqual(
+    expect(pipeline.asQuery()).toEqual(
       'FROM `logs-*`\n\t| STATS avg_duration = AVG(transaction.duration.us) WHERE log.level == ? BY service.name'
     );
     expect(pipeline.getBindings()).toEqual(['error']);
@@ -79,7 +79,7 @@ describe('stats', () => {
         svcName: { identifier: 'service.name' },
       })
     );
-    expect(pipeline.asString()).toEqual(
+    expect(pipeline.asQuery()).toEqual(
       'FROM `logs-*`\n\t| STATS avg_duration = AVG(transaction.duration.us) BY ?svcName'
     );
     expect(pipeline.getBindings()).toEqual([
@@ -98,7 +98,7 @@ describe('stats', () => {
         svcEnv: { identifier: 'service.environment' },
       })
     );
-    expect(pipeline.asString()).toEqual(
+    expect(pipeline.asQuery()).toEqual(
       'FROM `logs-*`\n\t| STATS avg_duration = AVG(transaction.duration.us) BY ?svcName, ?svcEnv'
     );
     expect(pipeline.getBindings()).toEqual([
@@ -126,7 +126,7 @@ describe('stats', () => {
         })
         .by('service.environment')
     );
-    expect(pipeline.asString()).toEqual(
+    expect(pipeline.asQuery()).toEqual(
       'FROM `logs-*`\n\t| STATS avg_duration = AVG(transaction.duration.us), max_duration = MAX(transaction.duration.us) WHERE @timestamp > ?, min_duration = MIN(transaction.duration.us) WHERE service.name == ? BY service.environment'
     );
     expect(pipeline.getBindings()).toEqual(['2021-01-01', 'service2']);
