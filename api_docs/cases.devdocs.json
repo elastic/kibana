@@ -47,21 +47,9 @@
         "description": [],
         "signature": [
           "<T extends ",
-          {
-            "pluginId": "@kbn/core-application-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreApplicationBrowserPluginApi",
-            "section": "def-public.AppDeepLink",
-            "text": "AppDeepLink"
-          },
+          "AppDeepLink",
           "<string> = ",
-          {
-            "pluginId": "@kbn/core-application-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreApplicationBrowserPluginApi",
-            "section": "def-public.AppDeepLink",
-            "text": "AppDeepLink"
-          },
+          "AppDeepLink",
           "<string>>({ basePath, extend, }: { basePath?: string | undefined; extend?: Partial<Record<",
           {
             "pluginId": "cases",
@@ -589,7 +577,7 @@
             "CustomFieldTypes",
             ".TOGGLE; value: boolean | null; } | { key: string; type: ",
             "CustomFieldTypes",
-            ".NUMBER; value: number | null; })[]; settings: { syncAlerts: boolean; }; status: ",
+            ".NUMBER; value: number | null; })[]; settings: { syncAlerts: boolean; }; observables: ({ id: string; createdAt: string; updatedAt: string | null; } & { typeKey: string; value: string; description: string | null; })[]; status: ",
             {
               "pluginId": "@kbn/cases-components",
               "scope": "common",
@@ -2054,7 +2042,7 @@
           "CustomFieldTypes",
           ".TOGGLE; value: boolean | null; } | { key: string; type: ",
           "CustomFieldTypes",
-          ".NUMBER; value: number | null; })[]; settings: { syncAlerts: boolean; }; status: ",
+          ".NUMBER; value: number | null; })[]; settings: { syncAlerts: boolean; }; observables: ({ id: string; createdAt: string; updatedAt: string | null; } & { typeKey: string; value: string; description: string | null; })[]; status: ",
           {
             "pluginId": "@kbn/cases-components",
             "scope": "common",
@@ -2452,7 +2440,7 @@
           "CustomFieldTypes",
           ".TOGGLE; value: boolean | null; } | { key: string; type: ",
           "CustomFieldTypes",
-          ".NUMBER; value: number | null; })[]; settings: { syncAlerts: boolean; }; status: ",
+          ".NUMBER; value: number | null; })[]; settings: { syncAlerts: boolean; }; observables: ({ id: string; createdAt: string; updatedAt: string | null; } & { typeKey: string; value: string; description: string | null; })[]; status: ",
           {
             "pluginId": "@kbn/cases-components",
             "scope": "common",
@@ -2703,7 +2691,7 @@
           "CustomFieldTypes",
           ".TOGGLE; value: boolean | null; } | { key: string; type: ",
           "CustomFieldTypes",
-          ".NUMBER; value: number | null; })[]; settings: { syncAlerts: boolean; }; status: ",
+          ".NUMBER; value: number | null; })[]; settings: { syncAlerts: boolean; }; observables: ({ id: string; createdAt: string; updatedAt: string | null; } & { typeKey: string; value: string; description: string | null; })[]; status: ",
           {
             "pluginId": "@kbn/cases-components",
             "scope": "common",
@@ -2892,7 +2880,7 @@
           "CustomFieldTypes",
           ".TOGGLE; value: boolean | null; } | { key: string; type: ",
           "CustomFieldTypes",
-          ".NUMBER; value: number | null; })[]; settings: { syncAlerts: boolean; }; status: ",
+          ".NUMBER; value: number | null; })[]; settings: { syncAlerts: boolean; }; observables: { id: string; createdAt: string; updatedAt: string | null; typeKey: string; value: string; description: string | null; }[]; status: ",
           {
             "pluginId": "@kbn/cases-components",
             "scope": "common",
@@ -3102,7 +3090,7 @@
           "CustomFieldTypes",
           ".TOGGLE; value: boolean | null; } | { key: string; type: ",
           "CustomFieldTypes",
-          ".NUMBER; value: number | null; })[]; settings: { syncAlerts: boolean; }; status: ",
+          ".NUMBER; value: number | null; })[]; settings: { syncAlerts: boolean; }; observables: { id: string; createdAt: string; updatedAt: string | null; typeKey: string; value: string; description: string | null; }[]; status: ",
           {
             "pluginId": "@kbn/cases-components",
             "scope": "common",

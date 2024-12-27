@@ -39,7 +39,7 @@
           "FileHashCache",
           "; isDist: boolean; }) => void"
         ],
-        "path": "packages/core/apps/core-apps-server-internal/src/bundle_routes/bundles_route.ts",
+        "path": "src/core/packages/apps/server-internal/src/bundle_routes/bundles_route.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -68,7 +68,7 @@
               },
               ">"
             ],
-            "path": "packages/core/apps/core-apps-server-internal/src/bundle_routes/bundles_route.ts",
+            "path": "src/core/packages/apps/server-internal/src/bundle_routes/bundles_route.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -80,7 +80,7 @@
             "tags": [],
             "label": "{\n    publicPath,\n    routePath,\n    bundlesPath,\n    fileHashCache,\n    isDist,\n  }",
             "description": [],
-            "path": "packages/core/apps/core-apps-server-internal/src/bundle_routes/bundles_route.ts",
+            "path": "src/core/packages/apps/server-internal/src/bundle_routes/bundles_route.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -91,7 +91,7 @@
                 "tags": [],
                 "label": "publicPath",
                 "description": [],
-                "path": "packages/core/apps/core-apps-server-internal/src/bundle_routes/bundles_route.ts",
+                "path": "src/core/packages/apps/server-internal/src/bundle_routes/bundles_route.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -102,7 +102,7 @@
                 "tags": [],
                 "label": "routePath",
                 "description": [],
-                "path": "packages/core/apps/core-apps-server-internal/src/bundle_routes/bundles_route.ts",
+                "path": "src/core/packages/apps/server-internal/src/bundle_routes/bundles_route.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -113,7 +113,7 @@
                 "tags": [],
                 "label": "bundlesPath",
                 "description": [],
-                "path": "packages/core/apps/core-apps-server-internal/src/bundle_routes/bundles_route.ts",
+                "path": "src/core/packages/apps/server-internal/src/bundle_routes/bundles_route.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -127,7 +127,7 @@
                 "signature": [
                   "FileHashCache"
                 ],
-                "path": "packages/core/apps/core-apps-server-internal/src/bundle_routes/bundles_route.ts",
+                "path": "src/core/packages/apps/server-internal/src/bundle_routes/bundles_route.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -138,7 +138,7 @@
                 "tags": [],
                 "label": "isDist",
                 "description": [],
-                "path": "packages/core/apps/core-apps-server-internal/src/bundle_routes/bundles_route.ts",
+                "path": "src/core/packages/apps/server-internal/src/bundle_routes/bundles_route.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -162,7 +162,7 @@
         "signature": [
           "{ readonly allowDynamicConfigOverrides: boolean; }"
         ],
-        "path": "packages/core/apps/core-apps-server-internal/src/core_app_config.ts",
+        "path": "src/core/packages/apps/server-internal/src/core_app_config.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
