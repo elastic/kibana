@@ -337,3 +337,45 @@ const allFieldsDiffAlgorithms: FieldsDiffAlgorithmsFor<DiffableAllFields> = {
   ...newTermsFieldsDiffAlgorithms,
   type: ruleTypeDiffAlgorithm,
 };
+
+export type SINGLE_LINE_STRING_FIELDS =
+  | 'name'
+  | 'severity'
+  | 'threat_indicator_path'
+  | 'history_window_start';
+
+export type MULTI_LINE_STRING_FIELDS = 'description' | 'note' | 'setup';
+
+export type NUMBER_FIELDS = 'risk_score' | 'max_signals' | 'anomaly_threshold';
+
+export type SCALAR_ARRAY_FIELDS = 'tags' | 'references' | 'threat_index' | 'new_terms_fields';
+
+export type SIMPLE_FIELDS =
+  | 'rule_id'
+  | 'severity_mapping'
+  | 'risk_score_mapping'
+  | 'false_positives'
+  | 'threat'
+  | 'related_integrations'
+  | 'required_fields'
+  | 'rule_schedule'
+  | 'rule_name_override'
+  | 'timestamp_override'
+  | 'timeline_template'
+  | 'building_block'
+  | 'investigation_fields'
+  | 'alert_suppression'
+  | 'threshold'
+  | 'machine_learning_job_id';
+
+export type KQL_QUERY_FIELDS = 'kql_query' | 'threat_query';
+
+export type EQL_QUERY_FIELDS = 'eql_query';
+
+export type ESQL_QUERY_FIELDS = 'esql_query';
+
+export type DATA_SOURCE_FIELDS = 'data_source';
+
+export type RULE_TYPE_FIELDS = 'type';
+
+export type FORCE_TARGET_VERSION_FIELDS = 'version';

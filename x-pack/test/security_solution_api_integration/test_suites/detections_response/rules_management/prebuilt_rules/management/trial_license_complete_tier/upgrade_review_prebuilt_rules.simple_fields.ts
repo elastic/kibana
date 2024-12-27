@@ -10,10 +10,11 @@ import {
   ThreeWayDiffOutcome,
   ThreeWayMergeOutcome,
 } from '@kbn/security-solution-plugin/common/api/detection_engine';
-import { KQL_QUERY_FIELDS } from '@kbn/security-solution-plugin/server/lib/detection_engine/prebuilt_rules/logic/diff/calculation/calculate_rule_fields_diff';
+import { SIMPLE_FIELDS } from '@kbn/security-solution-plugin/server/lib/detection_engine/prebuilt_rules/logic/diff/calculation/calculate_rule_fields_diff';
 import { Client } from '@elastic/elasticsearch';
 import TestAgent from 'supertest/lib/agent';
 import { ToolingLog } from '@kbn/tooling-log';
+import { calculateFromValue } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/utils/utils';
 import { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import {
   deleteAllTimelines,
@@ -21,98 +22,243 @@ import {
   installPrebuiltRules,
   createPrebuiltRuleAssetSavedObjects,
   reviewPrebuiltRulesToUpgrade,
+  updateRule,
+  fetchRule,
   createHistoricalPrebuiltRuleAssetSavedObjects,
   createRuleAssetSavedObjectOfType,
-  fetchRule,
-  updateRule,
 } from '../../../../utils';
 import { deleteAllRules } from '../../../../../../../common/utils/security_solution';
 
-interface Value {
-  query: string;
-  language: string;
-  type?: string;
-  filters: string[];
+interface SimpleFieldTestValues {
+  baseValue: any;
+  customValue: any;
+  updatedValue: any;
 }
 
-interface KqlQueryFieldTestValues {
-  baseValue: Value;
-  customValue: Value;
-  updatedValue: Value;
-}
-
-const mapDiffableFieldToRuleFields = (diffableField: string, value: Value) => {
+const mapDiffableFieldToRuleFields = (diffableField: string, value: any) => {
   const updatePayload: Record<string, any> = {};
 
   switch (diffableField) {
-    case 'kql_query':
-      updatePayload.query = value.query;
-      updatePayload.language = value.language;
-      updatePayload.filters = value.filters;
+    case 'rule_schedule':
+      updatePayload.interval = value.interval;
+      updatePayload.from = calculateFromValue(value.interval, value.lookback);
+      updatePayload.to = 'now';
       break;
-    case 'threat_query':
-      updatePayload.threat_query = value.query;
-      updatePayload.threat_language = value.language;
-      updatePayload.threat_filters = value.filters;
+    case 'timestamp_override':
+      updatePayload.timestamp_override = value.field_name;
       break;
+    case 'rule_name_override':
+      updatePayload.rule_name_override = value.field_name;
+    case 'timeline_template':
+      updatePayload.timeline_id = value.timeline_id;
+      updatePayload.timeline_title = value.timeline_title;
+    case 'timestamp_override_fallback_disabled':
+      updatePayload.fallback_disabled = value;
+      break;
+    case 'building_block':
+      updatePayload.building_block_type = value.type;
+      break;
+    default:
+      updatePayload[diffableField] = value;
   }
 
   return updatePayload;
 };
 
-const KQL_QUERY_FIELDS_MAP: Record<KQL_QUERY_FIELDS, KqlQueryFieldTestValues> = {
-  kql_query: {
+const SIMPLE_FIELDS_MAP: Record<Exclude<SIMPLE_FIELDS, 'rule_id'>, SimpleFieldTestValues> = {
+  severity_mapping: {
+    baseValue: [
+      {
+        field: 'base.field',
+        value: 'base-value',
+        operator: 'equals',
+        severity: 'low',
+      },
+    ],
+    customValue: [
+      {
+        field: 'custom.field',
+        value: 'custom-value',
+        operator: 'equals',
+        severity: 'medium',
+      },
+    ],
+    updatedValue: [
+      {
+        field: 'updated.field',
+        value: 'updated-value',
+        operator: 'equals',
+        severity: 'high',
+      },
+    ],
+  },
+  risk_score_mapping: {
+    baseValue: [
+      {
+        field: 'base.field',
+        value: 'base-value',
+        operator: 'equals',
+        risk_score: 10,
+      },
+    ],
+    customValue: [
+      {
+        field: 'custom.field',
+        value: 'custom-value',
+        operator: 'equals',
+        risk_score: 20,
+      },
+    ],
+    updatedValue: [
+      {
+        field: 'updated.field',
+        value: 'updated-value',
+        operator: 'equals',
+        risk_score: 30,
+      },
+    ],
+  },
+  false_positives: {
+    baseValue: ['base-false-positive'],
+    customValue: ['custom-false-positive'],
+    updatedValue: ['updated-false-positive'],
+  },
+  threat: {
+    baseValue: [{ framework: 'MITRE', tactic: { id: 'base', name: 'base', reference: 'base' } }],
+    customValue: [
+      { framework: 'MITRE', tactic: { id: 'custom', name: 'custom', reference: 'custom' } },
+    ],
+    updatedValue: [
+      { framework: 'MITRE', tactic: { id: 'updated', name: 'updated', reference: 'updated' } },
+    ],
+  },
+  related_integrations: {
+    baseValue: [
+      {
+        package: 'base-package',
+        version: '1.0.0',
+        integration: 'base-integration',
+      },
+    ],
+    customValue: [
+      {
+        package: 'custom-package',
+        version: '1.0.0',
+        integration: 'custom-integration',
+      },
+    ],
+    updatedValue: [
+      {
+        package: 'updated-package',
+        version: '1.0.0',
+        integration: 'updated-integration',
+      },
+    ],
+  },
+  required_fields: {
+    baseValue: [
+      {
+        name: 'base.field',
+        type: 'keyword',
+        ecs: false,
+      },
+    ],
+    customValue: [
+      {
+        name: 'custom.field',
+        type: 'keyword',
+        ecs: false,
+      },
+    ],
+    updatedValue: [
+      {
+        name: 'updated.field',
+        type: 'keyword',
+        ecs: false,
+      },
+    ],
+  },
+  rule_schedule: {
+    baseValue: { interval: '5m', lookback: '60s' },
+    customValue: { interval: '10m', lookback: '0s' },
+    updatedValue: { interval: '15m', lookback: '60s' },
+  },
+  rule_name_override: {
+    baseValue: { field_name: 'base-override' },
+    customValue: { field_name: 'custom-override' },
+    updatedValue: { field_name: 'updated-override' },
+  },
+  timestamp_override: {
+    baseValue: { field_name: 'base-timestamp', fallback_disabled: false },
+    customValue: { field_name: 'custom-timestamp', fallback_disabled: false },
+    updatedValue: { field_name: 'updated-timestamp', fallback_disabled: false },
+  },
+  timeline_template: {
+    baseValue: { timeline_id: 'base-template', timeline_title: 'base-template' },
+    customValue: { timeline_id: 'custom-template', timeline_title: 'base-template' },
+    updatedValue: { timeline_id: 'updated-template', timeline_title: 'base-template' },
+  },
+  building_block: {
+    baseValue: { type: 'a' },
+    customValue: { type: 'b' },
+    updatedValue: { type: 'c' },
+  },
+  investigation_fields: {
     baseValue: {
-      query: 'process.name:*.exe',
-      language: 'kuery',
-      filters: [],
-      type: 'inline_query',
+      field_names: ['base.field'],
     },
     customValue: {
-      query: 'process.name:*.dll',
-      language: 'kuery',
-      filters: [],
-      type: 'inline_query',
+      field_names: ['custom.field'],
     },
     updatedValue: {
-      query: 'process.name:*.sys',
-      language: 'kuery',
-      filters: [],
-      type: 'inline_query',
+      field_names: ['updated.field'],
     },
   },
-  threat_query: {
-    baseValue: {
-      query: 'source.ip:10.0.0.*',
-      language: 'kuery',
-      filters: [],
-    },
-    customValue: {
-      query: 'source.ip:192.168.*',
-      language: 'kuery',
-      filters: [],
-    },
-    updatedValue: {
-      query: 'source.ip:172.16.*',
-      language: 'kuery',
-      filters: [],
-    },
+  alert_suppression: {
+    baseValue: { group_by: ['base-field'] },
+    customValue: { group_by: ['custom-field'] },
+    updatedValue: { group_by: ['updated-field'] },
+  },
+  threshold: {
+    baseValue: { field: ['base-field'], value: 100 },
+    customValue: { field: ['custom-field'], value: 200 },
+    updatedValue: { field: ['updated-field'], value: 300 },
+  },
+  machine_learning_job_id: {
+    baseValue: ['base-job-id'],
+    customValue: ['custom-job-id'],
+    updatedValue: ['updated-job-id'],
   },
 };
 
 const RULE_TYPE_FIELD_MAPPING = {
-  query: ['kql_query'],
-  // threat_match: ['threat_query'],
+  query: [
+    'severity_mapping',
+    'risk_score_mapping',
+    'false_positives',
+    'threat',
+    'related_integrations',
+    'required_fields',
+    'rule_schedule',
+    'rule_name_override',
+    'timestamp_override',
+    'timeline_template',
+    'building_block',
+    'investigation_fields',
+    'alert_suppression',
+  ],
+  threshold: ['threshold'],
+  machine_learning: ['machine_learning_job_id'],
 } as const;
 
 type RuleTypeToFields = typeof RULE_TYPE_FIELD_MAPPING;
 
-type FieldDiffs = Record<KQL_QUERY_FIELDS, unknown>;
+type FieldDiffs = Record<SIMPLE_FIELDS, unknown>;
 
 const createTestSuite = (
   ruleType: keyof RuleTypeToFields,
-  field: KQL_QUERY_FIELDS,
-  testValues: KqlQueryFieldTestValues,
+  field: SIMPLE_FIELDS,
+  testValues: SimpleFieldTestValues,
   services: { es: Client; supertest: TestAgent; log: ToolingLog }
 ) => {
   const { es, supertest, log } = services;
@@ -160,12 +306,13 @@ const createTestSuite = (
         await installPrebuiltRules(es, supertest);
 
         const rule = await fetchRule(supertest, { ruleId: 'rule-1' });
+        const mappedFields = mapDiffableFieldToRuleFields(field, customValue);
+
         await updateRule(supertest, {
           ...rule,
           id: undefined,
-          ...mapDiffableFieldToRuleFields(field, customValue),
+          ...mappedFields,
         });
-
         const updatedRuleAssetSavedObjects = [
           createRuleAssetSavedObjectOfType(ruleType, {
             rule_id: 'rule-1',
@@ -241,10 +388,12 @@ const createTestSuite = (
         await installPrebuiltRules(es, supertest);
 
         const rule = await fetchRule(supertest, { ruleId: 'rule-1' });
+        const mappedFields = mapDiffableFieldToRuleFields(field, customValue);
+
         await updateRule(supertest, {
           ...rule,
           id: undefined,
-          ...mapDiffableFieldToRuleFields(field, customValue),
+          ...mappedFields,
         });
 
         const updatedRuleAssetSavedObjects = [
@@ -285,10 +434,12 @@ const createTestSuite = (
         await installPrebuiltRules(es, supertest);
 
         const rule = await fetchRule(supertest, { ruleId: 'rule-1' });
+        const mappedFields = mapDiffableFieldToRuleFields(field, customValue);
+
         await updateRule(supertest, {
           ...rule,
           id: undefined,
-          ...mapDiffableFieldToRuleFields(field, customValue),
+          ...mappedFields,
         });
 
         const updatedRuleAssetSavedObjects = [
@@ -414,19 +565,14 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     Object.entries(RULE_TYPE_FIELD_MAPPING).forEach(([ruleType, fields]) => {
-      describe(`${ruleType} rule kql query fields`, () => {
+      describe(`${ruleType} rule simple fields`, () => {
         fields.forEach((field) => {
-          const testValues = KQL_QUERY_FIELDS_MAP[field as KQL_QUERY_FIELDS];
-          createTestSuite(
-            ruleType as keyof RuleTypeToFields,
-            field as KQL_QUERY_FIELDS,
-            testValues,
-            {
-              es,
-              supertest,
-              log,
-            }
-          );
+          const testValues = SIMPLE_FIELDS_MAP[field as SIMPLE_FIELDS];
+          createTestSuite(ruleType as keyof RuleTypeToFields, field as SIMPLE_FIELDS, testValues, {
+            es,
+            supertest,
+            log,
+          });
         });
       });
     });
