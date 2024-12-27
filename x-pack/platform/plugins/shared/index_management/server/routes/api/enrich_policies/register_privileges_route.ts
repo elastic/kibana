@@ -25,6 +25,12 @@ export const registerPrivilegesRoute = ({
   router.get(
     {
       path: addInternalBasePath('/enrich_policies/privileges'),
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Relies on es client for authorization',
+        },
+      },
       validate: false,
     },
     async (context, request, response) => {
