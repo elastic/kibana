@@ -24,6 +24,6 @@ export default {
   },
 };
 
-export const Empty: StoryFn<void> = () => {
+export const Empty: StoryFn = () => {
   return <Grouping {...mockGroupingProps} />;
 };
