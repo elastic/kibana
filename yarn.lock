@@ -3857,7 +3857,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/ai-assistant@link:x-pack/packages/kbn-ai-assistant":
+"@kbn/ai-assistant@link:x-pack/platform/packages/shared/kbn-ai-assistant":
   version "0.0.0"
   uid ""
 
@@ -5301,7 +5301,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/deeplinks-search@link:packages/deeplinks/search":
+"@kbn/deeplinks-search@link:src/platform/packages/shared/deeplinks/search":
   version "0.0.0"
   uid ""
 
@@ -5453,7 +5453,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/enterprise-search-plugin@link:x-pack/plugins/enterprise_search":
+"@kbn/enterprise-search-plugin@link:x-pack/solutions/search/plugins/enterprise_search":
   version "0.0.0"
   uid ""
 
@@ -6013,7 +6013,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/ipynb@link:packages/kbn-ipynb":
+"@kbn/ipynb@link:x-pack/solutions/search/packages/kbn-ipynb":
   version "0.0.0"
   uid ""
 
@@ -6961,27 +6961,27 @@
   version "0.0.0"
   uid ""
 
-"@kbn/search-api-keys-components@link:packages/kbn-search-api-keys-components":
+"@kbn/search-api-keys-components@link:x-pack/solutions/search/packages/kbn-search-api-keys-components":
   version "0.0.0"
   uid ""
 
-"@kbn/search-api-keys-server@link:packages/kbn-search-api-keys-server":
+"@kbn/search-api-keys-server@link:x-pack/solutions/search/packages/kbn-search-api-keys-server":
   version "0.0.0"
   uid ""
 
-"@kbn/search-api-panels@link:packages/kbn-search-api-panels":
+"@kbn/search-api-panels@link:src/platform/packages/shared/kbn-search-api-panels":
   version "0.0.0"
   uid ""
 
-"@kbn/search-assistant@link:x-pack/plugins/search_assistant":
+"@kbn/search-assistant@link:x-pack/solutions/search/plugins/search_assistant":
   version "0.0.0"
   uid ""
 
-"@kbn/search-connectors-plugin@link:x-pack/plugins/search_connectors":
+"@kbn/search-connectors-plugin@link:x-pack/solutions/search/plugins/search_connectors":
   version "0.0.0"
   uid ""
 
-"@kbn/search-connectors@link:packages/kbn-search-connectors":
+"@kbn/search-connectors@link:src/platform/packages/shared/kbn-search-connectors":
   version "0.0.0"
   uid ""
 
@@ -6993,31 +6993,31 @@
   version "0.0.0"
   uid ""
 
-"@kbn/search-homepage@link:x-pack/plugins/search_homepage":
+"@kbn/search-homepage@link:x-pack/solutions/search/plugins/search_homepage":
   version "0.0.0"
   uid ""
 
-"@kbn/search-index-documents@link:packages/kbn-search-index-documents":
+"@kbn/search-index-documents@link:x-pack/solutions/search/packages/kbn-search-index-documents":
   version "0.0.0"
   uid ""
 
-"@kbn/search-indices@link:x-pack/plugins/search_indices":
+"@kbn/search-indices@link:x-pack/solutions/search/plugins/search_indices":
   version "0.0.0"
   uid ""
 
-"@kbn/search-inference-endpoints@link:x-pack/plugins/search_inference_endpoints":
+"@kbn/search-inference-endpoints@link:x-pack/solutions/search/plugins/search_inference_endpoints":
   version "0.0.0"
   uid ""
 
-"@kbn/search-navigation@link:x-pack/plugins/search_solution/search_navigation":
+"@kbn/search-navigation@link:x-pack/solutions/search/plugins/search_solution/search_navigation":
   version "0.0.0"
   uid ""
 
-"@kbn/search-notebooks@link:x-pack/plugins/search_notebooks":
+"@kbn/search-notebooks@link:x-pack/solutions/search/plugins/search_notebooks":
   version "0.0.0"
   uid ""
 
-"@kbn/search-playground@link:x-pack/plugins/search_playground":
+"@kbn/search-playground@link:x-pack/solutions/search/plugins/search_playground":
   version "0.0.0"
   uid ""
 
@@ -7025,7 +7025,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/search-shared-ui@link:x-pack/packages/search/shared_ui":
+"@kbn/search-shared-ui@link:x-pack/solutions/search/packages/search/shared_ui":
   version "0.0.0"
   uid ""
 
@@ -7241,11 +7241,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/serverless-search-settings@link:packages/serverless/settings/search_project":
+"@kbn/serverless-search-settings@link:src/platform/packages/shared/serverless/settings/search_project":
   version "0.0.0"
   uid ""
 
-"@kbn/serverless-search@link:x-pack/plugins/serverless_search":
+"@kbn/serverless-search@link:x-pack/solutions/search/plugins/serverless_search":
   version "0.0.0"
   uid ""
 
@@ -7725,7 +7725,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/try-in-console@link:packages/kbn-try-in-console":
+"@kbn/try-in-console@link:src/platform/packages/shared/kbn-try-in-console":
   version "0.0.0"
   uid ""
 
