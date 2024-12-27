@@ -12,7 +12,7 @@ import { Title, Subtitle, Description, Primary, Stories } from '@storybook/block
 
 import { getCustomIntegrationsContextDecorator } from './decorator';
 
-export const decorators = [getCustomIntegrationsContextDecorator()];
+export const decorators = [getCustomIntegrationsContextDecorator];
 
 export const parameters = {
   docs: {
