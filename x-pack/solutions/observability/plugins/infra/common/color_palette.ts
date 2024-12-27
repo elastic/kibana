@@ -28,9 +28,9 @@ export type Palette = {
 const euiPalette = euiPaletteColorBlind();
 
 export const defaultPalette: Palette = {
-  // TODO: Waiting for the designer input on the colors mapping
+  // TODO: Update these colors to match the new color palette with a designer
   // As a temp solution, in the old palette, colors 0..3 are the dark colors, 4..6 are the light colors and 7..9 dark again
-  // I followed the same pattern here for the new palette
+  // To follow the same pattern. The first 4 colors are the dark ones, the next 3 are the light ones and the last 3 are dark again
   [Color.color0]: euiPalette[0],
   [Color.color1]: euiPalette[2],
   [Color.color2]: euiPalette[4],
