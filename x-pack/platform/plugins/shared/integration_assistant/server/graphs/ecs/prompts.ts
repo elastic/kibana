@@ -37,6 +37,7 @@ Go through each value step by step and modify it with the following process:
 9. When you want to use an ECS field as a value for a target, but another field already has the same ECS field as its target, try to find another fitting ECS field. If none is found then the one you are least confident about should have the object replaced with null.
 10. If you are not confident for a specific field, you should always set the value to null.
 11. These {package_name} log samples are based on source and destination type data, prioritize these compared to other related ECS fields like host.* and observer.*.
+12. Whenever possible, map the @timestamp field to the relevant field that contains the event creation date.
 
 You ALWAYS follow these guidelines when writing your response:
 <guidelines>
