@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { ClientRequestParamsOf } from '@kbn/server-route-repository-utils';
-import { StreamsRouteRepository } from '@kbn/streams-plugin/server';
+import type { StreamsRouteRepository } from '@kbn/streams-plugin/server';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { cleanUpRootStream } from './helpers/cleanup';
 import { createStreamsRepositorySupertestClient } from './helpers/repository_client';
@@ -16,88 +16,94 @@ import { enableStreams, indexDocument } from './helpers/requests';
 type StreamPutItem = ClientRequestParamsOf<
   StreamsRouteRepository,
   'PUT /api/streams/{id}'
->['params']['body'] & { id: string };
+>['params']['body'] & { name: string };
 
-const streams = [
+const streams: StreamPutItem[] = [
   {
-    processing: [],
-    fields: [
-      {
-        name: '@timestamp',
-        type: 'date',
+    name: 'logs',
+    ingest: {
+      processing: [],
+      wired: {
+        fields: {
+          '@timestamp': {
+            type: 'date',
+          },
+          message: {
+            type: 'match_only_text',
+          },
+          'host.name': {
+            type: 'keyword',
+          },
+          'log.level': {
+            type: 'keyword',
+          },
+        },
       },
-      {
-        name: 'message',
-        type: 'match_only_text',
+      routing: [
+        {
+          name: 'logs.test',
+          condition: {
+            and: [
+              {
+                field: 'numberfield',
+                operator: 'gt',
+                value: 15,
+              },
+            ],
+          },
+        },
+        {
+          name: 'logs.test2',
+          condition: {
+            and: [
+              {
+                field: 'field2',
+                operator: 'eq',
+                value: 'abc',
+              },
+            ],
+          },
+        },
+      ],
+    },
+  },
+  {
+    name: 'logs.test',
+    ingest: {
+      processing: [],
+      wired: {
+        fields: {
+          numberfield: {
+            type: 'long',
+          },
+        },
       },
-      {
-        name: 'host.name',
-        type: 'keyword',
-      },
-      {
-        name: 'log.level',
-        type: 'keyword',
-      },
-    ],
-    children: [
-      {
-        id: 'logs.test',
-        condition: {
-          and: [
-            {
-              field: 'numberfield',
-              operator: 'gt',
-              value: 15,
+    },
+  },
+  {
+    name: 'logs.test2',
+    ingest: {
+      processing: [
+        {
+          config: {
+            grok: {
+              field: 'message',
+              patterns: ['%{NUMBER:numberfield}'],
             },
-          ],
+          },
+        },
+      ],
+      wired: {
+        fields: {
+          field2: {
+            type: 'keyword',
+          },
         },
       },
-      {
-        id: 'logs.test2',
-        condition: {
-          and: [
-            {
-              field: 'field2',
-              operator: 'eq',
-              value: 'abc',
-            },
-          ],
-        },
-      },
-    ],
-    id: 'logs',
+      routing: [],
+    },
   },
-  {
-    id: 'logs.test',
-    processing: [],
-    fields: [
-      {
-        name: 'numberfield',
-        type: 'long',
-      },
-    ],
-    children: [],
-  },
-  {
-    id: 'logs.test2',
-    processing: [
-      {
-        config: {
-          type: 'grok',
-          field: 'message',
-          patterns: ['%{NUMBER:numberfield}'],
-        },
-      },
-    ],
-    fields: [
-      {
-        name: 'field2',
-        type: 'keyword',
-      },
-    ],
-    children: [],
-  },
-] satisfies StreamPutItem[];
+];
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -150,7 +156,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     async function createStreams() {
-      for (const { id: streamId, ...stream } of streams) {
+      for (const { name: streamId, ...stream } of streams) {
         await apiClient
           .fetch('PUT /api/streams/{id}', {
             params: {

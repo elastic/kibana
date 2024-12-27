@@ -6,4 +6,3 @@
  */
 
 export type { Asset, AssetType } from './assets';
-export type { StreamDefinition, ReadStreamDefinition } from './types';

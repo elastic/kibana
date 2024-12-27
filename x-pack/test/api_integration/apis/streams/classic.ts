@@ -41,18 +41,23 @@ export default function ({ getService }: FtrProviderContext) {
       const response = await indexDocument(esClient, TEST_STREAM_NAME, doc);
       expect(response.result).to.eql('created');
 
-      const { body: streams, status } = await apiClient.fetch('GET /api/streams');
+      const {
+        body: { streams },
+        status,
+      } = await apiClient.fetch('GET /api/streams');
 
       expect(status).to.eql(200);
 
-      const classicStream = streams.definitions.find((stream) => stream.id === TEST_STREAM_NAME);
+      const classicStream = streams.find((stream) => stream.name === TEST_STREAM_NAME);
 
       expect(classicStream).to.eql({
-        id: TEST_STREAM_NAME,
-        managed: false,
-        children: [],
-        fields: [],
-        processing: [],
+        name: TEST_STREAM_NAME,
+        stream: {
+          ingest: {
+            processing: [],
+            routing: [],
+          },
+        },
       });
     });
 
@@ -63,20 +68,20 @@ export default function ({ getService }: FtrProviderContext) {
             id: TEST_STREAM_NAME,
           },
           body: {
-            managed: false,
-            children: [],
-            fields: [],
-            processing: [
-              {
-                config: {
-                  type: 'grok',
-                  field: 'message',
-                  patterns: [
-                    '%{TIMESTAMP_ISO8601:inner_timestamp} %{LOGLEVEL:log.level} %{GREEDYDATA:message2}',
-                  ],
+            ingest: {
+              processing: [
+                {
+                  config: {
+                    grok: {
+                      field: 'message',
+                      patterns: [
+                        '%{TIMESTAMP_ISO8601:inner_timestamp} %{LOGLEVEL:log.level} %{GREEDYDATA:message2}',
+                      ],
+                    },
+                  },
                 },
-              },
-            ],
+              ],
+            },
           },
         },
       });
@@ -92,23 +97,26 @@ export default function ({ getService }: FtrProviderContext) {
       expect(getResponse.status).to.eql(200);
 
       expect(getResponse.body).to.eql({
-        id: TEST_STREAM_NAME,
-        managed: false,
-        children: [],
-        inheritedFields: [],
-        fields: [],
+        name: TEST_STREAM_NAME,
         dashboards: [],
-        processing: [
-          {
-            config: {
-              type: 'grok',
-              field: 'message',
-              patterns: [
-                '%{TIMESTAMP_ISO8601:inner_timestamp} %{LOGLEVEL:log.level} %{GREEDYDATA:message2}',
-              ],
-            },
+        inherited_fields: [],
+        stream: {
+          ingest: {
+            processing: [
+              {
+                config: {
+                  grok: {
+                    field: 'message',
+                    patterns: [
+                      '%{TIMESTAMP_ISO8601:inner_timestamp} %{LOGLEVEL:log.level} %{GREEDYDATA:message2}',
+                    ],
+                  },
+                },
+              },
+            ],
+            routing: [],
           },
-        ],
+        },
       });
     });
 
@@ -143,10 +151,10 @@ export default function ({ getService }: FtrProviderContext) {
         params: {
           path: { id: TEST_STREAM_NAME },
           body: {
-            managed: false,
-            children: [],
-            fields: [],
-            processing: [],
+            ingest: {
+              processing: [],
+              routing: [],
+            },
           },
         },
       });
@@ -193,8 +201,8 @@ export default function ({ getService }: FtrProviderContext) {
 
       expect(getStreamsResponse.status).to.eql(200);
 
-      const classicStream = getStreamsResponse.body.definitions.find(
-        (stream) => stream.id === TEST_STREAM_NAME
+      const classicStream = getStreamsResponse.body.streams.find(
+        (stream) => stream.name === TEST_STREAM_NAME
       );
       expect(classicStream).to.eql(undefined);
     });

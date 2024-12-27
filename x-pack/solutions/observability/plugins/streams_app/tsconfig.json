@@ -38,5 +38,14 @@
     "@kbn/logging",
     "@kbn/deeplinks-observability",
     "@kbn/config-schema",
+    "@kbn/calculate-auto",
+    "@kbn/streams-plugin",
+    "@kbn/share-plugin",
+    "@kbn/observability-utils-server",
+    "@kbn/code-editor",
+    "@kbn/ui-theme",
+    "@kbn/navigation-plugin",
+    "@kbn/core-notifications-browser",
+    "@kbn/streams-schema",
   ]
 }

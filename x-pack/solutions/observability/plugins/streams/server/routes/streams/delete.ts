@@ -9,6 +9,7 @@ import { z } from '@kbn/zod';
 import { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import { Logger } from '@kbn/logging';
 import { badRequest, internal, notFound } from '@hapi/boom';
+import { isWiredStream } from '@kbn/streams-schema';
 import {
   DefinitionNotFound,
   ForkConditionMissing,
@@ -44,7 +45,6 @@ export const deleteStreamRoute = createServerRoute({
     }),
   }),
   handler: async ({
-    response,
     params,
     logger,
     request,
@@ -93,8 +93,8 @@ export async function deleteStream(
   logger: Logger
 ) {
   try {
-    const { definition } = await readStream({ scopedClusterClient, id });
-    if (!definition.managed) {
+    const definition = await readStream({ scopedClusterClient, id });
+    if (!isWiredStream(definition)) {
       await deleteUnmanagedStreamObjects({ scopedClusterClient, id, logger, assetClient });
       return;
     }
@@ -106,8 +106,8 @@ export async function deleteStream(
 
     // need to update parent first to cut off documents streaming down
     await updateParentStream(scopedClusterClient, assetClient, id, parentId, logger);
-    for (const child of definition.children) {
-      await deleteStream(scopedClusterClient, assetClient, child.id, logger);
+    for (const child of definition.stream.ingest.routing) {
+      await deleteStream(scopedClusterClient, assetClient, child.name, logger);
     }
     await deleteStreamObjects({ scopedClusterClient, id, logger, assetClient });
   } catch (e) {
@@ -126,12 +126,14 @@ async function updateParentStream(
   parentId: string,
   logger: Logger
 ) {
-  const { definition: parentDefinition } = await readStream({
+  const parentDefinition = await readStream({
     scopedClusterClient,
     id: parentId,
   });
 
-  parentDefinition.children = parentDefinition.children.filter((child) => child.id !== id);
+  parentDefinition.stream.ingest.routing = parentDefinition.stream.ingest.routing.filter(
+    (child) => child.name !== id
+  );
 
   await syncStream({
     scopedClusterClient,
