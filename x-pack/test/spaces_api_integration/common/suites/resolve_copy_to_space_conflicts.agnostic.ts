@@ -8,7 +8,7 @@
 import type { Agent as SuperTestAgent } from 'supertest';
 
 import type { SavedObject } from '@kbn/core/server';
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
 import type { CopyResponse } from '@kbn/spaces-plugin/server/lib/copy_to_spaces';
 
@@ -76,6 +76,7 @@ const getDestinationSpace = (originSpaceId?: string) => {
 export function resolveCopyToSpaceConflictsSuite(context: DeploymentAgnosticFtrProviderContext) {
   const testDataLoader = getTestDataLoader(context);
   const supertestWithAuth = context.getService('supertest');
+  const roleScopedSupertest = context.getService('roleScopedSupertest');
 
   const getVisualizationAtSpace = async (spaceId: string): Promise<SavedObject<any>> => {
     return supertestWithAuth
@@ -517,15 +518,15 @@ export function resolveCopyToSpaceConflictsSuite(context: DeploymentAgnosticFtrP
       { user, spaceId = DEFAULT_SPACE_ID, tests }: ResolveCopyToSpaceTestDefinition
     ) => {
       describeFn(description, () => {
-        let supertest: SupertestWithRoleScopeType | SuperTestAgent;
+        let supertest: SupertestWithRoleScopeType;
         before(async () => {
-          supertest = await getSupertest(context, user);
+          supertest = await roleScopedSupertest.getSupertestWithRoleScope(user!);
           // test data only allows for the following spaces as the copy origin
           expect(['default', 'space_1']).to.contain(spaceId);
         });
 
         after(async () => {
-          await maybeDestroySupertest(supertest);
+          await supertest.destroy();
         });
 
         describe('single-namespace types', () => {

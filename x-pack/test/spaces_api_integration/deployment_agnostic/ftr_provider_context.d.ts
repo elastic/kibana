@@ -10,4 +10,4 @@ import type { GenericFtrProviderContext } from '@kbn/test';
 import type { services } from './services';
 
 export type DeploymentAgnosticFtrProviderContext = GenericFtrProviderContext<typeof services, {}>;
-export type { SupertestWithRoleScopeType } from '../../api_integration/deployment_agnostic/services';
+export type { SupertestWithRoleScopeType } from './services';
