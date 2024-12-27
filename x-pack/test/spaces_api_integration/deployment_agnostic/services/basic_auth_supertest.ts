@@ -26,7 +26,7 @@ export class SupertestWithBasicAuth {
     const agent = this.supertestWithoutAuth[method](url);
 
     if (this.user) {
-      agent.auth(this.user.username!, this.user.password!);
+      agent.auth(this.user.username!, this.user.password!).catch(() => {}); // to silence @typescript-eslint/no-floating-promises;
     }
 
     return agent;
