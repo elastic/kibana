@@ -38,13 +38,12 @@ export const useGraphLabelExpandPopover = ({
 
   const onLabelExpandButtonClick: ExpandButtonClickCallback = useCallback(
     (e, node, unToggleCallback) => {
-      if (selectedNode.current?.id === node.id) {
-        // If the same node is clicked again, close the popover
-        closePopoverHandler();
-      } else {
-        // Close the current popover if open
-        closePopoverHandler();
+      const lastExpandedNode = selectedNode.current?.id;
 
+      // Close the current popover if open
+      closePopoverHandler();
+
+      if (lastExpandedNode !== node.id) {
         // Set the pending open state
         setPendingOpen({ node, el: e.currentTarget, unToggleCallback });
       }

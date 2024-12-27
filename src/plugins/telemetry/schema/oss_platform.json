@@ -1,74 +1,111 @@
 {
   "properties": {
-    "files": {
+    "dashboard": {
       "properties": {
-        "countByExtension": {
-          "type": "array",
-          "items": {
-            "properties": {
-              "extension": {
-                "type": "keyword"
-              },
-              "count": {
-                "type": "long"
-              }
-            }
-          }
-        },
-        "countByStatus": {
+        "panels": {
           "properties": {
-            "AWAITING_UPLOAD": {
-              "type": "long",
-              "_meta": {
-                "description": "Number of files awaiting upload"
-              }
+            "total": {
+              "type": "long"
             },
-            "DELETED": {
-              "type": "long",
-              "_meta": {
-                "description": "Number of files that are marked as deleted"
-              }
+            "by_reference": {
+              "type": "long"
             },
-            "READY": {
-              "type": "long",
-              "_meta": {
-                "description": "Number of files that are ready for download"
-              }
+            "by_value": {
+              "type": "long"
             },
-            "UPLOADING": {
-              "type": "long",
-              "_meta": {
-                "description": "Number of files that are currently uploading"
-              }
-            },
-            "UPLOAD_ERROR": {
-              "type": "long",
-              "_meta": {
-                "description": "Number of files that failed to upload"
-              }
-            }
-          }
-        },
-        "storage": {
-          "properties": {
-            "esFixedSizeIndex": {
+            "by_type": {
               "properties": {
-                "capacity": {
-                  "type": "long",
-                  "_meta": {
-                    "description": "Capacity of the fixed size index"
+                "DYNAMIC_KEY": {
+                  "properties": {
+                    "total": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "The number of panels that have been added to all dashboards."
+                      }
+                    },
+                    "by_reference": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "The number of \"by reference\" panels that have been added to all dashboards."
+                      }
+                    },
+                    "by_value": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "The number of \"by value\" panels that have been added to all dashboards."
+                      }
+                    },
+                    "details": {
+                      "properties": {
+                        "DYNAMIC_KEY": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Collection of telemetry metrics that embeddable service reports. Embeddable service internally calls each embeddable, which in turn calls its dynamic actions, which calls each drill down attached to that embeddable."
+                          }
+                        }
+                      }
+                    }
                   }
-                },
-                "available": {
-                  "type": "long",
-                  "_meta": {
-                    "description": "Available storage in bytes"
+                }
+              }
+            }
+          }
+        },
+        "controls": {
+          "properties": {
+            "total": {
+              "type": "long"
+            },
+            "by_type": {
+              "properties": {
+                "DYNAMIC_KEY": {
+                  "properties": {
+                    "total": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "The number of this type of control in all Control Groups"
+                      }
+                    },
+                    "details": {
+                      "properties": {
+                        "DYNAMIC_KEY": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Collection of telemetry metrics that embeddable service reports. Will be used for details which are specific to the current control type"
+                          }
+                        }
+                      }
+                    }
                   }
-                },
-                "used": {
+                }
+              }
+            },
+            "ignore_settings": {
+              "properties": {
+                "DYNAMIC_KEY": {
                   "type": "long",
                   "_meta": {
-                    "description": "Used storage in bytes"
+                    "description": "Collection of telemetry metrics that count the number of control groups which have this ignore setting turned on"
+                  }
+                }
+              }
+            },
+            "chaining_system": {
+              "properties": {
+                "DYNAMIC_KEY": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Collection of telemetry metrics that count the number of control groups which are using this chaining system"
+                  }
+                }
+              }
+            },
+            "label_position": {
+              "properties": {
+                "DYNAMIC_KEY": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Collection of telemetry metrics that count the number of control groups which have their labels in this position"
                   }
                 }
               }
@@ -76,32 +113,109 @@
           }
         }
       }
-    },
-    "sample-data": {
-      "properties": {
-        "installed": {
-          "type": "array",
-          "items": {
-            "type": "keyword"
+    }
+  },
+  "files": {
+    "properties": {
+      "countByExtension": {
+        "type": "array",
+        "items": {
+          "properties": {
+            "extension": {
+              "type": "keyword"
+            },
+            "count": {
+              "type": "long"
+            }
           }
-        },
-        "last_install_date": {
-          "type": "date"
-        },
-        "last_install_set": {
-          "type": "keyword"
-        },
-        "last_uninstall_date": {
-          "type": "date"
-        },
-        "last_uninstall_set": {
-          "type": "keyword"
-        },
-        "uninstalled": {
-          "type": "array",
-          "items": {
-            "type": "keyword"
+        }
+      },
+      "countByStatus": {
+        "properties": {
+          "AWAITING_UPLOAD": {
+            "type": "long",
+            "_meta": {
+              "description": "Number of files awaiting upload"
+            }
+          },
+          "DELETED": {
+            "type": "long",
+            "_meta": {
+              "description": "Number of files that are marked as deleted"
+            }
+          },
+          "READY": {
+            "type": "long",
+            "_meta": {
+              "description": "Number of files that are ready for download"
+            }
+          },
+          "UPLOADING": {
+            "type": "long",
+            "_meta": {
+              "description": "Number of files that are currently uploading"
+            }
+          },
+          "UPLOAD_ERROR": {
+            "type": "long",
+            "_meta": {
+              "description": "Number of files that failed to upload"
+            }
           }
+        }
+      },
+      "storage": {
+        "properties": {
+          "esFixedSizeIndex": {
+            "properties": {
+              "capacity": {
+                "type": "long",
+                "_meta": {
+                  "description": "Capacity of the fixed size index"
+                }
+              },
+              "available": {
+                "type": "long",
+                "_meta": {
+                  "description": "Available storage in bytes"
+                }
+              },
+              "used": {
+                "type": "long",
+                "_meta": {
+                  "description": "Used storage in bytes"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "sample-data": {
+    "properties": {
+      "installed": {
+        "type": "array",
+        "items": {
+          "type": "keyword"
+        }
+      },
+      "last_install_date": {
+        "type": "date"
+      },
+      "last_install_set": {
+        "type": "keyword"
+      },
+      "last_uninstall_date": {
+        "type": "date"
+      },
+      "last_uninstall_set": {
+        "type": "keyword"
+      },
+      "uninstalled": {
+        "type": "array",
+        "items": {
+          "type": "keyword"
         }
       }
     }
