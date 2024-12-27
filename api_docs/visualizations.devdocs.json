@@ -1339,15 +1339,15 @@
         "references": [
           {
             "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/legacy_visualizations/is_legacy_map.ts"
+            "path": "x-pack/platform/plugins/shared/maps/public/legacy_visualizations/is_legacy_map.ts"
           },
           {
             "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/legacy_visualizations/is_legacy_map.ts"
+            "path": "x-pack/platform/plugins/shared/maps/public/legacy_visualizations/is_legacy_map.ts"
           },
           {
             "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/legacy_visualizations/is_legacy_map.ts"
+            "path": "x-pack/platform/plugins/shared/maps/public/legacy_visualizations/is_legacy_map.ts"
           }
         ],
         "children": [
