@@ -132,6 +132,7 @@ const mountComponent = async ({
         }
         isChartAvailable={undefined}
         renderedFor="root"
+        services={services}
       />
     ),
   };
