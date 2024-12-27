@@ -1466,9 +1466,119 @@
                       "type": "string"
                     },
                     "params": {
-                      "additionalProperties": {},
-                      "description": "The parameters for the rule.",
-                      "type": "object"
+                      "anyOf": [
+                        {
+                          "additionalProperties": false,
+                          "description": "The parameters for the rule.",
+                          "properties": {
+                            "condition": {
+                              "additionalProperties": false,
+                              "properties": {
+                                "downThreshold": {
+                                  "type": "number"
+                                },
+                                "groupBy": {
+                                  "type": "string"
+                                },
+                                "includeRetests": {
+                                  "type": "boolean"
+                                },
+                                "locationsThreshold": {
+                                  "type": "number"
+                                },
+                                "window": {
+                                  "anyOf": [
+                                    {
+                                      "additionalProperties": false,
+                                      "properties": {
+                                        "time": {
+                                          "additionalProperties": false,
+                                          "properties": {
+                                            "size": {
+                                              "default": 5,
+                                              "type": "number"
+                                            },
+                                            "unit": {
+                                              "default": "m",
+                                              "enum": [
+                                                "s",
+                                                "m",
+                                                "h",
+                                                "d"
+                                              ],
+                                              "type": "string"
+                                            }
+                                          },
+                                          "type": "object"
+                                        }
+                                      },
+                                      "required": [
+                                        "time"
+                                      ],
+                                      "type": "object"
+                                    },
+                                    {
+                                      "additionalProperties": false,
+                                      "properties": {
+                                        "numberOfChecks": {
+                                          "default": 5,
+                                          "maximum": 100,
+                                          "minimum": 1,
+                                          "type": "number"
+                                        }
+                                      },
+                                      "type": "object"
+                                    }
+                                  ]
+                                }
+                              },
+                              "required": [
+                                "window"
+                              ],
+                              "type": "object"
+                            },
+                            "kqlQuery": {
+                              "type": "string"
+                            },
+                            "locations": {
+                              "items": {
+                                "type": "string"
+                              },
+                              "type": "array"
+                            },
+                            "monitorIds": {
+                              "items": {
+                                "type": "string"
+                              },
+                              "type": "array"
+                            },
+                            "monitorTypes": {
+                              "items": {
+                                "type": "string"
+                              },
+                              "type": "array"
+                            },
+                            "projects": {
+                              "items": {
+                                "type": "string"
+                              },
+                              "type": "array"
+                            },
+                            "tags": {
+                              "items": {
+                                "type": "string"
+                              },
+                              "type": "array"
+                            }
+                          },
+                          "type": "object"
+                        },
+                        {
+                          "additionalProperties": {},
+                          "description": "The parameters for the rule.",
+                          "type": "object"
+                        }
+                      ]
                     },
                     "revision": {
                       "description": "The rule revision number.",
@@ -2640,9 +2750,119 @@
                       "type": "string"
                     },
                     "params": {
-                      "additionalProperties": {},
-                      "description": "The parameters for the rule.",
-                      "type": "object"
+                      "anyOf": [
+                        {
+                          "additionalProperties": false,
+                          "description": "The parameters for the rule.",
+                          "properties": {
+                            "condition": {
+                              "additionalProperties": false,
+                              "properties": {
+                                "downThreshold": {
+                                  "type": "number"
+                                },
+                                "groupBy": {
+                                  "type": "string"
+                                },
+                                "includeRetests": {
+                                  "type": "boolean"
+                                },
+                                "locationsThreshold": {
+                                  "type": "number"
+                                },
+                                "window": {
+                                  "anyOf": [
+                                    {
+                                      "additionalProperties": false,
+                                      "properties": {
+                                        "time": {
+                                          "additionalProperties": false,
+                                          "properties": {
+                                            "size": {
+                                              "default": 5,
+                                              "type": "number"
+                                            },
+                                            "unit": {
+                                              "default": "m",
+                                              "enum": [
+                                                "s",
+                                                "m",
+                                                "h",
+                                                "d"
+                                              ],
+                                              "type": "string"
+                                            }
+                                          },
+                                          "type": "object"
+                                        }
+                                      },
+                                      "required": [
+                                        "time"
+                                      ],
+                                      "type": "object"
+                                    },
+                                    {
+                                      "additionalProperties": false,
+                                      "properties": {
+                                        "numberOfChecks": {
+                                          "default": 5,
+                                          "maximum": 100,
+                                          "minimum": 1,
+                                          "type": "number"
+                                        }
+                                      },
+                                      "type": "object"
+                                    }
+                                  ]
+                                }
+                              },
+                              "required": [
+                                "window"
+                              ],
+                              "type": "object"
+                            },
+                            "kqlQuery": {
+                              "type": "string"
+                            },
+                            "locations": {
+                              "items": {
+                                "type": "string"
+                              },
+                              "type": "array"
+                            },
+                            "monitorIds": {
+                              "items": {
+                                "type": "string"
+                              },
+                              "type": "array"
+                            },
+                            "monitorTypes": {
+                              "items": {
+                                "type": "string"
+                              },
+                              "type": "array"
+                            },
+                            "projects": {
+                              "items": {
+                                "type": "string"
+                              },
+                              "type": "array"
+                            },
+                            "tags": {
+                              "items": {
+                                "type": "string"
+                              },
+                              "type": "array"
+                            }
+                          },
+                          "type": "object"
+                        },
+                        {
+                          "additionalProperties": {},
+                          "description": "The parameters for the rule.",
+                          "type": "object"
+                        }
+                      ]
                     },
                     "revision": {
                       "description": "The rule revision number.",
@@ -3797,9 +4017,119 @@
                       "type": "string"
                     },
                     "params": {
-                      "additionalProperties": {},
-                      "description": "The parameters for the rule.",
-                      "type": "object"
+                      "anyOf": [
+                        {
+                          "additionalProperties": false,
+                          "description": "The parameters for the rule.",
+                          "properties": {
+                            "condition": {
+                              "additionalProperties": false,
+                              "properties": {
+                                "downThreshold": {
+                                  "type": "number"
+                                },
+                                "groupBy": {
+                                  "type": "string"
+                                },
+                                "includeRetests": {
+                                  "type": "boolean"
+                                },
+                                "locationsThreshold": {
+                                  "type": "number"
+                                },
+                                "window": {
+                                  "anyOf": [
+                                    {
+                                      "additionalProperties": false,
+                                      "properties": {
+                                        "time": {
+                                          "additionalProperties": false,
+                                          "properties": {
+                                            "size": {
+                                              "default": 5,
+                                              "type": "number"
+                                            },
+                                            "unit": {
+                                              "default": "m",
+                                              "enum": [
+                                                "s",
+                                                "m",
+                                                "h",
+                                                "d"
+                                              ],
+                                              "type": "string"
+                                            }
+                                          },
+                                          "type": "object"
+                                        }
+                                      },
+                                      "required": [
+                                        "time"
+                                      ],
+                                      "type": "object"
+                                    },
+                                    {
+                                      "additionalProperties": false,
+                                      "properties": {
+                                        "numberOfChecks": {
+                                          "default": 5,
+                                          "maximum": 100,
+                                          "minimum": 1,
+                                          "type": "number"
+                                        }
+                                      },
+                                      "type": "object"
+                                    }
+                                  ]
+                                }
+                              },
+                              "required": [
+                                "window"
+                              ],
+                              "type": "object"
+                            },
+                            "kqlQuery": {
+                              "type": "string"
+                            },
+                            "locations": {
+                              "items": {
+                                "type": "string"
+                              },
+                              "type": "array"
+                            },
+                            "monitorIds": {
+                              "items": {
+                                "type": "string"
+                              },
+                              "type": "array"
+                            },
+                            "monitorTypes": {
+                              "items": {
+                                "type": "string"
+                              },
+                              "type": "array"
+                            },
+                            "projects": {
+                              "items": {
+                                "type": "string"
+                              },
+                              "type": "array"
+                            },
+                            "tags": {
+                              "items": {
+                                "type": "string"
+                              },
+                              "type": "array"
+                            }
+                          },
+                          "type": "object"
+                        },
+                        {
+                          "additionalProperties": {},
+                          "description": "The parameters for the rule.",
+                          "type": "object"
+                        }
+                      ]
                     },
                     "revision": {
                       "description": "The rule revision number.",
@@ -5151,9 +5481,119 @@
                       "type": "string"
                     },
                     "params": {
-                      "additionalProperties": {},
-                      "description": "The parameters for the rule.",
-                      "type": "object"
+                      "anyOf": [
+                        {
+                          "additionalProperties": false,
+                          "description": "The parameters for the rule.",
+                          "properties": {
+                            "condition": {
+                              "additionalProperties": false,
+                              "properties": {
+                                "downThreshold": {
+                                  "type": "number"
+                                },
+                                "groupBy": {
+                                  "type": "string"
+                                },
+                                "includeRetests": {
+                                  "type": "boolean"
+                                },
+                                "locationsThreshold": {
+                                  "type": "number"
+                                },
+                                "window": {
+                                  "anyOf": [
+                                    {
+                                      "additionalProperties": false,
+                                      "properties": {
+                                        "time": {
+                                          "additionalProperties": false,
+                                          "properties": {
+                                            "size": {
+                                              "default": 5,
+                                              "type": "number"
+                                            },
+                                            "unit": {
+                                              "default": "m",
+                                              "enum": [
+                                                "s",
+                                                "m",
+                                                "h",
+                                                "d"
+                                              ],
+                                              "type": "string"
+                                            }
+                                          },
+                                          "type": "object"
+                                        }
+                                      },
+                                      "required": [
+                                        "time"
+                                      ],
+                                      "type": "object"
+                                    },
+                                    {
+                                      "additionalProperties": false,
+                                      "properties": {
+                                        "numberOfChecks": {
+                                          "default": 5,
+                                          "maximum": 100,
+                                          "minimum": 1,
+                                          "type": "number"
+                                        }
+                                      },
+                                      "type": "object"
+                                    }
+                                  ]
+                                }
+                              },
+                              "required": [
+                                "window"
+                              ],
+                              "type": "object"
+                            },
+                            "kqlQuery": {
+                              "type": "string"
+                            },
+                            "locations": {
+                              "items": {
+                                "type": "string"
+                              },
+                              "type": "array"
+                            },
+                            "monitorIds": {
+                              "items": {
+                                "type": "string"
+                              },
+                              "type": "array"
+                            },
+                            "monitorTypes": {
+                              "items": {
+                                "type": "string"
+                              },
+                              "type": "array"
+                            },
+                            "projects": {
+                              "items": {
+                                "type": "string"
+                              },
+                              "type": "array"
+                            },
+                            "tags": {
+                              "items": {
+                                "type": "string"
+                              },
+                              "type": "array"
+                            }
+                          },
+                          "type": "object"
+                        },
+                        {
+                          "additionalProperties": {},
+                          "description": "The parameters for the rule.",
+                          "type": "object"
+                        }
+                      ]
                     },
                     "revision": {
                       "description": "The rule revision number.",
