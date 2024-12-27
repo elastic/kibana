@@ -18,6 +18,18 @@
         "trackAdoption": false,
         "references": [
           {
+            "plugin": "@kbn/core-lifecycle-browser",
+            "path": "packages/core/lifecycle/core-lifecycle-browser/src/core_start.ts"
+          },
+          {
+            "plugin": "@kbn/core-lifecycle-browser",
+            "path": "packages/core/lifecycle/core-lifecycle-browser/src/core_start.ts"
+          },
+          {
+            "plugin": "@kbn/core-lifecycle-browser",
+            "path": "packages/core/lifecycle/core-lifecycle-browser/src/core_start.ts"
+          },
+          {
             "plugin": "@kbn/core-saved-objects-browser-internal",
             "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_service.ts"
           },
@@ -36,18 +48,6 @@
           {
             "plugin": "@kbn/core-saved-objects-browser-mocks",
             "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/saved_objects_service.mock.ts"
-          },
-          {
-            "plugin": "@kbn/core-lifecycle-browser",
-            "path": "packages/core/lifecycle/core-lifecycle-browser/src/core_start.ts"
-          },
-          {
-            "plugin": "@kbn/core-lifecycle-browser",
-            "path": "packages/core/lifecycle/core-lifecycle-browser/src/core_start.ts"
-          },
-          {
-            "plugin": "@kbn/core-lifecycle-browser",
-            "path": "packages/core/lifecycle/core-lifecycle-browser/src/core_start.ts"
           },
           {
             "plugin": "@kbn/core",
