@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
-import { createProxyActionConnector, deleteActionConnector } from '../../common/action_connectors';
 import type {
   InternalRequestHeader,
   RoleCredentials,
@@ -42,46 +40,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         internalReqHeader,
       });
       await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
-    });
-
-    it('Returns a 2xx for enterprise license', async () => {
-      await observabilityAIAssistantAPIClient
-        .slsEditor({
-          endpoint: `GET /internal/observability_ai_assistant/connectors`,
-        })
-        .expect(200);
-    });
-
-    it('returns an empty list of connectors', async () => {
-      const res = await observabilityAIAssistantAPIClient.slsEditor({
-        endpoint: `GET /internal/observability_ai_assistant/connectors`,
-      });
-
-      expect(res.body.length).to.be(0);
-    });
-
-    it("returns the gen ai connector if it's been created", async () => {
-      const connectorId = await createProxyActionConnector({
-        supertest: supertestWithoutAuth,
-        log,
-        port: 1234,
-        internalReqHeader,
-        roleAuthc,
-      });
-
-      const res = await observabilityAIAssistantAPIClient.slsEditor({
-        endpoint: `GET /internal/observability_ai_assistant/connectors`,
-      });
-
-      expect(res.body.length).to.be(1);
-
-      await deleteActionConnector({
-        supertest: supertestWithoutAuth,
-        connectorId,
-        log,
-        internalReqHeader,
-        roleAuthc,
-      });
     });
 
     describe('security roles and access privileges', () => {
