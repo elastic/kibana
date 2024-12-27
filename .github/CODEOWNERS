@@ -608,41 +608,41 @@ src/platform/packages/shared/kbn-zod-helpers @elastic/security-detection-rule-ma
 src/platform/packages/shared/presentation/presentation_containers @elastic/kibana-presentation
 src/platform/packages/shared/presentation/presentation_publishing @elastic/kibana-presentation
 src/platform/packages/shared/serverless/settings/security_project @elastic/security-solution @elastic/kibana-management
-src/platform/plugins/private/input_control_vis @elastic/kibana-presentation
-src/platform/plugins/private/links @elastic/kibana-presentation
-src/platform/plugins/private/maps_ems @elastic/kibana-presentation
-src/platform/plugins/private/presentation_panel @elastic/kibana-presentation
-src/platform/plugins/private/vis_type_markdown @elastic/kibana-presentation
 src/platform/plugins/private/files_management @elastic/appex-sharedux
 src/platform/plugins/private/image_embeddable @elastic/appex-sharedux
+src/platform/plugins/private/input_control_vis @elastic/kibana-presentation
 src/platform/plugins/private/kibana_overview @elastic/appex-sharedux
+src/platform/plugins/private/links @elastic/kibana-presentation
+src/platform/plugins/private/maps_ems @elastic/kibana-presentation
 src/platform/plugins/private/no_data_page @elastic/appex-sharedux
+src/platform/plugins/private/presentation_panel @elastic/kibana-presentation
+src/platform/plugins/private/vis_type_markdown @elastic/kibana-presentation
 src/platform/plugins/shared/ai_assistant_management/selection @elastic/obs-ai-assistant
 src/platform/plugins/shared/console @elastic/kibana-management
+src/platform/plugins/shared/content_management @elastic/appex-sharedux
 src/platform/plugins/shared/controls @elastic/kibana-presentation
 src/platform/plugins/shared/custom_integrations @elastic/fleet
 src/platform/plugins/shared/dashboard @elastic/kibana-presentation
-src/platform/plugins/shared/content_management @elastic/appex-sharedux
 src/platform/plugins/shared/dev_tools @elastic/kibana-management
 src/platform/plugins/shared/embeddable @elastic/kibana-presentation
 src/platform/plugins/shared/es_ui_shared @elastic/kibana-management
 src/platform/plugins/shared/esql @elastic/kibana-esql
 src/platform/plugins/shared/esql_datagrid @elastic/kibana-esql
-src/platform/plugins/shared/files @elastic/appex-sharedux
-src/platform/plugins/shared/guided_onboarding @elastic/appex-sharedux
-src/platform/plugins/shared/home @elastic/appex-sharedux
-src/platform/plugins/shared/kibana_react @elastic/appex-sharedux
-src/platform/plugins/shared/kibana_utils @elastic/appex-sharedux
 src/platform/plugins/shared/expression_error @elastic/kibana-presentation
 src/platform/plugins/shared/expression_image @elastic/kibana-presentation
 src/platform/plugins/shared/expression_metric @elastic/kibana-presentation
 src/platform/plugins/shared/expression_repeat_image @elastic/kibana-presentation
 src/platform/plugins/shared/expression_reveal_image @elastic/kibana-presentation
 src/platform/plugins/shared/expression_shape @elastic/kibana-presentation
+src/platform/plugins/shared/files @elastic/appex-sharedux
+src/platform/plugins/shared/guided_onboarding @elastic/appex-sharedux
+src/platform/plugins/shared/home @elastic/appex-sharedux
 src/platform/plugins/shared/inspector @elastic/kibana-presentation
+src/platform/plugins/shared/kibana_react @elastic/appex-sharedux
+src/platform/plugins/shared/kibana_utils @elastic/appex-sharedux
 src/platform/plugins/shared/management @elastic/kibana-management
-src/platform/plugins/shared/presentation_util @elastic/kibana-presentation
 src/platform/plugins/shared/navigation @elastic/appex-sharedux
+src/platform/plugins/shared/presentation_util @elastic/kibana-presentation
 src/platform/plugins/shared/saved_objects @elastic/appex-sharedux
 src/platform/plugins/shared/saved_objects_tagging_oss @elastic/appex-sharedux
 src/platform/plugins/shared/screenshot_mode @elastic/appex-sharedux
@@ -840,9 +840,9 @@ x-pack/platform/plugins/private/cross_cluster_replication @elastic/kibana-manage
 x-pack/platform/plugins/private/custom_branding @elastic/appex-sharedux
 x-pack/platform/plugins/private/data_usage @elastic/obs-ai-assistant @elastic/security-solution
 x-pack/platform/plugins/private/data_visualizer @elastic/ml-ui
+x-pack/platform/plugins/private/file_upload @elastic/kibana-presentation @elastic/ml-ui
 x-pack/platform/plugins/private/global_search_bar @elastic/appex-sharedux
 x-pack/platform/plugins/private/global_search_providers @elastic/appex-sharedux
-x-pack/platform/plugins/private/file_upload @elastic/kibana-presentation @elastic/ml-ui
 x-pack/platform/plugins/private/grokdebugger @elastic/kibana-management
 x-pack/platform/plugins/private/index_lifecycle_management @elastic/kibana-management
 x-pack/platform/plugins/private/license_api_guard @elastic/kibana-management
@@ -872,8 +872,8 @@ x-pack/platform/plugins/shared/embeddable_enhanced @elastic/kibana-presentation
 x-pack/platform/plugins/shared/entity_manager @elastic/obs-entities
 x-pack/platform/plugins/shared/event_log @elastic/response-ops
 x-pack/platform/plugins/shared/fields_metadata @elastic/obs-ux-logs-team
-x-pack/platform/plugins/shared/global_search @elastic/appex-sharedux
 x-pack/platform/plugins/shared/fleet @elastic/fleet
+x-pack/platform/plugins/shared/global_search @elastic/appex-sharedux
 x-pack/platform/plugins/shared/index_management @elastic/kibana-management
 x-pack/platform/plugins/shared/inference @elastic/appex-ai-infra
 x-pack/platform/plugins/shared/ingest_pipelines @elastic/kibana-management
@@ -889,11 +889,12 @@ x-pack/platform/plugins/shared/osquery @elastic/security-defend-workflows
 x-pack/platform/plugins/shared/rule_registry @elastic/response-ops @elastic/obs-ux-management-team
 x-pack/platform/plugins/shared/screenshotting @elastic/kibana-reporting-services
 x-pack/platform/plugins/shared/searchprofiler @elastic/kibana-management
+x-pack/platform/plugins/shared/serverless @elastic/appex-sharedux
 x-pack/platform/plugins/shared/stack_alerts @elastic/response-ops
 x-pack/platform/plugins/shared/stack_connectors @elastic/response-ops
 x-pack/platform/plugins/shared/task_manager @elastic/response-ops
 x-pack/platform/plugins/shared/triggers_actions_ui @elastic/response-ops
-x-pack/platform/plugins/shared/serverless @elastic/appex-sharedux
+x-pack/plugins/banners @elastic/appex-sharedux
 x-pack/plugins/cloud @elastic/kibana-core
 x-pack/plugins/cloud_integrations/cloud_chat @elastic/kibana-core
 x-pack/plugins/cloud_integrations/cloud_experiments @elastic/kibana-core
