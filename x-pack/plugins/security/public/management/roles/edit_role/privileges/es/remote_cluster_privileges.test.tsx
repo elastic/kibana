@@ -9,7 +9,10 @@ import React from 'react';
 
 import { coreMock } from '@kbn/core/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import type { SecurityLicenseFeatures } from '@kbn/security-plugin-types-common';
+import type {
+  RemoteClusterPrivilege,
+  SecurityLicenseFeatures,
+} from '@kbn/security-plugin-types-common';
 import { mountWithIntl, shallowWithIntl } from '@kbn/test-jest-helpers';
 import '@kbn/code-editor-mock/jest_helper';
 
@@ -69,7 +72,7 @@ test('it renders an RemoteClusterPrivilegesForm for each remote cluster privileg
               },
               {
                 clusters: ['cluster5', 'cluster6'],
-                privileges: ['monitor_enrich', 'custom-privilege'],
+                privileges: ['monitor_enrich', 'monitor_stats'],
               },
             ],
             indices: [],
@@ -98,11 +101,11 @@ test('it renders fields as disabled when not editable', async () => {
         remote_cluster: [
           {
             clusters: ['cluster1', 'cluster2'],
-            privileges: ['monitor_enrich'],
+            privileges: ['monitor_enrich'] as RemoteClusterPrivilege[],
           },
           {
             clusters: ['cluster3', 'cluster4'],
-            privileges: ['monitor_enrich'],
+            privileges: ['monitor_enrich'] as RemoteClusterPrivilege[],
           },
         ],
         indices: [],
@@ -144,11 +147,11 @@ test('it renders fields as disabled when `allowRemoteClusterPrivileges` is set t
         remote_cluster: [
           {
             clusters: ['cluster1', 'cluster2'],
-            privileges: ['monitor_enrich'],
+            privileges: ['monitor_enrich'] as RemoteClusterPrivilege[],
           },
           {
             clusters: ['cluster3', 'cluster4'],
-            privileges: ['monitor_enrich'],
+            privileges: ['monitor_enrich'] as RemoteClusterPrivilege[],
           },
         ],
         indices: [],

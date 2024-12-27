@@ -8,6 +8,7 @@
 export type { FeaturesPrivileges } from './features_privileges';
 export type { RawKibanaFeaturePrivileges, RawKibanaPrivileges } from './raw_kibana_privileges';
 export type {
+  RemoteClusterPrivilege,
   Role,
   RoleKibanaPrivilege,
   RoleIndexPrivilege,
