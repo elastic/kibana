@@ -62,8 +62,8 @@ const SINGLE_LINE_STRING_FIELDS_MAP: Record<
 
 const RULE_TYPE_FIELD_MAPPING = {
   query: ['name', 'severity'],
-  threat_match: ['name', 'severity', 'threat_indicator_path'],
-  new_terms: ['name', 'severity', 'history_window_start'],
+  threat_match: ['threat_indicator_path'],
+  new_terms: ['history_window_start'],
 } as const;
 
 type RuleTypeToFields = typeof RULE_TYPE_FIELD_MAPPING;
