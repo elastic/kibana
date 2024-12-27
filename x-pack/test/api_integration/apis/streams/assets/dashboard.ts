@@ -186,10 +186,6 @@ export default function ({ getService }: FtrProviderContext) {
 
       describe('after manually rolling over the index and relinking the dashboard', () => {
         before(async () => {
-          await esClient.indices.create({
-            index: `.kibana_streams_assets-000002`,
-          });
-
           await esClient.indices.updateAliases({
             actions: [
               {
@@ -199,14 +195,11 @@ export default function ({ getService }: FtrProviderContext) {
                   is_write_index: false,
                 },
               },
-              {
-                add: {
-                  index: `.kibana_streams_assets-000002`,
-                  alias: `.kibana_streams_assets`,
-                  is_write_index: true,
-                },
-              },
             ],
+          });
+
+          await esClient.indices.create({
+            index: `.kibana_streams_assets-000002`,
           });
 
           await unlinkDashboard(SEARCH_DASHBOARD_ID);

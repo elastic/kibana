@@ -75,6 +75,9 @@ function catchConflictError(error: Error) {
  * Adapter for writing and reading documents to/from Elasticsearch,
  * using plain indices.
  *
+ * TODO:
+ * - Index Lifecycle Management
+ * - Schema upgrades w/ fallbacks
  */
 export class StorageIndexAdapter<TStorageSettings extends IndexStorageSettings>
   implements IStorageAdapter<TStorageSettings>
@@ -132,7 +135,13 @@ export class StorageIndexAdapter<TStorageSettings extends IndexStorageSettings>
       .getIndexTemplate({
         name: getIndexTemplateName(this.storage.name),
       })
-      .then((templates) => templates.index_templates[0]?.index_template);
+      .then((templates) => templates.index_templates[0]?.index_template)
+      .catch((error) => {
+        if (isResponseError(error) && error.statusCode === 404) {
+          return undefined;
+        }
+        throw error;
+      });
   }
 
   private async getCurrentWriteIndex(): Promise<
@@ -234,7 +243,7 @@ export class StorageIndexAdapter<TStorageSettings extends IndexStorageSettings>
     if (!existingIndexTemplate) {
       this.logger.info(`Creating index template as it does not exist`);
       await this.createOrUpdateIndexTemplate();
-    } else if (existingIndexTemplate?._meta?.version !== expectedSchemaVersion) {
+    } else if (existingIndexTemplate._meta?.version !== expectedSchemaVersion) {
       this.logger.info(`Updating existing index template`);
       await this.createOrUpdateIndexTemplate();
     }
