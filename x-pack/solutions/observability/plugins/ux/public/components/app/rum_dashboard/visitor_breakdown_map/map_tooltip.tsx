@@ -13,7 +13,7 @@ import {
   EuiOutsideClickDetector,
   EuiPopoverTitle,
 } from '@elastic/eui';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 import type { RenderTooltipContentParams } from '@kbn/maps-plugin/public';
 import {
   COUNTRY_NAME,

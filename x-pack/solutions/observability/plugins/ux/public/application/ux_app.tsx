@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import { euiLightVars, euiDarkVars } from '@kbn/ui-theme';
 import { EuiErrorBoundary } from '@elastic/eui';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Redirect } from 'react-router-dom';
-import { DefaultTheme, ThemeProvider } from 'styled-components';
+import { EuiThemeProvider } from '@elastic/eui';
 import { RouterProvider, createRouter } from '@kbn/typed-react-router-config';
 import { i18n } from '@kbn/i18n';
 import { RouteComponentProps, RouteProps } from 'react-router-dom';
@@ -18,7 +17,7 @@ import { AppMountParameters, CoreStart, APP_WRAPPER_CLASS } from '@kbn/core/publ
 
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
-import { KibanaContextProvider, useDarkMode } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 
@@ -57,7 +56,6 @@ export const uxRoutes: RouteDefinition[] = [
 function UxApp() {
   const { http } = useKibanaServices();
   const basePath = http.basePath.get();
-  const darkMode = useDarkMode(false);
 
   useBreadcrumbs([
     {
@@ -74,17 +72,11 @@ function UxApp() {
   ]);
 
   return (
-    <ThemeProvider
-      theme={(outerTheme?: DefaultTheme) => ({
-        ...outerTheme,
-        eui: darkMode ? euiDarkVars : euiLightVars,
-        darkMode,
-      })}
-    >
+    <EuiThemeProvider>
       <div className={APP_WRAPPER_CLASS} data-test-subj="csmMainContainer">
         <RumHome />
       </div>
-    </ThemeProvider>
+    </EuiThemeProvider>
   );
 }
 
