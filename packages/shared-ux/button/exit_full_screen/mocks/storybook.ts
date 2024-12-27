@@ -30,7 +30,7 @@ export class StorybookMock extends AbstractStorybookMock<
 > {
   propArguments = {
     toggleChrome: {
-      control: 'boolean',
+      control: { control: 'boolean' },
       defaultValue: true,
     },
   };

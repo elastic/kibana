@@ -30,7 +30,7 @@ export class ProjectSwitcherStorybookMock extends AbstractStorybookMock<
 > {
   propArguments = {
     currentProjectType: {
-      control: { type: 'radio' },
+      control: { control: 'radio' },
       options: ['observability', 'security', 'search'],
       defaultValue: 'observability',
     },
