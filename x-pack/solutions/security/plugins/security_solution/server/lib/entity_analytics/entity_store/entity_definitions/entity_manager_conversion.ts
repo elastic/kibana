@@ -14,10 +14,7 @@ export const convertToEntityManagerDefinition = (
   description: EntityEngineInstallationDescriptor,
   options: { namespace: string; filter: string }
 ): EntityDefinition => {
-  const metadata = [
-    ...description.fields.map(pick(['source', 'destination', 'aggregation'])),
-    ...description.identityFields.map((source) => ({ source })),
-  ];
+  const metadata = description.fields.map(pick(['source', 'destination', 'aggregation']));
 
   const definition = {
     id: buildEntityDefinitionId(description.entityType, options.namespace),

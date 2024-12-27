@@ -5,13 +5,6 @@
  * 2.0.
  */
 
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
- */
-
 import { duration } from 'moment';
 import { createEngineDescription } from './engine_description';
 import { convertToEntityManagerDefinition } from '../entity_definitions/entity_manager_conversion';
@@ -27,8 +20,8 @@ describe('getUnitedEntityDefinition', () => {
       },
       defaultIndexPatterns,
       config: {
-        syncDelay: duration('1m'),
-        frequency: duration('1m'),
+        syncDelay: duration(60, 'seconds'),
+        frequency: duration(60, 'seconds'),
         developer: { pipelineDebugMode: false },
       },
     });
@@ -128,10 +121,10 @@ describe('getUnitedEntityDefinition', () => {
             "test*",
           ],
           "latest": Object {
-            "lookbackPeriod": "24h",
+            "lookbackPeriod": "1d",
             "settings": Object {
-              "frequency": "1m",
-              "syncDelay": "1m",
+              "frequency": "60s",
+              "syncDelay": "60s",
             },
             "timestampField": "@timestamp",
           },
@@ -276,8 +269,8 @@ describe('getUnitedEntityDefinition', () => {
       },
       defaultIndexPatterns,
       config: {
-        syncDelay: duration('1m'),
-        frequency: duration('1m'),
+        syncDelay: duration(60, 'seconds'),
+        frequency: duration(60, 'seconds'),
         developer: { pipelineDebugMode: false },
       },
     });
@@ -366,10 +359,10 @@ describe('getUnitedEntityDefinition', () => {
             "test*",
           ],
           "latest": Object {
-            "lookbackPeriod": "24h",
+            "lookbackPeriod": "1d",
             "settings": Object {
-              "frequency": "1m",
-              "syncDelay": "1m",
+              "frequency": "60s",
+              "syncDelay": "60s",
             },
             "timestampField": "@timestamp",
           },
@@ -491,8 +484,8 @@ describe('getUnitedEntityDefinition', () => {
       },
       defaultIndexPatterns,
       config: {
-        syncDelay: duration('1m'),
-        frequency: duration('1m'),
+        syncDelay: duration(60, 'seconds'),
+        frequency: duration(60, 'seconds'),
         developer: { pipelineDebugMode: false },
       },
     });
@@ -544,15 +537,6 @@ describe('getUnitedEntityDefinition', () => {
             "service.node.roles": Object {
               "type": "keyword",
             },
-            "service.risk.calculated_level": Object {
-              "type": "keyword",
-            },
-            "service.risk.calculated_score": Object {
-              "type": "float",
-            },
-            "service.risk.calculated_score_norm": Object {
-              "type": "float",
-            },
             "service.state": Object {
               "type": "keyword",
             },
@@ -586,10 +570,10 @@ describe('getUnitedEntityDefinition', () => {
             "test*",
           ],
           "latest": Object {
-            "lookbackPeriod": "24h",
+            "lookbackPeriod": "1d",
             "settings": Object {
-              "frequency": "1m",
-              "syncDelay": "1m",
+              "frequency": "60s",
+              "syncDelay": "60s",
             },
             "timestampField": "@timestamp",
           },
@@ -670,56 +654,6 @@ describe('getUnitedEntityDefinition', () => {
               },
               "destination": "service.version",
               "source": "service.version",
-            },
-            Object {
-              "aggregation": Object {
-                "sort": Object {
-                  "@timestamp": "asc",
-                },
-                "type": "top_value",
-              },
-              "destination": "entity.source",
-              "source": "_index",
-            },
-            Object {
-              "aggregation": Object {
-                "sort": Object {
-                  "@timestamp": "desc",
-                },
-                "type": "top_value",
-              },
-              "destination": "asset.criticality",
-              "source": "asset.criticality",
-            },
-            Object {
-              "aggregation": Object {
-                "sort": Object {
-                  "@timestamp": "desc",
-                },
-                "type": "top_value",
-              },
-              "destination": "service.risk.calculated_level",
-              "source": "service.risk.calculated_level",
-            },
-            Object {
-              "aggregation": Object {
-                "sort": Object {
-                  "@timestamp": "desc",
-                },
-                "type": "top_value",
-              },
-              "destination": "service.risk.calculated_score",
-              "source": "service.risk.calculated_score",
-            },
-            Object {
-              "aggregation": Object {
-                "sort": Object {
-                  "@timestamp": "desc",
-                },
-                "type": "top_value",
-              },
-              "destination": "service.risk.calculated_score_norm",
-              "source": "service.risk.calculated_score_norm",
             },
           ],
           "name": "Security 'service' Entity Store Definition",
