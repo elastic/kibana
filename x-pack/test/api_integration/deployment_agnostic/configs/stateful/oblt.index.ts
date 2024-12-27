@@ -15,5 +15,6 @@ export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext)
     loadTestFile(require.resolve('../../apis/observability/slo'));
     loadTestFile(require.resolve('../../apis/observability/synthetics'));
     loadTestFile(require.resolve('../../apis/observability/infra'));
+    loadTestFile(require.resolve('../../apis/observability/ai_assistant'));
   });
 }
