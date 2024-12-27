@@ -732,7 +732,7 @@ export class SecurityPageObject extends FtrService {
         await this.addRemoteClusterPrivilege(remoteClusterPrivilege, index);
       }
     }
-    console.log('is create role');
+
     await this.saveRole();
   }
 
