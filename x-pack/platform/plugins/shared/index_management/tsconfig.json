@@ -56,7 +56,8 @@
     "@kbn/shared-ux-table-persist",
     "@kbn/core-application-browser",
     "@kbn/inference-endpoint-ui-common",
-    "@kbn/safer-lodash-set"
+    "@kbn/safer-lodash-set",
+    "@kbn/search-connectors"
   ],
   "exclude": ["target/**/*"]
 }
