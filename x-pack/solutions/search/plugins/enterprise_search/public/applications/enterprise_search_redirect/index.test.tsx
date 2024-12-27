@@ -39,7 +39,7 @@ describe('RedirectWithReplace', () => {
 
   it('should redirect to the new path', async () => {
     render(
-      <MemoryRouter initialEntries={['/enterprise_search/content/search_indices']}>
+      <MemoryRouter>
         <ApplicationRedirect />
       </MemoryRouter>
     );
