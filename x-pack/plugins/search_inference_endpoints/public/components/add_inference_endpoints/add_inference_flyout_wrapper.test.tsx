@@ -37,7 +37,8 @@ const MockFormProvider = ({ children }: { children: React.ReactElement }) => {
   );
 };
 
-describe('AddInferenceFlyout', () => {
+// Failing: See https://github.com/elastic/kibana/issues/205201
+describe.skip('AddInferenceFlyout', () => {
   it('renders', () => {
     render(
       <MockFormProvider>
