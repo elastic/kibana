@@ -321,8 +321,8 @@ export const SeriesControls: FC<PropsWithChildren<SeriesControlsProps>> = ({
 
   return (
     <div data-test-subj="mlSingleMetricViewerSeriesControls">
-      <EuiFlexGroup direction={direction}>
-        <EuiFlexItem grow={false}>
+      <EuiFlexGroup direction={direction} gutterSize="s" wrap={true}>
+        <EuiFlexItem grow={false} css={{ minWidth: '200px' }}>
           <EuiFormRow
             label={
               <FormattedMessage

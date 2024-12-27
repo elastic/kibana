@@ -7,84 +7,99 @@
 
 import expect from '@kbn/expect';
 import { SearchTotalHits } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { StreamDefinition } from '@kbn/streams-schema';
 import { deleteStream, enableStreams, indexDocument } from './helpers/requests';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { waitForDocumentInIndex } from '../../../alerting_api_integration/observability/helpers/alerting_wait_for_helpers';
 import { cleanUpRootStream } from './helpers/cleanup';
 
-const streams = [
+const streams: StreamDefinition[] = [
   {
-    processing: [],
-    fields: [
-      {
-        name: '@timestamp',
-        type: 'date',
-      },
-      {
-        name: 'message',
-        type: 'match_only_text',
-      },
-      {
-        name: 'host.name',
-        type: 'keyword',
-      },
-      {
-        name: 'log.level',
-        type: 'keyword',
-      },
-    ],
-    children: [
-      {
-        id: 'logs.test',
-        condition: {
-          and: [
-            {
-              field: 'numberfield',
-              operator: 'gt',
-              value: 15,
+    name: 'logs',
+    stream: {
+      ingest: {
+        processing: [],
+        wired: {
+          fields: {
+            '@timestamp': {
+              type: 'date',
             },
-          ],
-        },
-      },
-      {
-        id: 'logs.test2',
-        condition: {
-          and: [
-            {
-              field: 'field2',
-              operator: 'eq',
-              value: 'abc',
+            message: {
+              type: 'match_only_text',
             },
-          ],
+            'host.name': {
+              type: 'keyword',
+            },
+            'log.level': {
+              type: 'keyword',
+            },
+          },
         },
+        routing: [
+          {
+            name: 'logs.test',
+            condition: {
+              and: [
+                {
+                  field: 'numberfield',
+                  operator: 'gt',
+                  value: 15,
+                },
+              ],
+            },
+          },
+          {
+            name: 'logs.test2',
+            condition: {
+              and: [
+                {
+                  field: 'field2',
+                  operator: 'eq',
+                  value: 'abc',
+                },
+              ],
+            },
+          },
+        ],
       },
-    ],
-    id: 'logs',
+    },
   },
   {
-    id: 'logs.test',
-    processing: [],
-    fields: [],
-    children: [],
+    name: 'logs.test',
+    stream: {
+      ingest: {
+        processing: [],
+        wired: {
+          fields: {},
+        },
+        routing: [],
+      },
+    },
   },
   {
-    id: 'logs.test2',
-    processing: [
-      {
-        config: {
-          type: 'grok',
-          field: 'message',
-          patterns: ['%{NUMBER:numberfield}'],
+    name: 'logs.test2',
+    stream: {
+      ingest: {
+        processing: [
+          {
+            config: {
+              grok: {
+                field: 'message',
+                patterns: ['%{NUMBER:numberfield}'],
+              },
+            },
+          },
+        ],
+        wired: {
+          fields: {
+            numberfield: {
+              type: 'long',
+            },
+          },
         },
+        routing: [],
       },
-    ],
-    fields: [
-      {
-        name: 'numberfield',
-        type: 'long',
-      },
-    ],
-    children: [],
+    },
   },
 ];
 
@@ -107,9 +122,9 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('PUTs all streams one by one without errors', async () => {
-      for (const { id: streamId, ...stream } of streams) {
+      for (const { name, stream } of streams) {
         const response = await supertest
-          .put(`/api/streams/${streamId}`)
+          .put(`/api/streams/${name}`)
           .set('kbn-xsrf', 'xxx')
           .send(stream)
           .expect(200);
