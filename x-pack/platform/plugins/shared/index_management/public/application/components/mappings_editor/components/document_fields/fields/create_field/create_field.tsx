@@ -77,7 +77,7 @@ export const CreateField = React.memo(function CreateFieldComponent({
   semanticTextInfo,
   createFieldFormRef,
 }: Props) {
-  const { isSemanticTextEnabled, ml, setErrorsInTrainedModelDeployment } = semanticTextInfo ?? {};
+  const { isSemanticTextEnabled, setErrorsInTrainedModelDeployment } = semanticTextInfo ?? {};
   const dispatch = useDispatch();
   const fieldTypeInputRef = useRef<HTMLInputElement>(null);
 
@@ -106,10 +106,9 @@ export const CreateField = React.memo(function CreateFieldComponent({
     }
   };
 
-  const { createInferenceEndpoint, handleSemanticText } = useSemanticText({
+  const { handleSemanticText } = useSemanticText({
     form,
     setErrorsInTrainedModelDeployment,
-    ml,
   });
 
   const isSemanticText = form.getFormData().type === 'semantic_text';
@@ -286,9 +285,7 @@ export const CreateField = React.memo(function CreateFieldComponent({
 
               {renderRequiredParametersForm()}
 
-              {isSemanticText && (
-                <SelectInferenceId createInferenceEndpoint={createInferenceEndpoint} />
-              )}
+              {isSemanticText && <SelectInferenceId />}
               {renderFormActions()}
             </div>
           </div>

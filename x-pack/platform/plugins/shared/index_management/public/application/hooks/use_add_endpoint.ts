@@ -12,7 +12,8 @@ import { useMLModelNotificationToasts } from '../../hooks/use_ml_model_status_to
 import { createInferenceEndpoint } from '../services';
 
 export const useAddEndpoint = (onSuccess?: () => void, onError?: () => void) => {
-  const { showErrorToasts, showInferenceSuccessToast } = useMLModelNotificationToasts();
+  const { showInferenceCreationErrorToasts, showInferenceSuccessToast } =
+    useMLModelNotificationToasts();
 
   const addInferenceEndpoint = useCallback(
     async (inferenceEndpoint: InferenceEndpoint) => {
@@ -23,7 +24,7 @@ export const useAddEndpoint = (onSuccess?: () => void, onError?: () => void) => 
       );
 
       if (error) {
-        showErrorToasts(error?.message, 'Endpoint creation failed');
+        showInferenceCreationErrorToasts(error?.message);
         if (onError) {
           onError();
         }
@@ -34,7 +35,7 @@ export const useAddEndpoint = (onSuccess?: () => void, onError?: () => void) => 
         }
       }
     },
-    [onError, onSuccess, showErrorToasts, showInferenceSuccessToast]
+    [onError, onSuccess, showInferenceCreationErrorToasts, showInferenceSuccessToast]
   );
 
   return {

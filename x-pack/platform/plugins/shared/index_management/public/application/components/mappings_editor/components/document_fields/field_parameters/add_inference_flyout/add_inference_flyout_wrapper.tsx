@@ -32,7 +32,6 @@ export const AddInferenceFlyoutWrapper: React.FC<AddInferenceFlyoutWrapperProps>
   const inferenceCreationFlyoutId = useGeneratedHtmlId({
     prefix: 'addInferenceFlyoutId',
   });
-  // const closeFlyout = () => onClose(false);
 
   return (
     <EuiFlyout
