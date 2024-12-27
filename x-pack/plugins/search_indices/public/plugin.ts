@@ -9,6 +9,7 @@ import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { SEARCH_INDICES_CREATE_INDEX } from '@kbn/deeplinks-search/constants';
 import { i18n } from '@kbn/i18n';
 
+import { Subscription } from 'rxjs';
 import { docLinks } from '../common/doc_links';
 import type {
   AppPluginSetupDependencies,
@@ -31,6 +32,7 @@ export class SearchIndicesPlugin
   implements Plugin<SearchIndicesPluginSetup, SearchIndicesPluginStart>
 {
   private pluginEnabled: boolean = false;
+  private activeSolutionIdSubscription: Subscription | undefined;
 
   public setup(
     core: CoreSetup<SearchIndicesAppPluginStartDependencies, SearchIndicesPluginStart>,
@@ -99,16 +101,23 @@ export class SearchIndicesPlugin
   ): SearchIndicesPluginStart {
     const { indexManagement } = deps;
     docLinks.setDocLinks(core.docLinks.links);
+
     if (this.pluginEnabled) {
-      indexManagement?.extensionsService.setIndexDetailsPageRoute({
-        renderRoute: (indexName, detailsTabId) => {
-          const route = `/app/elasticsearch/indices/index_details/${indexName}`;
-          if (detailsTabId && SearchIndexDetailsTabValues.includes(detailsTabId)) {
-            return `${route}/${detailsTabId}`;
+      this.activeSolutionIdSubscription = core.chrome
+        .getActiveSolutionNavId$()
+        .subscribe((activeSolutionId) => {
+          if (activeSolutionId === 'es') {
+            indexManagement?.extensionsService.setIndexDetailsPageRoute({
+              renderRoute: (indexName, detailsTabId) => {
+                const route = `/app/elasticsearch/indices/index_details/${indexName}`;
+                if (detailsTabId && SearchIndexDetailsTabValues.includes(detailsTabId)) {
+                  return `${route}/${detailsTabId}`;
+                }
+                return route;
+              },
+            });
           }
-          return route;
-        },
-      });
+        });
     }
     return {
       enabled: this.pluginEnabled,
@@ -117,5 +126,10 @@ export class SearchIndicesPlugin
     };
   }
 
-  public stop() {}
+  public stop() {
+    if (this.activeSolutionIdSubscription) {
+      this.activeSolutionIdSubscription.unsubscribe();
+      this.activeSolutionIdSubscription = undefined;
+    }
+  }
 }

@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
+
+import { useValues } from 'kea';
 
 import {
   EuiButtonIcon,
@@ -28,10 +30,11 @@ import { Connector } from '@kbn/search-connectors';
 
 import { MANAGE_API_KEYS_URL } from '../../../../../../common/constants';
 import { generateEncodedPath } from '../../../../shared/encode_path_params';
+import { KibanaLogic } from '../../../../shared/kibana';
 import { EuiLinkTo } from '../../../../shared/react_router_helpers';
 
 import { ApiKey } from '../../../api/connector/generate_connector_api_key_api_logic';
-import { CONNECTOR_DETAIL_PATH, SEARCH_INDEX_PATH } from '../../../routes';
+import { CONNECTOR_DETAIL_PATH } from '../../../routes';
 
 export interface GeneratedConfigFieldsProps {
   apiKey?: ApiKey;
@@ -84,7 +87,7 @@ export const GeneratedConfigFields: React.FC<GeneratedConfigFieldsProps> = ({
   isGenerateLoading,
 }) => {
   const [isModalVisible, setIsModalVisible] = useState(false);
-
+  const { navigateToUrl, share } = useValues(KibanaLogic);
   const refreshButtonClick = () => {
     setIsModalVisible(true);
   };
@@ -96,6 +99,34 @@ export const GeneratedConfigFields: React.FC<GeneratedConfigFieldsProps> = ({
     if (generateApiKey) generateApiKey();
     setIsModalVisible(false);
   };
+  const searchIndexDetailsUrl = share?.url.locators
+    .get('SEARCH_INDEX_DETAILS_LOCATOR_ID')
+    ?.useUrl({ indexName: connector?.index_name });
+
+  const SearchIndicesLinkProps = useMemo(() => {
+    const props = {
+      target: '_blank',
+      external: true,
+    };
+    if (searchIndexDetailsUrl) {
+      return {
+        ...props,
+        href: searchIndexDetailsUrl,
+        onClick: async (event: React.MouseEvent<HTMLAnchorElement>) => {
+          event.preventDefault();
+          navigateToUrl(searchIndexDetailsUrl, {
+            shouldNotCreateHref: true,
+            shouldNotPrepend: true,
+          });
+        },
+      };
+    } else {
+      return {
+        disabled: true,
+        target: undefined,
+      };
+    }
+  }, [navigateToUrl, searchIndexDetailsUrl]);
 
   return (
     <>
@@ -181,15 +212,7 @@ export const GeneratedConfigFields: React.FC<GeneratedConfigFieldsProps> = ({
           </EuiFlexItem>
           <EuiFlexItem>
             {connector.index_name && (
-              <EuiLinkTo
-                external
-                target="_blank"
-                to={generateEncodedPath(SEARCH_INDEX_PATH, {
-                  indexName: connector.index_name,
-                })}
-              >
-                {connector.index_name}
-              </EuiLinkTo>
+              <EuiLink {...SearchIndicesLinkProps}>{connector.index_name}</EuiLink>
             )}
           </EuiFlexItem>
           <EuiFlexItem />
