@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { ProcessingDefinition } from '@kbn/streams-schema';
+import {
+  DissectProcessingDefinition,
+  GrokProcessingDefinition,
+  ProcessingDefinition,
+} from '@kbn/streams-schema';
 
 export interface ProcessorDefinition extends ProcessingDefinition {
   id: string;
@@ -16,3 +20,27 @@ export type ProcessorType = ProcessingDefinition['config'] extends infer U
     ? keyof U
     : never
   : never;
+
+export interface BaseProcessingDefinition {
+  condition?: ProcessingDefinition['condition'];
+}
+
+export interface BaseFormState {
+  condition?: ProcessingDefinition['condition'];
+}
+export interface ProcessingDefinitionGrok extends BaseProcessingDefinition {
+  config: GrokProcessingDefinition;
+}
+
+export interface ProcessingDefinitionDissect extends BaseProcessingDefinition {
+  config: DissectProcessingDefinition;
+}
+
+export type GrokFormState = Omit<GrokProcessingDefinition['grok'], 'patterns'> & {
+  type: 'grok';
+  patterns: Array<{ value: string }>;
+};
+
+export type DissectFormState = { type: 'dissect' } & DissectProcessingDefinition['dissect'];
+
+export type ProcessorFormState = BaseFormState & (GrokFormState | DissectFormState);

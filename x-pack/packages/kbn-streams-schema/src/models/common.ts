@@ -52,6 +52,7 @@ export const grokProcessingDefinitionSchema = z.object({
     field: z.string(),
     patterns: z.array(z.string()),
     pattern_definitions: z.optional(z.record(z.string())),
+    ignore_failure: z.optional(z.boolean()),
   }),
 });
 

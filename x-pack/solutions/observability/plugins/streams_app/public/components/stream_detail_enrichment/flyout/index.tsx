@@ -6,73 +6,30 @@
  */
 
 import React, { useMemo } from 'react';
-import {
-  FormProvider,
-  UseControllerProps,
-  useController,
-  useFieldArray,
-  useForm,
-  useFormContext,
-  useWatch,
-} from 'react-hook-form';
-import {
-  EuiCallOut,
-  EuiForm,
-  EuiFormRow,
-  EuiFlexGroup,
-  EuiSuperSelect,
-  EuiSuperSelectOption,
-  EuiButtonEmpty,
-  EuiButton,
-  EuiIcon,
-  EuiButtonIcon,
-  EuiFieldText,
-  EuiPanel,
-  DragDropContextProps,
-  EuiDraggable,
-  EuiSpacer,
-  EuiAccordion,
-  useEuiTheme,
-} from '@elastic/eui';
+import { FormProvider, useController, useForm, useWatch } from 'react-hook-form';
+import { EuiCallOut, EuiForm, EuiButton, EuiSpacer, EuiAccordion, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FieldIcon } from '@kbn/react-field';
-import {
-  DissectProcessingDefinition,
-  FieldDefinitionConfig,
-  GrokProcessingDefinition,
-  ProcessingDefinition,
-  ReadStreamDefinition,
-  isWiredReadStream,
-} from '@kbn/streams-schema';
+import { ProcessingDefinition, ReadStreamDefinition, isWiredReadStream } from '@kbn/streams-schema';
 import { css } from '@emotion/react';
-import { CodeEditor } from '@kbn/code-editor';
 import { ProcessorTypeSelector } from './processor_type_selector';
-import { SortableList } from '../sortable_list';
 import { ProcessorFlyoutTemplate } from './processor_flyout_template';
+import { ConditionEditor } from '../../condition_editor';
+import { GrokPatternDefinition } from './grok_pattern_definition';
+import { ProcessingDefinitionGrok, ProcessorFormState } from '../types';
+import { ProcessorFieldSelector } from './processor_field_selector';
+import { GrokPatternsEditor } from './grok_patterns_editor';
+import { ToggleField } from './toggle_field';
 
-interface ProcessorFlyoutProps {
+const defaultCondition: ProcessingDefinition['condition'] = {
+  field: '',
+  operator: 'eq',
+  value: '',
+};
+
+export interface ProcessorFlyoutProps {
   definition: ReadStreamDefinition;
   onClose: () => void;
 }
-
-interface BaseProcessingDefinition {
-  condition?: ProcessingDefinition['condition'];
-}
-interface ProcessingDefinitionGrok extends BaseProcessingDefinition {
-  config: GrokProcessingDefinition;
-}
-
-interface ProcessingDefinitionDissect extends BaseProcessingDefinition {
-  config: DissectProcessingDefinition;
-}
-
-type GrokFormState = Omit<GrokProcessingDefinition['grok'], 'patterns'> & {
-  type: 'grok';
-  patterns: Array<{ value: string }>;
-};
-type DissectFormState = { type: 'dissect' } & DissectProcessingDefinition['dissect'];
-
-type ProcessorFormState = GrokFormState | DissectFormState;
 
 export function AddProcessorFlyout({ definition, onClose }: ProcessorFlyoutProps) {
   const methods = useForm<ProcessorFormState>({
@@ -80,13 +37,13 @@ export function AddProcessorFlyout({ definition, onClose }: ProcessorFlyoutProps
       type: 'grok',
       field: 'message',
       patterns: [{ value: '' }],
-      pattern_definitions: '{}',
+      pattern_definitions: {},
+      ignore_failure: false,
+      condition: defaultCondition,
     },
   });
 
   const processorType = useWatch({ name: 'type', control: methods.control });
-  const all = useWatch({ control: methods.control });
-  console.log(all);
 
   const handleSubmit = (data) => {
     console.log(data);
@@ -109,7 +66,7 @@ export function AddProcessorFlyout({ definition, onClose }: ProcessorFlyoutProps
       }
     >
       <FormProvider {...methods}>
-        <EuiForm component="form" fullWidth>
+        <EuiForm component="form" fullWidth onSubmit={methods.handleSubmit(handleSubmit)}>
           <ProcessorTypeSelector />
           <EuiSpacer />
           {processorType === 'grok' && <GrokProcessorForm definition={definition} />}
@@ -163,6 +120,8 @@ interface GrokProcessorFormProps {
 const GrokProcessorForm = ({ definition, processor, onChange }: GrokProcessorFormProps) => {
   const { euiTheme } = useEuiTheme();
 
+  const { field } = useController({ name: 'condition' });
+
   const mappedFields = useMemo(() => {
     if (isWiredReadStream(definition)) {
       return Object.entries({
@@ -176,9 +135,9 @@ const GrokProcessorForm = ({ definition, processor, onChange }: GrokProcessorFor
 
   return (
     <>
-      <ProcessorFieldSelector name="field" rules={{ required: true }} fields={mappedFields} />
+      <ProcessorFieldSelector fields={mappedFields} />
       <GrokPatternsEditor />
-      <EuiSpacer size="s" />
+      <EuiSpacer size="m" />
       <EuiAccordion
         element="fieldset"
         id="optionalFieldsAccordion"
@@ -192,187 +151,23 @@ const GrokProcessorForm = ({ definition, processor, onChange }: GrokProcessorFor
           css={css`
             border-left: ${euiTheme.border.thin};
             margin-left: ${euiTheme.size.m};
-            margin-top: ${euiTheme.size.m};
+            padding-top: ${euiTheme.size.m};
             padding-left: calc(${euiTheme.size.m} + ${euiTheme.size.xs});
           `}
         >
           <GrokPatternDefinition />
+          <EuiSpacer size="m" />
+          <ConditionEditor condition={field.value} onConditionChange={field.onChange} />
         </div>
       </EuiAccordion>
+      <EuiSpacer size="m" />
+      <ToggleField
+        name="ignore_failure"
+        label={i18n.translate(
+          'xpack.streams.streamDetailView.managementTab.enrichment.processorFlyout.ignoreFailuresLabel',
+          { defaultMessage: 'Ignore failures for this processor' }
+        )}
+      />
     </>
-  );
-};
-
-interface ProcessorFieldSelectorProps extends UseControllerProps<GrokFormState> {
-  fields: Array<{ name: string; type: FieldDefinitionConfig['type'] }>;
-}
-
-const ProcessorFieldSelector = ({ fields, ...props }: ProcessorFieldSelectorProps) => {
-  const { field, fieldState } = useController(props);
-  // Should we filter the available options by "match_only_text" only?
-  const options: Array<EuiSuperSelectOption<string>> = useMemo(
-    () =>
-      fields.map(({ name, type }) => ({
-        value: name,
-        inputDisplay: type ? (
-          <EuiFlexGroup alignItems="center" gutterSize="s">
-            {type && <FieldIcon type={type} size="s" />}
-            {name}
-          </EuiFlexGroup>
-        ) : (
-          name
-        ),
-      })),
-    [fields]
-  );
-
-  return (
-    <EuiFormRow
-      label={i18n.translate(
-        'xpack.streams.streamDetailView.managementTab.enrichment.processorFlyout.fieldSelectorLabel',
-        { defaultMessage: 'Field' }
-      )}
-      helpText={i18n.translate(
-        'xpack.streams.streamDetailView.managementTab.enrichment.processorFlyout.fieldSelectorHelpText',
-        { defaultMessage: 'Field to search for matches.' }
-      )}
-    >
-      <EuiSuperSelect
-        isInvalid={fieldState.invalid}
-        options={options}
-        valueOfSelected={field.value as string}
-        onChange={field.onChange}
-        fullWidth
-        placeholder={i18n.translate(
-          'xpack.streams.streamDetailView.managementTab.enrichment.processorFlyout.fieldSelectorPlaceholder',
-          { defaultMessage: 'message, event.original ...' }
-        )}
-      />
-    </EuiFormRow>
-  );
-};
-
-const GrokPatternsEditor = () => {
-  const { register } = useFormContext();
-  const { fields, append, remove, move } = useFieldArray({
-    name: 'patterns',
-  });
-
-  const handlerPatternDrag: DragDropContextProps['onDragEnd'] = ({ source, destination }) => {
-    if (source && destination) {
-      move(source.index, destination.index);
-    }
-  };
-
-  const handleAddPattern = () => {
-    append({ value: '' });
-  };
-
-  const getRemovePatternHandler = (id: number) => (fields.length > 1 ? () => remove(id) : null);
-
-  return (
-    <EuiFormRow
-      label={i18n.translate(
-        'xpack.streams.streamDetailView.managementTab.enrichment.processorFlyout.grokEditorLabel',
-        { defaultMessage: 'Grok patterns editor' }
-      )}
-    >
-      <EuiPanel color="subdued" paddingSize="m">
-        <SortableList onDragItem={handlerPatternDrag}>
-          {fields.map((field, idx) => (
-            <DraggablePatternInput
-              key={field.id}
-              pattern={field}
-              idx={idx}
-              onRemove={getRemovePatternHandler(idx)}
-              inputProps={register(`patterns.${idx}.value`)}
-            />
-          ))}
-        </SortableList>
-        <EuiSpacer size="s" />
-        <EuiButtonEmpty onClick={handleAddPattern} iconType="plusInCircle" flush="left">
-          {i18n.translate(
-            'xpack.streams.streamDetailView.managementTab.enrichment.processorFlyout.grokEditor.addPattern',
-            { defaultMessage: 'Add pattern' }
-          )}
-        </EuiButtonEmpty>
-      </EuiPanel>
-    </EuiFormRow>
-  );
-};
-
-const DraggablePatternInput = ({ pattern, onRemove, idx, inputProps }) => {
-  return (
-    <EuiDraggable
-      index={idx}
-      spacing="m"
-      draggableId={pattern.id}
-      hasInteractiveChildren
-      customDragHandle
-      style={{
-        paddingLeft: 0,
-        paddingRight: 0,
-      }}
-    >
-      {(provided) => (
-        <EuiFlexGroup gutterSize="m" responsive={false} alignItems="center">
-          <EuiPanel
-            color="transparent"
-            paddingSize="xs"
-            {...provided.dragHandleProps}
-            aria-label="Drag Handle"
-          >
-            <EuiIcon type="grab" />
-          </EuiPanel>
-          <EuiFieldText {...inputProps} inputRef={inputProps.ref} compressed />
-          {onRemove && (
-            <EuiButtonIcon
-              iconType="minusInCircle"
-              color="danger"
-              onClick={() => onRemove(idx)}
-              aria-label={i18n.translate(
-                'xpack.streams.streamDetailView.managementTab.enrichment.processorFlyout.grokEditor.removePattern',
-                {
-                  defaultMessage: 'Remove pattern {pattern}',
-                  values: { pattern: inputProps.value },
-                }
-              )}
-            />
-          )}
-        </EuiFlexGroup>
-      )}
-    </EuiDraggable>
-  );
-};
-
-const GrokPatternDefinition = () => {
-  const { field } = useController({ name: 'pattern_definitions' });
-
-  return (
-    <EuiFormRow
-      label={i18n.translate(
-        'xpack.streams.streamDetailView.managementTab.enrichment.processorFlyout.patternDefinitionsLabel',
-        { defaultMessage: 'Pattern definitions' }
-      )}
-      helpText={i18n.translate(
-        'xpack.streams.streamDetailView.managementTab.enrichment.processorFlyout.patternDefinitionsHelpText',
-        {
-          defaultMessage:
-            'A map of pattern-name and pattern tuples defining custom patterns. Patterns matching existing names will override the pre-existing definition.',
-        }
-      )}
-      fullWidth
-    >
-      <CodeEditor
-        value={field.value}
-        onChange={(_value, event) => field.onChange(event)}
-        languageId="xjson"
-        height={200}
-        aria-label={i18n.translate(
-          'xpack.streams.streamDetailView.managementTab.enrichment.processorFlyout.patternDefinitionsAriaLabel',
-          { defaultMessage: 'Pattern definitions editor' }
-        )}
-      />
-    </EuiFormRow>
   );
 };

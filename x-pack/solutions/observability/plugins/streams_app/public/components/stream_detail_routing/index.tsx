@@ -736,6 +736,7 @@ function NewRoutingStreamEntry({
   child: StreamChild;
   onChildChange: (child?: StreamChild) => void;
 }) {
+  console.log(child.condition);
   return (
     <EuiPanel hasShadow={false} hasBorder paddingSize="s">
       <EuiFlexGroup gutterSize="m" direction="column">
