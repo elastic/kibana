@@ -26,11 +26,7 @@ import {
 } from '../../common/create_llm_proxy';
 import { createOpenAiChunk } from '../../common/create_openai_chunk';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
-import {
-  decodeEvents,
-  getConversationCreatedEvent,
-  getConversationUpdatedEvent,
-} from '../conversations/helpers';
+import { decodeEvents, getConversationCreatedEvent, getConversationUpdatedEvent } from '../helpers';
 import { createProxyActionConnector, deleteActionConnector } from '../../common/action_connectors';
 import { ForbiddenApiError } from '../../common/config';
 
