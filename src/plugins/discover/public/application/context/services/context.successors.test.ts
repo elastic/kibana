@@ -87,7 +87,6 @@ describe('context successors', function () {
           size,
           [],
           dataPluginMock,
-          false,
           discoverServiceMock
         );
       };
@@ -205,7 +204,7 @@ describe('context successors', function () {
     });
   });
 
-  describe('function fetchSuccessors with useNewFieldsApi set', function () {
+  describe('fetchSuccessors', function () {
     beforeEach(() => {
       mockSearchSource = createContextSearchSourceStub('@timestamp');
 
@@ -240,7 +239,6 @@ describe('context successors', function () {
           size,
           [],
           dataPluginMock,
-          true,
           discoverServiceMock
         );
       };
@@ -312,7 +310,6 @@ describe('context successors', function () {
           size,
           [],
           dataPluginMock,
-          true,
           {
             ...discoverServiceMock,
             data: dataPluginMock,

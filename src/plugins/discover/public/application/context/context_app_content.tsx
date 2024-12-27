@@ -70,7 +70,6 @@ export interface ContextAppContentProps {
   predecessorsStatus: LoadingStatus;
   successorsStatus: LoadingStatus;
   interceptedWarnings: SearchResponseWarning[];
-  useNewFieldsApi: boolean;
   setAppState: (newState: Partial<AppState>) => void;
   addFilter: DocViewFilterFn;
 }
@@ -100,7 +99,6 @@ export function ContextAppContent({
   predecessorsStatus,
   successorsStatus,
   interceptedWarnings,
-  useNewFieldsApi,
   setAppState,
   addFilter,
 }: ContextAppContentProps) {
@@ -225,7 +223,6 @@ export function ContextAppContent({
             sort={sort as SortOrder[]}
             isSortEnabled={false}
             showTimeCol={showTimeCol}
-            useNewFieldsApi={useNewFieldsApi}
             isPaginationEnabled={false}
             rowsPerPageState={getDefaultRowsPerPage(services.uiSettings)}
             controlColumnIds={controlColumnIds}

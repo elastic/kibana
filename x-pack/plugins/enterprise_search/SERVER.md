@@ -12,7 +12,7 @@ On startup, [the plugin](server/plugin.ts) registers all API routes with the mai
 API endpoints are organized according to loosely applied RESTful principles. GET for fetching data, POST for creating new data, PUT for updating data. The main routes you'll likely be working with:
 
 `enterprise_search`
-- enterprise_search/analytics
+- elasticsearch/analytics
 - enterprise_search/crawler
 - enterprise_search/connectors
 - enterprise_search/indices

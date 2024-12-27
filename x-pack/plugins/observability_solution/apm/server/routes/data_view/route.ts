@@ -13,7 +13,7 @@ import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
 
 const staticDataViewRoute = createApmServerRoute({
   endpoint: 'POST /internal/apm/data_view/static',
-  options: { tags: ['access:apm'] },
+  security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (resources): CreateDataViewResponse => {
     const { context, plugins, request, logger } = resources;
     const apmEventClient = await getApmEventClient(resources);
@@ -49,7 +49,7 @@ const staticDataViewRoute = createApmServerRoute({
 
 const dataViewTitleRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/data_view/index_pattern',
-  options: { tags: ['access:apm'] },
+  security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async ({ getApmIndices }): Promise<{ apmDataViewIndexPattern: string }> => {
     const apmIndicies = await getApmIndices();
     const apmDataViewIndexPattern = getApmDataViewIndexPattern(apmIndicies);

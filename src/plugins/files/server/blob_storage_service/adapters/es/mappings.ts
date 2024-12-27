@@ -7,10 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type {
-  MappingTypeMapping,
-  MappingProperty,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { MappingTypeMapping, MappingProperty } from '@elastic/elasticsearch/lib/api/types';
 
 /**
  * These are the fields we expect to find a given document acting as a file chunk.

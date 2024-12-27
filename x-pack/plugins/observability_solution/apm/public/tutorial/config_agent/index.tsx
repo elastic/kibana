@@ -8,7 +8,7 @@ import { EuiLoadingSpinner } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { HttpStart } from '@kbn/core/public';
 import React, { useEffect, useMemo, useState } from 'react';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 import { APIReturnType } from '../../services/rest/create_call_apm_api';
 import { AgentConfigInstructions } from './agent_config_instructions';
 import { getPolicyOptions, PolicyOption } from './get_policy_options';

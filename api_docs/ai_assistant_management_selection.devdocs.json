@@ -12,7 +12,7 @@
         "tags": [],
         "label": "AIAssistantType",
         "description": [],
-        "path": "src/plugins/ai_assistant_management/selection/common/ai_assistant_type.ts",
+        "path": "src/platform/plugins/shared/ai_assistant_management/selection/common/ai_assistant_type.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -27,7 +27,7 @@
       "tags": [],
       "label": "AIAssistantManagementSelectionPluginPublicSetup",
       "description": [],
-      "path": "src/plugins/ai_assistant_management/selection/public/plugin.ts",
+      "path": "src/platform/plugins/shared/ai_assistant_management/selection/public/plugin.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -41,7 +41,7 @@
       "tags": [],
       "label": "AIAssistantManagementSelectionPluginPublicStart",
       "description": [],
-      "path": "src/plugins/ai_assistant_management/selection/public/plugin.ts",
+      "path": "src/platform/plugins/shared/ai_assistant_management/selection/public/plugin.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -58,7 +58,7 @@
             "AIAssistantType",
             ">"
           ],
-          "path": "src/plugins/ai_assistant_management/selection/public/plugin.ts",
+          "path": "src/platform/plugins/shared/ai_assistant_management/selection/public/plugin.ts",
           "deprecated": false,
           "trackAdoption": false
         }

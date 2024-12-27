@@ -168,11 +168,13 @@
             "parentPluginId": "@kbn/router-to-openapispec",
             "id": "def-server.GenerateOpenApiDocumentOptionsFilters.access",
             "type": "CompoundType",
-            "tags": [],
+            "tags": [
+              "default"
+            ],
             "label": "access",
             "description": [],
             "signature": [
-              "\"internal\" | \"public\" | undefined"
+              "\"internal\" | \"public\""
             ],
             "path": "packages/kbn-router-to-openapispec/src/generate_oas.ts",
             "deprecated": false,
@@ -182,9 +184,13 @@
             "parentPluginId": "@kbn/router-to-openapispec",
             "id": "def-server.GenerateOpenApiDocumentOptionsFilters.version",
             "type": "string",
-            "tags": [],
+            "tags": [
+              "default"
+            ],
             "label": "version",
-            "description": [],
+            "description": [
+              "\nWe generate spec for one version at a time"
+            ],
             "signature": [
               "string | undefined"
             ],

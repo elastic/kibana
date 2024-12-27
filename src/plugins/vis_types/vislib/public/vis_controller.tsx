@@ -136,7 +136,7 @@ export const createVislibVisController = (
     }
 
     mountLegend(
-      startServices: Pick<CoreStart, 'analytics' | 'i18n' | 'theme'>,
+      startServices: Pick<CoreStart, 'analytics' | 'i18n' | 'theme' | 'userProfile'>,
       visData: unknown,
       visParams: BasicVislibParams,
       fireEvent: IInterpreterRenderHandlers['event'],

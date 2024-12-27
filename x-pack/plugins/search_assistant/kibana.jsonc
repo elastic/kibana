@@ -16,6 +16,7 @@
     "requiredPlugins": [
       "actions",
       "licensing",
+      "ml", // necessary for assistant's use of knowledge base in assistant package
       "observabilityAIAssistant",
       "triggersActionsUi",
       "share"

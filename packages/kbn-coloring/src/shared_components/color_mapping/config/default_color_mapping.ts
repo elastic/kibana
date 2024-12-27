@@ -7,11 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { KbnPalettes } from '@kbn/palettes';
 import { ColorMapping } from '.';
-import { AVAILABLE_PALETTES, getPalette } from '../palettes';
-import { EUIAmsterdamColorBlindPalette } from '../palettes/eui_amsterdam';
-import { NeutralPalette } from '../palettes/neutral';
 import { getColor, getGradientColorScale } from '../color/color_handling';
+import { DEFAULT_FALLBACK_PALETTE } from '../../../palettes';
 
 export const DEFAULT_NEUTRAL_PALETTE_INDEX = 1;
 export const DEFAULT_OTHER_ASSIGNMENT_INDEX = 0;
@@ -32,32 +31,31 @@ export const DEFAULT_COLOR_MAPPING_CONFIG: ColorMapping.Config = {
       touched: false,
     },
   ],
-  paletteId: EUIAmsterdamColorBlindPalette.id,
+  paletteId: DEFAULT_FALLBACK_PALETTE,
   colorMode: {
     type: 'categorical',
   },
 };
 
 export function getPaletteColors(
-  isDarkMode: boolean,
+  palettes: KbnPalettes,
   colorMappings?: ColorMapping.Config
 ): string[] {
   const colorMappingModel = colorMappings ?? { ...DEFAULT_COLOR_MAPPING_CONFIG };
-  const palette = getPalette(AVAILABLE_PALETTES, NeutralPalette)(colorMappingModel.paletteId);
-  return getPaletteColorsFromPaletteId(isDarkMode, palette.id);
+  const palette = palettes.get(colorMappingModel.paletteId);
+  return getPaletteColorsFromPaletteId(palettes, palette.id);
 }
 
 export function getPaletteColorsFromPaletteId(
-  isDarkMode: boolean,
+  palettes: KbnPalettes,
   paletteId: ColorMapping.Config['paletteId']
 ): string[] {
-  const palette = getPalette(AVAILABLE_PALETTES, NeutralPalette)(paletteId);
-  return Array.from({ length: palette.colorCount }, (d, i) =>
-    palette.getColor(i, isDarkMode, true)
-  );
+  const palette = palettes.get(paletteId);
+  return Array.from({ length: palette.colorCount }, (d, i) => palette.getColor(i));
 }
 
 export function getColorsFromMapping(
+  palettes: KbnPalettes,
   isDarkMode: boolean,
   colorMappings?: ColorMapping.Config
 ): string[] {
@@ -65,27 +63,18 @@ export function getColorsFromMapping(
     ...DEFAULT_COLOR_MAPPING_CONFIG,
   };
 
-  const getPaletteFn = getPalette(AVAILABLE_PALETTES, NeutralPalette);
   if (colorMode.type === 'gradient') {
-    const colorScale = getGradientColorScale(colorMode, getPaletteFn, isDarkMode);
+    const colorScale = getGradientColorScale(colorMode, palettes, isDarkMode);
     return Array.from({ length: 6 }, (d, i) => colorScale(i / 6));
   } else {
-    const palette = getPaletteFn(paletteId);
+    const palette = palettes.get(paletteId);
     const otherColors =
       specialAssignments[DEFAULT_OTHER_ASSIGNMENT_INDEX].color.type === 'loop'
-        ? Array.from({ length: palette.colorCount }, (d, i) =>
-            palette.getColor(i, isDarkMode, true)
-          )
-        : [
-            getColor(
-              specialAssignments[DEFAULT_OTHER_ASSIGNMENT_INDEX].color,
-              getPaletteFn,
-              isDarkMode
-            ),
-          ];
+        ? Array.from({ length: palette.colorCount }, (d, i) => palette.getColor(i))
+        : [getColor(specialAssignments[DEFAULT_OTHER_ASSIGNMENT_INDEX].color, palettes)];
     return [
       ...assignments.map((a) => {
-        return a.color.type === 'gradient' ? '' : getColor(a.color, getPaletteFn, isDarkMode);
+        return a.color.type === 'gradient' ? '' : getColor(a.color, palettes);
       }),
       ...otherColors,
     ].filter((color) => color !== '');

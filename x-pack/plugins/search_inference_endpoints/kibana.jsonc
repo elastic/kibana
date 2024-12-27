@@ -18,16 +18,19 @@
     "requiredPlugins": [
       "actions",
       "features",
+      "licensing",
       "ml",
       "share",
     ],
     "optionalPlugins": [
       "cloud",
       "console",
-      "serverless"
+      "serverless",
+      "searchNavigation",
     ],
     "requiredBundles": [
-      "kibanaReact"
+      "kibanaReact",
+      "esUiShared"
     ]
   }
 }

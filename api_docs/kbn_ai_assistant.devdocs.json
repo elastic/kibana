@@ -1102,7 +1102,7 @@
               "State<{ errorMessage?: string | undefined; ready: boolean; enabled: boolean; endpoint?: Partial<",
               "InferenceInferenceEndpointInfo",
               "> | undefined; model_stats?: { deployment_state: ",
-              "MlDeploymentState",
+              "MlDeploymentAssignmentState",
               " | undefined; allocation_state: ",
               "MlDeploymentAllocationState",
               " | undefined; } | undefined; }> & { refresh: () => void; }"

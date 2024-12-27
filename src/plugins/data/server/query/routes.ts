@@ -43,6 +43,11 @@ export function registerSavedQueryRoutes({ http }: CoreSetup): void {
   router.versioned.post({ path: `${SAVED_QUERY_BASE_URL}/_is_duplicate_title`, access }).addVersion(
     {
       version,
+      security: {
+        authz: {
+          requiredPrivileges: ['savedQuery:read'],
+        },
+      },
       validate: {
         request: {
           body: schema.object({
@@ -75,6 +80,11 @@ export function registerSavedQueryRoutes({ http }: CoreSetup): void {
   router.versioned.post({ path: `${SAVED_QUERY_BASE_URL}/_create`, access }).addVersion(
     {
       version,
+      security: {
+        authz: {
+          requiredPrivileges: ['savedQuery:manage'],
+        },
+      },
       validate: {
         request: {
           body: SAVED_QUERY_ATTRS_CONFIG,
@@ -101,6 +111,11 @@ export function registerSavedQueryRoutes({ http }: CoreSetup): void {
   router.versioned.put({ path: `${SAVED_QUERY_BASE_URL}/{id}`, access }).addVersion(
     {
       version,
+      security: {
+        authz: {
+          requiredPrivileges: ['savedQuery:manage'],
+        },
+      },
       validate: {
         request: {
           params: SAVED_QUERY_ID_CONFIG,
@@ -129,6 +144,11 @@ export function registerSavedQueryRoutes({ http }: CoreSetup): void {
   router.versioned.get({ path: `${SAVED_QUERY_BASE_URL}/{id}`, access }).addVersion(
     {
       version,
+      security: {
+        authz: {
+          requiredPrivileges: ['savedQuery:read'],
+        },
+      },
       validate: {
         request: {
           params: SAVED_QUERY_ID_CONFIG,
@@ -156,6 +176,11 @@ export function registerSavedQueryRoutes({ http }: CoreSetup): void {
   router.versioned.get({ path: `${SAVED_QUERY_BASE_URL}/_count`, access }).addVersion(
     {
       version,
+      security: {
+        authz: {
+          requiredPrivileges: ['savedQuery:read'],
+        },
+      },
       validate: {
         request: {},
         response: {
@@ -180,6 +205,11 @@ export function registerSavedQueryRoutes({ http }: CoreSetup): void {
   router.versioned.post({ path: `${SAVED_QUERY_BASE_URL}/_find`, access }).addVersion(
     {
       version,
+      security: {
+        authz: {
+          requiredPrivileges: ['savedQuery:read'],
+        },
+      },
       validate: {
         request: {
           body: schema.object({
@@ -214,6 +244,11 @@ export function registerSavedQueryRoutes({ http }: CoreSetup): void {
   router.versioned.delete({ path: `${SAVED_QUERY_BASE_URL}/{id}`, access }).addVersion(
     {
       version,
+      security: {
+        authz: {
+          requiredPrivileges: ['savedQuery:manage'],
+        },
+      },
       validate: {
         request: {
           params: SAVED_QUERY_ID_CONFIG,

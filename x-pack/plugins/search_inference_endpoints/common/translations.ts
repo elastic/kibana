@@ -40,6 +40,13 @@ export const API_DOCUMENTATION_LINK = i18n.translate(
   }
 );
 
+export const ADD_ENDPOINT_LABEL = i18n.translate(
+  'xpack.searchInferenceEndpoints.addConnectorButtonLabel',
+  {
+    defaultMessage: 'Add endpoint',
+  }
+);
+
 export const ERROR_TITLE = i18n.translate('xpack.searchInferenceEndpoints.inferenceId.errorTitle', {
   defaultMessage: 'Error adding inference endpoint',
 });
@@ -101,5 +108,19 @@ export const TRAINED_MODELS_STAT_GATHER_FAILED = i18n.translate(
   'xpack.searchInferenceEndpoints.actions.trainedModelsStatGatherFailed',
   {
     defaultMessage: 'Failed to retrieve trained model statistics',
+  }
+);
+
+export const BREADCRUMB_RELEVANCE = i18n.translate(
+  'xpack.searchInferenceEndpoints.breadcrumbs.relevance',
+  {
+    defaultMessage: 'Relevance',
+  }
+);
+
+export const BREADCRUMB_INFERENCE_ENDPOINTS = i18n.translate(
+  'xpack.searchInferenceEndpoints.breadcrumbs.inferenceEndpoints',
+  {
+    defaultMessage: 'Inference Endpoints',
   }
 );

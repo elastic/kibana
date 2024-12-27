@@ -1210,7 +1210,7 @@
             "label": "getParamDefaults",
             "description": [],
             "signature": [
-              "() => { fieldType: null; colors: { range: string; regex: string; text: string; background: string; }[]; }"
+              "() => { fieldType: null; colors: { range: string; regex: string; text: string; background: string; boolean: string; }[]; }"
             ],
             "path": "src/plugins/field_formats/common/converters/color.tsx",
             "deprecated": false,
@@ -1226,7 +1226,7 @@
             "label": "findColorRuleForVal",
             "description": [],
             "signature": [
-              "(val: string | number) => any"
+              "(val: string | number | boolean) => any"
             ],
             "path": "src/plugins/field_formats/common/converters/color.tsx",
             "deprecated": false,
@@ -1240,7 +1240,7 @@
                 "label": "val",
                 "description": [],
                 "signature": [
-                  "string | number"
+                  "string | number | boolean"
                 ],
                 "path": "src/plugins/field_formats/common/converters/color.tsx",
                 "deprecated": false,
@@ -6573,6 +6573,17 @@
             "type": "string",
             "tags": [],
             "label": "background",
+            "description": [],
+            "path": "src/plugins/field_formats/common/constants/color_default.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fieldFormats",
+            "id": "def-common.DEFAULT_CONVERTER_COLOR.boolean",
+            "type": "string",
+            "tags": [],
+            "label": "boolean",
             "description": [],
             "path": "src/plugins/field_formats/common/constants/color_default.ts",
             "deprecated": false,

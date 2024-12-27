@@ -36,7 +36,6 @@ export interface ClientConfigType {
       intervalErrorMultiplier: number;
     };
   };
-  roles: { enabled: boolean };
   export_types: {
     pdf: { enabled: boolean };
     png: { enabled: boolean };

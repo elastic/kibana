@@ -24,7 +24,7 @@ const environmentsRoute = createApmServerRoute({
       rangeRt,
     ]),
   }),
-  options: { tags: ['access:apm'] },
+  security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (
     resources
   ): Promise<{

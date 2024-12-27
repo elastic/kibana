@@ -22,8 +22,10 @@ import { getLatestEntitiesAlerts } from './get_latest_entities_alerts';
 
 export const getEntityTypesRoute = createInventoryServerRoute({
   endpoint: 'GET /internal/inventory/entities/types',
-  options: {
-    tags: ['access:inventory'],
+  security: {
+    authz: {
+      requiredPrivileges: ['inventory'],
+    },
   },
   handler: async ({ context, logger }) => {
     const coreContext = await context.core;
@@ -52,8 +54,10 @@ export const listLatestEntitiesRoute = createInventoryServerRoute({
       }),
     ]),
   }),
-  options: {
-    tags: ['access:inventory'],
+  security: {
+    authz: {
+      requiredPrivileges: ['inventory'],
+    },
   },
   handler: async ({
     params,
@@ -119,8 +123,10 @@ export const groupEntitiesByRoute = createInventoryServerRoute({
       }),
     }),
   ]),
-  options: {
-    tags: ['access:inventory'],
+  security: {
+    authz: {
+      requiredPrivileges: ['inventory'],
+    },
   },
   handler: async ({ params, context, logger }) => {
     const coreContext = await context.core;

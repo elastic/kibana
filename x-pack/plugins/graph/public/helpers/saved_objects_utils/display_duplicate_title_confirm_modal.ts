@@ -13,7 +13,7 @@ import { confirmModalPromise } from './confirm_modal_promise';
 
 export function displayDuplicateTitleConfirmModal(
   savedObject: Pick<GraphWorkspaceSavedObject, 'title'>,
-  startServices: Pick<CoreStart, 'overlays' | 'analytics' | 'i18n' | 'theme'>
+  startServices: Pick<CoreStart, 'overlays' | 'analytics' | 'i18n' | 'theme' | 'userProfile'>
 ): Promise<boolean> {
   const confirmTitle = i18n.translate('xpack.graph.confirmModal.saveDuplicateConfirmationTitle', {
     defaultMessage: `This visualization already exists`,

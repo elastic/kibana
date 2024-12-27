@@ -8,12 +8,12 @@
 import { EuiAccordion } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import styled from '@emotion/styled';
 import { Stackframe } from '../../../../typings/es_schemas/raw/fields/stackframe';
 import { Stackframe as StackframeComponent } from './stackframe';
 
-const LibraryStacktraceAccordion = euiStyled(EuiAccordion)`
-  margin: ${({ theme }) => theme.eui.euiSizeXS} 0;
+const LibraryStacktraceAccordion = styled(EuiAccordion)`
+  margin: ${({ theme }) => theme.euiTheme.size.xs} 0;
 `;
 
 interface Props {
