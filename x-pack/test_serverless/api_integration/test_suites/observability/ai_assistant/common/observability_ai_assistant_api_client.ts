@@ -40,7 +40,11 @@ export function getObservabilityAIAssistantApiClient({
   }
 }
 
-type ObservabilityAIAssistantApiClientKey = 'slsAdmin' | 'slsEditor' | 'slsUser';
+type ObservabilityAIAssistantApiClientKey =
+  | 'slsAdmin'
+  | 'slsEditor'
+  | 'slsUser'
+  | 'slsUnauthorized';
 
 export type ObservabilityAIAssistantApiClient = Record<
   ObservabilityAIAssistantApiClientKey,
@@ -195,16 +199,25 @@ export async function getObservabilityAIAssistantApiClientService({
   const svlSharedConfig = getService('config');
   const roleScopedSupertest = getService('roleScopedSupertest');
 
+  // admin user
   const supertestAdminWithCookieCredentials: SupertestWithRoleScope =
     await roleScopedSupertest.getSupertestWithRoleScope('admin', {
       useCookieHeader: true,
       withInternalHeaders: true,
     });
 
+  // editor user
   const supertestEditorWithCookieCredentials: SupertestWithRoleScope =
     await roleScopedSupertest.getSupertestWithRoleScope('editor', {
       useCookieHeader: true,
       withInternalHeaders: true,
+    });
+
+  // unauthorized user
+  const supertestUnauthorizedWithCookieCredentials: SupertestWithRoleScope =
+    await roleScopedSupertest.getSupertestWithRoleScope('viewer', {
+      useCookieHeader: true,
+      withInternalHeaders: false, // No internal headers for unauthorized users
     });
 
   return {
@@ -221,6 +234,10 @@ export async function getObservabilityAIAssistantApiClientService({
     slsEditor: await getObservabilityAIAssistantApiClient({
       svlSharedConfig,
       supertestUserWithCookieCredentials: supertestEditorWithCookieCredentials,
+    }),
+    slsUnauthorized: await getObservabilityAIAssistantApiClient({
+      svlSharedConfig,
+      supertestUserWithCookieCredentials: supertestUnauthorizedWithCookieCredentials,
     }),
   };
 }

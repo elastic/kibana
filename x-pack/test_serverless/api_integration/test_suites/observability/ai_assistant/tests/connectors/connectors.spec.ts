@@ -13,6 +13,9 @@ import type {
   RoleCredentials,
   SupertestWithoutAuthProviderType,
 } from '../../../../../../shared/services';
+import { ForbiddenApiError } from '../../common/forbidden_api_error';
+
+const CONNECTOR_API_URL = '/internal/observability_ai_assistant/connectors';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantAPIClient');
@@ -47,14 +50,14 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     it('Returns a 2xx for enterprise license', async () => {
       await observabilityAIAssistantAPIClient
         .slsEditor({
-          endpoint: 'GET /internal/observability_ai_assistant/connectors',
+          endpoint: `GET ${CONNECTOR_API_URL}`,
         })
         .expect(200);
     });
 
     it('returns an empty list of connectors', async () => {
       const res = await observabilityAIAssistantAPIClient.slsEditor({
-        endpoint: 'GET /internal/observability_ai_assistant/connectors',
+        endpoint: `GET ${CONNECTOR_API_URL}`,
       });
 
       expect(res.body.length).to.be(0);
@@ -70,7 +73,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
 
       const res = await observabilityAIAssistantAPIClient.slsEditor({
-        endpoint: 'GET /internal/observability_ai_assistant/connectors',
+        endpoint: `GET ${CONNECTOR_API_URL}`,
       });
 
       expect(res.body.length).to.be(1);
@@ -81,6 +84,19 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         log,
         internalReqHeader,
         roleAuthc,
+      });
+    });
+
+    describe('security roles and access privileges', () => {
+      it('should deny access for users without the ai_assistant privilege', async () => {
+        try {
+          await observabilityAIAssistantAPIClient.slsUnauthorized({
+            endpoint: `GET ${CONNECTOR_API_URL}`,
+          });
+          throw new ForbiddenApiError('Expected slsUnauthorized() to throw a 403 Forbidden error');
+        } catch (e) {
+          expect(e.status).to.be(403);
+        }
       });
     });
   });
