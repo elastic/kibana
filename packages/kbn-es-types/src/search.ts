@@ -8,8 +8,9 @@
  */
 
 import type { ValuesType, UnionToIntersection } from 'utility-types';
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import * as estypesWithoutBodyKey from '@elastic/elasticsearch/lib/api/types';
+import * as estypes from '@elastic/elasticsearch/lib/api/types';
+// TODO: Remove when all usages have been migrated to non-body
+import { SearchRequest as SearchRequestWithBodyKey } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 interface AggregationsAggregationContainer extends Record<string, any> {
   aggs?: any;
@@ -61,7 +62,7 @@ type ValueTypeOfField<T> = T extends Record<string, string | number>
 
 type MaybeArray<T> = T | T[];
 
-type Fields = Required<Required<estypes.SearchRequest>['body']>['fields'];
+type Fields = Required<estypes.SearchRequest>['fields'];
 type DocValueFields = MaybeArray<string | estypes.QueryDslFieldAndFormat>;
 
 export type ChangePointType =
@@ -635,8 +636,8 @@ type WrapAggregationResponse<T> = keyof UnionToIntersection<T> extends never
 export type InferSearchResponseOf<
   TDocument = unknown,
   TSearchRequest extends
-    | estypes.SearchRequest
-    | (estypesWithoutBodyKey.SearchRequest & { body?: never }) = estypes.SearchRequest,
+    | (estypes.SearchRequest & { body?: never }) // the union is necessary for the check 4 lines below
+    | SearchRequestWithBodyKey = estypes.SearchRequest,
   TOptions extends { restTotalHitsAsInt?: boolean } = {}
 > = Omit<estypes.SearchResponse<TDocument>, 'aggregations' | 'hits'> &
   (TSearchRequest['body'] extends TopLevelAggregationRequest
@@ -656,7 +657,7 @@ export type InferSearchResponseOf<
             };
           }) & {
         hits: HitsOf<
-          TSearchRequest extends estypes.SearchRequest ? TSearchRequest['body'] : TSearchRequest,
+          TSearchRequest extends SearchRequestWithBodyKey ? TSearchRequest['body'] : TSearchRequest,
           TDocument
         >;
       };
@@ -690,5 +691,5 @@ export interface ESQLSearchParams {
   locale?: string;
   include_ccs_metadata?: boolean;
   dropNullColumns?: boolean;
-  params?: estypesWithoutBodyKey.ScalarValue[] | Array<Record<string, string | undefined>>;
+  params?: estypes.ScalarValue[] | Array<Record<string, string | undefined>>;
 }
