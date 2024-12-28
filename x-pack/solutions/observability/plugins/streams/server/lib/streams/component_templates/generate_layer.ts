@@ -16,6 +16,7 @@ import { logsSettings } from './logs_layer';
 import { isRoot } from '../helpers/hierarchy';
 import { getComponentTemplateName } from './name';
 import { otelFields, otelMappings, otelPrefixes, otelSettings } from './otel_layer';
+import { getSortedFields } from '../helpers/field_sorting';
 
 export function generateLayer(
   id: string,
@@ -26,7 +27,7 @@ export function generateLayer(
     ...definition.stream.ingest.wired.fields,
     ...(definition.stream.ingest.wired.otel_compat_mode ? otelFields : {}),
   };
-  Object.entries(fields).forEach(([field, props]) => {
+  getSortedFields(fields).forEach(([field, props]) => {
     const property: MappingProperty = {
       type: props.type,
     };

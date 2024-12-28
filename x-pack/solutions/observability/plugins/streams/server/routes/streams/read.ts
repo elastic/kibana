@@ -21,6 +21,7 @@ import {
   otelMappings,
   otelPrefixes,
 } from '../../lib/streams/component_templates/otel_layer';
+import { getSortedFields } from '../../lib/streams/helpers/field_sorting';
 
 export const readStreamRoute = createServerRoute({
   endpoint: 'GET /api/streams/{id}',
@@ -60,11 +61,11 @@ export const readStreamRoute = createServerRoute({
       });
 
       const inheritedFields = ancestors.reduce((acc, def) => {
-        Object.entries(def.stream.ingest.wired.fields).forEach(([key, fieldDef]) => {
+        getSortedFields(def.stream.ingest.wired.fields).forEach(([key, fieldDef]) => {
           acc[key] = { ...fieldDef, from: def.name };
         });
         if (def.stream.ingest.wired.otel_compat_mode) {
-          Object.entries(otelFields).forEach(([key, fieldDef]) => {
+          getSortedFields(otelFields).forEach(([key, fieldDef]) => {
             acc[key] = { ...fieldDef, from: '<otel_compat_mode>' };
           });
         }
@@ -73,11 +74,11 @@ export const readStreamRoute = createServerRoute({
       }, {} as Record<string, FieldDefinitionConfig & { from: string; alias_for?: string }>);
 
       if (streamEntity.stream.ingest.wired.otel_compat_mode) {
-        Object.entries(otelFields).forEach(([key, fieldDef]) => {
+        getSortedFields(otelFields).forEach(([key, fieldDef]) => {
           inheritedFields[key] = { ...fieldDef, from: '<otel_compat_mode>' };
         });
         // calculate aliases for all fields based on their prefixes and add them to the inherited fields
-        Object.entries(inheritedFields).forEach(([key, fieldDef]) => {
+        getSortedFields(inheritedFields).forEach(([key, fieldDef]) => {
           // if the field starts with one of the otel prefixes, add an alias without the prefix
           if (otelPrefixes.some((prefix) => key.startsWith(prefix))) {
             inheritedFields[key.replace(new RegExp(`^(${otelPrefixes.join('|')})`), '')] = {
@@ -88,7 +89,7 @@ export const readStreamRoute = createServerRoute({
           }
         });
         // calculate aliases for regular fields of this stream
-        Object.entries(streamEntity.stream.ingest.wired.fields).forEach(([key, fieldDef]) => {
+        getSortedFields(streamEntity.stream.ingest.wired.fields).forEach(([key, fieldDef]) => {
           if (otelPrefixes.some((prefix) => key.startsWith(prefix))) {
             inheritedFields[key.replace(new RegExp(`^(${otelPrefixes.join('|')})`), '')] = {
               ...fieldDef,

@@ -18,10 +18,10 @@ export const otelSettings: IndicesIndexSettings = {
 };
 
 export const otelPrefixes = [
+  'body.structured.',
+  'attributes.',
   'scope.attributes.',
   'resource.attributes.',
-  'attributes.',
-  'body.structured.',
 ];
 
 export const otelFields: FieldDefinition = {

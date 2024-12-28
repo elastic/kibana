@@ -44,7 +44,7 @@ import {
   upsertIngestPipeline,
 } from './ingest_pipelines/manage_ingest_pipelines';
 import { getProcessingPipelineName, getReroutePipelineName } from './ingest_pipelines/name';
-import { otelFields, otelPrefixes } from './component_templates/otel_layer';
+import { otelFields, otelMappings, otelPrefixes } from './component_templates/otel_layer';
 
 interface BaseParams {
   scopedClusterClient: IScopedClusterClient;
@@ -420,36 +420,8 @@ export async function validateAncestorFields(
               );
             }
           }
-          // if a field starts with a prefix, it's not allowed to have the same field name with a different prefix as it would map to the same field
-          if (
-            Object.entries(fields).some(
-              ([fieldName]) =>
-                fieldName !== name &&
-                otelPrefixes.some((prefix) => fieldName.startsWith(prefix)) &&
-                fieldName.replace(new RegExp(`^(${otelPrefixes.join('|')})`), '') ===
-                  name.replace(new RegExp(`^(${otelPrefixes.join('|')})`), '')
-            )
-          ) {
-            throw new MalformedFields(
-              `Field ${name} is an automatic alias of another field because of otel compat mode`
-            );
-          }
-          // same check for the ancestor fields
-          if (
-            Object.entries(ancestor.stream.ingest.wired.fields).some(
-              ([ancestorFieldName]) =>
-                ancestorFieldName !== name &&
-                otelPrefixes.some((prefix) => ancestorFieldName.startsWith(prefix)) &&
-                ancestorFieldName.replace(new RegExp(`^(${otelPrefixes.join('|')})`), '') ===
-                  name.replace(new RegExp(`^(${otelPrefixes.join('|')})`), '')
-            )
-          ) {
-            throw new MalformedFields(
-              `Field ${name} is an automatic alias of another field because of otel compat mode`
-            );
-          }
           // check the otelMappings - they are aliases and are not allowed to have the same name as a field
-          if (Object.keys(otelFields).some((otelFieldName) => otelFieldName === name)) {
+          if (Object.keys(otelMappings).some((otelFieldName) => otelFieldName === name)) {
             throw new MalformedFields(
               `Field ${name} is an automatic alias of another field because of otel compat mode`
             );
