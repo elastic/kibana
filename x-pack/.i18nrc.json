@@ -14,7 +14,7 @@
     "xpack.eventLog": "platform/plugins/shared/event_log",
     "xpack.stackAlerts": "platform/plugins/shared/stack_alerts",
     "xpack.stackConnectors": "platform/plugins/shared/stack_connectors",
-    "xpack.apm": "plugins/observability_solution/apm",
+    "xpack.apm": "solutions/observability/plugins/apm",
     "xpack.apmDataAccess": "solutions/observability/plugins/apm_data_access",
     "xpack.banners": "plugins/banners",
     "xpack.canvas": "platform/plugins/private/canvas",

@@ -78,7 +78,7 @@ const getPipeline = (filename: string, removeSteps = true) => {
 
     if (
       (await doAnyChangesMatch([
-        /^x-pack\/plugins\/observability_solution\/apm/,
+        /^x-pack\/solutions\/observability\/plugins\/apm/,
         /^packages\/kbn-apm-synthtrace/,
       ])) ||
       GITHUB_PR_LABELS.includes('ci:all-cypress-suites')

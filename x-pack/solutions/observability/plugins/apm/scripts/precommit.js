@@ -12,11 +12,11 @@ const execa = require('execa');
 const { Listr } = require('listr2');
 const { resolve } = require('path');
 
-const root = resolve(__dirname, '../../../..');
+const root = resolve(__dirname, '../../../../..');
 
 const execaOpts = { cwd: root, stderr: 'pipe' };
 
-const tsconfig = resolve(root, 'x-pack/plugins/observability_solution/apm/tsconfig.json');
+const tsconfig = resolve(root, 'x-pack/solutions/observability/plugins/apm/tsconfig.json');
 
 const testTsconfig = resolve(root, 'x-pack/test/tsconfig.json');
 
@@ -30,12 +30,12 @@ const tasks = new Listr(
       title: 'Typescript',
       task: async () => {
         await execa('node', [
-          resolve(__dirname, '../../../../scripts/type_check.js'),
+          resolve(__dirname, '../../../../../scripts/type_check.js'),
           '--project',
           tsconfig,
         ]);
         await execa('node', [
-          resolve(__dirname, '../../../../scripts/type_check.js'),
+          resolve(__dirname, '../../../../../scripts/type_check.js'),
           '--project',
           testTsconfig,
         ]);
@@ -47,7 +47,7 @@ const tasks = new Listr(
         execa(
           'node',
           [
-            resolve(__dirname, '../../../../scripts/jest.js'),
+            resolve(__dirname, '../../../../../scripts/jest.js'),
             '--config',
             resolve(__dirname, '../jest.config.js'),
             '--maxWorkers',
