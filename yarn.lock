@@ -6653,7 +6653,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/profiling-plugin@link:x-pack/plugins/observability_solution/profiling":
+"@kbn/profiling-plugin@link:x-pack/solutions/observability/plugins/profiling":
   version "0.0.0"
   uid ""
 

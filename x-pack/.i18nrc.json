@@ -118,7 +118,7 @@
     ],
     "xpack.painlessLab": "platform/plugins/private/painless_lab",
     "xpack.profiling": [
-      "plugins/observability_solution/profiling"
+      "solutions/observability/plugins/profiling"
     ],
     "xpack.remoteClusters": "platform/plugins/private/remote_clusters",
     "xpack.reporting": [

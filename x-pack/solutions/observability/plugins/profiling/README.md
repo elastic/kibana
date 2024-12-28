@@ -43,36 +43,36 @@ The authentication and authorization on this endpoint are provided as part of th
 ### Unit Tests (Jest)
 
 ```
-node scripts/jest --config x-pack/plugins/observability_solution/profiling/jest.config.js [--watchAll]
+node scripts/jest --config x-pack/solutions/observability/plugins/profiling/jest.config.js [--watchAll]
 ```
 
 ## E2E Tests (Cypress)
-The E2E tests are located in [`x-pack/plugins/observability_solution/profiling/e2e`](./e2e).
+The E2E tests are located in [`x-pack/solutions/observability/plugins/profiling/e2e`](./e2e).
 
-Universal Profiling uses [FTR](../../../packages/kbn-test/README.mdx) (functional test runner) and [Cypress](https://www.cypress.io/) to run the e2e tests. The tests are located at `kibana/x-pack/plugins/observability_solution/profiling/e2e/cypress/e2e`.
+Universal Profiling uses [FTR](../../../../packages/kbn-test/README.mdx) (functional test runner) and [Cypress](https://www.cypress.io/) to run the e2e tests. The tests are located at `kibana/x-pack/solutions/observability/plugins/profiling/e2e/cypress/e2e`.
 
 ### Start test server
 
 ```
-node x-pack/plugins/observability_solution/profiling/scripts/test/e2e --server
+node x-pack/solutions/observability/plugins/profiling/scripts/test/e2e --server
 ```
 
 ### Open cypress dashboard
 
 ```
-node x-pack/plugins/observability_solution/profiling/scripts/test/e2e --open
+node x-pack/solutions/observability/plugins/profiling/scripts/test/e2e --open
 ```
 
 ### Run tests in terminal
 
 ```
-node x-pack/plugins/observability_solution/profiling/scripts/test/e2e --runner
+node x-pack/solutions/observability/plugins/profiling/scripts/test/e2e --runner
 ```
 
 ### Run like CI
 
 ```
-node x-pack/plugins/observability_solution/profiling/scripts/test/e2e
+node x-pack/solutions/observability/plugins/profiling/scripts/test/e2e
 ```
 
 ## Other resources
