@@ -2814,18 +2814,6 @@
             "path": "x-pack/platform/plugins/shared/alerting/server/saved_objects/geo_containment/migrations.ts"
           },
           {
-            "plugin": "enterpriseSearch",
-            "path": "x-pack/plugins/enterprise_search/server/collectors/lib/telemetry.ts"
-          },
-          {
-            "plugin": "enterpriseSearch",
-            "path": "x-pack/plugins/enterprise_search/server/collectors/lib/telemetry.ts"
-          },
-          {
-            "plugin": "enterpriseSearch",
-            "path": "x-pack/plugins/enterprise_search/server/collectors/lib/telemetry.ts"
-          },
-          {
             "plugin": "savedSearch",
             "path": "src/plugins/saved_search/server/saved_objects/search_migrations.ts"
           },
@@ -2884,6 +2872,18 @@
           {
             "plugin": "taskManager",
             "path": "x-pack/platform/plugins/shared/task_manager/server/task_store.test.ts"
+          },
+          {
+            "plugin": "enterpriseSearch",
+            "path": "x-pack/solutions/search/plugins/enterprise_search/server/collectors/lib/telemetry.ts"
+          },
+          {
+            "plugin": "enterpriseSearch",
+            "path": "x-pack/solutions/search/plugins/enterprise_search/server/collectors/lib/telemetry.ts"
+          },
+          {
+            "plugin": "enterpriseSearch",
+            "path": "x-pack/solutions/search/plugins/enterprise_search/server/collectors/lib/telemetry.ts"
           },
           {
             "plugin": "alerting",

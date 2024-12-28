@@ -2808,20 +2808,20 @@
             "path": "x-pack/platform/plugins/private/data_visualizer/common/types/index.ts"
           },
           {
-            "plugin": "ml",
-            "path": "x-pack/platform/plugins/shared/ml/common/types/kibana.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/platform/plugins/shared/ml/common/types/kibana.ts"
-          },
-          {
             "plugin": "graph",
             "path": "x-pack/plugins/graph/public/types/app_state.ts"
           },
           {
             "plugin": "graph",
             "path": "x-pack/plugins/graph/public/types/app_state.ts"
+          },
+          {
+            "plugin": "ml",
+            "path": "x-pack/platform/plugins/shared/ml/common/types/kibana.ts"
+          },
+          {
+            "plugin": "ml",
+            "path": "x-pack/platform/plugins/shared/ml/common/types/kibana.ts"
           },
           {
             "plugin": "graph",

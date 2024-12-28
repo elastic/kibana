@@ -12148,9 +12148,7 @@
               "\nA record of capabilities (aggregations) for an index rollup job"
             ],
             "signature": [
-              "[index: string]:  { aggs?: ",
-              "Dictionary",
-              "<",
+              "[index: string]:  { aggs?: _.Dictionary<",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -14057,6 +14055,46 @@
                 "path": "x-pack/platform/plugins/private/data_visualizer/public/application/index_data_visualizer/hooks/use_data_visualizer_grid_data.ts"
               },
               {
+                "plugin": "graph",
+                "path": "x-pack/plugins/graph/public/state_management/datasource.sagas.ts"
+              },
+              {
+                "plugin": "graph",
+                "path": "x-pack/plugins/graph/public/state_management/persistence.ts"
+              },
+              {
+                "plugin": "graph",
+                "path": "x-pack/plugins/graph/public/state_management/persistence.ts"
+              },
+              {
+                "plugin": "upgradeAssistant",
+                "path": "x-pack/plugins/upgrade_assistant/public/application/components/es_deprecation_logs/fix_deprecation_logs/external_links.tsx"
+              },
+              {
+                "plugin": "graph",
+                "path": "x-pack/plugins/graph/public/state_management/datasource.test.ts"
+              },
+              {
+                "plugin": "exploratoryView",
+                "path": "x-pack/solutions/observability/plugins/exploratory_view/public/utils/observability_data_views/observability_data_views.ts"
+              },
+              {
+                "plugin": "exploratoryView",
+                "path": "x-pack/solutions/observability/plugins/exploratory_view/public/components/shared/exploratory_view/series_editor/columns/report_definition_field.tsx"
+              },
+              {
+                "plugin": "exploratoryView",
+                "path": "x-pack/solutions/observability/plugins/exploratory_view/public/components/shared/exploratory_view/series_editor/use_filter_values.ts"
+              },
+              {
+                "plugin": "exploratoryView",
+                "path": "x-pack/solutions/observability/plugins/exploratory_view/public/components/shared/exploratory_view/series_editor/columns/filter_value_btn.tsx"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/platform/plugins/shared/fleet/public/applications/fleet/sections/agents/agent_details_page/components/agent_logs/query_bar.tsx"
+              },
+              {
                 "plugin": "ml",
                 "path": "x-pack/platform/plugins/shared/ml/public/application/jobs/new_job/common/job_creator/job_creator.ts"
               },
@@ -14125,62 +14163,6 @@
                 "path": "x-pack/platform/plugins/shared/ml/public/application/data_frame_analytics/pages/analytics_management/components/source_selection/source_selection.tsx"
               },
               {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/public/applications/analytics/utils/find_or_create_data_view.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/public/applications/analytics/components/analytics_collection_view/analytics_collection_explore_table_formulas.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/platform/plugins/shared/ml/server/models/job_service/new_job_caps/rollup.ts"
-              },
-              {
-                "plugin": "@kbn/ml-data-view-utils",
-                "path": "x-pack/platform/packages/private/ml/data_view_utils/actions/data_view_handler.ts"
-              },
-              {
-                "plugin": "graph",
-                "path": "x-pack/plugins/graph/public/state_management/datasource.sagas.ts"
-              },
-              {
-                "plugin": "graph",
-                "path": "x-pack/plugins/graph/public/state_management/persistence.ts"
-              },
-              {
-                "plugin": "graph",
-                "path": "x-pack/plugins/graph/public/state_management/persistence.ts"
-              },
-              {
-                "plugin": "upgradeAssistant",
-                "path": "x-pack/plugins/upgrade_assistant/public/application/components/es_deprecation_logs/fix_deprecation_logs/external_links.tsx"
-              },
-              {
-                "plugin": "graph",
-                "path": "x-pack/plugins/graph/public/state_management/datasource.test.ts"
-              },
-              {
-                "plugin": "exploratoryView",
-                "path": "x-pack/solutions/observability/plugins/exploratory_view/public/utils/observability_data_views/observability_data_views.ts"
-              },
-              {
-                "plugin": "exploratoryView",
-                "path": "x-pack/solutions/observability/plugins/exploratory_view/public/components/shared/exploratory_view/series_editor/columns/report_definition_field.tsx"
-              },
-              {
-                "plugin": "exploratoryView",
-                "path": "x-pack/solutions/observability/plugins/exploratory_view/public/components/shared/exploratory_view/series_editor/use_filter_values.ts"
-              },
-              {
-                "plugin": "exploratoryView",
-                "path": "x-pack/solutions/observability/plugins/exploratory_view/public/components/shared/exploratory_view/series_editor/columns/filter_value_btn.tsx"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/platform/plugins/shared/fleet/public/applications/fleet/sections/agents/agent_details_page/components/agent_logs/query_bar.tsx"
-              },
-              {
                 "plugin": "stackAlerts",
                 "path": "x-pack/platform/plugins/shared/stack_alerts/public/rule_types/geo_containment/rule_form/boundary_form.tsx"
               },
@@ -14193,8 +14175,12 @@
                 "path": "x-pack/platform/plugins/shared/stack_alerts/public/rule_types/components/data_view_select_popover.tsx"
               },
               {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/public/applications/analytics/utils/find_or_create_data_view.test.ts"
+                "plugin": "ml",
+                "path": "x-pack/platform/plugins/shared/ml/server/models/job_service/new_job_caps/rollup.ts"
+              },
+              {
+                "plugin": "@kbn/ml-data-view-utils",
+                "path": "x-pack/platform/packages/private/ml/data_view_utils/actions/data_view_handler.ts"
               },
               {
                 "plugin": "canvas",
@@ -14259,6 +14245,18 @@
               {
                 "plugin": "ux",
                 "path": "x-pack/solutions/observability/plugins/ux/public/components/app/rum_dashboard/local_uifilters/use_data_view.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/public/applications/analytics/utils/find_or_create_data_view.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/public/applications/analytics/components/analytics_collection_view/analytics_collection_explore_table_formulas.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/public/applications/analytics/utils/find_or_create_data_view.test.ts"
               },
               {
                 "plugin": "exploratoryView",

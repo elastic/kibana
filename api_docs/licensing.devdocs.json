@@ -2195,16 +2195,16 @@
               "path": "x-pack/platform/plugins/shared/alerting/server/plugin.ts"
             },
             {
-              "plugin": "ml",
-              "path": "x-pack/platform/plugins/shared/ml/server/plugin.ts"
-            },
-            {
               "plugin": "graph",
               "path": "x-pack/plugins/graph/server/plugin.ts"
             },
             {
               "plugin": "upgradeAssistant",
               "path": "x-pack/plugins/upgrade_assistant/server/lib/reindexing/reindex_service.ts"
+            },
+            {
+              "plugin": "ml",
+              "path": "x-pack/platform/plugins/shared/ml/server/plugin.ts"
             },
             {
               "plugin": "spaces",

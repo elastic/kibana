@@ -4014,434 +4014,6 @@
                 "path": "x-pack/plugins/global_search/server/routes/get_searchable_types.ts"
               },
               {
-                "plugin": "guidedOnboarding",
-                "path": "src/plugins/guided_onboarding/server/routes/guide_state_routes.ts"
-              },
-              {
-                "plugin": "guidedOnboarding",
-                "path": "src/plugins/guided_onboarding/server/routes/plugin_state_routes.ts"
-              },
-              {
-                "plugin": "guidedOnboarding",
-                "path": "src/plugins/guided_onboarding/server/routes/config_routes.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/crawler/crawler_extraction_rules.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/app_search/adaptive_relevance.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/app_search/adaptive_relevance.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/app_search/analytics.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/app_search/analytics.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/app_search/api_logs.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/app_search/crawler.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/app_search/crawler.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/app_search/crawler.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/app_search/crawler.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/app_search/crawler.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/app_search/crawler.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/app_search/crawler.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/app_search/credentials.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/app_search/credentials.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/app_search/curations.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/app_search/curations.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/app_search/documents.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/app_search/engines.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/app_search/engines.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/app_search/engines.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/app_search/result_settings.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/app_search/role_mappings.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/app_search/schema.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/app_search/schema.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/app_search/search_settings.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/app_search/search_ui.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/app_search/settings.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/app_search/source_engines.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/app_search/synonyms.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/documents.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/indices.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/indices.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/indices.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/indices.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/indices.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/indices.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/indices.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/indices.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/indices.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/indices.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/indices.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/indices.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/indices.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/mapping.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/search_applications.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/search_applications.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/search_applications.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/analytics.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/analytics.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/analytics.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/api_keys.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/api_keys.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/config_data.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/config_data.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/connectors.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/connectors.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/connectors.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/connectors.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/connectors.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/crawler/crawler_multiple_schedules.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/crawler/crawler.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/crawler/crawler.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/crawler/crawler.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/crawler/crawler.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/crawler/crawler.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/crawler/crawler.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/stats.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/stats.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/workplace_search/api_keys.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/workplace_search/groups.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/workplace_search/groups.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/workplace_search/groups.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/workplace_search/oauth.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/workplace_search/overview.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/workplace_search/role_mappings.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/workplace_search/security.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/workplace_search/security.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/workplace_search/settings.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/workplace_search/sources.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/workplace_search/sources.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/workplace_search/sources.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/workplace_search/sources.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/workplace_search/sources.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/workplace_search/sources.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/workplace_search/sources.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/workplace_search/sources.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/workplace_search/sources.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/workplace_search/sources.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/workplace_search/sources.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/workplace_search/sources.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/workplace_search/sources.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/workplace_search/sources.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/workplace_search/sources.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/workplace_search/sources.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/workplace_search/sources.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/workplace_search/sources.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/workplace_search/sources.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/workplace_search/sources.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/workplace_search/sources.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/workplace_search/sources.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/workplace_search/sources.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/workplace_search/sources.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/workplace_search/sources.ts"
-              },
-              {
                 "plugin": "reporting",
                 "path": "x-pack/plugins/reporting/server/routes/internal/deprecations/deprecations.ts"
               },
@@ -4496,66 +4068,6 @@
               {
                 "plugin": "savedObjectsTagging",
                 "path": "x-pack/plugins/saved_objects_tagging/server/routes/internal/find_tags.ts"
-              },
-              {
-                "plugin": "searchIndices",
-                "path": "x-pack/plugins/search_indices/server/routes/status.ts"
-              },
-              {
-                "plugin": "searchIndices",
-                "path": "x-pack/plugins/search_indices/server/routes/status.ts"
-              },
-              {
-                "plugin": "searchInferenceEndpoints",
-                "path": "x-pack/plugins/search_inference_endpoints/server/routes.ts"
-              },
-              {
-                "plugin": "searchNotebooks",
-                "path": "x-pack/plugins/search_notebooks/server/routes/index.ts"
-              },
-              {
-                "plugin": "searchNotebooks",
-                "path": "x-pack/plugins/search_notebooks/server/routes/index.ts"
-              },
-              {
-                "plugin": "searchPlayground",
-                "path": "x-pack/plugins/search_playground/server/routes.ts"
-              },
-              {
-                "plugin": "serverlessSearch",
-                "path": "x-pack/plugins/serverless_search/server/routes/api_key_routes.ts"
-              },
-              {
-                "plugin": "serverlessSearch",
-                "path": "x-pack/plugins/serverless_search/server/routes/indices_routes.ts"
-              },
-              {
-                "plugin": "serverlessSearch",
-                "path": "x-pack/plugins/serverless_search/server/routes/indices_routes.ts"
-              },
-              {
-                "plugin": "serverlessSearch",
-                "path": "x-pack/plugins/serverless_search/server/routes/indices_routes.ts"
-              },
-              {
-                "plugin": "serverlessSearch",
-                "path": "x-pack/plugins/serverless_search/server/routes/connectors_routes.ts"
-              },
-              {
-                "plugin": "serverlessSearch",
-                "path": "x-pack/plugins/serverless_search/server/routes/connectors_routes.ts"
-              },
-              {
-                "plugin": "serverlessSearch",
-                "path": "x-pack/plugins/serverless_search/server/routes/connectors_routes.ts"
-              },
-              {
-                "plugin": "serverlessSearch",
-                "path": "x-pack/plugins/serverless_search/server/routes/mapping_routes.ts"
-              },
-              {
-                "plugin": "serverlessSearch",
-                "path": "x-pack/plugins/serverless_search/server/routes/ingest_pipeline_routes.ts"
               },
               {
                 "plugin": "upgradeAssistant",
@@ -4616,6 +4128,18 @@
               {
                 "plugin": "customBranding",
                 "path": "x-pack/plugins/custom_branding/server/routes/info.ts"
+              },
+              {
+                "plugin": "guidedOnboarding",
+                "path": "src/plugins/guided_onboarding/server/routes/guide_state_routes.ts"
+              },
+              {
+                "plugin": "guidedOnboarding",
+                "path": "src/plugins/guided_onboarding/server/routes/plugin_state_routes.ts"
+              },
+              {
+                "plugin": "guidedOnboarding",
+                "path": "src/plugins/guided_onboarding/server/routes/config_routes.ts"
               },
               {
                 "plugin": "observability",
@@ -5016,6 +4540,482 @@
               {
                 "plugin": "uptime",
                 "path": "x-pack/solutions/observability/plugins/uptime/server/legacy_uptime/uptime_server.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/enterprise_search/crawler/crawler_extraction_rules.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/app_search/adaptive_relevance.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/app_search/adaptive_relevance.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/app_search/analytics.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/app_search/analytics.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/app_search/api_logs.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/app_search/crawler.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/app_search/crawler.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/app_search/crawler.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/app_search/crawler.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/app_search/crawler.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/app_search/crawler.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/app_search/crawler.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/app_search/credentials.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/app_search/credentials.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/app_search/curations.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/app_search/curations.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/app_search/documents.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/app_search/engines.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/app_search/engines.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/app_search/engines.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/app_search/result_settings.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/app_search/role_mappings.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/app_search/schema.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/app_search/schema.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/app_search/search_settings.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/app_search/search_ui.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/app_search/settings.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/app_search/source_engines.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/app_search/synonyms.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/enterprise_search/documents.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/enterprise_search/indices.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/enterprise_search/indices.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/enterprise_search/indices.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/enterprise_search/indices.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/enterprise_search/indices.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/enterprise_search/indices.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/enterprise_search/indices.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/enterprise_search/indices.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/enterprise_search/indices.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/enterprise_search/indices.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/enterprise_search/indices.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/enterprise_search/indices.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/enterprise_search/indices.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/enterprise_search/mapping.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/enterprise_search/search_applications.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/enterprise_search/search_applications.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/enterprise_search/search_applications.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/enterprise_search/analytics.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/enterprise_search/analytics.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/enterprise_search/analytics.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/enterprise_search/api_keys.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/enterprise_search/api_keys.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/enterprise_search/config_data.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/enterprise_search/config_data.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/enterprise_search/connectors.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/enterprise_search/connectors.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/enterprise_search/connectors.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/enterprise_search/connectors.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/enterprise_search/connectors.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/enterprise_search/crawler/crawler_multiple_schedules.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/enterprise_search/crawler/crawler.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/enterprise_search/crawler/crawler.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/enterprise_search/crawler/crawler.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/enterprise_search/crawler/crawler.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/enterprise_search/crawler/crawler.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/enterprise_search/crawler/crawler.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/enterprise_search/stats.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/enterprise_search/stats.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/workplace_search/api_keys.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/workplace_search/groups.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/workplace_search/groups.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/workplace_search/groups.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/workplace_search/oauth.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/workplace_search/overview.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/workplace_search/role_mappings.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/workplace_search/security.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/workplace_search/security.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/workplace_search/settings.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/workplace_search/sources.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/workplace_search/sources.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/workplace_search/sources.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/workplace_search/sources.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/workplace_search/sources.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/workplace_search/sources.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/workplace_search/sources.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/workplace_search/sources.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/workplace_search/sources.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/workplace_search/sources.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/workplace_search/sources.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/workplace_search/sources.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/workplace_search/sources.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/workplace_search/sources.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/workplace_search/sources.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/workplace_search/sources.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/workplace_search/sources.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/workplace_search/sources.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/workplace_search/sources.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/workplace_search/sources.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/workplace_search/sources.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/workplace_search/sources.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/workplace_search/sources.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/workplace_search/sources.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/workplace_search/sources.ts"
+              },
+              {
+                "plugin": "searchIndices",
+                "path": "x-pack/solutions/search/plugins/search_indices/server/routes/status.ts"
+              },
+              {
+                "plugin": "searchIndices",
+                "path": "x-pack/solutions/search/plugins/search_indices/server/routes/status.ts"
+              },
+              {
+                "plugin": "searchInferenceEndpoints",
+                "path": "x-pack/solutions/search/plugins/search_inference_endpoints/server/routes.ts"
+              },
+              {
+                "plugin": "searchNotebooks",
+                "path": "x-pack/solutions/search/plugins/search_notebooks/server/routes/index.ts"
+              },
+              {
+                "plugin": "searchNotebooks",
+                "path": "x-pack/solutions/search/plugins/search_notebooks/server/routes/index.ts"
+              },
+              {
+                "plugin": "searchPlayground",
+                "path": "x-pack/solutions/search/plugins/search_playground/server/routes.ts"
+              },
+              {
+                "plugin": "serverlessSearch",
+                "path": "x-pack/solutions/search/plugins/serverless_search/server/routes/api_key_routes.ts"
+              },
+              {
+                "plugin": "serverlessSearch",
+                "path": "x-pack/solutions/search/plugins/serverless_search/server/routes/indices_routes.ts"
+              },
+              {
+                "plugin": "serverlessSearch",
+                "path": "x-pack/solutions/search/plugins/serverless_search/server/routes/indices_routes.ts"
+              },
+              {
+                "plugin": "serverlessSearch",
+                "path": "x-pack/solutions/search/plugins/serverless_search/server/routes/indices_routes.ts"
+              },
+              {
+                "plugin": "serverlessSearch",
+                "path": "x-pack/solutions/search/plugins/serverless_search/server/routes/connectors_routes.ts"
+              },
+              {
+                "plugin": "serverlessSearch",
+                "path": "x-pack/solutions/search/plugins/serverless_search/server/routes/connectors_routes.ts"
+              },
+              {
+                "plugin": "serverlessSearch",
+                "path": "x-pack/solutions/search/plugins/serverless_search/server/routes/connectors_routes.ts"
+              },
+              {
+                "plugin": "serverlessSearch",
+                "path": "x-pack/solutions/search/plugins/serverless_search/server/routes/mapping_routes.ts"
+              },
+              {
+                "plugin": "serverlessSearch",
+                "path": "x-pack/solutions/search/plugins/serverless_search/server/routes/ingest_pipeline_routes.ts"
               },
               {
                 "plugin": "assetInventory",
@@ -6528,346 +6528,6 @@
                 "path": "x-pack/plugins/global_search/server/routes/find.ts"
               },
               {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/crawler/crawler_extraction_rules.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/app_search/adaptive_relevance.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/app_search/app_search_gated_form.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/app_search/crawler.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/app_search/crawler.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/app_search/crawler.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/app_search/crawler.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/app_search/crawler.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/app_search/crawler_crawl_rules.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/app_search/crawler_entry_points.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/app_search/crawler_sitemaps.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/app_search/credentials.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/app_search/curations.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/app_search/curations.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/app_search/documents.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/app_search/engines.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/app_search/engines.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/app_search/onboarding.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/app_search/role_mappings.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/app_search/role_mappings.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/app_search/role_mappings.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/app_search/schema.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/app_search/search.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/app_search/search.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/app_search/search_settings.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/app_search/source_engines.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/app_search/synonyms.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/indices.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/indices.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/indices.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/indices.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/indices.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/indices.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/indices.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/indices.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/indices.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/search.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/search_applications.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/search_applications.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/analytics.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/analytics.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/api_keys.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/api_keys.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/connectors.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/connectors.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/connectors.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/connectors.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/connectors.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/connectors.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/connectors.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/connectors.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/connectors.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/crawler/crawler_crawl_rules.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/crawler/crawler_entry_points.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/crawler/crawler_multiple_schedules.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/crawler/crawler_sitemaps.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/crawler/crawler.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/crawler/crawler.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/crawler/crawler.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/crawler/crawler.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/crawler/crawler.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/crawler/crawler.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/crawler/crawler.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/workplace_search/api_keys.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/workplace_search/gated_form.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/workplace_search/groups.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/workplace_search/groups.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/workplace_search/groups.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/workplace_search/oauth.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/workplace_search/role_mappings.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/workplace_search/role_mappings.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/workplace_search/role_mappings.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/workplace_search/sources.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/workplace_search/sources.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/workplace_search/sources.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/workplace_search/sources.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/workplace_search/sources.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/workplace_search/sources.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/workplace_search/sources.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/workplace_search/sources.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/workplace_search/sources.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/workplace_search/sources.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/workplace_search/sources.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/workplace_search/sources.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/workplace_search/sources.ts"
-              },
-              {
                 "plugin": "graph",
                 "path": "x-pack/plugins/graph/server/routes/search.ts"
               },
@@ -6902,78 +6562,6 @@
               {
                 "plugin": "savedObjectsTagging",
                 "path": "x-pack/plugins/saved_objects_tagging/server/routes/internal/bulk_delete.ts"
-              },
-              {
-                "plugin": "@kbn/search-api-keys-server",
-                "path": "packages/kbn-search-api-keys-server/src/routes/routes.ts"
-              },
-              {
-                "plugin": "@kbn/search-api-keys-server",
-                "path": "packages/kbn-search-api-keys-server/src/routes/routes.ts"
-              },
-              {
-                "plugin": "searchIndices",
-                "path": "x-pack/plugins/search_indices/server/routes/indices.ts"
-              },
-              {
-                "plugin": "searchPlayground",
-                "path": "x-pack/plugins/search_playground/server/routes.ts"
-              },
-              {
-                "plugin": "searchPlayground",
-                "path": "x-pack/plugins/search_playground/server/routes.ts"
-              },
-              {
-                "plugin": "searchPlayground",
-                "path": "x-pack/plugins/search_playground/server/routes.ts"
-              },
-              {
-                "plugin": "searchPlayground",
-                "path": "x-pack/plugins/search_playground/server/routes.ts"
-              },
-              {
-                "plugin": "serverlessSearch",
-                "path": "x-pack/plugins/serverless_search/server/routes/api_key_routes.ts"
-              },
-              {
-                "plugin": "serverlessSearch",
-                "path": "x-pack/plugins/serverless_search/server/routes/indices_routes.ts"
-              },
-              {
-                "plugin": "serverlessSearch",
-                "path": "x-pack/plugins/serverless_search/server/routes/connectors_routes.ts"
-              },
-              {
-                "plugin": "serverlessSearch",
-                "path": "x-pack/plugins/serverless_search/server/routes/connectors_routes.ts"
-              },
-              {
-                "plugin": "serverlessSearch",
-                "path": "x-pack/plugins/serverless_search/server/routes/connectors_routes.ts"
-              },
-              {
-                "plugin": "serverlessSearch",
-                "path": "x-pack/plugins/serverless_search/server/routes/connectors_routes.ts"
-              },
-              {
-                "plugin": "serverlessSearch",
-                "path": "x-pack/plugins/serverless_search/server/routes/connectors_routes.ts"
-              },
-              {
-                "plugin": "serverlessSearch",
-                "path": "x-pack/plugins/serverless_search/server/routes/connectors_routes.ts"
-              },
-              {
-                "plugin": "serverlessSearch",
-                "path": "x-pack/plugins/serverless_search/server/routes/connectors_routes.ts"
-              },
-              {
-                "plugin": "serverlessSearch",
-                "path": "x-pack/plugins/serverless_search/server/routes/connectors_routes.ts"
-              },
-              {
-                "plugin": "serverlessSearch",
-                "path": "x-pack/plugins/serverless_search/server/routes/connectors_routes.ts"
               },
               {
                 "plugin": "upgradeAssistant",
@@ -7340,6 +6928,14 @@
                 "path": "x-pack/platform/plugins/private/grokdebugger/server/lib/kibana_framework.ts"
               },
               {
+                "plugin": "@kbn/search-api-keys-server",
+                "path": "x-pack/solutions/search/packages/kbn-search-api-keys-server/src/routes/routes.ts"
+              },
+              {
+                "plugin": "@kbn/search-api-keys-server",
+                "path": "x-pack/solutions/search/packages/kbn-search-api-keys-server/src/routes/routes.ts"
+              },
+              {
                 "plugin": "visTypeTimeseries",
                 "path": "src/plugins/vis_types/timeseries/server/routes/vis.ts"
               },
@@ -7354,6 +6950,410 @@
               {
                 "plugin": "uptime",
                 "path": "x-pack/solutions/observability/plugins/uptime/server/legacy_uptime/uptime_server.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/enterprise_search/crawler/crawler_extraction_rules.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/app_search/adaptive_relevance.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/app_search/app_search_gated_form.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/app_search/crawler.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/app_search/crawler.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/app_search/crawler.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/app_search/crawler.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/app_search/crawler.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/app_search/crawler_crawl_rules.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/app_search/crawler_entry_points.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/app_search/crawler_sitemaps.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/app_search/credentials.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/app_search/curations.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/app_search/curations.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/app_search/documents.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/app_search/engines.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/app_search/engines.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/app_search/onboarding.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/app_search/role_mappings.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/app_search/role_mappings.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/app_search/role_mappings.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/app_search/schema.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/app_search/search.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/app_search/search.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/app_search/search_settings.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/app_search/source_engines.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/app_search/synonyms.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/enterprise_search/indices.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/enterprise_search/indices.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/enterprise_search/indices.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/enterprise_search/indices.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/enterprise_search/indices.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/enterprise_search/indices.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/enterprise_search/indices.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/enterprise_search/indices.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/enterprise_search/indices.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/enterprise_search/search.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/enterprise_search/search_applications.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/enterprise_search/search_applications.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/enterprise_search/analytics.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/enterprise_search/analytics.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/enterprise_search/api_keys.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/enterprise_search/api_keys.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/enterprise_search/connectors.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/enterprise_search/connectors.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/enterprise_search/connectors.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/enterprise_search/connectors.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/enterprise_search/connectors.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/enterprise_search/connectors.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/enterprise_search/connectors.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/enterprise_search/connectors.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/enterprise_search/connectors.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/enterprise_search/crawler/crawler_crawl_rules.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/enterprise_search/crawler/crawler_entry_points.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/enterprise_search/crawler/crawler_multiple_schedules.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/enterprise_search/crawler/crawler_sitemaps.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/enterprise_search/crawler/crawler.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/enterprise_search/crawler/crawler.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/enterprise_search/crawler/crawler.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/enterprise_search/crawler/crawler.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/enterprise_search/crawler/crawler.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/enterprise_search/crawler/crawler.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/enterprise_search/crawler/crawler.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/workplace_search/api_keys.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/workplace_search/gated_form.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/workplace_search/groups.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/workplace_search/groups.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/workplace_search/groups.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/workplace_search/oauth.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/workplace_search/role_mappings.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/workplace_search/role_mappings.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/workplace_search/role_mappings.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/workplace_search/sources.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/workplace_search/sources.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/workplace_search/sources.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/workplace_search/sources.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/workplace_search/sources.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/workplace_search/sources.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/workplace_search/sources.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/workplace_search/sources.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/workplace_search/sources.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/workplace_search/sources.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/workplace_search/sources.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/workplace_search/sources.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/workplace_search/sources.ts"
+              },
+              {
+                "plugin": "searchIndices",
+                "path": "x-pack/solutions/search/plugins/search_indices/server/routes/indices.ts"
+              },
+              {
+                "plugin": "searchPlayground",
+                "path": "x-pack/solutions/search/plugins/search_playground/server/routes.ts"
+              },
+              {
+                "plugin": "searchPlayground",
+                "path": "x-pack/solutions/search/plugins/search_playground/server/routes.ts"
+              },
+              {
+                "plugin": "searchPlayground",
+                "path": "x-pack/solutions/search/plugins/search_playground/server/routes.ts"
+              },
+              {
+                "plugin": "searchPlayground",
+                "path": "x-pack/solutions/search/plugins/search_playground/server/routes.ts"
+              },
+              {
+                "plugin": "serverlessSearch",
+                "path": "x-pack/solutions/search/plugins/serverless_search/server/routes/api_key_routes.ts"
+              },
+              {
+                "plugin": "serverlessSearch",
+                "path": "x-pack/solutions/search/plugins/serverless_search/server/routes/indices_routes.ts"
+              },
+              {
+                "plugin": "serverlessSearch",
+                "path": "x-pack/solutions/search/plugins/serverless_search/server/routes/connectors_routes.ts"
+              },
+              {
+                "plugin": "serverlessSearch",
+                "path": "x-pack/solutions/search/plugins/serverless_search/server/routes/connectors_routes.ts"
+              },
+              {
+                "plugin": "serverlessSearch",
+                "path": "x-pack/solutions/search/plugins/serverless_search/server/routes/connectors_routes.ts"
+              },
+              {
+                "plugin": "serverlessSearch",
+                "path": "x-pack/solutions/search/plugins/serverless_search/server/routes/connectors_routes.ts"
+              },
+              {
+                "plugin": "serverlessSearch",
+                "path": "x-pack/solutions/search/plugins/serverless_search/server/routes/connectors_routes.ts"
+              },
+              {
+                "plugin": "serverlessSearch",
+                "path": "x-pack/solutions/search/plugins/serverless_search/server/routes/connectors_routes.ts"
+              },
+              {
+                "plugin": "serverlessSearch",
+                "path": "x-pack/solutions/search/plugins/serverless_search/server/routes/connectors_routes.ts"
+              },
+              {
+                "plugin": "serverlessSearch",
+                "path": "x-pack/solutions/search/plugins/serverless_search/server/routes/connectors_routes.ts"
+              },
+              {
+                "plugin": "serverlessSearch",
+                "path": "x-pack/solutions/search/plugins/serverless_search/server/routes/connectors_routes.ts"
               },
               {
                 "plugin": "contentManagement",
@@ -8386,190 +8386,6 @@
                 "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/update/update_rule_route.ts"
               },
               {
-                "plugin": "guidedOnboarding",
-                "path": "src/plugins/guided_onboarding/server/routes/plugin_state_routes.ts"
-              },
-              {
-                "plugin": "logsShared",
-                "path": "x-pack/platform/plugins/shared/logs_shared/server/routes/deprecations/migrate_log_view_settings.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/crawler/crawler_extraction_rules.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/app_search/adaptive_relevance.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/app_search/adaptive_relevance.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/app_search/crawler.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/app_search/crawler.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/app_search/crawler_crawl_rules.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/app_search/crawler_entry_points.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/app_search/crawler_sitemaps.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/app_search/credentials.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/app_search/curations.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/app_search/result_settings.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/app_search/role_mappings.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/app_search/search_settings.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/app_search/settings.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/app_search/synonyms.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/indices.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/search_applications.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/connectors.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/connectors.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/connectors.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/connectors.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/connectors.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/connectors.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/connectors.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/connectors.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/connectors.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/connectors.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/crawler/crawler_crawl_rules.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/crawler/crawler_entry_points.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/crawler/crawler_sitemaps.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/crawler/crawler.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/crawler/crawler.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/crawler/crawler.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/telemetry.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/workplace_search/groups.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/workplace_search/groups.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/workplace_search/role_mappings.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/workplace_search/settings.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/workplace_search/settings.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/workplace_search/settings.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/workplace_search/sources.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/workplace_search/sources.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/workplace_search/sources.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/workplace_search/sources.ts"
-              },
-              {
                 "plugin": "reporting",
                 "path": "x-pack/plugins/reporting/server/routes/internal/deprecations/deprecations.ts"
               },
@@ -8578,12 +8394,16 @@
                 "path": "x-pack/plugins/reporting/server/test_helpers/create_mock_reportingplugin.ts"
               },
               {
-                "plugin": "searchInferenceEndpoints",
-                "path": "x-pack/plugins/search_inference_endpoints/server/routes.ts"
+                "plugin": "logsShared",
+                "path": "x-pack/platform/plugins/shared/logs_shared/server/routes/deprecations/migrate_log_view_settings.ts"
               },
               {
                 "plugin": "upgradeAssistant",
                 "path": "x-pack/plugins/upgrade_assistant/server/routes/deprecation_logging.ts"
+              },
+              {
+                "plugin": "guidedOnboarding",
+                "path": "src/plugins/guided_onboarding/server/routes/plugin_state_routes.ts"
               },
               {
                 "plugin": "observability",
@@ -8720,6 +8540,186 @@
               {
                 "plugin": "uptime",
                 "path": "x-pack/solutions/observability/plugins/uptime/server/legacy_uptime/uptime_server.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/enterprise_search/crawler/crawler_extraction_rules.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/app_search/adaptive_relevance.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/app_search/adaptive_relevance.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/app_search/crawler.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/app_search/crawler.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/app_search/crawler_crawl_rules.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/app_search/crawler_entry_points.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/app_search/crawler_sitemaps.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/app_search/credentials.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/app_search/curations.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/app_search/result_settings.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/app_search/role_mappings.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/app_search/search_settings.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/app_search/settings.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/app_search/synonyms.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/enterprise_search/indices.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/enterprise_search/search_applications.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/enterprise_search/connectors.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/enterprise_search/connectors.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/enterprise_search/connectors.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/enterprise_search/connectors.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/enterprise_search/connectors.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/enterprise_search/connectors.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/enterprise_search/connectors.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/enterprise_search/connectors.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/enterprise_search/connectors.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/enterprise_search/connectors.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/enterprise_search/crawler/crawler_crawl_rules.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/enterprise_search/crawler/crawler_entry_points.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/enterprise_search/crawler/crawler_sitemaps.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/enterprise_search/crawler/crawler.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/enterprise_search/crawler/crawler.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/enterprise_search/crawler/crawler.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/enterprise_search/telemetry.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/workplace_search/groups.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/workplace_search/groups.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/workplace_search/role_mappings.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/workplace_search/settings.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/workplace_search/settings.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/workplace_search/settings.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/workplace_search/sources.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/workplace_search/sources.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/workplace_search/sources.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/workplace_search/sources.ts"
+              },
+              {
+                "plugin": "searchInferenceEndpoints",
+                "path": "x-pack/solutions/search/plugins/search_inference_endpoints/server/routes.ts"
               },
               {
                 "plugin": "ftrApis",
@@ -9024,18 +9024,6 @@
                 "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/bulk_disable/bulk_disable_rules_route.ts"
               },
               {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/workplace_search/security.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/workplace_search/sources.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/workplace_search/sources.ts"
-              },
-              {
                 "plugin": "metricsDataAccess",
                 "path": "x-pack/plugins/observability_solution/metrics_data_access/server/lib/adapters/framework/kibana_framework_adapter.ts"
               },
@@ -9046,6 +9034,18 @@
               {
                 "plugin": "infra",
                 "path": "x-pack/solutions/observability/plugins/infra/server/lib/adapters/framework/kibana_framework_adapter.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/workplace_search/security.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/workplace_search/sources.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/workplace_search/sources.ts"
               },
               {
                 "plugin": "@kbn/core-http-router-server-internal",
@@ -9358,134 +9358,6 @@
                 "path": "x-pack/platform/plugins/shared/alerting/server/routes/backfill/apis/delete/delete_backfill_route.ts"
               },
               {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/crawler/crawler_extraction_rules.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/app_search/crawler.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/app_search/crawler.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/app_search/crawler_crawl_rules.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/app_search/crawler_entry_points.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/app_search/crawler_sitemaps.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/app_search/credentials.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/app_search/curations.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/app_search/documents.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/app_search/engines.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/app_search/role_mappings.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/app_search/source_engines.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/app_search/synonyms.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/indices.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/indices.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/indices.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/indices.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/search_applications.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/analytics.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/connectors.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/crawler/crawler_crawl_rules.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/crawler/crawler_entry_points.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/crawler/crawler_sitemaps.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/crawler/crawler.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/crawler/crawler.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/workplace_search/api_keys.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/workplace_search/groups.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/workplace_search/oauth.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/workplace_search/role_mappings.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/workplace_search/sources.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/workplace_search/sources.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/workplace_search/sources.ts"
-              },
-              {
                 "plugin": "reporting",
                 "path": "x-pack/plugins/reporting/server/routes/internal/management/jobs.ts"
               },
@@ -9500,18 +9372,6 @@
               {
                 "plugin": "savedObjectsTagging",
                 "path": "x-pack/plugins/saved_objects_tagging/server/routes/tags/delete_tag.ts"
-              },
-              {
-                "plugin": "searchIndices",
-                "path": "x-pack/plugins/search_indices/server/routes/documents.ts"
-              },
-              {
-                "plugin": "searchInferenceEndpoints",
-                "path": "x-pack/plugins/search_inference_endpoints/server/routes.ts"
-              },
-              {
-                "plugin": "serverlessSearch",
-                "path": "x-pack/plugins/serverless_search/server/routes/connectors_routes.ts"
               },
               {
                 "plugin": "upgradeAssistant",
@@ -9588,6 +9448,146 @@
               {
                 "plugin": "uptime",
                 "path": "x-pack/solutions/observability/plugins/uptime/server/legacy_uptime/uptime_server.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/enterprise_search/crawler/crawler_extraction_rules.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/app_search/crawler.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/app_search/crawler.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/app_search/crawler_crawl_rules.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/app_search/crawler_entry_points.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/app_search/crawler_sitemaps.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/app_search/credentials.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/app_search/curations.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/app_search/documents.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/app_search/engines.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/app_search/role_mappings.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/app_search/source_engines.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/app_search/synonyms.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/enterprise_search/indices.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/enterprise_search/indices.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/enterprise_search/indices.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/enterprise_search/indices.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/enterprise_search/search_applications.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/enterprise_search/analytics.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/enterprise_search/connectors.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/enterprise_search/crawler/crawler_crawl_rules.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/enterprise_search/crawler/crawler_entry_points.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/enterprise_search/crawler/crawler_sitemaps.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/enterprise_search/crawler/crawler.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/enterprise_search/crawler/crawler.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/workplace_search/api_keys.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/workplace_search/groups.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/workplace_search/oauth.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/workplace_search/role_mappings.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/workplace_search/sources.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/workplace_search/sources.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/workplace_search/sources.ts"
+              },
+              {
+                "plugin": "searchIndices",
+                "path": "x-pack/solutions/search/plugins/search_indices/server/routes/documents.ts"
+              },
+              {
+                "plugin": "searchInferenceEndpoints",
+                "path": "x-pack/solutions/search/plugins/search_inference_endpoints/server/routes.ts"
+              },
+              {
+                "plugin": "serverlessSearch",
+                "path": "x-pack/solutions/search/plugins/serverless_search/server/routes/connectors_routes.ts"
               },
               {
                 "plugin": "ftrApis",
@@ -13002,10 +13002,6 @@
                 "path": "x-pack/plugins/custom_branding/server/routes/info.ts"
               },
               {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/lib/route_config_helpers.test.ts"
-              },
-              {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/routes/agent/agent_status_handler.ts"
               },
@@ -13208,6 +13204,10 @@
               {
                 "plugin": "taskManager",
                 "path": "x-pack/platform/plugins/shared/task_manager/server/routes/background_task_utilization.test.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/server/lib/route_config_helpers.test.ts"
               },
               {
                 "plugin": "interactiveSetup",
@@ -15378,8 +15378,28 @@
                 "path": "src/platform/plugins/shared/dashboard/server/api/register_routes.ts"
               },
               {
+                "plugin": "telemetry",
+                "path": "src/plugins/telemetry/server/routes/telemetry_config.ts"
+              },
+              {
+                "plugin": "telemetry",
+                "path": "src/plugins/telemetry/server/routes/telemetry_config.ts"
+              },
+              {
+                "plugin": "telemetry",
+                "path": "src/plugins/telemetry/server/routes/telemetry_last_reported.ts"
+              },
+              {
                 "plugin": "logsShared",
                 "path": "x-pack/platform/plugins/shared/logs_shared/server/lib/adapters/framework/kibana_framework_adapter.ts"
+              },
+              {
+                "plugin": "fieldsMetadata",
+                "path": "x-pack/platform/plugins/shared/fields_metadata/server/routes/fields_metadata/find_fields_metadata.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/platform/plugins/shared/fleet/server/services/security/fleet_router.ts"
               },
               {
                 "plugin": "ml",
@@ -15620,26 +15640,6 @@
               {
                 "plugin": "ml",
                 "path": "x-pack/platform/plugins/shared/ml/server/routes/inference_models.ts"
-              },
-              {
-                "plugin": "telemetry",
-                "path": "src/plugins/telemetry/server/routes/telemetry_config.ts"
-              },
-              {
-                "plugin": "telemetry",
-                "path": "src/plugins/telemetry/server/routes/telemetry_config.ts"
-              },
-              {
-                "plugin": "telemetry",
-                "path": "src/plugins/telemetry/server/routes/telemetry_last_reported.ts"
-              },
-              {
-                "plugin": "fieldsMetadata",
-                "path": "x-pack/platform/plugins/shared/fields_metadata/server/routes/fields_metadata/find_fields_metadata.ts"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/platform/plugins/shared/fleet/server/services/security/fleet_router.ts"
               },
               {
                 "plugin": "metricsDataAccess",
@@ -16521,8 +16521,20 @@
                 "path": "src/platform/plugins/shared/dashboard/server/api/register_routes.ts"
               },
               {
+                "plugin": "telemetry",
+                "path": "src/plugins/telemetry/server/routes/telemetry_user_has_seen_notice.ts"
+              },
+              {
+                "plugin": "telemetry",
+                "path": "src/plugins/telemetry/server/routes/telemetry_last_reported.ts"
+              },
+              {
                 "plugin": "logsShared",
                 "path": "x-pack/platform/plugins/shared/logs_shared/server/lib/adapters/framework/kibana_framework_adapter.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/platform/plugins/shared/fleet/server/services/security/fleet_router.ts"
               },
               {
                 "plugin": "ml",
@@ -16567,18 +16579,6 @@
               {
                 "plugin": "ml",
                 "path": "x-pack/platform/plugins/shared/ml/server/routes/inference_models.ts"
-              },
-              {
-                "plugin": "telemetry",
-                "path": "src/plugins/telemetry/server/routes/telemetry_user_has_seen_notice.ts"
-              },
-              {
-                "plugin": "telemetry",
-                "path": "src/plugins/telemetry/server/routes/telemetry_last_reported.ts"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/platform/plugins/shared/fleet/server/services/security/fleet_router.ts"
               },
               {
                 "plugin": "metricsDataAccess",
@@ -16920,8 +16920,24 @@
                 "path": "src/platform/plugins/shared/dashboard/server/api/register_routes.ts"
               },
               {
+                "plugin": "telemetry",
+                "path": "src/plugins/telemetry/server/routes/telemetry_opt_in_stats.ts"
+              },
+              {
+                "plugin": "telemetry",
+                "path": "src/plugins/telemetry/server/routes/telemetry_opt_in.ts"
+              },
+              {
+                "plugin": "telemetry",
+                "path": "src/plugins/telemetry/server/routes/telemetry_usage_stats.ts"
+              },
+              {
                 "plugin": "logsShared",
                 "path": "x-pack/platform/plugins/shared/logs_shared/server/lib/adapters/framework/kibana_framework_adapter.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/platform/plugins/shared/fleet/server/services/security/fleet_router.ts"
               },
               {
                 "plugin": "ml",
@@ -17218,22 +17234,6 @@
               {
                 "plugin": "ml",
                 "path": "x-pack/platform/plugins/shared/ml/server/routes/alerting.ts"
-              },
-              {
-                "plugin": "telemetry",
-                "path": "src/plugins/telemetry/server/routes/telemetry_opt_in_stats.ts"
-              },
-              {
-                "plugin": "telemetry",
-                "path": "src/plugins/telemetry/server/routes/telemetry_opt_in.ts"
-              },
-              {
-                "plugin": "telemetry",
-                "path": "src/plugins/telemetry/server/routes/telemetry_usage_stats.ts"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/platform/plugins/shared/fleet/server/services/security/fleet_router.ts"
               },
               {
                 "plugin": "metricsDataAccess",
@@ -18178,6 +18178,10 @@
                 "path": "x-pack/platform/plugins/shared/logs_shared/server/lib/adapters/framework/kibana_framework_adapter.ts"
               },
               {
+                "plugin": "fleet",
+                "path": "x-pack/platform/plugins/shared/fleet/server/services/security/fleet_router.ts"
+              },
+              {
                 "plugin": "ml",
                 "path": "x-pack/platform/plugins/shared/ml/server/routes/trained_models.ts"
               },
@@ -18212,10 +18216,6 @@
               {
                 "plugin": "ml",
                 "path": "x-pack/platform/plugins/shared/ml/server/routes/anomaly_detectors.ts"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/platform/plugins/shared/fleet/server/services/security/fleet_router.ts"
               },
               {
                 "plugin": "metricsDataAccess",
