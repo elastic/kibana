@@ -44,6 +44,7 @@ import {
   upsertIngestPipeline,
 } from './ingest_pipelines/manage_ingest_pipelines';
 import { getProcessingPipelineName, getReroutePipelineName } from './ingest_pipelines/name';
+import { otelFields, otelPrefixes } from './component_templates/otel_layer';
 
 interface BaseParams {
   scopedClusterClient: IScopedClusterClient;
@@ -370,25 +371,90 @@ export async function readDescendants({ id, scopedClusterClient }: ReadDescendan
 export async function validateAncestorFields(
   scopedClusterClient: IScopedClusterClient,
   id: string,
-  fields: FieldDefinition
+  fields: FieldDefinition,
+  otelCompatMode: boolean | undefined
 ) {
   const { ancestors } = await readAncestors({
     id,
     scopedClusterClient,
   });
   for (const ancestor of ancestors) {
+    if (!otelCompatMode && ancestor.stream.ingest.wired.otel_compat_mode) {
+      throw new MalformedFields(
+        `Ancestor stream ${ancestor.name} is in otel compat mode, but the child stream is not`
+      );
+    }
+    const inOtelCompatMode = otelCompatMode || ancestor.stream.ingest.wired.otel_compat_mode;
     for (const name in fields) {
-      if (
-        Object.hasOwn(fields, name) &&
-        isWiredStream(ancestor) &&
-        Object.entries(ancestor.stream.ingest.wired.fields).some(
-          ([ancestorFieldName, attr]) =>
-            attr.type !== fields[name].type && ancestorFieldName === name
-        )
-      ) {
-        throw new MalformedFields(
-          `Field ${name} is already defined with incompatible type in the parent stream ${ancestor.name}`
-        );
+      if (Object.prototype.hasOwnProperty.call(fields, name) && isWiredStream(ancestor)) {
+        if (
+          isWiredStream(ancestor) &&
+          Object.entries(ancestor.stream.ingest.wired.fields).some(
+            ([ancestorFieldName, attr]) =>
+              attr.type !== fields[name].type && ancestorFieldName === name
+          )
+        ) {
+          throw new MalformedFields(
+            `Field ${name} is already defined with incompatible type in the parent stream ${ancestor.name}`
+          );
+        }
+        if (inOtelCompatMode) {
+          const predefinedOtelField = otelFields[name];
+          // TODO - this is strictly speaking not an ancestor check, should be refactored
+          if (predefinedOtelField && predefinedOtelField.type !== fields[name].type) {
+            throw new MalformedFields(
+              `Field ${name} is predefined as part of otel compat made as type ${predefinedOtelField.type}`
+            );
+          }
+          for (const prefix of otelPrefixes) {
+            const prefixedName = `${prefix}${name}`;
+            if (
+              Object.prototype.hasOwnProperty.call(fields, prefixedName) ||
+              Object.prototype.hasOwnProperty.call(
+                ancestor.stream.ingest.wired.fields,
+                prefixedName
+              )
+            ) {
+              throw new MalformedFields(
+                `Field ${name} is an automatic alias of ${prefixedName} because of otel compat mode`
+              );
+            }
+          }
+          // if a field starts with a prefix, it's not allowed to have the same field name with a different prefix as it would map to the same field
+          if (
+            Object.entries(fields).some(
+              ([fieldName]) =>
+                fieldName !== name &&
+                otelPrefixes.some((prefix) => fieldName.startsWith(prefix)) &&
+                fieldName.replace(new RegExp(`^(${otelPrefixes.join('|')})`), '') ===
+                  name.replace(new RegExp(`^(${otelPrefixes.join('|')})`), '')
+            )
+          ) {
+            throw new MalformedFields(
+              `Field ${name} is an automatic alias of another field because of otel compat mode`
+            );
+          }
+          // same check for the ancestor fields
+          if (
+            Object.entries(ancestor.stream.ingest.wired.fields).some(
+              ([ancestorFieldName]) =>
+                ancestorFieldName !== name &&
+                otelPrefixes.some((prefix) => ancestorFieldName.startsWith(prefix)) &&
+                ancestorFieldName.replace(new RegExp(`^(${otelPrefixes.join('|')})`), '') ===
+                  name.replace(new RegExp(`^(${otelPrefixes.join('|')})`), '')
+            )
+          ) {
+            throw new MalformedFields(
+              `Field ${name} is an automatic alias of another field because of otel compat mode`
+            );
+          }
+          // check the otelMappings - they are aliases and are not allowed to have the same name as a field
+          if (Object.keys(otelFields).some((otelFieldName) => otelFieldName === name)) {
+            throw new MalformedFields(
+              `Field ${name} is an automatic alias of another field because of otel compat mode`
+            );
+          }
+        }
       }
     }
   }
@@ -397,24 +463,46 @@ export async function validateAncestorFields(
 export async function validateDescendantFields(
   scopedClusterClient: IScopedClusterClient,
   id: string,
-  fields: FieldDefinition
+  fields: FieldDefinition,
+  otelCompatMode: boolean | undefined
 ) {
   const descendants = await readDescendants({
     id,
     scopedClusterClient,
   });
   for (const descendant of descendants) {
+    if (otelCompatMode && !descendant.stream.ingest.wired.otel_compat_mode) {
+      throw new MalformedFields(
+        `Child stream ${descendant.name} is not in otel compat mode, but the parent stream is`
+      );
+    }
     for (const name in fields) {
-      if (
-        Object.hasOwn(fields, name) &&
-        Object.entries(descendant.stream.ingest.wired.fields).some(
-          ([descendantFieldName, attr]) =>
-            attr.type !== fields[name].type && descendantFieldName === name
-        )
-      ) {
-        throw new MalformedFields(
-          `Field ${name} is already defined with incompatible type in the child stream ${descendant.name}`
-        );
+      if (Object.prototype.hasOwnProperty.call(fields, name) && otelCompatMode) {
+        if (
+          Object.hasOwn(fields, name) &&
+          Object.entries(descendant.stream.ingest.wired.fields).some(
+            ([descendantFieldName, attr]) =>
+              attr.type !== fields[name].type && descendantFieldName === name
+          )
+        ) {
+          throw new MalformedFields(
+            `Field ${name} is already defined with incompatible type in the child stream ${descendant.name}`
+          );
+        }
+        for (const prefix of otelPrefixes) {
+          const prefixedName = `${prefix}${name}`;
+          if (
+            Object.prototype.hasOwnProperty.call(fields, prefixedName) ||
+            Object.prototype.hasOwnProperty.call(
+              descendant.stream.ingest.wired.fields,
+              prefixedName
+            )
+          ) {
+            throw new MalformedFields(
+              `Field ${name} is an automatic alias of ${prefixedName} because of otel compat mode`
+            );
+          }
+        }
       }
     }
   }

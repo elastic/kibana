@@ -16,6 +16,11 @@ import {
 import { createServerRoute } from '../create_server_route';
 import { DefinitionNotFound } from '../../lib/streams/errors';
 import { readAncestors, readStream } from '../../lib/streams/stream_crud';
+import {
+  otelFields,
+  otelMappings,
+  otelPrefixes,
+} from '../../lib/streams/component_templates/otel_layer';
 
 export const readStreamRoute = createServerRoute({
   endpoint: 'GET /api/streams/{id}',
@@ -54,15 +59,59 @@ export const readStreamRoute = createServerRoute({
         scopedClusterClient,
       });
 
+      const inheritedFields = ancestors.reduce((acc, def) => {
+        Object.entries(def.stream.ingest.wired.fields).forEach(([key, fieldDef]) => {
+          acc[key] = { ...fieldDef, from: def.name };
+        });
+        if (def.stream.ingest.wired.otel_compat_mode) {
+          Object.entries(otelFields).forEach(([key, fieldDef]) => {
+            acc[key] = { ...fieldDef, from: '<otel_compat_mode>' };
+          });
+        }
+        return acc;
+        // TODO: replace this with a proper type
+      }, {} as Record<string, FieldDefinitionConfig & { from: string; alias_for?: string }>);
+
+      if (streamEntity.stream.ingest.wired.otel_compat_mode) {
+        Object.entries(otelFields).forEach(([key, fieldDef]) => {
+          inheritedFields[key] = { ...fieldDef, from: '<otel_compat_mode>' };
+        });
+        // calculate aliases for all fields based on their prefixes and add them to the inherited fields
+        Object.entries(inheritedFields).forEach(([key, fieldDef]) => {
+          // if the field starts with one of the otel prefixes, add an alias without the prefix
+          if (otelPrefixes.some((prefix) => key.startsWith(prefix))) {
+            inheritedFields[key.replace(new RegExp(`^(${otelPrefixes.join('|')})`), '')] = {
+              ...fieldDef,
+              from: '<otel_compat_mode>',
+              alias_for: key,
+            };
+          }
+        });
+        // calculate aliases for regular fields of this stream
+        Object.entries(streamEntity.stream.ingest.wired.fields).forEach(([key, fieldDef]) => {
+          if (otelPrefixes.some((prefix) => key.startsWith(prefix))) {
+            inheritedFields[key.replace(new RegExp(`^(${otelPrefixes.join('|')})`), '')] = {
+              ...fieldDef,
+              from: streamEntity.name,
+              alias_for: key,
+            };
+          }
+        });
+        // add aliases defined by the otel compat mode itself
+        Object.entries(otelMappings).forEach(([key, fieldDef]) => {
+          if (fieldDef.type === 'alias') {
+            inheritedFields[key] = {
+              type: otelFields[fieldDef.path!].type,
+              alias_for: fieldDef.path,
+              from: '<otel_compat_mode>',
+            };
+          }
+        });
+      }
+
       const body = {
         ...streamEntity,
-        inherited_fields: ancestors.reduce((acc, def) => {
-          Object.entries(def.stream.ingest.wired.fields).forEach(([key, fieldDef]) => {
-            acc[key] = { ...fieldDef, from: def.name };
-          });
-          return acc;
-          // TODO: replace this with a proper type
-        }, {} as Record<string, FieldDefinitionConfig & { from: string }>),
+        inherited_fields: inheritedFields,
       };
 
       return body;

@@ -15,7 +15,7 @@ import { ASSET_VERSION } from '../../../../common/constants';
 import { logsSettings } from './logs_layer';
 import { isRoot } from '../helpers/hierarchy';
 import { getComponentTemplateName } from './name';
-import { otelFields, otelMappings, otelSettings } from './otel_layer';
+import { otelFields, otelMappings, otelPrefixes, otelSettings } from './otel_layer';
 
 export function generateLayer(
   id: string,
@@ -38,17 +38,11 @@ export function generateLayer(
       (property as MappingDateProperty).format = props.format;
     }
     properties[field] = property;
-    const prefixes = [
-      'scope.attributes.',
-      'resource.attributes.',
-      'attributes.',
-      'body.structure.',
-    ];
     if (
       definition.stream.ingest.wired.otel_compat_mode &&
-      prefixes.some((prefix) => field.startsWith(prefix))
+      otelPrefixes.some((prefix) => field.startsWith(prefix))
     ) {
-      properties[field.replace(new RegExp(`^(${prefixes.join('|')})`), '')] = {
+      properties[field.replace(new RegExp(`^(${otelPrefixes.join('|')})`), '')] = {
         type: 'alias',
         path: field,
       };

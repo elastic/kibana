@@ -74,12 +74,14 @@ export const editStreamRoute = createServerRoute({
         await validateAncestorFields(
           scopedClusterClient,
           params.path.id,
-          params.body.ingest.wired.fields
+          params.body.ingest.wired.fields,
+          params.body.ingest.wired.otel_compat_mode
         );
         await validateDescendantFields(
           scopedClusterClient,
           params.path.id,
-          params.body.ingest.wired.fields
+          params.body.ingest.wired.fields,
+          params.body.ingest.wired.otel_compat_mode
         );
       }
 

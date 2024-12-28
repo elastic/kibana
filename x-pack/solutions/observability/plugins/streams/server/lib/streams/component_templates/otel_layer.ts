@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IndicesIndexSettings, MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
+import { IndicesIndexSettings, MappingProperty } from '@elastic/elasticsearch/lib/api/types';
 import { FieldDefinition } from '@kbn/streams-schema';
 
 export const otelSettings: IndicesIndexSettings = {
@@ -16,6 +16,13 @@ export const otelSettings: IndicesIndexSettings = {
     },
   },
 };
+
+export const otelPrefixes = [
+  'scope.attributes.',
+  'resource.attributes.',
+  'attributes.',
+  'body.structured.',
+];
 
 export const otelFields: FieldDefinition = {
   'scope.dropped_attributes_count': {
@@ -74,7 +81,7 @@ export const otelFields: FieldDefinition = {
   },
 };
 
-export const otelMappings: MappingTypeMapping['properties'] = {
+export const otelMappings: Record<string, MappingProperty> = {
   'error.exception.type': {
     path: 'attributes.exception.type',
     type: 'alias',

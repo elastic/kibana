@@ -67,6 +67,10 @@ export const forkStreamsRoute = createServerRoute({
         stream: { ingest: { processing: [], routing: [], wired: { fields: {} } } },
       };
 
+      if (rootDefinition.stream.ingest.wired.otel_compat_mode) {
+        childDefinition.stream.ingest.wired.otel_compat_mode = true;
+      }
+
       // check whether root stream has a child of the given name already
       if (
         rootDefinition.stream.ingest.routing.some((child) => child.name === childDefinition.name)
@@ -85,7 +89,8 @@ export const forkStreamsRoute = createServerRoute({
       await validateAncestorFields(
         scopedClusterClient,
         childDefinition.name,
-        childDefinition.stream.ingest.wired.fields
+        childDefinition.stream.ingest.wired.fields,
+        childDefinition.stream.ingest.wired.otel_compat_mode
       );
 
       // need to create the child first, otherwise we risk streaming data even though the child data stream is not ready
