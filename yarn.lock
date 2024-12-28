@@ -7285,7 +7285,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/shared-svg@link:packages/kbn-shared-svg":
+"@kbn/shared-svg@link:src/platform/packages/shared/kbn-shared-svg":
   version "0.0.0"
   uid ""
 
