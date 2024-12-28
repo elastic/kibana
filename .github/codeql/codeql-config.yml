@@ -26,7 +26,6 @@ paths-ignore:
   - dev_docs
   - docs
   - examples
-  - kbn_pm
   - rfcs
   - packages/*/scripts
   - packages/core/test-helpers/core-test-helpers-kbn-server
@@ -65,6 +64,7 @@ paths-ignore:
   - packages/kbn-performance-testing-dataset-extractor
   - packages/kbn-plugin-generator
   - packages/kbn-plugin-helpers
+  - packages/kbn-pm
   - packages/kbn-repo-path
   - packages/kbn-repo-source-classifier
   - packages/kbn-repo-source-classifier-cli
