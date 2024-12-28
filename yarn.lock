@@ -6657,7 +6657,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/profiling-utils@link:packages/kbn-profiling-utils":
+"@kbn/profiling-utils@link:src/platform/packages/shared/kbn-profiling-utils":
   version "0.0.0"
   uid ""
 
