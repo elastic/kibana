@@ -5989,11 +5989,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/inventory-e2e@link:x-pack/plugins/observability_solution/inventory/e2e":
+"@kbn/inventory-e2e@link:x-pack/solutions/observability/plugins/inventory/e2e":
   version "0.0.0"
   uid ""
 
-"@kbn/inventory-plugin@link:x-pack/plugins/observability_solution/inventory":
+"@kbn/inventory-plugin@link:x-pack/solutions/observability/plugins/inventory":
   version "0.0.0"
   uid ""
 
