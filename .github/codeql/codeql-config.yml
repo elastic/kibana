@@ -74,6 +74,7 @@ paths-ignore:
   - packages/kbn-scout-*
   - packages/kbn-some-dev-log
   - packages/kbn-sort-package-json
+  - packages/kbn-spec-to-console
   - packages/kbn-stdio-dev-helpers
   - packages/kbn-storybook
   - packages/kbn-telemetry-tools
@@ -89,6 +90,7 @@ paths-ignore:
   - x-pack/examples
   - x-pack/performance
   - x-pack/platform/**/scripts
+  - x-pack/plugins/observability_solution/*/scripts
   - x-pack/scripts
   - x-pack/solutions/**/scripts
   - x-pack/test
