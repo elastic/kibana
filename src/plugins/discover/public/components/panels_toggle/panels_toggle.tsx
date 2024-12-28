@@ -13,8 +13,8 @@ import useObservable from 'react-use/lib/useObservable';
 import { BehaviorSubject } from 'rxjs';
 import { IconButtonGroup } from '@kbn/shared-ux-button-toolbar';
 import { setChartHidden } from '@kbn/unified-histogram-plugin/public';
+import { useInternalStateSelector } from '../../application/main/state_management/discover_internal_state_container';
 import { DiscoverServices } from '../..';
-import { useAppStateSelector } from '../../application/main/state_management/discover_app_state_container';
 import { DiscoverStateContainer } from '../../application/main/state_management/discover_state';
 import { SidebarToggleState } from '../../application/types';
 
@@ -41,7 +41,7 @@ export const PanelsToggle: React.FC<PanelsToggleProps> = ({
   isChartAvailable,
   services,
 }) => {
-  const isChartHidden = useAppStateSelector((state) => Boolean(state.hideChart));
+  const isChartHidden = useInternalStateSelector((state) => Boolean(state.appState?.hideChart));
 
   const onToggleChart = useCallback(() => {
     setChartHidden(services.storage, 'discover', !isChartHidden);

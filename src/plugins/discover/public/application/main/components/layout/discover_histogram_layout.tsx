@@ -13,9 +13,9 @@ import { css } from '@emotion/react';
 import useObservable from 'react-use/lib/useObservable';
 import { ESQL_TABLE_TYPE } from '@kbn/data-plugin/common';
 import type { Datatable } from '@kbn/expressions-plugin/common';
+import { useInternalStateSelector } from '../../state_management/discover_internal_state_container';
 import { useDiscoverHistogram } from './use_discover_histogram';
 import { type DiscoverMainContentProps, DiscoverMainContent } from './discover_main_content';
-import { useAppStateSelector } from '../../state_management/discover_app_state_container';
 import { FetchStatus } from '../../../types';
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
 
@@ -36,7 +36,7 @@ export const DiscoverHistogramLayout = ({
 }: DiscoverHistogramLayoutProps) => {
   const { dataState } = stateContainer;
   const searchSessionId = useObservable(stateContainer.searchSessionManager.searchSessionId$);
-  const hideChart = useAppStateSelector((state) => state.hideChart);
+  const hideChart = useInternalStateSelector((state) => state.appState?.hideChart);
   const isEsqlMode = useIsEsqlMode();
   const unifiedHistogramProps = useDiscoverHistogram({
     stateContainer,
