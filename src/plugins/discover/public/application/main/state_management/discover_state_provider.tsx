@@ -7,51 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useContext } from 'react';
-import useObservable from 'react-use/lib/useObservable';
-import { SavedSearch } from '@kbn/saved-search-plugin/public';
+import React from 'react';
 import { InternalStateProvider } from './discover_internal_state_container';
 import { DiscoverStateContainer } from './discover_state';
 
 function createStateHelpers() {
   const context = React.createContext<DiscoverStateContainer | null>(null);
-  const useContainer = () => useContext(context);
-  const useSavedSearch = () => {
-    const container = useContainer();
-    return useObservable<SavedSearch>(
-      container!.savedSearchState.getCurrent$(),
-      container!.savedSearchState.getCurrent$().getValue()
-    );
-  };
-  const useSavedSearchInitial = () => {
-    const container = useContainer();
-    return useObservable<SavedSearch>(
-      container!.savedSearchState.getInitial$(),
-      container!.savedSearchState.getInitial$().getValue()
-    );
-  };
-  const useSavedSearchHasChanged = () => {
-    const container = useContainer();
-    return useObservable<boolean>(
-      container!.savedSearchState.getHasChanged$(),
-      container!.savedSearchState.getHasChanged$().getValue()
-    );
-  };
-
   return {
     Provider: context.Provider,
-    useSavedSearch,
-    useSavedSearchInitial,
-    useSavedSearchHasChanged,
   };
 }
 
-export const {
-  Provider: DiscoverStateProvider,
-  useSavedSearchInitial,
-  useSavedSearch,
-  useSavedSearchHasChanged,
-} = createStateHelpers();
+export const { Provider: DiscoverStateProvider } = createStateHelpers();
 
 export const DiscoverMainProvider = ({
   value,

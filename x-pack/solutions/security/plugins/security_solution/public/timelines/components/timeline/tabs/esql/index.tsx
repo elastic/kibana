@@ -218,13 +218,12 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
         next: setDiscoverInternalState,
       });
 
-      const savedSearchStateSub = stateContainer.savedSearchState.getHasChanged$().subscribe({
-        next: (hasChanged) => {
-          if (hasChanged) {
-            const latestSavedSearchState = stateContainer.savedSearchState.getState();
-            setDiscoverSavedSearchState(latestSavedSearchState);
+      const savedSearchStateSub = stateContainer.internalState.state$.subscribe({
+        next: ({ discoverSessionHasChanged: hasChanged, discoverSessionEdited }) => {
+          if (hasChanged && discoverSessionEdited) {
+            setDiscoverSavedSearchState(discoverSessionEdited);
           }
-        },
+        }
       });
 
       const timeRangeSub = discoverDataService.query.timefilter.timefilter

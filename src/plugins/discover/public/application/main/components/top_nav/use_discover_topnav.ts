@@ -8,16 +8,11 @@
  */
 
 import { useMemo } from 'react';
-import useObservable from 'react-use/lib/useObservable';
 import { useDiscoverCustomization } from '../../../../customizations';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { useInspector } from '../../hooks/use_inspector';
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
 import { useInternalStateSelector } from '../../state_management/discover_internal_state_container';
-import {
-  useSavedSearch,
-  useSavedSearchHasChanged,
-} from '../../state_management/discover_state_provider';
 import type { DiscoverStateContainer } from '../../state_management/discover_state';
 import { getTopNavBadges } from './get_top_nav_badges';
 import { useTopNavLinks } from './use_top_nav_links';
@@ -29,10 +24,12 @@ export const useDiscoverTopNav = ({
 }) => {
   const services = useDiscoverServices();
   const topNavCustomization = useDiscoverCustomization('top_nav');
-  const hasSavedSearchChanges = useObservable(stateContainer.savedSearchState.getHasChanged$());
-  const hasUnsavedChanges = Boolean(
-    hasSavedSearchChanges && stateContainer.savedSearchState.getId()
+  const hasSavedSearchChanges = useInternalStateSelector(
+    (state) => state.discoverSessionHasChanged
   );
+  const savedSearchId = useInternalStateSelector((state) => state.discoverSessionEdited!.id);
+
+  const hasUnsavedChanges = Boolean(hasSavedSearchChanges && savedSearchId);
 
   const topNavBadges = useMemo(
     () =>
@@ -44,9 +41,7 @@ export const useDiscoverTopNav = ({
       }),
     [stateContainer, services, hasUnsavedChanges, topNavCustomization]
   );
-  const savedSearchId = useSavedSearch().id;
-  const savedSearchHasChanged = useSavedSearchHasChanged();
-  const shouldShowESQLToDataViewTransitionModal = !savedSearchId || savedSearchHasChanged;
+  const shouldShowESQLToDataViewTransitionModal = !savedSearchId || hasSavedSearchChanges;
   const dataView = useInternalStateSelector((state) => state.dataView);
   const adHocDataViews = useInternalStateSelector((state) => state.adHocDataViews);
   const isEsqlMode = useIsEsqlMode();

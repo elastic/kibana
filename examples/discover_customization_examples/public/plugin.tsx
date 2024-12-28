@@ -123,9 +123,9 @@ export class DiscoverCustomizationExamplesPlugin implements Plugin {
               });
           }, []);
 
-          const currentSavedSearch = useObservable(
-            stateContainer.savedSearchState.getCurrent$(),
-            stateContainer.savedSearchState.getState()
+          const { discoverSessionEdited: currentSavedSearch } = useObservable(
+            stateContainer.internalState.state$,
+            stateContainer.internalState.getState()
           );
 
           return (
@@ -189,9 +189,9 @@ export class DiscoverCustomizationExamplesPlugin implements Plugin {
               });
           }, []);
 
-          const currentSavedSearch = useObservable(
-            stateContainer.savedSearchState.getCurrent$(),
-            stateContainer.savedSearchState.getState()
+          const { discoverSessionEdited: currentSavedSearch } = useObservable(
+            stateContainer.internalState.state$,
+            stateContainer.internalState.getState()
           );
 
           return (

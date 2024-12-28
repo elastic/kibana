@@ -9,6 +9,7 @@
 
 import React, { useEffect } from 'react';
 import { RootDragDropProvider } from '@kbn/dom-drag-drop';
+import { useInternalStateSelector } from './state_management/discover_internal_state_container';
 import { useUrlTracking } from './hooks/use_url_tracking';
 import { DiscoverStateContainer } from './state_management/discover_state';
 import { DiscoverLayout } from './components/layout';
@@ -16,7 +17,6 @@ import { setBreadcrumbs } from '../../utils/breadcrumbs';
 import { addHelpMenuToAppChrome } from '../../components/help_menu/help_menu_util';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { useSavedSearchAliasMatchRedirect } from '../../hooks/saved_search_alias_match_redirect';
-import { useSavedSearchInitial } from './state_management/discover_state_provider';
 import { useAdHocDataViews } from './hooks/use_adhoc_data_views';
 import { useEsqlMode } from './hooks/use_esql_mode';
 import { addLog } from '../../utils/add_log';
@@ -32,16 +32,16 @@ export interface DiscoverMainProps {
 
 export function DiscoverMainApp(props: DiscoverMainProps) {
   const { stateContainer } = props;
-  const savedSearch = useSavedSearchInitial();
+  const savedSearch = useInternalStateSelector((state) => state.discoverSessionInitial!);
   const services = useDiscoverServices();
   const { chrome, docLinks, data, spaces, history } = services;
 
-  useUrlTracking(stateContainer.savedSearchState);
+  useUrlTracking();
 
   /**
    * Adhoc data views functionality
    */
-  useAdHocDataViews({ stateContainer, services });
+  useAdHocDataViews({ services });
 
   /**
    * State changes (data view, columns), when a text base query result is returned

@@ -13,7 +13,7 @@ import { hasTransformationalCommand, getIndexPatternFromESQLQuery } from '@kbn/e
 import { useCallback, useEffect, useRef } from 'react';
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import { switchMap } from 'rxjs';
-import { useSavedSearchInitial } from '../state_management/discover_state_provider';
+import { useInternalStateSelector } from '../state_management/discover_internal_state_container';
 import type { DiscoverStateContainer } from '../state_management/discover_state';
 import { getValidViewMode } from '../utils/get_valid_view_mode';
 import { FetchStatus } from '../../types';
@@ -31,7 +31,7 @@ export function useEsqlMode({
   stateContainer: DiscoverStateContainer;
   dataViews: DataViewsContract;
 }) {
-  const savedSearch = useSavedSearchInitial();
+  const savedSearch = useInternalStateSelector((state) => state.discoverSessionInitial!);
   const prev = useRef<{
     initialFetch: boolean;
     query: string;

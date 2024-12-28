@@ -17,7 +17,8 @@ import type { DataView, DataViewListItem } from '@kbn/data-views-plugin/common';
 import type { Filter, TimeRange } from '@kbn/es-query';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { UnifiedHistogramVisContext } from '@kbn/unified-histogram-plugin/public';
-import type { DiscoverAppState } from "@kbn/discover-plugin/public";
+import type { SavedSearch } from '@kbn/saved-search-plugin/public';
+import type { DiscoverAppState } from '../../..';
 
 interface InternalStateDataRequestParams {
   timeRangeAbsolute?: TimeRange;
@@ -27,6 +28,9 @@ interface InternalStateDataRequestParams {
 export interface InternalState {
   appState: DiscoverAppState | undefined;
   dataView: DataView | undefined;
+  discoverSessionInitial: SavedSearch | undefined;
+  discoverSessionEdited: SavedSearch | undefined;
+  discoverSessionHasChanged: boolean;
   isDataViewLoading: boolean;
   savedDataViews: DataViewListItem[];
   adHocDataViews: DataView[];
@@ -45,6 +49,9 @@ export interface InternalState {
 
 export interface InternalStateTransitions {
   setAppState: (state: InternalState) => (appState: DiscoverAppState) => InternalState;
+  setDiscoverSessionInitial: (state: InternalState) => (value: SavedSearch) => InternalState;
+  setDiscoverSessionEdited: (state: InternalState) => (value: SavedSearch) => InternalState;
+  setDiscoverSessionHasChanged: (state: InternalState) => (value: boolean) => InternalState;
   setDataView: (state: InternalState) => (dataView: DataView) => InternalState;
   setIsDataViewLoading: (state: InternalState) => (isLoading: boolean) => InternalState;
   setSavedDataViews: (state: InternalState) => (dataView: DataViewListItem[]) => InternalState;
@@ -92,6 +99,9 @@ export function getInternalStateContainer() {
     {
       appState: undefined,
       dataView: undefined,
+      discoverSessionInitial: undefined,
+      discoverSessionEdited: undefined,
+      discoverSessionHasChanged: false,
       isDataViewLoading: false,
       adHocDataViews: [],
       savedDataViews: [],
@@ -116,6 +126,18 @@ export function getInternalStateContainer() {
         dataView: nextDataView,
         expandedDoc:
           nextDataView?.id !== prevState.dataView?.id ? undefined : prevState.expandedDoc,
+      }),
+      setDiscoverSessionInitial: (prevState: InternalState) => (next: SavedSearch) => ({
+        ...prevState,
+        discoverSessionInitial: next,
+      }),
+      setDiscoverSessionEdited: (prevState: InternalState) => (next: SavedSearch) => ({
+        ...prevState,
+        discoverSessionEdited: next,
+      }),
+      setDiscoverSessionHasChanged: (prevState: InternalState) => (next: boolean) => ({
+        ...prevState,
+        discoverSessionHasChanged: next,
       }),
       setIsDataViewLoading: (prevState: InternalState) => (loading: boolean) => ({
         ...prevState,

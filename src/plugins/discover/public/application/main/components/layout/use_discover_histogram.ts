@@ -45,7 +45,6 @@ import { addLog } from '../../../../utils/add_log';
 import { useInternalStateSelector } from '../../state_management/discover_internal_state_container';
 import { type DiscoverAppState } from '../../state_management/discover_app_state_container';
 import { DataDocumentsMsg } from '../../state_management/discover_data_state_container';
-import { useSavedSearch } from '../../state_management/discover_state_provider';
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
 
 const EMPTY_ESQL_COLUMNS: DatatableColumn[] = [];
@@ -70,7 +69,8 @@ export const useDiscoverHistogram = ({
 } => {
   const services = useDiscoverServices();
   const { main$, documents$, totalHits$ } = stateContainer.dataState.data$;
-  const savedSearchState = useSavedSearch();
+  const savedSearchState = useInternalStateSelector((state) => state.discoverSessionEdited!);
+
   const isEsqlMode = useIsEsqlMode();
 
   /**

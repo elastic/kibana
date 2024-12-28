@@ -58,7 +58,6 @@ import {
   getAllowedSampleSize,
 } from '../../../../utils/get_allowed_sample_size';
 import { DiscoverGridFlyout } from '../../../../components/discover_grid_flyout';
-import { useSavedSearchInitial } from '../../state_management/discover_state_provider';
 import { useFetchMoreRecords } from './use_fetch_more_records';
 import { SelectedVSAvailableCallout } from './selected_vs_available_callout';
 import { useDiscoverCustomization } from '../../../../customizations';
@@ -108,7 +107,7 @@ function DiscoverDocumentsComponent({
 }) {
   const services = useDiscoverServices();
   const documents$ = stateContainer.dataState.data$.documents$;
-  const savedSearch = useSavedSearchInitial();
+  const savedSearch = useInternalStateSelector((state) => state.discoverSessionInitial!);
   const { dataViews, capabilities, uiSettings, uiActions, ebtManager, fieldsMetadata } = services;
   const requestParams = useInternalStateSelector((state) => state.dataRequestParams);
   const [

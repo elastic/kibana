@@ -31,7 +31,6 @@ import { UseColumnsProps, popularizeField, useColumns } from '@kbn/unified-data-
 import { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import { BehaviorSubject } from 'rxjs';
 import { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
-import { useSavedSearchInitial } from '../../state_management/discover_state_provider';
 import { DiscoverStateContainer } from '../../state_management/discover_state';
 import { VIEW_MODE } from '../../../../../common/constants';
 import { useInternalStateSelector } from '../../state_management/discover_internal_state_container';
@@ -104,7 +103,7 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
   const customFilters = useInternalStateSelector((state) => state.customFilters);
 
   const dataState: DataMainMsg = useDataState(main$);
-  const savedSearch = useSavedSearchInitial();
+  const savedSearch = useInternalStateSelector((state) => state.discoverSessionInitial!);
 
   const fetchCounter = useRef<number>(0);
 
