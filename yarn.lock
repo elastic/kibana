@@ -4001,7 +4001,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/apm-utils@link:packages/kbn-apm-utils":
+"@kbn/apm-utils@link:src/platform/packages/shared/kbn-apm-utils":
   version "0.0.0"
   uid ""
 
