@@ -353,12 +353,12 @@ export async function readDescendants({ id, scopedClusterClient }: ReadDescendan
         bool: {
           filter: {
             prefix: {
-              id,
+              name: id,
             },
           },
           must_not: {
             term: {
-              id,
+              name: id,
             },
           },
         },
@@ -449,7 +449,7 @@ export async function validateDescendantFields(
       );
     }
     for (const name in fields) {
-      if (Object.prototype.hasOwnProperty.call(fields, name) && otelCompatMode) {
+      if (Object.prototype.hasOwnProperty.call(fields, name)) {
         if (
           Object.hasOwn(fields, name) &&
           Object.entries(descendant.stream.ingest.wired.fields).some(
@@ -461,18 +461,22 @@ export async function validateDescendantFields(
             `Field ${name} is already defined with incompatible type in the child stream ${descendant.name}`
           );
         }
-        for (const prefix of otelPrefixes) {
-          const prefixedName = `${prefix}${name}`;
-          if (
-            Object.prototype.hasOwnProperty.call(fields, prefixedName) ||
-            Object.prototype.hasOwnProperty.call(
-              descendant.stream.ingest.wired.fields,
-              prefixedName
-            )
-          ) {
-            throw new MalformedFields(
-              `Field ${name} is an automatic alias of ${prefixedName} because of otel compat mode`
-            );
+        if (otelCompatMode) {
+          for (const prefix of otelPrefixes) {
+            const prefixedName = `${prefix}${name}`;
+            if (
+              (Object.prototype.hasOwnProperty.call(fields, prefixedName) &&
+                fields[prefixedName].type !== fields[name].type) ||
+              (Object.prototype.hasOwnProperty.call(
+                descendant.stream.ingest.wired.fields,
+                prefixedName
+              ) &&
+                descendant.stream.ingest.wired.fields[prefixedName].type !== fields[name].type)
+            ) {
+              throw new MalformedFields(
+                `Field ${name} is an automatic alias of ${prefixedName} because of otel compat mode and has a different type`
+              );
+            }
           }
         }
       }
