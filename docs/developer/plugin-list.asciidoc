@@ -459,11 +459,11 @@ The plugin exposes the static DefaultEditorController class to consume.
 |The Kibana Alerting plugin provides a common place to set up rules. You can:
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/apm/readme.md[apm]
+|{kib-repo}blob/{branch}/x-pack/solutions/observability/plugins/apm/readme.md[apm]
 |This plugin provides access to App Monitoring features provided by Elastic. It allows you to monitor your software services and applications in real-time; visualize detailed performance information on your services, identify and analyze errors, and monitor host-level and APM agent-specific metrics like JVM and Go runtime metrics.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/apm_data_access[apmDataAccess]
+|{kib-repo}blob/{branch}/x-pack/solutions/observability/plugins/apm_data_access[apmDataAccess]
 |WARNING: Missing README.
 
 
@@ -658,7 +658,7 @@ the infrastructure monitoring use-case within Kibana.
 |Team owner: Security Integrations Scalability
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/inventory/README.md[inventory]
+|{kib-repo}blob/{branch}/x-pack/solutions/observability/plugins/inventory/README.md[inventory]
 |Home of the Inventory plugin, which renders the... inventory.
 
 
@@ -719,7 +719,7 @@ using the CURL scripts in the scripts folder.
 |Visualize geo data from Elasticsearch or 3rd party geo-services.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/metrics_data_access/README.md[metricsDataAccess]
+|{kib-repo}blob/{branch}/x-pack/solutions/observability/plugins/metrics_data_access/README.md[metricsDataAccess]
 |Exposes utilities to access metrics data.
 
 
@@ -780,11 +780,11 @@ Elastic.
 |This plugin contains the product documentation base service.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/profiling/README.md[profiling]
+|{kib-repo}blob/{branch}/x-pack/solutions/observability/plugins/profiling/README.md[profiling]
 |Universal Profiling provides fleet-wide, whole-system, continuous profiling with zero instrumentation. Get a comprehensive understanding of what lines of code are consuming compute resources throughout your entire fleet by visualizing your data in Kibana using the flamegraph, stacktraces, and top functions views.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/profiling_data_access[profilingDataAccess]
+|{kib-repo}blob/{branch}/x-pack/solutions/observability/plugins/profiling_data_access[profilingDataAccess]
 |WARNING: Missing README.
 
 
