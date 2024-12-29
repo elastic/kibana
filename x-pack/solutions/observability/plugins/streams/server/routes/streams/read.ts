@@ -9,8 +9,8 @@ import { z } from '@kbn/zod';
 import { notFound, internal } from '@hapi/boom';
 import {
   FieldDefinitionConfig,
-  isIngestStream,
-  isWiredStream,
+  isIngestReadStream,
+  isWiredReadStream,
   ReadStreamDefinition,
 } from '@kbn/streams-schema';
 import { createServerRoute } from '../create_server_route';
@@ -42,7 +42,7 @@ export const readStreamRoute = createServerRoute({
 
       // TODO: I have no idea why I can just do `isIngestStream` here but when I do,
       // streamEntity becomes `streamEntity: never` in the statements afterwards
-      if (!isWiredStream(streamEntity) && isIngestStream(streamEntity)) {
+      if (!isWiredReadStream(streamEntity) && isIngestReadStream(streamEntity)) {
         return {
           ...streamEntity,
           inherited_fields: {},

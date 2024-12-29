@@ -156,7 +156,7 @@ async function upsertInternalStream({ definition, scopedClusterClient }: BasePar
   return scopedClusterClient.asInternalUser.index({
     id: definition.name,
     index: STREAMS_INDEX,
-    document: { ...omit(definition, 'elasticsearch_assets') },
+    document: { ...omit(definition, 'elasticsearch_assets', 'inherited_fields') },
     refresh: 'wait_for',
   });
 }
