@@ -18,6 +18,7 @@ module.exports = {
     /x-pack[\/\\]solutions[\/\\]observability[\/\\]plugins[\/\\](exploratory_view|investigate|investigate_app|observability|observability_ai_assistant_app|observability_ai_assistant_management|observability_solution|serverless_observability|streams|streams_app|synthetics|uptime|ux|infra)[\/\\]/,
     /x-pack[\/\\]plugins[\/\\](observability_solution\/apm|beats_management|fleet|observability_solution\/infra|observability_solution\/observability|observability_solution\/observability_shared|observability_solution\/exploratory_view|security_solution|timelines|observability_solution\/synthetics|observability_solution\/ux|observability_solution\/uptime)[\/\\]/,
     /x-pack[\/\\]solutions[\/\\]observability[\/\\]plugins[\/\\]observability_shared[\/\\]/,
+    /x-pack[\/\\]solutions[\/\\]observability[\/\\]plugins[\/\\]apm[\/\\]/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\](observability_solution\/apm|beats_management|fleet|observability_solution\/infra|observability_solution\/observability|observability_solution\/observability_shared|observability_solution\/exploratory_view|security_solution|timelines|observability_solution\/synthetics|observability_solution\/ux|observability_solution\/uptime)[\/\\]/,
     /x-pack[\/\\]platform[\/\\]plugins[\/\\]shared[\/\\](fleet)[\/\\]/,
     /x-pack[\/\\]test[\/\\]plugin_functional[\/\\]plugins[\/\\]resolver_test[\/\\]/,
