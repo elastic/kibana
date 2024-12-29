@@ -8,8 +8,8 @@ import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiPanel, EuiBadge } from 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { css } from '@emotion/css';
-import { ReadStreamDefinition, StreamLifecycle } from '@kbn/streams-plugin/common/types';
 import { ILM_LOCATOR_ID, IlmLocatorParams } from '@kbn/index-lifecycle-management-common-shared';
+import { ReadStreamDefinition, StreamLifecycle, isIngestStream } from '@kbn/streams-schema';
 import { useStreamsAppBreadcrumbs } from '../../hooks/use_streams_app_breadcrumbs';
 import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
 import { EntityOverviewTabList } from '../entity_overview_tab_list';
@@ -103,13 +103,16 @@ export function EntityDetailViewWithoutParams({
               title={
                 <EuiFlexGroup gutterSize="s" alignItems="center">
                   {entity.displayName}
-                  {definition && !definition.managed ? (
-                    <EuiBadge>
-                      {i18n.translate(
-                        'xpack.streams.entityDetailViewWithoutParams.unmanagedBadgeLabel',
-                        { defaultMessage: 'Classic' }
-                      )}
-                    </EuiBadge>
+                  {definition && isIngestStream(definition) ? (
+                    <>
+                      {' '}
+                      <EuiBadge>
+                        {i18n.translate(
+                          'xpack.streams.entityDetailViewWithoutParams.unmanagedBadgeLabel',
+                          { defaultMessage: 'Classic' }
+                        )}
+                      </EuiBadge>
+                    </>
                   ) : null}
                   {definition && <LifecycleBadge lifecycle={definition.lifecycle} />}
                 </EuiFlexGroup>

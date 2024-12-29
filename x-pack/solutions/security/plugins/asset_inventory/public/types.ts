@@ -8,8 +8,9 @@
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface AssetInventoryPluginSetup {}
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface AssetInventoryPluginStart {}
+export interface AssetInventoryPluginStart {
+  getAssetInventoryPage: (assetInventoryStartDeps: AppPluginStartDependencies) => JSX.Element;
+}
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface AppPluginStartDependencies {}
