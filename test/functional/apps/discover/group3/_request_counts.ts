@@ -158,7 +158,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         log.debug('Creating saved search');
         await expectSearches(
           type,
-          type === 'esql' ? actualExpectedRequests + 2 : actualExpectedRequests,
+          type === 'esql' ? actualExpectedRequests + 1 : actualExpectedRequests,
           async () => {
             await discover.saveSearch(savedSearch);
           }
@@ -173,7 +173,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         log.debug('Clearing saved search');
         await expectSearches(
           type,
-          type === 'esql' ? actualExpectedRequests + 2 : actualExpectedRequests,
+          type === 'esql' ? actualExpectedRequests + 1 : actualExpectedRequests,
           async () => {
             await testSubjects.click('discoverNewButton');
             await waitForLoadingToFinish();
@@ -182,7 +182,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         log.debug('Loading saved search');
         await expectSearches(
           type,
-          type === 'esql' ? actualExpectedRequests + 2 : actualExpectedRequests,
+          type === 'esql' ? actualExpectedRequests + 1 : actualExpectedRequests,
           async () => {
             await discover.loadSavedSearch(savedSearch);
           }
