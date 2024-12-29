@@ -14,8 +14,8 @@
     "xpack.eventLog": "platform/plugins/shared/event_log",
     "xpack.stackAlerts": "platform/plugins/shared/stack_alerts",
     "xpack.stackConnectors": "platform/plugins/shared/stack_connectors",
-    "xpack.apm": "plugins/observability_solution/apm",
-    "xpack.apmDataAccess": "plugins/observability_solution/apm_data_access",
+    "xpack.apm": "solutions/observability/plugins/apm",
+    "xpack.apmDataAccess": "solutions/observability/plugins/apm_data_access",
     "xpack.banners": "plugins/banners",
     "xpack.canvas": "platform/plugins/private/canvas",
     "xpack.cases": "platform/plugins/shared/cases",
@@ -68,7 +68,7 @@
     "xpack.ingestPipelines": "platform/plugins/shared/ingest_pipelines",
     "xpack.integrationAssistant": "platform/plugins/shared/integration_assistant",
     "xpack.inference": "platform/plugins/shared/inference",
-    "xpack.inventory": "plugins/observability_solution/inventory",
+    "xpack.inventory": "solutions/observability/plugins/inventory",
     "xpack.investigate": "solutions/observability/plugins/investigate",
     "xpack.investigateApp": "solutions/observability/plugins/investigate_app",
     "xpack.kubernetesSecurity": "solutions/security/plugins/kubernetes_security",
@@ -84,7 +84,7 @@
     "xpack.maps": [
       "platform/plugins/shared/maps"
     ],
-    "xpack.metricsData": "plugins/observability_solution/metrics_data_access",
+    "xpack.metricsData": "solutions/observability/plugins/metrics_data_access",
     "xpack.ml": [
       "platform/packages/shared/ml/anomaly_utils",
       "platform/packages/private/ml/creation_wizard_utils",
@@ -118,7 +118,7 @@
     ],
     "xpack.painlessLab": "platform/plugins/private/painless_lab",
     "xpack.profiling": [
-      "plugins/observability_solution/profiling"
+      "solutions/observability/plugins/profiling"
     ],
     "xpack.remoteClusters": "platform/plugins/private/remote_clusters",
     "xpack.reporting": [

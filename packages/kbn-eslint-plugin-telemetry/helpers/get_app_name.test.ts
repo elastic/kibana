@@ -13,7 +13,7 @@ const SYSTEMPATH = 'systemPath';
 
 const testMap = [
   ['x-pack/solutions/observability/plugins/observability/foo/bar/baz/header_actions.tsx', 'o11y'],
-  ['x-pack/plugins/observability_solution/apm/baz/header_actions.tsx', 'apm'],
+  ['x-pack/solutions/observability/plugins/apm/baz/header_actions.tsx', 'apm'],
   ['x-pack/platform/plugins/shared/cases/public/components/foo.tsx', 'cases'],
   [
     'src/platform/packages/shared/kbn-alerts-ui-shared/src/alert_lifecycle_status_badge/index.tsx',

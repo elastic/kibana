@@ -3973,19 +3973,19 @@
   version "0.0.0"
   uid ""
 
-"@kbn/apm-data-access-plugin@link:x-pack/plugins/observability_solution/apm_data_access":
+"@kbn/apm-data-access-plugin@link:x-pack/solutions/observability/plugins/apm_data_access":
   version "0.0.0"
   uid ""
 
-"@kbn/apm-data-view@link:packages/kbn-apm-data-view":
+"@kbn/apm-data-view@link:src/platform/packages/shared/kbn-apm-data-view":
   version "0.0.0"
   uid ""
 
-"@kbn/apm-ftr-e2e@link:x-pack/plugins/observability_solution/apm/ftr_e2e":
+"@kbn/apm-ftr-e2e@link:x-pack/solutions/observability/plugins/apm/ftr_e2e":
   version "0.0.0"
   uid ""
 
-"@kbn/apm-plugin@link:x-pack/plugins/observability_solution/apm":
+"@kbn/apm-plugin@link:x-pack/solutions/observability/plugins/apm":
   version "0.0.0"
   uid ""
 
@@ -3997,11 +3997,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/apm-types@link:packages/kbn-apm-types":
+"@kbn/apm-types@link:x-pack/solutions/observability/packages/kbn-apm-types":
   version "0.0.0"
   uid ""
 
-"@kbn/apm-utils@link:packages/kbn-apm-utils":
+"@kbn/apm-utils@link:src/platform/packages/shared/kbn-apm-utils":
   version "0.0.0"
   uid ""
 
@@ -5989,11 +5989,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/inventory-e2e@link:x-pack/plugins/observability_solution/inventory/e2e":
+"@kbn/inventory-e2e@link:x-pack/solutions/observability/plugins/inventory/e2e":
   version "0.0.0"
   uid ""
 
-"@kbn/inventory-plugin@link:x-pack/plugins/observability_solution/inventory":
+"@kbn/inventory-plugin@link:x-pack/solutions/observability/plugins/inventory":
   version "0.0.0"
   uid ""
 
@@ -6097,7 +6097,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/lens-embeddable-utils@link:packages/kbn-lens-embeddable-utils":
+"@kbn/lens-embeddable-utils@link:src/platform/packages/shared/kbn-lens-embeddable-utils":
   version "0.0.0"
   uid ""
 
@@ -6269,7 +6269,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/metrics-data-access-plugin@link:x-pack/plugins/observability_solution/metrics_data_access":
+"@kbn/metrics-data-access-plugin@link:x-pack/solutions/observability/plugins/metrics_data_access":
   version "0.0.0"
   uid ""
 
@@ -6649,15 +6649,15 @@
   version "0.0.0"
   uid ""
 
-"@kbn/profiling-data-access-plugin@link:x-pack/plugins/observability_solution/profiling_data_access":
+"@kbn/profiling-data-access-plugin@link:x-pack/solutions/observability/plugins/profiling_data_access":
   version "0.0.0"
   uid ""
 
-"@kbn/profiling-plugin@link:x-pack/plugins/observability_solution/profiling":
+"@kbn/profiling-plugin@link:x-pack/solutions/observability/plugins/profiling":
   version "0.0.0"
   uid ""
 
-"@kbn/profiling-utils@link:packages/kbn-profiling-utils":
+"@kbn/profiling-utils@link:src/platform/packages/shared/kbn-profiling-utils":
   version "0.0.0"
   uid ""
 
@@ -7285,7 +7285,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/shared-svg@link:packages/kbn-shared-svg":
+"@kbn/shared-svg@link:src/platform/packages/shared/kbn-shared-svg":
   version "0.0.0"
   uid ""
 

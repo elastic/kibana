@@ -13,7 +13,7 @@
 // alias to .buildkite/scripts/steps/storybooks/build_and_upload.ts
 export const storybookAliases = {
   ai_assistant: 'x-pack/platform/packages/shared/kbn-ai-assistant/.storybook',
-  apm: 'x-pack/plugins/observability_solution/apm/.storybook',
+  apm: 'x-pack/solutions/observability/plugins/apm/.storybook',
   canvas: 'x-pack/platform/plugins/private/canvas/storybook',
   cases: 'src/platform/packages/shared/kbn-cases-components/.storybook',
   cell_actions: 'src/platform/packages/shared/kbn-cell-actions/.storybook',
@@ -47,7 +47,7 @@ export const storybookAliases = {
   grouping: 'src/platform/packages/shared/kbn-grouping/.storybook',
   home: 'src/plugins/home/.storybook',
   infra: 'x-pack/solutions/observability/plugins/infra/.storybook',
-  inventory: 'x-pack/plugins/observability_solution/inventory/.storybook',
+  inventory: 'x-pack/solutions/observability/plugins/inventory/.storybook',
   investigate: 'x-pack/solutions/observability/plugins/investigate_app/.storybook',
   kibana_react: 'src/plugins/kibana_react/.storybook',
   lists: 'x-pack/solutions/security/plugins/lists/.storybook',
@@ -58,7 +58,7 @@ export const storybookAliases = {
     'x-pack/platform/plugins/shared/observability_solution/observability_ai_assistant/.storybook',
   observability_ai_assistant_app:
     'x-pack/solutions/observability/plugins/observability_ai_assistant_app/.storybook',
-  observability_inventory: 'x-pack/plugins/observability_solution/inventory/.storybook',
+  observability_inventory: 'x-pack/solutions/observability/plugins/inventory/.storybook',
   observability_shared: 'x-pack/solutions/observability/plugins/observability_shared/.storybook',
   observability_slo: 'x-pack/solutions/observability/plugins/slo/.storybook',
   presentation: 'src/platform/plugins/shared/presentation_util/storybook',
@@ -72,5 +72,5 @@ export const storybookAliases = {
   triggers_actions_ui: 'x-pack/platform/plugins/shared/triggers_actions_ui/.storybook',
   ui_actions_enhanced: 'src/plugins/ui_actions_enhanced/.storybook',
   unified_search: 'src/plugins/unified_search/.storybook',
-  profiling: 'x-pack/plugins/observability_solution/profiling/.storybook',
+  profiling: 'x-pack/solutions/observability/plugins/profiling/.storybook',
 };
