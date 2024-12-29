@@ -18,7 +18,13 @@ export type SecuritySolutionRowCellRendererGetter = Awaited<
   ReturnType<SecuritySolutionCellRendererFeature['getRenderer']>
 >;
 
-const ALLOWED_DISCOVER_RENDERED_FIELDS = ['host.name', 'user.name', 'source.ip', 'destination.ip'];
+const ALLOWED_DISCOVER_RENDERED_FIELDS = [
+  'host.name',
+  'user.name',
+  'source.ip',
+  'destination.ip',
+  'kibana.alert.workflow_status',
+];
 
 export const getCellRendererForGivenRecord: SecuritySolutionRowCellRendererGetter = (
   fieldName: string
