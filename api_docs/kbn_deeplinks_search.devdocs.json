@@ -32,7 +32,7 @@
         "signature": [
           "\"appSearch\" | \"enterpriseSearch\" | \"enterpriseSearchContent\" | \"enterpriseSearchApplications\" | \"enterpriseSearchAnalytics\" | \"workplaceSearch\" | \"serverlessElasticsearch\" | \"serverlessConnectors\" | \"serverlessWebCrawlers\" | \"searchPlayground\" | \"searchInferenceEndpoints\" | \"searchHomepage\" | \"enterpriseSearchContent:connectors\" | \"enterpriseSearchContent:searchIndices\" | \"enterpriseSearchContent:webCrawlers\" | \"enterpriseSearchApplications:searchApplications\" | \"appSearch:engines\" | \"searchInferenceEndpoints:inferenceEndpoints\" | \"elasticsearchStart\" | \"elasticsearchIndices\" | \"enterpriseSearchElasticsearch\" | \"enterpriseSearchVectorSearch\" | \"enterpriseSearchSemanticSearch\" | \"enterpriseSearchAISearch\" | \"elasticsearchIndices:createIndex\""
         ],
-        "path": "packages/deeplinks/search/deep_links.ts",
+        "path": "src/platform/packages/shared/deeplinks/search/deep_links.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -47,7 +47,7 @@
         "signature": [
           "\"enterpriseSearchAnalytics\""
         ],
-        "path": "packages/deeplinks/search/constants.ts",
+        "path": "src/platform/packages/shared/deeplinks/search/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -62,7 +62,7 @@
         "signature": [
           "\"enterpriseSearch\""
         ],
-        "path": "packages/deeplinks/search/constants.ts",
+        "path": "src/platform/packages/shared/deeplinks/search/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -77,7 +77,7 @@
         "signature": [
           "\"enterpriseSearchApplications\""
         ],
-        "path": "packages/deeplinks/search/constants.ts",
+        "path": "src/platform/packages/shared/deeplinks/search/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -92,7 +92,7 @@
         "signature": [
           "\"appSearch\""
         ],
-        "path": "packages/deeplinks/search/constants.ts",
+        "path": "src/platform/packages/shared/deeplinks/search/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -107,7 +107,7 @@
         "signature": [
           "\"enterpriseSearchContent\""
         ],
-        "path": "packages/deeplinks/search/constants.ts",
+        "path": "src/platform/packages/shared/deeplinks/search/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -122,7 +122,7 @@
         "signature": [
           "\"workplaceSearch\""
         ],
-        "path": "packages/deeplinks/search/constants.ts",
+        "path": "src/platform/packages/shared/deeplinks/search/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -137,7 +137,7 @@
         "signature": [
           "\"enterpriseSearchAnalytics\""
         ],
-        "path": "packages/deeplinks/search/deep_links.ts",
+        "path": "src/platform/packages/shared/deeplinks/search/deep_links.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -152,7 +152,7 @@
         "signature": [
           "\"enterpriseSearch\""
         ],
-        "path": "packages/deeplinks/search/deep_links.ts",
+        "path": "src/platform/packages/shared/deeplinks/search/deep_links.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -167,7 +167,7 @@
         "signature": [
           "\"enterpriseSearchApplications\""
         ],
-        "path": "packages/deeplinks/search/deep_links.ts",
+        "path": "src/platform/packages/shared/deeplinks/search/deep_links.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -182,7 +182,7 @@
         "signature": [
           "\"appSearch\""
         ],
-        "path": "packages/deeplinks/search/deep_links.ts",
+        "path": "src/platform/packages/shared/deeplinks/search/deep_links.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -197,7 +197,7 @@
         "signature": [
           "\"enterpriseSearchContent\""
         ],
-        "path": "packages/deeplinks/search/deep_links.ts",
+        "path": "src/platform/packages/shared/deeplinks/search/deep_links.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -212,7 +212,7 @@
         "signature": [
           "\"workplaceSearch\""
         ],
-        "path": "packages/deeplinks/search/deep_links.ts",
+        "path": "src/platform/packages/shared/deeplinks/search/deep_links.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -227,7 +227,7 @@
         "signature": [
           "\"searchPlayground\""
         ],
-        "path": "packages/deeplinks/search/constants.ts",
+        "path": "src/platform/packages/shared/deeplinks/search/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -242,7 +242,7 @@
         "signature": [
           "\"enterpriseSearchAISearch\""
         ],
-        "path": "packages/deeplinks/search/constants.ts",
+        "path": "src/platform/packages/shared/deeplinks/search/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -257,7 +257,7 @@
         "signature": [
           "\"enterpriseSearchElasticsearch\""
         ],
-        "path": "packages/deeplinks/search/constants.ts",
+        "path": "src/platform/packages/shared/deeplinks/search/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -272,7 +272,7 @@
         "signature": [
           "\"enterpriseSearchSemanticSearch\""
         ],
-        "path": "packages/deeplinks/search/constants.ts",
+        "path": "src/platform/packages/shared/deeplinks/search/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -287,7 +287,7 @@
         "signature": [
           "\"enterpriseSearchVectorSearch\""
         ],
-        "path": "packages/deeplinks/search/constants.ts",
+        "path": "src/platform/packages/shared/deeplinks/search/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -302,7 +302,7 @@
         "signature": [
           "\"serverlessElasticsearch\""
         ],
-        "path": "packages/deeplinks/search/constants.ts",
+        "path": "src/platform/packages/shared/deeplinks/search/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -317,7 +317,7 @@
         "signature": [
           "\"serverlessConnectors\""
         ],
-        "path": "packages/deeplinks/search/constants.ts",
+        "path": "src/platform/packages/shared/deeplinks/search/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -332,7 +332,7 @@
         "signature": [
           "\"serverlessElasticsearch\""
         ],
-        "path": "packages/deeplinks/search/deep_links.ts",
+        "path": "src/platform/packages/shared/deeplinks/search/deep_links.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

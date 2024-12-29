@@ -7,10 +7,10 @@
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import { calculateAuto } from '@kbn/calculate-auto';
 import { i18n } from '@kbn/i18n';
-import { useDateRange } from '@kbn/observability-utils-browser/hooks/use_date_range';
 import moment from 'moment';
 import React, { useMemo } from 'react';
-import { ReadStreamDefinition } from '@kbn/streams-plugin/common';
+import { ReadStreamDefinition } from '@kbn/streams-schema';
+import { useDateRange } from '@kbn/observability-utils-browser/hooks/use_date_range';
 import { useKibana } from '../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
 import { ControlledEsqlChart } from '../esql_chart/controlled_esql_chart';
