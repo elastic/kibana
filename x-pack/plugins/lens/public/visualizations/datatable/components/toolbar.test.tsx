@@ -89,9 +89,9 @@ describe('datatable toolbar', () => {
       getPaginationSwitch,
     } = await renderAndOpenToolbar();
 
-    expect(getRowHeightValue()).toHaveTextContent(/single/i);
+    expect(getRowHeightValue()).toHaveTextContent(/custom/i);
     expect(getHeaderHeightValue()).toHaveTextContent(/custom/i);
-    expect(getHeaderHeightCustomValue()).toHaveValue(3);
+    expect(getHeaderHeightCustomValue()).toHaveValue(1);
     expect(getPaginationSwitch()).not.toBeChecked();
   });
 
@@ -123,7 +123,7 @@ describe('datatable toolbar', () => {
   it('should change row height to "Auto" mode when selected', async () => {
     const { selectRowHeightOption } = await renderAndOpenToolbar();
 
-    selectRowHeightOption(/auto fit/i);
+    selectRowHeightOption(/auto/i);
     expect(defaultProps.setState).toHaveBeenCalledTimes(1);
     expect(defaultProps.setState).toHaveBeenCalledWith(
       expect.objectContaining({ rowHeight: 'auto' })
@@ -147,20 +147,20 @@ describe('datatable toolbar', () => {
     expect(defaultProps.setState).toHaveBeenCalledTimes(1);
     expect(defaultProps.setState).toHaveBeenCalledWith({
       rowHeight: 'custom',
-      rowHeightLines: 2,
+      rowHeightLines: 1,
     });
   });
 
   it('should change header height to "Custom" mode', async () => {
     const { selectHeaderHeightOption } = await renderAndOpenToolbar({
-      headerRowHeight: 'single',
+      headerRowHeight: 'auto',
     });
 
     selectHeaderHeightOption(/custom/i);
     expect(defaultProps.setState).toHaveBeenCalledTimes(1);
     expect(defaultProps.setState).toHaveBeenCalledWith({
       headerRowHeight: 'custom',
-      headerRowHeightLines: 3,
+      headerRowHeightLines: 1,
     });
   });
 
