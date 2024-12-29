@@ -16,10 +16,10 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { StreamDefinition } from '@kbn/streams-plugin/common';
 import React, { useMemo } from 'react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { css } from '@emotion/css';
+import { StreamDefinition, isWiredStream } from '@kbn/streams-schema';
 import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
 import { NestedView } from '../nested_view';
 import { useKibana } from '../../hooks/use_kibana';
@@ -34,23 +34,23 @@ export interface StreamTree {
 
 function asTrees(definitions: StreamDefinition[]) {
   const trees: StreamTree[] = [];
-  const wiredDefinitions = definitions.filter((definition) => definition.managed);
-  wiredDefinitions.sort((a, b) => a.id.split('.').length - b.id.split('.').length);
+  const wiredDefinitions = definitions.filter((definition) => isWiredStream(definition));
+  wiredDefinitions.sort((a, b) => a.name.split('.').length - b.name.split('.').length);
 
   wiredDefinitions.forEach((definition) => {
     let currentTree = trees;
     let existingNode: StreamTree | undefined;
     // traverse the tree following the prefix of the current id.
     // once we reach the leaf, the current id is added as child - this works because the ids are sorted by depth
-    while ((existingNode = currentTree.find((node) => definition.id.startsWith(node.id)))) {
+    while ((existingNode = currentTree.find((node) => definition.name.startsWith(node.id)))) {
       currentTree = existingNode.children;
     }
     if (!existingNode) {
       const newNode: StreamTree = {
-        id: definition.id,
+        id: definition.name,
         children: [],
         definition,
-        type: definition.id.split('.').length === 1 ? 'root' : 'wired',
+        type: definition.name.split('.').length === 1 ? 'root' : 'wired',
       };
       currentTree.push(newNode);
     }
@@ -76,18 +76,18 @@ export function StreamsList({
 
   const filteredItems = useMemo(() => {
     return items
-      .filter((item) => showClassic || item.managed)
-      .filter((item) => !query || item.id.toLowerCase().includes(query.toLowerCase()));
+      .filter((item) => showClassic || isWiredStream(item))
+      .filter((item) => !query || item.name.toLowerCase().includes(query.toLowerCase()));
   }, [query, items, showClassic]);
 
   const classicStreams = useMemo(() => {
-    return filteredItems.filter((item) => !item.managed);
+    return filteredItems.filter((item) => !isWiredStream(item));
   }, [filteredItems]);
 
   const treeView = useMemo(() => {
     const trees = asTrees(filteredItems);
     const classicList = classicStreams.map((definition) => ({
-      id: definition.id,
+      id: definition.name,
       type: 'classic' as const,
       definition,
       children: [],
@@ -113,7 +113,7 @@ export function StreamsList({
                   iconType="fold"
                   size="s"
                   onClick={() =>
-                    setCollapsed(Object.fromEntries(items.map((item) => [item.id, true])))
+                    setCollapsed(Object.fromEntries(items.map((item) => [item.name, true])))
                   }
                 >
                   {i18n.translate('xpack.streams.streamsTable.collapseAll', {

@@ -53,7 +53,7 @@ export const streamDetailRoute = createServerRoute({
 
       // check doc count
       const docCountResponse = await scopedClusterClient.asCurrentUser.search({
-        index: streamEntity.definition.id,
+        index: streamEntity.name,
         body: {
           track_total_hits: true,
           query: {

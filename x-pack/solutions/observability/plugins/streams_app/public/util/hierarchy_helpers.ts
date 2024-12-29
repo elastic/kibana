@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { StreamDefinition } from '@kbn/streams-plugin/common';
+import { ReadStreamDefinition, isIngestReadStream, isWiredReadStream } from '@kbn/streams-schema';
 
-export function getIndexPatterns(definition: StreamDefinition | undefined) {
+export function getIndexPatterns(definition: ReadStreamDefinition | undefined) {
   if (!definition) {
     return undefined;
   }
-  if (!definition.managed) {
-    return [definition.id];
+  if (!isWiredReadStream(definition) && isIngestReadStream(definition)) {
+    return [definition.name as string];
   }
-  const isRoot = definition?.id?.indexOf('.') === -1;
-  const dataStreamOfDefinition = definition?.id;
+  const isRoot = definition.name.indexOf('.') === -1;
+  const dataStreamOfDefinition = definition.name;
   return isRoot
     ? [dataStreamOfDefinition, `${dataStreamOfDefinition}.*`]
     : [`${dataStreamOfDefinition}*`];

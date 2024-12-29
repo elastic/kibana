@@ -17,11 +17,11 @@ import {
 } from '@elastic/eui';
 import { calculateAuto } from '@kbn/calculate-auto';
 import { i18n } from '@kbn/i18n';
-import { useDateRange } from '@kbn/observability-utils-browser/hooks/use_date_range';
 import moment from 'moment';
 import React, { useMemo } from 'react';
 import { css } from '@emotion/css';
-import { ReadStreamDefinition } from '@kbn/streams-plugin/common';
+import { ReadStreamDefinition, isWiredReadStream, isWiredStream } from '@kbn/streams-schema';
+import { useDateRange } from '@kbn/observability-utils-browser/hooks/use_date_range';
 import illustration from '../assets/illustration.png';
 import { useKibana } from '../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
@@ -131,7 +131,7 @@ export function StreamDetailOverview({ definition }: { definition?: ReadStreamDe
         signal,
         params: {
           path: {
-            id: definition.id,
+            id: definition.name as string,
           },
           query: {
             start: String(start),
@@ -146,7 +146,7 @@ export function StreamDetailOverview({ definition }: { definition?: ReadStreamDe
   const [selectedTab, setSelectedTab] = React.useState<string | undefined>(undefined);
 
   const tabs = [
-    ...(definition?.managed
+    ...(definition && isWiredReadStream(definition)
       ? [
           {
             id: 'streams',
@@ -287,10 +287,10 @@ function ChildStreamList({ stream }: { stream?: ReadStreamDefinition }) {
     if (!stream) {
       return [];
     }
-    return streamsListFetch.value?.definitions.filter(
-      (d) => d.managed && d.id.startsWith(stream.id)
+    return streamsListFetch.value?.streams.filter(
+      (d) => isWiredStream(d) && d.name.startsWith(stream.name as string)
     );
-  }, [stream, streamsListFetch.value?.definitions]);
+  }, [stream, streamsListFetch.value?.streams]);
 
   if (stream && childDefinitions?.length === 1) {
     return (
@@ -326,7 +326,7 @@ function ChildStreamList({ stream }: { stream?: ReadStreamDefinition }) {
                   iconType="plusInCircle"
                   href={router.link('/{key}/management/{subtab}', {
                     path: {
-                      key: stream?.id,
+                      key: stream?.name as string,
                       subtab: 'route',
                     },
                   })}
