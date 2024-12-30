@@ -14,8 +14,9 @@ import {
   EuiPopover,
   EuiPopoverProps,
   EuiPopoverTitle,
-  useEuiTheme,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
+
 import './field_popover.scss';
 
 export interface FieldPopoverProps extends EuiPopoverProps {
@@ -32,8 +33,6 @@ export const FieldPopover: React.FC<FieldPopoverProps> = ({
   renderFooter,
   ...otherPopoverProps
 }) => {
-  const { euiTheme } = useEuiTheme();
-
   let header: React.ReactNode | null = null;
   let content: React.ReactNode | null = null;
   let footer: React.ReactNode | null = null;
@@ -82,10 +81,10 @@ export const FieldPopover: React.FC<FieldPopoverProps> = ({
           {content ? (
             <EuiFlexItem
               className="eui-yScrollWithShadows"
-              css={{
-                padding: euiTheme.size.base,
-                margin: `-${euiTheme.size.base}`,
-              }}
+              css={({ euiTheme }) => css`
+                padding: ${euiTheme.size.base};
+                margin: -${euiTheme.size.base};
+              `}
             >
               {content}
             </EuiFlexItem>
