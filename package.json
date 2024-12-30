@@ -766,7 +766,7 @@
     "@kbn/response-ops-rule-form": "link:packages/response-ops/rule_form",
     "@kbn/response-ops-rule-params": "link:src/platform/packages/private/response-ops/rule_params",
     "@kbn/response-stream-plugin": "link:examples/response_stream",
-    "@kbn/rison": "link:packages/kbn-rison",
+    "@kbn/rison": "link:src/platform/packages/shared/kbn-rison",
     "@kbn/rollup": "link:x-pack/platform/packages/private/rollup",
     "@kbn/rollup-plugin": "link:x-pack/platform/plugins/private/rollup",
     "@kbn/router-to-openapispec": "link:packages/kbn-router-to-openapispec",
