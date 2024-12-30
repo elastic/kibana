@@ -105,7 +105,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     describe('data retention', function () {
       // failsOnMKI, see https://github.com/elastic/kibana/issues/181242
-      this.tags(['failsOnMKI']);
+      // this.tags(['failsOnMKI']);
       it('allows to update data retention', async () => {
         // Open details flyout
         await pageObjects.indexManagement.clickDataStreamNameLink(TEST_DS_NAME);
@@ -129,7 +129,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       describe('Project level data retention checks - security solution', () => {
-        this.tags(['skipSvlOblt', 'skipSvlSearch']);
+        // this.tags(['skipSvlOblt', 'skipSvlSearch']);
 
         it('shows project data retention in the datastreams list', async () => {
           expect(await testSubjects.exists('projectLevelRetentionCallout')).to.be(true);
@@ -215,6 +215,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         // Close flyout
         await testSubjects.click('closeDetailsButton');
       };
+
+      before(async () => {
+        await pageObjects.common.navigateToApp('indexManagement');
+        // Navigate to the indices tab
+        await pageObjects.indexManagement.changeTabs('data_streamsTab');
+        await pageObjects.header.waitUntilLoadingHasFinished();
+      });
 
       afterEach(async () => {
         await log.debug('Cleaning up created data stream');

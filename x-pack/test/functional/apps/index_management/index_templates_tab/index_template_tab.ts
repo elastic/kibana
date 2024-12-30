@@ -33,7 +33,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await es.indices.deleteIndexTemplate({
         name: INDEX_TEMPLATE_NAME,
       });
-      await testSubjects.click('closeDetailsButton');
+      await testSubjects.click('reloadButton');
     });
 
     it('can create an index template with data retention', async () => {
