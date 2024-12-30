@@ -191,13 +191,12 @@ export const annotateTestFailures = async () => {
 
 export const pingTeam = async () => {
   if (process.env.ELASTIC_SLACK_NOTIFICATIONS_ENABLED === 'true') {
-    const reportSlackDir = 'target/report-slack-team';
-    const team: string =
-      recursiveReadDir(reportSlackDir).find((file) => file.endsWith('.slack')) || '';
-
-    buildkite.setMetadata(
-      'slack:ping_team:body',
-      `@${team}, can you please take a look at the test failures?`
-    );
+    const team = process.env.PING_SLACK_TEAM;
+    if (team) {
+      buildkite.setMetadata(
+        'slack:ping_team:body',
+        `${team}, can you please take a look at the test failures?`
+      );
+    }
   }
 };

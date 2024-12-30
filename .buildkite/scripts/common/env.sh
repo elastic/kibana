@@ -7,7 +7,6 @@ export CI=true
 KIBANA_DIR=$(pwd)
 export KIBANA_DIR
 export XPACK_DIR="$KIBANA_DIR/x-pack"
-export REPORT_SLACK_TEAM="target/report-slack-team"
 
 export CACHE_DIR="$HOME/.kibana"
 export ES_CACHE_DIR="$HOME/.es-snapshot-cache"
