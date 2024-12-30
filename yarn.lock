@@ -5255,7 +5255,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/data-views-plugin@link:src/plugins/data_views":
+"@kbn/data-views-plugin@link:src/platform/plugins/shared/data_views":
   version "0.0.0"
   uid ""
 

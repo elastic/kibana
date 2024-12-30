@@ -24,7 +24,7 @@
     "controls": "src/platform/plugins/shared/controls",
     "data": "src/plugins/data",
     "observabilityAlertDetails": "x-pack/solutions/observability/packages/alert_details",
-    "dataViews": "src/plugins/data_views",
+    "dataViews": "src/platform/plugins/shared/data_views",
     "defaultNavigation": ["packages/default-nav", "src/platform/packages/private/default-nav"],
     "devTools": "src/platform/plugins/shared/dev_tools",
     "discover": [
