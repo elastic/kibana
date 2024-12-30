@@ -76,7 +76,7 @@ describe('useUserProfileForm', () => {
             "initials": "fn",
           },
           "userSettings": Object {
-            "darkMode": "",
+            "darkMode": "space_default",
           },
         },
         "user": Object {
@@ -259,7 +259,7 @@ describe('useUserProfileForm', () => {
       expect(themeMenu).toHaveLength(1);
 
       const themeOptions = themeMenu.find('EuiKeyPadMenuItem');
-      expect(themeOptions).toHaveLength(3);
+      expect(themeOptions).toHaveLength(4);
       themeOptions.forEach((option) => {
         const menuItemEl = (option.getDOMNode() as unknown as Element[])[1];
         expect(menuItemEl.className).not.toContain('disabled');
@@ -343,7 +343,7 @@ describe('useUserProfileForm', () => {
       expect(themeMenu).toHaveLength(1);
 
       const themeOptions = themeMenu.find('EuiKeyPadMenuItem');
-      expect(themeOptions).toHaveLength(3);
+      expect(themeOptions).toHaveLength(4);
       themeOptions.forEach((option) => {
         const menuItemEl = (option.getDOMNode() as unknown as Element[])[1];
         expect(menuItemEl.className).toContain('disabled');
@@ -379,7 +379,7 @@ describe('useUserProfileForm', () => {
       expect(themeMenu).toHaveLength(1);
 
       const themeOptions = themeMenu.find('EuiKeyPadMenuItem');
-      expect(themeOptions).toHaveLength(3);
+      expect(themeOptions).toHaveLength(4);
       themeOptions.forEach((option) => {
         const menuItemEl = (option.getDOMNode() as unknown as Element[])[1];
         expect(menuItemEl.className).toContain('disabled');
