@@ -13,5 +13,10 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   return {
     ...functionalConfig.getAll(),
     testFiles: [require.resolve('.')],
+    esTestCluster: {
+      serverArgs: {
+        esJavaOpts: '-Des.queryable_built_in_roles_enabled=true',
+      },
+    },
   };
 }
