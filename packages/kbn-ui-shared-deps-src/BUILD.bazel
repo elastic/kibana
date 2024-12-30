@@ -43,6 +43,7 @@ webpack_cli(
     "//packages/react/kibana_context/root",
     "//packages/react/kibana_context/render",
     "//packages/react/kibana_context/theme",
+    "//packages/shared-ux/router/impl:shared-ux-router",
   ],
   output_dir = True,
   args = [

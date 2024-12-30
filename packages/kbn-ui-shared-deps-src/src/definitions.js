@@ -110,6 +110,7 @@ const externals = {
   '@kbn/react-kibana-context-root': '__kbnSharedDeps__.KbnReactKibanaContextRoot',
   '@kbn/react-kibana-context-render': '__kbnSharedDeps__.KbnReactKibanaContextRender',
   '@kbn/react-kibana-context-theme': '__kbnSharedDeps__.KbnReactKibanaContextTheme',
+  '@kbn/shared-ux-router': '__kbnSharedDeps__.KbnSharedUxRouter',
 };
 
 module.exports = { distDir, jsFilename, cssDistFilename, externals };
