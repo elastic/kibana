@@ -34,6 +34,12 @@ import { SecurityPageName } from '@kbn/deeplinks-security';
 import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/use_has_misconfigurations';
 import { SecuritySolutionLinkAnchor } from '../../../common/components/links';
 
+type MisconfigurationSortFieldType =
+  | MISCONFIGURATION.RESULT_EVALUATION
+  | MISCONFIGURATION.RULE_NAME
+  | 'resource'
+  | 'rule';
+
 const getFindingsStats = (
   passedFindingsStats: number,
   failedFindingsStats: number,
@@ -95,17 +101,17 @@ export const MisconfigurationFindingsDetailsTable = memo(
 
     const [currentFilter, setCurrentFilter] = useState<string>('');
 
-    const [sortField, setSortField] = useState<
-      MISCONFIGURATION.RESULT_EVALUATION | MISCONFIGURATION.RULE_NAME | 'resource' | 'rule'
-    >(MISCONFIGURATION.RESULT_EVALUATION);
+    const [sortField, setSortField] = useState<MisconfigurationSortFieldType>(
+      MISCONFIGURATION.RESULT_EVALUATION
+    );
     const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
 
-    const obj: { [key: string]: string } = {};
-    obj[sortField] = sortDirection;
+    const sortFieldDirection: { [key: string]: string } = {};
+    sortFieldDirection[sortField] = sortDirection;
 
     const { data } = useMisconfigurationFindings({
       query: buildMisconfigurationEntityFlyoutPreviewQuery(field, value, currentFilter),
-      sort: [obj],
+      sort: [sortFieldDirection],
       enabled: true,
       pageSize: 1,
     });

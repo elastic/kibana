@@ -38,6 +38,14 @@ import { useGetNavigationUrlParams } from '@kbn/cloud-security-posture/src/hooks
 import { useHasVulnerabilities } from '@kbn/cloud-security-posture/src/hooks/use_has_vulnerabilities';
 import { SecuritySolutionLinkAnchor } from '../../../common/components/links';
 
+type VulnerabilitySortFieldType =
+  | 'score'
+  | 'vulnerability'
+  | 'resource'
+  | VULNERABILITY.SEVERITY
+  | VULNERABILITY.ID
+  | VULNERABILITY.PACKAGE_NAME;
+
 export const VulnerabilitiesFindingsDetailsTable = memo(({ value }: { value: string }) => {
   useEffect(() => {
     uiMetricService.trackUiMetric(
@@ -47,18 +55,12 @@ export const VulnerabilitiesFindingsDetailsTable = memo(({ value }: { value: str
   }, []);
 
   const [currentFilter, setCurrentFilter] = useState<string>('');
-  const [sortField, setSortField] = useState<
-    | 'score'
-    | 'vulnerability'
-    | 'resource'
-    | VULNERABILITY.SEVERITY
-    | VULNERABILITY.ID
-    | VULNERABILITY.PACKAGE_NAME
-  >(VULNERABILITY.SEVERITY);
+  const [sortField, setSortField] = useState<VulnerabilitySortFieldType>(VULNERABILITY.SEVERITY);
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
 
-  const obj: { [key: string]: string } = {};
-  obj[sortField === 'score' ? 'vulnerability.score.base' : sortField] = sortDirection;
+  const sortFieldDirection: { [key: string]: string } = {};
+  sortFieldDirection[sortField === 'score' ? 'vulnerability.score.base' : sortField] =
+    sortDirection;
 
   const sorting: EuiTableSortingType<VulnerabilitiesFindingDetailFields> = {
     sort: {
@@ -69,7 +71,7 @@ export const VulnerabilitiesFindingsDetailsTable = memo(({ value }: { value: str
 
   const { data } = useVulnerabilitiesFindings({
     query: buildVulnerabilityEntityFlyoutPreviewQuery('host.name', value, currentFilter),
-    sort: [obj],
+    sort: [sortFieldDirection],
     enabled: true,
     pageSize: 1,
   });

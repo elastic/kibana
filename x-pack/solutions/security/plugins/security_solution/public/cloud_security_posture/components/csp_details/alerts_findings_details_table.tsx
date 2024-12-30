@@ -46,6 +46,13 @@ enum KIBANA_ALERTS {
 
 type AlertSeverity = 'low' | 'medium' | 'high' | 'critical';
 
+type AlertsSortFieldType =
+  | 'id'
+  | 'index'
+  | KIBANA_ALERTS.SEVERITY
+  | KIBANA_ALERTS.WORKFLOW_STATUS
+  | KIBANA_ALERTS.RULE_NAME;
+
 interface ResultAlertsField {
   _id: string[];
   _index: string[];
@@ -80,13 +87,7 @@ export const AlertsDetailsTable = memo(
     const [pageIndex, setPageIndex] = useState(0);
     const [pageSize, setPageSize] = useState(10);
 
-    const [sortField, setSortField] = useState<
-      | 'id'
-      | 'index'
-      | KIBANA_ALERTS.SEVERITY
-      | KIBANA_ALERTS.WORKFLOW_STATUS
-      | KIBANA_ALERTS.RULE_NAME
-    >(KIBANA_ALERTS.SEVERITY);
+    const [sortField, setSortField] = useState<AlertsSortFieldType>(KIBANA_ALERTS.SEVERITY);
     const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
 
     const sorting: EuiTableSortingType<ContextualFlyoutAlertsField> = {
