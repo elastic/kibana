@@ -8,7 +8,7 @@
 import React from 'react';
 import { KeyValueTable } from '.';
 import { render } from '@testing-library/react';
-import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
+import { renderWithTheme } from './utils/test_helpers';
 
 function getKeys(output: ReturnType<typeof render>) {
   const keys = output.getAllByTestId('dot-key');
@@ -33,11 +33,7 @@ describe('KeyValueTable', () => {
       { key: 'nested.b.c', value: 'ccc' },
       { key: 'nested.a', value: 'aaa' },
     ];
-    const output = render(
-      <EuiThemeProvider>
-        <KeyValueTable keyValuePairs={data} />
-      </EuiThemeProvider>
-    );
+    const output = renderWithTheme(<KeyValueTable keyValuePairs={data} />);
     const rows = output.container.querySelectorAll('tr');
     expect(rows.length).toEqual(9);
 
