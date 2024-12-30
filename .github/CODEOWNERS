@@ -360,7 +360,7 @@ test/plugin_functional/plugins/data_search @elastic/kibana-data-discovery
 packages/kbn-data-service @elastic/kibana-visualizations @elastic/kibana-data-discovery
 x-pack/solutions/security/packages/data-stream-adapter @elastic/security-threat-hunting
 x-pack/platform/plugins/private/data_usage @elastic/obs-ai-assistant @elastic/security-solution
-src/plugins/data_view_editor @elastic/kibana-data-discovery
+src/platform/plugins/shared/data_view_editor @elastic/kibana-data-discovery
 examples/data_view_field_editor_example @elastic/kibana-data-discovery
 src/plugins/data_view_field_editor @elastic/kibana-data-discovery
 src/plugins/data_view_management @elastic/kibana-data-discovery

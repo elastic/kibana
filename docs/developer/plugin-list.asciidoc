@@ -65,7 +65,7 @@ as uiSettings within the code.
 |The data plugin provides common data access services, such as search and query, for solutions and application developers.
 
 
-|{kib-repo}blob/{branch}/src/plugins/data_view_editor/README.md[dataViewEditor]
+|{kib-repo}blob/{branch}/src/platform/plugins/shared/data_view_editor/README.md[dataViewEditor]
 |Create data views from within Kibana apps.
 
 
