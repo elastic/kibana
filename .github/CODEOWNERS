@@ -286,7 +286,6 @@ packages/kbn-coloring @elastic/kibana-visualizations
 packages/kbn-config @elastic/kibana-core
 packages/kbn-config-mocks @elastic/kibana-core
 packages/kbn-config-schema @elastic/kibana-core
-packages/kbn-content-management-utils @elastic/kibana-data-discovery
 packages/kbn-crypto @elastic/kibana-security
 packages/kbn-crypto-browser @elastic/kibana-core
 packages/kbn-cypress-config @elastic/kibana-operations
@@ -554,6 +553,7 @@ src/platform/packages/shared/kbn-apm-utils @elastic/obs-ux-infra_services-team
 src/platform/packages/shared/kbn-avc-banner @elastic/security-defend-workflows
 src/platform/packages/shared/kbn-cases-components @elastic/response-ops
 src/platform/packages/shared/kbn-cell-actions @elastic/security-threat-hunting-explore
+src/platform/packages/shared/kbn-content-management-utils @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-custom-icons @elastic/obs-ux-logs-team
 src/platform/packages/shared/kbn-discover-contextual-components @elastic/obs-ux-logs-team @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-doc-links @elastic/docs
