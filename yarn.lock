@@ -6779,7 +6779,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/resizable-layout@link:packages/kbn-resizable-layout":
+"@kbn/resizable-layout@link:src/platform/packages/shared/kbn-resizable-layout":
   version "0.0.0"
   uid ""
 
