@@ -29,8 +29,15 @@ fi
 
 echo "--- APM Cypress Tests"
 
-cd "$XPACK_DIR"
+pushd "$XPACK_DIR"
 
-node solutions/observability/plugins/apm/scripts/test/e2e.js \
+if ! node solutions/observability/plugins/apm/scripts/test/e2e.js \
   --kibana-install-dir "$KIBANA_BUILD_LOCATION" \
-  $CYPRESS_ARGS
+  $CYPRESS_ARGS ; then
+
+  # Report the error to the team using the subfolder matching the Slack Team
+  popd
+  mkdir "$REPORT_SLACK_TEAM"
+  touch "$REPORT_SLACK_TEAM"/obs-ux-infra_services-team.slack
+  exit 1
+fi

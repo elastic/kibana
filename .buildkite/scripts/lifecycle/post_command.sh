@@ -52,4 +52,8 @@ if [[ "$IS_TEST_EXECUTION_STEP" == "true" ]]; then
     buildkite-agent artifact upload 'target/test_failures/**/*'
     ts-node .buildkite/scripts/lifecycle/annotate_test_failures.ts
   fi
+
+  if [[ -d "${REPORT_SLACK_TEAM}" ]]; then
+    ts-node .buildkite/scripts/lifecycle/ping_team_ftrs.ts
+  fi
 fi

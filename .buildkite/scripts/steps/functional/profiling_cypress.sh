@@ -12,7 +12,13 @@ export JOB=kibana-profiling-cypress
 
 echo "--- Profiling Cypress Tests"
 
-cd "$XPACK_DIR"
+pushd "$XPACK_DIR"
 
-NODE_OPTIONS=--openssl-legacy-provider node solutions/observability/plugins/profiling/scripts/test/e2e.js \
-  --kibana-install-dir "$KIBANA_BUILD_LOCATION" \
+if ! NODE_OPTIONS=--openssl-legacy-provider node solutions/observability/plugins/profiling/scripts/test/e2e.js \
+  --kibana-install-dir "$KIBANA_BUILD_LOCATION" ; then
+  # Report the error to the team using the subfolder matching the Slack Team
+  popd
+  mkdir "$REPORT_SLACK_TEAM"
+  touch "$REPORT_SLACK_TEAM"/obs-ux-infra_services-team.slack
+  exit 1
+fi
