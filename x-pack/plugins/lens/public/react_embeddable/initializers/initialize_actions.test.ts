@@ -109,6 +109,7 @@ describe('Dashboard actions', () => {
             },
           ],
           getFieldByName: jest.fn(),
+          getFormatterForField: jest.fn(),
           isPersisted: true,
           spec: {},
         },
