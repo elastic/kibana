@@ -17,6 +17,7 @@ import { UserProfileData } from '@kbn/core-user-profile-common';
 export const getDefaultUserProfileImplementation = (): CoreUserProfileDelegateContract => {
   return {
     userProfile$: of(null),
+    enabled$: of(false),
     getCurrent: <D extends UserProfileData>() =>
       Promise.resolve(null as unknown as GetUserProfileResponse<D>),
     bulkGet: () => Promise.resolve([]),

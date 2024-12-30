@@ -17,9 +17,12 @@ import type {
 
 export interface UserProfileService {
   /**
-   * Retrieve an observable emitting when the user profile is loaded.
+   * Retrieve an observable emitting the current user profile data.
    */
   getUserProfile$(): Observable<UserProfileData | null>;
+
+  /** Flag to indicate if the current user has a user profile. Anonymous users don't have user profiles. */
+  getEnabled$(): Observable<boolean>;
 
   /**
    * Retrieves the user profile of the current user. If the profile isn't available, e.g. for the anonymous users or
