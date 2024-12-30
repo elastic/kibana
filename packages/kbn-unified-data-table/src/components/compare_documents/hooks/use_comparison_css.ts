@@ -61,7 +61,7 @@ export const useComparisonCss = ({
         .${CELL_CLASS} {
           &,
           & * {
-            color: ${euiTheme.colors.successText} !important;
+            color: ${euiTheme.colors.textSuccess} !important;
           }
         }
       }
@@ -70,7 +70,7 @@ export const useComparisonCss = ({
         .${CELL_CLASS} {
           &,
           & * {
-            color: ${euiTheme.colors.dangerText} !important;
+            color: ${euiTheme.colors.textDanger} !important;
           }
         }
       }
@@ -82,12 +82,12 @@ export const useComparisonCss = ({
 
     .${ADDED_SEGMENT_CLASS} {
       background-color: ${matchSegmentBackgroundColor};
-      color: ${euiTheme.colors.successText};
+      color: ${euiTheme.colors.textSuccess};
     }
 
     .${REMOVED_SEGMENT_CLASS} {
       background-color: ${diffSegmentBackgroundColor};
-      color: ${euiTheme.colors.dangerText};
+      color: ${euiTheme.colors.textDanger};
     }
 
     ${(diffMode === 'chars' || diffMode === 'words') &&
