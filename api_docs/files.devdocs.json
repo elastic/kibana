@@ -555,35 +555,27 @@
           "references": [
             {
               "plugin": "cases",
-              "path": "x-pack/plugins/cases/public/application.tsx"
+              "path": "x-pack/platform/plugins/shared/cases/public/application.tsx"
             },
             {
               "plugin": "cases",
-              "path": "x-pack/plugins/cases/public/plugin.ts"
+              "path": "x-pack/platform/plugins/shared/cases/public/plugin.ts"
             },
             {
               "plugin": "cases",
-              "path": "x-pack/plugins/cases/public/plugin.ts"
+              "path": "x-pack/platform/plugins/shared/cases/public/plugin.ts"
             },
             {
               "plugin": "cases",
-              "path": "x-pack/plugins/cases/public/plugin.ts"
+              "path": "x-pack/platform/plugins/shared/cases/public/plugin.ts"
             },
             {
               "plugin": "cases",
-              "path": "x-pack/plugins/cases/public/plugin.ts"
+              "path": "x-pack/platform/plugins/shared/cases/public/plugin.ts"
             },
             {
               "plugin": "cases",
-              "path": "x-pack/plugins/cases/public/plugin.ts"
-            },
-            {
-              "plugin": "cases",
-              "path": "x-pack/plugins/cases/public/plugin.test.ts"
-            },
-            {
-              "plugin": "cases",
-              "path": "x-pack/plugins/cases/public/plugin.test.ts"
+              "path": "x-pack/platform/plugins/shared/cases/public/plugin.ts"
             },
             {
               "plugin": "imageEmbeddable",
@@ -592,6 +584,14 @@
             {
               "plugin": "imageEmbeddable",
               "path": "src/plugins/image_embeddable/public/image_embeddable/get_image_embeddable_factory.tsx"
+            },
+            {
+              "plugin": "cases",
+              "path": "x-pack/platform/plugins/shared/cases/public/plugin.test.ts"
+            },
+            {
+              "plugin": "cases",
+              "path": "x-pack/platform/plugins/shared/cases/public/plugin.test.ts"
             },
             {
               "plugin": "filesManagement",
@@ -5398,47 +5398,47 @@
           "references": [
             {
               "plugin": "cases",
-              "path": "x-pack/plugins/cases/server/files/index.ts"
+              "path": "x-pack/platform/plugins/shared/cases/server/files/index.ts"
             },
             {
               "plugin": "cases",
-              "path": "x-pack/plugins/cases/server/files/index.test.ts"
+              "path": "x-pack/platform/plugins/shared/cases/server/files/index.test.ts"
             },
             {
               "plugin": "cases",
-              "path": "x-pack/plugins/cases/server/files/index.test.ts"
+              "path": "x-pack/platform/plugins/shared/cases/server/files/index.test.ts"
             },
             {
               "plugin": "cases",
-              "path": "x-pack/plugins/cases/server/files/index.test.ts"
+              "path": "x-pack/platform/plugins/shared/cases/server/files/index.test.ts"
             },
             {
               "plugin": "cases",
-              "path": "x-pack/plugins/cases/server/files/index.test.ts"
+              "path": "x-pack/platform/plugins/shared/cases/server/files/index.test.ts"
             },
             {
               "plugin": "cases",
-              "path": "x-pack/plugins/cases/server/files/index.test.ts"
+              "path": "x-pack/platform/plugins/shared/cases/server/files/index.test.ts"
             },
             {
               "plugin": "cases",
-              "path": "x-pack/plugins/cases/server/files/index.test.ts"
+              "path": "x-pack/platform/plugins/shared/cases/server/files/index.test.ts"
             },
             {
               "plugin": "cases",
-              "path": "x-pack/plugins/cases/server/files/index.test.ts"
+              "path": "x-pack/platform/plugins/shared/cases/server/files/index.test.ts"
             },
             {
               "plugin": "cases",
-              "path": "x-pack/plugins/cases/server/files/index.test.ts"
+              "path": "x-pack/platform/plugins/shared/cases/server/files/index.test.ts"
             },
             {
               "plugin": "cases",
-              "path": "x-pack/plugins/cases/server/files/index.test.ts"
+              "path": "x-pack/platform/plugins/shared/cases/server/files/index.test.ts"
             },
             {
               "plugin": "cases",
-              "path": "x-pack/plugins/cases/server/files/index.test.ts"
+              "path": "x-pack/platform/plugins/shared/cases/server/files/index.test.ts"
             }
           ],
           "children": [
@@ -5511,11 +5511,11 @@
           "references": [
             {
               "plugin": "cases",
-              "path": "x-pack/plugins/cases/server/client/factory.ts"
+              "path": "x-pack/platform/plugins/shared/cases/server/client/factory.ts"
             },
             {
               "plugin": "cases",
-              "path": "x-pack/plugins/cases/server/plugin.test.ts"
+              "path": "x-pack/platform/plugins/shared/cases/server/plugin.test.ts"
             }
           ]
         }

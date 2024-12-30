@@ -54,6 +54,7 @@ export const DashboardListing = ({
     return new FavoritesClient(DASHBOARD_APP_ID, DASHBOARD_CONTENT_ID, {
       http: coreServices.http,
       usageCollection: usageCollectionService,
+      userProfile: coreServices.userProfile,
     });
   }, []);
 
