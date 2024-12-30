@@ -40,7 +40,7 @@
     "expandableFlyout": "packages/kbn-expandable-flyout",
     "expressionError": "src/platform/plugins/shared/expression_error",
     "expressionGauge": "src/platform/plugins/shared/chart_expressions/expression_gauge",
-    "expressionHeatmap": "src/plugins/chart_expressions/expression_heatmap",
+    "expressionHeatmap": "src/platform/plugins/shared/chart_expressions/expression_heatmap",
     "expressionImage": "src/platform/plugins/shared/expression_image",
     "expressionMetric": "src/platform/plugins/shared/expression_metric",
     "expressionMetricVis": "src/plugins/chart_expressions/expression_metric",
