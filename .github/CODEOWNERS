@@ -476,7 +476,7 @@ x-pack/plugins/features @elastic/kibana-core
 x-pack/test/security_api_integration/plugins/features_provider @elastic/kibana-security
 x-pack/test/functional_execution_context/plugins/alerts @elastic/kibana-core
 examples/field_formats_example @elastic/kibana-data-discovery
-src/plugins/field_formats @elastic/kibana-data-discovery
+src/platform/plugins/shared/field_formats @elastic/kibana-data-discovery
 packages/kbn-field-types @elastic/kibana-data-discovery
 packages/kbn-field-utils @elastic/kibana-data-discovery
 x-pack/platform/plugins/shared/fields_metadata @elastic/obs-ux-logs-team

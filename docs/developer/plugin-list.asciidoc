@@ -196,7 +196,7 @@ for use in their own application.
 |Expression XY plugin adds a xy renderer and function to the expression plugin. The renderer will display the xy chart.
 
 
-|{kib-repo}blob/{branch}/src/plugins/field_formats/README.md[fieldFormats]
+|{kib-repo}blob/{branch}/src/platform/plugins/shared/field_formats/README.md[fieldFormats]
 |Index pattern fields formatters
 
 

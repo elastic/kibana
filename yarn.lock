@@ -5699,7 +5699,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/field-formats-plugin@link:src/plugins/field_formats":
+"@kbn/field-formats-plugin@link:src/platform/plugins/shared/field_formats":
   version "0.0.0"
   uid ""
 
