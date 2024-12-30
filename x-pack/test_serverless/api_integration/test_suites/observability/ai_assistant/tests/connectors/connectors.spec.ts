@@ -13,7 +13,6 @@ import type {
   RoleCredentials,
   SupertestWithoutAuthProviderType,
 } from '../../../../../../shared/services';
-import { ForbiddenApiError } from '../../common/forbidden_api_error';
 
 const CONNECTOR_API_URL = '/internal/observability_ai_assistant/connectors';
 
@@ -89,14 +88,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
     describe('security roles and access privileges', () => {
       it('should deny access for users without the ai_assistant privilege', async () => {
-        try {
-          await observabilityAIAssistantAPIClient.slsUnauthorized({
+        await observabilityAIAssistantAPIClient
+          .slsUnauthorized({
             endpoint: `GET ${CONNECTOR_API_URL}`,
-          });
-          throw new ForbiddenApiError('Expected slsUnauthorized() to throw a 403 Forbidden error');
-        } catch (e) {
-          expect(e.status).to.be(403);
-        }
+          })
+          .expect(403);
       });
     });
   });

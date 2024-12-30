@@ -14,7 +14,6 @@ import {
 } from '@kbn/observability-ai-assistant-plugin/common/types';
 import type { FtrProviderContext } from '../../common/ftr_provider_context';
 import type { SupertestReturnType } from '../../common/observability_ai_assistant_api_client';
-import { ForbiddenApiError } from '../../common/forbidden_api_error';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantAPIClient');
@@ -287,39 +286,29 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
 
         it('POST /internal/observability_ai_assistant/conversation', async () => {
-          try {
-            await observabilityAIAssistantAPIClient.slsUnauthorized({
+          await observabilityAIAssistantAPIClient
+            .slsUnauthorized({
               endpoint: 'POST /internal/observability_ai_assistant/conversation',
               params: {
                 body: {
                   conversation: conversationCreate,
                 },
               },
-            });
-            throw new ForbiddenApiError(
-              'Expected slsUnauthorized() to throw a 403 Forbidden error'
-            );
-          } catch (e) {
-            expect(e.status).to.be(403);
-          }
+            })
+            .expect(403);
         });
 
         it('POST /internal/observability_ai_assistant/conversations', async () => {
-          try {
-            await observabilityAIAssistantAPIClient.slsUnauthorized({
+          await observabilityAIAssistantAPIClient
+            .slsUnauthorized({
               endpoint: 'POST /internal/observability_ai_assistant/conversations',
-            });
-            throw new ForbiddenApiError(
-              'Expected slsUnauthorized() to throw a 403 Forbidden error'
-            );
-          } catch (e) {
-            expect(e.status).to.be(403);
-          }
+            })
+            .expect(403);
         });
 
         it('PUT /internal/observability_ai_assistant/conversation/{conversationId}', async () => {
-          try {
-            await observabilityAIAssistantAPIClient.slsUnauthorized({
+          await observabilityAIAssistantAPIClient
+            .slsUnauthorized({
               endpoint: 'PUT /internal/observability_ai_assistant/conversation/{conversationId}',
               params: {
                 path: {
@@ -331,49 +320,34 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                   }),
                 },
               },
-            });
-            throw new ForbiddenApiError(
-              'Expected slsUnauthorized() to throw a 403 Forbidden error'
-            );
-          } catch (e) {
-            expect(e.status).to.be(403);
-          }
+            })
+            .expect(403);
         });
 
         it('GET /internal/observability_ai_assistant/conversation/{conversationId}', async () => {
-          try {
-            await observabilityAIAssistantAPIClient.slsUnauthorized({
+          await observabilityAIAssistantAPIClient
+            .slsUnauthorized({
               endpoint: 'GET /internal/observability_ai_assistant/conversation/{conversationId}',
               params: {
                 path: {
                   conversationId: createResponse.body.conversation.id,
                 },
               },
-            });
-            throw new ForbiddenApiError(
-              'Expected slsUnauthorized() to throw a 403 Forbidden error'
-            );
-          } catch (e) {
-            expect(e.status).to.be(403);
-          }
+            })
+            .expect(403);
         });
 
         it('DELETE /internal/observability_ai_assistant/conversation/{conversationId}', async () => {
-          try {
-            await observabilityAIAssistantAPIClient.slsUnauthorized({
+          await observabilityAIAssistantAPIClient
+            .slsUnauthorized({
               endpoint: 'DELETE /internal/observability_ai_assistant/conversation/{conversationId}',
               params: {
                 path: {
                   conversationId: createResponse.body.conversation.id,
                 },
               },
-            });
-            throw new ForbiddenApiError(
-              'Expected slsUnauthorized() to throw a 403 Forbidden error'
-            );
-          } catch (e) {
-            expect(e.status).to.be(403);
-          }
+            })
+            .expect(403);
         });
       });
     });

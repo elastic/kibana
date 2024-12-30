@@ -14,7 +14,6 @@ import {
 } from '@kbn/test-suites-xpack/observability_ai_assistant_api_integration/tests/knowledge_base/helpers';
 import { AI_ASSISTANT_KB_INFERENCE_ID } from '@kbn/observability-ai-assistant-plugin/server/service/inference_endpoint';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
-import { ForbiddenApiError } from '../../common/forbidden_api_error';
 import { KNOWLEDGE_BASE_SETUP_API_URL } from './knowledge_base_setup.spec';
 
 const KNOWLEDGE_BASE_STATUS_API_URL = '/internal/observability_ai_assistant/kb/status';
@@ -73,14 +72,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
     describe('security roles and access privileges', () => {
       it('should deny access for users without the ai_assistant privilege', async () => {
-        try {
-          await observabilityAIAssistantAPIClient.slsUnauthorized({
+        await observabilityAIAssistantAPIClient
+          .slsUnauthorized({
             endpoint: `GET ${KNOWLEDGE_BASE_STATUS_API_URL}`,
-          });
-          throw new ForbiddenApiError('Expected unauthorizedUser() to throw a 403 Forbidden error');
-        } catch (e) {
-          expect(e.status).to.be(403);
-        }
+          })
+          .expect(403);
       });
     });
   });

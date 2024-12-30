@@ -34,7 +34,6 @@ import {
 } from '../conversations/helpers';
 import { createProxyActionConnector, deleteActionConnector } from '../../common/action_connectors';
 import type { InternalRequestHeader, RoleCredentials } from '../../../../../../shared/services';
-import { ForbiddenApiError } from '../../common/forbidden_api_error';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
@@ -551,8 +550,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
     describe('security roles and access privileges', () => {
       it('should deny access for users without the ai_assistant privilege', async () => {
-        try {
-          await observabilityAIAssistantAPIClient.slsUnauthorized({
+        await observabilityAIAssistantAPIClient
+          .slsUnauthorized({
             endpoint: 'POST /internal/observability_ai_assistant/chat/complete',
             params: {
               body: {
@@ -563,11 +562,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 scopes: ['all'],
               },
             },
-          });
-          throw new ForbiddenApiError('Expected slsUnauthorized() to throw a 403 Forbidden error');
-        } catch (e) {
-          expect(e.status).to.be(403);
-        }
+          })
+          .expect(403);
       });
     });
   });

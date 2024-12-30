@@ -14,7 +14,6 @@ import {
 } from '@kbn/test-suites-xpack/observability_ai_assistant_api_integration/tests/knowledge_base/helpers';
 
 import { FtrProviderContext } from '../../common/ftr_provider_context';
-import { ForbiddenApiError } from '../../common/forbidden_api_error';
 
 export const KNOWLEDGE_BASE_SETUP_API_URL = '/internal/observability_ai_assistant/kb/setup';
 
@@ -72,19 +71,16 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
     describe('security roles and access privileges', () => {
       it('should deny access for users without the ai_assistant privilege', async () => {
-        try {
-          await observabilityAIAssistantAPIClient.slsUnauthorized({
+        await observabilityAIAssistantAPIClient
+          .slsUnauthorized({
             endpoint: `POST ${KNOWLEDGE_BASE_SETUP_API_URL}`,
             params: {
               query: {
                 model_id: TINY_ELSER.id,
               },
             },
-          });
-          throw new ForbiddenApiError('Expected slsUnauthorized() to throw a 403 Forbidden error');
-        } catch (e) {
-          expect(e.status).to.be(403);
-        }
+          })
+          .expect(403);
       });
     });
   });

@@ -15,7 +15,6 @@ import {
 } from '@kbn/test-suites-xpack/observability_ai_assistant_api_integration/tests/knowledge_base/helpers';
 import { type KnowledgeBaseEntry } from '@kbn/observability-ai-assistant-plugin/common';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
-import { ForbiddenApiError } from '../../common/forbidden_api_error';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const ml = getService('ml');
@@ -217,8 +216,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     describe('security roles and access privileges', () => {
       describe('should deny access for users without the ai_assistant privilege', () => {
         it('POST /internal/observability_ai_assistant/kb/entries/save', async () => {
-          try {
-            await observabilityAIAssistantAPIClient.slsUnauthorized({
+          await observabilityAIAssistantAPIClient
+            .slsUnauthorized({
               endpoint: 'POST /internal/observability_ai_assistant/kb/entries/save',
               params: {
                 body: {
@@ -227,45 +226,30 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                   text: 'My content',
                 },
               },
-            });
-            throw new ForbiddenApiError(
-              'Expected unauthorizedUser() to throw a 403 Forbidden error'
-            );
-          } catch (e) {
-            expect(e.status).to.be(403);
-          }
+            })
+            .expect(403);
         });
 
         it('GET /internal/observability_ai_assistant/kb/entries', async () => {
-          try {
-            await observabilityAIAssistantAPIClient.slsUnauthorized({
+          await observabilityAIAssistantAPIClient
+            .slsUnauthorized({
               endpoint: 'GET /internal/observability_ai_assistant/kb/entries',
               params: {
                 query: { query: '', sortBy: 'title', sortDirection: 'asc' },
               },
-            });
-            throw new ForbiddenApiError(
-              'Expected slsUnauthorized() to throw a 403 Forbidden error'
-            );
-          } catch (e) {
-            expect(e.status).to.be(403);
-          }
+            })
+            .expect(403);
         });
 
         it('DELETE /internal/observability_ai_assistant/kb/entries/{entryId}', async () => {
-          try {
-            await observabilityAIAssistantAPIClient.slsUnauthorized({
+          await observabilityAIAssistantAPIClient
+            .slsUnauthorized({
               endpoint: 'DELETE /internal/observability_ai_assistant/kb/entries/{entryId}',
               params: {
                 path: { entryId: 'my-doc-id-1' },
               },
-            });
-            throw new ForbiddenApiError(
-              'Expected slsUnauthorized() to throw a 403 Forbidden error'
-            );
-          } catch (e) {
-            expect(e.status).to.be(403);
-          }
+            })
+            .expect(403);
         });
       });
     });

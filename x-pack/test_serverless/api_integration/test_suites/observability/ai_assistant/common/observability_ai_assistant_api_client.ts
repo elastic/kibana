@@ -216,8 +216,8 @@ export async function getObservabilityAIAssistantApiClientService({
   // unauthorized user
   const supertestUnauthorizedWithCookieCredentials: SupertestWithRoleScope =
     await roleScopedSupertest.getSupertestWithRoleScope('viewer', {
-      useCookieHeader: true,
-      withInternalHeaders: false, // No internal headers for unauthorized users
+      useCookieHeader: false,
+      withInternalHeaders: true,
     });
 
   return {
