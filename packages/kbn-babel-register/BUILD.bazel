@@ -37,7 +37,7 @@ BUNDLER_DEPS = [
   "@npm//lmdb",
   "@npm//date-fns",
   "@npm//source-map-support",
-  "//packages/kbn-repo-packages",
+  "//src/platform/packages/private/kbn-repo-packages",
   "//src/platform/packages/shared/kbn-repo-info",
   "//packages/kbn-babel-transform",
 ]
