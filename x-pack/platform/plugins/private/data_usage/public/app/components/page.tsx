@@ -16,45 +16,57 @@ import {
   EuiTitle,
   EuiSpacer,
 } from '@elastic/eui';
+import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
 
-interface DataUsagePageProps {
+export interface DataUsagePageProps {
   title: React.ReactNode;
   subtitle?: React.ReactNode;
   actions?: React.ReactNode;
   restrictWidth?: boolean | number;
   hasBottomBorder?: boolean;
   hideHeader?: boolean;
+  'data-test-subj'?: string;
 }
 
 export const DataUsagePage = memo<PropsWithChildren<DataUsagePageProps & CommonProps>>(
-  ({ title, subtitle, children, restrictWidth = false, hasBottomBorder = true, ...otherProps }) => {
+  ({
+    title,
+    subtitle,
+    children,
+    restrictWidth = false,
+    hasBottomBorder = true,
+    'data-test-subj': dataTestSubj,
+    ...otherProps
+  }) => {
+    const getTestId = useTestIdGenerator(dataTestSubj);
+
     const header = useMemo(() => {
       return (
         <EuiFlexGroup direction="column" gutterSize="none" alignItems="flexStart">
           <EuiFlexItem grow={false}>
             <EuiTitle size="l">
-              <span data-test-subj="dataUsage-page-title">{title}</span>
+              <span data-test-subj={getTestId(`title`)}>{title}</span>
             </EuiTitle>
           </EuiFlexItem>
         </EuiFlexGroup>
       );
-    }, [, title]);
+    }, [getTestId, title]);
 
     const description = useMemo(() => {
       return subtitle ? (
-        <span data-test-subj="dataUsage-page-description">{subtitle}</span>
+        <span data-test-subj={getTestId(`description`)}>{subtitle}</span>
       ) : undefined;
-    }, [subtitle]);
+    }, [getTestId, subtitle]);
 
     return (
-      <div {...otherProps}>
+      <div {...otherProps} data-test-subj={dataTestSubj}>
         <>
           <EuiPageHeader
             pageTitle={header}
             description={description}
             bottomBorder={hasBottomBorder}
             restrictWidth={restrictWidth}
-            data-test-subj={'dataUsage-page-header'}
+            data-test-subj={getTestId('header')}
           />
           <EuiSpacer size="l" />
         </>

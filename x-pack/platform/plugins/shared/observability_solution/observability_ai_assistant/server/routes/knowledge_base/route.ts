@@ -12,7 +12,7 @@ import * as t from 'io-ts';
 import {
   InferenceInferenceEndpointInfo,
   MlDeploymentAllocationState,
-  MlDeploymentState,
+  MlDeploymentAssignmentState,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import moment from 'moment';
 import { createObservabilityAIAssistantServerRoute } from '../create_observability_ai_assistant_server_route';
@@ -34,7 +34,7 @@ const getKnowledgeBaseStatus = createObservabilityAIAssistantServerRoute({
     enabled: boolean;
     endpoint?: Partial<InferenceInferenceEndpointInfo>;
     model_stats?: {
-      deployment_state: MlDeploymentState | undefined;
+      deployment_state: MlDeploymentAssignmentState | undefined;
       allocation_state: MlDeploymentAllocationState | undefined;
     };
   }> => {

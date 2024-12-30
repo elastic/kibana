@@ -29,7 +29,11 @@ export function StreamDetailView() {
     },
   } = useKibana();
 
-  const { value: streamEntity, refresh } = useStreamsAppFetch(
+  const {
+    value: streamEntity,
+    refresh,
+    loading,
+  } = useStreamsAppFetch(
     ({ signal }) => {
       return streamsRepositoryClient.fetch('GET /api/streams/{id}', {
         signal,
@@ -58,7 +62,13 @@ export function StreamDetailView() {
     },
     {
       name: 'management',
-      content: <StreamDetailManagement definition={streamEntity} refreshDefinition={refresh} />,
+      content: (
+        <StreamDetailManagement
+          definition={streamEntity}
+          refreshDefinition={refresh}
+          isLoadingDefinition={loading}
+        />
+      ),
       label: i18n.translate('xpack.streams.streamDetailView.managementTab', {
         defaultMessage: 'Management',
       }),

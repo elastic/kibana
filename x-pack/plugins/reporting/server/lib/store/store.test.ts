@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import * as estypes from '@elastic/elasticsearch/lib/api/types';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { JOB_STATUS } from '@kbn/reporting-common';
 import { ReportDocument } from '@kbn/reporting-common/types';
@@ -212,7 +212,7 @@ describe('ReportingStore', () => {
 
     const [[updateCall]] = mockEsClient.update.mock.calls;
 
-    const response = (updateCall as estypes.UpdateRequest).body?.doc as Report;
+    const response = (updateCall as estypes.UpdateRequest)?.doc as Report;
     expect(response.migration_version).toBe(`7.14.0`);
     expect(response.status).toBe(`processing`);
     expect(updateCall.if_seq_no).toBe(42);
@@ -242,7 +242,7 @@ describe('ReportingStore', () => {
     await store.setReportFailed(report, { errors: 'yes' } as any);
 
     const [[updateCall]] = mockEsClient.update.mock.calls;
-    const response = (updateCall as estypes.UpdateRequest).body?.doc as Report;
+    const response = (updateCall as estypes.UpdateRequest)?.doc as Report;
     expect(response.migration_version).toBe(`7.14.0`);
     expect(response.status).toBe(`failed`);
     expect(updateCall.if_seq_no).toBe(43);
@@ -272,7 +272,7 @@ describe('ReportingStore', () => {
     await store.setReportError(report, { errors: 'yes' } as any);
 
     const [[updateCall]] = mockEsClient.update.mock.calls;
-    const response = (updateCall as estypes.UpdateRequest).body?.doc as Report;
+    const response = (updateCall as estypes.UpdateRequest)?.doc as Report;
     expect(response.migration_version).toBe(`7.14.0`);
     expect(updateCall.if_seq_no).toBe(43);
     expect(updateCall.if_primary_term).toBe(10002);
@@ -301,7 +301,7 @@ describe('ReportingStore', () => {
     await store.setReportCompleted(report, { certainly_completed: 'yes' } as any);
 
     const [[updateCall]] = mockEsClient.update.mock.calls;
-    const response = (updateCall as estypes.UpdateRequest).body?.doc as Report;
+    const response = (updateCall as estypes.UpdateRequest)?.doc as Report;
     expect(response.migration_version).toBe(`7.14.0`);
     expect(response.status).toBe(`completed`);
     expect(updateCall.if_seq_no).toBe(44);
@@ -336,7 +336,7 @@ describe('ReportingStore', () => {
     } as any);
 
     const [[updateCall]] = mockEsClient.update.mock.calls;
-    const response = (updateCall as estypes.UpdateRequest).body?.doc as Report;
+    const response = (updateCall as estypes.UpdateRequest)?.doc as Report;
 
     expect(response.migration_version).toBe(`7.14.0`);
     expect(response.status).toBe(`completed_with_warnings`);

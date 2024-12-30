@@ -107,51 +107,35 @@
           },
           {
             "plugin": "cases",
-            "path": "x-pack/plugins/cases/common/ui/types.ts"
+            "path": "x-pack/platform/plugins/shared/cases/common/ui/types.ts"
           },
           {
             "plugin": "cases",
-            "path": "x-pack/plugins/cases/common/ui/types.ts"
+            "path": "x-pack/platform/plugins/shared/cases/common/ui/types.ts"
           },
           {
             "plugin": "cases",
-            "path": "x-pack/plugins/cases/common/ui/types.ts"
+            "path": "x-pack/platform/plugins/shared/cases/common/ui/types.ts"
           },
           {
             "plugin": "cases",
-            "path": "x-pack/plugins/cases/common/ui/types.ts"
+            "path": "x-pack/platform/plugins/shared/cases/common/ui/types.ts"
           },
           {
             "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/routes/map_page/saved_map/load_from_library.ts"
+            "path": "x-pack/platform/plugins/shared/maps/public/routes/map_page/saved_map/load_from_library.ts"
           },
           {
             "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/routes/map_page/saved_map/load_from_library.ts"
+            "path": "x-pack/platform/plugins/shared/maps/public/routes/map_page/saved_map/load_from_library.ts"
           },
           {
             "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/routes/map_page/saved_map/load_from_library.ts"
+            "path": "x-pack/platform/plugins/shared/maps/public/routes/map_page/saved_map/load_from_library.ts"
           },
           {
             "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/routes/map_page/saved_map/load_from_library.ts"
-          },
-          {
-            "plugin": "canvas",
-            "path": "x-pack/plugins/canvas/public/services/canvas_workpad_service.ts"
-          },
-          {
-            "plugin": "canvas",
-            "path": "x-pack/plugins/canvas/public/services/canvas_workpad_service.ts"
-          },
-          {
-            "plugin": "canvas",
-            "path": "x-pack/plugins/canvas/public/services/canvas_workpad_service.ts"
-          },
-          {
-            "plugin": "canvas",
-            "path": "x-pack/plugins/canvas/public/services/canvas_workpad_service.ts"
+            "path": "x-pack/platform/plugins/shared/maps/public/routes/map_page/saved_map/load_from_library.ts"
           },
           {
             "plugin": "graph",
@@ -168,6 +152,22 @@
           {
             "plugin": "graph",
             "path": "x-pack/plugins/graph/public/helpers/use_workspace_loader.ts"
+          },
+          {
+            "plugin": "canvas",
+            "path": "x-pack/platform/plugins/private/canvas/public/services/canvas_workpad_service.ts"
+          },
+          {
+            "plugin": "canvas",
+            "path": "x-pack/platform/plugins/private/canvas/public/services/canvas_workpad_service.ts"
+          },
+          {
+            "plugin": "canvas",
+            "path": "x-pack/platform/plugins/private/canvas/public/services/canvas_workpad_service.ts"
+          },
+          {
+            "plugin": "canvas",
+            "path": "x-pack/platform/plugins/private/canvas/public/services/canvas_workpad_service.ts"
           }
         ],
         "children": [
@@ -1477,7 +1477,7 @@
               },
               {
                 "plugin": "dashboardEnhanced",
-                "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/components/collect_config_container.tsx"
+                "path": "x-pack/platform/plugins/shared/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/components/collect_config_container.tsx"
               },
               {
                 "plugin": "@kbn/core-saved-objects-browser-internal",
@@ -1557,7 +1557,7 @@
               },
               {
                 "plugin": "dashboardEnhanced",
-                "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/components/collect_config_container.tsx"
+                "path": "x-pack/platform/plugins/shared/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/components/collect_config_container.tsx"
               },
               {
                 "plugin": "@kbn/core-saved-objects-browser-internal",
@@ -2808,22 +2808,6 @@
             "path": "x-pack/platform/plugins/private/data_visualizer/common/types/index.ts"
           },
           {
-            "plugin": "ml",
-            "path": "x-pack/platform/plugins/shared/ml/common/types/kibana.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/platform/plugins/shared/ml/common/types/kibana.ts"
-          },
-          {
-            "plugin": "dashboardEnhanced",
-            "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/components/collect_config_container.tsx"
-          },
-          {
-            "plugin": "dashboardEnhanced",
-            "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/components/collect_config_container.tsx"
-          },
-          {
             "plugin": "graph",
             "path": "x-pack/plugins/graph/public/types/app_state.ts"
           },
@@ -2848,12 +2832,28 @@
             "path": "x-pack/plugins/lens/public/persistence/saved_objects_utils/find_object_by_title.test.ts"
           },
           {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/hooks/types.ts"
+            "plugin": "ml",
+            "path": "x-pack/platform/plugins/shared/ml/common/types/kibana.ts"
+          },
+          {
+            "plugin": "ml",
+            "path": "x-pack/platform/plugins/shared/ml/common/types/kibana.ts"
+          },
+          {
+            "plugin": "dashboardEnhanced",
+            "path": "x-pack/platform/plugins/shared/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/components/collect_config_container.tsx"
+          },
+          {
+            "plugin": "dashboardEnhanced",
+            "path": "x-pack/platform/plugins/shared/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/components/collect_config_container.tsx"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/hooks/types.ts"
+            "path": "x-pack/solutions/security/plugins/security_solution/public/common/hooks/types.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/common/hooks/types.ts"
           },
           {
             "plugin": "eventAnnotation",

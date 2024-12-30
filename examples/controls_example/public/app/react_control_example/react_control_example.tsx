@@ -371,10 +371,10 @@ export const ReactControlExample = ({
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButton
-                onClick={async () => {
+                onClick={() => {
                   if (controlGroupApi) {
                     saveNotification$.next();
-                    setControlGroupSerializedState(await controlGroupApi.serializeState());
+                    setControlGroupSerializedState(controlGroupApi.serializeState());
                   }
                 }}
               >

@@ -14,7 +14,7 @@
       "tags": [],
       "label": "IntegrationAssistantPluginSetup",
       "description": [],
-      "path": "x-pack/plugins/integration_assistant/public/types.ts",
+      "path": "x-pack/platform/plugins/shared/integration_assistant/public/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -28,7 +28,7 @@
       "tags": [],
       "label": "IntegrationAssistantPluginStart",
       "description": [],
-      "path": "x-pack/plugins/integration_assistant/public/types.ts",
+      "path": "x-pack/platform/plugins/shared/integration_assistant/public/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -46,7 +46,7 @@
             "CreateIntegrationCardButtonComponent",
             "; }"
           ],
-          "path": "x-pack/plugins/integration_assistant/public/types.ts",
+          "path": "x-pack/platform/plugins/shared/integration_assistant/public/types.ts",
           "deprecated": false,
           "trackAdoption": false
         },
@@ -62,7 +62,7 @@
           "signature": [
             "(upselling: React.ReactNode) => void"
           ],
-          "path": "x-pack/plugins/integration_assistant/public/types.ts",
+          "path": "x-pack/platform/plugins/shared/integration_assistant/public/types.ts",
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -76,7 +76,7 @@
               "signature": [
                 "React.ReactNode"
               ],
-              "path": "x-pack/plugins/integration_assistant/public/types.ts",
+              "path": "x-pack/platform/plugins/shared/integration_assistant/public/types.ts",
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": false
@@ -103,7 +103,7 @@
       "tags": [],
       "label": "IntegrationAssistantPluginSetup",
       "description": [],
-      "path": "x-pack/plugins/integration_assistant/server/types.ts",
+      "path": "x-pack/platform/plugins/shared/integration_assistant/server/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -117,7 +117,7 @@
           "signature": [
             "(isAvailable: boolean) => void"
           ],
-          "path": "x-pack/plugins/integration_assistant/server/types.ts",
+          "path": "x-pack/platform/plugins/shared/integration_assistant/server/types.ts",
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -131,7 +131,7 @@
               "signature": [
                 "boolean"
               ],
-              "path": "x-pack/plugins/integration_assistant/server/types.ts",
+              "path": "x-pack/platform/plugins/shared/integration_assistant/server/types.ts",
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -150,7 +150,7 @@
       "tags": [],
       "label": "IntegrationAssistantPluginStart",
       "description": [],
-      "path": "x-pack/plugins/integration_assistant/server/types.ts",
+      "path": "x-pack/platform/plugins/shared/integration_assistant/server/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -173,7 +173,7 @@
         "signature": [
           "(arr: T[], start: number, end: number, seed: string) => void"
         ],
-        "path": "x-pack/plugins/integration_assistant/common/utils.ts",
+        "path": "x-pack/platform/plugins/shared/integration_assistant/common/utils.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -189,7 +189,7 @@
             "signature": [
               "T[]"
             ],
-            "path": "x-pack/plugins/integration_assistant/common/utils.ts",
+            "path": "x-pack/platform/plugins/shared/integration_assistant/common/utils.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -206,7 +206,7 @@
             "signature": [
               "number"
             ],
-            "path": "x-pack/plugins/integration_assistant/common/utils.ts",
+            "path": "x-pack/platform/plugins/shared/integration_assistant/common/utils.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -223,7 +223,7 @@
             "signature": [
               "number"
             ],
-            "path": "x-pack/plugins/integration_assistant/common/utils.ts",
+            "path": "x-pack/platform/plugins/shared/integration_assistant/common/utils.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -238,7 +238,7 @@
             "signature": [
               "string"
             ],
-            "path": "x-pack/plugins/integration_assistant/common/utils.ts",
+            "path": "x-pack/platform/plugins/shared/integration_assistant/common/utils.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -258,7 +258,7 @@
         "description": [
           "\nProcessor item for the Elasticsearch processor."
         ],
-        "path": "x-pack/plugins/integration_assistant/common/api/model/processor_attributes.gen.ts",
+        "path": "x-pack/platform/plugins/shared/integration_assistant/common/api/model/processor_attributes.gen.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -273,7 +273,7 @@
               "[key: string]:  ",
               "ESProcessorOptions"
             ],
-            "path": "x-pack/plugins/integration_assistant/common/api/model/processor_attributes.gen.ts",
+            "path": "x-pack/platform/plugins/shared/integration_assistant/common/api/model/processor_attributes.gen.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -290,7 +290,7 @@
         "tags": [],
         "label": "ANALYZE_LOGS_PATH",
         "description": [],
-        "path": "x-pack/plugins/integration_assistant/common/constants.ts",
+        "path": "x-pack/platform/plugins/shared/integration_assistant/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -305,7 +305,7 @@
         "signature": [
           "{ connectorId: string; packageName: string; dataStreamName: string; packageTitle: string; dataStreamTitle: string; logSamples: string[]; langSmithOptions?: { apiKey: string; projectName: string; } | undefined; }"
         ],
-        "path": "x-pack/plugins/integration_assistant/common/api/analyze_logs/analyze_logs_route.gen.ts",
+        "path": "x-pack/platform/plugins/shared/integration_assistant/common/api/analyze_logs/analyze_logs_route.gen.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -328,7 +328,7 @@
           },
           "[] | undefined; }"
         ],
-        "path": "x-pack/plugins/integration_assistant/common/api/analyze_logs/analyze_logs_route.gen.ts",
+        "path": "x-pack/platform/plugins/shared/integration_assistant/common/api/analyze_logs/analyze_logs_route.gen.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -359,7 +359,7 @@
           },
           "[] | undefined; }; docs: Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\">[]; samplesFormat: { name: \"unsupported\" | \"json\" | \"ndjson\" | \"csv\" | \"structured\" | \"unstructured\" | \"cef\" | \"leef\" | \"fix\"; columns?: string[] | undefined; header?: boolean | undefined; multiline?: boolean | undefined; json_path?: string[] | undefined; }; celInput?: { program: string; stateSettings: {} & { [k: string]: unknown; }; redactVars: string[]; } | undefined; }[]; logo?: string | undefined; }; }"
         ],
-        "path": "x-pack/plugins/integration_assistant/common/api/build_integration/build_integration.gen.ts",
+        "path": "x-pack/platform/plugins/shared/integration_assistant/common/api/build_integration/build_integration.gen.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -371,7 +371,7 @@
         "tags": [],
         "label": "CATEGORIZATION_GRAPH_PATH",
         "description": [],
-        "path": "x-pack/plugins/integration_assistant/common/constants.ts",
+        "path": "x-pack/platform/plugins/shared/integration_assistant/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -402,7 +402,7 @@
           },
           "[] | undefined; }; langSmithOptions?: { apiKey: string; projectName: string; } | undefined; }"
         ],
-        "path": "x-pack/plugins/integration_assistant/common/api/categorization/categorization_route.gen.ts",
+        "path": "x-pack/platform/plugins/shared/integration_assistant/common/api/categorization/categorization_route.gen.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -433,7 +433,7 @@
           },
           "[] | undefined; }; docs: Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\">[]; }; }"
         ],
-        "path": "x-pack/plugins/integration_assistant/common/api/categorization/categorization_route.gen.ts",
+        "path": "x-pack/platform/plugins/shared/integration_assistant/common/api/categorization/categorization_route.gen.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -445,7 +445,7 @@
         "tags": [],
         "label": "CEL_INPUT_GRAPH_PATH",
         "description": [],
-        "path": "x-pack/plugins/integration_assistant/common/constants.ts",
+        "path": "x-pack/platform/plugins/shared/integration_assistant/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -462,7 +462,7 @@
         "signature": [
           "{ program: string; stateSettings: {} & { [k: string]: unknown; }; redactVars: string[]; }"
         ],
-        "path": "x-pack/plugins/integration_assistant/common/api/model/cel_input_attributes.gen.ts",
+        "path": "x-pack/platform/plugins/shared/integration_assistant/common/api/model/cel_input_attributes.gen.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -477,7 +477,7 @@
         "signature": [
           "{ connectorId: string; dataStreamName: string; apiDefinition: string; langSmithOptions?: { apiKey: string; projectName: string; } | undefined; }"
         ],
-        "path": "x-pack/plugins/integration_assistant/common/api/cel/cel_input_route.gen.ts",
+        "path": "x-pack/platform/plugins/shared/integration_assistant/common/api/cel/cel_input_route.gen.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -492,7 +492,7 @@
         "signature": [
           "{ results: { program: string; stateSettings: {} & { [k: string]: unknown; }; redactVars: string[]; }; }"
         ],
-        "path": "x-pack/plugins/integration_assistant/common/api/cel/cel_input_route.gen.ts",
+        "path": "x-pack/platform/plugins/shared/integration_assistant/common/api/cel/cel_input_route.gen.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -504,7 +504,7 @@
         "tags": [],
         "label": "CHECK_PIPELINE_PATH",
         "description": [],
-        "path": "x-pack/plugins/integration_assistant/common/constants.ts",
+        "path": "x-pack/platform/plugins/shared/integration_assistant/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -535,7 +535,7 @@
           },
           "[] | undefined; }; }"
         ],
-        "path": "x-pack/plugins/integration_assistant/common/api/check_pipeline/check_pipeline.gen.ts",
+        "path": "x-pack/platform/plugins/shared/integration_assistant/common/api/check_pipeline/check_pipeline.gen.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -550,7 +550,7 @@
         "signature": [
           "{ results: { docs: Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\">[]; }; }"
         ],
-        "path": "x-pack/plugins/integration_assistant/common/api/check_pipeline/check_pipeline.gen.ts",
+        "path": "x-pack/platform/plugins/shared/integration_assistant/common/api/check_pipeline/check_pipeline.gen.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -583,7 +583,7 @@
           },
           "[] | undefined; }; docs: Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\">[]; samplesFormat: { name: \"unsupported\" | \"json\" | \"ndjson\" | \"csv\" | \"structured\" | \"unstructured\" | \"cef\" | \"leef\" | \"fix\"; columns?: string[] | undefined; header?: boolean | undefined; multiline?: boolean | undefined; json_path?: string[] | undefined; }; celInput?: { program: string; stateSettings: {} & { [k: string]: unknown; }; redactVars: string[]; } | undefined; }"
         ],
-        "path": "x-pack/plugins/integration_assistant/common/api/model/common_attributes.gen.ts",
+        "path": "x-pack/platform/plugins/shared/integration_assistant/common/api/model/common_attributes.gen.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -600,7 +600,7 @@
         "signature": [
           "Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\">[]"
         ],
-        "path": "x-pack/plugins/integration_assistant/common/api/model/common_attributes.gen.ts",
+        "path": "x-pack/platform/plugins/shared/integration_assistant/common/api/model/common_attributes.gen.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -612,7 +612,7 @@
         "tags": [],
         "label": "ECS_GRAPH_PATH",
         "description": [],
-        "path": "x-pack/plugins/integration_assistant/common/constants.ts",
+        "path": "x-pack/platform/plugins/shared/integration_assistant/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -635,7 +635,7 @@
           },
           "[] | undefined; }"
         ],
-        "path": "x-pack/plugins/integration_assistant/common/api/ecs/ecs_route.gen.ts",
+        "path": "x-pack/platform/plugins/shared/integration_assistant/common/api/ecs/ecs_route.gen.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -666,7 +666,7 @@
           },
           "[] | undefined; }; mapping: {} & { [k: string]: unknown; }; }; }"
         ],
-        "path": "x-pack/plugins/integration_assistant/common/api/ecs/ecs_route.gen.ts",
+        "path": "x-pack/platform/plugins/shared/integration_assistant/common/api/ecs/ecs_route.gen.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -683,7 +683,7 @@
         "signature": [
           "\"kafka\" | \"aws-cloudwatch\" | \"aws-s3\" | \"azure-blob-storage\" | \"azure-eventhub\" | \"cel\" | \"cloudfoundry\" | \"filestream\" | \"gcp-pubsub\" | \"gcs\" | \"http_endpoint\" | \"journald\" | \"tcp\" | \"udp\""
         ],
-        "path": "x-pack/plugins/integration_assistant/common/api/model/common_attributes.gen.ts",
+        "path": "x-pack/platform/plugins/shared/integration_assistant/common/api/model/common_attributes.gen.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -716,7 +716,7 @@
           },
           "[] | undefined; }; docs: Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\">[]; samplesFormat: { name: \"unsupported\" | \"json\" | \"ndjson\" | \"csv\" | \"structured\" | \"unstructured\" | \"cef\" | \"leef\" | \"fix\"; columns?: string[] | undefined; header?: boolean | undefined; multiline?: boolean | undefined; json_path?: string[] | undefined; }; celInput?: { program: string; stateSettings: {} & { [k: string]: unknown; }; redactVars: string[]; } | undefined; }[]; logo?: string | undefined; }"
         ],
-        "path": "x-pack/plugins/integration_assistant/common/api/model/common_attributes.gen.ts",
+        "path": "x-pack/platform/plugins/shared/integration_assistant/common/api/model/common_attributes.gen.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -731,7 +731,7 @@
         "signature": [
           "\"/app/integration_assistant\""
         ],
-        "path": "x-pack/plugins/integration_assistant/common/constants.ts",
+        "path": "x-pack/platform/plugins/shared/integration_assistant/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -744,9 +744,9 @@
         "label": "INTEGRATION_ASSISTANT_BASE_PATH",
         "description": [],
         "signature": [
-          "\"/api/integration_assistant\""
+          "\"/internal/automatic_import\""
         ],
-        "path": "x-pack/plugins/integration_assistant/common/constants.ts",
+        "path": "x-pack/platform/plugins/shared/integration_assistant/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -758,7 +758,7 @@
         "tags": [],
         "label": "INTEGRATION_BUILDER_PATH",
         "description": [],
-        "path": "x-pack/plugins/integration_assistant/common/constants.ts",
+        "path": "x-pack/platform/plugins/shared/integration_assistant/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -775,7 +775,7 @@
         "signature": [
           "{ apiKey: string; projectName: string; }"
         ],
-        "path": "x-pack/plugins/integration_assistant/common/api/model/common_attributes.gen.ts",
+        "path": "x-pack/platform/plugins/shared/integration_assistant/common/api/model/common_attributes.gen.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -808,7 +808,7 @@
           },
           "[] | undefined; }"
         ],
-        "path": "x-pack/plugins/integration_assistant/common/api/model/common_attributes.gen.ts",
+        "path": "x-pack/platform/plugins/shared/integration_assistant/common/api/model/common_attributes.gen.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -823,7 +823,7 @@
         "signature": [
           "\"integrationAssistant\""
         ],
-        "path": "x-pack/plugins/integration_assistant/common/constants.ts",
+        "path": "x-pack/platform/plugins/shared/integration_assistant/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -835,7 +835,7 @@
         "tags": [],
         "label": "RELATED_GRAPH_PATH",
         "description": [],
-        "path": "x-pack/plugins/integration_assistant/common/constants.ts",
+        "path": "x-pack/platform/plugins/shared/integration_assistant/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -866,7 +866,7 @@
           },
           "[] | undefined; }; langSmithOptions?: { apiKey: string; projectName: string; } | undefined; }"
         ],
-        "path": "x-pack/plugins/integration_assistant/common/api/related/related_route.gen.ts",
+        "path": "x-pack/platform/plugins/shared/integration_assistant/common/api/related/related_route.gen.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -897,7 +897,7 @@
           },
           "[] | undefined; }; docs: Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\">[]; }; }"
         ],
-        "path": "x-pack/plugins/integration_assistant/common/api/related/related_route.gen.ts",
+        "path": "x-pack/platform/plugins/shared/integration_assistant/common/api/related/related_route.gen.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -914,7 +914,7 @@
         "signature": [
           "{ name: \"unsupported\" | \"json\" | \"ndjson\" | \"csv\" | \"structured\" | \"unstructured\" | \"cef\" | \"leef\" | \"fix\"; columns?: string[] | undefined; header?: boolean | undefined; multiline?: boolean | undefined; json_path?: string[] | undefined; }"
         ],
-        "path": "x-pack/plugins/integration_assistant/common/api/model/common_attributes.gen.ts",
+        "path": "x-pack/platform/plugins/shared/integration_assistant/common/api/model/common_attributes.gen.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -931,7 +931,7 @@
         "signature": [
           "\"ndjson\" | \"json\" | \"csv\" | \"structured\" | \"unstructured\" | \"unsupported\" | \"cef\" | \"leef\" | \"fix\""
         ],
-        "path": "x-pack/plugins/integration_assistant/common/api/model/common_attributes.gen.ts",
+        "path": "x-pack/platform/plugins/shared/integration_assistant/common/api/model/common_attributes.gen.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -948,7 +948,7 @@
         "signature": [
           "Zod.ZodObject<{ packageName: Zod.ZodString; dataStreamName: Zod.ZodString; packageTitle: Zod.ZodString; dataStreamTitle: Zod.ZodString; logSamples: Zod.ZodArray<Zod.ZodString, \"many\">; connectorId: Zod.ZodString; langSmithOptions: Zod.ZodOptional<Zod.ZodObject<{ projectName: Zod.ZodString; apiKey: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { apiKey: string; projectName: string; }, { apiKey: string; projectName: string; }>>; }, \"strip\", Zod.ZodTypeAny, { connectorId: string; packageName: string; dataStreamName: string; packageTitle: string; dataStreamTitle: string; logSamples: string[]; langSmithOptions?: { apiKey: string; projectName: string; } | undefined; }, { connectorId: string; packageName: string; dataStreamName: string; packageTitle: string; dataStreamTitle: string; logSamples: string[]; langSmithOptions?: { apiKey: string; projectName: string; } | undefined; }>"
         ],
-        "path": "x-pack/plugins/integration_assistant/common/api/analyze_logs/analyze_logs_route.gen.ts",
+        "path": "x-pack/platform/plugins/shared/integration_assistant/common/api/analyze_logs/analyze_logs_route.gen.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -983,7 +983,7 @@
           "ESProcessorItemInput",
           "[] | undefined; }>"
         ],
-        "path": "x-pack/plugins/integration_assistant/common/api/analyze_logs/analyze_logs_route.gen.ts",
+        "path": "x-pack/platform/plugins/shared/integration_assistant/common/api/analyze_logs/analyze_logs_route.gen.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1098,7 +1098,7 @@
           "ESProcessorItemInput",
           "[] | undefined; }; docs: Zod.objectInputType<{}, Zod.ZodUnknown, \"strip\">[]; samplesFormat: { name: \"unsupported\" | \"json\" | \"ndjson\" | \"csv\" | \"structured\" | \"unstructured\" | \"cef\" | \"leef\" | \"fix\"; columns?: string[] | undefined; header?: boolean | undefined; multiline?: boolean | undefined; json_path?: string[] | undefined; }; celInput?: { program: string; stateSettings: {} & { [k: string]: unknown; }; redactVars: string[]; } | undefined; }[]; logo?: string | undefined; }; }>"
         ],
-        "path": "x-pack/plugins/integration_assistant/common/api/build_integration/build_integration.gen.ts",
+        "path": "x-pack/platform/plugins/shared/integration_assistant/common/api/build_integration/build_integration.gen.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1173,7 +1173,7 @@
           "ESProcessorItemInput",
           "[] | undefined; }; langSmithOptions?: { apiKey: string; projectName: string; } | undefined; }>"
         ],
-        "path": "x-pack/plugins/integration_assistant/common/api/categorization/categorization_route.gen.ts",
+        "path": "x-pack/platform/plugins/shared/integration_assistant/common/api/categorization/categorization_route.gen.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1268,7 +1268,7 @@
           "ESProcessorItemInput",
           "[] | undefined; }; docs: Zod.objectInputType<{}, Zod.ZodUnknown, \"strip\">[]; }; }>"
         ],
-        "path": "x-pack/plugins/integration_assistant/common/api/categorization/categorization_route.gen.ts",
+        "path": "x-pack/platform/plugins/shared/integration_assistant/common/api/categorization/categorization_route.gen.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1283,7 +1283,7 @@
         "signature": [
           "Zod.ZodObject<{ program: Zod.ZodString; stateSettings: Zod.ZodObject<{}, \"strip\", Zod.ZodUnknown, Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\">, Zod.objectInputType<{}, Zod.ZodUnknown, \"strip\">>; redactVars: Zod.ZodArray<Zod.ZodString, \"many\">; }, \"strip\", Zod.ZodTypeAny, { program: string; stateSettings: {} & { [k: string]: unknown; }; redactVars: string[]; }, { program: string; stateSettings: {} & { [k: string]: unknown; }; redactVars: string[]; }>"
         ],
-        "path": "x-pack/plugins/integration_assistant/common/api/model/cel_input_attributes.gen.ts",
+        "path": "x-pack/platform/plugins/shared/integration_assistant/common/api/model/cel_input_attributes.gen.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1298,7 +1298,7 @@
         "signature": [
           "Zod.ZodObject<{ dataStreamName: Zod.ZodString; apiDefinition: Zod.ZodString; connectorId: Zod.ZodString; langSmithOptions: Zod.ZodOptional<Zod.ZodObject<{ projectName: Zod.ZodString; apiKey: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { apiKey: string; projectName: string; }, { apiKey: string; projectName: string; }>>; }, \"strip\", Zod.ZodTypeAny, { connectorId: string; dataStreamName: string; apiDefinition: string; langSmithOptions?: { apiKey: string; projectName: string; } | undefined; }, { connectorId: string; dataStreamName: string; apiDefinition: string; langSmithOptions?: { apiKey: string; projectName: string; } | undefined; }>"
         ],
-        "path": "x-pack/plugins/integration_assistant/common/api/cel/cel_input_route.gen.ts",
+        "path": "x-pack/platform/plugins/shared/integration_assistant/common/api/cel/cel_input_route.gen.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1313,7 +1313,7 @@
         "signature": [
           "Zod.ZodObject<{ results: Zod.ZodObject<{ program: Zod.ZodString; stateSettings: Zod.ZodObject<{}, \"strip\", Zod.ZodUnknown, Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\">, Zod.objectInputType<{}, Zod.ZodUnknown, \"strip\">>; redactVars: Zod.ZodArray<Zod.ZodString, \"many\">; }, \"strip\", Zod.ZodTypeAny, { program: string; stateSettings: {} & { [k: string]: unknown; }; redactVars: string[]; }, { program: string; stateSettings: {} & { [k: string]: unknown; }; redactVars: string[]; }>; }, \"strip\", Zod.ZodTypeAny, { results: { program: string; stateSettings: {} & { [k: string]: unknown; }; redactVars: string[]; }; }, { results: { program: string; stateSettings: {} & { [k: string]: unknown; }; redactVars: string[]; }; }>"
         ],
-        "path": "x-pack/plugins/integration_assistant/common/api/cel/cel_input_route.gen.ts",
+        "path": "x-pack/platform/plugins/shared/integration_assistant/common/api/cel/cel_input_route.gen.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1388,7 +1388,7 @@
           "ESProcessorItemInput",
           "[] | undefined; }; }>"
         ],
-        "path": "x-pack/plugins/integration_assistant/common/api/check_pipeline/check_pipeline.gen.ts",
+        "path": "x-pack/platform/plugins/shared/integration_assistant/common/api/check_pipeline/check_pipeline.gen.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1403,7 +1403,7 @@
         "signature": [
           "Zod.ZodObject<{ results: Zod.ZodObject<{ docs: Zod.ZodArray<Zod.ZodObject<{}, \"strip\", Zod.ZodUnknown, Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\">, Zod.objectInputType<{}, Zod.ZodUnknown, \"strip\">>, \"many\">; }, \"strip\", Zod.ZodTypeAny, { docs: Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\">[]; }, { docs: Zod.objectInputType<{}, Zod.ZodUnknown, \"strip\">[]; }>; }, \"strip\", Zod.ZodTypeAny, { results: { docs: Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\">[]; }; }, { results: { docs: Zod.objectInputType<{}, Zod.ZodUnknown, \"strip\">[]; }; }>"
         ],
-        "path": "x-pack/plugins/integration_assistant/common/api/check_pipeline/check_pipeline.gen.ts",
+        "path": "x-pack/platform/plugins/shared/integration_assistant/common/api/check_pipeline/check_pipeline.gen.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1478,7 +1478,7 @@
           "ESProcessorItemInput",
           "[] | undefined; }; docs: Zod.objectInputType<{}, Zod.ZodUnknown, \"strip\">[]; samplesFormat: { name: \"unsupported\" | \"json\" | \"ndjson\" | \"csv\" | \"structured\" | \"unstructured\" | \"cef\" | \"leef\" | \"fix\"; columns?: string[] | undefined; header?: boolean | undefined; multiline?: boolean | undefined; json_path?: string[] | undefined; }; celInput?: { program: string; stateSettings: {} & { [k: string]: unknown; }; redactVars: string[]; } | undefined; }>"
         ],
-        "path": "x-pack/plugins/integration_assistant/common/api/model/common_attributes.gen.ts",
+        "path": "x-pack/platform/plugins/shared/integration_assistant/common/api/model/common_attributes.gen.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1493,7 +1493,7 @@
         "signature": [
           "Zod.ZodArray<Zod.ZodObject<{}, \"strip\", Zod.ZodUnknown, Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\">, Zod.objectInputType<{}, Zod.ZodUnknown, \"strip\">>, \"many\">"
         ],
-        "path": "x-pack/plugins/integration_assistant/common/api/model/common_attributes.gen.ts",
+        "path": "x-pack/platform/plugins/shared/integration_assistant/common/api/model/common_attributes.gen.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1528,7 +1528,7 @@
           "ESProcessorItemInput",
           "[] | undefined; }>"
         ],
-        "path": "x-pack/plugins/integration_assistant/common/api/ecs/ecs_route.gen.ts",
+        "path": "x-pack/platform/plugins/shared/integration_assistant/common/api/ecs/ecs_route.gen.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1623,7 +1623,7 @@
           "ESProcessorItemInput",
           "[] | undefined; }; mapping: {} & { [k: string]: unknown; }; }; }>"
         ],
-        "path": "x-pack/plugins/integration_assistant/common/api/ecs/ecs_route.gen.ts",
+        "path": "x-pack/platform/plugins/shared/integration_assistant/common/api/ecs/ecs_route.gen.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1648,7 +1648,7 @@
           "ESProcessorItemInput",
           ">"
         ],
-        "path": "x-pack/plugins/integration_assistant/common/api/model/processor_attributes.gen.ts",
+        "path": "x-pack/platform/plugins/shared/integration_assistant/common/api/model/processor_attributes.gen.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1663,7 +1663,7 @@
         "signature": [
           "Zod.ZodEnum<[\"aws-cloudwatch\", \"aws-s3\", \"azure-blob-storage\", \"azure-eventhub\", \"cel\", \"cloudfoundry\", \"filestream\", \"gcp-pubsub\", \"gcs\", \"http_endpoint\", \"journald\", \"kafka\", \"tcp\", \"udp\"]>"
         ],
-        "path": "x-pack/plugins/integration_assistant/common/api/model/common_attributes.gen.ts",
+        "path": "x-pack/platform/plugins/shared/integration_assistant/common/api/model/common_attributes.gen.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1758,7 +1758,7 @@
           "ESProcessorItemInput",
           "[] | undefined; }; docs: Zod.objectInputType<{}, Zod.ZodUnknown, \"strip\">[]; samplesFormat: { name: \"unsupported\" | \"json\" | \"ndjson\" | \"csv\" | \"structured\" | \"unstructured\" | \"cef\" | \"leef\" | \"fix\"; columns?: string[] | undefined; header?: boolean | undefined; multiline?: boolean | undefined; json_path?: string[] | undefined; }; celInput?: { program: string; stateSettings: {} & { [k: string]: unknown; }; redactVars: string[]; } | undefined; }[]; logo?: string | undefined; }>"
         ],
-        "path": "x-pack/plugins/integration_assistant/common/api/model/common_attributes.gen.ts",
+        "path": "x-pack/platform/plugins/shared/integration_assistant/common/api/model/common_attributes.gen.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1773,7 +1773,7 @@
         "signature": [
           "Zod.ZodObject<{ projectName: Zod.ZodString; apiKey: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { apiKey: string; projectName: string; }, { apiKey: string; projectName: string; }>"
         ],
-        "path": "x-pack/plugins/integration_assistant/common/api/model/common_attributes.gen.ts",
+        "path": "x-pack/platform/plugins/shared/integration_assistant/common/api/model/common_attributes.gen.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1828,7 +1828,7 @@
           "ESProcessorItemInput",
           "[] | undefined; }>"
         ],
-        "path": "x-pack/plugins/integration_assistant/common/api/model/common_attributes.gen.ts",
+        "path": "x-pack/platform/plugins/shared/integration_assistant/common/api/model/common_attributes.gen.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1903,7 +1903,7 @@
           "ESProcessorItemInput",
           "[] | undefined; }; langSmithOptions?: { apiKey: string; projectName: string; } | undefined; }>"
         ],
-        "path": "x-pack/plugins/integration_assistant/common/api/related/related_route.gen.ts",
+        "path": "x-pack/platform/plugins/shared/integration_assistant/common/api/related/related_route.gen.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1998,7 +1998,7 @@
           "ESProcessorItemInput",
           "[] | undefined; }; docs: Zod.objectInputType<{}, Zod.ZodUnknown, \"strip\">[]; }; }>"
         ],
-        "path": "x-pack/plugins/integration_assistant/common/api/related/related_route.gen.ts",
+        "path": "x-pack/platform/plugins/shared/integration_assistant/common/api/related/related_route.gen.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2013,7 +2013,7 @@
         "signature": [
           "Zod.ZodObject<{ name: Zod.ZodEnum<[\"ndjson\", \"json\", \"csv\", \"structured\", \"unstructured\", \"unsupported\", \"cef\", \"leef\", \"fix\"]>; multiline: Zod.ZodOptional<Zod.ZodBoolean>; header: Zod.ZodOptional<Zod.ZodBoolean>; columns: Zod.ZodOptional<Zod.ZodArray<Zod.ZodString, \"many\">>; json_path: Zod.ZodOptional<Zod.ZodArray<Zod.ZodString, \"many\">>; }, \"strip\", Zod.ZodTypeAny, { name: \"unsupported\" | \"json\" | \"ndjson\" | \"csv\" | \"structured\" | \"unstructured\" | \"cef\" | \"leef\" | \"fix\"; columns?: string[] | undefined; header?: boolean | undefined; multiline?: boolean | undefined; json_path?: string[] | undefined; }, { name: \"unsupported\" | \"json\" | \"ndjson\" | \"csv\" | \"structured\" | \"unstructured\" | \"cef\" | \"leef\" | \"fix\"; columns?: string[] | undefined; header?: boolean | undefined; multiline?: boolean | undefined; json_path?: string[] | undefined; }>"
         ],
-        "path": "x-pack/plugins/integration_assistant/common/api/model/common_attributes.gen.ts",
+        "path": "x-pack/platform/plugins/shared/integration_assistant/common/api/model/common_attributes.gen.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2028,7 +2028,7 @@
         "signature": [
           "Zod.ZodEnum<[\"ndjson\", \"json\", \"csv\", \"structured\", \"unstructured\", \"unsupported\", \"cef\", \"leef\", \"fix\"]>"
         ],
-        "path": "x-pack/plugins/integration_assistant/common/api/model/common_attributes.gen.ts",
+        "path": "x-pack/platform/plugins/shared/integration_assistant/common/api/model/common_attributes.gen.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
