@@ -319,5 +319,5 @@ Elastic will make a best effort to fix any issues, but experimental features are
 ====
 
 `xpack.fleet.enableManagedLogsAndMetricsDataviews`::
-Set to `true` (default), to enable the automatic creation of global logs-* and metrics-* data views.
+Set to `true` (default), to enable the automatic creation of global `logs-*` and `metrics-*` data views.
 
