@@ -414,7 +414,6 @@ packages/kbn-transpose-utils @elastic/kibana-visualizations
 packages/kbn-ts-projects @elastic/kibana-operations
 packages/kbn-ts-type-check-cli @elastic/kibana-operations
 packages/kbn-ui-actions-browser @elastic/appex-sharedux
-packages/kbn-ui-theme @elastic/kibana-operations
 packages/kbn-use-tracked-promise @elastic/obs-ux-logs-team
 packages/kbn-user-profile-components @elastic/kibana-security
 packages/kbn-utility-types @elastic/kibana-core
@@ -593,6 +592,7 @@ src/platform/packages/shared/kbn-timerange @elastic/obs-ux-logs-team
 src/platform/packages/shared/kbn-triggers-actions-ui-types @elastic/response-ops
 src/platform/packages/shared/kbn-try-in-console @elastic/search-kibana
 src/platform/packages/shared/kbn-typed-react-router-config @elastic/obs-knowledge-team @elastic/obs-ux-infra_services-team
+src/platform/packages/shared/kbn-ui-theme @elastic/kibana-operations
 src/platform/packages/shared/kbn-unified-data-table @elastic/kibana-data-discovery @elastic/security-threat-hunting-investigations
 src/platform/packages/shared/kbn-unified-doc-viewer @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-unified-field-list @elastic/kibana-data-discovery

@@ -3953,7 +3953,7 @@
   ],
   [
     "@kbn/ui-theme",
-    "packages/kbn-ui-theme"
+    "src/platform/packages/shared/kbn-ui-theme"
   ],
   [
     "@kbn/unified-data-table",

@@ -7777,7 +7777,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/ui-theme@link:packages/kbn-ui-theme":
+"@kbn/ui-theme@link:src/platform/packages/shared/kbn-ui-theme":
   version "0.0.0"
   uid ""
 

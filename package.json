@@ -983,7 +983,7 @@
     "@kbn/ui-settings-plugin": "link:test/plugin_functional/plugins/ui_settings_plugin",
     "@kbn/ui-shared-deps-npm": "link:src/platform/packages/private/kbn-ui-shared-deps-npm",
     "@kbn/ui-shared-deps-src": "link:src/platform/packages/private/kbn-ui-shared-deps-src",
-    "@kbn/ui-theme": "link:packages/kbn-ui-theme",
+    "@kbn/ui-theme": "link:src/platform/packages/shared/kbn-ui-theme",
     "@kbn/unified-data-table": "link:src/platform/packages/shared/kbn-unified-data-table",
     "@kbn/unified-doc-viewer": "link:src/platform/packages/shared/kbn-unified-doc-viewer",
     "@kbn/unified-doc-viewer-examples": "link:examples/unified_doc_viewer",
