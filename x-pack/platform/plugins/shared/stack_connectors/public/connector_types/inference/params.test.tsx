@@ -137,7 +137,7 @@ describe('Inference Params Fields renders', () => {
       />
     );
     expect(editAction).toHaveBeenCalledTimes(1);
-    expect(editAction).toHaveBeenCalledWith('subAction', SUB_ACTION.UNIFIED_COMPLETION, 0);
+    expect(editAction).toHaveBeenCalledWith('subAction', SUB_ACTION.COMPLETION, 0);
   });
 
   it('calls editAction function with the correct arguments ', () => {

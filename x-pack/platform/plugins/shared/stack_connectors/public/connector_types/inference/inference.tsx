@@ -52,16 +52,6 @@ export function getConnectorType(): InferenceConnector {
         subAction === SUB_ACTION.UNIFIED_COMPLETION_STREAM ||
         subAction === SUB_ACTION.UNIFIED_COMPLETION_ASYNC_ITERATOR
       ) {
-        if (!subActionParams.body.messages.length) {
-          errors.body.push(translations.getRequiredMessage('Messages'));
-        }
-      }
-
-      if (
-        subAction === SUB_ACTION.UNIFIED_COMPLETION ||
-        subAction === SUB_ACTION.UNIFIED_COMPLETION_STREAM ||
-        subAction === SUB_ACTION.UNIFIED_COMPLETION_ASYNC_ITERATOR
-      ) {
         if (
           !Array.isArray(subActionParams.body.messages) ||
           !subActionParams.body.messages.length

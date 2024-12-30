@@ -14,6 +14,7 @@ import { EuiTextArea, EuiFormRow, EuiSpacer, EuiSelect } from '@elastic/eui';
 import type { RuleFormParamsErrors } from '@kbn/response-ops-rule-form';
 import { ActionVariable } from '@kbn/alerting-types';
 import {
+  ChatCompleteParams,
   RerankParams,
   SparseEmbeddingParams,
   TextEmbeddingParams,
@@ -90,11 +91,10 @@ const InferenceServiceParamsFields: React.FunctionComponent<
 
   if (subAction === SUB_ACTION.COMPLETION) {
     return (
-      <UnifiedCompletionParamsFields
+      <CompletionParamsFields
         errors={errors}
-        messageVariables={messageVariables}
         editSubActionParams={editSubActionParams}
-        subActionParams={subActionParams as UnifiedChatCompleteParams}
+        subActionParams={subActionParams as ChatCompleteParams}
       />
     );
   }
@@ -187,29 +187,15 @@ const CompletionParamsFields: React.FunctionComponent<{
   subActionParams: ChatCompleteParams;
   errors: RuleFormParamsErrors;
   editSubActionParams: (params: Partial<InferenceActionParams['subActionParams']>) => void;
-  messageVariables: ActionVariable[] | undefined;
-}> = ({ subActionParams, editSubActionParams, errors, messageVariables }) => {
-  const { body } = subActionParams ?? {};
+}> = ({ subActionParams, editSubActionParams, errors }) => {
+  const { input } = subActionParams;
 
   return (
-    <>
-      <JsonEditorWithMessageVariables
-        messageVariables={messageVariables}
-        paramsProperty={'body'}
-        inputTargetValue={JSON.stringify(body)}
-        label={i18n.BODY}
-        errors={errors.body as string[]}
-        onDocumentsChange={(json: string) => {
-          editSubActionParams({ body: JSON.parse(json) });
-        }}
-        onBlur={() => {
-          if (!subActionParams.body) {
-            editSubActionParams({ body: { messages: [] } });
-          }
-        }}
-        dataTestSubj="inference-bodyJsonEditor"
-      />
-    </>
+    <InferenceInput
+      input={input}
+      editSubActionParams={editSubActionParams}
+      inputError={errors.input as string}
+    />
   );
 };
 
