@@ -868,6 +868,7 @@ x-pack/platform/plugins/shared/index_management @elastic/kibana-management
 x-pack/platform/plugins/shared/inference @elastic/appex-ai-infra
 x-pack/platform/plugins/shared/ingest_pipelines @elastic/kibana-management
 x-pack/platform/plugins/shared/integration_assistant @elastic/security-scalability
+x-pack/platform/plugins/shared/lens @elastic/kibana-visualizations
 x-pack/platform/plugins/shared/license_management @elastic/kibana-management
 x-pack/platform/plugins/shared/logs_data_access @elastic/obs-ux-logs-team
 x-pack/platform/plugins/shared/logs_shared @elastic/obs-ux-logs-team
@@ -895,7 +896,6 @@ x-pack/plugins/features @elastic/kibana-core
 x-pack/plugins/global_search @elastic/appex-sharedux
 x-pack/plugins/global_search_bar @elastic/appex-sharedux
 x-pack/plugins/global_search_providers @elastic/appex-sharedux
-x-pack/plugins/lens @elastic/kibana-visualizations
 x-pack/plugins/licensing @elastic/kibana-core
 x-pack/plugins/notifications @elastic/appex-sharedux
 x-pack/plugins/reporting @elastic/appex-sharedux
