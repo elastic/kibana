@@ -413,7 +413,6 @@ packages/kbn-utility-types @elastic/kibana-core
 packages/kbn-utility-types-jest @elastic/kibana-operations
 packages/kbn-utils @elastic/kibana-operations
 packages/kbn-validate-next-docs-cli @elastic/kibana-operations
-packages/kbn-visualization-ui-components @elastic/kibana-visualizations
 packages/kbn-visualization-utils @elastic/kibana-visualizations
 packages/kbn-web-worker-stub @elastic/kibana-operations
 packages/kbn-whereis-pkg-cli @elastic/kibana-operations
@@ -598,6 +597,7 @@ src/platform/packages/shared/kbn-unified-data-table @elastic/kibana-data-discove
 src/platform/packages/shared/kbn-unified-doc-viewer @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-unified-field-list @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-unsaved-changes-prompt @elastic/kibana-management
+src/platform/packages/shared/kbn-visualization-ui-components @elastic/kibana-visualizations
 src/platform/packages/shared/kbn-xstate-utils @elastic/obs-ux-logs-team
 src/platform/packages/shared/kbn-zod-helpers @elastic/security-detection-rule-management
 src/platform/packages/shared/presentation/presentation_containers @elastic/kibana-presentation
