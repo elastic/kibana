@@ -14,8 +14,8 @@ import { useMemo } from 'react';
 import { useTimelineContext } from '../timeline_context/use_timeline_context';
 import type { TemporaryProcessingPluginsType } from './types';
 import { KibanaServices, useApplicationCapabilities } from '../../common/lib/kibana';
-import * as lensMarkdownPlugin from './platform/plugins/shared/lens';
-import { ID as LensPluginId } from './platform/plugins/shared/lens/constants';
+import * as lensMarkdownPlugin from './plugins/lens';
+import { ID as LensPluginId } from './plugins/lens/constants';
 
 export const usePlugins = (disabledPlugins?: string[]) => {
   const kibanaConfig = KibanaServices.getConfig();
