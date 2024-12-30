@@ -412,6 +412,8 @@ describe('description_step', () => {
     });
 
     describe('threshold', () => {
+      const thresholdLabel = 'Threshold';
+
       test('returns threshold description when threshold exist and field is empty', () => {
         const mockThreshold = {
           threshold: {
@@ -421,13 +423,13 @@ describe('description_step', () => {
         };
         const result: ListItems[] = getDescriptionItem(
           'threshold',
-          'Threshold label',
+          thresholdLabel,
           mockThreshold,
           mockFilterManager,
           mockLicenseService
         );
 
-        expect(result[0].title).toEqual('Threshold label');
+        expect(result[0].title).toEqual(thresholdLabel);
         expect(React.isValidElement(result[0].description)).toBeTruthy();
         expect(mount(result[0].description as React.ReactElement).html()).toContain(
           'All results >= 100'
@@ -443,13 +445,13 @@ describe('description_step', () => {
         };
         const result: ListItems[] = getDescriptionItem(
           'threshold',
-          'Threshold label',
+          thresholdLabel,
           mockThreshold,
           mockFilterManager,
           mockLicenseService
         );
 
-        expect(result[0].title).toEqual('Threshold label');
+        expect(result[0].title).toEqual(thresholdLabel);
         expect(React.isValidElement(result[0].description)).toBeTruthy();
         expect(mount(result[0].description as React.ReactElement).html()).toEqual(
           'Results aggregated by user.name >= 100'
@@ -469,13 +471,13 @@ describe('description_step', () => {
         };
         const result: ListItems[] = getDescriptionItem(
           'threshold',
-          'Threshold label',
+          thresholdLabel,
           mockThreshold,
           mockFilterManager,
           mockLicenseService
         );
 
-        expect(result[0].title).toEqual('Threshold label');
+        expect(result[0].title).toEqual(thresholdLabel);
         expect(React.isValidElement(result[0].description)).toBeTruthy();
         expect(mount(result[0].description as React.ReactElement).html()).toEqual(
           'Results aggregated by user.name >= 100'
@@ -495,13 +497,13 @@ describe('description_step', () => {
         };
         const result: ListItems[] = getDescriptionItem(
           'threshold',
-          'Threshold label',
+          thresholdLabel,
           mockThreshold,
           mockFilterManager,
           mockLicenseService
         );
 
-        expect(result[0].title).toEqual('Threshold label');
+        expect(result[0].title).toEqual(thresholdLabel);
         expect(React.isValidElement(result[0].description)).toBeTruthy();
         expect(mount(result[0].description as React.ReactElement).html()).toContain(
           'Results aggregated by user.name >= 100 when unique values count of host.test_value >= 10'

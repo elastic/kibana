@@ -20,7 +20,7 @@ import {
   EmbeddableInput,
   SavedObjectEmbeddableInput,
   isSavedObjectEmbeddableInput,
-} from '@kbn/embeddable-plugin/public';
+} from '@kbn/embeddable-plugin/common';
 import { getNotifications } from '../../services';
 
 /**
