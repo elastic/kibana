@@ -172,8 +172,6 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
 
     const allowedTypes = this.props.allowedTypes.map((type) => type.name);
 
-    // @TODO: remove
-    console.log(`--@@allowedTypes`, allowedTypes);
     const selectedTypes = allowedTypes.filter(
       (type) => !visibleTypes || visibleTypes.includes(type)
     );
