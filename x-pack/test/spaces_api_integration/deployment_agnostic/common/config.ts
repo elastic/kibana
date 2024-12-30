@@ -10,8 +10,8 @@ import path from 'path';
 import { REPO_ROOT } from '@kbn/repo-info';
 import type { FtrConfigProviderContext } from '@kbn/test';
 
-import { services } from './services';
-import { createStatefulTestConfig } from '../../api_integration/deployment_agnostic/default_configs/stateful.config.base';
+import { createStatefulTestConfig } from '../../../api_integration/deployment_agnostic/default_configs/stateful.config.base';
+import { services } from '../services';
 
 export function createTestConfig({
   license = 'trial',
@@ -30,7 +30,7 @@ export function createTestConfig({
         ),
       },
       xpack: {
-        api: await readConfigFile(require.resolve('../../api_integration/config.ts')),
+        api: await readConfigFile(require.resolve('../../../api_integration/config.ts')),
       },
     };
 
@@ -48,7 +48,7 @@ export function createTestConfig({
         spaces: config.xpack.api.get('services.spaces'),
         usageAPI: config.xpack.api.get('services.usageAPI'),
       },
-      testFiles: testFiles ?? [require.resolve('./security_and_spaces/apis')],
+      testFiles: testFiles ?? [require.resolve('../security_and_spaces/apis')],
       junit: {
         reportName: 'X-Pack Spaces API Integration Tests -- ',
       },
