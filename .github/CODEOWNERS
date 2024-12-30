@@ -636,6 +636,7 @@ src/platform/plugins/shared/management @elastic/kibana-management
 src/platform/plugins/shared/presentation_util @elastic/kibana-presentation
 src/platform/plugins/shared/saved_objects_finder @elastic/kibana-data-discovery
 src/platform/plugins/shared/saved_search @elastic/kibana-data-discovery
+src/platform/plugins/shared/unified_doc_viewer @elastic/kibana-data-discovery
 src/plugins/advanced_settings @elastic/appex-sharedux @elastic/kibana-management
 src/plugins/chart_expressions/common @elastic/kibana-visualizations
 src/plugins/chart_expressions/expression_gauge @elastic/kibana-visualizations
@@ -675,7 +676,6 @@ src/plugins/telemetry_collection_manager @elastic/kibana-core
 src/plugins/telemetry_management_section @elastic/kibana-core
 src/plugins/ui_actions @elastic/appex-sharedux
 src/plugins/ui_actions_enhanced @elastic/appex-sharedux
-src/plugins/unified_doc_viewer @elastic/kibana-data-discovery
 src/plugins/unified_histogram @elastic/kibana-data-discovery
 src/plugins/unified_search @elastic/kibana-visualizations
 src/plugins/url_forwarding @elastic/kibana-visualizations
@@ -1436,7 +1436,7 @@ packages/kbn-monaco/src/esql @elastic/kibana-esql
 /x-pack/test/functional/apps/dataset_quality @elastic/obs-ux-logs-team
 /x-pack/test_serverless/functional/test_suites/observability/dataset_quality @elastic/obs-ux-logs-team
 /x-pack/test_serverless/functional/test_suites/observability/discover @elastic/obs-ux-logs-team @elastic/kibana-data-discovery
-/src/plugins/unified_doc_viewer/public/components/doc_viewer_logs_overview @elastic/obs-ux-logs-team
+/src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_logs_overview @elastic/obs-ux-logs-team
 /x-pack/test/api_integration/apis/logs_shared @elastic/obs-ux-logs-team
 
 # Observability-ui
