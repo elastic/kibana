@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import type { SecurityActivateUserProfileRequest } from '@elastic/elasticsearch/lib/api/types';
-import type { SecurityUserProfile } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type {
+  SecurityActivateUserProfileRequest,
+  SecurityUserProfile,
+} from '@elastic/elasticsearch/lib/api/types';
 
 import type { IClusterClient, Logger } from '@kbn/core/server';
 import type {
