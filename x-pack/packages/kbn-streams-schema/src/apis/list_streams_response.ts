@@ -5,10 +5,10 @@
  * 2.0.
  */
 import { z } from '@kbn/zod';
-import { streamDefintionSchema } from '../models';
+import { streamDefinitionSchema } from '../models';
 
 export const listStreamsResponseSchema = z.object({
-  streams: z.array(streamDefintionSchema),
+  streams: z.array(streamDefinitionSchema),
 });
 
 export type ListStreamsResponse = z.infer<typeof listStreamsResponseSchema>;

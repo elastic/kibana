@@ -23,7 +23,7 @@ import {
   ReadStreamDefinition,
   readStreamDefinitonSchema,
   StreamDefinition,
-  streamDefintionSchema,
+  streamDefinitionSchema,
   WiredReadStreamDefinition,
   wiredReadStreamDefinitonSchema,
   WiredStreamDefinition,
@@ -60,7 +60,7 @@ export function isIngestReadStream(subject: any): subject is IngestReadStreamDef
 }
 
 export function isStream(subject: any): subject is StreamDefinition {
-  return isSchema(streamDefintionSchema, subject);
+  return isSchema(streamDefinitionSchema, subject);
 }
 
 export function isIngestStream(
