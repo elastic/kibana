@@ -384,7 +384,7 @@ It acts as a container for a particular visualization and options tabs. Contains
 The plugin exposes the static DefaultEditorController class to consume.
 
 
-|{kib-repo}blob/{branch}/src/plugins/vis_types/gauge[visTypeGauge]
+|{kib-repo}blob/{branch}/src/platform/plugins/private/vis_types/gauge[visTypeGauge]
 |WARNING: Missing README.
 
 
