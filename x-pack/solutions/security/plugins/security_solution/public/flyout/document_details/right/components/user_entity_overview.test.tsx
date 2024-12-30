@@ -23,12 +23,8 @@ import { useObservedUserDetails } from '../../../../explore/users/containers/use
 import { mockContextValue } from '../../shared/mocks/mock_context';
 import { mockDataFormattedForFieldBrowser } from '../../shared/mocks/mock_data_formatted_for_field_browser';
 import { DocumentDetailsContext } from '../../shared/context';
-import { DocumentDetailsLeftPanelKey } from '../../shared/constants/panel_keys';
-import { LeftPanelInsightsTab } from '../../left';
-import { ENTITIES_TAB_ID } from '../../left/components/entities_details';
 import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_score';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { mockFlyoutApi } from '../../shared/mocks/mock_flyout_context';
 import { UserPreviewPanelKey } from '../../../entity_details/user_right';
 import { useAlertsByStatus } from '../../../../overview/components/detection_response/alerts_by_status/use_alerts_by_status';
@@ -71,9 +67,6 @@ const mockAlertData = {
   },
 };
 
-jest.mock('../../../../common/hooks/use_experimental_features');
-const mockUseIsExperimentalFeatureEnabled = useIsExperimentalFeatureEnabled as jest.Mock;
-
 const mockUseGlobalTime = jest.fn().mockReturnValue({ from, to });
 jest.mock('../../../../common/containers/use_global_time', () => {
   return {
@@ -109,7 +102,6 @@ const renderUserEntityOverview = () =>
 describe('<UserEntityOverview />', () => {
   beforeAll(() => {
     jest.mocked(useExpandableFlyoutApi).mockReturnValue(mockFlyoutApi);
-    mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
     (useMisconfigurationPreview as jest.Mock).mockReturnValue({});
     (useAlertsByStatus as jest.Mock).mockReturnValue({ isLoading: false, items: {} });
   });
@@ -190,34 +182,9 @@ describe('<UserEntityOverview />', () => {
       expect(queryByTestId(ENTITIES_USER_OVERVIEW_DOMAIN_TEST_ID)).not.toBeInTheDocument();
     });
 
-    it('should navigate to left panel entities tab when clicking on title when feature flag is off', () => {
+    it('should open user preview', () => {
       mockUseUserDetails.mockReturnValue([false, { userDetails: userData }]);
       mockUseRiskScore.mockReturnValue({ data: riskLevel, isAuthorized: true });
-
-      const { getByTestId } = render(
-        <TestProviders>
-          <DocumentDetailsContext.Provider value={panelContextValue}>
-            <UserEntityOverview userName={userName} />
-          </DocumentDetailsContext.Provider>
-        </TestProviders>
-      );
-
-      getByTestId(ENTITIES_USER_OVERVIEW_LINK_TEST_ID).click();
-      expect(mockFlyoutApi.openLeftPanel).toHaveBeenCalledWith({
-        id: DocumentDetailsLeftPanelKey,
-        path: { tab: LeftPanelInsightsTab, subTab: ENTITIES_TAB_ID },
-        params: {
-          id: panelContextValue.eventId,
-          indexName: panelContextValue.indexName,
-          scopeId: panelContextValue.scopeId,
-        },
-      });
-    });
-
-    it('should open user preview if feature flag is true', () => {
-      mockUseUserDetails.mockReturnValue([false, { userDetails: userData }]);
-      mockUseRiskScore.mockReturnValue({ data: riskLevel, isAuthorized: true });
-      mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
 
       const { getByTestId } = render(
         <TestProviders>
