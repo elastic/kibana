@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { act, renderHook } from '@testing-library/react-hooks';
+
+import { renderHook, act } from '@testing-library/react';
 import { TestProviders } from '../../../common/mock';
 
 import { useRiskScoreFeatureStatus } from './use_risk_score_feature_status';
