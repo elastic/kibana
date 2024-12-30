@@ -75,9 +75,8 @@ export const contentHeaderTooltipParagraph1 = (
     id="xpack.logsExplorer.dataTable.header.content.tooltip.paragraph1"
     defaultMessage="Displays the document's {logLevel} and {message} fields."
     values={{
-      // eslint-disable-next-line @kbn/i18n/strings_should_be_translated_with_i18n
       logLevel: <strong>log.level</strong>,
-      // eslint-disable-next-line @kbn/i18n/strings_should_be_translated_with_i18n
+
       message: <strong>message</strong>,
     }}
   />
