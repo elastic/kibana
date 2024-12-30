@@ -4041,7 +4041,7 @@
   ],
   [
     "@kbn/utility-types-jest",
-    "packages/kbn-utility-types-jest"
+    "src/platform/packages/shared/kbn-utility-types-jest"
   ],
   [
     "@kbn/utils",

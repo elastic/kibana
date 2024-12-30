@@ -7861,7 +7861,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/utility-types-jest@link:packages/kbn-utility-types-jest":
+"@kbn/utility-types-jest@link:src/platform/packages/shared/kbn-utility-types-jest":
   version "0.0.0"
   uid ""
 

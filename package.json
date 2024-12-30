@@ -1005,7 +1005,7 @@
     "@kbn/user-profile-examples-plugin": "link:examples/user_profile_examples",
     "@kbn/user-profiles-consumer-plugin": "link:x-pack/test/security_api_integration/plugins/user_profiles_consumer",
     "@kbn/utility-types": "link:packages/kbn-utility-types",
-    "@kbn/utility-types-jest": "link:packages/kbn-utility-types-jest",
+    "@kbn/utility-types-jest": "link:src/platform/packages/shared/kbn-utility-types-jest",
     "@kbn/utils": "link:packages/kbn-utils",
     "@kbn/ux-plugin": "link:x-pack/solutions/observability/plugins/ux",
     "@kbn/v8-profiler-examples-plugin": "link:examples/v8_profiler_examples",
