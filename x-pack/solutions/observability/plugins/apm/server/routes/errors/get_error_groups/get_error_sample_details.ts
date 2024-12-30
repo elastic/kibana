@@ -28,6 +28,7 @@ import {
   TRANSACTION_ID,
   ERROR_STACK_TRACE,
   SPAN_ID,
+  SERVICE_LANGUAGE_NAME,
 } from '../../../../common/es_fields/apm';
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import { ApmDocumentType } from '../../../../common/document_type';
@@ -83,6 +84,7 @@ export async function getErrorSampleDetails({
     SPAN_ID,
     AGENT_VERSION,
     PROCESSOR_NAME,
+    SERVICE_LANGUAGE_NAME,
     ERROR_CULPRIT,
     ERROR_STACK_TRACE,
     ERROR_EXC_MESSAGE,

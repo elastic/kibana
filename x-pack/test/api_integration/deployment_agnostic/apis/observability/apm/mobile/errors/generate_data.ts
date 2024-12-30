@@ -33,6 +33,9 @@ export async function generateData({
 }) {
   const serviceGoProdInstance = apm
     .service({ name: serviceName, environment: 'production', agentName: 'swift' })
+    .defaults({
+      'service.language.name': 'swift',
+    })
     .instance('instance-a');
 
   const interval = '1m';
