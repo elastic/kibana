@@ -54,7 +54,7 @@ export const StatusRuleConditionSchema = schema.object({
   includeRetests: schema.maybe(schema.boolean()),
 });
 
-export const StatusRuleParamsSchema = schema.object(
+export const SyntheticsMonitorStatusRuleParamsSchema = schema.object(
   {
     condition: schema.maybe(StatusRuleConditionSchema),
     monitorIds: schema.maybe(schema.arrayOf(schema.string())),
@@ -69,6 +69,8 @@ export const StatusRuleParamsSchema = schema.object(
   }
 );
 
-export type StatusRuleParams = TypeOf<typeof StatusRuleParamsSchema>;
+export type SyntheticsMonitorStatusRuleParams = TypeOf<
+  typeof SyntheticsMonitorStatusRuleParamsSchema
+>;
 export type TimeWindow = TypeOf<typeof TimeWindowSchema>;
 export type StatusRuleCondition = TypeOf<typeof StatusRuleConditionSchema>;

@@ -9,7 +9,7 @@ import React, { useCallback } from 'react';
 import { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { Filter } from '@kbn/es-query';
 import { EuiSpacer } from '@elastic/eui';
-import { StatusRuleParams } from '@kbn/response-ops-rule-params/synthetics_monitor_status/latest';
+import { SyntheticsMonitorStatusRuleParams as StatusRuleParams } from '@kbn/response-ops-rule-params/synthetics_monitor_status/latest';
 import { FieldFilters } from './common/field_filters';
 import { AlertSearchBar } from './query_bar';
 import { StatusRuleExpression } from './status_rule_expression';

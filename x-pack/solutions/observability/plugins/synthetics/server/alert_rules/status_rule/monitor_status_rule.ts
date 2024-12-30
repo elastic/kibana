@@ -11,7 +11,7 @@ import { GetViewInAppRelativeUrlFnOpts, AlertsClientError } from '@kbn/alerting-
 import { observabilityPaths } from '@kbn/observability-plugin/common';
 import apm from 'elastic-apm-node';
 import { SYNTHETICS_ALERT_RULE_TYPES } from '@kbn/rule-data-utils';
-import { StatusRuleParamsSchema } from '@kbn/response-ops-rule-params/synthetics_monitor_status/latest';
+import { SyntheticsMonitorStatusRuleParamsSchema } from '@kbn/response-ops-rule-params/synthetics_monitor_status/latest';
 import { AlertOverviewStatus } from '../../../common/runtime_types/alert_rules/common';
 import { StatusRuleExecutorOptions } from './types';
 import { syntheticsRuleFieldMap } from '../../../common/rules/synthetics_rule_field_map';
@@ -44,7 +44,7 @@ export const registerSyntheticsStatusCheckRule = (
     producer: 'uptime',
     name: STATUS_RULE_NAME,
     validate: {
-      params: StatusRuleParamsSchema,
+      params: SyntheticsMonitorStatusRuleParamsSchema,
     },
     defaultActionGroupId: MONITOR_STATUS.id,
     actionGroups: [MONITOR_STATUS],
