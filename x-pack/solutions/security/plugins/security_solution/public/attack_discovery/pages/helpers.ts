@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Query } from '@kbn/es-query';
+
 export const getInitialIsOpen = (index: number) => index < 3;
 
 interface ErrorWithStringMessage {
@@ -130,3 +132,8 @@ export const getSize = ({
 
   return isNaN(size) || size <= 0 ? defaultMaxAlerts : size;
 };
+
+export const getDefaultQuery = (): Query => ({
+  language: 'kuery',
+  query: '',
+});

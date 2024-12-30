@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import React from 'react';
 import { composeStories } from '@storybook/testing-react';
 import { render } from '@testing-library/react';
-import React from 'react';
 import * as stories from './graph_layout.stories';
 
 const { GraphLargeStackedEdgeCases } = composeStories(stories);
@@ -46,6 +46,11 @@ const rectIntersect = (rect1: Rect, rect2: Rect) => {
   );
 };
 
+// Turn off the optimization that hides elements that are not visible in the viewport
+jest.mock('./graph/constants', () => ({
+  ONLY_RENDER_VISIBLE_ELEMENTS: false,
+}));
+
 describe('GraphLargeStackedEdgeCases story', () => {
   it('all labels should be visible', async () => {
     const { getAllByText } = render(<GraphLargeStackedEdgeCases />);
@@ -59,13 +64,10 @@ describe('GraphLargeStackedEdgeCases story', () => {
 
     for (const { label } of labels ?? []) {
       // Get all label nodes that contains the label's text
-      const allLabelElements = getAllByText(
-        (_content, element) => element?.textContent === `${label!}`,
-        {
-          exact: true,
-          selector: 'div.react-flow__node-label',
-        }
-      );
+      const allLabelElements = getAllByText((_content, element) => element?.textContent === label, {
+        exact: true,
+        selector: 'div.react-flow__node-label',
+      });
       expect(allLabelElements.length).toBeGreaterThan(0);
 
       for (const labelElm of allLabelElements) {

@@ -681,13 +681,7 @@
               "\nThe category for this feature.\nThis will be used to organize the list of features for display within the\nSpaces and Roles management screens."
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/core-application-common",
-                "scope": "common",
-                "docId": "kibKbnCoreApplicationCommonPluginApi",
-                "section": "def-common.AppCategory",
-                "text": "AppCategory"
-              }
+              "AppCategory"
             ],
             "path": "x-pack/plugins/features/common/kibana_feature.ts",
             "deprecated": false,
@@ -2380,14 +2374,6 @@
                 "path": "x-pack/plugins/security/server/authorization/authorization_service.tsx"
               },
               {
-                "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/plugin.test.ts"
-              },
-              {
-                "plugin": "cases",
-                "path": "x-pack/plugins/cases/server/client/factory.test.ts"
-              },
-              {
                 "plugin": "security",
                 "path": "x-pack/plugins/security/server/authorization/app_authorization.test.ts"
               },
@@ -2526,6 +2512,14 @@
               {
                 "plugin": "@kbn/security-authorization-core",
                 "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/platform/plugins/shared/alerting/server/plugin.test.ts"
+              },
+              {
+                "plugin": "cases",
+                "path": "x-pack/platform/plugins/shared/cases/server/client/factory.test.ts"
               }
             ],
             "children": [],
@@ -2877,13 +2871,7 @@
               "\nThe category for this feature.\nThis will be used to organize the list of features for display within the\nSpaces and Roles management screens."
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/core-application-common",
-                "scope": "common",
-                "docId": "kibKbnCoreApplicationCommonPluginApi",
-                "section": "def-common.AppCategory",
-                "text": "AppCategory"
-              }
+              "AppCategory"
             ],
             "path": "x-pack/plugins/features/common/kibana_feature.ts",
             "deprecated": false,
@@ -4502,13 +4490,7 @@
               "\nThe category for this feature.\nThis will be used to organize the list of features for display within the\nSpaces and Roles management screens."
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/core-application-common",
-                "scope": "common",
-                "docId": "kibKbnCoreApplicationCommonPluginApi",
-                "section": "def-common.AppCategory",
-                "text": "AppCategory"
-              }
+              "AppCategory"
             ],
             "path": "x-pack/plugins/features/common/kibana_feature.ts",
             "deprecated": false,

@@ -8,7 +8,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiPanel, EuiBadge } from 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { css } from '@emotion/css';
-import { StreamDefinition } from '@kbn/streams-plugin/common';
+import { isIngestStream, StreamDefinition } from '@kbn/streams-schema';
 import { useStreamsAppBreadcrumbs } from '../../hooks/use_streams_app_breadcrumbs';
 import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
 import { EntityOverviewTabList } from '../entity_overview_tab_list';
@@ -101,7 +101,7 @@ export function EntityDetailViewWithoutParams({
               title={
                 <>
                   {entity.displayName}
-                  {definition && !definition.managed ? (
+                  {definition && isIngestStream(definition) ? (
                     <>
                       {' '}
                       <EuiBadge>

@@ -183,13 +183,7 @@
             "description": [],
             "signature": [
               "{ application: { navigateToUrl: (url: string, options?: ",
-              {
-                "pluginId": "@kbn/core-application-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreApplicationBrowserPluginApi",
-                "section": "def-public.NavigateToUrlOptions",
-                "text": "NavigateToUrlOptions"
-              },
+              "NavigateToUrlOptions",
               " | undefined) => Promise<void>; }; chrome: { recentlyAccessed: { get$: () => ",
               "Observable",
               "<",
@@ -327,13 +321,7 @@
             "description": [],
             "signature": [
               "(url: string, options?: ",
-              {
-                "pluginId": "@kbn/core-application-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreApplicationBrowserPluginApi",
-                "section": "def-public.NavigateToUrlOptions",
-                "text": "NavigateToUrlOptions"
-              },
+              "NavigateToUrlOptions",
               " | undefined) => Promise<void>"
             ],
             "path": "packages/shared-ux/chrome/navigation/src/types.ts",
@@ -348,7 +336,7 @@
                 "tags": [],
                 "label": "url",
                 "description": [],
-                "path": "packages/core/application/core-application-browser/src/contracts.ts",
+                "path": "src/core/packages/application/browser/src/contracts.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -360,16 +348,10 @@
                 "label": "options",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-application-browser",
-                    "scope": "public",
-                    "docId": "kibKbnCoreApplicationBrowserPluginApi",
-                    "section": "def-public.NavigateToUrlOptions",
-                    "text": "NavigateToUrlOptions"
-                  },
+                  "NavigateToUrlOptions",
                   " | undefined"
                 ],
-                "path": "packages/core/application/core-application-browser/src/contracts.ts",
+                "path": "src/core/packages/application/browser/src/contracts.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }

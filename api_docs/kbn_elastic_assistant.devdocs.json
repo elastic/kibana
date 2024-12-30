@@ -2744,6 +2744,36 @@
       },
       {
         "parentPluginId": "@kbn/elastic-assistant",
+        "id": "def-public.END_LOCAL_STORAGE_KEY",
+        "type": "string",
+        "tags": [],
+        "label": "END_LOCAL_STORAGE_KEY",
+        "description": [],
+        "signature": [
+          "\"end\""
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/assistant_context/constants.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant",
+        "id": "def-public.FILTERS_LOCAL_STORAGE_KEY",
+        "type": "string",
+        "tags": [],
+        "label": "FILTERS_LOCAL_STORAGE_KEY",
+        "description": [],
+        "signature": [
+          "\"filters\""
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/assistant_context/constants.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant",
         "id": "def-public.GetAssistantMessages",
         "type": "Type",
         "tags": [],
@@ -2845,6 +2875,21 @@
       },
       {
         "parentPluginId": "@kbn/elastic-assistant",
+        "id": "def-public.QUERY_LOCAL_STORAGE_KEY",
+        "type": "string",
+        "tags": [],
+        "label": "QUERY_LOCAL_STORAGE_KEY",
+        "description": [],
+        "signature": [
+          "\"query\""
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/assistant_context/constants.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant",
         "id": "def-public.QueryType",
         "type": "Type",
         "tags": [],
@@ -2896,6 +2941,21 @@
           "React.ChangeEvent<HTMLInputElement> | React.KeyboardEvent<HTMLInputElement> | React.MouseEvent<HTMLButtonElement, MouseEvent>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/knowledge_base/alerts_range.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant",
+        "id": "def-public.START_LOCAL_STORAGE_KEY",
+        "type": "string",
+        "tags": [],
+        "label": "START_LOCAL_STORAGE_KEY",
+        "description": [],
+        "signature": [
+          "\"start\""
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/assistant_context/constants.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

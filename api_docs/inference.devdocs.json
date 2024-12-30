@@ -200,7 +200,13 @@
           "description": [],
           "signature": [
             "() => Promise<",
-            "InferenceConnector",
+            {
+              "pluginId": "@kbn/inference-common",
+              "scope": "common",
+              "docId": "kibKbnInferenceCommonPluginApi",
+              "section": "def-common.InferenceConnector",
+              "text": "InferenceConnector"
+            },
             "[]>"
           ],
           "path": "x-pack/platform/plugins/shared/inference/public/types.ts",
@@ -417,7 +423,13 @@
             ],
             "signature": [
               "(id: string) => Promise<",
-              "InferenceConnector",
+              {
+                "pluginId": "@kbn/inference-common",
+                "scope": "common",
+                "docId": "kibKbnInferenceCommonPluginApi",
+                "section": "def-common.InferenceConnector",
+                "text": "InferenceConnector"
+              },
               ">"
             ],
             "path": "x-pack/platform/plugins/shared/inference/server/inference_client/types.ts",
@@ -610,7 +622,13 @@
             ],
             "signature": [
               "(id: string) => Promise<",
-              "InferenceConnector",
+              {
+                "pluginId": "@kbn/inference-common",
+                "scope": "common",
+                "docId": "kibKbnInferenceCommonPluginApi",
+                "section": "def-common.InferenceConnector",
+                "text": "InferenceConnector"
+              },
               ">"
             ],
             "path": "x-pack/platform/plugins/shared/inference/server/inference_client/types.ts",
@@ -961,7 +979,13 @@
             "label": "connectors",
             "description": [],
             "signature": [
-              "InferenceConnector",
+              {
+                "pluginId": "@kbn/inference-common",
+                "scope": "common",
+                "docId": "kibKbnInferenceCommonPluginApi",
+                "section": "def-common.InferenceConnector",
+                "text": "InferenceConnector"
+              },
               "[]"
             ],
             "path": "x-pack/platform/plugins/shared/inference/common/http_apis.ts",

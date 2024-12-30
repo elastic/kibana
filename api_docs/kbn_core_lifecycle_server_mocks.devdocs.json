@@ -35,13 +35,7 @@
             "description": [],
             "signature": [
               "() => { analytics: jest.Mocked<",
-              {
-                "pluginId": "@kbn/core-analytics-server",
-                "scope": "server",
-                "docId": "kibKbnCoreAnalyticsServerPluginApi",
-                "section": "def-server.AnalyticsServicePreboot",
-                "text": "AnalyticsServicePreboot"
-              },
+              "AnalyticsServicePreboot",
               ">; context: jest.Mocked<",
               "InternalContextSetup",
               ">; elasticsearch: MockedElasticSearchServicePreboot; http: ",
@@ -89,13 +83,7 @@
             "description": [],
             "signature": [
               "() => { analytics: jest.Mocked<",
-              {
-                "pluginId": "@kbn/core-analytics-server",
-                "scope": "server",
-                "docId": "kibKbnCoreAnalyticsServerPluginApi",
-                "section": "def-server.AnalyticsServiceSetup",
-                "text": "AnalyticsServiceSetup"
-              },
+              "AnalyticsServiceSetup",
               ">; capabilities: jest.Mocked<",
               {
                 "pluginId": "@kbn/core-capabilities-server",
@@ -219,13 +207,7 @@
             "description": [],
             "signature": [
               "() => { analytics: jest.Mocked<",
-              {
-                "pluginId": "@kbn/core-analytics-server",
-                "scope": "server",
-                "docId": "kibKbnCoreAnalyticsServerPluginApi",
-                "section": "def-server.AnalyticsServiceStart",
-                "text": "AnalyticsServiceStart"
-              },
+              "AnalyticsServiceStart",
               ">; capabilities: jest.Mocked<",
               {
                 "pluginId": "@kbn/core-capabilities-server",

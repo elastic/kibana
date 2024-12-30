@@ -6,7 +6,7 @@
  */
 import { AppMountParameters, APP_WRAPPER_CLASS, CoreStart } from '@kbn/core/public';
 import { PerformanceContextProvider } from '@kbn/ebt-tools';
-import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
+import { EuiThemeProvider } from '@elastic/eui';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { LazyObservabilityPageTemplateProps } from '@kbn/observability-shared-plugin/public';
@@ -44,7 +44,6 @@ export function renderApp({
   entityClient: EntityClient;
 }) {
   const { element, history, theme$ } = appMountParameters;
-  const isDarkMode = core.theme.getTheme().darkMode;
 
   // ensure all divs are .kbnAppWrappers
   element.classList.add(APP_WRAPPER_CLASS);
@@ -80,7 +79,7 @@ export function renderApp({
                 }}
               >
                 <Router history={history}>
-                  <EuiThemeProvider darkMode={isDarkMode}>
+                  <EuiThemeProvider>
                     <RedirectAppLinks coreStart={core} data-test-subj="observabilityMainContainer">
                       <PerformanceContextProvider>
                         <EntityManagerOverviewPage />

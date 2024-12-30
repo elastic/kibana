@@ -7,6 +7,7 @@
 import type { CoreStart } from '@kbn/core/public';
 
 import { links as attackDiscoveryLinks } from './attack_discovery/links';
+import { links as assetInventoryLinks } from './asset_inventory/links';
 import type { AppLinkItems } from './common/links/types';
 import { indicatorsLinks } from './threat_intelligence/links';
 import { links as alertsLinks } from './detections/links';
@@ -32,6 +33,7 @@ export const appLinks: AppLinkItems = Object.freeze([
   timelinesLinks,
   indicatorsLinks,
   exploreLinks,
+  assetInventoryLinks,
   rulesLinks,
   onboardingLinks,
   managementLinks,
@@ -52,6 +54,7 @@ export const getFilteredLinks = async (
     timelinesLinks,
     indicatorsLinks,
     exploreLinks,
+    assetInventoryLinks,
     rulesLinks,
     onboardingLinks,
     managementFilteredLinks,

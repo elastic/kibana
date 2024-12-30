@@ -659,39 +659,6 @@
       },
       {
         "parentPluginId": "observabilityAIAssistant",
-        "id": "def-public.isSupportedConnectorType",
-        "type": "Function",
-        "tags": [],
-        "label": "isSupportedConnectorType",
-        "description": [],
-        "signature": [
-          "(type: string) => boolean"
-        ],
-        "path": "x-pack/platform/plugins/shared/observability_solution/observability_ai_assistant/common/connectors.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "observabilityAIAssistant",
-            "id": "def-public.isSupportedConnectorType.$1",
-            "type": "string",
-            "tags": [],
-            "label": "type",
-            "description": [],
-            "signature": [
-              "string"
-            ],
-            "path": "x-pack/platform/plugins/shared/observability_solution/observability_ai_assistant/common/connectors.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "observabilityAIAssistant",
         "id": "def-public.MessageText",
         "type": "Function",
         "tags": [],
@@ -11022,39 +10989,6 @@
               "Error"
             ],
             "path": "x-pack/platform/plugins/shared/observability_solution/observability_ai_assistant/common/conversation_complete.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "observabilityAIAssistant",
-        "id": "def-common.isSupportedConnectorType",
-        "type": "Function",
-        "tags": [],
-        "label": "isSupportedConnectorType",
-        "description": [],
-        "signature": [
-          "(type: string) => boolean"
-        ],
-        "path": "x-pack/platform/plugins/shared/observability_solution/observability_ai_assistant/common/connectors.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "observabilityAIAssistant",
-            "id": "def-common.isSupportedConnectorType.$1",
-            "type": "string",
-            "tags": [],
-            "label": "type",
-            "description": [],
-            "signature": [
-              "string"
-            ],
-            "path": "x-pack/platform/plugins/shared/observability_solution/observability_ai_assistant/common/connectors.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true

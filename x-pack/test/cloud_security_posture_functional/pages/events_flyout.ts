@@ -82,6 +82,19 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         'actor.entity.id: admin@example.com OR target.entity.id: admin@example.com OR related.entity: admin@example.com'
       );
 
+      // Show events with the same action
+      await expandedFlyout.showEventsOfSameAction(
+        'a(admin@example.com)-b(projects/your-project-id/roles/customRole)label(google.iam.admin.v1.CreateRole)outcome(success)'
+      );
+      await expandedFlyout.expectFilterTextEquals(
+        0,
+        'actor.entity.id: admin@example.com OR target.entity.id: admin@example.com OR related.entity: admin@example.com OR event.action: google.iam.admin.v1.CreateRole'
+      );
+      await expandedFlyout.expectFilterPreviewEquals(
+        0,
+        'actor.entity.id: admin@example.com OR target.entity.id: admin@example.com OR related.entity: admin@example.com OR event.action: google.iam.admin.v1.CreateRole'
+      );
+
       // Clear filters
       await expandedFlyout.clearAllFilters();
 
