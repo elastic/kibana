@@ -17,7 +17,7 @@ const testMap = [
     'xpack.observability',
   ],
   [
-    'x-pack/plugins/observability_solution/apm/common/components/app/correlations/correlations_table.tsx',
+    'x-pack/solutions/observability/plugins/apm/common/components/app/correlations/correlations_table.tsx',
     'xpack.apm',
   ],
   ['x-pack/platform/plugins/shared/cases/server/components/foo.tsx', 'xpack.cases'],
