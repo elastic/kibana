@@ -7,10 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './agent_images';
-export * from './buildkite';
-export * as CiStats from './ci-stats';
-export * from './github';
-export * as Slack from './slack';
-export * as TestFailures from './test-failures';
-export * from './utils';
+import { BuildkiteClient } from '..';
+
+const buildkite = new BuildkiteClient();
+
+export const pingTeam = async () => {
+  if (process.env.ELASTIC_SLACK_NOTIFICATIONS_ENABLED === 'true') {
+    const team = process.env.PING_SLACK_TEAM;
+    if (team) {
+      buildkite.setMetadata(
+        'slack:ping_team:body',
+        `${team}, can you please take a look at the test failures?`
+      );
+    }
+  }
+};

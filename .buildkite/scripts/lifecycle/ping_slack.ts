@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { TestFailures } from '#pipeline-utils';
+import { Slack } from '#pipeline-utils';
 
 (async () => {
   try {
-    await TestFailures.pingTeam();
+    await Slack.pingTeam();
   } catch (ex) {
     console.error('Ping team for the test failures error', ex.message);
     if (ex.response) {

@@ -188,15 +188,3 @@ export const annotateTestFailures = async () => {
     );
   }
 };
-
-export const pingTeam = async () => {
-  if (process.env.ELASTIC_SLACK_NOTIFICATIONS_ENABLED === 'true') {
-    const team = process.env.PING_SLACK_TEAM;
-    if (team) {
-      buildkite.setMetadata(
-        'slack:ping_team:body',
-        `${team}, can you please take a look at the test failures?`
-      );
-    }
-  }
-};

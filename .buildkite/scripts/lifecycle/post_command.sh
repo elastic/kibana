@@ -53,7 +53,11 @@ if [[ "$IS_TEST_EXECUTION_STEP" == "true" ]]; then
     ts-node .buildkite/scripts/lifecycle/annotate_test_failures.ts
   fi
 
-  if [ -n "$SLACK_TEAM_FTR" ]; then
-    ts-node .buildkite/scripts/lifecycle/ping_team_ftrs.ts
+fi
+
+if [[ $BUILDKITE_COMMAND_EXIT_STATUS -ne 0 ]]; then
+  # If the slack team environment variable is set, ping the team in slack
+  if [ -n "$PING_SLACK_TEAM" ]; then
+    ts-node .buildkite/scripts/lifecycle/ping_slack.ts
   fi
 fi
