@@ -57,7 +57,7 @@ as uiSettings within the code.
 - Adds a dashboard embeddable that can be used in other applications.
 
 
-|{kib-repo}blob/{branch}/src/plugins/data/README.mdx[data]
+|{kib-repo}blob/{branch}/src/platform/plugins/shared/data/README.mdx[data]
 |The data plugin provides common data access services, such as search and query, for solutions and application developers.
 
 

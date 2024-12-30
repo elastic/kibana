@@ -871,7 +871,7 @@ export const getFormattedBuilderEntries = (
         entryIndex: index,
         field: isNewNestedEntry
           ? undefined
-          : // This type below is really a FieldSpec type from "src/plugins/data/common/index_patterns/fields/types.ts", we cast it here to keep using the DataViewFieldBase interface
+          : // This type below is really a FieldSpec type from "src/platform/plugins/shared/data/common/index_patterns/fields/types.ts", we cast it here to keep using the DataViewFieldBase interface
             ({
               aggregatable: false,
               esTypes: ['nested'],
