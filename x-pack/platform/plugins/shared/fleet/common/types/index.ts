@@ -51,7 +51,7 @@ export interface FleetConfigType {
   agentIdVerificationEnabled?: boolean;
   eventIngestedEnabled?: boolean;
   enableExperimental?: string[];
-  enableManagedLogsAndMetricsDataviews: boolean;
+  enableManagedLogsAndMetricsDataviews?: boolean;
   packageVerification?: {
     gpgKeyPath?: string;
   };
