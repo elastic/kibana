@@ -79,6 +79,12 @@ export function registerGetRoute({ router, license, lib: { handleEsError } }: Ro
   router.post(
     {
       path: '/api/watcher/indices',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Relies on es client for authorization',
+        },
+      },
       validate: {
         body: bodySchema,
       },

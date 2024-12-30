@@ -10119,7 +10119,7 @@
             "references": [
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/lib/wrap_search_source_client.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/lib/wrap_search_source_client.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -10397,55 +10397,55 @@
             "references": [
               {
                 "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/server/rule_types/es_query/lib/fetch_search_source_query.ts"
+                "path": "x-pack/platform/plugins/shared/stack_alerts/server/rule_types/es_query/lib/fetch_search_source_query.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/lib/wrap_search_source_client.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/lib/wrap_search_source_client.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/lib/wrap_search_source_client.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/lib/wrap_search_source_client.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/lib/wrap_search_source_client.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/lib/wrap_search_source_client.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/lib/wrap_search_source_client.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/lib/wrap_search_source_client.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/lib/wrap_search_source_client.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/lib/wrap_search_source_client.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/lib/wrap_search_source_client.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/lib/wrap_search_source_client.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/lib/wrap_search_source_client.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/lib/wrap_search_source_client.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/lib/wrap_search_source_client.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/lib/wrap_search_source_client.test.ts"
               },
               {
                 "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/server/rule_types/es_query/rule_type.test.ts"
+                "path": "x-pack/platform/plugins/shared/stack_alerts/server/rule_types/es_query/rule_type.test.ts"
               },
               {
                 "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/server/rule_types/es_query/rule_type.test.ts"
+                "path": "x-pack/platform/plugins/shared/stack_alerts/server/rule_types/es_query/rule_type.test.ts"
               },
               {
                 "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/server/rule_types/es_query/lib/fetch_search_source_query.test.ts"
+                "path": "x-pack/platform/plugins/shared/stack_alerts/server/rule_types/es_query/lib/fetch_search_source_query.test.ts"
               },
               {
                 "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/server/rule_types/es_query/lib/fetch_search_source_query.test.ts"
+                "path": "x-pack/platform/plugins/shared/stack_alerts/server/rule_types/es_query/lib/fetch_search_source_query.test.ts"
               },
               {
                 "plugin": "securitySolution",
