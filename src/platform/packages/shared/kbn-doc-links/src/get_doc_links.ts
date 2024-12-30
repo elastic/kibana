@@ -504,6 +504,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       },
       detectionEngineOverview: `${SECURITY_SOLUTION_DOCS}detection-engine-overview.html`,
       aiAssistant: `${SECURITY_SOLUTION_DOCS}security-assistant.html`,
+      signalsMigrationApi: `${SECURITY_SOLUTION_DOCS}signals-migration-api.html`,
     },
     query: {
       eql: `${ELASTICSEARCH_DOCS}eql.html`,
@@ -793,6 +794,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       restoreSnapshot: `${ELASTICSEARCH_DOCS}snapshots-restore-snapshot.html`,
       restoreSnapshotApi: `${ELASTICSEARCH_DOCS}restore-snapshot-api.html#restore-snapshot-api-request-body`,
       searchableSnapshotSharedCache: `${ELASTICSEARCH_DOCS}searchable-snapshots.html#searchable-snapshots-shared-cache`,
+      slmStart: `${ELASTICSEARCH_DOCS}slm-api-start.html`,
     },
     ingest: {
       append: `${ELASTICSEARCH_DOCS}append-processor.html`,
@@ -899,7 +901,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       dataStreams: `${ELASTIC_WEBSITE_URL}guide/en/ecs/${ECS_VERSION}/ecs-data_stream.html`,
     },
     clients: {
-      /** Changes to these URLs must also be synched in src/plugins/custom_integrations/server/language_clients/index.ts */
+      /** Changes to these URLs must also be synched in src/platform/plugins/shared/custom_integrations/server/language_clients/index.ts */
       guide: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/client/index.html`,
       goConnecting: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/client/go-api/${DOC_LINK_VERSION}/connecting.html`,
       goGettingStarted: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/client/go-api/${DOC_LINK_VERSION}/getting-started-go.html`,

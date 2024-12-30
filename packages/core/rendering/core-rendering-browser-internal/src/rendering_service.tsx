@@ -20,6 +20,7 @@ import type { ThemeServiceStart } from '@kbn/core-theme-browser';
 import type { UserProfileService } from '@kbn/core-user-profile-browser';
 import { KibanaRootContextProvider } from '@kbn/react-kibana-context-root';
 import { APP_FIXED_VIEWPORT_ID } from '@kbn/core-rendering-browser';
+import { GlobalAppStyle } from '@kbn/core-application-common';
 import { AppWrapper } from './app_containers';
 
 interface StartServices {
@@ -62,6 +63,9 @@ export class RenderingService {
     ReactDOM.render(
       <KibanaRootContextProvider {...startServices} globalStyles={true}>
         <>
+          {/* Global Styles that apply across the entire app */}
+          <GlobalAppStyle />
+
           {/* Fixed headers */}
           {chromeHeader}
 

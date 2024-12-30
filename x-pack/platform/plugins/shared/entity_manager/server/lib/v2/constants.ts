@@ -7,7 +7,7 @@
 
 // Definitions index
 
-export const DEFINITIONS_ALIAS = '.kibana-entities-definitions';
+export const DEFINITIONS_ALIAS = '.kibana_entities-definitions';
 export const TEMPLATE_VERSION = 1;
 
 // Privileges
