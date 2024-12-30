@@ -25,7 +25,7 @@ export const storybookAliases = {
     'src/platform/packages/private/kbn-language-documentation/.storybook',
   chart_icons: 'packages/kbn-chart-icons/.storybook',
   content_management_examples: 'examples/content_management_examples/.storybook',
-  custom_icons: 'packages/kbn-custom-icons/.storybook',
+  custom_icons: 'src/platform/packages/shared/kbn-custom-icons/.storybook',
   custom_integrations: 'src/platform/plugins/shared/custom_integrations/storybook',
   dashboard_enhanced: 'x-pack/platform/plugins/shared/dashboard_enhanced/.storybook',
   dashboard: 'src/platform/plugins/shared/dashboard/.storybook',
