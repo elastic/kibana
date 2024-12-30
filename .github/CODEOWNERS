@@ -1038,7 +1038,7 @@ src/plugins/visualizations @elastic/kibana-visualizations
 x-pack/platform/plugins/private/watcher @elastic/kibana-management
 packages/kbn-web-worker-stub @elastic/kibana-operations
 packages/kbn-whereis-pkg-cli @elastic/kibana-operations
-packages/kbn-xstate-utils @elastic/obs-ux-logs-team
+src/platform/packages/shared/kbn-xstate-utils @elastic/obs-ux-logs-team
 packages/kbn-yarn-lock-validator @elastic/kibana-operations
 packages/kbn-zod @elastic/kibana-core
 src/platform/packages/shared/kbn-zod-helpers @elastic/security-detection-rule-management
