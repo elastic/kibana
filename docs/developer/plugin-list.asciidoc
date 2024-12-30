@@ -44,11 +44,11 @@ as uiSettings within the code.
 |The content management plugin provides functionality to manage content in Kibana.
 
 
-|{kib-repo}blob/{branch}/src/plugins/controls/README.mdx[controls]
+|{kib-repo}blob/{branch}/src/platform/plugins/shared/controls/README.mdx[controls]
 |The Controls plugin contains Embeddables which can be used to add user-friendly interactivity to apps.
 
 
-|{kib-repo}blob/{branch}/src/plugins/custom_integrations/README.md[customIntegrations]
+|{kib-repo}blob/{branch}/src/platform/plugins/shared/custom_integrations/README.md[customIntegrations]
 |Register add-data cards
 
 
@@ -94,7 +94,7 @@ This API doesn't support angular, for registering angular dev tools, bootstrap a
 |A stateful layer to register shared features and provide an access point to discover without a direct dependency.
 
 
-|{kib-repo}blob/{branch}/src/plugins/embeddable/README.md[embeddable]
+|{kib-repo}blob/{branch}/src/platform/plugins/shared/embeddable/README.md[embeddable]
 |Embeddables are React components that manage their own state, can be serialized and deserialized, and return an API that can be used to interact with them imperatively.
 
 
@@ -118,7 +118,7 @@ This API doesn't support angular, for registering angular dev tools, bootstrap a
 |This plugin contains the library listing page for event annotation groups.
 
 
-|{kib-repo}blob/{branch}/src/plugins/expression_error/README.md[expressionError]
+|{kib-repo}blob/{branch}/src/platform/plugins/shared/expression_error/README.md[expressionError]
 |Expression Error plugin adds an error renderer to the expression plugin. The renderer will display the error image.
 
 
@@ -130,7 +130,7 @@ This API doesn't support angular, for registering angular dev tools, bootstrap a
 |WARNING: Missing README.
 
 
-|{kib-repo}blob/{branch}/src/plugins/expression_image/README.md[expressionImage]
+|{kib-repo}blob/{branch}/src/platform/plugins/shared/expression_image/README.md[expressionImage]
 |Expression Image plugin adds an image renderer to the expression plugin. The renderer will display the given image.
 
 
@@ -138,7 +138,7 @@ This API doesn't support angular, for registering angular dev tools, bootstrap a
 |Expression MetricVis plugin adds a metric renderer and function to the expression plugin. The renderer will display the metric chart.
 
 
-|{kib-repo}blob/{branch}/src/plugins/expression_metric/README.md[expressionMetric]
+|{kib-repo}blob/{branch}/src/platform/plugins/shared/expression_metric/README.md[expressionMetric]
 |Expression Metric plugin adds a metric renderer and function to the expression plugin.
 
 
@@ -150,11 +150,11 @@ This API doesn't support angular, for registering angular dev tools, bootstrap a
 |Expression Partition Visualization plugin adds a partitionVis renderer and pieVis, mosaicVis, treemapVis, waffleVis functions to the expression plugin. The renderer will display the pie, waffle, treemap and mosaic charts.
 
 
-|{kib-repo}blob/{branch}/src/plugins/expression_repeat_image/README.md[expressionRepeatImage]
+|{kib-repo}blob/{branch}/src/platform/plugins/shared/expression_repeat_image/README.md[expressionRepeatImage]
 |Expression Repeat Image plugin adds a repeatImage function to the expression plugin and an associated renderer. The renderer will display the given image in mutliple instances.
 
 
-|{kib-repo}blob/{branch}/src/plugins/expression_reveal_image/README.md[expressionRevealImage]
+|{kib-repo}blob/{branch}/src/platform/plugins/shared/expression_reveal_image/README.md[expressionRevealImage]
 |Expression Reveal Image plugin adds a revealImage function to the expression plugin and an associated renderer. The renderer will display the given percentage of a given image.
 
 
@@ -180,7 +180,7 @@ want to incorporate their own functions, types, and renderers into the service
 for use in their own application.
 
 
-|{kib-repo}blob/{branch}/src/plugins/expression_shape/README.md[expressionShape]
+|{kib-repo}blob/{branch}/src/platform/plugins/shared/expression_shape/README.md[expressionShape]
 |Expression Shape plugin adds a shape function to the expression plugin and an associated renderer. The renderer will display the given shape with selected decorations.
 
 
@@ -221,11 +221,11 @@ for use in their own application.
 Images can be added either by URL or by uploading the image file via file service.
 
 
-|{kib-repo}blob/{branch}/src/plugins/input_control_vis/README.md[inputControlVis]
+|{kib-repo}blob/{branch}/src/platform/plugins/private/input_control_vis/README.md[inputControlVis]
 |Contains the input control visualization allowing to place custom filter controls on a dashboard.
 
 
-|{kib-repo}blob/{branch}/src/plugins/inspector/README.md[inspector]
+|{kib-repo}blob/{branch}/src/platform/plugins/shared/inspector/README.md[inspector]
 |The inspector is a contextual tool to gain insights into different elements
 in Kibana, e.g. visualizations. It has the form of a flyout panel.
 
@@ -250,7 +250,7 @@ in Kibana, e.g. visualizations. It has the form of a flyout panel.
 |Utilities for building Kibana plugins.
 
 
-|{kib-repo}blob/{branch}/src/plugins/links/README.md[links]
+|{kib-repo}blob/{branch}/src/platform/plugins/private/links/README.md[links]
 |This plugin adds the Links panel which allows authors to create hard links to navigate on click and bring all context from the source dashboard to the destination dashboard.
 
 
@@ -260,7 +260,7 @@ to link individual management section into it. This plugin does not contain any 
 management section itself.
 
 
-|{kib-repo}blob/{branch}/src/plugins/maps_ems/README.md[mapsEms]
+|{kib-repo}blob/{branch}/src/platform/plugins/private/maps_ems/README.md[mapsEms]
 |Utility plugin:
 
 
@@ -278,11 +278,11 @@ Content is fetched from the remote (https://feeds.elastic.co) once a day, with p
 |Helps to globally configure the no data page components
 
 
-|{kib-repo}blob/{branch}/src/plugins/presentation_panel/README.md[presentationPanel]
+|{kib-repo}blob/{branch}/src/platform/plugins/private/presentation_panel/README.md[presentationPanel]
 |The Presentation Panel is the point of contact between any React component and any registered UI actions. Components provided to the Presentation Panel should use an imperative handle to expose methods and state.
 
 
-|{kib-repo}blob/{branch}/src/plugins/presentation_util/README.mdx[presentationUtil]
+|{kib-repo}blob/{branch}/src/platform/plugins/shared/presentation_util/README.mdx[presentationUtil]
 |The Presentation Utility Plugin is a set of common, shared components and toolkits for solutions within the Presentation space, (e.g. Dashboards, Canvas).
 
 
@@ -392,7 +392,7 @@ The plugin exposes the static DefaultEditorController class to consume.
 |WARNING: Missing README.
 
 
-|{kib-repo}blob/{branch}/src/plugins/vis_type_markdown/README.md[visTypeMarkdown]
+|{kib-repo}blob/{branch}/src/platform/plugins/private/vis_type_markdown/README.md[visTypeMarkdown]
 |The markdown visualization that can be used to place text panels on dashboards.
 
 
@@ -447,7 +447,7 @@ The plugin exposes the static DefaultEditorController class to consume.
 |Description
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/actions/README.md[actions]
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/shared/actions/README.md[actions]
 |The Kibana actions plugin provides a framework to create executable actions. You can:
 
 
@@ -455,15 +455,15 @@ The plugin exposes the static DefaultEditorController class to consume.
 |The plugin provides APIs and components for AIOps features, including the “Log rate analysis” UI, maintained by the ML team.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/alerting/README.md[alerting]
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/shared/alerting/README.md[alerting]
 |The Kibana Alerting plugin provides a common place to set up rules. You can:
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/apm/readme.md[apm]
+|{kib-repo}blob/{branch}/x-pack/solutions/observability/plugins/apm/readme.md[apm]
 |This plugin provides access to App Monitoring features provided by Elastic. It allows you to monitor your software services and applications in real-time; visualize detailed performance information on your services, identify and analyze errors, and monitor host-level and APM agent-specific metrics like JVM and Go runtime metrics.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/apm_data_access[apmDataAccess]
+|{kib-repo}blob/{branch}/x-pack/solutions/observability/plugins/apm_data_access[apmDataAccess]
 |WARNING: Missing README.
 
 
@@ -475,11 +475,11 @@ The plugin exposes the static DefaultEditorController class to consume.
 |Allow to add a header banner that will be displayed on every page of the Kibana application
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/canvas/README.md[canvas]
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/private/canvas/README.md[canvas]
 |"Never look back. The past is done. The future is a blank canvas." ― Suzy Kassem, Rise Up and Salute the Sun
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/cases/README.md[cases]
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/shared/cases/README.md[cases]
 |This plugin provides cases management in Kibana
 
 
@@ -568,7 +568,7 @@ adds dynamic actions to every embeddables state, in order to support drilldowns.
 security and spaces filtering.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/enterprise_search/README.md[enterpriseSearch]
+|{kib-repo}blob/{branch}/x-pack/solutions/search/plugins/enterprise_search/README.md[enterpriseSearch]
 |This plugin provides Kibana user interfaces for managing the Enterprise Search solution and its products, App Search and Workplace Search.
 
 
@@ -584,7 +584,7 @@ security and spaces filtering.
 |This plugin provides a user interface to interact with the Entity Manager.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/event_log/README.md[eventLog]
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/shared/event_log/README.md[eventLog]
 |The event log plugin provides a persistent history of alerting and action
 activities.
 
@@ -601,11 +601,11 @@ activities.
 |The @kbn/fields-metadata-plugin is designed to provide a centralized and asynchronous way to consume field metadata across Kibana. This plugin addresses the need for on-demand retrieval of field metadata from static ECS/Metadata definitions and integration manifests, with the flexibility to extend to additional resolution sources in the future.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/file_upload[fileUpload]
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/private/file_upload[fileUpload]
 |WARNING: Missing README.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/fleet/README.md[fleet]
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/shared/fleet/README.md[fleet]
 |Fleet provides a web-based UI in Kibana for centrally managing Elastic Agents and their policies.
 
 
@@ -658,7 +658,7 @@ the infrastructure monitoring use-case within Kibana.
 |Team owner: Security Integrations Scalability
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/inventory/README.md[inventory]
+|{kib-repo}blob/{branch}/x-pack/solutions/observability/plugins/inventory/README.md[inventory]
 |Home of the Inventory plugin, which renders the... inventory.
 
 
@@ -711,15 +711,15 @@ using the CURL scripts in the scripts folder.
 |Exposes the shared components and APIs to access and visualize logs.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/logstash[logstash]
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/private/logstash[logstash]
 |WARNING: Missing README.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/maps/README.md[maps]
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/shared/maps/README.md[maps]
 |Visualize geo data from Elasticsearch or 3rd party geo-services.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/metrics_data_access/README.md[metricsDataAccess]
+|{kib-repo}blob/{branch}/x-pack/solutions/observability/plugins/metrics_data_access/README.md[metricsDataAccess]
 |Exposes utilities to access metrics data.
 
 
@@ -728,11 +728,11 @@ using the CURL scripts in the scripts folder.
 Elastic.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/monitoring/readme.md[monitoring]
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/private/monitoring/readme.md[monitoring]
 |This plugin provides the Stack Monitoring kibana application.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/monitoring_collection/README.md[monitoringCollection]
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/private/monitoring_collection/README.md[monitoringCollection]
 |This plugin allows for other plugins to add data to Kibana stack monitoring documents.
 
 
@@ -764,7 +764,7 @@ Elastic.
 |This plugin provides an onboarding framework for observability solutions: Logs and APM.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/observability_shared/README.md[observabilityShared]
+|{kib-repo}blob/{branch}/x-pack/solutions/observability/plugins/observability_shared/README.md[observabilityShared]
 |A plugin that contains components and utilities shared by all Observability plugins.
 
 
@@ -780,11 +780,11 @@ Elastic.
 |This plugin contains the product documentation base service.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/profiling/README.md[profiling]
+|{kib-repo}blob/{branch}/x-pack/solutions/observability/plugins/profiling/README.md[profiling]
 |Universal Profiling provides fleet-wide, whole-system, continuous profiling with zero instrumentation. Get a comprehensive understanding of what lines of code are consuming compute resources throughout your entire fleet by visualizing your data in Kibana using the flamegraph, stacktraces, and top functions views.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/profiling_data_access[profilingDataAccess]
+|{kib-repo}blob/{branch}/x-pack/solutions/observability/plugins/profiling_data_access[profilingDataAccess]
 |WARNING: Missing README.
 
 
@@ -800,7 +800,7 @@ Elastic.
 |Welcome to the Kibana rollup plugin! This plugin provides Kibana support for Elasticsearch's rollup feature. Please refer to the Elasticsearch documentation to understand rollup indices and how to create rollup jobs.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/rule_registry/README.md[ruleRegistry]
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/shared/rule_registry/README.md[ruleRegistry]
 |The rule registry plugin aims to make it easy for rule type producers to have their rules produce the data that they need to build rich experiences on top of a unified experience, without the risk of mapping conflicts.
 
 
@@ -817,35 +817,35 @@ Elastic.
 It uses Chromium and Puppeteer underneath to run the browser in headless mode.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/search_assistant/README.md[searchAssistant]
+|{kib-repo}blob/{branch}/x-pack/solutions/search/plugins/search_assistant/README.md[searchAssistant]
 |This holds the Search AI Assistant which targets Search users and Serverless Elasticsearch.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/search_connectors/README.mdx[searchConnectors]
+|{kib-repo}blob/{branch}/x-pack/solutions/search/plugins/search_connectors/README.mdx[searchConnectors]
 |This plugin contains common assets and endpoints for the use of connectors in Kibana. Primarily used by the enterprise_search and serverless_search plugins.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/search_homepage/README.mdx[searchHomepage]
+|{kib-repo}blob/{branch}/x-pack/solutions/search/plugins/search_homepage/README.mdx[searchHomepage]
 |The Search Homepage is a shared homepage for elasticsearch users.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/search_indices/README.mdx[searchIndices]
+|{kib-repo}blob/{branch}/x-pack/solutions/search/plugins/search_indices/README.mdx[searchIndices]
 |The Search Indices plugin is a shared set of pages for elasticsearch users across stack and serverless search solutions.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/search_inference_endpoints/README.md[searchInferenceEndpoints]
+|{kib-repo}blob/{branch}/x-pack/solutions/search/plugins/search_inference_endpoints/README.md[searchInferenceEndpoints]
 |The Inference Endpoints is a tool used to manage inference endpoints
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/search_solution/search_navigation/README.mdx[searchNavigation]
+|{kib-repo}blob/{branch}/x-pack/solutions/search/plugins/search_solution/search_navigation/README.mdx[searchNavigation]
 |The Search Navigation plugin is used to handle navigation for search solution plugins across both stack and serverless.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/search_notebooks/README.mdx[searchNotebooks]
+|{kib-repo}blob/{branch}/x-pack/solutions/search/plugins/search_notebooks/README.mdx[searchNotebooks]
 |This plugin contains endpoints and components for rendering search python notebooks in the persistent dev console.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/search_playground/README.md[searchPlayground]
+|{kib-repo}blob/{branch}/x-pack/solutions/search/plugins/search_playground/README.md[searchPlayground]
 |The Search Playground is a tool for developers to experiment with their own data using LLMs.
 
 
@@ -883,7 +883,7 @@ This plugin is only enabled when the application is built for serverless project
 |This plugin contains configuration and code used to create a Serverless Observability project.  It leverages universal configuration and other APIs in the serverless plugin to configure Kibana.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/serverless_search/README.mdx[serverlessSearch]
+|{kib-repo}blob/{branch}/x-pack/solutions/search/plugins/serverless_search/README.mdx[serverlessSearch]
 |This plugin contains configuration and code used to create a Serverless Search project. It leverages universal configuration and other APIs in the serverless plugin to configure Kibana.
 
 
@@ -903,14 +903,14 @@ This plugin is only enabled when the application is built for serverless project
 |See Configuring Kibana Spaces.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/stack_alerts/README.md[stackAlerts]
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/shared/stack_alerts/README.md[stackAlerts]
 |This plugin provides alertTypes shipped with Kibana for use with the
 the alerting plugin.  When enabled, it will register
 the alertTypes by the Stack in the alerting plugin, register associated HTTP
 routes, etc.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/stack_connectors/README.md[stackConnectors]
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/shared/stack_connectors/README.md[stackConnectors]
 |The stack_connectors plugin provides connector types shipped with Kibana, built on top of the framework provided in the actions plugin.
 
 
@@ -927,7 +927,7 @@ routes, etc.
 in their infrastructure.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/task_manager/README.md[taskManager]
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/shared/task_manager/README.md[taskManager]
 |The task manager is a generic system for running background tasks.
 
 
@@ -952,7 +952,7 @@ in their infrastructure.
 For adding localizations and instrument a ui to support translated content, see https://github.com/elastic/kibana/tree/main/packages/kbn-i18n
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/triggers_actions_ui/README.md[triggersActionsUi]
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/shared/triggers_actions_ui/README.md[triggersActionsUi]
 |The Kibana alerts and actions UI plugin provides a user interface for managing alerts and actions.
 As a developer you can reuse and extend built-in alerts and actions UI functionality:
 
@@ -980,9 +980,9 @@ in their infrastructure.
 
 |===
 
-include::{kibana-root}/src/plugins/dashboard/README.asciidoc[leveloffset=+1]
+include::{kibana-root}/src/platform/plugins/shared/dashboard/README.asciidoc[leveloffset=+1]
 include::{kibana-root}/src/plugins/expressions/README.asciidoc[leveloffset=+1]
 include::{kibana-root}/src/plugins/ui_actions/README.asciidoc[leveloffset=+1]
-include::{kibana-root}/x-pack/plugins/dashboard_enhanced/README.asciidoc[leveloffset=+1]
-include::{kibana-root}/x-pack/plugins/embeddable_enhanced/README.asciidoc[leveloffset=+1]
+include::{kibana-root}/x-pack/platform/plugins/shared/dashboard_enhanced/README.asciidoc[leveloffset=+1]
+include::{kibana-root}/x-pack/platform/plugins/shared/embeddable_enhanced/README.asciidoc[leveloffset=+1]
 include::{kibana-root}/x-pack/platform/plugins/private/translations/README.asciidoc[leveloffset=+1]

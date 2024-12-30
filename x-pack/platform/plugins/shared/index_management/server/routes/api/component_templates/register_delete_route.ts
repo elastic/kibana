@@ -21,6 +21,12 @@ export const registerDeleteRoute = ({
   router.delete(
     {
       path: addBasePath('/component_templates/{names}'),
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Relies on es client for authorization',
+        },
+      },
       validate: {
         params: paramsSchema,
       },
