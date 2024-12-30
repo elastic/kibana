@@ -17,19 +17,15 @@ export const GrokPatternDefinition = () => {
   return (
     <EuiFormRow
       label={i18n.translate(
-        'xpack.streams.streamDetailView.managementTab.enrichment.processorFlyout.patternDefinitionsLabel',
+        'xpack.streams.streamDetailView.managementTab.enrichment.processorFlyout.grokPatternDefinitionsLabel',
         { defaultMessage: 'Pattern definitions' }
       )}
       helpText={i18n.translate(
-        'xpack.streams.streamDetailView.managementTab.enrichment.processorFlyout.patternDefinitionsHelpText',
+        'xpack.streams.streamDetailView.managementTab.enrichment.processorFlyout.grokPatternDefinitionsHelpText',
         {
           defaultMessage:
             'A map of pattern-name and pattern tuples defining custom patterns. Patterns matching existing names will override the pre-existing definition.',
         }
-      )}
-      error={i18n.translate(
-        'xpack.streams.streamDetailView.managementTab.enrichment.processorFlyout.patternDefinitionsError',
-        { defaultMessage: 'Pattern definitions' }
       )}
       isInvalid={fieldState.invalid}
       fullWidth
@@ -40,7 +36,7 @@ export const GrokPatternDefinition = () => {
         languageId="xjson"
         height={200}
         aria-label={i18n.translate(
-          'xpack.streams.streamDetailView.managementTab.enrichment.processorFlyout.patternDefinitionsAriaLabel',
+          'xpack.streams.streamDetailView.managementTab.enrichment.processorFlyout.grokPatternDefinitionsAriaLabel',
           { defaultMessage: 'Pattern definitions editor' }
         )}
       />

@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo, useState } from 'react';
-import deepEqual from 'fast-deep-equal';
+import React, { useEffect } from 'react';
 import {
   DragDropContextProps,
   EuiPanel,
@@ -14,20 +13,17 @@ import {
   EuiText,
   EuiTitle,
   euiDragDropReorder,
-  htmlIdGenerator,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useAbortController } from '@kbn/observability-utils-browser/hooks/use_abort_controller';
-import { ProcessingDefinition, ReadStreamDefinition } from '@kbn/streams-schema';
+import { ReadStreamDefinition } from '@kbn/streams-schema';
 import { useBoolean } from '@kbn/react-hooks';
 import { EnrichmentEmptyPrompt } from './enrichment_empty_prompt';
 import { AddProcessorButton } from './add_processor_button';
 import { AddProcessorFlyout } from './flyout';
 import { DraggableProcessorListItem } from './processors_list';
-import { ProcessorDefinition } from './types';
 import { ManagementBottomBar } from '../management_bottom_bar';
-import { useKibana } from '../../hooks/use_kibana';
 import { SortableList } from './sortable_list';
+import { useDefinition } from './hooks/use_definition';
 
 export function StreamDetailEnrichmentContent({
   definition,
@@ -43,9 +39,10 @@ export function StreamDetailEnrichmentContent({
     deleteProcessor,
     setProcessors,
     hasChanges,
+    isSavingChanges,
     resetChanges,
     saveChanges,
-  } = useProcessorsList(definition, refreshDefinition);
+  } = useDefinition(definition, refreshDefinition);
 
   const [isAddProcessorOpen, { on: openAddProcessor, off: closeAddProcessor }] = useBoolean();
   const [isBottomBarOpen, { on: openBottomBar, off: closeBottomBar }] = useBoolean();
@@ -84,7 +81,11 @@ export function StreamDetailEnrichmentContent({
   );
 
   const bottomBar = isBottomBarOpen && (
-    <ManagementBottomBar onCancel={handleDiscardChanges} onConfirm={handleSaveChanges} />
+    <ManagementBottomBar
+      onCancel={handleDiscardChanges}
+      onConfirm={handleSaveChanges}
+      isLoading={isSavingChanges}
+    />
   );
 
   if (!hasProcessors) {
@@ -145,107 +146,4 @@ const ProcessorsHeader = () => {
       </EuiText>
     </>
   );
-};
-
-const useProcessorsList = (definition: ReadStreamDefinition, refreshDefinition: () => void) => {
-  const { core, dependencies } = useKibana();
-  const abortController = useAbortController();
-
-  const { toasts } = core.notifications;
-  const { streamsRepositoryClient } = dependencies.start.streams;
-
-  const { processing } = definition.stream.ingest;
-
-  const [processors, setProcessors] = useState(() => createProcessorsList(processing));
-
-  const httpProcessing = useMemo(() => processors.map(removeIdFromProcessor), [processors]);
-
-  useEffect(() => {
-    setProcessors(createProcessorsList(definition.stream.ingest.processing));
-  }, [definition]);
-
-  const hasChanges = useMemo(
-    () => !deepEqual(processing, httpProcessing),
-    [processing, httpProcessing]
-  );
-
-  const addProcessor = (newProcessing: ProcessingDefinition) => {
-    setProcessors(processors.concat(createProcessorWithId(newProcessing)));
-  };
-
-  const updateProcessor = (id: string, processorUpdate: ProcessorDefinition) => {
-    const updatedProcessors = processors.map((processor) => {
-      if (processor.id === id) {
-        return processorUpdate;
-      }
-
-      return processor;
-    });
-
-    setProcessors(updatedProcessors);
-  };
-
-  const deleteProcessor = (id: string) => {
-    const updatedProcessors = processors.filter((processor) => processor.id !== id);
-
-    setProcessors(updatedProcessors);
-  };
-
-  const resetChanges = () => {
-    setProcessors(createProcessorsList(processing));
-  };
-
-  const saveChanges = async () => {
-    try {
-      await streamsRepositoryClient.fetch(`PUT /api/streams/{id}`, {
-        signal: abortController.signal,
-        params: {
-          path: {
-            id: definition.name,
-          },
-          body: {
-            ...definition.stream,
-            ingest: {
-              ...definition.stream.ingest,
-              processing: httpProcessing,
-            },
-          },
-        },
-      });
-
-      await refreshDefinition();
-
-      toasts.addSuccess(
-        i18n.translate(
-          'xpack.streams.streamDetailView.managementTab.enrichment.saveChangesSuccess',
-          { defaultMessage: "Stream's processors were successfully updated" }
-        )
-      );
-    } catch (error) {}
-  };
-
-  return {
-    hasChanges,
-    processors,
-    addProcessor,
-    updateProcessor,
-    deleteProcessor,
-    resetChanges,
-    saveChanges,
-    setProcessors,
-  };
-};
-
-const createId = htmlIdGenerator();
-const createProcessorsList = (processors: ProcessingDefinition[]): ProcessorDefinition[] =>
-  processors.map(createProcessorWithId);
-
-const createProcessorWithId = (processor: ProcessingDefinition): ProcessorDefinition => ({
-  ...processor,
-  id: createId(),
-});
-
-const removeIdFromProcessor = (processor: ProcessorDefinition): ProcessingDefinition => {
-  const { id, ...rest } = processor;
-  return rest;
 };
