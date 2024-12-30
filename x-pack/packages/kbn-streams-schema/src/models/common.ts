@@ -62,6 +62,7 @@ export const dissectProcessingDefinitionSchema = z.object({
   dissect: z.object({
     field: z.string(),
     pattern: z.string(),
+    append_separator: z.optional(z.string()),
     ignore_failure: z.optional(z.boolean()),
   }),
 });
