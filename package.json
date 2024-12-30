@@ -612,7 +612,7 @@
     "@kbn/language-documentation": "link:src/platform/packages/private/kbn-language-documentation",
     "@kbn/lens-config-builder-example-plugin": "link:x-pack/examples/lens_config_builder_example",
     "@kbn/lens-embeddable-utils": "link:src/platform/packages/shared/kbn-lens-embeddable-utils",
-    "@kbn/lens-formula-docs": "link:packages/kbn-lens-formula-docs",
+    "@kbn/lens-formula-docs": "link:src/platform/packages/private/kbn-lens-formula-docs",
     "@kbn/lens-inline-editing-example-plugin": "link:x-pack/examples/lens_embeddable_inline_editing_example",
     "@kbn/lens-plugin": "link:x-pack/plugins/lens",
     "@kbn/license-api-guard-plugin": "link:x-pack/platform/plugins/private/license_api_guard",
