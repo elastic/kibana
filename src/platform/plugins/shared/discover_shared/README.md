@@ -21,7 +21,7 @@ First of all, we need to define an interface to which the plugin registering the
 The `DiscoverFeaturesService` already defines a union of available features and uses them to strictly type the exposed registry from the discover_shared plugin, so we can update it with the new feature:
 
 ```tsx
-// src/plugins/discover_shared/public/services/discover_features/types.ts
+// src/platform/plugins/shared/discover_shared/public/services/discover_features/types.ts
 
 export interface SecurityAIAssistantFeature {
   id: 'security-ai-assistant';
