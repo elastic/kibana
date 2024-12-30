@@ -7773,7 +7773,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/ui-shared-deps-src@link:packages/kbn-ui-shared-deps-src":
+"@kbn/ui-shared-deps-src@link:src/platform/packages/private/kbn-ui-shared-deps-src":
   version "0.0.0"
   uid ""
 

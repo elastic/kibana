@@ -3949,7 +3949,7 @@
   ],
   [
     "@kbn/ui-shared-deps-src",
-    "packages/kbn-ui-shared-deps-src"
+    "src/platform/packages/private/kbn-ui-shared-deps-src"
   ],
   [
     "@kbn/ui-theme",
