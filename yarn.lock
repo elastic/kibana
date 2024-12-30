@@ -5257,7 +5257,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/data-view-utils@link:packages/kbn-data-view-utils":
+"@kbn/data-view-utils@link:src/platform/packages/shared/kbn-data-view-utils":
   version "0.0.0"
   uid ""
 
