@@ -51,18 +51,8 @@ const mockPlugin = {
   observabilityAIAssistant: mockAIAssistantPlugin,
 };
 
-const mockEmbeddable = embeddablePluginMock.createStartContract();
-
-mockEmbeddable.getEmbeddableFactory = jest.fn().mockImplementation(() => ({
-  create: () => ({
-    reload: jest.fn(),
-    setRenderTooltipContent: jest.fn(),
-    setLayerList: jest.fn(),
-  }),
-}));
-
 const mockCorePlugins = {
-  embeddable: mockEmbeddable,
+  embeddable: embeddablePluginMock.createStartContract(),
   inspector: {},
   maps: {},
   observabilityShared: {

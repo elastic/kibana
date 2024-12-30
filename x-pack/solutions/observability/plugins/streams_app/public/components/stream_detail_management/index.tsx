@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import { ReadStreamDefinition } from '@kbn/streams-plugin/common';
+import { isWiredReadStream, ReadStreamDefinition } from '@kbn/streams-schema';
 import { WiredStreamDetailManagement } from './wired';
 import { ClassicStreamDetailManagement } from './classic';
 
@@ -22,7 +22,7 @@ export function StreamDetailManagement({
     return null;
   }
 
-  if (definition.managed) {
+  if (isWiredReadStream(definition)) {
     return (
       <WiredStreamDetailManagement
         definition={definition}
