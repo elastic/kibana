@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import { act, renderHook } from '@testing-library/react-hooks';
+import { waitFor, renderHook } from '@testing-library/react';
 import produce from 'immer';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { useAppToastsMock } from '../../../../common/hooks/use_app_toasts.mock';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import type { Privilege } from './types';
-import type { UseAlertsPrivelegesReturn } from './use_alerts_privileges';
 import { useAlertsPrivileges } from './use_alerts_privileges';
 import { getEndpointPrivilegesInitialStateMock } from '../../../../common/components/user_privileges/endpoint/mocks';
 
@@ -90,11 +89,8 @@ describe('useAlertsPrivileges', () => {
   });
 
   test('init', async () => {
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<void, UseAlertsPrivelegesReturn>(() =>
-        useAlertsPrivileges()
-      );
-      await waitForNextUpdate();
+    const { result } = renderHook(() => useAlertsPrivileges());
+    await waitFor(() =>
       expect(result.current).toEqual({
         hasEncryptionKey: null,
         hasIndexManage: null,
@@ -106,8 +102,8 @@ describe('useAlertsPrivileges', () => {
         hasKibanaREAD: false,
         isAuthenticated: null,
         loading: false,
-      });
-    });
+      })
+    );
   });
 
   test('if there is an error when fetching user privilege, we should get back false for all index related properties', async () => {
@@ -115,12 +111,8 @@ describe('useAlertsPrivileges', () => {
       draft.detectionEnginePrivileges.error = new Error('Something went wrong');
     });
     useUserPrivilegesMock.mockReturnValue(userPrivileges);
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<void, UseAlertsPrivelegesReturn>(() =>
-        useAlertsPrivileges()
-      );
-      await waitForNextUpdate();
-      await waitForNextUpdate();
+    const { result } = renderHook(() => useAlertsPrivileges());
+    await waitFor(() =>
       expect(result.current).toEqual({
         hasEncryptionKey: false,
         hasIndexManage: false,
@@ -132,8 +124,8 @@ describe('useAlertsPrivileges', () => {
         hasKibanaREAD: true,
         isAuthenticated: false,
         loading: false,
-      });
-    });
+      })
+    );
   });
 
   test('returns "hasIndexManage" is false if the privilege does not have cluster manage', async () => {
@@ -145,12 +137,8 @@ describe('useAlertsPrivileges', () => {
     });
     useUserPrivilegesMock.mockReturnValue(userPrivileges);
 
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<void, UseAlertsPrivelegesReturn>(() =>
-        useAlertsPrivileges()
-      );
-      await waitForNextUpdate();
-      await waitForNextUpdate();
+    const { result } = renderHook(() => useAlertsPrivileges());
+    await waitFor(() =>
       expect(result.current).toEqual({
         hasEncryptionKey: true,
         hasIndexManage: false,
@@ -162,8 +150,8 @@ describe('useAlertsPrivileges', () => {
         hasKibanaREAD: true,
         isAuthenticated: true,
         loading: false,
-      });
-    });
+      })
+    );
   });
 
   test('returns "hasIndexManage" is true if the privilege has cluster manage', async () => {
@@ -172,12 +160,8 @@ describe('useAlertsPrivileges', () => {
     });
     useUserPrivilegesMock.mockReturnValue(userPrivileges);
 
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<void, UseAlertsPrivelegesReturn>(() =>
-        useAlertsPrivileges()
-      );
-      await waitForNextUpdate();
-      await waitForNextUpdate();
+    const { result } = renderHook(() => useAlertsPrivileges());
+    await waitFor(() =>
       expect(result.current).toEqual({
         hasEncryptionKey: true,
         hasIndexManage: true,
@@ -189,8 +173,8 @@ describe('useAlertsPrivileges', () => {
         hasKibanaREAD: true,
         isAuthenticated: true,
         loading: false,
-      });
-    });
+      })
+    );
   });
 
   test('returns "hasKibanaCRUD" as false if user does not have SIEM Kibana "all" privileges', async () => {
@@ -200,12 +184,8 @@ describe('useAlertsPrivileges', () => {
     });
     useUserPrivilegesMock.mockReturnValue(userPrivileges);
 
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<void, UseAlertsPrivelegesReturn>(() =>
-        useAlertsPrivileges()
-      );
-      await waitForNextUpdate();
-      await waitForNextUpdate();
+    const { result } = renderHook(() => useAlertsPrivileges());
+    await waitFor(() =>
       expect(result.current).toEqual({
         hasEncryptionKey: true,
         hasIndexManage: true,
@@ -217,8 +197,8 @@ describe('useAlertsPrivileges', () => {
         hasKibanaREAD: true,
         isAuthenticated: true,
         loading: false,
-      });
-    });
+      })
+    );
   });
 
   test('returns "hasKibanaREAD" as false if user does not have at least SIEM Kibana "read" privileges', async () => {
@@ -228,12 +208,8 @@ describe('useAlertsPrivileges', () => {
     });
     useUserPrivilegesMock.mockReturnValue(userPrivileges);
 
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<void, UseAlertsPrivelegesReturn>(() =>
-        useAlertsPrivileges()
-      );
-      await waitForNextUpdate();
-      await waitForNextUpdate();
+    const { result } = renderHook(() => useAlertsPrivileges());
+    await waitFor(() =>
       expect(result.current).toEqual({
         hasEncryptionKey: true,
         hasIndexManage: true,
@@ -245,7 +221,7 @@ describe('useAlertsPrivileges', () => {
         hasKibanaREAD: false,
         isAuthenticated: true,
         loading: false,
-      });
-    });
+      })
+    );
   });
 });

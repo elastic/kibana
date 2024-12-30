@@ -53,13 +53,13 @@ window.scrollTo = jest.fn();
 const MockKibanaContextProvider = createKibanaContextProviderMock();
 
 /** A utility for wrapping children in the providers required to run most tests */
-export const TestProvidersComponent: React.FC<Props> = ({
+export const TestProvidersComponent = ({
   children,
   store = createMockStore(),
   startServices,
   onDragEnd = jest.fn(),
   cellActions = [],
-}) => {
+}: React.PropsWithChildren<Props>) => {
   const queryClient = new QueryClient({
     defaultOptions: {
       queries: {
