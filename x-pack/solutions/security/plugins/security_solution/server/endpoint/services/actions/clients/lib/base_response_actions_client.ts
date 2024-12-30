@@ -654,7 +654,13 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
     }
   }
 
-  protected fetchAllPendingActions(): AsyncIterable<ResponseActionsClientPendingAction[]> {
+  protected fetchAllPendingActions<
+    TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes,
+    TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
+    TMeta extends {} = {}
+  >(): AsyncIterable<
+    Array<ResponseActionsClientPendingAction<TParameters, TOutputContent, TMeta>>
+  > {
     const esClient = this.options.esClient;
     const query: QueryDslQueryContainer = {
       bool: {
