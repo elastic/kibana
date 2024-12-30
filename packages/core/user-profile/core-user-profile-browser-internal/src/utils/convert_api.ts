@@ -15,6 +15,7 @@ export const convertUserProfileAPI = (
 ): InternalUserProfileServiceStart => {
   return {
     getUserProfile$: () => delegate.userProfile$,
+    getEnabled$: () => delegate.enabled$,
     getCurrent: delegate.getCurrent.bind(delegate),
     bulkGet: delegate.bulkGet.bind(delegate),
     suggest: delegate.suggest.bind(delegate),
