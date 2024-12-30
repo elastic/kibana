@@ -362,7 +362,7 @@ x-pack/solutions/security/packages/data-stream-adapter @elastic/security-threat-
 x-pack/platform/plugins/private/data_usage @elastic/obs-ai-assistant @elastic/security-solution
 src/platform/plugins/shared/data_view_editor @elastic/kibana-data-discovery
 examples/data_view_field_editor_example @elastic/kibana-data-discovery
-src/plugins/data_view_field_editor @elastic/kibana-data-discovery
+src/platform/plugins/shared/data_view_field_editor @elastic/kibana-data-discovery
 src/plugins/data_view_management @elastic/kibana-data-discovery
 packages/kbn-data-view-utils @elastic/kibana-data-discovery
 src/plugins/data_views @elastic/kibana-data-discovery

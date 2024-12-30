@@ -5243,7 +5243,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/data-view-field-editor-plugin@link:src/plugins/data_view_field_editor":
+"@kbn/data-view-field-editor-plugin@link:src/platform/plugins/shared/data_view_field_editor":
   version "0.0.0"
   uid ""
 
