@@ -355,7 +355,7 @@ x-pack/platform/plugins/shared/dashboard_enhanced @elastic/kibana-presentation
 src/platform/plugins/shared/dashboard @elastic/kibana-presentation
 x-pack/platform/packages/shared/kbn-data-forge @elastic/obs-ux-management-team
 src/plugins/data @elastic/kibana-visualizations @elastic/kibana-data-discovery
-x-pack/plugins/data_quality @elastic/obs-ux-logs-team
+x-pack/platform/plugins/shared/data_quality @elastic/obs-ux-logs-team
 test/plugin_functional/plugins/data_search @elastic/kibana-data-discovery
 packages/kbn-data-service @elastic/kibana-visualizations @elastic/kibana-data-discovery
 x-pack/solutions/security/packages/data-stream-adapter @elastic/security-threat-hunting
