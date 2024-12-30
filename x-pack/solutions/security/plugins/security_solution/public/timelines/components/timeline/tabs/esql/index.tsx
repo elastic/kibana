@@ -223,7 +223,7 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
           if (hasChanged && discoverSessionEdited) {
             setDiscoverSavedSearchState(discoverSessionEdited);
           }
-        }
+        },
       });
 
       const timeRangeSub = discoverDataService.query.timefilter.timefilter
