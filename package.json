@@ -804,7 +804,7 @@
     "@kbn/search-assistant": "link:x-pack/solutions/search/plugins/search_assistant",
     "@kbn/search-connectors": "link:src/platform/packages/shared/kbn-search-connectors",
     "@kbn/search-connectors-plugin": "link:x-pack/solutions/search/plugins/search_connectors",
-    "@kbn/search-errors": "link:packages/kbn-search-errors",
+    "@kbn/search-errors": "link:src/platform/packages/shared/kbn-search-errors",
     "@kbn/search-examples-plugin": "link:examples/search_examples",
     "@kbn/search-homepage": "link:x-pack/solutions/search/plugins/search_homepage",
     "@kbn/search-index-documents": "link:x-pack/solutions/search/packages/kbn-search-index-documents",

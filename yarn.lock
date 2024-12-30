@@ -6985,7 +6985,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/search-errors@link:packages/kbn-search-errors":
+"@kbn/search-errors@link:src/platform/packages/shared/kbn-search-errors":
   version "0.0.0"
   uid ""
 
