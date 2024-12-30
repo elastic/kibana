@@ -15,7 +15,6 @@ import {
   type MicrosoftDefenderEndpointIsolateHostParams,
   type MicrosoftDefenderEndpointMachine,
   type MicrosoftDefenderEndpointMachineAction,
-  type MicrosoftDefenderEndpointReleaseHostParams,
 } from '@kbn/stack-connectors-plugin/common/microsoft_defender_endpoint/types';
 import type {
   IsolationRouteRequestBody,
@@ -171,12 +170,6 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
       hosts: {
         [agentId]: { name: agentDetails.computerDnsName },
       },
-      meta: {
-        // Add common meta data
-        agentId: agentDetails.id,
-        hostName: agentDetails.computerDnsName,
-        ...(actionRequest.meta ?? {}),
-      } as TMeta & MicrosoftDefenderEndpointActionRequestCommonMeta,
     });
 
     return doc;
@@ -224,12 +217,10 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
     return msDefenderEndpointGetMachineDetailsApiResponse;
   }
 
-  // // get list of actions  and their status
-
   protected async validateRequest(
     payload: ResponseActionsClientWriteActionRequestToEndpointIndexOptions
   ): Promise<ResponseActionsClientValidateRequestResponse> {
-    // TODO:PT support multiple agents
+    // TODO: support multiple agents
     if (payload.endpoint_ids.length > 1) {
       return {
         isValid: false,
@@ -257,20 +248,26 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
       command: 'isolate',
     };
 
-    let actionResponse: ActionTypeExecutorResult<MicrosoftDefenderEndpointMachineAction>;
-
     if (!reqIndexOptions.error) {
       let error = (await this.validateRequest(reqIndexOptions)).error;
 
       if (!error) {
         try {
-          actionResponse = await this.sendAction<
+          const msActionResponse = await this.sendAction<
             MicrosoftDefenderEndpointMachineAction,
             MicrosoftDefenderEndpointIsolateHostParams
           >(MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.ISOLATE_HOST, {
             id: actionRequest.endpoint_ids[0],
-            comment: actionRequest.comment ?? '',
+            comment: this.buildExternalComment(reqIndexOptions),
           });
+
+          if (msActionResponse?.data?.id) {
+            reqIndexOptions.meta = { machineActionId: msActionResponse.data.id };
+          } else {
+            throw new ResponseActionsClientError(
+              `Isolate request was sent to Microsoft Defender, but Machine Action Id was not provided!`
+            );
+          }
         } catch (err) {
           error = err;
         }
@@ -283,17 +280,9 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
       }
     }
 
-    // write to endpoint response index
-    await this.writeActionResponseToEndpointIndex({
-      actionId: actionResponse.data.id,
-      agentId: actionResponse.data.machineId,
-      data: {
-        command: 'isolate',
-      },
-    });
+    const { actionDetails } = await this.handleResponseActionCreation(reqIndexOptions);
 
-    // TODO: get action list using ms defend API
-    return this.fetchActionDetails(actionResponse.data.id);
+    return actionDetails;
   }
 
   async release(
@@ -310,20 +299,26 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
       command: 'unisolate',
     };
 
-    let actionResponse: ActionTypeExecutorResult<MicrosoftDefenderEndpointMachineAction>;
-
     if (!reqIndexOptions.error) {
       let error = (await this.validateRequest(reqIndexOptions)).error;
 
       if (!error) {
         try {
-          actionResponse = await this.sendAction<
+          const msActionResponse = await this.sendAction<
             MicrosoftDefenderEndpointMachineAction,
-            MicrosoftDefenderEndpointReleaseHostParams
+            MicrosoftDefenderEndpointIsolateHostParams
           >(MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.RELEASE_HOST, {
             id: actionRequest.endpoint_ids[0],
-            comment: actionRequest.comment ?? '',
+            comment: this.buildExternalComment(reqIndexOptions),
           });
+
+          if (msActionResponse?.data?.id) {
+            reqIndexOptions.meta = { machineActionId: msActionResponse.data.id };
+          } else {
+            throw new ResponseActionsClientError(
+              `Un-Isolate request was sent to Microsoft Defender, but Machine Action Id was not provided!`
+            );
+          }
         } catch (err) {
           error = err;
         }
@@ -336,16 +331,8 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
       }
     }
 
-    // write to endpoint response index
-    await this.writeActionResponseToEndpointIndex({
-      actionId: actionResponse.data.id,
-      agentId: actionResponse.data.machineId,
-      data: {
-        command: 'isolate',
-      },
-    });
+    const { actionDetails } = await this.handleResponseActionCreation(reqIndexOptions);
 
-    // TODO: get action list using ms defend API
-    return this.fetchActionDetails(actionResponse.data.id);
+    return actionDetails;
   }
 }

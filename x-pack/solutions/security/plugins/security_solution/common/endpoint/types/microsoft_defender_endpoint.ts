@@ -6,8 +6,6 @@
  */
 
 export interface MicrosoftDefenderEndpointActionRequestCommonMeta {
-  /** MS Defender for Endpoint Machine Id */
-  agentId: string;
-  /** MS Defender for Endpoint Computer DNS Name **/
-  hostName: string;
+  /** The ID of the action in Microsoft Defender's system */
+  machineActionId: string;
 }
