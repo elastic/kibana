@@ -166,7 +166,6 @@ export function useEsqlMode({
               await stateContainer.appState.replaceUrlState(nextState);
             }
           }
-          console.log('complete');
 
           stateContainer.dataState.data$.documents$.next({
             ...next,

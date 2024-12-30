@@ -139,7 +139,7 @@ export class DiscoverCustomizationExamplesPlugin implements Plugin {
                     onClick={togglePopover}
                     data-test-subj="logsViewSelectorButton"
                   >
-                    {currentSavedSearch.title ?? 'None selected'}
+                    {currentSavedSearch?.title ?? 'None selected'}
                   </EuiButton>
                 }
                 isOpen={isPopoverOpen}
@@ -156,7 +156,7 @@ export class DiscoverCustomizationExamplesPlugin implements Plugin {
                       items: savedSearches.map((savedSearch) => ({
                         name: savedSearch.get('title'),
                         onClick: () => stateContainer.actions.onOpenSavedSearch(savedSearch.id),
-                        icon: savedSearch.id === currentSavedSearch.id ? 'check' : 'empty',
+                        icon: savedSearch.id === currentSavedSearch?.id ? 'check' : 'empty',
                         'data-test-subj': `logsViewSelectorOption-${savedSearch.attributes.title.replace(
                           /[^a-zA-Z0-9]/g,
                           ''
@@ -205,7 +205,7 @@ export class DiscoverCustomizationExamplesPlugin implements Plugin {
                     onClick={togglePopover}
                     data-test-subj="logsViewSelectorButton"
                   >
-                    {currentSavedSearch.title ?? 'None selected'}
+                    {currentSavedSearch?.title ?? 'None selected'}
                   </EuiButton>
                 }
                 isOpen={isPopoverOpen}
@@ -222,7 +222,7 @@ export class DiscoverCustomizationExamplesPlugin implements Plugin {
                       items: savedSearches.map((savedSearch) => ({
                         name: savedSearch.get('title'),
                         onClick: () => stateContainer.actions.onOpenSavedSearch(savedSearch.id),
-                        icon: savedSearch.id === currentSavedSearch.id ? 'check' : 'empty',
+                        icon: savedSearch.id === currentSavedSearch?.id ? 'check' : 'empty',
                         'data-test-subj': `logsViewSelectorOption-${savedSearch.attributes.title.replace(
                           /[^a-zA-Z0-9]/g,
                           ''
