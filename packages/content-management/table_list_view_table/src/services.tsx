@@ -288,9 +288,7 @@ export const TableListViewKibanaProvider: FC<
                 currentAppId$={application.currentAppId$}
                 navigateToUrl={application.navigateToUrl}
                 isTaggingEnabled={() => Boolean(savedObjectsTagging)}
-                isFavoritesEnabled={() => {
-                  return services.favorites?.isAvailable() ?? Promise.resolve(false);
-                }}
+                isFavoritesEnabled={async () => services.favorites?.isAvailable() ?? false}
                 getTagList={getTagList}
                 TagList={TagList}
                 itemHasTags={itemHasTags}
