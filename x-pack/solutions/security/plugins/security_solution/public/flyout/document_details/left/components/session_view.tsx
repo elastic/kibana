@@ -6,7 +6,7 @@
  */
 
 import type { FC } from 'react';
-import React, { useCallback, useMemo } from 'react';
+import React, { memo, useCallback, useMemo } from 'react';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import type { TableId } from '@kbn/securitysolution-data-table';
 import { EuiPanel } from '@elastic/eui';
@@ -35,7 +35,7 @@ export const SESSION_VIEW_ID = 'session-view';
 /**
  * Session view displayed in the document details expandable flyout left section under the Visualize tab
  */
-export const SessionView: FC = () => {
+export const SessionView: FC = memo(() => {
   const { sessionView, telemetry } = useKibana().services;
   const {
     eventId,
@@ -161,6 +161,6 @@ export const SessionView: FC = () => {
       />
     </EuiPanel>
   );
-};
+});
 
 SessionView.displayName = 'SessionView';
