@@ -778,7 +778,7 @@ packages/kbn-saved-objects-settings @elastic/appex-sharedux
 src/plugins/saved_objects_tagging_oss @elastic/appex-sharedux
 x-pack/plugins/saved_objects_tagging @elastic/appex-sharedux
 packages/kbn-saved-search-component @elastic/obs-ux-logs-team
-src/plugins/saved_search @elastic/kibana-data-discovery
+src/platform/plugins/shared/saved_search @elastic/kibana-data-discovery
 packages/kbn-scout @elastic/appex-qa
 packages/kbn-scout-info @elastic/appex-qa
 packages/kbn-scout-reporting @elastic/appex-qa
