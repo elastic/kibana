@@ -115,12 +115,12 @@ describe('GridLayout', () => {
       drop(panel1DragHandle);
       expect(getAllThePanelIds()).toEqual([
         'panel2',
-        'panel1',
         'panel5',
         'panel3',
         'panel7',
-        'panel6',
+        'panel1',
         'panel8',
+        'panel6',
         'panel4',
         'panel9',
         'panel10',
@@ -145,6 +145,7 @@ describe('GridLayout', () => {
         'panel10',
       ]);
     });
+
     it('after replacing a panel id', async () => {
       const { rerender } = renderGridLayout();
       const modifiedLayout = cloneDeep(getSampleLayout());
