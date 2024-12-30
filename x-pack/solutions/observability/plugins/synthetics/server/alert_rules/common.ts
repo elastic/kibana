@@ -24,7 +24,7 @@ import {
   RecoveredAlertData,
 } from '@kbn/alerting-plugin/server/alerts_client/types';
 import {
-  StatusRuleParams,
+  SyntheticsMonitorStatusRuleParams as StatusRuleParams,
   TimeWindow,
 } from '@kbn/response-ops-rule-params/synthetics_monitor_status/latest';
 import { syntheticsRuleFieldMap } from '../../common/rules/synthetics_rule_field_map';
