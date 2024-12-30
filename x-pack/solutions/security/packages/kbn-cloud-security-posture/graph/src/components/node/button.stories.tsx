@@ -14,7 +14,7 @@ import { type NodeButtonProps, NodeShapeContainer } from './styles';
 import { NodeExpandButton } from './node_expand_button';
 
 export default {
-  title: 'Components/Graph Components',
+  title: 'Components/Graph Components/Additional Components',
   description: 'CDR - Graph visualization',
   argTypes: {
     onClick: { action: 'onClick' },
@@ -30,4 +30,4 @@ const Template: Story<NodeButtonProps> = (args) => (
   </ThemeProvider>
 );
 
-export const Button = Template.bind({});
+export const ExpandButton = Template.bind({});

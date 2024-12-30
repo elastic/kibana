@@ -5,7 +5,26 @@
  * 2.0.
  */
 
-import { defaultConfig } from '@kbn/storybook';
+import { defaultConfig, mergeWebpackFinal } from '@kbn/storybook';
+import type { Configuration } from 'webpack';
+// eslint-disable-next-line import/no-nodejs-modules
+import { resolve } from 'path';
+
+const graphWebpack: Configuration = {
+  resolve: {
+    alias: {
+      '../../hooks/use_fetch_graph_data': resolve(
+        __dirname,
+        '../graph/src/components/mock/use_fetch_graph_data.mock.ts'
+      ),
+    },
+  },
+  node: {
+    fs: 'empty',
+    stream: false,
+    os: false,
+  },
+};
 
 module.exports = {
   ...defaultConfig,
@@ -13,4 +32,5 @@ module.exports = {
   reactOptions: {
     strictMode: true,
   },
+  ...mergeWebpackFinal(graphWebpack),
 };
