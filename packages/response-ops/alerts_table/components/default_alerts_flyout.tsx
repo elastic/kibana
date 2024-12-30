@@ -49,7 +49,10 @@ export const DefaultAlertsFlyoutBody = <AC extends AdditionalContext>(
                 title: column.displayAsText as string,
                 description:
                   value != null ? (
-                    <DefaultCellValue {...(props as unknown as CellComponentProps)} />
+                    <DefaultCellValue
+                      {...(props as unknown as CellComponentProps)}
+                      columnId={column.id}
+                    />
                   ) : (
                     '—'
                   ),
