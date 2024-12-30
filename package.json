@@ -438,7 +438,7 @@
     "@kbn/data-visualizer-plugin": "link:x-pack/platform/plugins/private/data_visualizer",
     "@kbn/dataset-quality-plugin": "link:x-pack/platform/plugins/shared/observability_solution/dataset_quality",
     "@kbn/datemath": "link:src/platform/packages/shared/kbn-datemath",
-    "@kbn/deeplinks-analytics": "link:packages/deeplinks/analytics",
+    "@kbn/deeplinks-analytics": "link:src/platform/packages/shared/deeplinks/analytics",
     "@kbn/deeplinks-devtools": "link:src/platform/packages/shared/deeplinks/devtools",
     "@kbn/deeplinks-fleet": "link:src/platform/packages/shared/deeplinks/fleet",
     "@kbn/deeplinks-management": "link:src/platform/packages/shared/deeplinks/management",
