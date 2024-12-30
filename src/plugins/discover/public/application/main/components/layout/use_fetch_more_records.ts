@@ -8,8 +8,8 @@
  */
 
 import { useMemo } from 'react';
+import { useInternalStateSelector } from '../../state_management/discover_internal_state_container';
 import { FetchStatus } from '../../../types';
-import { useDataState } from '../../hooks/use_data_state';
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
 import type { DiscoverStateContainer } from '../../state_management/discover_state';
 
@@ -36,10 +36,11 @@ export interface UseFetchMoreRecordsResult {
 export const useFetchMoreRecords = ({
   stateContainer,
 }: UseFetchMoreRecordsParams): UseFetchMoreRecordsResult => {
-  const documents$ = stateContainer.dataState.data$.documents$;
-  const totalHits$ = stateContainer.dataState.data$.totalHits$;
-  const documentState = useDataState(documents$);
-  const totalHitsState = useDataState(totalHits$);
+  const { documentState, totalHitsState } = useInternalStateSelector((state) => ({
+    documentState: state.dataResults!,
+    totalHitsState: state.dataTotalHits!,
+  }));
+
   const isEsqlMode = useIsEsqlMode();
 
   const rows = documentState.result || [];

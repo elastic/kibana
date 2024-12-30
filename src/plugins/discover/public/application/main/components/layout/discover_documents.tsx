@@ -42,7 +42,6 @@ import {
   SHOW_MULTIFIELDS,
   SORT_DEFAULT_ORDER_SETTING,
 } from '@kbn/discover-utils';
-import useObservable from 'react-use/lib/useObservable';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
 import { useQuerySubscriber } from '@kbn/unified-field-list';
@@ -52,7 +51,6 @@ import { useInternalStateSelector } from '../../state_management/discover_intern
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { FetchStatus } from '../../../types';
 import { DiscoverStateContainer } from '../../state_management/discover_state';
-import { useDataState } from '../../hooks/use_data_state';
 import {
   getMaxAllowedSampleSize,
   getAllowedSampleSize,
@@ -106,9 +104,8 @@ function DiscoverDocumentsComponent({
   onFieldEdited?: () => void;
 }) {
   const services = useDiscoverServices();
-  const documents$ = stateContainer.dataState.data$.documents$;
-  const savedSearch = useInternalStateSelector((state) => state.discoverSessionInitial!);
   const { dataViews, capabilities, uiSettings, uiActions, ebtManager, fieldsMetadata } = services;
+  const savedSearch = useInternalStateSelector((state) => state.discoverSessionInitial!);
   const requestParams = useInternalStateSelector((state) => state.dataRequestParams);
   const [
     dataSource,
@@ -137,7 +134,7 @@ function DiscoverDocumentsComponent({
   });
   const expandedDoc = useInternalStateSelector((state) => state.expandedDoc);
   const isEsqlMode = useIsEsqlMode();
-  const documentState = useDataState(documents$);
+  const documentState = useInternalStateSelector((state) => state.dataResults!);
   const isDataLoading =
     documentState.fetchStatus === FetchStatus.LOADING ||
     documentState.fetchStatus === FetchStatus.PARTIAL;
@@ -338,20 +335,18 @@ function DiscoverDocumentsComponent({
     return getCellRenderers(cellRendererParams);
   }, [cellRendererParams, customCellRenderer, getCellRenderersAccessor]);
 
-  const documents = useObservable(stateContainer.dataState.data$.documents$);
-
   const callouts = useMemo(
     () => (
       <>
         <SelectedVSAvailableCallout
-          esqlQueryColumns={documents?.esqlQueryColumns}
+          esqlQueryColumns={documentState.esqlQueryColumns}
           // If `_source` is in the columns, we should exclude it from the callout
           selectedColumns={currentColumns.filter((col) => col !== '_source')}
         />
         <SearchResponseWarningsCallout warnings={documentState.interceptedWarnings ?? []} />
       </>
     ),
-    [currentColumns, documents?.esqlQueryColumns, documentState.interceptedWarnings]
+    [currentColumns, documentState]
   );
 
   const loadingIndicator = useMemo(

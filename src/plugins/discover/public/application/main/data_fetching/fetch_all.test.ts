@@ -26,6 +26,7 @@ import { fetchEsql } from './fetch_esql';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { dataViewMock, esHitsMockWithSort } from '@kbn/discover-utils/src/__mocks__';
 import { searchResponseIncompleteWarningLocalCluster } from '@kbn/search-response-warnings/src/__mocks__/search_response_warnings';
+import { getDiscoverStateMock } from '../../../__mocks__/discover_state.mock';
 
 jest.mock('./fetch_documents', () => ({
   fetchDocuments: jest.fn().mockResolvedValue([]),
@@ -62,27 +63,13 @@ describe('test fetchAll', () => {
       totalHits$: new BehaviorSubject<DataTotalHitsMsg>({ fetchStatus: FetchStatus.UNINITIALIZED }),
     };
     searchSource = savedSearchMock.searchSource.createChild();
+    const stateContainer = getDiscoverStateMock({ isTimeBased: true });
 
     deps = {
       abortController: new AbortController(),
       inspectorAdapters: { requests: new RequestAdapter() },
       getAppState: () => ({}),
-      getInternalState: () => ({
-        dataView: undefined,
-        isDataViewLoading: false,
-        savedDataViews: [],
-        adHocDataViews: [],
-        expandedDoc: undefined,
-        customFilters: [],
-        overriddenVisContextAfterInvalidation: undefined,
-        resetDefaultProfileState: {
-          resetId: 'test',
-          columns: false,
-          rowHeight: false,
-          breakdownField: false,
-        },
-        dataRequestParams: {},
-      }),
+      getInternalState: () => stateContainer.internalState.getState(),
       searchSessionId: '123',
       initialFetchStatus: FetchStatus.UNINITIALIZED,
       savedSearch: {
@@ -252,6 +239,8 @@ describe('test fetchAll', () => {
       esqlQueryColumns: [{ id: '1', name: 'test1', meta: { type: 'number' } }],
     });
     const query = { esql: 'from foo' };
+    const stateContainer = getDiscoverStateMock({ isTimeBased: true });
+
     deps = {
       abortController: new AbortController(),
       inspectorAdapters: { requests: new RequestAdapter() },
@@ -260,22 +249,7 @@ describe('test fetchAll', () => {
       savedSearch: savedSearchMock,
       services: discoverServiceMock,
       getAppState: () => ({ query }),
-      getInternalState: () => ({
-        dataView: undefined,
-        isDataViewLoading: false,
-        savedDataViews: [],
-        adHocDataViews: [],
-        expandedDoc: undefined,
-        customFilters: [],
-        overriddenVisContextAfterInvalidation: undefined,
-        resetDefaultProfileState: {
-          resetId: 'test',
-          columns: false,
-          rowHeight: false,
-          breakdownField: false,
-        },
-        dataRequestParams: {},
-      }),
+      getInternalState: () => stateContainer.internalState.getState(),
     };
     fetchAll(subjects, false, deps);
     await waitForNextTick();
@@ -376,6 +350,8 @@ describe('test fetchAll', () => {
       const collect = subjectCollector(subjects.documents$);
       mockfetchEsql.mockRejectedValue({ msg: 'The query was aborted' });
       const query = { esql: 'from foo' };
+      const stateContainer = getDiscoverStateMock({ isTimeBased: true });
+
       deps = {
         abortController: new AbortController(),
         inspectorAdapters: { requests: new RequestAdapter() },
@@ -384,22 +360,7 @@ describe('test fetchAll', () => {
         savedSearch: savedSearchMock,
         services: discoverServiceMock,
         getAppState: () => ({ query }),
-        getInternalState: () => ({
-          dataView: undefined,
-          isDataViewLoading: false,
-          savedDataViews: [],
-          adHocDataViews: [],
-          expandedDoc: undefined,
-          customFilters: [],
-          overriddenVisContextAfterInvalidation: undefined,
-          resetDefaultProfileState: {
-            resetId: 'test',
-            columns: false,
-            rowHeight: false,
-            breakdownField: false,
-          },
-          dataRequestParams: {},
-        }),
+        getInternalState: () => stateContainer.internalState.getState(),
       };
       fetchAll(subjects, false, deps);
       deps.abortController.abort();

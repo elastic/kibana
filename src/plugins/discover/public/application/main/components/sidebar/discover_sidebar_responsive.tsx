@@ -24,9 +24,9 @@ import {
 } from '@kbn/unified-field-list';
 import { calcFieldCounts } from '@kbn/discover-utils/src/utils/calc_field_counts';
 import { Filter } from '@kbn/es-query';
+import { useInternalStateSelector } from '../../state_management/discover_internal_state_container';
 import { PLUGIN_ID } from '../../../../../common';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
-import { DataDocuments$ } from '../../state_management/discover_data_state_container';
 import { FetchStatus, SidebarToggleState } from '../../../types';
 import {
   discoverSidebarReducer,
@@ -83,10 +83,6 @@ export interface DiscoverSidebarResponsiveProps {
    * the selected columns displayed in the doc table in discover
    */
   columns: string[];
-  /**
-   * hits fetched from ES, displayed in the doc table
-   */
-  documents$: DataDocuments$;
   /**
    * Callback to update breakdown field
    */
@@ -172,53 +168,51 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
   );
   const selectedDataViewRef = useRef<DataView | null | undefined>(selectedDataView);
   const showFieldList = sidebarState.status !== DiscoverSidebarReducerStatus.INITIAL;
+  const documentState = useInternalStateSelector((state) => state.dataResults!);
 
   useEffect(() => {
-    const subscription = props.documents$.subscribe((documentState) => {
-      switch (documentState?.fetchStatus) {
-        case FetchStatus.UNINITIALIZED:
-          dispatchSidebarStateAction({
-            type: DiscoverSidebarReducerActionType.RESET,
-            payload: {
-              dataView: selectedDataViewRef.current,
-            },
-          });
-          break;
-        case FetchStatus.LOADING:
-          dispatchSidebarStateAction({
-            type: DiscoverSidebarReducerActionType.DOCUMENTS_LOADING,
-            payload: {
-              isEsqlMode,
-            },
-          });
-          break;
-        case FetchStatus.COMPLETE:
-          dispatchSidebarStateAction({
-            type: DiscoverSidebarReducerActionType.DOCUMENTS_LOADED,
-            payload: {
-              dataView: selectedDataViewRef.current,
-              fieldCounts: isEsqlMode ? EMPTY_FIELD_COUNTS : calcFieldCounts(documentState.result),
-              esqlQueryColumns: documentState.esqlQueryColumns,
-              isEsqlMode,
-            },
-          });
-          break;
-        case FetchStatus.ERROR:
-          dispatchSidebarStateAction({
-            type: DiscoverSidebarReducerActionType.DOCUMENTS_LOADED,
-            payload: {
-              dataView: selectedDataViewRef.current,
-              fieldCounts: EMPTY_FIELD_COUNTS,
-              isEsqlMode,
-            },
-          });
-          break;
-        default:
-          break;
-      }
-    });
-    return () => subscription.unsubscribe();
-  }, [props.documents$, dispatchSidebarStateAction, selectedDataViewRef, isEsqlMode]);
+    switch (documentState?.fetchStatus) {
+      case FetchStatus.UNINITIALIZED:
+        dispatchSidebarStateAction({
+          type: DiscoverSidebarReducerActionType.RESET,
+          payload: {
+            dataView: selectedDataViewRef.current,
+          },
+        });
+        break;
+      case FetchStatus.LOADING:
+        dispatchSidebarStateAction({
+          type: DiscoverSidebarReducerActionType.DOCUMENTS_LOADING,
+          payload: {
+            isEsqlMode,
+          },
+        });
+        break;
+      case FetchStatus.COMPLETE:
+        dispatchSidebarStateAction({
+          type: DiscoverSidebarReducerActionType.DOCUMENTS_LOADED,
+          payload: {
+            dataView: selectedDataViewRef.current,
+            fieldCounts: isEsqlMode ? EMPTY_FIELD_COUNTS : calcFieldCounts(documentState.result),
+            esqlQueryColumns: documentState.esqlQueryColumns,
+            isEsqlMode,
+          },
+        });
+        break;
+      case FetchStatus.ERROR:
+        dispatchSidebarStateAction({
+          type: DiscoverSidebarReducerActionType.DOCUMENTS_LOADED,
+          payload: {
+            dataView: selectedDataViewRef.current,
+            fieldCounts: EMPTY_FIELD_COUNTS,
+            isEsqlMode,
+          },
+        });
+        break;
+      default:
+        break;
+    }
+  }, [documentState, dispatchSidebarStateAction, selectedDataViewRef, isEsqlMode]);
 
   useEffect(() => {
     if (selectedDataView !== selectedDataViewRef.current) {

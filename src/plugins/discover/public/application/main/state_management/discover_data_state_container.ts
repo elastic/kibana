@@ -25,7 +25,7 @@ import type { DiscoverSearchSessionManager } from './discover_search_session';
 import { FetchStatus } from '../../types';
 import { validateTimeRange } from './utils/validate_time_range';
 import { fetchAll, fetchMoreDocuments } from '../data_fetching/fetch_all';
-import { sendResetMsg } from '../hooks/use_saved_search_messages';
+import { sendErrorMsg, sendResetMsg } from '../hooks/use_saved_search_messages';
 import { getFetch$ } from '../data_fetching/get_fetch_observable';
 import type { DiscoverInternalStateContainer } from './discover_internal_state_container';
 import { getDefaultProfileState } from './utils/get_default_profile_state';
@@ -71,13 +71,13 @@ export interface DiscoverDataStateContainer {
    */
   fetch: () => void;
   /**
-   * Fetch more data from ES
-   */
-  fetchMore: () => void;
-  /**
    * Container of data observables (orchestration, data table, total hits, available fields)
    */
   data$: SavedSearchData;
+  /**
+   * Fetch more data from ES
+   */
+  fetchMore: () => void;
   /**
    * Observable triggering fetching data from ES
    */
@@ -171,6 +171,10 @@ export function getDataStateContainer({
     documents$: new BehaviorSubject<DataDocumentsMsg>(initialState),
     totalHits$: new BehaviorSubject<DataTotalHitsMsg>(initialState),
   };
+  internalStateContainer.transitions.setDataMain(dataSubjects.main$.getValue());
+  internalStateContainer.transitions.setDataResults(dataSubjects.documents$.getValue());
+  internalStateContainer.transitions.setDataTotalHits(dataSubjects.totalHits$.getValue());
+
   // This is debugging code, helping you to understand which messages are sent to the data observables
   // Adding a debugger in the functions can be helpful to understand what triggers a message
   // dataSubjects.main$.subscribe((msg) => addLog('dataSubjects.main$', msg));
@@ -211,6 +215,21 @@ export function getDataStateContainer({
   let abortControllerFetchMore: AbortController;
 
   function subscribe() {
+    const mainSubscription = dataSubjects.main$.subscribe((value) => {
+      internalStateContainer.transitions.setDataMain(value);
+    });
+    const resultSubscription = dataSubjects.documents$.subscribe((value) => {
+      if (value.fetchStatus === FetchStatus.PARTIAL) {
+        // omitting UI updates in ES|QL which lead to be partial as the latest state
+        return;
+      }
+
+      internalStateContainer.transitions.setDataResults(value);
+    });
+    const totalHitsSubscription = dataSubjects.totalHits$.subscribe((value) => {
+      internalStateContainer.transitions.setDataTotalHits(value);
+    });
+
     const subscription = fetch$
       .pipe(
         mergeMap(async ({ options, searchSessionId }) => {
@@ -334,6 +353,9 @@ export function getDataStateContainer({
       abortController?.abort();
       abortControllerFetchMore?.abort();
       subscription.unsubscribe();
+      mainSubscription.unsubscribe();
+      resultSubscription.unsubscribe();
+      totalHitsSubscription.unsubscribe();
     };
   }
 
@@ -370,6 +392,8 @@ export function getDataStateContainer({
   const cancel = () => {
     abortController?.abort();
     abortControllerFetchMore?.abort();
+    sendErrorMsg(dataSubjects.documents$);
+    sendErrorMsg(dataSubjects.main$);
   };
 
   const getAbortController = () => {

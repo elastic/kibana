@@ -44,7 +44,7 @@ export const DiscoverHistogramLayout = ({
     hideChart,
   });
 
-  const datatable = useObservable(dataState.data$.documents$);
+  const datatable = useInternalStateSelector((state) => state.dataResults!);
   const renderCustomChartToggleActions = useCallback(
     () =>
       React.isValidElement(panelsToggle)

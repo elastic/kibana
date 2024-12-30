@@ -471,9 +471,13 @@ const createAppStateObservable = (state$: Observable<DiscoverAppState>) => {
 };
 
 const createFetchCompleteObservable = (stateContainer: DiscoverStateContainer) => {
-  return stateContainer.dataState.data$.documents$.pipe(
-    distinctUntilChanged((prev, curr) => prev.fetchStatus === curr.fetchStatus),
-    filter(({ fetchStatus }) => [FetchStatus.COMPLETE, FetchStatus.ERROR].includes(fetchStatus)),
+  return stateContainer.internalState.state$.pipe(
+    map((state) => state.dataResults),
+    distinctUntilChanged((prev, curr) => prev?.fetchStatus === curr?.fetchStatus),
+    filter(
+      (state) =>
+        Boolean(state) && [FetchStatus.COMPLETE, FetchStatus.ERROR].includes(state!.fetchStatus)
+    ),
     map((documentsValue) => {
       return getUnifiedHistogramPropsForEsql({
         documentsValue,

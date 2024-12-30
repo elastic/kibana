@@ -43,14 +43,12 @@ import { getResultState } from '../../utils/get_result_state';
 import { DiscoverUninitialized } from '../uninitialized/uninitialized';
 import { DataMainMsg } from '../../state_management/discover_data_state_container';
 import { FetchStatus, SidebarToggleState } from '../../../types';
-import { useDataState } from '../../hooks/use_data_state';
 import { SavedSearchURLConflictCallout } from '../../../../components/saved_search_url_conflict_callout/saved_search_url_conflict_callout';
 import { DiscoverHistogramLayout } from './discover_histogram_layout';
 import { ErrorCallout } from '../../../../components/common/error_callout';
 import { addLog } from '../../../../utils/add_log';
 import { DiscoverResizableLayout } from './discover_resizable_layout';
 import { PanelsToggle, PanelsToggleProps } from '../../../../components/panels_toggle';
-import { sendErrorMsg } from '../../hooks/use_saved_search_messages';
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
 
 const SidebarMemoized = React.memo(DiscoverSidebarResponsive);
@@ -78,7 +76,6 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
   } = services;
   const pageBackgroundColor = useEuiBackgroundColor('plain');
   const globalQueryState = data.query.getState();
-  const { main$ } = stateContainer.dataState.data$;
   const [query, savedQuery, columns, sort, grid] = useInternalStateSelector((state) => [
     state.appState?.query,
     state.appState?.savedQuery,
@@ -101,8 +98,7 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     state.isDataViewLoading,
   ]);
   const customFilters = useInternalStateSelector((state) => state.customFilters);
-
-  const dataState: DataMainMsg = useDataState(main$);
+  const dataState: DataMainMsg = useInternalStateSelector((state) => state.dataMain!);
   const savedSearch = useInternalStateSelector((state) => state.discoverSessionInitial!);
 
   const fetchCounter = useRef<number>(0);
@@ -284,7 +280,7 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
   }, [filterManager]);
 
   const contentCentered = resultState === 'uninitialized' || resultState === 'none';
-  const documentState = useDataState(stateContainer.dataState.data$.documents$);
+  const documentState = useInternalStateSelector((state) => state.dataResults!);
 
   const esqlModeWarning = useMemo(() => {
     if (isEsqlMode) {
@@ -369,8 +365,6 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
 
   const onCancelClick = useCallback(() => {
     stateContainer.dataState.cancel();
-    sendErrorMsg(stateContainer.dataState.data$.documents$);
-    sendErrorMsg(stateContainer.dataState.data$.main$);
   }, [stateContainer.dataState]);
 
   return (
@@ -433,7 +427,6 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
               <SidebarMemoized
                 additionalFilters={customFilters}
                 columns={currentColumns}
-                documents$={stateContainer.dataState.data$.documents$}
                 onAddBreakdownField={canSetBreakdownField ? onAddBreakdownField : undefined}
                 onAddField={onAddColumnWithTracking}
                 onAddFilter={onFilter}

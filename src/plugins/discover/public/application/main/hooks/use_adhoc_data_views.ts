@@ -12,7 +12,6 @@ import { METRIC_TYPE } from '@kbn/analytics';
 import { DiscoverServices } from '../../../build_services';
 import { useInternalStateSelector } from '../state_management/discover_internal_state_container';
 import { ADHOC_DATA_VIEW_RENDER_EVENT } from '../../../constants';
-import { DiscoverStateContainer } from '../state_management/discover_state';
 import { useFiltersValidation } from './use_filters_validation';
 import { useIsEsqlMode } from './use_is_esql_mode';
 

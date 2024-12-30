@@ -456,7 +456,7 @@ describe('Test discover state actions', () => {
     expect(getCurrentUrl()).toMatchInlineSnapshot(
       `"/#?_g=(refreshInterval:(pause:!t,value:1000),time:(from:now-15d,to:now))&_a=(columns:!(default_column),dataSource:(dataViewId:the-data-view-id,type:dataView),interval:auto,sort:!())"`
     );
-    expect(state.savedSearchState.getHasChanged$().getValue()).toBe(false);
+    expect(state.internalState.getState().discoverSessionHasChanged).toBe(false);
     const { searchSource, ...savedSearch } = state.savedSearchState.getState();
     expect(savedSearch).toMatchInlineSnapshot(`
       Object {
@@ -489,7 +489,7 @@ describe('Test discover state actions', () => {
     expect(getCurrentUrl()).toMatchInlineSnapshot(
       `"/#?_g=(refreshInterval:(pause:!t,value:1000),time:(from:now-15d,to:now))&_a=(columns:!(default_column),dataSource:(dataViewId:the-data-view-id,type:dataView),interval:auto,sort:!())"`
     );
-    expect(state.savedSearchState.getHasChanged$().getValue()).toBe(false);
+    expect(state.internalState.getState().discoverSessionHasChanged).toBe(false);
     unsubscribe();
   });
 
@@ -505,7 +505,7 @@ describe('Test discover state actions', () => {
     expect(getCurrentUrl()).toMatchInlineSnapshot(
       `"/#?_a=(columns:!(bytes),dataSource:(dataViewId:the-data-view-id,type:dataView),interval:month,sort:!())&_g=()"`
     );
-    expect(state.savedSearchState.getHasChanged$().getValue()).toBe(true);
+    expect(state.internalState.getState().discoverSessionHasChanged).toBe(true);
     unsubscribe();
   });
 
@@ -521,7 +521,7 @@ describe('Test discover state actions', () => {
     expect(getCurrentUrl()).toMatchInlineSnapshot(
       `"/#?_a=(columns:!(bytes),dataSource:(dataViewId:the-data-view-id,type:dataView),interval:month,sort:!())&_g=()"`
     );
-    expect(state.savedSearchState.getHasChanged$().getValue()).toBe(true);
+    expect(state.internalState.getState().discoverSessionHasChanged).toBe(true);
     unsubscribe();
   });
 
@@ -536,7 +536,7 @@ describe('Test discover state actions', () => {
     expect(getCurrentUrl()).toMatchInlineSnapshot(
       `"/#?_g=(refreshInterval:(pause:!t,value:1000),time:(from:now-15d,to:now))&_a=(columns:!(default_column),dataSource:(dataViewId:the-data-view-id,type:dataView),interval:auto,sort:!())"`
     );
-    expect(state.savedSearchState.getHasChanged$().getValue()).toBe(false);
+    expect(state.internalState.getState().discoverSessionHasChanged).toBe(false);
     unsubscribe();
   });
 
@@ -552,7 +552,7 @@ describe('Test discover state actions', () => {
     expect(getCurrentUrl()).toMatchInlineSnapshot(
       `"/#?_a=(columns:!(message),dataSource:(dataViewId:the-data-view-id,type:dataView),interval:month,sort:!())&_g=()"`
     );
-    expect(state.savedSearchState.getHasChanged$().getValue()).toBe(true);
+    expect(state.internalState.getState().discoverSessionHasChanged).toBe(true);
     unsubscribe();
   });
 
@@ -571,7 +571,7 @@ describe('Test discover state actions', () => {
     await state.actions.loadSavedSearch({ savedSearchId: savedSearchMock.id });
     const unsubscribe = state.actions.initializeAndSync();
     await new Promise(process.nextTick);
-    expect(state.savedSearchState.getHasChanged$().getValue()).toBe(true);
+    expect(state.internalState.getState().discoverSessionHasChanged).toBe(true);
     unsubscribe();
   });
 
@@ -594,7 +594,7 @@ describe('Test discover state actions', () => {
     await state.actions.loadSavedSearch({ savedSearchId: savedSearchMock.id });
     const unsubscribe = state.actions.initializeAndSync();
     await new Promise(process.nextTick);
-    expect(state.savedSearchState.getHasChanged$().getValue()).toBe(true);
+    expect(state.internalState.getState().discoverSessionHasChanged).toBe(true);
     unsubscribe();
   });
 
@@ -617,7 +617,7 @@ describe('Test discover state actions', () => {
     await state.actions.loadSavedSearch({ savedSearchId: savedSearchMock.id });
     const unsubscribe = state.actions.initializeAndSync();
     await new Promise(process.nextTick);
-    expect(state.savedSearchState.getHasChanged$().getValue()).toBe(false);
+    expect(state.internalState.getState().discoverSessionHasChanged).toBe(false);
     unsubscribe();
   });
 
@@ -672,7 +672,7 @@ describe('Test discover state actions', () => {
     expect(state.savedSearchState.getState().searchSource.getField('index')?.id).toBe(
       'the-data-view-id'
     );
-    expect(state.savedSearchState.getHasChanged$().getValue()).toBe(false);
+    expect(state.internalState.getState().discoverSessionHasChanged).toBe(false);
 
     state.savedSearchState.load = jest.fn().mockReturnValue(savedSearchMockWithTimeField);
     // unsetting the previous index else this is considered as update to the persisted saved search
@@ -683,7 +683,7 @@ describe('Test discover state actions', () => {
     expect(state.savedSearchState.getState().searchSource.getField('index')?.id).toBe(
       'index-pattern-with-timefield-id'
     );
-    expect(state.savedSearchState.getHasChanged$().getValue()).toBe(false);
+    expect(state.internalState.getState().discoverSessionHasChanged).toBe(false);
 
     // switch back to the previous savedSearch, but not cleaning up appState index, so it's considered as update to the persisted saved search
     state.appState.isEmptyURL = jest.fn().mockReturnValue(false);
@@ -691,7 +691,7 @@ describe('Test discover state actions', () => {
     expect(state.savedSearchState.getState().searchSource.getField('index')?.id).toBe(
       'index-pattern-with-timefield-id'
     );
-    expect(state.savedSearchState.getHasChanged$().getValue()).toBe(true);
+    expect(state.internalState.getState().discoverSessionHasChanged).toBe(true);
   });
 
   test('loadSavedSearch generating a new saved search, updated by ad-hoc data view', async () => {
@@ -708,15 +708,15 @@ describe('Test discover state actions', () => {
       isPersisted: () => false,
     }));
     await state.actions.loadSavedSearch({ dataViewSpec: dataViewSpecMock });
-    expect(state.savedSearchState.getInitial$().getValue().id).toEqual(undefined);
-    expect(state.savedSearchState.getCurrent$().getValue().id).toEqual(undefined);
+    expect(state.internalState.getState().discoverSessionInitial?.id).toEqual(undefined);
+    expect(state.internalState.getState().discoverSessionEdited?.id).toEqual(undefined);
     expect(
-      state.savedSearchState.getInitial$().getValue().searchSource?.getField('index')?.id
+      state.internalState.getState().discoverSessionInitial?.searchSource?.getField('index')?.id
     ).toEqual(dataViewSpecMock.id);
     expect(
-      state.savedSearchState.getCurrent$().getValue().searchSource?.getField('index')?.id
+      state.internalState.getState().discoverSessionEdited?.searchSource?.getField('index')?.id
     ).toEqual(dataViewSpecMock.id);
-    expect(state.savedSearchState.getHasChanged$().getValue()).toEqual(false);
+    expect(state.internalState.getState().discoverSessionHasChanged).toEqual(false);
     expect(state.internalState.getState().adHocDataViews.length).toBe(1);
   });
 

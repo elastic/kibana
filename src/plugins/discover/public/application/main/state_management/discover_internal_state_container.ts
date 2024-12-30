@@ -18,7 +18,8 @@ import type { Filter, TimeRange } from '@kbn/es-query';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { UnifiedHistogramVisContext } from '@kbn/unified-histogram-plugin/public';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
-import type { DiscoverAppState } from '../../..';
+import { DataMainMsg, DataTotalHitsMsg } from './discover_data_state_container';
+import type { DataDocumentsMsg, DiscoverAppState } from '../../..';
 
 interface InternalStateDataRequestParams {
   timeRangeAbsolute?: TimeRange;
@@ -28,6 +29,9 @@ interface InternalStateDataRequestParams {
 export interface InternalState {
   appState: DiscoverAppState | undefined;
   dataView: DataView | undefined;
+  dataMain: DataMainMsg | undefined;
+  dataResults: DataDocumentsMsg | undefined;
+  dataTotalHits: DataTotalHitsMsg | undefined;
   discoverSessionInitial: SavedSearch | undefined;
   discoverSessionEdited: SavedSearch | undefined;
   discoverSessionHasChanged: boolean;
@@ -49,6 +53,9 @@ export interface InternalState {
 
 export interface InternalStateTransitions {
   setAppState: (state: InternalState) => (appState: DiscoverAppState) => InternalState;
+  setDataMain: (state: InternalState) => (value: DataMainMsg) => InternalState;
+  setDataTotalHits: (state: InternalState) => (value: DataTotalHitsMsg) => InternalState;
+  setDataResults: (state: InternalState) => (value: DataDocumentsMsg) => InternalState;
   setDiscoverSessionInitial: (state: InternalState) => (value: SavedSearch) => InternalState;
   setDiscoverSessionEdited: (state: InternalState) => (value: SavedSearch) => InternalState;
   setDiscoverSessionHasChanged: (state: InternalState) => (value: boolean) => InternalState;
@@ -99,6 +106,9 @@ export function getInternalStateContainer() {
     {
       appState: undefined,
       dataView: undefined,
+      dataMain: undefined,
+      dataResults: undefined,
+      dataTotalHits: undefined,
       discoverSessionInitial: undefined,
       discoverSessionEdited: undefined,
       discoverSessionHasChanged: false,
@@ -126,6 +136,18 @@ export function getInternalStateContainer() {
         dataView: nextDataView,
         expandedDoc:
           nextDataView?.id !== prevState.dataView?.id ? undefined : prevState.expandedDoc,
+      }),
+      setDataMain: (prevState: InternalState) => (next: DataMainMsg) => ({
+        ...prevState,
+        dataMain: next,
+      }),
+      setDataTotalHits: (prevState: InternalState) => (next: DataTotalHitsMsg) => ({
+        ...prevState,
+        dataTotalHits: next,
+      }),
+      setDataResults: (prevState: InternalState) => (next: DataDocumentsMsg) => ({
+        ...prevState,
+        dataResults: next,
       }),
       setDiscoverSessionInitial: (prevState: InternalState) => (next: SavedSearch) => ({
         ...prevState,

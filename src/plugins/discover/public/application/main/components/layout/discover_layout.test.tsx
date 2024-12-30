@@ -21,11 +21,7 @@ import {
 } from '@kbn/data-plugin/common/search/search_source/mocks';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { dataViewWithTimefieldMock } from '../../../../__mocks__/data_view_with_timefield';
-import {
-  DataDocuments$,
-  DataMain$,
-  DataTotalHits$,
-} from '../../state_management/discover_data_state_container';
+import type { DataMainMsg } from '../../state_management/discover_data_state_container';
 import { createDiscoverServicesMock } from '../../../../__mocks__/services';
 import { FetchStatus } from '../../../types';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
@@ -50,10 +46,10 @@ async function mountComponent(
   prevSidebarClosed?: boolean,
   mountOptions: { attachTo?: HTMLElement } = {},
   query?: Query | AggregateQuery,
-  main$: DataMain$ = new BehaviorSubject({
+  dataMainMsg: DataMainMsg = {
     fetchStatus: FetchStatus.COMPLETE,
     foundDocuments: true,
-  }) as DataMain$
+  }
 ) {
   const searchSourceMock = createSearchSourceMock({ index: dataView });
   const services = createDiscoverServicesMock();
@@ -77,22 +73,15 @@ async function mountComponent(
   }
 
   const stateContainer = getDiscoverStateMock({ isTimeBased: true });
-
-  const documents$ = new BehaviorSubject({
+  stateContainer.internalState.transitions.setDataMain(dataMainMsg);
+  stateContainer.internalState.transitions.setDataResults({
     fetchStatus: FetchStatus.COMPLETE,
     result: esHitsMock.map((esHit) => buildDataTableRecord(esHit, dataView)),
-  }) as DataDocuments$;
-
-  const totalHits$ = new BehaviorSubject({
+  });
+  stateContainer.internalState.transitions.setDataTotalHits({
     fetchStatus: FetchStatus.COMPLETE,
     result: Number(esHitsMock.length),
-  }) as DataTotalHits$;
-
-  stateContainer.dataState.data$ = {
-    main$,
-    documents$,
-    totalHits$,
-  };
+  });
 
   const session = getSessionServiceMock();
 
@@ -180,11 +169,11 @@ describe('Discover component', () => {
       undefined,
       undefined,
       undefined,
-      new BehaviorSubject({
+      {
         fetchStatus: FetchStatus.ERROR,
         foundDocuments: false,
         error: new Error('No results'),
-      }) as DataMain$
+      }
     );
     expect(component.find(ErrorCallout)).toHaveLength(1);
     expect(component.find(PanelsToggle).prop('isChartAvailable')).toBe(false);
