@@ -4193,7 +4193,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/coloring@link:packages/kbn-coloring":
+"@kbn/coloring@link:src/platform/packages/shared/kbn-coloring":
   version "0.0.0"
   uid ""
 
