@@ -671,11 +671,11 @@
               },
               {
                 "plugin": "profiling",
-                "path": "x-pack/plugins/observability_solution/profiling/server/lib/setup/get_has_setup_privileges.ts"
+                "path": "x-pack/solutions/observability/plugins/profiling/server/lib/setup/get_has_setup_privileges.ts"
               },
               {
                 "plugin": "profiling",
-                "path": "x-pack/plugins/observability_solution/profiling/server/lib/setup/get_has_setup_privileges.ts"
+                "path": "x-pack/solutions/observability/plugins/profiling/server/lib/setup/get_has_setup_privileges.ts"
               },
               {
                 "plugin": "@kbn/security-authorization-core",
@@ -4854,10 +4854,6 @@
                 "path": "x-pack/platform/plugins/shared/observability_solution/observability_ai_assistant/server/service/index.ts"
               },
               {
-                "plugin": "serverlessSearch",
-                "path": "x-pack/plugins/serverless_search/server/routes/api_key_routes.ts"
-              },
-              {
                 "plugin": "upgradeAssistant",
                 "path": "x-pack/plugins/upgrade_assistant/server/lib/reindexing/credential_store.ts"
               },
@@ -4868,6 +4864,10 @@
               {
                 "plugin": "upgradeAssistant",
                 "path": "x-pack/plugins/upgrade_assistant/server/lib/reindexing/credential_store.ts"
+              },
+              {
+                "plugin": "transform",
+                "path": "x-pack/platform/plugins/private/transform/server/routes/api/reauthorize_transforms/route_handler_factory.ts"
               },
               {
                 "plugin": "fleet",
@@ -4910,10 +4910,6 @@
                 "path": "x-pack/platform/plugins/shared/entity_manager/server/routes/enablement/disable.ts"
               },
               {
-                "plugin": "transform",
-                "path": "x-pack/platform/plugins/private/transform/server/routes/api/reauthorize_transforms/route_handler_factory.ts"
-              },
-              {
                 "plugin": "fleet",
                 "path": "x-pack/platform/plugins/shared/fleet/server/routes/setup/handlers.test.ts"
               },
@@ -4956,6 +4952,10 @@
               {
                 "plugin": "synthetics",
                 "path": "x-pack/solutions/observability/plugins/synthetics/server/routes/synthetics_service/enablement.ts"
+              },
+              {
+                "plugin": "serverlessSearch",
+                "path": "x-pack/solutions/search/plugins/serverless_search/server/routes/api_key_routes.ts"
               },
               {
                 "plugin": "cloudSecurityPosture",
