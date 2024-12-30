@@ -8,17 +8,9 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 
 import React, { useMemo } from 'react';
-import { FormProvider, SubmitHandler, useController, useForm, useWatch } from 'react-hook-form';
+import { FormProvider, SubmitHandler, useForm, useWatch } from 'react-hook-form';
 import deepEqual from 'fast-deep-equal';
-import {
-  EuiCallOut,
-  EuiForm,
-  EuiButton,
-  EuiSpacer,
-  EuiAccordion,
-  useEuiTheme,
-  EuiHorizontalRule,
-} from '@elastic/eui';
+import { EuiCallOut, EuiForm, EuiButton, EuiSpacer, EuiHorizontalRule } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import {
   DissectProcessingDefinition,
@@ -27,20 +19,13 @@ import {
   ReadStreamDefinition,
   conditionSchema,
   getProcessorType,
-  isWiredReadStream,
 } from '@kbn/streams-schema';
-import { css } from '@emotion/react';
 import { ProcessorTypeSelector } from './processor_type_selector';
 import { ProcessorFlyoutTemplate } from './processor_flyout_template';
-import { ConditionEditor } from '../../condition_editor';
-import { GrokPatternDefinition } from './grok_pattern_definition';
 import { GrokFormState, ProcessorDefinition, ProcessorFormState } from '../types';
-import { ProcessorFieldSelector } from './processor_field_selector';
-import { GrokPatternsEditor } from './grok_patterns_editor';
-import { ToggleField } from './toggle_field';
 import { DangerZone } from './danger_zone';
-import { DissectPatternDefinition } from './dissect_pattern_definition';
-import { DissectAppendSeparator } from './dissect_append_separator';
+import { DissectProcessorForm } from './dissect';
+import { GrokProcessorForm } from './grok';
 
 const defaultCondition: ProcessingDefinition['condition'] = {
   field: '',
@@ -282,124 +267,6 @@ export function EditProcessorFlyout({
     </ProcessorFlyoutTemplate>
   );
 }
-
-interface GrokProcessorFormProps {
-  definition: ReadStreamDefinition;
-}
-
-const GrokProcessorForm = ({ definition }: GrokProcessorFormProps) => {
-  const { euiTheme } = useEuiTheme();
-
-  const { field } = useController({ name: 'condition' });
-
-  const mappedFields = useMemo(() => {
-    if (isWiredReadStream(definition)) {
-      return Object.entries({
-        ...definition.stream.ingest.wired.fields,
-        ...definition.inherited_fields,
-      }).map(([name, { type }]) => ({ name, type }));
-    }
-
-    return [];
-  }, [definition]);
-
-  return (
-    <>
-      <ProcessorFieldSelector fields={mappedFields} />
-      <GrokPatternsEditor />
-      <EuiSpacer size="m" />
-      <EuiAccordion
-        element="fieldset"
-        id="optionalFieldsAccordion"
-        paddingSize="none"
-        buttonContent={i18n.translate(
-          'xpack.streams.streamDetailView.managementTab.enrichment.processorFlyout.optionalFields',
-          { defaultMessage: 'Optional fields' }
-        )}
-      >
-        <div
-          css={css`
-            border-left: ${euiTheme.border.thin};
-            margin-left: ${euiTheme.size.m};
-            padding-top: ${euiTheme.size.m};
-            padding-left: calc(${euiTheme.size.m} + ${euiTheme.size.xs});
-          `}
-        >
-          <GrokPatternDefinition />
-          <EuiSpacer size="m" />
-          <ConditionEditor condition={field.value} onConditionChange={field.onChange} />
-        </div>
-      </EuiAccordion>
-      <EuiSpacer size="m" />
-      <ToggleField
-        name="ignore_failure"
-        label={i18n.translate(
-          'xpack.streams.streamDetailView.managementTab.enrichment.processorFlyout.ignoreFailuresLabel',
-          { defaultMessage: 'Ignore failures for this processor' }
-        )}
-      />
-    </>
-  );
-};
-
-interface DissectProcessorFormProps {
-  definition: ReadStreamDefinition;
-}
-
-const DissectProcessorForm = ({ definition }: DissectProcessorFormProps) => {
-  const { euiTheme } = useEuiTheme();
-
-  const { field } = useController({ name: 'condition' });
-
-  const mappedFields = useMemo(() => {
-    if (isWiredReadStream(definition)) {
-      return Object.entries({
-        ...definition.stream.ingest.wired.fields,
-        ...definition.inherited_fields,
-      }).map(([name, { type }]) => ({ name, type }));
-    }
-
-    return [];
-  }, [definition]);
-
-  return (
-    <>
-      <ProcessorFieldSelector fields={mappedFields} />
-      <DissectPatternDefinition />
-      <EuiSpacer size="m" />
-      <EuiAccordion
-        element="fieldset"
-        id="optionalFieldsAccordion"
-        paddingSize="none"
-        buttonContent={i18n.translate(
-          'xpack.streams.streamDetailView.managementTab.enrichment.processorFlyout.optionalFields',
-          { defaultMessage: 'Optional fields' }
-        )}
-      >
-        <div
-          css={css`
-            border-left: ${euiTheme.border.thin};
-            margin-left: ${euiTheme.size.m};
-            padding-top: ${euiTheme.size.m};
-            padding-left: calc(${euiTheme.size.m} + ${euiTheme.size.xs});
-          `}
-        >
-          <DissectAppendSeparator />
-          <EuiSpacer size="m" />
-          <ConditionEditor condition={field.value} onConditionChange={field.onChange} />
-        </div>
-      </EuiAccordion>
-      <EuiSpacer size="m" />
-      <ToggleField
-        name="ignore_failure"
-        label={i18n.translate(
-          'xpack.streams.streamDetailView.managementTab.enrichment.processorFlyout.ignoreFailuresLabel',
-          { defaultMessage: 'Ignore failures for this processor' }
-        )}
-      />
-    </>
-  );
-};
 
 const isValidCondition = (condition: ProcessingDefinition['condition']) => {
   return conditionSchema.safeParse(condition).success;

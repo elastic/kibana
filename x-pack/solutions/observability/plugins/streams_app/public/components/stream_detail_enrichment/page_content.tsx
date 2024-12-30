@@ -25,13 +25,15 @@ import { ManagementBottomBar } from '../management_bottom_bar';
 import { SortableList } from './sortable_list';
 import { useDefinition } from './hooks/use_definition';
 
+interface StreamDetailEnrichmentContentProps {
+  definition: ReadStreamDefinition;
+  refreshDefinition: () => void;
+}
+
 export function StreamDetailEnrichmentContent({
   definition,
   refreshDefinition,
-}: {
-  definition: ReadStreamDefinition;
-  refreshDefinition: () => void;
-}) {
+}: StreamDetailEnrichmentContentProps) {
   const {
     processors,
     addProcessor,

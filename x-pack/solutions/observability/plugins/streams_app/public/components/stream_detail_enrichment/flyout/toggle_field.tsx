@@ -6,8 +6,8 @@
  */
 
 import React from 'react';
-import { EuiFormRow, EuiSwitch, htmlIdGenerator } from '@elastic/eui';
 import { useController } from 'react-hook-form';
+import { EuiFormRow, EuiSwitch, htmlIdGenerator } from '@elastic/eui';
 
 interface Props {
   name: string;

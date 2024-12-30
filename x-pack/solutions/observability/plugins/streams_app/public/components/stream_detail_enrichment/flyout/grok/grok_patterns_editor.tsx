@@ -20,8 +20,8 @@ import {
   EuiButtonIcon,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { SortableList } from '../sortable_list';
-import { GrokFormState } from '../types';
+import { SortableList } from '../../sortable_list';
+import { GrokFormState } from '../../types';
 
 export const GrokPatternsEditor = () => {
   const { register } = useFormContext();

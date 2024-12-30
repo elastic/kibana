@@ -14,13 +14,15 @@ const StreamDetailEnrichmentContent = dynamic(() =>
   }))
 );
 
+interface StreamDetailEnrichmentProps {
+  definition?: ReadStreamDefinition;
+  refreshDefinition: () => void;
+}
+
 export function StreamDetailEnrichment({
   definition,
   refreshDefinition,
-}: {
-  definition?: ReadStreamDefinition;
-  refreshDefinition: () => void;
-}) {
+}: StreamDetailEnrichmentProps) {
   if (!definition) return null;
 
   return (

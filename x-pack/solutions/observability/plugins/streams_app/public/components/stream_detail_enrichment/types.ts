@@ -21,19 +21,20 @@ export type ProcessorType = ProcessingDefinition['config'] extends infer U
     : never
   : never;
 
-export interface BaseProcessingDefinition {
+interface BaseProcessingDefinition {
   condition?: ProcessingDefinition['condition'];
 }
 
-export interface BaseFormState {
-  condition?: ProcessingDefinition['condition'];
-}
 export interface ProcessingDefinitionGrok extends BaseProcessingDefinition {
   config: GrokProcessingDefinition;
 }
 
 export interface ProcessingDefinitionDissect extends BaseProcessingDefinition {
   config: DissectProcessingDefinition;
+}
+
+interface BaseFormState {
+  condition?: ProcessingDefinition['condition'];
 }
 
 export type GrokFormState = BaseFormState &

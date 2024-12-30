@@ -68,7 +68,7 @@ const DeleteProcessorButton = ({ onDeleteProcessor }: DeleteProcessorButtonProps
           )}
           confirmButtonText={i18n.translate(
             'xpack.streams.streamDetailView.managementTab.enrichment.processorFlyout.deleteProcessorModalConfirm',
-            { defaultMessage: 'Delete processor progress' }
+            { defaultMessage: 'Delete processor' }
           )}
           buttonColor="danger"
           defaultFocusedButton="confirm"
