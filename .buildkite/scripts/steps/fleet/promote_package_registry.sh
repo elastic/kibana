@@ -14,8 +14,8 @@ steps:
     async: true
     build:
       env:
-        IMAGES_CONFIG="kibana/images.yml"
-        RETRY="1"
+        IMAGES_CONFIG: "kibana/images.yml"
+        RETRY: "1"
 EOF
 else
   echo "Skipping promotion for untracked branch $BUILDKITE_BRANCH"
