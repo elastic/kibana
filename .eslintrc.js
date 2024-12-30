@@ -2009,7 +2009,7 @@ module.exports = {
     {
       files: [
         // this plugin depends on visTypeTimeseries plugin (for TSVB viz) which is platform/private ATM
-        'x-pack/plugins/observability_solution/infra/**',
+        'x-pack/solutions/observability/plugins/infra/**',
 
         // TODO @kibana/operations
         'scripts/create_observability_rules.js', // is importing "@kbn/observability-alerting-test-data" (observability/private)

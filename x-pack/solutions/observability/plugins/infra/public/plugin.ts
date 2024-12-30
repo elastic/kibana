@@ -152,7 +152,7 @@ export class Plugin implements InfraClientPluginClass {
 
     const logRoutes = getLogsAppRoutes({ isLogsStreamEnabled });
 
-    /** !! Need to be kept in sync with the deepLinks in x-pack/plugins/observability_solution/infra/public/plugin.ts */
+    /** !! Need to be kept in sync with the deepLinks in x-pack/solutions/observability/plugins/infra/public/plugin.ts */
     pluginsSetup.observabilityShared.navigation.registerSections(
       startDep$AndAccessibleFlag$.pipe(
         map(([application, isInfrastructureHostsViewEnabled, isLogsExplorerAccessible]) => {
@@ -250,7 +250,7 @@ export class Plugin implements InfraClientPluginClass {
       });
     }
 
-    // !! Need to be kept in sync with the routes in x-pack/plugins/observability_solution/infra/public/pages/metrics/index.tsx
+    // !! Need to be kept in sync with the routes in x-pack/solutions/observability/plugins/infra/public/pages/metrics/index.tsx
     const getInfraDeepLinks = ({
       hostsEnabled,
       metricsExplorerEnabled,

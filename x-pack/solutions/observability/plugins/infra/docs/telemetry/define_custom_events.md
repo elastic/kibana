@@ -15,7 +15,7 @@ export enum InfraTelemetryEventTypes {
 
 In this example, we're adding a new event type called `SEARCH_SUBMITTED` with a value `Search Submitted` that will be used for tracking the event.
 
-N.B. Each custom event should also be added to the whitelist defined in the [core analytics package](../../../cloud_integrations/cloud_full_story/server/config.ts) to be tracked correctly.
+N.B. Each custom event should also be added to the whitelist defined in the [core analytics package](../../../../cloud_integrations/cloud_full_story/server/config.ts) to be tracked correctly.
 
 ## Step 2: Update types and define the event schema
 

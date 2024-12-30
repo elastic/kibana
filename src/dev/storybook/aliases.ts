@@ -46,7 +46,7 @@ export const storybookAliases = {
   fleet: 'x-pack/platform/plugins/shared/fleet/.storybook',
   grouping: 'src/platform/packages/shared/kbn-grouping/.storybook',
   home: 'src/plugins/home/.storybook',
-  infra: 'x-pack/plugins/observability_solution/infra/.storybook',
+  infra: 'x-pack/solutions/observability/plugins/infra/.storybook',
   inventory: 'x-pack/solutions/observability/plugins/inventory/.storybook',
   investigate: 'x-pack/solutions/observability/plugins/investigate_app/.storybook',
   kibana_react: 'src/plugins/kibana_react/.storybook',
