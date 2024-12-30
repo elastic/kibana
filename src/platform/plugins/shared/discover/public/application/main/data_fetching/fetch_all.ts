@@ -24,16 +24,10 @@ import {
 } from 'rxjs';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import { isEqual } from 'lodash';
-import {
-  type AggregateQuery,
-  type Filter,
-  isOfAggregateQueryType,
-  type Query,
-  type TimeRange,
-} from '@kbn/es-query';
+import { type Filter, isOfAggregateQueryType, type TimeRange } from '@kbn/es-query';
 import { DataView, DataViewType } from '@kbn/data-views-plugin/common';
 import { i18n } from '@kbn/i18n';
-import { isRunningResponse } from '@kbn/data-plugin/common';
+import { isRunningResponse, SearchSource } from '@kbn/data-plugin/common';
 import type { DiscoverAppState } from '../state_management/discover_app_state_container';
 import { updateVolatileSearchSource } from './update_search_source';
 import {
@@ -134,16 +128,17 @@ export function fetchAll(
           inputTimeRange: getInternalState().dataRequestParams.timeRangeAbsolute,
         })
       : fetchDocuments(searchSource, fetchDeps);
+
     const responseTotalHits =
-      getAppState().hideChart && query && !isEsqlQuery
+      (getAppState().hideChart || !dataView.getTimeField()) && query && !isEsqlQuery
         ? fetchTotalHitsSearchSource({
             services,
             searchSessionId: fetchDeps.searchSessionId,
             adapter: inspectorAdapters.requests,
             abortSignal: abortController.signal,
+            searchSource: savedSearch.searchSource.createChild(),
             dataView,
             filters: getInternalState().customFilters,
-            query,
             timeRange: getInternalState().dataRequestParams.timeRangeAbsolute!,
           })
         : undefined;
@@ -323,26 +318,20 @@ const fetchTotalHitsSearchSource = async ({
   adapter,
   dataView,
   searchSessionId,
+  searchSource,
   filters: originalFilters,
-  query,
   timeRange,
 }: {
   services: DiscoverServices;
   abortSignal: AbortSignal;
   dataView: DataView;
   searchSessionId: string | undefined;
+  searchSource: SearchSource;
   adapter: RequestAdapter | undefined;
   filters: Filter[];
-  query: Query | AggregateQuery;
   timeRange: TimeRange;
 }) => {
-  const searchSource = data.search.searchSource.createEmpty();
-
-  searchSource
-    .setField('index', dataView)
-    .setField('query', query)
-    .setField('size', 0)
-    .setField('trackTotalHits', true);
+  searchSource.setField('index', dataView).setField('size', 0).setField('trackTotalHits', true);
 
   let filters = originalFilters;
 
