@@ -8,13 +8,11 @@
 import type { FC } from 'react';
 import React, { memo, useCallback, useMemo } from 'react';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import type { TableId } from '@kbn/securitysolution-data-table';
 import { EuiPanel } from '@elastic/eui';
 import type { Process } from '@kbn/session-view-plugin/common';
 import type { CustomProcess } from '../../session_view/context';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { SESSION_VIEW_TEST_ID } from './test_ids';
-import { isActiveTimeline } from '../../../../helpers';
 import { useSourcererDataView } from '../../../../sourcerer/containers';
 import {
   DocumentDetailsPreviewPanelKey,
@@ -23,7 +21,6 @@ import {
 import { useKibana } from '../../../../common/lib/kibana';
 import { useDocumentDetailsContext } from '../../shared/context';
 import { SourcererScopeName } from '../../../../sourcerer/store/model';
-import { detectionsTimelineIds } from '../../../../timelines/containers/helpers';
 import { ALERT_PREVIEW_BANNER } from '../../preview/constants';
 import { useLicense } from '../../../../common/hooks/use_license';
 import { useSessionViewConfig } from '../../shared/hooks/use_session_view_config';
@@ -53,17 +50,7 @@ export const SessionView: FC = memo(() => {
   const isEnterprisePlus = useLicense().isEnterprise();
   const isEnabled = sessionViewConfig && isEnterprisePlus;
 
-  const sourcererScope = useMemo(() => {
-    if (isActiveTimeline(scopeId)) {
-      return SourcererScopeName.timeline;
-    } else if (detectionsTimelineIds.includes(scopeId as TableId)) {
-      return SourcererScopeName.detections;
-    } else {
-      return SourcererScopeName.default;
-    }
-  }, [scopeId]);
-
-  const { selectedPatterns } = useSourcererDataView(sourcererScope);
+  const { selectedPatterns } = useSourcererDataView(SourcererScopeName.detections);
   const eventDetailsIndex = useMemo(() => selectedPatterns.join(','), [selectedPatterns]);
 
   const { openPreviewPanel, closePreviewPanel } = useExpandableFlyoutApi();
