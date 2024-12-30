@@ -33,7 +33,7 @@
     "xpack.dataQuality": "platform/plugins/shared/data_quality",
     "xpack.datasetQuality": "platform/plugins/shared/dataset_quality",
     "xpack.dataUsage": "platform/plugins/private/data_usage",
-    "xpack.discover": "plugins/discover_enhanced",
+    "xpack.discover": "platform/plugins/private/discover_enhanced",
     "xpack.crossClusterReplication": "platform/plugins/private/cross_cluster_replication",
     "xpack.elasticAssistant": "platform/packages/shared/kbn-elastic-assistant",
     "xpack.elasticAssistantCommon": "platform/packages/shared/kbn-elastic-assistant-common",

@@ -4265,7 +4265,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/content-management-utils@link:packages/kbn-content-management-utils":
+"@kbn/content-management-utils@link:src/platform/packages/shared/kbn-content-management-utils":
   version "0.0.0"
   uid ""
 
@@ -5241,7 +5241,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/data-view-editor-plugin@link:src/plugins/data_view_editor":
+"@kbn/data-view-editor-plugin@link:src/platform/plugins/shared/data_view_editor":
   version "0.0.0"
   uid ""
 
@@ -5249,19 +5249,19 @@
   version "0.0.0"
   uid ""
 
-"@kbn/data-view-field-editor-plugin@link:src/plugins/data_view_field_editor":
+"@kbn/data-view-field-editor-plugin@link:src/platform/plugins/shared/data_view_field_editor":
   version "0.0.0"
   uid ""
 
-"@kbn/data-view-management-plugin@link:src/plugins/data_view_management":
+"@kbn/data-view-management-plugin@link:src/platform/plugins/shared/data_view_management":
   version "0.0.0"
   uid ""
 
-"@kbn/data-view-utils@link:packages/kbn-data-view-utils":
+"@kbn/data-view-utils@link:src/platform/packages/shared/kbn-data-view-utils":
   version "0.0.0"
   uid ""
 
-"@kbn/data-views-plugin@link:src/plugins/data_views":
+"@kbn/data-views-plugin@link:src/platform/plugins/shared/data_views":
   version "0.0.0"
   uid ""
 
@@ -5273,11 +5273,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/datemath@link:packages/kbn-datemath":
+"@kbn/datemath@link:src/platform/packages/shared/kbn-datemath":
   version "0.0.0"
   uid ""
 
-"@kbn/deeplinks-analytics@link:packages/deeplinks/analytics":
+"@kbn/deeplinks-analytics@link:src/platform/packages/shared/deeplinks/analytics":
   version "0.0.0"
   uid ""
 
@@ -5313,7 +5313,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/default-nav-analytics@link:packages/default-nav/analytics":
+"@kbn/default-nav-analytics@link:src/platform/packages/private/default-nav/analytics":
   version "0.0.0"
   uid ""
 
@@ -5369,19 +5369,19 @@
   version "0.0.0"
   uid ""
 
-"@kbn/discover-enhanced-plugin@link:x-pack/plugins/discover_enhanced":
+"@kbn/discover-enhanced-plugin@link:x-pack/platform/plugins/private/discover_enhanced":
   version "0.0.0"
   uid ""
 
-"@kbn/discover-plugin@link:src/plugins/discover":
+"@kbn/discover-plugin@link:src/platform/plugins/shared/discover":
   version "0.0.0"
   uid ""
 
-"@kbn/discover-shared-plugin@link:src/plugins/discover_shared":
+"@kbn/discover-shared-plugin@link:src/platform/plugins/shared/discover_shared":
   version "0.0.0"
   uid ""
 
-"@kbn/discover-utils@link:packages/kbn-discover-utils":
+"@kbn/discover-utils@link:src/platform/packages/shared/kbn-discover-utils":
   version "0.0.0"
   uid ""
 
@@ -5489,7 +5489,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/es-query@link:packages/kbn-es-query":
+"@kbn/es-query@link:src/platform/packages/shared/kbn-es-query":
   version "0.0.0"
   uid ""
 
@@ -5709,15 +5709,15 @@
   version "0.0.0"
   uid ""
 
-"@kbn/field-formats-plugin@link:src/plugins/field_formats":
+"@kbn/field-formats-plugin@link:src/platform/plugins/shared/field_formats":
   version "0.0.0"
   uid ""
 
-"@kbn/field-types@link:packages/kbn-field-types":
+"@kbn/field-types@link:src/platform/packages/shared/kbn-field-types":
   version "0.0.0"
   uid ""
 
-"@kbn/field-utils@link:packages/kbn-field-utils":
+"@kbn/field-utils@link:src/platform/packages/shared/kbn-field-utils":
   version "0.0.0"
   uid ""
 
@@ -6665,7 +6665,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/react-field@link:packages/kbn-react-field":
+"@kbn/react-field@link:src/platform/packages/shared/kbn-react-field":
   version "0.0.0"
   uid ""
 
@@ -6797,7 +6797,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/resizable-layout@link:packages/kbn-resizable-layout":
+"@kbn/resizable-layout@link:src/platform/packages/shared/kbn-resizable-layout":
   version "0.0.0"
   uid ""
 
@@ -6889,7 +6889,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/saved-objects-finder-plugin@link:src/plugins/saved_objects_finder":
+"@kbn/saved-objects-finder-plugin@link:src/platform/plugins/shared/saved_objects_finder":
   version "0.0.0"
   uid ""
 
@@ -6925,7 +6925,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/saved-search-plugin@link:src/plugins/saved_search":
+"@kbn/saved-search-plugin@link:src/platform/plugins/shared/saved_search":
   version "0.0.0"
   uid ""
 
@@ -6985,7 +6985,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/search-errors@link:packages/kbn-search-errors":
+"@kbn/search-errors@link:src/platform/packages/shared/kbn-search-errors":
   version "0.0.0"
   uid ""
 
@@ -7021,7 +7021,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/search-response-warnings@link:packages/kbn-search-response-warnings":
+"@kbn/search-response-warnings@link:src/platform/packages/shared/kbn-search-response-warnings":
   version "0.0.0"
   uid ""
 
@@ -7029,7 +7029,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/search-types@link:packages/kbn-search-types":
+"@kbn/search-types@link:src/platform/packages/shared/kbn-search-types":
   version "0.0.0"
   uid ""
 
@@ -7781,7 +7781,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/unified-data-table@link:packages/kbn-unified-data-table":
+"@kbn/unified-data-table@link:src/platform/packages/shared/kbn-unified-data-table":
   version "0.0.0"
   uid ""
 
@@ -7789,11 +7789,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/unified-doc-viewer-plugin@link:src/plugins/unified_doc_viewer":
+"@kbn/unified-doc-viewer-plugin@link:src/platform/plugins/shared/unified_doc_viewer":
   version "0.0.0"
   uid ""
 
-"@kbn/unified-doc-viewer@link:packages/kbn-unified-doc-viewer":
+"@kbn/unified-doc-viewer@link:src/platform/packages/shared/kbn-unified-doc-viewer":
   version "0.0.0"
   uid ""
 
@@ -7801,11 +7801,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/unified-field-list@link:packages/kbn-unified-field-list":
+"@kbn/unified-field-list@link:src/platform/packages/shared/kbn-unified-field-list":
   version "0.0.0"
   uid ""
 
-"@kbn/unified-histogram-plugin@link:src/plugins/unified_histogram":
+"@kbn/unified-histogram-plugin@link:src/platform/plugins/shared/unified_histogram":
   version "0.0.0"
   uid ""
 
@@ -7813,7 +7813,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/unsaved-changes-badge@link:packages/kbn-unsaved-changes-badge":
+"@kbn/unsaved-changes-badge@link:src/platform/packages/private/kbn-unsaved-changes-badge":
   version "0.0.0"
   uid ""
 

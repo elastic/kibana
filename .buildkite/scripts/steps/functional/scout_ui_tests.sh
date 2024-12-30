@@ -6,7 +6,7 @@ source .buildkite/scripts/steps/functional/common.sh
 
 export JOB=kibana-scout-ui-tests
 
-TEST_CONFIG="x-pack/plugins/discover_enhanced/ui_tests/playwright.config.ts"
+TEST_CONFIG="x-pack/platform/plugins/private/discover_enhanced/ui_tests/playwright.config.ts"
 KIBANA_DIR="$KIBANA_BUILD_LOCATION"
 
 declare -A TESTS=(

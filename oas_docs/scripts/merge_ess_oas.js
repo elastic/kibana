@@ -17,7 +17,7 @@ const { REPO_ROOT } = require('@kbn/repo-info');
       `${REPO_ROOT}/oas_docs/bundle.json`,
       `${REPO_ROOT}/x-pack/platform/plugins/shared/alerting/docs/openapi/bundled.yaml`,
       `${REPO_ROOT}/x-pack/platform/plugins/shared/cases/docs/openapi/bundled.yaml`,
-      `${REPO_ROOT}/src/plugins/data_views/docs/openapi/bundled.yaml`,
+      `${REPO_ROOT}/src/platform/plugins/shared/data_views/docs/openapi/bundled.yaml`,
       `${REPO_ROOT}/x-pack/platform/plugins/shared/ml/common/openapi/ml_apis.yaml`,
       `${REPO_ROOT}/packages/core/saved-objects/docs/openapi/bundled.yaml`,
 

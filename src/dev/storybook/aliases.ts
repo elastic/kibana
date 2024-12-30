@@ -30,7 +30,7 @@ export const storybookAliases = {
   dashboard_enhanced: 'x-pack/platform/plugins/shared/dashboard_enhanced/.storybook',
   dashboard: 'src/platform/plugins/shared/dashboard/.storybook',
   data: 'src/plugins/data/.storybook',
-  discover: 'src/plugins/discover/.storybook',
+  discover: 'src/platform/plugins/shared/discover/.storybook',
   esql_ast_inspector: 'examples/esql_ast_inspector/.storybook',
   es_ui_shared: 'src/platform/plugins/shared/es_ui_shared/.storybook',
   expandable_flyout: 'x-pack/solutions/security/packages/expandable-flyout/.storybook',

@@ -11,7 +11,7 @@ import { EuiEmptyPromptProps } from '@elastic/eui';
 import type { ILocatorClient } from '@kbn/share-plugin/common/url_service';
 
 /**
- * TODO: `DataView` is a class exported by `src/plugins/data_views/public`.  Since this service
+ * TODO: `DataView` is a class exported by `src/platform/plugins/shared/data_views/public`.  Since this service
  * is contained in this package-- and packages can only depend on other packages and never on
  * plugins-- we have to set this to `unknown`.  If and when `DataView` is exported from a
  * stateless package, we can remove this.
@@ -23,7 +23,7 @@ type DataView = unknown;
 /**
  * A subset of the `DataViewEditorOptions` interface relevant to our service and components.
  *
- * @see: src/plugins/data_view_editor/public/types.ts
+ * @see: src/platform/plugins/shared/data_view_editor/public/types.ts
  */
 interface DataViewEditorOptions {
   /** Handler to be invoked when the Data View Editor completes a save operation. */

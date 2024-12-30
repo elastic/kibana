@@ -83,13 +83,6 @@
         }
       }
     },
-    "discoverEnhanced": {
-      "properties": {
-        "exploreDataInChartActionEnabled": {
-          "type": "boolean"
-        }
-      }
-    },
     "reporting": {
       "properties": {
         "available": {
