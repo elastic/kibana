@@ -661,6 +661,7 @@ src/platform/plugins/shared/saved_search @elastic/kibana-data-discovery
 src/platform/plugins/shared/unified_doc_viewer @elastic/kibana-data-discovery
 src/platform/plugins/shared/unified_histogram @elastic/kibana-data-discovery
 src/platform/plugins/shared/unified_search @elastic/kibana-visualizations
+src/platform/plugins/shared/vis_types/timeseries @elastic/kibana-visualizations
 src/plugins/advanced_settings @elastic/appex-sharedux @elastic/kibana-management
 src/plugins/content_management @elastic/appex-sharedux
 src/plugins/files @elastic/appex-sharedux
@@ -688,7 +689,6 @@ src/plugins/telemetry_management_section @elastic/kibana-core
 src/plugins/ui_actions @elastic/appex-sharedux
 src/plugins/ui_actions_enhanced @elastic/appex-sharedux
 src/plugins/usage_collection @elastic/kibana-core
-src/plugins/vis_types/timeseries @elastic/kibana-visualizations
 src/plugins/vis_types/vega @elastic/kibana-visualizations
 src/plugins/vis_types/vislib @elastic/kibana-visualizations
 src/plugins/vis_types/xy @elastic/kibana-visualizations

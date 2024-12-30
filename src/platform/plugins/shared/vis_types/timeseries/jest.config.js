@@ -9,11 +9,11 @@
 
 module.exports = {
   preset: '@kbn/test',
-  rootDir: '../../../..',
-  roots: ['<rootDir>/src/plugins/vis_types/timeseries'],
-  coverageDirectory: '<rootDir>/target/kibana-coverage/jest/src/plugins/vis_types/timeseries',
+  rootDir: '../../../../../..',
+  roots: ['<rootDir>/src/platform/plugins/shared/vis_types/timeseries'],
+  coverageDirectory: '<rootDir>/target/kibana-coverage/jest/src/platform/plugins/shared/vis_types/timeseries',
   coverageReporters: ['text', 'html'],
   collectCoverageFrom: [
-    '<rootDir>/src/plugins/vis_types/timeseries/{common,public,server}/**/*.{js,ts,tsx}',
+    '<rootDir>/src/platform/plugins/shared/vis_types/timeseries/{common,public,server}/**/*.{js,ts,tsx}',
   ],
 };
