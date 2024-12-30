@@ -5307,7 +5307,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/default-nav-analytics@link:packages/default-nav/analytics":
+"@kbn/default-nav-analytics@link:src/platform/packages/private/default-nav/analytics":
   version "0.0.0"
   uid ""
 
