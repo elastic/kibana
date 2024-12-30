@@ -110,7 +110,7 @@ export class UpdateSLO {
           try {
             await operation();
           } catch (rollbackErr) {
-            this.logger.error('Rollback operation failed', rollbackErr);
+            this.logger.error(`Rollback operation failed: ${rollbackErr}`);
           }
         });
 
@@ -189,7 +189,7 @@ export class UpdateSLO {
         try {
           await operation();
         } catch (rollbackErr) {
-          this.logger.error('Rollback operation failed', rollbackErr);
+          this.logger.error(`Rollback operation failed ${rollbackErr}`);
         }
       });
 

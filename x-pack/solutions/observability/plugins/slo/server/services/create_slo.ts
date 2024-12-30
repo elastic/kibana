@@ -107,7 +107,7 @@ export class CreateSLO {
         try {
           await operation();
         } catch (rollbackErr) {
-          this.logger.error('Rollback operation failed', rollbackErr);
+          this.logger.error(`Rollback operation failed: ${rollbackErr}`);
         }
       });
 
