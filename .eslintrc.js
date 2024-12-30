@@ -183,7 +183,7 @@ const DEV_PATTERNS = [
   ...DEV_PACKAGE_DIRS.map((pkg) => `${pkg}/**/*`),
   ...DEV_DIRECTORIES.map((dir) => `{packages,src,x-pack}/**/${dir}/**/*`),
   ...DEV_FILE_PATTERNS.map((file) => `{packages,src,x-pack}/**/${file}`),
-  'packages/kbn-interpreter/tasks/**/*',
+  'src/platform/packages/shared/kbn-interpreter/tasks/**/*',
   'src/dev/**/*',
   'x-pack/{dev-tools,tasks,test,test_serverless,build_chromium}/**/*',
   'x-pack/performance/**/*',
