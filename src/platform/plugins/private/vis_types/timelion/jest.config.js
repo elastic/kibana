@@ -11,7 +11,8 @@ module.exports = {
   preset: '@kbn/test',
   rootDir: '../../../../../..',
   roots: ['<rootDir>/src/platform/plugins/private/vis_types/timelion'],
-  coverageDirectory: '<rootDir>/target/kibana-coverage/jest/src/platform/plugins/private/vis_types/timelion',
+  coverageDirectory:
+    '<rootDir>/target/kibana-coverage/jest/src/platform/plugins/private/vis_types/timelion',
   coverageReporters: ['text', 'html'],
   collectCoverageFrom: [
     '<rootDir>/src/platform/plugins/private/vis_types/timelion/{common,public,server}/**/*.{js,ts,tsx}',

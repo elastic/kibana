@@ -11,7 +11,8 @@ module.exports = {
   preset: '@kbn/test',
   rootDir: '../../../../../..',
   roots: ['<rootDir>/src/platform/plugins/private/vis_types/gauge'],
-  coverageDirectory: '<rootDir>/target/kibana-coverage/jest/src/platform/plugins/private/vis_types/gauge',
+  coverageDirectory:
+    '<rootDir>/target/kibana-coverage/jest/src/platform/plugins/private/vis_types/gauge',
   coverageReporters: ['text', 'html'],
   collectCoverageFrom: [
     '<rootDir>/src/platform/plugins/private/vis_types/gauge/{common,public,server}/**/*.{ts,tsx}',
