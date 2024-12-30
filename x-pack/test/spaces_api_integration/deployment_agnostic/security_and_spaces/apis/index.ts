@@ -22,7 +22,7 @@ export default function ({ loadTestFile, getService }: DeploymentAgnosticFtrProv
     });
     loadTestFile(require.resolve('./resolve_copy_to_space_conflicts')); // PASS
     loadTestFile(require.resolve('./create')); // PASS
-    // loadTestFile(require.resolve('./delete'));
+    loadTestFile(require.resolve('./delete'));
     loadTestFile(require.resolve('./get_all')); // PASS
     loadTestFile(require.resolve('./get')); // PASS
     loadTestFile(require.resolve('./update')); // PASS
