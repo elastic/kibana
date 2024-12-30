@@ -11,6 +11,7 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiButtonGroup,
+  EuiCallOut,
   EuiColorPicker,
   EuiDescribedFormGroup,
   EuiDescriptionList,
@@ -22,9 +23,12 @@ import {
   EuiIconTip,
   EuiKeyPadMenu,
   EuiKeyPadMenuItem,
+  EuiPageHeaderSection,
   EuiPopover,
   EuiSpacer,
   EuiText,
+  EuiTextTruncate,
+  EuiTitle,
   EuiToolTip,
   useEuiTheme,
   useGeneratedHtmlId,
@@ -70,6 +74,28 @@ const formRowCSS = css`
   .euiFormRow__label {
     flex: 1;
   }
+`;
+
+const pageHeaderCSS = css`
+  max-width: 1248px;
+  margin: auto;
+  border-bottom: none;
+`;
+
+const pageTitleCSS = css`
+  min-width: 120px;
+`;
+
+const rightSideItemsCSS = css`
+  justify-content: flex-start;
+
+  @include euiBreakpoint('m') {
+    justify-content: flex-end;
+  }
+`;
+
+const rightSideItemCSS = css`
+  min-width: 160px;
 `;
 
 export interface UserProfileProps {
@@ -204,7 +230,7 @@ const UserSettingsEditor: FunctionComponent<UserSettingsEditorProps> = ({
       <EuiKeyPadMenuItem
         name={id}
         label={label}
-        data-test-subj={`themeKeyPadItem${label}`}
+        data-test-subj={`themeKeyPadItem${id}`}
         checkable="single"
         isSelected={idSelected === id}
         isDisabled={isThemeOverridden}
@@ -235,13 +261,16 @@ const UserSettingsEditor: FunctionComponent<UserSettingsEditorProps> = ({
             </FormLabel>
           ),
         }}
+        css={css`
+          inline-size: 420px; // Allow for 4 items to fit in a row instead of the default 3
+        `}
       >
         {themeItem({
-          id: '',
-          label: i18n.translate('xpack.security.accountManagement.userProfile.defaultModeButton', {
-            defaultMessage: 'Space default',
+          id: 'system',
+          label: i18n.translate('xpack.security.accountManagement.userProfile.systemModeButton', {
+            defaultMessage: 'System',
           }),
-          icon: 'spaces',
+          icon: 'desktop',
         })}
         {themeItem({
           id: 'light',
@@ -256,6 +285,13 @@ const UserSettingsEditor: FunctionComponent<UserSettingsEditorProps> = ({
             defaultMessage: 'Dark',
           }),
           icon: 'moon',
+        })}
+        {themeItem({
+          id: 'space_default',
+          label: i18n.translate('xpack.security.accountManagement.userProfile.defaultModeButton', {
+            defaultMessage: 'Space default',
+          }),
+          icon: 'spaces',
         })}
       </EuiKeyPadMenu>
     );
@@ -275,6 +311,32 @@ const UserSettingsEditor: FunctionComponent<UserSettingsEditorProps> = ({
       themeKeyPadMenu
     );
   };
+
+  const deprecatedWarning = idSelected === 'space_default' && (
+    <>
+      <EuiSpacer size="s" />
+      <EuiCallOut
+        title={i18n.translate(
+          'xpack.security.accountManagement.userProfile.deprecatedSpaceDefaultTitle',
+          {
+            defaultMessage: 'Space default settings will be removed in a future version',
+          }
+        )}
+        color="warning"
+        iconType="warning"
+      >
+        <p>
+          {i18n.translate(
+            'xpack.security.accountManagement.userProfile.deprecatedSpaceDefaultDescription',
+            {
+              defaultMessage:
+                'All users with the Space default color mode enabled will be automatically transitioned to the System color mode.',
+            }
+          )}
+        </p>
+      </EuiCallOut>
+    </>
+  );
 
   return (
     <EuiDescribedFormGroup
@@ -296,7 +358,10 @@ const UserSettingsEditor: FunctionComponent<UserSettingsEditorProps> = ({
       }
     >
       <FormRow name="data.userSettings.darkMode" fullWidth>
-        {themeMenu(isThemeOverridden)}
+        <>
+          {themeMenu(isThemeOverridden)}
+          {deprecatedWarning}
+        </>
       </FormRow>
     </EuiDescribedFormGroup>
   );
@@ -607,14 +672,13 @@ function UserPasswordEditor({
 }
 
 const UserRoles: FunctionComponent<UserRoleProps> = ({ user }) => {
-  const { euiTheme } = useEuiTheme();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const onButtonClick = () => setIsPopoverOpen((isOpen) => !isOpen);
   const closePopover = () => setIsPopoverOpen(false);
 
-  const [firstRole] = user.roles;
-  const remainingRoles = user.roles.slice(1);
+  const firstThreeRoles = user.roles.slice(0, 3);
+  const remainingRoles = user.roles.slice(3);
 
   const renderMoreRoles = () => {
     const button = (
@@ -653,16 +717,13 @@ const UserRoles: FunctionComponent<UserRoleProps> = ({ user }) => {
 
   return (
     <>
-      <div
-        style={{
-          maxWidth: euiTheme.breakpoint.m / 6,
-          display: 'inline-block',
-        }}
-      >
-        <EuiBadge key={firstRole} color="hollow" data-test-subj={`role${firstRole}`}>
-          {firstRole}
-        </EuiBadge>
-      </div>
+      <EuiBadgeGroup gutterSize="xs" data-test-subj="displayedRoles">
+        {firstThreeRoles.map((role) => (
+          <EuiBadge key={role} color="hollow" data-test-subj={`role${role}`}>
+            {role}
+          </EuiBadge>
+        ))}
+      </EuiBadgeGroup>
       {remainingRoles.length ? renderMoreRoles() : null}
     </>
   );
@@ -693,7 +754,9 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
           defaultMessage="Username"
         />
       ),
-      description: user.username as string | undefined | JSX.Element,
+      description:
+        user.username &&
+        ((<EuiTextTruncate text={user.username} />) as string | undefined | JSX.Element),
       helpText: (
         <FormattedMessage
           id="xpack.security.accountManagement.userProfile.usernameHelpText"
@@ -712,7 +775,7 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
           defaultMessage="Full name"
         />
       ),
-      description: user.full_name,
+      description: user.full_name && <EuiTextTruncate text={user.full_name} />,
       helpText: (
         <FormattedMessage
           id="xpack.security.accountManagement.userProfile.fullNameHelpText"
@@ -729,7 +792,7 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
           defaultMessage="Email address"
         />
       ),
-      description: user.email,
+      description: user.email && <EuiTextTruncate text={user.email} />,
       helpText: (
         <FormattedMessage
           id="xpack.security.accountManagement.userProfile.emailHelpText"
@@ -778,48 +841,61 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
               />
             ) : null}
 
-            <KibanaPageTemplate className="eui-fullHeight" restrictWidth={1000}>
-              <KibanaPageTemplate.Header
-                pageTitle={
-                  <FormattedMessage
-                    id="xpack.security.accountManagement.userProfile.title"
-                    defaultMessage="Profile"
-                  />
-                }
-                id={titleId}
-                rightSideItems={rightSideItems.reverse().map((item) => (
-                  <EuiDescriptionList
-                    textStyle="reverse"
-                    listItems={[
-                      {
-                        title: (
-                          <EuiText color={euiTheme.colors.darkestShade} size="s">
-                            <EuiFlexGroup responsive={false} alignItems="center" gutterSize="none">
-                              <EuiFlexItem grow={false}>{item.title}</EuiFlexItem>
-                              <EuiFlexItem grow={false} style={{ marginLeft: '0.33em' }}>
-                                <EuiIconTip type="questionInCircle" content={item.helpText} />
-                              </EuiFlexItem>
-                            </EuiFlexGroup>
-                          </EuiText>
-                        ),
-                        description: (
-                          <span data-test-subj={item.testSubj}>
-                            {item.description || (
-                              <EuiText color={euiTheme.colors.disabledText} size="s">
-                                <FormattedMessage
-                                  id="xpack.security.accountManagement.userProfile.noneProvided"
-                                  defaultMessage="None provided"
-                                />
+            <KibanaPageTemplate className="eui-fullHeight" restrictWidth={true}>
+              <KibanaPageTemplate.Header id={titleId} css={pageHeaderCSS}>
+                <EuiPageHeaderSection>
+                  <EuiTitle size="l" css={pageTitleCSS}>
+                    <h1>
+                      <FormattedMessage
+                        id="xpack.security.accountManagement.userProfile.title"
+                        defaultMessage="Profile"
+                      />
+                    </h1>
+                  </EuiTitle>
+                </EuiPageHeaderSection>
+                <EuiPageHeaderSection>
+                  <EuiFlexGroup alignItems="flexStart" css={rightSideItemsCSS}>
+                    {rightSideItems.map((item) => (
+                      <EuiDescriptionList
+                        key={item.testSubj}
+                        textStyle="reverse"
+                        css={rightSideItemCSS}
+                        listItems={[
+                          {
+                            title: (
+                              <EuiText color={euiTheme.colors.darkestShade} size="s">
+                                <EuiFlexGroup
+                                  responsive={false}
+                                  alignItems="center"
+                                  gutterSize="none"
+                                >
+                                  <EuiFlexItem grow={false}>{item.title}</EuiFlexItem>
+                                  <EuiFlexItem grow={false}>
+                                    <EuiIconTip type="questionInCircle" content={item.helpText} />
+                                  </EuiFlexItem>
+                                </EuiFlexGroup>
                               </EuiText>
-                            )}
-                          </span>
-                        ),
-                      },
-                    ]}
-                    compressed
-                  />
-                ))}
-              />
+                            ),
+                            description: (
+                              <span data-test-subj={item.testSubj}>
+                                {item.description || (
+                                  <EuiText color={euiTheme.colors.textDisabled} size="s">
+                                    <FormattedMessage
+                                      id="xpack.security.accountManagement.userProfile.noneProvided"
+                                      defaultMessage="None provided"
+                                    />
+                                  </EuiText>
+                                )}
+                              </span>
+                            ),
+                          },
+                        ]}
+                        compressed
+                      />
+                    ))}
+                  </EuiFlexGroup>
+                </EuiPageHeaderSection>
+              </KibanaPageTemplate.Header>
               <KibanaPageTemplate.Section>
                 <Form aria-labelledby={titleId}>
                   <UserDetailsEditor user={user} />
@@ -875,7 +951,7 @@ export function useUserProfileForm({ user, data }: UserProfileProps) {
             imageUrl: data.avatar?.imageUrl || '',
           },
           userSettings: {
-            darkMode: data.userSettings?.darkMode || '',
+            darkMode: data.userSettings?.darkMode || 'space_default',
           },
         }
       : undefined,
@@ -1009,7 +1085,7 @@ export const SaveChangesBottomBar: FunctionComponent = () => {
           data-test-subj="saveProfileChangesButton"
           isLoading={formik.isSubmitting}
           isDisabled={formik.submitCount > 0 && !formik.isValid}
-          color="success"
+          color="primary"
           iconType="save"
           fill
         >

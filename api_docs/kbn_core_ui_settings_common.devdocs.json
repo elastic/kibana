@@ -610,7 +610,7 @@
               },
               {
                 "plugin": "@kbn/management-settings-field-definition",
-                "path": "packages/kbn-management/settings/field_definition/get_definition.ts"
+                "path": "src/platform/packages/shared/kbn-management/settings/field_definition/get_definition.ts"
               }
             ]
           },

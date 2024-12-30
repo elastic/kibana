@@ -179,7 +179,7 @@ export class DiscoverPlugin
           window.dispatchEvent(new HashChangeEvent('hashchange'));
         });
 
-        ebtManager.enableContext();
+        ebtManager.onDiscoverAppMounted();
 
         const services = buildServices({
           core: coreStart,
@@ -228,7 +228,7 @@ export class DiscoverPlugin
         });
 
         return () => {
-          ebtManager.disableAndResetContext();
+          ebtManager.onDiscoverAppUnmounted();
           unlistenParentHistory();
           unmount();
           appUnMounted();
@@ -429,7 +429,7 @@ export class DiscoverPlugin
       },
       savedObjectType: SavedSearchType,
       savedObjectName: i18n.translate('discover.savedSearch.savedObjectName', {
-        defaultMessage: 'Saved search',
+        defaultMessage: 'Discover session',
       }),
       getIconForSavedObject: () => 'discoverApp',
     });

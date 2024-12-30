@@ -114,7 +114,12 @@ tags:
   - description: Manage and interact with Security Assistant resources.
     name: Security AI Assistant API
     x-displayName: Security AI assistant
-  - description: You can create rules that automatically turn events and external alerts sent to Elastic Security into detection alerts. These alerts are displayed on the Detections page.
+  - description: |
+      Use the detections APIs to create and manage detection rules. Detection rules search events and external alerts sent to Elastic Security and generate detection alerts from any hits. Alerts are displayed on the **Alerts** page and can be assigned and triaged, using the alert status to mark them as open, closed, or acknowledged.
+      > warn
+      > If the API key used for authorization has different privileges than the key that created or most recently updated a rule, the rule behavior might change.
+
+      > If the API key that created a rule is deleted, or the user that created the rule becomes inactive, the rule will stop running.
     name: Security Detections API
     x-displayName: Security detections
   - description: Endpoint Exceptions API allows you to manage detection rule endpoint exceptions to prevent a rule from generating an alert from incoming events even when the rule's other criteria are met.
@@ -126,10 +131,67 @@ tags:
   - description: ''
     name: Security Entity Analytics API
     x-displayName: Security entity analytics
-  - description: Exceptions API allows you to manage detection rule exceptions to prevent a rule from generating an alert from incoming events even when the rule's other criteria are met.
+  - description: |
+      Exceptions are associated with detection and endpoint rules, and are used to prevent a rule from generating an alert from incoming events, even when the rule's other criteria are met. They can help reduce the number of false positives and prevent trusted processes and network activity from generating unnecessary alerts.
+
+      Exceptions are made up of:
+
+      * **Exception containers**: A container for related exceptions. Generally, a single exception container contains all the exception items relevant for a subset of rules. For example, a container can be used to group together network-related exceptions that are relevant for a large number of network rules. The container can then be associated with all the relevant rules.
+      * **Exception items**: The query (fields, values, and logic) used to prevent rules from generating alerts. When an exception item's query evaluates to `true`, the rule does not generate an alert.
+
+      For detection rules, you can also use lists to define rule exceptions. A list holds multiple values of the same Elasticsearch data type, such as IP addresses. These values are used to determine when an exception prevents an alert from being generated.
+      > info
+      > You cannot use lists with endpoint rule exceptions.
+
+      > info
+      > Only exception containers can be associated with rules. You cannot directly associate an exception item or a list container with a rule. To use list exceptions, create an exception item that references the relevant list container.
+
+      ## Exceptions requirements
+
+      Before you can start working with exceptions that use value lists, you must create the `.lists` and `.items` data streams for the relevant Kibana space. To do this, use the [Create list data streams](../operation/operation-createlistindex) endpoint. Once these data streams are created, your role needs privileges to manage rules. For a complete list of requirements, refer to [Enable and access detections](https://www.elastic.co/guide/en/serverless/current/security-detections-requirements.html#enable-detections-ui).
     name: Security Exceptions API
     x-displayName: Security exceptions
-  - description: Lists API allows you to manage lists of keywords, IPs or IP ranges items.
+  - description: |
+      Lists can be used with detection rule exceptions to define values that prevent a rule from generating alerts.
+
+      Lists are made up of:
+
+      * **List containers**: A container for values of the same Elasticsearch data type. The following data types can be used:
+          * `boolean`
+          * `byte`
+          * `date`
+          * `date_nanos`
+          * `date_range`
+          * `double`
+          * `double_range`
+          * `float`
+          * `float_range`
+          * `half_float`
+          * `integer`
+          * `integer_range`
+          * `ip`
+          * `ip_range`
+          * `keyword`
+          * `long`
+          * `long_range`
+          * `short`
+          * `text`
+      * **List items**: The values used to determine whether the exception prevents an alert from being generated.
+
+      All list items in the same list container must be of the same data type, and each item defines a single value. For example, an IP list container named `internal-ip-addresses-southport` contains five items, where each item defines one internal IP address:
+      1. `192.168.1.1`
+      2. `192.168.1.3`
+      3. `192.168.1.18`
+      4. `192.168.1.12`
+      5. `192.168.1.7`
+
+      To use these IP addresses as values for defining rule exceptions, use the Security exceptions API to [create an exception list item](../operation/operation-createexceptionlistitem) that references the `internal-ip-addresses-southport` list.
+      > info
+      > Lists cannot be added directly to rules, nor do they define the operators used to determine when exceptions are applied (`is in list`, `is not in list`). Use an exception item to define the operator and associate it with an [exception container](../operation/operation-createexceptionlist). You can then add the exception container to a rule's `exceptions_list` object.
+
+      ## Lists requirements
+
+      Before you can start using lists, you must create the `.lists` and `.items` data streams for the relevant Kibana space. To do this, use the [Create list data streams](../operation/operation-createlistindex) endpoint. Once these data streams are created, your role needs privileges to manage rules. Refer to [Enable and access detections](https://www.elastic.co/guide/en/serverless/current/security-detections-requirements.html#enable-detections-ui) for a complete list of requirements.
     name: Security Lists API
     x-displayName: Security lists
   - description: Run live queries, manage packs and saved queries.
@@ -33483,6 +33545,58 @@ paths:
       tags:
         - Security Entity Analytics API
       x-beta: true
+  /api/risk_score/engine/saved_object/configure:
+    patch:
+      description: Configuring the Risk Engine Saved Object
+      operationId: ConfigureRiskEngineSavedObject
+      requestBody:
+        content:
+          application/json; Elastic-Api-Version=2023-10-31:
+            schema:
+              type: object
+              properties:
+                exclude_alert_statuses:
+                  items:
+                    type: string
+                  type: array
+                exclude_alert_tags:
+                  items:
+                    type: string
+                  type: array
+                range:
+                  type: object
+                  properties:
+                    end:
+                      type: string
+                    start:
+                      type: string
+        required: true
+      responses:
+        '200':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                type: object
+                properties:
+                  risk_engine_saved_object_configured:
+                    type: boolean
+          description: Successful response
+        '400':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: '#/components/schemas/Security_Entity_Analytics_API_TaskManagerUnavailableResponse'
+          description: Task manager is unavailable
+        default:
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: '#/components/schemas/Security_Entity_Analytics_API_ConfigureRiskEngineSavedObjectErrorResponse'
+          description: Unexpected error
+      summary: Configure the Risk Engine Saved Object
+      tags:
+        - Security Entity Analytics API
+      x-beta: true
   /api/risk_score/engine/schedule_now:
     post:
       description: Schedule the risk scoring engine to run as soon as possible. You can use this to recalculate entity risk scores after updating their asset criticality.
@@ -40331,9 +40445,9 @@ components:
         - assistant
       type: string
     Security_AI_Assistant_API_NonEmptyString:
-      description: A string that is not empty and does not contain only whitespace
+      description: A string that does not contain only whitespace characters
+      format: nonempty
       minLength: 1
-      pattern: ^(?! *$).+$
       type: string
     Security_AI_Assistant_API_NormalizedAnonymizationFieldError:
       type: object
@@ -43097,9 +43211,9 @@ components:
             - severity
         - $ref: '#/components/schemas/Security_Detections_API_NewTermsRuleCreateFields'
     Security_Detections_API_NonEmptyString:
-      description: A string that is not empty and does not contain only whitespace
+      description: A string that does not contain only whitespace characters
+      format: nonempty
       minLength: 1
-      pattern: ^(?! *$).+$
       type: string
     Security_Detections_API_NormalizedRuleAction:
       additionalProperties: false
@@ -46301,9 +46415,9 @@ components:
         - text
       type: string
     Security_Endpoint_Exceptions_API_NonEmptyString:
-      description: A string that is not empty and does not contain only whitespace
+      description: A string that does not contain only whitespace characters
+      format: nonempty
       minLength: 1
-      pattern: ^(?! *$).+$
       type: string
     Security_Endpoint_Exceptions_API_PlatformErrorResponse:
       type: object
@@ -46604,9 +46718,9 @@ components:
       required:
         - hostStatuses
     Security_Endpoint_Management_API_NonEmptyString:
-      description: A string that is not empty and does not contain only whitespace
+      description: A string that does not contain only whitespace characters
+      format: nonempty
       minLength: 1
-      pattern: ^(?! *$).+$
       type: string
     Security_Endpoint_Management_API_NoParametersRequestSchema:
       type: object
@@ -46924,6 +47038,27 @@ components:
           type: array
       required:
         - cleanup_successful
+        - errors
+    Security_Entity_Analytics_API_ConfigureRiskEngineSavedObjectErrorResponse:
+      type: object
+      properties:
+        errors:
+          items:
+            type: object
+            properties:
+              error:
+                type: string
+              seq:
+                type: integer
+            required:
+              - seq
+              - error
+          type: array
+        risk_engine_saved_object_configured:
+          example: false
+          type: boolean
+      required:
+        - risk_engine_saved_object_configured
         - errors
     Security_Entity_Analytics_API_CreateAssetCriticalityRecord:
       allOf:
@@ -47788,9 +47923,9 @@ components:
         - text
       type: string
     Security_Exceptions_API_NonEmptyString:
-      description: A string that is not empty and does not contain only whitespace
+      description: A string that does not contain only whitespace characters
+      format: nonempty
       minLength: 1
-      pattern: ^(?! *$).+$
       type: string
     Security_Exceptions_API_PlatformErrorResponse:
       type: object
@@ -48034,9 +48169,9 @@ components:
         - text
       type: string
     Security_Lists_API_NonEmptyString:
-      description: A string that is not empty and does not contain only whitespace
+      description: A string that does not contain only whitespace characters
+      format: nonempty
       minLength: 1
-      pattern: ^(?! *$).+$
       type: string
     Security_Lists_API_PlatformErrorResponse:
       type: object

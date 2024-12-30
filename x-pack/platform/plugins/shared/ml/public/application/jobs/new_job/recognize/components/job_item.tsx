@@ -8,6 +8,7 @@
 import type { FC } from 'react';
 import React, { memo } from 'react';
 import {
+  useEuiTheme,
   EuiBadge,
   EuiButtonIcon,
   EuiFlexGroup,
@@ -35,6 +36,8 @@ interface JobItemProps {
 
 export const JobItem: FC<JobItemProps> = memo(
   ({ job, jobOverride, isSaving, jobPrefix, onEditRequest }) => {
+    const { euiTheme } = useEuiTheme();
+
     const {
       id,
       config: { description, groups },
@@ -54,7 +57,7 @@ export const JobItem: FC<JobItemProps> = memo(
         <EuiFlexItem>
           <EuiFlexGroup gutterSize="s">
             <EuiFlexItem grow={false}>
-              <EuiText size="s" color="success">
+              <EuiText size="s" color="accentSecondary">
                 {jobPrefix}
                 {id}
               </EuiText>
@@ -90,7 +93,7 @@ export const JobItem: FC<JobItemProps> = memo(
           <EuiFlexGroup wrap responsive={false} gutterSize="xs">
             {(jobGroups ?? []).map((group) => (
               <EuiFlexItem grow={false} key={group}>
-                <EuiBadge color={tabColor(group)}>{group}</EuiBadge>
+                <EuiBadge color={tabColor(group, euiTheme)}>{group}</EuiBadge>
               </EuiFlexItem>
             ))}
           </EuiFlexGroup>

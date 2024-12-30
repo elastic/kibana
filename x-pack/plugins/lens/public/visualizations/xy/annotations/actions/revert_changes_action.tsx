@@ -36,7 +36,10 @@ export const getRevertChangesAction = ({
   state: XYState;
   layer: XYByReferenceAnnotationLayerConfig;
   setState: StateSetter<XYState, unknown>;
-  core: Pick<CoreStart, 'overlays' | 'analytics' | 'i18n' | 'theme' | 'notifications'>;
+  core: Pick<
+    CoreStart,
+    'overlays' | 'analytics' | 'i18n' | 'theme' | 'notifications' | 'userProfile'
+  >;
 }): LayerAction => {
   return {
     displayName: i18n.translate('xpack.lens.xyChart.annotations.revertChanges', {
