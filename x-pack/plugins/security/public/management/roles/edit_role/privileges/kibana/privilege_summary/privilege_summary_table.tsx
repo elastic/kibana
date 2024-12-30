@@ -48,7 +48,15 @@ function getColumnKey(entry: RoleKibanaPrivilege) {
   return `privilege_entry_${entry.spaces.join('|')}`;
 }
 
-function showPrivilege(allSpacesSelected: boolean, primaryFeature?: PrimaryFeaturePrivilege) {
+function showPrivilege({
+  allSpacesSelected,
+  primaryFeature,
+  globalPrimaryFeature,
+}: {
+  allSpacesSelected: boolean;
+  primaryFeature?: PrimaryFeaturePrivilege;
+  globalPrimaryFeature?: PrimaryFeaturePrivilege;
+}) {
   if (
     primaryFeature?.name == null ||
     primaryFeature?.disabled ||
@@ -56,6 +64,11 @@ function showPrivilege(allSpacesSelected: boolean, primaryFeature?: PrimaryFeatu
   ) {
     return 'None';
   }
+
+  if (primaryFeature?.requireAllSpaces && allSpacesSelected) {
+    return globalPrimaryFeature?.name ?? primaryFeature?.name;
+  }
+
   return primaryFeature?.name;
 }
 
@@ -127,6 +140,15 @@ export const PrivilegeSummaryTable = (props: PrivilegeSummaryTableProps) => {
     }
     return 0;
   });
+
+  const globalRawPrivilege = rawKibanaPrivileges.find((entry) =>
+    isGlobalPrivilegeDefinition(entry)
+  );
+
+  const globalPrivilege = globalRawPrivilege
+    ? calculator.getEffectiveFeaturePrivileges(globalRawPrivilege)
+    : null;
+
   const privilegeColumns = rawKibanaPrivileges.map((entry) => {
     const key = getColumnKey(entry);
     return {
@@ -161,10 +183,11 @@ export const PrivilegeSummaryTable = (props: PrivilegeSummaryTableProps) => {
               hasCustomizedSubFeaturePrivileges ? 'additionalPrivilegesGranted' : ''
             }`}
           >
-            {showPrivilege(
-              entry.spaces.some((space) => space === ALL_SPACES_ID),
-              primary
-            )}{' '}
+            {showPrivilege({
+              allSpacesSelected: props.spaces.some((space) => space.id === ALL_SPACES_ID),
+              primaryFeature: primary,
+              globalPrimaryFeature: globalPrivilege?.[record.featureId]?.primary,
+            })}{' '}
             {iconTip}
           </span>
         );
