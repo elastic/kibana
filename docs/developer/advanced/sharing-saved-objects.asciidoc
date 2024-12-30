@@ -390,7 +390,7 @@ const warningMessage =
 ```
 
 The <<data-views,Data Views page>> in <<management>> uses a
-https://github.com/elastic/kibana/blob/{branch}/src/plugins/data_view_management/public/components/edit_index_pattern/edit_index_pattern.tsx[similar
+https://github.com/elastic/kibana/blob/{branch}/src/platform/plugins/shared/data_view_management/public/components/edit_index_pattern/edit_index_pattern.tsx[similar
 approach] to show a warning in its delete confirmation modal:
 
 image::images/sharing-saved-objects-step-7.png["Sharing Saved Objects deletion warning"]
@@ -429,7 +429,7 @@ Second, display a https://github.com/elastic/kibana/blob/{branch}/x-pack/plugins
 object, and third, show a
 https://github.com/elastic/kibana/blob/{branch}/x-pack/plugins/spaces/public/share_saved_objects_to_space/types.ts[flyout] for the user to
 edit the object's assigned spaces. You may want to follow the example of the <<data-views,Data Views page>> and
-https://github.com/elastic/kibana/blob/{branch}/src/plugins/data_view_management/public/components/index_pattern_table/spaces_list.tsx[combine
+https://github.com/elastic/kibana/blob/{branch}/src/platform/plugins/shared/data_view_management/public/components/index_pattern_table/spaces_list.tsx[combine
 these into a single component] so that the space list can be clicked to show the flyout:
 +
 ```tsx
