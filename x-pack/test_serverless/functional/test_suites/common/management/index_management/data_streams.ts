@@ -149,10 +149,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     describe('Modify data streams index mode', () => {
+      const TEST_DS_NAME_INDEX_MODE = 'test-ds';
       const setIndexModeTemplate = async (settings: object) => {
         await es.indices.putIndexTemplate({
-          name: `index_template_${TEST_DS_NAME}`,
-          index_patterns: [TEST_DS_NAME],
+          name: `index_template_${TEST_DS_NAME_INDEX_MODE}`,
+          index_patterns: [TEST_DS_NAME_INDEX_MODE],
           data_stream: {},
           template: {
             settings,
@@ -163,7 +164,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       const verifyIndexModeIsOrigin = async (indexModeName: string) => {
         // Open details flyout of data stream
-        await pageObjects.indexManagement.clickDataStreamNameLink(TEST_DS_NAME);
+        await pageObjects.indexManagement.clickDataStreamNameLink(TEST_DS_NAME_INDEX_MODE);
         // Check that index mode detail exists and its label is origin
         expect(await testSubjects.exists('indexModeDetail')).to.be(true);
         expect(await testSubjects.getVisibleText('indexModeDetail')).to.be(indexModeName);
@@ -174,7 +175,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await pageObjects.header.waitUntilLoadingHasFinished();
         // Edit template
         await pageObjects.indexManagement.clickIndexTemplateNameLink(
-          `index_template_${TEST_DS_NAME}`
+          `index_template_${TEST_DS_NAME_INDEX_MODE}`
         );
         await testSubjects.click('manageTemplateButton');
         await testSubjects.click('editIndexTemplateButton');
