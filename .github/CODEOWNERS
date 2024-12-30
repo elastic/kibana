@@ -802,7 +802,7 @@ x-pack/solutions/search/plugins/search_inference_endpoints @elastic/search-kiban
 x-pack/solutions/search/plugins/search_solution/search_navigation @elastic/search-kibana
 x-pack/solutions/search/plugins/search_notebooks @elastic/search-kibana
 x-pack/solutions/search/plugins/search_playground @elastic/search-kibana
-packages/kbn-search-response-warnings @elastic/kibana-data-discovery
+src/platform/packages/shared/kbn-search-response-warnings @elastic/kibana-data-discovery
 x-pack/solutions/search/packages/search/shared_ui @elastic/search-kibana
 packages/kbn-search-types @elastic/kibana-data-discovery
 x-pack/platform/plugins/shared/searchprofiler @elastic/kibana-management
