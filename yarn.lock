@@ -5359,7 +5359,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/discover-enhanced-plugin@link:x-pack/plugins/discover_enhanced":
+"@kbn/discover-enhanced-plugin@link:x-pack/platform/plugins/private/discover_enhanced":
   version "0.0.0"
   uid ""
 

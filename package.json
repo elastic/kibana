@@ -455,7 +455,7 @@
     "@kbn/developer-examples-plugin": "link:examples/developer_examples",
     "@kbn/discover-contextual-components": "link:src/platform/packages/shared/kbn-discover-contextual-components",
     "@kbn/discover-customization-examples-plugin": "link:examples/discover_customization_examples",
-    "@kbn/discover-enhanced-plugin": "link:x-pack/plugins/discover_enhanced",
+    "@kbn/discover-enhanced-plugin": "link:x-pack/platform/plugins/private/discover_enhanced",
     "@kbn/discover-plugin": "link:src/plugins/discover",
     "@kbn/discover-shared-plugin": "link:src/plugins/discover_shared",
     "@kbn/discover-utils": "link:packages/kbn-discover-utils",

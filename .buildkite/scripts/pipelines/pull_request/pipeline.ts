@@ -391,7 +391,7 @@ const getPipeline = (filename: string, removeSteps = true) => {
 
     if (
       (await doAnyChangesMatch([
-        /^x-pack\/plugins\/discover_enhanced\/ui_tests/,
+        /^x-pack\/platform\/plugins\/private\/discover_enhanced\/ui_tests/,
         /^packages\/kbn-scout/,
       ])) ||
       GITHUB_PR_LABELS.includes('ci:scout-ui-tests')
