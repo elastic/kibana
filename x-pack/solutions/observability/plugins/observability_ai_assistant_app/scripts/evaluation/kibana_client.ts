@@ -124,7 +124,7 @@ export class KibanaClient {
     return this.axios<T>({
       method,
       url,
-      ...(method.toLowerCase() !== 'delete' ? { data: data || {} } : {}),
+      ...(method.toLowerCase() === 'delete' && !data ? {} : { data: data || {} }),
       headers: {
         'kbn-xsrf': 'true',
         'x-elastic-internal-origin': 'Kibana',
