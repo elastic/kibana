@@ -5,7 +5,7 @@ It acts as a container for a particular visualization and options tabs. Contains
 The plugin exposes the static `DefaultEditorController` class to consume.
 
 ```ts
-import { DefaultEditorController } from '../../vis_default_editor/public';
+import { DefaultEditorController } from '../../../../vis_default_editor/public';
 
 const editor = new DefaultEditorController(
   element,
