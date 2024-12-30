@@ -10,12 +10,17 @@ import {
   MICROSOFT_DEFENDER_ENDPOINT_CONNECTOR_ID,
   MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION,
 } from '@kbn/stack-connectors-plugin/common/microsoft_defender_endpoint/constants';
+import type {
+  MicrosoftDefenderEndpointGetActionsParams,
+  MicrosoftDefenderEndpointGetActionsResponse,
+} from '@kbn/stack-connectors-plugin/common/microsoft_defender_endpoint/types';
 import {
   type MicrosoftDefenderEndpointAgentDetailsParams,
   type MicrosoftDefenderEndpointIsolateHostParams,
   type MicrosoftDefenderEndpointMachine,
   type MicrosoftDefenderEndpointMachineAction,
 } from '@kbn/stack-connectors-plugin/common/microsoft_defender_endpoint/types';
+import { groupBy } from 'lodash';
 import type {
   IsolationRouteRequestBody,
   UnisolationRouteRequestBody,
@@ -25,11 +30,16 @@ import type {
   EndpointActionDataParameterTypes,
   EndpointActionResponseDataOutput,
   LogsEndpointAction,
+  LogsEndpointActionResponse,
   MicrosoftDefenderEndpointActionRequestCommonMeta,
 } from '../../../../../../../../common/endpoint/types';
-import type { ResponseActionAgentType } from '../../../../../../../../common/endpoint/service/response_actions/constants';
+import type {
+  ResponseActionAgentType,
+  ResponseActionsApiCommandNames,
+} from '../../../../../../../../common/endpoint/service/response_actions/constants';
 import type { NormalizedExternalConnectorClient } from '../../../lib/normalized_external_connector_client';
 import type {
+  ResponseActionsClientPendingAction,
   ResponseActionsClientValidateRequestResponse,
   ResponseActionsClientWriteActionRequestToEndpointIndexOptions,
 } from '../../../lib/base_response_actions_client';
@@ -39,7 +49,10 @@ import {
 } from '../../../lib/base_response_actions_client';
 import { stringify } from '../../../../../../utils/stringify';
 import { ResponseActionsClientError } from '../../../errors';
-import type { CommonResponseActionMethodOptions } from '../../../lib/types';
+import type {
+  CommonResponseActionMethodOptions,
+  ProcessPendingActionsMethodOptions,
+} from '../../../lib/types';
 
 export type MicrosoftDefenderActionsClientOptions = ResponseActionsClientOptions & {
   connectorActions: NormalizedExternalConnectorClient;
@@ -334,5 +347,188 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
     const { actionDetails } = await this.handleResponseActionCreation(reqIndexOptions);
 
     return actionDetails;
+  }
+
+  async processPendingActions({
+    abortSignal,
+    addToQueue,
+  }: ProcessPendingActionsMethodOptions): Promise<void> {
+    if (abortSignal.aborted) {
+      return;
+    }
+
+    const addResponsesToQueueIfAny = (responseList: LogsEndpointActionResponse[]): void => {
+      if (responseList.length > 0) {
+        addToQueue(...responseList);
+
+        this.sendActionResponseTelemetry(responseList);
+      }
+    };
+
+    for await (const pendingActions of this.fetchAllPendingActions<
+      EndpointActionDataParameterTypes,
+      EndpointActionResponseDataOutput,
+      MicrosoftDefenderEndpointActionRequestCommonMeta
+    >()) {
+      if (abortSignal.aborted) {
+        return;
+      }
+
+      const pendingActionsByType = groupBy(pendingActions, 'action.EndpointActions.data.command');
+
+      for (const [actionType, typePendingActions] of Object.entries(pendingActionsByType)) {
+        if (abortSignal.aborted) {
+          return;
+        }
+
+        switch (actionType as ResponseActionsApiCommandNames) {
+          case 'isolate':
+          case 'unisolate':
+            addResponsesToQueueIfAny(
+              await this.checkPendingIsolateReleaseActions(
+                typePendingActions as Array<
+                  ResponseActionsClientPendingAction<
+                    undefined,
+                    {},
+                    MicrosoftDefenderEndpointActionRequestCommonMeta
+                  >
+                >
+              )
+            );
+        }
+      }
+    }
+  }
+
+  private async checkPendingIsolateReleaseActions(
+    actionRequests: Array<
+      ResponseActionsClientPendingAction<
+        undefined,
+        {},
+        MicrosoftDefenderEndpointActionRequestCommonMeta
+      >
+    >
+  ): Promise<LogsEndpointActionResponse[]> {
+    const completedResponses: LogsEndpointActionResponse[] = [];
+    const warnings: string[] = [];
+    const actionsByMachineId: Record<
+      string,
+      Array<LogsEndpointAction<undefined, {}, MicrosoftDefenderEndpointActionRequestCommonMeta>>
+    > = {};
+    const machineActionIds: string[] = [];
+    const msApiOptions: MicrosoftDefenderEndpointGetActionsParams = {
+      id: machineActionIds,
+      pageSize: 1000,
+    };
+
+    for (const { action } of actionRequests) {
+      const command = action.EndpointActions.data.command;
+      const machineActionId = action.meta?.machineActionId;
+
+      if (!machineActionId) {
+        warnings.push(
+          `${command} response action ID [${action.EndpointActions.action_id}] is missing Microsoft Defender for Endpoint machine action id, thus unable to check on it's status. Forcing it to complete as failure.`
+        );
+
+        completedResponses.push(
+          this.buildActionResponseEsDoc({
+            actionId: action.EndpointActions.action_id,
+            agentId: Array.isArray(action.agent.id) ? action.agent.id[0] : action.agent.id,
+            data: { command },
+            error: {
+              message: `Unable to very if action completed. Microsoft Defender machine action id ('meta.machineActionId') missing on action request document!`,
+            },
+          })
+        );
+      } else {
+        if (!actionsByMachineId[machineActionId]) {
+          actionsByMachineId[machineActionId] = [];
+        }
+
+        actionsByMachineId[machineActionId].push(action);
+        machineActionIds.push(machineActionId);
+      }
+    }
+
+    const { data: machineActions } =
+      await this.sendAction<MicrosoftDefenderEndpointGetActionsResponse>(
+        MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.GET_ACTIONS,
+        msApiOptions
+      );
+
+    if (machineActions?.value) {
+      for (const machineAction of machineActions.value) {
+        const { isPending, isError, message } = this.calculateMachineActionState(machineAction);
+
+        if (!isPending) {
+          const pendingActionRequests = actionsByMachineId[machineAction.id] ?? [];
+
+          for (const actionRequest of pendingActionRequests) {
+            completedResponses.push(
+              this.buildActionResponseEsDoc({
+                actionId: actionRequest.EndpointActions.action_id,
+                agentId: Array.isArray(actionRequest.agent.id)
+                  ? actionRequest.agent.id[0]
+                  : actionRequest.agent.id,
+                data: { command: actionRequest.EndpointActions.data.command },
+                error: isError ? { message } : undefined,
+              })
+            );
+          }
+        }
+      }
+    }
+
+    this.log.debug(
+      () =>
+        `${completedResponses.length} action responses generated:\n${stringify(completedResponses)}`
+    );
+
+    if (warnings.length > 0) {
+      this.log.warn(warnings.join('\n'));
+    }
+
+    return completedResponses;
+  }
+
+  private calculateMachineActionState(machineAction: MicrosoftDefenderEndpointMachineAction): {
+    isPending: boolean;
+    isError: boolean;
+    message: string;
+  } {
+    let isPending = true;
+    let isError = false;
+    let message = '';
+
+    switch (machineAction.status) {
+      case 'Failed':
+      case 'TimeOut':
+        isPending = false;
+        isError = true;
+        message = `Response action ${machineAction.status} (Microsoft Defender for Endpoint machine action ID: ${machineAction.id})`;
+        break;
+
+      case 'Cancelled':
+        isPending = false;
+        isError = true;
+        message = `Response action was canceled by [${
+          machineAction.cancellationRequestor
+        }] (Microsoft Defender for Endpoint machine action ID: ${machineAction.id})${
+          machineAction.cancellationComment ? `: ${machineAction.cancellationComment}` : ''
+        }`;
+        break;
+
+      case 'Succeeded':
+        isPending = false;
+        isError = false;
+        break;
+
+      default:
+        // covers 'Pending' | 'InProgress'
+        isPending = true;
+        isError = false;
+    }
+
+    return { isPending, isError, message };
   }
 }
