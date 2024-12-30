@@ -19,6 +19,7 @@ import type {
   ESQLCommand,
   ESQLCommandMode,
   ESQLCommandOption,
+  ESQLField,
   ESQLFunction,
   ESQLIdentifier,
   ESQLInlineCast,
@@ -51,6 +52,7 @@ export interface WalkerOptions {
   visitInlineCast?: (node: ESQLInlineCast) => void;
   visitUnknown?: (node: ESQLUnknownItem) => void;
   visitIdentifier?: (node: ESQLIdentifier) => void;
+  visitField?: (node: ESQLField) => void;
 
   /**
    * Called for any node type that does not have a specific visitor.
@@ -65,20 +67,6 @@ export type WalkerAstNode = ESQLAstNode | ESQLAstNode[];
 /**
  * Iterates over all nodes in the AST and calls the appropriate visitor
  * functions.
- *
- * AST nodes supported:
- *
- * - [x] command
- * - [x] option
- * - [x] mode
- * - [x] function
- * - [x] source
- * - [x] column
- * - [x] literal
- * - [x] list literal
- * - [x] timeInterval
- * - [x] inlineCast
- * - [x] unknown
  */
 export class Walker {
   /**
@@ -325,7 +313,7 @@ export class Walker {
     }
   }
 
-  public walkAstItem(node: ESQLAstItem): void {
+  public walkAstItem(node: ESQLAstItem | ESQLAstExpression): void {
     if (node instanceof Array) {
       const list = node as ESQLAstItem[];
       for (const item of list) this.walkAstItem(item);
@@ -367,13 +355,25 @@ export class Walker {
     this.walkAstItem(node.value);
   }
 
+  public walkField(node: ESQLField): void {
+    const { options } = this;
+
+    (options.visitField ?? options.visitAny)?.(node);
+    this.walkColumn(node.column);
+    this.walkSingleAstItem(node.value);
+
+    if (node.where) {
+      this.walkSingleAstItem(node.where);
+    }
+  }
+
   public walkFunction(node: ESQLFunction): void {
     const { options } = this;
     (options.visitFunction ?? options.visitAny)?.(node);
     const args = node.args;
     const length = args.length;
 
-    if (node.operator) this.walkAstItem(node.operator);
+    if (node.operator) this.walkSingleAstItem(node.operator);
 
     for (let i = 0; i < length; i++) {
       const arg = args[i];
@@ -438,6 +438,10 @@ export class Walker {
       }
       case 'identifier': {
         (options.visitIdentifier ?? options.visitAny)?.(node);
+        break;
+      }
+      case 'field': {
+        this.walkField(node);
         break;
       }
       case 'unknown': {

@@ -38,6 +38,7 @@ import {
   ESQLTimeInterval,
   ESQLBooleanLiteral,
   ESQLNullLiteral,
+  ESQLField,
 } from '../types';
 import { AstNodeParserFields, AstNodeTemplate, PartialFields } from './types';
 
@@ -56,10 +57,10 @@ export namespace Builder {
     incomplete,
   });
 
-  export const command = (
-    template: PartialFields<AstNodeTemplate<ESQLCommand>, 'args'>,
+  export const command = <Name extends string>(
+    template: PartialFields<AstNodeTemplate<ESQLCommand<Name>>, 'args'>,
     fromParser?: Partial<AstNodeParserFields>
-  ): ESQLCommand => {
+  ): ESQLCommand<Name> => {
     return {
       ...template,
       ...Builder.parserFields(fromParser),
@@ -171,6 +172,20 @@ export namespace Builder {
       };
 
       node.name = LeafPrinter.column(node);
+
+      return node;
+    };
+
+    export const field = (
+      template: Omit<AstNodeTemplate<ESQLField>, 'name' | 'args'>,
+      fromParser?: Partial<AstNodeParserFields>
+    ): ESQLField => {
+      const node: ESQLField = {
+        ...template,
+        ...Builder.parserFields(fromParser),
+        name: '',
+        type: 'field',
+      };
 
       return node;
     };

@@ -81,5 +81,14 @@ export function* children(node: ESQLProperNode): Iterable<ESQLAstExpression> {
       }
       break;
     }
+    case 'field': {
+      yield node.column;
+      yield node.value;
+
+      if (node.where) {
+        yield node.where;
+      }
+      break;
+    }
   }
 }

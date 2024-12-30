@@ -126,6 +126,9 @@ export const prettyPrint = (ast: ESQLAstQueryExpression | ESQLAstQueryExpression
     .on('visitColumnExpression', (ctx) => {
       return ctx.node.name;
     })
+    .on('visitFieldExpression', (ctx) => {
+      return `${ctx.visitArgument(1)}`;
+    })
     .on('visitFunctionCallExpression', (ctx) => {
       let args = '';
       for (const arg of ctx.visitArguments()) {
@@ -189,6 +192,6 @@ test('can print a query to text', () => {
   const text = prettyPrint(ast);
 
   expect(text).toBe(
-    'FROM index METADATA _id, asdf, 123 | STATS FN(<LIST>, <TIME_INTERVAL>, <CAST>, IN(x, 1, 2)), =(a, b) | LIMIT 1000'
+    'FROM index METADATA _id, asdf, 123 | STATS FN(<LIST>, <TIME_INTERVAL>, <CAST>, IN(x, 1, 2)), b | LIMIT 1000'
   );
 });
