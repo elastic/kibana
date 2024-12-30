@@ -90,7 +90,7 @@ Routing will be handled by the id of the dev tool - your dev tool will be mounte
 This API doesn't support angular, for registering angular dev tools, bootstrap a local module on mount into the given HTML element.
 
 
-|{kib-repo}blob/{branch}/src/plugins/discover/README.md[discover]
+|{kib-repo}blob/{branch}/src/platform/plugins/shared/discover/README.md[discover]
 |Contains the Discover application and the saved search embeddable.
 
 
