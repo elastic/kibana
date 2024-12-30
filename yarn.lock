@@ -4259,7 +4259,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/content-management-utils@link:packages/kbn-content-management-utils":
+"@kbn/content-management-utils@link:src/platform/packages/shared/kbn-content-management-utils":
   version "0.0.0"
   uid ""
 
