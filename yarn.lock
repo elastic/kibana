@@ -5489,7 +5489,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/es-query@link:packages/kbn-es-query":
+"@kbn/es-query@link:src/platform/packages/shared/kbn-es-query":
   version "0.0.0"
   uid ""
 

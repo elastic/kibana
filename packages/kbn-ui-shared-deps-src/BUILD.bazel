@@ -30,7 +30,7 @@ webpack_cli(
     "//src/platform/packages/shared/kbn-datemath",
     "//packages/kbn-analytics",
     "//packages/kbn-crypto-browser",
-    "//packages/kbn-es-query",
+    "//src/platform/packages/shared/kbn-es-query",
     "//packages/kbn-search-errors",
     "//packages/kbn-std",
     "//packages/kbn-safer-lodash-set",
