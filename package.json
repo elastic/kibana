@@ -528,7 +528,7 @@
     "@kbn/features-provider-plugin": "link:x-pack/test/security_api_integration/plugins/features_provider",
     "@kbn/fec-alerts-test-plugin": "link:x-pack/test/functional_execution_context/plugins/alerts",
     "@kbn/field-formats-example-plugin": "link:examples/field_formats_example",
-    "@kbn/field-formats-plugin": "link:src/plugins/field_formats",
+    "@kbn/field-formats-plugin": "link:src/platform/plugins/shared/field_formats",
     "@kbn/field-types": "link:packages/kbn-field-types",
     "@kbn/field-utils": "link:packages/kbn-field-utils",
     "@kbn/fields-metadata-plugin": "link:x-pack/platform/plugins/shared/fields_metadata",

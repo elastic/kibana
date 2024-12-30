@@ -9,9 +9,9 @@
 
 module.exports = {
   preset: '@kbn/test',
-  rootDir: '../../..',
-  roots: ['<rootDir>/src/plugins/field_formats'],
-  coverageDirectory: '<rootDir>/target/kibana-coverage/jest/src/plugins/field_formats',
+  rootDir: '../../../../..',
+  roots: ['<rootDir>/src/platform/plugins/shared/field_formats'],
+  coverageDirectory: '<rootDir>/target/kibana-coverage/jest/src/platform/plugins/shared/field_formats',
   coverageReporters: ['text', 'html'],
-  collectCoverageFrom: ['<rootDir>/src/plugins/field_formats/{common,public,server}/**/*.{ts,tsx}'],
+  collectCoverageFrom: ['<rootDir>/src/platform/plugins/shared/field_formats/{common,public,server}/**/*.{ts,tsx}'],
 };
