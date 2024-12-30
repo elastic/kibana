@@ -22,13 +22,13 @@ const getAllCollisionsWithPanel = (
   panelToCheck: GridPanelData,
   gridLayout: GridRowData,
   keysInOrder: string[]
-): Array<GridPanelData & { moved: boolean }> => {
-  const collidingPanels: Array<GridPanelData & { moved: boolean }> = [];
+): GridPanelData[] => {
+  const collidingPanels: GridPanelData[] = [];
   for (const key of keysInOrder) {
     const comparePanel = gridLayout.panels[key];
     if (comparePanel.id === panelToCheck.id) continue;
     if (collides(panelToCheck, comparePanel)) {
-      collidingPanels.push({ ...comparePanel, moved: false });
+      collidingPanels.push(comparePanel);
     }
   }
   return collidingPanels;
@@ -98,16 +98,16 @@ export const resolveGridRow = (
   if (dragRequest) {
     nextRowData.panels[dragRequest.id] = dragRequest;
   }
-  // get keys in order from top to bottom, left to right
+  // get keys in order from top to bottom, left to right, with priority on the dragged item if it exists
   const sortedKeys = getKeysInOrder(nextRowData.panels, dragRequest?.id);
 
-  // while the layout has at least one collision, try to resolve them
-  let collision = getFirstCollision(nextRowData, sortedKeys); // top-left most collision
+  // while the layout has at least one collision, try to resolve them in order
+  let collision = getFirstCollision(nextRowData, sortedKeys);
   while (collision !== undefined) {
     nextRowData = resolvePanelCollisions(nextRowData, nextRowData.panels[collision], sortedKeys);
     collision = getFirstCollision(nextRowData, sortedKeys);
   }
-  return compactGridRow(nextRowData); // compact the grid to close any gaps;
+  return compactGridRow(nextRowData); // compact the grid to close any gaps
 };
 
 /**
@@ -128,7 +128,7 @@ function resolvePanelCollisions(
       rowData.panels[collision.id],
       /**
        * when recursively resolving any collisions that result from moving this colliding panel down,
-       * ignore if `collision` is still colliding with `panelToResolve`t o prevent an infinite loop
+       * ignore if `collision` is still colliding with `panelToResolve` to prevent an infinite loop
        */
       keysInOrder.filter((key) => key !== panelToResolve.id)
     );
