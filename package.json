@@ -483,7 +483,7 @@
     "@kbn/entityManager-plugin": "link:x-pack/platform/plugins/shared/entity_manager",
     "@kbn/error-boundary-example-plugin": "link:examples/error_boundary",
     "@kbn/es-errors": "link:packages/kbn-es-errors",
-    "@kbn/es-query": "link:packages/kbn-es-query",
+    "@kbn/es-query": "link:src/platform/packages/shared/kbn-es-query",
     "@kbn/es-types": "link:packages/kbn-es-types",
     "@kbn/es-ui-shared-plugin": "link:src/platform/plugins/shared/es_ui_shared",
     "@kbn/eso-model-version-example": "link:examples/eso_model_version_example",

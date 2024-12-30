@@ -422,7 +422,7 @@ examples/error_boundary @elastic/appex-sharedux
 packages/kbn-es @elastic/kibana-operations
 packages/kbn-es-archiver @elastic/kibana-operations @elastic/appex-qa
 packages/kbn-es-errors @elastic/kibana-core
-packages/kbn-es-query @elastic/kibana-data-discovery
+src/platform/packages/shared/kbn-es-query @elastic/kibana-data-discovery
 packages/kbn-es-types @elastic/kibana-core @elastic/obs-knowledge-team
 src/platform/plugins/shared/es_ui_shared @elastic/kibana-management
 packages/kbn-eslint-config @elastic/kibana-operations
