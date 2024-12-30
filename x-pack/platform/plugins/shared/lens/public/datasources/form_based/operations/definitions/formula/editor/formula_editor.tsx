@@ -900,7 +900,7 @@ export function FormulaEditor({
                   >
                     <div
                       css={css`
-                        max-width: 400px;
+                        max-width: ${euiTheme.components.forms.maxWidth};
                       `}
                     >
                       {warnings.map(({ message, severity }, index) => (
