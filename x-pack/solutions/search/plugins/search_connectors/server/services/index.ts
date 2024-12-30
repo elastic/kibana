@@ -8,8 +8,11 @@
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE, PackagePolicy } from '@kbn/fleet-plugin/common';
 import { AgentPolicyServiceInterface, PackagePolicyClient } from '@kbn/fleet-plugin/server';
-import { NATIVE_CONNECTOR_DEFINITIONS, fetchConnectors } from '@kbn/search-connectors';
 import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
+import {
+  NATIVE_CONNECTOR_DEFINITIONS,
+  fetchConnectors,
+} from '../../../../../../../src/platform/packages/shared/kbn-search-connectors';
 
 export interface ConnectorMetadata {
   id: string;

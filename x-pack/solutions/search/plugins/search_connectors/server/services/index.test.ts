@@ -140,6 +140,7 @@ describe('AgentlessConnectorsInfraService', () => {
       const firstPackagePolicy = createPackagePolicyMock();
       firstPackagePolicy.id = 'this-is-package-policy-id';
       firstPackagePolicy.policy_ids = ['this-is-agent-policy-id'];
+      firstPackagePolicy.supports_agentless = true;
       firstPackagePolicy.inputs = [
         {
           type: 'connectors-py',
@@ -151,7 +152,9 @@ describe('AgentlessConnectorsInfraService', () => {
         } as PackagePolicyInput,
       ];
       const secondPackagePolicy = createPackagePolicyMock();
+      secondPackagePolicy.supports_agentless = true;
       const thirdPackagePolicy = createPackagePolicyMock();
+      thirdPackagePolicy.supports_agentless = true;
       thirdPackagePolicy.inputs = [
         {
           type: 'something-unsupported',
@@ -187,6 +190,7 @@ describe('AgentlessConnectorsInfraService', () => {
       const firstPackagePolicy = createPackagePolicyMock();
       firstPackagePolicy.id = 'this-is-package-policy-id';
       firstPackagePolicy.policy_ids = ['this-is-agent-policy-id'];
+      firstPackagePolicy.supports_agentless = true;
       firstPackagePolicy.inputs = [
         {
           type: 'connectors-py',
@@ -198,7 +202,9 @@ describe('AgentlessConnectorsInfraService', () => {
         } as PackagePolicyInput,
       ];
       const secondPackagePolicy = createPackagePolicyMock();
+      secondPackagePolicy.supports_agentless = true;
       const thirdPackagePolicy = createPackagePolicyMock();
+      thirdPackagePolicy.supports_agentless = true;
       thirdPackagePolicy.inputs = [
         {
           type: 'connectors-py',
