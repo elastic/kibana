@@ -159,6 +159,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             settings,
           },
         });
+        await es.indices.createDataStream({
+          name: TEST_DS_NAME_INDEX_MODE,
+        });
         await testSubjects.click('reloadButton');
       };
 
@@ -205,13 +208,27 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await pageObjects.header.waitUntilLoadingHasFinished();
 
         // Open data stream
-        await pageObjects.indexManagement.clickDataStreamNameLink(TEST_DS_NAME);
+        await pageObjects.indexManagement.clickDataStreamNameLink(TEST_DS_NAME_INDEX_MODE);
         // Check that index mode detail exists and its label is destination index mode
         expect(await testSubjects.exists('indexModeDetail')).to.be(true);
         expect(await testSubjects.getVisibleText('indexModeDetail')).to.be(indexModeName);
         // Close flyout
         await testSubjects.click('closeDetailsButton');
       };
+
+      afterEach(async () => {
+        await log.debug('Cleaning up created data stream');
+
+        try {
+          await es.indices.deleteDataStream({ name: TEST_DS_NAME_INDEX_MODE });
+          await es.indices.deleteIndexTemplate({
+            name: `index_template_${TEST_DS_NAME_INDEX_MODE}`,
+          });
+        } catch (e) {
+          log.debug('Error deleting test data stream');
+          throw e;
+        }
+      });
 
       it('allows to upgrade data stream from standard to logsdb index mode', async () => {
         await setIndexModeTemplate({
