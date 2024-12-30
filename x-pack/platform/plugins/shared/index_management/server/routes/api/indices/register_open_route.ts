@@ -17,7 +17,16 @@ const bodySchema = schema.object({
 
 export function registerOpenRoute({ router, lib: { handleEsError } }: RouteDependencies) {
   router.post(
-    { path: addBasePath('/indices/open'), validate: { body: bodySchema } },
+    {
+      path: addBasePath('/indices/open'),
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Relies on es client for authorization',
+        },
+      },
+      validate: { body: bodySchema },
+    },
     async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
       const { indices = [] } = request.body as typeof bodySchema.type;
