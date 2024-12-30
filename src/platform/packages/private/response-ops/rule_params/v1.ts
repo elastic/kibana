@@ -8,13 +8,10 @@
  */
 
 import { TypeOf, schema } from '@kbn/config-schema';
-import { StatusRuleParamsSchema as StatusRuleParamsSchemaV1 } from './synthetics_monitor_status/v1';
 
-const defaultRuleParamsSchema = schema.recordOf(schema.string(), schema.maybe(schema.any()), {
+export const ruleParamsSchema = schema.recordOf(schema.string(), schema.maybe(schema.any()), {
   meta: { description: 'The parameters for the rule.' },
 });
-
-export const ruleParamsSchema = schema.oneOf([StatusRuleParamsSchemaV1, defaultRuleParamsSchema]);
 
 export const ruleParamsSchemaWithDefaultValue = schema.recordOf(
   schema.string(),
