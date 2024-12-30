@@ -57,7 +57,7 @@
     "xpack.infra": "solutions/observability/plugins/infra",
     "xpack.logsDataAccess": "platform/plugins/shared/observability_solution/logs_data_access",
     "xpack.logsExplorer": "solutions/observability/plugins/logs_explorer",
-    "xpack.logsShared": "plugins/observability_solution/logs_shared",
+    "xpack.logsShared": "platform/plugins/shared/observability_solution/logs_shared",
     "xpack.fleet": "platform/plugins/shared/fleet",
     "xpack.ingestPipelines": "platform/plugins/shared/ingest_pipelines",
     "xpack.integrationAssistant": "platform/plugins/shared/integration_assistant",
