@@ -13,10 +13,10 @@ import {
   BuilderCommand,
   Params,
   ChainedCommand,
-  QueryBuilderToOperator,
+  QueryOperatorConvertible,
 } from './types';
 
-export abstract class QueryBuilder implements QueryBuilderToOperator {
+export abstract class QueryBuilder implements QueryOperatorConvertible {
   protected readonly commands: BuilderCommand[] = [];
 
   public abstract build(): ChainedCommand;
@@ -27,7 +27,7 @@ export abstract class QueryBuilder implements QueryBuilderToOperator {
 
   protected buildChain(): ChainedCommand {
     const commandParts: string[] = [];
-    const bindingParts: Params[] = [];
+    const paramsParts: Params[] = [];
 
     for (let i = 0; i < this.commands.length; i++) {
       const currentCondition = this.commands[i];
@@ -41,16 +41,16 @@ export abstract class QueryBuilder implements QueryBuilderToOperator {
         commandParts.push(
           currentCondition.nested ? `(${innerCommand.command})` : innerCommand.command
         );
-        bindingParts.push(innerCommand.bindings ?? []);
+        paramsParts.push(innerCommand.params ?? []);
       } else {
         commandParts.push(currentCondition.command);
-        bindingParts.push(currentCondition.bindings ?? []);
+        paramsParts.push(currentCondition.params ?? []);
       }
     }
 
     return {
       command: commandParts.join(' '),
-      bindings: bindingParts.flatMap((binding) => binding),
+      params: paramsParts.flatMap((params) => params),
     };
   }
 }

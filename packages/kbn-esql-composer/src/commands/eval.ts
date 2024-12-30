@@ -13,30 +13,30 @@ import { ChainedCommand, Params } from '../types';
 const EVAL = 'EVAL';
 
 class EvalBuilder extends QueryBuilder {
-  private constructor(body: string, bindings?: Params) {
+  private constructor(body: string, params?: Params) {
     super();
-    this.commands.push({ command: body, bindings, type: EVAL });
+    this.commands.push({ command: body, params, type: EVAL });
   }
 
-  public static create(body: string, bindings?: Params) {
-    return new EvalBuilder(body, bindings);
+  public static create(body: string, params?: Params) {
+    return new EvalBuilder(body, params);
   }
 
-  public concat(body: string, bindings?: Params) {
-    this.commands.push({ command: body, bindings, type: EVAL });
+  public concat(body: string, params?: Params) {
+    this.commands.push({ command: body, params, type: EVAL });
     return this;
   }
 
   public build(): ChainedCommand {
-    const { command, bindings } = this.buildChain();
+    const { command, params } = this.buildChain();
 
     return {
       command: `${EVAL} ${command.replace(/\s+EVAL/g, ',')}`,
-      bindings,
+      params,
     };
   }
 }
 
-export function evaluate(body: string, bindings?: Params) {
-  return EvalBuilder.create(body, bindings);
+export function evaluate(body: string, params?: Params) {
+  return EvalBuilder.create(body, params);
 }

@@ -9,74 +9,50 @@
 
 import { QueryBuilder } from '../builder';
 import { Params, FieldValue, ChainedCommand } from '../types';
-
-const operators = ['==', '>', '<', '!=', '>=', '<='] as const;
+import { formatColumn } from '../utils/formatters';
 
 const WHERE = 'WHERE';
 
 type WhereCriteria = string | (() => WhereBuilder) | Record<string, FieldValue>;
-type Operators = (typeof operators)[number];
 type LogicalOperator = 'AND' | 'OR';
 
-function isOperator(value?: Params | Operators): value is Operators {
-  return !!value && operators.includes(value as Operators);
-}
-
 class WhereBuilder extends QueryBuilder {
-  private constructor(
-    criteria: WhereCriteria,
-    operatorOrBindings?: Operators | Params,
-    params?: Params
-  ) {
+  private constructor(criteria: WhereCriteria, params?: Params) {
     super();
-    this.push(criteria, operatorOrBindings, params);
+    this.push(criteria, params);
   }
 
-  public static create(
-    criteria: WhereCriteria,
-    operatorOrBindings?: Operators | Params,
-    params?: Params
-  ) {
-    return new WhereBuilder(criteria, operatorOrBindings, params);
+  public static create(criteria: WhereCriteria, params?: Params) {
+    return new WhereBuilder(criteria, params);
   }
 
-  public and(
-    criteria: WhereCriteria,
-    operatorOrParams?: Operators | Params,
-    bindings?: Params
-  ): WhereBuilder {
-    return this.addCondition('AND', criteria, operatorOrParams, bindings);
+  public and(criteria: WhereCriteria, params?: Params): WhereBuilder {
+    return this.addCondition('AND', criteria, params);
   }
 
-  public or(
-    criteria: WhereCriteria,
-    operatorOrParams?: Operators | Params,
-    bindings?: Params
-  ): WhereBuilder {
-    return this.addCondition('OR', criteria, operatorOrParams, bindings);
+  public or(criteria: WhereCriteria, params?: Params): WhereBuilder {
+    return this.addCondition('OR', criteria, params);
   }
 
   public build(): ChainedCommand {
-    const { command, bindings } = this.buildChain();
+    const { command, params } = this.buildChain();
 
     return {
       command: `${WHERE} ${command}`,
-      bindings,
+      params,
     };
   }
 
   private addCondition(
     logicalOperator: LogicalOperator,
     body: WhereCriteria,
-    operatorOrParams?: Operators | Params,
-    bindings?: Params
+    params?: Params
   ): WhereBuilder {
-    return this.push(body, operatorOrParams, bindings, logicalOperator);
+    return this.push(body, params, logicalOperator);
   }
 
   private push(
     criteria: WhereCriteria,
-    operatorOrBindings?: Operators | Params,
     params?: Params,
     type: LogicalOperator | typeof WHERE = 'WHERE'
   ) {
@@ -91,28 +67,15 @@ class WhereBuilder extends QueryBuilder {
       // Handle object with named parameters
       const keys = Object.keys(criteria);
       this.commands.push({
-        command: keys.map((key) => `${key} == ?`).join(' AND '),
-        bindings: keys.map((key) => criteria[key]),
-        type,
-      });
-    } else if (
-      !Array.isArray(operatorOrBindings) &&
-      isOperator(operatorOrBindings) &&
-      params !== undefined
-    ) {
-      // Handle explicit operator and parameter
-      const operator = operatorOrBindings;
-      this.commands.push({
-        command: `${criteria} ${operator} ?`,
-        bindings: params,
+        command: keys.map((key) => `${formatColumn(key)} == ?`).join(' AND '),
+        params: keys.map((key) => criteria[key]),
         type,
       });
     } else {
       // Handle raw and nested conditions
-      const bindings = operatorOrBindings;
       this.commands.push({
         command: criteria,
-        bindings,
+        params,
         type,
       });
     }
@@ -121,10 +84,6 @@ class WhereBuilder extends QueryBuilder {
   }
 }
 
-export function where(
-  criteria: WhereCriteria,
-  operatorOrParams?: Operators | Params,
-  bindings?: Params
-): WhereBuilder {
-  return WhereBuilder.create(criteria, operatorOrParams, bindings);
+export function where(criteria: WhereCriteria, params?: Params): WhereBuilder {
+  return WhereBuilder.create(criteria, params);
 }

@@ -17,23 +17,10 @@ describe('evaluate', () => {
     const pipeline = source.pipe(
       evaluate('type = CASE(languages <= 1, "monolingual",languages <= 2, "bilingual","polyglot")')
     );
-    expect(pipeline.asQuery()).toEqual(
+
+    expect(pipeline.asString()).toEqual(
       'FROM `logs-*`\n\t| EVAL type = CASE(languages <= 1, "monolingual",languages <= 2, "bilingual","polyglot")'
     );
-    expect(pipeline.getBindings()).toEqual([]);
-  });
-
-  it('handles chained EVAL', () => {
-    const ids = ['host1', 'host2', 'host3'];
-    const pipeline = source.pipe(
-      evaluate('entity.type = ?', 'host')
-        .concat('entity.display_name = COALESCE(?, entity.id)', 'some_host')
-        .concat(`entity.id = CONCAT(${ids.map(() => '?').join()})`, ids)
-    );
-    expect(pipeline.asQuery()).toEqual(
-      'FROM `logs-*`\n\t| EVAL entity.type = ?, entity.display_name = COALESCE(?, entity.id), entity.id = CONCAT(?,?,?)'
-    );
-    expect(pipeline.getBindings()).toEqual(['host', 'some_host', 'host1', 'host2', 'host3']);
   });
 
   it('handles EVAL with params', () => {
@@ -44,14 +31,36 @@ describe('evaluate', () => {
         },
       })
     );
+    const queryRequest = pipeline.asRequest();
 
-    expect(pipeline.asQuery()).toEqual('FROM `logs-*`\n\t| EVAL hour = DATE_TRUNC(1 hour, ?ts)');
-    expect(pipeline.getBindings()).toEqual([
+    expect(queryRequest.query).toEqual('FROM `logs-*`\n\t| EVAL hour = DATE_TRUNC(1 hour, ?ts)');
+    expect(queryRequest.params).toEqual([
       {
         ts: {
           identifier: '@timestamp',
         },
       },
     ]);
+    expect(pipeline.asString()).toEqual(
+      'FROM `logs-*`\n\t| EVAL hour = DATE_TRUNC(1 hour, `@timestamp`)'
+    );
+  });
+
+  it('handles chained EVAL with params', () => {
+    const ids = ['aws', 'host1'];
+    const pipeline = source.pipe(
+      evaluate('entity.type = ?', 'host')
+        .concat('entity.display_name = COALESCE(?, entity.id)', 'some_host')
+        .concat(`entity.id = CONCAT(${ids.map(() => '?').join()})`, ids)
+    );
+    const queryRequest = pipeline.asRequest();
+
+    expect(queryRequest.query).toEqual(
+      'FROM `logs-*`\n\t| EVAL entity.type = ?, entity.display_name = COALESCE(?, entity.id), entity.id = CONCAT(?,?)'
+    );
+    expect(queryRequest.params).toEqual(['host', 'some_host', 'aws', 'host1']);
+    expect(pipeline.asString()).toEqual(
+      'FROM `logs-*`\n\t| EVAL entity.type = "host", entity.display_name = COALESCE("some_host", entity.id), entity.id = CONCAT("aws","host1")'
+    );
   });
 });

@@ -17,13 +17,13 @@ describe('stats', () => {
     const pipeline = source.pipe(
       stats('avg_duration = AVG(transaction.duration.us) BY service.name')
     );
-    expect(pipeline.asQuery()).toEqual(
+
+    expect(pipeline.asString()).toEqual(
       'FROM `logs-*`\n\t| STATS avg_duration = AVG(transaction.duration.us) BY service.name'
     );
-    expect(pipeline.getBindings()).toEqual([]);
   });
 
-  it('handles STATS with bindings', () => {
+  it('handles STATS with params', () => {
     const pipeline = source.pipe(
       stats('AVG(?duration), COUNT(?svcName) BY ?env', {
         duration: {
@@ -37,10 +37,12 @@ describe('stats', () => {
         },
       })
     );
-    expect(pipeline.asQuery()).toEqual(
+    const queryRequest = pipeline.asRequest();
+
+    expect(queryRequest.query).toEqual(
       'FROM `logs-*`\n\t| STATS AVG(?duration), COUNT(?svcName) BY ?env'
     );
-    expect(pipeline.getBindings()).toEqual([
+    expect(queryRequest.params).toEqual([
       {
         duration: {
           identifier: 'transaction.duration.us',
@@ -57,6 +59,9 @@ describe('stats', () => {
         },
       },
     ]);
+    expect(pipeline.asString()).toEqual(
+      'FROM `logs-*`\n\t| STATS AVG(`transaction.duration.us`), COUNT(`service.name`) BY `service.environment`'
+    );
   });
 
   it('handles STATS with WHERE and BY', () => {
@@ -67,22 +72,29 @@ describe('stats', () => {
         })
         .by('service.name')
     );
-    expect(pipeline.asQuery()).toEqual(
-      'FROM `logs-*`\n\t| STATS avg_duration = AVG(transaction.duration.us) WHERE log.level == ? BY service.name'
+    const queryRequest = pipeline.asRequest();
+
+    expect(queryRequest.query).toEqual(
+      'FROM `logs-*`\n\t| STATS avg_duration = AVG(transaction.duration.us) WHERE `log.level` == ? BY `service.name`'
     );
-    expect(pipeline.getBindings()).toEqual(['error']);
+    expect(queryRequest.params).toEqual(['error']);
+    expect(pipeline.asString()).toEqual(
+      'FROM `logs-*`\n\t| STATS avg_duration = AVG(transaction.duration.us) WHERE `log.level` == "error" BY `service.name`'
+    );
   });
 
-  it('handles STATS and BY with bindings', () => {
+  it('handles STATS and BY with params', () => {
     const pipeline = source.pipe(
       stats('avg_duration = AVG(transaction.duration.us)').by('?svcName', {
         svcName: { identifier: 'service.name' },
       })
     );
-    expect(pipeline.asQuery()).toEqual(
+    const queryRequest = pipeline.asRequest();
+
+    expect(queryRequest.query).toEqual(
       'FROM `logs-*`\n\t| STATS avg_duration = AVG(transaction.duration.us) BY ?svcName'
     );
-    expect(pipeline.getBindings()).toEqual([
+    expect(queryRequest.params).toEqual([
       {
         svcName: {
           identifier: 'service.name',
@@ -98,10 +110,12 @@ describe('stats', () => {
         svcEnv: { identifier: 'service.environment' },
       })
     );
-    expect(pipeline.asQuery()).toEqual(
+    const queryRequest = pipeline.asRequest();
+
+    expect(queryRequest.query).toEqual(
       'FROM `logs-*`\n\t| STATS avg_duration = AVG(transaction.duration.us) BY ?svcName, ?svcEnv'
     );
-    expect(pipeline.getBindings()).toEqual([
+    expect(queryRequest.params).toEqual([
       {
         svcName: {
           identifier: 'service.name',
@@ -113,22 +127,30 @@ describe('stats', () => {
         },
       },
     ]);
+    expect(pipeline.asString()).toEqual(
+      'FROM `logs-*`\n\t| STATS avg_duration = AVG(transaction.duration.us) BY `service.name`, `service.environment`'
+    );
   });
 
   it('handles multiple chained STATS', () => {
     const pipeline = source.pipe(
       stats('avg_duration = AVG(transaction.duration.us)')
         .concat('max_duration = MAX(transaction.duration.us)')
-        .where('@timestamp > ?', '2021-01-01')
+        .where('@timestamp > ?', new Date('2025-01-01').toISOString())
         .concat('min_duration = MIN(transaction.duration.us)')
         .where({
           'service.name': 'service2',
         })
         .by('service.environment')
     );
-    expect(pipeline.asQuery()).toEqual(
-      'FROM `logs-*`\n\t| STATS avg_duration = AVG(transaction.duration.us), max_duration = MAX(transaction.duration.us) WHERE @timestamp > ?, min_duration = MIN(transaction.duration.us) WHERE service.name == ? BY service.environment'
+    const queryRequest = pipeline.asRequest();
+
+    expect(queryRequest.query).toEqual(
+      'FROM `logs-*`\n\t| STATS avg_duration = AVG(transaction.duration.us), max_duration = MAX(transaction.duration.us) WHERE @timestamp > ?, min_duration = MIN(transaction.duration.us) WHERE `service.name` == ? BY `service.environment`'
     );
-    expect(pipeline.getBindings()).toEqual(['2021-01-01', 'service2']);
+    expect(queryRequest.params).toEqual(['2025-01-01T00:00:00.000Z', 'service2']);
+    expect(pipeline.asString()).toEqual(
+      'FROM `logs-*`\n\t| STATS avg_duration = AVG(transaction.duration.us), max_duration = MAX(transaction.duration.us) WHERE @timestamp > "2025-01-01T00:00:00.000Z", min_duration = MIN(transaction.duration.us) WHERE `service.name` == "service2" BY `service.environment`'
+    );
   });
 });

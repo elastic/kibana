@@ -12,10 +12,10 @@ import { Command, QueryOperator, Params, Query } from '../types';
 
 export function append({
   command,
-  bindings,
+  params,
 }: {
   command: Command | string;
-  bindings?: Params;
+  params?: Params;
 }): QueryOperator {
   return (source): Query => {
     const nextCommand = typeof command === 'string' ? { body: command } : command;
@@ -23,9 +23,7 @@ export function append({
     return {
       ...source,
       commands: source.commands.concat(nextCommand),
-      bindings: !!bindings
-        ? source.bindings.concat(isObject(bindings) ? bindings : [bindings])
-        : source.bindings,
+      params: !!params ? source.params.concat(isObject(params) ? params : [params]) : source.params,
     };
   };
 }

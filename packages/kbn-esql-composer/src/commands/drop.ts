@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { escapeIdentifier } from '../utils/escape_identifier';
+import { escapeIdentifier } from '../utils/formatters';
 import { append } from './append';
 
 export function drop(...columns: Array<string | string[]>) {

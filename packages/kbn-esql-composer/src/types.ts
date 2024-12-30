@@ -15,37 +15,38 @@ export interface Command {
 
 // Replace
 export type FieldValue = number | string | boolean | null;
-export type NamedParameterWithIdentifier = Record<
-  string,
-  { identifier: string } | { pattern: string }
->;
+export type NamedParameterWithIdentifier = Record<string, { identifier: string }>;
 export type NamedParameter = Record<string, string> | NamedParameterWithIdentifier;
 
 export type Params = NamedParameter | FieldValue | Array<FieldValue | NamedParameter>;
 export interface QueryPipeline {
-  pipe: (...args: Array<QueryOperator | QueryBuilderToOperator>) => QueryPipeline;
-  asQuery: () => string;
-  getBindings: () => Params[];
+  pipe: (...args: Array<QueryOperator | QueryOperatorConvertible>) => QueryPipeline;
+  asRequest: () => QueryRequest;
   asString: () => string;
 }
 export interface Query {
   commands: Command[];
-  bindings: Params[];
+  params: Params[];
+}
+
+export interface QueryRequest {
+  query: string;
+  params: Params[];
 }
 
 export type QueryOperator = (sourceQuery: Query) => Query;
 export interface BuilderCommand<TType extends string = string> {
   command: string | (() => QueryBuilder);
-  bindings?: Params;
+  params?: Params;
   type: TType;
   nested?: boolean;
 }
 
 export interface ChainedCommand {
   command: string;
-  bindings?: Params;
+  params?: Params;
 }
 
-export interface QueryBuilderToOperator {
+export interface QueryOperatorConvertible {
   toQueryOperator(): QueryOperator;
 }

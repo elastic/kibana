@@ -15,33 +15,38 @@ describe('sort', () => {
 
   it('handles single strings', () => {
     const pipeline = source.pipe(sort('@timestamp', 'log.level'));
-    expect(pipeline.asQuery()).toEqual('FROM `logs-*`\n\t| SORT @timestamp ASC, log.level ASC');
-    expect(pipeline.getBindings()).toEqual([]);
+
+    expect(pipeline.asString()).toEqual(
+      'FROM `logs-*`\n\t| SORT `@timestamp` ASC, `log.level` ASC'
+    );
   });
 
   it('handles SORT with SortOrder', () => {
     const pipeline = source.pipe(sort({ '@timestamp': SortOrder.Desc }));
-    expect(pipeline.asQuery()).toEqual('FROM `logs-*`\n\t| SORT @timestamp DESC');
-    expect(pipeline.getBindings()).toEqual([]);
+
+    expect(pipeline.asString()).toEqual('FROM `logs-*`\n\t| SORT `@timestamp` DESC');
   });
 
   it('handles a mix of strings and SortOrder instructions', () => {
     const pipeline = source.pipe(sort('@timestamp', { 'log.level': SortOrder.Desc }));
 
-    expect(pipeline.asQuery()).toEqual('FROM `logs-*`\n\t| SORT @timestamp ASC, log.level DESC');
-    expect(pipeline.getBindings()).toEqual([]);
+    expect(pipeline.asString()).toEqual(
+      'FROM `logs-*`\n\t| SORT `@timestamp` ASC, `log.level` DESC'
+    );
   });
 
-  it('handles nested sort arrays', () => {
+  it('handles sort arrays', () => {
     const pipeline = source.pipe(sort(['@timestamp', { 'log.level': SortOrder.Asc }]));
-    expect(pipeline.asQuery()).toEqual('FROM `logs-*`\n\t| SORT @timestamp ASC, log.level ASC');
-    expect(pipeline.getBindings()).toEqual([]);
+
+    expect(pipeline.asString()).toEqual(
+      'FROM `logs-*`\n\t| SORT `@timestamp` ASC, `log.level` ASC'
+    );
   });
 
   it('handles SORT with params', () => {
     const pipeline = source.pipe(
       sortRaw('?timestamp DESC, ?logLevel ASC', {
-        env: {
+        timestamp: {
           identifier: '@timestamp',
         },
         logLevel: {
@@ -49,11 +54,11 @@ describe('sort', () => {
         },
       })
     );
-
-    expect(pipeline.asQuery()).toEqual('FROM `logs-*`\n\t| SORT ?timestamp DESC, ?logLevel ASC');
-    expect(pipeline.getBindings()).toEqual([
+    const queryRequest = pipeline.asRequest();
+    expect(queryRequest.query).toEqual('FROM `logs-*`\n\t| SORT ?timestamp DESC, ?logLevel ASC');
+    expect(queryRequest.params).toEqual([
       {
-        env: {
+        timestamp: {
           identifier: '@timestamp',
         },
       },
@@ -63,5 +68,9 @@ describe('sort', () => {
         },
       },
     ]);
+
+    expect(pipeline.asString()).toEqual(
+      'FROM `logs-*`\n\t| SORT `@timestamp` DESC, `log.level` ASC'
+    );
   });
 });

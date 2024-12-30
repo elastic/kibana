@@ -8,6 +8,7 @@
  */
 
 import { NamedParameterWithIdentifier, QueryOperator } from '../types';
+import { formatColumn } from '../utils/formatters';
 import { append } from './append';
 
 export enum SortOrder {
@@ -20,8 +21,8 @@ type Sort = Record<string, SortOrder>;
 type SortArgs = Sort | string | Array<Sort | string>;
 
 // TODO: a better name?
-export function sortRaw(body: string, bindings?: NamedParameterWithIdentifier): QueryOperator {
-  return append({ command: `SORT ${body}`, bindings });
+export function sortRaw(body: string, params?: NamedParameterWithIdentifier): QueryOperator {
+  return append({ command: `SORT ${body}`, params });
 }
 
 export function sort(...sorts: SortArgs[]): QueryOperator {
@@ -40,7 +41,7 @@ export function sort(...sorts: SortArgs[]): QueryOperator {
     });
 
   const command = `SORT ${allSorts
-    .map((sortInstruction) => `${sortInstruction.column} ${sortInstruction.order}`)
+    .map((sortInstruction) => `${formatColumn(sortInstruction.column)} ${sortInstruction.order}`)
     .join(', ')}`;
 
   return append({ command });

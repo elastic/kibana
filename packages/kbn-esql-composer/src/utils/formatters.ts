@@ -10,3 +10,11 @@
 export function escapeIdentifier(identifier: string) {
   return `\`${identifier}\``;
 }
+
+export const formatValue = (value: any) => {
+  return typeof value === 'string' ? `"${value}"` : value;
+};
+
+export const formatColumn = (column: string) => {
+  return column.startsWith('?') ? column : escapeIdentifier(column);
+};

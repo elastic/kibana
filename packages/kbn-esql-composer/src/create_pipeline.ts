@@ -8,59 +8,58 @@
  */
 
 import { isObject } from 'lodash';
-import { Query, QueryBuilderToOperator, QueryOperator, QueryPipeline } from './types';
+import {
+  Query,
+  QueryOperatorConvertible,
+  QueryOperator,
+  QueryPipeline,
+  QueryRequest,
+  NamedParameter,
+  Params,
+} from './types';
+import { escapeIdentifier, formatValue } from './utils/formatters';
 
-function isQueryBuilderOperator(
-  value: QueryOperator | QueryBuilderToOperator
-): value is QueryBuilderToOperator {
-  return (value as QueryBuilderToOperator).toQueryOperator !== undefined;
+function isQueryOperatorConvertible(
+  value: QueryOperator | QueryOperatorConvertible
+): value is QueryOperatorConvertible {
+  return (value as QueryOperatorConvertible).toQueryOperator !== undefined;
 }
 
-const formatValue = (value: any) => {
-  return typeof value === 'string' ? `"${value}"` : value;
-};
-
 export function createPipeline(source: Query): QueryPipeline {
-  const asQuery = () => {
-    return source.commands.map((command) => command.body).join('\n\t| ');
-  };
-  const getBindings = () => {
-    return source.bindings.flatMap((binding) => {
-      if (isObject(binding)) {
-        return Object.entries(binding).map(([key, value]) => ({
-          [key]: value,
-        }));
+  const asRequest = (): QueryRequest => {
+    const params = source.params.flatMap<Params>((param) => {
+      if (isObject(param)) {
+        return Object.entries(param).map(([key, value]) => ({ [key]: value }));
       }
-      if (Array.isArray(binding)) {
-        return binding.map((p) => p);
+      if (Array.isArray(param)) {
+        return param.map((p) => p);
       }
-
-      return binding;
+      return param;
     });
+
+    return {
+      query: source.commands.map((command) => command.body).join('\n\t| '),
+      params,
+    };
   };
 
   const asString = () => {
-    const query = asQuery();
-    const bindings = getBindings();
+    const { query, params } = asRequest();
 
     let index = 0;
-    return query.replace(/\\?\?([a-zA-Z0-9_]+)?/g, (match, namedParam) => {
-      if (match === '\\?') {
-        return '?';
-      }
+    return query.replace(/\?([a-zA-Z0-9_]+)?/g, (match, namedParam) => {
+      if (index < params.length) {
+        const value = params[index++];
 
-      if (index < bindings.length) {
         if (namedParam) {
-          const value = bindings[index++];
-          if (typeof value === 'object') {
-            return 'identifier' in value[namedParam]
-              ? value[namedParam].identifier
-              : formatValue(value[namedParam]);
+          if (isObject(value)) {
+            const paramValue = (value as NamedParameter)[namedParam];
+            return isObject(paramValue) && 'identifier' in paramValue
+              ? escapeIdentifier(paramValue.identifier)
+              : formatValue(paramValue);
           }
-          return value;
         }
 
-        const value = bindings[index++];
         return formatValue(value);
       }
 
@@ -71,7 +70,7 @@ export function createPipeline(source: Query): QueryPipeline {
   return {
     pipe: (...operators) => {
       const nextSource = operators.reduce((previousQuery, operator) => {
-        if (isQueryBuilderOperator(operator)) {
+        if (isQueryOperatorConvertible(operator)) {
           return operator.toQueryOperator()(previousQuery);
         }
 
@@ -80,8 +79,7 @@ export function createPipeline(source: Query): QueryPipeline {
 
       return createPipeline(nextSource);
     },
-    asQuery,
+    asRequest,
     asString,
-    getBindings,
   };
 }
