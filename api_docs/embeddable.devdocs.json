@@ -27,7 +27,7 @@
           },
           "<TEmbeddableInput, TEmbeddableOutput, TNode>"
         ],
-        "path": "src/plugins/embeddable/public/lib/embeddables/embeddable.tsx",
+        "path": "src/platform/plugins/shared/embeddable/public/lib/embeddables/embeddable.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -38,7 +38,7 @@
             "tags": [],
             "label": "runtimeId",
             "description": [],
-            "path": "src/plugins/embeddable/public/lib/embeddables/embeddable.tsx",
+            "path": "src/platform/plugins/shared/embeddable/public/lib/embeddables/embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -49,7 +49,7 @@
             "tags": [],
             "label": "runtimeId",
             "description": [],
-            "path": "src/plugins/embeddable/public/lib/embeddables/embeddable.tsx",
+            "path": "src/platform/plugins/shared/embeddable/public/lib/embeddables/embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -60,7 +60,7 @@
             "tags": [],
             "label": "deferEmbeddableLoad",
             "description": [],
-            "path": "src/plugins/embeddable/public/lib/embeddables/embeddable.tsx",
+            "path": "src/platform/plugins/shared/embeddable/public/lib/embeddables/embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -71,7 +71,7 @@
             "tags": [],
             "label": "type",
             "description": [],
-            "path": "src/plugins/embeddable/public/lib/embeddables/embeddable.tsx",
+            "path": "src/platform/plugins/shared/embeddable/public/lib/embeddables/embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -82,7 +82,7 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "path": "src/plugins/embeddable/public/lib/embeddables/embeddable.tsx",
+            "path": "src/platform/plugins/shared/embeddable/public/lib/embeddables/embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -96,7 +96,7 @@
             "signature": [
               "Error | undefined"
             ],
-            "path": "src/plugins/embeddable/public/lib/embeddables/embeddable.tsx",
+            "path": "src/platform/plugins/shared/embeddable/public/lib/embeddables/embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -110,7 +110,7 @@
             "signature": [
               "TEmbeddableOutput"
             ],
-            "path": "src/plugins/embeddable/public/lib/embeddables/embeddable.tsx",
+            "path": "src/platform/plugins/shared/embeddable/public/lib/embeddables/embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -124,7 +124,7 @@
             "signature": [
               "TEmbeddableInput"
             ],
-            "path": "src/plugins/embeddable/public/lib/embeddables/embeddable.tsx",
+            "path": "src/platform/plugins/shared/embeddable/public/lib/embeddables/embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -144,7 +144,7 @@
                 "text": "RenderCompleteDispatcher"
               }
             ],
-            "path": "src/plugins/embeddable/public/lib/embeddables/embeddable.tsx",
+            "path": "src/platform/plugins/shared/embeddable/public/lib/embeddables/embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -155,7 +155,7 @@
             "tags": [],
             "label": "destroyed",
             "description": [],
-            "path": "src/plugins/embeddable/public/lib/embeddables/embeddable.tsx",
+            "path": "src/platform/plugins/shared/embeddable/public/lib/embeddables/embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -169,7 +169,7 @@
             "signature": [
               "any"
             ],
-            "path": "src/plugins/embeddable/public/lib/embeddables/embeddable.tsx",
+            "path": "src/platform/plugins/shared/embeddable/public/lib/embeddables/embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -183,7 +183,7 @@
                 "signature": [
                   "TEmbeddableInput"
                 ],
-                "path": "src/plugins/embeddable/public/lib/embeddables/embeddable.tsx",
+                "path": "src/platform/plugins/shared/embeddable/public/lib/embeddables/embeddable.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -198,7 +198,7 @@
                 "signature": [
                   "TEmbeddableOutput"
                 ],
-                "path": "src/plugins/embeddable/public/lib/embeddables/embeddable.tsx",
+                "path": "src/platform/plugins/shared/embeddable/public/lib/embeddables/embeddable.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -216,7 +216,7 @@
             "signature": [
               "() => Promise<string | undefined>"
             ],
-            "path": "src/plugins/embeddable/public/lib/embeddables/embeddable.tsx",
+            "path": "src/platform/plugins/shared/embeddable/public/lib/embeddables/embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -232,7 +232,7 @@
             "signature": [
               "() => boolean"
             ],
-            "path": "src/plugins/embeddable/public/lib/embeddables/embeddable.tsx",
+            "path": "src/platform/plugins/shared/embeddable/public/lib/embeddables/embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -250,7 +250,7 @@
             "signature": [
               "() => void"
             ],
-            "path": "src/plugins/embeddable/public/lib/embeddables/embeddable.tsx",
+            "path": "src/platform/plugins/shared/embeddable/public/lib/embeddables/embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -270,7 +270,7 @@
               "Observable",
               "<TEmbeddableInput | TEmbeddableOutput>>"
             ],
-            "path": "src/plugins/embeddable/public/lib/embeddables/embeddable.tsx",
+            "path": "src/platform/plugins/shared/embeddable/public/lib/embeddables/embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -288,7 +288,7 @@
               "Observable",
               "<TEmbeddableInput>>"
             ],
-            "path": "src/plugins/embeddable/public/lib/embeddables/embeddable.tsx",
+            "path": "src/platform/plugins/shared/embeddable/public/lib/embeddables/embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -306,7 +306,7 @@
               "Observable",
               "<TEmbeddableOutput>>"
             ],
-            "path": "src/plugins/embeddable/public/lib/embeddables/embeddable.tsx",
+            "path": "src/platform/plugins/shared/embeddable/public/lib/embeddables/embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -322,7 +322,7 @@
             "signature": [
               "() => Readonly<TEmbeddableOutput>"
             ],
-            "path": "src/plugins/embeddable/public/lib/embeddables/embeddable.tsx",
+            "path": "src/platform/plugins/shared/embeddable/public/lib/embeddables/embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -338,7 +338,7 @@
             "signature": [
               "(lastExplicitInput: Partial<TEmbeddableInput>) => Promise<boolean>"
             ],
-            "path": "src/plugins/embeddable/public/lib/embeddables/embeddable.tsx",
+            "path": "src/platform/plugins/shared/embeddable/public/lib/embeddables/embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -352,7 +352,7 @@
                 "signature": [
                   "Partial<TEmbeddableInput>"
                 ],
-                "path": "src/plugins/embeddable/public/lib/embeddables/embeddable.tsx",
+                "path": "src/platform/plugins/shared/embeddable/public/lib/embeddables/embeddable.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -370,7 +370,7 @@
             "signature": [
               "() => Readonly<TEmbeddableInput>"
             ],
-            "path": "src/plugins/embeddable/public/lib/embeddables/embeddable.tsx",
+            "path": "src/platform/plugins/shared/embeddable/public/lib/embeddables/embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -386,7 +386,7 @@
             "signature": [
               "() => Readonly<TEmbeddableInput>"
             ],
-            "path": "src/plugins/embeddable/public/lib/embeddables/embeddable.tsx",
+            "path": "src/platform/plugins/shared/embeddable/public/lib/embeddables/embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -402,7 +402,7 @@
             "signature": [
               "() => Readonly<TEmbeddableInput>"
             ],
-            "path": "src/plugins/embeddable/public/lib/embeddables/embeddable.tsx",
+            "path": "src/platform/plugins/shared/embeddable/public/lib/embeddables/embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -418,7 +418,7 @@
             "signature": [
               "() => string"
             ],
-            "path": "src/plugins/embeddable/public/lib/embeddables/embeddable.tsx",
+            "path": "src/platform/plugins/shared/embeddable/public/lib/embeddables/embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -434,7 +434,7 @@
             "signature": [
               "() => string"
             ],
-            "path": "src/plugins/embeddable/public/lib/embeddables/embeddable.tsx",
+            "path": "src/platform/plugins/shared/embeddable/public/lib/embeddables/embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -450,7 +450,7 @@
             "signature": [
               "(changes: Partial<TEmbeddableInput>) => void"
             ],
-            "path": "src/plugins/embeddable/public/lib/embeddables/embeddable.tsx",
+            "path": "src/platform/plugins/shared/embeddable/public/lib/embeddables/embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -464,7 +464,7 @@
                 "signature": [
                   "Partial<TEmbeddableInput>"
                 ],
-                "path": "src/plugins/embeddable/public/lib/embeddables/embeddable.tsx",
+                "path": "src/platform/plugins/shared/embeddable/public/lib/embeddables/embeddable.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -482,7 +482,7 @@
             "signature": [
               "(el: HTMLElement) => void | TNode"
             ],
-            "path": "src/plugins/embeddable/public/lib/embeddables/embeddable.tsx",
+            "path": "src/platform/plugins/shared/embeddable/public/lib/embeddables/embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -496,7 +496,7 @@
                 "signature": [
                   "HTMLElement"
                 ],
-                "path": "src/plugins/embeddable/public/lib/embeddables/embeddable.tsx",
+                "path": "src/platform/plugins/shared/embeddable/public/lib/embeddables/embeddable.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -526,7 +526,7 @@
               },
               " | undefined"
             ],
-            "path": "src/plugins/embeddable/public/lib/embeddables/embeddable.tsx",
+            "path": "src/platform/plugins/shared/embeddable/public/lib/embeddables/embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -546,7 +546,7 @@
             "signature": [
               "() => void"
             ],
-            "path": "src/plugins/embeddable/public/lib/embeddables/embeddable.tsx",
+            "path": "src/platform/plugins/shared/embeddable/public/lib/embeddables/embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -562,7 +562,7 @@
             "signature": [
               "() => Promise<void>"
             ],
-            "path": "src/plugins/embeddable/public/lib/embeddables/embeddable.tsx",
+            "path": "src/platform/plugins/shared/embeddable/public/lib/embeddables/embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -580,7 +580,7 @@
             "signature": [
               "() => void"
             ],
-            "path": "src/plugins/embeddable/public/lib/embeddables/embeddable.tsx",
+            "path": "src/platform/plugins/shared/embeddable/public/lib/embeddables/embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -596,7 +596,7 @@
             "signature": [
               "(outputChanges: Partial<TEmbeddableOutput>) => void"
             ],
-            "path": "src/plugins/embeddable/public/lib/embeddables/embeddable.tsx",
+            "path": "src/platform/plugins/shared/embeddable/public/lib/embeddables/embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -610,7 +610,7 @@
                 "signature": [
                   "Partial<TEmbeddableOutput>"
                 ],
-                "path": "src/plugins/embeddable/public/lib/embeddables/embeddable.tsx",
+                "path": "src/platform/plugins/shared/embeddable/public/lib/embeddables/embeddable.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -630,7 +630,7 @@
             "signature": [
               "(e: Error) => void"
             ],
-            "path": "src/plugins/embeddable/public/lib/embeddables/embeddable.tsx",
+            "path": "src/platform/plugins/shared/embeddable/public/lib/embeddables/embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -646,7 +646,7 @@
                 "signature": [
                   "Error"
                 ],
-                "path": "src/plugins/embeddable/public/lib/embeddables/embeddable.tsx",
+                "path": "src/platform/plugins/shared/embeddable/public/lib/embeddables/embeddable.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -664,7 +664,7 @@
             "signature": [
               "() => string[]"
             ],
-            "path": "src/plugins/embeddable/public/lib/embeddables/embeddable.tsx",
+            "path": "src/platform/plugins/shared/embeddable/public/lib/embeddables/embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -682,7 +682,7 @@
         "description": [
           "\nA wrapper around the session storage which provides strongly typed helper methods\nfor common incoming and outgoing states used by the embeddable infrastructure.\n"
         ],
-        "path": "src/plugins/embeddable/public/lib/state_transfer/embeddable_state_transfer.ts",
+        "path": "src/platform/plugins/shared/embeddable/public/lib/state_transfer/embeddable_state_transfer.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -693,7 +693,7 @@
             "tags": [],
             "label": "isTransferInProgress",
             "description": [],
-            "path": "src/plugins/embeddable/public/lib/state_transfer/embeddable_state_transfer.ts",
+            "path": "src/platform/plugins/shared/embeddable/public/lib/state_transfer/embeddable_state_transfer.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -707,7 +707,7 @@
             "signature": [
               "any"
             ],
-            "path": "src/plugins/embeddable/public/lib/state_transfer/embeddable_state_transfer.ts",
+            "path": "src/platform/plugins/shared/embeddable/public/lib/state_transfer/embeddable_state_transfer.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -720,16 +720,10 @@
                 "description": [],
                 "signature": [
                   "(appId: string, options?: ",
-                  {
-                    "pluginId": "@kbn/core-application-browser",
-                    "scope": "public",
-                    "docId": "kibKbnCoreApplicationBrowserPluginApi",
-                    "section": "def-public.NavigateToAppOptions",
-                    "text": "NavigateToAppOptions"
-                  },
+                  "NavigateToAppOptions",
                   " | undefined) => Promise<void>"
                 ],
-                "path": "src/plugins/embeddable/public/lib/state_transfer/embeddable_state_transfer.ts",
+                "path": "src/platform/plugins/shared/embeddable/public/lib/state_transfer/embeddable_state_transfer.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -745,7 +739,7 @@
                   "Observable",
                   "<string | undefined>"
                 ],
-                "path": "src/plugins/embeddable/public/lib/state_transfer/embeddable_state_transfer.ts",
+                "path": "src/platform/plugins/shared/embeddable/public/lib/state_transfer/embeddable_state_transfer.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -759,16 +753,10 @@
                 "description": [],
                 "signature": [
                   "ReadonlyMap<string, ",
-                  {
-                    "pluginId": "@kbn/core-application-browser",
-                    "scope": "public",
-                    "docId": "kibKbnCoreApplicationBrowserPluginApi",
-                    "section": "def-public.PublicAppInfo",
-                    "text": "PublicAppInfo"
-                  },
+                  "PublicAppInfo",
                   "> | undefined"
                 ],
-                "path": "src/plugins/embeddable/public/lib/state_transfer/embeddable_state_transfer.ts",
+                "path": "src/platform/plugins/shared/embeddable/public/lib/state_transfer/embeddable_state_transfer.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -790,7 +778,7 @@
                   },
                   " | undefined"
                 ],
-                "path": "src/plugins/embeddable/public/lib/state_transfer/embeddable_state_transfer.ts",
+                "path": "src/platform/plugins/shared/embeddable/public/lib/state_transfer/embeddable_state_transfer.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -810,7 +798,7 @@
             "signature": [
               "(appId: string) => string | undefined"
             ],
-            "path": "src/plugins/embeddable/public/lib/state_transfer/embeddable_state_transfer.ts",
+            "path": "src/platform/plugins/shared/embeddable/public/lib/state_transfer/embeddable_state_transfer.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -826,7 +814,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "src/plugins/embeddable/public/lib/state_transfer/embeddable_state_transfer.ts",
+                "path": "src/platform/plugins/shared/embeddable/public/lib/state_transfer/embeddable_state_transfer.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -854,7 +842,7 @@
               },
               " | undefined"
             ],
-            "path": "src/plugins/embeddable/public/lib/state_transfer/embeddable_state_transfer.ts",
+            "path": "src/platform/plugins/shared/embeddable/public/lib/state_transfer/embeddable_state_transfer.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -870,7 +858,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "src/plugins/embeddable/public/lib/state_transfer/embeddable_state_transfer.ts",
+                "path": "src/platform/plugins/shared/embeddable/public/lib/state_transfer/embeddable_state_transfer.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -887,7 +875,7 @@
                 "signature": [
                   "boolean | undefined"
                 ],
-                "path": "src/plugins/embeddable/public/lib/state_transfer/embeddable_state_transfer.ts",
+                "path": "src/platform/plugins/shared/embeddable/public/lib/state_transfer/embeddable_state_transfer.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -907,7 +895,7 @@
             "signature": [
               "(appId?: string | undefined) => void"
             ],
-            "path": "src/plugins/embeddable/public/lib/state_transfer/embeddable_state_transfer.ts",
+            "path": "src/platform/plugins/shared/embeddable/public/lib/state_transfer/embeddable_state_transfer.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -923,7 +911,7 @@
                 "signature": [
                   "string | undefined"
                 ],
-                "path": "src/plugins/embeddable/public/lib/state_transfer/embeddable_state_transfer.ts",
+                "path": "src/platform/plugins/shared/embeddable/public/lib/state_transfer/embeddable_state_transfer.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -951,7 +939,7 @@
               },
               " | undefined"
             ],
-            "path": "src/plugins/embeddable/public/lib/state_transfer/embeddable_state_transfer.ts",
+            "path": "src/platform/plugins/shared/embeddable/public/lib/state_transfer/embeddable_state_transfer.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -967,7 +955,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "src/plugins/embeddable/public/lib/state_transfer/embeddable_state_transfer.ts",
+                "path": "src/platform/plugins/shared/embeddable/public/lib/state_transfer/embeddable_state_transfer.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -984,7 +972,7 @@
                 "signature": [
                   "boolean | undefined"
                 ],
-                "path": "src/plugins/embeddable/public/lib/state_transfer/embeddable_state_transfer.ts",
+                "path": "src/platform/plugins/shared/embeddable/public/lib/state_transfer/embeddable_state_transfer.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -1012,7 +1000,7 @@
               },
               "; } | undefined) => Promise<void>"
             ],
-            "path": "src/plugins/embeddable/public/lib/state_transfer/embeddable_state_transfer.ts",
+            "path": "src/platform/plugins/shared/embeddable/public/lib/state_transfer/embeddable_state_transfer.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1026,7 +1014,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "src/plugins/embeddable/public/lib/state_transfer/embeddable_state_transfer.ts",
+                "path": "src/platform/plugins/shared/embeddable/public/lib/state_transfer/embeddable_state_transfer.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1038,7 +1026,7 @@
                 "tags": [],
                 "label": "options",
                 "description": [],
-                "path": "src/plugins/embeddable/public/lib/state_transfer/embeddable_state_transfer.ts",
+                "path": "src/platform/plugins/shared/embeddable/public/lib/state_transfer/embeddable_state_transfer.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -1052,7 +1040,7 @@
                     "signature": [
                       "string | undefined"
                     ],
-                    "path": "src/plugins/embeddable/public/lib/state_transfer/embeddable_state_transfer.ts",
+                    "path": "src/platform/plugins/shared/embeddable/public/lib/state_transfer/embeddable_state_transfer.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -1066,7 +1054,7 @@
                     "signature": [
                       "boolean | undefined"
                     ],
-                    "path": "src/plugins/embeddable/public/lib/state_transfer/embeddable_state_transfer.ts",
+                    "path": "src/platform/plugins/shared/embeddable/public/lib/state_transfer/embeddable_state_transfer.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -1080,7 +1068,7 @@
                     "signature": [
                       "boolean | undefined"
                     ],
-                    "path": "src/plugins/embeddable/public/lib/state_transfer/embeddable_state_transfer.ts",
+                    "path": "src/platform/plugins/shared/embeddable/public/lib/state_transfer/embeddable_state_transfer.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -1100,7 +1088,7 @@
                         "text": "EmbeddableEditorState"
                       }
                     ],
-                    "path": "src/plugins/embeddable/public/lib/state_transfer/embeddable_state_transfer.ts",
+                    "path": "src/platform/plugins/shared/embeddable/public/lib/state_transfer/embeddable_state_transfer.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -1129,7 +1117,7 @@
               },
               "; } | undefined) => Promise<void>"
             ],
-            "path": "src/plugins/embeddable/public/lib/state_transfer/embeddable_state_transfer.ts",
+            "path": "src/platform/plugins/shared/embeddable/public/lib/state_transfer/embeddable_state_transfer.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1143,7 +1131,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "src/plugins/embeddable/public/lib/state_transfer/embeddable_state_transfer.ts",
+                "path": "src/platform/plugins/shared/embeddable/public/lib/state_transfer/embeddable_state_transfer.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1155,7 +1143,7 @@
                 "tags": [],
                 "label": "options",
                 "description": [],
-                "path": "src/plugins/embeddable/public/lib/state_transfer/embeddable_state_transfer.ts",
+                "path": "src/platform/plugins/shared/embeddable/public/lib/state_transfer/embeddable_state_transfer.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -1169,7 +1157,7 @@
                     "signature": [
                       "string | undefined"
                     ],
-                    "path": "src/plugins/embeddable/public/lib/state_transfer/embeddable_state_transfer.ts",
+                    "path": "src/platform/plugins/shared/embeddable/public/lib/state_transfer/embeddable_state_transfer.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -1189,7 +1177,7 @@
                         "text": "EmbeddablePackageState"
                       }
                     ],
-                    "path": "src/plugins/embeddable/public/lib/state_transfer/embeddable_state_transfer.ts",
+                    "path": "src/platform/plugins/shared/embeddable/public/lib/state_transfer/embeddable_state_transfer.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -1242,7 +1230,7 @@
           },
           ", React.ReactNode>"
         ],
-        "path": "src/plugins/embeddable/public/lib/embeddables/error_embeddable.tsx",
+        "path": "src/platform/plugins/shared/embeddable/public/lib/embeddables/error_embeddable.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1256,7 +1244,7 @@
             "signature": [
               "\"error\""
             ],
-            "path": "src/plugins/embeddable/public/lib/embeddables/error_embeddable.tsx",
+            "path": "src/platform/plugins/shared/embeddable/public/lib/embeddables/error_embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1270,7 +1258,7 @@
             "signature": [
               "string | Error"
             ],
-            "path": "src/plugins/embeddable/public/lib/embeddables/error_embeddable.tsx",
+            "path": "src/platform/plugins/shared/embeddable/public/lib/embeddables/error_embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1284,7 +1272,7 @@
             "signature": [
               "any"
             ],
-            "path": "src/plugins/embeddable/public/lib/embeddables/error_embeddable.tsx",
+            "path": "src/platform/plugins/shared/embeddable/public/lib/embeddables/error_embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1298,7 +1286,7 @@
                 "signature": [
                   "string | Error"
                 ],
-                "path": "src/plugins/embeddable/public/lib/embeddables/error_embeddable.tsx",
+                "path": "src/platform/plugins/shared/embeddable/public/lib/embeddables/error_embeddable.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1319,7 +1307,7 @@
                     "text": "EmbeddableInput"
                   }
                 ],
-                "path": "src/plugins/embeddable/public/lib/embeddables/error_embeddable.tsx",
+                "path": "src/platform/plugins/shared/embeddable/public/lib/embeddables/error_embeddable.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1337,7 +1325,7 @@
             "signature": [
               "() => void"
             ],
-            "path": "src/plugins/embeddable/public/lib/embeddables/error_embeddable.tsx",
+            "path": "src/platform/plugins/shared/embeddable/public/lib/embeddables/error_embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1353,7 +1341,7 @@
             "signature": [
               "() => React.JSX.Element"
             ],
-            "path": "src/plugins/embeddable/public/lib/embeddables/error_embeddable.tsx",
+            "path": "src/platform/plugins/shared/embeddable/public/lib/embeddables/error_embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1379,7 +1367,7 @@
           },
           " extends Error"
         ],
-        "path": "src/plugins/embeddable/public/lib/errors.ts",
+        "path": "src/platform/plugins/shared/embeddable/public/lib/errors.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1390,7 +1378,7 @@
             "tags": [],
             "label": "code",
             "description": [],
-            "path": "src/plugins/embeddable/public/lib/errors.ts",
+            "path": "src/platform/plugins/shared/embeddable/public/lib/errors.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1404,7 +1392,7 @@
             "signature": [
               "any"
             ],
-            "path": "src/plugins/embeddable/public/lib/errors.ts",
+            "path": "src/platform/plugins/shared/embeddable/public/lib/errors.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1430,7 +1418,7 @@
           },
           " extends Error"
         ],
-        "path": "src/plugins/embeddable/public/lib/errors.ts",
+        "path": "src/platform/plugins/shared/embeddable/public/lib/errors.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1441,7 +1429,7 @@
             "tags": [],
             "label": "code",
             "description": [],
-            "path": "src/plugins/embeddable/public/lib/errors.ts",
+            "path": "src/platform/plugins/shared/embeddable/public/lib/errors.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1455,7 +1443,7 @@
             "signature": [
               "any"
             ],
-            "path": "src/plugins/embeddable/public/lib/errors.ts",
+            "path": "src/platform/plugins/shared/embeddable/public/lib/errors.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1508,7 +1496,7 @@
           },
           ", any>>"
         ],
-        "path": "src/plugins/embeddable/public/lib/triggers/triggers.ts",
+        "path": "src/platform/plugins/shared/embeddable/public/lib/triggers/triggers.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1522,7 +1510,7 @@
             "signature": [
               "unknown"
             ],
-            "path": "src/plugins/embeddable/public/lib/triggers/triggers.ts",
+            "path": "src/platform/plugins/shared/embeddable/public/lib/triggers/triggers.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1556,7 +1544,7 @@
             "text": "MultiValueClickContext"
           }
         ],
-        "path": "src/plugins/embeddable/public/lib/triggers/triggers.ts",
+        "path": "src/platform/plugins/shared/embeddable/public/lib/triggers/triggers.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1576,7 +1564,7 @@
                 "text": "ChartActionContext"
               }
             ],
-            "path": "src/plugins/embeddable/public/lib/triggers/triggers.ts",
+            "path": "src/platform/plugins/shared/embeddable/public/lib/triggers/triggers.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1610,7 +1598,7 @@
             "text": "RangeSelectContext"
           }
         ],
-        "path": "src/plugins/embeddable/public/lib/triggers/triggers.ts",
+        "path": "src/platform/plugins/shared/embeddable/public/lib/triggers/triggers.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1630,7 +1618,7 @@
                 "text": "ChartActionContext"
               }
             ],
-            "path": "src/plugins/embeddable/public/lib/triggers/triggers.ts",
+            "path": "src/platform/plugins/shared/embeddable/public/lib/triggers/triggers.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1664,7 +1652,7 @@
             "text": "RowClickContext"
           }
         ],
-        "path": "src/plugins/embeddable/public/lib/triggers/triggers.ts",
+        "path": "src/platform/plugins/shared/embeddable/public/lib/triggers/triggers.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1684,7 +1672,7 @@
                 "text": "ChartActionContext"
               }
             ],
-            "path": "src/plugins/embeddable/public/lib/triggers/triggers.ts",
+            "path": "src/platform/plugins/shared/embeddable/public/lib/triggers/triggers.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1718,7 +1706,7 @@
             "text": "ValueClickContext"
           }
         ],
-        "path": "src/plugins/embeddable/public/lib/triggers/triggers.ts",
+        "path": "src/platform/plugins/shared/embeddable/public/lib/triggers/triggers.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1738,7 +1726,7 @@
                 "text": "ChartActionContext"
               }
             ],
-            "path": "src/plugins/embeddable/public/lib/triggers/triggers.ts",
+            "path": "src/platform/plugins/shared/embeddable/public/lib/triggers/triggers.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1772,7 +1760,7 @@
             "text": "OverlayRef"
           }
         ],
-        "path": "src/plugins/embeddable/public/add_from_library/open_add_from_library_flyout.tsx",
+        "path": "src/platform/plugins/shared/embeddable/public/add_from_library/open_add_from_library_flyout.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1783,7 +1771,7 @@
             "tags": [],
             "label": "{\n  container,\n  onClose,\n}",
             "description": [],
-            "path": "src/plugins/embeddable/public/add_from_library/open_add_from_library_flyout.tsx",
+            "path": "src/platform/plugins/shared/embeddable/public/add_from_library/open_add_from_library_flyout.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1803,7 +1791,7 @@
                     "text": "CanAddNewPanel"
                   }
                 ],
-                "path": "src/plugins/embeddable/public/add_from_library/open_add_from_library_flyout.tsx",
+                "path": "src/platform/plugins/shared/embeddable/public/add_from_library/open_add_from_library_flyout.tsx",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1817,7 +1805,7 @@
                 "signature": [
                   "(() => void) | undefined"
                 ],
-                "path": "src/plugins/embeddable/public/add_from_library/open_add_from_library_flyout.tsx",
+                "path": "src/platform/plugins/shared/embeddable/public/add_from_library/open_add_from_library_flyout.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [],
@@ -1889,7 +1877,7 @@
           },
           "<SerializedState>) => void) | undefined; }) => React.JSX.Element"
         ],
-        "path": "src/plugins/embeddable/public/react_embeddable_system/react_embeddable_renderer.tsx",
+        "path": "src/platform/plugins/shared/embeddable/public/react_embeddable_system/react_embeddable_renderer.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1900,7 +1888,7 @@
             "tags": [],
             "label": "{\n  type,\n  maybeId,\n  getParentApi,\n  panelProps,\n  onAnyStateChange,\n  onApiAvailable,\n  hidePanelChrome,\n}",
             "description": [],
-            "path": "src/plugins/embeddable/public/react_embeddable_system/react_embeddable_renderer.tsx",
+            "path": "src/platform/plugins/shared/embeddable/public/react_embeddable_system/react_embeddable_renderer.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1911,7 +1899,7 @@
                 "tags": [],
                 "label": "type",
                 "description": [],
-                "path": "src/plugins/embeddable/public/react_embeddable_system/react_embeddable_renderer.tsx",
+                "path": "src/platform/plugins/shared/embeddable/public/react_embeddable_system/react_embeddable_renderer.tsx",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1925,7 +1913,7 @@
                 "signature": [
                   "string | undefined"
                 ],
-                "path": "src/plugins/embeddable/public/react_embeddable_system/react_embeddable_renderer.tsx",
+                "path": "src/platform/plugins/shared/embeddable/public/react_embeddable_system/react_embeddable_renderer.tsx",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1939,7 +1927,7 @@
                 "signature": [
                   "() => ParentApi"
                 ],
-                "path": "src/plugins/embeddable/public/react_embeddable_system/react_embeddable_renderer.tsx",
+                "path": "src/platform/plugins/shared/embeddable/public/react_embeddable_system/react_embeddable_renderer.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [],
@@ -1955,7 +1943,7 @@
                 "signature": [
                   "((api: Api) => void) | undefined"
                 ],
-                "path": "src/plugins/embeddable/public/react_embeddable_system/react_embeddable_renderer.tsx",
+                "path": "src/platform/plugins/shared/embeddable/public/react_embeddable_system/react_embeddable_renderer.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -1969,7 +1957,7 @@
                     "signature": [
                       "Api"
                     ],
-                    "path": "src/plugins/embeddable/public/react_embeddable_system/react_embeddable_renderer.tsx",
+                    "path": "src/platform/plugins/shared/embeddable/public/react_embeddable_system/react_embeddable_renderer.tsx",
                     "deprecated": false,
                     "trackAdoption": false,
                     "isRequired": true
@@ -1995,7 +1983,7 @@
                   },
                   "<Api, {}>, \"showShadow\" | \"showBorder\" | \"showBadges\" | \"showNotifications\" | \"hideLoader\" | \"hideHeader\" | \"hideInspector\" | \"getActions\" | \"setDragHandles\"> | undefined"
                 ],
-                "path": "src/plugins/embeddable/public/react_embeddable_system/react_embeddable_renderer.tsx",
+                "path": "src/platform/plugins/shared/embeddable/public/react_embeddable_system/react_embeddable_renderer.tsx",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -2009,7 +1997,7 @@
                 "signature": [
                   "boolean | undefined"
                 ],
-                "path": "src/plugins/embeddable/public/react_embeddable_system/react_embeddable_renderer.tsx",
+                "path": "src/platform/plugins/shared/embeddable/public/react_embeddable_system/react_embeddable_renderer.tsx",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -2033,7 +2021,7 @@
                   },
                   "<SerializedState>) => void) | undefined"
                 ],
-                "path": "src/plugins/embeddable/public/react_embeddable_system/react_embeddable_renderer.tsx",
+                "path": "src/platform/plugins/shared/embeddable/public/react_embeddable_system/react_embeddable_renderer.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -2054,7 +2042,7 @@
                       },
                       "<SerializedState>"
                     ],
-                    "path": "src/plugins/embeddable/public/react_embeddable_system/react_embeddable_renderer.tsx",
+                    "path": "src/platform/plugins/shared/embeddable/public/react_embeddable_system/react_embeddable_renderer.tsx",
                     "deprecated": false,
                     "trackAdoption": false,
                     "isRequired": true
@@ -2094,7 +2082,7 @@
           },
           ">[]"
         ],
-        "path": "src/plugins/embeddable/public/add_from_library/registry.ts",
+        "path": "src/platform/plugins/shared/embeddable/public/add_from_library/registry.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -2164,7 +2152,7 @@
           },
           "<RuntimeState>"
         ],
-        "path": "src/plugins/embeddable/public/react_embeddable_system/types.ts",
+        "path": "src/platform/plugins/shared/embeddable/public/react_embeddable_system/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -2189,7 +2177,7 @@
           },
           "<T>"
         ],
-        "path": "src/plugins/embeddable/public/lib/triggers/triggers.ts",
+        "path": "src/platform/plugins/shared/embeddable/public/lib/triggers/triggers.ts",
         "deprecated": true,
         "trackAdoption": false,
         "references": [],
@@ -2204,7 +2192,7 @@
             "signature": [
               "T"
             ],
-            "path": "src/plugins/embeddable/public/lib/triggers/triggers.ts",
+            "path": "src/platform/plugins/shared/embeddable/public/lib/triggers/triggers.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2220,7 +2208,7 @@
         "description": [
           "\nA state package that contains information an editor will need to create or edit an embeddable then redirect back."
         ],
-        "path": "src/plugins/embeddable/public/lib/state_transfer/types.ts",
+        "path": "src/platform/plugins/shared/embeddable/public/lib/state_transfer/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2231,7 +2219,7 @@
             "tags": [],
             "label": "originatingApp",
             "description": [],
-            "path": "src/plugins/embeddable/public/lib/state_transfer/types.ts",
+            "path": "src/platform/plugins/shared/embeddable/public/lib/state_transfer/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2245,7 +2233,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/embeddable/public/lib/state_transfer/types.ts",
+            "path": "src/platform/plugins/shared/embeddable/public/lib/state_transfer/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2259,7 +2247,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/embeddable/public/lib/state_transfer/types.ts",
+            "path": "src/platform/plugins/shared/embeddable/public/lib/state_transfer/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2273,7 +2261,7 @@
             "signature": [
               "object | undefined"
             ],
-            "path": "src/plugins/embeddable/public/lib/state_transfer/types.ts",
+            "path": "src/platform/plugins/shared/embeddable/public/lib/state_transfer/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2289,7 +2277,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/embeddable/public/lib/state_transfer/types.ts",
+            "path": "src/platform/plugins/shared/embeddable/public/lib/state_transfer/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2303,7 +2291,7 @@
         "tags": [],
         "label": "EmbeddableOutput",
         "description": [],
-        "path": "src/plugins/embeddable/public/lib/embeddables/i_embeddable.ts",
+        "path": "src/platform/plugins/shared/embeddable/public/lib/embeddables/i_embeddable.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2317,7 +2305,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/plugins/embeddable/public/lib/embeddables/i_embeddable.ts",
+            "path": "src/platform/plugins/shared/embeddable/public/lib/embeddables/i_embeddable.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2331,7 +2319,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/plugins/embeddable/public/lib/embeddables/i_embeddable.ts",
+            "path": "src/platform/plugins/shared/embeddable/public/lib/embeddables/i_embeddable.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2352,7 +2340,7 @@
               },
               " | undefined"
             ],
-            "path": "src/plugins/embeddable/public/lib/embeddables/i_embeddable.ts",
+            "path": "src/platform/plugins/shared/embeddable/public/lib/embeddables/i_embeddable.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2366,7 +2354,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/embeddable/public/lib/embeddables/i_embeddable.ts",
+            "path": "src/platform/plugins/shared/embeddable/public/lib/embeddables/i_embeddable.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2380,7 +2368,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/embeddable/public/lib/embeddables/i_embeddable.ts",
+            "path": "src/platform/plugins/shared/embeddable/public/lib/embeddables/i_embeddable.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2394,7 +2382,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/embeddable/public/lib/embeddables/i_embeddable.ts",
+            "path": "src/platform/plugins/shared/embeddable/public/lib/embeddables/i_embeddable.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2408,7 +2396,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/embeddable/public/lib/embeddables/i_embeddable.ts",
+            "path": "src/platform/plugins/shared/embeddable/public/lib/embeddables/i_embeddable.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2422,7 +2410,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/embeddable/public/lib/embeddables/i_embeddable.ts",
+            "path": "src/platform/plugins/shared/embeddable/public/lib/embeddables/i_embeddable.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2436,7 +2424,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/embeddable/public/lib/embeddables/i_embeddable.ts",
+            "path": "src/platform/plugins/shared/embeddable/public/lib/embeddables/i_embeddable.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2450,7 +2438,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/embeddable/public/lib/embeddables/i_embeddable.ts",
+            "path": "src/platform/plugins/shared/embeddable/public/lib/embeddables/i_embeddable.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2464,7 +2452,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/plugins/embeddable/public/lib/embeddables/i_embeddable.ts",
+            "path": "src/platform/plugins/shared/embeddable/public/lib/embeddables/i_embeddable.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2478,7 +2466,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/plugins/embeddable/public/lib/embeddables/i_embeddable.ts",
+            "path": "src/platform/plugins/shared/embeddable/public/lib/embeddables/i_embeddable.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2492,7 +2480,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/plugins/embeddable/public/lib/embeddables/i_embeddable.ts",
+            "path": "src/platform/plugins/shared/embeddable/public/lib/embeddables/i_embeddable.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2506,7 +2494,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/embeddable/public/lib/embeddables/i_embeddable.ts",
+            "path": "src/platform/plugins/shared/embeddable/public/lib/embeddables/i_embeddable.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2522,7 +2510,7 @@
         "description": [
           "\nA state package that contains all fields necessary to create or update an embeddable by reference or by value in a container."
         ],
-        "path": "src/plugins/embeddable/public/lib/state_transfer/types.ts",
+        "path": "src/platform/plugins/shared/embeddable/public/lib/state_transfer/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2533,7 +2521,7 @@
             "tags": [],
             "label": "type",
             "description": [],
-            "path": "src/plugins/embeddable/public/lib/state_transfer/types.ts",
+            "path": "src/platform/plugins/shared/embeddable/public/lib/state_transfer/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2549,7 +2537,7 @@
             "signature": [
               "object"
             ],
-            "path": "src/plugins/embeddable/public/lib/state_transfer/types.ts",
+            "path": "src/platform/plugins/shared/embeddable/public/lib/state_transfer/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2563,7 +2551,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/embeddable/public/lib/state_transfer/types.ts",
+            "path": "src/platform/plugins/shared/embeddable/public/lib/state_transfer/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2577,7 +2565,7 @@
             "signature": [
               "{ width?: number | undefined; height?: number | undefined; } | undefined"
             ],
-            "path": "src/plugins/embeddable/public/lib/state_transfer/types.ts",
+            "path": "src/platform/plugins/shared/embeddable/public/lib/state_transfer/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2593,7 +2581,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/embeddable/public/lib/state_transfer/types.ts",
+            "path": "src/platform/plugins/shared/embeddable/public/lib/state_transfer/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2625,7 +2613,7 @@
           },
           "<P>>"
         ],
-        "path": "src/plugins/embeddable/public/enhancements/types.ts",
+        "path": "src/platform/plugins/shared/embeddable/public/enhancements/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2636,7 +2624,7 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "path": "src/plugins/embeddable/public/enhancements/types.ts",
+            "path": "src/platform/plugins/shared/embeddable/public/enhancements/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2660,7 +2648,7 @@
           },
           "<I, O, N>"
         ],
-        "path": "src/plugins/embeddable/public/lib/embeddables/i_embeddable.ts",
+        "path": "src/platform/plugins/shared/embeddable/public/lib/embeddables/i_embeddable.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2673,7 +2661,7 @@
             "description": [
               "\nThe type of embeddable, this is what will be used to take a serialized\nembeddable and find the correct factory for which to create an instance of it."
             ],
-            "path": "src/plugins/embeddable/public/lib/embeddables/i_embeddable.ts",
+            "path": "src/platform/plugins/shared/embeddable/public/lib/embeddables/i_embeddable.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2686,7 +2674,7 @@
             "description": [
               "\nA unique identifier for this embeddable. Mainly only used by containers to map their\nPanel States to a child embeddable instance."
             ],
-            "path": "src/plugins/embeddable/public/lib/embeddables/i_embeddable.ts",
+            "path": "src/platform/plugins/shared/embeddable/public/lib/embeddables/i_embeddable.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2699,7 +2687,7 @@
             "description": [
               "\nIf set to true, defer embeddable load tells the container that this embeddable\ntype isn't completely loaded when the constructor returns. This embeddable\nwill have to manually call setChildLoaded on its parent when all of its initial\noutput is finalized. For instance, after loading a saved object."
             ],
-            "path": "src/plugins/embeddable/public/lib/embeddables/i_embeddable.ts",
+            "path": "src/platform/plugins/shared/embeddable/public/lib/embeddables/i_embeddable.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2715,7 +2703,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "src/plugins/embeddable/public/lib/embeddables/i_embeddable.ts",
+            "path": "src/platform/plugins/shared/embeddable/public/lib/embeddables/i_embeddable.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2731,7 +2719,7 @@
             "signature": [
               "object | undefined"
             ],
-            "path": "src/plugins/embeddable/public/lib/embeddables/i_embeddable.ts",
+            "path": "src/platform/plugins/shared/embeddable/public/lib/embeddables/i_embeddable.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2747,7 +2735,7 @@
             "signature": [
               "Error | undefined"
             ],
-            "path": "src/plugins/embeddable/public/lib/embeddables/i_embeddable.ts",
+            "path": "src/platform/plugins/shared/embeddable/public/lib/embeddables/i_embeddable.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2763,7 +2751,7 @@
             "signature": [
               "() => boolean"
             ],
-            "path": "src/plugins/embeddable/public/lib/embeddables/i_embeddable.ts",
+            "path": "src/platform/plugins/shared/embeddable/public/lib/embeddables/i_embeddable.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -2781,7 +2769,7 @@
             "signature": [
               "() => Readonly<I>"
             ],
-            "path": "src/plugins/embeddable/public/lib/embeddables/i_embeddable.ts",
+            "path": "src/platform/plugins/shared/embeddable/public/lib/embeddables/i_embeddable.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -2799,7 +2787,7 @@
             "signature": [
               "() => Readonly<Partial<I>>"
             ],
-            "path": "src/plugins/embeddable/public/lib/embeddables/i_embeddable.ts",
+            "path": "src/platform/plugins/shared/embeddable/public/lib/embeddables/i_embeddable.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -2817,7 +2805,7 @@
             "signature": [
               "() => Readonly<Partial<I>>"
             ],
-            "path": "src/plugins/embeddable/public/lib/embeddables/i_embeddable.ts",
+            "path": "src/platform/plugins/shared/embeddable/public/lib/embeddables/i_embeddable.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -2835,7 +2823,7 @@
             "signature": [
               "() => Readonly<O>"
             ],
-            "path": "src/plugins/embeddable/public/lib/embeddables/i_embeddable.ts",
+            "path": "src/platform/plugins/shared/embeddable/public/lib/embeddables/i_embeddable.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -2853,7 +2841,7 @@
             "signature": [
               "(changes: Partial<I>) => void"
             ],
-            "path": "src/plugins/embeddable/public/lib/embeddables/i_embeddable.ts",
+            "path": "src/platform/plugins/shared/embeddable/public/lib/embeddables/i_embeddable.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2867,7 +2855,7 @@
                 "signature": [
                   "Partial<I>"
                 ],
-                "path": "src/plugins/embeddable/public/lib/embeddables/i_embeddable.ts",
+                "path": "src/platform/plugins/shared/embeddable/public/lib/embeddables/i_embeddable.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2887,7 +2875,7 @@
             "signature": [
               "(changes: Partial<O>) => void"
             ],
-            "path": "src/plugins/embeddable/public/lib/embeddables/i_embeddable.ts",
+            "path": "src/platform/plugins/shared/embeddable/public/lib/embeddables/i_embeddable.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2901,7 +2889,7 @@
                 "signature": [
                   "Partial<O>"
                 ],
-                "path": "src/plugins/embeddable/public/lib/embeddables/i_embeddable.ts",
+                "path": "src/platform/plugins/shared/embeddable/public/lib/embeddables/i_embeddable.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2923,7 +2911,7 @@
               "Observable",
               "<I>>"
             ],
-            "path": "src/plugins/embeddable/public/lib/embeddables/i_embeddable.ts",
+            "path": "src/platform/plugins/shared/embeddable/public/lib/embeddables/i_embeddable.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -2943,7 +2931,7 @@
               "Observable",
               "<O>>"
             ],
-            "path": "src/plugins/embeddable/public/lib/embeddables/i_embeddable.ts",
+            "path": "src/platform/plugins/shared/embeddable/public/lib/embeddables/i_embeddable.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -2961,7 +2949,7 @@
             "signature": [
               "() => string | undefined"
             ],
-            "path": "src/plugins/embeddable/public/lib/embeddables/i_embeddable.ts",
+            "path": "src/platform/plugins/shared/embeddable/public/lib/embeddables/i_embeddable.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -2979,7 +2967,7 @@
             "signature": [
               "() => string | undefined"
             ],
-            "path": "src/plugins/embeddable/public/lib/embeddables/i_embeddable.ts",
+            "path": "src/platform/plugins/shared/embeddable/public/lib/embeddables/i_embeddable.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -2997,7 +2985,7 @@
             "signature": [
               "(domNode: HTMLElement | Element) => void | N"
             ],
-            "path": "src/plugins/embeddable/public/lib/embeddables/i_embeddable.ts",
+            "path": "src/platform/plugins/shared/embeddable/public/lib/embeddables/i_embeddable.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -3011,7 +2999,7 @@
                 "signature": [
                   "HTMLElement | Element"
                 ],
-                "path": "src/plugins/embeddable/public/lib/embeddables/i_embeddable.ts",
+                "path": "src/platform/plugins/shared/embeddable/public/lib/embeddables/i_embeddable.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -3041,7 +3029,7 @@
               },
               ", domNode: HTMLElement | Element) => N | (() => void)) | undefined"
             ],
-            "path": "src/plugins/embeddable/public/lib/embeddables/i_embeddable.ts",
+            "path": "src/platform/plugins/shared/embeddable/public/lib/embeddables/i_embeddable.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -3061,7 +3049,7 @@
                     "text": "ErrorLike"
                   }
                 ],
-                "path": "src/plugins/embeddable/public/lib/embeddables/i_embeddable.ts",
+                "path": "src/platform/plugins/shared/embeddable/public/lib/embeddables/i_embeddable.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -3076,7 +3064,7 @@
                 "signature": [
                   "HTMLElement | Element"
                 ],
-                "path": "src/plugins/embeddable/public/lib/embeddables/i_embeddable.ts",
+                "path": "src/platform/plugins/shared/embeddable/public/lib/embeddables/i_embeddable.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -3098,7 +3086,7 @@
             "signature": [
               "() => void"
             ],
-            "path": "src/plugins/embeddable/public/lib/embeddables/i_embeddable.ts",
+            "path": "src/platform/plugins/shared/embeddable/public/lib/embeddables/i_embeddable.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -3126,7 +3114,7 @@
               },
               " | undefined"
             ],
-            "path": "src/plugins/embeddable/public/lib/embeddables/i_embeddable.ts",
+            "path": "src/platform/plugins/shared/embeddable/public/lib/embeddables/i_embeddable.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -3146,7 +3134,7 @@
             "signature": [
               "() => void"
             ],
-            "path": "src/plugins/embeddable/public/lib/embeddables/i_embeddable.ts",
+            "path": "src/platform/plugins/shared/embeddable/public/lib/embeddables/i_embeddable.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -3164,7 +3152,7 @@
             "signature": [
               "() => string[]"
             ],
-            "path": "src/plugins/embeddable/public/lib/embeddables/i_embeddable.ts",
+            "path": "src/platform/plugins/shared/embeddable/public/lib/embeddables/i_embeddable.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -3182,7 +3170,7 @@
             "signature": [
               "(lastInput: Partial<I>) => Promise<boolean>"
             ],
-            "path": "src/plugins/embeddable/public/lib/embeddables/i_embeddable.ts",
+            "path": "src/platform/plugins/shared/embeddable/public/lib/embeddables/i_embeddable.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -3196,7 +3184,7 @@
                 "signature": [
                   "Partial<I>"
                 ],
-                "path": "src/plugins/embeddable/public/lib/embeddables/i_embeddable.ts",
+                "path": "src/platform/plugins/shared/embeddable/public/lib/embeddables/i_embeddable.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -3214,7 +3202,7 @@
             "signature": [
               "() => Promise<void>"
             ],
-            "path": "src/plugins/embeddable/public/lib/embeddables/i_embeddable.ts",
+            "path": "src/platform/plugins/shared/embeddable/public/lib/embeddables/i_embeddable.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -3230,7 +3218,7 @@
         "tags": [],
         "label": "PropertySpec",
         "description": [],
-        "path": "src/plugins/embeddable/public/lib/types.ts",
+        "path": "src/platform/plugins/shared/embeddable/public/lib/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3241,7 +3229,7 @@
             "tags": [],
             "label": "displayName",
             "description": [],
-            "path": "src/plugins/embeddable/public/lib/types.ts",
+            "path": "src/platform/plugins/shared/embeddable/public/lib/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3252,7 +3240,7 @@
             "tags": [],
             "label": "accessPath",
             "description": [],
-            "path": "src/plugins/embeddable/public/lib/types.ts",
+            "path": "src/platform/plugins/shared/embeddable/public/lib/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3263,7 +3251,7 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "path": "src/plugins/embeddable/public/lib/types.ts",
+            "path": "src/platform/plugins/shared/embeddable/public/lib/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3274,7 +3262,7 @@
             "tags": [],
             "label": "description",
             "description": [],
-            "path": "src/plugins/embeddable/public/lib/types.ts",
+            "path": "src/platform/plugins/shared/embeddable/public/lib/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3288,7 +3276,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/embeddable/public/lib/types.ts",
+            "path": "src/platform/plugins/shared/embeddable/public/lib/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3314,7 +3302,7 @@
           },
           "<SerializedState, RuntimeState, Api>"
         ],
-        "path": "src/plugins/embeddable/public/react_embeddable_system/types.ts",
+        "path": "src/platform/plugins/shared/embeddable/public/react_embeddable_system/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3327,7 +3315,7 @@
             "description": [
               "\nA unique key for the type of this embeddable. The React Embeddable Renderer will use this type\nto find this factory."
             ],
-            "path": "src/plugins/embeddable/public/react_embeddable_system/types.ts",
+            "path": "src/platform/plugins/shared/embeddable/public/react_embeddable_system/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3359,7 +3347,7 @@
               },
               "<RuntimeState>"
             ],
-            "path": "src/plugins/embeddable/public/react_embeddable_system/types.ts",
+            "path": "src/platform/plugins/shared/embeddable/public/react_embeddable_system/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -3380,7 +3368,7 @@
                   },
                   "<SerializedState>"
                 ],
-                "path": "src/plugins/embeddable/public/react_embeddable_system/types.ts",
+                "path": "src/platform/plugins/shared/embeddable/public/react_embeddable_system/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -3420,7 +3408,7 @@
               "SetReactEmbeddableApiRegistration",
               "<SerializedState, RuntimeState, Api>) => Api, lastSavedRuntimeState: RuntimeState) => Promise<{ Component: React.FC<{}>; api: Api; }>"
             ],
-            "path": "src/plugins/embeddable/public/react_embeddable_system/types.ts",
+            "path": "src/platform/plugins/shared/embeddable/public/react_embeddable_system/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -3434,7 +3422,7 @@
                 "signature": [
                   "RuntimeState"
                 ],
-                "path": "src/plugins/embeddable/public/react_embeddable_system/types.ts",
+                "path": "src/platform/plugins/shared/embeddable/public/react_embeddable_system/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -3467,7 +3455,7 @@
                   },
                   "<RuntimeState>"
                 ],
-                "path": "src/plugins/embeddable/public/react_embeddable_system/types.ts",
+                "path": "src/platform/plugins/shared/embeddable/public/react_embeddable_system/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -3482,7 +3470,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "src/plugins/embeddable/public/react_embeddable_system/types.ts",
+                "path": "src/platform/plugins/shared/embeddable/public/react_embeddable_system/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -3497,7 +3485,7 @@
                 "signature": [
                   "unknown"
                 ],
-                "path": "src/plugins/embeddable/public/react_embeddable_system/types.ts",
+                "path": "src/platform/plugins/shared/embeddable/public/react_embeddable_system/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -3514,7 +3502,7 @@
                   "SetReactEmbeddableApiRegistration",
                   "<SerializedState, RuntimeState, Api>) => Api"
                 ],
-                "path": "src/plugins/embeddable/public/react_embeddable_system/types.ts",
+                "path": "src/platform/plugins/shared/embeddable/public/react_embeddable_system/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -3529,7 +3517,7 @@
                 "signature": [
                   "RuntimeState"
                 ],
-                "path": "src/plugins/embeddable/public/react_embeddable_system/types.ts",
+                "path": "src/platform/plugins/shared/embeddable/public/react_embeddable_system/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -3549,7 +3537,7 @@
         "tags": [],
         "label": "ViewMode",
         "description": [],
-        "path": "src/plugins/embeddable/common/types.ts",
+        "path": "src/platform/plugins/shared/embeddable/common/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3566,7 +3554,7 @@
         "signature": [
           "\"CELL_VALUE_TRIGGER\""
         ],
-        "path": "src/plugins/embeddable/public/lib/triggers/triggers.ts",
+        "path": "src/platform/plugins/shared/embeddable/public/lib/triggers/triggers.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3597,7 +3585,7 @@
           },
           " | undefined; }[]; }"
         ],
-        "path": "src/plugins/embeddable/public/lib/triggers/triggers.ts",
+        "path": "src/platform/plugins/shared/embeddable/public/lib/triggers/triggers.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3642,7 +3630,7 @@
             "text": "RowClickContext"
           }
         ],
-        "path": "src/plugins/embeddable/public/lib/triggers/triggers.ts",
+        "path": "src/platform/plugins/shared/embeddable/public/lib/triggers/triggers.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3657,7 +3645,7 @@
         "signature": [
           "\"CONTEXT_MENU_TRIGGER\""
         ],
-        "path": "src/plugins/embeddable/public/lib/triggers/triggers.ts",
+        "path": "src/platform/plugins/shared/embeddable/public/lib/triggers/triggers.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3696,7 +3684,7 @@
           },
           " | undefined; }"
         ],
-        "path": "src/plugins/embeddable/common/types.ts",
+        "path": "src/platform/plugins/shared/embeddable/common/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3711,7 +3699,7 @@
         "signature": [
           "\"MULTI_VALUE_CLICK_TRIGGER\""
         ],
-        "path": "src/plugins/embeddable/public/lib/triggers/triggers.ts",
+        "path": "src/platform/plugins/shared/embeddable/public/lib/triggers/triggers.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3750,7 +3738,7 @@
           },
           " | undefined; }[]; timeFieldName?: string | undefined; negate?: boolean | undefined; }; }"
         ],
-        "path": "src/plugins/embeddable/public/lib/triggers/triggers.ts",
+        "path": "src/platform/plugins/shared/embeddable/public/lib/triggers/triggers.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3765,7 +3753,7 @@
         "signature": [
           "\"PANEL_BADGE_TRIGGER\""
         ],
-        "path": "src/plugins/embeddable/public/lib/triggers/triggers.ts",
+        "path": "src/platform/plugins/shared/embeddable/public/lib/triggers/triggers.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3780,7 +3768,7 @@
         "signature": [
           "\"PANEL_HOVER_TRIGGER\""
         ],
-        "path": "src/plugins/embeddable/public/lib/triggers/triggers.ts",
+        "path": "src/platform/plugins/shared/embeddable/public/lib/triggers/triggers.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3795,7 +3783,7 @@
         "signature": [
           "\"PANEL_NOTIFICATION_TRIGGER\""
         ],
-        "path": "src/plugins/embeddable/public/lib/triggers/triggers.ts",
+        "path": "src/platform/plugins/shared/embeddable/public/lib/triggers/triggers.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3826,7 +3814,7 @@
           },
           "; column: number; range: number[]; timeFieldName?: string | undefined; }; }"
         ],
-        "path": "src/plugins/embeddable/public/lib/triggers/triggers.ts",
+        "path": "src/platform/plugins/shared/embeddable/public/lib/triggers/triggers.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3841,7 +3829,7 @@
         "signature": [
           "\"SELECT_RANGE_TRIGGER\""
         ],
-        "path": "src/plugins/embeddable/public/lib/triggers/triggers.ts",
+        "path": "src/platform/plugins/shared/embeddable/public/lib/triggers/triggers.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3856,7 +3844,7 @@
         "signature": [
           "\"VALUE_CLICK_TRIGGER\""
         ],
-        "path": "src/plugins/embeddable/public/lib/triggers/triggers.ts",
+        "path": "src/platform/plugins/shared/embeddable/public/lib/triggers/triggers.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3887,7 +3875,7 @@
           },
           ", \"columns\" | \"rows\">; column: number; row: number; value: any; }[]; timeFieldName?: string | undefined; negate?: boolean | undefined; }; }"
         ],
-        "path": "src/plugins/embeddable/public/lib/triggers/triggers.ts",
+        "path": "src/platform/plugins/shared/embeddable/public/lib/triggers/triggers.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3901,7 +3889,7 @@
         "tags": [],
         "label": "cellValueTrigger",
         "description": [],
-        "path": "src/plugins/embeddable/public/lib/triggers/triggers.ts",
+        "path": "src/platform/plugins/shared/embeddable/public/lib/triggers/triggers.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3912,7 +3900,7 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "path": "src/plugins/embeddable/public/lib/triggers/triggers.ts",
+            "path": "src/platform/plugins/shared/embeddable/public/lib/triggers/triggers.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3923,7 +3911,7 @@
             "tags": [],
             "label": "title",
             "description": [],
-            "path": "src/plugins/embeddable/public/lib/triggers/triggers.ts",
+            "path": "src/platform/plugins/shared/embeddable/public/lib/triggers/triggers.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3934,7 +3922,7 @@
             "tags": [],
             "label": "description",
             "description": [],
-            "path": "src/plugins/embeddable/public/lib/triggers/triggers.ts",
+            "path": "src/platform/plugins/shared/embeddable/public/lib/triggers/triggers.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3948,7 +3936,7 @@
         "tags": [],
         "label": "COMMON_EMBEDDABLE_GROUPING",
         "description": [],
-        "path": "src/plugins/embeddable/public/lib/embeddables/common/constants.ts",
+        "path": "src/platform/plugins/shared/embeddable/public/lib/embeddables/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3959,7 +3947,7 @@
             "tags": [],
             "label": "annotation",
             "description": [],
-            "path": "src/plugins/embeddable/public/lib/embeddables/common/constants.ts",
+            "path": "src/platform/plugins/shared/embeddable/public/lib/embeddables/common/constants.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -3970,7 +3958,7 @@
                 "tags": [],
                 "label": "id",
                 "description": [],
-                "path": "src/plugins/embeddable/public/lib/embeddables/common/constants.ts",
+                "path": "src/platform/plugins/shared/embeddable/public/lib/embeddables/common/constants.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -3984,7 +3972,7 @@
                 "signature": [
                   "() => string"
                 ],
-                "path": "src/plugins/embeddable/public/lib/embeddables/common/constants.ts",
+                "path": "src/platform/plugins/shared/embeddable/public/lib/embeddables/common/constants.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [],
@@ -3997,7 +3985,7 @@
                 "tags": [],
                 "label": "order",
                 "description": [],
-                "path": "src/plugins/embeddable/public/lib/embeddables/common/constants.ts",
+                "path": "src/platform/plugins/shared/embeddable/public/lib/embeddables/common/constants.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -4010,7 +3998,7 @@
             "tags": [],
             "label": "other",
             "description": [],
-            "path": "src/plugins/embeddable/public/lib/embeddables/common/constants.ts",
+            "path": "src/platform/plugins/shared/embeddable/public/lib/embeddables/common/constants.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -4021,7 +4009,7 @@
                 "tags": [],
                 "label": "id",
                 "description": [],
-                "path": "src/plugins/embeddable/public/lib/embeddables/common/constants.ts",
+                "path": "src/platform/plugins/shared/embeddable/public/lib/embeddables/common/constants.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -4035,7 +4023,7 @@
                 "signature": [
                   "() => string"
                 ],
-                "path": "src/plugins/embeddable/public/lib/embeddables/common/constants.ts",
+                "path": "src/platform/plugins/shared/embeddable/public/lib/embeddables/common/constants.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [],
@@ -4051,7 +4039,7 @@
                 "signature": [
                   "() => string"
                 ],
-                "path": "src/plugins/embeddable/public/lib/embeddables/common/constants.ts",
+                "path": "src/platform/plugins/shared/embeddable/public/lib/embeddables/common/constants.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [],
@@ -4064,7 +4052,7 @@
                 "tags": [],
                 "label": "order",
                 "description": [],
-                "path": "src/plugins/embeddable/public/lib/embeddables/common/constants.ts",
+                "path": "src/platform/plugins/shared/embeddable/public/lib/embeddables/common/constants.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -4077,7 +4065,7 @@
             "tags": [],
             "label": "legacy",
             "description": [],
-            "path": "src/plugins/embeddable/public/lib/embeddables/common/constants.ts",
+            "path": "src/platform/plugins/shared/embeddable/public/lib/embeddables/common/constants.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -4088,7 +4076,7 @@
                 "tags": [],
                 "label": "id",
                 "description": [],
-                "path": "src/plugins/embeddable/public/lib/embeddables/common/constants.ts",
+                "path": "src/platform/plugins/shared/embeddable/public/lib/embeddables/common/constants.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -4102,7 +4090,7 @@
                 "signature": [
                   "() => string"
                 ],
-                "path": "src/plugins/embeddable/public/lib/embeddables/common/constants.ts",
+                "path": "src/platform/plugins/shared/embeddable/public/lib/embeddables/common/constants.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [],
@@ -4115,7 +4103,7 @@
                 "tags": [],
                 "label": "order",
                 "description": [],
-                "path": "src/plugins/embeddable/public/lib/embeddables/common/constants.ts",
+                "path": "src/platform/plugins/shared/embeddable/public/lib/embeddables/common/constants.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -4131,7 +4119,7 @@
         "tags": [],
         "label": "contextMenuTrigger",
         "description": [],
-        "path": "src/plugins/embeddable/public/lib/triggers/triggers.ts",
+        "path": "src/platform/plugins/shared/embeddable/public/lib/triggers/triggers.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -4142,7 +4130,7 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "path": "src/plugins/embeddable/public/lib/triggers/triggers.ts",
+            "path": "src/platform/plugins/shared/embeddable/public/lib/triggers/triggers.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4153,7 +4141,7 @@
             "tags": [],
             "label": "title",
             "description": [],
-            "path": "src/plugins/embeddable/public/lib/triggers/triggers.ts",
+            "path": "src/platform/plugins/shared/embeddable/public/lib/triggers/triggers.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4164,7 +4152,7 @@
             "tags": [],
             "label": "description",
             "description": [],
-            "path": "src/plugins/embeddable/public/lib/triggers/triggers.ts",
+            "path": "src/platform/plugins/shared/embeddable/public/lib/triggers/triggers.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -4178,7 +4166,7 @@
         "tags": [],
         "label": "panelBadgeTrigger",
         "description": [],
-        "path": "src/plugins/embeddable/public/lib/triggers/triggers.ts",
+        "path": "src/platform/plugins/shared/embeddable/public/lib/triggers/triggers.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -4189,7 +4177,7 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "path": "src/plugins/embeddable/public/lib/triggers/triggers.ts",
+            "path": "src/platform/plugins/shared/embeddable/public/lib/triggers/triggers.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4200,7 +4188,7 @@
             "tags": [],
             "label": "title",
             "description": [],
-            "path": "src/plugins/embeddable/public/lib/triggers/triggers.ts",
+            "path": "src/platform/plugins/shared/embeddable/public/lib/triggers/triggers.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4211,7 +4199,7 @@
             "tags": [],
             "label": "description",
             "description": [],
-            "path": "src/plugins/embeddable/public/lib/triggers/triggers.ts",
+            "path": "src/platform/plugins/shared/embeddable/public/lib/triggers/triggers.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -4225,7 +4213,7 @@
         "tags": [],
         "label": "panelHoverTrigger",
         "description": [],
-        "path": "src/plugins/embeddable/public/lib/triggers/triggers.ts",
+        "path": "src/platform/plugins/shared/embeddable/public/lib/triggers/triggers.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -4236,7 +4224,7 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "path": "src/plugins/embeddable/public/lib/triggers/triggers.ts",
+            "path": "src/platform/plugins/shared/embeddable/public/lib/triggers/triggers.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4247,7 +4235,7 @@
             "tags": [],
             "label": "title",
             "description": [],
-            "path": "src/plugins/embeddable/public/lib/triggers/triggers.ts",
+            "path": "src/platform/plugins/shared/embeddable/public/lib/triggers/triggers.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4258,7 +4246,7 @@
             "tags": [],
             "label": "description",
             "description": [],
-            "path": "src/plugins/embeddable/public/lib/triggers/triggers.ts",
+            "path": "src/platform/plugins/shared/embeddable/public/lib/triggers/triggers.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -4272,7 +4260,7 @@
         "tags": [],
         "label": "panelNotificationTrigger",
         "description": [],
-        "path": "src/plugins/embeddable/public/lib/triggers/triggers.ts",
+        "path": "src/platform/plugins/shared/embeddable/public/lib/triggers/triggers.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -4283,7 +4271,7 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "path": "src/plugins/embeddable/public/lib/triggers/triggers.ts",
+            "path": "src/platform/plugins/shared/embeddable/public/lib/triggers/triggers.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4294,7 +4282,7 @@
             "tags": [],
             "label": "title",
             "description": [],
-            "path": "src/plugins/embeddable/public/lib/triggers/triggers.ts",
+            "path": "src/platform/plugins/shared/embeddable/public/lib/triggers/triggers.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4305,7 +4293,7 @@
             "tags": [],
             "label": "description",
             "description": [],
-            "path": "src/plugins/embeddable/public/lib/triggers/triggers.ts",
+            "path": "src/platform/plugins/shared/embeddable/public/lib/triggers/triggers.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -4320,7 +4308,7 @@
       "tags": [],
       "label": "EmbeddableSetup",
       "description": [],
-      "path": "src/plugins/embeddable/public/types.ts",
+      "path": "src/platform/plugins/shared/embeddable/public/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -4394,7 +4382,7 @@
             },
             "<TSavedObjectAttributes>) => string) | undefined; }) => void"
           ],
-          "path": "src/plugins/embeddable/public/types.ts",
+          "path": "src/platform/plugins/shared/embeddable/public/types.ts",
           "deprecated": false,
           "trackAdoption": false,
           "returnComment": [],
@@ -4459,7 +4447,7 @@
                 },
                 "<TSavedObjectAttributes>) => string) | undefined; }"
               ],
-              "path": "src/plugins/embeddable/public/add_from_library/registry.ts",
+              "path": "src/platform/plugins/shared/embeddable/public/add_from_library/registry.ts",
               "deprecated": false,
               "trackAdoption": false
             }
@@ -4501,7 +4489,7 @@
             },
             "<SerializedState, RuntimeState, Api>>) => void"
           ],
-          "path": "src/plugins/embeddable/public/types.ts",
+          "path": "src/platform/plugins/shared/embeddable/public/types.ts",
           "deprecated": false,
           "trackAdoption": false,
           "returnComment": [],
@@ -4513,7 +4501,7 @@
               "tags": [],
               "label": "type",
               "description": [],
-              "path": "src/plugins/embeddable/public/react_embeddable_system/react_embeddable_registry.ts",
+              "path": "src/platform/plugins/shared/embeddable/public/react_embeddable_system/react_embeddable_registry.ts",
               "deprecated": false,
               "trackAdoption": false
             },
@@ -4535,7 +4523,7 @@
                 },
                 "<SerializedState, RuntimeState, Api>>"
               ],
-              "path": "src/plugins/embeddable/public/react_embeddable_system/react_embeddable_registry.ts",
+              "path": "src/platform/plugins/shared/embeddable/public/react_embeddable_system/react_embeddable_registry.ts",
               "deprecated": false,
               "trackAdoption": false,
               "returnComment": [],
@@ -4571,7 +4559,7 @@
             },
             ">) => void"
           ],
-          "path": "src/plugins/embeddable/public/types.ts",
+          "path": "src/platform/plugins/shared/embeddable/public/types.ts",
           "deprecated": true,
           "trackAdoption": false,
           "references": [
@@ -4606,7 +4594,7 @@
                 },
                 ">"
               ],
-              "path": "src/plugins/embeddable/public/types.ts",
+              "path": "src/platform/plugins/shared/embeddable/public/types.ts",
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -4651,7 +4639,7 @@
         },
         ">"
       ],
-      "path": "src/plugins/embeddable/public/types.ts",
+      "path": "src/platform/plugins/shared/embeddable/public/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -4680,7 +4668,7 @@
               "text": "EmbeddableStateTransfer"
             }
           ],
-          "path": "src/plugins/embeddable/public/types.ts",
+          "path": "src/platform/plugins/shared/embeddable/public/types.ts",
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -4701,7 +4689,7 @@
                 },
                 " | undefined"
               ],
-              "path": "src/plugins/embeddable/public/types.ts",
+              "path": "src/platform/plugins/shared/embeddable/public/types.ts",
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": false
@@ -4743,7 +4731,7 @@
           },
           "<P>>"
         ],
-        "path": "src/plugins/embeddable/common/types.ts",
+        "path": "src/platform/plugins/shared/embeddable/common/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -4754,7 +4742,7 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "path": "src/plugins/embeddable/common/types.ts",
+            "path": "src/platform/plugins/shared/embeddable/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -4786,7 +4774,7 @@
           },
           "<P>>"
         ],
-        "path": "src/plugins/embeddable/server/types.ts",
+        "path": "src/platform/plugins/shared/embeddable/server/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -4797,7 +4785,7 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "path": "src/plugins/embeddable/server/types.ts",
+            "path": "src/platform/plugins/shared/embeddable/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -4841,7 +4829,7 @@
         },
         ">"
       ],
-      "path": "src/plugins/embeddable/server/plugin.ts",
+      "path": "src/platform/plugins/shared/embeddable/server/plugin.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -4871,7 +4859,7 @@
             },
             ">) => void"
           ],
-          "path": "src/plugins/embeddable/server/plugin.ts",
+          "path": "src/platform/plugins/shared/embeddable/server/plugin.ts",
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -4900,7 +4888,7 @@
                 },
                 ">"
               ],
-              "path": "src/plugins/embeddable/server/plugin.ts",
+              "path": "src/platform/plugins/shared/embeddable/server/plugin.ts",
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -4934,7 +4922,7 @@
             },
             ">) => void"
           ],
-          "path": "src/plugins/embeddable/server/plugin.ts",
+          "path": "src/platform/plugins/shared/embeddable/server/plugin.ts",
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -4963,7 +4951,7 @@
                 },
                 ">"
               ],
-              "path": "src/plugins/embeddable/server/plugin.ts",
+              "path": "src/platform/plugins/shared/embeddable/server/plugin.ts",
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -4988,7 +4976,7 @@
               "text": "MigrateFunctionsObject"
             }
           ],
-          "path": "src/plugins/embeddable/server/plugin.ts",
+          "path": "src/platform/plugins/shared/embeddable/server/plugin.ts",
           "deprecated": false,
           "trackAdoption": false,
           "children": [],
@@ -5023,7 +5011,7 @@
         },
         ">"
       ],
-      "path": "src/plugins/embeddable/server/plugin.ts",
+      "path": "src/platform/plugins/shared/embeddable/server/plugin.ts",
       "deprecated": false,
       "trackAdoption": false,
       "lifecycle": "start",
@@ -5059,7 +5047,7 @@
           },
           ") => boolean"
         ],
-        "path": "src/plugins/embeddable/common/lib/saved_object_embeddable.ts",
+        "path": "src/platform/plugins/shared/embeddable/common/lib/saved_object_embeddable.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -5087,7 +5075,7 @@
                 "text": "SavedObjectEmbeddableInput"
               }
             ],
-            "path": "src/plugins/embeddable/common/lib/saved_object_embeddable.ts",
+            "path": "src/platform/plugins/shared/embeddable/common/lib/saved_object_embeddable.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -5105,7 +5093,7 @@
         "tags": [],
         "label": "CommonEmbeddableStartContract",
         "description": [],
-        "path": "src/plugins/embeddable/common/types.ts",
+        "path": "src/platform/plugins/shared/embeddable/common/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -5135,7 +5123,7 @@
               },
               "> & { isContainerType: boolean; }) | undefined"
             ],
-            "path": "src/plugins/embeddable/common/types.ts",
+            "path": "src/platform/plugins/shared/embeddable/common/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -5149,7 +5137,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "src/plugins/embeddable/common/types.ts",
+                "path": "src/platform/plugins/shared/embeddable/common/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -5183,7 +5171,7 @@
               },
               ">"
             ],
-            "path": "src/plugins/embeddable/common/types.ts",
+            "path": "src/platform/plugins/shared/embeddable/common/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -5197,7 +5185,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "src/plugins/embeddable/common/types.ts",
+                "path": "src/platform/plugins/shared/embeddable/common/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -5233,7 +5221,7 @@
           },
           "<P>>"
         ],
-        "path": "src/plugins/embeddable/common/types.ts",
+        "path": "src/platform/plugins/shared/embeddable/common/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -5244,7 +5232,7 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "path": "src/plugins/embeddable/common/types.ts",
+            "path": "src/platform/plugins/shared/embeddable/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -5268,7 +5256,7 @@
           },
           "<E>"
         ],
-        "path": "src/plugins/embeddable/common/types.ts",
+        "path": "src/platform/plugins/shared/embeddable/common/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -5279,7 +5267,7 @@
             "tags": [],
             "label": "type",
             "description": [],
-            "path": "src/plugins/embeddable/common/types.ts",
+            "path": "src/platform/plugins/shared/embeddable/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -5293,7 +5281,7 @@
             "signature": [
               "Partial<E> & { id: string; }"
             ],
-            "path": "src/plugins/embeddable/common/types.ts",
+            "path": "src/platform/plugins/shared/embeddable/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -5324,7 +5312,7 @@
             "text": "EmbeddableInput"
           }
         ],
-        "path": "src/plugins/embeddable/common/lib/saved_object_embeddable.ts",
+        "path": "src/platform/plugins/shared/embeddable/common/lib/saved_object_embeddable.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -5335,7 +5323,7 @@
             "tags": [],
             "label": "savedObjectId",
             "description": [],
-            "path": "src/plugins/embeddable/common/lib/saved_object_embeddable.ts",
+            "path": "src/platform/plugins/shared/embeddable/common/lib/saved_object_embeddable.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -5351,7 +5339,7 @@
         "tags": [],
         "label": "ViewMode",
         "description": [],
-        "path": "src/plugins/embeddable/common/types.ts",
+        "path": "src/platform/plugins/shared/embeddable/common/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5392,7 +5380,7 @@
           },
           " | undefined; }"
         ],
-        "path": "src/plugins/embeddable/common/types.ts",
+        "path": "src/platform/plugins/shared/embeddable/common/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5422,7 +5410,7 @@
           },
           ">"
         ],
-        "path": "src/plugins/embeddable/common/types.ts",
+        "path": "src/platform/plugins/shared/embeddable/common/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5444,7 +5432,7 @@
           },
           " & { type: string; }"
         ],
-        "path": "src/plugins/embeddable/common/types.ts",
+        "path": "src/platform/plugins/shared/embeddable/common/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
