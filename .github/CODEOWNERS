@@ -604,6 +604,7 @@ src/platform/packages/shared/presentation/presentation_containers @elastic/kiban
 src/platform/packages/shared/presentation/presentation_publishing @elastic/kibana-presentation
 src/platform/packages/shared/serverless/settings/search_project @elastic/search-kibana @elastic/kibana-management
 src/platform/packages/shared/serverless/settings/security_project @elastic/security-solution @elastic/kibana-management
+src/platform/plugins/private/event_annotation @elastic/kibana-visualizations
 src/platform/plugins/private/event_annotation_listing @elastic/kibana-visualizations
 src/platform/plugins/private/input_control_vis @elastic/kibana-presentation
 src/platform/plugins/private/links @elastic/kibana-presentation
@@ -651,7 +652,6 @@ src/plugins/chart_expressions/expression_partition_vis @elastic/kibana-visualiza
 src/plugins/chart_expressions/expression_tagcloud @elastic/kibana-visualizations
 src/plugins/chart_expressions/expression_xy @elastic/kibana-visualizations
 src/plugins/content_management @elastic/appex-sharedux
-src/plugins/event_annotation @elastic/kibana-visualizations
 src/plugins/expressions @elastic/kibana-visualizations
 src/plugins/files @elastic/appex-sharedux
 src/plugins/files_management @elastic/appex-sharedux
