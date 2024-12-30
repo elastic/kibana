@@ -7,22 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { defaultConfig } from '@kbn/storybook';
-import webpackMerge from 'webpack-merge';
-import { resolve } from 'path';
-
-const mockConfig = {
-  resolve: {
-    alias: {
-      '../../../expression_legacy_metric/public/services': resolve(
-        __dirname,
-        '../public/__mocks__/services.ts'
-      ),
-    },
-  },
-};
-
 module.exports = {
-  ...defaultConfig,
-  webpackFinal: (config) => webpackMerge(config, mockConfig),
+  preset: '@kbn/test',
+  rootDir: '../../../../../../',
+  roots: ['<rootDir>/src/platform/plugins/shared/chart_expressions/expression_legacy_metric'],
+  coverageDirectory:
+    '<rootDir>/target/kibana-coverage/jest/src/platform/plugins/shared/chart_expressions/expression_legacy_metric',
+  coverageReporters: ['text', 'html'],
+  collectCoverageFrom: [
+    '<rootDir>/src/platform/plugins/shared/chart_expressions/expression_legacy_metric/{common,public,server}/**/*.{ts,tsx}',
+  ],
 };
