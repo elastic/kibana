@@ -249,7 +249,6 @@ packages/core/user-profile/core-user-profile-server-mocks @elastic/kibana-core
 packages/core/user-settings/core-user-settings-server @elastic/kibana-security
 packages/core/user-settings/core-user-settings-server-internal @elastic/kibana-security
 packages/core/user-settings/core-user-settings-server-mocks @elastic/kibana-security
-packages/deeplinks/analytics @elastic/kibana-data-discovery @elastic/kibana-presentation @elastic/kibana-visualizations
 packages/deeplinks/shared @elastic/appex-sharedux
 packages/default-nav/analytics @elastic/kibana-data-discovery @elastic/kibana-presentation @elastic/kibana-visualizations
 packages/home/sample_data_card @elastic/appex-sharedux
@@ -535,6 +534,7 @@ src/platform/packages/private/kbn-management/settings/components/form @elastic/k
 src/platform/packages/private/kbn-mapbox-gl @elastic/kibana-presentation
 src/platform/packages/private/kbn-panel-loader @elastic/kibana-presentation
 src/platform/packages/private/response-ops/rule_params @elastic/response-ops
+src/platform/packages/shared/deeplinks/analytics @elastic/kibana-data-discovery @elastic/kibana-presentation @elastic/kibana-visualizations
 src/platform/packages/shared/deeplinks/devtools @elastic/kibana-management
 src/platform/packages/shared/deeplinks/fleet @elastic/fleet
 src/platform/packages/shared/deeplinks/management @elastic/kibana-management
