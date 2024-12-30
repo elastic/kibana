@@ -21,15 +21,16 @@ SRCS = glob(
   ],
 )
 
-BUNDLER_DEPS = [
-  "//packages/kbn-i18n",
+DEPS = [
+  "@npm//react",
   "@npm//tslib",
+  "@npm//@elastic/eui",
 ]
 
 js_library(
-  name = "core-base-common",
-  package_name = "@kbn/core-base-common",
+  name = "common",
+  package_name = "@kbn/react-kibana-context-common",
   srcs = ["package.json"] + SRCS,
-  deps = BUNDLER_DEPS,
+  deps = DEPS,
   visibility = ["//visibility:public"],
 )
