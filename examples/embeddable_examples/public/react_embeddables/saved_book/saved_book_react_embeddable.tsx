@@ -7,7 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiBadge, EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiText, EuiTitle } from '@elastic/eui';
+import {
+  EuiBadge,
+  EuiCallOut,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiText,
+  EuiTitle,
+  useEuiTheme,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 import { CoreStart } from '@kbn/core-lifecycle-browser';
 import { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
@@ -18,7 +26,6 @@ import {
   SerializedTitles,
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
-import { euiThemeVars } from '@kbn/ui-theme';
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { PresentationContainer } from '@kbn/presentation-containers';
@@ -81,14 +88,22 @@ export const getSavedBookEmbeddableFactory = (core: CoreStart) => {
         {
           ...titlesApi,
           onEdit: async () => {
-            openSavedBookEditor(bookAttributesManager, false, core, api);
+            openSavedBookEditor({
+              attributesManager: bookAttributesManager,
+              parent: api.parentApi,
+              isCreate: false,
+              core,
+              api,
+            }).then((result) => {
+              savedBookId$.next(result.savedBookId);
+            });
           },
           isEditingEnabled: () => true,
           getTypeDisplayName: () =>
             i18n.translate('embeddableExamples.savedbook.editBook.displayName', {
               defaultMessage: 'book',
             }),
-          serializeState: async () => {
+          serializeState: () => {
             if (!Boolean(savedBookId$.value)) {
               // if this book is currently by value, we serialize the entire state.
               const bookByValueState: BookByValueSerializedState = {
@@ -98,16 +113,11 @@ export const getSavedBookEmbeddableFactory = (core: CoreStart) => {
               return { rawState: bookByValueState };
             }
 
-            // if this book is currently by reference, we serialize the reference and write to the external store.
+            // if this book is currently by reference, we serialize the reference only.
             const bookByReferenceState: BookByReferenceSerializedState = {
               savedBookId: savedBookId$.value!,
               ...serializeTitles(),
             };
-
-            await saveBookAttributes(
-              savedBookId$.value,
-              serializeBookAttributes(bookAttributesManager)
-            );
             return { rawState: bookByReferenceState };
           },
 
@@ -154,6 +164,7 @@ export const getSavedBookEmbeddableFactory = (core: CoreStart) => {
               bookAttributesManager.bookTitle,
               bookAttributesManager.bookSynopsis
             );
+          const { euiTheme } = useEuiTheme();
 
           return (
             <div
@@ -179,7 +190,7 @@ export const getSavedBookEmbeddableFactory = (core: CoreStart) => {
               )}
               <div
                 css={css`
-                  padding: ${euiThemeVars.euiSizeM};
+                  padding: ${euiTheme.size.m};
                 `}
               >
                 <EuiFlexGroup

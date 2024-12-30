@@ -24,11 +24,8 @@ import {
   searchSessionsUpdateSchema,
 } from './response_schema';
 
-const STORE_SEARCH_SESSIONS_ROLE_TAG = `access:store_search_session`;
 const access = 'internal';
-const options = {
-  tags: [STORE_SEARCH_SESSIONS_ROLE_TAG],
-};
+const requiredPrivileges = ['store_search_session'];
 const pathPrefix = '/internal/session';
 export const INITIAL_SEARCH_SESSION_REST_VERSION = '1';
 const version = INITIAL_SEARCH_SESSION_REST_VERSION;
@@ -37,9 +34,12 @@ const idAndAttrsOnly = (so?: SearchSessionRestResponse) =>
   so && { id: so.id, attributes: so.attributes };
 
 export function registerSessionRoutes(router: DataPluginRouter, logger: Logger): void {
-  router.versioned.post({ path: pathPrefix, access, options }).addVersion(
+  router.versioned.post({ path: pathPrefix, access }).addVersion(
     {
       version,
+      security: {
+        authz: { requiredPrivileges },
+      },
       validate: {
         request: {
           body: schema.object({
@@ -85,9 +85,12 @@ export function registerSessionRoutes(router: DataPluginRouter, logger: Logger):
     }
   );
 
-  router.versioned.get({ path: `${pathPrefix}/{id}`, access, options }).addVersion(
+  router.versioned.get({ path: `${pathPrefix}/{id}`, access }).addVersion(
     {
       version,
+      security: {
+        authz: { requiredPrivileges },
+      },
       validate: {
         request: {
           params: schema.object({
@@ -117,9 +120,12 @@ export function registerSessionRoutes(router: DataPluginRouter, logger: Logger):
     }
   );
 
-  router.versioned.get({ path: `${pathPrefix}/{id}/status`, access, options }).addVersion(
+  router.versioned.get({ path: `${pathPrefix}/{id}/status`, access }).addVersion(
     {
       version,
+      security: {
+        authz: { requiredPrivileges },
+      },
       validate: {
         request: {
           params: schema.object({
@@ -150,9 +156,12 @@ export function registerSessionRoutes(router: DataPluginRouter, logger: Logger):
     }
   );
 
-  router.versioned.post({ path: `${pathPrefix}/_find`, access, options }).addVersion(
+  router.versioned.post({ path: `${pathPrefix}/_find`, access }).addVersion(
     {
       version,
+      security: {
+        authz: { requiredPrivileges },
+      },
       validate: {
         request: {
           body: schema.object({
@@ -200,9 +209,12 @@ export function registerSessionRoutes(router: DataPluginRouter, logger: Logger):
     }
   );
 
-  router.versioned.delete({ path: `${pathPrefix}/{id}`, access, options }).addVersion(
+  router.versioned.delete({ path: `${pathPrefix}/{id}`, access }).addVersion(
     {
       version,
+      security: {
+        authz: { requiredPrivileges },
+      },
       validate: {
         request: {
           params: schema.object({
@@ -226,9 +238,12 @@ export function registerSessionRoutes(router: DataPluginRouter, logger: Logger):
     }
   );
 
-  router.versioned.post({ path: `${pathPrefix}/{id}/cancel`, access, options }).addVersion(
+  router.versioned.post({ path: `${pathPrefix}/{id}/cancel`, access }).addVersion(
     {
       version,
+      security: {
+        authz: { requiredPrivileges },
+      },
       validate: {
         request: {
           params: schema.object({
@@ -252,9 +267,12 @@ export function registerSessionRoutes(router: DataPluginRouter, logger: Logger):
     }
   );
 
-  router.versioned.put({ path: `${pathPrefix}/{id}`, access, options }).addVersion(
+  router.versioned.put({ path: `${pathPrefix}/{id}`, access }).addVersion(
     {
       version,
+      security: {
+        authz: { requiredPrivileges },
+      },
       validate: {
         request: {
           params: schema.object({
@@ -291,9 +309,12 @@ export function registerSessionRoutes(router: DataPluginRouter, logger: Logger):
     }
   );
 
-  router.versioned.post({ path: `${pathPrefix}/{id}/_extend`, access, options }).addVersion(
+  router.versioned.post({ path: `${pathPrefix}/{id}/_extend`, access }).addVersion(
     {
       version,
+      security: {
+        authz: { requiredPrivileges },
+      },
       validate: {
         request: {
           params: schema.object({

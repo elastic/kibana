@@ -428,7 +428,7 @@ This connector was renamed. Refer to <<openai-action-type>>.
 == APIs
 
 For the most up-to-date API details, refer to the
-{kib-repo}/tree/{branch}/x-pack/plugins/alerting/docs/openapi[alerting], {kib-repo}/tree/{branch}/x-pack/plugins/cases/docs/openapi[cases], {kib-repo}/tree/{branch}/x-pack/plugins/actions/docs/openapi[connectors], and {kib-repo}/tree/{branch}/x-pack/plugins/ml/common/openapi[machine learning] open API specifications.
+{kib-repo}/tree/{branch}/x-pack/platform/plugins/shared/alerting/docs/openapi[alerting], {kib-repo}/tree/{branch}/x-pack/platform/plugins/shared/cases/docs/openapi[cases], {kib-repo}/tree/{branch}/x-pack/platform/plugins/shared/actions/docs/openapi[connectors], and {kib-repo}/tree/{branch}/x-pack/platform/plugins/shared/ml/common/openapi[machine learning] open API specifications.
 
 [role="exclude",id="add-case-connectors"]
 == Add connectors to cases

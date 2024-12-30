@@ -95,7 +95,7 @@
           },
           "[]; }[]; }>; }"
         ],
-        "path": "x-pack/packages/ml/category_validator/src/examples.ts",
+        "path": "x-pack/platform/packages/private/ml/category_validator/src/examples.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -117,7 +117,7 @@
                 "text": "IScopedClusterClient"
               }
             ],
-            "path": "x-pack/packages/ml/category_validator/src/examples.ts",
+            "path": "x-pack/platform/packages/private/ml/category_validator/src/examples.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -137,7 +137,7 @@
         "description": [
           "\nField example for a category."
         ],
-        "path": "x-pack/packages/ml/category_validator/common/types/categories.ts",
+        "path": "x-pack/platform/packages/private/ml/category_validator/common/types/categories.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -150,7 +150,7 @@
             "description": [
               "\nThe text of the field example."
             ],
-            "path": "x-pack/packages/ml/category_validator/common/types/categories.ts",
+            "path": "x-pack/platform/packages/private/ml/category_validator/common/types/categories.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -173,7 +173,7 @@
               },
               "[]"
             ],
-            "path": "x-pack/packages/ml/category_validator/common/types/categories.ts",
+            "path": "x-pack/platform/packages/private/ml/category_validator/common/types/categories.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -189,7 +189,7 @@
         "description": [
           "\nResult of a field example check."
         ],
-        "path": "x-pack/packages/ml/category_validator/common/types/categories.ts",
+        "path": "x-pack/platform/packages/private/ml/category_validator/common/types/categories.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -211,7 +211,7 @@
                 "text": "VALIDATION_RESULT"
               }
             ],
-            "path": "x-pack/packages/ml/category_validator/common/types/categories.ts",
+            "path": "x-pack/platform/packages/private/ml/category_validator/common/types/categories.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -233,7 +233,7 @@
                 "text": "CATEGORY_EXAMPLES_VALIDATION_STATUS"
               }
             ],
-            "path": "x-pack/packages/ml/category_validator/common/types/categories.ts",
+            "path": "x-pack/platform/packages/private/ml/category_validator/common/types/categories.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -246,7 +246,7 @@
             "description": [
               "\nThe message associated with the validation result."
             ],
-            "path": "x-pack/packages/ml/category_validator/common/types/categories.ts",
+            "path": "x-pack/platform/packages/private/ml/category_validator/common/types/categories.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -262,7 +262,7 @@
         "description": [
           "\nValidation results for a specific field."
         ],
-        "path": "x-pack/packages/ml/category_validator/common/types/categories.ts",
+        "path": "x-pack/platform/packages/private/ml/category_validator/common/types/categories.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -287,7 +287,7 @@
               },
               "[] | undefined"
             ],
-            "path": "x-pack/packages/ml/category_validator/common/types/categories.ts",
+            "path": "x-pack/platform/packages/private/ml/category_validator/common/types/categories.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -302,7 +302,7 @@
             "description": [
               "\nThe total number of examples used for validation."
             ],
-            "path": "x-pack/packages/ml/category_validator/common/types/categories.ts",
+            "path": "x-pack/platform/packages/private/ml/category_validator/common/types/categories.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -326,7 +326,7 @@
                 "text": "CATEGORY_EXAMPLES_VALIDATION_STATUS"
               }
             ],
-            "path": "x-pack/packages/ml/category_validator/common/types/categories.ts",
+            "path": "x-pack/platform/packages/private/ml/category_validator/common/types/categories.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -351,7 +351,7 @@
               },
               "[]"
             ],
-            "path": "x-pack/packages/ml/category_validator/common/types/categories.ts",
+            "path": "x-pack/platform/packages/private/ml/category_validator/common/types/categories.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -367,7 +367,7 @@
         "description": [
           "\nToken"
         ],
-        "path": "x-pack/packages/ml/category_validator/common/types/categories.ts",
+        "path": "x-pack/platform/packages/private/ml/category_validator/common/types/categories.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -380,7 +380,7 @@
             "description": [
               "\nThe token string."
             ],
-            "path": "x-pack/packages/ml/category_validator/common/types/categories.ts",
+            "path": "x-pack/platform/packages/private/ml/category_validator/common/types/categories.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -393,7 +393,7 @@
             "description": [
               "\nThe starting offset of the token."
             ],
-            "path": "x-pack/packages/ml/category_validator/common/types/categories.ts",
+            "path": "x-pack/platform/packages/private/ml/category_validator/common/types/categories.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -406,7 +406,7 @@
             "description": [
               "\nThe ending offset of the token."
             ],
-            "path": "x-pack/packages/ml/category_validator/common/types/categories.ts",
+            "path": "x-pack/platform/packages/private/ml/category_validator/common/types/categories.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -419,7 +419,7 @@
             "description": [
               "\nThe type of the token."
             ],
-            "path": "x-pack/packages/ml/category_validator/common/types/categories.ts",
+            "path": "x-pack/platform/packages/private/ml/category_validator/common/types/categories.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -432,7 +432,7 @@
             "description": [
               "\nThe position of the token."
             ],
-            "path": "x-pack/packages/ml/category_validator/common/types/categories.ts",
+            "path": "x-pack/platform/packages/private/ml/category_validator/common/types/categories.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -450,7 +450,7 @@
         "description": [
           "\nEnum representing the validation status of category examples."
         ],
-        "path": "x-pack/packages/ml/category_validator/common/constants/categorization.ts",
+        "path": "x-pack/platform/packages/private/ml/category_validator/common/constants/categorization.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -464,7 +464,7 @@
         "description": [
           "\nEnum representing the validation results for field examples."
         ],
-        "path": "x-pack/packages/ml/category_validator/common/constants/categorization.ts",
+        "path": "x-pack/platform/packages/private/ml/category_validator/common/constants/categorization.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -484,7 +484,7 @@
           "MlCategorizationAnalyzerDefinition",
           " & { analyzer?: string | undefined; }"
         ],
-        "path": "x-pack/packages/ml/category_validator/common/types/categories.ts",
+        "path": "x-pack/platform/packages/private/ml/category_validator/common/types/categories.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -501,7 +501,7 @@
         "signature": [
           "0.02"
         ],
-        "path": "x-pack/packages/ml/category_validator/common/constants/categorization.ts",
+        "path": "x-pack/platform/packages/private/ml/category_validator/common/constants/categorization.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -518,7 +518,7 @@
         "signature": [
           "1000"
         ],
-        "path": "x-pack/packages/ml/category_validator/common/constants/categorization.ts",
+        "path": "x-pack/platform/packages/private/ml/category_validator/common/constants/categorization.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -535,7 +535,7 @@
         "signature": [
           "0.75"
         ],
-        "path": "x-pack/packages/ml/category_validator/common/constants/categorization.ts",
+        "path": "x-pack/platform/packages/private/ml/category_validator/common/constants/categorization.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -552,7 +552,7 @@
         "signature": [
           "400"
         ],
-        "path": "x-pack/packages/ml/category_validator/common/constants/categorization.ts",
+        "path": "x-pack/platform/packages/private/ml/category_validator/common/constants/categorization.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -569,7 +569,7 @@
         "signature": [
           "0.75"
         ],
-        "path": "x-pack/packages/ml/category_validator/common/constants/categorization.ts",
+        "path": "x-pack/platform/packages/private/ml/category_validator/common/constants/categorization.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -586,7 +586,7 @@
         "signature": [
           "3"
         ],
-        "path": "x-pack/packages/ml/category_validator/common/constants/categorization.ts",
+        "path": "x-pack/platform/packages/private/ml/category_validator/common/constants/categorization.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -602,7 +602,7 @@
         "description": [
           "\nDescription for each validation result."
         ],
-        "path": "x-pack/packages/ml/category_validator/common/constants/categorization.ts",
+        "path": "x-pack/platform/packages/private/ml/category_validator/common/constants/categorization.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -615,7 +615,7 @@
             "description": [
               "/**\n   * Examples were successfully loaded.\n   */"
             ],
-            "path": "x-pack/packages/ml/category_validator/common/constants/categorization.ts",
+            "path": "x-pack/platform/packages/private/ml/category_validator/common/constants/categorization.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -628,7 +628,7 @@
             "description": [
               "/**\n   * The loaded examples were tokenized successfully.\n   */"
             ],
-            "path": "x-pack/packages/ml/category_validator/common/constants/categorization.ts",
+            "path": "x-pack/platform/packages/private/ml/category_validator/common/constants/categorization.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -641,7 +641,7 @@
             "description": [
               "/**\n   * More than {tokenCount} tokens per example were found in over {percentage}% of the loaded examples.\n   */"
             ],
-            "path": "x-pack/packages/ml/category_validator/common/constants/categorization.ts",
+            "path": "x-pack/platform/packages/private/ml/category_validator/common/constants/categorization.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -654,7 +654,7 @@
             "description": [
               "/**\n   * The median line length of the loaded examples was less than {medianCharCount} characters.\n   */"
             ],
-            "path": "x-pack/packages/ml/category_validator/common/constants/categorization.ts",
+            "path": "x-pack/platform/packages/private/ml/category_validator/common/constants/categorization.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -667,7 +667,7 @@
             "description": [
               "/**\n   * Less than {percentage}% of the loaded examples were null.\n   */"
             ],
-            "path": "x-pack/packages/ml/category_validator/common/constants/categorization.ts",
+            "path": "x-pack/platform/packages/private/ml/category_validator/common/constants/categorization.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -680,7 +680,7 @@
             "description": [
               "/**\n   * Less than 10000 tokens were found in total in the loaded examples.\n   */"
             ],
-            "path": "x-pack/packages/ml/category_validator/common/constants/categorization.ts",
+            "path": "x-pack/platform/packages/private/ml/category_validator/common/constants/categorization.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -693,7 +693,7 @@
             "description": [
               "/**\n   * The user has sufficient privileges to perform the checks.\n   */"
             ],
-            "path": "x-pack/packages/ml/category_validator/common/constants/categorization.ts",
+            "path": "x-pack/platform/packages/private/ml/category_validator/common/constants/categorization.ts",
             "deprecated": false,
             "trackAdoption": false
           }

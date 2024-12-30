@@ -11,17 +11,15 @@
         "label": "getRevealImageRenderer",
         "description": [],
         "signature": [
-          "(theme$: ",
-          "Observable",
-          "<",
+          "(core: ",
           {
-            "pluginId": "@kbn/core-theme-browser",
+            "pluginId": "@kbn/core-lifecycle-browser",
             "scope": "public",
-            "docId": "kibKbnCoreThemeBrowserPluginApi",
-            "section": "def-public.CoreTheme",
-            "text": "CoreTheme"
+            "docId": "kibKbnCoreLifecycleBrowserPluginApi",
+            "section": "def-public.CoreStart",
+            "text": "CoreStart"
           },
-          ">) => () => ",
+          ") => () => ",
           {
             "pluginId": "expressions",
             "scope": "common",
@@ -33,7 +31,7 @@
           "RevealImageRendererConfig",
           ">"
         ],
-        "path": "src/plugins/expression_reveal_image/public/expression_renderers/reveal_image_renderer.tsx",
+        "path": "src/platform/plugins/shared/expression_reveal_image/public/expression_renderers/reveal_image_renderer.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -42,21 +40,18 @@
             "id": "def-public.getRevealImageRenderer.$1",
             "type": "Object",
             "tags": [],
-            "label": "theme$",
+            "label": "core",
             "description": [],
             "signature": [
-              "Observable",
-              "<",
               {
-                "pluginId": "@kbn/core-theme-browser",
+                "pluginId": "@kbn/core-lifecycle-browser",
                 "scope": "public",
-                "docId": "kibKbnCoreThemeBrowserPluginApi",
-                "section": "def-public.CoreTheme",
-                "text": "CoreTheme"
-              },
-              ">"
+                "docId": "kibKbnCoreLifecycleBrowserPluginApi",
+                "section": "def-public.CoreStart",
+                "text": "CoreStart"
+              }
             ],
-            "path": "src/plugins/expression_reveal_image/public/expression_renderers/reveal_image_renderer.tsx",
+            "path": "src/platform/plugins/shared/expression_reveal_image/public/expression_renderers/reveal_image_renderer.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -78,10 +73,10 @@
             "pluginId": "@kbn/core-lifecycle-browser",
             "scope": "public",
             "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-            "section": "def-public.CoreSetup",
-            "text": "CoreSetup"
+            "section": "def-public.CoreStart",
+            "text": "CoreStart"
           },
-          "<object, unknown>) => () => ",
+          ") => () => ",
           {
             "pluginId": "expressions",
             "scope": "common",
@@ -93,7 +88,7 @@
           "RevealImageRendererConfig",
           ">"
         ],
-        "path": "src/plugins/expression_reveal_image/public/expression_renderers/reveal_image_renderer.tsx",
+        "path": "src/platform/plugins/shared/expression_reveal_image/public/expression_renderers/reveal_image_renderer.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -109,12 +104,11 @@
                 "pluginId": "@kbn/core-lifecycle-browser",
                 "scope": "public",
                 "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-                "section": "def-public.CoreSetup",
-                "text": "CoreSetup"
-              },
-              "<object, unknown>"
+                "section": "def-public.CoreStart",
+                "text": "CoreStart"
+              }
             ],
-            "path": "src/plugins/expression_reveal_image/public/expression_renderers/reveal_image_renderer.tsx",
+            "path": "src/platform/plugins/shared/expression_reveal_image/public/expression_renderers/reveal_image_renderer.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -138,7 +132,7 @@
       "signature": [
         "void"
       ],
-      "path": "src/plugins/expression_reveal_image/public/plugin.ts",
+      "path": "src/platform/plugins/shared/expression_reveal_image/public/plugin.ts",
       "deprecated": false,
       "trackAdoption": false,
       "lifecycle": "start",
@@ -162,7 +156,7 @@
       "signature": [
         "void"
       ],
-      "path": "src/plugins/expression_reveal_image/server/plugin.ts",
+      "path": "src/platform/plugins/shared/expression_reveal_image/server/plugin.ts",
       "deprecated": false,
       "trackAdoption": false,
       "lifecycle": "start",
@@ -186,7 +180,7 @@
           "Origin",
           "; percent: number; }; }>; }"
         ],
-        "path": "src/plugins/expression_reveal_image/common/expression_functions/reveal_image_function.ts",
+        "path": "src/platform/plugins/shared/expression_reveal_image/common/expression_functions/reveal_image_function.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -207,7 +201,7 @@
         "signature": [
           "\"`base64`\""
         ],
-        "path": "src/plugins/expression_reveal_image/common/constants.ts",
+        "path": "src/platform/plugins/shared/expression_reveal_image/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -223,7 +217,7 @@
           "ExpressionRevealImageFunction",
           "[]"
         ],
-        "path": "src/plugins/expression_reveal_image/common/expression_functions/index.ts",
+        "path": "src/platform/plugins/shared/expression_reveal_image/common/expression_functions/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -238,7 +232,7 @@
         "signature": [
           "\"expressionRevealImage\""
         ],
-        "path": "src/plugins/expression_reveal_image/common/constants.ts",
+        "path": "src/platform/plugins/shared/expression_reveal_image/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -253,7 +247,7 @@
         "signature": [
           "\"expressionRevealImage\""
         ],
-        "path": "src/plugins/expression_reveal_image/common/constants.ts",
+        "path": "src/platform/plugins/shared/expression_reveal_image/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -268,7 +262,7 @@
         "signature": [
           "\"URL\""
         ],
-        "path": "src/plugins/expression_reveal_image/common/constants.ts",
+        "path": "src/platform/plugins/shared/expression_reveal_image/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

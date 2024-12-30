@@ -18,11 +18,7 @@ describe('Share modal embed content tab', () => {
 
     beforeEach(() => {
       component = mountWithIntl(
-        <EmbedContent
-          objectType="dashboard"
-          setIsNotSaved={() => jest.fn()}
-          shareableUrl="/home#/"
-        />
+        <EmbedContent isDirty={false} objectType="dashboard" shareableUrl="/home#/" />
       );
     });
 

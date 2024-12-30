@@ -179,6 +179,18 @@ export class SpaceTestApiClient {
 
     return res;
   }
+
+  async getAgentPoliciesSpaces(spaceId?: string) {
+    const { body: res } = await this.supertest
+      .get(`${this.getBaseUrl(spaceId)}/internal/fleet/agent_policies_spaces`)
+      .auth(this.auth.username, this.auth.password)
+      .set('kbn-xsrf', 'xxxx')
+      .set('elastic-api-version', '1')
+      .expect(200);
+
+    return res;
+  }
+
   // Enrollment API Keys
   async getEnrollmentApiKey(
     keyId: string,

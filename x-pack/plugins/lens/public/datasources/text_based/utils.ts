@@ -11,9 +11,15 @@ import { getESQLAdHocDataview } from '@kbn/esql-utils';
 import type { AggregateQuery } from '@kbn/es-query';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import type { DatatableColumn } from '@kbn/expressions-plugin/public';
+import { ValueFormatConfig } from '../form_based/operations/definitions/column_types';
 import { generateId } from '../../id_generator';
 import { fetchDataFromAggregateQuery } from './fetch_data_from_aggregate_query';
-import type { IndexPatternRef, TextBasedPrivateState, TextBasedLayerColumn } from './types';
+import type {
+  IndexPatternRef,
+  TextBasedPrivateState,
+  TextBasedLayerColumn,
+  TextBasedLayer,
+} from './types';
 import type { DataViewsState } from '../../state_management';
 import { addColumnsToCache } from './fieldlist_cache';
 
@@ -46,7 +52,12 @@ export const getAllColumns = (
   });
   const allCols = [
     ...columns,
-    ...columnsFromQuery.map((c) => ({ columnId: c.id, fieldName: c.id, meta: c.meta })),
+    ...columnsFromQuery.map((c) => ({
+      columnId: c.id,
+      fieldName: c.id,
+      label: c.name,
+      meta: c.meta,
+    })),
   ];
   const uniqueIds: string[] = [];
 
@@ -153,4 +164,71 @@ export function canColumnBeUsedBeInMetricDimension(
     columns.length >= MAX_NUM_OF_COLUMNS ||
     (hasNumberTypeColumns && selectedColumnType === 'number')
   );
+}
+
+export function mergeLayer({
+  state,
+  layerId,
+  newLayer,
+}: {
+  state: TextBasedPrivateState;
+  layerId: string;
+  newLayer: Partial<TextBasedLayer>;
+}) {
+  return {
+    ...state,
+    layers: {
+      ...state.layers,
+      [layerId]: { ...state.layers[layerId], ...newLayer },
+    },
+  };
+}
+
+export function updateColumnLabel({
+  layer,
+  columnId,
+  value,
+}: {
+  layer: TextBasedLayer;
+  columnId: string;
+  value: string;
+}): TextBasedLayer {
+  const currentColumnIndex = layer.columns.findIndex((c) => c.columnId === columnId);
+  const currentColumn = layer.columns[currentColumnIndex];
+  return {
+    ...layer,
+    columns: [
+      ...layer.columns.slice(0, currentColumnIndex),
+      {
+        ...currentColumn,
+        label: value,
+        customLabel: !!value,
+      },
+      ...layer.columns.slice(currentColumnIndex + 1),
+    ],
+  };
+}
+
+export function updateColumnFormat({
+  layer,
+  columnId,
+  value,
+}: {
+  layer: TextBasedLayer;
+  columnId: string;
+  value: ValueFormatConfig | undefined;
+}): TextBasedLayer {
+  const currentColumnIndex = layer.columns.findIndex((c) => c.columnId === columnId);
+  const currentColumn = layer.columns[currentColumnIndex];
+  return {
+    ...layer,
+    columns: [
+      ...layer.columns.slice(0, currentColumnIndex),
+      {
+        ...currentColumn,
+        params: { format: value },
+      },
+      ...layer.columns.slice(currentColumnIndex + 1),
+    ],
+  };
 }
