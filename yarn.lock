@@ -7869,7 +7869,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/utils@link:packages/kbn-utils":
+"@kbn/utils@link:src/platform/packages/shared/kbn-utils":
   version "0.0.0"
   uid ""
 
