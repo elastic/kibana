@@ -58,7 +58,6 @@
     "@kbn/features-plugin",
     "@kbn/rule-registry-plugin",
     "@kbn/security-plugin",
-    "@kbn/bfetch-plugin",
     "@kbn/alerts-as-data-utils",
     "@kbn/std",
     "@kbn/utility-types",
@@ -78,6 +77,7 @@
     "@kbn/deeplinks-observability",
     "@kbn/ebt-tools",
     "@kbn/core-rendering-browser",
+    "@kbn/charts-theme",
     "@kbn/charts-plugin",
   ],
   "exclude": ["target/**/*"]
