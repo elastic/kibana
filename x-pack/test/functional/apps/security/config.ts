@@ -15,6 +15,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     testFiles: [require.resolve('.')],
     esTestCluster: {
       serverArgs: {
+        // TODO: remove this once ES has built-in roles enabled by default
         esJavaOpts: '-Des.queryable_built_in_roles_enabled=true',
       },
     },
