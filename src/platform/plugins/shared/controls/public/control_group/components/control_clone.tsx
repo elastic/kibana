@@ -31,8 +31,8 @@ export const ControlClone = ({
 }) => {
   const [width, panelTitle, defaultPanelTitle] = useBatchedPublishingSubjects(
     controlApi ? controlApi.width : new BehaviorSubject(DEFAULT_CONTROL_GROW),
-    controlApi?.panelTitle ? controlApi.panelTitle : new BehaviorSubject(undefined),
-    controlApi?.defaultPanelTitle ? controlApi.defaultPanelTitle : new BehaviorSubject('')
+    controlApi?.title$ ? controlApi.title$ : new BehaviorSubject(undefined),
+    controlApi?.defaultTitle$ ? controlApi.defaultTitle$ : new BehaviorSubject('')
   );
 
   return (

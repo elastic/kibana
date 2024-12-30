@@ -26,7 +26,7 @@ export function minMax$({
 }: {
   controlFetch$: Observable<ControlFetchContext>;
   controlGroupApi: ControlGroupApi;
-  dataViews$: PublishesDataViews['dataViews'];
+  dataViews$: PublishesDataViews['dataViews$'];
   fieldName$: PublishingSubject<string>;
   setIsLoading: (isLoading: boolean) => void;
 }) {
