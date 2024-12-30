@@ -756,7 +756,7 @@ packages/kbn-rison @elastic/kibana-operations
 x-pack/platform/packages/private/rollup @elastic/kibana-management
 x-pack/platform/plugins/private/rollup @elastic/kibana-management
 packages/kbn-router-to-openapispec @elastic/kibana-core
-packages/kbn-router-utils @elastic/obs-ux-logs-team
+src/platform/packages/shared/kbn-router-utils @elastic/obs-ux-logs-team
 examples/routing_example @elastic/kibana-core
 src/platform/packages/shared/kbn-rrule @elastic/response-ops
 src/platform/packages/shared/kbn-rule-data-utils @elastic/security-detections-response @elastic/response-ops @elastic/obs-ux-management-team
