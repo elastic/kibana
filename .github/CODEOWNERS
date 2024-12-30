@@ -348,7 +348,7 @@ packages/kbn-crypto @elastic/kibana-security
 packages/kbn-crypto-browser @elastic/kibana-core
 x-pack/plugins/custom_branding @elastic/appex-sharedux
 src/platform/packages/shared/kbn-custom-icons @elastic/obs-ux-logs-team
-packages/kbn-custom-integrations @elastic/obs-ux-logs-team
+x-pack/solutions/observability/packages/kbn-custom-integrations @elastic/obs-ux-logs-team
 src/platform/plugins/shared/custom_integrations @elastic/fleet
 packages/kbn-cypress-config @elastic/kibana-operations
 x-pack/platform/plugins/shared/dashboard_enhanced @elastic/kibana-presentation
