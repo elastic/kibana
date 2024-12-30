@@ -6,7 +6,7 @@
  */
 
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
-import type { SearchRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
 import type { RiskEngineMetrics } from './types';
 
 interface GetRiskEngineMetricsOptions {
@@ -50,7 +50,7 @@ const getEntitiesAggregationData = async ({
   lastDay: boolean;
 }) => {
   try {
-    const bodyRequest: SearchRequest['body'] = {
+    const bodyRequest: SearchRequest = {
       ...allEnititiesByTypeAggregationBody,
     };
     if (lastDay) {
