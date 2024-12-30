@@ -17,7 +17,7 @@
         "tags": [],
         "label": "APMEventClient",
         "description": [],
-        "path": "x-pack/plugins/observability_solution/apm_data_access/server/lib/helpers/create_es_client/create_apm_event_client/index.ts",
+        "path": "x-pack/solutions/observability/plugins/apm_data_access/server/lib/helpers/create_es_client/create_apm_event_client/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -31,7 +31,7 @@
             "signature": [
               "{ readonly error: string; readonly transaction: string; readonly span: string; readonly metric: string; readonly onboarding: string; readonly sourcemap: string; }"
             ],
-            "path": "x-pack/plugins/observability_solution/apm_data_access/server/lib/helpers/create_es_client/create_apm_event_client/index.ts",
+            "path": "x-pack/solutions/observability/plugins/apm_data_access/server/lib/helpers/create_es_client/create_apm_event_client/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -45,7 +45,7 @@
             "signature": [
               "any"
             ],
-            "path": "x-pack/plugins/observability_solution/apm_data_access/server/lib/helpers/create_es_client/create_apm_event_client/index.ts",
+            "path": "x-pack/solutions/observability/plugins/apm_data_access/server/lib/helpers/create_es_client/create_apm_event_client/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -65,7 +65,7 @@
                     "text": "APMEventClientConfig"
                   }
                 ],
-                "path": "x-pack/plugins/observability_solution/apm_data_access/server/lib/helpers/create_es_client/create_apm_event_client/index.ts",
+                "path": "x-pack/solutions/observability/plugins/apm_data_access/server/lib/helpers/create_es_client/create_apm_event_client/index.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -91,7 +91,7 @@
               },
               ">(operationName: string, params: TParams) => Promise<TypedSearchResponse<TParams>>"
             ],
-            "path": "x-pack/plugins/observability_solution/apm_data_access/server/lib/helpers/create_es_client/create_apm_event_client/index.ts",
+            "path": "x-pack/solutions/observability/plugins/apm_data_access/server/lib/helpers/create_es_client/create_apm_event_client/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -105,7 +105,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "x-pack/plugins/observability_solution/apm_data_access/server/lib/helpers/create_es_client/create_apm_event_client/index.ts",
+                "path": "x-pack/solutions/observability/plugins/apm_data_access/server/lib/helpers/create_es_client/create_apm_event_client/index.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -120,7 +120,7 @@
                 "signature": [
                   "TParams"
                 ],
-                "path": "x-pack/plugins/observability_solution/apm_data_access/server/lib/helpers/create_es_client/create_apm_event_client/index.ts",
+                "path": "x-pack/solutions/observability/plugins/apm_data_access/server/lib/helpers/create_es_client/create_apm_event_client/index.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -146,7 +146,7 @@
               },
               ">(operationName: string, params: TParams) => Promise<TypedLogEventSearchResponse<TParams>>"
             ],
-            "path": "x-pack/plugins/observability_solution/apm_data_access/server/lib/helpers/create_es_client/create_apm_event_client/index.ts",
+            "path": "x-pack/solutions/observability/plugins/apm_data_access/server/lib/helpers/create_es_client/create_apm_event_client/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -160,7 +160,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "x-pack/plugins/observability_solution/apm_data_access/server/lib/helpers/create_es_client/create_apm_event_client/index.ts",
+                "path": "x-pack/solutions/observability/plugins/apm_data_access/server/lib/helpers/create_es_client/create_apm_event_client/index.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -175,7 +175,7 @@
                 "signature": [
                   "TParams"
                 ],
-                "path": "x-pack/plugins/observability_solution/apm_data_access/server/lib/helpers/create_es_client/create_apm_event_client/index.ts",
+                "path": "x-pack/solutions/observability/plugins/apm_data_access/server/lib/helpers/create_es_client/create_apm_event_client/index.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -201,7 +201,7 @@
               },
               ">(operationName: string, ...allParams: TParams[]) => Promise<TypedMSearchResponse<TParams>>"
             ],
-            "path": "x-pack/plugins/observability_solution/apm_data_access/server/lib/helpers/create_es_client/create_apm_event_client/index.ts",
+            "path": "x-pack/solutions/observability/plugins/apm_data_access/server/lib/helpers/create_es_client/create_apm_event_client/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -215,7 +215,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "x-pack/plugins/observability_solution/apm_data_access/server/lib/helpers/create_es_client/create_apm_event_client/index.ts",
+                "path": "x-pack/solutions/observability/plugins/apm_data_access/server/lib/helpers/create_es_client/create_apm_event_client/index.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -230,7 +230,7 @@
                 "signature": [
                   "TParams[]"
                 ],
-                "path": "x-pack/plugins/observability_solution/apm_data_access/server/lib/helpers/create_es_client/create_apm_event_client/index.ts",
+                "path": "x-pack/solutions/observability/plugins/apm_data_access/server/lib/helpers/create_es_client/create_apm_event_client/index.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -250,7 +250,7 @@
               "EqlSearchResponse",
               "<unknown>>"
             ],
-            "path": "x-pack/plugins/observability_solution/apm_data_access/server/lib/helpers/create_es_client/create_apm_event_client/index.ts",
+            "path": "x-pack/solutions/observability/plugins/apm_data_access/server/lib/helpers/create_es_client/create_apm_event_client/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -264,7 +264,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "x-pack/plugins/observability_solution/apm_data_access/server/lib/helpers/create_es_client/create_apm_event_client/index.ts",
+                "path": "x-pack/solutions/observability/plugins/apm_data_access/server/lib/helpers/create_es_client/create_apm_event_client/index.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -279,7 +279,7 @@
                 "signature": [
                   "APMEventEqlSearchRequest"
                 ],
-                "path": "x-pack/plugins/observability_solution/apm_data_access/server/lib/helpers/create_es_client/create_apm_event_client/index.ts",
+                "path": "x-pack/solutions/observability/plugins/apm_data_access/server/lib/helpers/create_es_client/create_apm_event_client/index.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -301,7 +301,7 @@
               "FieldCapsResponse",
               ">"
             ],
-            "path": "x-pack/plugins/observability_solution/apm_data_access/server/lib/helpers/create_es_client/create_apm_event_client/index.ts",
+            "path": "x-pack/solutions/observability/plugins/apm_data_access/server/lib/helpers/create_es_client/create_apm_event_client/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -315,7 +315,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "x-pack/plugins/observability_solution/apm_data_access/server/lib/helpers/create_es_client/create_apm_event_client/index.ts",
+                "path": "x-pack/solutions/observability/plugins/apm_data_access/server/lib/helpers/create_es_client/create_apm_event_client/index.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -330,7 +330,7 @@
                 "signature": [
                   "APMEventFieldCapsRequest"
                 ],
-                "path": "x-pack/plugins/observability_solution/apm_data_access/server/lib/helpers/create_es_client/create_apm_event_client/index.ts",
+                "path": "x-pack/solutions/observability/plugins/apm_data_access/server/lib/helpers/create_es_client/create_apm_event_client/index.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -352,7 +352,7 @@
               "TermsEnumResponse",
               ">"
             ],
-            "path": "x-pack/plugins/observability_solution/apm_data_access/server/lib/helpers/create_es_client/create_apm_event_client/index.ts",
+            "path": "x-pack/solutions/observability/plugins/apm_data_access/server/lib/helpers/create_es_client/create_apm_event_client/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -366,7 +366,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "x-pack/plugins/observability_solution/apm_data_access/server/lib/helpers/create_es_client/create_apm_event_client/index.ts",
+                "path": "x-pack/solutions/observability/plugins/apm_data_access/server/lib/helpers/create_es_client/create_apm_event_client/index.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -381,7 +381,7 @@
                 "signature": [
                   "APMEventTermsEnumRequest"
                 ],
-                "path": "x-pack/plugins/observability_solution/apm_data_access/server/lib/helpers/create_es_client/create_apm_event_client/index.ts",
+                "path": "x-pack/solutions/observability/plugins/apm_data_access/server/lib/helpers/create_es_client/create_apm_event_client/index.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -407,7 +407,7 @@
               },
               ") => string[]"
             ],
-            "path": "x-pack/plugins/observability_solution/apm_data_access/server/lib/helpers/create_es_client/create_apm_event_client/index.ts",
+            "path": "x-pack/solutions/observability/plugins/apm_data_access/server/lib/helpers/create_es_client/create_apm_event_client/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -427,7 +427,7 @@
                     "text": "ProcessorEvent"
                   }
                 ],
-                "path": "x-pack/plugins/observability_solution/apm_data_access/server/lib/helpers/create_es_client/create_apm_event_client/index.ts",
+                "path": "x-pack/solutions/observability/plugins/apm_data_access/server/lib/helpers/create_es_client/create_apm_event_client/index.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -448,7 +448,7 @@
         "tags": [],
         "label": "ApmDataAccessPrivilegesCheck",
         "description": [],
-        "path": "x-pack/plugins/observability_solution/apm_data_access/server/lib/check_privileges.ts",
+        "path": "x-pack/solutions/observability/plugins/apm_data_access/server/lib/check_privileges.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -469,7 +469,7 @@
               },
               "<unknown, unknown, unknown, any>"
             ],
-            "path": "x-pack/plugins/observability_solution/apm_data_access/server/lib/check_privileges.ts",
+            "path": "x-pack/solutions/observability/plugins/apm_data_access/server/lib/check_privileges.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -490,7 +490,7 @@
               },
               " | undefined"
             ],
-            "path": "x-pack/plugins/observability_solution/apm_data_access/server/lib/check_privileges.ts",
+            "path": "x-pack/solutions/observability/plugins/apm_data_access/server/lib/check_privileges.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -504,7 +504,7 @@
             "signature": [
               "() => Promise<Readonly<{} & { error: string; transaction: string; span: string; metric: string; onboarding: string; sourcemap: string; }>>"
             ],
-            "path": "x-pack/plugins/observability_solution/apm_data_access/server/lib/check_privileges.ts",
+            "path": "x-pack/solutions/observability/plugins/apm_data_access/server/lib/check_privileges.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -520,7 +520,7 @@
         "tags": [],
         "label": "ApmDataAccessServicesParams",
         "description": [],
-        "path": "x-pack/plugins/observability_solution/apm_data_access/server/services/get_services.ts",
+        "path": "x-pack/solutions/observability/plugins/apm_data_access/server/services/get_services.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -540,7 +540,7 @@
                 "text": "APMEventClient"
               }
             ],
-            "path": "x-pack/plugins/observability_solution/apm_data_access/server/services/get_services.ts",
+            "path": "x-pack/solutions/observability/plugins/apm_data_access/server/services/get_services.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -554,7 +554,7 @@
         "tags": [],
         "label": "APMEventClientConfig",
         "description": [],
-        "path": "x-pack/plugins/observability_solution/apm_data_access/server/lib/helpers/create_es_client/create_apm_event_client/index.ts",
+        "path": "x-pack/solutions/observability/plugins/apm_data_access/server/lib/helpers/create_es_client/create_apm_event_client/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1822,7 +1822,7 @@
               "default",
               "; }"
             ],
-            "path": "x-pack/plugins/observability_solution/apm_data_access/server/lib/helpers/create_es_client/create_apm_event_client/index.ts",
+            "path": "x-pack/solutions/observability/plugins/apm_data_access/server/lib/helpers/create_es_client/create_apm_event_client/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1833,7 +1833,7 @@
             "tags": [],
             "label": "debug",
             "description": [],
-            "path": "x-pack/plugins/observability_solution/apm_data_access/server/lib/helpers/create_es_client/create_apm_event_client/index.ts",
+            "path": "x-pack/solutions/observability/plugins/apm_data_access/server/lib/helpers/create_es_client/create_apm_event_client/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1854,7 +1854,7 @@
               },
               "<unknown, unknown, unknown, any>"
             ],
-            "path": "x-pack/plugins/observability_solution/apm_data_access/server/lib/helpers/create_es_client/create_apm_event_client/index.ts",
+            "path": "x-pack/solutions/observability/plugins/apm_data_access/server/lib/helpers/create_es_client/create_apm_event_client/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1868,7 +1868,7 @@
             "signature": [
               "{ readonly error: string; readonly transaction: string; readonly span: string; readonly metric: string; readonly onboarding: string; readonly sourcemap: string; }"
             ],
-            "path": "x-pack/plugins/observability_solution/apm_data_access/server/lib/helpers/create_es_client/create_apm_event_client/index.ts",
+            "path": "x-pack/solutions/observability/plugins/apm_data_access/server/lib/helpers/create_es_client/create_apm_event_client/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1900,7 +1900,7 @@
               },
               "[] | undefined; }"
             ],
-            "path": "x-pack/plugins/observability_solution/apm_data_access/server/lib/helpers/create_es_client/create_apm_event_client/index.ts",
+            "path": "x-pack/solutions/observability/plugins/apm_data_access/server/lib/helpers/create_es_client/create_apm_event_client/index.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1914,7 +1914,7 @@
         "tags": [],
         "label": "DocumentSourcesRequest",
         "description": [],
-        "path": "x-pack/plugins/observability_solution/apm_data_access/server/services/get_document_sources/get_document_sources.ts",
+        "path": "x-pack/solutions/observability/plugins/apm_data_access/server/services/get_document_sources/get_document_sources.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1934,7 +1934,7 @@
                 "text": "APMEventClient"
               }
             ],
-            "path": "x-pack/plugins/observability_solution/apm_data_access/server/services/get_document_sources/get_document_sources.ts",
+            "path": "x-pack/solutions/observability/plugins/apm_data_access/server/services/get_document_sources/get_document_sources.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1945,7 +1945,7 @@
             "tags": [],
             "label": "start",
             "description": [],
-            "path": "x-pack/plugins/observability_solution/apm_data_access/server/services/get_document_sources/get_document_sources.ts",
+            "path": "x-pack/solutions/observability/plugins/apm_data_access/server/services/get_document_sources/get_document_sources.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1956,7 +1956,7 @@
             "tags": [],
             "label": "end",
             "description": [],
-            "path": "x-pack/plugins/observability_solution/apm_data_access/server/services/get_document_sources/get_document_sources.ts",
+            "path": "x-pack/solutions/observability/plugins/apm_data_access/server/services/get_document_sources/get_document_sources.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1967,7 +1967,7 @@
             "tags": [],
             "label": "kuery",
             "description": [],
-            "path": "x-pack/plugins/observability_solution/apm_data_access/server/services/get_document_sources/get_document_sources.ts",
+            "path": "x-pack/solutions/observability/plugins/apm_data_access/server/services/get_document_sources/get_document_sources.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1978,7 +1978,7 @@
             "tags": [],
             "label": "enableServiceTransactionMetrics",
             "description": [],
-            "path": "x-pack/plugins/observability_solution/apm_data_access/server/services/get_document_sources/get_document_sources.ts",
+            "path": "x-pack/solutions/observability/plugins/apm_data_access/server/services/get_document_sources/get_document_sources.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1989,7 +1989,7 @@
             "tags": [],
             "label": "enableContinuousRollups",
             "description": [],
-            "path": "x-pack/plugins/observability_solution/apm_data_access/server/services/get_document_sources/get_document_sources.ts",
+            "path": "x-pack/solutions/observability/plugins/apm_data_access/server/services/get_document_sources/get_document_sources.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2003,7 +2003,7 @@
         "tags": [],
         "label": "GetDocumentTypeParams",
         "description": [],
-        "path": "x-pack/plugins/observability_solution/apm_data_access/server/services/get_document_type_config/index.ts",
+        "path": "x-pack/solutions/observability/plugins/apm_data_access/server/services/get_document_type_config/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2014,7 +2014,7 @@
             "tags": [],
             "label": "start",
             "description": [],
-            "path": "x-pack/plugins/observability_solution/apm_data_access/server/services/get_document_type_config/index.ts",
+            "path": "x-pack/solutions/observability/plugins/apm_data_access/server/services/get_document_type_config/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2025,7 +2025,7 @@
             "tags": [],
             "label": "end",
             "description": [],
-            "path": "x-pack/plugins/observability_solution/apm_data_access/server/services/get_document_type_config/index.ts",
+            "path": "x-pack/solutions/observability/plugins/apm_data_access/server/services/get_document_type_config/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2047,7 +2047,7 @@
               },
               "<AnyApmDocumentType> & { hasDocs: boolean; hasDurationSummaryField: boolean; })[]"
             ],
-            "path": "x-pack/plugins/observability_solution/apm_data_access/server/services/get_document_type_config/index.ts",
+            "path": "x-pack/solutions/observability/plugins/apm_data_access/server/services/get_document_type_config/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2068,7 +2068,7 @@
               },
               "[]"
             ],
-            "path": "x-pack/plugins/observability_solution/apm_data_access/server/services/get_document_type_config/index.ts",
+            "path": "x-pack/solutions/observability/plugins/apm_data_access/server/services/get_document_type_config/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2082,7 +2082,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "x-pack/plugins/observability_solution/apm_data_access/server/services/get_document_type_config/index.ts",
+            "path": "x-pack/solutions/observability/plugins/apm_data_access/server/services/get_document_type_config/index.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2096,7 +2096,7 @@
         "tags": [],
         "label": "HostNamesRequest",
         "description": [],
-        "path": "x-pack/plugins/observability_solution/apm_data_access/server/services/get_host_names/index.ts",
+        "path": "x-pack/solutions/observability/plugins/apm_data_access/server/services/get_host_names/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2111,7 +2111,7 @@
               "QueryDslQueryContainer",
               " | undefined"
             ],
-            "path": "x-pack/plugins/observability_solution/apm_data_access/server/services/get_host_names/index.ts",
+            "path": "x-pack/solutions/observability/plugins/apm_data_access/server/services/get_host_names/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2125,7 +2125,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/observability_solution/apm_data_access/server/services/get_host_names/index.ts",
+            "path": "x-pack/solutions/observability/plugins/apm_data_access/server/services/get_host_names/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2136,7 +2136,7 @@
             "tags": [],
             "label": "start",
             "description": [],
-            "path": "x-pack/plugins/observability_solution/apm_data_access/server/services/get_host_names/index.ts",
+            "path": "x-pack/solutions/observability/plugins/apm_data_access/server/services/get_host_names/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2147,7 +2147,7 @@
             "tags": [],
             "label": "end",
             "description": [],
-            "path": "x-pack/plugins/observability_solution/apm_data_access/server/services/get_host_names/index.ts",
+            "path": "x-pack/solutions/observability/plugins/apm_data_access/server/services/get_host_names/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2161,7 +2161,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "x-pack/plugins/observability_solution/apm_data_access/server/services/get_host_names/index.ts",
+            "path": "x-pack/solutions/observability/plugins/apm_data_access/server/services/get_host_names/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2183,7 +2183,7 @@
               },
               "<AnyApmDocumentType> & { hasDocs: boolean; hasDurationSummaryField: boolean; })[]"
             ],
-            "path": "x-pack/plugins/observability_solution/apm_data_access/server/services/get_host_names/index.ts",
+            "path": "x-pack/solutions/observability/plugins/apm_data_access/server/services/get_host_names/index.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2203,7 +2203,7 @@
         "signature": [
           "{ readonly indices: Readonly<{} & { error: string; transaction: string; span: string; metric: string; onboarding: string; sourcemap: string; }>; }"
         ],
-        "path": "x-pack/plugins/observability_solution/apm_data_access/server/index.ts",
+        "path": "x-pack/solutions/observability/plugins/apm_data_access/server/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2260,7 +2260,7 @@
           "HostServicesRequest",
           ") => Promise<{ services: { serviceName: string; agentName: string | null; }[]; }>; }"
         ],
-        "path": "x-pack/plugins/observability_solution/apm_data_access/server/types.ts",
+        "path": "x-pack/solutions/observability/plugins/apm_data_access/server/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2293,7 +2293,7 @@
           },
           "<AnyApmDocumentType>[]; }); body: { size: number; track_total_hits: number | boolean; }; }"
         ],
-        "path": "x-pack/plugins/observability_solution/apm_data_access/server/lib/helpers/create_es_client/create_apm_event_client/index.ts",
+        "path": "x-pack/solutions/observability/plugins/apm_data_access/server/lib/helpers/create_es_client/create_apm_event_client/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2308,7 +2308,7 @@
         "signature": [
           "{ readonly error: string; readonly transaction: string; readonly span: string; readonly metric: string; readonly onboarding: string; readonly sourcemap: string; }"
         ],
-        "path": "x-pack/plugins/observability_solution/apm_data_access/server/index.ts",
+        "path": "x-pack/solutions/observability/plugins/apm_data_access/server/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2325,7 +2325,7 @@
           "SearchRequest",
           ", \"index\"> & { body: { size: number; track_total_hits: number | boolean; }; }"
         ],
-        "path": "x-pack/plugins/observability_solution/apm_data_access/server/lib/helpers/create_es_client/create_apm_event_client/index.ts",
+        "path": "x-pack/solutions/observability/plugins/apm_data_access/server/lib/helpers/create_es_client/create_apm_event_client/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2339,7 +2339,7 @@
       "tags": [],
       "label": "ApmDataAccessPluginSetup",
       "description": [],
-      "path": "x-pack/plugins/observability_solution/apm_data_access/server/types.ts",
+      "path": "x-pack/solutions/observability/plugins/apm_data_access/server/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -2353,7 +2353,7 @@
           "signature": [
             "{ readonly error: string; readonly transaction: string; readonly span: string; readonly metric: string; readonly onboarding: string; readonly sourcemap: string; }"
           ],
-          "path": "x-pack/plugins/observability_solution/apm_data_access/server/types.ts",
+          "path": "x-pack/solutions/observability/plugins/apm_data_access/server/types.ts",
           "deprecated": false,
           "trackAdoption": false
         },
@@ -2375,7 +2375,7 @@
             },
             ") => Promise<Readonly<{} & { error: string; transaction: string; span: string; metric: string; onboarding: string; sourcemap: string; }>>"
           ],
-          "path": "x-pack/plugins/observability_solution/apm_data_access/server/types.ts",
+          "path": "x-pack/solutions/observability/plugins/apm_data_access/server/types.ts",
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -2395,7 +2395,7 @@
                   "text": "SavedObjectsClientContract"
                 }
               ],
-              "path": "x-pack/plugins/observability_solution/apm_data_access/server/types.ts",
+              "path": "x-pack/solutions/observability/plugins/apm_data_access/server/types.ts",
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -2463,7 +2463,7 @@
             "HostServicesRequest",
             ") => Promise<{ services: { serviceName: string; agentName: string | null; }[]; }>; }"
           ],
-          "path": "x-pack/plugins/observability_solution/apm_data_access/server/types.ts",
+          "path": "x-pack/solutions/observability/plugins/apm_data_access/server/types.ts",
           "deprecated": false,
           "trackAdoption": false,
           "returnComment": [],
@@ -2484,7 +2484,7 @@
                   "text": "ApmDataAccessServicesParams"
                 }
               ],
-              "path": "x-pack/plugins/observability_solution/apm_data_access/server/services/get_services.ts",
+              "path": "x-pack/solutions/observability/plugins/apm_data_access/server/services/get_services.ts",
               "deprecated": false,
               "trackAdoption": false
             }
@@ -2501,7 +2501,7 @@
       "tags": [],
       "label": "ApmDataAccessPluginStart",
       "description": [],
-      "path": "x-pack/plugins/observability_solution/apm_data_access/server/types.ts",
+      "path": "x-pack/solutions/observability/plugins/apm_data_access/server/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -2523,7 +2523,7 @@
             },
             ", \"request\">) => Promise<boolean>"
           ],
-          "path": "x-pack/plugins/observability_solution/apm_data_access/server/types.ts",
+          "path": "x-pack/solutions/observability/plugins/apm_data_access/server/types.ts",
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -2545,7 +2545,7 @@
                 },
                 ", \"request\">"
               ],
-              "path": "x-pack/plugins/observability_solution/apm_data_access/server/types.ts",
+              "path": "x-pack/solutions/observability/plugins/apm_data_access/server/types.ts",
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -2571,7 +2571,7 @@
         "signature": [
           "({\n  start,\n  end,\n  numBuckets = 50,\n  minBucketSize,\n}: { start: number; end: number; numBuckets?: number | undefined; minBucketSize?: number | undefined; }) => { bucketSize: number; intervalString: string; }"
         ],
-        "path": "x-pack/plugins/observability_solution/apm_data_access/common/utils/get_bucket_size/index.ts",
+        "path": "x-pack/solutions/observability/plugins/apm_data_access/common/utils/get_bucket_size/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2582,7 +2582,7 @@
             "tags": [],
             "label": "{\n  start,\n  end,\n  numBuckets = 50,\n  minBucketSize,\n}",
             "description": [],
-            "path": "x-pack/plugins/observability_solution/apm_data_access/common/utils/get_bucket_size/index.ts",
+            "path": "x-pack/solutions/observability/plugins/apm_data_access/common/utils/get_bucket_size/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2593,7 +2593,7 @@
                 "tags": [],
                 "label": "start",
                 "description": [],
-                "path": "x-pack/plugins/observability_solution/apm_data_access/common/utils/get_bucket_size/index.ts",
+                "path": "x-pack/solutions/observability/plugins/apm_data_access/common/utils/get_bucket_size/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -2604,7 +2604,7 @@
                 "tags": [],
                 "label": "end",
                 "description": [],
-                "path": "x-pack/plugins/observability_solution/apm_data_access/common/utils/get_bucket_size/index.ts",
+                "path": "x-pack/solutions/observability/plugins/apm_data_access/common/utils/get_bucket_size/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -2618,7 +2618,7 @@
                 "signature": [
                   "number | undefined"
                 ],
-                "path": "x-pack/plugins/observability_solution/apm_data_access/common/utils/get_bucket_size/index.ts",
+                "path": "x-pack/solutions/observability/plugins/apm_data_access/common/utils/get_bucket_size/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -2632,7 +2632,7 @@
                 "signature": [
                   "number | undefined"
                 ],
-                "path": "x-pack/plugins/observability_solution/apm_data_access/common/utils/get_bucket_size/index.ts",
+                "path": "x-pack/solutions/observability/plugins/apm_data_access/common/utils/get_bucket_size/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -2668,7 +2668,7 @@
           },
           "<AnyApmDocumentType>; bucketSizeInSeconds: number; }"
         ],
-        "path": "x-pack/plugins/observability_solution/apm_data_access/common/utils/get_preferred_bucket_size_and_data_source.ts",
+        "path": "x-pack/solutions/observability/plugins/apm_data_access/common/utils/get_preferred_bucket_size_and_data_source.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2679,7 +2679,7 @@
             "tags": [],
             "label": "{\n  sources,\n  bucketSizeInSeconds,\n}",
             "description": [],
-            "path": "x-pack/plugins/observability_solution/apm_data_access/common/utils/get_preferred_bucket_size_and_data_source.ts",
+            "path": "x-pack/solutions/observability/plugins/apm_data_access/common/utils/get_preferred_bucket_size_and_data_source.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2700,7 +2700,7 @@
                   },
                   "<AnyApmDocumentType>[]"
                 ],
-                "path": "x-pack/plugins/observability_solution/apm_data_access/common/utils/get_preferred_bucket_size_and_data_source.ts",
+                "path": "x-pack/solutions/observability/plugins/apm_data_access/common/utils/get_preferred_bucket_size_and_data_source.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -2711,7 +2711,7 @@
                 "tags": [],
                 "label": "bucketSizeInSeconds",
                 "description": [],
-                "path": "x-pack/plugins/observability_solution/apm_data_access/common/utils/get_preferred_bucket_size_and_data_source.ts",
+                "path": "x-pack/solutions/observability/plugins/apm_data_access/common/utils/get_preferred_bucket_size_and_data_source.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -2740,7 +2740,7 @@
           },
           "<TDocumentType>"
         ],
-        "path": "x-pack/plugins/observability_solution/apm_data_access/common/data_source.ts",
+        "path": "x-pack/solutions/observability/plugins/apm_data_access/common/data_source.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2760,7 +2760,7 @@
                 "text": "RollupInterval"
               }
             ],
-            "path": "x-pack/plugins/observability_solution/apm_data_access/common/data_source.ts",
+            "path": "x-pack/solutions/observability/plugins/apm_data_access/common/data_source.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2774,7 +2774,7 @@
             "signature": [
               "TDocumentType"
             ],
-            "path": "x-pack/plugins/observability_solution/apm_data_access/common/data_source.ts",
+            "path": "x-pack/solutions/observability/plugins/apm_data_access/common/data_source.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2788,7 +2788,7 @@
         "tags": [],
         "label": "TimeRangeMetadata",
         "description": [],
-        "path": "x-pack/plugins/observability_solution/apm_data_access/common/time_range_metadata.ts",
+        "path": "x-pack/solutions/observability/plugins/apm_data_access/common/time_range_metadata.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2799,7 +2799,7 @@
             "tags": [],
             "label": "isUsingServiceDestinationMetrics",
             "description": [],
-            "path": "x-pack/plugins/observability_solution/apm_data_access/common/time_range_metadata.ts",
+            "path": "x-pack/solutions/observability/plugins/apm_data_access/common/time_range_metadata.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2821,7 +2821,7 @@
               },
               "<AnyApmDocumentType> & { hasDocs: boolean; hasDurationSummaryField: boolean; })[]"
             ],
-            "path": "x-pack/plugins/observability_solution/apm_data_access/common/time_range_metadata.ts",
+            "path": "x-pack/solutions/observability/plugins/apm_data_access/common/time_range_metadata.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2837,7 +2837,7 @@
         "tags": [],
         "label": "ApmDocumentType",
         "description": [],
-        "path": "x-pack/plugins/observability_solution/apm_data_access/common/document_type.ts",
+        "path": "x-pack/solutions/observability/plugins/apm_data_access/common/document_type.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2849,7 +2849,7 @@
         "tags": [],
         "label": "RollupInterval",
         "description": [],
-        "path": "x-pack/plugins/observability_solution/apm_data_access/common/rollup.ts",
+        "path": "x-pack/solutions/observability/plugins/apm_data_access/common/rollup.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2873,7 +2873,7 @@
           },
           "<T> & { hasDurationSummaryField: boolean; hasDocs: boolean; }"
         ],
-        "path": "x-pack/plugins/observability_solution/apm_data_access/common/data_source.ts",
+        "path": "x-pack/solutions/observability/plugins/apm_data_access/common/data_source.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2911,7 +2911,7 @@
           },
           ".TransactionEvent"
         ],
-        "path": "x-pack/plugins/observability_solution/apm_data_access/common/document_type.ts",
+        "path": "x-pack/solutions/observability/plugins/apm_data_access/common/document_type.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2941,7 +2941,7 @@
           },
           ".TransactionEvent"
         ],
-        "path": "x-pack/plugins/observability_solution/apm_data_access/common/document_type.ts",
+        "path": "x-pack/solutions/observability/plugins/apm_data_access/common/document_type.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2956,7 +2956,7 @@
         "signature": [
           "\"apmDataAccess\""
         ],
-        "path": "x-pack/plugins/observability_solution/apm_data_access/common/index.ts",
+        "path": "x-pack/solutions/observability/plugins/apm_data_access/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2971,7 +2971,7 @@
         "signature": [
           "\"apmDataAccess\""
         ],
-        "path": "x-pack/plugins/observability_solution/apm_data_access/common/index.ts",
+        "path": "x-pack/solutions/observability/plugins/apm_data_access/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

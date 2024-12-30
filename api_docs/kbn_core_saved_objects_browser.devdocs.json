@@ -62,20 +62,20 @@
             "path": "src/plugins/visualizations/public/services.ts"
           },
           {
-            "plugin": "exploratoryView",
-            "path": "x-pack/solutions/observability/plugins/exploratory_view/public/application/types.ts"
-          },
-          {
-            "plugin": "exploratoryView",
-            "path": "x-pack/solutions/observability/plugins/exploratory_view/public/application/types.ts"
-          },
-          {
             "plugin": "transform",
             "path": "x-pack/platform/plugins/private/transform/public/app/app_dependencies.tsx"
           },
           {
             "plugin": "transform",
             "path": "x-pack/platform/plugins/private/transform/public/app/app_dependencies.tsx"
+          },
+          {
+            "plugin": "exploratoryView",
+            "path": "x-pack/solutions/observability/plugins/exploratory_view/public/application/types.ts"
+          },
+          {
+            "plugin": "exploratoryView",
+            "path": "x-pack/solutions/observability/plugins/exploratory_view/public/application/types.ts"
           },
           {
             "plugin": "@kbn/core",
