@@ -5377,7 +5377,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/discover-shared-plugin@link:src/plugins/discover_shared":
+"@kbn/discover-shared-plugin@link:src/platform/plugins/shared/discover_shared":
   version "0.0.0"
   uid ""
 
