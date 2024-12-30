@@ -37,8 +37,8 @@ describe('helpers', function () {
       expect(
         parseErrors(
           errors,
-          `SELECT * 
-      FROM "kibana_sample_data_ecommerce" 
+          `SELECT *
+      FROM "kibana_sample_data_ecommerce"
       WHERE category`
         )
       ).toEqual([
@@ -213,6 +213,7 @@ describe('helpers', function () {
           {
             name: '.system1',
             title: 'system1',
+            tags: [{ name: 'system', type: 'system', key: 'alias' }],
           },
           {
             name: 'logs',
@@ -222,7 +223,7 @@ describe('helpers', function () {
       };
       const indices = await getIndicesList(updatedDataViewsMock);
       expect(indices).toStrictEqual([
-        { name: '.system1', hidden: true, type: 'Index' },
+        { name: '.system1', hidden: true, type: 'system' },
         { name: 'logs', hidden: false, type: 'Index' },
       ]);
     });
@@ -273,6 +274,7 @@ describe('helpers', function () {
             item: {
               name: 'system',
             },
+            tags: [{ name: 'system', type: 'system', key: 'alias' }],
           },
           {
             name: 'remote:logs',

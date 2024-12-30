@@ -177,8 +177,10 @@ export const getIndicesList = async (dataViews: DataViewsPublicPluginStart) => {
   });
 
   return indices.map((index) => {
+    const hidden =
+      index.name.startsWith('.') && Boolean(index.tags.find((tag) => tag.key === 'alias'));
     const [tag] = index?.tags ?? [];
-    return { name: index.name, hidden: false, type: tag?.name ?? 'Index' };
+    return { name: index.name, hidden, type: tag?.name ?? 'Index' };
   });
 };
 
@@ -189,7 +191,10 @@ export const getRemoteIndicesList = async (dataViews: DataViewsPublicPluginStart
     isRollupIndex: () => false,
   });
   const finalIndicesList = indices.filter((source) => {
-    return !Boolean(source.item.indices);
+    const [_, indexName] = source.name.split(':');
+    const hidden =
+      indexName.startsWith('.') && Boolean(source.tags.find((tag) => tag.key === 'alias'));
+    return !hidden && !Boolean(source.item.indices);
   });
 
   return finalIndicesList.map((source) => {
