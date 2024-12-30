@@ -989,7 +989,7 @@ module.exports = {
         'x-pack/plugins/observability_solution/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
         'x-pack/plugins/{streams,streams_app}/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
         'src/plugins/ai_assistant_management/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
-        'x-pack/packages/observability/logs_overview/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
+        'x-pack/platform/packages/shared/observability/logs_overview/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
       ],
       rules: {
         '@kbn/i18n/strings_should_be_translated_with_i18n': 'warn',
@@ -2009,7 +2009,7 @@ module.exports = {
     {
       files: [
         // this plugin depends on visTypeTimeseries plugin (for TSVB viz) which is platform/private ATM
-        'x-pack/plugins/observability_solution/infra/**',
+        'x-pack/solutions/observability/plugins/infra/**',
 
         // TODO @kibana/operations
         'scripts/create_observability_rules.js', // is importing "@kbn/observability-alerting-test-data" (observability/private)
