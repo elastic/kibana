@@ -364,7 +364,7 @@ module.exports = {
     {
       files: [
         'packages/kbn-eslint-config/**/*.{js,mjs,ts,tsx}',
-        'packages/kbn-datemath/**/*.{js,mjs,ts,tsx}',
+        'src/platform/packages/shared/kbn-datemath/**/*.{js,mjs,ts,tsx}',
       ],
       rules: {
         '@kbn/eslint/require-license-header': [
