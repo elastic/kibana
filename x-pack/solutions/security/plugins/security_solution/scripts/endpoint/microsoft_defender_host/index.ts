@@ -161,7 +161,7 @@ const runCli: RunFn = async ({ log, flags }) => {
 
   const activeSpaceId = (await fetchActiveSpace(kbnClient)).id;
 
-  await onboardVmHostWithMicrosoftDefender({
+  const msVm = await onboardVmHostWithMicrosoftDefender({
     kbnClient,
     log,
     vmName,
@@ -234,14 +234,13 @@ const runCli: RunFn = async ({ log, flags }) => {
       apiUrl,
     }),
     createDetectionEngineMicrosoftDefenderRuleIfNeeded(kbnClient, log, agentPolicyNamespace),
+    // Trigger alert on the windows VM
+    msVm.exec('curl -o /tmp/eicar.com.txt https://secure.eicar.org/eicar.com.txt'),
   ]);
-
-  // FIXME:PT trigger alert in VM whenever that is implemented
-
-  // FIXME:PT add VM output (.info()) to the message below
 
   log.info(`Done!
 
+${msVm.info()}
 ${agentPolicyVm ? `${agentPolicyVm.info()}\n` : ''}
 ${await getMultipassVmCountNotice(2)}
 `);
