@@ -49,9 +49,13 @@ import {
   ExportModal,
 } from './components';
 
+// Saved objects for ML job are not importable/exportable because they are wrappers around ES objects
+const DISABLED_TYPES_FOR_EXPORT = new Set(['ml-job']);
+
 interface ExportAllOption {
   id: string;
   label: string;
+  disabled?: boolean;
 }
 
 export interface SavedObjectsTableProps {
@@ -168,6 +172,8 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
 
     const allowedTypes = this.props.allowedTypes.map((type) => type.name);
 
+    // @TODO: remove
+    console.log(`--@@allowedTypes`, allowedTypes);
     const selectedTypes = allowedTypes.filter(
       (type) => !visibleTypes || visibleTypes.includes(type)
     );
@@ -186,18 +192,18 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       ([id, count]) => ({
         id,
         label: `${id} (${count || 0})`,
+        disabled: DISABLED_TYPES_FOR_EXPORT.has(id),
       })
     );
     const exportAllSelectedOptions: Record<string, boolean> = exportAllOptions.reduce(
       (record, { id }) => {
         return {
           ...record,
-          [id]: true,
+          [id]: DISABLED_TYPES_FOR_EXPORT.has(id) ? false : true,
         };
       },
       {}
     );
-
     // Fetch all the saved objects that exist so we can accurately populate the counts within
     // the table filter dropdown.
     const savedObjectCounts = await getSavedObjectCounts({
@@ -420,7 +426,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
     const { notifications, http, taggingApi, allowedTypes } = this.props;
     const { queryText, selectedTags } = parseQuery(activeQuery, allowedTypes);
     const exportTypes = Object.entries(exportAllSelectedOptions).reduce((accum, [id, selected]) => {
-      if (selected) {
+      if (selected && !DISABLED_TYPES_FOR_EXPORT.has(id)) {
         accum.push(id);
       }
       return accum;

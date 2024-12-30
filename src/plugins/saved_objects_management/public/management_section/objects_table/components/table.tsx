@@ -386,9 +386,30 @@ export class Table extends PureComponent<TableProps, TableState> {
     const activeActionContents = this.state.activeAction?.render() ?? null;
     const exceededResultCount = totalItemCount > MAX_PAGINATED_ITEM;
 
+    const hasMlObjects = selectedSavedObjects.some(({ type }) => type === 'ml-job');
+
     const anySelected = selectedSavedObjects.length > 0;
     const allHidden =
       anySelected && selectedSavedObjects.every(({ meta: { hiddenType } }) => hiddenType);
+
+    const deleteTooltip = () => {
+      if (hasMlObjects) {
+        return (
+          <FormattedMessage
+            id="savedObjectsManagement.objectsTable.table.hasMlObjects.deleteDisabledTooltip"
+            defaultMessage="Machine learning objects can’t be deleted."
+          />
+        );
+      }
+      if (allHidden) {
+        return (
+          <FormattedMessage
+            id="savedObjectsManagement.objectsTable.table.deleteDisabledTooltip"
+            defaultMessage="Selected objects can’t be deleted because they are hidden objects."
+          />
+        );
+      }
+    };
     return (
       <Fragment>
         {activeActionContents}
@@ -406,14 +427,7 @@ export class Table extends PureComponent<TableProps, TableState> {
             <EuiToolTip
               data-test-subj="deleteSOToolTip"
               key="deleteSOToolTip"
-              content={
-                allHidden ? (
-                  <FormattedMessage
-                    id="savedObjectsManagement.objectsTable.table.deleteDisabledTooltip"
-                    defaultMessage="Selected objects can’t be deleted because they are hidden objects."
-                  />
-                ) : undefined
-              }
+              content={deleteTooltip()}
             >
               <EuiButton
                 key="deleteSO"
@@ -421,7 +435,10 @@ export class Table extends PureComponent<TableProps, TableState> {
                 color="danger"
                 onClick={onDelete}
                 isDisabled={
-                  !anySelected || allHidden || !capabilities.savedObjectsManagement.delete
+                  hasMlObjects ||
+                  !anySelected ||
+                  allHidden ||
+                  !capabilities.savedObjectsManagement.delete
                 }
                 title={
                   capabilities.savedObjectsManagement.delete
