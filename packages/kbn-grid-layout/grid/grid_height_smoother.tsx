@@ -9,7 +9,7 @@
 
 import { css } from '@emotion/react';
 import React, { PropsWithChildren, useEffect, useRef } from 'react';
-import { combineLatest } from 'rxjs';
+import { combineLatest, distinctUntilChanged, map } from 'rxjs';
 import { GridLayoutStateManager } from './types';
 
 export const GridHeightSmoother = ({
@@ -58,9 +58,21 @@ export const GridHeightSmoother = ({
         }
       }
     );
+
+    const marginSubscription = gridLayoutStateManager.runtimeSettings$
+      .pipe(
+        map(({ gutterSize }) => gutterSize),
+        distinctUntilChanged()
+      )
+      .subscribe((gutterSize) => {
+        if (!smoothHeightRef.current) return;
+        smoothHeightRef.current.style.margin = `${gutterSize}px`;
+      });
+
     return () => {
       interactionStyleSubscription.unsubscribe();
       expandedPanelSubscription.unsubscribe();
+      marginSubscription.unsubscribe();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
