@@ -296,7 +296,7 @@ describe('reactEmbeddable phase events', () => {
       ...testEmbeddableFactory,
       type: 'loadClicker',
       buildEmbeddable: async (state, registerApi) => {
-        const dataLoading = new BehaviorSubject<boolean | undefined>(true);
+        const dataLoading$ = new BehaviorSubject<boolean | undefined>(true);
         const api = registerApi(
           {
             serializeState: () => ({
@@ -305,7 +305,7 @@ describe('reactEmbeddable phase events', () => {
                 bork: state.bork,
               },
             }),
-            dataLoading,
+            dataLoading$,
           },
           {
             name: [new BehaviorSubject<string>(state.name), () => {}],
@@ -318,7 +318,7 @@ describe('reactEmbeddable phase events', () => {
               <div data-test-subj="superTestEmbeddable">
                 SUPER TEST COMPONENT, name: {state.name} bork: {state.bork}
               </div>
-              <button data-test-subj="clickToStopLoading" onClick={() => dataLoading.next(false)}>
+              <button data-test-subj="clickToStopLoading" onClick={() => dataLoading$.next(false)}>
                 Done loading
               </button>
             </>
