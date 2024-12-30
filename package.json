@@ -981,7 +981,7 @@
     "@kbn/ui-actions-explorer-plugin": "link:examples/ui_actions_explorer",
     "@kbn/ui-actions-plugin": "link:src/plugins/ui_actions",
     "@kbn/ui-settings-plugin": "link:test/plugin_functional/plugins/ui_settings_plugin",
-    "@kbn/ui-shared-deps-npm": "link:packages/kbn-ui-shared-deps-npm",
+    "@kbn/ui-shared-deps-npm": "link:src/platform/packages/private/kbn-ui-shared-deps-npm",
     "@kbn/ui-shared-deps-src": "link:packages/kbn-ui-shared-deps-src",
     "@kbn/ui-theme": "link:packages/kbn-ui-theme",
     "@kbn/unified-data-table": "link:src/platform/packages/shared/kbn-unified-data-table",

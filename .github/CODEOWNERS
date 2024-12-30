@@ -414,7 +414,6 @@ packages/kbn-transpose-utils @elastic/kibana-visualizations
 packages/kbn-ts-projects @elastic/kibana-operations
 packages/kbn-ts-type-check-cli @elastic/kibana-operations
 packages/kbn-ui-actions-browser @elastic/appex-sharedux
-packages/kbn-ui-shared-deps-npm @elastic/kibana-operations
 packages/kbn-ui-shared-deps-src @elastic/kibana-operations
 packages/kbn-ui-theme @elastic/kibana-operations
 packages/kbn-use-tracked-promise @elastic/obs-ux-logs-team
@@ -517,6 +516,7 @@ src/platform/packages/private/kbn-management/settings/components/form @elastic/k
 src/platform/packages/private/kbn-mapbox-gl @elastic/kibana-presentation
 src/platform/packages/private/kbn-panel-loader @elastic/kibana-presentation
 src/platform/packages/private/kbn-repo-packages @elastic/kibana-operations
+src/platform/packages/private/kbn-ui-shared-deps-npm @elastic/kibana-operations
 src/platform/packages/private/kbn-unsaved-changes-badge @elastic/kibana-data-discovery
 src/platform/packages/private/response-ops/rule_params @elastic/response-ops
 src/platform/packages/shared/deeplinks/analytics @elastic/kibana-data-discovery @elastic/kibana-presentation @elastic/kibana-visualizations

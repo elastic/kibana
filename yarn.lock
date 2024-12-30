@@ -7769,7 +7769,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/ui-shared-deps-npm@link:packages/kbn-ui-shared-deps-npm":
+"@kbn/ui-shared-deps-npm@link:src/platform/packages/private/kbn-ui-shared-deps-npm":
   version "0.0.0"
   uid ""
 
