@@ -5373,7 +5373,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/discover-plugin@link:src/plugins/discover":
+"@kbn/discover-plugin@link:src/platform/plugins/shared/discover":
   version "0.0.0"
   uid ""
 

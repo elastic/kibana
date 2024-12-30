@@ -323,7 +323,7 @@ const getPipeline = (filename: string, removeSteps = true) => {
         /^src\/platform\/plugins\/shared\/controls/,
         /^src\/plugins\/data/,
         /^src\/platform\/plugins\/shared\/data_views/,
-        /^src\/plugins\/discover/,
+        /^src\/platform\/plugins\/shared\/discover/,
         /^src\/plugins\/field_formats/,
         /^src\/platform\/plugins\/shared\/inspector/,
         /^src\/plugins\/kibana_react/,
