@@ -30,7 +30,16 @@ export function registerDeleteRoute({
   lib: { handleEsError },
 }: RouteDependencies) {
   router.delete(
-    { path: addBasePath('/policies/{policyNames}'), validate: { params: paramsSchema } },
+    {
+      path: addBasePath('/policies/{policyNames}'),
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Relies on es client for authorization',
+        },
+      },
+      validate: { params: paramsSchema },
+    },
     license.guardApiRoute(async (context, request, response) => {
       const params = request.params as typeof paramsSchema.type;
       const { policyNames } = params;
