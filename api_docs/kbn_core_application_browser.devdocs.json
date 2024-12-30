@@ -1046,12 +1046,12 @@
                 "path": "src/platform/plugins/shared/management/public/application.tsx"
               },
               {
-                "plugin": "fleet",
-                "path": "x-pack/platform/plugins/shared/fleet/public/applications/integrations/index.tsx"
-              },
-              {
                 "plugin": "security",
                 "path": "x-pack/plugins/security/public/authentication/logout/logout_app.test.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/platform/plugins/shared/fleet/public/applications/integrations/index.tsx"
               },
               {
                 "plugin": "kibanaOverview",
