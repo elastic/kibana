@@ -999,7 +999,7 @@ examples/unified_doc_viewer @elastic/kibana-core
 src/platform/plugins/shared/unified_doc_viewer @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-unified-field-list @elastic/kibana-data-discovery
 examples/unified_field_list_examples @elastic/kibana-data-discovery
-src/plugins/unified_histogram @elastic/kibana-data-discovery
+src/platform/plugins/shared/unified_histogram @elastic/kibana-data-discovery
 src/plugins/unified_search @elastic/kibana-visualizations
 packages/kbn-unsaved-changes-badge @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-unsaved-changes-prompt @elastic/kibana-management

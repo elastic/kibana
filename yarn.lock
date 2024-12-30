@@ -7791,7 +7791,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/unified-histogram-plugin@link:src/plugins/unified_histogram":
+"@kbn/unified-histogram-plugin@link:src/platform/plugins/shared/unified_histogram":
   version "0.0.0"
   uid ""
 
