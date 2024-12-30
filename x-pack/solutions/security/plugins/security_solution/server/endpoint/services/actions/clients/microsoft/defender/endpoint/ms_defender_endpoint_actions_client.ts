@@ -92,7 +92,7 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
     return {
       actionEsDoc: actionRequestDoc,
       actionDetails: await this.fetchActionDetails<ActionDetails<TOutputContent, TParameters>>(
-        actionRequestOptions.actionId
+        actionRequestDoc.EndpointActions.action_id
       ),
     };
   }
