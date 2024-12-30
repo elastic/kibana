@@ -89,6 +89,7 @@ paths-ignore:
   - x-pack/examples
   - x-pack/performance
   - x-pack/platform/**/scripts
+  - x-pack/plugins/observability_solution/*/scripts
   - x-pack/scripts
   - x-pack/solutions/**/scripts
   - x-pack/test
