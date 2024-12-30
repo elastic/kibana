@@ -970,7 +970,7 @@
         "tags": [],
         "label": "SecurityPageName",
         "description": [],
-        "path": "packages/deeplinks/security/deep_links.ts",
+        "path": "src/platform/packages/shared/deeplinks/security/deep_links.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1041,13 +1041,7 @@
         "description": [],
         "signature": [
           "(param: { url?: string | undefined; appId?: string | undefined; restoreScroll?: boolean | undefined; } & ",
-          {
-            "pluginId": "@kbn/core-application-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreApplicationBrowserPluginApi",
-            "section": "def-public.NavigateToAppOptions",
-            "text": "NavigateToAppOptions"
-          },
+          "NavigateToAppOptions",
           ") => void"
         ],
         "path": "x-pack/solutions/security/packages/navigation/src/navigation.ts",
@@ -1064,13 +1058,7 @@
             "description": [],
             "signature": [
               "{ url?: string | undefined; appId?: string | undefined; restoreScroll?: boolean | undefined; } & ",
-              {
-                "pluginId": "@kbn/core-application-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreApplicationBrowserPluginApi",
-                "section": "def-public.NavigateToAppOptions",
-                "text": "NavigateToAppOptions"
-              }
+              "NavigateToAppOptions"
             ],
             "path": "x-pack/solutions/security/packages/navigation/src/navigation.ts",
             "deprecated": false,

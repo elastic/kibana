@@ -842,6 +842,25 @@
           "Window parameters"
         ],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/aiops-log-rate-analysis",
+        "id": "def-common.useLogRateAnalysisBarColors",
+        "type": "Function",
+        "tags": [],
+        "label": "useLogRateAnalysisBarColors",
+        "description": [
+          "Highlighting color for charts"
+        ],
+        "signature": [
+          "() => { barColor: string; barHighlightColor: string; }"
+        ],
+        "path": "x-pack/platform/packages/shared/ml/aiops_log_rate_analysis/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
       }
     ],
     "interfaces": [
@@ -1250,23 +1269,6 @@
     ],
     "enums": [],
     "misc": [
-      {
-        "parentPluginId": "@kbn/aiops-log-rate-analysis",
-        "id": "def-common.LOG_RATE_ANALYSIS_HIGHLIGHT_COLOR",
-        "type": "string",
-        "tags": [],
-        "label": "LOG_RATE_ANALYSIS_HIGHLIGHT_COLOR",
-        "description": [
-          "Highlighting color for charts"
-        ],
-        "signature": [
-          "\"orange\""
-        ],
-        "path": "x-pack/platform/packages/shared/ml/aiops_log_rate_analysis/constants.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
       {
         "parentPluginId": "@kbn/aiops-log-rate-analysis",
         "id": "def-common.LogRateAnalysisType",

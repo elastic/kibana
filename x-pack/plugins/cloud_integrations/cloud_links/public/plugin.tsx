@@ -8,11 +8,13 @@
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import type { PluginInitializerContext } from '@kbn/core-plugins-browser';
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
 import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/public';
 import type { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import * as connectionDetails from '@kbn/cloud/connection_details';
+import type { BuildFlavor } from '@kbn/config';
 import { maybeAddCloudLinks } from './maybe_add_cloud_links';
 
 interface CloudLinksDepsSetup {
@@ -30,6 +32,12 @@ interface CloudLinksDepsStart {
 export class CloudLinksPlugin
   implements Plugin<void, void, CloudLinksDepsSetup, CloudLinksDepsStart>
 {
+  public offering: BuildFlavor;
+
+  constructor(initializerContext: PluginInitializerContext) {
+    this.offering = initializerContext.env.packageInfo.buildFlavor;
+  }
+
   public setup({ analytics }: CoreSetup) {
     analytics.registerEventType({
       eventType: 'connection_details_learn_more_clicked',
@@ -115,6 +123,7 @@ export class CloudLinksPlugin
           security,
           cloud,
           share,
+          isServerless: this.offering === 'serverless',
         });
       }
     }
