@@ -11,7 +11,8 @@ module.exports = {
   preset: '@kbn/test',
   rootDir: '../../../../..',
   roots: ['<rootDir>/src/platform/plugins/shared/discover_shared'],
-  coverageDirectory: '<rootDir>/target/kibana-coverage/jest/src/platform/plugins/shared/discover_shared',
+  coverageDirectory:
+    '<rootDir>/target/kibana-coverage/jest/src/platform/plugins/shared/discover_shared',
   coverageReporters: ['text', 'html'],
   collectCoverageFrom: [
     '<rootDir>/src/platform/plugins/shared/discover_shared/{common,public,server}/**/*.{js,ts,tsx}',
