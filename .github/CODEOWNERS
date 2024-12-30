@@ -333,7 +333,6 @@ packages/kbn-lint-packages-cli @elastic/kibana-operations
 packages/kbn-lint-ts-projects-cli @elastic/kibana-operations
 packages/kbn-logging @elastic/kibana-core
 packages/kbn-logging-mocks @elastic/kibana-core
-packages/kbn-managed-content-badge @elastic/kibana-visualizations
 packages/kbn-managed-vscode-config @elastic/kibana-operations
 packages/kbn-managed-vscode-config-cli @elastic/kibana-operations
 packages/kbn-management/settings/section_registry @elastic/appex-sharedux @elastic/kibana-management
@@ -507,6 +506,7 @@ src/platform/packages/private/default-nav/ml @elastic/ml-ui
 src/platform/packages/private/kbn-esql-editor @elastic/kibana-esql
 src/platform/packages/private/kbn-language-documentation @elastic/kibana-esql
 src/platform/packages/private/kbn-lens-formula-docs @elastic/kibana-visualizations
+src/platform/packages/private/kbn-managed-content-badge @elastic/kibana-visualizations
 src/platform/packages/private/kbn-management/settings/application @elastic/kibana-management
 src/platform/packages/private/kbn-management/settings/components/field_category @elastic/kibana-management
 src/platform/packages/private/kbn-management/settings/components/form @elastic/kibana-management
