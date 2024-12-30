@@ -7021,7 +7021,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/search-response-warnings@link:packages/kbn-search-response-warnings":
+"@kbn/search-response-warnings@link:src/platform/packages/shared/kbn-search-response-warnings":
   version "0.0.0"
   uid ""
 
