@@ -75,9 +75,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('Returns unknown status when documents are missing and status cannot be determined', async () => {
         const forkBody = {
           stream: {
-            id: 'logs.nginx',
-            fields: [],
-            processing: [],
+            name: 'logs.nginx',
           },
           condition: {
             field: 'log.logger',
