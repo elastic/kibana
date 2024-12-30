@@ -793,7 +793,7 @@ src/platform/packages/shared/kbn-search-api-panels @elastic/search-kibana
 x-pack/solutions/search/plugins/search_assistant @elastic/search-kibana
 src/platform/packages/shared/kbn-search-connectors @elastic/search-kibana
 x-pack/solutions/search/plugins/search_connectors @elastic/search-kibana
-packages/kbn-search-errors @elastic/kibana-data-discovery
+src/platform/packages/shared/kbn-search-errors @elastic/kibana-data-discovery
 examples/search_examples @elastic/kibana-data-discovery
 x-pack/solutions/search/plugins/search_homepage @elastic/search-kibana
 x-pack/solutions/search/packages/kbn-search-index-documents @elastic/search-kibana
