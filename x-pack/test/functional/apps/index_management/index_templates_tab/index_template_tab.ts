@@ -14,7 +14,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const security = getService('security');
   const testSubjects = getService('testSubjects');
   const es = getService('es');
-  const browser = getService('browser');
 
   const INDEX_TEMPLATE_NAME = `test-index-template-name`;
 
@@ -34,7 +33,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await es.indices.deleteIndexTemplate({
         name: INDEX_TEMPLATE_NAME,
       });
-      await browser.refresh();
+      await testSubjects.click('closeDetailsButton');
     });
 
     it('can create an index template with data retention', async () => {

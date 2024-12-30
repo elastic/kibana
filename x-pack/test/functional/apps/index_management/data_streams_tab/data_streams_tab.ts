@@ -17,6 +17,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const security = getService('security');
   const testSubjects = getService('testSubjects');
 
+  enum INDEX_MODE {
+    STANDARD = 'Standard',
+    LOGSDB = 'LogsDB',
+    TIME_SERIES = 'Time series',
+  }
+
   const TEST_DS_NAME_1 = 'test-ds-1';
   const TEST_DS_NAME_2 = 'test-ds-2';
   const TEST_DATA_STREAM_NAMES = [TEST_DS_NAME_1, TEST_DS_NAME_2];
@@ -132,7 +138,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await es.indices.deleteIndexTemplate({
           name: `logsdb_index_template`,
         });
-        await browser.refresh();
+        await testSubjects.click('reloadButton');
       });
     });
 
@@ -240,7 +246,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await es.indices.createDataStream({
           name: TEST_DS_NAME,
         });
-        await browser.refresh();
+        await testSubjects.click('reloadButton');
       };
 
       const verifyIndexModeIsOrigin = async (indexModeName: string) => {
@@ -312,7 +318,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await setIndexModeTemplate({
           mode: 'standard',
         });
-        await verifyIndexModeIsOrigin('Standard');
+        await verifyIndexModeIsOrigin(INDEX_MODE.STANDARD);
 
         await changeIndexMode('index_mode_logsdb');
         // Navigate to the last step of the wizard
@@ -322,14 +328,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await testSubjects.click('nextButton');
         await testSubjects.click('nextButton');
 
-        await verifyModeHasBeenChanged('LogsDB');
+        await verifyModeHasBeenChanged(INDEX_MODE.LOGSDB);
       });
 
       it('allows to downgrade data stream from logsdb to standard index mode', async () => {
         await setIndexModeTemplate({
           mode: 'logsdb',
         });
-        await verifyIndexModeIsOrigin('LogsDB');
+        await verifyIndexModeIsOrigin(INDEX_MODE.LOGSDB);
 
         await changeIndexMode('index_mode_standard');
         // Navigate to the last step of the wizard
@@ -339,7 +345,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await testSubjects.click('nextButton');
         await testSubjects.click('nextButton');
 
-        await verifyModeHasBeenChanged('Standard');
+        await verifyModeHasBeenChanged(INDEX_MODE.STANDARD);
       });
 
       it('allows to upgrade data stream from time series to logsdb index mode', async () => {
@@ -347,7 +353,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           mode: 'time_series',
           routing_path: 'test',
         });
-        await verifyIndexModeIsOrigin('Time series');
+        await verifyIndexModeIsOrigin(INDEX_MODE.TIME_SERIES);
 
         await changeIndexMode('index_mode_logsdb');
 
@@ -362,14 +368,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await testSubjects.click('nextButton');
         await testSubjects.click('nextButton');
 
-        await verifyModeHasBeenChanged('LogsDB');
+        await verifyModeHasBeenChanged(INDEX_MODE.LOGSDB);
       });
 
       it('allows to downgrade data stream from logsdb to time series index mode', async () => {
         await setIndexModeTemplate({
           mode: 'logsdb',
         });
-        await verifyIndexModeIsOrigin('LogsDB');
+        await verifyIndexModeIsOrigin(INDEX_MODE.LOGSDB);
 
         await changeIndexMode('index_mode_time_series');
 
@@ -388,7 +394,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await testSubjects.click('nextButton');
         await testSubjects.click('nextButton');
 
-        await verifyModeHasBeenChanged('Time series');
+        await verifyModeHasBeenChanged(INDEX_MODE.TIME_SERIES);
       });
     });
   });
