@@ -22,8 +22,8 @@ interface TAvailableProcessor {
 type TAvailableProcessors = Record<ProcessorType, TAvailableProcessor>;
 
 export const ProcessorTypeSelector = ({
-  readOnly = false,
-}: Pick<EuiSuperSelectProps, 'readOnly'>) => {
+  disabled = false,
+}: Pick<EuiSuperSelectProps, 'disabled'>) => {
   const { core } = useKibana();
   const esDocUrl = core.docLinks.links.elasticsearch.docsBase;
 
@@ -42,7 +42,7 @@ export const ProcessorTypeSelector = ({
       helpText={getProcessorDescription(esDocUrl)(processorType)}
     >
       <EuiSuperSelect
-        readOnly={readOnly}
+        disabled={disabled}
         options={processorTypeSelectorOptions}
         isInvalid={fieldState.invalid}
         valueOfSelected={field.value}

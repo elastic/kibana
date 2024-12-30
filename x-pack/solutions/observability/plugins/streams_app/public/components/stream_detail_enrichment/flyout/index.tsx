@@ -25,10 +25,12 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import {
+  GrokProcessingDefinition,
   ProcessingDefinition,
   ReadStreamDefinition,
   conditionSchema,
   getProcessorType,
+  isGrokProcessor,
   isWiredReadStream,
 } from '@kbn/streams-schema';
 import { css } from '@emotion/react';
@@ -147,14 +149,19 @@ export function EditProcessorFlyout({
 }: EditProcessorFlyoutProps) {
   const initialProcessorConfig = useMemo(() => {
     const type = getProcessorType(processor);
-    const configValues = structuredClone(processor.config[type]);
+    let configValues: ProcessorFormState = defaultProcessorConfig;
 
     if (type === 'grok') {
-      configValues.patterns = configValues.patterns.map((pattern) => ({ value: pattern }));
+      const { grok } = processor.config as GrokProcessingDefinition;
+
+      configValues = structuredClone({
+        ...grok,
+        type,
+        patterns: grok.patterns.map((pattern) => ({ value: pattern })),
+      });
     }
 
     return {
-      type,
       condition: processor.condition || defaultCondition,
       ...configValues,
     };
@@ -216,7 +223,7 @@ export function EditProcessorFlyout({
         />
       }
       confirmButton={
-        <EuiButton onClick={methods.handleSubmit(handleSubmit)}>
+        <EuiButton onClick={methods.handleSubmit(handleSubmit)} disabled={!hasChanges}>
           {i18n.translate(
             'xpack.streams.streamDetailView.managementTab.enrichment.processorFlyout.confirmEditProcessor',
             { defaultMessage: 'Update processor' }
@@ -226,7 +233,7 @@ export function EditProcessorFlyout({
     >
       <FormProvider {...methods}>
         <EuiForm component="form" fullWidth onSubmit={methods.handleSubmit(handleSubmit)}>
-          <ProcessorTypeSelector readOnly />
+          <ProcessorTypeSelector disabled />
           <EuiSpacer size="m" />
           {formFields.type === 'grok' && <GrokProcessorForm definition={definition} />}
           <EuiHorizontalRule />
