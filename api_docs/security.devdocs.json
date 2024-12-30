@@ -1287,19 +1287,19 @@
           "references": [
             {
               "plugin": "enterpriseSearch",
-              "path": "x-pack/plugins/enterprise_search/public/applications/workplace_search/views/account_settings/account_settings.tsx"
+              "path": "x-pack/solutions/search/plugins/enterprise_search/public/applications/workplace_search/views/account_settings/account_settings.tsx"
             },
             {
               "plugin": "enterpriseSearch",
-              "path": "x-pack/plugins/enterprise_search/public/applications/workplace_search/views/account_settings/account_settings.tsx"
+              "path": "x-pack/solutions/search/plugins/enterprise_search/public/applications/workplace_search/views/account_settings/account_settings.tsx"
             },
             {
               "plugin": "enterpriseSearch",
-              "path": "x-pack/plugins/enterprise_search/public/applications/workplace_search/views/account_settings/account_settings.tsx"
+              "path": "x-pack/solutions/search/plugins/enterprise_search/public/applications/workplace_search/views/account_settings/account_settings.tsx"
             },
             {
               "plugin": "enterpriseSearch",
-              "path": "x-pack/plugins/enterprise_search/public/applications/workplace_search/views/account_settings/account_settings.tsx"
+              "path": "x-pack/solutions/search/plugins/enterprise_search/public/applications/workplace_search/views/account_settings/account_settings.tsx"
             }
           ]
         }
@@ -6435,6 +6435,10 @@
               "path": "x-pack/platform/plugins/shared/actions/server/plugin.ts"
             },
             {
+              "plugin": "savedObjectsTagging",
+              "path": "x-pack/plugins/saved_objects_tagging/server/request_handler_context.ts"
+            },
+            {
               "plugin": "ml",
               "path": "x-pack/platform/plugins/shared/ml/server/saved_objects/initialization/initialization.ts"
             },
@@ -6451,20 +6455,16 @@
               "path": "x-pack/platform/plugins/shared/ml/server/plugin.ts"
             },
             {
-              "plugin": "savedObjectsTagging",
-              "path": "x-pack/plugins/saved_objects_tagging/server/request_handler_context.ts"
+              "plugin": "enterpriseSearch",
+              "path": "x-pack/solutions/search/plugins/enterprise_search/server/lib/check_access.ts"
             },
             {
               "plugin": "enterpriseSearch",
-              "path": "x-pack/plugins/enterprise_search/server/lib/check_access.ts"
+              "path": "x-pack/solutions/search/plugins/enterprise_search/server/lib/check_access.ts"
             },
             {
               "plugin": "enterpriseSearch",
-              "path": "x-pack/plugins/enterprise_search/server/lib/check_access.ts"
-            },
-            {
-              "plugin": "enterpriseSearch",
-              "path": "x-pack/plugins/enterprise_search/server/lib/check_access.ts"
+              "path": "x-pack/solutions/search/plugins/enterprise_search/server/lib/check_access.ts"
             }
           ]
         }
@@ -6528,10 +6528,6 @@
             {
               "plugin": "observabilityAIAssistant",
               "path": "x-pack/platform/plugins/shared/observability_solution/observability_ai_assistant/server/service/index.ts"
-            },
-            {
-              "plugin": "serverlessSearch",
-              "path": "x-pack/plugins/serverless_search/server/routes/api_key_routes.ts"
             },
             {
               "plugin": "upgradeAssistant",
@@ -6632,6 +6628,10 @@
             {
               "plugin": "synthetics",
               "path": "x-pack/solutions/observability/plugins/synthetics/server/routes/synthetics_service/enablement.ts"
+            },
+            {
+              "plugin": "serverlessSearch",
+              "path": "x-pack/solutions/search/plugins/serverless_search/server/routes/api_key_routes.ts"
             },
             {
               "plugin": "cloudSecurityPosture",
