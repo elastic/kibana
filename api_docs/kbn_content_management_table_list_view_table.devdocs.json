@@ -371,6 +371,22 @@
             "path": "packages/content-management/table_list_view_table/src/services.tsx",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-management-table-list-view-table",
+            "id": "def-public.TableListViewKibanaDependencies.isKibanaVersioningEnabled",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isKibanaVersioningEnabled",
+            "description": [
+              "\nFlag to indicate if Kibana versioning is enabled. (aka not Serverless)\nUsed to determine if we should show the version mentions in the help text."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/content-management/table_list_view_table/src/services.tsx",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false

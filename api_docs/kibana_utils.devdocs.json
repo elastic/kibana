@@ -1972,13 +1972,7 @@
           "<unknown>; }[]; storageKey: string; navLinkUpdater$: ",
           "BehaviorSubject",
           "<",
-          {
-            "pluginId": "@kbn/core-application-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreApplicationBrowserPluginApi",
-            "section": "def-public.AppUpdater",
-            "text": "AppUpdater"
-          },
+          "AppUpdater",
           ">; toastNotifications: ",
           {
             "pluginId": "@kbn/core-notifications-browser",
@@ -2078,13 +2072,7 @@
                 "signature": [
                   "BehaviorSubject",
                   "<",
-                  {
-                    "pluginId": "@kbn/core-application-browser",
-                    "scope": "public",
-                    "docId": "kibKbnCoreApplicationBrowserPluginApi",
-                    "section": "def-public.AppUpdater",
-                    "text": "AppUpdater"
-                  },
+                  "AppUpdater",
                   ">"
                 ],
                 "path": "src/plugins/kibana_utils/public/state_management/url/kbn_url_tracker.ts",
@@ -3327,16 +3315,10 @@
           "\nCreates an error handler that will redirect to a url when a SavedObjectNotFound\nerror is thrown"
         ],
         "signature": [
-          "({\n  history,\n  navigateToApp,\n  basePath,\n  mapping,\n  toastNotifications,\n  onBeforeRedirect,\n  theme,\n}: { history: ",
+          "({\n  history,\n  navigateToApp,\n  basePath,\n  mapping,\n  toastNotifications,\n  onBeforeRedirect,\n  theme,\n  userProfile,\n}: { history: ",
           "History",
           "<unknown>; navigateToApp: (appId: string, options?: ",
-          {
-            "pluginId": "@kbn/core-application-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreApplicationBrowserPluginApi",
-            "section": "def-public.NavigateToAppOptions",
-            "text": "NavigateToAppOptions"
-          },
+          "NavigateToAppOptions",
           " | undefined) => Promise<void>; basePath: ",
           {
             "pluginId": "@kbn/core-http-browser",
@@ -3369,7 +3351,15 @@
             "section": "def-public.ThemeServiceSetup",
             "text": "ThemeServiceSetup"
           },
-          "; }) => (error: ",
+          "; userProfile?: ",
+          {
+            "pluginId": "@kbn/core-user-profile-browser",
+            "scope": "public",
+            "docId": "kibKbnCoreUserProfileBrowserPluginApi",
+            "section": "def-public.UserProfileService",
+            "text": "UserProfileService"
+          },
+          " | undefined; }) => (error: ",
           {
             "pluginId": "kibanaUtils",
             "scope": "common",
@@ -3388,7 +3378,7 @@
             "id": "def-public.redirectWhenMissing.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  history,\n  navigateToApp,\n  basePath,\n  mapping,\n  toastNotifications,\n  onBeforeRedirect,\n  theme,\n}",
+            "label": "{\n  history,\n  navigateToApp,\n  basePath,\n  mapping,\n  toastNotifications,\n  onBeforeRedirect,\n  theme,\n  userProfile,\n}",
             "description": [],
             "path": "src/plugins/kibana_utils/public/history/redirect_when_missing.tsx",
             "deprecated": false,
@@ -3418,13 +3408,7 @@
                 "description": [],
                 "signature": [
                   "(appId: string, options?: ",
-                  {
-                    "pluginId": "@kbn/core-application-browser",
-                    "scope": "public",
-                    "docId": "kibKbnCoreApplicationBrowserPluginApi",
-                    "section": "def-public.NavigateToAppOptions",
-                    "text": "NavigateToAppOptions"
-                  },
+                  "NavigateToAppOptions",
                   " | undefined) => Promise<void>"
                 ],
                 "path": "src/plugins/kibana_utils/public/history/redirect_when_missing.tsx",
@@ -3439,7 +3423,7 @@
                     "tags": [],
                     "label": "appId",
                     "description": [],
-                    "path": "packages/core/application/core-application-browser/src/contracts.ts",
+                    "path": "src/core/packages/application/browser/src/contracts.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -3451,16 +3435,10 @@
                     "label": "options",
                     "description": [],
                     "signature": [
-                      {
-                        "pluginId": "@kbn/core-application-browser",
-                        "scope": "public",
-                        "docId": "kibKbnCoreApplicationBrowserPluginApi",
-                        "section": "def-public.NavigateToAppOptions",
-                        "text": "NavigateToAppOptions"
-                      },
+                      "NavigateToAppOptions",
                       " | undefined"
                     ],
-                    "path": "packages/core/application/core-application-browser/src/contracts.ts",
+                    "path": "src/core/packages/application/browser/src/contracts.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -3587,6 +3565,27 @@
                     "section": "def-public.ThemeServiceSetup",
                     "text": "ThemeServiceSetup"
                   }
+                ],
+                "path": "src/plugins/kibana_utils/public/history/redirect_when_missing.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "kibanaUtils",
+                "id": "def-public.redirectWhenMissing.$1.userProfile",
+                "type": "Object",
+                "tags": [],
+                "label": "userProfile",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-user-profile-browser",
+                    "scope": "public",
+                    "docId": "kibKbnCoreUserProfileBrowserPluginApi",
+                    "section": "def-public.UserProfileService",
+                    "text": "UserProfileService"
+                  },
+                  " | undefined"
                 ],
                 "path": "src/plugins/kibana_utils/public/history/redirect_when_missing.tsx",
                 "deprecated": false,

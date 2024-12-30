@@ -304,6 +304,7 @@ export interface DocLinks {
     readonly fieldFormattersNumber: string;
     readonly fieldFormattersString: string;
     readonly runtimeFields: string;
+    readonly migrateOffScriptedFields: string;
   };
   readonly addData: string;
   readonly kibana: {
@@ -371,6 +372,7 @@ export interface DocLinks {
       readonly assetCriticality: string;
     };
     readonly detectionEngineOverview: string;
+    readonly signalsMigrationApi: string;
   };
   readonly query: {
     readonly eql: string;

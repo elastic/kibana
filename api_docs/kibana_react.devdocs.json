@@ -493,7 +493,7 @@
         "label": "KibanaThemeProvider",
         "description": [],
         "signature": [
-          "({ children, theme$, modify }: ",
+          "({ children, theme$, userProfile, modify, }: ",
           {
             "pluginId": "kibanaReact",
             "scope": "public",
@@ -513,7 +513,7 @@
             "id": "def-public.KibanaThemeProvider.$1",
             "type": "CompoundType",
             "tags": [],
-            "label": "{ children, theme$, modify }",
+            "label": "{\n  children,\n  theme$,\n  userProfile,\n  modify,\n}",
             "description": [],
             "signature": [
               {
@@ -772,13 +772,7 @@
         "description": [],
         "signature": [
           "(history: ",
-          {
-            "pluginId": "@kbn/core-application-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreApplicationBrowserPluginApi",
-            "section": "def-public.ScopedHistory",
-            "text": "ScopedHistory"
-          },
+          "ScopedHistory",
           "<unknown> | ",
           "History",
           "<unknown>, to: string | LocationObject, onClickCallback?: Function | undefined) => { href: string; onClick: (event: React.MouseEvent<Element, MouseEvent>) => void; }"
@@ -795,13 +789,7 @@
             "label": "history",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-application-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreApplicationBrowserPluginApi",
-                "section": "def-public.ScopedHistory",
-                "text": "ScopedHistory"
-              },
+              "ScopedHistory",
               "<unknown> | ",
               "History",
               "<unknown>"
@@ -854,13 +842,7 @@
         "description": [],
         "signature": [
           "(history: ",
-          {
-            "pluginId": "@kbn/core-application-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreApplicationBrowserPluginApi",
-            "section": "def-public.ScopedHistory",
-            "text": "ScopedHistory"
-          },
+          "ScopedHistory",
           "<unknown> | ",
           "History",
           "<unknown>, to: string | LocationObject, onClickCallback?: Function | undefined) => (event: React.MouseEvent<Element, MouseEvent>) => void"
@@ -877,13 +859,7 @@
             "label": "history",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-application-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreApplicationBrowserPluginApi",
-                "section": "def-public.ScopedHistory",
-                "text": "ScopedHistory"
-              },
+              "ScopedHistory",
               "<unknown> | ",
               "History",
               "<unknown>"
@@ -937,7 +913,7 @@
         "label": "toMountPoint",
         "description": [],
         "signature": [
-          "(node: React.ReactNode, { analytics, theme$ }?: ",
+          "(node: React.ReactNode, { analytics, theme$, userProfile }?: ",
           {
             "pluginId": "kibanaReact",
             "scope": "public",
@@ -960,12 +936,20 @@
         "trackAdoption": false,
         "references": [
           {
-            "plugin": "observabilityShared",
-            "path": "x-pack/plugins/observability_solution/observability_shared/public/components/header_menu/header_menu_portal.tsx"
+            "plugin": "monitoring",
+            "path": "x-pack/platform/plugins/private/monitoring/public/components/header_menu/header_menu_portal.tsx"
+          },
+          {
+            "plugin": "monitoring",
+            "path": "x-pack/platform/plugins/private/monitoring/public/components/header_menu/header_menu_portal.tsx"
           },
           {
             "plugin": "observabilityShared",
-            "path": "x-pack/plugins/observability_solution/observability_shared/public/components/header_menu/header_menu_portal.tsx"
+            "path": "x-pack/solutions/observability/plugins/observability_shared/public/components/header_menu/header_menu_portal.tsx"
+          },
+          {
+            "plugin": "observabilityShared",
+            "path": "x-pack/solutions/observability/plugins/observability_shared/public/components/header_menu/header_menu_portal.tsx"
           }
         ],
         "children": [
@@ -989,7 +973,7 @@
             "id": "def-public.toMountPoint.$2",
             "type": "Object",
             "tags": [],
-            "label": "{ analytics, theme$ }",
+            "label": "{ analytics, theme$, userProfile }",
             "description": [],
             "signature": [
               {
@@ -1446,7 +1430,9 @@
         "parentPluginId": "kibanaReact",
         "id": "def-public.wrapWithTheme",
         "type": "Function",
-        "tags": [],
+        "tags": [
+          "deprecated"
+        ],
         "label": "wrapWithTheme",
         "description": [],
         "signature": [
@@ -1460,11 +1446,37 @@
             "section": "def-common.KibanaTheme",
             "text": "KibanaTheme"
           },
-          ">) => React.JSX.Element"
+          ">, userProfile?: ",
+          {
+            "pluginId": "@kbn/core-user-profile-browser",
+            "scope": "public",
+            "docId": "kibKbnCoreUserProfileBrowserPluginApi",
+            "section": "def-public.UserProfileService",
+            "text": "UserProfileService"
+          },
+          " | undefined) => React.JSX.Element"
         ],
         "path": "src/plugins/kibana_react/public/theme.tsx",
-        "deprecated": false,
+        "deprecated": true,
         "trackAdoption": false,
+        "references": [
+          {
+            "plugin": "aiAssistantManagementSelection",
+            "path": "src/platform/plugins/shared/ai_assistant_management/selection/public/management_section/mount_section.tsx"
+          },
+          {
+            "plugin": "aiAssistantManagementSelection",
+            "path": "src/platform/plugins/shared/ai_assistant_management/selection/public/management_section/mount_section.tsx"
+          },
+          {
+            "plugin": "observabilityAiAssistantManagement",
+            "path": "x-pack/solutions/observability/plugins/observability_ai_assistant_management/public/app.tsx"
+          },
+          {
+            "plugin": "observabilityAiAssistantManagement",
+            "path": "x-pack/solutions/observability/plugins/observability_ai_assistant_management/public/app.tsx"
+          }
+        ],
         "children": [
           {
             "parentPluginId": "kibanaReact",
@@ -1504,6 +1516,28 @@
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
+          },
+          {
+            "parentPluginId": "kibanaReact",
+            "id": "def-public.wrapWithTheme.$3",
+            "type": "Object",
+            "tags": [],
+            "label": "userProfile",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-user-profile-browser",
+                "scope": "public",
+                "docId": "kibKbnCoreUserProfileBrowserPluginApi",
+                "section": "def-public.UserProfileService",
+                "text": "UserProfileService"
+              },
+              " | undefined"
+            ],
+            "path": "src/plugins/kibana_react/public/theme.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
           }
         ],
         "returnComment": [],
@@ -2158,13 +2192,7 @@
             "label": "analytics",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-analytics-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreAnalyticsBrowserPluginApi",
-                "section": "def-public.AnalyticsServiceStart",
-                "text": "AnalyticsServiceStart"
-              },
+              "AnalyticsServiceStart",
               " | undefined"
             ],
             "path": "src/plugins/kibana_react/public/util/index.tsx",
@@ -2189,6 +2217,27 @@
                 "text": "CoreTheme"
               },
               "> | undefined"
+            ],
+            "path": "src/plugins/kibana_react/public/util/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "kibanaReact",
+            "id": "def-public.ToMountPointOptions.userProfile",
+            "type": "Object",
+            "tags": [],
+            "label": "userProfile",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-user-profile-browser",
+                "scope": "public",
+                "docId": "kibKbnCoreUserProfileBrowserPluginApi",
+                "section": "def-public.UserProfileService",
+                "text": "UserProfileService"
+              },
+              " | undefined"
             ],
             "path": "src/plugins/kibana_react/public/util/index.tsx",
             "deprecated": false,
@@ -2474,21 +2523,9 @@
         "description": [],
         "signature": [
           "{ analytics?: ",
-          {
-            "pluginId": "@kbn/core-analytics-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreAnalyticsBrowserPluginApi",
-            "section": "def-public.AnalyticsServiceStart",
-            "text": "AnalyticsServiceStart"
-          },
+          "AnalyticsServiceStart",
           " | undefined; application?: ",
-          {
-            "pluginId": "@kbn/core-application-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreApplicationBrowserPluginApi",
-            "section": "def-public.ApplicationStart",
-            "text": "ApplicationStart"
-          },
+          "ApplicationStart",
           " | undefined; chrome?: ",
           {
             "pluginId": "@kbn/core-chrome-browser",
@@ -2658,7 +2695,7 @@
             "section": "def-common.KibanaThemeProviderProps",
             "text": "KibanaThemeProviderProps"
           },
-          ", \"children\" | \"modify\"> & ",
+          ", \"children\" | \"userProfile\" | \"modify\"> & ",
           {
             "pluginId": "@kbn/react-kibana-context-common",
             "scope": "common",

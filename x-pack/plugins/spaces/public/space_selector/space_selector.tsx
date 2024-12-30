@@ -249,7 +249,7 @@ export class SpaceSelector extends Component<Props, State> {
 }
 
 export const renderSpaceSelectorApp = (
-  services: Pick<CoreStart, 'analytics' | 'i18n' | 'theme'>,
+  services: Pick<CoreStart, 'analytics' | 'i18n' | 'theme' | 'userProfile'>,
   { element }: Pick<AppMountParameters, 'element'>,
   props: Props
 ) => {

@@ -13,7 +13,6 @@ import {
 } from '@kbn/observability-ai-assistant-plugin/common';
 import type { AssistantScope } from '@kbn/ai-assistant-common';
 import { Readable } from 'stream';
-import type { InternalRequestHeader, RoleCredentials } from '../../../../../../../shared/services';
 import { ObservabilityAIAssistantApiClient } from '../../../common/observability_ai_assistant_api_client';
 
 function decodeEvents(body: Readable | string) {
@@ -34,22 +33,16 @@ export async function invokeChatCompleteWithFunctionRequest({
   connectorId,
   observabilityAIAssistantAPIClient,
   functionCall,
-  roleAuthc,
-  internalReqHeader,
   scopes,
 }: {
   connectorId: string;
   observabilityAIAssistantAPIClient: ObservabilityAIAssistantApiClient;
   functionCall: Message['message']['function_call'];
   scopes?: AssistantScope[];
-  roleAuthc: RoleCredentials;
-  internalReqHeader: InternalRequestHeader;
 }) {
   const { body } = await observabilityAIAssistantAPIClient
-    .slsUser({
+    .slsEditor({
       endpoint: 'POST /internal/observability_ai_assistant/chat/complete',
-      internalReqHeader,
-      roleAuthc,
       params: {
         body: {
           messages: [
