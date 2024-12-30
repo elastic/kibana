@@ -1564,80 +1564,9 @@ paths:
                     nullable: true
                     type: string
                   params:
-                    anyOf:
-                      - additionalProperties: false
-                        description: The parameters for the rule.
-                        type: object
-                        properties:
-                          condition:
-                            additionalProperties: false
-                            type: object
-                            properties:
-                              downThreshold:
-                                type: number
-                              groupBy:
-                                type: string
-                              includeRetests:
-                                type: boolean
-                              locationsThreshold:
-                                type: number
-                              window:
-                                anyOf:
-                                  - additionalProperties: false
-                                    type: object
-                                    properties:
-                                      time:
-                                        additionalProperties: false
-                                        type: object
-                                        properties:
-                                          size:
-                                            default: 5
-                                            type: number
-                                          unit:
-                                            default: m
-                                            enum:
-                                              - s
-                                              - m
-                                              - h
-                                              - d
-                                            type: string
-                                    required:
-                                      - time
-                                  - additionalProperties: false
-                                    type: object
-                                    properties:
-                                      numberOfChecks:
-                                        default: 5
-                                        maximum: 100
-                                        minimum: 1
-                                        type: number
-                            required:
-                              - window
-                          kqlQuery:
-                            type: string
-                          locations:
-                            items:
-                              type: string
-                            type: array
-                          monitorIds:
-                            items:
-                              type: string
-                            type: array
-                          monitorTypes:
-                            items:
-                              type: string
-                            type: array
-                          projects:
-                            items:
-                              type: string
-                            type: array
-                          tags:
-                            items:
-                              type: string
-                            type: array
-                      - additionalProperties: {}
-                        description: The parameters for the rule.
-                        type: object
+                    additionalProperties: {}
+                    description: The parameters for the rule.
+                    type: object
                   revision:
                     description: The rule revision number.
                     type: number
@@ -2539,80 +2468,9 @@ paths:
                     nullable: true
                     type: string
                   params:
-                    anyOf:
-                      - additionalProperties: false
-                        description: The parameters for the rule.
-                        type: object
-                        properties:
-                          condition:
-                            additionalProperties: false
-                            type: object
-                            properties:
-                              downThreshold:
-                                type: number
-                              groupBy:
-                                type: string
-                              includeRetests:
-                                type: boolean
-                              locationsThreshold:
-                                type: number
-                              window:
-                                anyOf:
-                                  - additionalProperties: false
-                                    type: object
-                                    properties:
-                                      time:
-                                        additionalProperties: false
-                                        type: object
-                                        properties:
-                                          size:
-                                            default: 5
-                                            type: number
-                                          unit:
-                                            default: m
-                                            enum:
-                                              - s
-                                              - m
-                                              - h
-                                              - d
-                                            type: string
-                                    required:
-                                      - time
-                                  - additionalProperties: false
-                                    type: object
-                                    properties:
-                                      numberOfChecks:
-                                        default: 5
-                                        maximum: 100
-                                        minimum: 1
-                                        type: number
-                            required:
-                              - window
-                          kqlQuery:
-                            type: string
-                          locations:
-                            items:
-                              type: string
-                            type: array
-                          monitorIds:
-                            items:
-                              type: string
-                            type: array
-                          monitorTypes:
-                            items:
-                              type: string
-                            type: array
-                          projects:
-                            items:
-                              type: string
-                            type: array
-                          tags:
-                            items:
-                              type: string
-                            type: array
-                      - additionalProperties: {}
-                        description: The parameters for the rule.
-                        type: object
+                    additionalProperties: {}
+                    description: The parameters for the rule.
+                    type: object
                   revision:
                     description: The rule revision number.
                     type: number
@@ -3489,80 +3347,9 @@ paths:
                     nullable: true
                     type: string
                   params:
-                    anyOf:
-                      - additionalProperties: false
-                        description: The parameters for the rule.
-                        type: object
-                        properties:
-                          condition:
-                            additionalProperties: false
-                            type: object
-                            properties:
-                              downThreshold:
-                                type: number
-                              groupBy:
-                                type: string
-                              includeRetests:
-                                type: boolean
-                              locationsThreshold:
-                                type: number
-                              window:
-                                anyOf:
-                                  - additionalProperties: false
-                                    type: object
-                                    properties:
-                                      time:
-                                        additionalProperties: false
-                                        type: object
-                                        properties:
-                                          size:
-                                            default: 5
-                                            type: number
-                                          unit:
-                                            default: m
-                                            enum:
-                                              - s
-                                              - m
-                                              - h
-                                              - d
-                                            type: string
-                                    required:
-                                      - time
-                                  - additionalProperties: false
-                                    type: object
-                                    properties:
-                                      numberOfChecks:
-                                        default: 5
-                                        maximum: 100
-                                        minimum: 1
-                                        type: number
-                            required:
-                              - window
-                          kqlQuery:
-                            type: string
-                          locations:
-                            items:
-                              type: string
-                            type: array
-                          monitorIds:
-                            items:
-                              type: string
-                            type: array
-                          monitorTypes:
-                            items:
-                              type: string
-                            type: array
-                          projects:
-                            items:
-                              type: string
-                            type: array
-                          tags:
-                            items:
-                              type: string
-                            type: array
-                      - additionalProperties: {}
-                        description: The parameters for the rule.
-                        type: object
+                    additionalProperties: {}
+                    description: The parameters for the rule.
+                    type: object
                   revision:
                     description: The rule revision number.
                     type: number
@@ -4536,80 +4323,9 @@ paths:
                     nullable: true
                     type: string
                   params:
-                    anyOf:
-                      - additionalProperties: false
-                        description: The parameters for the rule.
-                        type: object
-                        properties:
-                          condition:
-                            additionalProperties: false
-                            type: object
-                            properties:
-                              downThreshold:
-                                type: number
-                              groupBy:
-                                type: string
-                              includeRetests:
-                                type: boolean
-                              locationsThreshold:
-                                type: number
-                              window:
-                                anyOf:
-                                  - additionalProperties: false
-                                    type: object
-                                    properties:
-                                      time:
-                                        additionalProperties: false
-                                        type: object
-                                        properties:
-                                          size:
-                                            default: 5
-                                            type: number
-                                          unit:
-                                            default: m
-                                            enum:
-                                              - s
-                                              - m
-                                              - h
-                                              - d
-                                            type: string
-                                    required:
-                                      - time
-                                  - additionalProperties: false
-                                    type: object
-                                    properties:
-                                      numberOfChecks:
-                                        default: 5
-                                        maximum: 100
-                                        minimum: 1
-                                        type: number
-                            required:
-                              - window
-                          kqlQuery:
-                            type: string
-                          locations:
-                            items:
-                              type: string
-                            type: array
-                          monitorIds:
-                            items:
-                              type: string
-                            type: array
-                          monitorTypes:
-                            items:
-                              type: string
-                            type: array
-                          projects:
-                            items:
-                              type: string
-                            type: array
-                          tags:
-                            items:
-                              type: string
-                            type: array
-                      - additionalProperties: {}
-                        description: The parameters for the rule.
-                        type: object
+                    additionalProperties: {}
+                    description: The parameters for the rule.
+                    type: object
                   revision:
                     description: The rule revision number.
                     type: number
