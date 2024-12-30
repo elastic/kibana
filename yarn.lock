@@ -5247,7 +5247,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/data-view-management-plugin@link:src/plugins/data_view_management":
+"@kbn/data-view-management-plugin@link:src/platform/plugins/shared/data_view_management":
   version "0.0.0"
   uid ""
 

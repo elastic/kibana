@@ -72,7 +72,7 @@
     "homePackages": "packages/home",
     "indexPatternEditor": "src/platform/plugins/shared/data_view_editor",
     "indexPatternFieldEditor": "src/platform/plugins/shared/data_view_field_editor",
-    "indexPatternManagement": "src/plugins/data_view_management",
+    "indexPatternManagement": "src/platform/plugins/shared/data_view_management",
     "inputControl": "src/platform/plugins/private/input_control_vis",
     "inspector": "src/platform/plugins/shared/inspector",
     "inspectorViews": "src/legacy/core_plugins/inspector_views",
