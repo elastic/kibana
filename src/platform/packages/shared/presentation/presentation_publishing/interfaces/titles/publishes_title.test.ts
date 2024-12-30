@@ -8,30 +8,30 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
-import { getPanelTitle } from './publishes_panel_title';
+import { getTitle } from './publishes_title';
 
 describe('getPanelTitle', () => {
   test('should return default title when title is undefined', () => {
     const api = {
-      panelTitle: new BehaviorSubject<string | undefined>(undefined),
-      defaultPanelTitle: new BehaviorSubject<string | undefined>('default title'),
+      title$: new BehaviorSubject<string | undefined>(undefined),
+      defaultTitle$: new BehaviorSubject<string | undefined>('default title'),
     };
-    expect(getPanelTitle(api)).toBe('default title');
+    expect(getTitle(api)).toBe('default title');
   });
 
   test('should return empty title when title is empty string', () => {
     const api = {
-      panelTitle: new BehaviorSubject<string | undefined>(''),
-      defaultPanelTitle: new BehaviorSubject<string | undefined>('default title'),
+      title$: new BehaviorSubject<string | undefined>(''),
+      defaultTitle$: new BehaviorSubject<string | undefined>('default title'),
     };
-    expect(getPanelTitle(api)).toBe('');
+    expect(getTitle(api)).toBe('');
   });
 
   test('should return title when title is provided', () => {
     const api = {
-      panelTitle: new BehaviorSubject<string | undefined>('custom title'),
-      defaultPanelTitle: new BehaviorSubject<string | undefined>('default title'),
+      title$: new BehaviorSubject<string | undefined>('custom title'),
+      defaultTitle$: new BehaviorSubject<string | undefined>('default title'),
     };
-    expect(getPanelTitle(api)).toBe('custom title');
+    expect(getTitle(api)).toBe('custom title');
   });
 });
