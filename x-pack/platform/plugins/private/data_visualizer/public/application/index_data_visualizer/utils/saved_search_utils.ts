@@ -6,7 +6,7 @@
  */
 
 // TODO Consolidate with duplicate component `CorrelationsProgressControls` in
-// `x-pack/plugins/observability_solution/apm/public/components/app/correlations/progress_controls.tsx`
+// `x-pack/solutions/observability/plugins/apm/public/components/app/correlations/progress_controls.tsx`
 import { cloneDeep } from 'lodash';
 import type { IUiSettingsClient } from '@kbn/core/public';
 import type { Query, Filter, AggregateQuery } from '@kbn/es-query';
