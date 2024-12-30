@@ -63,6 +63,7 @@ export const SessionView = ({
   canReadPolicyManagement,
   trackEvent,
   openDetailsInExpandableFlyout,
+  closeDetailsInExpandableFlyout,
   resetJumpToEntityId,
   resetJumpToCursor,
 }: SessionViewDeps & { trackEvent: (name: SessionViewTelemetryKey) => void }) => {
@@ -194,11 +195,29 @@ export const SessionView = ({
   const onToggleTTY = useCallback(() => {
     if (hasTTYOutput) {
       setShowTTY(!showTTY);
+
+      // used when SessionView is displayed in the expandable flyout
+      // This closes the detailed panel rendered in the flyout preview panel when the user activate the TTY output mode
+      // then reopens the detailed panel to the previously selected process when the user deactivates the TTY output mode
+      if (closeDetailsInExpandableFlyout && !showTTY) {
+        closeDetailsInExpandableFlyout();
+      }
+      if (openDetailsInExpandableFlyout && showTTY) {
+        openDetailsInExpandableFlyout(selectedProcess);
+      }
+
       trackEvent('tty_loaded');
     } else {
       trackEvent('disabled_tty_clicked');
     }
-  }, [hasTTYOutput, showTTY, trackEvent]);
+  }, [
+    closeDetailsInExpandableFlyout,
+    hasTTYOutput,
+    openDetailsInExpandableFlyout,
+    selectedProcess,
+    showTTY,
+    trackEvent,
+  ]);
 
   const handleRefresh = useCallback(() => {
     refetch({ refetchPage: (_page, i, allPages) => allPages.length - 1 === i });

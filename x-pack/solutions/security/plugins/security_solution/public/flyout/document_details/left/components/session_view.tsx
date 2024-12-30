@@ -66,7 +66,7 @@ export const SessionView: FC = () => {
   const { selectedPatterns } = useSourcererDataView(sourcererScope);
   const eventDetailsIndex = useMemo(() => selectedPatterns.join(','), [selectedPatterns]);
 
-  const { openPreviewPanel } = useExpandableFlyoutApi();
+  const { openPreviewPanel, closePreviewPanel } = useExpandableFlyoutApi();
   const openAlertDetailsPreview = useCallback(
     (evtId?: string, onClose?: () => void) => {
       // In the SessionView component, when the user clicks on the
@@ -137,6 +137,8 @@ export const SessionView: FC = () => {
     ]
   );
 
+  const closeDetailsInPreview = useCallback(() => closePreviewPanel(), [closePreviewPanel]);
+
   return isEnabled ? (
     <div data-test-subj={SESSION_VIEW_TEST_ID}>
       {sessionView.getSessionView({
@@ -145,6 +147,7 @@ export const SessionView: FC = () => {
         loadAlertDetails: openAlertDetailsPreview,
         openDetailsInExpandableFlyout: (selectedProcess: Process | null) =>
           openDetailsInPreview(selectedProcess),
+        closeDetailsInExpandableFlyout: () => closeDetailsInPreview(),
         canReadPolicyManagement,
         resetJumpToEntityId: jumpToEntityId,
         resetJumpToCursor: jumpToCursor,
