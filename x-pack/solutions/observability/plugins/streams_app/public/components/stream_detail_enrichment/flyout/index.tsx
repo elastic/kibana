@@ -9,15 +9,40 @@
 
 import React, { useMemo } from 'react';
 import { FormProvider, SubmitHandler, useController, useForm, useWatch } from 'react-hook-form';
-import { EuiCallOut, EuiForm, EuiButton, EuiSpacer, EuiAccordion, useEuiTheme } from '@elastic/eui';
+import deepEqual from 'fast-deep-equal';
+import {
+  EuiCallOut,
+  EuiForm,
+  EuiButton,
+  EuiSpacer,
+  EuiAccordion,
+  useEuiTheme,
+  EuiPanel,
+  EuiTitle,
+  EuiConfirmModal,
+  useGeneratedHtmlId,
+  EuiHorizontalRule,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ProcessingDefinition, ReadStreamDefinition, isWiredReadStream } from '@kbn/streams-schema';
+import {
+  ProcessingDefinition,
+  ReadStreamDefinition,
+  conditionSchema,
+  getProcessorType,
+  isWiredReadStream,
+} from '@kbn/streams-schema';
 import { css } from '@emotion/react';
+import { useBoolean } from '@kbn/react-hooks';
 import { ProcessorTypeSelector } from './processor_type_selector';
 import { ProcessorFlyoutTemplate } from './processor_flyout_template';
 import { ConditionEditor } from '../../condition_editor';
 import { GrokPatternDefinition } from './grok_pattern_definition';
-import { GrokFormState, ProcessingDefinitionGrok, ProcessorFormState } from '../types';
+import {
+  GrokFormState,
+  ProcessingDefinitionGrok,
+  ProcessorDefinition,
+  ProcessorFormState,
+} from '../types';
 import { ProcessorFieldSelector } from './processor_field_selector';
 import { GrokPatternsEditor } from './grok_patterns_editor';
 import { ToggleField } from './toggle_field';
@@ -28,35 +53,53 @@ const defaultCondition: ProcessingDefinition['condition'] = {
   value: '',
 };
 
+const defaultProcessorConfig: GrokFormState = {
+  type: 'grok',
+  field: 'message',
+  patterns: [{ value: '' }],
+  pattern_definitions: {},
+  ignore_failure: false,
+  condition: defaultCondition,
+};
+
 export interface ProcessorFlyoutProps {
   definition: ReadStreamDefinition;
-  onAddProcessor: (_newProcessing: ProcessingDefinition) => void;
   onClose: () => void;
 }
 
-export function AddProcessorFlyout({ definition, onClose, onAddProcessor }: ProcessorFlyoutProps) {
+export interface AddProcessorFlyoutProps extends ProcessorFlyoutProps {
+  onAddProcessor: (_newProcessing: ProcessingDefinition) => void;
+}
+export interface EditProcessorFlyoutProps extends ProcessorFlyoutProps {
+  processor: ProcessorDefinition;
+  onUpdateProcessor: (id: string, _processor: ProcessorDefinition) => void;
+  onDeleteProcessor: (id: string) => void;
+}
+
+export function AddProcessorFlyout({
+  definition,
+  onClose,
+  onAddProcessor,
+}: AddProcessorFlyoutProps) {
   const methods = useForm<ProcessorFormState>({
-    defaultValues: {
-      type: 'grok',
-      field: 'message',
-      patterns: [{ value: '' }],
-      pattern_definitions: {},
-      ignore_failure: false,
-      condition: defaultCondition,
-    },
+    defaultValues: defaultProcessorConfig,
   });
 
-  const processorType = useWatch({ name: 'type', control: methods.control });
+  const formFields = useWatch({ control: methods.control });
+
+  const hasChanges = useMemo(() => !deepEqual(defaultProcessorConfig, formFields), [formFields]);
 
   const handleSubmit: SubmitHandler<ProcessorFormState> = (data) => {
     if (data.type === 'grok') {
       const { condition, field, patterns, pattern_definitions, ignore_failure } = data;
 
       onAddProcessor({
-        condition,
+        condition: isValidCondition(condition) ? condition : undefined,
         config: {
           grok: {
-            patterns: patterns.map(({ value }) => value),
+            patterns: patterns
+              .filter(({ value }) => value.trim().length > 0)
+              .map(({ value }) => value),
             field,
             pattern_definitions,
             ignore_failure,
@@ -69,6 +112,7 @@ export function AddProcessorFlyout({ definition, onClose, onAddProcessor }: Proc
 
   return (
     <ProcessorFlyoutTemplate
+      shouldConfirm={hasChanges}
       onClose={onClose}
       title={i18n.translate(
         'xpack.streams.streamDetailView.managementTab.enrichment.processorFlyout.titleAdd',
@@ -87,7 +131,7 @@ export function AddProcessorFlyout({ definition, onClose, onAddProcessor }: Proc
         <EuiForm component="form" fullWidth onSubmit={methods.handleSubmit(handleSubmit)}>
           <ProcessorTypeSelector />
           <EuiSpacer size="m" />
-          {processorType === 'grok' && <GrokProcessorForm definition={definition} />}
+          {formFields.type === 'grok' && <GrokProcessorForm definition={definition} />}
         </EuiForm>
       </FormProvider>
     </ProcessorFlyoutTemplate>
@@ -97,10 +141,66 @@ export function AddProcessorFlyout({ definition, onClose, onAddProcessor }: Proc
 export function EditProcessorFlyout({
   definition,
   processor,
+  onUpdateProcessor,
+  onDeleteProcessor,
   onClose,
-}: ProcessorFlyoutProps & { processor: ProcessingDefinition }) {
+}: EditProcessorFlyoutProps) {
+  const initialProcessorConfig = useMemo(() => {
+    const type = getProcessorType(processor);
+    const configValues = structuredClone(processor.config[type]);
+
+    if (type === 'grok') {
+      configValues.patterns = configValues.patterns.map((pattern) => ({ value: pattern }));
+    }
+
+    return {
+      type,
+      condition: processor.condition || defaultCondition,
+      ...configValues,
+    };
+  }, [processor]);
+
+  const methods = useForm<ProcessorFormState>({
+    defaultValues: initialProcessorConfig,
+  });
+
+  const formFields = useWatch({ control: methods.control });
+
+  const hasChanges = useMemo(
+    () => !deepEqual(initialProcessorConfig, formFields),
+    [initialProcessorConfig, formFields]
+  );
+
+  const handleSubmit: SubmitHandler<ProcessorFormState> = (data) => {
+    if (data.type === 'grok') {
+      const { condition, field, patterns, pattern_definitions, ignore_failure } = data;
+
+      onUpdateProcessor(processor.id, {
+        id: processor.id,
+        condition: isValidCondition(condition) ? condition : undefined,
+        config: {
+          grok: {
+            patterns: patterns
+              .filter(({ value }) => value.trim().length > 0)
+              .map(({ value }) => value),
+            field,
+            pattern_definitions,
+            ignore_failure,
+          },
+        },
+      });
+      onClose();
+    }
+  };
+
+  const handleProcessorDelete = () => {
+    onDeleteProcessor(processor.id);
+    onClose();
+  };
+
   return (
     <ProcessorFlyoutTemplate
+      shouldConfirm={hasChanges}
       onClose={onClose}
       title={i18n.translate(
         'xpack.streams.streamDetailView.managementTab.enrichment.processorFlyout.titleEdit',
@@ -116,17 +216,24 @@ export function EditProcessorFlyout({
         />
       }
       confirmButton={
-        <EuiButton
-        // isDisabled={isSaving || !saveChanges}
-        // onClick={() => saveChanges && saveChanges()}
-        >
+        <EuiButton onClick={methods.handleSubmit(handleSubmit)}>
           {i18n.translate(
             'xpack.streams.streamDetailView.managementTab.enrichment.processorFlyout.confirmEditProcessor',
             { defaultMessage: 'Update processor' }
           )}
         </EuiButton>
       }
-    />
+    >
+      <FormProvider {...methods}>
+        <EuiForm component="form" fullWidth onSubmit={methods.handleSubmit(handleSubmit)}>
+          <ProcessorTypeSelector readOnly />
+          <EuiSpacer size="m" />
+          {formFields.type === 'grok' && <GrokProcessorForm definition={definition} />}
+          <EuiHorizontalRule />
+          <DangerZone onDeleteProcessor={handleProcessorDelete} />
+        </EuiForm>
+      </FormProvider>
+    </ProcessorFlyoutTemplate>
   );
 }
 
@@ -135,7 +242,7 @@ interface GrokProcessorFormProps {
   processor?: ProcessingDefinitionGrok;
 }
 
-const GrokProcessorForm = ({ definition, processor, onChange }: GrokProcessorFormProps) => {
+const GrokProcessorForm = ({ definition }: GrokProcessorFormProps) => {
   const { euiTheme } = useEuiTheme();
 
   const { field } = useController({ name: 'condition' });
@@ -188,4 +295,79 @@ const GrokProcessorForm = ({ definition, processor, onChange }: GrokProcessorFor
       />
     </>
   );
+};
+
+const DangerZone = ({
+  onDeleteProcessor,
+}: Pick<DeleteProcessorButtonProps, 'onDeleteProcessor'>) => {
+  return (
+    <EuiPanel hasShadow={false} paddingSize="none">
+      <EuiTitle size="xs">
+        <h3>
+          {i18n.translate(
+            'xpack.streams.streamDetailView.managementTab.enrichment.processorFlyout.dangerAreaTitle',
+            { defaultMessage: 'Danger area' }
+          )}
+        </h3>
+      </EuiTitle>
+      <EuiSpacer />
+      <DeleteProcessorButton onDeleteProcessor={onDeleteProcessor} />
+    </EuiPanel>
+  );
+};
+
+interface DeleteProcessorButtonProps {
+  onDeleteProcessor: () => void;
+}
+
+const DeleteProcessorButton = ({ onDeleteProcessor }: DeleteProcessorButtonProps) => {
+  const [isConfirmModalOpen, { on: openConfirmModal, off: closeConfirmModal }] = useBoolean();
+  const confirmModalId = useGeneratedHtmlId();
+
+  return (
+    <>
+      <EuiButton color="danger" onClick={openConfirmModal}>
+        {i18n.translate(
+          'xpack.streams.streamDetailView.managementTab.enrichment.processorFlyout.dangerAreaTitle',
+          { defaultMessage: 'Delete processor' }
+        )}
+      </EuiButton>
+      {isConfirmModalOpen && (
+        <EuiConfirmModal
+          aria-labelledby={confirmModalId}
+          title={i18n.translate(
+            'xpack.streams.streamDetailView.managementTab.enrichment.processorFlyout.deleteProcessorModalTitle',
+            { defaultMessage: 'Delete processor' }
+          )}
+          titleProps={{ id: confirmModalId }}
+          onCancel={closeConfirmModal}
+          onConfirm={onDeleteProcessor}
+          cancelButtonText={i18n.translate(
+            'xpack.streams.streamDetailView.managementTab.enrichment.processorFlyout.deleteProcessorModalCancel',
+            { defaultMessage: 'Keep processor' }
+          )}
+          confirmButtonText={i18n.translate(
+            'xpack.streams.streamDetailView.managementTab.enrichment.processorFlyout.deleteProcessorModalConfirm',
+            { defaultMessage: 'Delete processor progress' }
+          )}
+          buttonColor="danger"
+          defaultFocusedButton="confirm"
+        >
+          <p>
+            {i18n.translate(
+              'xpack.streams.streamDetailView.managementTab.enrichment.processorFlyout.deleteProcessorModalBody',
+              {
+                defaultMessage:
+                  'You can still reset this until the changes are confirmed on the processors list.',
+              }
+            )}
+          </p>
+        </EuiConfirmModal>
+      )}
+    </>
+  );
+};
+
+const isValidCondition = (condition: ProcessingDefinition['condition']) => {
+  return conditionSchema.safeParse(condition).success;
 };

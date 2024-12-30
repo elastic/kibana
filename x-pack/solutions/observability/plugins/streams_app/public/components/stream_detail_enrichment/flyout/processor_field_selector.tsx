@@ -18,6 +18,7 @@ interface ProcessorFieldSelectorProps {
 
 export const ProcessorFieldSelector = ({ fields }: ProcessorFieldSelectorProps) => {
   const { field, fieldState } = useController({ name: 'field', rules: { required: true } });
+
   // Should we filter the available options by "match_only_text" only?
   const options: Array<EuiSuperSelectOption<string>> = useMemo(
     () =>

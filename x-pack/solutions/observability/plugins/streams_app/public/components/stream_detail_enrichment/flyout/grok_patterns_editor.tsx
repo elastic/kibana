@@ -85,6 +85,8 @@ const DraggablePatternInput = ({
   onRemove,
   pattern,
 }: DraggablePatternInputProps) => {
+  const { ref, ...inputPropsWithoutRef } = inputProps;
+
   return (
     <EuiDraggable
       index={idx}
@@ -107,7 +109,7 @@ const DraggablePatternInput = ({
           >
             <EuiIcon type="grab" />
           </EuiPanel>
-          <EuiFieldText {...inputProps} inputRef={inputProps.ref} compressed />
+          <EuiFieldText {...inputPropsWithoutRef} inputRef={ref} compressed />
           {onRemove && (
             <EuiButtonIcon
               iconType="minusInCircle"

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiLink, EuiFormRow, EuiSuperSelect } from '@elastic/eui';
+import { EuiLink, EuiFormRow, EuiSuperSelect, EuiSuperSelectProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useController, useFormContext, useWatch } from 'react-hook-form';
@@ -21,7 +21,9 @@ interface TAvailableProcessor {
 
 type TAvailableProcessors = Record<ProcessorType, TAvailableProcessor>;
 
-export const ProcessorTypeSelector = () => {
+export const ProcessorTypeSelector = ({
+  readOnly = false,
+}: Pick<EuiSuperSelectProps, 'readOnly'>) => {
   const { core } = useKibana();
   const esDocUrl = core.docLinks.links.elasticsearch.docsBase;
 
@@ -40,6 +42,7 @@ export const ProcessorTypeSelector = () => {
       helpText={getProcessorDescription(esDocUrl)(processorType)}
     >
       <EuiSuperSelect
+        readOnly={readOnly}
         options={processorTypeSelectorOptions}
         isInvalid={fieldState.invalid}
         valueOfSelected={field.value}

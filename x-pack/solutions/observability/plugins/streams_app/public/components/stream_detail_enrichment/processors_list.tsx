@@ -24,7 +24,7 @@ import {
   isGrokProcessor,
 } from '@kbn/streams-schema';
 import { useBoolean } from '@kbn/react-hooks';
-import { EditProcessorFlyout } from './flyout';
+import { EditProcessorFlyout, EditProcessorFlyoutProps } from './flyout';
 import { ProcessorDefinition } from './types';
 
 export const DraggableProcessorListItem = ({
@@ -52,12 +52,16 @@ interface ProcessorListItemProps {
   definition: ReadStreamDefinition;
   processor: ProcessorDefinition;
   hasShadow: EuiPanelProps['hasShadow'];
+  onUpdateProcessor: EditProcessorFlyoutProps['onUpdateProcessor'];
+  onDeleteProcessor: EditProcessorFlyoutProps['onDeleteProcessor'];
 }
 
 const ProcessorListItem = ({
   processor,
   definition,
   hasShadow = false,
+  onUpdateProcessor,
+  onDeleteProcessor,
 }: ProcessorListItemProps) => {
   const [isEditProcessorOpen, { on: openEditProcessor, off: closeEditProcessor }] = useBoolean();
 
@@ -91,8 +95,10 @@ const ProcessorListItem = ({
         <EditProcessorFlyout
           key={`edit-processor`}
           definition={definition}
-          onClose={closeEditProcessor}
           processor={processor}
+          onClose={closeEditProcessor}
+          onUpdateProcessor={onUpdateProcessor}
+          onDeleteProcessor={onDeleteProcessor}
         />
       )}
     </EuiPanel>

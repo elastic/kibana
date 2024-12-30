@@ -36,8 +36,16 @@ export function StreamDetailEnrichmentContent({
   definition: ReadStreamDefinition;
   refreshDefinition: () => void;
 }) {
-  const { processors, addProcessor, setProcessors, hasChanges, resetChanges, saveChanges } =
-    useProcessorsList(definition, refreshDefinition);
+  const {
+    processors,
+    addProcessor,
+    updateProcessor,
+    deleteProcessor,
+    setProcessors,
+    hasChanges,
+    resetChanges,
+    saveChanges,
+  } = useProcessorsList(definition, refreshDefinition);
 
   const [isAddProcessorOpen, { on: openAddProcessor, off: closeAddProcessor }] = useBoolean();
   const [isBottomBarOpen, { on: openBottomBar, off: closeBottomBar }] = useBoolean();
@@ -75,35 +83,46 @@ export function StreamDetailEnrichmentContent({
     />
   );
 
+  const bottomBar = isBottomBarOpen && (
+    <ManagementBottomBar onCancel={handleDiscardChanges} onConfirm={handleSaveChanges} />
+  );
+
   if (!hasProcessors) {
     return (
       <>
         <EnrichmentEmptyPrompt onAddProcessor={openAddProcessor} />
         {addProcessorFlyout}
+        {bottomBar}
       </>
     );
   }
 
   return (
     <EuiPanel paddingSize="none">
-      <ProcessorsHeader />
-      <EuiSpacer size="l" />
-      <SortableList onDragItem={handlerItemDrag}>
-        {processors.map((processor, idx) => (
-          <DraggableProcessorListItem
-            key={processor.id}
-            idx={idx}
-            definition={definition}
-            processor={processor}
-          />
-        ))}
-      </SortableList>
-      <EuiSpacer size="m" />
-      <AddProcessorButton onClick={openAddProcessor} />
-      {addProcessorFlyout}
-      {isBottomBarOpen && (
-        <ManagementBottomBar onCancel={handleDiscardChanges} onConfirm={handleSaveChanges} />
+      {hasProcessors ? (
+        <>
+          <ProcessorsHeader />
+          <EuiSpacer size="l" />
+          <SortableList onDragItem={handlerItemDrag}>
+            {processors.map((processor, idx) => (
+              <DraggableProcessorListItem
+                key={processor.id}
+                idx={idx}
+                definition={definition}
+                processor={processor}
+                onUpdateProcessor={updateProcessor}
+                onDeleteProcessor={deleteProcessor}
+              />
+            ))}
+          </SortableList>
+          <EuiSpacer size="m" />
+          <AddProcessorButton onClick={openAddProcessor} />
+        </>
+      ) : (
+        <EnrichmentEmptyPrompt onAddProcessor={openAddProcessor} />
       )}
+      {addProcessorFlyout}
+      {bottomBar}
     </EuiPanel>
   );
 }
@@ -141,6 +160,10 @@ const useProcessorsList = (definition: ReadStreamDefinition, refreshDefinition: 
 
   const httpProcessing = useMemo(() => processors.map(removeIdFromProcessor), [processors]);
 
+  useEffect(() => {
+    setProcessors(createProcessorsList(definition.stream.ingest.processing));
+  }, [definition]);
+
   const hasChanges = useMemo(
     () => !deepEqual(processing, httpProcessing),
     [processing, httpProcessing]
@@ -148,6 +171,24 @@ const useProcessorsList = (definition: ReadStreamDefinition, refreshDefinition: 
 
   const addProcessor = (newProcessing: ProcessingDefinition) => {
     setProcessors(processors.concat(createProcessorWithId(newProcessing)));
+  };
+
+  const updateProcessor = (id: string, processorUpdate: ProcessorDefinition) => {
+    const updatedProcessors = processors.map((processor) => {
+      if (processor.id === id) {
+        return processorUpdate;
+      }
+
+      return processor;
+    });
+
+    setProcessors(updatedProcessors);
+  };
+
+  const deleteProcessor = (id: string) => {
+    const updatedProcessors = processors.filter((processor) => processor.id !== id);
+
+    setProcessors(updatedProcessors);
   };
 
   const resetChanges = () => {
@@ -187,6 +228,8 @@ const useProcessorsList = (definition: ReadStreamDefinition, refreshDefinition: 
     hasChanges,
     processors,
     addProcessor,
+    updateProcessor,
+    deleteProcessor,
     resetChanges,
     saveChanges,
     setProcessors,

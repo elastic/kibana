@@ -22,6 +22,7 @@ import { DiscardChangesModal } from '../discard_changes_modal';
 interface ProcessorFlyoutTemplateProps {
   confirmButton?: React.ReactNode;
   onClose: () => void;
+  shouldConfirm?: boolean;
   subHeader?: React.ReactNode;
   title: string;
 }
@@ -30,6 +31,7 @@ export function ProcessorFlyoutTemplate({
   children,
   confirmButton,
   onClose,
+  shouldConfirm = false,
   subHeader,
   title,
 }: PropsWithChildren<ProcessorFlyoutTemplateProps>) {
@@ -41,7 +43,7 @@ export function ProcessorFlyoutTemplate({
   };
 
   return (
-    <EuiFlyoutResizable onClose={openDiscardModal}>
+    <EuiFlyoutResizable onClose={shouldConfirm ? openDiscardModal : onClose}>
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
           <h2>{title}</h2>
@@ -60,7 +62,7 @@ export function ProcessorFlyoutTemplate({
           {confirmButton}
         </EuiFlexGroup>
       </EuiFlyoutFooter>
-      {isDiscardModalOpen && (
+      {shouldConfirm && isDiscardModalOpen && (
         <DiscardChangesModal onCancel={closeDiscardModal} onConfirm={discardChanges} />
       )}
     </EuiFlyoutResizable>
