@@ -29,7 +29,7 @@
     "devTools": "src/platform/plugins/shared/dev_tools",
     "discover": [
       "src/platform/plugins/shared/discover",
-      "packages/kbn-discover-utils",
+      "src/platform/packages/shared/kbn-discover-utils",
       "src/platform/packages/shared/kbn-discover-contextual-components"
     ],
     "savedSearch": "src/plugins/saved_search",

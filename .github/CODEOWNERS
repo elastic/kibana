@@ -394,7 +394,7 @@ examples/discover_customization_examples @elastic/kibana-data-discovery
 x-pack/platform/plugins/private/discover_enhanced @elastic/kibana-data-discovery
 src/platform/plugins/shared/discover @elastic/kibana-data-discovery
 src/platform/plugins/shared/discover_shared @elastic/kibana-data-discovery @elastic/obs-ux-logs-team
-packages/kbn-discover-utils @elastic/kibana-data-discovery
+src/platform/packages/shared/kbn-discover-utils @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-doc-links @elastic/docs
 packages/kbn-docs-utils @elastic/kibana-operations
 packages/kbn-dom-drag-drop @elastic/kibana-visualizations @elastic/kibana-data-discovery

@@ -296,7 +296,7 @@ const getPipeline = (filename: string, removeSteps = true) => {
     if (
       (await doAnyChangesMatch([
         /^package.json/,
-        /^packages\/kbn-discover-utils/,
+        /^src\/platform\/packages\/shared\/kbn-discover-utils/,
         /^packages\/kbn-doc-links/,
         /^packages\/kbn-dom-drag-drop/,
         /^packages\/kbn-es-query/,
