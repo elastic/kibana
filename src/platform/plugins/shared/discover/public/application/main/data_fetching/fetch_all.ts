@@ -135,7 +135,7 @@ export function fetchAll(
         })
       : fetchDocuments(searchSource, fetchDeps);
     const responseTotalHits =
-      getAppState().hideChart && query && !isEsqlQuery
+      (getAppState().hideChart || !dataView.getTimeField()) && query && !isEsqlQuery
         ? fetchTotalHitsSearchSource({
             services,
             searchSessionId: fetchDeps.searchSessionId,
