@@ -17,7 +17,7 @@ import {
 import { getTotalDocCountRequest } from './get_total_doc_count_request';
 
 // TODO Consolidate with duplicate `fetchPValues` in
-// `x-pack/plugins/observability_solution/apm/server/routes/correlations/queries/fetch_duration_field_candidates.ts`
+// `x-pack/solutions/observability/plugins/apm/server/routes/correlations/queries/fetch_duration_field_candidates.ts`
 
 export interface FetchIndexInfoParamsArguments {
   skipFieldCandidates?: boolean;
