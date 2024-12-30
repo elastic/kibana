@@ -968,7 +968,7 @@
     "@kbn/tinymath": "link:src/platform/packages/private/kbn-tinymath",
     "@kbn/transform-plugin": "link:x-pack/platform/plugins/private/transform",
     "@kbn/translations-plugin": "link:x-pack/platform/plugins/private/translations",
-    "@kbn/transpose-utils": "link:packages/kbn-transpose-utils",
+    "@kbn/transpose-utils": "link:src/platform/packages/private/kbn-transpose-utils",
     "@kbn/triggers-actions-ui-example-plugin": "link:x-pack/examples/triggers_actions_ui_example",
     "@kbn/triggers-actions-ui-plugin": "link:x-pack/platform/plugins/shared/triggers_actions_ui",
     "@kbn/triggers-actions-ui-types": "link:src/platform/packages/shared/kbn-triggers-actions-ui-types",
