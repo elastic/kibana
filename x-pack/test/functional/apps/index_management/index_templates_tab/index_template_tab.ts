@@ -13,19 +13,27 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const log = getService('log');
   const security = getService('security');
   const testSubjects = getService('testSubjects');
+  const es = getService('es');
 
-  const INDEX_TEMPLATE_NAME = `test-index-template`;
+  const INDEX_TEMPLATE_NAME = `test-index-template-name`;
 
-  describe('Create index template', function () {
+  describe('Index template tab', function () {
     before(async () => {
       await log.debug('Navigating to the index templates tab');
       await security.testUser.setRoles(['index_management_user']);
       await pageObjects.common.navigateToApp('indexManagement');
-      // Navigate to the data streams tab
+      // Navigate to the templates tab
       await pageObjects.indexManagement.changeTabs('templatesTab');
       await pageObjects.header.waitUntilLoadingHasFinished();
       // Click create template button
       await testSubjects.click('createTemplateButton');
+    });
+
+    afterEach(async () => {
+      await es.indices.deleteIndexTemplate({
+        name: INDEX_TEMPLATE_NAME,
+      });
+      await testSubjects.click('reloadButton');
     });
 
     it('can create an index template with data retention', async () => {
@@ -46,6 +54,36 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.click('nextButton');
 
       expect(await testSubjects.getVisibleText('lifecycleValue')).to.be('7 hours');
+
+      // Click Create template
+      await pageObjects.indexManagement.clickNextButton();
+      // Close detail tab
+      await testSubjects.click('closeDetailsButton');
+    });
+
+    it('can create an index template with logsdb index mode', async () => {
+      await testSubjects.click('createTemplateButton');
+      // Fill out required fields
+      await testSubjects.setValue('nameField', INDEX_TEMPLATE_NAME);
+      await testSubjects.setValue('indexPatternsField', 'logsdb-test-index-pattern');
+
+      await testSubjects.click('indexModeField');
+      await testSubjects.click('index_mode_logsdb');
+
+      // Navigate to the last step of the wizard
+      await testSubjects.click('nextButton');
+      await testSubjects.click('nextButton');
+      await testSubjects.click('nextButton');
+      await testSubjects.click('nextButton');
+      await testSubjects.click('nextButton');
+
+      expect(await testSubjects.exists('indexModeTitle')).to.be(true);
+      expect(await testSubjects.getVisibleText('indexModeValue')).to.be('LogsDB');
+
+      // Click Create template
+      await pageObjects.indexManagement.clickNextButton();
+      // Close detail tab
+      await testSubjects.click('closeDetailsButton');
     });
   });
 };
