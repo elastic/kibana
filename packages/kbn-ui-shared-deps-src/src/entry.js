@@ -83,3 +83,4 @@ export const KbnReactKibanaContextCommon = require('@kbn/react-kibana-context-co
 export const KbnReactKibanaContextRoot = require('@kbn/react-kibana-context-root');
 export const KbnReactKibanaContextRender = require('@kbn/react-kibana-context-render');
 export const KbnReactKibanaContextTheme = require('@kbn/react-kibana-context-theme');
+export const KbnSharedUxRouter = require('@kbn/shared-ux-router');
