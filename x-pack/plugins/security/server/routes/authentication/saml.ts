@@ -14,19 +14,16 @@ import { ROUTE_TAG_AUTH_FLOW, ROUTE_TAG_CAN_REDIRECT } from '../tags';
 /**
  * Defines routes required for SAML authentication.
  */
-export function defineSAMLRoutes({
-  router,
-  getAuthenticationService,
-  basePath,
-  logger,
-  buildFlavor,
-  docLinks,
-}: RouteDefinitionParams) {
+export function defineSAMLRoutes({ router, getAuthenticationService }: RouteDefinitionParams) {
   router.post(
     {
       path: '/api/security/saml/callback',
       security: {
         authz: {
+          enabled: false,
+          reason: 'This route must remain accessible to 3rd-party SAML providers',
+        },
+        authc: {
           enabled: false,
           reason: 'This route must remain accessible to 3rd-party SAML providers',
         },
@@ -40,7 +37,6 @@ export function defineSAMLRoutes({
       options: {
         access: 'public',
         excludeFromOAS: true,
-        authRequired: false,
         xsrfRequired: false,
         tags: [ROUTE_TAG_CAN_REDIRECT, ROUTE_TAG_AUTH_FLOW],
       },

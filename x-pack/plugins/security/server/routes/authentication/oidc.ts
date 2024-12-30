@@ -22,10 +22,8 @@ import { ROUTE_TAG_AUTH_FLOW, ROUTE_TAG_CAN_REDIRECT } from '../tags';
 export function defineOIDCRoutes({
   router,
   httpResources,
-  logger,
   getAuthenticationService,
   basePath,
-  docLinks,
 }: RouteDefinitionParams) {
   /**
    * The route should be configured as a redirect URI in OP when OpenID Connect implicit flow
@@ -36,8 +34,17 @@ export function defineOIDCRoutes({
     {
       path: '/api/security/oidc/implicit',
       validate: false,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route must remain accessible to 3rd-party OIDC providers',
+        },
+        authc: {
+          enabled: false,
+          reason: 'This route must remain accessible to 3rd-party OIDC providers',
+        },
+      },
       options: {
-        authRequired: false,
         excludeFromOAS: true,
       },
     },
@@ -63,7 +70,17 @@ export function defineOIDCRoutes({
     {
       path: '/internal/security/oidc/implicit.js',
       validate: false,
-      options: { authRequired: false, excludeFromOAS: true },
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route must remain accessible to 3rd-party OIDC providers',
+        },
+        authc: {
+          enabled: false,
+          reason: 'This route must remain accessible to 3rd-party OIDC providers',
+        },
+      },
+      options: { excludeFromOAS: true },
     },
     (context, request, response) => {
       const serverBasePath = basePath.serverBasePath;
@@ -85,6 +102,10 @@ export function defineOIDCRoutes({
           enabled: false,
           reason: 'This route must remain accessible to 3rd-party OIDC providers',
         },
+        authc: {
+          enabled: false,
+          reason: 'This route must remain accessible to 3rd-party OIDC providers',
+        },
       },
       validate: {
         query: schema.object(
@@ -94,9 +115,6 @@ export function defineOIDCRoutes({
             error: schema.maybe(schema.string()),
             error_description: schema.maybe(schema.string()),
             error_uri: schema.maybe(schema.uri()),
-            iss: schema.maybe(schema.uri({ scheme: ['https'] })),
-            login_hint: schema.maybe(schema.string()),
-            target_link_uri: schema.maybe(schema.uri()),
             state: schema.maybe(schema.string()),
           },
           // The client MUST ignore unrecognized response parameters according to
@@ -108,7 +126,6 @@ export function defineOIDCRoutes({
       options: {
         access: 'public',
         excludeFromOAS: true,
-        authRequired: false,
         tags: [ROUTE_TAG_CAN_REDIRECT, ROUTE_TAG_AUTH_FLOW],
       },
     },
@@ -131,14 +148,6 @@ export function defineOIDCRoutes({
           type: OIDCLogin.LoginWithAuthorizationCodeFlow,
           //  We pass the path only as we can't be sure of the full URL and Elasticsearch doesn't need it anyway.
           authenticationResponseURI: request.url.pathname + request.url.search,
-        };
-      } else if (request.query.iss) {
-        // An HTTP GET request with a query parameter named `iss` as part of a 3rd party initiated authentication.
-        // See more details at https://openid.net/specs/openid-connect-core-1_0.html#ThirdPartyInitiatedLogin
-        loginAttempt = {
-          type: OIDCLogin.LoginInitiatedBy3rdParty,
-          iss: request.query.iss,
-          loginHint: request.query.login_hint,
         };
       }
 
@@ -164,6 +173,10 @@ export function defineOIDCRoutes({
           enabled: false,
           reason: 'This route must remain accessible to 3rd-party OIDC providers',
         },
+        authc: {
+          enabled: false,
+          reason: 'This route must remain accessible to 3rd-party OIDC providers',
+        },
       },
       validate: {
         body: schema.object(
@@ -180,7 +193,6 @@ export function defineOIDCRoutes({
       options: {
         access: 'public',
         excludeFromOAS: true,
-        authRequired: false,
         xsrfRequired: false,
         tags: [ROUTE_TAG_CAN_REDIRECT, ROUTE_TAG_AUTH_FLOW],
       },
@@ -206,6 +218,10 @@ export function defineOIDCRoutes({
           enabled: false,
           reason: 'This route must remain accessible to 3rd-party OIDC providers',
         },
+        authc: {
+          enabled: false,
+          reason: 'This route must remain accessible to 3rd-party OIDC providers',
+        },
       },
       validate: {
         query: schema.object(
@@ -222,7 +238,6 @@ export function defineOIDCRoutes({
       options: {
         access: 'public',
         excludeFromOAS: true,
-        authRequired: false,
         tags: [ROUTE_TAG_CAN_REDIRECT, ROUTE_TAG_AUTH_FLOW],
       },
     },
