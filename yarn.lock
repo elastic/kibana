@@ -7767,7 +7767,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/unified-data-table@link:packages/kbn-unified-data-table":
+"@kbn/unified-data-table@link:src/platform/packages/shared/kbn-unified-data-table":
   version "0.0.0"
   uid ""
 
