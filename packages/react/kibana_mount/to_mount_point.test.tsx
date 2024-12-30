@@ -12,7 +12,7 @@ import { act } from 'react-dom/test-utils';
 import { of, BehaviorSubject } from 'rxjs';
 import { useEuiTheme } from '@elastic/eui';
 import type { UseEuiTheme } from '@elastic/eui';
-import type { CoreTheme } from '@kbn/core/public';
+import type { CoreTheme } from '@kbn/core-theme-browser';
 import { toMountPoint } from './to_mount_point';
 import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
 import { userProfileServiceMock } from '@kbn/core-user-profile-browser-mocks';

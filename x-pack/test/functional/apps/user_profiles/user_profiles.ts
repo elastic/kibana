@@ -98,15 +98,15 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         const themeKeyPadMenu = await pageObjects.userProfiles.getThemeKeypadMenu();
         expect(themeKeyPadMenu).not.to.be(null);
 
-        await pageObjects.userProfiles.changeUserProfileTheme('Dark');
+        await pageObjects.userProfiles.changeUserProfileTheme('dark');
         const darkModeTag = await pageObjects.userProfiles.getThemeTag();
         expect(darkModeTag).to.be('v8dark');
 
-        await pageObjects.userProfiles.changeUserProfileTheme('Light');
+        await pageObjects.userProfiles.changeUserProfileTheme('light');
         const lightModeTag = await pageObjects.userProfiles.getThemeTag();
         expect(lightModeTag).to.be('v8light');
 
-        await pageObjects.userProfiles.changeUserProfileTheme('Space default');
+        await pageObjects.userProfiles.changeUserProfileTheme('space_default');
         const spaceDefaultModeTag = await pageObjects.userProfiles.getThemeTag();
         expect(spaceDefaultModeTag).to.be('v8light');
       });
@@ -131,15 +131,15 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         let spaceDefaultModeTag = await pageObjects.userProfiles.getThemeTag();
         expect(spaceDefaultModeTag).to.be('v8dark');
 
-        await pageObjects.userProfiles.changeUserProfileTheme('Light');
+        await pageObjects.userProfiles.changeUserProfileTheme('light');
         const lightModeTag = await pageObjects.userProfiles.getThemeTag();
         expect(lightModeTag).to.be('v8light');
 
-        await pageObjects.userProfiles.changeUserProfileTheme('Dark');
+        await pageObjects.userProfiles.changeUserProfileTheme('dark');
         const darkModeTag = await pageObjects.userProfiles.getThemeTag();
         expect(darkModeTag).to.be('v8dark');
 
-        await pageObjects.userProfiles.changeUserProfileTheme('Space default');
+        await pageObjects.userProfiles.changeUserProfileTheme('space_default');
         spaceDefaultModeTag = await pageObjects.userProfiles.getThemeTag();
         expect(spaceDefaultModeTag).to.be('v8dark');
 

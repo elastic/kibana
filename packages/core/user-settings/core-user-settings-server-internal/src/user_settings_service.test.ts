@@ -70,8 +70,42 @@ describe('#setup', () => {
     });
   });
 
+  it('fetches userSettings when client is set and returns `system` when `darkMode` is set to `system`', async () => {
+    startDeps.userProfile.getCurrent.mockResolvedValue(createUserProfile('system'));
+
+    const { getUserSettingDarkMode } = service.setup();
+    service.start(startDeps);
+
+    const kibanaRequest = httpServerMock.createKibanaRequest();
+    const darkMode = await getUserSettingDarkMode(kibanaRequest);
+
+    expect(darkMode).toEqual('system');
+    expect(startDeps.userProfile.getCurrent).toHaveBeenCalledTimes(1);
+    expect(startDeps.userProfile.getCurrent).toHaveBeenCalledWith({
+      request: kibanaRequest,
+      dataPath: 'userSettings',
+    });
+  });
+
   it('fetches userSettings when client is set and returns `undefined` when `darkMode` is set to `` (the default value)', async () => {
     startDeps.userProfile.getCurrent.mockResolvedValue(createUserProfile(''));
+
+    const { getUserSettingDarkMode } = service.setup();
+    service.start(startDeps);
+
+    const kibanaRequest = httpServerMock.createKibanaRequest();
+    const darkMode = await getUserSettingDarkMode(kibanaRequest);
+
+    expect(darkMode).toEqual(undefined);
+    expect(startDeps.userProfile.getCurrent).toHaveBeenCalledTimes(1);
+    expect(startDeps.userProfile.getCurrent).toHaveBeenCalledWith({
+      request: kibanaRequest,
+      dataPath: 'userSettings',
+    });
+  });
+
+  it('fetches userSettings when client is set and returns `undefined` when `darkMode` is set to `space_default`', async () => {
+    startDeps.userProfile.getCurrent.mockResolvedValue(createUserProfile('space_default'));
 
     const { getUserSettingDarkMode } = service.setup();
     service.start(startDeps);

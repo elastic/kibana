@@ -214,6 +214,7 @@ describe('SecurityNavControl', () => {
       Array [
         Object {
           "content": <ContextMenuContent
+            closePopover={[Function]}
             items={
               Array [
                 Object {
@@ -319,6 +320,7 @@ describe('SecurityNavControl', () => {
       Array [
         Object {
           "content": <ContextMenuContent
+            closePopover={[Function]}
             items={
               Array [
                 Object {
@@ -391,6 +393,7 @@ describe('SecurityNavControl', () => {
       Array [
         Object {
           "content": <ContextMenuContent
+            closePopover={[Function]}
             items={
               Array [
                 Object {
@@ -465,6 +468,7 @@ describe('SecurityNavControl', () => {
       Array [
         Object {
           "content": <ContextMenuContent
+            closePopover={[Function]}
             items={
               Array [
                 Object {

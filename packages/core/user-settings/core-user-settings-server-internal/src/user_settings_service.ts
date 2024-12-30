@@ -64,11 +64,18 @@ export class UserSettingsService {
   }
 }
 
+/**
+ * Extracts the dark mode setting from the user settings.
+ * Returning "undefined" means that we will use the space default settings.
+ */
 const getUserSettingDarkMode = (
   userSettings: Record<string, string>
 ): DarkModeValue | undefined => {
-  if (userSettings?.darkMode) {
-    return userSettings.darkMode.toUpperCase() === 'DARK';
+  if (userSettings.darkMode) {
+    const { darkMode } = userSettings;
+    if (darkMode === 'space_default') return undefined;
+
+    return darkMode.toUpperCase() === 'SYSTEM' ? 'system' : darkMode.toUpperCase() === 'DARK';
   }
   return undefined;
 };
