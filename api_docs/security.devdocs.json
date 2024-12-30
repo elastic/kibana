@@ -1992,11 +1992,11 @@
               },
               {
                 "plugin": "profiling",
-                "path": "x-pack/plugins/observability_solution/profiling/server/lib/setup/get_has_setup_privileges.ts"
+                "path": "x-pack/solutions/observability/plugins/profiling/server/lib/setup/get_has_setup_privileges.ts"
               },
               {
                 "plugin": "profiling",
-                "path": "x-pack/plugins/observability_solution/profiling/server/lib/setup/get_has_setup_privileges.ts"
+                "path": "x-pack/solutions/observability/plugins/profiling/server/lib/setup/get_has_setup_privileges.ts"
               },
               {
                 "plugin": "@kbn/security-authorization-core",
@@ -6542,6 +6542,10 @@
               "path": "x-pack/plugins/upgrade_assistant/server/lib/reindexing/credential_store.ts"
             },
             {
+              "plugin": "transform",
+              "path": "x-pack/platform/plugins/private/transform/server/routes/api/reauthorize_transforms/route_handler_factory.ts"
+            },
+            {
               "plugin": "fleet",
               "path": "x-pack/platform/plugins/shared/fleet/server/services/api_keys/security.ts"
             },
@@ -6580,10 +6584,6 @@
             {
               "plugin": "entityManager",
               "path": "x-pack/platform/plugins/shared/entity_manager/server/routes/enablement/disable.ts"
-            },
-            {
-              "plugin": "transform",
-              "path": "x-pack/platform/plugins/private/transform/server/routes/api/reauthorize_transforms/route_handler_factory.ts"
             },
             {
               "plugin": "fleet",
