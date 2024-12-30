@@ -30,7 +30,7 @@
       "src/platform/packages/shared/kbn-discover-utils",
       "src/platform/packages/shared/kbn-discover-contextual-components"
     ],
-    "savedSearch": "src/plugins/saved_search",
+    "savedSearch": "src/platform/plugins/shared/saved_search",
     "embeddableApi": "src/platform/plugins/shared/embeddable",
     "presentationPanel": "src/platform/plugins/private/presentation_panel",
     "embeddableExamples": "examples/embeddable_examples",
