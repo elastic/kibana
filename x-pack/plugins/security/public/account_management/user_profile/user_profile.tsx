@@ -11,6 +11,7 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiButtonGroup,
+  EuiCallOut,
   EuiColorPicker,
   EuiDescribedFormGroup,
   EuiDescriptionList,
@@ -229,7 +230,7 @@ const UserSettingsEditor: FunctionComponent<UserSettingsEditorProps> = ({
       <EuiKeyPadMenuItem
         name={id}
         label={label}
-        data-test-subj={`themeKeyPadItem${label}`}
+        data-test-subj={`themeKeyPadItem${id}`}
         checkable="single"
         isSelected={idSelected === id}
         isDisabled={isThemeOverridden}
@@ -260,13 +261,16 @@ const UserSettingsEditor: FunctionComponent<UserSettingsEditorProps> = ({
             </FormLabel>
           ),
         }}
+        css={css`
+          inline-size: 420px; // Allow for 4 items to fit in a row instead of the default 3
+        `}
       >
         {themeItem({
-          id: '',
-          label: i18n.translate('xpack.security.accountManagement.userProfile.defaultModeButton', {
-            defaultMessage: 'Space default',
+          id: 'system',
+          label: i18n.translate('xpack.security.accountManagement.userProfile.systemModeButton', {
+            defaultMessage: 'System',
           }),
-          icon: 'spaces',
+          icon: 'desktop',
         })}
         {themeItem({
           id: 'light',
@@ -281,6 +285,13 @@ const UserSettingsEditor: FunctionComponent<UserSettingsEditorProps> = ({
             defaultMessage: 'Dark',
           }),
           icon: 'moon',
+        })}
+        {themeItem({
+          id: 'space_default',
+          label: i18n.translate('xpack.security.accountManagement.userProfile.defaultModeButton', {
+            defaultMessage: 'Space default',
+          }),
+          icon: 'spaces',
         })}
       </EuiKeyPadMenu>
     );
@@ -300,6 +311,32 @@ const UserSettingsEditor: FunctionComponent<UserSettingsEditorProps> = ({
       themeKeyPadMenu
     );
   };
+
+  const deprecatedWarning = idSelected === 'space_default' && (
+    <>
+      <EuiSpacer size="s" />
+      <EuiCallOut
+        title={i18n.translate(
+          'xpack.security.accountManagement.userProfile.deprecatedSpaceDefaultTitle',
+          {
+            defaultMessage: 'Space default settings will be removed in a future version',
+          }
+        )}
+        color="warning"
+        iconType="warning"
+      >
+        <p>
+          {i18n.translate(
+            'xpack.security.accountManagement.userProfile.deprecatedSpaceDefaultDescription',
+            {
+              defaultMessage:
+                'All users with the Space default color mode enabled will be automatically transitioned to the System color mode.',
+            }
+          )}
+        </p>
+      </EuiCallOut>
+    </>
+  );
 
   return (
     <EuiDescribedFormGroup
@@ -321,7 +358,10 @@ const UserSettingsEditor: FunctionComponent<UserSettingsEditorProps> = ({
       }
     >
       <FormRow name="data.userSettings.darkMode" fullWidth>
-        {themeMenu(isThemeOverridden)}
+        <>
+          {themeMenu(isThemeOverridden)}
+          {deprecatedWarning}
+        </>
       </FormRow>
     </EuiDescribedFormGroup>
   );
@@ -911,7 +951,7 @@ export function useUserProfileForm({ user, data }: UserProfileProps) {
             imageUrl: data.avatar?.imageUrl || '',
           },
           userSettings: {
-            darkMode: data.userSettings?.darkMode || '',
+            darkMode: data.userSettings?.darkMode || 'space_default',
           },
         }
       : undefined,

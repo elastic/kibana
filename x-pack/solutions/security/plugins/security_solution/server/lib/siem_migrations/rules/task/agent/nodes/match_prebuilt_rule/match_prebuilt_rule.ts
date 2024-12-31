@@ -7,7 +7,7 @@
 
 import type { Logger } from '@kbn/core/server';
 import { JsonOutputParser } from '@langchain/core/output_parsers';
-import { SiemMigrationRuleTranslationResult } from '../../../../../../../../common/siem_migrations/constants';
+import { RuleTranslationResult } from '../../../../../../../../common/siem_migrations/constants';
 import type { RuleMigrationsRetriever } from '../../../retrievers';
 import type { ChatModel } from '../../../util/actions_client_chat';
 import type { GraphNode } from '../../types';
@@ -68,7 +68,7 @@ export const getMatchPrebuiltRuleNode = ({
             id: matchedRule.installedRuleId,
             prebuilt_rule_id: matchedRule.rule_id,
           },
-          translation_result: SiemMigrationRuleTranslationResult.FULL,
+          translation_result: RuleTranslationResult.FULL,
         };
       }
     }
@@ -80,7 +80,7 @@ export const getMatchPrebuiltRuleNode = ({
       logger.debug(
         `Rule: ${state.original_rule?.title} did not match any prebuilt rule, but contains inputlookup, dropping`
       );
-      return { translation_result: SiemMigrationRuleTranslationResult.UNTRANSLATABLE };
+      return { translation_result: RuleTranslationResult.UNTRANSLATABLE };
     }
     return {};
   };

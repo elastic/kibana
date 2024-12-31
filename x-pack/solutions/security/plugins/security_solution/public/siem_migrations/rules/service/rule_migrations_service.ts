@@ -45,7 +45,7 @@ import * as i18n from './translations';
 const NAMESPACE_TRACE_OPTIONS_SESSION_STORAGE_KEY =
   `${DEFAULT_ASSISTANT_NAMESPACE}.${TRACE_OPTIONS_SESSION_STORAGE_KEY}` as const;
 
-const REQUEST_POLLING_INTERVAL_MS = 5000 as const;
+const REQUEST_POLLING_INTERVAL_SECONDS = 10 as const;
 const CREATE_MIGRATION_BODY_BATCH_SIZE = 50 as const;
 
 export class SiemRulesMigrationsService {
@@ -213,7 +213,7 @@ export class SiemRulesMigrationsService {
         }
       }
 
-      await new Promise((resolve) => setTimeout(resolve, REQUEST_POLLING_INTERVAL_MS));
+      await new Promise((resolve) => setTimeout(resolve, REQUEST_POLLING_INTERVAL_SECONDS * 1000));
     } while (pendingMigrationIds.length > 0);
   }
 }

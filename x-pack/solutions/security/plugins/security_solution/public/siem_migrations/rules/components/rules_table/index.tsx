@@ -31,7 +31,7 @@ import { useGetMigrationPrebuiltRules } from '../../logic/use_get_migration_preb
 import * as logicI18n from '../../logic/translations';
 import { BulkActions } from './bulk_actions';
 import { SearchField } from './search_field';
-import { SiemMigrationRuleTranslationResult } from '../../../../../common/siem_migrations/constants';
+import { RuleTranslationResult } from '../../../../../common/siem_migrations/constants';
 import * as i18n from './translations';
 
 const DEFAULT_PAGE_SIZE = 10;
@@ -80,10 +80,7 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
     const tableSelection: EuiTableSelectionType<RuleMigration> = useMemo(
       () => ({
         selectable: (item: RuleMigration) => {
-          return (
-            !item.elastic_rule?.id &&
-            item.translation_result === SiemMigrationRuleTranslationResult.FULL
-          );
+          return !item.elastic_rule?.id && item.translation_result === RuleTranslationResult.FULL;
         },
         selectableMessage: (selectable: boolean, item: RuleMigration) => {
           if (selectable) {
@@ -190,7 +187,7 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
         const canMigrationRuleBeInstalled =
           !isLoading &&
           !ruleMigration.elastic_rule?.id &&
-          ruleMigration.translation_result === SiemMigrationRuleTranslationResult.FULL;
+          ruleMigration.translation_result === RuleTranslationResult.FULL;
         return (
           <EuiFlexGroup>
             <EuiFlexItem>
@@ -271,7 +268,7 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
                   <EuiFlexItem grow={false}>
                     <BulkActions
                       isTableLoading={isLoading}
-                      numberOfTranslatedRules={translationStats?.rules.installable ?? 0}
+                      numberOfTranslatedRules={translationStats?.rules.success.installable ?? 0}
                       numberOfSelectedRules={selectedRuleMigrations.length}
                       installTranslatedRule={installTranslatedRules}
                       installSelectedRule={installSelectedRule}
