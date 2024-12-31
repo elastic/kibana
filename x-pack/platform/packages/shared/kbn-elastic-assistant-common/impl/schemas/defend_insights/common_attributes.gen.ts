@@ -36,6 +36,10 @@ export const DefendInsightEvent = z.object({
    * The value of the event
    */
   value: z.string(),
+  /**
+   * The signature of the event
+   */
+  signature: z.string().optional(),
 });
 
 /**
