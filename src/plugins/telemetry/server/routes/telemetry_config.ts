@@ -102,12 +102,46 @@ export function registerTelemetryConfigRoutes({
       options: { authRequired: 'optional' },
     })
     // Just because it used to be /v2/, we are creating identical v1 and v2.
-    .addVersion({ version: '1', validate: v2Validations }, v2Handler)
-    .addVersion({ version: '2', validate: v2Validations }, v2Handler);
+    .addVersion(
+      {
+        version: '1',
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
+        validate: v2Validations,
+      },
+      v2Handler
+    )
+    .addVersion(
+      {
+        version: '2',
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
+        validate: v2Validations,
+      },
+      v2Handler
+    );
 
   // Register the deprecated public and path-based for BWC
   // as we know this one is used by other Elastic products to fetch the opt-in status.
-  router.versioned
-    .get({ access: 'public', path: FetchTelemetryConfigRoutePathBasedV2 })
-    .addVersion({ version: '2023-10-31', validate: v2Validations }, v2Handler);
+  router.versioned.get({ access: 'public', path: FetchTelemetryConfigRoutePathBasedV2 }).addVersion(
+    {
+      version: '2023-10-31',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
+      validate: v2Validations,
+    },
+    v2Handler
+  );
 }

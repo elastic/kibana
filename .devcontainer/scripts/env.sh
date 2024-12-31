@@ -9,7 +9,7 @@ setup_fips() {
   fi
 
   if [ -n "$FIPS" ] && [ "$FIPS" = "1" ]; then
-    sed -i '/xpack.security.experimental.fipsMode.enabled:/ {s/.*/xpack.security.experimental.fipsMode.enabled: true/; t}; $a\xpack.security.experimental.fipsMode.enabled: true' "$KBN_CONFIG_FILE"
+    sed -i '/xpack.security.fipsMode.enabled:/ {s/.*/xpack.security.fipsMode.enabled: true/; t}; $a\xpack.security.fipsMode.enabled: true' "$KBN_CONFIG_FILE"
 
     # Patch node_modules so we can start Kibana in dev mode
     sed -i 's/hashType = hashType || '\''md5'\'';/hashType = hashType || '\''sha1'\'';/g' "${KBN_DIR}/node_modules/file-loader/node_modules/loader-utils/lib/getHashDigest.js"
@@ -21,7 +21,7 @@ setup_fips() {
     echo "FIPS mode enabled"
     echo "If manually bootstrapping in FIPS mode use: NODE_OPTIONS='' yarn kbn bootstrap"
   else
-    sed -i '/xpack.security.experimental.fipsMode.enabled:/ {s/.*/xpack.security.experimental.fipsMode.enabled: false/; t}; $a\xpack.security.experimental.fipsMode.enabled: false' "$KBN_CONFIG_FILE"
+    sed -i '/xpack.security.fipsMode.enabled:/ {s/.*/xpack.security.fipsMode.enabled: false/; t}; $a\xpack.security.fipsMode.enabled: false' "$KBN_CONFIG_FILE"
   fi
 }
 

@@ -334,6 +334,13 @@ export default ({ getService }: FtrProviderContext): void => {
                   defaultValue: false,
                   required: true,
                 },
+                {
+                  key: 'test_custom_field_3',
+                  label: 'toggle',
+                  type: CustomFieldTypes.NUMBER,
+                  defaultValue: 1,
+                  required: true,
+                },
               ],
             },
           })
@@ -367,6 +374,11 @@ export default ({ getService }: FtrProviderContext): void => {
                     type: CustomFieldTypes.TOGGLE,
                     value: true,
                   },
+                  {
+                    key: 'test_custom_field_3',
+                    type: CustomFieldTypes.NUMBER,
+                    value: 2,
+                  },
                 ],
               },
             ],
@@ -383,6 +395,11 @@ export default ({ getService }: FtrProviderContext): void => {
             key: 'test_custom_field_2',
             type: CustomFieldTypes.TOGGLE,
             value: true,
+          },
+          {
+            key: 'test_custom_field_3',
+            type: CustomFieldTypes.NUMBER,
+            value: 2,
           },
         ]);
       });
@@ -405,6 +422,12 @@ export default ({ getService }: FtrProviderContext): void => {
                   type: CustomFieldTypes.TOGGLE,
                   defaultValue: false,
                   required: true,
+                },
+                {
+                  key: 'test_custom_field_3',
+                  label: 'number',
+                  type: CustomFieldTypes.NUMBER,
+                  required: false,
                 },
               ],
             },
@@ -444,6 +467,7 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(patchedCases[0].customFields).to.eql([
           { key: 'test_custom_field_2', type: 'toggle', value: true },
           { key: 'test_custom_field_1', type: 'text', value: null },
+          { key: 'test_custom_field_3', type: 'number', value: null },
         ]);
       });
 
@@ -521,7 +545,7 @@ export default ({ getService }: FtrProviderContext): void => {
           caseId: postedCase.id,
           params: {
             alertId: '4679431ee0ba3209b6fcd60a255a696886fe0a7d18f5375de510ff5b68fa6b78',
-            index: '.siem-signals-default-000001',
+            index: 'siem-signals-default-000001',
             rule: { id: 'test-rule-id', name: 'test-index-id' },
             type: AttachmentType.alert,
             owner: 'securitySolutionFixture',
@@ -569,7 +593,7 @@ export default ({ getService }: FtrProviderContext): void => {
             caseId: postedCaseId,
             params: {
               alertId: '4679431ee0ba3209b6fcd60a255a696886fe0a7d18f5375de510ff5b68fa6b78',
-              index: '.siem-signals-default-000001',
+              index: 'siem-signals-default-000001',
               rule: { id: 'test-rule-id', name: 'test-index-id' },
               type: AttachmentType.alert,
               owner: 'securitySolutionFixture',
@@ -1106,6 +1130,13 @@ export default ({ getService }: FtrProviderContext): void => {
                     defaultValue: false,
                     required: true,
                   },
+                  {
+                    key: 'number_custom_field',
+                    label: 'number',
+                    type: CustomFieldTypes.NUMBER,
+                    defaultValue: 3,
+                    required: true,
+                  },
                 ],
               },
             })
@@ -1121,6 +1152,11 @@ export default ({ getService }: FtrProviderContext): void => {
               key: 'toggle_custom_field',
               type: CustomFieldTypes.TOGGLE,
               value: true,
+            },
+            {
+              key: 'number_custom_field',
+              type: CustomFieldTypes.NUMBER,
+              value: 4,
             },
           ] as CaseCustomFields;
 
@@ -1145,6 +1181,7 @@ export default ({ getService }: FtrProviderContext): void => {
           expect(patchedCases[0].customFields).to.eql([
             { ...originalValues[0], value: 'default value' },
             { ...originalValues[1], value: false },
+            { ...originalValues[2], value: 3 },
           ]);
         });
 
@@ -1168,6 +1205,13 @@ export default ({ getService }: FtrProviderContext): void => {
                     defaultValue: false,
                     required: false,
                   },
+                  {
+                    key: 'number_custom_field',
+                    label: 'number',
+                    type: CustomFieldTypes.NUMBER,
+                    defaultValue: 5,
+                    required: false,
+                  },
                 ],
               },
             })
@@ -1183,6 +1227,11 @@ export default ({ getService }: FtrProviderContext): void => {
               key: 'toggle_custom_field',
               type: CustomFieldTypes.TOGGLE,
               value: true,
+            },
+            {
+              key: 'number_custom_field',
+              type: CustomFieldTypes.NUMBER,
+              value: 6,
             },
           ] as CaseCustomFields;
 
@@ -1213,6 +1262,7 @@ export default ({ getService }: FtrProviderContext): void => {
           expect(patchedCases[0].customFields).to.eql([
             { ...originalValues[1], value: false },
             { ...originalValues[0], value: 'default value' },
+            { ...originalValues[2], value: 5 },
           ]);
         });
 
@@ -1234,6 +1284,12 @@ export default ({ getService }: FtrProviderContext): void => {
                     type: CustomFieldTypes.TOGGLE,
                     required: true,
                   },
+                  {
+                    key: 'number_custom_field',
+                    label: 'number',
+                    type: CustomFieldTypes.NUMBER,
+                    required: true,
+                  },
                 ],
               },
             })
@@ -1251,6 +1307,11 @@ export default ({ getService }: FtrProviderContext): void => {
                 key: 'toggle_custom_field',
                 type: CustomFieldTypes.TOGGLE,
                 value: true,
+              },
+              {
+                key: 'number_custom_field',
+                type: CustomFieldTypes.NUMBER,
+                value: 7,
               },
             ],
           });
@@ -1358,6 +1419,13 @@ export default ({ getService }: FtrProviderContext): void => {
                     required: true,
                     defaultValue: false,
                   },
+                  {
+                    key: 'number_custom_field',
+                    label: 'number',
+                    type: CustomFieldTypes.NUMBER,
+                    required: true,
+                    defaultValue: 8,
+                  },
                 ],
               },
             })
@@ -1376,6 +1444,11 @@ export default ({ getService }: FtrProviderContext): void => {
                 type: CustomFieldTypes.TOGGLE,
                 value: true,
               },
+              {
+                key: 'number_custom_field',
+                type: CustomFieldTypes.NUMBER,
+                value: 9,
+              },
             ],
           });
 
@@ -1388,6 +1461,11 @@ export default ({ getService }: FtrProviderContext): void => {
             {
               key: 'toggle_custom_field',
               type: CustomFieldTypes.TOGGLE,
+              value: null,
+            },
+            {
+              key: 'number_custom_field',
+              type: CustomFieldTypes.NUMBER,
               value: null,
             },
           ];
@@ -1450,7 +1528,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
     describe('alerts', () => {
       describe('Update', () => {
-        const defaultSignalsIndex = '.siem-signals-default-000001';
+        const defaultSignalsIndex = 'siem-signals-default-000001';
 
         beforeEach(async () => {
           await esArchiver.load('x-pack/test/functional/es_archives/cases/signals/default');
@@ -1584,7 +1662,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       describe('No update', () => {
-        const defaultSignalsIndex = '.siem-signals-default-000001';
+        const defaultSignalsIndex = 'siem-signals-default-000001';
 
         beforeEach(async () => {
           await esArchiver.load('x-pack/test/functional/es_archives/cases/signals/duplicate_ids');
@@ -1603,12 +1681,12 @@ export default ({ getService }: FtrProviderContext): void => {
             });
           };
 
-          // this id exists only in .siem-signals-default-000001
+          // this id exists only in siem-signals-default-000001
           const signalIDInFirstIndex =
             'cae78067e65582a3b277c1ad46ba3cb29044242fe0d24bbf3fcde757fdd31d1c';
-          // This id exists in both .siem-signals-default-000001 and .siem-signals-default-000002
+          // This id exists in both siem-signals-default-000001 and siem-signals-default-000002
           const signalIDInSecondIndex = 'duplicate-signal-id';
-          const signalsIndex2 = '.siem-signals-default-000002';
+          const signalsIndex2 = 'siem-signals-default-000002';
 
           const individualCase = await createCase(supertest, {
             ...postCaseReq,

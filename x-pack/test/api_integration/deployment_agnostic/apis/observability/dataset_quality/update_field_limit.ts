@@ -8,6 +8,7 @@
 import expect from '@kbn/expect';
 import { log, timerange } from '@kbn/apm-synthtrace-client';
 
+import { LogsSynthtraceEsClient } from '@kbn/apm-synthtrace';
 import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import { RoleCredentials, SupertestWithRoleScopeType } from '../../../services';
 import { createBackingIndexNameWithoutVersion, rolloverDataStream } from './utils/es_utils';
@@ -15,7 +16,7 @@ import { createBackingIndexNameWithoutVersion, rolloverDataStream } from './util
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const samlAuth = getService('samlAuth');
   const roleScopedSupertest = getService('roleScopedSupertest');
-  const synthtrace = getService('logsSynthtraceEsClient');
+  const synthtrace = getService('synthtrace');
   const esClient = getService('es');
   const packageApi = getService('packageApi');
   const start = '2024-10-17T11:00:00.000Z';
@@ -50,6 +51,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   describe('Update field limit', function () {
     let adminRoleAuthc: RoleCredentials;
     let supertestAdminWithCookieCredentials: SupertestWithRoleScopeType;
+    let synthtraceLogsEsClient: LogsSynthtraceEsClient;
 
     before(async () => {
       adminRoleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('admin');
@@ -64,7 +66,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         roleAuthc: adminRoleAuthc,
         pkg,
       });
-      await synthtrace.index([
+
+      synthtraceLogsEsClient = await synthtrace.createLogsSynthtraceEsClient();
+      await synthtraceLogsEsClient.index([
         timerange(start, end)
           .interval('1m')
           .rate(1)
@@ -85,7 +89,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
 
     after(async () => {
-      await synthtrace.clean();
+      await synthtraceLogsEsClient.clean();
       await packageApi.uninstallPackage({
         roleAuthc: adminRoleAuthc,
         pkg,

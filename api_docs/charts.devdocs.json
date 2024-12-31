@@ -155,6 +155,71 @@
       },
       {
         "parentPluginId": "charts",
+        "id": "def-public.decreaseOpacity",
+        "type": "Function",
+        "tags": [],
+        "label": "decreaseOpacity",
+        "description": [
+          "\nReduces color opacity, by mixing color with background color.\n\nThis is used when the resulting color needs to be opaque (i.e. alpha of 1)."
+        ],
+        "signature": [
+          "(baseColor: string, step: number, totalSteps: number) => string"
+        ],
+        "path": "src/plugins/charts/public/services/palettes/decrease_opacity.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "charts",
+            "id": "def-public.decreaseOpacity.$1",
+            "type": "string",
+            "tags": [],
+            "label": "baseColor",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/plugins/charts/public/services/palettes/decrease_opacity.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "charts",
+            "id": "def-public.decreaseOpacity.$2",
+            "type": "number",
+            "tags": [],
+            "label": "step",
+            "description": [],
+            "signature": [
+              "number"
+            ],
+            "path": "src/plugins/charts/public/services/palettes/decrease_opacity.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "charts",
+            "id": "def-public.decreaseOpacity.$3",
+            "type": "number",
+            "tags": [],
+            "label": "totalSteps",
+            "description": [],
+            "signature": [
+              "number"
+            ],
+            "path": "src/plugins/charts/public/services/palettes/decrease_opacity.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "charts",
         "id": "def-public.EmptyPlaceholder",
         "type": "Function",
         "tags": [],
@@ -2219,22 +2284,6 @@
       "deprecated": false,
       "trackAdoption": false,
       "children": [
-        {
-          "parentPluginId": "charts",
-          "id": "def-public.ChartsPluginSetup.legacyColors",
-          "type": "Object",
-          "tags": [],
-          "label": "legacyColors",
-          "description": [],
-          "signature": [
-            "{ readonly seedColors: string[]; readonly mappedColors: ",
-            "MappedColors",
-            "; createColorLookupFunction: (arrayOfStringsOrNumbers?: (string | number)[] | undefined, colorMapping?: Partial<Record<string, string>>) => (value: string | number) => any; }"
-          ],
-          "path": "src/plugins/charts/public/plugin.ts",
-          "deprecated": false,
-          "trackAdoption": false
-        },
         {
           "parentPluginId": "charts",
           "id": "def-public.ChartsPluginSetup.theme",

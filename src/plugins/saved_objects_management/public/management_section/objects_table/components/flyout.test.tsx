@@ -12,7 +12,7 @@ import { importFileMock, resolveImportErrorsMock } from './flyout.test.mocks';
 import React from 'react';
 import { shallowWithI18nProvider } from '@kbn/test-jest-helpers';
 import { coreMock, httpServiceMock } from '@kbn/core/public/mocks';
-import { Flyout, FlyoutProps, FlyoutState } from './flyout';
+import { FlyoutClass as Flyout, FlyoutProps, FlyoutState } from './flyout';
 import { ShallowWrapper } from 'enzyme';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 
@@ -21,15 +21,21 @@ const mockFile = {
   path: '/home/foo.ndjson',
 } as unknown as File;
 
+const baseProps = {
+  euiTablePersist: {
+    pageSize: 5,
+    onTableChange: () => {},
+    sorting: { sort: { direction: 'asc' as const, field: 'foo' as const } },
+  },
+};
+
 describe('Flyout', () => {
   let defaultProps: FlyoutProps;
 
   const shallowRender = (props: FlyoutProps) => {
-    return shallowWithI18nProvider(<Flyout {...props} />) as unknown as ShallowWrapper<
-      FlyoutProps,
-      FlyoutState,
-      Flyout
-    >;
+    return shallowWithI18nProvider(
+      <Flyout {...baseProps} {...props} />
+    ) as unknown as ShallowWrapper<FlyoutProps, FlyoutState, Flyout>;
   };
 
   beforeEach(() => {

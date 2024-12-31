@@ -115,7 +115,8 @@ function findMatchingDescriptors({
       // avoid system indices caught by very fuzzy index patterns (i.e.: *log* would catch `.kibana-log-...`)
       return false;
     }
-    return new RegExp(`^${pattern.replace(/\./g, '\\.').replace(/\*/g, '.*')}$`).test(name);
+    const escapedPattern = pattern.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+    return new RegExp(`^${escapedPattern.replace(/\\\*/g, '.*')}$`).test(name);
   });
 }
 

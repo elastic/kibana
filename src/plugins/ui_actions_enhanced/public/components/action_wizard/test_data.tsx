@@ -25,6 +25,7 @@ export const dashboards = [
   { id: 'dashboard2', title: 'Dashboard 2' },
 ];
 
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 type DashboardDrilldownConfig = {
   dashboardId?: string;
   useCurrentFilters: boolean;
@@ -119,6 +120,7 @@ export const dashboardFactory = new ActionFactory(dashboardDrilldownActionFactor
   getFeatureUsageStart: () => licensingMock.createStart().featureUsage,
 });
 
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 type UrlDrilldownConfig = {
   url: string;
   openInNewTab: boolean;
@@ -261,7 +263,7 @@ export function Demo({
         getTriggerInfo={mockGetTriggerInfo}
         triggers={[VALUE_CLICK_TRIGGER, APPLY_FILTER_TRIGGER, SELECT_RANGE_TRIGGER]}
       />
-      <div style={{ marginTop: '44px' }} />
+      <div css={{ marginTop: '44px' }} />
       <hr />
       <div>Action Factory Id: {state.currentActionFactory?.id}</div>
       <div>Action Factory Config: {JSON.stringify(state.config)}</div>

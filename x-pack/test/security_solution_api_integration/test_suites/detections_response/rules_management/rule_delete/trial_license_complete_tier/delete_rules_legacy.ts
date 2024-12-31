@@ -45,7 +45,7 @@ export default ({ getService }: FtrProviderContext): void => {
       it('should have exactly 1 legacy action before a delete within alerting', async () => {
         // create an action
         const { body: hookAction } = await supertest
-          .post('/api/actions/action')
+          .post('/api/actions/connector')
           .set('kbn-xsrf', 'true')
           .send(getWebHookAction())
           .expect(200);
@@ -81,7 +81,7 @@ export default ({ getService }: FtrProviderContext): void => {
       it('should return the legacy action in the response body when it deletes a rule that has one', async () => {
         // create an action
         const { body: hookAction } = await supertest
-          .post('/api/actions/action')
+          .post('/api/actions/connector')
           .set('kbn-xsrf', 'true')
           .send(getSlackAction())
           .expect(200);
@@ -103,7 +103,7 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(body.actions).to.eql([
           {
             id: hookAction.id,
-            action_type_id: hookAction.actionTypeId,
+            action_type_id: hookAction.connector_type_id,
             group: 'default',
             params: {
               message:
@@ -120,7 +120,7 @@ export default ({ getService }: FtrProviderContext): void => {
       it('should delete a legacy action when it deletes a rule that has one', async () => {
         // create an action
         const { body: hookAction } = await supertest
-          .post('/api/actions/action')
+          .post('/api/actions/connector')
           .set('kbn-xsrf', 'true')
           .send(getWebHookAction())
           .expect(200);

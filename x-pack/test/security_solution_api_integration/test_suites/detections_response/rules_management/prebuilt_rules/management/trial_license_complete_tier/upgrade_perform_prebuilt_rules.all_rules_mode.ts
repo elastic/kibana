@@ -502,8 +502,13 @@ function createIdToRuleMap(rules: Array<PrebuiltRuleAsset | RuleResponse>) {
 
 async function createAction(supertest: SuperTest.Agent) {
   const createConnector = async (payload: Record<string, unknown>) =>
-    (await supertest.post('/api/actions/action').set('kbn-xsrf', 'true').send(payload).expect(200))
-      .body;
+    (
+      await supertest
+        .post('/api/actions/connector')
+        .set('kbn-xsrf', 'true')
+        .send(payload)
+        .expect(200)
+    ).body;
 
   const createWebHookConnector = () => createConnector(getWebHookAction());
 

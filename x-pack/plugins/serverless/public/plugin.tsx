@@ -61,7 +61,7 @@ export class ServerlessPlugin
       const { currentType } = developer.projectSwitcher;
 
       core.chrome.navControls.registerRight({
-        order: 500,
+        order: 5000,
         mount: (target) => this.mountProjectSwitcher(target, core, currentType),
       });
     }
@@ -83,7 +83,7 @@ export class ServerlessPlugin
     core.chrome.navControls.registerRight({
       order: 1,
       mount: toMountPoint(
-        <KibanaRenderContextProvider i18n={core.i18n} theme={core.theme}>
+        <KibanaRenderContextProvider {...core}>
           <EuiButton
             href="https://ela.st/serverless-feedback"
             size={'s'}
@@ -143,7 +143,7 @@ export class ServerlessPlugin
     currentProjectType: ProjectType
   ) {
     ReactDOM.render(
-      <KibanaRenderContextProvider i18n={coreStart.i18n} theme={coreStart.theme}>
+      <KibanaRenderContextProvider {...coreStart}>
         <ProjectSwitcherKibanaProvider {...{ coreStart, projectChangeAPIUrl }}>
           <ProjectSwitcher {...{ currentProjectType }} />
         </ProjectSwitcherKibanaProvider>

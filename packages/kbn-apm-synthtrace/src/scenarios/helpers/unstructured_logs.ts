@@ -33,7 +33,7 @@ export const unstructuredLogMessageGenerators = {
     ])} successfully ${f.number.int({ max: 100000 })} times`,
   ],
   taskStatusSuccess: (f: Faker) => [
-    `${f.hacker.noun()}: ${f.word.words()} ${f.helpers.arrayElement([
+    `${f.hacker.noun()}: ${f.word.words()} ${f.string.uuid()} ${f.helpers.arrayElement([
       'triggered',
       'executed',
       'processed',
@@ -46,7 +46,7 @@ export const unstructuredLogMessageGenerators = {
       'execution',
       'processing',
       'handling',
-    ])} of ${f.word.words()} failed at ${f.date.recent().toISOString()}`,
+    ])} of ${f.string.uuid()} failed at ${f.date.recent().toISOString()}`,
   ],
   error: (f: Faker) => [
     `${f.helpers.arrayElement([
@@ -58,7 +58,7 @@ export const unstructuredLogMessageGenerators = {
       'Issue',
     ])}: ${f.hacker.phrase()}`,
     `Stopping ${f.number.int(42)} background tasks...`,
-    'Shutting down process...',
+    `Shutting down process ${f.string.hexadecimal({ length: 16, prefix: '' })}...`,
   ],
   restart: (f: Faker) => {
     const service = f.database.engine();
@@ -72,13 +72,27 @@ export const unstructuredLogMessageGenerators = {
       ])}`,
     ];
   },
-  userAuthentication: (f: Faker) => [
-    `User ${f.internet.userName()} ${f.helpers.arrayElement([
-      'logged in',
-      'logged out',
-      'failed to login',
-    ])}`,
-  ],
+  userAuthentication: (f: Faker) =>
+    f.helpers.arrayElements(
+      [
+        `User ${f.internet.userName()} (id ${f.string.uuid()}) ${f.helpers.arrayElement([
+          'logged in',
+          'logged out',
+        ])} at ${f.date.recent().toISOString()} from ${f.internet.ip()}:${f.internet.port()}`,
+        `Created new user ${f.internet.userName()} (id ${f.string.uuid()})`,
+        `Disabled user ${f.internet.userName()} (id ${f.string.uuid()}) due to level ${f.number.int(
+          { max: 10 }
+        )} ${f.helpers.arrayElement([
+          'suspicious activity',
+          'security concerns',
+          'policy violation',
+        ])}`,
+        `Login ${f.internet.userName()} (id ${f.string.uuid()}) incorrect ${f.number.int({
+          max: 100,
+        })} times from ${f.internet.ipv6()}.`,
+      ],
+      { min: 1, max: 3 }
+    ),
   networkEvent: (f: Faker) => [
     `Network ${f.helpers.arrayElement([
       'connection',

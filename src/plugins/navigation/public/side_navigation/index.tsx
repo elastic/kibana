@@ -7,15 +7,35 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { css } from '@emotion/react';
 import React, { Suspense, type FC } from 'react';
-import { EuiLoadingSpinner } from '@elastic/eui';
+import { EuiSkeletonRectangle, useEuiTheme } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 import type { Props as NavigationProps } from './side_navigation';
 
 const SideNavComponentLazy = React.lazy(() => import('./side_navigation'));
 
-export const SideNavComponent: FC<NavigationProps> = (props) => (
-  <Suspense fallback={<EuiLoadingSpinner size="s" />}>
-    <SideNavComponentLazy {...props} />
-  </Suspense>
-);
+export const SideNavComponent: FC<NavigationProps> = (props) => {
+  const { euiTheme } = useEuiTheme();
+  return (
+    <Suspense
+      fallback={
+        <EuiSkeletonRectangle
+          css={css`
+            margin: ${euiTheme.size.base};
+          `}
+          width={16}
+          height={16}
+          borderRadius="s"
+          contentAriaLabel={i18n.translate(
+            'navigation.sideNavigation.loadingSolutionNavigationLabel',
+            { defaultMessage: 'Loading solution navigation' }
+          )}
+        />
+      }
+    >
+      <SideNavComponentLazy {...props} />
+    </Suspense>
+  );
+};

@@ -14,6 +14,7 @@ import {
 } from '@kbn/observability-ai-assistant-plugin/common/types';
 import type { FtrProviderContext } from '../../common/ftr_provider_context';
 import type { SupertestReturnType } from '../../common/observability_ai_assistant_api_client';
+import { ForbiddenApiError } from '../../common/config';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantAPIClient');
@@ -48,7 +49,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     describe('without conversations', () => {
       it('returns no conversations when listing', async () => {
         const response = await observabilityAIAssistantAPIClient
-          .editorUser({
+          .editor({
             endpoint: 'POST /internal/observability_ai_assistant/conversations',
           })
           .expect(200);
@@ -58,7 +59,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       it('returns a 404 for updating conversations', async () => {
         await observabilityAIAssistantAPIClient
-          .editorUser({
+          .editor({
             endpoint: 'PUT /internal/observability_ai_assistant/conversation/{conversationId}',
             params: {
               path: {
@@ -74,7 +75,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       it('returns a 404 for retrieving a conversation', async () => {
         await observabilityAIAssistantAPIClient
-          .editorUser({
+          .editor({
             endpoint: 'GET /internal/observability_ai_assistant/conversation/{conversationId}',
             params: {
               path: {
@@ -92,7 +93,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       >;
       before(async () => {
         createResponse = await observabilityAIAssistantAPIClient
-          .editorUser({
+          .editor({
             endpoint: 'POST /internal/observability_ai_assistant/conversation',
             params: {
               body: {
@@ -105,7 +106,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       after(async () => {
         await observabilityAIAssistantAPIClient
-          .editorUser({
+          .editor({
             endpoint: 'DELETE /internal/observability_ai_assistant/conversation/{conversationId}',
             params: {
               path: {
@@ -116,7 +117,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           .expect(200);
 
         await observabilityAIAssistantAPIClient
-          .editorUser({
+          .editor({
             endpoint: 'GET /internal/observability_ai_assistant/conversation/{conversationId}',
             params: {
               path: {
@@ -148,7 +149,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       it('returns a 404 for updating a non-existing conversation', async () => {
         await observabilityAIAssistantAPIClient
-          .editorUser({
+          .editor({
             endpoint: 'PUT /internal/observability_ai_assistant/conversation/{conversationId}',
             params: {
               path: {
@@ -164,7 +165,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       it('returns a 404 for retrieving a non-existing conversation', async () => {
         await observabilityAIAssistantAPIClient
-          .editorUser({
+          .editor({
             endpoint: 'GET /internal/observability_ai_assistant/conversation/{conversationId}',
             params: {
               path: {
@@ -177,7 +178,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       it('returns the conversation that was created', async () => {
         const response = await observabilityAIAssistantAPIClient
-          .editorUser({
+          .editor({
             endpoint: 'GET /internal/observability_ai_assistant/conversation/{conversationId}',
             params: {
               path: {
@@ -192,7 +193,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       it('returns the created conversation when listing', async () => {
         const response = await observabilityAIAssistantAPIClient
-          .editorUser({
+          .editor({
             endpoint: 'POST /internal/observability_ai_assistant/conversations',
           })
           .expect(200);
@@ -210,7 +211,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         before(async () => {
           updateResponse = await observabilityAIAssistantAPIClient
-            .editorUser({
+            .editor({
               endpoint: 'PUT /internal/observability_ai_assistant/conversation/{conversationId}',
               params: {
                 path: {
@@ -234,7 +235,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         it('returns the updated conversation after get', async () => {
           const updateAfterCreateResponse = await observabilityAIAssistantAPIClient
-            .editorUser({
+            .editor({
               endpoint: 'GET /internal/observability_ai_assistant/conversation/{conversationId}',
               params: {
                 path: {
@@ -247,6 +248,129 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           expect(updateAfterCreateResponse.body.conversation.title).to.eql(
             conversationUpdate.conversation.title
           );
+        });
+      });
+    });
+
+    describe('security roles and access privileges', () => {
+      describe('should deny access for users without the ai_assistant privilege', () => {
+        let createResponse: Awaited<
+          SupertestReturnType<'POST /internal/observability_ai_assistant/conversation'>
+        >;
+        before(async () => {
+          createResponse = await observabilityAIAssistantAPIClient
+            .editor({
+              endpoint: 'POST /internal/observability_ai_assistant/conversation',
+              params: {
+                body: {
+                  conversation: conversationCreate,
+                },
+              },
+            })
+            .expect(200);
+        });
+
+        after(async () => {
+          await observabilityAIAssistantAPIClient
+            .editor({
+              endpoint: 'DELETE /internal/observability_ai_assistant/conversation/{conversationId}',
+              params: {
+                path: {
+                  conversationId: createResponse.body.conversation.id,
+                },
+              },
+            })
+            .expect(200);
+        });
+
+        it('POST /internal/observability_ai_assistant/conversation', async () => {
+          try {
+            await observabilityAIAssistantAPIClient.unauthorizedUser({
+              endpoint: 'POST /internal/observability_ai_assistant/conversation',
+              params: {
+                body: {
+                  conversation: conversationCreate,
+                },
+              },
+            });
+            throw new ForbiddenApiError(
+              'Expected unauthorizedUser() to throw a 403 Forbidden error'
+            );
+          } catch (e) {
+            expect(e.status).to.be(403);
+          }
+        });
+
+        it('POST /internal/observability_ai_assistant/conversations', async () => {
+          try {
+            await observabilityAIAssistantAPIClient.unauthorizedUser({
+              endpoint: 'POST /internal/observability_ai_assistant/conversations',
+            });
+            throw new ForbiddenApiError(
+              'Expected unauthorizedUser() to throw a 403 Forbidden error'
+            );
+          } catch (e) {
+            expect(e.status).to.be(403);
+          }
+        });
+
+        it('PUT /internal/observability_ai_assistant/conversation/{conversationId}', async () => {
+          try {
+            await observabilityAIAssistantAPIClient.unauthorizedUser({
+              endpoint: 'PUT /internal/observability_ai_assistant/conversation/{conversationId}',
+              params: {
+                path: {
+                  conversationId: createResponse.body.conversation.id,
+                },
+                body: {
+                  conversation: merge(omit(conversationUpdate, 'conversation.id'), {
+                    conversation: { id: createResponse.body.conversation.id },
+                  }),
+                },
+              },
+            });
+            throw new ForbiddenApiError(
+              'Expected unauthorizedUser() to throw a 403 Forbidden error'
+            );
+          } catch (e) {
+            expect(e.status).to.be(403);
+          }
+        });
+
+        it('GET /internal/observability_ai_assistant/conversation/{conversationId}', async () => {
+          try {
+            await observabilityAIAssistantAPIClient.unauthorizedUser({
+              endpoint: 'GET /internal/observability_ai_assistant/conversation/{conversationId}',
+              params: {
+                path: {
+                  conversationId: createResponse.body.conversation.id,
+                },
+              },
+            });
+            throw new ForbiddenApiError(
+              'Expected unauthorizedUser() to throw a 403 Forbidden error'
+            );
+          } catch (e) {
+            expect(e.status).to.be(403);
+          }
+        });
+
+        it('DELETE /internal/observability_ai_assistant/conversation/{conversationId}', async () => {
+          try {
+            await observabilityAIAssistantAPIClient.unauthorizedUser({
+              endpoint: 'DELETE /internal/observability_ai_assistant/conversation/{conversationId}',
+              params: {
+                path: {
+                  conversationId: createResponse.body.conversation.id,
+                },
+              },
+            });
+            throw new ForbiddenApiError(
+              'Expected unauthorizedUser() to throw a 403 Forbidden error'
+            );
+          } catch (e) {
+            expect(e.status).to.be(403);
+          }
         });
       });
     });

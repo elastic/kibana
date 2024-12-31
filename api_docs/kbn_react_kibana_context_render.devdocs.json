@@ -93,22 +93,32 @@
             "text": "I18nStart"
           },
           "; analytics?: Pick<",
+          "AnalyticsServiceStart",
+          ", \"reportEvent\"> | undefined; executionContext?: ",
           {
-            "pluginId": "@kbn/core-analytics-browser",
+            "pluginId": "@kbn/core-execution-context-browser",
             "scope": "public",
-            "docId": "kibKbnCoreAnalyticsBrowserPluginApi",
-            "section": "def-public.AnalyticsServiceStart",
-            "text": "AnalyticsServiceStart"
+            "docId": "kibKbnCoreExecutionContextBrowserPluginApi",
+            "section": "def-public.ExecutionContextSetup",
+            "text": "ExecutionContextSetup"
           },
-          ", \"reportEvent\"> | undefined; theme: ",
+          " | undefined; theme: ",
           {
             "pluginId": "@kbn/react-kibana-context-common",
-            "scope": "public",
+            "scope": "common",
             "docId": "kibKbnReactKibanaContextCommonPluginApi",
-            "section": "def-public.ThemeServiceStart",
+            "section": "def-common.ThemeServiceStart",
             "text": "ThemeServiceStart"
           },
-          "; modify?: ",
+          "; userProfile?: Pick<",
+          {
+            "pluginId": "@kbn/core-user-profile-browser",
+            "scope": "public",
+            "docId": "kibKbnCoreUserProfileBrowserPluginApi",
+            "section": "def-public.UserProfileService",
+            "text": "UserProfileService"
+          },
+          ", \"getUserProfile$\"> | undefined; modify?: ",
           "RecursivePartial",
           "<",
           "EuiThemeShape",

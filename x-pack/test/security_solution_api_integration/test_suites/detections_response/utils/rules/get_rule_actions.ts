@@ -12,7 +12,7 @@ import { getSlackAction } from '..';
 import { getWebHookAction } from '..';
 
 const createConnector = async (supertest: SuperTest.Agent, payload: Record<string, unknown>) =>
-  (await supertest.post('/api/actions/action').set('kbn-xsrf', 'true').send(payload).expect(200))
+  (await supertest.post('/api/actions/connector').set('kbn-xsrf', 'true').send(payload).expect(200))
     .body;
 const createWebHookConnector = (supertest: SuperTest.Agent) =>
   createConnector(supertest, getWebHookAction());

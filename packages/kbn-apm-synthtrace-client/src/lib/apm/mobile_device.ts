@@ -262,7 +262,6 @@ export class MobileDevice extends Entity<ApmFields> {
       'error.type': 'crash',
       'error.id': generateLongIdWithSeed(message),
       'error.exception': [{ message, ...{ type: 'crash' } }],
-      'error.grouping_name': groupingName || message,
     });
   }
 }

@@ -15,6 +15,12 @@ export function defineEnableUserRoutes({ router }: RouteDefinitionParams) {
   router.post(
     {
       path: '/internal/security/users/{username}/_enable',
+      security: {
+        authz: {
+          enabled: false,
+          reason: `This route delegates authorization to Core's scoped ES cluster client`,
+        },
+      },
       validate: {
         params: schema.object({ username: schema.string({ minLength: 1, maxLength: 1024 }) }),
       },

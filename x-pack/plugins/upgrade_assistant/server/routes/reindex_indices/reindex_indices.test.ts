@@ -94,9 +94,9 @@ describe('reindex API', () => {
       });
       mockReindexService.detectReindexWarnings.mockResolvedValueOnce([
         {
-          warningType: 'customTypeName',
+          warningType: 'indexSetting',
           meta: {
-            typeName: 'my_mapping_type',
+            settingA: 'deprecated',
           },
         },
       ]);
@@ -120,9 +120,9 @@ describe('reindex API', () => {
       expect(data.reindexOp).toEqual({ indexName: 'wowIndex', status: ReindexStatus.inProgress });
       expect(data.warnings).toEqual([
         {
-          warningType: 'customTypeName',
+          warningType: 'indexSetting',
           meta: {
-            typeName: 'my_mapping_type',
+            settingA: 'deprecated',
           },
         },
       ]);

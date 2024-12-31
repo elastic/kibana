@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 
 import type { RouteDefinitionParams } from '..';
 import { KIBANA_ADMIN_ROLE_NAME, KIBANA_USER_ROLE_NAME } from '../../deprecations';
@@ -23,6 +23,12 @@ export function defineKibanaUserRoleDeprecationRoutes({ router, logger }: RouteD
   router.post(
     {
       path: '/internal/security/deprecations/kibana_user_role/_fix_users',
+      security: {
+        authz: {
+          enabled: false,
+          reason: `This route delegates authorization to Core's scoped ES cluster client`,
+        },
+      },
       validate: false,
     },
     createLicensedRouteHandler(async (context, request, response) => {
@@ -88,6 +94,12 @@ export function defineKibanaUserRoleDeprecationRoutes({ router, logger }: RouteD
   router.post(
     {
       path: '/internal/security/deprecations/kibana_user_role/_fix_role_mappings',
+      security: {
+        authz: {
+          enabled: false,
+          reason: `This route delegates authorization to Core's scoped ES cluster client`,
+        },
+      },
       validate: false,
     },
     createLicensedRouteHandler(async (context, request, response) => {

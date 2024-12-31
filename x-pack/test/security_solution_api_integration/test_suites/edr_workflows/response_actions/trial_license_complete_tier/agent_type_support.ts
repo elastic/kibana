@@ -10,7 +10,7 @@ import TestAgent from 'supertest/lib/agent';
 import { FtrProviderContext } from '../../../../ftr_provider_context_edr_workflows';
 
 export default function ({ getService }: FtrProviderContext) {
-  describe('@ess @serverless Response Actions support for sentinelOne agentType', function () {
+  describe('@ess @serverless @serverlessQA Response Actions support for sentinelOne agentType', function () {
     const utils = getService('securitySolutionUtils');
 
     let adminSupertest: TestAgent;

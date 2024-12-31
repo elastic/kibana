@@ -14,6 +14,7 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import { makeMatcher } from '@kbn/picomatcher';
 import { type Package, findPackageForPath, getRepoRelsSync } from '@kbn/repo-packages';
 import { createFailError } from '@kbn/dev-cli-errors';
+import { readPackageJson } from '@kbn/repo-packages';
 
 import { readTsConfig, parseTsConfig, TsConfig } from './ts_configfile';
 
@@ -151,6 +152,8 @@ export class TsProject {
   public readonly directory: string;
   /** the package this tsconfig file is within, if any */
   public readonly pkg?: Package;
+  /** the package is esm or not */
+  public readonly isEsm?: boolean;
   /**
    * if this project is within a package then this will
    * be set to the import request that maps to the root of this project
@@ -187,6 +190,7 @@ export class TsProject {
       : undefined;
 
     this._disableTypeCheck = !!opts?.disableTypeCheck;
+    this.isEsm = readPackageJson(`${this.dir}/package.json`)?.type === 'module';
   }
 
   private _name: string | undefined;

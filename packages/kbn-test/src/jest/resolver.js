@@ -30,6 +30,8 @@ const STATIC_FILE_EXT =
     .split('|')
     .map((e) => `.${e}`);
 
+const IS_REACT_18 = process.env.REACT_18 === 'true';
+
 /**
  * @param {string} request
  * @param {import('resolve').SyncOpts} options
@@ -51,8 +53,34 @@ module.exports = (request, options) => {
     });
   }
 
+  if (request === '@launchdarkly/js-sdk-common') {
+    return resolve.sync('@launchdarkly/js-sdk-common/dist/cjs/index.cjs', {
+      basedir: options.basedir,
+      extensions: options.extensions,
+    });
+  }
+
+  // This is a workaround to run tests with React 17 and the latest @testing-library/react
+  // This will be removed once we upgrade to React 18 and start transitioning to the Concurrent Mode
+  // Tracking issue to clean this up https://github.com/elastic/kibana/issues/199100
+  if (request === 'react-dom/client') {
+    return Path.resolve(__dirname, 'mocks/react_dom_client_mock.ts');
+  }
+
   if (request === `elastic-apm-node`) {
     return APM_AGENT_MOCK;
+  }
+
+  // routes tests to the react-18 alias package
+  if (IS_REACT_18) {
+    // routes tests to the react-18 alias package
+    if (/^react?(\/[\s\S]*)?$/.test(request)) {
+      return module.exports(request.replace('react', 'react-18'), options);
+    }
+
+    if (/^react-dom?(\/[\s\S]*)?$/.test(request)) {
+      return module.exports(request.replace('react-dom', 'react-dom-18'), options);
+    }
   }
 
   const reqExt = Path.extname(request);

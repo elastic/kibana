@@ -18,27 +18,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const transactionType = 'request';
   const transactionName = 'GET /api';
 
-  registry.when('Breakdown when data is not loaded', { config: 'basic', archives: [] }, () => {
-    it('handles the empty state', async () => {
-      const response = await apmApiClient.readUser({
-        endpoint: 'GET /internal/apm/services/{serviceName}/transaction/charts/breakdown',
-        params: {
-          path: { serviceName: 'opbeans-node' },
-          query: {
-            start,
-            end,
-            transactionType,
-            environment: 'ENVIRONMENT_ALL',
-            kuery: '',
-          },
-        },
-      });
-
-      expect(response.status).to.be(200);
-      expect(response.body).to.eql({ timeseries: [] });
-    });
-  });
-
   registry.when(
     'Breakdown when data is loaded',
     { config: 'basic', archives: [archiveName] },

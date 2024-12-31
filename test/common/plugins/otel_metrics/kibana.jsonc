@@ -2,6 +2,8 @@
   "type": "plugin",
   "id": "@kbn/open-telemetry-instrumented-plugin",
   "owner": "@elastic/obs-ux-infra_services-team",
+  "group": "platform",
+  "visibility": "shared",
   "plugin": {
     "id": "openTelemetryInstrumentedPlugin",
     "server": true,

@@ -4,6 +4,7 @@ set -euo pipefail
 
 export DISABLE_BOOTSTRAP_VALIDATION=false
 .buildkite/scripts/bootstrap.sh
+.buildkite/scripts/copy_es_snapshot_cache.sh
 
 if [[ "${FTR_ENABLE_FIPS_AGENT:-}" == "true" ]]; then
   .buildkite/scripts/steps/checks/verify_fips_enabled.sh

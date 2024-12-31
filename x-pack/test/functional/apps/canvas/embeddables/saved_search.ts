@@ -20,6 +20,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.importExport.load(
         'test/functional/fixtures/kbn_archiver/dashboard/current/kibana'
       );
+      // canvas application is only available when installation contains canvas workpads
+      await kibanaServer.importExport.load(
+        'x-pack/test/functional/fixtures/kbn_archiver/canvas/default'
+      );
       // open canvas home
       await canvas.goToListingPage();
       // create new workpad

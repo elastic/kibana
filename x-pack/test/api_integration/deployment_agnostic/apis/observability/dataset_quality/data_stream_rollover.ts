@@ -8,12 +8,13 @@
 import { log, timerange } from '@kbn/apm-synthtrace-client';
 import expect from '@kbn/expect';
 
+import { LogsSynthtraceEsClient } from '@kbn/apm-synthtrace';
 import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import { SupertestWithRoleScopeType } from '../../../services';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const roleScopedSupertest = getService('roleScopedSupertest');
-  const synthtrace = getService('logsSynthtraceEsClient');
+  const synthtrace = getService('synthtrace');
   const start = '2024-10-17T11:00:00.000Z';
   const end = '2024-10-17T11:01:00.000Z';
   const type = 'logs';
@@ -39,6 +40,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
   describe('Datastream Rollover', function () {
     let supertestAdminWithCookieCredentials: SupertestWithRoleScopeType;
+    let synthtraceLogsEsClient: LogsSynthtraceEsClient;
 
     before(async () => {
       supertestAdminWithCookieCredentials = await roleScopedSupertest.getSupertestWithRoleScope(
@@ -48,7 +50,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           withInternalHeaders: true,
         }
       );
-      await synthtrace.index([
+
+      synthtraceLogsEsClient = await synthtrace.createLogsSynthtraceEsClient();
+      await synthtraceLogsEsClient.index([
         timerange(start, end)
           .interval('1m')
           .rate(1)
@@ -69,7 +73,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
 
     after(async () => {
-      await synthtrace.clean();
+      await synthtraceLogsEsClient.clean();
     });
 
     it('returns acknowledged when rollover is successful', async () => {

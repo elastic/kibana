@@ -20,9 +20,8 @@ import type { Datasource, Visualization } from '../../types';
 import type { LensPluginStartDependencies } from '../../plugin';
 import { suggestionsApi } from '../../lens_suggestions_api';
 import { generateId } from '../../id_generator';
-import { executeEditAction } from './edit_action_helpers';
-import { Embeddable } from '../../embeddable';
 import type { EditorFrameService } from '../../editor_frame_service';
+import { LensApi } from '../..';
 
 // datasourceMap and visualizationMap setters/getters
 export const [getVisualizationMap, setVisualizationMap] = createGetterSetter<
@@ -117,29 +116,21 @@ export async function executeCreateAction({
   const attrs = getLensAttributesFromSuggestion({
     filters: [],
     query: defaultEsqlQuery,
-    suggestion: firstSuggestion,
+    suggestion: {
+      ...firstSuggestion,
+      title: '', // when creating a new panel, we don't want to use the title from the suggestion
+    },
     dataView,
   });
 
-  const embeddable = await api.addNewPanel<object, Embeddable>({
+  const embeddable = await api.addNewPanel<object, LensApi>({
     panelType: 'lens',
     initialState: {
       attributes: attrs,
       id: generateId(),
+      isNewPanel: true,
     },
   });
   // open the flyout if embeddable has been created successfully
-  if (embeddable) {
-    const deletePanel = () => {
-      api.removePanel(embeddable.id);
-    };
-
-    executeEditAction({
-      embeddable,
-      startDependencies: deps,
-      isNewPanel: true,
-      deletePanel,
-      ...core,
-    });
-  }
+  embeddable?.onEdit?.();
 }

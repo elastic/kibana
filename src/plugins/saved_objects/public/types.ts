@@ -7,16 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  ChromeStart,
-  CoreStart,
-  OverlayStart,
-  SavedObjectsClientContract,
-  SavedObjectAttributes,
-  SavedObjectReference,
-} from '@kbn/core/public';
-import { ISearchSource, ISearchStart, SerializedSearchSourceFields } from '@kbn/data-plugin/public';
-import { DataViewsContract } from '@kbn/data-views-plugin/public';
+import { CoreStart, SavedObjectAttributes, SavedObjectReference } from '@kbn/core/public';
+import { ISearchSource, SerializedSearchSourceFields } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
 
 /**
@@ -62,15 +54,7 @@ export interface SavedObjectCreationOpts {
   overwrite?: boolean;
 }
 
-export interface SavedObjectKibanaServices {
-  savedObjectsClient: SavedObjectsClientContract;
-  dataViews: DataViewsContract;
-  search: ISearchStart;
-  chrome: ChromeStart;
-  overlays: OverlayStart;
-}
-
-export type StartServices = Pick<CoreStart, 'analytics' | 'i18n' | 'theme'>;
+export type StartServices = Pick<CoreStart, 'analytics' | 'i18n' | 'theme' | 'userProfile'>;
 
 export interface SavedObjectAttributesAndRefs {
   attributes: SavedObjectAttributes;

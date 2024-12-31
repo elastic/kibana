@@ -18,7 +18,11 @@ async function getDeprecations({
   savedObjectsClient,
 }: GetDeprecationsContext): Promise<DeprecationsDetails[]> {
   const deprecations: DeprecationsDetails[] = [];
-  const { total } = await savedObjectsClient.find({ type: 'test-deprecations-plugin', perPage: 1 });
+  const { total } = await savedObjectsClient.find({
+    type: 'test-deprecations-plugin',
+    perPage: 1,
+    namespaces: ['*'],
+  });
 
   deprecations.push({
     title: 'CorePluginDeprecationsPlugin plugin is deprecated',

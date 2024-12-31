@@ -26,7 +26,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
 
     it('7.10.0 migrates the `casesConfiguration` to be the `incidentConfiguration` in `config`, then 7.11.0 removes `incidentConfiguration`', async () => {
       const response = await supertest.get(
-        `${getUrlPrefix(``)}/api/actions/action/791a2ab1-784a-46ea-aa68-04c837e5da2d`
+        `${getUrlPrefix(``)}/api/actions/connector/791a2ab1-784a-46ea-aa68-04c837e5da2d`
       );
 
       expect(response.status).to.eql(200);
@@ -42,7 +42,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
 
     it('7.11.0 migrates webhook connector configurations to have `hasAuth` property', async () => {
       const responseWithAuth = await supertest.get(
-        `${getUrlPrefix(``)}/api/actions/action/949f909b-20a0-46e3-aadb-6a4d117bb592`
+        `${getUrlPrefix(``)}/api/actions/connector/949f909b-20a0-46e3-aadb-6a4d117bb592`
       );
 
       expect(responseWithAuth.status).to.eql(200);
@@ -50,7 +50,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
       expect(responseWithAuth.body.config.hasAuth).to.eql(true);
 
       const responseNoAuth = await supertest.get(
-        `${getUrlPrefix(``)}/api/actions/action/7434121e-045a-47d6-a0a6-0b6da752397a`
+        `${getUrlPrefix(``)}/api/actions/connector/7434121e-045a-47d6-a0a6-0b6da752397a`
       );
       expect(responseNoAuth.status).to.eql(200);
       expect(responseNoAuth.body.config).key('hasAuth');
@@ -59,16 +59,16 @@ export default function createGetTests({ getService }: FtrProviderContext) {
 
     it('7.14.0 migrates connectors to have `isMissingSecrets` property', async () => {
       const responseWithisMissingSecrets = await supertest.get(
-        `${getUrlPrefix(``)}/api/actions/action/7434121e-045a-47d6-a0a6-0b6da752397a`
+        `${getUrlPrefix(``)}/api/actions/connector/7434121e-045a-47d6-a0a6-0b6da752397a`
       );
 
       expect(responseWithisMissingSecrets.status).to.eql(200);
-      expect(responseWithisMissingSecrets.body.isMissingSecrets).to.eql(false);
+      expect(responseWithisMissingSecrets.body.is_missing_secrets).to.eql(false);
     });
 
     it('7.16.0 migrates email connector configurations to set `service` property if not set', async () => {
       const connectorWithService = await supertest.get(
-        `${getUrlPrefix(``)}/api/actions/action/0f8f2810-0a59-11ec-9a7c-fd0c2b83ff7c`
+        `${getUrlPrefix(``)}/api/actions/connector/0f8f2810-0a59-11ec-9a7c-fd0c2b83ff7c`
       );
 
       expect(connectorWithService.status).to.eql(200);
@@ -76,7 +76,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
       expect(connectorWithService.body.config.service).to.eql('someservice');
 
       const connectorWithoutService = await supertest.get(
-        `${getUrlPrefix(``)}/api/actions/action/1e0824a0-0a59-11ec-9a7c-fd0c2b83ff7c`
+        `${getUrlPrefix(``)}/api/actions/connector/1e0824a0-0a59-11ec-9a7c-fd0c2b83ff7c`
       );
 
       expect(connectorWithoutService.status).to.eql(200);
@@ -93,7 +93,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
 
       await asyncForEach(serviceNowConnectorIds, async (serviceNowConnectorId) => {
         const connectorResponse = await supertest.get(
-          `${getUrlPrefix(``)}/api/actions/action/${serviceNowConnectorId}`
+          `${getUrlPrefix(``)}/api/actions/connector/${serviceNowConnectorId}`
         );
 
         expect(connectorResponse.status).to.eql(200);

@@ -32,7 +32,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('with a data URI in the load_from query', () => {
       it('loads the data from the URI', async () => {
         await PageObjects.common.navigateToApp('console', {
-          hash: '#/console?load_from=data:text/plain,BYUwNmD2Q',
+          hash: '#/console/shell?load_from=data:text/plain,BYUwNmD2Q',
         });
 
         await retry.try(async () => {
@@ -44,7 +44,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       describe('with invalid data', () => {
         it('shows a toast error', async () => {
           await PageObjects.common.navigateToApp('console', {
-            hash: '#/console?load_from=data:text/plain,BYUwNmD2',
+            hash: '#/console/shell?load_from=data:text/plain,BYUwNmD2',
           });
 
           await retry.try(async () => {

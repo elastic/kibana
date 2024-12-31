@@ -684,9 +684,6 @@ export function LayerPanel(props: LayerPanelProps) {
               {layerDatasource?.LayerSettingsComponent && (
                 <layerDatasource.LayerSettingsComponent {...layerDatasourceConfigProps} />
               )}
-              {layerDatasource?.LayerSettingsComponent && visualizationLayerSettings.data ? (
-                <EuiSpacer size="m" />
-              ) : null}
               {activeVisualization?.LayerSettingsComponent && visualizationLayerSettings.data ? (
                 <activeVisualization.LayerSettingsComponent
                   {...{

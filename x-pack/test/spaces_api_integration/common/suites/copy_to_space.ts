@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 import type { SuperTest } from 'supertest';
 
 import type {
@@ -154,7 +154,8 @@ export function copyToSpaceTestSuiteFactory(context: FtrProviderContext) {
     expect(resp.body).to.eql({
       statusCode: 403,
       error: 'Forbidden',
-      message: 'Forbidden',
+      message:
+        'API [POST /api/spaces/_copy_saved_objects] is unauthorized for user, this action is granted by the Kibana privileges [copySavedObjectsToSpaces]',
     });
   };
 

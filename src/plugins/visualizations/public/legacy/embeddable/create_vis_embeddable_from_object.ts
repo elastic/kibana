@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { IContainer, ErrorEmbeddable, AttributeService } from '@kbn/embeddable-plugin/public';
+import { ErrorEmbeddable } from '@kbn/embeddable-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { Vis } from '../../types';
 import type {
@@ -16,18 +16,19 @@ import type {
   VisualizeByValueInput,
   VisualizeByReferenceInput,
   VisualizeSavedObjectAttributes,
+  VisualizeEmbeddableDeps,
 } from './visualize_embeddable';
 import { getHttp, getTimeFilter, getCapabilities } from '../../services';
 import { urlFor } from '../../utils/saved_visualize_utils';
-import { VisualizeEmbeddableFactoryDeps } from './visualize_embeddable_factory';
 import { createVisualizeEmbeddableAsync } from './visualize_embeddable_async';
+import { AttributeService } from './attribute_service';
 
 /** @deprecated
  * VisualizeEmbeddable is no longer registered with the legacy embeddable system and is only
  * used within the visualize editor.
  */
 export const createVisEmbeddableFromObject =
-  (deps: VisualizeEmbeddableFactoryDeps) =>
+  (deps: VisualizeEmbeddableDeps) =>
   async (
     vis: Vis,
     input: Partial<VisualizeInput> & { id: string },
@@ -35,8 +36,7 @@ export const createVisEmbeddableFromObject =
       VisualizeSavedObjectAttributes,
       VisualizeByValueInput,
       VisualizeByReferenceInput
-    >,
-    parent?: IContainer
+    >
   ): Promise<VisualizeEmbeddable | ErrorEmbeddable> => {
     try {
       const visId = vis.id as string;
@@ -74,11 +74,10 @@ export const createVisEmbeddableFromObject =
           capabilities,
         },
         input,
-        attributeService,
-        parent
+        attributeService
       );
     } catch (e) {
       console.error(e); // eslint-disable-line no-console
-      return new ErrorEmbeddable(e, input, parent);
+      return new ErrorEmbeddable(e, input);
     }
   };

@@ -184,7 +184,7 @@ const EnrollmentTokenDetails: FunctionComponent<EnrollmentTokenDetailsProps> = (
           defaultMessage="Connect to"
         />
       </EuiFlexItem>
-      <EuiFlexItem grow={false} style={{ overflow: 'hidden' }}>
+      <EuiFlexItem grow={false} css={{ overflow: 'hidden' }}>
         <TextTruncate>
           <strong>{token.adr[0]}</strong>
         </TextTruncate>

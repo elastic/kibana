@@ -1,0 +1,46 @@
+post:
+  summary: Create an APM agent key
+  description: Create a new agent key for APM.
+  operationId: createAgentKey
+  tags:
+    - APM agent keys
+  parameters:
+    - $ref: '../components/headers/elastic_api_version.yaml'
+    - $ref: '../components/headers/kbn_xsrf.yaml'
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../components/schemas/agent_keys_object.yaml'
+  responses:
+    "200":
+      description: Agent key created successfully
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/agent_keys_response.yaml'
+    '400':
+      description: Bad Request response
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/400_response.yaml'
+    '401':
+      description: Unauthorized response
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/401_response.yaml'
+    '403':
+      description: Forbidden response
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/403_response.yaml'
+    '500':
+      description: Internal Server Error response
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/500_response.yaml'

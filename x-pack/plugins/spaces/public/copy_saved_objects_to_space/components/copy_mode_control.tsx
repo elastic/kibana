@@ -80,7 +80,7 @@ const includeRelated = {
     'xpack.spaces.management.copyToSpace.copyModeControl.includeRelated.text',
     {
       defaultMessage:
-        'Copy this object and its related objects. For dashboards, related visualizations, index patterns, and saved searches are also copied.',
+        'Copy this object and its related objects. For dashboards, related visualizations, data views, and saved Discover sessions are also copied.',
     }
   ),
 };

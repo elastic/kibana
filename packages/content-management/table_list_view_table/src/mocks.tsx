@@ -9,6 +9,7 @@
 
 import React from 'react';
 import { from } from 'rxjs';
+import type { IStorage } from '@kbn/kibana-utils-plugin/public';
 
 import type { Services, TagListProps } from './services';
 
@@ -75,6 +76,7 @@ export const getStoryServices = (params: Params, action: ActionFn = () => {}) =>
     getTagIdsFromReferences: () => [],
     isTaggingEnabled: () => true,
     isFavoritesEnabled: () => false,
+    isKibanaVersioningEnabled: false,
     ...params,
   };
 
@@ -149,3 +151,22 @@ export const getStoryArgTypes = () => ({
     defaultValue: false,
   },
 });
+
+export const localStorageMock = (): IStorage => {
+  let store: Record<string, unknown> = {};
+
+  return {
+    getItem: (key: string) => {
+      return store[key] || null;
+    },
+    setItem: (key: string, value: unknown) => {
+      store[key] = value;
+    },
+    clear() {
+      store = {};
+    },
+    removeItem(key: string) {
+      delete store[key];
+    },
+  };
+};

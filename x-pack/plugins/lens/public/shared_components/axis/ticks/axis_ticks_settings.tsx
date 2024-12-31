@@ -40,7 +40,7 @@ export const AxisTicksSettings: React.FunctionComponent<AxisTicksSettingsProps> 
   return (
     <>
       <EuiFormRow
-        display="columnCompressedSwitch"
+        display="columnCompressed"
         label={i18n.translate('xpack.lens.shared.tickLabels', {
           defaultMessage: 'Tick labels',
         })}

@@ -62,10 +62,8 @@ describe('config schema', () => {
         },
         "cookieName": "sid",
         "encryptionKey": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-        "experimental": Object {
-          "fipsMode": Object {
-            "enabled": false,
-          },
+        "fipsMode": Object {
+          "enabled": false,
         },
         "loginAssistanceMessage": "",
         "public": Object {},
@@ -121,10 +119,8 @@ describe('config schema', () => {
         },
         "cookieName": "sid",
         "encryptionKey": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-        "experimental": Object {
-          "fipsMode": Object {
-            "enabled": false,
-          },
+        "fipsMode": Object {
+          "enabled": false,
         },
         "loginAssistanceMessage": "",
         "public": Object {},
@@ -179,10 +175,8 @@ describe('config schema', () => {
           "selector": Object {},
         },
         "cookieName": "sid",
-        "experimental": Object {
-          "fipsMode": Object {
-            "enabled": false,
-          },
+        "fipsMode": Object {
+          "enabled": false,
         },
         "loginAssistanceMessage": "",
         "public": Object {},
@@ -240,10 +234,8 @@ describe('config schema', () => {
           "selector": Object {},
         },
         "cookieName": "sid",
-        "experimental": Object {
-          "fipsMode": Object {
-            "enabled": false,
-          },
+        "fipsMode": Object {
+          "enabled": false,
         },
         "loginAssistanceMessage": "",
         "public": Object {},
