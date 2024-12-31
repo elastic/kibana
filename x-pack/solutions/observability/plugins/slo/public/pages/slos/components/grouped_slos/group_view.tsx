@@ -11,7 +11,7 @@ import { useFetchSloGroups } from '../../../../hooks/use_fetch_slo_groups';
 import type { SortDirection } from '../../hooks/use_url_search_state';
 import { SortField, useUrlSearchState } from '../../hooks/use_url_search_state';
 import { GroupByField } from '../slo_list_group_by';
-import type { SLOView } from '../../types';
+import type { ViewType } from '../../types';
 import { SloGroupListEmpty } from './group_list_empty';
 import { SloGroupListError } from './group_list_error';
 import { GroupListView } from './group_list_view';
@@ -19,7 +19,7 @@ import { GroupListView } from './group_list_view';
 interface Props {
   groupBy: GroupByField;
   kqlQuery?: string;
-  view: SLOView;
+  view: ViewType;
   sort?: SortField;
   direction?: SortDirection;
   filters?: Filter[];

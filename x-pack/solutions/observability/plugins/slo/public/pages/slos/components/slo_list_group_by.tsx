@@ -20,6 +20,7 @@ export type GroupByField =
   | 'slo.indicator.type'
   | 'slo.instanceId'
   | '_index';
+
 export interface Props {
   onStateChange: (newState: Partial<SearchState>) => void;
   state: SearchState;

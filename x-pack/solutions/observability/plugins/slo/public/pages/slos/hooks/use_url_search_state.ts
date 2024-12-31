@@ -12,7 +12,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { DEFAULT_SLO_PAGE_SIZE } from '../../../../common/constants';
 import type { GroupByField } from '../components/slo_list_group_by';
-import type { SLOView } from '../types';
+import type { ViewType } from '../types';
 
 export const SLO_LIST_SEARCH_URL_STORAGE_KEY = 'search';
 export type SortField =
@@ -34,7 +34,7 @@ export interface SearchState {
     by: SortField;
     direction: SortDirection;
   };
-  view: SLOView;
+  view: ViewType;
   groupBy: GroupByField;
   filters: Filter[];
   lastRefresh?: number;

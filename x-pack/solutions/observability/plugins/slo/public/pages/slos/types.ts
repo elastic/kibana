@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export type SLOView = 'cardView' | 'listView' | 'compactView';
+export type ViewType = 'cardView' | 'listView' | 'compactView';
