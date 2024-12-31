@@ -14,8 +14,7 @@
     "requiredPlugins": [
       "data",
       "fieldFormats",
-      "share",
-      "kibanaReact"
+      "share"
     ],
     "optionalPlugins": [
       "fieldsMetadata"
