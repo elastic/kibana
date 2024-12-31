@@ -57,6 +57,7 @@ steps:
     timeout_in_minutes: 60
     parallelism: 20
     key: defend-workflows-stateful
+    depends_on: build
     retry:
       automatic:
         - exit_status: '-1'
@@ -73,6 +74,7 @@ steps:
     timeout_in_minutes: 60
     parallelism: 14
     key: defend-workflows-serverless
+    depends_on: build
     retry:
       automatic:
         - exit_status: '-1'
