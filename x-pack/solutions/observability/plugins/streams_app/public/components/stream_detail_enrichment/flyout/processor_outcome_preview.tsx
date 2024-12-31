@@ -78,6 +78,7 @@ export const ProcessorOutcomePreview = ({ definition, processor }) => {
       <EuiSpacer />
       {/* TODO: Add Detected Fields sections */}
       <OutcomeControls
+        documents={value?.documents}
         timeRange={timeRange}
         onTimeRangeChange={setTimeRange}
         onTimeRangeRefresh={refresh}
@@ -114,7 +115,14 @@ const docsFilterOptions = {
 
 type DocsFilterOption = keyof typeof docsFilterOptions;
 
-const OutcomeControls = ({ docs, timeRange, onTimeRangeChange, onTimeRangeRefresh }) => {
+interface OutcomeControlsProps {
+  documents: any[];
+  timeRange: { from: number; to: number };
+  onTimeRangeChange: (timeRange: { from: number; to: number }) => void;
+  onTimeRangeRefresh: () => void;
+}
+
+const OutcomeControls = ({ documents, timeRange, onTimeRangeChange, onTimeRangeRefresh }) => {
   const [selectedDocsFilter, setSelectedDocsFilter] =
     useState<DocsFilterOption>('outcome_filter_all');
 
@@ -168,7 +176,19 @@ const OutcomeControls = ({ docs, timeRange, onTimeRangeChange, onTimeRangeRefres
   );
 };
 
-const OutcomePreviewTable = ({ documents, columns, error, isLoading }) => {
+interface OutcomePreviewTableProps {
+  documents?: any[];
+  columns: any[];
+  error: Error;
+  isLoading: boolean;
+}
+
+const OutcomePreviewTable = ({
+  documents = [],
+  columns,
+  error,
+  isLoading,
+}: OutcomePreviewTableProps) => {
   if (error) {
     return (
       <EuiEmptyPrompt
@@ -213,5 +233,24 @@ const OutcomePreviewTable = ({ documents, columns, error, isLoading }) => {
     );
   }
 
-  return <PreviewTable documents={documents ?? []} displayColumns={columns} height={500} />;
+  if (documents?.length === 0) {
+    return (
+      <EuiEmptyPrompt
+        iconType="dataVisualizer"
+        body={
+          <p>
+            {i18n.translate(
+              'xpack.streams.streamDetailView.managementTab.enrichment.processorFlyout.outcomePreviewTable.noDataTitle',
+              {
+                defaultMessage:
+                  'There are no simulation outcome documents for the current selection.',
+              }
+            )}
+          </p>
+        }
+      />
+    );
+  }
+
+  return <PreviewTable documents={documents} displayColumns={columns} height={500} />;
 };

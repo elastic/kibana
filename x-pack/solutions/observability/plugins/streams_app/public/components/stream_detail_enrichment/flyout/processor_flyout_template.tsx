@@ -42,8 +42,10 @@ export function ProcessorFlyoutTemplate({
     onClose();
   };
 
+  const closeHandler = shouldConfirm ? openDiscardModal : onClose;
+
   return (
-    <EuiFlyoutResizable onClose={shouldConfirm ? openDiscardModal : onClose}>
+    <EuiFlyoutResizable onClose={closeHandler}>
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
           <h2>{title}</h2>
@@ -53,7 +55,7 @@ export function ProcessorFlyoutTemplate({
       <EuiFlyoutBody>{children}</EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
-          <EuiButtonEmpty iconType="cross" onClick={openDiscardModal}>
+          <EuiButtonEmpty iconType="cross" onClick={closeHandler}>
             {i18n.translate(
               'xpack.streams.streamDetailView.managementTab.enrichment.processorFlyout.cancel',
               { defaultMessage: 'Cancel' }
