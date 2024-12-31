@@ -70,7 +70,7 @@ packages/kbn-capture-oas-snapshot-cli @elastic/kibana-core
 x-pack/test/cases_api_integration/common/plugins/cases @elastic/response-ops
 src/platform/packages/shared/kbn-cases-components @elastic/response-ops
 x-pack/platform/plugins/shared/cases @elastic/response-ops
-packages/kbn-cbor @elastic/kibana-operations
+src/platform/packages/shared/kbn-cbor @elastic/kibana-operations
 src/platform/packages/shared/kbn-cell-actions @elastic/security-threat-hunting-explore
 src/plugins/chart_expressions/common @elastic/kibana-visualizations
 packages/kbn-chart-icons @elastic/kibana-visualizations
@@ -727,9 +727,9 @@ packages/kbn-relocate @elastic/kibana-core
 x-pack/platform/plugins/private/remote_clusters @elastic/kibana-management
 test/plugin_functional/plugins/rendering_plugin @elastic/kibana-core
 packages/kbn-repo-file-maps @elastic/kibana-operations
-packages/kbn-repo-info @elastic/kibana-operations
+src/platform/packages/shared/kbn-repo-info @elastic/kibana-operations
 packages/kbn-repo-linter @elastic/kibana-operations
-packages/kbn-repo-packages @elastic/kibana-operations
+src/platform/packages/private/kbn-repo-packages @elastic/kibana-operations
 packages/kbn-repo-path @elastic/kibana-operations
 packages/kbn-repo-source-classifier @elastic/kibana-operations
 packages/kbn-repo-source-classifier-cli @elastic/kibana-operations
@@ -752,7 +752,7 @@ packages/response-ops/feature_flag_service @elastic/response-ops
 packages/response-ops/rule_form @elastic/response-ops
 src/platform/packages/private/response-ops/rule_params @elastic/response-ops
 examples/response_stream @elastic/ml-ui
-packages/kbn-rison @elastic/kibana-operations
+src/platform/packages/shared/kbn-rison @elastic/kibana-operations
 x-pack/platform/packages/private/rollup @elastic/kibana-management
 x-pack/platform/plugins/private/rollup @elastic/kibana-management
 packages/kbn-router-to-openapispec @elastic/kibana-core
@@ -990,9 +990,9 @@ examples/ui_action_examples @elastic/appex-sharedux
 examples/ui_actions_explorer @elastic/appex-sharedux
 src/plugins/ui_actions @elastic/appex-sharedux
 test/plugin_functional/plugins/ui_settings_plugin @elastic/kibana-core
-packages/kbn-ui-shared-deps-npm @elastic/kibana-operations
-packages/kbn-ui-shared-deps-src @elastic/kibana-operations
-packages/kbn-ui-theme @elastic/kibana-operations
+src/platform/packages/private/kbn-ui-shared-deps-npm @elastic/kibana-operations
+src/platform/packages/private/kbn-ui-shared-deps-src @elastic/kibana-operations
+src/platform/packages/shared/kbn-ui-theme @elastic/kibana-operations
 src/platform/packages/shared/kbn-unified-data-table @elastic/kibana-data-discovery @elastic/security-threat-hunting-investigations
 src/platform/packages/shared/kbn-unified-doc-viewer @elastic/kibana-data-discovery
 examples/unified_doc_viewer @elastic/kibana-core
@@ -1014,8 +1014,8 @@ packages/kbn-user-profile-components @elastic/kibana-security
 examples/user_profile_examples @elastic/kibana-security
 x-pack/test/security_api_integration/plugins/user_profiles_consumer @elastic/kibana-security
 packages/kbn-utility-types @elastic/kibana-core
-packages/kbn-utility-types-jest @elastic/kibana-operations
-packages/kbn-utils @elastic/kibana-operations
+src/platform/packages/shared/kbn-utility-types-jest @elastic/kibana-operations
+src/platform/packages/shared/kbn-utils @elastic/kibana-operations
 x-pack/solutions/observability/plugins/ux @elastic/obs-ux-management-team
 examples/v8_profiler_examples @elastic/response-ops
 packages/kbn-validate-next-docs-cli @elastic/kibana-operations
