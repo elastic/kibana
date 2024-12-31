@@ -42,19 +42,40 @@ export function defineGetAllRolesBySpaceRoutes({
 
         const [features, queryRolesResponse] = await Promise.all([
           getFeatures(),
-          // await esClient.asCurrentUser.security.getRole(),
           await esClient.asCurrentUser.security.queryRole({
             query: {
               bool: {
-                must: [
+                should: [
                   {
                     term: {
                       'applications.resources': `space:${request.params.spaceId}`,
                     },
                   },
+                  {
+                    term: {
+                      'metadata._reserved': true,
+                    },
+                  },
+                  {
+                    term: {
+                      'metadata._reserved': false,
+                    },
+                  },
+                  {
+                    bool: {
+                      must_not: {
+                        exists: {
+                          field: 'metadata._reserved',
+                        },
+                      },
+                    },
+                  },
                 ],
+                minimum_should_match: 1,
               },
             },
+            from: 0,
+            size: 100,
           }),
         ]);
         const elasticsearchRoles = (queryRolesResponse.roles || [])?.reduce<
