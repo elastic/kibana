@@ -5,7 +5,8 @@ This package contains components that render event (error, log, span) stack trac
 ## Unit Tests (Jest)
 
 ```
-node scripts/jest --config packages/kbn-event-stacktrace/jest.config.js [--watch]
+node scripts/jest --config x-pack/platform/packages/shared/kbn-event-stacktrace/README.md [--watch]
+
 ```
 
 ## Storybook
