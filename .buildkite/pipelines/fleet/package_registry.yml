@@ -46,6 +46,40 @@ steps:
         - exit_status: '*'
           limit: 1
 
+  - command: .buildkite/scripts/steps/functional/defend_workflows.sh
+    label: 'Defend Workflows Cypress Tests'
+    agents:
+      image: family/kibana-ubuntu-2004
+      imageProject: elastic-images-prod
+      provider: gcp
+      enableNestedVirtualization: true
+      machineType: n2-standard-4
+    timeout_in_minutes: 60
+    parallelism: 20
+    key: defend-workflows-stateful
+    depends_on: build
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 1
+
+  - command: .buildkite/scripts/steps/functional/defend_workflows_serverless.sh
+    label: 'Defend Workflows Cypress Tests on Serverless'
+    agents:
+      image: family/kibana-ubuntu-2004
+      imageProject: elastic-images-prod
+      provider: gcp
+      enableNestedVirtualization: true
+      machineType: n2-standard-4
+    timeout_in_minutes: 60
+    parallelism: 14
+    key: defend-workflows-serverless
+    depends_on: build
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 1
+
   - command: .buildkite/scripts/steps/fleet/promote_package_registry.sh
     label: Promote docker.elastic.co/package-registry/distribution:lite
     agents:
@@ -56,6 +90,8 @@ steps:
     depends_on:
       - ftr-configs
       - jest-integration
+      - defend-worfklows-stateful
+      - defend-workflows-serverless
 
   - wait: ~
     continue_on_failure: true
