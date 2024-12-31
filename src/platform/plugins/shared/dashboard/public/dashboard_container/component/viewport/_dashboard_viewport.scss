@@ -11,11 +11,12 @@
 
 .dshDashboardViewport {
   width: 100%;
+
+  &--panelExpanded {
+    flex: 1;
+  }
 }
 
-.dshDashboardViewport--panelExpanded {
-  flex: 1;
-}
 
 .dshDashboardViewport-controls {
   margin: 0 $euiSizeS 0 $euiSizeS;

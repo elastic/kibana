@@ -114,36 +114,6 @@ export const GridRow = forwardRef<HTMLDivElement, GridRowProps>(
             }
           });
 
-        const expandedPanelStyleSubscription = gridLayoutStateManager.expandedPanelId$
-          .pipe(skip(1)) // skip the first emit because the `initialStyles` will take care of it
-          .subscribe((expandedPanelId) => {
-            const rowContainerRef = rowContainer.current;
-            if (!rowContainerRef) return;
-
-            if (expandedPanelId) {
-              // If any panel is expanded, move all rows with their panels out of the viewport.
-              // The expanded panel is repositioned to its original location in the GridPanel component
-              // and stretched to fill the viewport.
-
-              rowContainerRef.style.transform = 'translate(-9999px, -9999px)';
-
-              const panelsIds = Object.keys(
-                gridLayoutStateManager.gridLayout$.getValue()[rowIndex].panels
-              );
-              const includesExpandedPanel = panelsIds.includes(expandedPanelId);
-              if (includesExpandedPanel) {
-                // Stretch the row with the expanded panel to occupy the entire remaining viewport
-                rowContainerRef.style.height = '100%';
-              } else {
-                // Hide the row if it does not contain the expanded panel
-                rowContainerRef.style.height = '0';
-              }
-            } else {
-              rowContainerRef.style.transform = ``;
-              rowContainerRef.style.height = ``;
-            }
-          });
-
         /**
          * This subscription ensures that the row will re-render when one of the following changes:
          * - Title
@@ -182,7 +152,6 @@ export const GridRow = forwardRef<HTMLDivElement, GridRowProps>(
         return () => {
           interactionStyleSubscription.unsubscribe();
           rowStateSubscription.unsubscribe();
-          expandedPanelStyleSubscription.unsubscribe();
         };
       },
       // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -253,7 +222,12 @@ export const GridRow = forwardRef<HTMLDivElement, GridRowProps>(
     }, [panelIds, gridLayoutStateManager, renderPanelContents, rowIndex, setInteractionEvent]);
 
     return (
-      <div ref={rowContainer}>
+      <div
+        ref={rowContainer}
+        css={css`
+          height: 100%;
+        `}
+      >
         {rowIndex !== 0 && (
           <GridRowHeader
             isCollapsed={isCollapsed}
@@ -267,8 +241,10 @@ export const GridRow = forwardRef<HTMLDivElement, GridRowProps>(
         )}
         {!isCollapsed && (
           <div
+            className={'kbnGridRow'}
             ref={gridRef}
             css={css`
+              height: 100%;
               display: grid;
               justify-items: stretch;
               transition: background-color 300ms linear;

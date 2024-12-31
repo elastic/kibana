@@ -9,7 +9,7 @@
 
 import { css } from '@emotion/react';
 import React, { PropsWithChildren, useEffect, useRef } from 'react';
-import { combineLatest, distinctUntilChanged, map } from 'rxjs';
+import { combineLatest } from 'rxjs';
 import { GridLayoutStateManager } from './types';
 
 export const GridHeightSmoother = ({
@@ -23,7 +23,7 @@ export const GridHeightSmoother = ({
       gridLayoutStateManager.gridDimensions$,
       gridLayoutStateManager.interactionEvent$,
     ]).subscribe(([dimensions, interactionEvent]) => {
-      if (!smoothHeightRef.current) return;
+      if (!smoothHeightRef.current || Boolean(gridLayoutStateManager.expandedPanelId$)) return;
       if (gridLayoutStateManager.expandedPanelId$.getValue()) {
         return;
       }
@@ -45,34 +45,8 @@ export const GridHeightSmoother = ({
       smoothHeightRef.current.style.userSelect = 'none';
     });
 
-    const expandedPanelSubscription = gridLayoutStateManager.expandedPanelId$.subscribe(
-      (expandedPanelId) => {
-        if (!smoothHeightRef.current) return;
-
-        if (expandedPanelId) {
-          smoothHeightRef.current.style.height = `100%`;
-          smoothHeightRef.current.style.transition = 'none';
-        } else {
-          smoothHeightRef.current.style.height = '';
-          smoothHeightRef.current.style.transition = '';
-        }
-      }
-    );
-
-    const marginSubscription = gridLayoutStateManager.runtimeSettings$
-      .pipe(
-        map(({ gutterSize }) => gutterSize),
-        distinctUntilChanged()
-      )
-      .subscribe((gutterSize) => {
-        if (!smoothHeightRef.current) return;
-        smoothHeightRef.current.style.margin = `${gutterSize}px`;
-      });
-
     return () => {
       interactionStyleSubscription.unsubscribe();
-      expandedPanelSubscription.unsubscribe();
-      marginSubscription.unsubscribe();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -81,8 +55,9 @@ export const GridHeightSmoother = ({
     <div
       ref={smoothHeightRef}
       css={css`
+        height: 100%;
         // the guttersize cannot currently change, so it's safe to set it just once
-        padding: ${gridLayoutStateManager.runtimeSettings$.getValue().gutterSize};
+        padding: ${gridLayoutStateManager.runtimeSettings$.getValue().gutterSize}px;
         overflow-anchor: none;
         transition: height 500ms linear;
       `}

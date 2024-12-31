@@ -153,6 +153,16 @@ export const GridLayout = ({
         css={css`
           &.kbnGrid--hasExpandedPanel {
             height: 100%;
+            .kbnGridPanel {
+              display: none;
+              &--isExpanded {
+                display: contents;
+                height: 100%;
+              }
+            }
+            .kbnGridRow {
+              display: block !important; // overwrite grid display
+            }
           }
         `}
       >
