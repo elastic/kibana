@@ -13,3 +13,4 @@ export type GroupByField =
   | 'slo.indicator.type'
   | 'slo.instanceId'
   | '_index';
+export type SortDirection = 'asc' | 'desc';
