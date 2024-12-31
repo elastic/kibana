@@ -4242,6 +4242,45 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         validations: [],
         value: '',
       },
+      auth_method: {
+        default_value: null,
+        depends_on: [],
+        display: DROPDOWN,
+        label: translate(
+          'searchConnectors.nativeConnectors.sharepoint_online.configuration.authMethodLabel',
+          {
+            defaultMessage: 'Authentication Method',
+          }
+        ),
+        options: [
+          {
+            label: translate(
+              'searchConnectors.nativeConnectors.sharepoint_online.configuration.authMethod.clientSecretLabel',
+              {
+                defaultMessage: 'Client Secret',
+              }
+            ),
+            value: 'secret',
+          },
+          {
+            label: translate(
+              'searchConnectors.nativeConnectors.sharepoint_online.configuration.authMethod.certificateLabel',
+              {
+                defaultMessage: 'Certificate',
+              }
+            ),
+            value: 'certificate',
+          },
+        ],
+        order: 4,
+        required: true,
+        sensitive: false,
+        tooltip: null,
+        type: STRING,
+        ui_restrictions: [],
+        validations: [],
+        value: 'certificate',
+      },
       secret_value: {
         default_value: null,
         depends_on: [],
@@ -4253,10 +4292,60 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
           }
         ),
         options: [],
-        order: 4,
+        order: 5,
         required: true,
         sensitive: true,
         tooltip: '',
+        type: STRING,
+        ui_restrictions: [],
+        validations: [],
+        value: '',
+      },
+      certificate: {
+        default_value: null,
+        depends_on: [
+          {
+            field: 'auth_method',
+            value: 'certificate',
+          },
+        ],
+        display: TEXTAREA,
+        label: translate(
+          'searchConnectors.nativeConnectors.sharepoint_online.configuration.certificateLabel',
+          {
+            defaultMessage: 'Content of certificate file',
+          }
+        ),
+        options: [],
+        order: 5,
+        required: true,
+        sensitive: true,
+        tooltip: null,
+        type: STRING,
+        ui_restrictions: [],
+        validations: [],
+        value: '',
+      },
+      private_key: {
+        default_value: null,
+        depends_on: [
+          {
+            field: 'auth_method',
+            value: 'certificate',
+          },
+        ],
+        display: TEXTAREA,
+        label: translate(
+          'searchConnectors.nativeConnectors.sharepoint_online.configuration.privateKeyLabel',
+          {
+            defaultMessage: 'Content of private key file',
+          }
+        ),
+        options: [],
+        order: 6,
+        required: true,
+        sensitive: true,
+        tooltip: null,
         type: STRING,
         ui_restrictions: [],
         validations: [],
@@ -4273,7 +4362,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
           }
         ),
         options: [],
-        order: 5,
+        order: 7,
         required: true,
         sensitive: false,
         tooltip: translate(
@@ -4295,7 +4384,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         display: TOGGLE,
         label: USE_TEXT_EXTRACTION_SERVICE_LABEL,
         options: [],
-        order: 6,
+        order: 8,
         required: true,
         sensitive: false,
         tooltip: USE_TEXT_EXTRACTION_SERVICE_TOOLTIP,
@@ -4315,7 +4404,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
           }
         ),
         options: [],
-        order: 7,
+        order: 9,
         required: true,
         sensitive: false,
         tooltip: translate(
@@ -4346,7 +4435,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
           }
         ),
         options: [],
-        order: 8,
+        order: 10,
         required: true,
         sensitive: false,
         tooltip: translate(
@@ -4377,7 +4466,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
           }
         ),
         options: [],
-        order: 9,
+        order: 11,
         required: true,
         sensitive: false,
         tooltip: translate(
@@ -4408,7 +4497,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
           }
         ),
         options: [],
-        order: 10,
+        order: 12,
         required: true,
         sensitive: false,
         tooltip: translate(
@@ -4439,7 +4528,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
           }
         ),
         options: [],
-        order: 11,
+        order: 13,
         required: true,
         sensitive: false,
         tooltip: translate(
@@ -4463,7 +4552,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
           { defaultMessage: 'Enumerate all sites?' }
         ),
         options: [],
-        order: 6,
+        order: 8,
         required: false,
         sensitive: false,
         tooltip: translate(
@@ -4489,7 +4578,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
           }
         ),
         options: [],
-        order: 7,
+        order: 9,
         required: false,
         sensitive: false,
         tooltip: translate(
