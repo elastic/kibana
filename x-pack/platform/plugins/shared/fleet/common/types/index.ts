@@ -50,6 +50,7 @@ export interface FleetConfigType {
   outputs?: PreconfiguredOutput[];
   agentIdVerificationEnabled?: boolean;
   enableExperimental?: string[];
+  enableManagedLogsAndMetricsDataviews?: boolean;
   packageVerification?: {
     gpgKeyPath?: string;
   };
