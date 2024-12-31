@@ -2831,7 +2831,6 @@ src/platform/packages/private/kbn-apm-config-loader @elastic/kibana-core @vignes
 src/platform/packages/private/kbn-config-mocks @elastic/kibana-core
 src/platform/packages/private/kbn-esql-editor @elastic/kibana-esql
 src/platform/packages/private/kbn-generate-csv @elastic/appex-sharedux
-src/platform/packages/private/kbn-handlebars @elastic/kibana-security
 src/platform/packages/private/kbn-hapi-mocks @elastic/kibana-core
 src/platform/packages/private/kbn-health-gateway-server @elastic/kibana-core
 src/platform/packages/private/kbn-item-buffer @elastic/appex-sharedux
@@ -2919,7 +2918,6 @@ src/platform/packages/shared/kbn-coloring @elastic/kibana-visualizations
 src/platform/packages/shared/kbn-config @elastic/kibana-core
 src/platform/packages/shared/kbn-config-schema @elastic/kibana-core
 src/platform/packages/shared/kbn-content-management-utils @elastic/kibana-data-discovery
-src/platform/packages/shared/kbn-crypto @elastic/kibana-security
 src/platform/packages/shared/kbn-crypto-browser @elastic/kibana-core
 src/platform/packages/shared/kbn-custom-icons @elastic/obs-ux-logs-team
 src/platform/packages/shared/kbn-data-service @elastic/kibana-visualizations @elastic/kibana-data-discovery
@@ -2975,13 +2973,11 @@ src/platform/packages/shared/kbn-router-to-openapispec @elastic/kibana-core
 src/platform/packages/shared/kbn-router-utils @elastic/obs-ux-logs-team
 src/platform/packages/shared/kbn-rrule @elastic/response-ops
 src/platform/packages/shared/kbn-rule-data-utils @elastic/security-detections-response @elastic/response-ops @elastic/obs-ux-management-team
-src/platform/packages/shared/kbn-safer-lodash-set @elastic/kibana-security
 src/platform/packages/shared/kbn-search-api-panels @elastic/search-kibana
 src/platform/packages/shared/kbn-search-connectors @elastic/search-kibana
 src/platform/packages/shared/kbn-search-errors @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-search-response-warnings @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-search-types @elastic/kibana-data-discovery
-src/platform/packages/shared/kbn-security-hardening @elastic/kibana-security
 src/platform/packages/shared/kbn-securitysolution-ecs @elastic/security-threat-hunting-explore
 src/platform/packages/shared/kbn-securitysolution-es-utils @elastic/security-detection-engine
 src/platform/packages/shared/kbn-securitysolution-io-ts-types @elastic/security-detection-engine
@@ -3006,7 +3002,6 @@ src/platform/packages/shared/kbn-unified-data-table @elastic/kibana-data-discove
 src/platform/packages/shared/kbn-unified-doc-viewer @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-unified-field-list @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-unsaved-changes-prompt @elastic/kibana-management
-src/platform/packages/shared/kbn-user-profile-components @elastic/kibana-security
 src/platform/packages/shared/kbn-utility-types @elastic/kibana-core
 src/platform/packages/shared/kbn-utility-types-jest @elastic/kibana-operations
 src/platform/packages/shared/kbn-utils @elastic/kibana-operations
@@ -3069,7 +3064,6 @@ src/platform/plugins/private/files_management @elastic/appex-sharedux
 src/platform/plugins/private/ftr_apis @elastic/kibana-core
 src/platform/plugins/private/image_embeddable @elastic/appex-sharedux
 src/platform/plugins/private/input_control_vis @elastic/kibana-presentation
-src/platform/plugins/private/interactive_setup @elastic/kibana-security
 src/platform/plugins/private/kibana_overview @elastic/appex-sharedux
 src/platform/plugins/private/kibana_usage_collection @elastic/kibana-core
 src/platform/plugins/private/links @elastic/kibana-presentation
@@ -3186,10 +3180,6 @@ x-pack/platform/packages/private/ml/ui_actions @elastic/ml-ui
 x-pack/platform/packages/private/ml/url_state @elastic/ml-ui
 x-pack/platform/packages/private/ml/validators @elastic/ml-ui
 x-pack/platform/packages/private/rollup @elastic/kibana-management
-x-pack/platform/packages/private/security/authorization_core @elastic/kibana-security
-x-pack/platform/packages/private/security/authorization_core_common @elastic/kibana-security
-x-pack/platform/packages/private/security/role_management_model @elastic/kibana-security
-x-pack/platform/packages/private/security/ui_components @elastic/kibana-security
 x-pack/platform/packages/shared/ai-infra/inference-common @elastic/appex-ai-infra
 x-pack/platform/packages/shared/ai-infra/product-doc-common @elastic/appex-ai-infra
 x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_management_common_shared @elastic/kibana-management
@@ -3215,11 +3205,6 @@ x-pack/platform/packages/shared/ml/response_stream @elastic/ml-ui
 x-pack/platform/packages/shared/ml/runtime_field_utils @elastic/ml-ui
 x-pack/platform/packages/shared/ml/trained_models_utils @elastic/ml-ui
 x-pack/platform/packages/shared/observability/alerting_rule_utils @elastic/obs-ux-management-team
-x-pack/platform/packages/shared/security/api_key_management @elastic/kibana-security
-x-pack/platform/packages/shared/security/form_components @elastic/kibana-security
-x-pack/platform/packages/shared/security/plugin_types_common @elastic/kibana-security
-x-pack/platform/packages/shared/security/plugin_types_public @elastic/kibana-security
-x-pack/platform/packages/shared/security/plugin_types_server @elastic/kibana-security
 x-pack/platform/plugins/private/banners @elastic/appex-sharedux
 x-pack/platform/plugins/private/canvas @elastic/kibana-presentation
 x-pack/platform/plugins/private/cloud_integrations/cloud_chat @elastic/kibana-core
@@ -3263,7 +3248,6 @@ x-pack/platform/plugins/shared/cloud @elastic/kibana-core
 x-pack/platform/plugins/shared/cloud_integrations/cloud_experiments @elastic/kibana-core
 x-pack/platform/plugins/shared/dashboard_enhanced @elastic/kibana-presentation
 x-pack/platform/plugins/shared/embeddable_enhanced @elastic/kibana-presentation
-x-pack/platform/plugins/shared/encrypted_saved_objects @elastic/kibana-security
 x-pack/platform/plugins/shared/entity_manager @elastic/obs-entities
 x-pack/platform/plugins/shared/event_log @elastic/response-ops
 x-pack/platform/plugins/shared/features @elastic/kibana-core
@@ -3285,9 +3269,7 @@ x-pack/platform/plugins/shared/osquery @elastic/security-defend-workflows
 x-pack/platform/plugins/shared/rule_registry @elastic/response-ops @elastic/obs-ux-management-team
 x-pack/platform/plugins/shared/screenshotting @elastic/kibana-reporting-services
 x-pack/platform/plugins/shared/searchprofiler @elastic/kibana-management
-x-pack/platform/plugins/shared/security @elastic/kibana-security
 x-pack/platform/plugins/shared/serverless @elastic/appex-sharedux
-x-pack/platform/plugins/shared/spaces @elastic/kibana-security
 x-pack/platform/plugins/shared/stack_alerts @elastic/response-ops
 x-pack/platform/plugins/shared/stack_connectors @elastic/response-ops
 x-pack/platform/plugins/shared/task_manager @elastic/response-ops
