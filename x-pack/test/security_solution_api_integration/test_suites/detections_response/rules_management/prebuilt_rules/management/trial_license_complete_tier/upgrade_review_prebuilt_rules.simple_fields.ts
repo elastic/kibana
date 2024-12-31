@@ -14,7 +14,7 @@ import { SIMPLE_FIELDS } from '@kbn/security-solution-plugin/server/lib/detectio
 import { Client } from '@elastic/elasticsearch';
 import TestAgent from 'supertest/lib/agent';
 import { ToolingLog } from '@kbn/tooling-log';
-import { calculateFromValue } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/utils/utils';
+
 import { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import {
   deleteAllTimelines,
@@ -28,230 +28,14 @@ import {
   createRuleAssetSavedObjectOfType,
 } from '../../../../utils';
 import { deleteAllRules } from '../../../../../../../common/utils/security_solution';
+import {
+  SIMPLE_FIELD_RULE_TYPE_MAPPING,
+  mapDiffableFieldToRuleFields,
+  SIMPLE_FIELDS_MOCK_VALUES,
+  SimpleFieldTestValues,
+} from './upgrade_prebuilt_rules.mock_data';
 
-interface SimpleFieldTestValues {
-  baseValue: any;
-  customValue: any;
-  updatedValue: any;
-}
-
-const mapDiffableFieldToRuleFields = (diffableField: string, value: any) => {
-  const updatePayload: Record<string, any> = {};
-
-  switch (diffableField) {
-    case 'rule_schedule':
-      updatePayload.interval = value.interval;
-      updatePayload.from = calculateFromValue(value.interval, value.lookback);
-      updatePayload.to = 'now';
-      break;
-    case 'timestamp_override':
-      updatePayload.timestamp_override = value.field_name;
-      break;
-    case 'rule_name_override':
-      updatePayload.rule_name_override = value.field_name;
-    case 'timeline_template':
-      updatePayload.timeline_id = value.timeline_id;
-      updatePayload.timeline_title = value.timeline_title;
-    case 'timestamp_override_fallback_disabled':
-      updatePayload.fallback_disabled = value;
-      break;
-    case 'building_block':
-      updatePayload.building_block_type = value.type;
-      break;
-    default:
-      updatePayload[diffableField] = value;
-  }
-
-  return updatePayload;
-};
-
-const SIMPLE_FIELDS_MAP: Record<Exclude<SIMPLE_FIELDS, 'rule_id'>, SimpleFieldTestValues> = {
-  severity_mapping: {
-    baseValue: [
-      {
-        field: 'base.field',
-        value: 'base-value',
-        operator: 'equals',
-        severity: 'low',
-      },
-    ],
-    customValue: [
-      {
-        field: 'custom.field',
-        value: 'custom-value',
-        operator: 'equals',
-        severity: 'medium',
-      },
-    ],
-    updatedValue: [
-      {
-        field: 'updated.field',
-        value: 'updated-value',
-        operator: 'equals',
-        severity: 'high',
-      },
-    ],
-  },
-  risk_score_mapping: {
-    baseValue: [
-      {
-        field: 'base.field',
-        value: 'base-value',
-        operator: 'equals',
-        risk_score: 10,
-      },
-    ],
-    customValue: [
-      {
-        field: 'custom.field',
-        value: 'custom-value',
-        operator: 'equals',
-        risk_score: 20,
-      },
-    ],
-    updatedValue: [
-      {
-        field: 'updated.field',
-        value: 'updated-value',
-        operator: 'equals',
-        risk_score: 30,
-      },
-    ],
-  },
-  false_positives: {
-    baseValue: ['base-false-positive'],
-    customValue: ['custom-false-positive'],
-    updatedValue: ['updated-false-positive'],
-  },
-  threat: {
-    baseValue: [{ framework: 'MITRE', tactic: { id: 'base', name: 'base', reference: 'base' } }],
-    customValue: [
-      { framework: 'MITRE', tactic: { id: 'custom', name: 'custom', reference: 'custom' } },
-    ],
-    updatedValue: [
-      { framework: 'MITRE', tactic: { id: 'updated', name: 'updated', reference: 'updated' } },
-    ],
-  },
-  related_integrations: {
-    baseValue: [
-      {
-        package: 'base-package',
-        version: '1.0.0',
-        integration: 'base-integration',
-      },
-    ],
-    customValue: [
-      {
-        package: 'custom-package',
-        version: '1.0.0',
-        integration: 'custom-integration',
-      },
-    ],
-    updatedValue: [
-      {
-        package: 'updated-package',
-        version: '1.0.0',
-        integration: 'updated-integration',
-      },
-    ],
-  },
-  required_fields: {
-    baseValue: [
-      {
-        name: 'base.field',
-        type: 'keyword',
-        ecs: false,
-      },
-    ],
-    customValue: [
-      {
-        name: 'custom.field',
-        type: 'keyword',
-        ecs: false,
-      },
-    ],
-    updatedValue: [
-      {
-        name: 'updated.field',
-        type: 'keyword',
-        ecs: false,
-      },
-    ],
-  },
-  rule_schedule: {
-    baseValue: { interval: '5m', lookback: '60s' },
-    customValue: { interval: '10m', lookback: '0s' },
-    updatedValue: { interval: '15m', lookback: '60s' },
-  },
-  rule_name_override: {
-    baseValue: { field_name: 'base-override' },
-    customValue: { field_name: 'custom-override' },
-    updatedValue: { field_name: 'updated-override' },
-  },
-  timestamp_override: {
-    baseValue: { field_name: 'base-timestamp', fallback_disabled: false },
-    customValue: { field_name: 'custom-timestamp', fallback_disabled: false },
-    updatedValue: { field_name: 'updated-timestamp', fallback_disabled: false },
-  },
-  timeline_template: {
-    baseValue: { timeline_id: 'base-template', timeline_title: 'base-template' },
-    customValue: { timeline_id: 'custom-template', timeline_title: 'base-template' },
-    updatedValue: { timeline_id: 'updated-template', timeline_title: 'base-template' },
-  },
-  building_block: {
-    baseValue: { type: 'a' },
-    customValue: { type: 'b' },
-    updatedValue: { type: 'c' },
-  },
-  investigation_fields: {
-    baseValue: {
-      field_names: ['base.field'],
-    },
-    customValue: {
-      field_names: ['custom.field'],
-    },
-    updatedValue: {
-      field_names: ['updated.field'],
-    },
-  },
-  alert_suppression: {
-    baseValue: { group_by: ['base-field'] },
-    customValue: { group_by: ['custom-field'] },
-    updatedValue: { group_by: ['updated-field'] },
-  },
-  threshold: {
-    baseValue: { field: ['base-field'], value: 100 },
-    customValue: { field: ['custom-field'], value: 200 },
-    updatedValue: { field: ['updated-field'], value: 300 },
-  },
-  machine_learning_job_id: {
-    baseValue: ['base-job-id'],
-    customValue: ['custom-job-id'],
-    updatedValue: ['updated-job-id'],
-  },
-};
-
-const RULE_TYPE_FIELD_MAPPING = {
-  query: [
-    'severity_mapping',
-    'risk_score_mapping',
-    'false_positives',
-    'threat',
-    'related_integrations',
-    'required_fields',
-    'rule_schedule',
-    'rule_name_override',
-    'timestamp_override',
-    'timeline_template',
-    'building_block',
-    'investigation_fields',
-    'alert_suppression',
-  ],
-  threshold: ['threshold'],
-  machine_learning: ['machine_learning_job_id'],
-} as const;
-
-type RuleTypeToFields = typeof RULE_TYPE_FIELD_MAPPING;
+type RuleTypeToFields = typeof SIMPLE_FIELD_RULE_TYPE_MAPPING;
 
 type FieldDiffs = Record<SIMPLE_FIELDS, unknown>;
 
@@ -564,10 +348,10 @@ export default ({ getService }: FtrProviderContext): void => {
       await deleteAllPrebuiltRuleAssets(es, log);
     });
 
-    Object.entries(RULE_TYPE_FIELD_MAPPING).forEach(([ruleType, fields]) => {
+    Object.entries(SIMPLE_FIELD_RULE_TYPE_MAPPING).forEach(([ruleType, fields]) => {
       describe(`${ruleType} rule simple fields`, () => {
         fields.forEach((field) => {
-          const testValues = SIMPLE_FIELDS_MAP[field];
+          const testValues = SIMPLE_FIELDS_MOCK_VALUES[field];
           createTestSuite(ruleType as keyof RuleTypeToFields, field as SIMPLE_FIELDS, testValues, {
             es,
             supertest,

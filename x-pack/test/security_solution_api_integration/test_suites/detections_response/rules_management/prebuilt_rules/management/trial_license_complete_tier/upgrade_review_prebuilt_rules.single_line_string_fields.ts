@@ -27,46 +27,13 @@ import {
   createRuleAssetSavedObjectOfType,
 } from '../../../../utils';
 import { deleteAllRules } from '../../../../../../../common/utils/security_solution';
+import {
+  SINGLE_LINE_FIELD_RULE_TYPE_MAPPING,
+  SingleLineStringFieldTestValues,
+  SINGLE_LINE_STRING_FIELDS_MOCK_VALUES,
+} from './upgrade_prebuilt_rules.mock_data';
 
-interface SingleLineStringFieldTestValues {
-  baseValue: string;
-  customValue: string;
-  updatedValue: string;
-}
-
-const SINGLE_LINE_STRING_FIELDS_MAP: Record<
-  SINGLE_LINE_STRING_FIELDS,
-  SingleLineStringFieldTestValues
-> = {
-  name: {
-    baseValue: 'Base Rule Name',
-    customValue: 'Custom Rule Name',
-    updatedValue: 'Updated Rule Name',
-  },
-  severity: {
-    baseValue: 'low',
-    customValue: 'medium',
-    updatedValue: 'high',
-  },
-  threat_indicator_path: {
-    baseValue: 'indicator.file.hash.base',
-    customValue: 'indicator.ip.current',
-    updatedValue: 'indicator.domain.target',
-  },
-  history_window_start: {
-    baseValue: 'now-10000m',
-    customValue: 'now-20000m',
-    updatedValue: 'now-30000m',
-  },
-};
-
-const RULE_TYPE_FIELD_MAPPING = {
-  query: ['name', 'severity'],
-  threat_match: ['threat_indicator_path'],
-  new_terms: ['history_window_start'],
-} as const;
-
-type RuleTypeToFields = typeof RULE_TYPE_FIELD_MAPPING;
+type RuleTypeToFields = typeof SINGLE_LINE_FIELD_RULE_TYPE_MAPPING;
 
 type FieldDiffs = Record<SINGLE_LINE_STRING_FIELDS, unknown>;
 
@@ -373,10 +340,10 @@ export default ({ getService }: FtrProviderContext): void => {
       await deleteAllPrebuiltRuleAssets(es, log);
     });
 
-    Object.entries(RULE_TYPE_FIELD_MAPPING).forEach(([ruleType, fields]) => {
+    Object.entries(SINGLE_LINE_FIELD_RULE_TYPE_MAPPING).forEach(([ruleType, fields]) => {
       describe(`${ruleType} rule single line string fields`, () => {
         fields.forEach((field) => {
-          const testValues = SINGLE_LINE_STRING_FIELDS_MAP[field];
+          const testValues = SINGLE_LINE_STRING_FIELDS_MOCK_VALUES[field];
           createTestSuite(
             ruleType as keyof RuleTypeToFields,
             field as SINGLE_LINE_STRING_FIELDS,

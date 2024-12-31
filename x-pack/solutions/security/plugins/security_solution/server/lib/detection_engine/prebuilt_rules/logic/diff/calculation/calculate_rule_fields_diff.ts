@@ -351,7 +351,6 @@ export type NUMBER_FIELDS = 'risk_score' | 'max_signals' | 'anomaly_threshold';
 export type SCALAR_ARRAY_FIELDS = 'tags' | 'references' | 'threat_index' | 'new_terms_fields';
 
 export type SIMPLE_FIELDS =
-  | 'rule_id'
   | 'severity_mapping'
   | 'risk_score_mapping'
   | 'false_positives'

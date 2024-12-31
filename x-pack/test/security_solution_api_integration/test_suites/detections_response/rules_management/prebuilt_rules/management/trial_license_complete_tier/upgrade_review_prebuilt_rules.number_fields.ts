@@ -27,37 +27,13 @@ import {
   updateRule,
 } from '../../../../utils';
 import { deleteAllRules } from '../../../../../../../common/utils/security_solution';
+import {
+  NUMBER_FIELDS_MOCK_VALUES,
+  NUMBER_FIELD_RULE_TYPE_MAPPING,
+  NumberFieldTestValues,
+} from './upgrade_prebuilt_rules.mock_data';
 
-interface NumberFieldTestValues {
-  baseValue: number;
-  customValue: number;
-  updatedValue: number;
-}
-
-const NUMBER_FIELDS_MAP: Record<NUMBER_FIELDS, NumberFieldTestValues> = {
-  risk_score: {
-    baseValue: 1,
-    customValue: 2,
-    updatedValue: 3,
-  },
-  max_signals: {
-    baseValue: 100,
-    customValue: 200,
-    updatedValue: 300,
-  },
-  anomaly_threshold: {
-    baseValue: 50,
-    customValue: 75,
-    updatedValue: 90,
-  },
-};
-
-const RULE_TYPE_FIELD_MAPPING = {
-  query: ['risk_score', 'max_signals'],
-  machine_learning: ['anomaly_threshold'],
-} as const;
-
-type RuleTypeToFields = typeof RULE_TYPE_FIELD_MAPPING;
+type RuleTypeToFields = typeof NUMBER_FIELD_RULE_TYPE_MAPPING;
 
 type FieldDiffs = Record<NUMBER_FIELDS, unknown>;
 
@@ -365,10 +341,10 @@ export default ({ getService }: FtrProviderContext): void => {
       await deleteAllPrebuiltRuleAssets(es, log);
     });
 
-    Object.entries(RULE_TYPE_FIELD_MAPPING).forEach(([ruleType, fields]) => {
+    Object.entries(NUMBER_FIELD_RULE_TYPE_MAPPING).forEach(([ruleType, fields]) => {
       describe(`${ruleType} rule number fields`, () => {
         fields.forEach((field) => {
-          const testValues = NUMBER_FIELDS_MAP[field];
+          const testValues = NUMBER_FIELDS_MOCK_VALUES[field];
           createTestSuite(ruleType as keyof RuleTypeToFields, field as NUMBER_FIELDS, testValues, {
             es,
             supertest,

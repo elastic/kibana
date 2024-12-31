@@ -27,85 +27,14 @@ import {
   updateRule,
 } from '../../../../utils';
 import { deleteAllRules } from '../../../../../../../common/utils/security_solution';
+import {
+  KQL_QUERY_FIELD_RULE_TYPE_MAPPING,
+  KQL_QUERY_FIELDS_MOCK_VALUES,
+  KqlQueryFieldTestValues,
+  mapKQLQueryDiffableFieldToRuleFields,
+} from './upgrade_prebuilt_rules.mock_data';
 
-interface Value {
-  query: string;
-  language: string;
-  type?: string;
-  filters: string[];
-}
-
-interface KqlQueryFieldTestValues {
-  baseValue: Value;
-  customValue: Value;
-  updatedValue: Value;
-}
-
-const mapDiffableFieldToRuleFields = (diffableField: string, value: Value) => {
-  const updatePayload: Record<string, any> = {};
-
-  switch (diffableField) {
-    case 'kql_query':
-      updatePayload.query = value.query;
-      updatePayload.language = value.language;
-      updatePayload.filters = value.filters;
-      break;
-    case 'threat_query':
-      updatePayload.threat_query = value.query;
-      updatePayload.threat_language = value.language;
-      updatePayload.threat_filters = value.filters;
-      break;
-  }
-
-  return updatePayload;
-};
-
-const KQL_QUERY_FIELDS_MAP: Record<KQL_QUERY_FIELDS, KqlQueryFieldTestValues> = {
-  kql_query: {
-    baseValue: {
-      query: 'process.name:*.exe',
-      language: 'kuery',
-      filters: [],
-      type: 'inline_query',
-    },
-    customValue: {
-      query: 'process.name:*.dll',
-      language: 'kuery',
-      filters: [],
-      type: 'inline_query',
-    },
-    updatedValue: {
-      query: 'process.name:*.sys',
-      language: 'kuery',
-      filters: [],
-      type: 'inline_query',
-    },
-  },
-  threat_query: {
-    baseValue: {
-      query: 'source.ip:10.0.0.*',
-      language: 'kuery',
-      filters: [],
-    },
-    customValue: {
-      query: 'source.ip:192.168.*',
-      language: 'kuery',
-      filters: [],
-    },
-    updatedValue: {
-      query: 'source.ip:172.16.*',
-      language: 'kuery',
-      filters: [],
-    },
-  },
-};
-
-const RULE_TYPE_FIELD_MAPPING = {
-  query: ['kql_query'],
-  // threat_match: ['threat_query'],
-} as const;
-
-type RuleTypeToFields = typeof RULE_TYPE_FIELD_MAPPING;
+type RuleTypeToFields = typeof KQL_QUERY_FIELD_RULE_TYPE_MAPPING;
 
 type FieldDiffs = Record<KQL_QUERY_FIELDS, unknown>;
 
@@ -123,7 +52,7 @@ const createTestSuite = (
       createRuleAssetSavedObjectOfType(ruleType, {
         rule_id: 'rule-1',
         version: 1,
-        ...mapDiffableFieldToRuleFields(field, baseValue),
+        ...mapKQLQueryDiffableFieldToRuleFields(field, baseValue),
       }),
     ];
 
@@ -135,7 +64,7 @@ const createTestSuite = (
         const updatedRuleAssetSavedObjects = [
           createRuleAssetSavedObjectOfType(ruleType, {
             rule_id: 'rule-1',
-            ...mapDiffableFieldToRuleFields(field, baseValue),
+            ...mapKQLQueryDiffableFieldToRuleFields(field, baseValue),
             version: 2,
           }),
         ];
@@ -163,13 +92,13 @@ const createTestSuite = (
         await updateRule(supertest, {
           ...rule,
           id: undefined,
-          ...mapDiffableFieldToRuleFields(field, customValue),
+          ...mapKQLQueryDiffableFieldToRuleFields(field, customValue),
         });
 
         const updatedRuleAssetSavedObjects = [
           createRuleAssetSavedObjectOfType(ruleType, {
             rule_id: 'rule-1',
-            ...mapDiffableFieldToRuleFields(field, baseValue),
+            ...mapKQLQueryDiffableFieldToRuleFields(field, baseValue),
             version: 2,
           }),
         ];
@@ -207,7 +136,7 @@ const createTestSuite = (
           createRuleAssetSavedObjectOfType(ruleType, {
             rule_id: 'rule-1',
             version: 2,
-            ...mapDiffableFieldToRuleFields(field, updatedValue),
+            ...mapKQLQueryDiffableFieldToRuleFields(field, updatedValue),
           }),
         ];
         await createHistoricalPrebuiltRuleAssetSavedObjects(es, updatedRuleAssetSavedObjects);
@@ -244,14 +173,14 @@ const createTestSuite = (
         await updateRule(supertest, {
           ...rule,
           id: undefined,
-          ...mapDiffableFieldToRuleFields(field, customValue),
+          ...mapKQLQueryDiffableFieldToRuleFields(field, customValue),
         });
 
         const updatedRuleAssetSavedObjects = [
           createRuleAssetSavedObjectOfType(ruleType, {
             rule_id: 'rule-1',
             version: 2,
-            ...mapDiffableFieldToRuleFields(field, customValue),
+            ...mapKQLQueryDiffableFieldToRuleFields(field, customValue),
           }),
         ];
         await createHistoricalPrebuiltRuleAssetSavedObjects(es, updatedRuleAssetSavedObjects);
@@ -288,14 +217,14 @@ const createTestSuite = (
         await updateRule(supertest, {
           ...rule,
           id: undefined,
-          ...mapDiffableFieldToRuleFields(field, customValue),
+          ...mapKQLQueryDiffableFieldToRuleFields(field, customValue),
         });
 
         const updatedRuleAssetSavedObjects = [
           createRuleAssetSavedObjectOfType(ruleType, {
             rule_id: 'rule-1',
             version: 2,
-            ...mapDiffableFieldToRuleFields(field, updatedValue),
+            ...mapKQLQueryDiffableFieldToRuleFields(field, updatedValue),
           }),
         ];
         await createHistoricalPrebuiltRuleAssetSavedObjects(es, updatedRuleAssetSavedObjects);
@@ -335,7 +264,7 @@ const createTestSuite = (
             createRuleAssetSavedObjectOfType(ruleType, {
               rule_id: 'rule-1',
               version: 2,
-              ...mapDiffableFieldToRuleFields(field, baseValue),
+              ...mapKQLQueryDiffableFieldToRuleFields(field, baseValue),
             }),
           ];
           await createPrebuiltRuleAssetSavedObjects(es, updatedRuleAssetSavedObjects);
@@ -364,14 +293,14 @@ const createTestSuite = (
           await updateRule(supertest, {
             ...rule,
             id: undefined,
-            ...mapDiffableFieldToRuleFields(field, customValue),
+            ...mapKQLQueryDiffableFieldToRuleFields(field, customValue),
           });
 
           const updatedRuleAssetSavedObjects = [
             createRuleAssetSavedObjectOfType(ruleType, {
               rule_id: 'rule-1',
               version: 2,
-              ...mapDiffableFieldToRuleFields(field, updatedValue),
+              ...mapKQLQueryDiffableFieldToRuleFields(field, updatedValue),
             }),
           ];
           await createPrebuiltRuleAssetSavedObjects(es, updatedRuleAssetSavedObjects);
@@ -413,10 +342,10 @@ export default ({ getService }: FtrProviderContext): void => {
       await deleteAllPrebuiltRuleAssets(es, log);
     });
 
-    Object.entries(RULE_TYPE_FIELD_MAPPING).forEach(([ruleType, fields]) => {
+    Object.entries(KQL_QUERY_FIELD_RULE_TYPE_MAPPING).forEach(([ruleType, fields]) => {
       describe(`${ruleType} rule kql query fields`, () => {
         fields.forEach((field) => {
-          const testValues = KQL_QUERY_FIELDS_MAP[field as KQL_QUERY_FIELDS];
+          const testValues = KQL_QUERY_FIELDS_MOCK_VALUES[field as KQL_QUERY_FIELDS];
           createTestSuite(
             ruleType as keyof RuleTypeToFields,
             field as KQL_QUERY_FIELDS,

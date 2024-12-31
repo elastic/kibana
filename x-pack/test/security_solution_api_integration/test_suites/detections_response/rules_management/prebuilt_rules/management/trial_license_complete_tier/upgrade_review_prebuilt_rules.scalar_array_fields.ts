@@ -27,43 +27,13 @@ import {
   updateRule,
 } from '../../../../utils';
 import { deleteAllRules } from '../../../../../../../common/utils/security_solution';
+import {
+  SCALAR_ARRAY_FIELD_RULE_TYPE_MAPPING,
+  ScalarArrayFieldTestValues,
+  SCALAR_ARRAY_FIELDS_MOCK_VALUES,
+} from './upgrade_prebuilt_rules.mock_data';
 
-interface ScalarArrayFieldTestValues {
-  baseValue: string[];
-  customValue: string[];
-  updatedValue: string[];
-}
-
-const SCALAR_ARRAY_FIELDS_MAP: Record<SCALAR_ARRAY_FIELDS, ScalarArrayFieldTestValues> = {
-  tags: {
-    baseValue: ['one', 'two', 'three'],
-    customValue: ['one', 'two', 'four'],
-    updatedValue: ['one', 'two', 'five'],
-  },
-  references: {
-    baseValue: ['ref1', 'ref2', 'ref3'],
-    customValue: ['ref1', 'ref2', 'ref4'],
-    updatedValue: ['ref1', 'ref2', 'ref5'],
-  },
-  threat_index: {
-    baseValue: ['index1', 'index2', 'index3'],
-    customValue: ['index1', 'index2', 'index4'],
-    updatedValue: ['index1', 'index2', 'index5'],
-  },
-  new_terms_fields: {
-    baseValue: ['field1', 'field2', 'field3'],
-    customValue: ['field1', 'field2', 'field4'],
-    updatedValue: ['field1', 'field2', 'field5'],
-  },
-};
-
-const RULE_TYPE_FIELD_MAPPING = {
-  query: ['tags', 'references'],
-  threat_match: ['threat_index'],
-  new_terms: ['new_terms_fields'],
-} as const;
-
-type RuleTypeToFields = typeof RULE_TYPE_FIELD_MAPPING;
+type RuleTypeToFields = typeof SCALAR_ARRAY_FIELD_RULE_TYPE_MAPPING;
 
 const createTestSuite = (
   ruleType: keyof RuleTypeToFields,
@@ -481,10 +451,10 @@ export default ({ getService }: FtrProviderContext): void => {
       await deleteAllPrebuiltRuleAssets(es, log);
     });
 
-    Object.entries(RULE_TYPE_FIELD_MAPPING).forEach(([ruleType, fields]) => {
+    Object.entries(SCALAR_ARRAY_FIELD_RULE_TYPE_MAPPING).forEach(([ruleType, fields]) => {
       describe(`${ruleType} rule scalar array fields`, () => {
         fields.forEach((field) => {
-          const testValues = SCALAR_ARRAY_FIELDS_MAP[field as SCALAR_ARRAY_FIELDS];
+          const testValues = SCALAR_ARRAY_FIELDS_MOCK_VALUES[field as SCALAR_ARRAY_FIELDS];
           createTestSuite(
             ruleType as keyof RuleTypeToFields,
             field as SCALAR_ARRAY_FIELDS,

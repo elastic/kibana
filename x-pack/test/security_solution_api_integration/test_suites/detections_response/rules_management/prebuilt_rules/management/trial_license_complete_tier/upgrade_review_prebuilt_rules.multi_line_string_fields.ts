@@ -11,12 +11,6 @@ import {
   ThreeWayMergeOutcome,
 } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { MULTI_LINE_STRING_FIELDS } from '@kbn/security-solution-plugin/server/lib/detection_engine/prebuilt_rules/logic/diff/calculation/calculate_rule_fields_diff';
-import {
-  TEXT_XL_A,
-  TEXT_XL_B,
-  TEXT_XL_C,
-  TEXT_XL_MERGED,
-} from '@kbn/security-solution-plugin/server/lib/detection_engine/prebuilt_rules/logic/diff/calculation/algorithms/multi_line_string_diff_algorithm.mock';
 import { Client } from '@elastic/elasticsearch';
 import TestAgent from 'supertest/lib/agent';
 import { ToolingLog } from '@kbn/tooling-log';
@@ -33,47 +27,16 @@ import {
   createRuleAssetSavedObjectOfType,
 } from '../../../../utils';
 import { deleteAllRules } from '../../../../../../../common/utils/security_solution';
+import {
+  MultiLineStringFieldTestValues,
+  MULTI_LINE_STRING_FIELDS_MOCK_VALUES,
+  MULTI_LINE_FIELD_RULE_TYPE_MAPPING,
+} from './upgrade_prebuilt_rules.mock_data';
 
-interface MultiLineStringFieldTestValues {
-  baseValue: string;
-  customValue: string;
-  updatedValue: string;
-  mergedValue: string;
-  longBaseValue?: string;
-  longCustomValue?: string;
-  longUpdatedValue?: string;
-  longMergedValue?: string;
-}
-
-const MULTI_LINE_STRING_FIELDS_MAP: Record<
-  MULTI_LINE_STRING_FIELDS,
-  MultiLineStringFieldTestValues
-> = {
-  description: {
-    baseValue: 'My description.\nThis is a second line.',
-    customValue: 'My GREAT description.\nThis is a second line.',
-    updatedValue: 'My description.\nThis is a second line, now longer.',
-    mergedValue: 'My GREAT description.\nThis is a second line, now longer.',
-    longBaseValue: TEXT_XL_A,
-    longCustomValue: TEXT_XL_B,
-    longUpdatedValue: TEXT_XL_C,
-    longMergedValue: TEXT_XL_MERGED,
-  },
-  note: {
-    baseValue: 'My note.\nThis is a second line.',
-    customValue: 'My GREAT note.\nThis is a second line.',
-    updatedValue: 'My note.\nThis is a second line, now longer.',
-    mergedValue: 'My GREAT note.\nThis is a second line, now longer.',
-  },
-  setup: {
-    baseValue: 'My setup.\nThis is a second line.',
-    customValue: 'My GREAT setup.\nThis is a second line.',
-    updatedValue: 'My setup.\nThis is a second line, now longer.',
-    mergedValue: 'My GREAT setup.\nThis is a second line, now longer.',
-  },
-};
+type RuleTypeToFields = typeof MULTI_LINE_FIELD_RULE_TYPE_MAPPING;
 
 const createTestSuite = (
+  ruleType: keyof RuleTypeToFields,
   field: MULTI_LINE_STRING_FIELDS,
   testValues: MultiLineStringFieldTestValues,
   services: { es: Client; supertest: TestAgent; log: ToolingLog }
@@ -480,8 +443,18 @@ export default ({ getService }: FtrProviderContext): void => {
       await deleteAllPrebuiltRuleAssets(es, log);
     });
 
-    Object.entries(MULTI_LINE_STRING_FIELDS_MAP).forEach(([field, testValues]) => {
-      createTestSuite(field as MULTI_LINE_STRING_FIELDS, testValues, { es, supertest, log });
+    Object.entries(MULTI_LINE_FIELD_RULE_TYPE_MAPPING).forEach(([ruleType, fields]) => {
+      describe(`${ruleType} rule multi line string fields`, () => {
+        fields.forEach((field) => {
+          const testValues = MULTI_LINE_STRING_FIELDS_MOCK_VALUES[field];
+          createTestSuite(
+            ruleType as keyof RuleTypeToFields,
+            field as MULTI_LINE_STRING_FIELDS,
+            testValues,
+            { es, supertest, log }
+          );
+        });
+      });
     });
   });
 };
