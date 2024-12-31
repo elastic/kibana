@@ -5,8 +5,14 @@
  * 2.0.
  */
 
-import { ProcessingDefinition } from '../models';
-import { isGrokProcessor, isDissectProcessor } from './type_guards';
+import { Condition, ProcessingDefinition } from '../models';
+import {
+  isGrokProcessor,
+  isDissectProcessor,
+  isFilterCondition,
+  isAndCondition,
+  isOrCondition,
+} from './type_guards';
 
 export function getProcessorType(processor: ProcessingDefinition) {
   if (isGrokProcessor(processor.config)) {
@@ -16,4 +22,17 @@ export function getProcessorType(processor: ProcessingDefinition) {
     return 'dissect';
   }
   throw new Error('Unknown processor type');
+}
+
+export function isCompleteCondition(condition: Condition): boolean {
+  if (isFilterCondition(condition)) {
+    return condition.field !== undefined && condition.field !== '';
+  }
+  if (isAndCondition(condition)) {
+    return condition.and.every(isCompleteCondition);
+  }
+  if (isOrCondition(condition)) {
+    return condition.or.every(isCompleteCondition);
+  }
+  return false;
 }

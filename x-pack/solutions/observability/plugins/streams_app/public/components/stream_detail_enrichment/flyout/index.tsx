@@ -19,6 +19,7 @@ import {
   ReadStreamDefinition,
   conditionSchema,
   getProcessorType,
+  isCompleteCondition,
 } from '@kbn/streams-schema';
 import { ProcessorTypeSelector } from './processor_type_selector';
 import { ProcessorFlyoutTemplate } from './processor_flyout_template';
@@ -26,6 +27,7 @@ import { GrokFormState, ProcessorDefinition, ProcessorFormState } from '../types
 import { DangerZone } from './danger_zone';
 import { DissectProcessorForm } from './dissect';
 import { GrokProcessorForm } from './grok';
+import { ProcessorOutcomePreview } from './processor_outcome_preview';
 
 const defaultCondition: ProcessingDefinition['condition'] = {
   field: '',
@@ -74,7 +76,7 @@ export function AddProcessorFlyout({
       const { condition, field, patterns, pattern_definitions, ignore_failure } = data;
 
       onAddProcessor({
-        condition: isValidCondition(condition) ? condition : undefined,
+        condition: isCompleteCondition(condition) ? condition : undefined,
         config: {
           grok: {
             patterns: patterns
@@ -92,7 +94,7 @@ export function AddProcessorFlyout({
       const { condition, field, pattern, append_separator, ignore_failure } = data;
 
       onAddProcessor({
-        condition: isValidCondition(condition) ? condition : undefined,
+        condition: isCompleteCondition(condition) ? condition : undefined,
         config: {
           dissect: {
             field,
@@ -131,6 +133,8 @@ export function AddProcessorFlyout({
           {formFields.type === 'grok' && <GrokProcessorForm definition={definition} />}
           {formFields.type === 'dissect' && <DissectProcessorForm definition={definition} />}
         </EuiForm>
+        <EuiHorizontalRule />
+        <ProcessorOutcomePreview definition={definition} processor={formFields} />
       </FormProvider>
     </ProcessorFlyoutTemplate>
   );
@@ -189,7 +193,7 @@ export function EditProcessorFlyout({
 
       onUpdateProcessor(processor.id, {
         id: processor.id,
-        condition: isValidCondition(condition) ? condition : undefined,
+        condition: isCompleteCondition(condition) ? condition : undefined,
         config: {
           grok: {
             patterns: patterns
@@ -208,7 +212,7 @@ export function EditProcessorFlyout({
 
       onUpdateProcessor(processor.id, {
         id: processor.id,
-        condition: isValidCondition(condition) ? condition : undefined,
+        condition: isCompleteCondition(condition) ? condition : undefined,
         config: {
           dissect: {
             field,
@@ -267,7 +271,3 @@ export function EditProcessorFlyout({
     </ProcessorFlyoutTemplate>
   );
 }
-
-const isValidCondition = (condition: ProcessingDefinition['condition']) => {
-  return conditionSchema.safeParse(condition).success;
-};

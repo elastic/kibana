@@ -10,13 +10,13 @@ import { z } from '@kbn/zod';
 const stringOrNumberOrBoolean = z.union([z.string(), z.number(), z.boolean()]);
 
 export const binaryConditionSchema = z.object({
-  field: z.string().min(1),
+  field: z.string(),
   operator: z.enum(['eq', 'neq', 'lt', 'lte', 'gt', 'gte', 'contains', 'startsWith', 'endsWith']),
   value: stringOrNumberOrBoolean,
 });
 
 export const unaryFilterConditionSchema = z.object({
-  field: z.string().min(1),
+  field: z.string(),
   operator: z.enum(['exists', 'notExists']),
 });
 
