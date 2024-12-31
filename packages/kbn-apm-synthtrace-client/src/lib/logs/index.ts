@@ -58,8 +58,8 @@ export type LogDocument = Fields &
     'cloud.project.id'?: string;
     'cloud.instance.id'?: string;
     'error.stack_trace'?: string;
-    'error.exception.stacktrace'?: unknown;
-    'error.log.stacktrace'?: unknown;
+    'error.exception'?: unknown;
+    'error.log'?: unknown;
     'log.custom': Record<string, unknown>;
     'host.geo.location': number[];
     'host.ip': string;

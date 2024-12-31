@@ -164,35 +164,46 @@ function generateLogsData({ to, count = 1 }: { to: string; count?: number }) {
             .logLevel('info')
             .timestamp(timestamp)
             .defaults({
-              'error.exception.stacktrace': [
+              'error.exception': [
                 {
-                  exclude_from_grouping: false,
-                  abs_path: '/app/server/coffee.js',
-                  filename: 'server/coffee.js',
-                  line: {
-                    number: 27,
-                    context: "  apm.captureError('this is a string', function (err) {",
-                  },
-                  function: '<anonymous>',
-                  context: {
-                    pre: ['', "app.get('/log-message', function (req, res) {"],
-                    post: [
-                      '    if (err) {',
-                      "      res.status(500).send('could not capture error: ' + err.message)",
-                    ],
-                  },
-                  vars: {},
+                  message: 'Exception stacktrace',
+                  stacktrace: [
+                    {
+                      exclude_from_grouping: false,
+                      abs_path: 'test.js',
+                      filename: 'test.js',
+                      line: {
+                        number: 1,
+                        context: 'console.log(err)',
+                      },
+                      function: '<anonymous>',
+                      context: {
+                        pre: ['console.log(err)'],
+                        post: ['console.log(err);'],
+                      },
+                      vars: {},
+                    },
+                    {
+                      exclude_from_grouping: false,
+                      library_frame: true,
+                      abs_path: 'test.js',
+                      filename: 'test.js',
+                      line: {
+                        number: 1,
+                      },
+                      function: 'test',
+                      vars: {},
+                    },
+                  ],
                 },
                 {
-                  exclude_from_grouping: false,
-                  library_frame: true,
-                  abs_path: 'node:internal/async_hooks',
-                  filename: 'node:internal/async_hooks',
-                  line: {
-                    number: 130,
+                  handled: true,
+                  module: 'module',
+                  attributes: {
+                    test: 'test',
                   },
-                  function: 'throwError',
-                  vars: {},
+                  message: 'message',
+                  type: 'type',
                 },
               ],
               'service.name': 'node-service',
@@ -215,34 +226,31 @@ function generateLogsData({ to, count = 1 }: { to: string; count?: number }) {
             .logLevel('info')
             .timestamp(timestamp)
             .defaults({
-              'error.log.stacktrace': [
+              'error.log': [
                 {
                   exclude_from_grouping: false,
-                  abs_path: '/app/server/coffee.js',
-                  filename: 'server/coffee.js',
+                  abs_path: 'test.js',
+                  filename: 'test.js',
                   line: {
-                    number: 27,
-                    context: "  apm.captureError('this is a string', function (err) {",
+                    number: 1,
+                    context: 'console.log(err)',
                   },
                   function: '<anonymous>',
                   context: {
-                    pre: ['', "app.get('/log-message', function (req, res) {"],
-                    post: [
-                      '    if (err) {',
-                      "      res.status(500).send('could not capture error: ' + err.message)",
-                    ],
+                    pre: ['console.log(err)'],
+                    post: ['console.log(err)'],
                   },
                   vars: {},
                 },
                 {
                   exclude_from_grouping: false,
                   library_frame: true,
-                  abs_path: 'node:internal/async_hooks',
-                  filename: 'node:internal/async_hooks',
+                  abs_path: 'test.js',
+                  filename: 'test.js',
                   line: {
-                    number: 130,
+                    number: 1,
                   },
-                  function: 'throwError',
+                  function: 'test',
                   vars: {},
                 },
               ],
