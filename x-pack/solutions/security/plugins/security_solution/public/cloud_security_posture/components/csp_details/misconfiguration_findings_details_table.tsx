@@ -14,6 +14,7 @@ import {
   MISCONFIGURATION,
 } from '@kbn/cloud-security-posture/src/hooks/use_misconfiguration_findings';
 import { i18n } from '@kbn/i18n';
+import type { CspFindingResult } from '@kbn/cloud-security-posture-common';
 import {
   MISCONFIGURATION_STATUS,
   buildMisconfigurationEntityFlyoutPreviewQuery,
@@ -218,7 +219,9 @@ export const MisconfigurationFindingsDetailsTable = memo(
       },
       {
         field: MISCONFIGURATION.RESULT_EVALUATION,
-        render: (result: 'failed' | 'passed' | undefined) => <CspEvaluationBadge type={result} />,
+        render: (result: CspFindingResult['evaluation'] | undefined) => (
+          <CspEvaluationBadge type={result} />
+        ),
         name: i18n.translate(
           'xpack.securitySolution.flyout.left.insights.misconfigurations.table.resultColumnName',
           {
@@ -230,7 +233,9 @@ export const MisconfigurationFindingsDetailsTable = memo(
       },
       {
         field: MISCONFIGURATION.RULE_NAME,
-        render: (ruleName: string) => <EuiText size="s">{ruleName}</EuiText>,
+        render: (ruleName: CspBenchmarkRuleMetadata['name']) => (
+          <EuiText size="s">{ruleName}</EuiText>
+        ),
         name: i18n.translate(
           'xpack.securitySolution.flyout.left.insights.misconfigurations.table.ruleColumnName',
           {

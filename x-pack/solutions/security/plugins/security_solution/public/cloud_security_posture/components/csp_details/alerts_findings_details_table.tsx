@@ -116,7 +116,16 @@ export const AlertsDetailsTable = memo(
     const { to, from } = useGlobalTime();
     const { signalIndexName } = useSignalIndex();
     const { data, setQuery } = useQueryAlerts({
-      query: buildEntityAlertsQuery(field, to, from, value, 500, '', sortField, sortDirection),
+      query: buildEntityAlertsQuery({
+        field,
+        to,
+        from,
+        queryValue: value,
+        size: 500,
+        severity: '',
+        sortField,
+        sortDirection,
+      }),
       queryName: ALERTS_QUERY_NAMES.BY_RULE_BY_STATUS,
       indexName: signalIndexName,
     });
@@ -146,13 +155,31 @@ export const AlertsDetailsTable = memo(
       filter: () => {
         setCurrentFilter(key);
         setQuery(
-          buildEntityAlertsQuery(field, to, from, value, 500, key, sortField, sortDirection)
+          buildEntityAlertsQuery({
+            field,
+            to,
+            from,
+            queryValue: value,
+            size: 500,
+            severity: key,
+            sortField,
+            sortDirection,
+          })
         );
       },
       isCurrentFilter: currentFilter === key,
       reset: (event: React.MouseEvent<SVGElement, MouseEvent>) => {
         setCurrentFilter('');
-        setQuery(buildEntityAlertsQuery(field, to, from, value, 500, ''));
+        setQuery(
+          buildEntityAlertsQuery({
+            field,
+            to,
+            from,
+            queryValue: value,
+            size: 500,
+            severity: '',
+          })
+        );
         event?.stopPropagation();
       },
     }));
@@ -191,7 +218,18 @@ export const AlertsDetailsTable = memo(
           setSortField(fieldSort);
           setSortDirection(direction);
 
-          setQuery(buildEntityAlertsQuery(field, to, from, value, 500, '', fieldSort, direction));
+          setQuery(
+            buildEntityAlertsQuery({
+              field,
+              to,
+              from,
+              queryValue: value,
+              size: 500,
+              severity: '',
+              sortField: fieldSort,
+              sortDirection: direction,
+            })
+          );
         }
       },
       [field, from, setQuery, to, value]
