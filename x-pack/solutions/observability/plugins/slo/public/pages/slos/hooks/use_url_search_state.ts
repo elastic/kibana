@@ -18,7 +18,7 @@ import { DEFAULT_SLO_PAGE_SIZE } from '../../../../common/constants';
 import type { GroupByField, SortDirection, SortField, ViewType } from '../types';
 
 export const SLO_LIST_SEARCH_URL_STORAGE_KEY = 'search';
-export const SLO_LIST_SEARCH_SESSION_STORAGE_KEY = 'slo_list_search_state';
+export const SLO_LIST_SEARCH_SESSION_STORAGE_KEY = 'slo.list_page_search_state';
 
 export interface SearchState {
   kqlQuery: string;
@@ -61,7 +61,7 @@ export function useUrlSearchState(): {
     })
   );
 
-  const sessionStorage = useRef(createSessionStorageStateStorage());
+  const sessionStorage = useRef(createSessionStorageStateStorage(window.localStorage));
 
   useEffect(() => {
     const sub = urlStateStorage.current
