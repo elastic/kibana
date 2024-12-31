@@ -108,6 +108,26 @@
                   },
                   {
                     "parentPluginId": "@kbn/content-management-favorites-public",
+                    "id": "def-public.FavoritesClient.Unnamed.$3.userProfile",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "userProfile",
+                    "description": [],
+                    "signature": [
+                      {
+                        "pluginId": "@kbn/core-user-profile-browser",
+                        "scope": "public",
+                        "docId": "kibKbnCoreUserProfileBrowserPluginApi",
+                        "section": "def-public.UserProfileService",
+                        "text": "UserProfileService"
+                      }
+                    ],
+                    "path": "packages/content-management/favorites/favorites_public/src/favorites_client.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "@kbn/content-management-favorites-public",
                     "id": "def-public.FavoritesClient.Unnamed.$3.usageCollection",
                     "type": "Object",
                     "tags": [],
@@ -130,6 +150,22 @@
                 ]
               }
             ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/content-management-favorites-public",
+            "id": "def-public.FavoritesClient.isAvailable",
+            "type": "Function",
+            "tags": [],
+            "label": "isAvailable",
+            "description": [],
+            "signature": [
+              "() => Promise<boolean>"
+            ],
+            "path": "packages/content-management/favorites/favorites_public/src/favorites_client.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
             "returnComment": []
           },
           {
@@ -700,6 +736,22 @@
                 ]
               }
             ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/content-management-favorites-public",
+            "id": "def-public.FavoritesClientPublic.isAvailable",
+            "type": "Function",
+            "tags": [],
+            "label": "isAvailable",
+            "description": [],
+            "signature": [
+              "() => Promise<boolean>"
+            ],
+            "path": "packages/content-management/favorites/favorites_public/src/favorites_client.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
             "returnComment": []
           },
           {

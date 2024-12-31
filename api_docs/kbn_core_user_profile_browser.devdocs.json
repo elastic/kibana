@@ -170,7 +170,7 @@
             "tags": [],
             "label": "getUserProfile$",
             "description": [
-              "\nRetrieve an observable emitting when the user profile is loaded."
+              "\nRetrieve an observable emitting the current user profile data."
             ],
             "signature": [
               "() => ",
@@ -184,6 +184,26 @@
                 "text": "UserProfileData"
               },
               " | null>"
+            ],
+            "path": "packages/core/user-profile/core-user-profile-browser/src/service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-user-profile-browser",
+            "id": "def-public.UserProfileService.getEnabled$",
+            "type": "Function",
+            "tags": [],
+            "label": "getEnabled$",
+            "description": [
+              "Flag to indicate if the current user has a user profile. Anonymous users don't have user profiles."
+            ],
+            "signature": [
+              "() => ",
+              "Observable",
+              "<boolean>"
             ],
             "path": "packages/core/user-profile/core-user-profile-browser/src/service.ts",
             "deprecated": false,
@@ -642,7 +662,7 @@
             "section": "def-public.UserProfileService",
             "text": "UserProfileService"
           },
-          ", \"getUserProfile$\"> & { userProfile$: ",
+          ", \"getUserProfile$\" | \"getEnabled$\"> & { userProfile$: ",
           "Observable",
           "<",
           {
@@ -652,7 +672,9 @@
             "section": "def-common.UserProfileData",
             "text": "UserProfileData"
           },
-          " | null>; }"
+          " | null>; enabled$: ",
+          "Observable",
+          "<boolean>; }"
         ],
         "path": "packages/core/user-profile/core-user-profile-browser/src/api_provider.ts",
         "deprecated": false,

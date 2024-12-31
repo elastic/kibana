@@ -583,6 +583,18 @@
                 "path": "packages/core/root/core-root-server-internal/src/events/kibana_started.ts"
               },
               {
+                "plugin": "security",
+                "path": "x-pack/plugins/security/server/analytics/analytics_service.ts"
+              },
+              {
+                "plugin": "security",
+                "path": "x-pack/plugins/security/server/analytics/analytics_service.ts"
+              },
+              {
+                "plugin": "security",
+                "path": "x-pack/plugins/security/server/analytics/analytics_service.ts"
+              },
+              {
                 "plugin": "@kbn/cloud",
                 "path": "packages/cloud/connection_details/kibana/kibana_connection_details_provider.tsx"
               },
@@ -627,20 +639,16 @@
                 "path": "packages/shared-ux/chrome/navigation/src/services.tsx"
               },
               {
+                "plugin": "globalSearchBar",
+                "path": "x-pack/plugins/global_search_bar/public/telemetry/event_reporter.ts"
+              },
+              {
+                "plugin": "globalSearchBar",
+                "path": "x-pack/plugins/global_search_bar/public/telemetry/event_reporter.ts"
+              },
+              {
                 "plugin": "spaces",
                 "path": "x-pack/plugins/spaces/public/analytics/event_tracker.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/server/analytics/analytics_service.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/server/analytics/analytics_service.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/server/analytics/analytics_service.ts"
               },
               {
                 "plugin": "actions",
@@ -660,19 +668,11 @@
               },
               {
                 "plugin": "discover",
-                "path": "src/plugins/discover/public/services/discover_ebt_manager.ts"
+                "path": "src/platform/plugins/shared/discover/public/services/discover_ebt_manager.ts"
               },
               {
                 "plugin": "discover",
-                "path": "src/plugins/discover/public/services/discover_ebt_manager.ts"
-              },
-              {
-                "plugin": "globalSearchBar",
-                "path": "x-pack/plugins/global_search_bar/public/telemetry/event_reporter.ts"
-              },
-              {
-                "plugin": "globalSearchBar",
-                "path": "x-pack/plugins/global_search_bar/public/telemetry/event_reporter.ts"
+                "path": "src/platform/plugins/shared/discover/public/services/discover_ebt_manager.ts"
               },
               {
                 "plugin": "reporting",
@@ -1116,67 +1116,67 @@
               },
               {
                 "plugin": "discover",
-                "path": "src/plugins/discover/public/services/discover_ebt_manager.test.ts"
+                "path": "src/platform/plugins/shared/discover/public/services/discover_ebt_manager.test.ts"
               },
               {
                 "plugin": "discover",
-                "path": "src/plugins/discover/public/services/discover_ebt_manager.test.ts"
+                "path": "src/platform/plugins/shared/discover/public/services/discover_ebt_manager.test.ts"
               },
               {
                 "plugin": "discover",
-                "path": "src/plugins/discover/public/services/discover_ebt_manager.test.ts"
+                "path": "src/platform/plugins/shared/discover/public/services/discover_ebt_manager.test.ts"
               },
               {
                 "plugin": "discover",
-                "path": "src/plugins/discover/public/services/discover_ebt_manager.test.ts"
+                "path": "src/platform/plugins/shared/discover/public/services/discover_ebt_manager.test.ts"
               },
               {
                 "plugin": "discover",
-                "path": "src/plugins/discover/public/services/discover_ebt_manager.test.ts"
+                "path": "src/platform/plugins/shared/discover/public/services/discover_ebt_manager.test.ts"
               },
               {
                 "plugin": "discover",
-                "path": "src/plugins/discover/public/services/discover_ebt_manager.test.ts"
+                "path": "src/platform/plugins/shared/discover/public/services/discover_ebt_manager.test.ts"
               },
               {
                 "plugin": "discover",
-                "path": "src/plugins/discover/public/services/discover_ebt_manager.test.ts"
+                "path": "src/platform/plugins/shared/discover/public/services/discover_ebt_manager.test.ts"
               },
               {
                 "plugin": "discover",
-                "path": "src/plugins/discover/public/services/discover_ebt_manager.test.ts"
+                "path": "src/platform/plugins/shared/discover/public/services/discover_ebt_manager.test.ts"
               },
               {
                 "plugin": "discover",
-                "path": "src/plugins/discover/public/services/discover_ebt_manager.test.ts"
+                "path": "src/platform/plugins/shared/discover/public/services/discover_ebt_manager.test.ts"
               },
               {
                 "plugin": "discover",
-                "path": "src/plugins/discover/public/services/discover_ebt_manager.test.ts"
+                "path": "src/platform/plugins/shared/discover/public/services/discover_ebt_manager.test.ts"
               },
               {
                 "plugin": "discover",
-                "path": "src/plugins/discover/public/services/discover_ebt_manager.test.ts"
+                "path": "src/platform/plugins/shared/discover/public/services/discover_ebt_manager.test.ts"
               },
               {
                 "plugin": "discover",
-                "path": "src/plugins/discover/public/services/discover_ebt_manager.test.ts"
+                "path": "src/platform/plugins/shared/discover/public/services/discover_ebt_manager.test.ts"
               },
               {
                 "plugin": "discover",
-                "path": "src/plugins/discover/public/services/discover_ebt_manager.test.ts"
+                "path": "src/platform/plugins/shared/discover/public/services/discover_ebt_manager.test.ts"
               },
               {
                 "plugin": "discover",
-                "path": "src/plugins/discover/public/services/discover_ebt_manager.test.ts"
+                "path": "src/platform/plugins/shared/discover/public/services/discover_ebt_manager.test.ts"
               },
               {
                 "plugin": "discover",
-                "path": "src/plugins/discover/public/services/discover_ebt_manager.test.ts"
+                "path": "src/platform/plugins/shared/discover/public/services/discover_ebt_manager.test.ts"
               },
               {
                 "plugin": "discover",
-                "path": "src/plugins/discover/public/services/discover_ebt_manager.test.ts"
+                "path": "src/platform/plugins/shared/discover/public/services/discover_ebt_manager.test.ts"
               },
               {
                 "plugin": "@kbn/core-analytics-browser-mocks",
@@ -1886,7 +1886,7 @@
               },
               {
                 "plugin": "discover",
-                "path": "src/plugins/discover/public/services/discover_ebt_manager.ts"
+                "path": "src/platform/plugins/shared/discover/public/services/discover_ebt_manager.ts"
               },
               {
                 "plugin": "telemetry",
@@ -1954,7 +1954,7 @@
               },
               {
                 "plugin": "discover",
-                "path": "src/plugins/discover/public/services/discover_ebt_manager.test.ts"
+                "path": "src/platform/plugins/shared/discover/public/services/discover_ebt_manager.test.ts"
               },
               {
                 "plugin": "@kbn/core",

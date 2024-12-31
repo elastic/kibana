@@ -2187,16 +2187,16 @@
               "path": "x-pack/plugins/security/server/plugin.ts"
             },
             {
+              "plugin": "graph",
+              "path": "x-pack/plugins/graph/server/plugin.ts"
+            },
+            {
               "plugin": "actions",
               "path": "x-pack/platform/plugins/shared/actions/server/plugin.ts"
             },
             {
               "plugin": "alerting",
               "path": "x-pack/platform/plugins/shared/alerting/server/plugin.ts"
-            },
-            {
-              "plugin": "graph",
-              "path": "x-pack/plugins/graph/server/plugin.ts"
             },
             {
               "plugin": "upgradeAssistant",

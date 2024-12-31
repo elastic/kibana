@@ -3738,14 +3738,6 @@
                 "path": "src/plugins/usage_collection/server/routes/stats/stats.ts"
               },
               {
-                "plugin": "@kbn/content-management-favorites-server",
-                "path": "packages/content-management/favorites/favorites_server/src/favorites_routes.ts"
-              },
-              {
-                "plugin": "@kbn/content-management-content-insights-server",
-                "path": "packages/content-management/content_insights/content_insights_server/src/register.ts"
-              },
-              {
                 "plugin": "features",
                 "path": "x-pack/plugins/features/server/routes/index.ts"
               },
@@ -3872,6 +3864,18 @@
               {
                 "plugin": "security",
                 "path": "x-pack/plugins/security/server/routes/views/login.ts"
+              },
+              {
+                "plugin": "globalSearch",
+                "path": "x-pack/plugins/global_search/server/routes/get_searchable_types.ts"
+              },
+              {
+                "plugin": "@kbn/content-management-favorites-server",
+                "path": "packages/content-management/favorites/favorites_server/src/favorites_routes.ts"
+              },
+              {
+                "plugin": "@kbn/content-management-content-insights-server",
+                "path": "packages/content-management/content_insights/content_insights_server/src/register.ts"
               },
               {
                 "plugin": "share",
@@ -4008,10 +4012,6 @@
               {
                 "plugin": "inference",
                 "path": "x-pack/platform/plugins/shared/inference/server/routes/connectors.ts"
-              },
-              {
-                "plugin": "globalSearch",
-                "path": "x-pack/plugins/global_search/server/routes/get_searchable_types.ts"
               },
               {
                 "plugin": "reporting",
@@ -5026,10 +5026,6 @@
                 "path": "x-pack/solutions/observability/plugins/apm_data_access/server/lib/helpers/create_es_client/create_apm_event_client/index.test.ts"
               },
               {
-                "plugin": "dataViewManagement",
-                "path": "src/plugins/data_view_management/server/routes/resolve_index.ts"
-              },
-              {
                 "plugin": "ftrApis",
                 "path": "src/plugins/ftr_apis/server/routes/kbn_client_so/find.ts"
               },
@@ -5068,6 +5064,10 @@
               {
                 "plugin": "console",
                 "path": "src/platform/plugins/shared/console/server/routes/api/console/autocomplete_entities/index.ts"
+              },
+              {
+                "plugin": "dataViewManagement",
+                "path": "src/platform/plugins/shared/data_view_management/server/routes/resolve_index.ts"
               },
               {
                 "plugin": "esql",
@@ -6224,22 +6224,6 @@
                 "path": "src/plugins/usage_collection/server/routes/ui_counters.ts"
               },
               {
-                "plugin": "@kbn/content-management-favorites-server",
-                "path": "packages/content-management/favorites/favorites_server/src/favorites_routes.ts"
-              },
-              {
-                "plugin": "@kbn/content-management-favorites-server",
-                "path": "packages/content-management/favorites/favorites_server/src/favorites_routes.ts"
-              },
-              {
-                "plugin": "contentManagement",
-                "path": "src/plugins/content_management/server/rpc/routes/routes.ts"
-              },
-              {
-                "plugin": "@kbn/content-management-content-insights-server",
-                "path": "packages/content-management/content_insights/content_insights_server/src/register.ts"
-              },
-              {
                 "plugin": "home",
                 "path": "src/plugins/home/server/services/sample_data/routes/install.ts"
               },
@@ -6350,6 +6334,34 @@
               {
                 "plugin": "encryptedSavedObjects",
                 "path": "x-pack/plugins/encrypted_saved_objects/server/routes/key_rotation.ts"
+              },
+              {
+                "plugin": "globalSearch",
+                "path": "x-pack/plugins/global_search/server/routes/find.ts"
+              },
+              {
+                "plugin": "@kbn/content-management-favorites-server",
+                "path": "packages/content-management/favorites/favorites_server/src/favorites_routes.ts"
+              },
+              {
+                "plugin": "@kbn/content-management-favorites-server",
+                "path": "packages/content-management/favorites/favorites_server/src/favorites_routes.ts"
+              },
+              {
+                "plugin": "contentManagement",
+                "path": "src/plugins/content_management/server/rpc/routes/routes.ts"
+              },
+              {
+                "plugin": "@kbn/content-management-content-insights-server",
+                "path": "packages/content-management/content_insights/content_insights_server/src/register.ts"
+              },
+              {
+                "plugin": "graph",
+                "path": "x-pack/plugins/graph/server/routes/search.ts"
+              },
+              {
+                "plugin": "graph",
+                "path": "x-pack/plugins/graph/server/routes/explore.ts"
               },
               {
                 "plugin": "share",
@@ -6522,18 +6534,6 @@
               {
                 "plugin": "inference",
                 "path": "x-pack/platform/plugins/shared/inference/server/routes/chat_complete.ts"
-              },
-              {
-                "plugin": "globalSearch",
-                "path": "x-pack/plugins/global_search/server/routes/find.ts"
-              },
-              {
-                "plugin": "graph",
-                "path": "x-pack/plugins/graph/server/routes/search.ts"
-              },
-              {
-                "plugin": "graph",
-                "path": "x-pack/plugins/graph/server/routes/explore.ts"
               },
               {
                 "plugin": "reporting",
@@ -7384,10 +7384,6 @@
                 "path": "src/plugins/content_management/server/plugin.test.ts"
               },
               {
-                "plugin": "dataViewManagement",
-                "path": "src/plugins/data_view_management/server/routes/preview_scripted_field.ts"
-              },
-              {
                 "plugin": "ftrApis",
                 "path": "src/plugins/ftr_apis/server/routes/kbn_client_so/bulk_delete.ts"
               },
@@ -7438,6 +7434,10 @@
               {
                 "plugin": "console",
                 "path": "src/platform/plugins/shared/console/server/routes/api/console/convert_request_to_language/index.ts"
+              },
+              {
+                "plugin": "dataViewManagement",
+                "path": "src/platform/plugins/shared/data_view_management/server/routes/preview_scripted_field.ts"
               },
               {
                 "plugin": "mockIdpPlugin",
@@ -15286,50 +15286,6 @@
                 "path": "x-pack/plugins/cloud/server/routes/get_cloud_data_route.ts"
               },
               {
-                "plugin": "dataViews",
-                "path": "src/plugins/data_views/server/rest_api_routes/public/runtime_fields/get_runtime_field.ts"
-              },
-              {
-                "plugin": "dataViews",
-                "path": "src/plugins/data_views/server/rest_api_routes/public/scripted_fields/get_scripted_field.ts"
-              },
-              {
-                "plugin": "dataViews",
-                "path": "src/plugins/data_views/server/rest_api_routes/public/default_data_view.ts"
-              },
-              {
-                "plugin": "dataViews",
-                "path": "src/plugins/data_views/server/rest_api_routes/public/get_data_view.ts"
-              },
-              {
-                "plugin": "dataViews",
-                "path": "src/plugins/data_views/server/rest_api_routes/public/get_data_views.ts"
-              },
-              {
-                "plugin": "dataViews",
-                "path": "src/plugins/data_views/server/rest_api_routes/public/has_user_data_view.ts"
-              },
-              {
-                "plugin": "dataViews",
-                "path": "src/plugins/data_views/server/rest_api_routes/internal/existing_indices.ts"
-              },
-              {
-                "plugin": "dataViews",
-                "path": "src/plugins/data_views/server/rest_api_routes/internal/fields_for.ts"
-              },
-              {
-                "plugin": "dataViews",
-                "path": "src/plugins/data_views/server/rest_api_routes/internal/has_data_views.ts"
-              },
-              {
-                "plugin": "dataViews",
-                "path": "src/plugins/data_views/server/rest_api_routes/internal/has_es_data.ts"
-              },
-              {
-                "plugin": "dataViews",
-                "path": "src/plugins/data_views/server/rest_api_routes/internal/fields.ts"
-              },
-              {
                 "plugin": "spaces",
                 "path": "x-pack/plugins/spaces/server/routes/api/external/get.ts"
               },
@@ -15344,6 +15300,50 @@
               {
                 "plugin": "security",
                 "path": "x-pack/plugins/security/server/routes/authorization/roles/get_all.ts"
+              },
+              {
+                "plugin": "dataViews",
+                "path": "src/platform/plugins/shared/data_views/server/rest_api_routes/public/runtime_fields/get_runtime_field.ts"
+              },
+              {
+                "plugin": "dataViews",
+                "path": "src/platform/plugins/shared/data_views/server/rest_api_routes/public/scripted_fields/get_scripted_field.ts"
+              },
+              {
+                "plugin": "dataViews",
+                "path": "src/platform/plugins/shared/data_views/server/rest_api_routes/public/default_data_view.ts"
+              },
+              {
+                "plugin": "dataViews",
+                "path": "src/platform/plugins/shared/data_views/server/rest_api_routes/public/get_data_view.ts"
+              },
+              {
+                "plugin": "dataViews",
+                "path": "src/platform/plugins/shared/data_views/server/rest_api_routes/public/get_data_views.ts"
+              },
+              {
+                "plugin": "dataViews",
+                "path": "src/platform/plugins/shared/data_views/server/rest_api_routes/public/has_user_data_view.ts"
+              },
+              {
+                "plugin": "dataViews",
+                "path": "src/platform/plugins/shared/data_views/server/rest_api_routes/internal/existing_indices.ts"
+              },
+              {
+                "plugin": "dataViews",
+                "path": "src/platform/plugins/shared/data_views/server/rest_api_routes/internal/fields_for.ts"
+              },
+              {
+                "plugin": "dataViews",
+                "path": "src/platform/plugins/shared/data_views/server/rest_api_routes/internal/has_data_views.ts"
+              },
+              {
+                "plugin": "dataViews",
+                "path": "src/platform/plugins/shared/data_views/server/rest_api_routes/internal/has_es_data.ts"
+              },
+              {
+                "plugin": "dataViews",
+                "path": "src/platform/plugins/shared/data_views/server/rest_api_routes/internal/fields.ts"
               },
               {
                 "plugin": "data",
@@ -16489,24 +16489,24 @@
                 "path": "packages/core/http/core-http-router-server-mocks/src/versioned_router.mock.ts"
               },
               {
-                "plugin": "dataViews",
-                "path": "src/plugins/data_views/server/rest_api_routes/public/runtime_fields/put_runtime_field.ts"
-              },
-              {
-                "plugin": "dataViews",
-                "path": "src/plugins/data_views/server/rest_api_routes/public/scripted_fields/put_scripted_field.ts"
-              },
-              {
-                "plugin": "dataViews",
-                "path": "src/plugins/data_views/server/rest_api_routes/internal/fields_for.ts"
-              },
-              {
                 "plugin": "spaces",
                 "path": "x-pack/plugins/spaces/server/routes/api/external/put.ts"
               },
               {
                 "plugin": "security",
                 "path": "x-pack/plugins/security/server/routes/authorization/roles/put.ts"
+              },
+              {
+                "plugin": "dataViews",
+                "path": "src/platform/plugins/shared/data_views/server/rest_api_routes/public/runtime_fields/put_runtime_field.ts"
+              },
+              {
+                "plugin": "dataViews",
+                "path": "src/platform/plugins/shared/data_views/server/rest_api_routes/public/scripted_fields/put_scripted_field.ts"
+              },
+              {
+                "plugin": "dataViews",
+                "path": "src/platform/plugins/shared/data_views/server/rest_api_routes/internal/fields_for.ts"
               },
               {
                 "plugin": "data",
@@ -16824,52 +16824,52 @@
                 "path": "x-pack/plugins/cloud/server/routes/set_cloud_data_route.ts"
               },
               {
-                "plugin": "dataViews",
-                "path": "src/plugins/data_views/server/rest_api_routes/public/fields/update_fields.ts"
-              },
-              {
-                "plugin": "dataViews",
-                "path": "src/plugins/data_views/server/rest_api_routes/public/runtime_fields/create_runtime_field.ts"
-              },
-              {
-                "plugin": "dataViews",
-                "path": "src/plugins/data_views/server/rest_api_routes/public/runtime_fields/update_runtime_field.ts"
-              },
-              {
-                "plugin": "dataViews",
-                "path": "src/plugins/data_views/server/rest_api_routes/public/scripted_fields/create_scripted_field.ts"
-              },
-              {
-                "plugin": "dataViews",
-                "path": "src/plugins/data_views/server/rest_api_routes/public/scripted_fields/update_scripted_field.ts"
-              },
-              {
-                "plugin": "dataViews",
-                "path": "src/plugins/data_views/server/rest_api_routes/public/create_data_view.ts"
-              },
-              {
-                "plugin": "dataViews",
-                "path": "src/plugins/data_views/server/rest_api_routes/public/default_data_view.ts"
-              },
-              {
-                "plugin": "dataViews",
-                "path": "src/plugins/data_views/server/rest_api_routes/public/update_data_view.ts"
-              },
-              {
-                "plugin": "dataViews",
-                "path": "src/plugins/data_views/server/rest_api_routes/public/swap_references.ts"
-              },
-              {
-                "plugin": "dataViews",
-                "path": "src/plugins/data_views/server/rest_api_routes/internal/fields_for.ts"
-              },
-              {
                 "plugin": "spaces",
                 "path": "x-pack/plugins/spaces/server/routes/api/external/post.ts"
               },
               {
                 "plugin": "security",
                 "path": "x-pack/plugins/security/server/routes/authorization/roles/post.ts"
+              },
+              {
+                "plugin": "dataViews",
+                "path": "src/platform/plugins/shared/data_views/server/rest_api_routes/public/fields/update_fields.ts"
+              },
+              {
+                "plugin": "dataViews",
+                "path": "src/platform/plugins/shared/data_views/server/rest_api_routes/public/runtime_fields/create_runtime_field.ts"
+              },
+              {
+                "plugin": "dataViews",
+                "path": "src/platform/plugins/shared/data_views/server/rest_api_routes/public/runtime_fields/update_runtime_field.ts"
+              },
+              {
+                "plugin": "dataViews",
+                "path": "src/platform/plugins/shared/data_views/server/rest_api_routes/public/scripted_fields/create_scripted_field.ts"
+              },
+              {
+                "plugin": "dataViews",
+                "path": "src/platform/plugins/shared/data_views/server/rest_api_routes/public/scripted_fields/update_scripted_field.ts"
+              },
+              {
+                "plugin": "dataViews",
+                "path": "src/platform/plugins/shared/data_views/server/rest_api_routes/public/create_data_view.ts"
+              },
+              {
+                "plugin": "dataViews",
+                "path": "src/platform/plugins/shared/data_views/server/rest_api_routes/public/default_data_view.ts"
+              },
+              {
+                "plugin": "dataViews",
+                "path": "src/platform/plugins/shared/data_views/server/rest_api_routes/public/update_data_view.ts"
+              },
+              {
+                "plugin": "dataViews",
+                "path": "src/platform/plugins/shared/data_views/server/rest_api_routes/public/swap_references.ts"
+              },
+              {
+                "plugin": "dataViews",
+                "path": "src/platform/plugins/shared/data_views/server/rest_api_routes/internal/fields_for.ts"
               },
               {
                 "plugin": "data",
@@ -17816,24 +17816,24 @@
                 "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_management/api/rules/bulk_delete_rules/route.ts"
               },
               {
+                "plugin": "telemetry",
+                "path": "src/plugins/telemetry/server/routes/telemetry_usage_stats.test.ts"
+              },
+              {
+                "plugin": "telemetry",
+                "path": "src/plugins/telemetry/server/routes/telemetry_usage_stats.test.ts"
+              },
+              {
+                "plugin": "telemetry",
+                "path": "src/plugins/telemetry/server/routes/telemetry_usage_stats.test.ts"
+              },
+              {
+                "plugin": "telemetry",
+                "path": "src/plugins/telemetry/server/routes/telemetry_usage_stats.test.ts"
+              },
+              {
                 "plugin": "dataViewFieldEditor",
-                "path": "src/plugins/data_view_field_editor/server/routes/field_preview.ts"
-              },
-              {
-                "plugin": "telemetry",
-                "path": "src/plugins/telemetry/server/routes/telemetry_usage_stats.test.ts"
-              },
-              {
-                "plugin": "telemetry",
-                "path": "src/plugins/telemetry/server/routes/telemetry_usage_stats.test.ts"
-              },
-              {
-                "plugin": "telemetry",
-                "path": "src/plugins/telemetry/server/routes/telemetry_usage_stats.test.ts"
-              },
-              {
-                "plugin": "telemetry",
-                "path": "src/plugins/telemetry/server/routes/telemetry_usage_stats.test.ts"
+                "path": "src/platform/plugins/shared/data_view_field_editor/server/routes/field_preview.ts"
               },
               {
                 "plugin": "@kbn/core-http-router-server-internal",
@@ -18138,24 +18138,24 @@
                 "path": "packages/core/http/core-http-router-server-mocks/src/versioned_router.mock.ts"
               },
               {
-                "plugin": "dataViews",
-                "path": "src/plugins/data_views/server/rest_api_routes/public/runtime_fields/delete_runtime_field.ts"
-              },
-              {
-                "plugin": "dataViews",
-                "path": "src/plugins/data_views/server/rest_api_routes/public/scripted_fields/delete_scripted_field.ts"
-              },
-              {
-                "plugin": "dataViews",
-                "path": "src/plugins/data_views/server/rest_api_routes/public/delete_data_view.ts"
-              },
-              {
                 "plugin": "spaces",
                 "path": "x-pack/plugins/spaces/server/routes/api/external/delete.ts"
               },
               {
                 "plugin": "security",
                 "path": "x-pack/plugins/security/server/routes/authorization/roles/delete.ts"
+              },
+              {
+                "plugin": "dataViews",
+                "path": "src/platform/plugins/shared/data_views/server/rest_api_routes/public/runtime_fields/delete_runtime_field.ts"
+              },
+              {
+                "plugin": "dataViews",
+                "path": "src/platform/plugins/shared/data_views/server/rest_api_routes/public/scripted_fields/delete_scripted_field.ts"
+              },
+              {
+                "plugin": "dataViews",
+                "path": "src/platform/plugins/shared/data_views/server/rest_api_routes/public/delete_data_view.ts"
               },
               {
                 "plugin": "data",

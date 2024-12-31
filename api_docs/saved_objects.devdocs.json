@@ -35,6 +35,14 @@
         "trackAdoption": false,
         "references": [
           {
+            "plugin": "graph",
+            "path": "x-pack/plugins/graph/public/components/save_modal.tsx"
+          },
+          {
+            "plugin": "graph",
+            "path": "x-pack/plugins/graph/public/components/save_modal.tsx"
+          },
+          {
             "plugin": "presentationUtil",
             "path": "src/platform/plugins/shared/presentation_util/public/components/saved_object_save_modal_dashboard.tsx"
           },
@@ -76,19 +84,11 @@
           },
           {
             "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/top_nav/on_save_search.tsx"
+            "path": "src/platform/plugins/shared/discover/public/application/main/components/top_nav/on_save_search.tsx"
           },
           {
             "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/top_nav/on_save_search.tsx"
-          },
-          {
-            "plugin": "graph",
-            "path": "x-pack/plugins/graph/public/components/save_modal.tsx"
-          },
-          {
-            "plugin": "graph",
-            "path": "x-pack/plugins/graph/public/components/save_modal.tsx"
+            "path": "src/platform/plugins/shared/discover/public/application/main/components/top_nav/on_save_search.tsx"
           },
           {
             "plugin": "links",

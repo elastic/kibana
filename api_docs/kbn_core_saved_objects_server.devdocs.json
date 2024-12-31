@@ -6199,6 +6199,66 @@
             "path": "src/core/server/index.ts"
           },
           {
+            "plugin": "actions",
+            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/create/types/types.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/create/types/types.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/create/types/types.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/platform/plugins/shared/actions/server/types.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/platform/plugins/shared/actions/server/types.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/platform/plugins/shared/actions/server/types.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/update/types/types.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/update/types/types.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/update/types/types.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/update/update.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/update/update.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/update/update.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/create/create.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/create/create.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/create/create.ts"
+          },
+          {
             "plugin": "@kbn/alerting-types",
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts"
           },
@@ -6259,66 +6319,6 @@
             "path": "x-pack/platform/plugins/shared/alerting/common/rule.ts"
           },
           {
-            "plugin": "actions",
-            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/create/types/types.ts"
-          },
-          {
-            "plugin": "actions",
-            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/create/types/types.ts"
-          },
-          {
-            "plugin": "actions",
-            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/create/types/types.ts"
-          },
-          {
-            "plugin": "actions",
-            "path": "x-pack/platform/plugins/shared/actions/server/types.ts"
-          },
-          {
-            "plugin": "actions",
-            "path": "x-pack/platform/plugins/shared/actions/server/types.ts"
-          },
-          {
-            "plugin": "actions",
-            "path": "x-pack/platform/plugins/shared/actions/server/types.ts"
-          },
-          {
-            "plugin": "actions",
-            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/update/types/types.ts"
-          },
-          {
-            "plugin": "actions",
-            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/update/types/types.ts"
-          },
-          {
-            "plugin": "actions",
-            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/update/types/types.ts"
-          },
-          {
-            "plugin": "actions",
-            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/update/update.ts"
-          },
-          {
-            "plugin": "actions",
-            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/update/update.ts"
-          },
-          {
-            "plugin": "actions",
-            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/update/update.ts"
-          },
-          {
-            "plugin": "actions",
-            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/create/create.ts"
-          },
-          {
-            "plugin": "actions",
-            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/create/create.ts"
-          },
-          {
-            "plugin": "actions",
-            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/create/create.ts"
-          },
-          {
             "plugin": "alerting",
             "path": "x-pack/platform/plugins/shared/alerting/server/rules_client/common/inject_references.ts"
           },
@@ -6344,11 +6344,11 @@
           },
           {
             "plugin": "savedSearch",
-            "path": "src/plugins/saved_search/server/saved_objects/search_migrations.ts"
+            "path": "src/platform/plugins/shared/saved_search/server/saved_objects/search_migrations.ts"
           },
           {
             "plugin": "savedSearch",
-            "path": "src/plugins/saved_search/server/saved_objects/search_migrations.ts"
+            "path": "src/platform/plugins/shared/saved_search/server/saved_objects/search_migrations.ts"
           },
           {
             "plugin": "canvas",
@@ -10667,10 +10667,6 @@
                 "path": "packages/core/saved-objects/core-saved-objects-migration-server-mocks/src/kibana_migrator.mock.ts"
               },
               {
-                "plugin": "dataViews",
-                "path": "src/plugins/data_views/server/saved_objects/data_views.ts"
-              },
-              {
                 "plugin": "spaces",
                 "path": "x-pack/plugins/spaces/server/saved_objects/saved_objects_service.ts"
               },
@@ -10683,16 +10679,8 @@
                 "path": "x-pack/platform/plugins/shared/task_manager/server/saved_objects/index.ts"
               },
               {
-                "plugin": "share",
-                "path": "src/plugins/share/server/url_service/saved_objects/register_url_service_saved_object_type.ts"
-              },
-              {
-                "plugin": "actions",
-                "path": "x-pack/platform/plugins/shared/actions/server/saved_objects/index.ts"
-              },
-              {
-                "plugin": "actions",
-                "path": "x-pack/platform/plugins/shared/actions/server/saved_objects/index.ts"
+                "plugin": "dataViews",
+                "path": "src/platform/plugins/shared/data_views/server/saved_objects/data_views.ts"
               },
               {
                 "plugin": "data",
@@ -10707,6 +10695,26 @@
                 "path": "src/plugins/data/server/search/saved_objects/search_session.ts"
               },
               {
+                "plugin": "graph",
+                "path": "x-pack/plugins/graph/server/saved_objects/graph_workspace.ts"
+              },
+              {
+                "plugin": "share",
+                "path": "src/plugins/share/server/url_service/saved_objects/register_url_service_saved_object_type.ts"
+              },
+              {
+                "plugin": "lens",
+                "path": "x-pack/plugins/lens/server/saved_objects.ts"
+              },
+              {
+                "plugin": "actions",
+                "path": "x-pack/platform/plugins/shared/actions/server/saved_objects/index.ts"
+              },
+              {
+                "plugin": "actions",
+                "path": "x-pack/platform/plugins/shared/actions/server/saved_objects/index.ts"
+              },
+              {
                 "plugin": "alerting",
                 "path": "x-pack/platform/plugins/shared/alerting/server/saved_objects/index.ts"
               },
@@ -10715,16 +10723,8 @@
                 "path": "src/platform/plugins/shared/dashboard/server/dashboard_saved_object/dashboard_saved_object.ts"
               },
               {
-                "plugin": "graph",
-                "path": "x-pack/plugins/graph/server/saved_objects/graph_workspace.ts"
-              },
-              {
-                "plugin": "lens",
-                "path": "x-pack/plugins/lens/server/saved_objects.ts"
-              },
-              {
                 "plugin": "savedSearch",
-                "path": "src/plugins/saved_search/server/saved_objects/search.ts"
+                "path": "src/platform/plugins/shared/saved_search/server/saved_objects/search.ts"
               },
               {
                 "plugin": "ml",
@@ -11375,7 +11375,7 @@
               },
               {
                 "plugin": "savedSearch",
-                "path": "src/plugins/saved_search/server/saved_objects/search.ts"
+                "path": "src/platform/plugins/shared/saved_search/server/saved_objects/search.ts"
               },
               {
                 "plugin": "visualizations",
@@ -11523,27 +11523,11 @@
               },
               {
                 "plugin": "dataViews",
-                "path": "src/plugins/data_views/server/saved_objects/data_views.ts"
-              },
-              {
-                "plugin": "actions",
-                "path": "x-pack/platform/plugins/shared/actions/server/saved_objects/index.ts"
-              },
-              {
-                "plugin": "actions",
-                "path": "x-pack/platform/plugins/shared/actions/server/saved_objects/index.ts"
+                "path": "src/platform/plugins/shared/data_views/server/saved_objects/data_views.ts"
               },
               {
                 "plugin": "data",
                 "path": "src/plugins/data/server/saved_objects/query.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/platform/plugins/shared/alerting/server/saved_objects/index.ts"
-              },
-              {
-                "plugin": "dashboard",
-                "path": "src/platform/plugins/shared/dashboard/server/dashboard_saved_object/dashboard_saved_object.ts"
               },
               {
                 "plugin": "graph",
@@ -11554,8 +11538,24 @@
                 "path": "x-pack/plugins/lens/server/saved_objects.ts"
               },
               {
+                "plugin": "actions",
+                "path": "x-pack/platform/plugins/shared/actions/server/saved_objects/index.ts"
+              },
+              {
+                "plugin": "actions",
+                "path": "x-pack/platform/plugins/shared/actions/server/saved_objects/index.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/platform/plugins/shared/alerting/server/saved_objects/index.ts"
+              },
+              {
+                "plugin": "dashboard",
+                "path": "src/platform/plugins/shared/dashboard/server/dashboard_saved_object/dashboard_saved_object.ts"
+              },
+              {
                 "plugin": "savedSearch",
-                "path": "src/plugins/saved_search/server/saved_objects/search.ts"
+                "path": "src/platform/plugins/shared/saved_search/server/saved_objects/search.ts"
               },
               {
                 "plugin": "savedObjectsTagging",
