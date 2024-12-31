@@ -43,8 +43,8 @@ export function defineCommonRoutes({
           reason: 'This route must remain accessible to 3rd-party IdPs',
         },
         authc: {
-          enabled: false,
-          reason: 'This route must remain accessible to 3rd-party IdPs',
+          enabled: 'optional',
+          // reason: 'This route must remain accessible to 3rd-party IdPs',
         },
       },
       // Allow unknown query parameters as this endpoint can be hit by the 3rd-party with any
@@ -138,9 +138,9 @@ export function defineCommonRoutes({
           reason: `This route provides basic and token login capbility, which is delegated to the internal authentication service`,
         },
         authc: {
-          enabled: false,
-          reason:
-            'This route is used for authenticaton - it does not require existing authentication',
+          enabled: 'optional',
+          // reason:
+          //  'This route is used for authenticaton - it does not require existing authentication',
         },
       },
       validate: {
