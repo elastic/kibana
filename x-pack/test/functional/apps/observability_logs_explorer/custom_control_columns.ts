@@ -158,10 +158,44 @@ function generateLogsData({ to, count = 1 }: { to: string; count?: number }) {
       Array(count)
         .fill(0)
         .map(() => {
-          return log.create().logLevel('info').timestamp(timestamp).defaults({
-            'error.exception.stacktrace': 'Error message in error.exception.stacktrace',
-            'service.name': 'node-service',
-          });
+          return log
+            .create()
+            .logLevel('info')
+            .timestamp(timestamp)
+            .defaults({
+              'error.exception.stacktrace': [
+                {
+                  exclude_from_grouping: false,
+                  abs_path: '/app/server/coffee.js',
+                  filename: 'server/coffee.js',
+                  line: {
+                    number: 27,
+                    context: "  apm.captureError('this is a string', function (err) {",
+                  },
+                  function: '<anonymous>',
+                  context: {
+                    pre: ['', "app.get('/log-message', function (req, res) {"],
+                    post: [
+                      '    if (err) {',
+                      "      res.status(500).send('could not capture error: ' + err.message)",
+                    ],
+                  },
+                  vars: {},
+                },
+                {
+                  exclude_from_grouping: false,
+                  library_frame: true,
+                  abs_path: 'node:internal/async_hooks',
+                  filename: 'node:internal/async_hooks',
+                  line: {
+                    number: 130,
+                  },
+                  function: 'throwError',
+                  vars: {},
+                },
+              ],
+              'service.name': 'node-service',
+            });
         })
     );
 
@@ -175,10 +209,44 @@ function generateLogsData({ to, count = 1 }: { to: string; count?: number }) {
       Array(count)
         .fill(0)
         .map(() => {
-          return log.create().logLevel('info').timestamp(timestamp).defaults({
-            'error.log.stacktrace': 'Error message in error.log.stacktrace',
-            'service.name': 'node-service',
-          });
+          return log
+            .create()
+            .logLevel('info')
+            .timestamp(timestamp)
+            .defaults({
+              'error.log.stacktrace': [
+                {
+                  exclude_from_grouping: false,
+                  abs_path: '/app/server/coffee.js',
+                  filename: 'server/coffee.js',
+                  line: {
+                    number: 27,
+                    context: "  apm.captureError('this is a string', function (err) {",
+                  },
+                  function: '<anonymous>',
+                  context: {
+                    pre: ['', "app.get('/log-message', function (req, res) {"],
+                    post: [
+                      '    if (err) {',
+                      "      res.status(500).send('could not capture error: ' + err.message)",
+                    ],
+                  },
+                  vars: {},
+                },
+                {
+                  exclude_from_grouping: false,
+                  library_frame: true,
+                  abs_path: 'node:internal/async_hooks',
+                  filename: 'node:internal/async_hooks',
+                  line: {
+                    number: 130,
+                  },
+                  function: 'throwError',
+                  vars: {},
+                },
+              ],
+              'service.name': 'node-service',
+            });
         })
     );
 
