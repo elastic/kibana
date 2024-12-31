@@ -43,7 +43,7 @@ export function ApmStacktrace({ hit, dataView }: { hit: DataTableRecord; dataVie
 
   if (requestState === ElasticRequestState.Error || requestState === ElasticRequestState.NotFound) {
     return (
-      <p>
+      <p data-test-subj="unifiedDocViewerApmStacktraceErrorMsg">
         {i18n.translate('unifiedDocViewer.apmStacktrace.errorMessage', {
           defaultMessage: 'Failed to load stacktrace',
         })}
@@ -51,17 +51,17 @@ export function ApmStacktrace({ hit, dataView }: { hit: DataTableRecord; dataVie
     );
   }
 
-  const codeLanguage = apmErrorDoc?.service.language?.name;
-  const exceptions = apmErrorDoc?.error.exception || [];
-  const logStackframes = apmErrorDoc?.error.log?.stacktrace;
+  const codeLanguage = apmErrorDoc?.service?.language?.name;
+  const exceptions = apmErrorDoc?.error?.exception || [];
+  const logStackframes = apmErrorDoc?.error?.log?.stacktrace;
   const isPlaintextException =
-    !!apmErrorDoc?.error.stack_trace && exceptions.length === 1 && !exceptions[0].stacktrace;
+    !!apmErrorDoc?.error?.stack_trace && exceptions.length === 1 && !exceptions[0].stacktrace;
 
-  if (apmErrorDoc?.error.log?.message) {
+  if (apmErrorDoc?.error?.log?.message) {
     return <Stacktrace stackframes={logStackframes} codeLanguage={codeLanguage} />;
   }
 
-  if (apmErrorDoc?.error.exception?.length) {
+  if (apmErrorDoc?.error?.exception?.length) {
     return isPlaintextException ? (
       <PlaintextStacktrace
         message={exceptions[0].message}
