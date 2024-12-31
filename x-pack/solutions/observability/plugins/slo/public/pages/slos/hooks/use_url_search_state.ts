@@ -11,7 +11,7 @@ import deepmerge from 'deepmerge';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { DEFAULT_SLO_PAGE_SIZE } from '../../../../common/constants';
-import type { ViewType, GroupByField, SortDirection, SortField } from '../types';
+import type { GroupByField, SortDirection, SortField, ViewType } from '../types';
 
 export const SLO_LIST_SEARCH_URL_STORAGE_KEY = 'search';
 
@@ -37,7 +37,7 @@ export const DEFAULT_STATE: SearchState = {
   perPage: DEFAULT_SLO_PAGE_SIZE,
   sort: { by: 'status', direction: 'desc' },
   view: 'cardView',
-  groupBy: 'ungrouped' as const,
+  groupBy: 'ungrouped',
   filters: [],
   lastRefresh: 0,
 };
@@ -77,7 +77,7 @@ export function useUrlSearchState(): {
   const onStateChange = useCallback(
     (newState: Partial<SearchState>) => {
       const updatedState = { ...state, page: 0, ...newState };
-      setState((stateN) => updatedState);
+      setState(() => updatedState);
       urlStateStorage.current?.set(SLO_LIST_SEARCH_URL_STORAGE_KEY, updatedState, {
         replace: true,
       });
