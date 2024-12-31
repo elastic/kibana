@@ -4,12 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { AppMountParameters, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import type {
   AssetInventoryPluginSetup,
   AssetInventoryPluginStart,
   AppPluginStartDependencies,
 } from './types';
+import { getAssetInventoryLazy } from './methods';
 
 export class AssetInventoryPlugin
   implements Plugin<AssetInventoryPluginSetup, AssetInventoryPluginStart>
@@ -17,16 +18,10 @@ export class AssetInventoryPlugin
   public setup(core: CoreSetup): AssetInventoryPluginSetup {
     return {};
   }
-  public start(
-    coreStart: CoreStart,
-    depsStart: AppPluginStartDependencies
-  ): AssetInventoryPluginStart {
+  public start(coreStart: CoreStart): AssetInventoryPluginStart {
     return {
-      getAssetInventoryPage: async (params: AppMountParameters) => {
-        // Load application bundle
-        const { renderApp } = await import('./application');
-        // Render the application
-        return renderApp(coreStart, depsStart as AppPluginStartDependencies, params);
+      getAssetInventoryPage: (assetInventoryDeps: AppPluginStartDependencies) => {
+        return getAssetInventoryLazy(assetInventoryDeps);
       },
     };
   }
