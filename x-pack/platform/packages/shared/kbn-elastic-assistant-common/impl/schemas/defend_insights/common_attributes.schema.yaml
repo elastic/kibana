@@ -23,6 +23,9 @@ components:
         value:
           description: The value of the event
           type: string
+        signature:
+          description: The signature of the event
+          type: string
 
     DefendInsightType:
       description: The insight type (ie. incompatible_antivirus)

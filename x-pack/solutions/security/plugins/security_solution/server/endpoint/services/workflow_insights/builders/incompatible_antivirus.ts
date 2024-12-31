@@ -33,9 +33,12 @@ export async function buildIncompatibleAntivirusWorkflowInsights(
   const osEndpointIdsMap = await groupEndpointIdsByOS(endpointIds, endpointMetadataService);
   return defendInsights.flatMap((defendInsight: DefendInsight) => {
     const filePaths = Array.from(new Set((defendInsight.events ?? []).map((event) => event.value)));
+    const signatures = Array.from(
+      new Set((defendInsight.events ?? []).map((event) => event.signature))
+    ).filter(Boolean) as string[];
 
-    return Object.keys(osEndpointIdsMap).flatMap((os) =>
-      filePaths.map((filePath) => ({
+    return Object.keys(osEndpointIdsMap).flatMap((os) => {
+      const common = {
         '@timestamp': currentTime,
         // TODO add i18n support
         message: 'Incompatible antiviruses detected',
@@ -57,32 +60,66 @@ export async function buildIncompatibleAntivirusWorkflowInsights(
           timestamp: currentTime,
         },
         value: defendInsight.group,
+        metadata: {
+          notes: {
+            llm_model: apiConfig.model ?? '',
+          },
+        },
         remediation: {
           exception_list_items: [
             {
               list_id: ENDPOINT_ARTIFACT_LISTS.trustedApps.id,
               name: defendInsight.group,
               description: 'Suggested by Security Workflow Insights',
-              entries: [
-                {
-                  field: 'process.executable.caseless',
-                  operator: 'included',
-                  type: 'match',
-                  value: filePath,
-                },
-              ],
+              entries: [],
               // TODO add per policy support
               tags: ['policy:all'],
               os_types: [os as SupportedHostOsType],
             },
           ],
         },
-        metadata: {
-          notes: {
-            llm_model: apiConfig.model ?? '',
+      };
+      if (signatures.length) {
+        return signatures.map((signature) => ({
+          ...common,
+          remediation: {
+            ...common.remediation,
+            exception_list_items: [
+              {
+                ...common.remediation.exception_list_items[0],
+                entries: [
+                  {
+                    field: os === 'macos' ? 'process.code_signature' : 'process.Ext.code_signature',
+                    operator: 'included',
+                    type: 'match',
+                    value: signature,
+                  },
+                ],
+              },
+            ],
           },
-        },
-      }))
-    );
+        }));
+      } else {
+        return filePaths.map((filePath) => ({
+          ...common,
+          remediation: {
+            ...common.remediation,
+            exception_list_items: [
+              {
+                ...common.remediation.exception_list_items[0],
+                entries: [
+                  {
+                    field: 'process.executable.caseless',
+                    operator: 'included',
+                    type: 'match',
+                    value: filePath,
+                  },
+                ],
+              },
+            ],
+          },
+        }));
+      }
+    });
   });
 }
