@@ -57,7 +57,7 @@ const getPipeline = (filename: string, removeSteps = true) => {
 
     if (
       (await doAnyChangesMatch([
-        /^src\/plugins\/data/,
+        /^src\/platform\/plugins\/shared\/data/,
         /^x-pack\/platform\/plugins\/shared\/actions/,
         /^x-pack\/platform\/plugins\/shared\/alerting/,
         /^x-pack\/platform\/plugins\/shared\/event_log/,
@@ -298,7 +298,7 @@ const getPipeline = (filename: string, removeSteps = true) => {
         /^package.json/,
         /^src\/platform\/packages\/shared\/kbn-discover-utils/,
         /^packages\/kbn-doc-links/,
-        /^packages\/kbn-dom-drag-drop/,
+        /^src\/platform\/packages\/shared\/kbn-dom-drag-drop/,
         /^src\/platform\/packages\/shared\/kbn-es-query/,
         /^packages\/kbn-i18n/,
         /^packages\/kbn-i18n-react/,
@@ -319,9 +319,9 @@ const getPipeline = (filename: string, removeSteps = true) => {
         /^packages\/react/,
         /^packages\/shared-ux/,
         /^src\/core/,
-        /^src\/plugins\/charts/,
+        /^src\/platform\/plugins\/shared\/charts/,
         /^src\/platform\/plugins\/shared\/controls/,
-        /^src\/plugins\/data/,
+        /^src\/platform\/plugins\/shared\/data/,
         /^src\/platform\/plugins\/shared\/data_views/,
         /^src\/platform\/plugins\/shared\/discover/,
         /^src\/platform\/plugins\/shared\/field_formats/,
@@ -331,7 +331,7 @@ const getPipeline = (filename: string, removeSteps = true) => {
         /^src\/platform\/plugins\/shared\/saved_search/,
         /^src\/plugins\/ui_actions/,
         /^src\/platform\/plugins\/shared\/unified_histogram/,
-        /^src\/plugins\/unified_search/,
+        /^src\/platform\/plugins\/shared\/unified_search/,
         /^x-pack\/platform\/packages\/shared\/kbn-elastic-assistant/,
         /^x-pack\/platform\/packages\/shared\/kbn-elastic-assistant-common/,
         /^x-pack\/solutions\/security\/packages/,
