@@ -11,17 +11,9 @@ import deepmerge from 'deepmerge';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { DEFAULT_SLO_PAGE_SIZE } from '../../../../common/constants';
-import type { ViewType, GroupByField, SortDirection } from '../types';
+import type { ViewType, GroupByField, SortDirection, SortField } from '../types';
 
 export const SLO_LIST_SEARCH_URL_STORAGE_KEY = 'search';
-export type SortField =
-  | 'sli_value'
-  | 'error_budget_consumed'
-  | 'error_budget_remaining'
-  | 'status'
-  | 'burn_rate_5m'
-  | 'burn_rate_1h'
-  | 'burn_rate_1d';
 
 export interface SearchState {
   kqlQuery: string;

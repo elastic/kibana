@@ -14,3 +14,11 @@ export type GroupByField =
   | 'slo.instanceId'
   | '_index';
 export type SortDirection = 'asc' | 'desc';
+export type SortField =
+  | 'sli_value'
+  | 'error_budget_consumed'
+  | 'error_budget_remaining'
+  | 'status'
+  | 'burn_rate_5m'
+  | 'burn_rate_1h'
+  | 'burn_rate_1d';

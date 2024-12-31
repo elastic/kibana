@@ -9,8 +9,7 @@ import { Filter } from '@kbn/es-query';
 import React, { useEffect, useState } from 'react';
 import { Subject } from 'rxjs';
 import { GroupView } from '../../../../pages/slos/components/grouped_slos/group_view';
-import type { ViewType, GroupByField } from '../../../../pages/slos/types';
-import { SortField } from '../../../../pages/slos/hooks/use_url_search_state';
+import type { ViewType, GroupByField, SortField } from '../../../../pages/slos/types';
 import { buildCombinedKqlQuery } from './helpers/build_kql_query';
 
 interface Props {

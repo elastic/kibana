@@ -8,8 +8,8 @@ import { EuiEmptyPrompt, EuiFlexItem, EuiLoadingSpinner, EuiTablePagination } fr
 import { Filter } from '@kbn/es-query';
 import React, { useEffect } from 'react';
 import { useFetchSloGroups } from '../../../../hooks/use_fetch_slo_groups';
-import { SortField, useUrlSearchState } from '../../hooks/use_url_search_state';
-import type { ViewType, GroupByField, SortDirection } from '../../types';
+import { useUrlSearchState } from '../../hooks/use_url_search_state';
+import type { ViewType, GroupByField, SortDirection, SortField } from '../../types';
 import { SloGroupListEmpty } from './group_list_empty';
 import { SloGroupListError } from './group_list_error';
 import { GroupListView } from './group_list_view';

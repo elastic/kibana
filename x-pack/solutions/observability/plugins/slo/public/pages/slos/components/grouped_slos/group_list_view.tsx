@@ -28,9 +28,8 @@ import { paths } from '../../../../../common/locators/paths';
 import { useFetchSloList } from '../../../../hooks/use_fetch_slo_list';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useSloFormattedSLIValue } from '../../hooks/use_slo_summary';
-import type { SortField } from '../../hooks/use_url_search_state';
 import { SlosView } from '../slos_view';
-import type { ViewType, GroupByField, SortDirection } from '../../types';
+import type { ViewType, GroupByField, SortDirection, SortField } from '../../types';
 import { useGroupName } from './hooks/use_group_name';
 
 interface Props {
