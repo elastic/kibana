@@ -20,7 +20,6 @@
   ],
   "kbn_references": [
     "@kbn/i18n",
-    "@kbn/kibana-react-plugin",
     "@kbn/apm-types",
     "@kbn/key-value-metadata-table"
   ]
