@@ -65,19 +65,19 @@ as uiSettings within the code.
 |The data plugin provides common data access services, such as search and query, for solutions and application developers.
 
 
-|{kib-repo}blob/{branch}/src/plugins/data_view_editor/README.md[dataViewEditor]
+|{kib-repo}blob/{branch}/src/platform/plugins/shared/data_view_editor/README.md[dataViewEditor]
 |Create data views from within Kibana apps.
 
 
-|{kib-repo}blob/{branch}/src/plugins/data_view_field_editor/README.md[dataViewFieldEditor]
+|{kib-repo}blob/{branch}/src/platform/plugins/shared/data_view_field_editor/README.md[dataViewFieldEditor]
 |The reusable field editor across Kibana!
 
 
-|{kib-repo}blob/{branch}/src/plugins/data_view_management[dataViewManagement]
+|{kib-repo}blob/{branch}/src/platform/plugins/shared/data_view_management[dataViewManagement]
 |WARNING: Missing README.
 
 
-|{kib-repo}blob/{branch}/src/plugins/data_views/README.mdx[dataViews]
+|{kib-repo}blob/{branch}/src/platform/plugins/shared/data_views/README.mdx[dataViews]
 |The data views API provides a consistent method of structuring and formatting documents
 and field lists across the various Kibana apps. It's typically used in conjunction with
 <DocLink id="kibDevTutorialDataSearchAndSessions" section="high-level-search" text="SearchSource" /> for composing queries.
@@ -90,11 +90,11 @@ Routing will be handled by the id of the dev tool - your dev tool will be mounte
 This API doesn't support angular, for registering angular dev tools, bootstrap a local module on mount into the given HTML element.
 
 
-|{kib-repo}blob/{branch}/src/plugins/discover/README.md[discover]
+|{kib-repo}blob/{branch}/src/platform/plugins/shared/discover/README.md[discover]
 |Contains the Discover application and the saved search embeddable.
 
 
-|{kib-repo}blob/{branch}/src/plugins/discover_shared/README.md[discoverShared]
+|{kib-repo}blob/{branch}/src/platform/plugins/shared/discover_shared/README.md[discoverShared]
 |A stateful layer to register shared features and provide an access point to discover without a direct dependency.
 
 
@@ -196,7 +196,7 @@ for use in their own application.
 |Expression XY plugin adds a xy renderer and function to the expression plugin. The renderer will display the xy chart.
 
 
-|{kib-repo}blob/{branch}/src/plugins/field_formats/README.md[fieldFormats]
+|{kib-repo}blob/{branch}/src/platform/plugins/shared/field_formats/README.md[fieldFormats]
 |Index pattern fields formatters
 
 
@@ -294,7 +294,7 @@ Content is fetched from the remote (https://feeds.elastic.co) once a day, with p
 |NOTE: This plugin is deprecated and will be removed in 8.0. See https://github.com/elastic/kibana/issues/46435 for more information.
 
 
-|{kib-repo}blob/{branch}/src/plugins/saved_objects_finder/README.md[savedObjectsFinder]
+|{kib-repo}blob/{branch}/src/platform/plugins/shared/saved_objects_finder/README.md[savedObjectsFinder]
 |The savedObjectsFinder plugin exposes a UI for finding saved objects on the client side.
 
 
@@ -307,7 +307,7 @@ Content is fetched from the remote (https://feeds.elastic.co) once a day, with p
 oss plugins.
 
 
-|{kib-repo}blob/{branch}/src/plugins/saved_search/README.md[savedSearch]
+|{kib-repo}blob/{branch}/src/platform/plugins/shared/saved_search/README.md[savedSearch]
 |Contains the saved search saved object definition and helpers.
 This object is created when a user saves their current session in the Discover app.
 
@@ -361,11 +361,11 @@ In general this plugin provides:
 |Registers commercially licensed generic actions like per panel time range and contains some code that supports drilldown work.
 
 
-|{kib-repo}blob/{branch}/src/plugins/unified_doc_viewer/README.md[unifiedDocViewer]
+|{kib-repo}blob/{branch}/src/platform/plugins/shared/unified_doc_viewer/README.md[unifiedDocViewer]
 |This plugin contains services reliant on the plugin lifecycle for the unified doc viewer component (see @kbn/unified-doc-viewer).
 
 
-|{kib-repo}blob/{branch}/src/plugins/unified_histogram/README.md[unifiedHistogram]
+|{kib-repo}blob/{branch}/src/platform/plugins/shared/unified_histogram/README.md[unifiedHistogram]
 |Unified Histogram is a UX Building Block including a layout with a resizable histogram and a main display.
 It manages its own state and data fetching, and can easily be dropped into pages with minimal setup.
 
@@ -463,11 +463,11 @@ The plugin exposes the static DefaultEditorController class to consume.
 |The Kibana Alerting plugin provides a common place to set up rules. You can:
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/apm/readme.md[apm]
+|{kib-repo}blob/{branch}/x-pack/solutions/observability/plugins/apm/readme.md[apm]
 |This plugin provides access to App Monitoring features provided by Elastic. It allows you to monitor your software services and applications in real-time; visualize detailed performance information on your services, identify and analyze errors, and monitor host-level and APM agent-specific metrics like JVM and Go runtime metrics.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/apm_data_access[apmDataAccess]
+|{kib-repo}blob/{branch}/x-pack/solutions/observability/plugins/apm_data_access[apmDataAccess]
 |WARNING: Missing README.
 
 
@@ -530,11 +530,11 @@ Plugin server-side only. Plugin has three main functions:
 |Adds drilldown capabilities to dashboard.  Owned by the Kibana App team.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/data_quality/README.md[dataQuality]
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/shared/data_quality/README.md[dataQuality]
 |Page where users can see the quality of their log data sets.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/dataset_quality/README.md[datasetQuality]
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/shared/observability_solution/dataset_quality/README.md[datasetQuality]
 |In order to make ongoing maintenance of log collection easy we want to introduce the concept of data set quality, where users can easily get an overview on the data sets they have with information such as integration, size, last activity, among others.
 
 
@@ -546,7 +546,7 @@ Plugin server-side only. Plugin has three main functions:
 |The data_visualizer plugin enables you to explore the fields in your data.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/discover_enhanced/README.md[discoverEnhanced]
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/private/discover_enhanced/README.md[discoverEnhanced]
 |Contains the enhancements to the OSS discover app.
 
 
@@ -568,7 +568,7 @@ adds dynamic actions to every embeddables state, in order to support drilldowns.
 security and spaces filtering.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/enterprise_search/README.md[enterpriseSearch]
+|{kib-repo}blob/{branch}/x-pack/solutions/search/plugins/enterprise_search/README.md[enterpriseSearch]
 |This plugin provides Kibana user interfaces for managing the Enterprise Search solution and its products, App Search and Workplace Search.
 
 
@@ -597,7 +597,7 @@ activities.
 |The features plugin enhance Kibana with a per-feature privilege system.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/fields_metadata/README.md[fieldsMetadata]
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/shared/fields_metadata/README.md[fieldsMetadata]
 |The @kbn/fields-metadata-plugin is designed to provide a centralized and asynchronous way to consume field metadata across Kibana. This plugin addresses the need for on-demand retrieval of field metadata from static ECS/Metadata definitions and integration manifests, with the flexibility to extend to additional resolution sources in the future.
 
 
@@ -645,7 +645,7 @@ Index Management by running this series of requests in Console:
 external LLM APIs. Its goals are:
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/infra/README.md[infra]
+|{kib-repo}blob/{branch}/x-pack/solutions/observability/plugins/infra/README.md[infra]
 |This is the home of the infra plugin, which aims to provide a solution for
 the infrastructure monitoring use-case within Kibana.
 
@@ -658,7 +658,7 @@ the infrastructure monitoring use-case within Kibana.
 |Team owner: Security Integrations Scalability
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/inventory/README.md[inventory]
+|{kib-repo}blob/{branch}/x-pack/solutions/observability/plugins/inventory/README.md[inventory]
 |Home of the Inventory plugin, which renders the... inventory.
 
 
@@ -699,15 +699,15 @@ using the CURL scripts in the scripts folder.
 |This plugin contains various LLM tasks.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/logs_data_access/README.md[logsDataAccess]
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/shared/observability_solution/logs_data_access/README.md[logsDataAccess]
 |Exposes services to access logs data.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/logs_explorer/README.md[logsExplorer]
+|{kib-repo}blob/{branch}/x-pack/solutions/observability/plugins/logs_explorer/README.md[logsExplorer]
 |This plugin is home to the <LogsExplorer /> component and related types. It implements several of the underlying concepts that the Observability Logs Explorer app builds upon.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/logs_shared/README.md[logsShared]
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/shared/observability_solution/logs_shared/README.md[logsShared]
 |Exposes the shared components and APIs to access and visualize logs.
 
 
@@ -719,7 +719,7 @@ using the CURL scripts in the scripts folder.
 |Visualize geo data from Elasticsearch or 3rd party geo-services.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/metrics_data_access/README.md[metricsDataAccess]
+|{kib-repo}blob/{branch}/x-pack/solutions/observability/plugins/metrics_data_access/README.md[metricsDataAccess]
 |Exposes utilities to access metrics data.
 
 
@@ -756,11 +756,11 @@ Elastic.
 |The observabilityAiAssistantManagement plugin manages the Ai Assistant for Observability and Search management section.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/observability_logs_explorer/README.md[observabilityLogsExplorer]
+|{kib-repo}blob/{branch}/x-pack/solutions/observability/plugins/observability_logs_explorer/README.md[observabilityLogsExplorer]
 |This plugin provides an app based on the LogsExplorer component from the logs_explorer plugin, but adds observability-specific affordances.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/observability_onboarding/README.md[observabilityOnboarding]
+|{kib-repo}blob/{branch}/x-pack/solutions/observability/plugins/observability_onboarding/README.md[observabilityOnboarding]
 |This plugin provides an onboarding framework for observability solutions: Logs and APM.
 
 
@@ -780,11 +780,11 @@ Elastic.
 |This plugin contains the product documentation base service.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/profiling/README.md[profiling]
+|{kib-repo}blob/{branch}/x-pack/solutions/observability/plugins/profiling/README.md[profiling]
 |Universal Profiling provides fleet-wide, whole-system, continuous profiling with zero instrumentation. Get a comprehensive understanding of what lines of code are consuming compute resources throughout your entire fleet by visualizing your data in Kibana using the flamegraph, stacktraces, and top functions views.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/profiling_data_access[profilingDataAccess]
+|{kib-repo}blob/{branch}/x-pack/solutions/observability/plugins/profiling_data_access[profilingDataAccess]
 |WARNING: Missing README.
 
 
@@ -817,35 +817,35 @@ Elastic.
 It uses Chromium and Puppeteer underneath to run the browser in headless mode.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/search_assistant/README.md[searchAssistant]
+|{kib-repo}blob/{branch}/x-pack/solutions/search/plugins/search_assistant/README.md[searchAssistant]
 |This holds the Search AI Assistant which targets Search users and Serverless Elasticsearch.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/search_connectors/README.mdx[searchConnectors]
+|{kib-repo}blob/{branch}/x-pack/solutions/search/plugins/search_connectors/README.mdx[searchConnectors]
 |This plugin contains common assets and endpoints for the use of connectors in Kibana. Primarily used by the enterprise_search and serverless_search plugins.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/search_homepage/README.mdx[searchHomepage]
+|{kib-repo}blob/{branch}/x-pack/solutions/search/plugins/search_homepage/README.mdx[searchHomepage]
 |The Search Homepage is a shared homepage for elasticsearch users.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/search_indices/README.mdx[searchIndices]
+|{kib-repo}blob/{branch}/x-pack/solutions/search/plugins/search_indices/README.mdx[searchIndices]
 |The Search Indices plugin is a shared set of pages for elasticsearch users across stack and serverless search solutions.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/search_inference_endpoints/README.md[searchInferenceEndpoints]
+|{kib-repo}blob/{branch}/x-pack/solutions/search/plugins/search_inference_endpoints/README.md[searchInferenceEndpoints]
 |The Inference Endpoints is a tool used to manage inference endpoints
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/search_solution/search_navigation/README.mdx[searchNavigation]
+|{kib-repo}blob/{branch}/x-pack/solutions/search/plugins/search_solution/search_navigation/README.mdx[searchNavigation]
 |The Search Navigation plugin is used to handle navigation for search solution plugins across both stack and serverless.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/search_notebooks/README.mdx[searchNotebooks]
+|{kib-repo}blob/{branch}/x-pack/solutions/search/plugins/search_notebooks/README.mdx[searchNotebooks]
 |This plugin contains endpoints and components for rendering search python notebooks in the persistent dev console.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/search_playground/README.md[searchPlayground]
+|{kib-repo}blob/{branch}/x-pack/solutions/search/plugins/search_playground/README.md[searchPlayground]
 |The Search Playground is a tool for developers to experiment with their own data using LLMs.
 
 
@@ -883,7 +883,7 @@ This plugin is only enabled when the application is built for serverless project
 |This plugin contains configuration and code used to create a Serverless Observability project.  It leverages universal configuration and other APIs in the serverless plugin to configure Kibana.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/serverless_search/README.mdx[serverlessSearch]
+|{kib-repo}blob/{branch}/x-pack/solutions/search/plugins/serverless_search/README.mdx[serverlessSearch]
 |This plugin contains configuration and code used to create a Serverless Search project. It leverages universal configuration and other APIs in the serverless plugin to configure Kibana.
 
 

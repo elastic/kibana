@@ -27,8 +27,8 @@ BUNDLER_DEPS = [
 ]
 
 js_library(
-  name = "kbn-bfetch-error",
-  package_name = "@kbn/bfetch-error",
+  name = "core-base-common",
+  package_name = "@kbn/core-base-common",
   srcs = ["package.json"] + SRCS,
   deps = BUNDLER_DEPS,
   visibility = ["//visibility:public"],
