@@ -9813,74 +9813,76 @@
         }
       }
     },
-    "index-patterns": {
+    "files": {
       "properties": {
-        "indexPatternsCount": {
-          "type": "long"
+        "countByExtension": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "extension": {
+                "type": "keyword"
+              },
+              "count": {
+                "type": "long"
+              }
+            }
+          }
         },
-        "indexPatternsWithScriptedFieldCount": {
-          "type": "long"
-        },
-        "indexPatternsWithRuntimeFieldCount": {
-          "type": "long"
-        },
-        "scriptedFieldCount": {
-          "type": "long"
-        },
-        "runtimeFieldCount": {
-          "type": "long"
-        },
-        "perIndexPattern": {
+        "countByStatus": {
           "properties": {
-            "scriptedFieldCount": {
-              "properties": {
-                "min": {
-                  "type": "long"
-                },
-                "max": {
-                  "type": "long"
-                },
-                "avg": {
-                  "type": "float"
-                }
+            "AWAITING_UPLOAD": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of files awaiting upload"
               }
             },
-            "runtimeFieldCount": {
-              "properties": {
-                "min": {
-                  "type": "long"
-                },
-                "max": {
-                  "type": "long"
-                },
-                "avg": {
-                  "type": "float"
-                }
+            "DELETED": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of files that are marked as deleted"
               }
             },
-            "scriptedFieldLineCount": {
-              "properties": {
-                "min": {
-                  "type": "long"
-                },
-                "max": {
-                  "type": "long"
-                },
-                "avg": {
-                  "type": "float"
-                }
+            "READY": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of files that are ready for download"
               }
             },
-            "runtimeFieldLineCount": {
+            "UPLOADING": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of files that are currently uploading"
+              }
+            },
+            "UPLOAD_ERROR": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of files that failed to upload"
+              }
+            }
+          }
+        },
+        "storage": {
+          "properties": {
+            "esFixedSizeIndex": {
               "properties": {
-                "min": {
-                  "type": "long"
+                "capacity": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Capacity of the fixed size index"
+                  }
                 },
-                "max": {
-                  "type": "long"
+                "available": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Available storage in bytes"
+                  }
                 },
-                "avg": {
-                  "type": "float"
+                "used": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Used storage in bytes"
+                  }
                 }
               }
             }
@@ -9983,6 +9985,34 @@
           "type": "long",
           "_meta": {
             "description": "The number of translated labels"
+          }
+        }
+      }
+    },
+    "sample-data": {
+      "properties": {
+        "installed": {
+          "type": "array",
+          "items": {
+            "type": "keyword"
+          }
+        },
+        "last_install_date": {
+          "type": "date"
+        },
+        "last_install_set": {
+          "type": "keyword"
+        },
+        "last_uninstall_date": {
+          "type": "date"
+        },
+        "last_uninstall_set": {
+          "type": "keyword"
+        },
+        "uninstalled": {
+          "type": "array",
+          "items": {
+            "type": "keyword"
           }
         }
       }
