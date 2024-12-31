@@ -31,6 +31,7 @@ export const ReactDomServer = require('react-dom/server');
 export const ReactRouter = require('react-router');
 export const ReactRouterDom = require('react-router-dom');
 export const ReactRouterDomV5Compat = require('react-router-dom-v5-compat');
+// eslint-disable-next-line @kbn/eslint/module_migration
 export const StyledComponents = require('styled-components');
 export const FastestLevenshtein = require('fastest-levenshtein');
 

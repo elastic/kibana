@@ -17,7 +17,7 @@ const UiSharedDepsNpm = require('.');
 const MOMENT_SRC = require.resolve('moment/min/moment-with-locales.js');
 const WEBPACK_SRC = require.resolve('webpack');
 
-const REPO_ROOT = Path.resolve(__dirname, '..', '..');
+const REPO_ROOT = Path.resolve(__dirname, '..', '..', '..', '..', '..');
 
 module.exports = (_, argv) => {
   const outputPath = argv.outputPath ? Path.resolve(argv.outputPath) : UiSharedDepsNpm.distDir;
