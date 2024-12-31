@@ -12,7 +12,7 @@ import deepEqual from 'fast-deep-equal';
 import useEffectOnce from 'react-use/lib/useEffectOnce';
 import { useKibanaQuerySettings } from '@kbn/observability-shared-plugin/public';
 import { useTimeRange } from '../../../../hooks/use_time_range';
-import { useSearchSessionContext } from '../../../../hooks/use_search_session';
+import { useReloadRequestTimeContext } from '../../../../hooks/use_reload_request_time';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { telemetryTimeRangeFormatter } from '../../../../../common/formatters/telemetry_time_range';
 import { useMetricsDataViewContext } from '../../../../containers/metrics_source';
@@ -42,7 +42,7 @@ export const useUnifiedSearch = () => {
   const [error, setError] = useState<Error | null>(null);
   const [searchCriteria, setSearch] = useHostsUrlState();
   const { metricsView } = useMetricsDataViewContext();
-  const { updateSearchSessionId } = useSearchSessionContext();
+  const { updateSearchSessionId } = useReloadRequestTimeContext();
   const { services } = useKibanaContextForPlugin();
   const kibanaQuerySettings = useKibanaQuerySettings();
 
