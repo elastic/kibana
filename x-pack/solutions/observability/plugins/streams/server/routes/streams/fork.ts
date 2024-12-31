@@ -7,6 +7,7 @@
 
 import { z } from '@kbn/zod';
 import { badRequest, internal, notFound } from '@hapi/boom';
+import { conditionSchema, isWiredStream, WiredStreamDefinition } from '@kbn/streams-schema';
 import {
   DefinitionNotFound,
   ForkConditionMissing,
@@ -14,7 +15,6 @@ import {
   SecurityException,
 } from '../../lib/streams/errors';
 import { createServerRoute } from '../create_server_route';
-import { conditionSchema, streamDefinitonWithoutChildrenSchema } from '../../../common/types';
 import { syncStream, readStream, validateAncestorFields } from '../../lib/streams/stream_crud';
 import { MalformedStreamId } from '../../lib/streams/errors/malformed_stream_id';
 import { isChildOf } from '../../lib/streams/helpers/hierarchy';
@@ -36,7 +36,7 @@ export const forkStreamsRoute = createServerRoute({
     path: z.object({
       id: z.string(),
     }),
-    body: z.object({ stream: streamDefinitonWithoutChildrenSchema, condition: conditionSchema }),
+    body: z.object({ stream: z.object({ name: z.string() }), condition: conditionSchema }),
   }),
   handler: async ({
     params,
@@ -53,34 +53,39 @@ export const forkStreamsRoute = createServerRoute({
 
       const { scopedClusterClient } = await getScopedClients({ request });
 
-      const { definition: rootDefinition } = await readStream({
+      const rootDefinition = await readStream({
         scopedClusterClient,
         id: params.path.id,
       });
 
-      if (rootDefinition.managed === false) {
+      if (!isWiredStream(rootDefinition)) {
         throw new MalformedStreamId('Cannot fork a stream that is not managed');
       }
 
-      const childDefinition = { ...params.body.stream, children: [] };
+      const childDefinition: WiredStreamDefinition = {
+        ...params.body.stream,
+        stream: { ingest: { processing: [], routing: [], wired: { fields: {} } } },
+      };
 
       // check whether root stream has a child of the given name already
-      if (rootDefinition.children.some((child) => child.id === childDefinition.id)) {
+      if (
+        rootDefinition.stream.ingest.routing.some((child) => child.name === childDefinition.name)
+      ) {
         throw new MalformedStreamId(
-          `The stream with ID (${params.body.stream.id}) already exists as a child of the parent stream`
+          `The stream with ID (${params.body.stream.name}) already exists as a child of the parent stream`
         );
       }
 
       if (!isChildOf(rootDefinition, childDefinition)) {
         throw new MalformedStreamId(
-          `The ID (${params.body.stream.id}) from the new stream must start with the parent's id (${rootDefinition.id}), followed by a dot and a name`
+          `The ID (${params.body.stream.name}) from the new stream must start with the parent's id (${rootDefinition.name}), followed by a dot and a name`
         );
       }
 
       await validateAncestorFields(
         scopedClusterClient,
-        params.body.stream.id,
-        params.body.stream.fields
+        childDefinition.name,
+        childDefinition.stream.ingest.wired.fields
       );
 
       // need to create the child first, otherwise we risk streaming data even though the child data stream is not ready
@@ -91,8 +96,8 @@ export const forkStreamsRoute = createServerRoute({
         logger,
       });
 
-      rootDefinition.children.push({
-        id: params.body.stream.id,
+      rootDefinition.stream.ingest.routing.push({
+        name: params.body.stream.name,
         condition: params.body.condition,
       });
 

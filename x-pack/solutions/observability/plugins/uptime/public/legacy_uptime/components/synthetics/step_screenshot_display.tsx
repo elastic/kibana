@@ -12,6 +12,7 @@ import {
   EuiImage,
   EuiLoadingSpinner,
   EuiText,
+  useEuiTheme,
 } from '@elastic/eui';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
@@ -23,7 +24,7 @@ import {
   isScreenshotRef as isAScreenshotRef,
   ScreenshotRefImageData,
 } from '../../../../common/runtime_types';
-import { UptimeRefreshContext, UptimeSettingsContext, UptimeThemeContext } from '../../contexts';
+import { UptimeRefreshContext, UptimeSettingsContext } from '../../contexts';
 import { getJourneyScreenshot } from '../../state/api/journey';
 import { useCompositeImage } from '../../hooks';
 
@@ -103,9 +104,9 @@ export const StepScreenshotDisplay: FC<StepScreenshotDisplayProps> = ({
   lazyLoad = true,
 }) => {
   const containerRef = useRef(null);
-  const {
-    colors: { lightestShade: pageBackground },
-  } = useContext(UptimeThemeContext);
+
+  const theme = useEuiTheme();
+  const pageBackground = theme.euiTheme.colors.lightestShade;
 
   const { basePath } = useContext(UptimeSettingsContext);
 
