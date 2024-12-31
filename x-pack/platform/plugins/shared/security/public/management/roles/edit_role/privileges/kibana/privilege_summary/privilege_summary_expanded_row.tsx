@@ -6,7 +6,7 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiText } from '@elastic/eui';
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import type {
@@ -27,8 +27,83 @@ interface Props {
 }
 
 export const PrivilegeSummaryExpandedRow = (props: Props) => {
-  const allSpacesEffectivePrivileges = props.effectiveFeaturePrivileges.find(([spaces]) =>
-    spaces.includes(ALL_SPACES_ID)
+  const allSpacesEffectivePrivileges = useMemo(
+    () => props.effectiveFeaturePrivileges.find(([spaces]) => spaces.includes(ALL_SPACES_ID)),
+    [props.effectiveFeaturePrivileges]
+  );
+
+  const renderIndependentPrivilegeGroup = useCallback(
+    (
+      effectiveSubFeaturePrivileges: string[],
+      privilegeGroup: SubFeaturePrivilegeGroup,
+      index: number
+    ) => {
+      return (
+        <div key={index}>
+          {privilegeGroup.privileges.map((privilege: SubFeaturePrivilege) => {
+            const isGranted = effectiveSubFeaturePrivileges.includes(privilege.id);
+            return (
+              <EuiFlexGroup gutterSize="s" data-test-subj="independentPrivilege" key={privilege.id}>
+                <EuiFlexItem grow={false}>
+                  <EuiIconTip
+                    type={isGranted ? 'check' : 'cross'}
+                    color={isGranted ? 'primary' : 'danger'}
+                    content={
+                      isGranted
+                        ? i18n.translate(
+                            'xpack.security.management.editRole.privilegeSummary.privilegeGrantedIconTip',
+                            { defaultMessage: 'Privilege is granted' }
+                          )
+                        : i18n.translate(
+                            'xpack.security.management.editRole.privilegeSummary.privilegeNotGrantedIconTip',
+                            { defaultMessage: 'Privilege is not granted' }
+                          )
+                    }
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiText size="s" data-test-subj="privilegeName">
+                    {privilege.name}
+                  </EuiText>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            );
+          })}
+        </div>
+      );
+    },
+    []
+  );
+
+  const renderMutuallyExclusivePrivilegeGroup = useCallback(
+    (
+      effectiveSubFeaturePrivileges: string[],
+      privilegeGroup: SubFeaturePrivilegeGroup,
+      index: number,
+      isDisabledDueToSpaceSelection: boolean
+    ) => {
+      const firstSelectedPrivilege = !isDisabledDueToSpaceSelection
+        ? privilegeGroup.privileges.find((p) => effectiveSubFeaturePrivileges.includes(p.id))?.name
+        : null;
+
+      return (
+        <EuiFlexGroup gutterSize="s" key={index} data-test-subj="mutexPrivilege">
+          <EuiFlexItem grow={false}>
+            <EuiIconTip
+              type={firstSelectedPrivilege ? 'check' : 'cross'}
+              color={firstSelectedPrivilege ? 'primary' : 'danger'}
+              content={firstSelectedPrivilege ? 'Privilege is granted' : 'Privilege is not granted'}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiText size="s" data-test-subj="privilegeName">
+              {firstSelectedPrivilege ?? 'None'}
+            </EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      );
+    },
+    []
   );
 
   const renderPrivilegeGroup = useCallback(
@@ -58,13 +133,16 @@ export const PrivilegeSummaryExpandedRow = (props: Props) => {
         }
       };
     },
-    []
+    [renderIndependentPrivilegeGroup, renderMutuallyExclusivePrivilegeGroup]
   );
 
   const getEffectiveFeaturePrivileges = useCallback(
     (subFeature: SecuredSubFeature) => {
       return props.effectiveFeaturePrivileges.map((entry, index) => {
-        const [spaces, privs] = allSpacesEffectivePrivileges ?? entry;
+        const [spaces, privs] =
+          subFeature.requireAllSpaces && allSpacesEffectivePrivileges
+            ? allSpacesEffectivePrivileges
+            : entry;
 
         return (
           <EuiFlexItem key={index} data-test-subj={`entry-${index}`}>
@@ -80,74 +158,6 @@ export const PrivilegeSummaryExpandedRow = (props: Props) => {
     },
     [props.effectiveFeaturePrivileges, allSpacesEffectivePrivileges, renderPrivilegeGroup]
   );
-
-  function renderIndependentPrivilegeGroup(
-    effectiveSubFeaturePrivileges: string[],
-    privilegeGroup: SubFeaturePrivilegeGroup,
-    index: number
-  ) {
-    return (
-      <div key={index}>
-        {privilegeGroup.privileges.map((privilege: SubFeaturePrivilege) => {
-          const isGranted = effectiveSubFeaturePrivileges.includes(privilege.id);
-          return (
-            <EuiFlexGroup gutterSize="s" data-test-subj="independentPrivilege" key={privilege.id}>
-              <EuiFlexItem grow={false}>
-                <EuiIconTip
-                  type={isGranted ? 'check' : 'cross'}
-                  color={isGranted ? 'primary' : 'danger'}
-                  content={
-                    isGranted
-                      ? i18n.translate(
-                          'xpack.security.management.editRole.privilegeSummary.privilegeGrantedIconTip',
-                          { defaultMessage: 'Privilege is granted' }
-                        )
-                      : i18n.translate(
-                          'xpack.security.management.editRole.privilegeSummary.privilegeNotGrantedIconTip',
-                          { defaultMessage: 'Privilege is not granted' }
-                        )
-                  }
-                />
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiText size="s" data-test-subj="privilegeName">
-                  {privilege.name}
-                </EuiText>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          );
-        })}
-      </div>
-    );
-  }
-
-  function renderMutuallyExclusivePrivilegeGroup(
-    effectiveSubFeaturePrivileges: string[],
-    privilegeGroup: SubFeaturePrivilegeGroup,
-    index: number,
-    isDisabledDueToSpaceSelection: boolean
-  ) {
-    const firstSelectedPrivilege = !isDisabledDueToSpaceSelection
-      ? privilegeGroup.privileges.find((p) => effectiveSubFeaturePrivileges.includes(p.id))?.name
-      : null;
-
-    return (
-      <EuiFlexGroup gutterSize="s" key={index} data-test-subj="mutexPrivilege">
-        <EuiFlexItem grow={false}>
-          <EuiIconTip
-            type={firstSelectedPrivilege ? 'check' : 'cross'}
-            color={firstSelectedPrivilege ? 'primary' : 'danger'}
-            content={firstSelectedPrivilege ? 'Privilege is granted' : 'Privilege is not granted'}
-          />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiText size="s" data-test-subj="privilegeName">
-            {firstSelectedPrivilege ?? 'None'}
-          </EuiText>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    );
-  }
 
   return (
     <EuiFlexGroup direction="column">

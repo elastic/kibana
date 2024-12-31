@@ -611,7 +611,7 @@ describe('PrivilegeSummaryTable', () => {
               hasCustomizedSubFeaturePrivileges: false,
               primaryFeaturePrivilege: 'All',
               ...maybeExpectSubFeaturePrivileges(allowSubFeaturePrivileges, {
-                'Cool Sub Feature': ['Cool toggle 2', 'Read'],
+                'Cool Sub Feature': ['Cool toggle 1', 'Cool toggle 2', 'All'],
               }),
             },
           },
@@ -735,7 +735,7 @@ describe('PrivilegeSummaryTable', () => {
               hasCustomizedSubFeaturePrivileges: allowSubFeaturePrivileges,
               primaryFeaturePrivilege: 'Read',
               ...maybeExpectSubFeaturePrivileges(allowSubFeaturePrivileges, {
-                'Cool Sub Feature': ['Cool toggle 2', 'Read'],
+                'Cool Sub Feature': ['Cool toggle 2', 'All'],
               }),
             },
           },
@@ -859,7 +859,7 @@ describe('PrivilegeSummaryTable', () => {
               hasCustomizedSubFeaturePrivileges: allowSubFeaturePrivileges,
               primaryFeaturePrivilege: 'Read',
               ...maybeExpectSubFeaturePrivileges(allowSubFeaturePrivileges, {
-                'Cool Sub Feature': ['All'],
+                'Cool Sub Feature': ['Cool toggle 2', 'All'],
               }),
             },
           },
@@ -985,7 +985,7 @@ describe('PrivilegeSummaryTable', () => {
               hasCustomizedSubFeaturePrivileges: false,
               primaryFeaturePrivilege: 'All',
               ...maybeExpectSubFeaturePrivileges(allowSubFeaturePrivileges, {
-                'Cool Sub Feature': ['All'],
+                'Cool Sub Feature': ['Cool toggle 1', 'Cool toggle 2', 'All'],
               }),
             },
           },
@@ -1214,7 +1214,7 @@ describe('PrivilegeSummaryTable', () => {
               hasCustomizedSubFeaturePrivileges: allowSubFeaturePrivileges,
               primaryFeaturePrivilege: 'All',
               ...maybeExpectSubFeaturePrivileges(allowSubFeaturePrivileges, {
-                'Cool Sub Feature': [],
+                'Cool Sub Feature': ['Cool toggle 2'],
               }),
             },
           },
@@ -1251,7 +1251,7 @@ describe('PrivilegeSummaryTable', () => {
               hasCustomizedSubFeaturePrivileges: allowSubFeaturePrivileges,
               primaryFeaturePrivilege: 'All',
               ...maybeExpectSubFeaturePrivileges(allowSubFeaturePrivileges, {
-                'Excluded Sub Feature': [],
+                'Excluded Sub Feature': ['Cool toggle 1'],
               }),
             },
           },
@@ -1267,7 +1267,7 @@ describe('PrivilegeSummaryTable', () => {
               hasCustomizedSubFeaturePrivileges: false,
               primaryFeaturePrivilege: 'All',
               ...maybeExpectSubFeaturePrivileges(allowSubFeaturePrivileges, {
-                'Cool Sub Feature': ['Cool toggle 2', 'Read'],
+                'Cool Sub Feature': ['Cool toggle 1', 'Cool toggle 2', 'All'],
               }),
             },
             'space-1, space-2': {
