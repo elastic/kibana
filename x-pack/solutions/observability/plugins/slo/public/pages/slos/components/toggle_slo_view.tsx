@@ -13,7 +13,7 @@ import React from 'react';
 import type { SearchState } from '../hooks/use_url_search_state';
 import { SLOSortBy } from './common/sort_by_select';
 import { SloGroupBy } from './slo_list_group_by';
-export type SLOView = 'cardView' | 'listView' | 'compactView';
+import type { SLOView } from '../types';
 
 interface Props {
   onChangeView: (view: SLOView) => void;

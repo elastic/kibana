@@ -12,7 +12,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { DEFAULT_SLO_PAGE_SIZE } from '../../../../common/constants';
 import type { GroupByField } from '../components/slo_list_group_by';
-import type { SLOView } from '../components/toggle_slo_view';
+import type { SLOView } from '../types';
 
 export const SLO_LIST_SEARCH_URL_STORAGE_KEY = 'search';
 export type SortField =
@@ -42,12 +42,12 @@ export interface SearchState {
   statusFilter?: Filter;
 }
 
-export const DEFAULT_STATE = {
+export const DEFAULT_STATE: SearchState = {
   kqlQuery: '',
   page: 0,
   perPage: DEFAULT_SLO_PAGE_SIZE,
-  sort: { by: 'status' as const, direction: 'desc' as const },
-  view: 'cardView' as const,
+  sort: { by: 'status', direction: 'desc' },
+  view: 'cardView',
   groupBy: 'ungrouped' as const,
   filters: [],
   lastRefresh: 0,

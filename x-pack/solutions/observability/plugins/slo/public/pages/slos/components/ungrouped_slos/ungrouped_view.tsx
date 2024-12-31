@@ -10,7 +10,7 @@ import { FindSLOResponse } from '@kbn/slo-schema';
 import React from 'react';
 import { useUrlSearchState } from '../../hooks/use_url_search_state';
 import { SlosView } from '../slos_view';
-import { SLOView } from '../toggle_slo_view';
+import type { SLOView } from '../../types';
 
 export interface Props {
   sloList: FindSLOResponse | undefined;
