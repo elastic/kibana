@@ -39,7 +39,7 @@ export function parseStringFilters(filters: string, logger: Logger) {
   try {
     return JSON.parse(filters);
   } catch (e) {
-    logger.info(`Failed to parse filters: ${e.message}`);
+    logger.info(`Failed to parse filters: ${e}`);
   }
 
   return {};
