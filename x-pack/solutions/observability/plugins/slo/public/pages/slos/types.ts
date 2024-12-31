@@ -6,3 +6,10 @@
  */
 
 export type ViewType = 'cardView' | 'listView' | 'compactView';
+export type GroupByField =
+  | 'ungrouped'
+  | 'slo.tags'
+  | 'status'
+  | 'slo.indicator.type'
+  | 'slo.instanceId'
+  | '_index';

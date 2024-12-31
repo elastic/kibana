@@ -30,8 +30,7 @@ import { useKibana } from '../../../../hooks/use_kibana';
 import { useSloFormattedSLIValue } from '../../hooks/use_slo_summary';
 import type { SortDirection, SortField } from '../../hooks/use_url_search_state';
 import { SlosView } from '../slos_view';
-import { GroupByField } from '../slo_list_group_by';
-import type { ViewType } from '../../types';
+import type { ViewType, GroupByField } from '../../types';
 import { useGroupName } from './hooks/use_group_name';
 
 interface Props {

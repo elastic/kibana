@@ -12,14 +12,7 @@ import { useGetSettings } from '../../slo_settings/hooks/use_get_settings';
 import type { SearchState } from '../hooks/use_url_search_state';
 import type { Option } from './slo_context_menu';
 import { ContextMenuItem, SLOContextMenu } from './slo_context_menu';
-
-export type GroupByField =
-  | 'ungrouped'
-  | 'slo.tags'
-  | 'status'
-  | 'slo.indicator.type'
-  | 'slo.instanceId'
-  | '_index';
+import type { GroupByField } from '../types';
 
 export interface Props {
   onStateChange: (newState: Partial<SearchState>) => void;
