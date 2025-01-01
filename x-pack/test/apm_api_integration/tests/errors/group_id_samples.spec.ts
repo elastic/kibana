@@ -135,6 +135,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         it('displays correct error message', () => {
           expect(errorSampleDetailsResponse.error.error.exception?.[0].message).to.equal('Error 1');
         });
+
+        it('displays correct error culprit info', () => {
+          expect(errorSampleDetailsResponse.error.error.culprit).to.equal('Error culprit 1');
+        });
       });
     });
 
