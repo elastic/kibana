@@ -7,7 +7,7 @@
 
 import { useEffect, useRef } from 'react';
 import usePrevious from 'react-use/lib/usePrevious';
-import type { ThreatMapEntries } from '../../../../common/components/threat_match/types';
+import type { ThreatMapping } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { DefineStepRule } from '../../../../detections/pages/detection_engine/rules/types';
 import { isThreatMatchRule } from '../../../../../common/detection_engine/utils';
 import type { FormHook } from '../../../../shared_imports';
@@ -21,7 +21,7 @@ interface UsePersistentThreatMatchStateParams {
 interface LastThreatMatchState {
   threatIndexPatterns: string[] | undefined;
   threatQueryBar: FieldValueQueryBar | undefined;
-  threatMapping: ThreatMapEntries[] | undefined;
+  threatMapping: ThreatMapping | undefined;
 }
 
 /**
