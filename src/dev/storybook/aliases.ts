@@ -30,7 +30,7 @@ export const storybookAliases = {
   discover: 'src/plugins/discover/.storybook',
   embeddable: 'src/plugins/embeddable/.storybook',
   esql_ast_inspector: 'examples/esql_ast_inspector/.storybook',
-  es_ui_shared: 'src/platform/plugins/shared/es_ui_shared/.storybook',
+  es_ui_shared: 'src/plugins/es_ui_shared/.storybook',
   expandable_flyout: 'x-pack/solutions/security/packages/expandable-flyout/.storybook',
   expression_error: 'src/platform/plugins/shared/expression_error/.storybook',
   expression_image: 'src/platform/plugins/shared/expression_image/.storybook',
