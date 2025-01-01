@@ -254,7 +254,7 @@ describe('Rule upgrade workflow: viewing rule changes in JSON diff view', () => 
         newRule={{ ...newRule, from: 'now-2h' }}
       />
     );
-    expect(findDiffLineContaining('-  "from": "now-7260s",+  "from": "now-7200s",')).not.toBeNull();
+    expect(findDiffLineContaining('-  "from": "now-121m",+  "from": "now-2h",')).not.toBeNull();
 
     /* NOTE - Investigation guide */
     rerender(<RuleDiffTab oldRule={{ ...oldRule, note: '' }} newRule={{ ...newRule }} />);

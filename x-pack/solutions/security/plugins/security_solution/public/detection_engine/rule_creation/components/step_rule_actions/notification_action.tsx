@@ -16,10 +16,8 @@ import type {
 } from '@kbn/alerting-plugin/common';
 import type { ActionTypeRegistryContract } from '@kbn/triggers-actions-ui-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
-import {
-  getTimeTypeValue,
-  isRuleAction as getIsRuleAction,
-} from '../../../rule_creation_ui/pages/rule_creation/helpers';
+import { parseTimeDuration } from '@kbn/securitysolution-utils/time_duration';
+import { isRuleAction as getIsRuleAction } from '../../../rule_creation_ui/pages/rule_creation/helpers';
 import * as i18n from './translations';
 
 const DescriptionLine = ({ children }: { children: React.ReactNode }) => (
@@ -49,7 +47,13 @@ export const FrequencyDescription: React.FC<{ frequency?: RuleActionFrequency }>
     return null;
   }
 
-  const { unit, value } = getTimeTypeValue(frequency.throttle);
+  const duration = parseTimeDuration(frequency.throttle);
+
+  if (!duration) {
+    return <DescriptionLine>{i18n.PERIODICALLY}</DescriptionLine>;
+  }
+
+  const { unit, value } = duration;
 
   const messagesByUnit: { [unit: string]: JSX.Element } = {
     s: (

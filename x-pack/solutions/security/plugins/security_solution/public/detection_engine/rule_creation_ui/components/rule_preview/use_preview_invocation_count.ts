@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import moment from 'moment';
-
+import { convertTimeDurationToMs } from '@kbn/securitysolution-utils/time_duration';
 import type { TimeframePreviewOptions } from '../../../../detections/pages/detection_engine/rules/types';
-import { getTimeTypeValue } from '../../pages/rule_creation/helpers';
 
 export const usePreviewInvocationCount = ({
   timeframeOptions,
@@ -20,17 +18,20 @@ export const usePreviewInvocationCount = ({
       timeframeOptions.timeframeStart.valueOf() / 1000) *
     1000;
 
-  const { unit: intervalUnit, value: intervalValue } = getTimeTypeValue(timeframeOptions.interval);
-  const duration = moment.duration(intervalValue, intervalUnit);
-  const ruleIntervalDuration = duration.asMilliseconds();
+  const intervalMs = convertTimeDurationToMs(timeframeOptions.interval ?? '');
+  const lookBackMs = convertTimeDurationToMs(timeframeOptions.lookback ?? '');
 
-  const invocationCount = Math.max(Math.ceil(timeframeDuration / ruleIntervalDuration), 1);
-  const interval = timeframeOptions.interval;
+  if (intervalMs === undefined) {
+    return { invocationCount: 0, interval: timeframeOptions.interval, from: `now` };
+  }
 
-  const { unit: lookbackUnit, value: lookbackValue } = getTimeTypeValue(timeframeOptions.lookback);
-  duration.add(lookbackValue, lookbackUnit);
+  const invocationCount = Math.max(Math.ceil(timeframeDuration / intervalMs), 1);
 
-  const from = `now-${duration.asSeconds()}s`;
+  if (lookBackMs === undefined) {
+    return { invocationCount, interval: timeframeOptions.interval, from: `now` };
+  }
 
-  return { invocationCount, interval, from };
+  const fromSecs = Math.round((intervalMs + lookBackMs) / 1000);
+
+  return { invocationCount, interval: timeframeOptions.interval, from: `now-${fromSecs}s` };
 };
