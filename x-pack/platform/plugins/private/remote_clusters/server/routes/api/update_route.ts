@@ -108,6 +108,12 @@ export const register = (deps: RouteDependencies): void => {
   router.put(
     {
       path: `${API_BASE_PATH}/{name}`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Relies on es client for authorization',
+        },
+      },
       validate: {
         params: paramsValidation,
         body: bodyValidation,

@@ -55,7 +55,7 @@
           },
           ">) => React.JSX.Element"
         ],
-        "path": "src/plugins/saved_objects_finder/public/finder/index.tsx",
+        "path": "src/platform/plugins/shared/saved_objects_finder/public/finder/index.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -75,7 +75,7 @@
                 "text": "ContentClient"
               }
             ],
-            "path": "src/plugins/saved_objects_finder/public/finder/index.tsx",
+            "path": "src/platform/plugins/shared/saved_objects_finder/public/finder/index.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -96,7 +96,7 @@
                 "text": "IUiSettingsClient"
               }
             ],
-            "path": "src/plugins/saved_objects_finder/public/finder/index.tsx",
+            "path": "src/platform/plugins/shared/saved_objects_finder/public/finder/index.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -118,7 +118,7 @@
               },
               " | undefined"
             ],
-            "path": "src/plugins/saved_objects_finder/public/finder/index.tsx",
+            "path": "src/platform/plugins/shared/saved_objects_finder/public/finder/index.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -155,7 +155,7 @@
           },
           ">) => React.JSX.Element"
         ],
-        "path": "src/plugins/saved_objects_finder/public/finder/index.tsx",
+        "path": "src/platform/plugins/shared/saved_objects_finder/public/finder/index.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -186,7 +186,7 @@
               },
               ">"
             ],
-            "path": "src/plugins/saved_objects_finder/public/finder/index.tsx",
+            "path": "src/platform/plugins/shared/saved_objects_finder/public/finder/index.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -214,7 +214,7 @@
           },
           "<T>"
         ],
-        "path": "src/plugins/saved_objects_finder/public/finder/saved_object_finder.tsx",
+        "path": "src/platform/plugins/shared/saved_objects_finder/public/finder/saved_object_finder.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -225,7 +225,7 @@
             "tags": [],
             "label": "type",
             "description": [],
-            "path": "src/plugins/saved_objects_finder/public/finder/saved_object_finder.tsx",
+            "path": "src/platform/plugins/shared/saved_objects_finder/public/finder/saved_object_finder.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -236,7 +236,7 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "path": "src/plugins/saved_objects_finder/public/finder/saved_object_finder.tsx",
+            "path": "src/platform/plugins/shared/saved_objects_finder/public/finder/saved_object_finder.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -259,7 +259,7 @@
               "<T>) => ",
               "IconType"
             ],
-            "path": "src/plugins/saved_objects_finder/public/finder/saved_object_finder.tsx",
+            "path": "src/platform/plugins/shared/saved_objects_finder/public/finder/saved_object_finder.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -280,7 +280,7 @@
                   },
                   "<T>"
                 ],
-                "path": "src/plugins/saved_objects_finder/public/finder/saved_object_finder.tsx",
+                "path": "src/platform/plugins/shared/saved_objects_finder/public/finder/saved_object_finder.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -306,7 +306,7 @@
               },
               "<T>) => string) | undefined"
             ],
-            "path": "src/plugins/saved_objects_finder/public/finder/saved_object_finder.tsx",
+            "path": "src/platform/plugins/shared/saved_objects_finder/public/finder/saved_object_finder.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -327,7 +327,7 @@
                   },
                   "<T>"
                 ],
-                "path": "src/plugins/saved_objects_finder/public/finder/saved_object_finder.tsx",
+                "path": "src/platform/plugins/shared/saved_objects_finder/public/finder/saved_object_finder.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -353,7 +353,7 @@
               },
               "<T>) => boolean) | undefined"
             ],
-            "path": "src/plugins/saved_objects_finder/public/finder/saved_object_finder.tsx",
+            "path": "src/platform/plugins/shared/saved_objects_finder/public/finder/saved_object_finder.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -374,7 +374,7 @@
                   },
                   "<T>"
                 ],
-                "path": "src/plugins/saved_objects_finder/public/finder/saved_object_finder.tsx",
+                "path": "src/platform/plugins/shared/saved_objects_finder/public/finder/saved_object_finder.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -400,7 +400,7 @@
               },
               "<T>) => string) | undefined"
             ],
-            "path": "src/plugins/saved_objects_finder/public/finder/saved_object_finder.tsx",
+            "path": "src/platform/plugins/shared/saved_objects_finder/public/finder/saved_object_finder.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -421,7 +421,7 @@
                   },
                   "<T>"
                 ],
-                "path": "src/plugins/saved_objects_finder/public/finder/saved_object_finder.tsx",
+                "path": "src/platform/plugins/shared/saved_objects_finder/public/finder/saved_object_finder.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -441,17 +441,17 @@
             "signature": [
               "string[] | undefined"
             ],
-            "path": "src/plugins/saved_objects_finder/public/finder/saved_object_finder.tsx",
+            "path": "src/platform/plugins/shared/saved_objects_finder/public/finder/saved_object_finder.tsx",
             "deprecated": true,
             "trackAdoption": false,
             "references": [
               {
-                "plugin": "visualizations",
-                "path": "src/plugins/visualizations/public/wizard/search_selection/search_selection.tsx"
-              },
-              {
                 "plugin": "graph",
                 "path": "x-pack/plugins/graph/public/components/source_picker.tsx"
+              },
+              {
+                "plugin": "visualizations",
+                "path": "src/plugins/visualizations/public/wizard/search_selection/search_selection.tsx"
               }
             ]
           }
@@ -471,7 +471,7 @@
         "signature": [
           "SavedObjectFinderFixedPage | SavedObjectFinderInitialPageSize"
         ],
-        "path": "src/plugins/saved_objects_finder/public/finder/saved_object_finder.tsx",
+        "path": "src/platform/plugins/shared/saved_objects_finder/public/finder/saved_object_finder.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -498,7 +498,7 @@
         "tags": [],
         "label": "FinderAttributes",
         "description": [],
-        "path": "src/plugins/saved_objects_finder/common/types.ts",
+        "path": "src/platform/plugins/shared/saved_objects_finder/common/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -512,7 +512,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/saved_objects_finder/common/types.ts",
+            "path": "src/platform/plugins/shared/saved_objects_finder/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -526,7 +526,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/saved_objects_finder/common/types.ts",
+            "path": "src/platform/plugins/shared/saved_objects_finder/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -540,7 +540,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/saved_objects_finder/common/types.ts",
+            "path": "src/platform/plugins/shared/saved_objects_finder/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -597,7 +597,7 @@
           },
           "<T>"
         ],
-        "path": "src/plugins/saved_objects_finder/common/types.ts",
+        "path": "src/platform/plugins/shared/saved_objects_finder/common/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

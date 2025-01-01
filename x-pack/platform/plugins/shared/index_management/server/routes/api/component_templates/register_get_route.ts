@@ -22,7 +22,16 @@ const paramsSchema = schema.object({
 export function registerGetAllRoute({ router, lib: { handleEsError } }: RouteDependencies) {
   // Get all component templates
   router.get(
-    { path: addBasePath('/component_templates'), validate: false },
+    {
+      path: addBasePath('/component_templates'),
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Relies on es client for authorization',
+        },
+      },
+      validate: false,
+    },
     async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
 
@@ -53,6 +62,12 @@ export function registerGetAllRoute({ router, lib: { handleEsError } }: RouteDep
   router.get(
     {
       path: addBasePath('/component_templates/{name}'),
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Relies on es client for authorization',
+        },
+      },
       validate: {
         params: paramsSchema,
       },

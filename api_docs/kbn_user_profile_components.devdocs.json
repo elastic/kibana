@@ -439,7 +439,7 @@
             "section": "def-common.UserProfileData",
             "text": "UserProfileData"
           },
-          ">>(updatedData: D) => Promise<void>; showSuccessNotification: ({ isRefreshRequired }?: { isRefreshRequired?: boolean | undefined; }) => void; userProfileData: ",
+          ">>(updatedData: D) => Promise<D>; showSuccessNotification: ({ isRefreshRequired }?: { isRefreshRequired?: boolean | undefined; }) => void; userProfileData: ",
           {
             "pluginId": "@kbn/user-profile-components",
             "scope": "common",
@@ -447,7 +447,7 @@
             "section": "def-common.UserProfileData",
             "text": "UserProfileData"
           },
-          " | null | undefined; isLoading: boolean; userProfileEnabled: boolean | undefined; }"
+          " | null | undefined; isLoading: boolean; userProfileEnabled: boolean | undefined; userProfileLoaded: boolean; }"
         ],
         "path": "packages/kbn-user-profile-components/src/hooks/use_update_user_profile.tsx",
         "deprecated": false,
@@ -1636,7 +1636,7 @@
         "label": "DarkModeValue",
         "description": [],
         "signature": [
-          "\"\" | \"light\" | \"dark\""
+          "\"light\" | \"dark\" | \"system\" | \"space_default\""
         ],
         "path": "packages/kbn-user-profile-components/src/types.ts",
         "deprecated": false,
@@ -1659,7 +1659,7 @@
             "section": "def-common.UserProfileData",
             "text": "UserProfileData"
           },
-          ">>(updatedData: D) => Promise<void>; showSuccessNotification: ({ isRefreshRequired }?: { isRefreshRequired?: boolean | undefined; }) => void; userProfileData: ",
+          ">>(updatedData: D) => Promise<D>; showSuccessNotification: ({ isRefreshRequired }?: { isRefreshRequired?: boolean | undefined; }) => void; userProfileData: ",
           {
             "pluginId": "@kbn/user-profile-components",
             "scope": "common",
@@ -1667,7 +1667,7 @@
             "section": "def-common.UserProfileData",
             "text": "UserProfileData"
           },
-          " | null | undefined; isLoading: boolean; userProfileEnabled: boolean | undefined; }"
+          " | null | undefined; isLoading: boolean; userProfileEnabled: boolean | undefined; userProfileLoaded: boolean; }"
         ],
         "path": "packages/kbn-user-profile-components/src/hooks/use_update_user_profile.tsx",
         "deprecated": false,

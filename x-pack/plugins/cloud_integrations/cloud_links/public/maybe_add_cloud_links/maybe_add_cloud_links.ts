@@ -20,9 +20,15 @@ export interface MaybeAddCloudLinksDeps {
   security: SecurityPluginStart;
   cloud: CloudStart;
   share: SharePluginStart;
+  isServerless: boolean;
 }
 
-export function maybeAddCloudLinks({ core, security, cloud }: MaybeAddCloudLinksDeps): void {
+export function maybeAddCloudLinks({
+  core,
+  security,
+  cloud,
+  isServerless,
+}: MaybeAddCloudLinksDeps): void {
   const userObservable = defer(() => security.authc.getCurrentUser()).pipe(
     // Check if user is a cloud user.
     map((user) => user.elastic_cloud_user),
@@ -43,6 +49,7 @@ export function maybeAddCloudLinks({ core, security, cloud }: MaybeAddCloudLinks
         core,
         cloud,
         security,
+        isServerless,
       });
       security.navControlService.addUserMenuLinks(userMenuLinks);
     })

@@ -19,6 +19,12 @@ export const registerCreateRoute = ({
   router.post(
     {
       path: addBasePath('/component_templates'),
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Relies on es client for authorization',
+        },
+      },
       validate: {
         body: componentTemplateSchema,
       },

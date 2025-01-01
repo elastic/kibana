@@ -22,7 +22,7 @@ import type {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import useToggle from 'react-use/lib/useToggle';
-import { isWiredStream, ReadStreamDefinition } from '@kbn/streams-schema';
+import { isWiredReadStream, ReadStreamDefinition } from '@kbn/streams-schema';
 import { FieldType } from './field_type';
 import { FieldStatus } from './field_status';
 import { FieldEntry, SchemaEditorEditingState } from './hooks/use_editing_state';
@@ -93,7 +93,7 @@ export const FieldsTableContainer = ({
   }, [inheritedFields, query]);
 
   const mappedFields = useMemo(() => {
-    if (isWiredStream(definition)) {
+    if (isWiredReadStream(definition)) {
       return Object.entries(definition.stream.ingest.wired.fields).map(([name, field]) => ({
         name,
         type: field.type,

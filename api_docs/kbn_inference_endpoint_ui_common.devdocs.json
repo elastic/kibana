@@ -405,7 +405,7 @@
         "tags": [],
         "label": "FieldType",
         "description": [],
-        "path": "packages/kbn-search-connectors/types/connectors.ts",
+        "path": "src/platform/packages/shared/kbn-search-connectors/types/connectors.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

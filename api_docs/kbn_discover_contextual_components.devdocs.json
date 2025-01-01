@@ -611,7 +611,7 @@
                 "tags": [],
                 "label": "fieldName",
                 "description": [],
-                "path": "packages/kbn-discover-utils/src/utils/get_should_show_field_handler.ts",
+                "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/get_should_show_field_handler.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }

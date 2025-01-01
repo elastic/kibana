@@ -3750,6 +3750,13 @@
         }
       }
     },
+    "discoverEnhanced": {
+      "properties": {
+        "exploreDataInChartActionEnabled": {
+          "type": "boolean"
+        }
+      }
+    },
     "fileUpload": {
       "properties": {
         "file_upload": {

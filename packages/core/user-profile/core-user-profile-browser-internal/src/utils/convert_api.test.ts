@@ -19,6 +19,7 @@ describe('convertUserProfileAPI', () => {
   beforeEach(() => {
     source = {
       userProfile$: of(null),
+      enabled$: of(false),
       getCurrent: jest.fn(),
       bulkGet: jest.fn(),
       suggest: jest.fn(),
@@ -31,6 +32,12 @@ describe('convertUserProfileAPI', () => {
   describe('getUserProfile$', () => {
     it('returns the observable from the source', () => {
       expect(output.getUserProfile$()).toBe(source.userProfile$);
+    });
+  });
+
+  describe('getEnabled$', () => {
+    it('returns the observable from the source', () => {
+      expect(output.getEnabled$()).toBe(source.enabled$);
     });
   });
 

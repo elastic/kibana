@@ -22,7 +22,14 @@ import type {
   OpenPointInTimeResponse,
   SearchRequest,
   SearchResponse,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+  SearchHit,
+  SearchRequest as ESSearchRequest,
+  SortResults,
+  IndicesGetDataStreamRequest,
+  IndicesStatsRequest,
+  IlmGetLifecycleRequest,
+  IndicesGetRequest,
+} from '@elastic/elasticsearch/lib/api/types';
 import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import {
   EQL_RULE_TYPE_ID,
@@ -35,15 +42,6 @@ import {
   THRESHOLD_RULE_TYPE_ID,
   ESQL_RULE_TYPE_ID,
 } from '@kbn/securitysolution-rules';
-import type {
-  SearchHit,
-  SearchRequest as ESSearchRequest,
-  SortResults,
-  IndicesGetDataStreamRequest,
-  IndicesStatsRequest,
-  IlmGetLifecycleRequest,
-  IndicesGetRequest,
-} from '@elastic/elasticsearch/lib/api/types';
 import type { TransportResult } from '@elastic/elasticsearch';
 import type { AgentPolicy, Installation } from '@kbn/fleet-plugin/common';
 import type {
@@ -365,45 +363,43 @@ export class TelemetryReceiver implements ITelemetryReceiver {
       expand_wildcards: ['open' as const, 'hidden' as const],
       index: `.ds-metrics-endpoint.policy*`,
       ignore_unavailable: false,
-      body: {
-        size: 0, // no query results required - only aggregation quantity
-        query: {
-          range: {
-            '@timestamp': {
-              gte: executeFrom,
-              lt: executeTo,
-            },
+      size: 0, // no query results required - only aggregation quantity
+      query: {
+        range: {
+          '@timestamp': {
+            gte: executeFrom,
+            lt: executeTo,
           },
         },
-        aggs: {
-          policy_responses: {
-            terms: {
-              size: this.maxRecords,
-              field: 'agent.id',
-            },
-            aggs: {
-              latest_response: {
-                top_hits: {
-                  size: 1,
-                  _source: {
-                    includes: [
-                      'agent',
-                      'event',
-                      'Endpoint.policy.applied.status',
-                      'Endpoint.policy.applied.actions',
-                      'Endpoint.policy.applied.artifacts.global',
-                      'Endpoint.configuration',
-                      'Endpoint.state',
-                    ],
-                  },
-                  sort: [
-                    {
-                      '@timestamp': {
-                        order: 'desc' as const,
-                      },
-                    },
+      },
+      aggs: {
+        policy_responses: {
+          terms: {
+            size: this.maxRecords,
+            field: 'agent.id',
+          },
+          aggs: {
+            latest_response: {
+              top_hits: {
+                size: 1,
+                _source: {
+                  includes: [
+                    'agent',
+                    'event',
+                    'Endpoint.policy.applied.status',
+                    'Endpoint.policy.applied.actions',
+                    'Endpoint.policy.applied.artifacts.global',
+                    'Endpoint.configuration',
+                    'Endpoint.state',
                   ],
                 },
+                sort: [
+                  {
+                    '@timestamp': {
+                      order: 'desc' as const,
+                    },
+                  },
+                ],
               },
             },
           },
@@ -431,42 +427,40 @@ export class TelemetryReceiver implements ITelemetryReceiver {
       expand_wildcards: ['open' as const, 'hidden' as const],
       index: ENDPOINT_METRICS_INDEX,
       ignore_unavailable: false,
-      body: {
-        size: 0, // no query results required - only aggregation quantity
-        query: {
-          range: {
-            '@timestamp': {
-              gte: executeFrom,
-              lt: executeTo,
-            },
+      size: 0, // no query results required - only aggregation quantity
+      query: {
+        range: {
+          '@timestamp': {
+            gte: executeFrom,
+            lt: executeTo,
           },
         },
-        aggs: {
-          endpoint_agents: {
-            terms: {
-              field: 'agent.id',
-              size: this.maxRecords,
-            },
-            aggs: {
-              latest_metrics: {
-                top_hits: {
-                  size: 1,
-                  _source: false,
-                  sort: [
-                    {
-                      '@timestamp': {
-                        order: 'desc' as const,
-                      },
+      },
+      aggs: {
+        endpoint_agents: {
+          terms: {
+            field: 'agent.id',
+            size: this.maxRecords,
+          },
+          aggs: {
+            latest_metrics: {
+              top_hits: {
+                size: 1,
+                _source: false,
+                sort: [
+                  {
+                    '@timestamp': {
+                      order: 'desc' as const,
                     },
-                  ],
-                },
+                  },
+                ],
               },
             },
           },
-          endpoint_count: {
-            cardinality: {
-              field: 'agent.id',
-            },
+        },
+        endpoint_count: {
+          cardinality: {
+            field: 'agent.id',
           },
         },
       },
@@ -508,37 +502,35 @@ export class TelemetryReceiver implements ITelemetryReceiver {
       expand_wildcards: ['open' as const, 'hidden' as const],
       index: `.ds-metrics-endpoint.metadata-*`,
       ignore_unavailable: false,
-      body: {
-        size: 0, // no query results required - only aggregation quantity
-        query: {
-          range: {
-            '@timestamp': {
-              gte: executeFrom,
-              lt: executeTo,
-            },
+      size: 0, // no query results required - only aggregation quantity
+      query: {
+        range: {
+          '@timestamp': {
+            gte: executeFrom,
+            lt: executeTo,
           },
         },
-        aggs: {
-          endpoint_metadata: {
-            terms: {
-              field: 'agent.id',
-              size: this.maxRecords,
-            },
-            aggs: {
-              latest_metadata: {
-                top_hits: {
-                  size: 1,
-                  _source: {
-                    includes: ['@timestamp', 'agent', 'Endpoint.capabilities', 'elastic.agent'],
-                  },
-                  sort: [
-                    {
-                      '@timestamp': {
-                        order: 'desc' as const,
-                      },
-                    },
-                  ],
+      },
+      aggs: {
+        endpoint_metadata: {
+          terms: {
+            field: 'agent.id',
+            size: this.maxRecords,
+          },
+          aggs: {
+            latest_metadata: {
+              top_hits: {
+                size: 1,
+                _source: {
+                  includes: ['@timestamp', 'agent', 'Endpoint.capabilities', 'elastic.agent'],
                 },
+                sort: [
+                  {
+                    '@timestamp': {
+                      order: 'desc' as const,
+                    },
+                  },
+                ],
               },
             },
           },
@@ -704,41 +696,39 @@ export class TelemetryReceiver implements ITelemetryReceiver {
       expand_wildcards: ['open' as const, 'hidden' as const],
       index: this.getIndexForType?.('alert'),
       ignore_unavailable: true,
-      body: {
-        size: this.maxRecords,
-        query: {
-          bool: {
-            must: [
-              {
-                bool: {
-                  filter: {
-                    terms: {
-                      'alert.alertTypeId': [
-                        SIGNALS_ID,
-                        EQL_RULE_TYPE_ID,
-                        ESQL_RULE_TYPE_ID,
-                        ML_RULE_TYPE_ID,
-                        QUERY_RULE_TYPE_ID,
-                        SAVED_QUERY_RULE_TYPE_ID,
-                        INDICATOR_RULE_TYPE_ID,
-                        THRESHOLD_RULE_TYPE_ID,
-                        NEW_TERMS_RULE_TYPE_ID,
-                      ],
-                    },
+      size: this.maxRecords,
+      query: {
+        bool: {
+          must: [
+            {
+              bool: {
+                filter: {
+                  terms: {
+                    'alert.alertTypeId': [
+                      SIGNALS_ID,
+                      EQL_RULE_TYPE_ID,
+                      ESQL_RULE_TYPE_ID,
+                      ML_RULE_TYPE_ID,
+                      QUERY_RULE_TYPE_ID,
+                      SAVED_QUERY_RULE_TYPE_ID,
+                      INDICATOR_RULE_TYPE_ID,
+                      THRESHOLD_RULE_TYPE_ID,
+                      NEW_TERMS_RULE_TYPE_ID,
+                    ],
                   },
                 },
               },
-              {
-                bool: {
-                  filter: {
-                    terms: {
-                      'alert.params.immutable': [true],
-                    },
+            },
+            {
+              bool: {
+                filter: {
+                  terms: {
+                    'alert.params.immutable': [true],
                   },
                 },
               },
-            ],
-          },
+            },
+          ],
         },
       },
     };
@@ -1101,34 +1091,32 @@ export class TelemetryReceiver implements ITelemetryReceiver {
       expand_wildcards: ['open' as const, 'hidden' as const],
       index: [`${this.alertsIndex}*`, 'logs-*'],
       ignore_unavailable: true,
-      body: {
-        size: 100,
-        _source: {
-          include: [
-            '@timestamp',
-            'process',
-            'event',
-            'file',
-            'network',
-            'dns',
-            'kibana.rule.alert.uuid',
+      size: 100,
+      _source: {
+        include: [
+          '@timestamp',
+          'process',
+          'event',
+          'file',
+          'network',
+          'dns',
+          'kibana.rule.alert.uuid',
+        ],
+      },
+      query: {
+        bool: {
+          filter: [
+            {
+              terms: {
+                'process.entity_id': nodeIds,
+              },
+            },
+            {
+              term: {
+                'event.category': 'process',
+              },
+            },
           ],
-        },
-        query: {
-          bool: {
-            filter: [
-              {
-                terms: {
-                  'process.entity_id': nodeIds,
-                },
-              },
-              {
-                term: {
-                  'event.category': 'process',
-                },
-              },
-            ],
-          },
         },
       },
     };
@@ -1141,19 +1129,17 @@ export class TelemetryReceiver implements ITelemetryReceiver {
       expand_wildcards: ['open' as const, 'hidden' as const],
       index: '.lists-*',
       ignore_unavailable: true,
-      body: {
-        size: 0, // no query results required - only aggregation quantity
-        aggs: {
-          total_value_list_count: {
-            cardinality: {
-              field: 'name',
-            },
+      size: 0, // no query results required - only aggregation quantity
+      aggs: {
+        total_value_list_count: {
+          cardinality: {
+            field: 'name',
           },
-          type_breakdown: {
-            terms: {
-              field: 'type',
-              size: 50,
-            },
+        },
+        type_breakdown: {
+          terms: {
+            field: 'type',
+            size: 50,
           },
         },
       },
@@ -1162,14 +1148,12 @@ export class TelemetryReceiver implements ITelemetryReceiver {
       expand_wildcards: ['open' as const, 'hidden' as const],
       index: '.items-*',
       ignore_unavailable: true,
-      body: {
-        size: 0, // no query results required - only aggregation quantity
-        aggs: {
-          value_list_item_count: {
-            terms: {
-              field: 'list_id',
-              size: 100,
-            },
+      size: 0, // no query results required - only aggregation quantity
+      aggs: {
+        value_list_item_count: {
+          terms: {
+            field: 'list_id',
+            size: 100,
           },
         },
       },
@@ -1178,18 +1162,16 @@ export class TelemetryReceiver implements ITelemetryReceiver {
       expand_wildcards: ['open' as const, 'hidden' as const],
       index: this.getIndexForType?.('exception-list'),
       ignore_unavailable: true,
-      body: {
-        size: 0, // no query results required - only aggregation quantity
-        query: {
-          bool: {
-            must: [{ match: { 'exception-list.entries.type': 'list' } }],
-          },
+      size: 0, // no query results required - only aggregation quantity
+      query: {
+        bool: {
+          must: [{ match: { 'exception-list.entries.type': 'list' } }],
         },
-        aggs: {
-          vl_included_in_exception_lists_count: {
-            cardinality: {
-              field: 'exception-list.entries.list.id',
-            },
+      },
+      aggs: {
+        vl_included_in_exception_lists_count: {
+          cardinality: {
+            field: 'exception-list.entries.list.id',
           },
         },
       },
@@ -1198,18 +1180,16 @@ export class TelemetryReceiver implements ITelemetryReceiver {
       expand_wildcards: ['open' as const, 'hidden' as const],
       index: this.getIndexForType?.('alert'),
       ignore_unavailable: true,
-      body: {
-        size: 0,
-        query: {
-          bool: {
-            must: [{ prefix: { 'alert.params.threatIndex': '.items' } }],
-          },
+      size: 0,
+      query: {
+        bool: {
+          must: [{ prefix: { 'alert.params.threatIndex': '.items' } }],
         },
-        aggs: {
-          vl_used_in_indicator_match_rule_count: {
-            cardinality: {
-              field: 'alert.params.ruleId',
-            },
+      },
+      aggs: {
+        vl_used_in_indicator_match_rule_count: {
+          cardinality: {
+            field: 'alert.params.ruleId',
           },
         },
       },

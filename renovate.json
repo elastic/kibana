@@ -17,6 +17,9 @@
   ],
   "baseBranches": [
     "main",
+    "8.x",
+    "8.17",
+    "8.16",
     "7.17"
   ],
   "prConcurrentLimit": 0,
@@ -2345,12 +2348,12 @@
         "team:kibana-operations"
       ],
       "matchBaseBranches": [
-        "main"
+        "*"
       ],
       "labels": [
         "Team:Operations",
         "release_note:skip",
-        "backport:all-open"
+        "backport:skip"
       ],
       "minimumReleaseAge": "7 days",
       "enabled": true

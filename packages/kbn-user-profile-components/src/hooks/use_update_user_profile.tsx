@@ -55,7 +55,7 @@ export const useUpdateUserProfile = ({
   pageReloadChecker,
 }: Props = {}) => {
   const { userProfileApiClient, notifySuccess } = useUserProfiles();
-  const { userProfile$, enabled$ } = userProfileApiClient;
+  const { userProfile$, enabled$, userProfileLoaded$ } = userProfileApiClient;
   const {
     enabled: notificationSuccessEnabled = true,
     title: notificationTitle = i18nTexts.notificationSuccess.title,
@@ -64,6 +64,7 @@ export const useUpdateUserProfile = ({
   const [isLoading, setIsLoading] = useState(false);
   const userProfileData = useObservable(userProfile$);
   const userProfileEnabled = useObservable(enabled$);
+  const userProfileLoaded = useObservable(userProfileLoaded$, false);
   // Keep a snapshot before updating the user profile so we can compare previous and updated values
   const userProfileSnapshot = useRef<UserProfileData | null>();
   const isMounted = useRef(false);
@@ -125,9 +126,10 @@ export const useUpdateUserProfile = ({
     <D extends Partial<UserProfileData>>(updatedData: D) => {
       userProfileSnapshot.current = merge({}, userProfileData);
       setIsLoading(true);
-      return userProfileApiClient
-        .partialUpdate(updatedData)
-        .then(() => onUserProfileUpdate(updatedData));
+      return userProfileApiClient.partialUpdate(updatedData).then(() => {
+        onUserProfileUpdate(updatedData);
+        return updatedData;
+      });
     },
     [userProfileApiClient, onUserProfileUpdate, userProfileData]
   );
@@ -150,6 +152,8 @@ export const useUpdateUserProfile = ({
     isLoading,
     /** Flag to indicate if user profile is enabled */
     userProfileEnabled,
+    /** Flag to indicate if the user profile has been loaded */
+    userProfileLoaded,
   };
 };
 

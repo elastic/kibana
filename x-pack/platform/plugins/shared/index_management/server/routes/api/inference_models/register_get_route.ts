@@ -23,6 +23,12 @@ export function registerGetAllRoute({ router, lib: { handleEsError } }: RouteDep
   router.get(
     {
       path: addBasePath('/inference/all'),
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Relies on es client for authorization',
+        },
+      },
       validate: {},
     },
     async (context, request, response) => {

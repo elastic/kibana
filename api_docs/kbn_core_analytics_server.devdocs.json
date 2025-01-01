@@ -487,14 +487,6 @@
             "trackAdoption": true,
             "references": [
               {
-                "plugin": "@kbn/core-notifications-browser-internal",
-                "path": "packages/core/notifications/core-notifications-browser-internal/src/toasts/telemetry/event_reporter.ts"
-              },
-              {
-                "plugin": "@kbn/core-notifications-browser-internal",
-                "path": "packages/core/notifications/core-notifications-browser-internal/src/toasts/telemetry/event_reporter.ts"
-              },
-              {
                 "plugin": "@kbn/ebt-tools",
                 "path": "packages/kbn-ebt-tools/src/performance_metric_events/helpers.ts"
               },
@@ -521,6 +513,14 @@
               {
                 "plugin": "@kbn/core",
                 "path": "src/core/packages/analytics/browser-internal/src/analytics_service.ts"
+              },
+              {
+                "plugin": "@kbn/core-notifications-browser-internal",
+                "path": "packages/core/notifications/core-notifications-browser-internal/src/toasts/telemetry/event_reporter.ts"
+              },
+              {
+                "plugin": "@kbn/core-notifications-browser-internal",
+                "path": "packages/core/notifications/core-notifications-browser-internal/src/toasts/telemetry/event_reporter.ts"
               },
               {
                 "plugin": "@kbn/core-root-browser-internal",
@@ -595,10 +595,6 @@
                 "path": "x-pack/plugins/security/server/analytics/analytics_service.ts"
               },
               {
-                "plugin": "actions",
-                "path": "x-pack/plugins/actions/server/lib/action_executor.ts"
-              },
-              {
                 "plugin": "@kbn/cloud",
                 "path": "packages/cloud/connection_details/kibana/kibana_connection_details_provider.tsx"
               },
@@ -643,8 +639,20 @@
                 "path": "packages/shared-ux/chrome/navigation/src/services.tsx"
               },
               {
+                "plugin": "globalSearchBar",
+                "path": "x-pack/plugins/global_search_bar/public/telemetry/event_reporter.ts"
+              },
+              {
+                "plugin": "globalSearchBar",
+                "path": "x-pack/plugins/global_search_bar/public/telemetry/event_reporter.ts"
+              },
+              {
                 "plugin": "spaces",
                 "path": "x-pack/plugins/spaces/public/analytics/event_tracker.ts"
+              },
+              {
+                "plugin": "actions",
+                "path": "x-pack/platform/plugins/shared/actions/server/lib/action_executor.ts"
               },
               {
                 "plugin": "observabilityAIAssistant",
@@ -660,27 +668,19 @@
               },
               {
                 "plugin": "discover",
-                "path": "src/plugins/discover/public/services/discover_ebt_manager.ts"
+                "path": "src/platform/plugins/shared/discover/public/services/discover_ebt_manager.ts"
               },
               {
                 "plugin": "discover",
-                "path": "src/plugins/discover/public/services/discover_ebt_manager.ts"
-              },
-              {
-                "plugin": "globalSearchBar",
-                "path": "x-pack/plugins/global_search_bar/public/telemetry/event_reporter.ts"
-              },
-              {
-                "plugin": "globalSearchBar",
-                "path": "x-pack/plugins/global_search_bar/public/telemetry/event_reporter.ts"
+                "path": "src/platform/plugins/shared/discover/public/services/discover_ebt_manager.ts"
               },
               {
                 "plugin": "reporting",
                 "path": "x-pack/plugins/reporting/server/usage/event_tracker.ts"
               },
               {
-                "plugin": "searchPlayground",
-                "path": "x-pack/plugins/search_playground/server/routes.ts"
+                "plugin": "spaces",
+                "path": "x-pack/plugins/spaces/public/management/management_service.test.ts"
               },
               {
                 "plugin": "integrationAssistant",
@@ -709,46 +709,6 @@
               {
                 "plugin": "fleet",
                 "path": "x-pack/platform/plugins/shared/fleet/server/services/telemetry/fleet_usage_sender.ts"
-              },
-              {
-                "plugin": "apm",
-                "path": "x-pack/plugins/observability_solution/apm/public/services/telemetry/telemetry_client.ts"
-              },
-              {
-                "plugin": "apm",
-                "path": "x-pack/plugins/observability_solution/apm/public/services/telemetry/telemetry_client.ts"
-              },
-              {
-                "plugin": "apm",
-                "path": "x-pack/plugins/observability_solution/apm/public/services/telemetry/telemetry_client.ts"
-              },
-              {
-                "plugin": "apm",
-                "path": "x-pack/plugins/observability_solution/apm/public/services/telemetry/telemetry_client.ts"
-              },
-              {
-                "plugin": "inventory",
-                "path": "x-pack/plugins/observability_solution/inventory/public/services/telemetry/telemetry_client.ts"
-              },
-              {
-                "plugin": "inventory",
-                "path": "x-pack/plugins/observability_solution/inventory/public/services/telemetry/telemetry_client.ts"
-              },
-              {
-                "plugin": "inventory",
-                "path": "x-pack/plugins/observability_solution/inventory/public/services/telemetry/telemetry_client.ts"
-              },
-              {
-                "plugin": "inventory",
-                "path": "x-pack/plugins/observability_solution/inventory/public/services/telemetry/telemetry_client.ts"
-              },
-              {
-                "plugin": "inventory",
-                "path": "x-pack/plugins/observability_solution/inventory/public/services/telemetry/telemetry_client.ts"
-              },
-              {
-                "plugin": "spaces",
-                "path": "x-pack/plugins/spaces/public/management/management_service.test.ts"
               },
               {
                 "plugin": "datasetQuality",
@@ -903,8 +863,20 @@
                 "path": "x-pack/platform/plugins/shared/observability_solution/observability_ai_assistant/public/service/create_chat_service.test.ts"
               },
               {
-                "plugin": "infra",
-                "path": "x-pack/solutions/observability/plugins/infra/public/services/telemetry/telemetry_client.ts"
+                "plugin": "apm",
+                "path": "x-pack/solutions/observability/plugins/apm/public/services/telemetry/telemetry_client.ts"
+              },
+              {
+                "plugin": "apm",
+                "path": "x-pack/solutions/observability/plugins/apm/public/services/telemetry/telemetry_client.ts"
+              },
+              {
+                "plugin": "apm",
+                "path": "x-pack/solutions/observability/plugins/apm/public/services/telemetry/telemetry_client.ts"
+              },
+              {
+                "plugin": "apm",
+                "path": "x-pack/solutions/observability/plugins/apm/public/services/telemetry/telemetry_client.ts"
               },
               {
                 "plugin": "infra",
@@ -965,6 +937,30 @@
               {
                 "plugin": "infra",
                 "path": "x-pack/solutions/observability/plugins/infra/public/services/telemetry/telemetry_client.ts"
+              },
+              {
+                "plugin": "infra",
+                "path": "x-pack/solutions/observability/plugins/infra/public/services/telemetry/telemetry_client.ts"
+              },
+              {
+                "plugin": "inventory",
+                "path": "x-pack/solutions/observability/plugins/inventory/public/services/telemetry/telemetry_client.ts"
+              },
+              {
+                "plugin": "inventory",
+                "path": "x-pack/solutions/observability/plugins/inventory/public/services/telemetry/telemetry_client.ts"
+              },
+              {
+                "plugin": "inventory",
+                "path": "x-pack/solutions/observability/plugins/inventory/public/services/telemetry/telemetry_client.ts"
+              },
+              {
+                "plugin": "inventory",
+                "path": "x-pack/solutions/observability/plugins/inventory/public/services/telemetry/telemetry_client.ts"
+              },
+              {
+                "plugin": "inventory",
+                "path": "x-pack/solutions/observability/plugins/inventory/public/services/telemetry/telemetry_client.ts"
               },
               {
                 "plugin": "observabilityLogsExplorer",
@@ -1009,6 +1005,10 @@
               {
                 "plugin": "observabilityOnboarding",
                 "path": "x-pack/solutions/observability/plugins/observability_onboarding/public/application/app.tsx"
+              },
+              {
+                "plugin": "searchPlayground",
+                "path": "x-pack/solutions/search/plugins/search_playground/server/routes.ts"
               },
               {
                 "plugin": "securitySolutionServerless",
@@ -1116,67 +1116,67 @@
               },
               {
                 "plugin": "discover",
-                "path": "src/plugins/discover/public/services/discover_ebt_manager.test.ts"
+                "path": "src/platform/plugins/shared/discover/public/services/discover_ebt_manager.test.ts"
               },
               {
                 "plugin": "discover",
-                "path": "src/plugins/discover/public/services/discover_ebt_manager.test.ts"
+                "path": "src/platform/plugins/shared/discover/public/services/discover_ebt_manager.test.ts"
               },
               {
                 "plugin": "discover",
-                "path": "src/plugins/discover/public/services/discover_ebt_manager.test.ts"
+                "path": "src/platform/plugins/shared/discover/public/services/discover_ebt_manager.test.ts"
               },
               {
                 "plugin": "discover",
-                "path": "src/plugins/discover/public/services/discover_ebt_manager.test.ts"
+                "path": "src/platform/plugins/shared/discover/public/services/discover_ebt_manager.test.ts"
               },
               {
                 "plugin": "discover",
-                "path": "src/plugins/discover/public/services/discover_ebt_manager.test.ts"
+                "path": "src/platform/plugins/shared/discover/public/services/discover_ebt_manager.test.ts"
               },
               {
                 "plugin": "discover",
-                "path": "src/plugins/discover/public/services/discover_ebt_manager.test.ts"
+                "path": "src/platform/plugins/shared/discover/public/services/discover_ebt_manager.test.ts"
               },
               {
                 "plugin": "discover",
-                "path": "src/plugins/discover/public/services/discover_ebt_manager.test.ts"
+                "path": "src/platform/plugins/shared/discover/public/services/discover_ebt_manager.test.ts"
               },
               {
                 "plugin": "discover",
-                "path": "src/plugins/discover/public/services/discover_ebt_manager.test.ts"
+                "path": "src/platform/plugins/shared/discover/public/services/discover_ebt_manager.test.ts"
               },
               {
                 "plugin": "discover",
-                "path": "src/plugins/discover/public/services/discover_ebt_manager.test.ts"
+                "path": "src/platform/plugins/shared/discover/public/services/discover_ebt_manager.test.ts"
               },
               {
                 "plugin": "discover",
-                "path": "src/plugins/discover/public/services/discover_ebt_manager.test.ts"
+                "path": "src/platform/plugins/shared/discover/public/services/discover_ebt_manager.test.ts"
               },
               {
                 "plugin": "discover",
-                "path": "src/plugins/discover/public/services/discover_ebt_manager.test.ts"
+                "path": "src/platform/plugins/shared/discover/public/services/discover_ebt_manager.test.ts"
               },
               {
                 "plugin": "discover",
-                "path": "src/plugins/discover/public/services/discover_ebt_manager.test.ts"
+                "path": "src/platform/plugins/shared/discover/public/services/discover_ebt_manager.test.ts"
               },
               {
                 "plugin": "discover",
-                "path": "src/plugins/discover/public/services/discover_ebt_manager.test.ts"
+                "path": "src/platform/plugins/shared/discover/public/services/discover_ebt_manager.test.ts"
               },
               {
                 "plugin": "discover",
-                "path": "src/plugins/discover/public/services/discover_ebt_manager.test.ts"
+                "path": "src/platform/plugins/shared/discover/public/services/discover_ebt_manager.test.ts"
               },
               {
                 "plugin": "discover",
-                "path": "src/plugins/discover/public/services/discover_ebt_manager.test.ts"
+                "path": "src/platform/plugins/shared/discover/public/services/discover_ebt_manager.test.ts"
               },
               {
                 "plugin": "discover",
-                "path": "src/plugins/discover/public/services/discover_ebt_manager.test.ts"
+                "path": "src/platform/plugins/shared/discover/public/services/discover_ebt_manager.test.ts"
               },
               {
                 "plugin": "@kbn/core-analytics-browser-mocks",
@@ -1239,228 +1239,228 @@
                 "path": "x-pack/plugins/security/server/analytics/analytics_service.test.ts"
               },
               {
+                "plugin": "datasetQuality",
+                "path": "x-pack/platform/plugins/shared/dataset_quality/public/services/telemetry/telemetry_service.test.ts"
+              },
+              {
+                "plugin": "datasetQuality",
+                "path": "x-pack/platform/plugins/shared/dataset_quality/public/services/telemetry/telemetry_service.test.ts"
+              },
+              {
+                "plugin": "datasetQuality",
+                "path": "x-pack/platform/plugins/shared/dataset_quality/public/services/telemetry/telemetry_service.test.ts"
+              },
+              {
+                "plugin": "datasetQuality",
+                "path": "x-pack/platform/plugins/shared/dataset_quality/public/services/telemetry/telemetry_service.test.ts"
+              },
+              {
+                "plugin": "datasetQuality",
+                "path": "x-pack/platform/plugins/shared/dataset_quality/public/services/telemetry/telemetry_service.test.ts"
+              },
+              {
+                "plugin": "datasetQuality",
+                "path": "x-pack/platform/plugins/shared/dataset_quality/public/services/telemetry/telemetry_service.test.ts"
+              },
+              {
+                "plugin": "datasetQuality",
+                "path": "x-pack/platform/plugins/shared/dataset_quality/public/services/telemetry/telemetry_service.test.ts"
+              },
+              {
+                "plugin": "datasetQuality",
+                "path": "x-pack/platform/plugins/shared/dataset_quality/public/services/telemetry/telemetry_service.test.ts"
+              },
+              {
+                "plugin": "datasetQuality",
+                "path": "x-pack/platform/plugins/shared/dataset_quality/public/services/telemetry/telemetry_service.test.ts"
+              },
+              {
+                "plugin": "datasetQuality",
+                "path": "x-pack/platform/plugins/shared/dataset_quality/public/services/telemetry/telemetry_service.test.ts"
+              },
+              {
                 "plugin": "apm",
-                "path": "x-pack/plugins/observability_solution/apm/public/services/telemetry/telemetry_service.test.ts"
+                "path": "x-pack/solutions/observability/plugins/apm/public/services/telemetry/telemetry_service.test.ts"
               },
               {
                 "plugin": "apm",
-                "path": "x-pack/plugins/observability_solution/apm/public/services/telemetry/telemetry_service.test.ts"
+                "path": "x-pack/solutions/observability/plugins/apm/public/services/telemetry/telemetry_service.test.ts"
+              },
+              {
+                "plugin": "infra",
+                "path": "x-pack/solutions/observability/plugins/infra/public/services/telemetry/telemetry_service.test.ts"
+              },
+              {
+                "plugin": "infra",
+                "path": "x-pack/solutions/observability/plugins/infra/public/services/telemetry/telemetry_service.test.ts"
+              },
+              {
+                "plugin": "infra",
+                "path": "x-pack/solutions/observability/plugins/infra/public/services/telemetry/telemetry_service.test.ts"
+              },
+              {
+                "plugin": "infra",
+                "path": "x-pack/solutions/observability/plugins/infra/public/services/telemetry/telemetry_service.test.ts"
+              },
+              {
+                "plugin": "infra",
+                "path": "x-pack/solutions/observability/plugins/infra/public/services/telemetry/telemetry_service.test.ts"
+              },
+              {
+                "plugin": "infra",
+                "path": "x-pack/solutions/observability/plugins/infra/public/services/telemetry/telemetry_service.test.ts"
+              },
+              {
+                "plugin": "infra",
+                "path": "x-pack/solutions/observability/plugins/infra/public/services/telemetry/telemetry_service.test.ts"
+              },
+              {
+                "plugin": "infra",
+                "path": "x-pack/solutions/observability/plugins/infra/public/services/telemetry/telemetry_service.test.ts"
+              },
+              {
+                "plugin": "infra",
+                "path": "x-pack/solutions/observability/plugins/infra/public/services/telemetry/telemetry_service.test.ts"
+              },
+              {
+                "plugin": "infra",
+                "path": "x-pack/solutions/observability/plugins/infra/public/services/telemetry/telemetry_service.test.ts"
+              },
+              {
+                "plugin": "infra",
+                "path": "x-pack/solutions/observability/plugins/infra/public/services/telemetry/telemetry_service.test.ts"
+              },
+              {
+                "plugin": "infra",
+                "path": "x-pack/solutions/observability/plugins/infra/public/services/telemetry/telemetry_service.test.ts"
+              },
+              {
+                "plugin": "infra",
+                "path": "x-pack/solutions/observability/plugins/infra/public/services/telemetry/telemetry_service.test.ts"
+              },
+              {
+                "plugin": "infra",
+                "path": "x-pack/solutions/observability/plugins/infra/public/services/telemetry/telemetry_service.test.ts"
+              },
+              {
+                "plugin": "infra",
+                "path": "x-pack/solutions/observability/plugins/infra/public/services/telemetry/telemetry_service.test.ts"
+              },
+              {
+                "plugin": "infra",
+                "path": "x-pack/solutions/observability/plugins/infra/public/services/telemetry/telemetry_service.test.ts"
+              },
+              {
+                "plugin": "infra",
+                "path": "x-pack/solutions/observability/plugins/infra/public/services/telemetry/telemetry_service.test.ts"
+              },
+              {
+                "plugin": "infra",
+                "path": "x-pack/solutions/observability/plugins/infra/public/services/telemetry/telemetry_service.test.ts"
+              },
+              {
+                "plugin": "infra",
+                "path": "x-pack/solutions/observability/plugins/infra/public/services/telemetry/telemetry_service.test.ts"
+              },
+              {
+                "plugin": "infra",
+                "path": "x-pack/solutions/observability/plugins/infra/public/services/telemetry/telemetry_service.test.ts"
+              },
+              {
+                "plugin": "infra",
+                "path": "x-pack/solutions/observability/plugins/infra/public/services/telemetry/telemetry_service.test.ts"
+              },
+              {
+                "plugin": "infra",
+                "path": "x-pack/solutions/observability/plugins/infra/public/services/telemetry/telemetry_service.test.ts"
+              },
+              {
+                "plugin": "infra",
+                "path": "x-pack/solutions/observability/plugins/infra/public/services/telemetry/telemetry_service.test.ts"
+              },
+              {
+                "plugin": "infra",
+                "path": "x-pack/solutions/observability/plugins/infra/public/services/telemetry/telemetry_service.test.ts"
+              },
+              {
+                "plugin": "infra",
+                "path": "x-pack/solutions/observability/plugins/infra/public/services/telemetry/telemetry_service.test.ts"
+              },
+              {
+                "plugin": "infra",
+                "path": "x-pack/solutions/observability/plugins/infra/public/services/telemetry/telemetry_service.test.ts"
+              },
+              {
+                "plugin": "infra",
+                "path": "x-pack/solutions/observability/plugins/infra/public/services/telemetry/telemetry_service.test.ts"
+              },
+              {
+                "plugin": "infra",
+                "path": "x-pack/solutions/observability/plugins/infra/public/services/telemetry/telemetry_service.test.ts"
+              },
+              {
+                "plugin": "infra",
+                "path": "x-pack/solutions/observability/plugins/infra/public/services/telemetry/telemetry_service.test.ts"
+              },
+              {
+                "plugin": "infra",
+                "path": "x-pack/solutions/observability/plugins/infra/public/services/telemetry/telemetry_service.test.ts"
+              },
+              {
+                "plugin": "infra",
+                "path": "x-pack/solutions/observability/plugins/infra/public/services/telemetry/telemetry_service.test.ts"
+              },
+              {
+                "plugin": "infra",
+                "path": "x-pack/solutions/observability/plugins/infra/public/services/telemetry/telemetry_service.test.ts"
+              },
+              {
+                "plugin": "infra",
+                "path": "x-pack/solutions/observability/plugins/infra/public/services/telemetry/telemetry_service.test.ts"
+              },
+              {
+                "plugin": "infra",
+                "path": "x-pack/solutions/observability/plugins/infra/public/services/telemetry/telemetry_service.test.ts"
               },
               {
                 "plugin": "inventory",
-                "path": "x-pack/plugins/observability_solution/inventory/public/services/telemetry/telemetry_service.test.ts"
+                "path": "x-pack/solutions/observability/plugins/inventory/public/services/telemetry/telemetry_service.test.ts"
               },
               {
                 "plugin": "inventory",
-                "path": "x-pack/plugins/observability_solution/inventory/public/services/telemetry/telemetry_service.test.ts"
+                "path": "x-pack/solutions/observability/plugins/inventory/public/services/telemetry/telemetry_service.test.ts"
               },
               {
                 "plugin": "inventory",
-                "path": "x-pack/plugins/observability_solution/inventory/public/services/telemetry/telemetry_service.test.ts"
+                "path": "x-pack/solutions/observability/plugins/inventory/public/services/telemetry/telemetry_service.test.ts"
               },
               {
                 "plugin": "inventory",
-                "path": "x-pack/plugins/observability_solution/inventory/public/services/telemetry/telemetry_service.test.ts"
+                "path": "x-pack/solutions/observability/plugins/inventory/public/services/telemetry/telemetry_service.test.ts"
               },
               {
                 "plugin": "inventory",
-                "path": "x-pack/plugins/observability_solution/inventory/public/services/telemetry/telemetry_service.test.ts"
+                "path": "x-pack/solutions/observability/plugins/inventory/public/services/telemetry/telemetry_service.test.ts"
               },
               {
                 "plugin": "inventory",
-                "path": "x-pack/plugins/observability_solution/inventory/public/services/telemetry/telemetry_service.test.ts"
+                "path": "x-pack/solutions/observability/plugins/inventory/public/services/telemetry/telemetry_service.test.ts"
               },
               {
                 "plugin": "inventory",
-                "path": "x-pack/plugins/observability_solution/inventory/public/services/telemetry/telemetry_service.test.ts"
+                "path": "x-pack/solutions/observability/plugins/inventory/public/services/telemetry/telemetry_service.test.ts"
               },
               {
                 "plugin": "inventory",
-                "path": "x-pack/plugins/observability_solution/inventory/public/services/telemetry/telemetry_service.test.ts"
+                "path": "x-pack/solutions/observability/plugins/inventory/public/services/telemetry/telemetry_service.test.ts"
               },
               {
                 "plugin": "inventory",
-                "path": "x-pack/plugins/observability_solution/inventory/public/services/telemetry/telemetry_service.test.ts"
+                "path": "x-pack/solutions/observability/plugins/inventory/public/services/telemetry/telemetry_service.test.ts"
               },
               {
                 "plugin": "inventory",
-                "path": "x-pack/plugins/observability_solution/inventory/public/services/telemetry/telemetry_service.test.ts"
-              },
-              {
-                "plugin": "datasetQuality",
-                "path": "x-pack/platform/plugins/shared/dataset_quality/public/services/telemetry/telemetry_service.test.ts"
-              },
-              {
-                "plugin": "datasetQuality",
-                "path": "x-pack/platform/plugins/shared/dataset_quality/public/services/telemetry/telemetry_service.test.ts"
-              },
-              {
-                "plugin": "datasetQuality",
-                "path": "x-pack/platform/plugins/shared/dataset_quality/public/services/telemetry/telemetry_service.test.ts"
-              },
-              {
-                "plugin": "datasetQuality",
-                "path": "x-pack/platform/plugins/shared/dataset_quality/public/services/telemetry/telemetry_service.test.ts"
-              },
-              {
-                "plugin": "datasetQuality",
-                "path": "x-pack/platform/plugins/shared/dataset_quality/public/services/telemetry/telemetry_service.test.ts"
-              },
-              {
-                "plugin": "datasetQuality",
-                "path": "x-pack/platform/plugins/shared/dataset_quality/public/services/telemetry/telemetry_service.test.ts"
-              },
-              {
-                "plugin": "datasetQuality",
-                "path": "x-pack/platform/plugins/shared/dataset_quality/public/services/telemetry/telemetry_service.test.ts"
-              },
-              {
-                "plugin": "datasetQuality",
-                "path": "x-pack/platform/plugins/shared/dataset_quality/public/services/telemetry/telemetry_service.test.ts"
-              },
-              {
-                "plugin": "datasetQuality",
-                "path": "x-pack/platform/plugins/shared/dataset_quality/public/services/telemetry/telemetry_service.test.ts"
-              },
-              {
-                "plugin": "datasetQuality",
-                "path": "x-pack/platform/plugins/shared/dataset_quality/public/services/telemetry/telemetry_service.test.ts"
-              },
-              {
-                "plugin": "infra",
-                "path": "x-pack/solutions/observability/plugins/infra/public/services/telemetry/telemetry_service.test.ts"
-              },
-              {
-                "plugin": "infra",
-                "path": "x-pack/solutions/observability/plugins/infra/public/services/telemetry/telemetry_service.test.ts"
-              },
-              {
-                "plugin": "infra",
-                "path": "x-pack/solutions/observability/plugins/infra/public/services/telemetry/telemetry_service.test.ts"
-              },
-              {
-                "plugin": "infra",
-                "path": "x-pack/solutions/observability/plugins/infra/public/services/telemetry/telemetry_service.test.ts"
-              },
-              {
-                "plugin": "infra",
-                "path": "x-pack/solutions/observability/plugins/infra/public/services/telemetry/telemetry_service.test.ts"
-              },
-              {
-                "plugin": "infra",
-                "path": "x-pack/solutions/observability/plugins/infra/public/services/telemetry/telemetry_service.test.ts"
-              },
-              {
-                "plugin": "infra",
-                "path": "x-pack/solutions/observability/plugins/infra/public/services/telemetry/telemetry_service.test.ts"
-              },
-              {
-                "plugin": "infra",
-                "path": "x-pack/solutions/observability/plugins/infra/public/services/telemetry/telemetry_service.test.ts"
-              },
-              {
-                "plugin": "infra",
-                "path": "x-pack/solutions/observability/plugins/infra/public/services/telemetry/telemetry_service.test.ts"
-              },
-              {
-                "plugin": "infra",
-                "path": "x-pack/solutions/observability/plugins/infra/public/services/telemetry/telemetry_service.test.ts"
-              },
-              {
-                "plugin": "infra",
-                "path": "x-pack/solutions/observability/plugins/infra/public/services/telemetry/telemetry_service.test.ts"
-              },
-              {
-                "plugin": "infra",
-                "path": "x-pack/solutions/observability/plugins/infra/public/services/telemetry/telemetry_service.test.ts"
-              },
-              {
-                "plugin": "infra",
-                "path": "x-pack/solutions/observability/plugins/infra/public/services/telemetry/telemetry_service.test.ts"
-              },
-              {
-                "plugin": "infra",
-                "path": "x-pack/solutions/observability/plugins/infra/public/services/telemetry/telemetry_service.test.ts"
-              },
-              {
-                "plugin": "infra",
-                "path": "x-pack/solutions/observability/plugins/infra/public/services/telemetry/telemetry_service.test.ts"
-              },
-              {
-                "plugin": "infra",
-                "path": "x-pack/solutions/observability/plugins/infra/public/services/telemetry/telemetry_service.test.ts"
-              },
-              {
-                "plugin": "infra",
-                "path": "x-pack/solutions/observability/plugins/infra/public/services/telemetry/telemetry_service.test.ts"
-              },
-              {
-                "plugin": "infra",
-                "path": "x-pack/solutions/observability/plugins/infra/public/services/telemetry/telemetry_service.test.ts"
-              },
-              {
-                "plugin": "infra",
-                "path": "x-pack/solutions/observability/plugins/infra/public/services/telemetry/telemetry_service.test.ts"
-              },
-              {
-                "plugin": "infra",
-                "path": "x-pack/solutions/observability/plugins/infra/public/services/telemetry/telemetry_service.test.ts"
-              },
-              {
-                "plugin": "infra",
-                "path": "x-pack/solutions/observability/plugins/infra/public/services/telemetry/telemetry_service.test.ts"
-              },
-              {
-                "plugin": "infra",
-                "path": "x-pack/solutions/observability/plugins/infra/public/services/telemetry/telemetry_service.test.ts"
-              },
-              {
-                "plugin": "infra",
-                "path": "x-pack/solutions/observability/plugins/infra/public/services/telemetry/telemetry_service.test.ts"
-              },
-              {
-                "plugin": "infra",
-                "path": "x-pack/solutions/observability/plugins/infra/public/services/telemetry/telemetry_service.test.ts"
-              },
-              {
-                "plugin": "infra",
-                "path": "x-pack/solutions/observability/plugins/infra/public/services/telemetry/telemetry_service.test.ts"
-              },
-              {
-                "plugin": "infra",
-                "path": "x-pack/solutions/observability/plugins/infra/public/services/telemetry/telemetry_service.test.ts"
-              },
-              {
-                "plugin": "infra",
-                "path": "x-pack/solutions/observability/plugins/infra/public/services/telemetry/telemetry_service.test.ts"
-              },
-              {
-                "plugin": "infra",
-                "path": "x-pack/solutions/observability/plugins/infra/public/services/telemetry/telemetry_service.test.ts"
-              },
-              {
-                "plugin": "infra",
-                "path": "x-pack/solutions/observability/plugins/infra/public/services/telemetry/telemetry_service.test.ts"
-              },
-              {
-                "plugin": "infra",
-                "path": "x-pack/solutions/observability/plugins/infra/public/services/telemetry/telemetry_service.test.ts"
-              },
-              {
-                "plugin": "infra",
-                "path": "x-pack/solutions/observability/plugins/infra/public/services/telemetry/telemetry_service.test.ts"
-              },
-              {
-                "plugin": "infra",
-                "path": "x-pack/solutions/observability/plugins/infra/public/services/telemetry/telemetry_service.test.ts"
-              },
-              {
-                "plugin": "infra",
-                "path": "x-pack/solutions/observability/plugins/infra/public/services/telemetry/telemetry_service.test.ts"
-              },
-              {
-                "plugin": "infra",
-                "path": "x-pack/solutions/observability/plugins/infra/public/services/telemetry/telemetry_service.test.ts"
+                "path": "x-pack/solutions/observability/plugins/inventory/public/services/telemetry/telemetry_service.test.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -1488,11 +1488,11 @@
               },
               {
                 "plugin": "actions",
-                "path": "x-pack/plugins/actions/server/lib/action_executor.test.ts"
+                "path": "x-pack/platform/plugins/shared/actions/server/lib/action_executor.test.ts"
               },
               {
                 "plugin": "actions",
-                "path": "x-pack/plugins/actions/server/lib/action_executor.test.ts"
+                "path": "x-pack/platform/plugins/shared/actions/server/lib/action_executor.test.ts"
               },
               {
                 "plugin": "@kbn/core",
@@ -1869,12 +1869,12 @@
                 "path": "src/core/packages/analytics/server-internal/src/analytics_service.ts"
               },
               {
-                "plugin": "cloud",
-                "path": "x-pack/plugins/cloud/common/register_cloud_deployment_id_analytics_context.ts"
-              },
-              {
                 "plugin": "licensing",
                 "path": "x-pack/plugins/licensing/common/register_analytics_context_provider.ts"
+              },
+              {
+                "plugin": "cloud",
+                "path": "x-pack/plugins/cloud/common/register_cloud_deployment_id_analytics_context.ts"
               },
               {
                 "plugin": "spaces",
@@ -1886,15 +1886,15 @@
               },
               {
                 "plugin": "discover",
-                "path": "src/plugins/discover/public/services/discover_ebt_manager.ts"
-              },
-              {
-                "plugin": "telemetry",
-                "path": "src/plugins/telemetry/public/plugin.ts"
+                "path": "src/platform/plugins/shared/discover/public/services/discover_ebt_manager.ts"
               },
               {
                 "plugin": "telemetry",
                 "path": "src/plugins/telemetry/server/plugin.ts"
+              },
+              {
+                "plugin": "telemetry",
+                "path": "src/plugins/telemetry/public/plugin.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -1954,7 +1954,7 @@
               },
               {
                 "plugin": "discover",
-                "path": "src/plugins/discover/public/services/discover_ebt_manager.test.ts"
+                "path": "src/platform/plugins/shared/discover/public/services/discover_ebt_manager.test.ts"
               },
               {
                 "plugin": "@kbn/core",
