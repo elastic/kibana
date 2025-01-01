@@ -33,16 +33,16 @@ describe('convertTimeDurationToMs', () => {
     }
   );
 
-  it('trims leading spaces', () => {
+  it('does NOT trim leading spaces', () => {
     const result = convertTimeDurationToMs(' 6m');
 
-    expect(result).toBe(360000);
+    expect(result).toBeUndefined();
   });
 
-  it('trims trailing spaces', () => {
+  it('does NOT trim trailing spaces', () => {
     const result = convertTimeDurationToMs('8h ');
 
-    expect(result).toBe(28800000);
+    expect(result).toBeUndefined();
   });
 
   it.each([[''], [' '], ['s'], ['invalid'], ['3ss'], ['m4s'], ['78']])(

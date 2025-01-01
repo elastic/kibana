@@ -11,8 +11,7 @@ import {
   toLargestTimeDuration,
 } from '@kbn/securitysolution-utils/time_duration';
 import { toSimpleRuleSchedule } from '../../../../../../../../../common/detection_engine/rule_management/to_simple_rule_schedule';
-import { type FormSchema, type FormData } from '../../../../../../../../shared_imports';
-import { schema } from '../../../../../../../rule_creation_ui/components/step_schedule_rule/schema';
+import { type FormData } from '../../../../../../../../shared_imports';
 import type {
   DiffableRule,
   RuleSchedule,
@@ -26,20 +25,11 @@ export function SimpleRuleScheduleForm(): JSX.Element {
   return (
     <RuleFieldEditFormWrapper
       component={SimpleRuleScheduleAdapter}
-      ruleFieldFormSchema={SIMPLE_RULE_SCHEDULE_SCHEMA}
       serializer={serializer}
       deserializer={deserializer}
     />
   );
 }
-
-const SIMPLE_RULE_SCHEDULE_SCHEMA = {
-  interval: schema.interval,
-  from: schema.from,
-} as FormSchema<{
-  interval: string;
-  from: string;
-}>;
 
 function deserializer(_: unknown, finalRule: DiffableRule): Partial<SimpleRuleSchedule> {
   const simpleRuleSchedule = toSimpleRuleSchedule(finalRule.rule_schedule);

@@ -201,8 +201,9 @@ export const getScheduleStepsData = (rule: RuleResponse): ScheduleStepRule => {
 
   return {
     interval: rule.interval,
-    // Temporally use default value
-    from: '1m',
+    // Fallback to zero look-back since UI isn't able to handle negative
+    // look-back
+    from: '0s',
   };
 };
 
