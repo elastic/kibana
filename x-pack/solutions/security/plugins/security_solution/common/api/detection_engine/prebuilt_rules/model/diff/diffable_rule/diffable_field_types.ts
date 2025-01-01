@@ -13,6 +13,8 @@ import {
   IndexPatternArray,
   KqlQueryLanguage,
   RuleFilterArray,
+  RuleIntervalFrom,
+  RuleIntervalTo,
   RuleNameOverride,
   RuleQuery,
   SavedQueryId,
@@ -98,7 +100,8 @@ export const RuleEsqlQuery = z.object({
 export type RuleSchedule = z.infer<typeof RuleSchedule>;
 export const RuleSchedule = z.object({
   interval: TimeDuration({ allowedUnits: ['s', 'm', 'h'] }),
-  lookback: TimeDuration({ allowedUnits: ['s', 'm', 'h'] }),
+  from: RuleIntervalFrom,
+  to: RuleIntervalTo,
 });
 
 // -------------------------------------------------------------------------------------------------
