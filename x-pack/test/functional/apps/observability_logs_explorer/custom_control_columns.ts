@@ -158,10 +158,55 @@ function generateLogsData({ to, count = 1 }: { to: string; count?: number }) {
       Array(count)
         .fill(0)
         .map(() => {
-          return log.create().logLevel('info').timestamp(timestamp).defaults({
-            'error.exception.stacktrace': 'Error message in error.exception.stacktrace',
-            'service.name': 'node-service',
-          });
+          return log
+            .create()
+            .logLevel('info')
+            .timestamp(timestamp)
+            .defaults({
+              'error.exception': [
+                {
+                  message: 'Exception stacktrace',
+                  stacktrace: [
+                    {
+                      exclude_from_grouping: false,
+                      abs_path: 'test.js',
+                      filename: 'test.js',
+                      line: {
+                        number: 1,
+                        context: 'console.log(err)',
+                      },
+                      function: '<anonymous>',
+                      context: {
+                        pre: ['console.log(err)'],
+                        post: ['console.log(err);'],
+                      },
+                      vars: {},
+                    },
+                    {
+                      exclude_from_grouping: false,
+                      library_frame: true,
+                      abs_path: 'test.js',
+                      filename: 'test.js',
+                      line: {
+                        number: 1,
+                      },
+                      function: 'test',
+                      vars: {},
+                    },
+                  ],
+                },
+                {
+                  handled: true,
+                  module: 'module',
+                  attributes: {
+                    test: 'test',
+                  },
+                  message: 'message',
+                  type: 'type',
+                },
+              ],
+              'service.name': 'node-service',
+            });
         })
     );
 
@@ -175,10 +220,44 @@ function generateLogsData({ to, count = 1 }: { to: string; count?: number }) {
       Array(count)
         .fill(0)
         .map(() => {
-          return log.create().logLevel('info').timestamp(timestamp).defaults({
-            'error.log.stacktrace': 'Error message in error.log.stacktrace',
-            'service.name': 'node-service',
-          });
+          return log
+            .create()
+            .logLevel('info')
+            .timestamp(timestamp)
+            .defaults({
+              'error.log': {
+                message: 'Log message',
+                stacktrace: [
+                  {
+                    exclude_from_grouping: false,
+                    abs_path: 'test.js',
+                    filename: 'test.js',
+                    line: {
+                      number: 1,
+                      context: 'console.log(err)',
+                    },
+                    function: '<anonymous>',
+                    context: {
+                      pre: ['console.log(err)'],
+                      post: ['console.log(err)'],
+                    },
+                    vars: {},
+                  },
+                  {
+                    exclude_from_grouping: false,
+                    library_frame: true,
+                    abs_path: 'test.js',
+                    filename: 'test.js',
+                    line: {
+                      number: 1,
+                    },
+                    function: 'test',
+                    vars: {},
+                  },
+                ],
+              },
+              'service.name': 'node-service',
+            });
         })
     );
 
