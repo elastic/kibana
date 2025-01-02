@@ -33,6 +33,40 @@ export interface GridLayoutProps {
   accessMode?: GridAccessMode;
 }
 
+const EXPANDED_PANEL_STYLES = css`
+  &.kbnGrid--hasExpandedPanel {
+    height: 100%;
+
+    .kbnGridRowHeader {
+      height: 0px; // used instead of 'display: none' due to a11y concerns
+    }
+
+    .kbnGridRowContainer {
+      &:not(.kbnGridRowContainer--hasExpandedPanel) {
+        display: none;
+      }
+      &--hasExpandedPanel {
+        .kbnGridRow {
+          display: block !important; // overwrite grid display
+          height: 100%;
+
+          .kbnGridPanel {
+            &:not(.kbnGridPanel--isExpanded) {
+              position: absolute;
+              top: -100vh;
+              left: -100vw;
+            }
+            &--isExpanded {
+              display: contents;
+              height: 100%;
+            }
+          }
+        }
+      }
+    }
+  }
+`;
+
 export const GridLayout = ({
   layout,
   gridSettings,
@@ -150,39 +184,7 @@ export const GridLayout = ({
           setDimensionsRef(divElement);
         }}
         className={gridClassNames}
-        css={css`
-          &.kbnGrid--hasExpandedPanel {
-            height: 100%;
-
-            .kbnGridRowHeader {
-              height: 0px; // used instead of 'display: none' due to a11y concerns
-            }
-
-            .kbnGridRowContainer {
-              &:not(.kbnGridRowContainer--hasExpandedPanel) {
-                display: none;
-              }
-              &--hasExpandedPanel {
-                .kbnGridRow {
-                  display: block !important; // overwrite grid display
-                  height: 100%;
-
-                  .kbnGridPanel {
-                    &:not(.kbnGridPanel--isExpanded) {
-                      position: absolute;
-                      top: -100vh;
-                      left: -100vw;
-                    }
-                    &--isExpanded {
-                      display: contents;
-                      height: 100%;
-                    }
-                  }
-                }
-              }
-            }
-          }
-        `}
+        css={EXPANDED_PANEL_STYLES}
       >
         {children}
       </div>
