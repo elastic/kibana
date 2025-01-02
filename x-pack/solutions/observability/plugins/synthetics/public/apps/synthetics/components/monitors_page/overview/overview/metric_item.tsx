@@ -9,9 +9,8 @@ import React, { useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { Chart, Settings, Metric, MetricTrendShape } from '@elastic/charts';
-import { EuiPanel, EuiSpacer } from '@elastic/eui';
+import { EuiPanel, EuiSpacer, useEuiTheme, EuiThemeComputed } from '@elastic/eui';
 import { useElasticChartsTheme } from '@kbn/charts-theme';
-import { useTheme } from '@kbn/observability-shared-plugin/public';
 import moment from 'moment';
 import { useSelector, useDispatch } from 'react-redux';
 
@@ -36,23 +35,19 @@ import { MetricItemExtra } from './metric_item/metric_item_extra';
 
 const METRIC_ITEM_HEIGHT = 160;
 
-export const getColor = (
-  theme: ReturnType<typeof useTheme>,
-  isEnabled: boolean,
-  status?: string
-) => {
+export const getColor = (theme: EuiThemeComputed, isEnabled: boolean, status?: string) => {
   if (!isEnabled) {
-    return theme.eui.euiColorLightestShade;
+    return theme.colors.disabled;
   }
   switch (status) {
     case 'down':
-      return theme.eui.euiColorVis9_behindText;
+      return theme.colors.danger;
     case 'up':
-      return theme.eui.euiColorVis0_behindText;
+      return theme.colors.success;
     case 'unknown':
-      return theme.eui.euiColorGhost;
+      return theme.colors.ghost;
     default:
-      return theme.eui.euiColorVis0_behindText;
+      return theme.colors.success;
   }
 };
 
@@ -73,11 +68,12 @@ export const MetricItem = ({
     configId: monitor.configId,
     locationId: monitor.locationId,
   });
-  const theme = useTheme();
 
   const testInProgress = useSelector(manualTestRunInProgressSelector(monitor.configId));
 
   const dispatch = useDispatch();
+
+  const theme = useEuiTheme();
 
   return (
     <div
@@ -164,7 +160,7 @@ export const MetricItem = ({
                       </div>
                     ) : undefined,
                   valueFormatter: (d: number) => formatDuration(d),
-                  color: getColor(theme, monitor.isEnabled, status),
+                  color: getColor(theme.euiTheme, monitor.isEnabled, status),
                   body: <MetricItemBody monitor={monitor} />,
                 },
               ],

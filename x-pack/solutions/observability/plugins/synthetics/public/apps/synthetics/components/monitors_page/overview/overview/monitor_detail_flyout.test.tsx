@@ -9,7 +9,6 @@ import React from 'react';
 import { render } from '../../../../utils/testing/rtl_helpers';
 import { fireEvent } from '@testing-library/react';
 import { MonitorDetailFlyout } from './monitor_detail_flyout';
-import * as observabilitySharedPublic from '@kbn/observability-shared-plugin/public';
 import * as monitorDetail from '../../../../hooks/use_monitor_detail';
 import * as statusByLocation from '../../../../hooks/use_status_by_location';
 import * as monitorDetailLocator from '../../../../hooks/use_monitor_detail_locator';
@@ -31,9 +30,6 @@ useFetcherMock.mockReturnValue({
 
 describe('Monitor Detail Flyout', () => {
   beforeEach(() => {
-    jest
-      .spyOn(observabilitySharedPublic, 'useTheme')
-      .mockReturnValue({ eui: { euiColorVis0: 'red', euiColorVis9: 'red' } } as any);
     jest.spyOn(monitorDetail, 'useMonitorDetail').mockReturnValue({
       data: {
         docId: 'docId',
