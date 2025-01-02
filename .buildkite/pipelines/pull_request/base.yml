@@ -2,7 +2,7 @@ steps:
   - command: .buildkite/scripts/steps/on_merge_api_docs.sh
     label: Check Public API Docs 0
     key: public-api-docs
-    parallellism: 5
+    parallelism: 5
 
     agents:
       image: family/kibana-ubuntu-2004
@@ -22,7 +22,7 @@ steps:
   - command: .buildkite/scripts/steps/on_merge_api_docs.sh
     label: Check Public API Docs 1
     key: public-api-docs
-    parallellism: 5
+    parallelism: 5
     agents:
     agents:
       image: family/kibana-ubuntu-2004
@@ -44,7 +44,7 @@ steps:
   - command: .buildkite/scripts/steps/on_merge_api_docs.sh
     label: Check Public API Docs 2
     key: public-api-docs
-    parallellism: 5
+    parallelism: 5
     agents:
       image: family/kibana-ubuntu-2004
       imageProject: elastic-images-prod
