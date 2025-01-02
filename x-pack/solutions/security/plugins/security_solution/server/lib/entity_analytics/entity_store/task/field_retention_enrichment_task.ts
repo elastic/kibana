@@ -13,7 +13,6 @@ import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import { getAvailableEntityTypes } from '../../../../../common/entity_analytics/entity_store/constants';
 import {
   EngineComponentResourceEnum,
   type EntityType,
@@ -34,7 +33,7 @@ import {
   ENTITY_STORE_USAGE_EVENT,
 } from '../../../telemetry/event_based/events';
 import { VERSIONS_BY_ENTITY_TYPE } from '../entity_definitions/constants';
-import { getAvailableEntityTypes } from '../installation/engine_description';
+import { getAvailableEntityDescriptions } from '../installation/engine_description';
 
 const logFactory =
   (logger: Logger, taskId: string) =>
@@ -204,7 +203,7 @@ export const runTask = async ({
       return { state: updatedState };
     }
 
-    const entityTypes = getAvailableEntityTypes();
+    const entityTypes = getAvailableEntityDescriptions();
 
     for (const entityType of entityTypes) {
       const start = Date.now();
