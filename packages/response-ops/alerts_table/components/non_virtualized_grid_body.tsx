@@ -17,7 +17,7 @@ const Row = styled.div`
   min-width: fit-content;
 `;
 
-type CustomGridBodyProps = Pick<
+export type CustomGridBodyProps = Pick<
   Parameters<NonNullable<EuiDataGridProps['renderCustomGridBody']>>['0'],
   'Cell' | 'visibleColumns'
 > & {
@@ -51,7 +51,7 @@ export const NonVirtualizedGridBody = memo(
             <Row
               role="row"
               key={`${rowIndex},${pageIndex}`}
-              // manually add stripes if props.gridStyle.stripes is true because presence of rowClasses
+              // Manually add stripes if props.gridStyle.stripes is true because presence of rowClasses
               // overrides the props.gridStyle.stripes option. And rowClasses will always be there.
               // Adding stripes only on even rows. It will be replaced by alertsTableHighlightedRow if
               // shouldHighlightRow is correct
