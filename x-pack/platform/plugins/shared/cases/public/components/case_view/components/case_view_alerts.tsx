@@ -10,6 +10,7 @@ import React, { useMemo } from 'react';
 import { EuiFlexItem, EuiFlexGroup, EuiProgress } from '@elastic/eui';
 import { SECURITY_SOLUTION_RULE_TYPE_IDS } from '@kbn/securitysolution-rules';
 import { AlertsTable } from '@kbn/response-ops-alerts-table';
+import type { SetRequired } from 'type-fest';
 import { SECURITY_SOLUTION_OWNER } from '../../../../common/constants';
 import type { CaseUI } from '../../../../common';
 import { getManualAlertIds } from './helpers';
@@ -25,8 +26,9 @@ interface CaseViewAlertsProps {
 }
 
 export const CaseViewAlerts = ({ caseData, onAlertsTableLoaded }: CaseViewAlertsProps) => {
+  const { services } = useKibana();
   const { data, http, notifications, fieldFormats, application, licensing, settings } =
-    useKibana().services;
+    services as SetRequired<typeof services, 'licensing'>;
   const alertIds = getManualAlertIds(caseData.comments);
   const alertIdsQuery = useMemo(
     () => ({
