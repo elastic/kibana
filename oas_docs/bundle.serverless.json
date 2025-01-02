@@ -16443,7 +16443,7 @@
     },
     "/api/fleet/agents/actions/{actionId}/cancel": {
       "post": {
-        "description": "[Required authorization] Route required privileges: ALL of [fleet-agents-read].",
+        "description": "[Required authorization] Route required privileges: ALL of [fleet-agents-all].",
         "operationId": "post-fleet-agents-actions-actionid-cancel",
         "parameters": [
           {
@@ -16632,7 +16632,7 @@
     },
     "/api/fleet/agents/bulk_reassign": {
       "post": {
-        "description": "[Required authorization] Route required privileges: ALL of [fleet-agents-read].",
+        "description": "[Required authorization] Route required privileges: ALL of [fleet-agents-all].",
         "operationId": "post-fleet-agents-bulk-reassign",
         "parameters": [
           {
@@ -16845,7 +16845,7 @@
     },
     "/api/fleet/agents/bulk_unenroll": {
       "post": {
-        "description": "[Required authorization] Route required privileges: ALL of [fleet-agents-read].",
+        "description": "[Required authorization] Route required privileges: ALL of [fleet-agents-all].",
         "operationId": "post-fleet-agents-bulk-unenroll",
         "parameters": [
           {
@@ -16957,7 +16957,7 @@
     },
     "/api/fleet/agents/bulk_update_agent_tags": {
       "post": {
-        "description": "[Required authorization] Route required privileges: ALL of [fleet-agents-read].",
+        "description": "[Required authorization] Route required privileges: ALL of [fleet-agents-all].",
         "operationId": "post-fleet-agents-bulk-update-agent-tags",
         "parameters": [
           {
@@ -17071,7 +17071,7 @@
     },
     "/api/fleet/agents/bulk_upgrade": {
       "post": {
-        "description": "[Required authorization] Route required privileges: ALL of [fleet-agents-read].",
+        "description": "[Required authorization] Route required privileges: ALL of [fleet-agents-all].",
         "operationId": "post-fleet-agents-bulk-upgrade",
         "parameters": [
           {
@@ -17193,7 +17193,7 @@
     },
     "/api/fleet/agents/files/{fileId}": {
       "delete": {
-        "description": "Delete a file uploaded by an agent.<br/><br/>[Required authorization] Route required privileges: ALL of [fleet-agents-read].",
+        "description": "Delete a file uploaded by an agent.<br/><br/>[Required authorization] Route required privileges: ALL of [fleet-agents-all].",
         "operationId": "delete-fleet-agents-files-fileid",
         "parameters": [
           {
@@ -17587,7 +17587,7 @@
     },
     "/api/fleet/agents/{agentId}": {
       "delete": {
-        "description": "Delete an agent by ID.<br/><br/>[Required authorization] Route required privileges: ALL of [fleet-agents-read].",
+        "description": "Delete an agent by ID.<br/><br/>[Required authorization] Route required privileges: ALL of [fleet-agents-all].",
         "operationId": "delete-fleet-agents-agentid",
         "parameters": [
           {
@@ -18117,7 +18117,7 @@
         ]
       },
       "put": {
-        "description": "Update an agent by ID.<br/><br/>[Required authorization] Route required privileges: ALL of [fleet-agents-read].",
+        "description": "Update an agent by ID.<br/><br/>[Required authorization] Route required privileges: ALL of [fleet-agents-all].",
         "operationId": "put-fleet-agents-agentid",
         "parameters": [
           {
@@ -18596,7 +18596,7 @@
     },
     "/api/fleet/agents/{agentId}/actions": {
       "post": {
-        "description": "[Required authorization] Route required privileges: ALL of [fleet-agents-read].",
+        "description": "[Required authorization] Route required privileges: ALL of [fleet-agents-all].",
         "operationId": "post-fleet-agents-agentid-actions",
         "parameters": [
           {
@@ -18801,7 +18801,7 @@
     },
     "/api/fleet/agents/{agentId}/reassign": {
       "post": {
-        "description": "[Required authorization] Route required privileges: ALL of [fleet-agents-read].",
+        "description": "[Required authorization] Route required privileges: ALL of [fleet-agents-all].",
         "operationId": "post-fleet-agents-agentid-reassign",
         "parameters": [
           {
@@ -18984,7 +18984,7 @@
     },
     "/api/fleet/agents/{agentId}/unenroll": {
       "post": {
-        "description": "[Required authorization] Route required privileges: ALL of [fleet-agents-read].",
+        "description": "[Required authorization] Route required privileges: ALL of [fleet-agents-all].",
         "operationId": "post-fleet-agents-agentid-unenroll",
         "parameters": [
           {
@@ -19034,7 +19034,7 @@
     },
     "/api/fleet/agents/{agentId}/upgrade": {
       "post": {
-        "description": "[Required authorization] Route required privileges: ALL of [fleet-agents-read].",
+        "description": "[Required authorization] Route required privileges: ALL of [fleet-agents-all].",
         "operationId": "post-fleet-agents-agentid-upgrade",
         "parameters": [
           {
@@ -24531,6 +24531,7 @@
     },
     "/api/fleet/health_check": {
       "post": {
+        "description": "[Required authorization] Route required privileges: ALL of [fleet-settings-all].",
         "operationId": "post-fleet-health-check",
         "parameters": [
           {
