@@ -5,11 +5,12 @@
  * 2.0.
  */
 import * as rt from 'io-ts';
-import { IToasts } from '@kbn/core-notifications-browser';
-import { IKbnUrlStateStorage, withNotifyOnErrors } from '@kbn/kibana-utils-plugin/public';
+import type { IToasts } from '@kbn/core-notifications-browser';
+import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
+import { withNotifyOnErrors } from '@kbn/kibana-utils-plugin/public';
 import * as Either from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/function';
-import { InvokeCreator } from 'xstate';
+import type { InvokeCreator } from 'xstate';
 import { createPlainError, formatErrors } from '@kbn/io-ts-utils';
 import { minimalTimeKeyRT, pickTimeKey } from '../../../../common/time';
 import type { LogStreamPositionContext, LogStreamPositionEvent } from './types';

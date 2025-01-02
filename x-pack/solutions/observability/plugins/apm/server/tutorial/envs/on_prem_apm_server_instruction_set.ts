@@ -6,7 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { InstructionsSchema, INSTRUCTION_VARIANT } from '@kbn/home-plugin/server';
+import type { InstructionsSchema } from '@kbn/home-plugin/server';
+import { INSTRUCTION_VARIANT } from '@kbn/home-plugin/server';
 import type { APMIndices } from '@kbn/apm-data-access-plugin/server';
 import {
   createDownloadServerDeb,
