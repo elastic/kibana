@@ -50,7 +50,7 @@ import type {
 } from '../../../../common/api/entity_analytics';
 import { EngineDescriptorClient } from './saved_object/engine_descriptor';
 import { ENGINE_STATUS, ENTITY_STORE_STATUS, MAX_SEARCH_RESPONSE_SIZE } from './constants';
-import { AssetCriticalityEcsMigrationClient } from '../asset_criticality/asset_criticality_migration_client';
+import { AssetCriticalityMigrationClient } from '../asset_criticality/asset_criticality_migration_client';
 import { getUnitedEntityDefinition } from './united_entity_definitions';
 import {
   startEntityStoreFieldRetentionEnrichTask,
@@ -128,7 +128,7 @@ interface SearchEntitiesParams {
 
 export class EntityStoreDataClient {
   private engineClient: EngineDescriptorClient;
-  private assetCriticalityMigrationClient: AssetCriticalityEcsMigrationClient;
+  private assetCriticalityMigrationClient: AssetCriticalityMigrationClient;
   private entityClient: EntityClient;
   private riskScoreDataClient: RiskScoreDataClient;
   private esClient: ElasticsearchClient;
@@ -148,7 +148,7 @@ export class EntityStoreDataClient {
       namespace,
     });
 
-    this.assetCriticalityMigrationClient = new AssetCriticalityEcsMigrationClient({
+    this.assetCriticalityMigrationClient = new AssetCriticalityMigrationClient({
       esClient: this.esClient,
       logger,
       auditLogger,
@@ -288,7 +288,7 @@ export class EntityStoreDataClient {
 
     const { config } = this.options;
 
-    await this.riskScoreDataClient.createRiskScoreLatestIndex().catch((e) => {
+    await this.riskScoreDataClient.createOrUpdateRiskScoreLatestIndex().catch((e) => {
       if (e.meta.body.error.type === 'resource_already_exists_exception') {
         this.options.logger.debug(
           `Risk score index for ${entityType} already exists, skipping creation.`

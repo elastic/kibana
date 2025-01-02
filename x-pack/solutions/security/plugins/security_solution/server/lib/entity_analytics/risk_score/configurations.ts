@@ -9,6 +9,7 @@ import type { FieldMap } from '@kbn/alerts-as-data-utils';
 import type { IdentifierType } from '../../../../common/entity_analytics/risk_engine';
 import {
   RiskScoreEntity,
+  SERVICE_RISK_SCORE_ENTITY,
   riskScoreBaseIndexName,
 } from '../../../../common/entity_analytics/risk_engine';
 import type { IIndexPatternString } from '../utils/create_datastream';
@@ -126,6 +127,17 @@ export const riskScoreFieldMap: FieldMap = {
     required: false,
   },
   ...buildIdentityRiskFields(RiskScoreEntity.user),
+  'service.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'service.risk': {
+    type: 'object',
+    array: false,
+    required: false,
+  },
+  ...buildIdentityRiskFields(SERVICE_RISK_SCORE_ENTITY),
 } as const;
 
 export const mappingComponentName = '.risk-score-mappings';
@@ -159,10 +171,24 @@ export const getTransformOptions = ({
   },
   latest: {
     sort: '@timestamp',
-    unique_key: [`host.name`, `user.name`],
+    unique_key: [`host.name`, `user.name`, `service.name`],
   },
   source: {
     index: source,
+    query: {
+      bool: {
+        filter: [
+          {
+            range: {
+              '@timestamp': {
+                // It prevents the transform from processing too much data on reinstall
+                gte: 'now-24h',
+              },
+            },
+          },
+        ],
+      },
+    },
   },
   frequency: '1h', // 1h is the maximum value
   sync: {
@@ -175,8 +201,7 @@ export const getTransformOptions = ({
     unattended: true, // In unattended mode, the transform retries indefinitely in case of an error
   },
   _meta: {
-    version: 2, // When this field is updated we automatically update the transform
-
+    version: 3, // When this field is updated we automatically update the transform
     managed: true, // Metadata that identifies the transform. It has no functionality
     managed_by: 'security-entity-analytics', // Metadata that identifies the transform. It has no functionality
   },

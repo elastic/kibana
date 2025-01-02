@@ -800,6 +800,20 @@ components:
               type: string
           required:
             - name
+        service:
+          type: object
+          properties:
+            asset:
+              type: object
+              properties:
+                criticality:
+                  $ref: '#/components/schemas/AssetCriticalityLevel'
+              required:
+                - criticality
+            name:
+              type: string
+          required:
+            - name
         user:
           type: object
           properties:
@@ -1130,6 +1144,7 @@ components:
       enum:
         - host.name
         - user.name
+        - service.name
       type: string
     IndexPattern:
       type: string
