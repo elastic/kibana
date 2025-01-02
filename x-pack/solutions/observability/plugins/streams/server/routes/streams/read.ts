@@ -9,9 +9,9 @@ import { z } from '@kbn/zod';
 import { notFound, internal } from '@hapi/boom';
 import {
   FieldDefinitionConfig,
-  isIngestStream,
   isWiredStream,
   ReadStreamDefinition,
+  WiredReadStreamDefinition,
 } from '@kbn/streams-schema';
 import { createServerRoute } from '../create_server_route';
 import { DefinitionNotFound } from '../../lib/streams/errors';
@@ -34,17 +34,21 @@ export const readStreamRoute = createServerRoute({
   }),
   handler: async ({ params, request, getScopedClients }): Promise<ReadStreamDefinition> => {
     try {
-      const { scopedClusterClient } = await getScopedClients({ request });
+      const { scopedClusterClient, assetClient } = await getScopedClients({ request });
       const streamEntity = await readStream({
         scopedClusterClient,
         id: params.path.id,
       });
+      const dashboards = await assetClient.getAssetIds({
+        entityId: streamEntity.name,
+        entityType: 'stream',
+        assetType: 'dashboard',
+      });
 
-      // TODO: I have no idea why I can just do `isIngestStream` here but when I do,
-      // streamEntity becomes `streamEntity: never` in the statements afterwards
-      if (!isWiredStream(streamEntity) && isIngestStream(streamEntity)) {
+      if (!isWiredStream(streamEntity)) {
         return {
           ...streamEntity,
+          dashboards,
           inherited_fields: {},
         };
       }
@@ -54,8 +58,9 @@ export const readStreamRoute = createServerRoute({
         scopedClusterClient,
       });
 
-      const body = {
+      const body: WiredReadStreamDefinition = {
         ...streamEntity,
+        dashboards,
         inherited_fields: ancestors.reduce((acc, def) => {
           Object.entries(def.stream.ingest.wired.fields).forEach(([key, fieldDef]) => {
             acc[key] = { ...fieldDef, from: def.name };

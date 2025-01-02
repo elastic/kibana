@@ -63,15 +63,11 @@ export function isStream(subject: any): subject is StreamDefinition {
   return isSchema(streamDefintionSchema, subject);
 }
 
-export function isIngestStream(
-  subject: IngestStreamDefinition | WiredStreamDefinition
-): subject is IngestStreamDefinition {
+export function isIngestStream(subject: StreamDefinition): subject is IngestStreamDefinition {
   return isSchema(ingestStreamDefinitonSchema, subject);
 }
 
-export function isWiredStream(
-  subject: IngestStreamDefinition | WiredStreamDefinition
-): subject is WiredStreamDefinition {
+export function isWiredStream(subject: StreamDefinition): subject is WiredStreamDefinition {
   return isSchema(wiredStreamDefinitonSchema, subject);
 }
 
