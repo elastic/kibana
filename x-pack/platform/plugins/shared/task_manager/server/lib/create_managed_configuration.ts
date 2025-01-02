@@ -18,11 +18,12 @@ import {
 } from '../config';
 import { TaskCost } from '../task';
 import { getMsearchStatusCode } from './msearch_error';
-import { getBulkUpdateStatusCode } from './bulk_update_error';
+import { getBulkUpdateStatusCode, isClusterBlockException } from './bulk_update_error';
 
 const FLUSH_MARKER = Symbol('flush');
 export const ADJUST_THROUGHPUT_INTERVAL = 10 * 1000;
 export const PREFERRED_MAX_POLL_INTERVAL = 60 * 1000;
+export const INTERVAL_AFTER_BLOCK_EXCEPTION = 61 * 1000;
 
 // Capacity is measured in number of normal cost tasks that can be run
 // At a minimum, we need to be able to run a single task with the greatest cost
@@ -44,43 +45,55 @@ const CAPACITY_INCREASE_PERCENTAGE = 1.05;
 const POLL_INTERVAL_DECREASE_PERCENTAGE = 0.95;
 const POLL_INTERVAL_INCREASE_PERCENTAGE = 1.2;
 
+interface ErrorScanResult {
+  count: number;
+  isBlockException: boolean;
+}
+
 export function createCapacityScan(
   config: TaskManagerConfig,
   logger: Logger,
   startingCapacity: number
 ) {
-  return scan((previousCapacity: number, errorCount: number) => {
-    let newCapacity: number;
-    if (errorCount > 0) {
-      const minCapacity = getMinCapacity(config);
-      // Decrease capacity by CAPACITY_DECREASE_PERCENTAGE while making sure it doesn't go lower than minCapacity.
-      // Using Math.floor to make sure the number is different than previous while not being a decimal value.
-      newCapacity = Math.max(
-        Math.floor(previousCapacity * CAPACITY_DECREASE_PERCENTAGE),
-        minCapacity
-      );
-    } else {
-      // Increase capacity by CAPACITY_INCREASE_PERCENTAGE while making sure it doesn't go
-      // higher than the starting value. Using Math.ceil to make sure the number is different than
-      // previous while not being a decimal value
-      newCapacity = Math.min(
-        startingCapacity,
-        Math.ceil(previousCapacity * CAPACITY_INCREASE_PERCENTAGE)
-      );
-    }
-
-    if (newCapacity !== previousCapacity) {
-      logger.debug(
-        `Capacity configuration changing from ${previousCapacity} to ${newCapacity} after seeing ${errorCount} "too many request" and/or "execute [inline] script" error(s)`
-      );
-      if (previousCapacity === startingCapacity) {
-        logger.warn(
-          `Capacity configuration is temporarily reduced after Elasticsearch returned ${errorCount} "too many request" and/or "execute [inline] script" error(s).`
-        );
+  return scan(
+    (previousCapacity: number, { count: errorCount, isBlockException }: ErrorScanResult) => {
+      let newCapacity: number;
+      if (isBlockException) {
+        newCapacity = previousCapacity;
+      } else {
+        if (errorCount > 0) {
+          const minCapacity = getMinCapacity(config);
+          // Decrease capacity by CAPACITY_DECREASE_PERCENTAGE while making sure it doesn't go lower than minCapacity.
+          // Using Math.floor to make sure the number is different than previous while not being a decimal value.
+          newCapacity = Math.max(
+            Math.floor(previousCapacity * CAPACITY_DECREASE_PERCENTAGE),
+            minCapacity
+          );
+        } else {
+          // Increase capacity by CAPACITY_INCREASE_PERCENTAGE while making sure it doesn't go
+          // higher than the starting value. Using Math.ceil to make sure the number is different than
+          // previous while not being a decimal value
+          newCapacity = Math.min(
+            startingCapacity,
+            Math.ceil(previousCapacity * CAPACITY_INCREASE_PERCENTAGE)
+          );
+        }
       }
-    }
-    return newCapacity;
-  }, startingCapacity);
+
+      if (newCapacity !== previousCapacity) {
+        logger.debug(
+          `Capacity configuration changing from ${previousCapacity} to ${newCapacity} after seeing ${errorCount} "too many request" and/or "execute [inline] script" error(s)`
+        );
+        if (previousCapacity === startingCapacity) {
+          logger.warn(
+            `Capacity configuration is temporarily reduced after Elasticsearch returned ${errorCount} "too many request" and/or "execute [inline] script" error(s).`
+          );
+        }
+      }
+      return newCapacity;
+    },
+    startingCapacity
+  );
 }
 
 export function createPollIntervalScan(
@@ -88,75 +101,93 @@ export function createPollIntervalScan(
   startingPollInterval: number,
   claimStrategy: string
 ) {
-  return scan((previousPollInterval: number, [errorCount, tmUtilization]) => {
-    let newPollInterval: number;
-    let updatedForCapacity = false;
-    if (errorCount > 0) {
-      // Increase poll interval by POLL_INTERVAL_INCREASE_PERCENTAGE and use Math.ceil to
-      // make sure the number is different than previous while not being a decimal value.
-      // Also ensure we don't go over PREFERRED_MAX_POLL_INTERVAL or startingPollInterval,
-      // whichever is greater.
-      newPollInterval = Math.min(
-        Math.ceil(previousPollInterval * POLL_INTERVAL_INCREASE_PERCENTAGE),
-        Math.ceil(Math.max(PREFERRED_MAX_POLL_INTERVAL, startingPollInterval))
-      );
-      if (!Number.isSafeInteger(newPollInterval) || newPollInterval < 0) {
-        logger.error(
-          `Poll interval configuration had an issue calculating the new poll interval: Math.min(Math.ceil(${previousPollInterval} * ${POLL_INTERVAL_INCREASE_PERCENTAGE}), Math.max(${PREFERRED_MAX_POLL_INTERVAL}, ${startingPollInterval})) = ${newPollInterval}, will keep the poll interval unchanged (${previousPollInterval})`
-        );
-        newPollInterval = previousPollInterval;
-      }
-    } else {
-      // Decrease poll interval by POLL_INTERVAL_DECREASE_PERCENTAGE and use Math.floor to
-      // make sure the number is different than previous while not being a decimal value.
-      newPollInterval = Math.max(
-        startingPollInterval,
-        Math.floor(previousPollInterval * POLL_INTERVAL_DECREASE_PERCENTAGE)
-      );
-      if (!Number.isSafeInteger(newPollInterval) || newPollInterval < 0) {
-        logger.error(
-          `Poll interval configuration had an issue calculating the new poll interval: Math.max(${startingPollInterval}, Math.floor(${previousPollInterval} * ${POLL_INTERVAL_DECREASE_PERCENTAGE})) = ${newPollInterval}, will keep the poll interval unchanged (${previousPollInterval})`
-        );
-        newPollInterval = previousPollInterval;
-      }
-
-      // If the task claim strategy is mget, increase the poll interval if the used capacity is less than 25%.
-      if (claimStrategy === CLAIM_STRATEGY_MGET && newPollInterval < DEFAULT_POLL_INTERVAL) {
-        updatedForCapacity = true;
-        if (tmUtilization < 25) {
-          newPollInterval = DEFAULT_POLL_INTERVAL;
+  return scan(
+    (previousPollInterval: number, [{ count: errorCount, isBlockException }, tmUtilization]) => {
+      let newPollInterval: number;
+      let updatedForCapacity = false;
+      if (isBlockException) {
+        newPollInterval = INTERVAL_AFTER_BLOCK_EXCEPTION;
+      } else {
+        if (errorCount > 0) {
+          // Increase poll interval by POLL_INTERVAL_INCREASE_PERCENTAGE and use Math.ceil to
+          // make sure the number is different than previous while not being a decimal value.
+          // Also ensure we don't go over PREFERRED_MAX_POLL_INTERVAL or startingPollInterval,
+          // whichever is greater.
+          newPollInterval = Math.min(
+            Math.ceil(previousPollInterval * POLL_INTERVAL_INCREASE_PERCENTAGE),
+            Math.ceil(Math.max(PREFERRED_MAX_POLL_INTERVAL, startingPollInterval))
+          );
+          if (!Number.isSafeInteger(newPollInterval) || newPollInterval < 0) {
+            logger.error(
+              `Poll interval configuration had an issue calculating the new poll interval: Math.min(Math.ceil(${previousPollInterval} * ${POLL_INTERVAL_INCREASE_PERCENTAGE}), Math.max(${PREFERRED_MAX_POLL_INTERVAL}, ${startingPollInterval})) = ${newPollInterval}, will keep the poll interval unchanged (${previousPollInterval})`
+            );
+            newPollInterval = previousPollInterval;
+          }
         } else {
-          // If the the used capacity is greater than or equal to 25% reset the polling interval.
-          newPollInterval = startingPollInterval;
+          if (previousPollInterval === INTERVAL_AFTER_BLOCK_EXCEPTION) {
+            newPollInterval = startingPollInterval;
+          } else {
+            // Decrease poll interval by POLL_INTERVAL_DECREASE_PERCENTAGE and use Math.floor to
+            // make sure the number is different than previous while not being a decimal value.
+            newPollInterval = Math.max(
+              startingPollInterval,
+              Math.floor(previousPollInterval * POLL_INTERVAL_DECREASE_PERCENTAGE)
+            );
+          }
+
+          if (!Number.isSafeInteger(newPollInterval) || newPollInterval < 0) {
+            logger.error(
+              `Poll interval configuration had an issue calculating the new poll interval: Math.max(${startingPollInterval}, Math.floor(${previousPollInterval} * ${POLL_INTERVAL_DECREASE_PERCENTAGE})) = ${newPollInterval}, will keep the poll interval unchanged (${previousPollInterval})`
+            );
+            newPollInterval = previousPollInterval;
+          }
+        }
+
+        // If the task claim strategy is mget, increase the poll interval if the used capacity is less than 25%.
+        if (claimStrategy === CLAIM_STRATEGY_MGET && newPollInterval < DEFAULT_POLL_INTERVAL) {
+          updatedForCapacity = true;
+          if (tmUtilization < 25) {
+            newPollInterval = DEFAULT_POLL_INTERVAL;
+          } else {
+            // If the the used capacity is greater than or equal to 25% reset the polling interval.
+            newPollInterval = startingPollInterval;
+          }
         }
       }
-    }
-    if (newPollInterval !== previousPollInterval) {
-      logger.debug(
-        `Poll interval configuration changing from ${previousPollInterval} to ${newPollInterval} after seeing ${
-          updatedForCapacity
-            ? `a change in the task load.`
-            : `${errorCount} "too many request" and/or "execute [inline] script" error(s)`
-        }`
-      );
-      if (previousPollInterval === startingPollInterval) {
-        logger.warn(
-          `Poll interval configuration is temporarily increased after ${
-            updatedForCapacity
-              ? `a decrease in the task load.`
-              : `Elasticsearch returned ${errorCount} "too many request" and/or "execute [inline] script" error(s).`
-          }`
-        );
+
+      if (newPollInterval !== previousPollInterval) {
+        if (previousPollInterval !== INTERVAL_AFTER_BLOCK_EXCEPTION) {
+          logger.debug(
+            `Poll interval configuration changing from ${previousPollInterval} to ${newPollInterval} after seeing ${
+              updatedForCapacity
+                ? `a change in the task load.`
+                : `${errorCount} "too many request" and/or "execute [inline] script" error(s)`
+            }`
+          );
+        }
+        if (previousPollInterval === startingPollInterval) {
+          logger.warn(
+            `Poll interval configuration is temporarily increased after ${
+              updatedForCapacity
+                ? `a decrease in the task load.`
+                : `Elasticsearch returned ${errorCount} "too many request" and/or "execute [inline] script" error(s).`
+            }`
+          );
+        }
+        if (newPollInterval === startingPollInterval) {
+          logger.debug(`Poll interval has been set to the default (${startingPollInterval}ms)`);
+        }
       }
-      if (newPollInterval === startingPollInterval) {
-        logger.debug(`Poll interval has been set to the default (${startingPollInterval}ms)`);
-      }
-    }
-    return newPollInterval;
-  }, startingPollInterval);
+      return newPollInterval;
+    },
+    startingPollInterval
+  );
 }
 
-export function countErrors(errors$: Observable<Error>, countInterval: number): Observable<number> {
+export function countErrors(
+  errors$: Observable<Error>,
+  countInterval: number
+): Observable<ErrorScanResult> {
   return merge(
     // Flush error count at fixed interval
     interval(countInterval).pipe(map(() => FLUSH_MARKER)),
@@ -172,36 +203,48 @@ export function countErrors(errors$: Observable<Error>, countInterval: number): 
           getMsearchStatusCode(e) === 503 ||
           getBulkUpdateStatusCode(e) === 429 ||
           getBulkUpdateStatusCode(e) === 500 ||
-          getBulkUpdateStatusCode(e) === 503
+          getBulkUpdateStatusCode(e) === 503 ||
+          isClusterBlockException(e)
       )
     )
   ).pipe(
     // When tag is "flush", reset the error counter
     // Otherwise increment the error counter
-    mergeScan(({ count }, next) => {
+    mergeScan(({ count, isBlockException }, next) => {
       return next === FLUSH_MARKER
-        ? of(emitErrorCount(count), resetErrorCount())
-        : of(incementErrorCount(count));
-    }, emitErrorCount(0)),
+        ? of(emitErrorCount(count, isBlockException), resetErrorCount())
+        : of(incrementOrEmitErrorCount(count, isClusterBlockException(next as Error)));
+    }, emitErrorCount(0, false)),
     filter(isEmitEvent),
-    map(({ count }) => count)
+    map(({ count, isBlockException }) => {
+      return { count, isBlockException };
+    })
   );
 }
 
-function emitErrorCount(count: number) {
+function emitErrorCount(count: number, isBlockException: boolean) {
   return {
     tag: 'emit',
+    isBlockException,
     count,
   };
 }
 
-function isEmitEvent(event: { tag: string; count: number }) {
+function isEmitEvent(event: { tag: string; count: number; isBlockException: boolean }) {
   return event.tag === 'emit';
 }
 
-function incementErrorCount(count: number) {
+function incrementOrEmitErrorCount(count: number, isBlockException: boolean) {
+  if (isBlockException) {
+    return {
+      tag: 'emit',
+      isBlockException,
+      count: count + 1,
+    };
+  }
   return {
     tag: 'inc',
+    isBlockException,
     count: count + 1,
   };
 }
@@ -209,6 +252,7 @@ function incementErrorCount(count: number) {
 function resetErrorCount() {
   return {
     tag: 'initial',
+    isBlockException: false,
     count: 0,
   };
 }
