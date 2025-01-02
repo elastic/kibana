@@ -31,7 +31,6 @@ import {
   isNLPModelItem,
 } from '../../../common/types/trained_models';
 import { useEnabledFeatures, useMlServerInfo } from '../contexts/ml';
-import { useTrainedModelsApiService } from '../services/ml_api_service/trained_models';
 import { getUserConfirmationProvider } from './force_stop_dialog';
 import { useToastNotificationService } from '../services/toast_notification_service';
 import { getUserInputModelDeploymentParamsProvider } from './deployment_setup';
@@ -49,7 +48,6 @@ export function useModelActions({
   onModelDeployRequest,
   isLoading,
   modelAndDeploymentIds,
-  onModelDownloadRequest,
 }: {
   isLoading: boolean;
   onDfaTestAction: (model: DFAModelItem) => void;
