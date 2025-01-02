@@ -177,7 +177,7 @@ export class DefaultSummarySearchClient implements SummarySearchClient {
         }),
       };
     } catch (err) {
-      this.logger.error(new Error(`Summary search query error, ${err.message}`, { cause: err }));
+      this.logger.error(`Error while searching SLO summary documents. ${err}`);
       return { total: 0, perPage: pagination.perPage, page: pagination.page, results: [] };
     }
   }
