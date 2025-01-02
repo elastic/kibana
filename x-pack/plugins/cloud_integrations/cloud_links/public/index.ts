@@ -5,8 +5,9 @@
  * 2.0.
  */
 
+import type { PluginInitializerContext } from '@kbn/core/public';
 import { CloudLinksPlugin } from './plugin';
 
-export function plugin() {
-  return new CloudLinksPlugin();
+export function plugin(context: PluginInitializerContext) {
+  return new CloudLinksPlugin(context);
 }
