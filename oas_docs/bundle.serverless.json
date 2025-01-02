@@ -8595,6 +8595,7 @@
     },
     "/api/fleet/agent_download_sources": {
       "get": {
+        "description": "[Required authorization] Route required privileges: ANY of [fleet-agent-policies-read OR fleet-settings-read].",
         "operationId": "get-fleet-agent-download-sources",
         "parameters": [],
         "responses": {
@@ -8690,6 +8691,7 @@
         ]
       },
       "post": {
+        "description": "[Required authorization] Route required privileges: ALL of [fleet-settings-all].",
         "operationId": "post-fleet-agent-download-sources",
         "parameters": [
           {
@@ -8818,7 +8820,7 @@
     },
     "/api/fleet/agent_download_sources/{sourceId}": {
       "delete": {
-        "description": "Delete an agent binary download source by ID.",
+        "description": "Delete an agent binary download source by ID.<br/><br/>[Required authorization] Route required privileges: ALL of [fleet-settings-all].",
         "operationId": "delete-fleet-agent-download-sources-sourceid",
         "parameters": [
           {
@@ -8891,7 +8893,7 @@
         ]
       },
       "get": {
-        "description": "Get an agent binary download source by ID.",
+        "description": "Get an agent binary download source by ID.<br/><br/>[Required authorization] Route required privileges: ANY of [fleet-agent-policies-read OR fleet-settings-read].",
         "operationId": "get-fleet-agent-download-sources-sourceid",
         "parameters": [
           {
@@ -8981,7 +8983,7 @@
         ]
       },
       "put": {
-        "description": "Update an agent binary download source by ID.",
+        "description": "Update an agent binary download source by ID.<br/><br/>[Required authorization] Route required privileges: ALL of [fleet-settings-all].",
         "operationId": "put-fleet-agent-download-sources-sourceid",
         "parameters": [
           {
@@ -17336,6 +17338,7 @@
     },
     "/api/fleet/agents/setup": {
       "get": {
+        "description": "[Required authorization] Route required privileges: ANY of [fleet-agents-read OR fleet-agent-policies-read OR fleet-settings-read OR fleet-setup].",
         "operationId": "get-fleet-agents-setup",
         "parameters": [],
         "responses": {
@@ -17423,6 +17426,7 @@
         ]
       },
       "post": {
+        "description": "[Required authorization] Route required privileges: ANY of [fleet-agents-read OR fleet-agent-policies-read OR fleet-settings-read OR fleet-setup].",
         "operationId": "post-fleet-agents-setup",
         "parameters": [
           {
@@ -19309,6 +19313,7 @@
     },
     "/api/fleet/data_streams": {
       "get": {
+        "description": "[Required authorization] Route required privileges: ALL of [fleet-agents-all, fleet-agent-policies-all, fleet-settings-all].",
         "operationId": "get-fleet-data-streams",
         "parameters": [],
         "responses": {
@@ -19453,6 +19458,7 @@
     },
     "/api/fleet/enrollment_api_keys": {
       "get": {
+        "description": "[Required authorization] Route required privileges: ANY of [fleet-agents-all OR fleet-setup].",
         "operationId": "get-fleet-enrollment-api-keys",
         "parameters": [
           {
@@ -19628,6 +19634,7 @@
         ]
       },
       "post": {
+        "description": "[Required authorization] Route required privileges: ALL of [fleet-agents-all].",
         "operationId": "post-fleet-enrollment-api-keys",
         "parameters": [
           {
@@ -19761,7 +19768,7 @@
     },
     "/api/fleet/enrollment_api_keys/{keyId}": {
       "delete": {
-        "description": "Revoke an enrollment API key by ID by marking it as inactive.",
+        "description": "Revoke an enrollment API key by ID by marking it as inactive.<br/><br/>[Required authorization] Route required privileges: ALL of [fleet-agents-all].",
         "operationId": "delete-fleet-enrollment-api-keys-keyid",
         "parameters": [
           {
@@ -19837,7 +19844,7 @@
         ]
       },
       "get": {
-        "description": "Get an enrollment API key by ID.",
+        "description": "Get an enrollment API key by ID.<br/><br/>[Required authorization] Route required privileges: ANY of [fleet-agents-all OR fleet-setup].",
         "operationId": "get-fleet-enrollment-api-keys-keyid",
         "parameters": [
           {
@@ -24823,6 +24830,7 @@
     },
     "/api/fleet/logstash_api_keys": {
       "post": {
+        "description": "[Required authorization] Route required privileges: ALL of [fleet-settings-all].",
         "operationId": "post-fleet-logstash-api-keys",
         "parameters": [
           {
@@ -24989,6 +24997,7 @@
     },
     "/api/fleet/outputs": {
       "get": {
+        "description": "[Required authorization] Route required privileges: ANY of [fleet-settings-read OR fleet-agent-policies-read].",
         "operationId": "get-fleet-outputs",
         "parameters": [],
         "responses": {
@@ -26072,6 +26081,7 @@
         ]
       },
       "post": {
+        "description": "[Required authorization] Route required privileges: ALL of [fleet-settings-all].",
         "operationId": "post-fleet-outputs",
         "parameters": [
           {
@@ -28177,7 +28187,7 @@
     },
     "/api/fleet/outputs/{outputId}": {
       "delete": {
-        "description": "Delete output by ID.",
+        "description": "Delete output by ID.<br/><br/>[Required authorization] Route required privileges: ALL of [fleet-settings-all].",
         "operationId": "delete-fleet-outputs-outputid",
         "parameters": [
           {
@@ -28275,7 +28285,7 @@
         ]
       },
       "get": {
-        "description": "Get output by ID.",
+        "description": "Get output by ID.<br/><br/>[Required authorization] Route required privileges: ANY of [fleet-settings-read OR fleet-agent-policies-read].",
         "operationId": "get-fleet-outputs-outputid",
         "parameters": [
           {
@@ -29353,7 +29363,7 @@
         ]
       },
       "put": {
-        "description": "Update output by ID.",
+        "description": "Update output by ID.<br/><br/>[Required authorization] Route required privileges: ANY of [fleet-settings-all OR fleet-agent-policies-all].",
         "operationId": "put-fleet-outputs-outputid",
         "parameters": [
           {
@@ -31443,6 +31453,7 @@
     },
     "/api/fleet/outputs/{outputId}/health": {
       "get": {
+        "description": "[Required authorization] Route required privileges: ALL of [fleet-settings-read].",
         "operationId": "get-fleet-outputs-outputid-health",
         "parameters": [
           {
@@ -37706,6 +37717,7 @@
     },
     "/api/fleet/proxies": {
       "get": {
+        "description": "[Required authorization] Route required privileges: ALL of [fleet-settings-read].",
         "operationId": "get-fleet-proxies",
         "parameters": [],
         "responses": {
@@ -37824,6 +37836,7 @@
         ]
       },
       "post": {
+        "description": "[Required authorization] Route required privileges: ALL of [fleet-settings-all].",
         "operationId": "post-fleet-proxies",
         "parameters": [
           {
@@ -37998,7 +38011,7 @@
     },
     "/api/fleet/proxies/{itemId}": {
       "delete": {
-        "description": "Delete a proxy by ID",
+        "description": "Delete a proxy by ID<br/><br/>[Required authorization] Route required privileges: ALL of [fleet-settings-all].",
         "operationId": "delete-fleet-proxies-itemid",
         "parameters": [
           {
@@ -38071,7 +38084,7 @@
         ]
       },
       "get": {
-        "description": "Get a proxy by ID.",
+        "description": "Get a proxy by ID.<br/><br/>[Required authorization] Route required privileges: ALL of [fleet-settings-read].",
         "operationId": "get-fleet-proxies-itemid",
         "parameters": [
           {
@@ -38184,7 +38197,7 @@
         ]
       },
       "put": {
-        "description": "Update a proxy by ID.",
+        "description": "Update a proxy by ID.<br/><br/>[Required authorization] Route required privileges: ALL of [fleet-settings-all].",
         "operationId": "put-fleet-proxies-itemid",
         "parameters": [
           {
@@ -38362,6 +38375,7 @@
     },
     "/api/fleet/service_tokens": {
       "post": {
+        "description": "[Required authorization] Route required privileges: ALL of [fleet-agents-all].",
         "operationId": "post-fleet-service-tokens",
         "parameters": [
           {
@@ -38773,6 +38787,7 @@
     },
     "/api/fleet/setup": {
       "post": {
+        "description": "[Required authorization] Route required privileges: ANY of [fleet-agents-read OR fleet-agent-policies-read OR fleet-settings-read OR fleet-setup].",
         "operationId": "post-fleet-setup",
         "parameters": [
           {
@@ -38879,7 +38894,7 @@
     },
     "/api/fleet/uninstall_tokens": {
       "get": {
-        "description": "List the metadata for the latest uninstall tokens per agent policy.",
+        "description": "List the metadata for the latest uninstall tokens per agent policy.<br/><br/>[Required authorization] Route required privileges: ALL of [fleet-agents-all].",
         "operationId": "get-fleet-uninstall-tokens",
         "parameters": [
           {
@@ -39016,7 +39031,7 @@
     },
     "/api/fleet/uninstall_tokens/{uninstallTokenId}": {
       "get": {
-        "description": "Get one decrypted uninstall token by its ID.",
+        "description": "Get one decrypted uninstall token by its ID.<br/><br/>[Required authorization] Route required privileges: ALL of [fleet-agents-all].",
         "operationId": "get-fleet-uninstall-tokens-uninstalltokenid",
         "parameters": [
           {
