@@ -57,7 +57,7 @@ describe('addPainlessFieldAccess', () => {
 
   it('should add a nullable dot-access for valid identifiers', () => {
     const expr = 'root' as SafePainlessExpression;
-    const result = addPainlessFieldAccess('foo', expr, true);
+    const result = addPainlessFieldAccess('foo', expr);
     expect(result).toBe('root?.foo');
   });
 
