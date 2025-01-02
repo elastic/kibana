@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { getDocumentTypeFilterForServiceDestinationStatistics } from '@kbn/apm-data-access-plugin/server/utils';
@@ -15,7 +15,7 @@ import {
   SPAN_DURATION,
   SPAN_NAME,
 } from '../../../../common/es_fields/apm';
-import { APMEventClient } from '../create_es_client/create_apm_event_client';
+import type { APMEventClient } from '../create_es_client/create_apm_event_client';
 
 export function getProcessorEventForServiceDestinationStatistics(
   searchServiceDestinationMetrics: boolean

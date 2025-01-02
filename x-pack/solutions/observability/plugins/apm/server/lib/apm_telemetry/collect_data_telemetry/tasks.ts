@@ -9,7 +9,7 @@ import { getKqlFieldNamesFromExpression } from '@kbn/es-query';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { createHash } from 'crypto';
 import { flatten, merge, pickBy, sortBy, sum, uniq, without } from 'lodash';
-import { SavedObjectsClient } from '@kbn/core/server';
+import type { SavedObjectsClient } from '@kbn/core/server';
 import type { APMIndices } from '@kbn/apm-data-access-plugin/server';
 import {
   AGENT_NAMES,
@@ -57,14 +57,14 @@ import {
   TRANSACTION_TYPE,
   USER_AGENT_ORIGINAL,
 } from '../../../../common/es_fields/apm';
+import type { SavedServiceGroup } from '../../../../common/service_groups';
 import {
   APM_SERVICE_GROUP_SAVED_OBJECT_TYPE,
   MAX_NUMBER_OF_SERVICE_GROUPS,
-  SavedServiceGroup,
 } from '../../../../common/service_groups';
 import { asMutableArray } from '../../../../common/utils/as_mutable_array';
-import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
-import {
+import type { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
+import type {
   APMDataTelemetry,
   APMPerService,
   APMTelemetry,
@@ -74,12 +74,10 @@ import {
   MetricSupportingRollUp,
 } from '../types';
 import { APM_AGENT_CONFIGURATION_INDEX } from '../../../routes/settings/apm_indices/apm_system_index_constants';
-import { IndicesStatsResponse, TelemetryClient } from '../telemetry_client';
+import type { IndicesStatsResponse, TelemetryClient } from '../telemetry_client';
 import { RollupInterval } from '../../../../common/rollup';
-import {
-  APM_CUSTOM_DASHBOARDS_SAVED_OBJECT_TYPE,
-  SavedApmCustomDashboard,
-} from '../../../../common/custom_dashboards';
+import type { SavedApmCustomDashboard } from '../../../../common/custom_dashboards';
+import { APM_CUSTOM_DASHBOARDS_SAVED_OBJECT_TYPE } from '../../../../common/custom_dashboards';
 
 type ISavedObjectsClient = Pick<SavedObjectsClient, 'find'>;
 const TIME_RANGES = ['1d', 'all'] as const;
