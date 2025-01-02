@@ -6813,7 +6813,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/response-ops-rule-params@link:src/platform/packages/private/response-ops/rule_params":
+"@kbn/response-ops-rule-params@link:src/platform/packages/shared/response-ops/rule_params":
   version "0.0.0"
   uid ""
 
