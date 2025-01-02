@@ -7,7 +7,8 @@
 import type { EuiDataGridSorting } from '@elastic/eui';
 import React from 'react';
 import useEffectOnce from 'react-use/lib/useEffectOnce';
-import { InventoryEntity, type EntityColumnIds } from '../../../common/entities';
+import type { InventoryEntity } from '../../../common/entities';
+import { type EntityColumnIds } from '../../../common/entities';
 import {
   type EntityTypeCheckOptions,
   entityPaginationRt,
