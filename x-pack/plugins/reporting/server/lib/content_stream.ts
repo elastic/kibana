@@ -192,7 +192,6 @@ export class ContentStream extends Duplex {
 
     const body = await this.client.update<ReportSource>({
       ...this.document,
-      refresh: 'wait_for',
       body: {
         doc: {
           output: { content },
@@ -212,7 +211,6 @@ export class ContentStream extends Duplex {
     await this.client.index<ChunkSource>({
       id,
       index: REPORTING_DATA_STREAM_ALIAS,
-      refresh: 'wait_for',
       op_type: 'create',
       body: {
         parent_id: parentId,
