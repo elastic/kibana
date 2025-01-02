@@ -105,21 +105,13 @@ export const DEFEND_INSIGHTS_TOOL: AssistantTool = Object.freeze({
           outputParser: outputFixingParser,
         });
 
-        // console.log(JSON.stringify(prompt, null, 2));
-
-        const query = getDefendInsightsPrompt({
-          type: insightType,
-          events: anonymizedEvents,
-        });
-        // console.log(JSON.stringify(query, null, 2));
-
         const result = await answerFormattingChain.call({
-          query,
+          query: getDefendInsightsPrompt({
+            type: insightType,
+            events: anonymizedEvents,
+          }),
           timeout: langChainTimeout,
         });
-
-        // console.log(JSON.stringify(result, null, 2));
-
         const insights: DefendInsight[] = result.records;
 
         await securityWorkflowInsightsService.createFromDefendInsights(insights, request);

@@ -128,7 +128,8 @@ export const WorkflowInsightsResults = ({
                       {insight.message}
                     </EuiText>
                     <EuiText size={'xs'} color={'subdued'}>
-                      {item.entries[0].field === 'process.executable.caseless' &&
+                      {item.entries[0].type === 'match' &&
+                        item.entries[0].field === 'process.executable.caseless' &&
                         item.entries[0].value}
                     </EuiText>
                   </EuiText>
