@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { ruleParamsSchemaWithDefaultValueV1 } from 'src/platform/packages/shared/response-ops/rule_params';
+import { ruleParamsSchemaWithDefaultValueV1 } from '@kbn/response-ops-rule-params';
 import { validateDurationV1, validateHoursV1, validateTimezoneV1 } from '../../../validation';
 import { notifyWhenSchemaV1, alertDelaySchemaV1 } from '../../../response';
 import { alertsFilterQuerySchemaV1 } from '../../../../alerts_filter_query';
