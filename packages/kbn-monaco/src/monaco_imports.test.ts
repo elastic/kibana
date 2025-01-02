@@ -10,17 +10,31 @@
 import { monaco } from './monaco_imports';
 
 describe('monaco augmentation', () => {
-  it('has the property registerLanguageThemeResolver defined', () => {
-    expect(monaco.editor).toHaveProperty('registerLanguageThemeResolver', expect.any(Function));
+  describe('getLanguageThemeResolver', () => {
+    it('has the property getLanguageThemeResolver defined', () => {
+      expect(monaco.editor).toHaveProperty('getLanguageThemeResolver', expect.any(Function));
+    });
   });
 
-  it('has the property getLanguageThemeResolver defined', () => {
-    expect(monaco.editor).toHaveProperty('getLanguageThemeResolver', expect.any(Function));
-  });
+  describe('registerLanguageThemeResolver', () => {
+    it('has the property registerLanguageThemeResolver defined', () => {
+      expect(monaco.editor).toHaveProperty('registerLanguageThemeResolver', expect.any(Function));
+    });
 
-  it('registers a theme resolver to a specific ID and returns the same registered theme resolver using the same ID', () => {
-    const themeResolver = jest.fn();
-    monaco.editor.registerLanguageThemeResolver('test', themeResolver);
-    expect(monaco.editor.getLanguageThemeResolver('test')).toBe(themeResolver);
+    it('registers a theme resolver to a specific ID and returns the same registered theme resolver using the same ID', () => {
+      const themeResolver = jest.fn();
+      monaco.editor.registerLanguageThemeResolver('test', themeResolver);
+      expect(monaco.editor.getLanguageThemeResolver('test')).toBe(themeResolver);
+    });
+
+    it('throws an error when attempting to register a different theme resolver if one exists for the specified theme ID', () => {
+      expect(() => monaco.editor.registerLanguageThemeResolver('test', jest.fn())).toThrow();
+    });
+
+    it('allows registering a different theme resolver for a theme ID with existing resolver definition by specifying the override flag', () => {
+      const alternateThemeResolver = jest.fn();
+      monaco.editor.registerLanguageThemeResolver('test', alternateThemeResolver, true);
+      expect(monaco.editor.getLanguageThemeResolver('test')).toBe(alternateThemeResolver);
+    });
   });
 });

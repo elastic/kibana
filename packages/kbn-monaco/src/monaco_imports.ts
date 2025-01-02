@@ -66,7 +66,8 @@ declare module 'monaco-editor/esm/vs/editor/editor.api' {
     // augment monaco editor types
     function registerLanguageThemeResolver(
       langId: string,
-      languageThemeResolver: CustomLangModuleType['languageThemeResolver']
+      languageThemeResolver: CustomLangModuleType['languageThemeResolver'],
+      forceOverride?: boolean
     ): void;
     function getLanguageThemeResolver(
       langId: string
@@ -82,8 +83,12 @@ Object.defineProperties(monaco.editor, {
   registerLanguageThemeResolver: {
     value: (
       langId: string,
-      languageThemeDefinition: CustomLangModuleType['languageThemeResolver']
+      languageThemeDefinition: CustomLangModuleType['languageThemeResolver'],
+      forceOverride?: boolean
     ) => {
+      if (!forceOverride && languageThemeResolverDefinitions.has(langId)) {
+        throw new Error(`Language theme resolver for ${langId} is already registered`);
+      }
       languageThemeResolverDefinitions.set(langId, languageThemeDefinition);
     },
     enumerable: true,
