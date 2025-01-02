@@ -11,6 +11,7 @@ import React from 'react';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { get } from 'lodash/fp';
+import type { EntityDetailsPath } from '../../shared/components/left_panel/left_panel_header';
 import { EntityDetailsLeftPanelTab } from '../../shared/components/left_panel/left_panel_header';
 import { ExpandablePanel } from '../../../shared/components/expandable_panel';
 import type { ManagedUserFields } from '../../../../../common/search_strategy/security_solution/users/managed_details';
@@ -23,7 +24,9 @@ interface ManagedUserAccordionProps {
   title: string;
   managedUser: ManagedUserFields;
   tableType: UserAssetTableType;
-  openDetailsPanel?: (tab: EntityDetailsLeftPanelTab) => void;
+  openDetailsPanel: (path: EntityDetailsPath) => void;
+  isLinkEnabled: boolean;
+  isPreviewMode?: boolean;
 }
 
 export const ManagedUserAccordion: React.FC<ManagedUserAccordionProps> = ({
@@ -32,6 +35,8 @@ export const ManagedUserAccordion: React.FC<ManagedUserAccordionProps> = ({
   managedUser,
   tableType,
   openDetailsPanel,
+  isLinkEnabled,
+  isPreviewMode,
 }) => {
   const xsFontSize = useEuiFontSize('xxs').fontSize;
   const timestamp = get('@timestamp[0]', managedUser) as unknown as string | undefined;
@@ -41,7 +46,7 @@ export const ManagedUserAccordion: React.FC<ManagedUserAccordionProps> = ({
       data-test-subj={`managed-user-accordion-${tableType}`}
       header={{
         title,
-        iconType: 'arrowStart',
+        iconType: !isPreviewMode ? 'arrowStart' : undefined,
         headerContent: timestamp && (
           <span
             css={css`
@@ -64,13 +69,14 @@ export const ManagedUserAccordion: React.FC<ManagedUserAccordionProps> = ({
           </span>
         ),
         link: {
-          callback: openDetailsPanel
+          callback: isLinkEnabled
             ? () =>
-                openDetailsPanel(
-                  tableType === UserAssetTableType.assetOkta
-                    ? EntityDetailsLeftPanelTab.OKTA
-                    : EntityDetailsLeftPanelTab.ENTRA
-                )
+                openDetailsPanel({
+                  tab:
+                    tableType === UserAssetTableType.assetOkta
+                      ? EntityDetailsLeftPanelTab.OKTA
+                      : EntityDetailsLeftPanelTab.ENTRA,
+                })
             : undefined,
           tooltip: (
             <FormattedMessage

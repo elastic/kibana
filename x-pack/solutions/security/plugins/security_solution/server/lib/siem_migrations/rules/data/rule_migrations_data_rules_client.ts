@@ -16,7 +16,10 @@ import type {
   Duration,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { StoredRuleMigration } from '../types';
-import { SiemMigrationStatus } from '../../../../../common/siem_migrations/constants';
+import {
+  SiemMigrationStatus,
+  RuleTranslationResult,
+} from '../../../../../common/siem_migrations/constants';
 import {
   type RuleMigration,
   type RuleMigrationTaskStats,
@@ -128,19 +131,14 @@ export class RuleMigrationsDataRulesClient extends RuleMigrationsDataBaseClient 
   /** Retrieves an array of rule documents of a specific migrations */
   async get(
     migrationId: string,
-    { filters = {}, sort = {}, from, size }: RuleMigrationGetOptions = {}
+    { filters = {}, sort: sortParam = {}, from, size }: RuleMigrationGetOptions = {}
   ): Promise<{ total: number; data: StoredRuleMigration[] }> {
     const index = await this.getIndexName();
     const query = this.getFilterQuery(migrationId, filters);
+    const sort = sortParam.sortField ? getSortingOptions(sortParam) : undefined;
 
     const result = await this.esClient
-      .search<RuleMigration>({
-        index,
-        query,
-        sort: sort.sortField ? getSortingOptions(sort) : undefined,
-        from,
-        size,
-      })
+      .search<RuleMigration>({ index, query, sort, from, size })
       .catch((error) => {
         this.logger.error(`Error searching rule migrations: ${error.message}`);
         throw error;
@@ -268,8 +266,15 @@ export class RuleMigrationsDataRulesClient extends RuleMigrationsDataBaseClient 
     const query = this.getFilterQuery(migrationId);
 
     const aggregations = {
-      prebuilt: { filter: searchConditions.isPrebuilt() },
-      installable: { filter: { bool: { must: searchConditions.isInstallable() } } },
+      success: {
+        filter: { term: { status: SiemMigrationStatus.COMPLETED } },
+        aggs: {
+          result: { terms: { field: 'translation_result' } },
+          installable: { filter: { bool: { must: searchConditions.isInstallable() } } },
+          prebuilt: { filter: searchConditions.isPrebuilt() },
+        },
+      },
+      failed: { filter: { term: { status: SiemMigrationStatus.FAILED } } },
     };
     const result = await this.esClient
       .search({ index, query, aggregations, _source: false })
@@ -278,16 +283,22 @@ export class RuleMigrationsDataRulesClient extends RuleMigrationsDataBaseClient 
         throw error;
       });
 
-    const bucket = result.aggregations ?? {};
+    const aggs = result.aggregations ?? {};
     const total = this.getTotalHits(result);
-    const prebuilt = (bucket.prebuilt as AggregationsFilterAggregate)?.doc_count ?? 0;
+    const successAgg = aggs.success as AggregationsFilterAggregate;
+    const translationResultsAgg = successAgg.result as AggregationsStringTermsAggregate;
+
     return {
       id: migrationId,
       rules: {
         total,
-        prebuilt,
-        custom: total - prebuilt,
-        installable: (bucket.installable as AggregationsFilterAggregate)?.doc_count ?? 0,
+        success: {
+          total: (successAgg as AggregationsFilterAggregate)?.doc_count ?? 0,
+          result: this.translationResultAggCount(translationResultsAgg),
+          installable: (successAgg.installable as AggregationsFilterAggregate)?.doc_count ?? 0,
+          prebuilt: (successAgg.prebuilt as AggregationsFilterAggregate)?.doc_count ?? 0,
+        },
+        failed: (aggs.failed as AggregationsFilterAggregate)?.doc_count ?? 0,
       },
     };
   }
@@ -297,10 +308,7 @@ export class RuleMigrationsDataRulesClient extends RuleMigrationsDataBaseClient 
     const index = await this.getIndexName();
     const query = this.getFilterQuery(migrationId);
     const aggregations = {
-      pending: { filter: { term: { status: SiemMigrationStatus.PENDING } } },
-      processing: { filter: { term: { status: SiemMigrationStatus.PROCESSING } } },
-      completed: { filter: { term: { status: SiemMigrationStatus.COMPLETED } } },
-      failed: { filter: { term: { status: SiemMigrationStatus.FAILED } } },
+      status: { terms: { field: 'status' } },
       createdAt: { min: { field: '@timestamp' } },
       lastUpdatedAt: { max: { field: 'updated_at' } },
     };
@@ -311,18 +319,16 @@ export class RuleMigrationsDataRulesClient extends RuleMigrationsDataBaseClient 
         throw error;
       });
 
-    const bucket = result.aggregations ?? {};
+    const aggs = result.aggregations ?? {};
+
     return {
       id: migrationId,
       rules: {
         total: this.getTotalHits(result),
-        pending: (bucket.pending as AggregationsFilterAggregate)?.doc_count ?? 0,
-        processing: (bucket.processing as AggregationsFilterAggregate)?.doc_count ?? 0,
-        completed: (bucket.completed as AggregationsFilterAggregate)?.doc_count ?? 0,
-        failed: (bucket.failed as AggregationsFilterAggregate)?.doc_count ?? 0,
+        ...this.statusAggCounts(aggs.status as AggregationsStringTermsAggregate),
       },
-      created_at: (bucket.createdAt as AggregationsMinAggregate)?.value_as_string ?? '',
-      last_updated_at: (bucket.lastUpdatedAt as AggregationsMaxAggregate)?.value_as_string ?? '',
+      created_at: (aggs.createdAt as AggregationsMinAggregate)?.value_as_string ?? '',
+      last_updated_at: (aggs.lastUpdatedAt as AggregationsMaxAggregate)?.value_as_string ?? '',
     };
   }
 
@@ -331,12 +337,9 @@ export class RuleMigrationsDataRulesClient extends RuleMigrationsDataBaseClient 
     const index = await this.getIndexName();
     const aggregations: { migrationIds: AggregationsAggregationContainer } = {
       migrationIds: {
-        terms: { field: 'migration_id', order: { createdAt: 'asc' } },
+        terms: { field: 'migration_id', order: { createdAt: 'asc' }, size: 10000 },
         aggregations: {
-          pending: { filter: { term: { status: SiemMigrationStatus.PENDING } } },
-          processing: { filter: { term: { status: SiemMigrationStatus.PROCESSING } } },
-          completed: { filter: { term: { status: SiemMigrationStatus.COMPLETED } } },
-          failed: { filter: { term: { status: SiemMigrationStatus.FAILED } } },
+          status: { terms: { field: 'status' } },
           createdAt: { min: { field: '@timestamp' } },
           lastUpdatedAt: { max: { field: 'updated_at' } },
         },
@@ -355,14 +358,41 @@ export class RuleMigrationsDataRulesClient extends RuleMigrationsDataBaseClient 
       id: bucket.key,
       rules: {
         total: bucket.doc_count,
-        pending: bucket.pending?.doc_count ?? 0,
-        processing: bucket.processing?.doc_count ?? 0,
-        completed: bucket.completed?.doc_count ?? 0,
-        failed: bucket.failed?.doc_count ?? 0,
+        ...this.statusAggCounts(bucket.status),
       },
       created_at: bucket.createdAt?.value_as_string,
       last_updated_at: bucket.lastUpdatedAt?.value_as_string,
     }));
+  }
+
+  private statusAggCounts(
+    statusAgg: AggregationsStringTermsAggregate
+  ): Record<SiemMigrationStatus, number> {
+    const buckets = statusAgg.buckets as AggregationsStringTermsBucket[];
+    return {
+      [SiemMigrationStatus.PENDING]:
+        buckets.find(({ key }) => key === SiemMigrationStatus.PENDING)?.doc_count ?? 0,
+      [SiemMigrationStatus.PROCESSING]:
+        buckets.find(({ key }) => key === SiemMigrationStatus.PROCESSING)?.doc_count ?? 0,
+      [SiemMigrationStatus.COMPLETED]:
+        buckets.find(({ key }) => key === SiemMigrationStatus.COMPLETED)?.doc_count ?? 0,
+      [SiemMigrationStatus.FAILED]:
+        buckets.find(({ key }) => key === SiemMigrationStatus.FAILED)?.doc_count ?? 0,
+    };
+  }
+
+  private translationResultAggCount(
+    resultAgg: AggregationsStringTermsAggregate
+  ): Record<RuleTranslationResult, number> {
+    const buckets = resultAgg.buckets as AggregationsStringTermsBucket[];
+    return {
+      [RuleTranslationResult.FULL]:
+        buckets.find(({ key }) => key === RuleTranslationResult.FULL)?.doc_count ?? 0,
+      [RuleTranslationResult.PARTIAL]:
+        buckets.find(({ key }) => key === RuleTranslationResult.PARTIAL)?.doc_count ?? 0,
+      [RuleTranslationResult.UNTRANSLATABLE]:
+        buckets.find(({ key }) => key === RuleTranslationResult.UNTRANSLATABLE)?.doc_count ?? 0,
+    };
   }
 
   private getFilterQuery(
