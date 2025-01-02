@@ -300,7 +300,6 @@ describe('ContentStream', () => {
           id: expect.any(String),
           index: '.kibana-reporting',
           op_type: 'create',
-          refresh: 'wait_for',
           body: {
             '@timestamp': '1970-01-01T00:00:00.000Z',
             parent_id: 'something',
@@ -317,7 +316,6 @@ describe('ContentStream', () => {
           id: expect.any(String),
           index: '.kibana-reporting',
           op_type: 'create',
-          refresh: 'wait_for',
           body: {
             '@timestamp': '1970-01-01T00:00:00.000Z',
             parent_id: 'something',
@@ -348,7 +346,6 @@ describe('ContentStream', () => {
           id: expect.any(String),
           index: '.kibana-reporting',
           op_type: 'create',
-          refresh: 'wait_for',
           body: {
             parent_id: 'something',
             '@timestamp': '1970-01-01T00:00:00.000Z',
@@ -365,7 +362,6 @@ describe('ContentStream', () => {
           id: expect.any(String),
           index: '.kibana-reporting',
           op_type: 'create',
-          refresh: 'wait_for',
           body: {
             parent_id: 'something',
             '@timestamp': '1970-01-01T00:00:00.000Z',
