@@ -1488,11 +1488,13 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       redirectToOrigin,
       ignoreTimeFilter,
       useAdHocDataView,
+      indexPattern,
     }: {
       title?: string;
       redirectToOrigin?: boolean;
       ignoreTimeFilter?: boolean;
       useAdHocDataView?: boolean;
+      indexPattern?: string;
     }) {
       log.debug(`createAndAddLens${title}`);
       const inViewMode = await dashboard.getIsInViewMode();
@@ -1507,6 +1509,10 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
 
       if (useAdHocDataView) {
         await dataViews.createFromSearchBar({ name: '*stash*', adHoc: true });
+      }
+
+      if (indexPattern) {
+        await dashboard.selectIndexPattern(indexPattern);
       }
 
       await this.configureDimension({

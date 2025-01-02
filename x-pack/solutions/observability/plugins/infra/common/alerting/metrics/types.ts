@@ -8,6 +8,8 @@ import type { TimeUnitChar } from '@kbn/observability-plugin/common/utils/format
 import type { InventoryItemType, SnapshotMetricType } from '@kbn/metrics-data-access-plugin/common';
 import type { COMPARATORS } from '@kbn/alerting-comparators';
 import type { LEGACY_COMPARATORS } from '@kbn/observability-plugin/common/utils/convert_legacy_outside_comparator';
+import type { DataViewSpec, SerializedSearchSourceFields } from '@kbn/data-plugin/common';
+import type { Filter } from '@kbn/es-query';
 export { INFRA_RULE_TYPE_IDS } from '@kbn/rule-data-utils';
 import type { SnapshotCustomMetricInput } from '../../http_api';
 
@@ -58,11 +60,22 @@ export interface InventoryMetricThresholdParams {
   alertOnNoData?: boolean;
 }
 
+export interface SearchConfigurationWithExtractedReferenceType {
+  // Index will be a data view spec after extracting references
+  index: DataViewSpec;
+  query: {
+    query: string;
+    language: string;
+  };
+  filter?: Filter[];
+}
+
 export interface MetricThresholdParams {
   criteria: MetricExpressionParams[];
   filterQuery?: string;
   filterQueryText?: string;
   sourceId?: string;
+  searchConfiguration: SearchConfigurationWithExtractedReferenceType;
   alertOnNoData?: boolean;
   alertOnGroupDisappear?: boolean;
 }
@@ -113,6 +126,15 @@ export type MetricExpressionParams =
 export const QUERY_INVALID: unique symbol = Symbol('QUERY_INVALID');
 
 export type FilterQuery = string | typeof QUERY_INVALID;
+
+export interface SearchConfigurationType {
+  index: SerializedSearchSourceFields;
+  query: {
+    query: string;
+    language: string;
+  };
+  filter?: Filter[];
+}
 
 export interface AlertExecutionDetails {
   alertId: string;

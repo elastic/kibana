@@ -74,6 +74,7 @@ export const metricExplorerOptionsOptionalRT = rt.partial({
   source: rt.string,
   forceInterval: rt.boolean,
   dropLastBucket: rt.boolean,
+  searchConfiguration: rt.UnknownRecord,
 });
 export const metricsExplorerOptionsRT = rt.intersection([
   metricExplorerOptionsRequiredRT,

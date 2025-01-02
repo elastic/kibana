@@ -115,6 +115,7 @@ export const getData = async (
   esClient: ElasticsearchClient,
   params: MetricExpressionParams,
   index: string,
+  timeFieldName: string,
   groupBy: string | undefined | string[],
   filterQuery: string | undefined,
   compositeSize: number,
@@ -189,6 +190,7 @@ export const getData = async (
           esClient,
           params,
           index,
+          timeFieldName,
           groupBy,
           filterQuery,
           compositeSize,
@@ -269,6 +271,7 @@ export const getData = async (
     body: getElasticsearchMetricQuery(
       params,
       timeframe,
+      timeFieldName,
       compositeSize,
       alertOnGroupDisappear,
       lastPeriodEnd,
