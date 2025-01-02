@@ -9,7 +9,7 @@ import { ResourceInstaller } from '../resource_installer';
 import { BurnRatesClient } from '../burn_rates_client';
 import { SLORepository } from '../slo_repository';
 import { SummaryClient } from '../summary_client';
-import { SummarySearchClient } from '../summary_search_client';
+import { SummarySearchClient } from '../summary_search_client/types';
 import { TransformManager } from '../transform_manager';
 
 const createResourceInstallerMock = (): jest.Mocked<ResourceInstaller> => {
