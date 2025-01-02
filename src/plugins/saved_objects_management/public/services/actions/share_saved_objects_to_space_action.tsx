@@ -43,6 +43,15 @@ export class ShareToSpaceSavedObjectsManagementAction extends SavedObjectsManage
         !this.actionContext ||
         !!this.actionContext.capabilities.savedObjectsManagement.shareIntoSpace;
       const { namespaceType, hiddenType } = object.meta;
+
+      if (object.type.startsWith('ml-')) {
+        const hasMlShareCapabilities =
+          this.actionContext?.capabilities?.ml?.canGetJobs &&
+          this.actionContext?.capabilities?.ml?.canCreateJob;
+        return (
+          namespaceType === 'multiple' && !hiddenType && hasCapability && hasMlShareCapabilities
+        );
+      }
       return namespaceType === 'multiple' && !hiddenType && hasCapability;
     },
     onClick: (object: SavedObjectsManagementRecord) => {

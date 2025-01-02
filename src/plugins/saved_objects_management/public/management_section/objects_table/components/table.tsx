@@ -328,7 +328,9 @@ export class Table extends PureComponent<TableProps, TableState> {
             icon: 'kqlSelector',
             onClick: (object) => onShowRelationships(object),
             'data-test-subj': 'savedObjectsTableAction-relationships',
-            available: (object) => !object.type.startsWith('ml'),
+            available: (object) => {
+              return !object.type.startsWith('ml');
+            },
           },
           ...actionRegistry.getAll().map((action) => {
             action.setActionContext({ capabilities });
