@@ -75,7 +75,6 @@
     "@kbn/zod",
     "@kbn/core-saved-objects-base-server-internal",
     "@kbn/core-security-server-mocks",
-    "@kbn/response-ops-rule-params",
     "@kbn/core-http-server-utils"
   ],
   "exclude": [
