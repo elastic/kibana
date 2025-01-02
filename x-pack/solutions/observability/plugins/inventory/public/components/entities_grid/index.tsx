@@ -23,6 +23,7 @@ import { AlertsBadge } from '../alerts_badge/alerts_badge';
 import { EntityName } from './entity_name';
 import { EntityActions } from '../entity_actions';
 import { type EntityTypeCheckOptions } from '../../../common/rt_types';
+import { useFetchEntityDefinitionIndexPattern } from '../../hooks/use_fetch_entity_definition_index_patterns';
 
 interface Props {
   loading: boolean;
@@ -58,6 +59,10 @@ export function EntitiesGrid({
     },
     [onChangeSort]
   );
+
+  const allEntityTypes = useMemo(() => entities?.map((entity) => entity.entityType), [entities]);
+  const { definitionIndexPatterns, isEntityDefinitionIndexPatternsLoading } =
+    useFetchEntityDefinitionIndexPattern(allEntityTypes.join(','));
 
   const showAlertsColumn = useMemo(
     () => entities?.some((entity) => entity?.alertsCount && entity?.alertsCount > 0),
@@ -124,12 +129,21 @@ export function EntitiesGrid({
         case 'entityDisplayName':
           return <EntityName entity={entity} />;
         case 'actions':
-          return <EntityActions entity={entity} setShowActions={setShowActions} />;
+          return isEntityDefinitionIndexPatternsLoading ? (
+            <EuiLoadingSpinner size="s" />
+          ) : (
+            <EntityActions
+              entity={entity}
+              definitionIndexPatterns={definitionIndexPatterns[entity.entityType]}
+              isEntityDefinitionIndexPatternsLoading={isEntityDefinitionIndexPatternsLoading}
+              setShowActions={setShowActions}
+            />
+          );
         default:
           return null;
       }
     },
-    [entities, onFilterByType]
+    [definitionIndexPatterns, entities, isEntityDefinitionIndexPatternsLoading, onFilterByType]
   );
 
   if (loading) {

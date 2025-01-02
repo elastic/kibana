@@ -8,17 +8,17 @@
 import { useInventoryAbortableAsync } from './use_inventory_abortable_async';
 import { useKibana } from './use_kibana';
 
-export const useFetchEntityDefinitionIndexPattern = (type: string) => {
+export const useFetchEntityDefinitionIndexPattern = (types: string) => {
   const {
     services: { inventoryAPIClient },
   } = useKibana();
 
-  const { value = { definitionIndexPatterns: [] }, loading } = useInventoryAbortableAsync(
+  const { value = { definitionIndexPatterns: {} }, loading } = useInventoryAbortableAsync(
     ({ signal }) => {
       return inventoryAPIClient.fetch('GET /internal/inventory/entity/definitions/sources', {
         params: {
           query: {
-            type,
+            types,
           },
         },
         signal,
@@ -28,7 +28,7 @@ export const useFetchEntityDefinitionIndexPattern = (type: string) => {
   );
 
   return {
-    entityDefinitionIndexPatterns: value?.definitionIndexPatterns,
+    definitionIndexPatterns: value?.definitionIndexPatterns,
     isEntityDefinitionIndexPatternsLoading: loading,
   };
 };

@@ -16,16 +16,25 @@ import { useDiscoverRedirect } from '../../hooks/use_discover_redirect';
 interface Props {
   entity: InventoryEntity;
   setShowActions: Dispatch<SetStateAction<boolean>>;
+  definitionIndexPatterns: string[];
+  isEntityDefinitionIndexPatternsLoading: boolean;
 }
 
-export const EntityActions = ({ entity, setShowActions }: Props) => {
+export const EntityActions = ({
+  entity,
+  setShowActions,
+  definitionIndexPatterns,
+  isEntityDefinitionIndexPatternsLoading,
+}: Props) => {
   const [isPopoverOpen, { toggle: togglePopover, off: closePopover }] = useBoolean(false);
   const actionButtonTestSubject = entity.entityDisplayName
     ? `inventoryEntityActionsButton-${entity.entityDisplayName}`
     : 'inventoryEntityActionsButton';
 
-  const { getDiscoverEntitiesRedirectUrl, isEntityDefinitionIndexPatternsLoading } =
-    useDiscoverRedirect(entity);
+  const { getDiscoverEntitiesRedirectUrl } = useDiscoverRedirect(
+    entity,
+    definitionIndexPatterns.join(',')
+  );
   const discoverUrl = getDiscoverEntitiesRedirectUrl();
 
   const actions: React.ReactElement[] = [];
