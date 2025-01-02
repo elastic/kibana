@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { join } from 'path';
+import { basename, join } from 'path';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { orderBy } from 'lodash';
 import type { Package } from '../types';
@@ -39,7 +39,12 @@ export const calculateModuleTargetFolder = (module: Package): string => {
   const group = module.manifest.group!;
   const isPlugin = module.manifest.type === 'plugin';
   const fullPath = join(BASE_FOLDER, module.directory);
-  let moduleDelimiter = isPlugin ? '/plugins/' : '/packages/';
+  if (!fullPath.includes('/plugins/') && !fullPath.includes('/packages/')) {
+    throw new Error(
+      `The module ${module.id} is not located under a '*/plugins/*' or '*/packages/*' folder`
+    );
+  }
+  let moduleDelimiter = fullPath.includes('/plugins/') ? '/plugins/' : '/packages/';
 
   // for platform modules that are in a sustainable folder, strip the /private/ or /shared/ part too
   if (module.directory.includes(`${moduleDelimiter}private/`)) {
@@ -87,9 +92,9 @@ export const calculateModuleTargetFolder = (module: Package): string => {
 };
 
 export const isInTargetFolder = (module: Package, log: ToolingLog): boolean => {
-  if (!module.group || !module.visibility) {
+  if (!module.group || module.group === 'common' || !module.visibility) {
     log.warning(`The module '${module.id}' is missing the group/visibility information`);
-    return true;
+    return false;
   }
 
   const baseTargetFolders = TARGET_FOLDERS[`${module.group}:${module.visibility}`];
@@ -154,9 +159,20 @@ const replaceReferencesInternal = async (
       continue;
     }
 
+    let d = dst;
+    // For .bazel references, we need to keep the original name reference if we are renaming the path
+    // For example, in the move "packages/core/base/core-base-common" to "src/core/packages/base/common",
+    // we need to keep the reference name to core-base-common by replacing it with "src/core/packages/base/common:core-base-common"
+    if (
+      file.endsWith('.bazel') &&
+      relativeDestination.startsWith('src/core/packages/') && // Only on core packages for now, since are the ones being renamed
+      basename(relativeSource) !== basename(relativeDestination)
+    ) {
+      d = `${dst}:${basename(relativeSource)}`;
+    }
     const md5Before = (await quietExec(`md5 ${file} --quiet`)).stdout.trim();
     // if we are updating packages/cloud references, we must pay attention to not update packages/cloud_defend too
-    await safeExec(`sed -i '' -E "/${src}[\-_a-zA-Z0-9]/! s/${src}/${dst}/g" ${file}`, false);
+    await safeExec(`sed -i '' -E "/${src}[\-_a-zA-Z0-9]/! s/${src}/${d}/g" ${file}`, false);
     const md5After = (await quietExec(`md5 ${file} --quiet`)).stdout.trim();
 
     if (md5Before !== md5After) {

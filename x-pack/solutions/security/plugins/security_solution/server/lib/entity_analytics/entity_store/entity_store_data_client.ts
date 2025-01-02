@@ -15,7 +15,7 @@ import type {
   AnalyticsServiceSetup,
 } from '@kbn/core/server';
 import { EntityClient } from '@kbn/entityManager-plugin/server/lib/entity_client';
-import type { SortOrder } from '@elastic/elasticsearch/lib/api/types';
+import type { HealthStatus, SortOrder } from '@elastic/elasticsearch/lib/api/types';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { DataViewsService } from '@kbn/data-views-plugin/common';
 import { isEqual } from 'lodash/fp';
@@ -465,7 +465,7 @@ export class EntityStoreDataClient {
 
   public getComponentFromEntityDefinition(
     id: string,
-    definition: EntityDefinitionWithState | EntityDefinition
+    definition: EntityDefinitionWithState | EntityDefinition | undefined
   ): EngineComponentStatus[] {
     if (!definition) {
       return [
@@ -478,16 +478,22 @@ export class EntityStoreDataClient {
     }
 
     if ('state' in definition) {
+      const transformHealthToComponentHealth = (
+        health: HealthStatus | undefined
+      ): EngineComponentStatus['health'] =>
+        health ? (health.toLowerCase() as Lowercase<HealthStatus>) : 'unknown';
+
       return [
         {
           id: definition.id,
           installed: definition.state.installed,
           resource: EngineComponentResourceEnum.entity_definition,
         },
-        ...definition.state.components.transforms.map(({ installed, running, stats }) => ({
+        ...definition.state.components.transforms.map(({ installed, stats }) => ({
           id,
           resource: EngineComponentResourceEnum.transform,
           installed,
+          health: transformHealthToComponentHealth(stats?.health?.status),
           errors: (stats?.health as TransformHealth)?.issues?.map(({ issue, details }) => ({
             title: issue,
             message: details,
