@@ -23,7 +23,7 @@
           },
           ") => React.JSX.Element | null"
         ],
-        "path": "x-pack/packages/ml/field_stats_flyout/field_stats_content.tsx",
+        "path": "x-pack/platform/packages/private/ml/field_stats_flyout/field_stats_content.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -45,7 +45,7 @@
                 "text": "FieldStatsFlyoutProps"
               }
             ],
-            "path": "x-pack/packages/ml/field_stats_flyout/field_stats_content.tsx",
+            "path": "x-pack/platform/packages/private/ml/field_stats_flyout/field_stats_content.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -78,7 +78,7 @@
           },
           ") => React.JSX.Element | null"
         ],
-        "path": "x-pack/packages/ml/field_stats_flyout/field_stats_flyout.tsx",
+        "path": "x-pack/platform/packages/private/ml/field_stats_flyout/field_stats_flyout.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -100,7 +100,7 @@
                 "text": "FieldStatsFlyoutProps"
               }
             ],
-            "path": "x-pack/packages/ml/field_stats_flyout/field_stats_flyout.tsx",
+            "path": "x-pack/platform/packages/private/ml/field_stats_flyout/field_stats_flyout.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -131,7 +131,7 @@
           },
           ") => React.JSX.Element"
         ],
-        "path": "x-pack/packages/ml/field_stats_flyout/field_stats_flyout_provider.tsx",
+        "path": "x-pack/platform/packages/private/ml/field_stats_flyout/field_stats_flyout_provider.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -153,7 +153,7 @@
                 "text": "FieldStatsFlyoutProviderProps"
               }
             ],
-            "path": "x-pack/packages/ml/field_stats_flyout/field_stats_flyout_provider.tsx",
+            "path": "x-pack/platform/packages/private/ml/field_stats_flyout/field_stats_flyout_provider.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -184,7 +184,7 @@
           },
           ") => React.JSX.Element"
         ],
-        "path": "x-pack/packages/ml/field_stats_flyout/field_stats_info_button.tsx",
+        "path": "x-pack/platform/packages/private/ml/field_stats_flyout/field_stats_info_button.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -206,7 +206,7 @@
                 "text": "FieldStatsInfoButtonProps"
               }
             ],
-            "path": "x-pack/packages/ml/field_stats_flyout/field_stats_info_button.tsx",
+            "path": "x-pack/platform/packages/private/ml/field_stats_flyout/field_stats_info_button.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -225,7 +225,7 @@
         "signature": [
           "({ options, placeholder, singleSelection, onChange, selectedOptions, fullWidth, isDisabled, isLoading, isClearable, prepend, compressed, \"aria-label\": ariaLabel, \"data-test-subj\": dataTestSubj, }: OptionListWithFieldStatsProps) => React.JSX.Element"
         ],
-        "path": "x-pack/packages/ml/field_stats_flyout/options_list_with_stats/option_list_with_stats.tsx",
+        "path": "x-pack/platform/packages/private/ml/field_stats_flyout/options_list_with_stats/option_list_with_stats.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -239,7 +239,7 @@
             "signature": [
               "OptionListWithFieldStatsProps"
             ],
-            "path": "x-pack/packages/ml/field_stats_flyout/options_list_with_stats/option_list_with_stats.tsx",
+            "path": "x-pack/platform/packages/private/ml/field_stats_flyout/options_list_with_stats/option_list_with_stats.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -260,7 +260,7 @@
         "signature": [
           "() => MLJobWizardFieldStatsFlyoutProps"
         ],
-        "path": "x-pack/packages/ml/field_stats_flyout/use_field_stats_flyout_context.ts",
+        "path": "x-pack/platform/packages/private/ml/field_stats_flyout/use_field_stats_flyout_context.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -291,7 +291,7 @@
           "SerializedStyles",
           "; populatedFields: Set<string> | undefined; }"
         ],
-        "path": "x-pack/packages/ml/field_stats_flyout/use_field_stats_trigger.tsx",
+        "path": "x-pack/platform/packages/private/ml/field_stats_flyout/use_field_stats_trigger.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -311,7 +311,7 @@
         "description": [
           "\nRepresents the props for the FieldStatsFlyout component."
         ],
-        "path": "x-pack/packages/ml/field_stats_flyout/field_stats_content.tsx",
+        "path": "x-pack/platform/packages/private/ml/field_stats_flyout/field_stats_content.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -333,7 +333,7 @@
                 "text": "DataView"
               }
             ],
-            "path": "x-pack/packages/ml/field_stats_flyout/field_stats_content.tsx",
+            "path": "x-pack/platform/packages/private/ml/field_stats_flyout/field_stats_content.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -355,7 +355,7 @@
                 "text": "FieldStatsServices"
               }
             ],
-            "path": "x-pack/packages/ml/field_stats_flyout/field_stats_content.tsx",
+            "path": "x-pack/platform/packages/private/ml/field_stats_flyout/field_stats_content.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -378,7 +378,7 @@
               },
               " | undefined"
             ],
-            "path": "x-pack/packages/ml/field_stats_flyout/field_stats_content.tsx",
+            "path": "x-pack/platform/packages/private/ml/field_stats_flyout/field_stats_content.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -394,7 +394,7 @@
             "signature": [
               "object | undefined"
             ],
-            "path": "x-pack/packages/ml/field_stats_flyout/field_stats_content.tsx",
+            "path": "x-pack/platform/packages/private/ml/field_stats_flyout/field_stats_content.tsx",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -410,7 +410,7 @@
         "description": [
           "\nRepresents the props for the FieldStatsInfoButton component."
         ],
-        "path": "x-pack/packages/ml/field_stats_flyout/field_stats_info_button.tsx",
+        "path": "x-pack/platform/packages/private/ml/field_stats_flyout/field_stats_info_button.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -434,7 +434,7 @@
               },
               "; }"
             ],
-            "path": "x-pack/packages/ml/field_stats_flyout/field_stats_info_button.tsx",
+            "path": "x-pack/platform/packages/private/ml/field_stats_flyout/field_stats_info_button.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -447,7 +447,7 @@
             "description": [
               "\nThe label for the field."
             ],
-            "path": "x-pack/packages/ml/field_stats_flyout/field_stats_info_button.tsx",
+            "path": "x-pack/platform/packages/private/ml/field_stats_flyout/field_stats_info_button.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -471,7 +471,7 @@
               },
               ") => void) | undefined"
             ],
-            "path": "x-pack/packages/ml/field_stats_flyout/field_stats_info_button.tsx",
+            "path": "x-pack/platform/packages/private/ml/field_stats_flyout/field_stats_info_button.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -493,7 +493,7 @@
                     "text": "FieldForStats"
                   }
                 ],
-                "path": "x-pack/packages/ml/field_stats_flyout/field_stats_info_button.tsx",
+                "path": "x-pack/platform/packages/private/ml/field_stats_flyout/field_stats_info_button.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -515,7 +515,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "x-pack/packages/ml/field_stats_flyout/field_stats_info_button.tsx",
+            "path": "x-pack/platform/packages/private/ml/field_stats_flyout/field_stats_info_button.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -531,7 +531,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "x-pack/packages/ml/field_stats_flyout/field_stats_info_button.tsx",
+            "path": "x-pack/platform/packages/private/ml/field_stats_flyout/field_stats_info_button.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -547,7 +547,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "x-pack/packages/ml/field_stats_flyout/field_stats_info_button.tsx",
+            "path": "x-pack/platform/packages/private/ml/field_stats_flyout/field_stats_info_button.tsx",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -583,7 +583,7 @@
           "EuiSelectableLIOption",
           "<BaseOption<T>>> & ",
           "CommonProps",
-          " & { label: string; searchableLabel?: string | undefined; key?: string | undefined; checked?: \"mixed\" | \"on\" | \"off\" | undefined; disabled?: boolean | undefined; isGroupLabel?: false | undefined; prepend?: React.ReactNode; append?: React.ReactNode; ref?: ((optionIndex: number) => void) | undefined; id?: undefined; data?: { [key: string]: any; } | undefined; textWrap?: \"wrap\" | \"truncate\" | undefined; truncationProps?: Partial<Omit<",
+          " & { label: string; searchableLabel?: string | undefined; key?: string | undefined; checked?: \"on\" | \"off\" | \"mixed\" | undefined; disabled?: boolean | undefined; isGroupLabel?: false | undefined; prepend?: React.ReactNode; append?: React.ReactNode; ref?: ((optionIndex: number) => void) | undefined; id?: undefined; data?: { [key: string]: any; } | undefined; textWrap?: \"wrap\" | \"truncate\" | undefined; truncationProps?: Partial<Omit<",
           "EuiTextTruncateProps",
           ", \"text\" | \"children\">> | undefined; toolTipContent?: React.ReactNode; toolTipProps?: Partial<Omit<",
           "EuiToolTipProps",
@@ -597,7 +597,7 @@
           "EuiSelectableOptionBase",
           ", \"isGroupLabel\"> & React.HTMLAttributes<HTMLDivElement> & { isGroupLabel: true; } & BaseOption<T>)"
         ],
-        "path": "x-pack/packages/ml/field_stats_flyout/options_list_with_stats/types.ts",
+        "path": "x-pack/platform/packages/private/ml/field_stats_flyout/options_list_with_stats/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -622,7 +622,7 @@
           },
           "; }"
         ],
-        "path": "x-pack/packages/ml/field_stats_flyout/field_stats_info_button.tsx",
+        "path": "x-pack/platform/packages/private/ml/field_stats_flyout/field_stats_info_button.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -655,14 +655,6 @@
             "section": "def-public.FieldStatsServices",
             "text": "FieldStatsServices"
           },
-          "; theme: ",
-          {
-            "pluginId": "@kbn/core-theme-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreThemeBrowserPluginApi",
-            "section": "def-public.ThemeServiceSetup",
-            "text": "ThemeServiceSetup"
-          },
           "; timeRangeMs?: ",
           {
             "pluginId": "@kbn/ml-date-picker",
@@ -673,7 +665,7 @@
           },
           " | undefined; dslQuery?: object | undefined; disablePopulatedFields?: boolean | undefined; } & { children?: React.ReactNode; }"
         ],
-        "path": "x-pack/packages/ml/field_stats_flyout/field_stats_flyout_provider.tsx",
+        "path": "x-pack/platform/packages/private/ml/field_stats_flyout/field_stats_flyout_provider.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -692,7 +684,7 @@
         "signature": [
           "React.Context<MLJobWizardFieldStatsFlyoutProps>"
         ],
-        "path": "x-pack/packages/ml/field_stats_flyout/use_field_stats_flyout_context.ts",
+        "path": "x-pack/platform/packages/private/ml/field_stats_flyout/use_field_stats_flyout_context.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

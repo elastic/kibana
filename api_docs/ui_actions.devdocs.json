@@ -767,31 +767,11 @@
               },
               {
                 "plugin": "discover",
-                "path": "src/plugins/discover/public/plugin.tsx"
+                "path": "src/platform/plugins/shared/discover/public/plugin.tsx"
               },
               {
                 "plugin": "imageEmbeddable",
                 "path": "src/plugins/image_embeddable/public/components/image_embeddable.tsx"
-              },
-              {
-                "plugin": "embeddable",
-                "path": "src/plugins/embeddable/public/tests/helpers.ts"
-              },
-              {
-                "plugin": "embeddable",
-                "path": "src/plugins/embeddable/public/tests/container.test.ts"
-              },
-              {
-                "plugin": "embeddable",
-                "path": "src/plugins/embeddable/public/tests/container.test.ts"
-              },
-              {
-                "plugin": "embeddable",
-                "path": "src/plugins/embeddable/public/tests/container.test.ts"
-              },
-              {
-                "plugin": "embeddable",
-                "path": "src/plugins/embeddable/public/tests/explicit_input.test.ts"
               }
             ],
             "children": [

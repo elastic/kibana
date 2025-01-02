@@ -197,7 +197,7 @@ export default async function ({ readConfigFile }) {
         pathname: '/app/management/kibana/observabilityAiAssistantManagement',
       },
       enterpriseSearch: {
-        pathname: '/app/enterprise_search/overview',
+        pathname: '/app/elasticsearch/overview',
       },
     },
 
@@ -401,7 +401,14 @@ export default async function ({ readConfigFile }) {
             indices: [
               {
                 names: ['*'],
-                privileges: ['create', 'read', 'view_index_metadata', 'monitor', 'create_index'],
+                privileges: [
+                  'create',
+                  'read',
+                  'view_index_metadata',
+                  'monitor',
+                  'create_index',
+                  'manage',
+                ],
               },
             ],
           },

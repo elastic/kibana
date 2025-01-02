@@ -75,9 +75,7 @@ export const RolesGridPage: FC<Props> = ({
   readOnly,
   buildFlavor,
   cloudOrgUrl,
-  analytics,
-  theme,
-  i18n: i18nStart,
+  ...startServices
 }) => {
   const [roles, setRoles] = useState<Role[]>([]);
   const [visibleRoles, setVisibleRoles] = useState<Role[]>([]);
@@ -409,9 +407,7 @@ export const RolesGridPage: FC<Props> = ({
             notifications={notifications}
             rolesAPIClient={rolesAPIClient}
             buildFlavor={buildFlavor}
-            theme={theme}
-            analytics={analytics}
-            i18n={i18nStart}
+            {...startServices}
           />
         ) : null}
 
