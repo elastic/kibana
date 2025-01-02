@@ -18,7 +18,17 @@ import { getDefaultAttackDiscoveryPrompt } from '../nodes/helpers/get_default_at
 import { getDefaultRefinePrompt } from '../nodes/refine/helpers/get_default_refine_prompt';
 import type { GraphState } from '../types';
 
-export const getDefaultGraphState = (): StateGraphArgs<GraphState>['channels'] => ({
+export interface Options {
+  end?: string;
+  filter?: Record<string, unknown> | null;
+  start?: string;
+}
+
+export const getDefaultGraphState = ({
+  end,
+  filter,
+  start,
+}: Options | undefined = {}): StateGraphArgs<GraphState>['channels'] => ({
   attackDiscoveries: {
     value: (x: AttackDiscovery[] | null, y?: AttackDiscovery[] | null) => y ?? x,
     default: () => null,
@@ -39,9 +49,17 @@ export const getDefaultGraphState = (): StateGraphArgs<GraphState>['channels'] =
     value: (x: string, y?: string) => y ?? x,
     default: () => '',
   },
+  end: {
+    value: (x?: string | null, y?: string | null) => y ?? x,
+    default: () => end,
+  },
   errors: {
     value: (x: string[], y?: string[]) => y ?? x,
     default: () => [],
+  },
+  filter: {
+    value: (x?: Record<string, unknown> | null, y?: Record<string, unknown> | null) => y ?? x,
+    default: () => filter,
   },
   generationAttempts: {
     value: (x: number, y?: number) => y ?? x,
@@ -78,6 +96,10 @@ export const getDefaultGraphState = (): StateGraphArgs<GraphState>['channels'] =
   replacements: {
     value: (x: Replacements, y?: Replacements) => y ?? x,
     default: () => ({}),
+  },
+  start: {
+    value: (x?: string | null, y?: string | null) => y ?? x,
+    default: () => start,
   },
   unrefinedResults: {
     value: (x: AttackDiscovery[] | null, y?: AttackDiscovery[] | null) => y ?? x,

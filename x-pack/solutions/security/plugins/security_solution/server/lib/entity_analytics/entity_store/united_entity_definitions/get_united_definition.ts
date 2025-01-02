@@ -67,6 +67,3 @@ const versionByEntityType: Record<EntityType, string> = {
 
 export const getUnitedEntityDefinitionVersion = (entityType: EntityType): string =>
   versionByEntityType[entityType];
-
-export const getAvailableEntityTypes = (): EntityType[] =>
-  Object.keys(unitedDefinitionBuilders) as EntityType[];
