@@ -6,25 +6,12 @@
  */
 
 import {
-  fieldPathToProcessorString,
   isPainlessIdentifier,
   painlessStringRepresentation,
   addPainlessFieldAccess,
   fieldPathToPainlessExpression,
   type SafePainlessExpression,
-} from './pipeline';
-
-describe('fieldPathToProcessorString', () => {
-  it('should join an array of strings with dots', () => {
-    const result = fieldPathToProcessorString(['foo', 'bar', 'baz']);
-    expect(result).toBe('foo.bar.baz');
-  });
-
-  it('should return an empty string if array is empty', () => {
-    const result = fieldPathToProcessorString([]);
-    expect(result).toBe('');
-  });
-});
+} from './painless';
 
 describe('isPainlessIdentifier', () => {
   it('should return true for valid identifiers', () => {

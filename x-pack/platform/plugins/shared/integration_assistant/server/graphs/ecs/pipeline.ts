@@ -12,12 +12,8 @@ import { Pipeline, ESProcessorItem } from '../../../common';
 import type { EcsMappingState } from '../../types';
 import { ECS_TYPES } from './constants';
 import { deepCopy } from '../../util/util';
-import {
-  fieldPathToPainlessExpression,
-  type FieldPath,
-  SafePainlessExpression,
-  fieldPathToProcessorString,
-} from '../../../common/pipeline';
+import { type FieldPath, fieldPathToProcessorString } from '../../util/fields';
+import { fieldPathToPainlessExpression, SafePainlessExpression } from '../../util/painless';
 
 interface ECSField {
   target: string;
