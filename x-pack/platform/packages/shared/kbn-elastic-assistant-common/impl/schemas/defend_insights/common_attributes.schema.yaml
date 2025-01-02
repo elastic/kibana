@@ -23,8 +23,8 @@ components:
         value:
           description: The value of the event
           type: string
-        signature:
-          description: The signature of the event
+        signerId:
+          description: The signer's ID
           type: string
 
     DefendInsightType:
