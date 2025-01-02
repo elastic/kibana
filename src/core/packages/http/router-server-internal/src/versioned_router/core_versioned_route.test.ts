@@ -669,4 +669,42 @@ describe('Versioned route', () => {
       - [authz.requiredPrivileges.0.1]: expected value of type [string] but got [Object]"
     `);
   });
+
+  it('should correctly merge security configuration for versions', () => {
+    const versionedRouter = CoreVersionedRouter.from({ router });
+    const validSecurityConfig: RouteSecurity = {
+      authz: {
+        requiredPrivileges: ['foo'],
+      },
+      authc: {
+        enabled: 'optional',
+      },
+    };
+
+    const route = versionedRouter.get({
+      path: '/test/{id}',
+      access: 'internal',
+      security: validSecurityConfig,
+    });
+
+    route.addVersion(
+      {
+        version: '1',
+        validate: false,
+        security: {
+          authz: {
+            requiredPrivileges: ['foo', 'bar'],
+          },
+        },
+      },
+      handlerFn
+    );
+
+    // @ts-expect-error for test purpose
+    const security = route.getSecurity({ headers: { [ELASTIC_HTTP_VERSION_HEADER]: '1' } });
+
+    expect(security.authc).toEqual({ enabled: 'optional' });
+
+    expect(security.authz).toEqual({ requiredPrivileges: ['foo', 'bar'] });
+  });
 });
