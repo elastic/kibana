@@ -5,15 +5,22 @@
  * 2.0.
  */
 
-import type { PropsWithChildren, FC } from 'react';
-import React, { useCallback, useState } from 'react';
+import React, {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type FC,
+  type PropsWithChildren,
+} from 'react';
+import useMountedState from 'react-use/lib/useMountedState';
+
 import type { DataView } from '@kbn/data-plugin/common';
 import type { FieldStatsServices } from '@kbn/unified-field-list/src/components/field_stats';
 import type { TimeRange as TimeRangeMs } from '@kbn/ml-date-picker';
 import type { FieldStatsProps } from '@kbn/unified-field-list/src/components/field_stats';
-import { useEffect } from 'react';
 import { stringHash } from '@kbn/ml-string-hash';
-import { useRef } from 'react';
+
 import { getRangeFilter } from './populated_fields/get_range_filter';
 import { FieldStatsFlyout } from './field_stats_flyout';
 import { MLFieldStatsFlyoutContext } from './use_field_stats_flyout_context';
@@ -77,12 +84,11 @@ export const FieldStatsFlyoutProvider: FC<FieldStatsFlyoutProviderProps> = (prop
   const [manager] = useState(new PopulatedFieldsCacheManager());
   const [populatedFields, setPopulatedFields] = useState<Set<string> | undefined>();
   const abortController = useRef(new AbortController());
+  const isMounted = useMountedState();
 
   useEffect(
     function fetchSampleDocsEffect() {
       if (disablePopulatedFields) return;
-
-      let unmounted = false;
 
       if (abortController.current) {
         abortController.current.abort();
@@ -104,14 +110,14 @@ export const FieldStatsFlyoutProvider: FC<FieldStatsFlyoutProviderProps> = (prop
           const fieldsWithData = new Set([...nonEmptyFields.map((field) => field.name)]);
 
           manager.set(cacheKey, fieldsWithData);
-          if (!unmounted) {
+          if (isMounted()) {
             setPopulatedFields(fieldsWithData);
           }
         } catch (e) {
           if (e.name !== 'AbortError') {
             // eslint-disable-next-line no-console
             console.error(
-              `An error occurred fetching field caps documents to determine populated field stats.
+              `An error occurred fetching field caps to determine populated fields.
           \nError:${e}`
             );
           }
@@ -126,7 +132,6 @@ export const FieldStatsFlyoutProvider: FC<FieldStatsFlyoutProviderProps> = (prop
       }
 
       return () => {
-        unmounted = true;
         abortController.current.abort();
       };
     },
