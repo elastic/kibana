@@ -436,73 +436,6 @@ export function useModelActions({
         },
       },
       {
-        name: (model) => {
-          return isModelDownloadItem(model) && model.state === MODEL_STATE.DOWNLOADING ? (
-            <>
-              {i18n.translate('xpack.ml.trainedModels.modelsList.deleteModelActionLabel', {
-                defaultMessage: 'Cancel',
-              })}
-            </>
-          ) : (
-            <>
-              {i18n.translate('xpack.ml.trainedModels.modelsList.deleteModelActionLabel', {
-                defaultMessage: 'Delete',
-              })}
-            </>
-          );
-        },
-        description: (model: TrainedModelUIItem) => {
-          if (isModelDownloadItem(model) && model.state === MODEL_STATE.DOWNLOADING) {
-            return i18n.translate('xpack.ml.trainedModels.modelsList.cancelDownloadActionLabel', {
-              defaultMessage: 'Cancel download',
-            });
-          } else if (isNLPModelItem(model)) {
-            const hasDeployments = model.deployment_ids?.length ?? 0 > 0;
-            const { hasInferenceServices } = model;
-            if (hasInferenceServices) {
-              return i18n.translate(
-                'xpack.ml.trainedModels.modelsList.deleteDisabledWithInferenceServicesTooltip',
-                {
-                  defaultMessage: 'Model is used by the _inference API',
-                }
-              );
-            } else if (hasDeployments) {
-              return i18n.translate(
-                'xpack.ml.trainedModels.modelsList.deleteDisabledWithDeploymentsTooltip',
-                {
-                  defaultMessage: 'Model has started deployments',
-                }
-              );
-            }
-          }
-          return i18n.translate('xpack.ml.trainedModels.modelsList.deleteModelActionLabel', {
-            defaultMessage: 'Delete model',
-          });
-        },
-        'data-test-subj': 'mlModelsTableRowDeleteAction',
-        icon: 'trash',
-        // @ts-ignore
-        type: isMobileLayout ? 'icon' : 'button',
-        color: 'danger',
-        isPrimary: false,
-        onClick: (model) => {
-          onModelsDeleteRequest([model]);
-        },
-        available: (item) => {
-          if (!canDeleteTrainedModels || isBuiltInModel(item)) return false;
-
-          if (isModelDownloadItem(item)) {
-            return !!item.downloadState;
-          } else {
-            const hasZeroPipelines = Object.keys(item.pipelines ?? {}).length === 0;
-            return hasZeroPipelines || canManageIngestPipelines;
-          }
-        },
-        enabled: (item) => {
-          return !isNLPModelItem(item) || item.state !== MODEL_STATE.STARTED;
-        },
-      },
-      {
         name: i18n.translate('xpack.ml.inference.modelsList.testModelActionLabel', {
           defaultMessage: 'Test',
         }),
@@ -559,6 +492,73 @@ export function useModelActions({
           });
 
           await navigateToPath(path, false);
+        },
+      },
+      {
+        name: (model) => {
+          return isModelDownloadItem(model) && model.state === MODEL_STATE.DOWNLOADING ? (
+            <>
+              {i18n.translate('xpack.ml.trainedModels.modelsList.deleteModelActionLabel', {
+                defaultMessage: 'Cancel',
+              })}
+            </>
+          ) : (
+            <>
+              {i18n.translate('xpack.ml.trainedModels.modelsList.deleteModelActionLabel', {
+                defaultMessage: 'Delete model',
+              })}
+            </>
+          );
+        },
+        description: (model: TrainedModelUIItem) => {
+          if (isModelDownloadItem(model) && model.state === MODEL_STATE.DOWNLOADING) {
+            return i18n.translate('xpack.ml.trainedModels.modelsList.cancelDownloadActionLabel', {
+              defaultMessage: 'Cancel download',
+            });
+          } else if (isNLPModelItem(model)) {
+            const hasDeployments = model.deployment_ids?.length ?? 0 > 0;
+            const { hasInferenceServices } = model;
+            if (hasInferenceServices) {
+              return i18n.translate(
+                'xpack.ml.trainedModels.modelsList.deleteDisabledWithInferenceServicesTooltip',
+                {
+                  defaultMessage: 'Model is used by the _inference API',
+                }
+              );
+            } else if (hasDeployments) {
+              return i18n.translate(
+                'xpack.ml.trainedModels.modelsList.deleteDisabledWithDeploymentsTooltip',
+                {
+                  defaultMessage: 'Model has started deployments',
+                }
+              );
+            }
+          }
+          return i18n.translate('xpack.ml.trainedModels.modelsList.deleteModelActionLabel', {
+            defaultMessage: 'Delete model',
+          });
+        },
+        'data-test-subj': 'mlModelsTableRowDeleteAction',
+        icon: 'trash',
+        // @ts-ignore
+        type: isMobileLayout ? 'icon' : 'button',
+        color: 'danger',
+        isPrimary: false,
+        onClick: (model) => {
+          onModelsDeleteRequest([model]);
+        },
+        available: (item) => {
+          if (!canDeleteTrainedModels || isBuiltInModel(item)) return false;
+
+          if (isModelDownloadItem(item)) {
+            return !!item.downloadState;
+          } else {
+            const hasZeroPipelines = Object.keys(item.pipelines ?? {}).length === 0;
+            return hasZeroPipelines || canManageIngestPipelines;
+          }
+        },
+        enabled: (item) => {
+          return !isNLPModelItem(item) || item.state !== MODEL_STATE.STARTED;
         },
       },
     ],
