@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { AggregationsCompositeAggregation } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+
 export const getGroupByTermsAgg = (fields: { [key: string]: string[] }, maxSize = 500) => {
   return Object.entries(fields).reduce((acc, [sourceId, identityFields]) => {
     acc[sourceId] = {
@@ -20,5 +22,5 @@ export const getGroupByTermsAgg = (fields: { [key: string]: string[] }, maxSize 
       },
     };
     return acc;
-  }, {} as Record<string, any>);
+  }, {} as Record<string, { composite: AggregationsCompositeAggregation }>);
 };
