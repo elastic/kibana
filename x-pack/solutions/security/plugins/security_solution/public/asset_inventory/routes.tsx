@@ -11,7 +11,6 @@ import { SecurityPageName } from '../app/types';
 import { ASSET_INVENTORY_PATH } from '../../common/constants';
 import { PluginTemplateWrapper } from '../common/components/plugin_template_wrapper';
 import { SecurityRoutePageWrapper } from '../common/components/security_route_page_wrapper';
-import { ExperimentalFeaturesService } from '../common/experimental_features_service';
 import { AssetInventoryContainer } from './pages';
 
 export const AssetInventoryRoutes = () => (
@@ -24,7 +23,7 @@ export const AssetInventoryRoutes = () => (
 
 export const routes: SecuritySubPluginRoutes = [
   {
-    path: ExperimentalFeaturesService.get().assetInventoryStoreEnabled ? ASSET_INVENTORY_PATH : [],
+    path: ASSET_INVENTORY_PATH,
     component: AssetInventoryRoutes,
   },
 ];

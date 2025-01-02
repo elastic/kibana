@@ -271,7 +271,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables the Asset Inventory feature
    */
-  assetInventoryStoreEnabled: false,
+  assetInventoryUXEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;
