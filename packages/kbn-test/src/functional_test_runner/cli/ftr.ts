@@ -16,8 +16,8 @@ import { ToolingLog } from '@kbn/tooling-log';
 import { getTimeReporter } from '@kbn/ci-stats-reporter';
 import exitHook from 'exit-hook';
 
-import { readConfigFile, EsVersion } from './lib';
-import { FunctionalTestRunner } from './functional_test_runner';
+import { readConfigFile, EsVersion } from '../lib';
+import { FunctionalTestRunner } from '../functional_test_runner';
 
 export function runFtrCli() {
   const runStartTime = Date.now();
