@@ -75,7 +75,7 @@ export function defineGetAllRolesBySpaceRoutes({
               },
             },
             from: 0,
-            size: 100,
+            size: 1000,
           }),
         ]);
         const elasticsearchRoles = (queryRolesResponse.roles || [])?.reduce<
