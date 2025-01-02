@@ -101,7 +101,91 @@ export class CustomLogsPage {
     }
   }
 
+  async updateInstallationStepStatus(
+    onboardingId: string,
+    step: string,
+    status: string,
+    payload?: object
+  ) {
+    await this.kbnClient.request({
+      method: 'POST',
+      path: `/internal/observability_onboarding/flow/${onboardingId}/step/${step}`,
+      body: {
+        status,
+        payload,
+      },
+    });
+  }
+
+  customIntegrationSuccessCallout() {
+    return this.page.testSubj.locator('obltOnboardingCustomIntegrationInstalled');
+  }
+
   customIntegrationErrorCallout() {
     return this.page.testSubj.locator('obltOnboardingCustomIntegrationErrorCallout');
+  }
+
+  apiKeyCreateSuccessCallout() {
+    return this.page.testSubj.locator('obltOnboardingLogsApiKeyCreated');
+  }
+
+  apiKeyPrivilegesErrorCallout() {
+    return this.page.testSubj.locator('obltOnboardingLogsApiKeyCreationNoPrivileges');
+  }
+
+  apiKeyCreateErrorCallout() {
+    return this.page.testSubj.locator('obltOnboardingLogsApiKeyCreationFailed');
+  }
+
+  linuxCodeSnippetButton() {
+    return this.page.testSubj.locator('linux-tar');
+  }
+
+  macOSCodeSnippetButton() {
+    return this.page.testSubj.locator('macos');
+  }
+
+  windowsCodeSnippetButton() {
+    return this.page.testSubj.locator('windows');
+  }
+
+  autoDownloadConfigurationToggle() {
+    return this.page.testSubj.locator('obltOnboardingInstallElasticAgentAutoDownloadConfig');
+  }
+
+  autoDownloadConfigurationCallout() {
+    return this.page.testSubj.locator('obltOnboardingInstallElasticAgentAutoDownloadConfigCallout');
+  }
+
+  installCodeSnippet() {
+    return this.page.testSubj.locator('obltOnboardingInstallElasticAgentStep').getByRole('code');
+  }
+
+  windowsInstallElasticAgentDocLink() {
+    return this.page.testSubj.locator('obltOnboardingInstallElasticAgentWindowsDocsLink');
+  }
+
+  configureElasticAgentStep() {
+    return this.page.testSubj.locator('obltOnboardingConfigureElasticAgentStep');
+  }
+
+  downloadConfigurationButton() {
+    return this.page.testSubj.locator('obltOnboardingConfigureElasticAgentStepDownloadConfig');
+  }
+
+  stepStatusLoading() {
+    return this.page.testSubj.locator('obltOnboardingStepStatus-loading');
+  }
+
+  stepStatusComplete() {
+    return this.page.testSubj.locator('obltOnboardingStepStatus-complete');
+  }
+
+  stepStatusDanger() {
+    return this.page.testSubj.locator('obltOnboardingStepStatus-danger');
+  }
+
+  stepStatusWarning() {
+    return this.page.testSubj.locator('obltOnboardingStepStatus-warning');
   }
 }
