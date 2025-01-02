@@ -103,7 +103,7 @@ export async function handleSystemColorModeChange({
       // we actually apply set the dark/light color mode of the page.
       currentDarkModeValue = isDarkMode;
     } else if (currentDarkModeValue !== isDarkMode) {
-      notifications.toasts.addSuccess(
+      notifications.toasts.addInfo(
         {
           title: i18n.translate('core.ui.chrome.appearanceChange.successNotificationTitle', {
             defaultMessage: 'System color mode updated',
