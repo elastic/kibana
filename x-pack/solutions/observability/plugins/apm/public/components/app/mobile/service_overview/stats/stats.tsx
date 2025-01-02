@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { MetricDatum, MetricTrendShape } from '@elastic/charts';
+import type { MetricDatum } from '@elastic/charts';
+import { MetricTrendShape } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLoadingSpinner, useEuiTheme } from '@elastic/eui';
 import React, { useCallback } from 'react';
