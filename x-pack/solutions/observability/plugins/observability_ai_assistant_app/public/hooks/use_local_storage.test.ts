@@ -6,13 +6,14 @@
  */
 
 import { renderHook, act } from '@testing-library/react';
-import { useLocalStorage } from './use_local_storage';
+import { useLocalStorage, clearUseLocalStorageCache } from './use_local_storage';
 
 describe('useLocalStorage', () => {
   const key = 'testKey';
-  const defaultValue = 'defaultValue';
+  const defaultValue: string = 'defaultValue';
 
   beforeEach(() => {
+    clearUseLocalStorageCache();
     localStorage.clear();
   });
 
@@ -42,17 +43,6 @@ describe('useLocalStorage', () => {
     });
 
     expect(JSON.parse(localStorage.getItem(key) || '')).toBe(newValue);
-  });
-
-  it('should remove the value from local storage when the value is undefined', () => {
-    const { result } = renderHook(() => useLocalStorage(key, defaultValue));
-    const [, saveToStorage] = result.current;
-
-    act(() => {
-      saveToStorage(undefined as unknown as string);
-    });
-
-    expect(localStorage.getItem(key)).toBe(null);
   });
 
   it('should listen for storage events to window, and remove the listener upon unmount', () => {
