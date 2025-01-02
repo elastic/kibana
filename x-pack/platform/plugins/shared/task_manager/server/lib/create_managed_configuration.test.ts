@@ -382,71 +382,29 @@ describe('createManagedConfiguration()', () => {
         expect(subscription).toHaveBeenNthCalledWith(2, 120);
       });
 
-    test('should increase configuration at the next interval when an error with cluster_block_exception type is emitted, then decreases back to normal', async () => {
-      const { subscription, errors$ } = setupScenario(100);
-      errors$.next(
-        new BulkUpdateError({
-          statusCode: 403,
-          message: 'index is blocked',
-          type: 'cluster_block_exception',
-        })
-      );
-      expect(subscription).toHaveBeenNthCalledWith(1, 100);
-      // It emits the error with cluster_block_exception type immediately
-      expect(subscription).toHaveBeenNthCalledWith(2, INTERVAL_AFTER_BLOCK_EXCEPTION);
-      clock.tick(INTERVAL_AFTER_BLOCK_EXCEPTION);
-      expect(subscription).toHaveBeenCalledTimes(3);
-      expect(subscription).toHaveBeenNthCalledWith(3, 100);
-    });
+      test('should increase configuration at the next interval when an error with cluster_block_exception type is emitted, then decreases back to normal', async () => {
+        const { subscription, errors$ } = setupScenario(100);
+        errors$.next(
+          new BulkUpdateError({
+            statusCode: 403,
+            message: 'index is blocked',
+            type: 'cluster_block_exception',
+          })
+        );
+        expect(subscription).toHaveBeenNthCalledWith(1, 100);
+        // It emits the error with cluster_block_exception type immediately
+        expect(subscription).toHaveBeenNthCalledWith(2, INTERVAL_AFTER_BLOCK_EXCEPTION);
+        clock.tick(INTERVAL_AFTER_BLOCK_EXCEPTION);
+        expect(subscription).toHaveBeenCalledTimes(3);
+        expect(subscription).toHaveBeenNthCalledWith(3, 100);
+      });
 
-    test('should log a warning when the configuration changes from the starting value', async () => {
-      const { errors$ } = setupScenario(100);
-      errors$.next(SavedObjectsErrorHelpers.createTooManyRequestsError('a', 'b'));
-      clock.tick(ADJUST_THROUGHPUT_INTERVAL);
-      expect(logger.warn).toHaveBeenCalledWith(
-        'Poll interval configuration is temporarily increased after Elasticsearch returned 1 "too many request" and/or "execute [inline] script" and/or "cluster_block_exception" error(s).'
-      );
-    });
-
-    test('should log a warning when an issue occurred in the calculating of the increased poll interval', async () => {
-      const { errors$ } = setupScenario(NaN);
-      errors$.next(SavedObjectsErrorHelpers.createTooManyRequestsError('a', 'b'));
-      clock.tick(ADJUST_THROUGHPUT_INTERVAL);
-      expect(logger.error).toHaveBeenCalledWith(
-        'Poll interval configuration had an issue calculating the new poll interval: Math.min(Math.ceil(NaN * 1.2), Math.max(60000, NaN)) = NaN, will keep the poll interval unchanged (NaN)'
-      );
-    });
-
-    test('should log a warning when an issue occurred in the calculating of the decreased poll interval', async () => {
-      setupScenario(NaN);
-      clock.tick(ADJUST_THROUGHPUT_INTERVAL);
-      expect(logger.error).toHaveBeenCalledWith(
-        'Poll interval configuration had an issue calculating the new poll interval: Math.max(NaN, Math.floor(NaN * 0.95)) = NaN, will keep the poll interval unchanged (NaN)'
-      );
-    });
-
-    test('should decrease configuration back to normal incrementally after an error is emitted', async () => {
-      const { subscription, errors$ } = setupScenario(100);
-      errors$.next(SavedObjectsErrorHelpers.createTooManyRequestsError('a', 'b'));
-      clock.tick(ADJUST_THROUGHPUT_INTERVAL * 10);
-      expect(subscription).toHaveBeenNthCalledWith(2, 120);
-      expect(subscription).toHaveBeenNthCalledWith(3, 114);
-      // 108.3 -> 108 from Math.floor
-      expect(subscription).toHaveBeenNthCalledWith(4, 108);
-      expect(subscription).toHaveBeenNthCalledWith(5, 102);
-      // 96.9 -> 100 from Math.max with the starting value
-      expect(subscription).toHaveBeenNthCalledWith(6, 100);
-      // No new calls due to value not changing and usage of distinctUntilChanged()
-      expect(subscription).toHaveBeenCalledTimes(6);
-    });
-
-    test('should increase configuration when errors keep emitting', async () => {
-      const { subscription, errors$ } = setupScenario(100);
-      for (let i = 0; i < 3; i++) {
+      test('should log a warning when the configuration changes from the starting value', async () => {
+        const { errors$ } = setupScenario(100);
         errors$.next(SavedObjectsErrorHelpers.createTooManyRequestsError('a', 'b'));
         clock.tick(ADJUST_THROUGHPUT_INTERVAL);
         expect(logger.warn).toHaveBeenCalledWith(
-          'Poll interval configuration is temporarily increased after Elasticsearch returned 1 "too many request" and/or "execute [inline] script" error(s).'
+          'Poll interval configuration is temporarily increased after Elasticsearch returned 1 "too many request" and/or "execute [inline] script" and/or "cluster_block_exception" error(s).'
         );
       });
 
