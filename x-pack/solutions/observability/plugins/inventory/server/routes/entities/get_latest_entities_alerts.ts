@@ -22,7 +22,7 @@ export async function getLatestEntitiesAlerts({
   identityFieldsBySource,
 }: {
   alertsClient: AlertsClient;
-  identityFieldsBySource: { [key: string]: string[] };
+  identityFieldsBySource: Record<string, string[]>;
 }): Promise<Array<{ [key: string]: any; alertsCount?: number }>> {
   if (Object.keys(identityFieldsBySource).length === 0) {
     return [];
