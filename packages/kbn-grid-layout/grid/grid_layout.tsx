@@ -37,16 +37,18 @@ const EXPANDED_PANEL_STYLES = css`
   &.kbnGrid--hasExpandedPanel {
     height: 100%;
 
-    // hide all row headers when panel is expanded
-    .kbnGridRowHeader {
-      height: 0px; // used instead of 'display: none' due to a11y concerns
-    }
-
     .kbnGridRowContainer {
       &:not(.kbnGridRowContainer--hasExpandedPanel) {
-        display: none;
+        // hide the rows that do not contain the expanded panel
+        position: absolute;
+        top: -9999px;
+        left: -9999px;
       }
       &--hasExpandedPanel {
+        .kbnGridRowHeader {
+          height: 0px; // used instead of 'display: none' due to a11y concerns
+        }
+
         .kbnGridRow {
           display: block !important; // overwrite grid display
           height: 100%;
@@ -57,10 +59,10 @@ const EXPANDED_PANEL_STYLES = css`
               position: absolute;
               top: -9999px;
               left: -9999px;
+              visibility: hidden; // remove hidden panels and their contents from tab order for a11y
             }
             &--isExpanded {
               // show only the expanded panel and make it take up the full height
-              display: contents;
               height: 100%;
             }
           }
