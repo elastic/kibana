@@ -50,7 +50,7 @@ const CAPITALIZATION_MAP = {
   [LogRetentionOptions.Crawler]: {
     capitalized: i18n.translate(
       'xpack.enterpriseSearch.appSearch.logRetention.type.crawler.title.capitalized',
-      { defaultMessage: 'Web crawler' }
+      { defaultMessage: 'Web Crawler' }
     ),
     lowercase: i18n.translate(
       'xpack.enterpriseSearch.appSearch.logRetention.type.crawler.title.lowercase',

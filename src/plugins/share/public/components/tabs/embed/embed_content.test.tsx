@@ -17,13 +17,7 @@ describe('Share modal embed content tab', () => {
     let component: ReactWrapper;
 
     beforeEach(() => {
-      component = mountWithIntl(
-        <EmbedContent
-          objectType="dashboard"
-          setIsNotSaved={() => jest.fn()}
-          shareableUrl="/home#/"
-        />
-      );
+      component = mountWithIntl(<EmbedContent objectType="dashboard" shareableUrl="/home#/" />);
     });
 
     it('works for simple url', async () => {

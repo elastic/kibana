@@ -17,6 +17,7 @@ import {
   EuiPopover,
   EuiPopoverFooter,
   EuiPopoverTitle,
+  EuiLoadingSpinner,
   EuiText,
   useEuiPaddingCSS,
 } from '@elastic/eui';
@@ -58,13 +59,14 @@ export const DataViewSelectPopover: React.FunctionComponent<DataViewSelectPopove
   onSelectDataView,
   onChangeMetaData,
 }) => {
+  const [loadingDataViews, setLoadingDataViews] = useState(false);
   const [dataViewItems, setDataViewsItems] = useState<DataViewListItemEnhanced[]>([]);
   const [dataViewPopoverOpen, setDataViewPopoverOpen] = useState(false);
 
   const closeDataViewEditor = useRef<() => void | undefined>();
 
   const allDataViewItems = useMemo(
-    () => [...dataViewItems, ...metadata.adHocDataViewList.map(toDataViewListItem)],
+    () => [...(dataViewItems ?? []), ...metadata.adHocDataViewList.map(toDataViewListItem)],
     [dataViewItems, metadata.adHocDataViewList]
   );
 
@@ -80,10 +82,16 @@ export const DataViewSelectPopover: React.FunctionComponent<DataViewSelectPopove
   );
 
   const loadPersistedDataViews = useCallback(async () => {
-    const ids = await dataViews.getIds();
-    const dataViewsList = await Promise.all(ids.map((id) => dataViews.get(id)));
-
-    setDataViewsItems(dataViewsList.map(toDataViewListItem));
+    setLoadingDataViews(true);
+    try {
+      // Calling getIds with refresh = true to make sure we don't get stale data
+      const ids = await dataViews.getIds(true);
+      const dataViewsList = await Promise.all(ids.map((id) => dataViews.get(id)));
+      setDataViewsItems(dataViewsList.map(toDataViewListItem));
+    } catch (e) {
+      // Error fetching data views
+    }
+    setLoadingDataViews(false);
   }, [dataViews]);
 
   const onAddAdHocDataView = useCallback(
@@ -146,8 +154,10 @@ export const DataViewSelectPopover: React.FunctionComponent<DataViewSelectPopove
     [dataViews, onAddAdHocDataView, onChangeDataView]
   );
 
-  if (!allDataViewItems) {
-    return null;
+  if (loadingDataViews) {
+    // The loading indicator is to make sure we don't render an
+    // empty popover when the DV cache is initially loading
+    return <EuiLoadingSpinner />;
   }
 
   return (

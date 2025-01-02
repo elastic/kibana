@@ -21,7 +21,7 @@ export const registerEnterpriseSearchIntegrations = (
     customIntegrations.registerCustomIntegration({
       id: 'web_crawler',
       title: i18n.translate('xpack.enterpriseSearch.integrations.webCrawlerName', {
-        defaultMessage: 'Web crawler',
+        defaultMessage: 'Web Crawler',
       }),
       description: i18n.translate('xpack.enterpriseSearch.integrations.webCrawlerDescription', {
         defaultMessage: 'Add search to your website with the web crawler.',

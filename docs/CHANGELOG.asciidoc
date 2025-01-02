@@ -10,6 +10,7 @@
 
 Review important information about the {kib} 8.x releases.
 
+* <<release-notes-8.16.2>>
 * <<release-notes-8.16.1>>
 * <<release-notes-8.16.0>>
 * <<release-notes-8.15.5>>
@@ -81,6 +82,51 @@ Review important information about the {kib} 8.x releases.
 
 include::upgrade-notes.asciidoc[]
 
+[[release-notes-8.16.2]]
+== {kib} 8.16.2
+
+The 8.16.2 release includes the following enhancements and bug fixes.
+
+[float]
+[[enhancement-v8.16.2]]
+=== Enhancements
+In this release, we've introduced an image based on the hardened link:https://github.com/wolfi-dev/[Wolfi] image to provide additional security to our self-managed customers, and improve our supply chain security posture. Wolfi-based images require Docker version 20.10.10 or higher.
+
+[float]
+[[fixes-v8.16.2]]
+=== Bug fixes
+Alerting::
+* Fixes Slack API connectors not displayed under Slack connector when adding new connector to rule ({kibana-pull}202315[#202315]).
+Dashboards::
+* Prevents resetting panel to undefined or empty last saved state ({kibana-pull}203158[#203158]).
+Data ingestion and Fleet::
+* Allows to create integration policy with no agent policies ({kibana-pull}201051[#201051]).
+Elastic Observability solution::
+* Preserves `kuery` filters when switching between Universal Profiling pages in new solution navigation ({kibana-pull}203545[#203545]).
+* Fixes error when opening rule flyout ({kibana-pull}202386[#202386]).
+* Handles ops genie as default connector ({kibana-pull}201923[#201923]).
+Elastic Search solution::
+* Adds ML as required plugin to Search Assistant ({kibana-pull}204009[#204009]).
+* Fixes web crawler name inconsistencies ({kibana-pull}202738[#202738]).
+Elastic Security solution::
+For the Elastic Security 8.16.2 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
+Kibana platform::
+* Adds `search` as a term for `elasticsearch` solution_type ({kibana-pull}201688[#201688]).
+* Adds a11y connector improvements ({kibana-pull}201590[#201590]).
+* Fixes issue with generating short url when copying share link ({kibana-pull}201475[#201475]).
+Kibana security::
+* Fixes error with opening a point in time query for session deletion by now accounting for partial results ({kibana-pull}203413[#203413]).
+* Adds functionality to restrict unsupported log formats ({kibana-pull}202994[#202994]).
+* Adds functionality to restrict and reject CEF logs in Automatic Import and redirect to CEF integration instead ({kibana-pull}201792[#201792]).
+* Removes fields with @ from the script processor ({kibana-pull}201548[#201548]).
+Lens & Visualizations::
+* Fixes point visibility regression in *TSVB* ({kibana-pull}202358[#202358]).
+Machine Learning::
+* Trained Models: Fixes spaces sync to retrieve 10000 models ({kibana-pull}202712[#202712]).
+* Trained Models: Shows deployment stats for unallocated deployments ({kibana-pull}202005[#202005]).
+* Trained Models: Fixes start deployment with ML autoscaling and 0 active nodes ({kibana-pull}201256[#201256]).
+* Trained Models: Fixes `NaN` in a progress bar during the download task initialization ({kibana-pull}201221[#201221]).
+* Single Metric Viewer embeddable: Fixes continuous job refetch when errors are encountered ({kibana-pull}199726[#199726]).
 
 [[release-notes-8.16.1]]
 == {kib} 8.16.1

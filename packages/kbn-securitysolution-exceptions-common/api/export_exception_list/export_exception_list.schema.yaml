@@ -8,8 +8,8 @@ paths:
       x-labels: [serverless, ess]
       operationId: ExportExceptionList
       x-codegen-enabled: true
-      summary: Exports an exception list
-      description: Exports an exception list and its associated items to an .ndjson file
+      summary: Export an exception list
+      description: Export an exception list and its associated items to an NDJSON file.
       parameters:
         - name: id
           in: query
