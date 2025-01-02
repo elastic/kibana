@@ -140,7 +140,7 @@ const services: Partial<KibanaServices> = {
   },
 };
 
-export function KibanaReactStorybookDecorator(Story: ComponentType) {
+export const KibanaReactStorybookDecorator = (Story: ComponentType) => {
   const KibanaReactContext = createKibanaReactContext(services);
   // @ts-ignore
   SecuritySolutionKibanaServices.init({
@@ -151,4 +151,4 @@ export function KibanaReactStorybookDecorator(Story: ComponentType) {
       <Story />
     </KibanaReactContext.Provider>
   );
-}
+};

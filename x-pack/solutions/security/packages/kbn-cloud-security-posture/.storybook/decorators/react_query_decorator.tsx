@@ -8,7 +8,7 @@
 import React, { ComponentType } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
-export function ReactQueryStorybookDecorator(Story: ComponentType) {
+export const ReactQueryStorybookDecorator = (Story: ComponentType) => {
   const mockQueryClient = new QueryClient({
     defaultOptions: {
       queries: { retry: false, cacheTime: 0 },
@@ -21,4 +21,4 @@ export function ReactQueryStorybookDecorator(Story: ComponentType) {
       <Story />
     </QueryClientProvider>
   );
-}
+};

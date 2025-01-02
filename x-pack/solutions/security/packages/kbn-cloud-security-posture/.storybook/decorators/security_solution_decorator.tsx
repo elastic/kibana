@@ -10,7 +10,7 @@ import { Provider as ReduxStoreProvider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
 import { DiscoverInTimelineContextProvider } from '@kbn/security-solution-plugin/public/common/components/discover_in_timeline/provider';
 
-export function SecuritySolutionStorybookDecorator(Story: ComponentType) {
+export const SecuritySolutionStorybookDecorator = (Story: ComponentType) => {
   const store = configureStore({
     reducer: {
       sourcerer: () => ({
@@ -54,4 +54,4 @@ export function SecuritySolutionStorybookDecorator(Story: ComponentType) {
       </DiscoverInTimelineContextProvider>
     </ReduxStoreProvider>
   );
-}
+};
