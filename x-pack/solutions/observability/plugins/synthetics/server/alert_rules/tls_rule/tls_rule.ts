@@ -18,7 +18,7 @@ import { SYNTHETICS_ALERT_RULE_TYPES } from '@kbn/rule-data-utils';
 import {
   TLSRuleParamsSchema,
   type TLSRuleParams,
-} from '@kbn/response-ops-rule-params/synthetics_tls/latest';
+} from 'src/platform/packages/shared/response-ops/rule_params/synthetics_tls/latest';
 import { getAlertDetailsUrl, observabilityPaths } from '@kbn/observability-plugin/common';
 import { ObservabilityUptimeAlert } from '@kbn/alerts-as-data-utils';
 import { syntheticsRuleFieldMap } from '../../../common/rules/synthetics_rule_field_map';

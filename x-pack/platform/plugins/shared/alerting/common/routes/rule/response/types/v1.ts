@@ -6,7 +6,7 @@
  */
 
 import type { TypeOf } from '@kbn/config-schema';
-import { RuleParamsV1 } from '@kbn/response-ops-rule-params';
+import { RuleParamsV1 } from 'src/platform/packages/shared/response-ops/rule_params';
 import {
   ruleResponseSchemaV1,
   ruleSnoozeScheduleSchemaV1,

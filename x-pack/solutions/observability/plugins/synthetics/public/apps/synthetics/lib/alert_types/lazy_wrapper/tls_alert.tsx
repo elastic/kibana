@@ -10,7 +10,7 @@ import { Provider as ReduxProvider } from 'react-redux';
 import { CoreStart } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
-import type { TLSRuleParams } from '@kbn/response-ops-rule-params/synthetics_tls/latest';
+import type { TLSRuleParams } from 'src/platform/packages/shared/response-ops/rule_params/synthetics_tls/latest';
 import { TLSRuleComponent } from '../../../components/alerts/tls_rule_ui';
 import { ClientPluginsStart } from '../../../../../plugin';
 import { kibanaService } from '../../../../../utils/kibana_service';

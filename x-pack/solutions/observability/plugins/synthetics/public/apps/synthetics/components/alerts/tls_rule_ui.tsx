@@ -8,7 +8,7 @@
 import { useDispatch, useSelector } from 'react-redux';
 import React, { useEffect } from 'react';
 import { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
-import type { TLSRuleParams } from '@kbn/response-ops-rule-params/synthetics_tls/latest';
+import type { TLSRuleParams } from 'src/platform/packages/shared/response-ops/rule_params/synthetics_tls/latest';
 import { AlertTlsComponent } from './alert_tls';
 import { getDynamicSettingsAction, selectDynamicSettings } from '../../state/settings';
 import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../../../common/constants';

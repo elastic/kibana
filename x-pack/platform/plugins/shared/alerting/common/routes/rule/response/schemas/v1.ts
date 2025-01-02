@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { ruleParamsSchemaV1 } from '@kbn/response-ops-rule-params';
+import { ruleParamsSchemaV1 } from 'src/platform/packages/shared/response-ops/rule_params';
 import { rRuleResponseSchemaV1 } from '../../../r_rule';
 import { alertsFilterQuerySchemaV1 } from '../../../alerts_filter_query';
 import {
