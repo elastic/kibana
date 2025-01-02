@@ -39782,9 +39782,7 @@
                 "section": "def-common.SerializedDatatable",
                 "text": "SerializedDatatable"
               },
-              ") => { rows: ",
-              "Dictionary",
-              "<string>[]; type: \"datatable\"; columns: ",
+              ") => { rows: _.Dictionary<string>[]; type: \"datatable\"; columns: ",
               {
                 "pluginId": "expressions",
                 "scope": "common",
