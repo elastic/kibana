@@ -149,9 +149,31 @@ export const GridRow = forwardRef<HTMLDivElement, GridRowProps>(
             }
           });
 
+        const expandedPanelStyleSubscription = gridLayoutStateManager.expandedPanelId$
+          .pipe(skip(1)) // skip the first emit because the `initialStyles` will take care of it
+          .subscribe((expandedPanelId) => {
+            const rowContainerRef = rowContainer.current;
+            if (!rowContainerRef) return;
+
+            if (expandedPanelId) {
+              const panelsIds = Object.keys(
+                gridLayoutStateManager.gridLayout$.getValue()[rowIndex].panels
+              );
+              const includesExpandedPanel = panelsIds.includes(expandedPanelId);
+              if (includesExpandedPanel) {
+                rowContainerRef.classList.add('kbnGridRowContainer--hasExpandedPanel');
+              } else {
+                rowContainerRef.classList.remove('kbnGridRowContainer--hasExpandedPanel');
+              }
+            } else {
+              rowContainerRef.classList.remove('kbnGridRowContainer--hasExpandedPanel');
+            }
+          });
+
         return () => {
           interactionStyleSubscription.unsubscribe();
           rowStateSubscription.unsubscribe();
+          expandedPanelStyleSubscription.unsubscribe();
         };
       },
       // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -227,6 +249,7 @@ export const GridRow = forwardRef<HTMLDivElement, GridRowProps>(
         css={css`
           height: 100%;
         `}
+        className="kbnGridRowContainer"
       >
         {rowIndex !== 0 && (
           <GridRowHeader

@@ -153,15 +153,33 @@ export const GridLayout = ({
         css={css`
           &.kbnGrid--hasExpandedPanel {
             height: 100%;
-            .kbnGridPanel {
-              display: none;
-              &--isExpanded {
-                display: contents;
-                height: 100%;
-              }
+
+            .kbnGridRowHeader {
+              height: 0px; // used instead of 'display: none' due to a11y concerns
             }
-            .kbnGridRow {
-              display: block !important; // overwrite grid display
+
+            .kbnGridRowContainer {
+              &:not(.kbnGridRowContainer--hasExpandedPanel) {
+                display: none;
+              }
+              &--hasExpandedPanel {
+                .kbnGridRow {
+                  display: block !important; // overwrite grid display
+                  height: 100%;
+
+                  .kbnGridPanel {
+                    &:not(.kbnGridPanel--isExpanded) {
+                      position: absolute;
+                      top: -100vh;
+                      left: -100vw;
+                    }
+                    &--isExpanded {
+                      display: contents;
+                      height: 100%;
+                    }
+                  }
+                }
+              }
             }
           }
         `}
