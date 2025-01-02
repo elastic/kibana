@@ -208,19 +208,19 @@ export function RuleDetailsFlyout({
       aria-labelledby={prebuiltRulesFlyoutTitleId}
       ownFocus
     >
-      <EuiFlyoutHeader>
-        <EuiTitle size="m">
-          <h2 id={prebuiltRulesFlyoutTitleId}>{rule.name}</h2>
-        </EuiTitle>
-        <EuiSpacer size="s" />
-        {subHeader && (
-          <>
-            {subHeader}
-            <EuiSpacer size="s" />
-          </>
-        )}
-      </EuiFlyoutHeader>
-      <KibanaSectionErrorBoundary sectionName={rule.name}>
+      <KibanaSectionErrorBoundary sectionName={i18n.RULE_DETAILS_FLYOUT_LABEL}>
+        <EuiFlyoutHeader>
+          <EuiTitle size="m">
+            <h2 id={prebuiltRulesFlyoutTitleId}>{rule.name}</h2>
+          </EuiTitle>
+          <EuiSpacer size="s" />
+          {subHeader && (
+            <>
+              {subHeader}
+              <EuiSpacer size="s" />
+            </>
+          )}
+        </EuiFlyoutHeader>
         <StyledEuiFlyoutBody>
           <ScrollableFlyoutTabbedContent
             tabs={tabs}

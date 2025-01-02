@@ -25,7 +25,6 @@ import {
   EuiButtonEmpty,
   EuiCopy,
   EuiPanel,
-  EuiCallOut,
 } from '@elastic/eui';
 
 import { errorMessageStrings as strings } from './message_strings';
@@ -112,22 +111,29 @@ interface SectionErrorPromptProps {
 export const SectionErrorPrompt = withErrorDetails(
   ({ sectionName, showErrorDetails }: SectionErrorPromptProps): JSX.Element => {
     return (
-      <EuiCallOut
-        title={strings.section.callout.title(sectionName)}
+      <EuiEmptyPrompt
+        iconType="error"
         color="danger"
-        iconType="warning"
-      >
-        <>
-          <p>{strings.section.callout.body(sectionName)}</p>
-          {showErrorDetails && (
-            <p>
-              <EuiButton color="danger" onClick={showErrorDetails}>
-                {strings.section.callout.showDetailsButton()}
-              </EuiButton>
+        title={
+          <h2 data-test-subj="sectionErrorBoundaryPromptHeader">
+            {strings.section.callout.title(sectionName)}
+          </h2>
+        }
+        body={
+          <>
+            <p data-test-subj="sectionErrorBoundaryPromptBody">
+              {strings.section.callout.body(sectionName)}
             </p>
-          )}
-        </>
-      </EuiCallOut>
+            {showErrorDetails && (
+              <p>
+                <EuiButton color="danger" onClick={showErrorDetails}>
+                  {strings.section.callout.showDetailsButton()}
+                </EuiButton>
+              </p>
+            )}
+          </>
+        }
+      />
     );
   }
 );
