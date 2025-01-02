@@ -9,11 +9,12 @@ import { EuiPanel, EuiSpacer, EuiThemeComputed, useEuiTheme } from '@elastic/eui
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import moment from 'moment';
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { OverviewStatusMetaData } from '../../../../../../../common/runtime_types';
+import { ClientPluginsStart } from '../../../../../../plugin';
 import { useLocationName, useStatusByLocationOverview } from '../../../../hooks';
 import {
   selectErrorPopoverState,
@@ -31,7 +32,6 @@ import { MetricItemBody } from './metric_item/metric_item_body';
 import { MetricItemExtra } from './metric_item/metric_item_extra';
 import { MetricItemIcon } from './metric_item_icon';
 import { FlyoutParamProps } from './types';
-import { ClientPluginsStart } from '../../../../../../plugin';
 
 const METRIC_ITEM_HEIGHT = 160;
 

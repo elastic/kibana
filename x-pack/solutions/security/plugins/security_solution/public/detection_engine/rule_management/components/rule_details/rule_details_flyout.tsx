@@ -40,6 +40,13 @@ const StyledEuiFlyoutBody = styled(EuiFlyoutBody)`
     display: flex;
     flex: 1;
     overflow: hidden;
+    /*
+      Removes "transform: translateZ(0)" from EuiFlyoutBody styles to avoid creating a new stacking context.
+      Fixed elements inside the flyout body are now correctly positioned relative to the viewport.
+      See: https://github.com/elastic/eui/blob/ffd0cbca4d323ad0b1d5a73c252380d93178e5e7/packages/eui/src/global_styling/mixins/_helpers.ts#L122
+      The Chrome bug mentioned in the link above no longer reproduces, so this change is safe.
+    */
+    transform: none;
 
     .euiFlyoutBody__overflowContent {
       flex: 1;

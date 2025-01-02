@@ -27,8 +27,7 @@ import {
   EuiOutsideClickDetector,
   useIsWithinMaxBreakpoint,
 } from '@elastic/eui';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
-
+import styled from '@emotion/styled';
 import { SYNTHETICS_API_URLS } from '../../../../../../common/constants';
 import { SyntheticsSettingsContext } from '../../../contexts';
 import { useRetrieveStepImage } from '../monitor_test_result/use_retrieve_step_image';
@@ -221,7 +220,7 @@ export const JourneyScreenshotDialog = ({
   ) : null;
 };
 
-const ModalBodyStyled = euiStyled(EuiModalBody)`
+const ModalBodyStyled = styled(EuiModalBody)`
   &&& {
     & > div {
       display: flex;
