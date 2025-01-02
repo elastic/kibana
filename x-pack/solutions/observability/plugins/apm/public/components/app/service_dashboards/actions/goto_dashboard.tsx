@@ -8,8 +8,8 @@ import { EuiButtonEmpty } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { ApmPluginStartDeps } from '../../../../plugin';
-import { SavedApmCustomDashboard } from '../../../../../common/custom_dashboards';
+import type { ApmPluginStartDeps } from '../../../../plugin';
+import type { SavedApmCustomDashboard } from '../../../../../common/custom_dashboards';
 
 export function GotoDashboard({ currentDashboard }: { currentDashboard: SavedApmCustomDashboard }) {
   const {
