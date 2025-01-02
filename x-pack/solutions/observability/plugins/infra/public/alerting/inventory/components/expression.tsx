@@ -20,24 +20,17 @@ import {
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { TimeUnitChar } from '@kbn/observability-plugin/common/utils/formatters/duration';
-import {
-  ForLastExpression,
+import type { TimeUnitChar } from '@kbn/observability-plugin/common/utils/formatters/duration';
+import type {
   IErrorObject,
   RuleTypeParamsExpressionProps,
-  ThresholdExpression,
 } from '@kbn/triggers-actions-ui-plugin/public';
+import { ForLastExpression, ThresholdExpression } from '@kbn/triggers-actions-ui-plugin/public';
 import { debounce, omit } from 'lodash';
-import React, {
-  ChangeEvent,
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-  FC,
-  PropsWithChildren,
-} from 'react';
+import type { ChangeEvent, FC, PropsWithChildren } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import useToggle from 'react-use/lib/useToggle';
+import type { InventoryItemType, SnapshotMetricType } from '@kbn/metrics-data-access-plugin/common';
 import {
   findInventoryModel,
   awsEC2SnapshotMetricTypes,
@@ -47,21 +40,14 @@ import {
   containerSnapshotMetricTypes,
   hostSnapshotMetricTypes,
   podSnapshotMetricTypes,
-  InventoryItemType,
-  SnapshotMetricType,
   SnapshotMetricTypeRT,
 } from '@kbn/metrics-data-access-plugin/common';
 import { COMPARATORS } from '@kbn/alerting-comparators';
 import { convertToBuiltInComparators } from '@kbn/observability-plugin/common';
-import {
-  SnapshotCustomMetricInput,
-  SnapshotCustomMetricInputRT,
-} from '../../../../common/http_api';
-import {
-  FilterQuery,
-  InventoryMetricConditions,
-  QUERY_INVALID,
-} from '../../../../common/alerting/metrics';
+import type { SnapshotCustomMetricInput } from '../../../../common/http_api';
+import { SnapshotCustomMetricInputRT } from '../../../../common/http_api';
+import type { FilterQuery, InventoryMetricConditions } from '../../../../common/alerting/metrics';
+import { QUERY_INVALID } from '../../../../common/alerting/metrics';
 import { toMetricOpt } from '../../../../common/snapshot_metric_i18n';
 import {
   useMetricsDataViewContext,

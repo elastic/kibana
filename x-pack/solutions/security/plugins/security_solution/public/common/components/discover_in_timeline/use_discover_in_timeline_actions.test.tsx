@@ -8,7 +8,7 @@ import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
 import { discoverPluginMock } from '@kbn/discover-plugin/public/mocks';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import type { SavedSearch } from '@kbn/saved-search-plugin/common';
-import { renderHook } from '@testing-library/react-hooks';
+import { waitFor, act, renderHook } from '@testing-library/react';
 import { createMockStore, mockGlobalState, TestProviders } from '../../mock';
 import { useDiscoverInTimelineActions } from './use_discover_in_timeline_actions';
 import type { Filter } from '@kbn/es-query';
@@ -20,9 +20,6 @@ import * as timelineActions from '../../../timelines/store/actions';
 import type { ComponentType, FC, PropsWithChildren } from 'react';
 import React from 'react';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import TestRenderer from 'react-test-renderer';
-
-const { act } = TestRenderer;
 
 let mockDiscoverStateContainerRef = {
   current: discoverPluginMock.getDiscoverStateMock({}),
@@ -148,7 +145,7 @@ describe('useDiscoverInTimelineActions', () => {
   });
   describe('getAppStateFromSavedSearch', () => {
     it('should reach out to discover to convert app state from saved search', async () => {
-      const { result, waitFor } = renderTestHook();
+      const { result } = renderTestHook();
       const { appState } = result.current.getAppStateFromSavedSearch(savedSearchMock);
       await waitFor(() => {
         expect(appState).toMatchObject(
@@ -178,7 +175,7 @@ describe('useDiscoverInTimelineActions', () => {
 
   describe('resetDiscoverAppState', () => {
     it('should reset Discover AppState to a default state', async () => {
-      const { result, waitFor } = renderTestHook();
+      const { result } = renderTestHook();
       await result.current.resetDiscoverAppState();
       await waitFor(() => {
         const appState = mockDiscoverStateContainerRef.current.appState.getState();
@@ -186,7 +183,7 @@ describe('useDiscoverInTimelineActions', () => {
       });
     });
     it('should reset Discover time to a default state', async () => {
-      const { result, waitFor } = renderTestHook();
+      const { result } = renderTestHook();
       await result.current.resetDiscoverAppState();
       await waitFor(() => {
         const globalState = mockDiscoverStateContainerRef.current.globalState.get();
@@ -197,6 +194,15 @@ describe('useDiscoverInTimelineActions', () => {
   describe('updateSavedSearch', () => {
     it('should add defaults to the savedSearch before updating saved search', async () => {
       const { result } = renderTestHook();
+
+      await waitFor(() =>
+        expect(result.current).toEqual(
+          expect.objectContaining({
+            updateSavedSearch: expect.any(Function),
+          })
+        )
+      );
+
       await act(async () => {
         await result.current.updateSavedSearch(savedSearchMock, TimelineId.active);
       });
@@ -216,6 +222,7 @@ describe('useDiscoverInTimelineActions', () => {
         })
       );
     });
+
     it('should initialize saved search when it is not set on the timeline model yet', async () => {
       const localMockState: State = {
         ...mockGlobalState,
@@ -235,6 +242,13 @@ describe('useDiscoverInTimelineActions', () => {
 
       const LocalTestProvider = getTestProviderWithCustomState(localMockState);
       const { result } = renderTestHook(LocalTestProvider);
+      await waitFor(() =>
+        expect(result.current).toEqual(
+          expect.objectContaining({
+            updateSavedSearch: expect.any(Function),
+          })
+        )
+      );
       await act(async () => {
         await result.current.updateSavedSearch(savedSearchMock, TimelineId.active);
       });
@@ -269,6 +283,13 @@ describe('useDiscoverInTimelineActions', () => {
 
       const LocalTestProvider = getTestProviderWithCustomState(localMockState);
       const { result } = renderTestHook(LocalTestProvider);
+      await waitFor(() =>
+        expect(result.current).toEqual(
+          expect.objectContaining({
+            updateSavedSearch: expect.any(Function),
+          })
+        )
+      );
       await act(async () => {
         await result.current.updateSavedSearch(changedSavedSearchMock, TimelineId.active);
       });

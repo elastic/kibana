@@ -574,13 +574,7 @@
               "\nType of the plugin, defaults to `standard`."
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/core-base-common",
-                "scope": "common",
-                "docId": "kibKbnCoreBaseCommonPluginApi",
-                "section": "def-common.PluginType",
-                "text": "PluginType"
-              }
+              "PluginType"
             ],
             "path": "packages/core/plugins/core-plugins-server/src/types.ts",
             "deprecated": false,

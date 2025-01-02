@@ -16,6 +16,12 @@ export function registerGetIndexPatternsRoute({
   router.get(
     {
       path: '/api/watcher/indices/index_patterns',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Relies on saved object client for authorization',
+        },
+      },
       validate: false,
     },
     license.guardApiRoute(async ({ core }, request, response) => {
