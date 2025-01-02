@@ -621,6 +621,7 @@ describe('Create case', () => {
               urgency: null,
               category: null,
               subcategory: null,
+              additionalFields: null,
             },
             id: 'servicenow-1',
             name: 'My SN connector',
@@ -821,7 +822,7 @@ describe('Create case', () => {
       });
 
       await user.selectOptions(screen.getByTestId('severitySelect'), '4 - Low');
-      expect(screen.getByTestId('severitySelect')).toHaveValue('4');
+      expect(await screen.findByTestId('severitySelect')).toHaveValue('4');
 
       await user.click(screen.getByTestId('dropdown-connectors'));
       await user.click(screen.getByTestId('dropdown-connector-servicenow-2'));
@@ -839,6 +840,7 @@ describe('Create case', () => {
                 impact: null,
                 severity: null,
                 urgency: null,
+                additionalFields: null,
               },
               id: 'servicenow-2',
               name: 'My SN connector 2',

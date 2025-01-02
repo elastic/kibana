@@ -1681,6 +1681,7 @@ export const ECS_TYPES: EcsFields = {
 };
 
 export const ECS_FIELDS: EcsFields = {
+  '@timestamp': 'Date/time when the event originated.',
   'as.number': 'Unique number allocated to the autonomous system.',
   'as.organization.name': 'Organization name of the autonomous system.',
   'client.address': 'Client network address.',
