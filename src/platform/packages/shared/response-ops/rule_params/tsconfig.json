@@ -15,6 +15,5 @@
   ],
   "kbn_references": [
     "@kbn/config-schema",
-    "@kbn/uptime-plugin"
   ]
 }
