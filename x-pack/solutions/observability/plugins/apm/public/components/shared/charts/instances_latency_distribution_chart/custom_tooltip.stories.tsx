@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { TooltipInfo } from '@elastic/charts';
+import type { TooltipInfo } from '@elastic/charts';
 import React from 'react';
-import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
+import type { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { getDurationFormatter } from '../../../../../common/utils/formatters';
 import { CustomTooltip } from './custom_tooltip';
 

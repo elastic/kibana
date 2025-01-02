@@ -20,8 +20,8 @@ import {
 } from '@kbn/rule-data-utils';
 import { APM_ALERTING_CONSUMERS } from '../../../../common/alerting/config/apm_alerting_feature_ids';
 import { SERVICE_NAME } from '../../../../common/es_fields/apm';
-import { ServiceGroup } from '../../../../common/service_groups';
-import { ApmAlertsClient } from '../../../lib/helpers/get_apm_alerts_client';
+import type { ServiceGroup } from '../../../../common/service_groups';
+import type { ApmAlertsClient } from '../../../lib/helpers/get_apm_alerts_client';
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import { MAX_NUMBER_OF_SERVICES } from './get_services_items';
 import { serviceGroupWithOverflowQuery } from '../../../lib/service_group_query_with_overflow';

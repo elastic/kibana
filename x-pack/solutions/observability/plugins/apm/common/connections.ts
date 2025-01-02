@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { AgentName } from '../typings/es_schemas/ui/fields/agent';
-import { Coordinate } from '../typings/timeseries';
+import type { AgentName } from '../typings/es_schemas/ui/fields/agent';
+import type { Coordinate } from '../typings/timeseries';
 
 export enum NodeType {
   service = 'service',
