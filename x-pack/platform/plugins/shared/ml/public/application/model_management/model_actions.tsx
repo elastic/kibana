@@ -204,7 +204,7 @@ export function useModelActions({
       },
       {
         name: i18n.translate('xpack.ml.inference.modelsList.startModelDeploymentActionLabel', {
-          defaultMessage: 'Deploy',
+          defaultMessage: 'Start deployment',
         }),
         description: i18n.translate(
           'xpack.ml.inference.modelsList.startModelDeploymentActionDescription',
