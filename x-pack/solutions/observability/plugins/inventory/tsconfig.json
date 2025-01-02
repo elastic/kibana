@@ -59,6 +59,7 @@
     "@kbn/observability-utils-browser",
     "@kbn/kibana-utils-plugin",
     "@kbn/dataset-quality-plugin",
-    "@kbn/observability-utils-common"
+    "@kbn/observability-utils-common",
+    "@kbn/observability-utils-server"
   ]
 }
