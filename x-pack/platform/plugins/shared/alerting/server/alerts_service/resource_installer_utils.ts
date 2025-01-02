@@ -13,14 +13,15 @@ interface GetComponentTemplateNameOpts {
   context?: string;
   name?: string;
 }
+
 export const VALID_ALERT_INDEX_PREFIXES = [
   '.ds-.alerts-',
   '.alerts-',
   '.internal.alerts-',
-  '.reindexed-v8-internal.alerts',
+  '.reindexed-v8-internal.alerts-',
   '.preview.alerts-',
   '.internal.preview.alerts-',
-  '.reindexed-v8-internal.preview.alerts',
+  '.reindexed-v8-internal.preview.alerts-',
 ];
 
 export const getComponentTemplateName = ({ context, name }: GetComponentTemplateNameOpts = {}) =>
