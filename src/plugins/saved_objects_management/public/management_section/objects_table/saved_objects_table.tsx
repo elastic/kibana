@@ -50,7 +50,7 @@ import {
 } from './components';
 
 // Saved objects for ML job are not importable/exportable because they are wrappers around ES objects
-const DISABLED_TYPES_FOR_EXPORT = new Set(['ml-job']);
+const DISABLED_TYPES_FOR_EXPORT = new Set(['ml-job', 'trained-model']);
 
 interface ExportAllOption {
   id: string;

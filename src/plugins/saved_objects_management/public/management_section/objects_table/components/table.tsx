@@ -328,6 +328,7 @@ export class Table extends PureComponent<TableProps, TableState> {
             icon: 'kqlSelector',
             onClick: (object) => onShowRelationships(object),
             'data-test-subj': 'savedObjectsTableAction-relationships',
+            available: (object) => !object.type.startsWith('ml'),
           },
           ...actionRegistry.getAll().map((action) => {
             action.setActionContext({ capabilities });
@@ -397,7 +398,7 @@ export class Table extends PureComponent<TableProps, TableState> {
         return (
           <FormattedMessage
             id="savedObjectsManagement.objectsTable.table.hasMlObjects.deleteDisabledTooltip"
-            defaultMessage="Machine learning objects can’t be deleted."
+            defaultMessage="Machine learning objects can only be deleted in the Machine Learning management page."
           />
         );
       }

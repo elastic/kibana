@@ -19,14 +19,19 @@ import { registerGetAllowedTypesRoute } from './get_allowed_types';
 interface RegisterRouteOptions {
   http: HttpServiceSetup;
   managementServicePromise: Promise<ISavedObjectsManagement>;
+  capabilitiesPromise: Promise<Capabilities>;
 }
 
-export function registerRoutes({ http, managementServicePromise }: RegisterRouteOptions) {
+export function registerRoutes({
+  http,
+  managementServicePromise,
+  capabilitiesPromise,
+}: RegisterRouteOptions) {
   const router = http.createRouter();
   registerFindRoute(router, managementServicePromise);
   registerBulkDeleteRoute(router);
   registerBulkGetRoute(router, managementServicePromise);
   registerScrollForCountRoute(router);
   registerRelationshipsRoute(router, managementServicePromise);
-  registerGetAllowedTypesRoute(router);
+  registerGetAllowedTypesRoute(router, capabilitiesPromise);
 }

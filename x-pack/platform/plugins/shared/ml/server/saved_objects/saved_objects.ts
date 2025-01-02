@@ -7,6 +7,7 @@
 
 import type { SavedObjectsServiceSetup } from '@kbn/core/server';
 import rison from '@kbn/rison';
+import { i18n } from '@kbn/i18n';
 import { mlJob, mlTrainedModel, mlModule } from './mappings';
 
 import { migrations } from './migrations';
@@ -40,26 +41,24 @@ export function setupSavedObjects(savedObjects: SavedObjectsServiceSetup) {
     migrations,
     mappings: mlJob,
     management: {
-      importableAndExportable: true,
+      importableAndExportable: false,
       getTitle(obj) {
         return obj.id;
       },
       getInAppUrl(obj) {
         if (obj.id.startsWith(AD_PREFIX)) {
-          const jobId = obj.id.slice(AD_PREFIX.length);
-          return {
-            path: `/app/management/insightsAndAlerting/jobsListLink/${jobId}`,
-            uiCapabilitiesPath: 'ml.canGetJobs',
-          };
+          // @TODO: Temporarily hide link until new management link is ready
+          // const jobId = obj.id.slice(AD_PREFIX.length);
         }
         if (obj.id.startsWith(DFA_PREFIX)) {
           // @TODO: Temporarily hide link until new management link is ready
-          return undefined;
         }
         return undefined;
       },
       icon: 'machineLearningApp',
-      displayName: 'ml',
+      displayName: i18n.translate('xpack.ml.savedObjects.mlJob.displayName', {
+        defaultMessage: 'Machine Learning',
+      }),
     },
   });
   savedObjects.registerType({
