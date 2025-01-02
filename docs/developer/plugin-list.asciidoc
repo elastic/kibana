@@ -22,7 +22,7 @@ NOTE:
 |Description
 
 
-|{kib-repo}blob/{branch}/src/plugins/advanced_settings/README.md[advancedSettings]
+|{kib-repo}blob/{branch}/src/platform/plugins/private/advanced_settings/README.md[advancedSettings]
 |This plugin registers the management settings application
 allowing users to configure their advanced settings, also known
 as uiSettings within the code.
