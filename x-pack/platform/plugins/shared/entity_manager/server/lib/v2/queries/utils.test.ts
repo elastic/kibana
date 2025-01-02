@@ -277,5 +277,48 @@ describe('mergeEntitiesList', () => {
         service_name: 'foo',
       });
     });
+
+    it('ignores null values when merging', () => {
+      const entities = [
+        {
+          'entity.id': 'foo',
+          'entity.type': 'service',
+          'entity.display_name': 'foo',
+          'service.name': 'foo',
+          'host.name': null,
+        },
+        {
+          'entity.id': 'foo',
+          'entity.type': 'service',
+          'entity.display_name': 'foo',
+          'service.name': 'foo',
+          'host.name': 'host-2',
+        },
+        {
+          'entity.id': 'foo',
+          'entity.type': 'service',
+          'entity.display_name': 'foo',
+          'service.name': 'foo',
+          'host.name': null,
+        },
+      ];
+
+      const mergedEntities = mergeEntitiesList({
+        entities,
+        metadataFields: ['host.name'],
+        sources: [
+          { identity_fields: ['service.name'], metadata_fields: [] as string[] },
+          { identity_fields: ['service.name'], metadata_fields: [] as string[] },
+        ] as EntitySourceDefinition[],
+      });
+      expect(mergedEntities.length).toEqual(1);
+      expect(mergedEntities[0]).toEqual({
+        'entity.id': 'foo',
+        'entity.type': 'service',
+        'entity.display_name': 'foo',
+        'service.name': 'foo',
+        'host.name': 'host-2',
+      });
+    });
   });
 });

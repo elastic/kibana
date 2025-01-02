@@ -40,7 +40,7 @@ export function createEmptyLensState(
         query: query || { query: '', language: 'kuery' },
         filters: filters || [],
         internalReferences: [],
-        datasourceStates: { ...(isTextBased ? { text_based: {} } : { form_based: {} }) },
+        datasourceStates: { ...(isTextBased ? { textBased: {} } : { formBased: {} }) },
         visualization: {},
       },
     },

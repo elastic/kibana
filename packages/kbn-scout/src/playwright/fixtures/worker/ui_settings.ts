@@ -12,6 +12,9 @@ import { UiSettingValues } from '@kbn/test/src/kbn_client/kbn_client_ui_settings
 import { ScoutWorkerFixtures } from '../types';
 import { isValidUTCDate, formatTime } from '../../utils';
 
+/**
+ * This fixture provides a way to interact with Kibana UI settings.
+ */
 export const uiSettingsFixture = base.extend<{}, ScoutWorkerFixtures>({
   uiSettings: [
     ({ kbnClient }, use) => {

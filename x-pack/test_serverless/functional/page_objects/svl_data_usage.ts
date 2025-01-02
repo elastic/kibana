@@ -13,7 +13,7 @@ export function SvlDataUsagePageProvider({ getService }: FtrProviderContext) {
 
   return {
     async assertDataUsagePageExists(): Promise<boolean> {
-      return await testSubjects.exists('DataUsagePage');
+      return await testSubjects.exists('data-usage-page');
     },
     async clickDatastreamsDropdown() {
       await testSubjects.click('data-usage-metrics-filter-dataStreams-popoverButton');
