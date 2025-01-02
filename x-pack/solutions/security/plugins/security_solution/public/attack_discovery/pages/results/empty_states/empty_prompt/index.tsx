@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { AssistantAvatar } from '@kbn/elastic-assistant';
 import {
   EuiEmptyPrompt,
   EuiFlexGroup,
@@ -19,6 +18,7 @@ import {
 import { css } from '@emotion/react';
 import React, { useMemo } from 'react';
 
+import { AssistantBeacon } from '@kbn/ai-assistant-icon';
 import { AnimatedCounter } from './animated_counter';
 import { Generate } from '../generate';
 import * as i18n from './translations';
@@ -50,7 +50,7 @@ const EmptyPromptComponent: React.FC<Props> = ({
         gutterSize="none"
       >
         <EuiFlexItem data-test-subj="emptyPromptAvatar" grow={false}>
-          <AssistantAvatar size="m" />
+          <AssistantBeacon size="xl" backgroundColor="emptyShade" />
           <EuiSpacer size="m" />
         </EuiFlexItem>
 

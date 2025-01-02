@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
-import {
+import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type {
   DataViewsPublicPluginSetup,
   DataViewsPublicPluginStart,
 } from '@kbn/data-views-plugin/public';
@@ -13,14 +13,14 @@ import type {
   ObservabilityPublicSetup,
   ObservabilityPublicStart,
 } from '@kbn/observability-plugin/public';
-import {
+import type {
   ObservabilitySharedPluginSetup,
   ObservabilitySharedPluginStart,
 } from '@kbn/observability-shared-plugin/public/plugin';
-import { ChartsPluginSetup, ChartsPluginStart } from '@kbn/charts-plugin/public';
+import type { ChartsPluginSetup, ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
-import {
+import type {
   ObservabilityAIAssistantPublicSetup,
   ObservabilityAIAssistantPublicStart,
 } from '@kbn/observability-ai-assistant-plugin/public';

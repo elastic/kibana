@@ -6,9 +6,9 @@
  */
 
 import type { HttpHandler } from '@kbn/core/public';
-import { PersistedLogViewReference } from '@kbn/logs-shared-plugin/common';
+import type { PersistedLogViewReference } from '@kbn/logs-shared-plugin/common';
 import { decodeOrThrow } from '@kbn/io-ts-utils';
-import { IdFormat } from '../../../../../common/http_api/latest';
+import type { IdFormat } from '../../../../../common/http_api/latest';
 
 import {
   getLogEntryExamplesRequestPayloadRT,

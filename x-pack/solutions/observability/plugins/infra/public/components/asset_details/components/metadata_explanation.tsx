@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiText, EuiLink } from '@elastic/eui';
 import { FormattedDate, FormattedMessage, FormattedTime } from '@kbn/i18n-react';
-import { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
+import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import { Popover } from '../tabs/common/popover';
 import { useMetadataStateContext } from '../hooks/use_metadata_state';

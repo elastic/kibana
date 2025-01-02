@@ -7,6 +7,7 @@
 
 import React, { useCallback, useState } from 'react';
 import { useHistory } from 'react-router-dom';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   EuiButton,
   EuiModal,
@@ -16,7 +17,6 @@ import {
   EuiSwitch,
   EuiModalBody,
   EuiComboBox,
-  EuiComboBoxOptionOption,
   EuiFlexGroup,
   EuiToolTip,
   EuiIcon,
@@ -29,7 +29,7 @@ import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { SERVICE_NAME } from '../../../../../common/es_fields/apm';
 import { fromQuery, toQuery } from '../../../shared/links/url_helpers';
-import { MergedServiceDashboard } from '..';
+import type { MergedServiceDashboard } from '..';
 
 interface Props {
   onClose: () => void;
