@@ -24,7 +24,7 @@ import { ChatConsolidatedItems } from './chat_consolidated_items';
 import { getTimelineItemsfromConversation } from '../utils/get_timeline_items_from_conversation';
 
 export interface ChatTimelineItem
-  extends Pick<Message['message'], 'role' | 'content' | 'function_call'> {
+  extends Pick<Message['message'], 'role' | 'content' | 'function_call' | 'attachments'> {
   id: string;
   title: ReactNode;
   actions: {

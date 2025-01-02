@@ -47,6 +47,16 @@ export const messageRt: t.Type<Message> = t.type({
           arguments: t.string,
         }),
       ]),
+      attachments: t.array(
+        t.type({
+          type: t.literal('image'),
+          title: t.string,
+          source: t.type({
+            data: t.string,
+            mimeType: t.string,
+          }),
+        })
+      ),
     }),
   ]),
 });
@@ -144,6 +154,7 @@ export const starterPromptRt: t.Type<StarterPrompt> = t.intersection([
 ]);
 
 export const screenContextRt: t.Type<ObservabilityAIAssistantScreenContextRequest> = t.partial({
+  instructions: t.string,
   description: t.string,
   data: t.array(
     t.type({

@@ -40,7 +40,7 @@ export async function scheduleDeleteInactiveNodesTaskDefinition(
 
 export function registerDeleteInactiveNodesTaskDefinition(
   logger: Logger,
-  coreStartServices: () => Promise<[CoreStart, TaskManagerStartContract, unknown]>,
+  coreStartServices: () => Promise<[CoreStart, unknown, TaskManagerStartContract]>,
   taskTypeDictionary: TaskTypeDictionary
 ) {
   taskTypeDictionary.registerTaskDefinitions({
@@ -53,7 +53,7 @@ export function registerDeleteInactiveNodesTaskDefinition(
 
 export function taskRunner(
   logger: Logger,
-  coreStartServices: () => Promise<[CoreStart, TaskManagerStartContract, unknown]>
+  coreStartServices: () => Promise<[CoreStart, unknown, TaskManagerStartContract]>
 ) {
   return () => {
     return {
