@@ -1585,7 +1585,7 @@
     "@types/ejs": "^3.0.6",
     "@types/enzyme": "^3.10.12",
     "@types/eslint": "^8.44.2",
-    "@types/express": "^4.17.21",
+    "@types/express": "^5.0.0",
     "@types/extract-zip": "^1.6.2",
     "@types/fetch-mock": "^7.3.1",
     "@types/file-saver": "^2.0.0",
