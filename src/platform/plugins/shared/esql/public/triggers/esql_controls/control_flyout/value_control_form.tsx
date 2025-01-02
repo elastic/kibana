@@ -102,9 +102,10 @@ export function ValueControlForm({
   }, [variableType, initialState, valuesField]);
 
   const [controlFlyoutType, setControlFlyoutType] = useState<EsqlControlType>(
-    initialState?.controlType ?? variableType === ESQLVariableType.TIME_LITERAL
-      ? EsqlControlType.STATIC_VALUES
-      : EsqlControlType.VALUES_FROM_QUERY
+    initialState?.controlType ??
+      (variableType === ESQLVariableType.TIME_LITERAL
+        ? EsqlControlType.STATIC_VALUES
+        : EsqlControlType.VALUES_FROM_QUERY)
   );
 
   const [availableValuesOptions, setAvailableValuesOptions] = useState<EuiComboBoxOptionOption[]>(
