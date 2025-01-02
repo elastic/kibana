@@ -2557,16 +2557,56 @@
         "react-hook-form"
       ],
       "reviewers": [
-        "team:security-asset-management",
-        "team:uptime"
+        "team:obs-ux-management-team"
       ],
       "matchBaseBranches": [
         "main"
       ],
       "labels": [
         "release_note:skip",
-        "backport:skip",
-        "ci:all-cypress-suites"
+        "backport:all-open",
+        "ci:all-cypress-suites",
+        "Team:obs-ux-management"
+      ],
+      "minimumReleaseAge": "7 days",
+      "enabled": true
+    },
+    {
+      "groupName": "@faker-js/faker",
+      "matchDepNames": [
+        "@faker-js/faker"
+      ],
+      "reviewers": [
+        "team:obs-ux-management-team"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "release_note:skip",
+        "backport:all-open",
+        "ci:all-cypress-suites",
+        "Team:obs-ux-management"
+      ],
+      "minimumReleaseAge": "7 days",
+      "enabled": true
+    },
+    {
+      "groupName": "@elastic/synthetics",
+      "matchDepNames": [
+        "@elastic/synthetics"
+      ],
+      "reviewers": [
+        "team:obs-ux-management-team"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "release_note:skip",
+        "backport:all-open",
+        "ci:all-cypress-suites",
+        "Team:obs-ux-management"
       ],
       "minimumReleaseAge": "7 days",
       "enabled": true
@@ -2609,7 +2649,101 @@
       ],
       "labels": [
         "release_note:skip",
-        "backport:skip"
+        "backport:all-open"
+      ],
+      "minimumReleaseAge": "7 days",
+      "enabled": true
+    },
+    {
+      "groupName": "Cytoscape",
+      "matchDepNames": [
+        "@types/cytoscape",
+        "cytoscape",
+        "cytoscape-dagre"
+      ],
+      "reviewers": [
+        "team:obs-ux-infra_services-team"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "release_note:skip",
+        "backport:all-open"
+      ],
+      "minimumReleaseAge": "7 days",
+      "enabled": true
+    },
+    {
+      "groupName": "fnv-plus",
+      "matchDepNames": [
+        "fnv-plus",
+        "@types/fnv-plus"
+      ],
+      "reviewers": [
+        "team:obs-ux-infra_services-team"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "release_note:skip",
+        "backport:all-open"
+      ],
+      "minimumReleaseAge": "7 days",
+      "enabled": true
+    },
+    {
+      "groupName": "react-syntax-highlighter",
+      "matchDepNames": [
+        "react-syntax-highlighter",
+        "@types/react-syntax-highlighter"
+      ],
+      "reviewers": [
+        "team:obs-ux-infra_services-team"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "release_note:skip",
+        "backport:all-open"
+      ],
+      "minimumReleaseAge": "7 days",
+      "enabled": true
+    },
+    {
+      "groupName": "native-hdr-histogram",
+      "matchDepNames": [
+        "native-hdr-histogram"
+      ],
+      "reviewers": [
+        "team:obs-ux-infra_services-team"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "release_note:skip",
+        "backport:all-open"
+      ],
+      "minimumReleaseAge": "7 days",
+      "enabled": true
+    },
+    {
+      "groupName": "native-hdr-histogram",
+      "matchDepNames": [
+        "native-hdr-histogram"
+      ],
+      "reviewers": [
+        "team:obs-ux-infra_services-team"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "release_note:skip",
+        "backport:all-open"
       ],
       "minimumReleaseAge": "7 days",
       "enabled": true
@@ -2667,7 +2801,8 @@
       ],
       "labels": [
         "Team:Obs UX Logs",
-        "release_note:skip"
+        "release_note:skip",
+        "backport:all-open"
       ],
       "minimumReleaseAge": "7 days",
       "enabled": true
@@ -2850,6 +2985,7 @@
     {
       "groupName": "Serve swagger docs",
       "matchDepNames": [
+        "@types/express",
         "express",
         "swagger-jsdoc",
         "swagger-ui-express"
@@ -2862,7 +2998,8 @@
       ],
       "labels": [
         "release_note:skip",
-        "team:obs-entities"
+        "team:obs-entities",
+        "backport:all-open"
       ],
       "enabled": true
     },
