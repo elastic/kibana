@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { waitFor } from '@testing-library/react';
+import { act, waitFor } from '@testing-library/react';
 import { timefilterServiceMock } from '@kbn/data-plugin/public/query/timefilter/timefilter_service.mock';
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 
@@ -92,11 +92,13 @@ describe('ObservabilityAlertSearchBar', () => {
     const mockedFrom = '2022-11-15T09:38:13.604Z';
     const mockedTo = '2022-11-15T09:53:13.604Z';
 
-    renderComponent({
-      onEsQueryChange: mockedOnEsQueryChange,
-      rangeFrom: mockedFrom,
-      rangeTo: mockedTo,
-      status: 'active',
+    await act(async () => {
+      renderComponent({
+        onEsQueryChange: mockedOnEsQueryChange,
+        rangeFrom: mockedFrom,
+        rangeTo: mockedTo,
+        status: 'active',
+      });
     });
 
     expect(mockedOnEsQueryChange).toHaveBeenCalledWith({
@@ -136,12 +138,14 @@ describe('ObservabilityAlertSearchBar', () => {
       },
     ];
 
-    renderComponent({
-      onEsQueryChange: mockedOnEsQueryChange,
-      rangeFrom: mockedFrom,
-      rangeTo: mockedTo,
-      defaultSearchQueries,
-      status: 'all',
+    await act(async () => {
+      renderComponent({
+        onEsQueryChange: mockedOnEsQueryChange,
+        rangeFrom: mockedFrom,
+        rangeTo: mockedTo,
+        defaultSearchQueries,
+        status: 'all',
+      });
     });
 
     const esQueryChangeParams = {
