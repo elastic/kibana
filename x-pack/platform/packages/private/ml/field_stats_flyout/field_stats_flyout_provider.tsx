@@ -12,11 +12,9 @@ import type { FieldStatsServices } from '@kbn/unified-field-list/src/components/
 import type { TimeRange as TimeRangeMs } from '@kbn/ml-date-picker';
 import type { FieldStatsProps } from '@kbn/unified-field-list/src/components/field_stats';
 import { useEffect } from 'react';
-import { getProcessedFields } from '@kbn/ml-data-grid';
 import { stringHash } from '@kbn/ml-string-hash';
-import { lastValueFrom } from 'rxjs';
 import { useRef } from 'react';
-import { getMergedSampleDocsForPopulatedFieldsQuery } from './populated_fields/get_merged_populated_fields_query';
+import { getRangeFilter } from './populated_fields/get_range_filter';
 import { FieldStatsFlyout } from './field_stats_flyout';
 import { MLFieldStatsFlyoutContext } from './use_field_stats_flyout_context';
 import { PopulatedFieldsCacheManager } from './populated_fields/populated_fields_cache_manager';
@@ -68,7 +66,6 @@ export const FieldStatsFlyoutProvider: FC<FieldStatsFlyoutProviderProps> = (prop
     disablePopulatedFields = false,
     children,
   } = props;
-  const { search } = fieldStatsServices.data;
   const [isFieldStatsFlyoutVisible, setFieldStatsIsFlyoutVisible] = useState(false);
   const [fieldName, setFieldName] = useState<string | undefined>();
   const [fieldValue, setFieldValue] = useState<string | number | undefined>();
@@ -92,40 +89,19 @@ export const FieldStatsFlyoutProvider: FC<FieldStatsFlyoutProviderProps> = (prop
         abortController.current = new AbortController();
       }
 
-      const queryAndRunTimeMappings = getMergedSampleDocsForPopulatedFieldsQuery({
-        searchQuery: dslQuery,
-        runtimeFields: dataView.getRuntimeMappings(),
-        datetimeField: dataView.getTimeField()?.name,
-        timeRange: timeRangeMs,
-      });
       const indexPattern = dataView.getIndexPattern();
-      const esSearchRequestParams = {
-        index: indexPattern,
-        body: {
-          fields: ['*'],
-          _source: false,
-          ...queryAndRunTimeMappings,
-          size: 500,
-        },
-      };
-      const cacheKey = stringHash(JSON.stringify(esSearchRequestParams)).toString();
+      const indexFilter = getRangeFilter(dataView.getTimeField()?.name, timeRangeMs);
+      const cacheKey = stringHash(JSON.stringify(indexFilter)).toString();
 
-      const fetchSampleDocuments = async function () {
+      const fetchPopulatedFields = async function () {
         try {
-          const resp = await lastValueFrom(
-            search.search(
-              {
-                params: esSearchRequestParams,
-              },
-              { abortSignal: abortController.current.signal }
-            )
-          );
+          const nonEmptyFields = await fieldStatsServices.dataViews.getFieldsForWildcard({
+            pattern: indexPattern,
+            includeEmptyFields: false,
+            indexFilter: getRangeFilter(dataView.getTimeField()?.name, timeRangeMs),
+          });
 
-          const docs = resp.rawResponse.hits.hits.map((d) => getProcessedFields(d.fields ?? {}));
-
-          // Get all field names for each returned doc and flatten it
-          // to a list of unique field names used across all docs.
-          const fieldsWithData = new Set(docs.map(Object.keys).flat(1));
+          const fieldsWithData = new Set([...nonEmptyFields.map((field) => field.name)]);
 
           manager.set(cacheKey, fieldsWithData);
           if (!unmounted) {
@@ -135,8 +111,7 @@ export const FieldStatsFlyoutProvider: FC<FieldStatsFlyoutProviderProps> = (prop
           if (e.name !== 'AbortError') {
             // eslint-disable-next-line no-console
             console.error(
-              `An error occurred fetching sample documents to determine populated field stats.
-          \nQuery:\n${JSON.stringify(esSearchRequestParams)}
+              `An error occurred fetching field caps documents to determine populated field stats.
           \nError:${e}`
             );
           }
@@ -147,7 +122,7 @@ export const FieldStatsFlyoutProvider: FC<FieldStatsFlyoutProviderProps> = (prop
       if (cachedResult) {
         return cachedResult;
       } else {
-        fetchSampleDocuments();
+        fetchPopulatedFields();
       }
 
       return () => {
