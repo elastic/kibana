@@ -8,12 +8,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { IEmbeddable } from '@kbn/embeddable-plugin/public';
+import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { UiActionsPresentableGrouping as PresentableGrouping } from '@kbn/ui-actions-plugin/public';
 
-export const dynamicActionGrouping: PresentableGrouping<{
-  embeddable?: IEmbeddable;
-}> = [
+export const dynamicActionGrouping: PresentableGrouping<EmbeddableApiContext> = [
   {
     id: 'dynamicActions',
     getDisplayName: () =>
