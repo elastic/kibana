@@ -20,4 +20,5 @@ export const FLEET_API_PRIVILEGES = {
     READ: `${PLUGIN_ID}-settings-read`,
     ALL: `${PLUGIN_ID}-settings-all`,
   },
+  SETUP: `fleet-setup`,
 };
