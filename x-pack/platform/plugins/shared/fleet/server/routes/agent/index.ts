@@ -599,7 +599,6 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
       },
       deleteAgentUploadFileHandler
     );
-
   // Get agent status for policy
   router.versioned
     .get({

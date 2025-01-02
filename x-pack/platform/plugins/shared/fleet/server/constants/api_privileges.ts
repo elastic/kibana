@@ -10,6 +10,14 @@ import { PLUGIN_ID } from '../../common';
 export const FLEET_API_PRIVILEGES = {
   AGENTS: {
     READ: `${PLUGIN_ID}-agents-read`,
-    ALL: `${PLUGIN_ID}-agents-read`,
+    ALL: `${PLUGIN_ID}-agents-all`,
+  },
+  AGENT_POLICIES: {
+    READ: `${PLUGIN_ID}-agent-policies-read`,
+    ALL: `${PLUGIN_ID}-agent-policies-all`,
+  },
+  SETTINGS: {
+    READ: `${PLUGIN_ID}-settings-read`,
+    ALL: `${PLUGIN_ID}-settings-all`,
   },
 };
