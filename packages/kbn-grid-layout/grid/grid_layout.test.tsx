@@ -32,6 +32,7 @@ describe('GridLayout', () => {
         rerender(<GridLayout {...defaultProps} {...overrides} />),
     };
   };
+
   const getAllThePanelIds = () =>
     screen
       .getAllByRole('button', { name: /panelId:panel/i })
@@ -40,9 +41,11 @@ describe('GridLayout', () => {
   const startDragging = (handle: HTMLElement, options = { clientX: 0, clientY: 0 }) => {
     fireEvent.mouseDown(handle, options);
   };
+
   const moveTo = (options = { clientX: 256, clientY: 128 }) => {
     fireEvent.mouseMove(document, options);
   };
+
   const drop = (handle: HTMLElement) => {
     fireEvent.mouseUp(handle);
   };
@@ -123,6 +126,7 @@ describe('GridLayout', () => {
         'panel10',
       ]);
     });
+
     it('after removing a panel', async () => {
       const { rerender } = renderGridLayout();
       const sampleLayoutWithoutPanel1 = cloneDeep(getSampleLayout());
@@ -141,6 +145,7 @@ describe('GridLayout', () => {
         'panel10',
       ]);
     });
+
     it('after replacing a panel id', async () => {
       const { rerender } = renderGridLayout();
       const modifiedLayout = cloneDeep(getSampleLayout());
