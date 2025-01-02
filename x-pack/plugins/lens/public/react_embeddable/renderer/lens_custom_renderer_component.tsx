@@ -60,6 +60,7 @@ export function LensRenderer({
   timeRange,
   disabledActions,
   searchSessionId,
+  forceDSL,
   hidePanelTitles,
   lastReloadRequestTime,
   ...props
@@ -157,6 +158,7 @@ export function LensRenderer({
           ...initialStateRef.current,
           attributes: props.attributes,
         }),
+        forceDSL,
         hidePanelTitle: hidePanelTitles$,
         reload$, // trigger a reload (replacement for deprepcated searchSessionId)
       })}
