@@ -521,7 +521,7 @@ export const SessionView = ({
 
           <EuiFlexItem grow={false}>
             {openDetailsInExpandableFlyout ? (
-              <EuiButtonIcon onClick={toggleDetailPanelInFlyout} iconType="expand" />
+              <EuiButtonIcon onClick={toggleDetailPanelInFlyout} iconType="list" />
             ) : (
               <EuiButton
                 onClick={toggleDetailPanel}
