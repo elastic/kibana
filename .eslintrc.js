@@ -296,7 +296,7 @@ module.exports = {
       },
     },
     {
-      files: ['x-pack/plugins/canvas/**/*.{js,mjs,ts,tsx}'],
+      files: ['x-pack/platform/plugins/private/canvas/**/*.{js,mjs,ts,tsx}'],
       rules: {
         'jsx-a11y/click-events-have-key-events': 'off',
       },
@@ -364,7 +364,7 @@ module.exports = {
     {
       files: [
         'packages/kbn-eslint-config/**/*.{js,mjs,ts,tsx}',
-        'packages/kbn-datemath/**/*.{js,mjs,ts,tsx}',
+        'src/platform/packages/shared/kbn-datemath/**/*.{js,mjs,ts,tsx}',
       ],
       rules: {
         '@kbn/eslint/require-license-header': [
@@ -633,7 +633,7 @@ module.exports = {
         '**/*.test.js',
         'x-pack/test/apm_api_integration/**/*.ts',
         'x-pack/test/functional/apps/**/*.js',
-        'x-pack/plugins/observability_solution/apm/**/*.js',
+        'x-pack/solutions/observability/plugins/apm/**/*.js',
         'test/*/config.ts',
         'test/*/config_open.ts',
         'test/*/*.config.ts',
@@ -764,7 +764,6 @@ module.exports = {
         ],
       },
     },
-
     /**
      * Jest specific rules
      */
@@ -914,11 +913,11 @@ module.exports = {
      */
     {
       files: [
-        'x-pack/plugins/observability_solution/apm/**/*.{js,mjs,ts,tsx}',
+        'x-pack/solutions/observability/plugins/apm/**/*.{js,mjs,ts,tsx}',
         'x-pack/solutions/observability/plugins/observability/**/*.{js,mjs,ts,tsx}',
         'x-pack/solutions/observability/plugins/exploratory_view/**/*.{js,mjs,ts,tsx}',
         'x-pack/solutions/observability/plugins/ux/**/*.{js,mjs,ts,tsx}',
-        'x-pack/plugins/observability_solution/slo/**/*.{js,mjs,ts,tsx}',
+        'x-pack/solutions/observability/plugins/slo/**/*.{js,mjs,ts,tsx}',
         'x-pack/packages/observability/**/*.{js,mjs,ts,tsx}',
       ],
       rules: {
@@ -935,10 +934,10 @@ module.exports = {
     },
     {
       files: [
-        'x-pack/plugins/observability_solution/apm/**/*.stories.*',
+        'x-pack/solutions/observability/plugins/apm/**/*.stories.*',
         'x-pack/solutions/observability/plugins/observability/**/*.stories.*',
         'x-pack/solutions/observability/plugins/exploratory_view/**/*.stories.*',
-        'x-pack/plugins/observability_solution/slo/**/*.stories.*',
+        'x-pack/solutions/observability/plugins/slo/**/*.stories.*',
         'x-pack/packages/observability/**/*.{js,mjs,ts,tsx}',
       ],
       rules: {
@@ -990,7 +989,7 @@ module.exports = {
         'x-pack/plugins/observability_solution/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
         'x-pack/plugins/{streams,streams_app}/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
         'src/plugins/ai_assistant_management/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
-        'x-pack/packages/observability/logs_overview/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
+        'x-pack/platform/packages/shared/observability/logs_overview/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
       ],
       rules: {
         '@kbn/i18n/strings_should_be_translated_with_i18n': 'warn',
@@ -1000,7 +999,7 @@ module.exports = {
     },
     {
       // require explicit return types in route handlers for performance reasons
-      files: ['x-pack/plugins/observability_solution/apm/server/**/route.ts'],
+      files: ['x-pack/solutions/observability/plugins/apm/server/**/route.ts'],
       rules: {
         '@typescript-eslint/explicit-function-return-type': [
           'error',
@@ -1030,7 +1029,7 @@ module.exports = {
      * Fleet overrides
      */
     {
-      files: ['x-pack/plugins/fleet/**/*.{js,mjs,ts,tsx}'],
+      files: ['x-pack/platform/plugins/shared/fleet/**/*.{js,mjs,ts,tsx}'],
       plugins: ['testing-library'],
       rules: {
         'testing-library/await-async-utils': 'error',
@@ -1103,16 +1102,16 @@ module.exports = {
         'x-pack/platform/packages/shared/kbn-elastic-assistant/**/*.{js,mjs,ts,tsx}',
         'x-pack/platform/packages/shared/kbn-elastic-assistant-common/**/*.{js,mjs,ts,tsx}',
         'x-pack/solutions/security/packages/**/*.{js,mjs,ts,tsx}',
-        'x-pack/plugins/security_solution/public/**/*.{js,mjs,ts,tsx}',
-        'x-pack/plugins/security_solution_ess/public/**/*.{js,mjs,ts,tsx}',
-        'x-pack/plugins/security_solution_serverless/public/**/*.{js,mjs,ts,tsx}',
-        'x-pack/plugins/security_solution/common/**/*.{js,mjs,ts,tsx}',
-        'x-pack/plugins/security_solution_ess/common/**/*.{js,mjs,ts,tsx}',
-        'x-pack/plugins/security_solution_serverless/common/**/*.{js,mjs,ts,tsx}',
+        'x-pack/solutions/security/plugins/security_solution/public/**/*.{js,mjs,ts,tsx}',
+        'x-pack/solutions/security/plugins/security_solution_ess/public/**/*.{js,mjs,ts,tsx}',
+        'x-pack/solutions/security/plugins/security_solution_serverless/public/**/*.{js,mjs,ts,tsx}',
+        'x-pack/solutions/security/plugins/security_solution/common/**/*.{js,mjs,ts,tsx}',
+        'x-pack/solutions/security/plugins/security_solution_ess/common/**/*.{js,mjs,ts,tsx}',
+        'x-pack/solutions/security/plugins/security_solution_serverless/common/**/*.{js,mjs,ts,tsx}',
         'x-pack/solutions/security/plugins/timelines/public/**/*.{js,mjs,ts,tsx}',
         'x-pack/solutions/security/plugins/timelines/common/**/*.{js,mjs,ts,tsx}',
-        'x-pack/plugins/cases/public/**/*.{js,mjs,ts,tsx}',
-        'x-pack/plugins/cases/common/**/*.{js,mjs,ts,tsx}',
+        'x-pack/platform/plugins/shared/cases/public/**/*.{js,mjs,ts,tsx}',
+        'x-pack/platform/plugins/shared/cases/common/**/*.{js,mjs,ts,tsx}',
         'src/platform/packages/shared/kbn-cell-actions/**/*.{js,mjs,ts,tsx}',
       ],
       rules: {
@@ -1141,11 +1140,11 @@ module.exports = {
         'x-pack/platform/packages/shared/kbn-elastic-assistant-common/**/*.{ts,tsx}',
         'x-pack/platform/packages/shared/kbn-langchain/**/*.{ts,tsx}',
         'x-pack/solutions/security/packages/**/*.{ts,tsx}',
-        'x-pack/plugins/security_solution/**/*.{ts,tsx}',
-        'x-pack/plugins/security_solution_ess/**/*.{ts,tsx}',
-        'x-pack/plugins/security_solution_serverless/**/*.{ts,tsx}',
+        'x-pack/solutions/security/plugins/security_solution/**/*.{ts,tsx}',
+        'x-pack/solutions/security/plugins/security_solution_ess/**/*.{ts,tsx}',
+        'x-pack/solutions/security/plugins/security_solution_serverless/**/*.{ts,tsx}',
         'x-pack/solutions/security/plugins/timelines/**/*.{ts,tsx}',
-        'x-pack/plugins/cases/**/*.{ts,tsx}',
+        'x-pack/platform/plugins/shared/cases/**/*.{ts,tsx}',
         'src/platform/packages/shared/kbn-cell-actions/**/*.{js,mjs,ts,tsx}',
       ],
       excludedFiles: [
@@ -1156,11 +1155,11 @@ module.exports = {
         'x-pack/platform/packages/shared/kbn-elastic-assistant-common/**/*.{test,mock,test_helper}.{ts,tsx}',
         'x-pack/platform/packages/shared/kbn-langchain/**/*.{test,mock,test_helper}.{ts,tsx}',
         'x-pack/solutions/security/packages/**/*.{test,mock,test_helper}.{ts,tsx}',
-        'x-pack/plugins/security_solution/**/*.{test,mock,test_helper}.{ts,tsx}',
-        'x-pack/plugins/security_solution_ess/**/*.{test,mock,test_helper}.{ts,tsx}',
-        'x-pack/plugins/security_solution_serverless/**/*.{test,mock,test_helper}.{ts,tsx}',
+        'x-pack/solutions/security/plugins/security_solution/**/*.{test,mock,test_helper}.{ts,tsx}',
+        'x-pack/solutions/security/plugins/security_solution_ess/**/*.{test,mock,test_helper}.{ts,tsx}',
+        'x-pack/solutions/security/plugins/security_solution_serverless/**/*.{test,mock,test_helper}.{ts,tsx}',
         'x-pack/solutions/security/plugins/timelines/**/*.{test,mock,test_helper}.{ts,tsx}',
-        'x-pack/plugins/cases/**/*.{test,mock,test_helper}.{ts,tsx}',
+        'x-pack/platform/plugins/shared/cases/**/*.{test,mock,test_helper}.{ts,tsx}',
         'src/platform/packages/shared/kbn-cell-actions/**/*.{test,mock,test_helper}.{ts,tsx}',
       ],
       rules: {
@@ -1177,11 +1176,11 @@ module.exports = {
         'x-pack/platform/packages/shared/kbn-elastic-assistant-common/**/*.{ts,tsx}',
         'x-pack/platform/packages/shared/kbn-langchain/**/*.{ts,tsx}',
         'x-pack/solutions/security/packages/**/*.{ts,tsx}',
-        'x-pack/plugins/security_solution/**/*.{ts,tsx}',
-        'x-pack/plugins/security_solution_ess/**/*.{ts,tsx}',
-        'x-pack/plugins/security_solution_serverless/**/*.{ts,tsx}',
+        'x-pack/solutions/security/plugins/security_solution/**/*.{ts,tsx}',
+        'x-pack/solutions/security/plugins/security_solution_ess/**/*.{ts,tsx}',
+        'x-pack/solutions/security/plugins/security_solution_serverless/**/*.{ts,tsx}',
         'x-pack/solutions/security/plugins/timelines/**/*.{ts,tsx}',
-        'x-pack/plugins/cases/**/*.{ts,tsx}',
+        'x-pack/platform/plugins/shared/cases/**/*.{ts,tsx}',
         'src/platform/packages/shared/kbn-cell-actions/**/*.{ts,tsx}',
       ],
       rules: {
@@ -1211,11 +1210,11 @@ module.exports = {
         'x-pack/platform/packages/shared/kbn-elastic-assistant-common/**/*.{js,mjs,ts,tsx}',
         'x-pack/platform/packages/shared/kbn-langchain/**/*.{js,mjs,ts,tsx}',
         'x-pack/solutions/security/packages/**/*.{js,mjs,ts,tsx}',
-        'x-pack/plugins/security_solution/**/*.{js,mjs,ts,tsx}',
-        'x-pack/plugins/security_solution_ess/**/*.{js,mjs,ts,tsx}',
-        'x-pack/plugins/security_solution_serverless/**/*.{js,mjs,ts,tsx}',
+        'x-pack/solutions/security/plugins/security_solution/**/*.{js,mjs,ts,tsx}',
+        'x-pack/solutions/security/plugins/security_solution_ess/**/*.{js,mjs,ts,tsx}',
+        'x-pack/solutions/security/plugins/security_solution_serverless/**/*.{js,mjs,ts,tsx}',
         'x-pack/solutions/security/plugins/timelines/**/*.{js,mjs,ts,tsx}',
-        'x-pack/plugins/cases/**/*.{js,mjs,ts,tsx}',
+        'x-pack/platform/plugins/shared/cases/**/*.{js,mjs,ts,tsx}',
         'x-pack/solutions/security/packages/data-stream-adapter/**/*.{js,mjs,ts,tsx}',
         'src/platform/packages/shared/kbn-cell-actions/**/*.{js,mjs,ts,tsx}',
       ],
@@ -1309,11 +1308,11 @@ module.exports = {
       overrides: [
         {
           files: [
-            'x-pack/plugins/cases/**/*.{js,mjs,ts,tsx}',
+            'x-pack/platform/plugins/shared/cases/**/*.{js,mjs,ts,tsx}',
             'x-pack/solutions/security/plugins/ecs_data_quality_dashboard/**/*.{js,mjs,ts,tsx}',
-            'x-pack/plugins/security_solution/**/*.{js,mjs,ts,tsx}',
-            'x-pack/plugins/security_solution_ess/**/*.{js,mjs,ts,tsx}',
-            'x-pack/plugins/security_solution_serverless/**/*.{js,mjs,ts,tsx}',
+            'x-pack/solutions/security/plugins/security_solution/**/*.{js,mjs,ts,tsx}',
+            'x-pack/solutions/security/plugins/security_solution_ess/**/*.{js,mjs,ts,tsx}',
+            'x-pack/solutions/security/plugins/security_solution_serverless/**/*.{js,mjs,ts,tsx}',
             'x-pack/solutions/security/packages/data-stream-adapter/**/*.{js,mjs,ts,tsx}',
             'x-pack/solutions/security/packages/features/**/*.{js,mjs,ts,tsx}',
             'x-pack/solutions/security/packages/navigation/**/*.{js,mjs,ts,tsx}',
@@ -1326,8 +1325,8 @@ module.exports = {
       ],
     },
     {
-      files: ['x-pack/plugins/cases/public/**/*.{js,mjs,ts,tsx}'],
-      excludedFiles: ['x-pack/plugins/cases/**/*.{test,mock,test_helper}.{ts,tsx}'],
+      files: ['x-pack/platform/plugins/shared/cases/public/**/*.{js,mjs,ts,tsx}'],
+      excludedFiles: ['x-pack/platform/plugins/shared/cases/**/*.{test,mock,test_helper}.{ts,tsx}'],
       rules: {
         'react/display-name': ['error', { ignoreTranspilerName: true }],
       },
@@ -1344,8 +1343,8 @@ module.exports = {
     {
       // front end and common typescript and javascript files only
       files: [
-        'x-pack/plugins/lists/public/**/*.{js,mjs,ts,tsx}',
-        'x-pack/plugins/lists/common/**/*.{js,mjs,ts,tsx}',
+        'x-pack/solutions/security/plugins/lists/public/**/*.{js,mjs,ts,tsx}',
+        'x-pack/solutions/security/plugins/lists/common/**/*.{js,mjs,ts,tsx}',
       ],
       rules: {
         'import/no-nodejs-modules': 'error',
@@ -1361,14 +1360,20 @@ module.exports = {
     },
     {
       // typescript for /public and /common
-      files: ['x-pack/plugins/lists/public/*.{ts,tsx}', 'x-pack/plugins/lists/common/*.{ts,tsx}'],
+      files: [
+        'x-pack/solutions/security/plugins/lists/public/*.{ts,tsx}',
+        'x-pack/solutions/security/plugins/lists/common/*.{ts,tsx}',
+      ],
       rules: {
         '@typescript-eslint/no-for-in-array': 'error',
       },
     },
     {
       // typescript for /public and /common
-      files: ['x-pack/plugins/lists/public/*.{ts,tsx}', 'x-pack/plugins/lists/common/*.{ts,tsx}'],
+      files: [
+        'x-pack/solutions/security/plugins/lists/public/*.{ts,tsx}',
+        'x-pack/solutions/security/plugins/lists/common/*.{ts,tsx}',
+      ],
       plugins: ['react'],
       env: {
         jest: true,
@@ -1426,7 +1431,7 @@ module.exports = {
       },
     },
     {
-      files: ['x-pack/plugins/lists/public/**/!(*.test).{js,mjs,ts,tsx}'],
+      files: ['x-pack/solutions/security/plugins/lists/public/**/!(*.test).{js,mjs,ts,tsx}'],
       plugins: ['react-perf'],
       rules: {
         'react-perf/jsx-no-new-object-as-prop': 'error',
@@ -1437,7 +1442,7 @@ module.exports = {
     },
     {
       // typescript and javascript for front and back
-      files: ['x-pack/plugins/lists/**/*.{js,mjs,ts,tsx}'],
+      files: ['x-pack/solutions/security/plugins/lists/**/*.{js,mjs,ts,tsx}'],
       plugins: ['eslint-plugin-node'],
       env: {
         jest: true,
@@ -1572,7 +1577,10 @@ module.exports = {
      * Discover overrides
      */
     {
-      files: ['src/plugins/discover/**/*.{ts,tsx}', 'src/plugins/saved_search/**/*.{ts,tsx}'],
+      files: [
+        'src/platform/plugins/shared/discover/**/*.{ts,tsx}',
+        'src/platform/plugins/shared/saved_search/**/*.{ts,tsx}',
+      ],
       rules: {
         '@typescript-eslint/no-explicit-any': 'error',
         '@typescript-eslint/ban-ts-comment': [
@@ -1591,7 +1599,7 @@ module.exports = {
      */
     {
       // All files
-      files: ['x-pack/plugins/enterprise_search/**/*.{ts,tsx}'],
+      files: ['x-pack/solutions/search/plugins/enterprise_search/**/*.{ts,tsx}'],
       rules: {
         'import/order': [
           'error',
@@ -1643,7 +1651,7 @@ module.exports = {
      * Allows snake_case variables in the server, because that's how we return API properties
      */
     {
-      files: ['x-pack/plugins/enterprise_search/server/**/*.{ts,tsx}'],
+      files: ['x-pack/solutions/search/plugins/enterprise_search/server/**/*.{ts,tsx}'],
       rules: {
         '@typescript-eslint/naming-convention': [
           'error',
@@ -1665,8 +1673,10 @@ module.exports = {
     },
     {
       // Source files only - allow `any` in test/mock files
-      files: ['x-pack/plugins/enterprise_search/**/*.{ts,tsx}'],
-      excludedFiles: ['x-pack/plugins/enterprise_search/**/*.{test,mock,test_helper}.{ts,tsx}'],
+      files: ['x-pack/solutions/search/plugins/enterprise_search/**/*.{ts,tsx}'],
+      excludedFiles: [
+        'x-pack/solutions/search/plugins/enterprise_search/**/*.{test,mock,test_helper}.{ts,tsx}',
+      ],
       rules: {
         '@typescript-eslint/no-explicit-any': 'error',
       },
@@ -1677,7 +1687,10 @@ module.exports = {
      */
     {
       // All files
-      files: ['x-pack/plugins/serverless_search/**/*.{ts,tsx}', 'packages/kbn-search-*'],
+      files: [
+        'x-pack/solutions/search/plugins/serverless_search/**/*.{ts,tsx}',
+        'packages/kbn-search-*',
+      ],
       rules: {
         '@kbn/telemetry/event_generating_elements_should_be_instrumented': 'error',
       },
@@ -1687,7 +1700,7 @@ module.exports = {
      * Canvas overrides
      */
     {
-      files: ['x-pack/plugins/canvas/**/*.js'],
+      files: ['x-pack/platform/plugins/private/canvas/**/*.js'],
       rules: {
         radix: 'error',
 
@@ -1731,12 +1744,12 @@ module.exports = {
     },
     {
       files: [
-        'x-pack/plugins/canvas/gulpfile.js',
-        'x-pack/plugins/canvas/scripts/*.js',
-        'x-pack/plugins/canvas/tasks/*.js',
-        'x-pack/plugins/canvas/tasks/**/*.js',
-        'x-pack/plugins/canvas/__tests__/**/*.js',
-        'x-pack/plugins/canvas/**/{__tests__,__test__,__jest__,__fixtures__,__mocks__}/**/*.js',
+        'x-pack/platform/plugins/private/canvas/gulpfile.js',
+        'x-pack/platform/plugins/private/canvas/scripts/*.js',
+        'x-pack/platform/plugins/private/canvas/tasks/*.js',
+        'x-pack/platform/plugins/private/canvas/tasks/**/*.js',
+        'x-pack/platform/plugins/private/canvas/__tests__/**/*.js',
+        'x-pack/platform/plugins/private/canvas/**/{__tests__,__test__,__jest__,__fixtures__,__mocks__}/**/*.js',
       ],
       rules: {
         'import/no-extraneous-dependencies': [
@@ -1750,17 +1763,17 @@ module.exports = {
       },
     },
     {
-      files: ['x-pack/plugins/canvas/canvas_plugin_src/**/*.js'],
+      files: ['x-pack/platform/plugins/private/canvas/canvas_plugin_src/**/*.js'],
       globals: { canvas: true, $: true },
     },
     {
-      files: ['x-pack/plugins/canvas/public/**/*.js'],
+      files: ['x-pack/platform/plugins/private/canvas/public/**/*.js'],
       env: {
         browser: true,
       },
     },
     {
-      files: ['packages/kbn-flot-charts/lib/**/*.js'],
+      files: ['src/platform/packages/shared/kbn-flot-charts/lib/**/*.js'],
       env: {
         jquery: true,
       },
@@ -1956,7 +1969,7 @@ module.exports = {
      * Lints unnecessary backticks - @see https://github.com/prettier/eslint-config-prettier/blob/main/README.md#forbid-unnecessary-backticks
      */
     {
-      files: ['x-pack/plugins/enterprise_search/**/*.{ts,tsx}'],
+      files: ['x-pack/solutions/search/plugins/enterprise_search/**/*.{ts,tsx}'],
       rules: {
         quotes: ['error', 'single', { avoidEscape: true, allowTemplateLiterals: false }],
       },
@@ -1966,7 +1979,7 @@ module.exports = {
      * Cloud Security Team overrides
      */
     {
-      files: ['x-pack/plugins/cloud_security_posture/**/*.{js,mjs,ts,tsx}'],
+      files: ['x-pack/solutions/security/plugins/cloud_security_posture/**/*.{js,mjs,ts,tsx}'],
       plugins: ['testing-library'],
       rules: {
         'testing-library/await-async-utils': 'error',
@@ -1998,9 +2011,6 @@ module.exports = {
     },
     {
       files: [
-        // logsShared depends on o11y/private plugins, but platform plugins depend on it
-        'x-pack/plugins/observability_solution/logs_shared/**',
-
         // TODO @kibana/operations
         'scripts/create_observability_rules.js', // is importing "@kbn/observability-alerting-test-data" (observability/private)
         'src/cli_setup/**', // is importing "@kbn/interactive-setup-plugin" (platform/private)
