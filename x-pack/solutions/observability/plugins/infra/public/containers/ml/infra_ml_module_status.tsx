@@ -7,16 +7,11 @@
 
 import { useReducer } from 'react';
 
-import {
-  JobStatus,
-  getDatafeedId,
-  getJobId,
-  isJobStatusWithResults,
-  SetupStatus,
-} from '../../../common/infra_ml';
-import { FetchJobStatusResponsePayload, JobSummary } from './api/ml_get_jobs_summary_api';
-import { SetupMlModuleResponsePayload } from './api/ml_setup_module_api';
-import { MandatoryProperty } from '../../../common/utility_types';
+import type { JobStatus, SetupStatus } from '../../../common/infra_ml';
+import { getDatafeedId, getJobId, isJobStatusWithResults } from '../../../common/infra_ml';
+import type { FetchJobStatusResponsePayload, JobSummary } from './api/ml_get_jobs_summary_api';
+import type { SetupMlModuleResponsePayload } from './api/ml_setup_module_api';
+import type { MandatoryProperty } from '../../../common/utility_types';
 
 interface StatusReducerState<JobType extends string> {
   jobStatus: Record<JobType, JobStatus>;

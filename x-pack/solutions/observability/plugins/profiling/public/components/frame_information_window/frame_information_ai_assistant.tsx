@@ -9,7 +9,7 @@ import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { Message } from '@kbn/observability-ai-assistant-plugin/public';
 import { EuiFlexItem } from '@elastic/eui';
-import { Frame } from '.';
+import type { Frame } from '.';
 import { useProfilingDependencies } from '../contexts/profiling_dependencies/use_profiling_dependencies';
 
 interface Props {

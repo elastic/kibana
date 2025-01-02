@@ -9,7 +9,7 @@ import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { getSpanLinksDetails } from './get_span_links_details';
 import { getLinkedChildrenOfSpan } from './get_linked_children';
 import { kueryRt, rangeRt } from '../default_api_types';
-import { SpanLinkDetails } from '../../../common/span_links';
+import type { SpanLinkDetails } from '../../../common/span_links';
 import { processorEventRt } from '../../../common/processor_event';
 import { getLinkedParentsOfSpan } from './get_linked_parents';
 import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
