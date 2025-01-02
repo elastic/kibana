@@ -6,7 +6,7 @@
  */
 import { useAbortableAsync } from '@kbn/observability-utils-browser/hooks/use_abortable_async';
 import { i18n } from '@kbn/i18n';
-import { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
+import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
 import { useKibana } from './use_kibana';
 
 const getDetailsFromErrorResponse = (error: IHttpFetchError<ResponseErrorBody>) =>

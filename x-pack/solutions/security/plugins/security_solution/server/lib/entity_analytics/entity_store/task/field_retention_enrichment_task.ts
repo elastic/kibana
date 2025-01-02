@@ -13,6 +13,7 @@ import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
+import { getAvailableEntityTypes } from '../../../../../common/entity_analytics/entity_store/constants';
 import {
   EngineComponentResourceEnum,
   type EntityType,

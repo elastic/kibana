@@ -21,8 +21,8 @@ import { environmentQuery } from '../../../../common/utils/environment_query';
 import { getMetricsDateHistogramParams } from '../../../lib/helpers/metrics';
 import { MAX_KPIS } from './constants';
 import { getVizColorForIndex } from '../../../../common/viz_colors';
-import { APMConfig } from '../../..';
-import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
+import type { APMConfig } from '../../..';
+import type { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 
 export interface TransactionBreakdownResponse {
   timeseries: Array<{

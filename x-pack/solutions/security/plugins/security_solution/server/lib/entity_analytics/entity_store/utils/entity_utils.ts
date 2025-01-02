@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import type { DataViewsService, DataView } from '@kbn/data-views-plugin/common';
 import {
   ENTITY_LATEST,
   ENTITY_SCHEMA_VERSION_V1,
   entitiesIndexPattern,
 } from '@kbn/entities-schema';
+import type { DataViewsService, DataView } from '@kbn/data-views-plugin/common';
+import { IDENTITY_FIELD_MAP } from '../../../../../common/entity_analytics/entity_store/constants';
 import type { AppClient } from '../../../../types';
 import { getRiskScoreLatestIndex } from '../../../../../common/entity_analytics/risk_engine';
 import { getAssetCriticalityIndex } from '../../../../../common/entity_analytics/asset_criticality';

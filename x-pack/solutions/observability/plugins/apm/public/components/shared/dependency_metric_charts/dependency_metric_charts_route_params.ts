@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { TypeOf } from '@kbn/typed-react-router-config';
-import { ApmRoutes } from '../../routing/apm_route_config';
+import type { TypeOf } from '@kbn/typed-react-router-config';
+import type { ApmRoutes } from '../../routing/apm_route_config';
 
 export type DependencyMetricChartsRouteParams = Pick<
   { spanName?: string } & TypeOf<

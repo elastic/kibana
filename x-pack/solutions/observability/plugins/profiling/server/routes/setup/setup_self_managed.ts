@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { ProfilingSetupOptions, SetupState } from '@kbn/profiling-data-access-plugin/common/setup';
+import type {
+  ProfilingSetupOptions,
+  SetupState,
+} from '@kbn/profiling-data-access-plugin/common/setup';
 import { enableResourceManagement, setMaximumBuckets } from '../../lib/setup/cluster_settings';
 
 export async function setupSelfManaged({
