@@ -18,10 +18,28 @@ const configSchema = schema.object({
       options: { defaultValue: schema.contextRef('serverless') },
     }),
   }),
+  /**
+   * For internal use. A list of string values (comma delimited) that will enable experimental
+   * type of functionality that is not yet released. Valid values for this settings need to
+   * be defined in:
+   * `x-pack/solutions/security/plugins/cloud_security_posture/common/experimental_features.ts`
+   * under the `allowedExperimentalValues` object
+   *
+   * @example
+   * xpack.cloudSecurityPosture.enableExperimental:
+   *   - newFeatureA
+   *   - newFeatureB
+   */
+  enableExperimental: schema.arrayOf(schema.string(), {
+    defaultValue: () => [],
+  }),
 });
 
 export type CloudSecurityPostureConfig = TypeOf<typeof configSchema>;
 
 export const config: PluginConfigDescriptor<CloudSecurityPostureConfig> = {
   schema: configSchema,
+  exposeToBrowser: {
+    enableExperimental: true,
+  },
 };
