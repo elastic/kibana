@@ -403,7 +403,7 @@ export const ModelsList: FC<Props> = ({
     },
     {
       name: i18n.translate('xpack.ml.trainedModels.modelsList.stateHeader', {
-        defaultMessage: 'State',
+        defaultMessage: 'Model state',
       }),
       truncateText: false,
       width: '150px',
