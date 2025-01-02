@@ -15,8 +15,9 @@ import { MessageRole } from '@kbn/observability-ai-assistant-plugin/common';
 import { chatClient, kibanaClient, synthtraceEsClients } from '../../services';
 import { apmErrorCountAIAssistant } from '../../alert_templates/templates';
 
-describe('apm', () => {
+describe('APM', () => {
   const ruleIds: any[] = [];
+
   before(async () => {
     const responseApmRule = await kibanaClient.callKibana<RuleResponse>(
       'post',
@@ -92,9 +93,10 @@ describe('apm', () => {
   });
 
   it('service throughput', async () => {
-    const conversation = await chatClient.complete(
-      'What is the average throughput per minute for the ai-assistant-service service over the past 4 hours?'
-    );
+    const conversation = await chatClient.complete({
+      messages:
+        'What is the average throughput per minute for the ai-assistant-service service over the past 4 hours?',
+    });
 
     const result = await chatClient.evaluate(conversation, [
       'Uses the get_apm_dataset_info function to get information about the APM data streams',
@@ -109,9 +111,9 @@ describe('apm', () => {
   });
 
   it('service dependencies', async () => {
-    const conversation = await chatClient.complete(
-      'What are the downstream dependencies of the ai-assistant-service-front service?'
-    );
+    const conversation = await chatClient.complete({
+      messages: 'What are the downstream dependencies of the ai-assistant-service-front service?',
+    });
 
     const result = await chatClient.evaluate(conversation, [
       'Uses the get_apm_downstream_dependencies function with the `service.name` parameter being "ai-assistant-service-front"',
@@ -122,34 +124,34 @@ describe('apm', () => {
   });
 
   it('services in environment', async () => {
-    let conversation = await chatClient.complete(
-      'What are the active services in the environment "test"?'
-    );
+    let conversation = await chatClient.complete({
+      messages: 'What are the active services in the environment "test"?',
+    });
 
-    conversation = await chatClient.complete(
-      conversation.conversationId!,
-      conversation.messages.concat({
+    conversation = await chatClient.complete({
+      conversationId: conversation.conversationId!,
+      messages: conversation.messages.concat({
         content: 'What is the average error rate per service over the past 4 hours?',
         role: MessageRole.User,
-      })
-    );
+      }),
+    });
 
-    conversation = await chatClient.complete(
-      conversation.conversationId!,
-      conversation.messages.concat({
+    conversation = await chatClient.complete({
+      conversationId: conversation.conversationId!,
+      messages: conversation.messages.concat({
         content:
           'What are the top 2 most frequent errors in the services in the test environment in the last hour?',
         role: MessageRole.User,
-      })
-    );
+      }),
+    });
 
-    conversation = await chatClient.complete(
-      conversation.conversationId!,
-      conversation.messages.concat({
+    conversation = await chatClient.complete({
+      conversationId: conversation.conversationId!,
+      messages: conversation.messages.concat({
         content: 'Are there any alert for those services?',
         role: MessageRole.User,
-      })
-    );
+      }),
+    });
 
     const result = await chatClient.evaluate(conversation, [
       'Responds with the active services in the environment "test"',
