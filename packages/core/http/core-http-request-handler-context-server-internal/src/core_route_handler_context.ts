@@ -111,7 +111,8 @@ export class CoreRouteHandlerContext implements CoreRequestHandlerContext {
       this.#deprecations = new CoreDeprecationsRouteHandlerContext(
         this.coreStart.deprecations,
         this.elasticsearch,
-        this.savedObjects
+        this.savedObjects,
+        this.request
       );
     }
     return this.#deprecations;

@@ -14,6 +14,7 @@ export interface CommitAuthor {
 }
 
 export interface Commit {
+  oid: string;
   messageHeadline: string;
   authors: CommitAuthor[];
 }

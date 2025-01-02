@@ -8,10 +8,7 @@
 import { useMemo } from 'react';
 import { of } from 'rxjs';
 import useObservable from 'react-use/lib/useObservable';
-import { euiDarkVars as euiThemeDark, euiLightVars as euiThemeLight } from '@kbn/ui-theme';
 import type { ThemeServiceStart } from '@kbn/core-theme-browser';
-
-export type EuiThemeType = typeof euiThemeLight | typeof euiThemeDark;
 
 const themeDefault = { darkMode: false };
 
@@ -27,12 +24,4 @@ export function useIsDarkTheme(theme: ThemeServiceStart): boolean {
   const { darkMode } = useObservable(themeObservable$, themeDefault);
 
   return darkMode;
-}
-
-/**
- * Returns an EUI theme definition based on the currently applied theme.
- */
-export function useCurrentEuiThemeVars(theme: ThemeServiceStart): { euiTheme: EuiThemeType } {
-  const isDarkMode = useIsDarkTheme(theme);
-  return useMemo(() => ({ euiTheme: isDarkMode ? euiThemeDark : euiThemeLight }), [isDarkMode]);
 }
