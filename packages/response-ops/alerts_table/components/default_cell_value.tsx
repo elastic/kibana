@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { ComponentProps } from 'react';
 import { isEmpty } from 'lodash';
 import {
   ALERT_DURATION,
@@ -24,12 +24,14 @@ import { AlertsTableSupportedConsumers, GetAlertsTableProp } from '../types';
 import { alertProducersData, observabilityFeatureIds } from '../constants';
 import { useFieldFormatter } from '../hooks/use_field_formatter';
 
-export const DefaultCellValue: GetAlertsTableProp<'renderCellValue'> = (props) => {
-  const {
-    alert,
-    columnId,
-    services: { fieldFormats, http },
-  } = props;
+export const DefaultCellValue = ({
+  alert,
+  columnId,
+  services: { fieldFormats, http },
+}: Pick<
+  ComponentProps<GetAlertsTableProp<'renderCellValue'>>,
+  'alert' | 'columnId' | 'services'
+>) => {
   const formatField = useFieldFormatter(fieldFormats);
   const rawValue = alert[columnId]?.[0];
   const value = getRenderValue(rawValue);
