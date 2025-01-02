@@ -8,6 +8,5 @@
  */
 
 export * from './errors';
-export * from './embeddables';
 export * from './triggers';
 export * from './state_transfer';
