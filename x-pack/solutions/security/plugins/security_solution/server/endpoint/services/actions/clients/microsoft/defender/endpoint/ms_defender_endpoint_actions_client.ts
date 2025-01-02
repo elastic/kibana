@@ -130,7 +130,7 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
 
     this.log.debug(
       () =>
-        `calling connector actions 'execute()' for MS Defender for Endpoint with:\n${stringify(
+        `calling connector actions 'execute()' for Microsoft Defender for Endpoint with:\n${stringify(
           executeOptions
         )}`
     );
@@ -141,7 +141,7 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
       this.log.error(stringify(actionSendResponse));
 
       throw new ResponseActionsClientError(
-        `Attempt to send [${actionType}] to MS Defender for Endpoint failed: ${
+        `Attempt to send [${actionType}] to Microsoft Defender for Endpoint failed: ${
           actionSendResponse.serviceMessage || actionSendResponse.message
         }`,
         500,
