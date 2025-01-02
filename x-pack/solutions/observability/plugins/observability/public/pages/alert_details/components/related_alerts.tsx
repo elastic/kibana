@@ -29,7 +29,6 @@ import { BoolQuery, Filter, type Query } from '@kbn/es-query';
 import { AlertsGrouping } from '@kbn/alerts-grouping';
 import { ObservabilityFields } from '../../../../common/utils/alerting/types';
 
-import { AlertActions } from '../../alerts/components/alert_actions';
 import {
   OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES,
   observabilityAlertFeatureIds,
@@ -151,7 +150,6 @@ export function InternalRelatedAlerts({ alert }: Props) {
                   consumers={observabilityAlertFeatureIds}
                   query={mergeBoolQueries(esQuery, groupQuery)}
                   initialPageSize={ALERTS_PER_PAGE}
-                  renderActionsCell={AlertActions}
                   showInspectButton
                 />
               );

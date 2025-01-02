@@ -5,11 +5,8 @@
  * 2.0.
  */
 
-import {
-  AlertsTablePropsWithRef,
-  LazyLoadProps,
-} from '@kbn/triggers-actions-ui-plugin/public/types';
 import { SetOptional } from 'type-fest';
+import type { AlertsTablePropsWithRef } from '@kbn/response-ops-alerts-table/types';
 import type { ConfigSchema, ObservabilityRuleTypeRegistry } from '../..';
 
 export interface ObservabilityAlertsTableContext {
@@ -20,8 +17,7 @@ export interface ObservabilityAlertsTableContext {
 export type ObservabilityAlertsTableProps = SetOptional<
   AlertsTablePropsWithRef<ObservabilityAlertsTableContext>,
   'ruleTypeIds'
-> &
-  LazyLoadProps;
+>;
 export type GetObservabilityAlertsTableProp<PropKey extends keyof ObservabilityAlertsTableProps> =
   NonNullable<ObservabilityAlertsTableProps[PropKey]>;
 

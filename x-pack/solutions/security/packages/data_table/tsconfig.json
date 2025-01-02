@@ -10,7 +10,6 @@
     "@kbn/cell-actions",
     "@kbn/timelines-plugin",
     "@kbn/es-query",
-    "@kbn/triggers-actions-ui-plugin",
     "@kbn/securitysolution-ecs",
     "@kbn/safer-lodash-set",
     "@kbn/i18n",
@@ -21,6 +20,7 @@
     "@kbn/ui-actions-plugin",
     "@kbn/data-views-plugin",
     "@kbn/field-formats-plugin",
-    "@kbn/data-plugin"
+    "@kbn/data-plugin",
+    "@kbn/response-ops-alerts-fields-browser"
   ]
 }

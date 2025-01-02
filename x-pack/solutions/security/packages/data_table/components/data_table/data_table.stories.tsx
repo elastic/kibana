@@ -99,7 +99,7 @@ export const DataTable = () => {
         loadPage={() => {}}
         rowRenderers={[]}
         totalItems={mockTimelineData.length}
-        getFieldBrowser={() => <MockFieldBrowser />}
+        fieldsBrowserComponent={() => <MockFieldBrowser />}
       />
     </StoryProviders>
   );
