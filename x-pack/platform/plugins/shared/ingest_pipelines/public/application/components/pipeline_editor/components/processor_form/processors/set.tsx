@@ -204,10 +204,11 @@ export const SetProcessor: FunctionComponent = () => {
   };
 
   const toggleCustom = useCallback(() => {
+    const newIsCopyFrom = !isCopyFromEnabled;
     setIsCopyFrom((prev) => !prev);
-    setFieldValue('fields.value', '');
+    setFieldValue('fields.value', !newIsCopyFrom && isDefineAsJson ? '{}' : '');
     setFieldValue('fields.copy_from', '');
-  }, [setFieldValue]);
+  }, [isCopyFromEnabled, isDefineAsJson, setFieldValue]);
 
   return (
     <>

@@ -11,6 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { isRight } from 'fp-ts/lib/Either';
 
 import { ERROR_CODE } from '@kbn/es-ui-shared-plugin/static/forms/helpers/field_validators/types';
+import { isPlainObject } from 'lodash';
 import {
   FieldConfig,
   ValidationFunc,
@@ -214,5 +215,5 @@ export const isXJsonValue = (value: any) => {
   if (typeof value === 'string') {
     return isJSON(collapseEscapedStrings(value));
   }
-  return Object.prototype.toString.call(value) === '[object Object]';
+  return isPlainObject(value);
 };

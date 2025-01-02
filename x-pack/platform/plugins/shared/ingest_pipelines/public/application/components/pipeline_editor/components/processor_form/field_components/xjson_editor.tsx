@@ -14,8 +14,7 @@ import { TextEditor } from './text_editor';
 interface Props {
   field: FieldHook<string>;
   editorProps: { [key: string]: any };
-  euiFieldProps?: Record<string, any>;
-  [key: string]: any;
+  disabled?: boolean;
 }
 
 const defaultEditorOptions = {
@@ -23,7 +22,7 @@ const defaultEditorOptions = {
   lineNumbers: 'off',
 };
 
-export const XJsonEditor: FunctionComponent<Props> = ({ field, editorProps, euiFieldProps }) => {
+export const XJsonEditor: FunctionComponent<Props> = ({ field, editorProps, disabled }) => {
   const { value, setValue } = field;
   const onChange = useCallback(
     (s: any) => {
@@ -42,7 +41,7 @@ export const XJsonEditor: FunctionComponent<Props> = ({ field, editorProps, euiF
         onChange,
         ...editorProps,
       }}
-      euiFieldProps={euiFieldProps}
+      euiFieldProps={{ disabled }}
     />
   );
 };

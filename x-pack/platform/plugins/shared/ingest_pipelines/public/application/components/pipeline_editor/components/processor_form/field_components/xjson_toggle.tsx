@@ -21,17 +21,19 @@ import { ComboBoxField, Field, FieldHook } from '../../../../../../shared_import
 
 import { XJsonEditor } from '.';
 
+type FieldType = 'text' | 'combox';
+
 interface Props {
   field: FieldHook;
   disabled?: boolean;
   handleIsJson: Function;
-  fieldType: string;
+  fieldType: FieldType;
 }
 interface ToggleProps {
   field: FieldHook;
   disabled?: boolean;
   toggleJson: MouseEventHandler;
-  fieldType: string;
+  fieldType: FieldType;
 }
 
 const FieldToToggle: FunctionComponent<ToggleProps> = ({
@@ -91,11 +93,12 @@ export const XJsonToggle: FunctionComponent<Props> = ({
   const [defineAsJson, setDefineAsJson] = useState<boolean | undefined>(undefined);
 
   const toggleJson = useCallback(() => {
+    const defaultValue = fieldType === 'text' ? '' : [];
     const newValueIsJson = !defineAsJson;
-    setValue(newValueIsJson ? '{}' : '');
+    setValue(newValueIsJson ? '{}' : defaultValue);
     setDefineAsJson(newValueIsJson);
     handleIsJson(newValueIsJson);
-  }, [defineAsJson, handleIsJson, setValue]);
+  }, [defineAsJson, fieldType, handleIsJson, setValue]);
 
   useEffect(() => {
     if (defineAsJson === undefined) {
@@ -115,7 +118,7 @@ export const XJsonToggle: FunctionComponent<Props> = ({
   return mustRenderXJsonEditor ? (
     <XJsonEditor
       field={field as FieldHook<string>}
-      euiFieldProps={{ disabled }}
+      disabled={disabled}
       editorProps={{
         'data-test-subj': 'jsonValueField',
         height: disabled ? EDITOR_PX_HEIGHT.extraSmall : EDITOR_PX_HEIGHT.medium,
