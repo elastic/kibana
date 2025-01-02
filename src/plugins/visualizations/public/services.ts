@@ -22,6 +22,7 @@ import type {
   AnalyticsServiceStart,
   I18nStart,
   NotificationsStart,
+  UserProfileService,
 } from '@kbn/core/public';
 import type { DataPublicPluginStart, TimefilterContract } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
@@ -47,6 +48,9 @@ export const [getNotifications, setNotifications] =
   createGetterSetter<NotificationsStart>('Notifications');
 
 export const [getCapabilities, setCapabilities] = createGetterSetter<Capabilities>('Capabilities');
+
+export const [getUserProfile, setUserProfile] =
+  createGetterSetter<UserProfileService>('UserProfile');
 
 export const [getHttp, setHttp] = createGetterSetter<HttpStart>('Http');
 
