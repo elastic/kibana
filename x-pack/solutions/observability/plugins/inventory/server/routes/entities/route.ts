@@ -84,7 +84,7 @@ export const listLatestEntitiesRoute = createInventoryServerRoute({
     request,
     logger,
     context,
-  }): Promise<{ entities: Array<Partial<InventoryEntity>> }> => {
+  }): Promise<{ entities: InventoryEntity[] }> => {
     const entityManagerStart = await plugins.entityManager.start();
     const { client: clusterClient } = (await context.core).elasticsearch;
 
