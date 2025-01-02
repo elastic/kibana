@@ -42,7 +42,7 @@ export const CellValueHost: GetAlertsTableProp<'renderCellValue'> = (props) => {
   const alert = alerts[idx];
   const legacyAlert = oldAlertsData[idx];
   const ecsAlert = ecsAlertsData[idx];
-  if (isSystemCell(columnId)) {
+  if (isSystemCell(columnId) && alert) {
     return (
       <SystemCell
         {...props}
