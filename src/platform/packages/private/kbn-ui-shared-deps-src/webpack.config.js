@@ -20,7 +20,7 @@ const { distDir: UiSharedDepsSrcDistDir } = require('./src/definitions');
 
 const MOMENT_SRC = require.resolve('moment/min/moment-with-locales.js');
 
-const REPO_ROOT = Path.resolve(__dirname, '..', '..');
+const REPO_ROOT = Path.resolve(__dirname, '..', '..', '..', '..', '..');
 
 module.exports = {
   node: {
