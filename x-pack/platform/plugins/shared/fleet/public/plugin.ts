@@ -88,6 +88,8 @@ import type {
 import { LazyCustomLogsAssetsExtension } from './lazy_custom_logs_assets_extension';
 import { setCustomIntegrations, setCustomIntegrationsStart } from './services/custom_integrations';
 import { getFleetDeepLinks } from './deep_links';
+import type { EmbeddedIntegrationsFlowWrapperProps } from './client/ui/get_embedded_integrations_flow_wrapper';
+import { getEmbeddedIntegrationsFlowWrapper } from './client/ui/get_embedded_integrations_flow_wrapper';
 
 export type { FleetConfigType } from '../common/types';
 
@@ -110,6 +112,11 @@ export interface FleetStart {
       getBulkAssets: (
         body: GetBulkAssetsRequest['body']
       ) => Promise<SendRequestResponse<GetBulkAssetsResponse, RequestError>>;
+    };
+  };
+  ui: {
+    components: {
+      EmbeddedIntegrationsFlow: React.FC<EmbeddedIntegrationsFlowWrapperProps>;
     };
   };
 }
@@ -157,6 +164,7 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
   private experimentalFeatures: ExperimentalFeatures;
   private storage = new Storage(localStorage);
   private appUpdater$ = new Subject<AppUpdater>();
+  private setupDeps?: FleetSetupDeps;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.config = this.initializerContext.config.get<FleetConfigType>();
@@ -165,6 +173,8 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
   }
 
   public setup(core: CoreSetup<FleetStartDeps, FleetStart>, deps: FleetSetupDeps) {
+    this.setupDeps = deps;
+
     const config = this.config;
     const kibanaVersion = this.kibanaVersion;
     const extensions = this.extensions;
@@ -188,18 +198,11 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
       euiIconType: 'logoElastic',
       mount: async (params: AppMountParameters) => {
         const [coreStartServices, startDepsServices, fleetStart] = await core.getStartServices();
-        const cloud =
-          deps.cloud && startDepsServices.cloud
-            ? { ...deps.cloud, ...startDepsServices.cloud }
-            : undefined;
-
-        const startServices: FleetStartServices = {
-          ...coreStartServices,
-          ...startDepsServices,
-          storage: this.storage,
-          cloud,
-          authz: fleetStart.authz,
-        };
+        const startServices = this.createStartServices(
+          coreStartServices,
+          startDepsServices,
+          fleetStart.authz
+        );
         const { renderApp, teardownIntegrations } = await import('./applications/integrations');
 
         const Tracker =
@@ -232,17 +235,11 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
       deepLinks: getFleetDeepLinks(this.experimentalFeatures),
       mount: async (params: AppMountParameters) => {
         const [coreStartServices, startDepsServices, fleetStart] = await core.getStartServices();
-        const cloud =
-          deps.cloud && startDepsServices.cloud
-            ? { ...deps.cloud, ...startDepsServices.cloud }
-            : undefined;
-        const startServices: FleetStartServices = {
-          ...coreStartServices,
-          ...startDepsServices,
-          storage: this.storage,
-          cloud,
-          authz: fleetStart.authz,
-        };
+        const startServices = this.createStartServices(
+          coreStartServices,
+          startDepsServices,
+          fleetStart.authz
+        );
         const { renderApp, teardownFleet } = await import('./applications/fleet');
         const unmount = renderApp(startServices, params, config, kibanaVersion, extensions);
         return () => {
@@ -354,6 +351,15 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
     // Set the custom integrations language clients
     setCustomIntegrationsStart(deps.customIntegrations);
 
+    const startServices = this.createStartServices(core, deps, authz);
+
+    const EmbeddedIntegrationsFlow = getEmbeddedIntegrationsFlowWrapper({
+      startServices,
+      kibanaVersion: this.kibanaVersion,
+      config: this.config,
+      extensions: this.extensions,
+    });
+
     //  capabilities.fleetv2 returns fleet privileges and capabilities.fleet returns integrations privileges
     return {
       authz,
@@ -386,8 +392,32 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
           getBulkAssets: sendGetBulkAssets,
         },
       },
+      ui: {
+        components: {
+          EmbeddedIntegrationsFlow,
+        },
+      },
     };
   }
 
   public stop() {}
+
+  /** This function create Fleet services from */
+  private createStartServices(
+    coreStartServices: CoreStart,
+    startDepsServices: FleetStartDeps,
+    authz: FleetAuthz
+  ): FleetStartServices {
+    const cloud =
+      this.setupDeps?.cloud && startDepsServices.cloud
+        ? { ...this.setupDeps?.cloud, ...startDepsServices.cloud }
+        : undefined;
+    return {
+      ...coreStartServices,
+      ...startDepsServices,
+      storage: this.storage,
+      cloud,
+      authz,
+    };
+  }
 }

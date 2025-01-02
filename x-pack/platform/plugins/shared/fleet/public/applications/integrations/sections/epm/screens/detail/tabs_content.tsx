@@ -76,7 +76,7 @@ export const TabsContent: React.FC<{
     policies: {
       path: INTEGRATIONS_ROUTING_PATHS.integration_details_policies,
       component: canReadIntegrationPolicies ? (
-        <PackagePoliciesPage name={packageInfo.name} version={packageInfo.version} />
+        <PackagePoliciesPage packageInfo={packageInfo} />
       ) : (
         <PermissionsError
           error="MISSING_PRIVILEGES"

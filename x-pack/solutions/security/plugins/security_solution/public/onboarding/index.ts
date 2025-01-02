@@ -6,15 +6,14 @@
  */
 
 import type { SecuritySubPlugin } from '../app/types';
-import type { StartPlugins } from '../types';
 import { routes } from './routes';
 
 export class Onboarding {
   public setup() {}
 
-  public start(plugins: StartPlugins): SecuritySubPlugin {
+  public start(): SecuritySubPlugin {
     return {
-      routes: routes(plugins),
+      routes,
     };
   }
 }
