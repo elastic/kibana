@@ -68,6 +68,40 @@ const AIMessage = schema.object({
 export const InvokeAIActionParamsSchema = schema.object({
   messages: schema.arrayOf(AIMessage),
   model: schema.maybe(schema.string()),
+  tools: schema.maybe(
+    schema.arrayOf(
+      schema.object(
+        {
+          type: schema.string(),
+          function: schema.object(
+            {
+              description: schema.maybe(schema.string()),
+              name: schema.string(),
+              parameters: schema.object({}, { unknowns: 'allow' }),
+              strict: schema.maybe(schema.boolean()),
+            },
+            { unknowns: 'allow' }
+          ),
+        },
+        // Not sure if this will include other properties, we should pass them if it does
+        { unknowns: 'allow' }
+      )
+    )
+  ),
+  tool_choice: schema.maybe(
+    schema.oneOf([
+      schema.literal('none'),
+      schema.literal('auto'),
+      schema.object(
+        {
+          type: schema.string(),
+          function: schema.object({ name: schema.string() }, { unknowns: 'allow' }),
+        },
+        { unknowns: 'ignore' }
+      ),
+    ])
+  ),
+  // Deprecated in favor of tools
   functions: schema.maybe(
     schema.arrayOf(
       schema.object(
@@ -89,6 +123,7 @@ export const InvokeAIActionParamsSchema = schema.object({
       )
     )
   ),
+  // Deprecated in favor of tool_choice
   function_call: schema.maybe(
     schema.oneOf([
       schema.literal('none'),
