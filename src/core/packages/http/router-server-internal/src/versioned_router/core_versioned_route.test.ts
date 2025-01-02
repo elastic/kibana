@@ -542,22 +542,19 @@ describe('Versioned route', () => {
       authz: {
         requiredPrivileges: ['foo', 'bar', 'baz'],
       },
+      authc: undefined,
     };
     const securityConfig1: RouteSecurity = {
       authz: {
         requiredPrivileges: ['foo'],
       },
-      authc: {
-        enabled: 'optional',
-      },
+      authc: undefined,
     };
     const securityConfig2: RouteSecurity = {
       authz: {
         requiredPrivileges: ['foo', 'bar'],
       },
-      authc: {
-        enabled: true,
-      },
+      authc: undefined,
     };
     const versionedRoute = versionedRouter
       .get({ path: '/test/{id}', access: 'internal', security: securityConfigDefault })
