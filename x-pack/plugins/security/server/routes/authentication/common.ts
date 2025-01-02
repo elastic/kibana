@@ -51,6 +51,11 @@ export function defineCommonRoutes({
             enabled: false,
             reason: 'This route must remain accessible to 3rd-party IdPs',
           },
+          authc: {
+            enabled: false,
+            reason:
+              'This route is used for authentication - it does not require existing authentication',
+          },
         },
         // Allow unknown query parameters as this endpoint can be hit by the 3rd-party with any
         // set of query string parameters (e.g. SAML/OIDC logout request/response parameters).
@@ -58,7 +63,6 @@ export function defineCommonRoutes({
         options: {
           access: 'public',
           excludeFromOAS: true,
-          authRequired: false,
           tags: [ROUTE_TAG_CAN_REDIRECT, ROUTE_TAG_AUTH_FLOW],
           ...(isDeprecated && {
             deprecated: {
@@ -191,7 +195,12 @@ export function defineCommonRoutes({
       security: {
         authz: {
           enabled: false,
-          reason: `This route provides basic and token login capbility, which is delegated to the internal authentication service`,
+          reason: `This route provides basic and token login capability, which is delegated to the internal authentication service`,
+        },
+        authc: {
+          enabled: false,
+          reason:
+            'This route is used for authentication - it does not require existing authentication',
         },
       },
       validate: {
@@ -210,7 +219,6 @@ export function defineCommonRoutes({
           ),
         }),
       },
-      options: { authRequired: false },
     },
     createLicensedRouteHandler(async (context, request, response) => {
       const { providerType, providerName, currentURL, params } = request.body;
