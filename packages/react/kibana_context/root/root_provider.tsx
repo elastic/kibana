@@ -11,6 +11,8 @@ import React, { FC, PropsWithChildren } from 'react';
 
 import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
 import type { I18nStart } from '@kbn/core-i18n-browser';
+import type { ExecutionContextStart } from '@kbn/core-execution-context-browser';
+import { SharedUXRouterContext } from '@kbn/shared-ux-router';
 
 // @ts-expect-error EUI exports this component internally, but Kibana isn't picking it up its types
 import { useIsNestedEuiProvider } from '@elastic/eui/lib/components/provider/nested';
@@ -25,6 +27,8 @@ export interface KibanaRootContextProviderProps extends KibanaEuiProviderProps {
   i18n: I18nStart;
   /** The `AnalyticsServiceStart` API from `CoreStart`. */
   analytics?: Pick<AnalyticsServiceStart, 'reportEvent'>;
+  /** The `ExecutionContextStart` API from `CoreStart`. */
+  executionContext?: ExecutionContextStart;
 }
 
 /**
@@ -44,20 +48,26 @@ export interface KibanaRootContextProviderProps extends KibanaEuiProviderProps {
 export const KibanaRootContextProvider: FC<PropsWithChildren<KibanaRootContextProviderProps>> = ({
   children,
   i18n,
+  executionContext,
   ...props
 }) => {
   const hasEuiProvider = useIsNestedEuiProvider();
+  const rootContextProvider = (
+    <SharedUXRouterContext.Provider value={{ services: { executionContext } }}>
+      <i18n.Context>{children}</i18n.Context>
+    </SharedUXRouterContext.Provider>
+  );
 
   if (hasEuiProvider) {
     emitEuiProviderWarning(
       'KibanaRootContextProvider has likely been nested in this React tree, either by direct reference or by KibanaRenderContextProvider.  The result of this nesting is a nesting of EuiProvider, which has negative effects.  Check your React tree for nested Kibana context providers.'
     );
-    return <i18n.Context>{children}</i18n.Context>;
+    return rootContextProvider;
   } else {
     const { theme, userProfile, globalStyles, colorMode, modify } = props;
     return (
       <KibanaEuiProvider {...{ theme, userProfile, globalStyles, colorMode, modify }}>
-        <i18n.Context>{children}</i18n.Context>
+        {rootContextProvider}
       </KibanaEuiProvider>
     );
   }
