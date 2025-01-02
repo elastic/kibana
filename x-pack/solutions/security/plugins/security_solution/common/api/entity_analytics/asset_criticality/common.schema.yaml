@@ -60,6 +60,11 @@ components:
           required:
             - criticality_level
     AssetCriticalityRecord:
+      example:
+        id_field: 'host.name'
+        id_value: my_host
+        criticality_level: high_impact
+        '@timestamp': '2024-08-02T11:15:34.290Z'
       allOf:
         - $ref: '#/components/schemas/CreateAssetCriticalityRecord'
         - $ref: '#/components/schemas/AssetCriticalityRecordEcsParts'
