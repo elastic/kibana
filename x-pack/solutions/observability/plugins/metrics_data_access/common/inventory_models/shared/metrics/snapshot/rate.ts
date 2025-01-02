@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MetricsUIAggregation } from '../../../types';
+import type { MetricsUIAggregation } from '../../../types';
 
 export const rate = (id: string, field: string): MetricsUIAggregation => {
   return {

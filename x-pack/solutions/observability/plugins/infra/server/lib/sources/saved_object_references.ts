@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { SavedObjectReference } from '@kbn/core/server';
-import {
+import type { SavedObjectReference } from '@kbn/core/server';
+import type {
   InfraSavedSourceConfiguration,
   InfraSourceConfiguration,
 } from '../../../common/source_configuration/source_configuration';
+import type { SavedObjectAttributesWithReferences } from '../../saved_objects/references';
 import {
-  SavedObjectAttributesWithReferences,
   extractSavedObjectReferences as genericExtractSavedObjectReferences,
   resolveSavedObjectReferences as genericResolveSavedObjectReferences,
 } from '../../saved_objects/references';

@@ -13,7 +13,8 @@
  */
 
 import React from 'react';
-import { AllDatasetsLocatorParams, ALL_DATASETS_LOCATOR_ID } from '@kbn/deeplinks-observability';
+import type { AllDatasetsLocatorParams } from '@kbn/deeplinks-observability';
+import { ALL_DATASETS_LOCATOR_ID } from '@kbn/deeplinks-observability';
 import { EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
