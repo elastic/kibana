@@ -5,20 +5,18 @@
  * 2.0.
  */
 
-import { Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import { chunk } from 'lodash';
-import { APMConfig } from '../..';
-import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
-import { MlClient } from '../../lib/helpers/get_ml_client';
+import type { APMConfig } from '../..';
+import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
+import type { MlClient } from '../../lib/helpers/get_ml_client';
 import { withApmSpan } from '../../utils/with_apm_span';
 import { DEFAULT_ANOMALIES, getServiceAnomalies } from './get_service_anomalies';
 import { getServiceMapFromTraceIds } from './get_service_map_from_trace_ids';
 import { getServiceStats } from './get_service_stats';
 import { getTraceSampleIds } from './get_trace_sample_ids';
-import {
-  TransformServiceMapResponse,
-  transformServiceMapResponses,
-} from './transform_service_map_responses';
+import type { TransformServiceMapResponse } from './transform_service_map_responses';
+import { transformServiceMapResponses } from './transform_service_map_responses';
 
 export interface IEnvOptions {
   mlClient?: MlClient;

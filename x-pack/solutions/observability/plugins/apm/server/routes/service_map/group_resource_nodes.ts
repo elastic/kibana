@@ -7,14 +7,14 @@
 
 import { i18n } from '@kbn/i18n';
 import { compact, groupBy } from 'lodash';
-import { ValuesType } from 'utility-types';
+import type { ValuesType } from 'utility-types';
 import { SPAN_TYPE, SPAN_SUBTYPE } from '../../../common/es_fields/apm';
-import {
+import type {
   ConnectionEdge,
   ConnectionElement,
   ConnectionNode,
-  isSpanGroupingSupported,
 } from '../../../common/service_map';
+import { isSpanGroupingSupported } from '../../../common/service_map';
 
 const MINIMUM_GROUP_SIZE = 4;
 

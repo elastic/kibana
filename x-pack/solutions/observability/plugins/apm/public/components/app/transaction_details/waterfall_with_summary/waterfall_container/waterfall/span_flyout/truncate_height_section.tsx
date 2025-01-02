@@ -7,7 +7,8 @@
 
 import { EuiIcon, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { Fragment, ReactNode, useEffect, useRef, useState } from 'react';
+import type { ReactNode } from 'react';
+import React, { Fragment, useEffect, useRef, useState } from 'react';
 import styled from '@emotion/styled';
 
 const ToggleButtonContainer = styled.div`

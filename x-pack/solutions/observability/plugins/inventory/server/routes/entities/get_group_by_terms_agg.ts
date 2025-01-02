@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IdentityFieldsPerEntityType } from './get_identity_fields_per_entity_type';
+import type { IdentityFieldsPerEntityType } from './get_identity_fields_per_entity_type';
 
 export const getGroupByTermsAgg = (fields: IdentityFieldsPerEntityType, maxSize = 500) => {
   return Array.from(fields).reduce((acc, [entityType, identityFields]) => {

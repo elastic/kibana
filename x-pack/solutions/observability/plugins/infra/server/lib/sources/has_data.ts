@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ESSearchClient } from '../metrics/types';
+import type { ESSearchClient } from '../metrics/types';
 
 export const hasData = async (index: string, client: ESSearchClient) => {
   const params = {

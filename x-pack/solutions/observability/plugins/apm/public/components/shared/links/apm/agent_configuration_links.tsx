@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { IBasePath } from '@kbn/core/public';
-import { AgentConfigurationIntake } from '../../../../../common/agent_configuration/configuration_types';
+import type { IBasePath } from '@kbn/core/public';
+import type { AgentConfigurationIntake } from '../../../../../common/agent_configuration/configuration_types';
 import { getLegacyApmHref } from './apm_link';
 
 export function editAgentConfigurationHref(

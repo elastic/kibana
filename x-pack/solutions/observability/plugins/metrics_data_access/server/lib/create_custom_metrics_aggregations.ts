@@ -7,8 +7,8 @@
 
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { isEmpty } from 'lodash';
-import { MetricExpressionCustomMetric } from '../../common/alerting/metrics';
-import { MetricsExplorerCustomMetric } from '../../common/http_api';
+import type { MetricExpressionCustomMetric } from '../../common/alerting/metrics';
+import type { MetricsExplorerCustomMetric } from '../../common/http_api';
 
 const isMetricExpressionCustomMetric = (
   subject: MetricsExplorerCustomMetric | MetricExpressionCustomMetric

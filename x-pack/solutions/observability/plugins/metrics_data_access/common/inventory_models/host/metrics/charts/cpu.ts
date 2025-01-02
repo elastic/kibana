@@ -14,7 +14,7 @@ import {
   DEFAULT_XY_LEGEND,
   DEFAULT_XY_YBOUNDS,
 } from '../../../shared/charts/constants';
-import { LensConfigWithId } from '../../../types';
+import type { LensConfigWithId } from '../../../types';
 import { formulas } from '../formulas';
 
 const cpuUsageBreakdown: LensConfigWithId = {

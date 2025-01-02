@@ -5,9 +5,9 @@
  * 2.0.
  */
 import React from 'react';
-import { FormElement } from './form_elements';
+import type { FormElement } from './form_elements';
 import { LogSourceConfigurationFormError } from './source_configuration_form_errors';
-import { FormValidationError } from './validation_errors';
+import type { FormValidationError } from './validation_errors';
 
 export const getFormRowProps = (formElement: FormElement<any, FormValidationError>) => ({
   error:

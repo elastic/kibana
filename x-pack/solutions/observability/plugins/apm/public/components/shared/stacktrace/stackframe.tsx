@@ -8,7 +8,7 @@
 import { EuiAccordion, useEuiFontSize } from '@elastic/eui';
 import React from 'react';
 import styled from '@emotion/styled';
-import {
+import type {
   Stackframe as StackframeType,
   StackframeWithLineContext,
 } from '../../../../typings/es_schemas/raw/fields/stackframe';

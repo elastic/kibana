@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PathsOf, TypeAsArgs, TypeOf } from '@kbn/typed-react-router-config';
+import type { PathsOf, TypeAsArgs, TypeOf } from '@kbn/typed-react-router-config';
 import { useMemo } from 'react';
 import type { InventoryRouter, InventoryRoutes } from '../routes/config';
 import { inventoryRouter } from '../routes/config';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CoreStart } from '@kbn/core-lifecycle-browser';
+import type { CoreStart } from '@kbn/core-lifecycle-browser';
 
 export function getIndexManagementHref(core: CoreStart, dataStream?: string) {
   const indexManagementPath = '/data/index_management/data_streams';

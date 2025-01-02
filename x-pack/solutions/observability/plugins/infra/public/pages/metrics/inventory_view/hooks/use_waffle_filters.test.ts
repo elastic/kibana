@@ -6,10 +6,11 @@
  */
 
 import { renderHook, act } from '@testing-library/react';
-import { DataView } from '@kbn/data-views-plugin/common';
-import { useWaffleFilters, WaffleFiltersState } from './use_waffle_filters';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import type { WaffleFiltersState } from './use_waffle_filters';
+import { useWaffleFilters } from './use_waffle_filters';
 import { TIMESTAMP_FIELD } from '../../../../../common/constants';
-import { ResolvedDataView } from '../../../../utils/data_view';
+import type { ResolvedDataView } from '../../../../utils/data_view';
 
 // Mock useUrlState hook
 jest.mock('react-router-dom', () => ({

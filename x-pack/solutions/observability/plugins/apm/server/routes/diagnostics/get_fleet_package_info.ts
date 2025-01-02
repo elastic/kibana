@@ -6,7 +6,7 @@
  */
 
 import { FleetUnauthorizedError } from '@kbn/fleet-plugin/server/errors';
-import { APMRouteHandlerResources } from '../apm_routes/register_apm_server_routes';
+import type { APMRouteHandlerResources } from '../apm_routes/register_apm_server_routes';
 
 export async function getFleetPackageInfo(resources: APMRouteHandlerResources) {
   const fleetPluginStart = await resources.plugins.fleet?.start();

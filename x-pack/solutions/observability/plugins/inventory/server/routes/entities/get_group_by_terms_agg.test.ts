@@ -6,7 +6,7 @@
  */
 
 import { getGroupByTermsAgg } from './get_group_by_terms_agg';
-import { IdentityFieldsPerEntityType } from './get_identity_fields_per_entity_type';
+import type { IdentityFieldsPerEntityType } from './get_identity_fields_per_entity_type';
 
 describe('getGroupByTermsAgg', () => {
   it('should return an empty object when fields is empty', () => {

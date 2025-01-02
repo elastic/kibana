@@ -8,7 +8,8 @@
 import React from 'react';
 import { EuiToolTip } from '@elastic/eui';
 import moment from 'moment-timezone';
-import { asAbsoluteDateTime, TimeUnit } from '../../../../common/utils/formatters';
+import type { TimeUnit } from '../../../../common/utils/formatters';
+import { asAbsoluteDateTime } from '../../../../common/utils/formatters';
 
 interface Props {
   /**

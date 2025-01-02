@@ -18,14 +18,14 @@ import {
   EuiLoadingSpinner,
   EuiToolTip,
 } from '@elastic/eui';
-import { ApiKey } from '@kbn/security-plugin-types-common';
+import type { ApiKey } from '@kbn/security-plugin-types-common';
 import { useFetcher, FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { PermissionDenied } from './prompts/permission_denied';
 import { ApiKeysNotEnabled } from './prompts/api_keys_not_enabled';
 import { AgentKeysTable } from './agent_keys_table';
 import { CreateAgentKeyFlyout } from './create_agent_key';
 import { AgentKeyCallOut } from './create_agent_key/agent_key_callout';
-import { CreateApiKeyResponse } from '../../../../../common/agent_key_types';
+import type { CreateApiKeyResponse } from '../../../../../common/agent_key_types';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 
 const INITIAL_DATA = {

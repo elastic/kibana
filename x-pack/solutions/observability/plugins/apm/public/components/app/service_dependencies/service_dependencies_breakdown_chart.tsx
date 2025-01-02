@@ -6,7 +6,7 @@
  */
 import React from 'react';
 import { getVizColorForIndex } from '../../../../common/viz_colors';
-import { Coordinate, TimeSeries } from '../../../../typings/timeseries';
+import type { Coordinate, TimeSeries } from '../../../../typings/timeseries';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
 import { useFetcher } from '../../../hooks/use_fetcher';

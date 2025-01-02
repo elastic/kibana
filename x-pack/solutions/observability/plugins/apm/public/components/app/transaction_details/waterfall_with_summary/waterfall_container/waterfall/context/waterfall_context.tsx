@@ -5,16 +5,20 @@
  * 2.0.
  */
 
-import { Dictionary, groupBy } from 'lodash';
-import React, { PropsWithChildren, useCallback, useEffect, useMemo, useState } from 'react';
-import { CriticalPathSegment } from '../../../../../../../../common/critical_path/types';
+import type { Dictionary } from 'lodash';
+import { groupBy } from 'lodash';
+import type { PropsWithChildren } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import type { CriticalPathSegment } from '../../../../../../../../common/critical_path/types';
 import { getCriticalPath } from '../../../../../../../../common/critical_path/get_critical_path';
-import {
-  buildTraceTree,
-  convertTreeToList,
+import type {
   IWaterfall,
   IWaterfallNode,
   IWaterfallNodeFlatten,
+} from '../waterfall_helpers/waterfall_helpers';
+import {
+  buildTraceTree,
+  convertTreeToList,
   updateTraceTreeNode,
 } from '../waterfall_helpers/waterfall_helpers';
 

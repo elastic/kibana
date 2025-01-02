@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { LazySavedSearchComponent } from '@kbn/saved-search-component';
 import useAsync from 'react-use/lib/useAsync';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
@@ -16,7 +16,7 @@ import { useKibana } from '../../../context/kibana_context/use_kibana';
 import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../hooks/use_time_range';
-import { APIReturnType } from '../../../services/rest/create_call_apm_api';
+import type { APIReturnType } from '../../../services/rest/create_call_apm_api';
 
 export function ServiceLogs() {
   const {

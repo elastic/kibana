@@ -6,7 +6,7 @@
  */
 import React from 'react';
 import { APMPolicyForm } from '.';
-import {
+import type {
   PackagePolicyVars,
   NewPackagePolicy,
   PackagePolicyCreateExtensionComponentProps,

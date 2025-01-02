@@ -6,19 +6,17 @@
  */
 
 import React, { useState } from 'react';
+import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import {
   EuiContextMenu,
-  EuiContextMenuPanelDescriptor,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHeaderLink,
   EuiIcon,
   EuiPopover,
 } from '@elastic/eui';
-import {
-  OBSERVABILITY_ONBOARDING_LOCATOR,
-  ObservabilityOnboardingLocatorParams,
-} from '@kbn/deeplinks-observability';
+import type { ObservabilityOnboardingLocatorParams } from '@kbn/deeplinks-observability';
+import { OBSERVABILITY_ONBOARDING_LOCATOR } from '@kbn/deeplinks-observability';
 import { useKibana } from '../../../hooks/use_kibana';
 import type { InventoryAddDataParams } from '../../../services/telemetry/types';
 import {

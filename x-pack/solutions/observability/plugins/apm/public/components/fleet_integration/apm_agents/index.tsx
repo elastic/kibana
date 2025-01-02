@@ -9,7 +9,7 @@ import { EuiPanel, EuiSpacer } from '@elastic/eui';
 import React, { Fragment } from 'react';
 import { AgentInstructionsAccordion } from './agent_instructions_accordion';
 import { ApmAgentInstructionsMappings } from './agent_instructions_mappings';
-import {
+import type {
   NewPackagePolicy,
   PackagePolicy,
   PackagePolicyEditExtensionComponentProps,

@@ -9,7 +9,8 @@ import { useCurrentRoute } from '@kbn/typed-react-router-config';
 import { useContext, useEffect, useRef } from 'react';
 import { castArray } from 'lodash';
 import useObservable from 'react-use/lib/useObservable';
-import { Breadcrumb, BreadcrumbsContext } from './context';
+import type { Breadcrumb } from './context';
+import { BreadcrumbsContext } from './context';
 import { useKibanaEnvironmentContext } from '../kibana_environment_context/use_kibana_environment_context';
 import { useKibana } from '../kibana_context/use_kibana';
 

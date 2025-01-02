@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Meta, Story } from '@storybook/react';
+import type { Meta, Story } from '@storybook/react';
 import cytoscape from 'cytoscape';
 import React from 'react';
 import { Popover } from '.';

@@ -7,17 +7,17 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiBasicTable,
   EuiLink,
   EuiSpacer,
   EuiText,
-  EuiBasicTableColumn,
   EuiButtonIcon,
   copyToClipboard,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ValuesType } from 'utility-types';
+import type { ValuesType } from 'utility-types';
 
 interface Props {
   apmServerUrl?: string;

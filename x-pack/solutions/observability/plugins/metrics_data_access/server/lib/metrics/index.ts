@@ -7,16 +7,14 @@
 
 import { decodeOrThrow } from '@kbn/io-ts-utils';
 const TIMESTAMP_FIELD = '@timestamp';
-import { MetricsAPIRequest, MetricsAPIResponse } from '../../../common/http_api/metrics_api';
-import {
+import type { MetricsAPIRequest, MetricsAPIResponse } from '../../../common/http_api/metrics_api';
+import type {
   ESSearchClient,
-  CompositeResponseRT,
   MetricsESResponse,
-  AggregationResponseRT,
   AggregationResponse,
   CompositeResponse,
-  HistogramBucketRT,
 } from './types';
+import { CompositeResponseRT, AggregationResponseRT, HistogramBucketRT } from './types';
 import { EMPTY_RESPONSE } from './constants';
 import { createAggregations, createCompositeAggregations } from './lib/create_aggregations';
 import { convertBucketsToMetricsApiSeries } from './lib/convert_buckets_to_metrics_series';

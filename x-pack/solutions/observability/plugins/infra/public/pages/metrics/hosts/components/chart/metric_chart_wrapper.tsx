@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useEffect, useRef, CSSProperties } from 'react';
+import type { CSSProperties } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { Chart, Metric, Settings, type MetricWNumber, type MetricWTrend } from '@elastic/charts';
 import { EuiPanel, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';

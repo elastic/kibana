@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import type { VectorStyleDescriptor } from '@kbn/maps-plugin/common';
 import {
-  VectorStyleDescriptor,
   COLOR_MAP_TYPE,
   FIELD_ORIGIN,
   LABEL_BORDER_SIZES,
@@ -15,7 +15,7 @@ import {
   SYMBOLIZE_AS_TYPES,
 } from '@kbn/maps-plugin/common';
 
-import { StyleColorParams } from './style_color_params';
+import type { StyleColorParams } from './style_color_params';
 
 export enum PalleteColors {
   BluetoRed = 'Blue to Red',

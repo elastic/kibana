@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { EuiDatePicker, EuiDatePickerProps } from '@elastic/eui';
+import type { EuiDatePickerProps } from '@elastic/eui';
+import { EuiDatePicker } from '@elastic/eui';
 import React from 'react';
 import styled, { type StyledComponent } from '@emotion/styled';
 

@@ -14,7 +14,7 @@ import {
 import cypress from 'cypress';
 import path from 'path';
 import Url from 'url';
-import { FtrProviderContext } from './ftr_provider_context';
+import type { FtrProviderContext } from './ftr_provider_context';
 
 export async function cypressTestRunner({ getService }: FtrProviderContext) {
   const config = getService('config');

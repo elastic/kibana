@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { CoreRequestHandlerContext, ElasticsearchClient } from '@kbn/core/server';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { CoreRequestHandlerContext, ElasticsearchClient } from '@kbn/core/server';
 import {
   profilingAWSCostDiscountRate,
   profilingCo2PerKWH,
@@ -16,7 +16,7 @@ import {
   profilingAzureCostDiscountRate,
 } from '@kbn/observability-plugin/common';
 import { percentToFactor } from '../../utils/percent_to_factor';
-import { RegisterServicesParams } from '../register_services';
+import type { RegisterServicesParams } from '../register_services';
 
 export interface FetchFlamechartParams {
   esClient: ElasticsearchClient;

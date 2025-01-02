@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import cytoscape from 'cytoscape';
+import type cytoscape from 'cytoscape';
 import { debounce } from 'lodash';
 import { useEffect } from 'react';
 import { useUiTracker } from '@kbn/observability-shared-plugin/public';

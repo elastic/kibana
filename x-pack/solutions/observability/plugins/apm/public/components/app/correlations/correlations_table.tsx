@@ -7,7 +7,8 @@
 
 import React, { useCallback, useMemo, useState } from 'react';
 import { debounce } from 'lodash';
-import { EuiBasicTable, EuiBasicTableColumn, useEuiTheme } from '@elastic/eui';
+import type { EuiBasicTableColumn } from '@elastic/eui';
+import { EuiBasicTable, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { EuiTableSortingType } from '@elastic/eui/src/components/basic_table/table_types';
 import type { Criteria } from '@elastic/eui/src/components/basic_table/basic_table';

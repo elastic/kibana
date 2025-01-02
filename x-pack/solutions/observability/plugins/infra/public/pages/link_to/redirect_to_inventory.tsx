@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import type React from 'react';
+import { useEffect } from 'react';
 import { parse } from 'query-string';
-import { RouteComponentProps } from 'react-router-dom';
+import type { RouteComponentProps } from 'react-router-dom';
 import type { SerializableRecord } from '@kbn/utility-types';
 import { INVENTORY_LOCATOR_ID } from '@kbn/observability-shared-plugin/common';
 import { useKibanaContextForPlugin } from '../../hooks/use_kibana';

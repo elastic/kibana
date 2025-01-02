@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { EuiSuperDatePicker, OnRefreshChangeProps, OnTimeChangeProps } from '@elastic/eui';
+import type { OnRefreshChangeProps, OnTimeChangeProps } from '@elastic/eui';
+import { EuiSuperDatePicker } from '@elastic/eui';
 import React, { useCallback } from 'react';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import styled from '@emotion/styled';
-import { MetricsTimeInput } from '../hooks/use_metrics_time';
+import type { MetricsTimeInput } from '../hooks/use_metrics_time';
 import { useKibanaUiSetting } from '../../../../hooks/use_kibana_ui_setting';
 import { mapKibanaQuickRangesToDatePickerRanges } from '../../../../utils/map_timepicker_quickranges_to_datepicker_ranges';
 

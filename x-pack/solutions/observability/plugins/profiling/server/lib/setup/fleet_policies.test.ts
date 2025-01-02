@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PackageInputType } from '../..';
+import type { PackageInputType } from '../..';
 import { getVarsFor } from './fleet_policies';
 
 const secretTokenRegex = /^[a-zA-Z0-9]+$/;

@@ -7,7 +7,7 @@
 import { type Theme, useTheme } from '@emotion/react';
 import React from 'react';
 
-import { ComponentType } from 'react';
+import type { ComponentType } from 'react';
 
 export const withAttrs =
   (Component: ComponentType<any>, fn: (args: { theme: Theme; props: any }) => any) =>

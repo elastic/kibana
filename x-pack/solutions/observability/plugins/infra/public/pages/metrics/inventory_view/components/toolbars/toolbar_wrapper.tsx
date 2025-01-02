@@ -10,7 +10,7 @@ import { EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import { fieldToName } from '../../lib/field_to_display_name';
 import { useWaffleOptionsContext } from '../../hooks/use_waffle_options';
 import { WaffleInventorySwitcher } from '../waffle/waffle_inventory_switcher';
-import { ToolbarProps } from './types';
+import type { ToolbarProps } from './types';
 
 interface Props {
   children: (props: Omit<ToolbarProps, 'accounts' | 'regions'>) => React.ReactElement;

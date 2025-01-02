@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from '@kbn/core/server';
-import { RequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
-import { SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
-import { SetupRouteOptions } from '../types';
-import { MetricIndicesAPIResponse } from '../../../common/http_api/metric_indices';
+import type { ElasticsearchClient } from '@kbn/core/server';
+import type { RequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
+import type { SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
+import type { SetupRouteOptions } from '../types';
+import type { MetricIndicesAPIResponse } from '../../../common/http_api/metric_indices';
 
 function getIndexStatus(client: ElasticsearchClient, index: string) {
   return client

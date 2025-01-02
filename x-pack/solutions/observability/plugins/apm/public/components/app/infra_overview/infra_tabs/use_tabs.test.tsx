@@ -4,11 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { ReactNode } from 'react';
+import type { ReactNode } from 'react';
+import React from 'react';
 import { renderHook } from '@testing-library/react';
 import { useTabs } from './use_tabs';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
-import { CoreStart } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
 import { shallow } from 'enzyme';
 
 const KibanaReactContext = createKibanaReactContext({

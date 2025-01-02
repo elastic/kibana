@@ -6,7 +6,7 @@
  */
 
 import styled from '@emotion/styled';
-import {
+import type {
   LogEntriesSummaryBucket,
   LogEntriesSummaryHighlightsBucket,
   LogEntryTime,
