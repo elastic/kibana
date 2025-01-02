@@ -46,7 +46,7 @@ export const registerFleetSetupRoute = (router: FleetAuthzRouter) => {
               anyRequired: [
                 FLEET_API_PRIVILEGES.AGENTS.READ,
                 FLEET_API_PRIVILEGES.AGENT_POLICIES.READ,
-                FLEET_API_PRIVILEGES.AGENT_POLICIES.READ,
+                FLEET_API_PRIVILEGES.SETTINGS.READ,
                 FLEET_API_PRIVILEGES.SETUP,
               ],
             },
@@ -119,7 +119,7 @@ export const registerCreateFleetSetupRoute = (router: FleetAuthzRouter) => {
               anyRequired: [
                 FLEET_API_PRIVILEGES.AGENTS.READ,
                 FLEET_API_PRIVILEGES.AGENT_POLICIES.READ,
-                FLEET_API_PRIVILEGES.AGENT_POLICIES.READ,
+                FLEET_API_PRIVILEGES.SETTINGS.READ,
                 FLEET_API_PRIVILEGES.SETUP,
               ],
             },
@@ -161,7 +161,7 @@ export const registerGetFleetStatusRoute = (router: FleetAuthzRouter) => {
               anyRequired: [
                 FLEET_API_PRIVILEGES.AGENTS.READ,
                 FLEET_API_PRIVILEGES.AGENT_POLICIES.READ,
-                FLEET_API_PRIVILEGES.AGENT_POLICIES.READ,
+                FLEET_API_PRIVILEGES.SETTINGS.READ,
                 FLEET_API_PRIVILEGES.SETUP,
               ],
             },
