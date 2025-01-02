@@ -8,12 +8,12 @@
 import { ALERT_RULE_PARAMETERS, TIMESTAMP } from '@kbn/rule-data-utils';
 import moment from 'moment';
 import { encode } from '@kbn/rison';
-import { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common/parse_technical_fields';
+import type { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common/parse_technical_fields';
 import { type InventoryItemType, findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
 import { SupportedAssetTypes } from '@kbn/observability-shared-plugin/common';
+import type { MetricsExplorerLocatorParams } from '@kbn/observability-shared-plugin/common';
 import {
-  MetricsExplorerLocatorParams,
   type AssetDetailsLocatorParams,
   type InventoryLocatorParams,
 } from '@kbn/observability-shared-plugin/common';
