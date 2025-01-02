@@ -6,15 +6,13 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { UrlService } from '@kbn/share-plugin/common/url_service';
+import type { UrlService } from '@kbn/share-plugin/common/url_service';
 import { getLogsLocatorsFromUrlService } from '@kbn/logs-shared-plugin/common';
-import { ObservabilityRuleTypeModel } from '@kbn/observability-plugin/public';
-import {
-  LOG_DOCUMENT_COUNT_RULE_TYPE_ID,
-  PartialRuleParams,
-} from '../../../common/alerting/logs/log_threshold';
+import type { ObservabilityRuleTypeModel } from '@kbn/observability-plugin/public';
+import type { PartialRuleParams } from '../../../common/alerting/logs/log_threshold';
+import { LOG_DOCUMENT_COUNT_RULE_TYPE_ID } from '../../../common/alerting/logs/log_threshold';
 import { createLazyComponentWithKibanaContext } from '../../hooks/use_kibana';
-import { InfraClientCoreSetup } from '../../types';
+import type { InfraClientCoreSetup } from '../../types';
 import { createRuleFormatter } from './rule_data_formatters';
 import { validateExpression } from './validation';
 

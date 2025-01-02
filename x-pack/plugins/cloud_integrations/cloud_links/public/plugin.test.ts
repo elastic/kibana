@@ -17,7 +17,7 @@ describe('Cloud Links Plugin - public', () => {
   let plugin: CloudLinksPlugin;
 
   beforeEach(() => {
-    plugin = new CloudLinksPlugin();
+    plugin = new CloudLinksPlugin(coreMock.createPluginInitializerContext());
   });
 
   afterEach(() => {

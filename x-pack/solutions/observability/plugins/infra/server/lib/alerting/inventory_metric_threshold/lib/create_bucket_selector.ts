@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { SnapshotMetricType } from '@kbn/metrics-data-access-plugin/common';
+import type { SnapshotMetricType } from '@kbn/metrics-data-access-plugin/common';
 import { convertToBuiltInComparators } from '@kbn/observability-plugin/common';
-import { InventoryMetricConditions } from '../../../../../common/alerting/metrics';
-import { SnapshotCustomMetricInput } from '../../../../../common/http_api';
+import type { InventoryMetricConditions } from '../../../../../common/alerting/metrics';
+import type { SnapshotCustomMetricInput } from '../../../../../common/http_api';
 import { createConditionScript } from './create_condition_script';
 
 const EMPTY_SHOULD_WARN = {

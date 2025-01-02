@@ -16,7 +16,16 @@ const bodySchema = schema.object({
 
 export function registerUnfreezeRoute({ router, lib: { handleEsError } }: RouteDependencies) {
   router.post(
-    { path: addBasePath('/indices/unfreeze'), validate: { body: bodySchema } },
+    {
+      path: addBasePath('/indices/unfreeze'),
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Relies on es client for authorization',
+        },
+      },
+      validate: { body: bodySchema },
+    },
     async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
       const { indices = [] } = request.body as typeof bodySchema.type;

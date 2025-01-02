@@ -26,6 +26,12 @@ export const registerPrivilegesRoute = ({ router, config }: RouteDependencies) =
   router.get(
     {
       path: `${API_BASE_PATH}/privileges/{permissions_type}`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Relies on es client for authorization',
+        },
+      },
       validate: {
         params: schema.object({
           permissions_type: schema.oneOf([

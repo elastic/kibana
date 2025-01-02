@@ -9,7 +9,7 @@ import { first } from 'lodash';
 import { useEffect, useMemo } from 'react';
 import type { InventoryItemType, SnapshotMetricType } from '@kbn/metrics-data-access-plugin/common';
 import { getIntervalInSeconds } from '../../../../../common/utils/get_interval_in_seconds';
-import { InfraTimerangeInput } from '../../../../../common/http_api/snapshot_api';
+import type { InfraTimerangeInput } from '../../../../../common/http_api/snapshot_api';
 import { useSnapshot } from './use_snaphot';
 
 const ONE_MINUTE = 60;

@@ -10,21 +10,21 @@ import rison from '@kbn/rison';
 import { getThresholds } from '../common/get_values';
 import { set } from '@kbn/safer-lodash-set';
 import { COMPARATORS } from '@kbn/alerting-comparators';
-import {
-  Aggregators,
+import type {
   CountMetricExpressionParams,
   NonCountMetricExpressionParams,
 } from '../../../../common/alerting/metrics';
+import { Aggregators } from '../../../../common/alerting/metrics';
 import {
   createMetricThresholdExecutor,
   FIRED_ACTIONS,
   NO_DATA_ACTIONS,
   WARNING_ACTIONS,
 } from './metric_threshold_executor';
-import { Evaluation } from './lib/evaluate_rule';
+import type { Evaluation } from './lib/evaluate_rule';
 import type { LogMeta, Logger } from '@kbn/logging';
 import { DEFAULT_FLAPPING_SETTINGS } from '@kbn/alerting-plugin/common';
-import { InfraConfig } from '../../../../common/plugin_config_types';
+import type { InfraConfig } from '../../../../common/plugin_config_types';
 import {
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUES,
@@ -33,11 +33,11 @@ import {
 } from '@kbn/rule-data-utils';
 import { type Group } from '@kbn/observability-alerting-rule-utils';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
-import {
+import type {
   AssetDetailsLocatorParams,
   MetricsExplorerLocatorParams,
 } from '@kbn/observability-shared-plugin/common';
-import { InfraLocators } from '../../infra_types';
+import type { InfraLocators } from '../../infra_types';
 
 jest.mock('./lib/evaluate_rule', () => ({ evaluateRule: jest.fn() }));
 

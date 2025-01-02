@@ -39,7 +39,12 @@ export const calculateModuleTargetFolder = (module: Package): string => {
   const group = module.manifest.group!;
   const isPlugin = module.manifest.type === 'plugin';
   const fullPath = join(BASE_FOLDER, module.directory);
-  let moduleDelimiter = isPlugin ? '/plugins/' : '/packages/';
+  if (!fullPath.includes('/plugins/') && !fullPath.includes('/packages/')) {
+    throw new Error(
+      `The module ${module.id} is not located under a '*/plugins/*' or '*/packages/*' folder`
+    );
+  }
+  let moduleDelimiter = fullPath.includes('/plugins/') ? '/plugins/' : '/packages/';
 
   // for platform modules that are in a sustainable folder, strip the /private/ or /shared/ part too
   if (module.directory.includes(`${moduleDelimiter}private/`)) {

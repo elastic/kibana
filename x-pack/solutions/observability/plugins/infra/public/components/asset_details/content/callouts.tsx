@@ -6,11 +6,11 @@
  */
 import React from 'react';
 
+import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 import {
   type SnapshotMetricType,
   findInventoryModel,
   type InventoryModels,
-  InventoryItemType,
 } from '@kbn/metrics-data-access-plugin/common';
 import { useAssetDetailsUrlState } from '../hooks/use_asset_details_url_state';
 import { useAssetDetailsRenderPropsContext } from '../hooks/use_asset_details_render_props';

@@ -12,14 +12,6 @@ import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { Datatable, DatatableColumnMeta } from '@kbn/expressions-plugin/common';
 import { Trigger, RowClickContext } from '@kbn/ui-actions-plugin/public';
 import { BooleanRelation } from '@kbn/es-query';
-import { IEmbeddable } from '..';
-
-/**
- * @deprecated use `EmbeddableApiContext` from `@kbn/presentation-publishing`
- */
-export interface EmbeddableContext<T extends IEmbeddable = IEmbeddable> {
-  embeddable: T;
-}
 
 export type ValueClickContext = Partial<EmbeddableApiContext> & {
   data: {
@@ -192,9 +184,3 @@ export const isRowClickTriggerContext = (context: ChartActionContext): context i
   !!context.data &&
   typeof context.data === 'object' &&
   typeof (context as RowClickContext).data.rowIndex === 'number';
-
-export const isContextMenuTriggerContext = (context: unknown): context is EmbeddableContext =>
-  !!context &&
-  typeof context === 'object' &&
-  !!(context as EmbeddableContext).embeddable &&
-  typeof (context as EmbeddableContext).embeddable === 'object';

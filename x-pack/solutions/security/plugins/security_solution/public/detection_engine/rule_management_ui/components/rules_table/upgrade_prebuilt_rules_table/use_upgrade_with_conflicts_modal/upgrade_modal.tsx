@@ -27,7 +27,7 @@ export const UpgradeWithConflictsModal = memo(function ConfirmUpgradeWithConflic
       confirmButtonText={i18n.UPGRADE_CONFLICTS_MODAL_CONFIRM}
       buttonColor="primary"
       defaultFocusedButton="confirm"
-      data-test-subj="confirmUpgradeWithConflictsModal"
+      data-test-subj="upgradeConflictsModal"
     >
       <EuiText>{i18n.UPGRADE_CONFLICTS_MODAL_BODY}</EuiText>
     </EuiConfirmModal>

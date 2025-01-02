@@ -85,7 +85,16 @@ export function registerListRoute({
   const disallowedNodeAttributes = [...NODE_ATTRS_KEYS_TO_IGNORE, ...filteredNodeAttributes];
 
   router.get(
-    { path: addBasePath('/nodes/list'), validate: false },
+    {
+      path: addBasePath('/nodes/list'),
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Relies on es client for authorization',
+        },
+      },
+      validate: false,
+    },
     license.guardApiRoute(async (context, request, response) => {
       try {
         const esClient = (await context.core).elasticsearch.client;

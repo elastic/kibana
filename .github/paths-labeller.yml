@@ -9,11 +9,11 @@
     - 'src/plugins/expressions/**/*.*'
     - 'src/plugins/bfetch/**/*.*'
 - 'Team:obs-ux-infra_services':
-    - 'x-pack/plugins/observability_solution/apm/**/*.*'
+    - 'x-pack/solutions/observability/plugins/apm/**/*.*'
     - 'x-pack/test/apm_api_integration/**/*.*'
     - 'packages/kbn-apm-synthtrace/**/*.*'
     - 'packages/kbn-apm-synthtrace-client/**/*.*'
-    - 'packages/kbn-apm-utils/**/*.*'
+    - 'src/platform/packages/shared/kbn-apm-utils/**/*.*'
     - 'x-pack/solutions/observability/plugins/ux/**/*.*'
 - 'Team:Fleet':
     - 'x-pack/platform/plugins/shared/fleet/**/*.*'

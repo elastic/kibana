@@ -20,6 +20,12 @@ export function registerForcemergeRoute({ router, lib: { handleEsError } }: Rout
   router.post(
     {
       path: addBasePath('/indices/forcemerge'),
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Relies on es client for authorization',
+        },
+      },
       validate: {
         body: bodySchema,
       },

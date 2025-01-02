@@ -6,8 +6,8 @@
  */
 
 import { sortBy, last, first } from 'lodash';
-import { SnapshotNode } from '../../../../../common/http_api/snapshot_api';
-import { WaffleSortOption } from '../hooks/use_waffle_options';
+import type { SnapshotNode } from '../../../../../common/http_api/snapshot_api';
+import type { WaffleSortOption } from '../hooks/use_waffle_options';
 
 const SORT_PATHS = {
   name: (node: SnapshotNode) => last(node.path),

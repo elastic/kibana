@@ -20,7 +20,7 @@ import { useAssetDetailsRenderPropsContext } from '../hooks/use_asset_details_re
 import { useMetadataStateContext } from '../hooks/use_metadata_state';
 import { usePageHeader } from '../hooks/use_page_header';
 import { useTabSwitcherContext } from '../hooks/use_tab_switcher';
-import { ContentTemplateProps } from '../types';
+import type { ContentTemplateProps } from '../types';
 import { getIntegrationsAvailable } from '../utils';
 import { InfraPageTemplate } from '../../shared/templates/infra_page_template';
 import { OnboardingFlow } from '../../shared/templates/no_data_config';

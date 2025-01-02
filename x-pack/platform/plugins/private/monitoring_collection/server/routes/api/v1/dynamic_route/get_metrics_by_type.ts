@@ -36,8 +36,15 @@ export function registerDynamicRoute({
   router.get(
     {
       path: `${MONITORING_COLLECTION_BASE_PATH}/{type}`,
+      security: {
+        authz: {
+          enabled: false,
+          reason:
+            'This route is opted out from authorization because it is only retrieving the ES cluster UUID',
+        },
+      },
       options: {
-        access: 'internal',
+        access: 'public',
         authRequired: true,
         tags: ['api'], // ensures that unauthenticated calls receive a 401 rather than a 302 redirect to login page
       },

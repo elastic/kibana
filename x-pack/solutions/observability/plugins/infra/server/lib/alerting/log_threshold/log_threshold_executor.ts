@@ -15,19 +15,19 @@ import {
   ALERT_GROUP,
   ALERT_REASON,
 } from '@kbn/rule-data-utils';
-import { ElasticsearchClient, IBasePath } from '@kbn/core/server';
-import {
+import type { ElasticsearchClient, IBasePath } from '@kbn/core/server';
+import type {
   ActionGroup,
   ActionGroupIdsOf,
   AlertInstanceContext as AlertContext,
   AlertInstanceState as AlertState,
   RuleTypeState,
   RuleExecutorOptions,
-  AlertsClientError,
 } from '@kbn/alerting-plugin/server';
+import { AlertsClientError } from '@kbn/alerting-plugin/server';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
-import { ObservabilityLogsAlert } from '@kbn/alerts-as-data-utils';
-import {
+import type { ObservabilityLogsAlert } from '@kbn/alerts-as-data-utils';
+import type {
   PublicAlertsClient,
   RecoveredAlertData,
 } from '@kbn/alerting-plugin/server/alerts_client/types';
@@ -36,31 +36,33 @@ import { getEcsGroups, type Group } from '@kbn/observability-alerting-rule-utils
 import { ecsFieldMap } from '@kbn/rule-registry-plugin/common/assets/field_maps/ecs_field_map';
 import { decodeOrThrow } from '@kbn/io-ts-utils';
 import { getChartGroupNames } from '../../../../common/utils/get_chart_group_names';
-import {
+import type {
   RuleParams,
+  CountRuleParams,
+  CountCriteria,
+  GroupedSearchQueryResponse,
+  RatioRuleParams,
+  UngroupedSearchQueryResponse,
+  ExecutionTimeRange,
+  Criterion,
+} from '../../../../common/alerting/logs/log_threshold';
+import {
   ruleParamsRT,
   AlertStates,
   Comparator,
-  CountRuleParams,
-  CountCriteria,
   getDenominator,
   getNumerator,
-  GroupedSearchQueryResponse,
   GroupedSearchQueryResponseRT,
   hasGroupBy,
   isOptimizableGroupedThreshold,
   isOptimizedGroupedSearchQueryResponse,
   isRatioRuleParams,
-  RatioRuleParams,
-  UngroupedSearchQueryResponse,
   UngroupedSearchQueryResponseRT,
-  ExecutionTimeRange,
-  Criterion,
 } from '../../../../common/alerting/logs/log_threshold';
 import { getLogsAppAlertUrl } from '../../../../common/formatters/alert_link';
-import { InfraBackendLibs } from '../../infra_types';
+import type { InfraBackendLibs } from '../../infra_types';
+import type { AdditionalContext } from '../common/utils';
 import {
-  AdditionalContext,
   flattenAdditionalContext,
   getContextForRecoveredAlerts,
   getGroupByObject,
@@ -73,9 +75,9 @@ import {
   getReasonMessageForUngroupedCountAlert,
   getReasonMessageForUngroupedRatioAlert,
 } from './reason_formatters';
+import type { LogThresholdRuleTypeParams } from '../../../../common/alerting/logs/log_threshold/query_helpers';
 import {
   buildFiltersFromCriteria,
-  LogThresholdRuleTypeParams,
   positiveComparators,
 } from '../../../../common/alerting/logs/log_threshold/query_helpers';
 

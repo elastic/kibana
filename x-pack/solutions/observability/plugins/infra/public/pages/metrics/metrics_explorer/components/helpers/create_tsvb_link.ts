@@ -8,15 +8,17 @@
 import { encode } from '@kbn/rison';
 import { v4 as uuidv4 } from 'uuid';
 import { set } from '@kbn/safer-lodash-set';
-import { LinkDescriptor } from '@kbn/observability-shared-plugin/public';
+import type { LinkDescriptor } from '@kbn/observability-shared-plugin/public';
 import { TIMESTAMP_FIELD } from '../../../../../../common/constants';
 import { colorTransformer, Color } from '../../../../../../common/color_palette';
-import { MetricsExplorerSeries } from '../../../../../../common/http_api/metrics_explorer';
-import {
+import type { MetricsExplorerSeries } from '../../../../../../common/http_api/metrics_explorer';
+import type {
   MetricsExplorerOptions,
   MetricsExplorerOptionsMetric,
   MetricsExplorerTimeOptions,
   MetricsExplorerChartOptions,
+} from '../../hooks/use_metrics_explorer_options';
+import {
   MetricsExplorerYAxisMode,
   MetricsExplorerChartType,
 } from '../../hooks/use_metrics_explorer_options';

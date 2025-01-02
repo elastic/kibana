@@ -6,8 +6,8 @@
  */
 
 import { transformRequestToMetricsAPIRequest } from './transform_request_to_metrics_api_request';
-import { ESSearchClient } from '../../../lib/metrics/types';
-import { InfraSource } from '../../../lib/sources';
+import type { ESSearchClient } from '../../../lib/metrics/types';
+import type { InfraSource } from '../../../lib/sources';
 import type { SnapshotRequest } from '../../../../common/http_api';
 import type { MetricsAPIRequest } from '@kbn/metrics-data-access-plugin/common';
 

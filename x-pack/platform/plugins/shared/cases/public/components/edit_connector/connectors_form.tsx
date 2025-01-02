@@ -13,7 +13,7 @@ import {
   useFormData,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import React, { useCallback, useMemo } from 'react';
-import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { NONE_CONNECTOR_ID } from '../../../common/constants';
 import type { CaseConnectors, CaseUI } from '../../../common/ui/types';
 import { ConnectorFieldsForm } from '../connectors/fields_form';
@@ -141,6 +141,7 @@ const ConnectorsFormComponent: React.FC<Props> = ({
         <EuiFlexItem data-test-subj="edit-connector-fields-form-flex-item">
           <ConnectorFieldsForm connector={currentActionConnector} key={connectorId} />
         </EuiFlexItem>
+        <EuiSpacer size="s" />
         <EuiFlexItem>
           <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
             <EuiFlexItem grow={false}>

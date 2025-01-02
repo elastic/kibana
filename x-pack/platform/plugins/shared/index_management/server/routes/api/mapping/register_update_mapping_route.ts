@@ -18,6 +18,12 @@ export function registerUpdateMappingRoute({ router, lib: { handleEsError } }: R
   router.put(
     {
       path: addBasePath('/mapping/{indexName}'),
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Relies on es client for authorization',
+        },
+      },
       validate: {
         body: schema.maybe(schema.object({}, { unknowns: 'allow' })),
         params: paramsSchema,

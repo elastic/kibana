@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SettingsProps } from '@elastic/charts';
+import type { SettingsProps } from '@elastic/charts';
 import { useEuiTheme } from '@elastic/eui';
 import { useKibanaContextForPlugin } from './use_kibana';
 
