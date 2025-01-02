@@ -468,7 +468,7 @@
                 "signature": [
                   "SearchStrategyRequest"
                 ],
-                "path": "packages/kbn-search-types/src/types.ts",
+                "path": "src/platform/packages/shared/kbn-search-types/src/types.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -489,7 +489,7 @@
                   },
                   " | undefined"
                 ],
-                "path": "packages/kbn-search-types/src/types.ts",
+                "path": "src/platform/packages/shared/kbn-search-types/src/types.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -29557,7 +29557,7 @@
                 "signature": [
                   "SearchStrategyRequest"
                 ],
-                "path": "packages/kbn-search-types/src/types.ts",
+                "path": "src/platform/packages/shared/kbn-search-types/src/types.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -29578,7 +29578,7 @@
                   },
                   " | undefined"
                 ],
-                "path": "packages/kbn-search-types/src/types.ts",
+                "path": "src/platform/packages/shared/kbn-search-types/src/types.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }

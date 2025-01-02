@@ -6,11 +6,11 @@
  */
 
 import { omit } from 'lodash';
-import { PackagePolicy } from '@kbn/fleet-plugin/common';
-import { CoreStart, Logger } from '@kbn/core/server';
-import { FleetStartContract } from '@kbn/fleet-plugin/server';
+import type { PackagePolicy } from '@kbn/fleet-plugin/common';
+import type { CoreStart, Logger } from '@kbn/core/server';
+import type { FleetStartContract } from '@kbn/fleet-plugin/server';
 import { getInternalSavedObjectsClient } from '../../../lib/helpers/get_internal_saved_objects_client';
-import { APMPluginStartDependencies } from '../../../types';
+import type { APMPluginStartDependencies } from '../../../types';
 import { getApmPackagePolicies } from '../get_apm_package_policies';
 import { createApmAgentConfigApiKey, createApmSourceMapApiKey } from './create_apm_api_keys';
 import { getPackagePolicyWithApiKeys, policyHasApiKey } from '../get_package_policy_decorators';

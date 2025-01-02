@@ -12,6 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { useMlHref, ML_PAGES } from '@kbn/ml-plugin/public';
 import styled from '@emotion/styled';
 import { useLinkProps, shouldHandleLinkEvent } from '@kbn/observability-shared-plugin/public';
+import type { LogEntryColumnWidths } from '@kbn/logs-shared-plugin/public';
 import {
   LogEntryColumn,
   LogEntryFieldColumn,
@@ -19,24 +20,24 @@ import {
   LogEntryRowWrapper,
   LogEntryTimestampColumn,
   LogEntryContextMenu,
-  LogEntryColumnWidths,
   iconColumnId,
   LogColumnHeadersWrapper,
   LogColumnHeader,
 } from '@kbn/logs-shared-plugin/public';
 import { useKibanaContextForPlugin } from '../../../../../hooks/use_kibana';
 import { getFriendlyNameForPartitionId } from '../../../../../../common/log_analysis';
-import { TimeRange } from '../../../../../../common/time/time_range';
+import type { TimeRange } from '../../../../../../common/time/time_range';
 import { partitionField } from '../../../../../../common/log_analysis/job_parameters';
-import { LogEntryExample, isCategoryAnomaly } from '../../../../../../common/log_analysis';
+import type { LogEntryExample } from '../../../../../../common/log_analysis';
+import { isCategoryAnomaly } from '../../../../../../common/log_analysis';
+import type { LogColumnConfiguration } from '../../../../../utils/source_configuration';
 import {
-  LogColumnConfiguration,
   isTimestampLogColumnConfiguration,
   isFieldLogColumnConfiguration,
   isMessageLogColumnConfiguration,
 } from '../../../../../utils/source_configuration';
 import { localizedDate } from '../../../../../../common/formatters/datetime';
-import { LogEntryAnomaly } from '../../../../../../common/log_analysis';
+import type { LogEntryAnomaly } from '../../../../../../common/log_analysis';
 import { useLogEntryFlyoutContext } from '../../../../../containers/logs/log_flyout';
 
 export const exampleMessageScale = 'medium' as const;

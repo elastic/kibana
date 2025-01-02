@@ -20,6 +20,7 @@ describe('SIR formatter', () => {
         malwareHash: true,
         malwareUrl: true,
         priority: '2 - High',
+        additionalFields: '{"foo": "bar"}',
       },
     },
   } as Case;
@@ -36,6 +37,7 @@ describe('SIR formatter', () => {
       priority: '2 - High',
       correlation_display: 'Elastic Case',
       correlation_id: 'case-id',
+      additional_fields: '{"foo": "bar"}',
     });
   });
 
@@ -52,6 +54,7 @@ describe('SIR formatter', () => {
       priority: null,
       correlation_display: 'Elastic Case',
       correlation_id: null,
+      additional_fields: null,
     });
   });
 
@@ -92,6 +95,7 @@ describe('SIR formatter', () => {
       priority: '2 - High',
       correlation_display: 'Elastic Case',
       correlation_id: 'case-id',
+      additional_fields: '{"foo": "bar"}',
     });
   });
 
@@ -129,6 +133,7 @@ describe('SIR formatter', () => {
       priority: '2 - High',
       correlation_display: 'Elastic Case',
       correlation_id: 'case-id',
+      additional_fields: '{"foo": "bar"}',
     });
   });
 
@@ -172,6 +177,7 @@ describe('SIR formatter', () => {
       priority: '2 - High',
       correlation_display: 'Elastic Case',
       correlation_id: 'case-id',
+      additional_fields: '{"foo": "bar"}',
     });
   });
 });
