@@ -52,7 +52,7 @@ export const TokenField: FunctionComponent<TokenFieldProps> = ({ value, ...props
                 defaultMessage: 'Copy to clipboard',
               })}
               iconType="copyClipboard"
-              color="success"
+              color="accentSecondary"
               style={{ backgroundColor: 'transparent' }}
               onClick={copyText}
             />

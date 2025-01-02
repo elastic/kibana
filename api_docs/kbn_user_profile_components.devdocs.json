@@ -439,7 +439,7 @@
             "section": "def-common.UserProfileData",
             "text": "UserProfileData"
           },
-          ">>(updatedData: D) => Promise<void>; showSuccessNotification: ({ isRefreshRequired }?: { isRefreshRequired?: boolean | undefined; }) => void; userProfileData: ",
+          ">>(updatedData: D) => Promise<D>; showSuccessNotification: ({ isRefreshRequired }?: { isRefreshRequired?: boolean | undefined; }) => void; userProfileData: ",
           {
             "pluginId": "@kbn/user-profile-components",
             "scope": "common",
@@ -447,7 +447,7 @@
             "section": "def-common.UserProfileData",
             "text": "UserProfileData"
           },
-          " | null | undefined; isLoading: boolean; userProfileEnabled: boolean | undefined; }"
+          " | null | undefined; isLoading: boolean; userProfileEnabled: boolean | undefined; userProfileLoaded: boolean; }"
         ],
         "path": "packages/kbn-user-profile-components/src/hooks/use_update_user_profile.tsx",
         "deprecated": false,
@@ -872,6 +872,14 @@
                 "section": "def-public.ThemeServiceSetup",
                 "text": "ThemeServiceSetup"
               },
+              "; userProfile: ",
+              {
+                "pluginId": "@kbn/core-user-profile-browser",
+                "scope": "public",
+                "docId": "kibKbnCoreUserProfileBrowserPluginApi",
+                "section": "def-public.UserProfileService",
+                "text": "UserProfileService"
+              },
               "; i18n: ",
               {
                 "pluginId": "@kbn/core-i18n-browser",
@@ -966,13 +974,7 @@
                     "text": "I18nStart"
                   },
                   "; analytics?: Pick<",
-                  {
-                    "pluginId": "@kbn/core-analytics-browser",
-                    "scope": "public",
-                    "docId": "kibKbnCoreAnalyticsBrowserPluginApi",
-                    "section": "def-public.AnalyticsServiceStart",
-                    "text": "AnalyticsServiceStart"
-                  },
+                  "AnalyticsServiceStart",
                   ", \"reportEvent\"> | undefined; theme: ",
                   {
                     "pluginId": "@kbn/react-kibana-context-common",
@@ -981,7 +983,15 @@
                     "section": "def-common.ThemeServiceStart",
                     "text": "ThemeServiceStart"
                   },
-                  "; }"
+                  "; userProfile?: Pick<",
+                  {
+                    "pluginId": "@kbn/core-user-profile-browser",
+                    "scope": "public",
+                    "docId": "kibKbnCoreUserProfileBrowserPluginApi",
+                    "section": "def-public.UserProfileService",
+                    "text": "UserProfileService"
+                  },
+                  ", \"getUserProfile$\"> | undefined; }"
                 ],
                 "path": "packages/react/kibana_mount/to_mount_point.tsx",
                 "deprecated": false,
@@ -1393,7 +1403,7 @@
               "EuiSelectableLIOption",
               "<{}>> & ",
               "CommonProps",
-              " & { label: string; searchableLabel?: string | undefined; key?: string | undefined; checked?: \"mixed\" | \"on\" | \"off\" | undefined; disabled?: boolean | undefined; isGroupLabel?: false | undefined; prepend?: React.ReactNode; append?: React.ReactNode; ref?: ((optionIndex: number) => void) | undefined; id?: undefined; data?: { [key: string]: any; } | undefined; textWrap?: \"wrap\" | \"truncate\" | undefined; truncationProps?: Partial<Omit<",
+              " & { label: string; searchableLabel?: string | undefined; key?: string | undefined; checked?: \"on\" | \"off\" | \"mixed\" | undefined; disabled?: boolean | undefined; isGroupLabel?: false | undefined; prepend?: React.ReactNode; append?: React.ReactNode; ref?: ((optionIndex: number) => void) | undefined; id?: undefined; data?: { [key: string]: any; } | undefined; textWrap?: \"wrap\" | \"truncate\" | undefined; truncationProps?: Partial<Omit<",
               "EuiTextTruncateProps",
               ", \"text\" | \"children\">> | undefined; toolTipContent?: React.ReactNode; toolTipProps?: Partial<Omit<",
               "EuiToolTipProps",
@@ -1626,7 +1636,7 @@
         "label": "DarkModeValue",
         "description": [],
         "signature": [
-          "\"\" | \"light\" | \"dark\""
+          "\"light\" | \"dark\" | \"system\" | \"space_default\""
         ],
         "path": "packages/kbn-user-profile-components/src/types.ts",
         "deprecated": false,
@@ -1649,7 +1659,7 @@
             "section": "def-common.UserProfileData",
             "text": "UserProfileData"
           },
-          ">>(updatedData: D) => Promise<void>; showSuccessNotification: ({ isRefreshRequired }?: { isRefreshRequired?: boolean | undefined; }) => void; userProfileData: ",
+          ">>(updatedData: D) => Promise<D>; showSuccessNotification: ({ isRefreshRequired }?: { isRefreshRequired?: boolean | undefined; }) => void; userProfileData: ",
           {
             "pluginId": "@kbn/user-profile-components",
             "scope": "common",
@@ -1657,7 +1667,7 @@
             "section": "def-common.UserProfileData",
             "text": "UserProfileData"
           },
-          " | null | undefined; isLoading: boolean; userProfileEnabled: boolean | undefined; }"
+          " | null | undefined; isLoading: boolean; userProfileEnabled: boolean | undefined; userProfileLoaded: boolean; }"
         ],
         "path": "packages/kbn-user-profile-components/src/hooks/use_update_user_profile.tsx",
         "deprecated": false,

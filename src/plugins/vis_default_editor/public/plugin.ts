@@ -11,7 +11,7 @@ import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 
 import type { VisualizationsSetup } from '@kbn/visualizations-plugin/public';
 import { DefaultEditorController } from './default_editor_controller';
-import { setAnalytics, setI18n, setTheme } from './services';
+import { setAnalytics, setCoreStart, setTheme } from './services';
 
 export interface VisDefaultEditorSetupDependencies {
   visualizations: VisualizationsSetup;
@@ -29,7 +29,7 @@ export class VisDefaultEditorPlugin
   }
 
   public start(core: CoreStart) {
-    setI18n(core.i18n);
+    setCoreStart(core);
   }
 
   stop() {}

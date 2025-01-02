@@ -95,7 +95,7 @@
           },
           ">[]; }"
         ],
-        "path": "packages/default-nav/devtools/default_navigation.ts",
+        "path": "src/platform/packages/private/default-nav/devtools/default_navigation.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -110,7 +110,7 @@
         "signature": [
           "\"root\" | \"rootNav:devtools\""
         ],
-        "path": "packages/default-nav/devtools/default_navigation.ts",
+        "path": "src/platform/packages/private/default-nav/devtools/default_navigation.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -124,7 +124,7 @@
         "tags": [],
         "label": "defaultNavigation",
         "description": [],
-        "path": "packages/default-nav/devtools/default_navigation.ts",
+        "path": "src/platform/packages/private/default-nav/devtools/default_navigation.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -135,7 +135,7 @@
             "tags": [],
             "label": "title",
             "description": [],
-            "path": "packages/default-nav/devtools/default_navigation.ts",
+            "path": "src/platform/packages/private/default-nav/devtools/default_navigation.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -149,7 +149,7 @@
             "signature": [
               "\"rootNav:devtools\""
             ],
-            "path": "packages/default-nav/devtools/default_navigation.ts",
+            "path": "src/platform/packages/private/default-nav/devtools/default_navigation.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -160,7 +160,7 @@
             "tags": [],
             "label": "icon",
             "description": [],
-            "path": "packages/default-nav/devtools/default_navigation.ts",
+            "path": "src/platform/packages/private/default-nav/devtools/default_navigation.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -174,7 +174,7 @@
             "signature": [
               "\"accordion\""
             ],
-            "path": "packages/default-nav/devtools/default_navigation.ts",
+            "path": "src/platform/packages/private/default-nav/devtools/default_navigation.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -188,7 +188,7 @@
             "signature": [
               "({ link: \"dev_tools:console\"; } | { link: \"dev_tools:searchprofiler\"; } | { link: \"dev_tools:grokdebugger\"; } | { link: \"dev_tools:painless_lab\"; })[]"
             ],
-            "path": "packages/default-nav/devtools/default_navigation.ts",
+            "path": "src/platform/packages/private/default-nav/devtools/default_navigation.ts",
             "deprecated": false,
             "trackAdoption": false
           }
