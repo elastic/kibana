@@ -37,10 +37,12 @@ export const getEntityTypesRoute = createInventoryServerRoute({
     const { includeEntityTypes, excludeEntityTypes, kuery } = params?.query ?? {};
 
     const rawEntityTypes = await entityManagerClient.v2.readTypeDefinitions();
-    const entityTypes = includeEntityTypes?.length
-      ? rawEntityTypes.filter((entityType) => includeEntityTypes.includes(entityType.id))
-      : rawEntityTypes.filter((entityType) => !excludeEntityTypes?.includes(entityType.id));
-
+    const hasIncludedEntityTypes = (includeEntityTypes ?? []).length > 0;
+    const entityTypes = rawEntityTypes.filter((entityType) =>
+      hasIncludedEntityTypes
+        ? includeEntityTypes?.includes(entityType.id)
+        : !excludeEntityTypes?.includes(entityType.id)
+    );
     const entityCount = await entityManagerClient.v2.countEntities({
       start: moment().subtract(15, 'm').toISOString(),
       end: moment().toISOString(),
