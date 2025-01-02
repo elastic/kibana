@@ -99,6 +99,18 @@ const rightSideItemCSS = css`
   min-width: 160px;
 `;
 
+const usernameTextCSS = css`
+  max-width: 160px;
+`;
+
+const fullnameTextCSS = css`
+  max-width: 300px;
+`;
+
+const emailTextCSS = css`
+  max-width: 420px;
+`;
+
 export interface UserProfileProps {
   user: AuthenticatedUser;
   data?: UserProfileData;
@@ -757,7 +769,10 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
       ),
       description:
         user.username &&
-        ((<EuiTextTruncate text={user.username} />) as string | undefined | JSX.Element),
+        ((<EuiTextTruncate text={user.username} css={usernameTextCSS} />) as
+          | string
+          | undefined
+          | JSX.Element),
       helpText: (
         <FormattedMessage
           id="xpack.security.accountManagement.userProfile.usernameHelpText"
@@ -777,7 +792,9 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
           defaultMessage="Full name"
         />
       ),
-      description: user.full_name && <EuiTextTruncate text={user.full_name} />,
+      description: user.full_name && (
+        <EuiTextTruncate text={user.full_name} css={fullnameTextCSS} />
+      ),
       helpText: (
         <FormattedMessage
           id="xpack.security.accountManagement.userProfile.fullNameHelpText"
@@ -795,7 +812,7 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
           defaultMessage="Email address"
         />
       ),
-      description: user.email && <EuiTextTruncate text={user.email} />,
+      description: user.email && <EuiTextTruncate text={user.email} css={emailTextCSS} />,
       helpText: (
         <FormattedMessage
           id="xpack.security.accountManagement.userProfile.emailHelpText"
