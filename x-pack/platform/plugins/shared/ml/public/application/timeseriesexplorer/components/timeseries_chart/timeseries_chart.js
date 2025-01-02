@@ -20,7 +20,11 @@ import moment from 'moment';
 import { EuiPopover } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import { getFormattedSeverityScore, getSeverityWithLow } from '@kbn/ml-anomaly-utils';
+import {
+  getFormattedSeverityScore,
+  getSeverityWithLow,
+  ML_SEVERITY_COLORS,
+} from '@kbn/ml-anomaly-utils';
 import { formatHumanReadableDateTimeSeconds } from '@kbn/ml-date-utils';
 import { context } from '@kbn/kibana-react-plugin/public';
 
@@ -87,7 +91,13 @@ const ZOOM_INTERVAL_OPTIONS = [
 const anomalyColorScale = d3.scale
   .threshold()
   .domain([3, 25, 50, 75, 100])
-  .range(['#d2e9f7', '#8bc8fb', '#ffdd00', '#ff7e00', '#fe5050']);
+  .range([
+    ML_SEVERITY_COLORS.LOW,
+    ML_SEVERITY_COLORS.WARNING,
+    ML_SEVERITY_COLORS.MINOR,
+    ML_SEVERITY_COLORS.MAJOR,
+    ML_SEVERITY_COLORS.CRITICAL,
+  ]);
 
 // Create a gray-toned version of the color scale to use under the context chart mask.
 const anomalyGrayScale = d3.scale
