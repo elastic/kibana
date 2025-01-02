@@ -12,10 +12,10 @@ import {
   METRIC_PROCESS_CPU_PERCENT,
   METRIC_OTEL_SYSTEM_CPU_UTILIZATION,
 } from '../../../../../../common/es_fields/apm';
-import { ChartBase } from '../../../types';
+import type { ChartBase } from '../../../types';
 import { fetchAndTransformMetrics } from '../../../fetch_and_transform_metrics';
-import { APMConfig } from '../../../../..';
-import { APMEventClient } from '../../../../../lib/helpers/create_es_client/create_apm_event_client';
+import type { APMConfig } from '../../../../..';
+import type { APMEventClient } from '../../../../../lib/helpers/create_es_client/create_apm_event_client';
 
 const series = {
   systemCPUMax: {

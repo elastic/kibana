@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ILicense } from '@kbn/licensing-plugin/public';
+import type { ILicense } from '@kbn/licensing-plugin/public';
 import React from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { ProfilingAppPageTemplate } from '../../profiling_app_page_template';

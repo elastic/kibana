@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React, { useMemo } from 'react';
-import { DecoratorFn } from '@storybook/react';
+import type { DecoratorFn } from '@storybook/react';
 import { InventoryContextProvider } from '../public/context/inventory_context_provider';
 import { getMockInventoryContext } from './get_mock_inventory_context';
 

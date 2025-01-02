@@ -6,9 +6,9 @@
  */
 
 import { isOpenTelemetryAgentName } from '../../../common/agent_name';
-import { AgentName } from '../../../typings/es_schemas/ui/fields/agent';
-import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
-import { RandomSampler } from '../../lib/helpers/get_random_sampler';
+import type { AgentName } from '../../../typings/es_schemas/ui/fields/agent';
+import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
+import type { RandomSampler } from '../../lib/helpers/get_random_sampler';
 import { getAgentDocsPageUrl } from './get_agent_url_repository';
 import { getAgentsItems } from './get_agents_items';
 

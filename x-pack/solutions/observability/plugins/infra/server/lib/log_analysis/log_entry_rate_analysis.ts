@@ -6,13 +6,9 @@
  */
 
 import { decodeOrThrow } from '@kbn/io-ts-utils';
-import { IdFormat } from '../../../common/http_api/latest';
-import {
-  logRateModelPlotResponseRT,
-  createLogEntryRateQuery,
-  LogRateModelPlotBucket,
-  CompositeTimestampPartitionKey,
-} from './queries';
+import type { IdFormat } from '../../../common/http_api/latest';
+import type { LogRateModelPlotBucket, CompositeTimestampPartitionKey } from './queries';
+import { logRateModelPlotResponseRT, createLogEntryRateQuery } from './queries';
 import { getJobId, logEntryRateJobType } from '../../../common/log_analysis';
 import type { MlSystem } from '../../types';
 

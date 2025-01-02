@@ -15,7 +15,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { getCustomMetricLabel } from '../../../../../../../common/formatters/get_custom_metric_label';
-import { SnapshotCustomMetricInput } from '../../../../../../../common/http_api/snapshot_api';
+import type { SnapshotCustomMetricInput } from '../../../../../../../common/http_api/snapshot_api';
 
 interface Props {
   customMetrics: SnapshotCustomMetricInput[];

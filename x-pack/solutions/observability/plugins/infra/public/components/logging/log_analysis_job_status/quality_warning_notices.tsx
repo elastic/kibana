@@ -18,11 +18,11 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { groupBy } from 'lodash';
 import React, { Fragment, useState } from 'react';
 import styled from '@emotion/styled';
-import {
+import type {
   CategoryQualityWarning,
   CategoryQualityWarningReason,
-  getFriendlyNameForPartitionId,
 } from '../../../../common/log_analysis';
+import { getFriendlyNameForPartitionId } from '../../../../common/log_analysis';
 import { RecreateJobCallout } from './recreate_job_callout';
 
 export const CategoryQualityWarnings: React.FC<{

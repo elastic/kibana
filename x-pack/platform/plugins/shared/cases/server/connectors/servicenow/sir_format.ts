@@ -17,6 +17,7 @@ export const format: ServiceNowSIRFormat = (theCase, alerts) => {
     malwareHash = null,
     malwareUrl = null,
     priority = null,
+    additionalFields = null,
   } = (theCase.connector.fields as ConnectorServiceNowSIRTypeFields['fields']) ?? {};
   const alertFieldMapping: AlertFieldMappingAndValues = {
     destIp: { alertPath: 'destination.ip', sirFieldKey: 'dest_ip', add: !!destIp },
@@ -72,6 +73,7 @@ export const format: ServiceNowSIRFormat = (theCase, alerts) => {
     category,
     subcategory,
     priority,
+    additional_fields: additionalFields,
     correlation_id: theCase.id ?? null,
     correlation_display: 'Elastic Case',
   };

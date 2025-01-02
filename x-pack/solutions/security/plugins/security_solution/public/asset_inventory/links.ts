@@ -19,7 +19,7 @@ export const links: LinkItem = {
       defaultMessage: 'Inventory',
     }),
   ],
-  experimentalKey: 'assetInventoryStoreEnabled',
+  experimentalKey: 'assetInventoryUXEnabled',
   id: SecurityPageName.assetInventory,
   path: ASSET_INVENTORY_PATH,
   title: INVENTORY,

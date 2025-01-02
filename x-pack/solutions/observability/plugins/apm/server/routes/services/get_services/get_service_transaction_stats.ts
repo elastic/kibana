@@ -7,7 +7,7 @@
 
 import { kqlQuery, rangeQuery, wildcardQuery } from '@kbn/observability-plugin/server';
 import { getAgentName } from '@kbn/elastic-agent-utils';
-import { ApmDocumentType } from '../../../../common/document_type';
+import type { ApmDocumentType } from '../../../../common/document_type';
 import {
   AGENT_NAME,
   SERVICE_ENVIRONMENT,
@@ -17,14 +17,14 @@ import {
   TELEMETRY_SDK_NAME,
   TELEMETRY_SDK_LANGUAGE,
 } from '../../../../common/es_fields/apm';
-import { RollupInterval } from '../../../../common/rollup';
-import { ServiceGroup } from '../../../../common/service_groups';
+import type { RollupInterval } from '../../../../common/rollup';
+import type { ServiceGroup } from '../../../../common/service_groups';
 import { isDefaultTransactionType } from '../../../../common/transaction_types';
 import { environmentQuery } from '../../../../common/utils/environment_query';
-import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
+import type { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
 import { calculateThroughputWithRange } from '../../../lib/helpers/calculate_throughput';
-import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
-import { RandomSampler } from '../../../lib/helpers/get_random_sampler';
+import type { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
+import type { RandomSampler } from '../../../lib/helpers/get_random_sampler';
 import { getDurationFieldForTransactions } from '../../../lib/helpers/transactions';
 import {
   calculateFailedTransactionRate,

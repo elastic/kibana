@@ -5,10 +5,8 @@
  * 2.0.
  */
 import type { Action, ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
-import type { Embeddable } from '@kbn/embeddable-plugin/public';
 
 import { createResetGroupByFieldAction, showInitialLoadingSpinner } from './helpers';
-import type { LensDataTableEmbeddable } from '../../../../common/components/visualization_actions/types';
 
 describe('helpers', () => {
   describe('showInitialLoadingSpinner', () => {
@@ -69,13 +67,13 @@ describe('createResetGroupByFieldAction', () => {
           },
         },
       },
-    } as unknown as Embeddable<LensDataTableEmbeddable>),
+    }),
     updateInput: jest.fn(),
   };
 
   const context = {
     embeddable,
-  } as unknown as ActionExecutionContext<Embeddable<LensDataTableEmbeddable>>;
+  } as unknown as ActionExecutionContext;
   const mockCallback = jest.fn();
   beforeAll(async () => {
     action = createResetGroupByFieldAction({ callback: mockCallback });

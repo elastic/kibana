@@ -5,11 +5,17 @@
  * 2.0.
  */
 
-import { CoreSetup, CoreStart, Logger, Plugin, PluginInitializerContext } from '@kbn/core/server';
-import { ProfilingConfig } from '.';
+import type {
+  CoreSetup,
+  CoreStart,
+  Logger,
+  Plugin,
+  PluginInitializerContext,
+} from '@kbn/core/server';
+import type { ProfilingConfig } from '.';
 import { PROFILING_FEATURE, PROFILING_SERVER_FEATURE_ID } from './feature';
 import { registerRoutes } from './routes';
-import {
+import type {
   ProfilingPluginSetup,
   ProfilingPluginSetupDeps,
   ProfilingPluginStart,

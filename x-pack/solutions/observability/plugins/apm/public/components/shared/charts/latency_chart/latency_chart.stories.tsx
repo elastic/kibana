@@ -6,7 +6,7 @@
  */
 
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { Meta, Story } from '@storybook/react';
+import type { Meta, Story } from '@storybook/react';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { LatencyChart } from '.';
@@ -20,7 +20,8 @@ import { ApmTimeRangeMetadataContextProvider } from '../../../../context/time_ra
 import { MockUrlParamsContextProvider } from '../../../../context/url_params_context/mock_url_params_context_provider';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { mockApmApiCallResponse } from '../../../../services/rest/call_apm_api_spy';
-import { APIReturnType, createCallApmApi } from '../../../../services/rest/create_call_apm_api';
+import type { APIReturnType } from '../../../../services/rest/create_call_apm_api';
+import { createCallApmApi } from '../../../../services/rest/create_call_apm_api';
 
 interface Args {
   latencyChartResponse: APIReturnType<'GET /internal/apm/services/{serviceName}/transactions/charts/latency'>;

@@ -6,7 +6,7 @@
  */
 import Boom from '@hapi/boom';
 import { ML_ERRORS } from '../../../common/anomaly_detection';
-import { MlClient } from '../helpers/get_ml_client';
+import type { MlClient } from '../helpers/get_ml_client';
 import { getMlJobsWithAPMGroup } from './get_ml_jobs_with_apm_group';
 
 export function getAnomalyDetectionJobs(mlClient?: MlClient) {

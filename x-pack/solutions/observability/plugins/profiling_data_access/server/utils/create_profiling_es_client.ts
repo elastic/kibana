@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import type { ESSearchRequest, InferSearchResponseOf } from '@kbn/es-types';
 import type {
   BaseFlameGraph,
@@ -13,7 +13,7 @@ import type {
   ProfilingStatusResponse,
   StackTraceResponse,
 } from '@kbn/profiling-utils';
-import { ProfilingESClient } from '../../common/profiling_es_client';
+import type { ProfilingESClient } from '../../common/profiling_es_client';
 import { unwrapEsResponse } from './unwrap_es_response';
 import { withProfilingSpan } from './with_profiling_span';
 

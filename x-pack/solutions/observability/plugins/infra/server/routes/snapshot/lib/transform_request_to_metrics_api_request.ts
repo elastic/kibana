@@ -12,14 +12,14 @@ import {
   findInventoryModel,
 } from '@kbn/metrics-data-access-plugin/common';
 import { TIMESTAMP_FIELD } from '../../../../common/constants';
-import { SnapshotRequest } from '../../../../common/http_api';
-import { ESSearchClient } from '../../../lib/metrics/types';
-import { InfraSource } from '../../../lib/sources';
+import type { SnapshotRequest } from '../../../../common/http_api';
+import type { ESSearchClient } from '../../../lib/metrics/types';
+import type { InfraSource } from '../../../lib/sources';
 import { createTimeRangeWithInterval } from './create_timerange_with_interval';
 import { parseFilterQuery } from '../../../utils/serialized_query';
 import { transformSnapshotMetricsToMetricsAPIMetrics } from './transform_snapshot_metrics_to_metrics_api_metrics';
 import { META_KEY } from './constants';
-import { SourceOverrides } from './get_nodes';
+import type { SourceOverrides } from './get_nodes';
 
 export const transformRequestToMetricsAPIRequest = async ({
   client,

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { DropResult } from '@elastic/eui';
 import {
   EuiCallOut,
   EuiSpacer,
@@ -17,14 +18,14 @@ import {
   EuiDroppable,
   EuiDraggable,
   EuiIcon,
-  DropResult,
 } from '@elastic/eui';
-import React, { ReactNode } from 'react';
+import type { ReactNode } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { DiscoveryRule } from './discovery_rule';
 import { DefaultDiscoveryRule } from './default_discovery_rule';
 import { EditDiscoveryRule } from './edit_discovery_rule';
-import { IDiscoveryRuleList, Operation, RuntimeAttachmentSettings } from '.';
+import type { IDiscoveryRuleList, Operation, RuntimeAttachmentSettings } from '.';
 import { JavaAgentVersionInput } from './java_agent_version_input';
 
 const DEFAULT_AGENT_VERSION = 'latest';

@@ -16,10 +16,12 @@ import type {
 } from '@kbn/task-manager-plugin/server';
 import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
 import type { AuditLogger } from '@kbn/security-plugin-types-server';
+import type { ExperimentalFeatures } from '../../../../../common';
 import type { AfterKeys } from '../../../../../common/api/entity_analytics/common';
 import {
   type IdentifierType,
   RiskScoreEntity,
+  SERVICE_RISK_SCORE_ENTITY,
 } from '../../../../../common/entity_analytics/risk_engine';
 import { type RiskScoreService, riskScoreServiceFactory } from '../risk_score_service';
 import { RiskEngineDataClient } from '../../risk_engine/risk_engine_data_client';
@@ -62,6 +64,7 @@ export const registerRiskScoringTask = ({
   taskManager,
   telemetry,
   entityAnalyticsConfig,
+  experimentalFeatures,
 }: {
   getStartServices: EntityAnalyticsRoutesDeps['getStartServices'];
   kibanaVersion: string;
@@ -70,6 +73,7 @@ export const registerRiskScoringTask = ({
   taskManager: TaskManagerSetupContract | undefined;
   telemetry: AnalyticsServiceSetup;
   entityAnalyticsConfig: EntityAnalyticsConfig;
+  experimentalFeatures: ExperimentalFeatures;
 }): void => {
   if (!taskManager) {
     logger.info('Task Manager is unavailable; skipping risk engine task registration.');
@@ -117,6 +121,7 @@ export const registerRiskScoringTask = ({
         riskEngineDataClient,
         riskScoreDataClient,
         spaceId: namespace,
+        experimentalFeatures,
       });
     });
 
@@ -130,6 +135,7 @@ export const registerRiskScoringTask = ({
         getRiskScoreService,
         telemetry,
         entityAnalyticsConfig,
+        experimentalFeatures,
       }),
     },
   });
@@ -218,6 +224,7 @@ export const runTask = async ({
   taskInstance,
   telemetry,
   entityAnalyticsConfig,
+  experimentalFeatures,
 }: {
   logger: Logger;
   isCancelled: () => boolean;
@@ -225,6 +232,7 @@ export const runTask = async ({
   taskInstance: ConcreteTaskInstance;
   telemetry: AnalyticsServiceSetup;
   entityAnalyticsConfig: EntityAnalyticsConfig;
+  experimentalFeatures: ExperimentalFeatures;
 }): Promise<{
   state: RiskScoringTaskState;
 }> => {
@@ -283,8 +291,11 @@ export const runTask = async ({
     const { index, runtimeMappings } = await riskScoreService.getRiskInputsIndex({
       dataViewId,
     });
+
     const identifierTypes: IdentifierType[] = configuredIdentifierType
       ? [configuredIdentifierType]
+      : experimentalFeatures.serviceEntityStoreEnabled
+      ? [RiskScoreEntity.host, RiskScoreEntity.user, SERVICE_RISK_SCORE_ENTITY]
       : [RiskScoreEntity.host, RiskScoreEntity.user];
 
     const runs: Array<{
@@ -384,11 +395,13 @@ const createTaskRunnerFactory =
     getRiskScoreService,
     telemetry,
     entityAnalyticsConfig,
+    experimentalFeatures,
   }: {
     logger: Logger;
     getRiskScoreService: GetRiskScoreService;
     telemetry: AnalyticsServiceSetup;
     entityAnalyticsConfig: EntityAnalyticsConfig;
+    experimentalFeatures: ExperimentalFeatures;
   }) =>
   ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => {
     let cancelled = false;
@@ -402,6 +415,7 @@ const createTaskRunnerFactory =
           taskInstance,
           telemetry,
           entityAnalyticsConfig,
+          experimentalFeatures,
         }),
       cancel: async () => {
         cancelled = true;

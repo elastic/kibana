@@ -8,6 +8,7 @@
 import React, { useState, useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import type { EuiSwitchProps } from '@elastic/eui';
 import {
   EuiRadioGroup,
   EuiButtonEmpty,
@@ -15,10 +16,9 @@ import {
   EuiForm,
   EuiFormRow,
   EuiSwitch,
-  EuiSwitchProps,
 } from '@elastic/eui';
+import type { MetricsExplorerChartOptions as ChartOptions } from '../hooks/use_metrics_explorer_options';
 import {
-  MetricsExplorerChartOptions as ChartOptions,
   MetricsExplorerYAxisMode,
   MetricsExplorerChartType,
 } from '../hooks/use_metrics_explorer_options';

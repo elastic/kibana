@@ -6,15 +6,13 @@
  */
 
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
-import {
+import type {
   DefaultMetricIndicesHandler,
   GetMetricIndicesOptions,
   UpdateMetricIndicesOptions,
 } from '../types';
-import {
-  MetricsDataSavedObject,
-  metricsDataSourceSavedObjectName,
-} from '../saved_objects/metrics_data_source';
+import type { MetricsDataSavedObject } from '../saved_objects/metrics_data_source';
+import { metricsDataSourceSavedObjectName } from '../saved_objects/metrics_data_source';
 
 export const DEFAULT_METRIC_INDICES = 'metrics-*,metricbeat-*';
 

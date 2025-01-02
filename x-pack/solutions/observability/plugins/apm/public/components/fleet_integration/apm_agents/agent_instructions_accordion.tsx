@@ -15,16 +15,17 @@ import {
   EuiTabbedContent,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { ComponentType } from 'react';
+import type { ComponentType } from 'react';
+import React from 'react';
 import styled from '@emotion/styled';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { Markdown } from '@kbn/shared-ux-markdown';
 import { AgentIcon } from '@kbn/custom-icons';
-import {
+import type {
   AgentRuntimeAttachmentProps,
   CreateAgentInstructions,
 } from './agent_instructions_mappings';
-import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
+import type { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
 import type {
   NewPackagePolicy,
   PackagePolicy,

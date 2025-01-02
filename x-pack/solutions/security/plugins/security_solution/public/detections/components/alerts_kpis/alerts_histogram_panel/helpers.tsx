@@ -6,9 +6,13 @@
  */
 
 import type { Action, ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
-import type { Embeddable } from '@kbn/embeddable-plugin/public';
 import { RESET_GROUP_BY_FIELDS } from '../../../../common/components/chart_settings_popover/configurations/default/translations';
 import type { LensDataTableEmbeddable } from '../../../../common/components/visualization_actions/types';
+
+interface LegacyLensEmbeddable {
+  getInput: () => LensDataTableEmbeddable;
+  updateInput: (input: LensDataTableEmbeddable) => void;
+}
 
 /**
  * Returns `true` when the alerts histogram initial loading spinner should be shown
@@ -48,7 +52,7 @@ export const createResetGroupByFieldAction: CreateResetGroupByFieldAction = ({
   async execute({
     embeddable,
   }: ActionExecutionContext<{
-    embeddable: Embeddable<LensDataTableEmbeddable>;
+    embeddable: LegacyLensEmbeddable;
   }>): Promise<void> {
     callback?.();
 

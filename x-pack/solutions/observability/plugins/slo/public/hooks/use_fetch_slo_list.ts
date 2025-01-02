@@ -14,11 +14,12 @@ import {
   DEFAULT_SLO_PAGE_SIZE,
   SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
 } from '../../common/constants';
-import { SearchState, SortDirection, SortField } from '../pages/slos/hooks/use_url_search_state';
+import { SearchState } from '../pages/slos/hooks/use_url_search_state';
 import { useKibana } from './use_kibana';
 import { sloKeys } from './query_key_factory';
 import { useCreateDataView } from './use_create_data_view';
 import { usePluginContext } from './use_plugin_context';
+import type { SortDirection, SortField } from '../pages/slos/types';
 
 export interface SLOListParams {
   kqlQuery?: string;

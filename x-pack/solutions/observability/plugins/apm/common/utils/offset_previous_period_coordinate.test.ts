@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { Coordinate } from '../../typings/timeseries';
+import type { Coordinate } from '../../typings/timeseries';
 import { offsetPreviousPeriodCoordinates } from './offset_previous_period_coordinate';
 
 const currentPeriodTimeseries: Coordinate[] = [

@@ -10,9 +10,9 @@ import React, { useMemo } from 'react';
 import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from '@kbn/ml-plugin/public';
 import { MissingEmbeddableFactoryCallout } from '../../../../../components/missing_embeddable_factory_callout';
 import { partitionField } from '../../../../../../common/infra_ml';
-import { TimeRange } from '../../../../../../common/time/time_range';
+import type { TimeRange } from '../../../../../../common/time/time_range';
 import { useKibanaContextForPlugin } from '../../../../../hooks/use_kibana';
-import { AutoRefresh } from '../../use_log_entry_rate_results_url_state';
+import type { AutoRefresh } from '../../use_log_entry_rate_results_url_state';
 
 interface Props {
   timeRange: TimeRange;

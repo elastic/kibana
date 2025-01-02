@@ -9,7 +9,7 @@ import { EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { isSettingsFormValid, OPTIONAL_LABEL } from '../settings_form/utils';
-import { PackagePolicyVars, SettingsRow } from '../typings';
+import type { PackagePolicyVars, SettingsRow } from '../typings';
 import { getDurationRt } from '../../../../../common/agent_configuration/runtime_types/duration_rt';
 import { getStorageSizeRt } from '../../../../../common/agent_configuration/runtime_types/storage_size_rt';
 

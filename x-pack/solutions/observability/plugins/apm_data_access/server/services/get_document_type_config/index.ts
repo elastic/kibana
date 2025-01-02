@@ -7,7 +7,7 @@
 
 import { getBucketSize, type TimeRangeMetadata } from '../../../common';
 import { getPreferredBucketSizeAndDataSource } from '../../../common/utils/get_preferred_bucket_size_and_data_source';
-import { ApmDocumentType } from '../../../common/document_type';
+import type { ApmDocumentType } from '../../../common/document_type';
 import { getConfigForDocumentType } from '../../lib/helpers/create_es_client/document_type';
 
 export interface GetDocumentTypeParams {

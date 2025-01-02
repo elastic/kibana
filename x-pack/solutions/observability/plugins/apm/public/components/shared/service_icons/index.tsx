@@ -7,14 +7,11 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import {
-  CloudProvider,
-  getAgentIcon,
-  getCloudProviderIcon,
-  getServerlessIcon,
-} from '@kbn/custom-icons';
-import React, { ReactChild, useState } from 'react';
-import { ContainerType } from '../../../../common/service_metadata';
+import type { CloudProvider } from '@kbn/custom-icons';
+import { getAgentIcon, getCloudProviderIcon, getServerlessIcon } from '@kbn/custom-icons';
+import type { ReactChild } from 'react';
+import React, { useState } from 'react';
+import type { ContainerType } from '../../../../common/service_metadata';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 import { CloudDetails } from './cloud_details';
 import { ServerlessDetails } from './serverless_details';

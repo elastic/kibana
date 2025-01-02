@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { KibanaRequest } from '@kbn/core-http-server';
-import { DataTier } from '@kbn/observability-shared-plugin/common';
-import { InfraBackendLibs } from '../infra_types';
+import type { KibanaRequest } from '@kbn/core-http-server';
+import type { DataTier } from '@kbn/observability-shared-plugin/common';
+import type { InfraBackendLibs } from '../infra_types';
 import { getInfraMetricsClient } from './get_infra_metrics_client';
-import { InfraPluginRequestHandlerContext } from '../../types';
-import { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
+import type { InfraPluginRequestHandlerContext } from '../../types';
+import type { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
 
 const withExcludedDataTiers = (tiers: DataTier[]) => ({
   uiSettings: {

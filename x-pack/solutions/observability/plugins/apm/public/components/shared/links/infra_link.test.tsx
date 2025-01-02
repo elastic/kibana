@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Location } from 'history';
+import type { Location } from 'history';
 import React from 'react';
 import { getRenderedHref } from '../../../utils/test_helpers';
 import { InfraLink } from './infra_link';

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { DownsampledEventsIndex, getSampledTraceEventsIndex } from './downsampling';
+import type { DownsampledEventsIndex } from './downsampling';
+import { getSampledTraceEventsIndex } from './downsampling';
 
 describe('Using down-sampled indexes', () => {
   test('getSampledTraceEventsIndex', () => {

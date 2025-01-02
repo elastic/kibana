@@ -8,21 +8,21 @@
 import { isEqual } from 'lodash';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import usePrevious from 'react-use/lib/usePrevious';
-import { JobType } from '../../../../common/http_api/latest';
+import type { JobType } from '../../../../common/http_api/latest';
+import type { DatasetFilter } from '../../../../common/log_analysis';
 import {
   combineDatasetFilters,
-  DatasetFilter,
   filterDatasetFilter,
   isExampleDataIndex,
 } from '../../../../common/log_analysis';
-import {
+import type {
   AvailableIndex,
   ValidationIndicesError,
   ValidationUIError,
 } from '../../../components/logging/log_analysis_setup/initial_configuration_step';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import { useTrackedPromise } from '../../../hooks/use_tracked_promise';
-import { ModuleDescriptor, ModuleSourceConfiguration } from './log_analysis_module_types';
+import type { ModuleDescriptor, ModuleSourceConfiguration } from './log_analysis_module_types';
 
 type SetupHandler = (
   indices: string[],

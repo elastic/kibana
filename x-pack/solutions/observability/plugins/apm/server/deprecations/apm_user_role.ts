@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import {
+import type {
   SecurityGetRoleMappingResponse,
   SecurityGetUserResponse,
 } from '@elastic/elasticsearch/lib/api/types';

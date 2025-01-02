@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { TimeKey } from '../../../../common/time';
-import { ReceivedInitialQueryParametersEvent } from '../../log_stream_page/state';
-import { TimeChangedEvent } from '../../log_stream_query_state/src/notifications';
+import type { TimeKey } from '../../../../common/time';
+import type { ReceivedInitialQueryParametersEvent } from '../../log_stream_page/state';
+import type { TimeChangedEvent } from '../../log_stream_query_state/src/notifications';
 
 export interface VisiblePositions {
   startKey: TimeKey | null;

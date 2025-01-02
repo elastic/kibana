@@ -5,7 +5,8 @@
  * 2.0.
  */
 import { render } from '@testing-library/react';
-import React, { ReactNode } from 'react';
+import type { ReactNode } from 'react';
+import React from 'react';
 import { AgentConfigInstructions } from './agent_config_instructions';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import * as getCommands from './commands/get_apm_agent_commands';

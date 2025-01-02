@@ -6,7 +6,7 @@
  */
 
 import { compact, isObject } from 'lodash';
-import { Maybe } from '../../typings/common';
+import type { Maybe } from '../../typings/common';
 
 export interface KeyValuePair {
   key: string;

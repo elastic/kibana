@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { FrameHeadingRendererProps } from '.';
+import type { FrameHeadingRendererProps } from '.';
 
 export function JavaFrameHeadingRenderer({
   stackframe,

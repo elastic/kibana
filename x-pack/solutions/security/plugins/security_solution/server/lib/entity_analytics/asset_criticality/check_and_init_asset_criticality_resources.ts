@@ -30,7 +30,6 @@ export const checkAndInitAssetCriticalityResources = async (
   });
 
   const doesIndexExist = await assetCriticalityDataClient.doesIndexExist();
-
   if (!doesIndexExist) {
     logger.info('Asset criticality resources are not installed, initialising...');
     await assetCriticalityDataClient.init();

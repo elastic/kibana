@@ -7,7 +7,8 @@
 
 import { schema } from '@kbn/config-schema';
 import { kqlQuery } from '@kbn/observability-plugin/server';
-import { IDLE_SOCKET_TIMEOUT, RouteRegisterParameters } from '.';
+import type { RouteRegisterParameters } from '.';
+import { IDLE_SOCKET_TIMEOUT } from '.';
 import { getRoutePaths } from '../../common';
 import { handleRouteHandlerError } from '../utils/handle_route_error_handler';
 import { getClient } from './compat';

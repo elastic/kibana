@@ -8,13 +8,13 @@
 import { defaults, omit } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useEffect } from 'react';
-import { CoreStart } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ForLastExpression, TIME_UNITS } from '@kbn/triggers-actions-ui-plugin/public';
 import { EuiFormRow } from '@elastic/eui';
 import { EuiSpacer } from '@elastic/eui';
-import { EuiSwitchEvent } from '@elastic/eui';
-import { SearchConfigurationType } from '../../../../../common/rules/schema';
+import type { EuiSwitchEvent } from '@elastic/eui';
+import type { SearchConfigurationType } from '../../../../../common/rules/schema';
 import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
 import { asPercent } from '../../../../../common/utils/formatters';
 import { FETCH_STATUS, isPending, useFetcher } from '../../../../hooks/use_fetcher';
@@ -27,7 +27,8 @@ import {
   TransactionTypeField,
   TransactionNameField,
 } from '../../utils/fields';
-import { AlertMetadata, getIntervalAndTimeRange } from '../../utils/helper';
+import type { AlertMetadata } from '../../utils/helper';
+import { getIntervalAndTimeRange } from '../../utils/helper';
 import { ApmRuleParamsContainer } from '../../ui_components/apm_rule_params_container';
 import { APMRuleGroupBy } from '../../ui_components/apm_rule_group_by';
 import {

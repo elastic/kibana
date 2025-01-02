@@ -30,11 +30,9 @@ import { useTimelineChartTheme } from '../../../../hooks/use_timeline_chart_them
 import { MetricExplorerSeriesChart } from '../../../../pages/metrics/metrics_explorer/components/series_chart';
 import { Color } from '../../../../../common/color_palette';
 import { createFormatter } from '../../../../../common/formatters';
-import {
-  MetricsExplorerAggregation,
-  ProcessListAPIChartResponseRT,
-} from '../../../../../common/http_api';
-import { Process } from './types';
+import type { MetricsExplorerAggregation } from '../../../../../common/http_api';
+import { ProcessListAPIChartResponseRT } from '../../../../../common/http_api';
+import type { Process } from './types';
 import { MetricsExplorerChartType } from '../../../../../common/metrics_explorer_views/types';
 import { MetricNotAvailableExplanationTooltip } from '../../components/metric_not_available_explanation';
 import { useProcessListContext } from '../../hooks/use_process_list';

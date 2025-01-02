@@ -6,7 +6,7 @@
  */
 
 import { scaleLinear } from 'd3-scale';
-import { Margins } from '.';
+import type { Margins } from '.';
 
 export type PlotValues = ReturnType<typeof getPlotValues>;
 

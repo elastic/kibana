@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import React, { FC, PropsWithChildren } from 'react';
-import { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
+import type { FC, PropsWithChildren } from 'react';
+import React from 'react';
+import type { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
 
 interface ContextProps {
   triggersActionsUI: TriggersAndActionsUIPublicPluginStart | null;

@@ -15,7 +15,8 @@ import {
 import type { APMServerRouteRepository } from '../../server';
 
 import type { APMClient, APMClientOptions } from '../services/rest/create_call_apm_api';
-import { FetcherResult, FETCH_STATUS, useFetcher } from './use_fetcher';
+import type { FetcherResult } from './use_fetcher';
+import { FETCH_STATUS, useFetcher } from './use_fetcher';
 
 type APMProgressivelyLoadingServerRouteRepository = OmitByValue<
   {

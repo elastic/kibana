@@ -9,12 +9,13 @@ import * as t from 'io-ts';
 import Boom from '@hapi/boom';
 import { toBooleanRt } from '@kbn/io-ts-utils';
 import { maxSuggestions } from '@kbn/observability-plugin/common';
-import { SearchHit } from '@kbn/es-types';
+import type { SearchHit } from '@kbn/es-types';
 import { createOrUpdateConfiguration } from './create_or_update_configuration';
 import { searchConfigurations } from './search_configurations';
 import { findExactConfiguration } from './find_exact_configuration';
 import { listConfigurations } from './list_configurations';
-import { EnvironmentsResponse, getEnvironments } from './get_environments';
+import type { EnvironmentsResponse } from './get_environments';
+import { getEnvironments } from './get_environments';
 import { deleteConfiguration } from './delete_configuration';
 import { createApmServerRoute } from '../../apm_routes/create_apm_server_route';
 import { getAgentNameByService } from './get_agent_name_by_service';
@@ -27,8 +28,8 @@ import { getSearchTransactionsEvents } from '../../../lib/helpers/transactions';
 import { syncAgentConfigsToApmPackagePolicies } from '../../fleet/sync_agent_configs_to_apm_package_policies';
 import { getApmEventClient } from '../../../lib/helpers/get_apm_event_client';
 import { createInternalESClientWithResources } from '../../../lib/helpers/create_es_client/create_internal_es_client';
-import { AgentConfiguration } from '../../../../common/agent_configuration/configuration_types';
-import { ApmFeatureFlags } from '../../../../common/apm_feature_flags';
+import type { AgentConfiguration } from '../../../../common/agent_configuration/configuration_types';
+import type { ApmFeatureFlags } from '../../../../common/apm_feature_flags';
 
 function throwNotFoundIfAgentConfigNotAvailable(featureFlags: ApmFeatureFlags): void {
   if (!featureFlags.agentConfigurationAvailable) {
