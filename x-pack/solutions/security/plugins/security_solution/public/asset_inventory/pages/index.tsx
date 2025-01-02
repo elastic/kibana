@@ -5,17 +5,18 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { lazy, Suspense } from 'react';
+import { EuiLoadingSpinner } from '@elastic/eui';
 import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
-import { SecurityPageName } from '../../../common/constants';
-import { SpyRoute } from '../../common/utils/route/spy_routes';
-import { AssetInventoryLazyWrapper } from '../methods';
+
+const AssetInventoryLazy = lazy(() => import('../components/app'));
 
 export const AssetInventoryContainer = React.memo(() => {
   return (
     <SecuritySolutionPageWrapper noPadding>
-      <AssetInventoryLazyWrapper />
-      <SpyRoute pageName={SecurityPageName.assetInventory} />
+      <Suspense fallback={<EuiLoadingSpinner />}>
+        <AssetInventoryLazy />
+      </Suspense>
     </SecuritySolutionPageWrapper>
   );
 });
