@@ -28,6 +28,7 @@ import { DangerZone } from './danger_zone';
 import { DissectProcessorForm } from './dissect';
 import { GrokProcessorForm } from './grok';
 import { ProcessorOutcomePreview } from './processor_outcome_preview';
+import { convertFormStateToProcessing } from '../utils';
 
 const defaultCondition: ProcessingDefinition['condition'] = {
   field: '',
@@ -72,39 +73,9 @@ export function AddProcessorFlyout({
   const hasChanges = useMemo(() => !deepEqual(defaultProcessorConfig, formFields), [formFields]);
 
   const handleSubmit: SubmitHandler<ProcessorFormState> = (data) => {
-    if (data.type === 'grok') {
-      const { condition, field, patterns, pattern_definitions, ignore_failure } = data;
+    const processingDefinition = convertFormStateToProcessing(data);
 
-      onAddProcessor({
-        condition: isCompleteCondition(condition) ? condition : undefined,
-        config: {
-          grok: {
-            patterns: patterns
-              .filter(({ value }) => value.trim().length > 0)
-              .map(({ value }) => value),
-            field,
-            pattern_definitions,
-            ignore_failure,
-          },
-        },
-      });
-    }
-
-    if (data.type === 'dissect') {
-      const { condition, field, pattern, append_separator, ignore_failure } = data;
-
-      onAddProcessor({
-        condition: isCompleteCondition(condition) ? condition : undefined,
-        config: {
-          dissect: {
-            field,
-            pattern,
-            append_separator,
-            ignore_failure,
-          },
-        },
-      });
-    }
+    onAddProcessor(processingDefinition);
 
     onClose();
   };
@@ -134,7 +105,7 @@ export function AddProcessorFlyout({
           {formFields.type === 'dissect' && <DissectProcessorForm definition={definition} />}
         </EuiForm>
         <EuiHorizontalRule />
-        <ProcessorOutcomePreview definition={definition} processor={formFields} />
+        <ProcessorOutcomePreview definition={definition} formFields={formFields} />
       </FormProvider>
     </ProcessorFlyoutTemplate>
   );

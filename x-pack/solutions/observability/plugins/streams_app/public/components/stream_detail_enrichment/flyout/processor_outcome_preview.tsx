@@ -11,22 +11,23 @@ import {
   EuiPanel,
   EuiTitle,
   EuiSpacer,
-  EuiButtonGroup,
   EuiFlexGroup,
-  EuiFlexItem,
-  EuiButtonGroupOptionProps,
   EuiFilterButton,
   EuiFilterGroup,
   EuiEmptyPrompt,
   EuiLoadingLogo,
+  EuiButton,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { TimeRange } from '@kbn/es-query';
+import { isEmpty } from 'lodash';
 import { useStreamsAppFetch } from '../../../hooks/use_streams_app_fetch';
 import { useKibana } from '../../../hooks/use_kibana';
-import { StreamsAppSearchBar } from '../../streams_app_search_bar';
+import { StreamsAppSearchBar, StreamsAppSearchBarProps } from '../../streams_app_search_bar';
 import { PreviewTable } from '../../preview_table';
+import { convertFormStateToProcessing, isCompleteProcessingDefinition } from '../utils';
 
-export const ProcessorOutcomePreview = ({ definition, processor }) => {
+export const ProcessorOutcomePreview = ({ definition, formFields }) => {
   const { dependencies } = useKibana();
   const {
     data,
@@ -39,7 +40,12 @@ export const ProcessorOutcomePreview = ({ definition, processor }) => {
     setTimeRange,
   } = useDateRange({ data });
 
-  const { value, loading, error, refresh } = useStreamsAppFetch(
+  const {
+    value: samples,
+    loading: isLoadingSamples,
+    error: samplesError,
+    refresh: refreshSamples,
+  } = useStreamsAppFetch(
     ({ signal }) => {
       if (!definition) {
         return Promise.resolve({ documents: [] });
@@ -60,31 +66,83 @@ export const ProcessorOutcomePreview = ({ definition, processor }) => {
       });
     },
     [definition, streamsRepositoryClient, start, end],
-    {
-      disableToastOnError: true,
-    }
+    { disableToastOnError: true }
+  );
+
+  const {
+    value: simulation,
+    loading: isLoadingSimulation,
+    error: simulationError,
+    refresh: refreshSimulation,
+  } = useStreamsAppFetch(
+    ({ signal }) => {
+      if (!definition || !samples || isEmpty(samples.documents)) {
+        return Promise.resolve(null);
+      }
+
+      const processingDefinition = convertFormStateToProcessing(formFields);
+
+      if (!isCompleteProcessingDefinition(processingDefinition)) {
+        return Promise.resolve(null);
+      }
+
+      return streamsRepositoryClient.fetch('POST /api/streams/{id}/processing/_simulate', {
+        signal,
+        params: {
+          path: {
+            id: definition.name,
+          },
+          body: {
+            documents: samples.documents as Array<Record<PropertyKey, unknown>>,
+            processing: [processingDefinition],
+          },
+        },
+      });
+    },
+    [definition, samples, streamsRepositoryClient, start, end],
+    { disableToastOnError: true }
   );
 
   return (
     <EuiPanel hasShadow={false} paddingSize="none">
-      <EuiTitle size="xs">
-        <h3>
+      <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
+        <EuiTitle size="xs">
+          <h3>
+            {i18n.translate(
+              'xpack.streams.streamDetailView.managementTab.enrichment.processorFlyout.outcomeTitle',
+              { defaultMessage: 'Outcome' }
+            )}
+          </h3>
+        </EuiTitle>
+        <EuiButton
+          iconType="play"
+          color="accentSecondary"
+          size="s"
+          onClick={refreshSimulation}
+          isLoading={isLoadingSimulation}
+        >
           {i18n.translate(
-            'xpack.streams.streamDetailView.managementTab.enrichment.processorFlyout.outcomeTitle',
-            { defaultMessage: 'Outcome' }
+            'xpack.streams.streamDetailView.managementTab.enrichment.processorFlyout.runSimulation',
+            { defaultMessage: 'Run simulation' }
           )}
-        </h3>
-      </EuiTitle>
+        </EuiButton>
+      </EuiFlexGroup>
       <EuiSpacer />
       {/* TODO: Add Detected Fields sections */}
       <OutcomeControls
-        documents={value?.documents}
         timeRange={timeRange}
         onTimeRangeChange={setTimeRange}
-        onTimeRangeRefresh={refresh}
+        onTimeRangeRefresh={refreshSamples}
+        simulationFailureRate={simulation?.failure_rate}
+        simulationSuccessRate={simulation?.success_rate}
       />
       <EuiSpacer size="m" />
-      <OutcomePreviewTable documents={value?.documents} error={error} isLoading={loading} />
+      <OutcomePreviewTable
+        documents={simulation?.documents}
+        columns={[formFields.field, ...(simulation?.detected_fields ?? [])]}
+        error={simulationError}
+        isLoading={isLoadingSimulation}
+      />
     </EuiPanel>
   );
 };
@@ -116,15 +174,39 @@ const docsFilterOptions = {
 type DocsFilterOption = keyof typeof docsFilterOptions;
 
 interface OutcomeControlsProps {
-  documents: any[];
-  timeRange: { from: number; to: number };
-  onTimeRangeChange: (timeRange: { from: number; to: number }) => void;
+  timeRange: TimeRange;
+  onTimeRangeChange: (timeRange: TimeRange) => void;
   onTimeRangeRefresh: () => void;
+  simulationFailureRate?: number;
+  simulationSuccessRate?: number;
 }
 
-const OutcomeControls = ({ documents, timeRange, onTimeRangeChange, onTimeRangeRefresh }) => {
+const OutcomeControls = ({
+  timeRange,
+  onTimeRangeChange,
+  onTimeRangeRefresh,
+  simulationFailureRate,
+  simulationSuccessRate,
+}: OutcomeControlsProps) => {
   const [selectedDocsFilter, setSelectedDocsFilter] =
     useState<DocsFilterOption>('outcome_filter_all');
+
+  const handleQuerySubmit: StreamsAppSearchBarProps['onQuerySubmit'] = (
+    { dateRange },
+    isUpdate
+  ) => {
+    if (!isUpdate) {
+      return onTimeRangeRefresh();
+    }
+
+    if (dateRange) {
+      onTimeRangeChange({
+        from: dateRange.from,
+        to: dateRange?.to,
+        mode: dateRange.mode,
+      });
+    }
+  };
 
   return (
     <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
@@ -143,31 +225,27 @@ const OutcomeControls = ({ documents, timeRange, onTimeRangeChange, onTimeRangeR
         <EuiFilterButton
           hasActiveFilters={selectedDocsFilter === docsFilterOptions.outcome_filter_matched.id}
           onClick={() => setSelectedDocsFilter(docsFilterOptions.outcome_filter_matched.id)}
+          badgeColor="success"
+          numActiveFilters={
+            simulationSuccessRate ? parseFloat((simulationSuccessRate * 100).toFixed(2)) : undefined
+          }
         >
           {docsFilterOptions.outcome_filter_matched.label}
         </EuiFilterButton>
         <EuiFilterButton
           hasActiveFilters={selectedDocsFilter === docsFilterOptions.outcome_filter_unmatched.id}
           onClick={() => setSelectedDocsFilter(docsFilterOptions.outcome_filter_unmatched.id)}
+          badgeColor="accent"
+          numActiveFilters={
+            simulationFailureRate ? parseFloat((simulationFailureRate * 100).toFixed(2)) : undefined
+          }
         >
           {docsFilterOptions.outcome_filter_unmatched.label}
         </EuiFilterButton>
       </EuiFilterGroup>
 
       <StreamsAppSearchBar
-        onQuerySubmit={({ dateRange }, isUpdate) => {
-          if (!isUpdate) {
-            return onTimeRangeRefresh();
-          }
-
-          if (dateRange) {
-            onTimeRangeChange({
-              from: dateRange.from,
-              to: dateRange?.to,
-              mode: dateRange.mode,
-            });
-          }
-        }}
+        onQuerySubmit={handleQuerySubmit}
         onRefresh={onTimeRangeRefresh}
         dateRangeFrom={timeRange.from}
         dateRangeTo={timeRange.to}
@@ -177,10 +255,10 @@ const OutcomeControls = ({ documents, timeRange, onTimeRangeChange, onTimeRangeR
 };
 
 interface OutcomePreviewTableProps {
-  documents?: any[];
-  columns: any[];
-  error: Error;
-  isLoading: boolean;
+  documents?: Array<Record<PropertyKey, unknown>>;
+  columns: string[];
+  error?: Error;
+  isLoading?: boolean;
 }
 
 const OutcomePreviewTable = ({
