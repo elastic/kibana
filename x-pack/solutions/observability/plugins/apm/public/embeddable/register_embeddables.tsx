@@ -4,10 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { CoreSetup } from '@kbn/core/public';
+import type { CoreSetup } from '@kbn/core/public';
 
-import { ApmPluginStartDeps, ApmPluginStart } from '../plugin';
-import { EmbeddableDeps } from './types';
+import type { ApmPluginStartDeps, ApmPluginStart } from '../plugin';
+import type { EmbeddableDeps } from './types';
 import {
   APM_ALERTING_FAILED_TRANSACTIONS_CHART_EMBEDDABLE,
   APM_ALERTING_LATENCY_CHART_EMBEDDABLE,

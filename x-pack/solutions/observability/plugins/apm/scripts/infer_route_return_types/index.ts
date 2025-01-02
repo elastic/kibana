@@ -5,19 +5,15 @@
  * 2.0.
  */
 
-import {
-  Project,
-  Node,
+import type {
   FunctionDeclaration,
   FunctionExpression,
   ArrowFunction,
   MethodDeclaration,
   SourceFile,
-  SyntaxKind,
   PropertyAssignment,
-  ts,
-  TypeFormatFlags,
 } from 'ts-morph';
+import { Project, Node, SyntaxKind, ts, TypeFormatFlags } from 'ts-morph';
 import Path from 'path';
 import { execSync } from 'child_process';
 import { argv } from 'yargs';
