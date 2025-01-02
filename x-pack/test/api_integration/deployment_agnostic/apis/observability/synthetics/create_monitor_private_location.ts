@@ -30,7 +30,7 @@ import { SyntheticsMonitorTestService } from '../../../services/synthetics_monit
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   describe('PrivateLocationAddMonitor', function () {
     const kibanaServer = getService('kibanaServer');
-    const supertestAPI = getService('supertestWithoutAuth');
+    const supertestWithoutAuth = getService('supertestWithoutAuth');
     const supertestWithAuth = getService('supertest');
     const samlAuth = getService('samlAuth');
     const retry = getService('retry');
@@ -46,7 +46,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     const testPrivateLocations = new PrivateLocationTestService(getService);
 
     const addMonitorAPI = async (monitor: any, statusCode = 200) => {
-      return addMonitorAPIHelper(supertestAPI, monitor, statusCode, editorUser, samlAuth);
+      return addMonitorAPIHelper(supertestWithoutAuth, monitor, statusCode, editorUser, samlAuth);
     };
 
     const deleteMonitor = async (
@@ -80,7 +80,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     it('add a test private location', async () => {
       privateLocations = await testPrivateLocations.setTestLocations([testFleetPolicyID]);
 
-      const apiResponse = await supertestAPI
+      const apiResponse = await supertestWithoutAuth
         .get(SYNTHETICS_API_URLS.SERVICE_LOCATIONS)
         .set(editorUser.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
@@ -119,7 +119,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       newMonitor.name = invalidName;
 
-      const apiResponse = await supertestAPI
+      const apiResponse = await supertestWithoutAuth
         .post(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS)
         .set(editorUser.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
@@ -132,7 +132,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         message: `Invalid locations specified. Private Location(s) 'invalidLocation' not found. Available private locations are '${privateLocations[0].label}'`,
       });
 
-      const apiGetResponse = await supertestAPI
+      const apiGetResponse = await supertestWithoutAuth
         .get(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS + `?query="${invalidName}"`)
         .set(editorUser.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
@@ -200,7 +200,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         },
       });
 
-      const apiResponse = await supertestAPI
+      const apiResponse = await supertestWithoutAuth
         .put(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS + '/' + newMonitorId)
         .set(editorUser.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
@@ -264,7 +264,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         ({ id }) => id !== testFleetPolicyID2
       );
 
-      await supertestAPI
+      await supertestWithoutAuth
         .put(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS + '/' + newMonitorId + '?internal=true')
         .set(editorUser.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
@@ -329,7 +329,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       };
 
       await kibanaServer.spaces.create({ id: SPACE_ID, name: SPACE_NAME });
-      const apiResponse = await supertestAPI
+      const apiResponse = await supertestWithoutAuth
         .post(`/s/${SPACE_ID}${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}`)
         .set(editorUser.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
@@ -371,7 +371,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           spaceId: SPACE_ID,
         })
       );
-      await supertestAPI
+      await supertestWithoutAuth
         .delete(`/s/${SPACE_ID}${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}`)
         .set(editorUser.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
@@ -397,7 +397,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       };
 
       try {
-        const apiResponse = await supertestAPI
+        const apiResponse = await supertestWithoutAuth
           .post(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS)
           .set(editorUser.apiKeyHeader)
           .set(samlAuth.getInternalRequestHeader())
@@ -446,7 +446,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       };
 
       try {
-        const apiResponse = await supertestAPI
+        const apiResponse = await supertestWithoutAuth
           .post(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS)
           .set(editorUser.apiKeyHeader)
           .set(samlAuth.getInternalRequestHeader())
@@ -491,7 +491,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       };
 
       try {
-        const apiResponse = await supertestAPI
+        const apiResponse = await supertestWithoutAuth
           .post(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS)
           .set(editorUser.apiKeyHeader)
           .set(samlAuth.getInternalRequestHeader())
