@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AggregationsAggregationContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { AggregationsAggregationContainer } from '@elastic/elasticsearch/lib/api/types';
 import { getEventLogAggByRuleType } from './get_event_log_agg_by_rule_type';
 
 describe('get_event_log_agg_by_rule_type', () => {
