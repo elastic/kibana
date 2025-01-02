@@ -142,7 +142,7 @@ export function FieldControlForm({
 
   const onCreateOption = useCallback(
     (searchValue: string, flattenedOptions: EuiComboBoxOptionOption[] = []) => {
-      if (!searchValue) {
+      if (!searchValue.trim()) {
         return;
       }
 
