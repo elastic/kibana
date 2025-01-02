@@ -7,13 +7,13 @@
 
 import { useMemo, useState } from 'react';
 
-import { PersistedLogViewReference } from '@kbn/logs-shared-plugin/common';
-import { IdFormat } from '../../../../common/http_api/latest';
-import {
+import type { PersistedLogViewReference } from '@kbn/logs-shared-plugin/common';
+import type { IdFormat } from '../../../../common/http_api/latest';
+import type {
   GetLogEntryCategoriesSuccessResponsePayload,
   GetLogEntryCategoryDatasetsSuccessResponsePayload,
 } from '../../../../common/http_api';
-import { CategoriesSort } from '../../../../common/log_analysis';
+import type { CategoriesSort } from '../../../../common/log_analysis';
 import { useTrackedPromise, CanceledPromiseError } from '../../../hooks/use_tracked_promise';
 import { callGetTopLogEntryCategoriesAPI } from './service_calls/get_top_log_entry_categories';
 import { callGetLogEntryCategoryDatasetsAPI } from './service_calls/get_log_entry_category_datasets';
