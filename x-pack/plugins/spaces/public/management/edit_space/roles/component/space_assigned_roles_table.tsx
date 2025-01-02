@@ -9,6 +9,7 @@ import {
   EuiBadge,
   EuiButton,
   EuiButtonEmpty,
+  EuiButtonIcon,
   EuiContextMenu,
   EuiFlexGroup,
   EuiFlexItem,
@@ -18,6 +19,7 @@ import {
   EuiPopover,
   EuiText,
   EuiTextColor,
+  EuiToolTip,
 } from '@elastic/eui';
 import type {
   CriteriaWithPagination,
@@ -140,33 +142,43 @@ const getTableColumns = ({
       ),
       actions: [
         {
-          type: 'icon',
-          icon: 'lock',
-          href: '#',
-          target: '_self',
-          'data-test-subj': 'spaceRoleCellActionLocked',
-          name: (role) =>
-            isRoleReserved(role)
-              ? i18n.translate(
-                  'xpack.spaces.management.spaceDetails.rolesTable.column.actions.notEditableTitle.isReserved',
-                  { defaultMessage: 'Reserved' }
-                )
-              : i18n.translate(
-                  'xpack.spaces.management.spaceDetails.rolesTable.column.actions.notEditableTitle.isAssignedToAll',
-                  { defaultMessage: 'Assigned to all spaces' }
-                ),
-          description: (role) =>
-            isRoleReserved(role)
-              ? i18n.translate(
-                  'xpack.spaces.management.spaceDetails.rolesTable.column.actions.notEditableDescription.isReserved',
-                  { defaultMessage: `You can’t edit the access of reserved roles to this space.` }
-                )
-              : i18n.translate(
-                  'xpack.spaces.management.spaceDetails.rolesTable.column.actions.notEditableDescription.isAssignedToAll',
-                  {
-                    defaultMessage: `You can't edit the access of a role that is assigned to all spaces.`,
+          render: (role) => {
+            return (
+              <EuiToolTip
+                content={
+                  isRoleReserved(role)
+                    ? i18n.translate(
+                        'xpack.spaces.management.spaceDetails.rolesTable.column.actions.notEditableDescription.isReserved',
+                        { defaultMessage: 'This role is reserved.' }
+                      )
+                    : i18n.translate(
+                        'xpack.spaces.management.spaceDetails.rolesTable.column.actions.notEditableDescription.isAssignedToAll',
+                        {
+                          defaultMessage:
+                            'This role is assigned to all spaces. To change this, go to Roles.',
+                        }
+                      )
+                }
+              >
+                <EuiButtonIcon
+                  iconType="lock"
+                  disabled={true}
+                  data-test-subj="spaceRoleCellActionLocked"
+                  aria-label={
+                    isRoleReserved(role)
+                      ? i18n.translate(
+                          'xpack.spaces.management.spaceDetails.rolesTable.column.actions.notEditableTitle.isReserved',
+                          { defaultMessage: 'Reserved' }
+                        )
+                      : i18n.translate(
+                          'xpack.spaces.management.spaceDetails.rolesTable.column.actions.notEditableTitle.isAssignedToAll',
+                          { defaultMessage: 'Assigned to all spaces' }
+                        )
                   }
-                ),
+                />
+              </EuiToolTip>
+            );
+          },
           showOnHover: true,
           enabled: () => false,
           available: (rowRecord) => !isEditableRole(rowRecord),
