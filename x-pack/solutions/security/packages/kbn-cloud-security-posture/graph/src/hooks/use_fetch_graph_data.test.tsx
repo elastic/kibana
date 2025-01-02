@@ -33,7 +33,7 @@ describe('useFetchGraphData', () => {
       return useFetchGraphData({
         req: {
           query: {
-            eventIds: [],
+            originEventIds: [],
             start: '2021-09-01T00:00:00.000Z',
             end: '2021-09-01T23:59:59.999Z',
           },
@@ -52,7 +52,7 @@ describe('useFetchGraphData', () => {
       return useFetchGraphData({
         req: {
           query: {
-            eventIds: [],
+            originEventIds: [],
             start: '2021-09-01T00:00:00.000Z',
             end: '2021-09-01T23:59:59.999Z',
           },
@@ -75,7 +75,7 @@ describe('useFetchGraphData', () => {
       return useFetchGraphData({
         req: {
           query: {
-            eventIds: [],
+            originEventIds: [],
             start: '2021-09-01T00:00:00.000Z',
             end: '2021-09-01T23:59:59.999Z',
           },
@@ -98,7 +98,7 @@ describe('useFetchGraphData', () => {
       return useFetchGraphData({
         req: {
           query: {
-            eventIds: [],
+            originEventIds: [],
             start: '2021-09-01T00:00:00.000Z',
             end: '2021-09-01T23:59:59.999Z',
           },

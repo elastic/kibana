@@ -20,6 +20,7 @@ import {
 import { Flyouts } from '../constants/flyouts';
 import { isTimelineScope } from '../../../../helpers';
 import { DocumentEventTypes } from '../../../../common/lib/telemetry';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 
 export interface UseNavigateToAnalyzerParams {
   /**
@@ -39,6 +40,10 @@ export interface UseNavigateToAnalyzerParams {
    * Scope id of the page
    */
   scopeId: string;
+  /**
+   * Whether the preview mode is enabled
+   */
+  isPreviewMode?: boolean;
 }
 
 export interface UseNavigateToAnalyzerResult {
@@ -56,9 +61,14 @@ export const useNavigateToAnalyzer = ({
   eventId,
   indexName,
   scopeId,
+  isPreviewMode,
 }: UseNavigateToAnalyzerParams): UseNavigateToAnalyzerResult => {
   const { telemetry } = useKibana().services;
   const { openLeftPanel, openPreviewPanel, openFlyout } = useExpandableFlyoutApi();
+
+  const isNewNavigationEnabled = useIsExperimentalFeatureEnabled(
+    'newExpandableFlyoutNavigationEnabled'
+  );
   let key = useWhichFlyout() ?? 'memory';
 
   if (!isFlyoutOpen) {
@@ -105,7 +115,8 @@ export const useNavigateToAnalyzer = ({
   );
 
   const navigateToAnalyzer = useCallback(() => {
-    if (isFlyoutOpen) {
+    // open left panel and preview panel if not in preview mode
+    if (isFlyoutOpen && !isPreviewMode) {
       openLeftPanel(left);
       openPreviewPanel(preview);
       telemetry.reportEvent(DocumentEventTypes.DetailsFlyoutTabClicked, {
@@ -113,7 +124,10 @@ export const useNavigateToAnalyzer = ({
         panel: 'left',
         tabId: 'visualize',
       });
-    } else {
+    }
+    // if flyout is not currently open, open flyout with right, left and preview panel
+    // if new navigation is enabled and in preview mode, open flyout with right, left and preview panel
+    else if (!isFlyoutOpen || (isNewNavigationEnabled && isPreviewMode)) {
       openFlyout({
         right,
         left,
@@ -134,6 +148,8 @@ export const useNavigateToAnalyzer = ({
     scopeId,
     telemetry,
     isFlyoutOpen,
+    isNewNavigationEnabled,
+    isPreviewMode,
   ]);
 
   return useMemo(() => ({ navigateToAnalyzer }), [navigateToAnalyzer]);

@@ -16,20 +16,14 @@ import {
 } from './test_ids';
 import { RelatedCases } from './related_cases';
 import { useFetchRelatedCases } from '../../shared/hooks/use_fetch_related_cases';
-import { DocumentDetailsLeftPanelKey } from '../../shared/constants/panel_keys';
-import { LeftPanelInsightsTab } from '../../left';
-import { CORRELATIONS_TAB_ID } from '../../left/components/correlations_details';
-import { useDocumentDetailsContext } from '../../shared/context';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { useNavigateToLeftPanel } from '../../shared/hooks/use_navigate_to_left_panel';
 
-jest.mock('@kbn/expandable-flyout');
-jest.mock('../../shared/context');
 jest.mock('../../shared/hooks/use_fetch_related_cases');
 
-const mockOpenLeftPanel = jest.fn();
+const mockNavigateToLeftPanel = jest.fn();
+jest.mock('../../shared/hooks/use_navigate_to_left_panel');
+
 const eventId = 'eventId';
-const indexName = 'indexName';
-const scopeId = 'scopeId';
 
 const TEXT_TEST_ID = SUMMARY_ROW_TEXT_TEST_ID(CORRELATIONS_RELATED_CASES_TEST_ID);
 const BUTTON_TEST_ID = SUMMARY_ROW_BUTTON_TEST_ID(CORRELATIONS_RELATED_CASES_TEST_ID);
@@ -46,13 +40,10 @@ describe('<RelatedCases />', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
-    (useDocumentDetailsContext as jest.Mock).mockReturnValue({
-      eventId,
-      indexName,
-      scopeId,
-      isPreviewMode: false,
+    (useNavigateToLeftPanel as jest.Mock).mockReturnValue({
+      navigateToLeftPanel: mockNavigateToLeftPanel,
+      isEnabled: true,
     });
-    (useExpandableFlyoutApi as jest.Mock).mockReturnValue({ openLeftPanel: mockOpenLeftPanel });
   });
 
   it('should render single related case correctly', () => {
@@ -108,17 +99,6 @@ describe('<RelatedCases />', () => {
     const { getByTestId } = renderRelatedCases();
     getByTestId(BUTTON_TEST_ID).click();
 
-    expect(mockOpenLeftPanel).toHaveBeenCalledWith({
-      id: DocumentDetailsLeftPanelKey,
-      path: {
-        tab: LeftPanelInsightsTab,
-        subTab: CORRELATIONS_TAB_ID,
-      },
-      params: {
-        id: eventId,
-        indexName,
-        scopeId,
-      },
-    });
+    expect(mockNavigateToLeftPanel).toHaveBeenCalled();
   });
 });

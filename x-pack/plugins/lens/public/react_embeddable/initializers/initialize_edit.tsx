@@ -37,6 +37,7 @@ import { setupPanelManagement } from '../inline_editing/panel_management';
 import { mountInlineEditPanel } from '../inline_editing/mount';
 import { StateManagementConfig } from './initialize_state_management';
 import { apiPublishesInlineEditingCapabilities } from '../type_guards';
+import { SearchContextConfig } from './initialize_search_context';
 
 function getSupportedTriggers(
   getState: GetStateType,
@@ -61,6 +62,7 @@ export function initializeEditApi(
   internalApi: LensInternalApi,
   stateApi: StateManagementConfig['api'],
   inspectorApi: LensInspectorAdapters,
+  searchContextApi: SearchContextConfig['api'],
   isTextBasedLanguage: (currentState: LensRuntimeState) => boolean,
   startDependencies: LensEmbeddableStartServices,
   parentApi?: unknown
@@ -126,9 +128,34 @@ export function initializeEditApi(
     stateApi.updateSavedObjectId(newState.savedObjectId);
   };
 
+  // Wrap the getState() when inline editing and make sure that the filters in the attributes
+  // are properly injected with the correct references to avoid issues when saving/navigating to the full editor
+  const getStateWithInjectedFilters = () => {
+    const currentState = getState();
+    // use the search context api here for filters for 2 reasons:
+    // * the filters here have the correct references already injected
+    // * the edit filters flow may change in the future and this is the right place to get the filters
+    const currentFilters = searchContextApi.filters$.getValue() ?? [];
+    // if there are no filters, avoid to copy the attributes
+    if (!currentFilters.length) {
+      return currentState;
+    }
+    // otherwise make sure to inject the references into filters
+    return {
+      ...currentState,
+      attributes: {
+        ...currentState.attributes,
+        state: {
+          ...currentState.attributes.state,
+          filters: currentFilters,
+        },
+      },
+    };
+  };
+
   const openInlineEditor = prepareInlineEditPanel(
     initialState,
-    getState,
+    getStateWithInjectedFilters,
     updateState,
     internalApi,
     panelManagementApi,
@@ -205,6 +232,9 @@ export function initializeEditApi(
         const rootEmbeddable = parentApi;
         const overlayTracker = tracksOverlays(rootEmbeddable) ? rootEmbeddable : undefined;
         const ConfigPanel = await openInlineEditor({
+          // the getState() here contains the wrong filters references
+          // but the input attributes are correct as openInlineEditor() handler is using
+          // the getStateWithInjectedFilters() function
           onApply: (attributes: LensRuntimeState['attributes']) =>
             updateState({ ...getState(), attributes }),
           // restore the first state found when the panel opened

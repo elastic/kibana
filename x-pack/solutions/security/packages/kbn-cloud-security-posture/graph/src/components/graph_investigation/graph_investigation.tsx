@@ -21,11 +21,17 @@ import type { Filter, Query, TimeRange, PhraseFilter } from '@kbn/es-query';
 import { css } from '@emotion/react';
 import { getEsQueryConfig } from '@kbn/data-service';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { Graph } from '../../..';
+import { Graph, isEntityNode } from '../../..';
 import { useGraphNodeExpandPopover } from './use_graph_node_expand_popover';
+import { useGraphLabelExpandPopover } from './use_graph_label_expand_popover';
 import { useFetchGraphData } from '../../hooks/use_fetch_graph_data';
 import { GRAPH_INVESTIGATION_TEST_ID } from '../test_ids';
-import { ACTOR_ENTITY_ID, RELATED_ENTITY, TARGET_ENTITY_ID } from '../../common/constants';
+import {
+  ACTOR_ENTITY_ID,
+  EVENT_ACTION,
+  RELATED_ENTITY,
+  TARGET_ENTITY_ID,
+} from '../../common/constants';
 
 const CONTROLLED_BY_GRAPH_INVESTIGATION_FILTER = 'graph-investigation';
 
@@ -112,35 +118,66 @@ const useGraphPopovers = (
     },
   });
 
+  const labelExpandPopover = useGraphLabelExpandPopover({
+    onShowEventsWithThisActionClick: (node) => {
+      setSearchFilters((prev) => addFilter(dataViewId, prev, EVENT_ACTION, node.data.label ?? ''));
+    },
+  });
+
   const openPopoverCallback = useCallback(
     (cb: Function, ...args: unknown[]) => {
-      [nodeExpandPopover].forEach(({ actions: { closePopover } }) => {
+      [nodeExpandPopover, labelExpandPopover].forEach(({ actions: { closePopover } }) => {
         closePopover();
       });
       cb(...args);
     },
-    [nodeExpandPopover]
+    [nodeExpandPopover, labelExpandPopover]
   );
 
-  return { nodeExpandPopover, openPopoverCallback };
+  return { nodeExpandPopover, labelExpandPopover, openPopoverCallback };
 };
 
 interface GraphInvestigationProps {
-  dataView: DataView;
-  eventIds: string[];
-  timestamp: string | null;
+  /**
+   * The initial state to use for the graph investigation view.
+   */
+  initialState: {
+    /**
+     * The data view to use for the graph investigation view.
+     */
+    dataView: DataView;
+
+    /**
+     * The origin events for the graph investigation view.
+     */
+    originEventIds: Array<{
+      /**
+       * The ID of the origin event.
+       */
+      id: string;
+
+      /**
+       * A flag indicating whether the origin event is an alert or not.
+       */
+      isAlert: boolean;
+    }>;
+
+    /**
+     * The initial timerange for the graph investigation view.
+     */
+    timeRange: TimeRange;
+  };
 }
 
 /**
  * Graph investigation view allows the user to expand nodes and view related entities.
  */
-export const GraphInvestigation: React.FC<GraphInvestigationProps> = memo(
-  ({ dataView, eventIds, timestamp = new Date().toISOString() }: GraphInvestigationProps) => {
+export const GraphInvestigation = memo<GraphInvestigationProps>(
+  ({
+    initialState: { dataView, originEventIds, timeRange: initialTimeRange },
+  }: GraphInvestigationProps) => {
     const [searchFilters, setSearchFilters] = useState<Filter[]>(() => []);
-    const [timeRange, setTimeRange] = useState<TimeRange>({
-      from: `${timestamp}||-30m`,
-      to: `${timestamp}||+30m`,
-    });
+    const [timeRange, setTimeRange] = useState<TimeRange>(initialTimeRange);
 
     const {
       services: { uiSettings },
@@ -153,20 +190,24 @@ export const GraphInvestigation: React.FC<GraphInvestigationProps> = memo(
           [...searchFilters],
           getEsQueryConfig(uiSettings as Parameters<typeof getEsQueryConfig>[0])
         ),
-      [searchFilters, dataView, uiSettings]
+      [dataView, searchFilters, uiSettings]
     );
 
-    const { nodeExpandPopover, openPopoverCallback } = useGraphPopovers(
+    const { nodeExpandPopover, labelExpandPopover, openPopoverCallback } = useGraphPopovers(
       dataView?.id ?? '',
       setSearchFilters
     );
-    const expandButtonClickHandler = (...args: unknown[]) =>
+    const nodeExpandButtonClickHandler = (...args: unknown[]) =>
       openPopoverCallback(nodeExpandPopover.onNodeExpandButtonClick, ...args);
-    const isPopoverOpen = [nodeExpandPopover].some(({ state: { isOpen } }) => isOpen);
+    const labelExpandButtonClickHandler = (...args: unknown[]) =>
+      openPopoverCallback(labelExpandPopover.onLabelExpandButtonClick, ...args);
+    const isPopoverOpen = [nodeExpandPopover, labelExpandPopover].some(
+      ({ state: { isOpen } }) => isOpen
+    );
     const { data, refresh, isFetching } = useFetchGraphData({
       req: {
         query: {
-          eventIds,
+          originEventIds,
           esQuery: query,
           start: timeRange.from,
           end: timeRange.to,
@@ -181,13 +222,19 @@ export const GraphInvestigation: React.FC<GraphInvestigationProps> = memo(
     const nodes = useMemo(() => {
       return (
         data?.nodes.map((node) => {
-          const nodeHandlers =
-            node.shape !== 'label' && node.shape !== 'group'
-              ? {
-                  expandButtonClick: expandButtonClickHandler,
-                }
-              : undefined;
-          return { ...node, ...nodeHandlers };
+          if (isEntityNode(node)) {
+            return {
+              ...node,
+              expandButtonClick: nodeExpandButtonClickHandler,
+            };
+          } else if (node.shape === 'label') {
+            return {
+              ...node,
+              expandButtonClick: labelExpandButtonClickHandler,
+            };
+          }
+
+          return { ...node };
         }) ?? []
       );
       // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -250,6 +297,7 @@ export const GraphInvestigation: React.FC<GraphInvestigationProps> = memo(
           </EuiFlexItem>
         </EuiFlexGroup>
         <nodeExpandPopover.PopoverComponent />
+        <labelExpandPopover.PopoverComponent />
       </>
     );
   }

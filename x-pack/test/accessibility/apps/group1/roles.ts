@@ -35,13 +35,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await a11y.testAppSnapshot();
     });
 
-    it('a11y test for searching a user', async () => {
-      await testSubjects.setValue('searchRoles', 'apm_user');
+    it('a11y test for searching a role', async () => {
+      await testSubjects.setValue('searchRoles', 'viewer');
       await a11y.testAppSnapshot();
       await testSubjects.setValue('searchRoles', '');
     });
 
-    it('a11y test for toggle button for show reserved users only', async () => {
+    it('a11y test for toggle button for show reserved roles only', async () => {
       await retry.waitFor(
         'show reserved roles toggle button is visible',
         async () => await testSubjects.exists('showReservedRolesSwitch')

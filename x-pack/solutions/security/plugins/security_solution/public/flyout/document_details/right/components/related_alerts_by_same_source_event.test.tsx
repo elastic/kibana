@@ -16,21 +16,15 @@ import {
 } from './test_ids';
 import { useFetchRelatedAlertsBySameSourceEvent } from '../../shared/hooks/use_fetch_related_alerts_by_same_source_event';
 import { RelatedAlertsBySameSourceEvent } from './related_alerts_by_same_source_event';
-import { DocumentDetailsLeftPanelKey } from '../../shared/constants/panel_keys';
-import { LeftPanelInsightsTab } from '../../left';
-import { CORRELATIONS_TAB_ID } from '../../left/components/correlations_details';
-import { useDocumentDetailsContext } from '../../shared/context';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { useNavigateToLeftPanel } from '../../shared/hooks/use_navigate_to_left_panel';
 
-jest.mock('@kbn/expandable-flyout');
-jest.mock('../../shared/context');
 jest.mock('../../shared/hooks/use_fetch_related_alerts_by_same_source_event');
 
-const mockOpenLeftPanel = jest.fn();
+const mockNavigateToLeftPanel = jest.fn();
+jest.mock('../../shared/hooks/use_navigate_to_left_panel');
+
 const originalEventId = 'originalEventId';
 const scopeId = 'scopeId';
-const eventId = 'eventId';
-const indexName = 'indexName';
 
 const TEXT_TEST_ID = SUMMARY_ROW_TEXT_TEST_ID(
   CORRELATIONS_RELATED_ALERTS_BY_SAME_SOURCE_EVENT_TEST_ID
@@ -53,13 +47,10 @@ describe('<RelatedAlertsBySameSourceEvent />', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
-    (useDocumentDetailsContext as jest.Mock).mockReturnValue({
-      eventId,
-      indexName,
-      scopeId,
-      isPreviewMode: false,
+    (useNavigateToLeftPanel as jest.Mock).mockReturnValue({
+      navigateToLeftPanel: mockNavigateToLeftPanel,
+      isEnabled: true,
     });
-    (useExpandableFlyoutApi as jest.Mock).mockReturnValue({ openLeftPanel: mockOpenLeftPanel });
   });
 
   it('should render single related alert correctly', () => {
@@ -117,17 +108,6 @@ describe('<RelatedAlertsBySameSourceEvent />', () => {
     const { getByTestId } = renderRelatedAlertsBySameSourceEvent();
     getByTestId(BUTTON_TEST_ID).click();
 
-    expect(mockOpenLeftPanel).toHaveBeenCalledWith({
-      id: DocumentDetailsLeftPanelKey,
-      path: {
-        tab: LeftPanelInsightsTab,
-        subTab: CORRELATIONS_TAB_ID,
-      },
-      params: {
-        id: eventId,
-        indexName,
-        scopeId,
-      },
-    });
+    expect(mockNavigateToLeftPanel).toHaveBeenCalled();
   });
 });

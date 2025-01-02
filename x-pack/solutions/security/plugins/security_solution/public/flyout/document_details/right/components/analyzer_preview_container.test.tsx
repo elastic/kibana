@@ -22,7 +22,7 @@ import {
   EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID,
   EXPANDABLE_PANEL_TOGGLE_ICON_TEST_ID,
 } from '../../../shared/components/test_ids';
-
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useInvestigateInTimeline } from '../../../../detections/components/alerts_table/timeline_actions/use_investigate_in_timeline';
 
 jest.mock(
@@ -32,6 +32,7 @@ jest.mock('../../shared/hooks/use_alert_prevalence_from_process_tree');
 jest.mock(
   '../../../../detections/components/alerts_table/timeline_actions/use_investigate_in_timeline'
 );
+jest.mock('../../../../common/hooks/use_experimental_features');
 
 const mockNavigateToAnalyzer = jest.fn();
 jest.mock('../../shared/hooks/use_navigate_to_analyzer', () => {
@@ -83,6 +84,7 @@ const renderAnalyzerPreview = (context = mockContextValue) =>
 describe('AnalyzerPreviewContainer', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(false);
   });
 
   it('should render component and link in header', () => {
@@ -254,6 +256,89 @@ describe('AnalyzerPreviewContainer', () => {
       expect(
         queryByTestId(EXPANDABLE_PANEL_HEADER_TITLE_LINK_TEST_ID(ANALYZER_PREVIEW_TEST_ID))
       ).not.toBeInTheDocument();
+    });
+  });
+
+  describe('when new navigation is enabled', () => {
+    beforeEach(() => {
+      (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
+    });
+    describe('when visualizationInFlyoutEnabled is enabled', () => {
+      beforeEach(() => {
+        mockUseUiSetting.mockReturnValue([true]);
+        (useIsInvestigateInResolverActionEnabled as jest.Mock).mockReturnValue(true);
+        (useAlertPrevalenceFromProcessTree as jest.Mock).mockReturnValue({
+          loading: false,
+          error: false,
+          alertIds: ['alertid'],
+          statsNodes: mock.mockStatsNodes,
+        });
+        (useInvestigateInTimeline as jest.Mock).mockReturnValue({
+          investigateInTimelineAlertClick: jest.fn(),
+        });
+      });
+      it('should open left flyout visualization tab when clicking on title', () => {
+        const { getByTestId } = renderAnalyzerPreview();
+
+        getByTestId(EXPANDABLE_PANEL_HEADER_TITLE_LINK_TEST_ID(ANALYZER_PREVIEW_TEST_ID)).click();
+        expect(mockNavigateToAnalyzer).toHaveBeenCalled();
+      });
+
+      it('should disable link when in rule preview', () => {
+        const { queryByTestId } = renderAnalyzerPreview({ ...mockContextValue, isPreview: true });
+        expect(
+          queryByTestId(EXPANDABLE_PANEL_HEADER_TITLE_LINK_TEST_ID(ANALYZER_PREVIEW_TEST_ID))
+        ).not.toBeInTheDocument();
+      });
+
+      it('should render link when in preview mode', () => {
+        const { getByTestId } = renderAnalyzerPreview({ ...mockContextValue, isPreviewMode: true });
+
+        getByTestId(EXPANDABLE_PANEL_HEADER_TITLE_LINK_TEST_ID(ANALYZER_PREVIEW_TEST_ID)).click();
+        expect(mockNavigateToAnalyzer).toHaveBeenCalled();
+      });
+    });
+
+    describe('when visualizationInFlyoutEnabled is disabled', () => {
+      beforeEach(() => {
+        mockUseUiSetting.mockReturnValue([false]);
+        (useIsInvestigateInResolverActionEnabled as jest.Mock).mockReturnValue(true);
+        (useAlertPrevalenceFromProcessTree as jest.Mock).mockReturnValue({
+          loading: false,
+          error: false,
+          alertIds: ['alertid'],
+          statsNodes: mock.mockStatsNodes,
+        });
+        (useInvestigateInTimeline as jest.Mock).mockReturnValue({
+          investigateInTimelineAlertClick: jest.fn(),
+        });
+      });
+      it('should navigate to analyzer in timeline when clicking on title', () => {
+        const { getByTestId } = renderAnalyzerPreview();
+        const { investigateInTimelineAlertClick } = useInvestigateInTimeline({});
+
+        getByTestId(EXPANDABLE_PANEL_HEADER_TITLE_LINK_TEST_ID(ANALYZER_PREVIEW_TEST_ID)).click();
+        expect(investigateInTimelineAlertClick).toHaveBeenCalled();
+      });
+
+      it('should not navigate to analyzer when in preview and clicking on title', () => {
+        const { queryByTestId } = renderAnalyzerPreview({ ...mockContextValue, isPreview: true });
+        expect(
+          queryByTestId(EXPANDABLE_PANEL_HEADER_TITLE_LINK_TEST_ID(ANALYZER_PREVIEW_TEST_ID))
+        ).not.toBeInTheDocument();
+        const { investigateInTimelineAlertClick } = useInvestigateInTimeline({});
+        expect(investigateInTimelineAlertClick).not.toHaveBeenCalled();
+      });
+
+      it('should open analyzer in timelinewhen in preview mode', () => {
+        const { getByTestId } = renderAnalyzerPreview({
+          ...mockContextValue,
+          isPreviewMode: true,
+        });
+        const { investigateInTimelineAlertClick } = useInvestigateInTimeline({});
+        getByTestId(EXPANDABLE_PANEL_HEADER_TITLE_LINK_TEST_ID(ANALYZER_PREVIEW_TEST_ID)).click();
+        expect(investigateInTimelineAlertClick).toHaveBeenCalled();
+      });
     });
   });
 });

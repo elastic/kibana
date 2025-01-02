@@ -6,12 +6,10 @@
  */
 
 import { get } from 'lodash';
-import React, { useCallback, useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { EuiFlexGroup } from '@elastic/eui';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ALERT_RULE_TYPE } from '@kbn/rule-data-utils';
-
 import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
 import { ExpandablePanel } from '../../../shared/components/expandable_panel';
 import { useShowRelatedAlertsBySession } from '../../shared/hooks/use_show_related_alerts_by_session';
@@ -26,7 +24,6 @@ import { RelatedCases } from './related_cases';
 import { useShowRelatedCases } from '../../shared/hooks/use_show_related_cases';
 import { CORRELATIONS_TEST_ID } from './test_ids';
 import { useDocumentDetailsContext } from '../../shared/context';
-import { DocumentDetailsLeftPanelKey } from '../../shared/constants/panel_keys';
 import { LeftPanelInsightsTab } from '../../left';
 import { CORRELATIONS_TAB_ID } from '../../left/components/correlations_details';
 import { useTimelineDataFilters } from '../../../../timelines/containers/use_timeline_data_filters';
@@ -36,6 +33,7 @@ import {
   AlertsCasesTourSteps,
   SecurityStepId,
 } from '../../../../common/components/guided_onboarding_tour/tour_config';
+import { useNavigateToLeftPanel } from '../../shared/hooks/use_navigate_to_left_panel';
 
 /**
  * Correlations section under Insights section, overview tab.
@@ -43,34 +41,17 @@ import {
  * and the SummaryPanel component for data rendering.
  */
 export const CorrelationsOverview: React.FC = () => {
-  const {
-    dataAsNestedObject,
-    eventId,
-    indexName,
-    getFieldsData,
-    scopeId,
-    isPreview,
-    isPreviewMode,
-  } = useDocumentDetailsContext();
-  const { openLeftPanel } = useExpandableFlyoutApi();
+  const { dataAsNestedObject, eventId, getFieldsData, scopeId, isPreview, isPreviewMode } =
+    useDocumentDetailsContext();
   const { isTourShown, activeStep } = useTourContext();
 
   const { selectedPatterns } = useTimelineDataFilters(isActiveTimeline(scopeId));
 
-  const goToCorrelationsTab = useCallback(() => {
-    openLeftPanel({
-      id: DocumentDetailsLeftPanelKey,
-      path: {
-        tab: LeftPanelInsightsTab,
-        subTab: CORRELATIONS_TAB_ID,
-      },
-      params: {
-        id: eventId,
-        indexName,
-        scopeId,
-      },
+  const { navigateToLeftPanel: goToCorrelationsTab, isEnabled: isLinkEnabled } =
+    useNavigateToLeftPanel({
+      tab: LeftPanelInsightsTab,
+      subTab: CORRELATIONS_TAB_ID,
     });
-  }, [eventId, openLeftPanel, indexName, scopeId]);
 
   useEffect(() => {
     if (isTourShown(SecurityStepId.alertsCases) && activeStep === AlertsCasesTourSteps.createCase) {
@@ -105,7 +86,7 @@ export const CorrelationsOverview: React.FC = () => {
 
   const link = useMemo(
     () =>
-      !isPreviewMode
+      isLinkEnabled
         ? {
             callback: goToCorrelationsTab,
             tooltip: (
@@ -116,7 +97,7 @@ export const CorrelationsOverview: React.FC = () => {
             ),
           }
         : undefined,
-    [isPreviewMode, goToCorrelationsTab]
+    [goToCorrelationsTab, isLinkEnabled]
   );
 
   return (
