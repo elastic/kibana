@@ -6,10 +6,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { DependencyList, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { HttpFetchOptions, HttpSetup } from '@kbn/core-http-browser';
-import { BehaviorSubject } from 'rxjs';
-import { InfraHttpError } from '../types';
+import type { DependencyList } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import type { HttpFetchOptions, HttpSetup } from '@kbn/core-http-browser';
+import type { BehaviorSubject } from 'rxjs';
+import type { InfraHttpError } from '../types';
 import { useKibanaContextForPlugin } from './use_kibana';
 import { useSearchSessionContext } from './use_search_session';
 
