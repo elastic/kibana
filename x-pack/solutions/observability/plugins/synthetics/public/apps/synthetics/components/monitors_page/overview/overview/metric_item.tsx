@@ -5,7 +5,13 @@
  * 2.0.
  */
 import { Chart, Metric, MetricTrendShape, Settings } from '@elastic/charts';
-import { EuiPanel, EuiSpacer, EuiThemeComputed, useEuiTheme } from '@elastic/eui';
+import {
+  EuiPanel,
+  EuiSpacer,
+  EuiThemeComputed,
+  euiPaletteColorBlindBehindText,
+  useEuiTheme,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -39,15 +45,17 @@ export const getColor = (euiTheme: EuiThemeComputed, isEnabled: boolean, status?
   if (!isEnabled) {
     return euiTheme.colors.lightestShade;
   }
+  const isAmsterdam = euiTheme.flags.hasVisColorAdjustment;
+
   switch (status) {
     case 'down':
-      return euiTheme.colors.vis.euiColorVis6;
+      return isAmsterdam ? euiPaletteColorBlindBehindText()[9] : euiTheme.colors.danger;
     case 'up':
-      return euiTheme.colors.success;
+      return isAmsterdam ? euiPaletteColorBlindBehindText()[0] : euiTheme.colors.success;
     case 'unknown':
       return euiTheme.colors.ghost;
     default:
-      return euiTheme.colors.success;
+      return isAmsterdam ? euiPaletteColorBlindBehindText()[0] : euiTheme.colors.success;
   }
 };
 

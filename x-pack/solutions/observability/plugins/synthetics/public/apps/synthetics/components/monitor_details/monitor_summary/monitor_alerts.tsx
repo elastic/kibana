@@ -12,6 +12,7 @@ import {
   EuiSkeletonText,
   EuiText,
   EuiTitle,
+  euiPaletteColorBlindBehindText,
   useEuiTheme,
 } from '@elastic/eui';
 import { RECORDS_FIELD } from '@kbn/exploratory-view-plugin/public';
@@ -41,6 +42,7 @@ export const MonitorAlerts = ({
   } = useKibana<ClientPluginsStart>().services;
 
   const { euiTheme } = useEuiTheme();
+  const isAmsterdam = euiTheme.flags.hasVisColorAdjustment;
 
   const { queryIdFilter, locationFilter } = useMonitorQueryFilters();
   const selectedLocation = useSelectedLocation();
@@ -145,7 +147,9 @@ export const MonitorAlerts = ({
                   { field: 'kibana.alert.status', values: ['active'] },
                   ...(locationFilter ?? []),
                 ],
-                color: euiTheme.colors.vis.euiColorVis7,
+                color: isAmsterdam
+                  ? euiPaletteColorBlindBehindText()[7]
+                  : euiTheme.colors.vis.euiColorVis7,
               },
             ]}
           />
@@ -198,7 +202,9 @@ export const MonitorAlerts = ({
                   { field: 'kibana.alert.status', values: ['recovered'] },
                   ...(locationFilter ?? []),
                 ],
-                color: euiTheme.colors.success,
+                color: isAmsterdam
+                  ? euiPaletteColorBlindBehindText()[0]
+                  : euiTheme.colors.vis.euiColorVis0,
               },
             ]}
           />
