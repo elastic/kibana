@@ -21,5 +21,6 @@
     "@kbn/es-query",
     "@kbn/data-service",
     "@kbn/i18n",
+    "@kbn/i18n-react",
   ]
 }
