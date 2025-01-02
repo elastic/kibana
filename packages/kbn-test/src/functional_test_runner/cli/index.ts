@@ -7,17 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { FunctionalTestRunner } from './functional_test_runner';
-export {
-  readConfigFile,
-  Config,
-  createAsyncInstance,
-  EsVersion,
-  Lifecycle,
-  LifecyclePhase,
-  runCheckFtrConfigsCli,
-  DedicatedTaskRunner,
-} from './lib';
-export * from './cli';
-export * from './lib/docker_servers';
-export * from './public_types';
+export { runFtrCli } from './ftr';
+export { checkFTRCodeOwnersCLI } from './code_owners';
