@@ -9,7 +9,7 @@
 
 import { renderHook, waitFor } from '@testing-library/react';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
-import { wrapper } from '@kbn/alerts-ui-shared/src/common/test_utils/wrapper';
+import { Wrapper } from '@kbn/alerts-ui-shared/src/common/test_utils/wrapper';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import * as api from '../apis/get_muted_alerts_instances_by_rule';
 import { useGetMutedAlertsQuery } from './use_get_muted_alerts_query';
@@ -31,7 +31,7 @@ describe('useGetMutedAlertsQuery', () => {
     const muteAlertInstanceSpy = jest.spyOn(api, 'getMutedAlertsInstancesByRule');
 
     renderHook(() => useGetMutedAlertsQuery({ http, notifications, ruleIds }), {
-      wrapper,
+      wrapper: Wrapper,
     });
 
     await waitFor(() =>
@@ -43,7 +43,7 @@ describe('useGetMutedAlertsQuery', () => {
     const spy = jest.spyOn(api, 'getMutedAlertsInstancesByRule');
 
     renderHook(() => useGetMutedAlertsQuery({ http, notifications, ruleIds }, { enabled: false }), {
-      wrapper,
+      wrapper: Wrapper,
     });
 
     await waitFor(() => expect(spy).not.toHaveBeenCalled());
@@ -55,7 +55,7 @@ describe('useGetMutedAlertsQuery', () => {
       .mockRejectedValue(new Error('An error'));
 
     renderHook(() => useGetMutedAlertsQuery({ http, notifications, ruleIds }), {
-      wrapper,
+      wrapper: Wrapper,
     });
 
     await waitFor(() => expect(spy).toHaveBeenCalled());

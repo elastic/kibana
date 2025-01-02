@@ -8,7 +8,7 @@
  */
 
 import { renderHook, waitFor } from '@testing-library/react';
-import { wrapper } from '@kbn/alerts-ui-shared/src/common/test_utils/wrapper';
+import { Wrapper } from '@kbn/alerts-ui-shared/src/common/test_utils/wrapper';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import * as api from '../apis/mute_alert_instance';
@@ -31,7 +31,7 @@ describe('useMuteAlertInstanceMutation', () => {
     const muteAlertInstanceSpy = jest.spyOn(api, 'muteAlertInstance');
 
     const { result } = renderHook(() => useMuteAlertInstanceMutation({ http, notifications }), {
-      wrapper,
+      wrapper: Wrapper,
     });
 
     result.current.mutate(params);
@@ -49,7 +49,7 @@ describe('useMuteAlertInstanceMutation', () => {
     const spy = jest.spyOn(api, 'muteAlertInstance').mockRejectedValue(new Error('An error'));
 
     const { result } = renderHook(() => useMuteAlertInstanceMutation({ http, notifications }), {
-      wrapper,
+      wrapper: Wrapper,
     });
 
     result.current.mutate(params);

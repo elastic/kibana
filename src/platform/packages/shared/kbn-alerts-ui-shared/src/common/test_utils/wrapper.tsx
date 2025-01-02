@@ -14,7 +14,7 @@ import { testQueryClientConfig } from './test_query_client_config';
 
 const queryClient = new QueryClient(testQueryClientConfig);
 
-export const wrapper = ({ children }: PropsWithChildren) => {
+export const Wrapper = ({ children }: PropsWithChildren) => {
   return (
     <QueryClientProvider client={queryClient} context={AlertsQueryContext}>
       {children}
