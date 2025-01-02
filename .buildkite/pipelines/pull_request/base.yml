@@ -9,7 +9,6 @@ steps:
       machineType: c2-highmem-4
       localSSds: 1
       preemptible: true
-      diskSizeGb: 75
     timeout_in_minutes: 80
     retry:
       automatic:
@@ -48,7 +47,6 @@ steps:
       machineType: c2-standard-8
       localSsds: 1
       preemptible: true
-      diskSizeGb: 75
     timeout_in_minutes: 80
     retry:
       automatic:
