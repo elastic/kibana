@@ -8,7 +8,6 @@
 import React, { lazy, Suspense } from 'react';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { AppPluginStartDependencies } from '../types';
 
 // Initializing react-query
 const queryClient = new QueryClient({
@@ -23,11 +22,11 @@ const queryClient = new QueryClient({
 
 const AssetInventoryLazy = lazy(() => import('../components/app'));
 
-export const getAssetInventoryLazy = (props: AppPluginStartDependencies) => {
+export const AssetInventoryLazyWrapper = () => {
   return (
     <QueryClientProvider client={queryClient}>
       <Suspense fallback={<EuiLoadingSpinner />}>
-        <AssetInventoryLazy {...props} />
+        <AssetInventoryLazy />
       </Suspense>
     </QueryClientProvider>
   );

@@ -7,16 +7,14 @@
 
 import React from 'react';
 import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
-import { useKibana } from '../../common/lib/kibana';
 import { SecurityPageName } from '../../../common/constants';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
+import { AssetInventoryLazyWrapper } from '../methods';
 
 export const AssetInventoryContainer = React.memo(() => {
-  const { assetInventory } = useKibana().services;
-
   return (
     <SecuritySolutionPageWrapper noPadding>
-      {assetInventory.getAssetInventoryPage({})}
+      <AssetInventoryLazyWrapper />
       <SpyRoute pageName={SecurityPageName.assetInventory} />
     </SecuritySolutionPageWrapper>
   );
