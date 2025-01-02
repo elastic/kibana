@@ -9,6 +9,7 @@
 
 import { firstValueFrom, Subject } from 'rxjs';
 import { CoreSetup, CoreStart, Logger, Plugin, PluginInitializerContext } from '@kbn/core/server';
+import type { CapabilitiesStart } from '@kbn/core-capabilities-server/src/contracts';
 import { SavedObjectsManagementPluginSetup, SavedObjectsManagementPluginStart } from './types';
 import { SavedObjectsManagement } from './services';
 import { registerRoutes } from './routes';
@@ -19,7 +20,7 @@ export class SavedObjectsManagementPlugin
 {
   private readonly logger: Logger;
   private managementService$ = new Subject<SavedObjectsManagement>();
-  private capabilitiesService$ = new Subject<Capabilities>();
+  private capabilitiesService$ = new Subject<CapabilitiesStart>();
 
   constructor(private readonly context: PluginInitializerContext) {
     this.logger = this.context.logger.get();

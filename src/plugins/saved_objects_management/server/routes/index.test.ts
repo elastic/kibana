@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { CapabilitiesStart } from '@kbn/core-capabilities-server/src/contracts';
 import { registerRoutes } from '.';
-import { ISavedObjectsManagement } from '../services';
+import type { ISavedObjectsManagement } from '../services';
 import { coreMock, httpServiceMock } from '@kbn/core/server/mocks';
 
 describe('registerRoutes', () => {
@@ -17,10 +18,12 @@ describe('registerRoutes', () => {
     const httpSetup = coreMock.createSetup().http;
     httpSetup.createRouter.mockReturnValue(router);
     const managementPromise = Promise.resolve({} as ISavedObjectsManagement);
+    const capabilitiesPromise = Promise.resolve({} as CapabilitiesStart);
 
     registerRoutes({
       http: httpSetup,
       managementServicePromise: managementPromise,
+      capabilitiesPromise,
     });
 
     expect(httpSetup.createRouter).toHaveBeenCalledTimes(1);

@@ -8,6 +8,7 @@
  */
 
 import type { IRouter, SavedObjectsType } from '@kbn/core/server';
+import type { CapabilitiesStart } from '@kbn/core-capabilities-server/src/contracts';
 import type { SavedObjectManagementTypeInfo } from '../../common';
 
 const convertType = (sot: SavedObjectsType): SavedObjectManagementTypeInfo => {
@@ -21,7 +22,7 @@ const convertType = (sot: SavedObjectsType): SavedObjectManagementTypeInfo => {
 
 export const registerGetAllowedTypesRoute = (
   router: IRouter,
-  capabilitiesPromise: Promise<Capabilities>
+  capabilitiesPromise?: Promise<CapabilitiesStart>
 ) => {
   router.get(
     {
@@ -40,30 +41,32 @@ export const registerGetAllowedTypesRoute = (
         .filter((type) => type.management!.visibleInManagement ?? true)
         .map(convertType);
 
-      // Check if the user has the capability to see ML objects
-      // if so, add it to the allowed types
-      // ML objects are not importable and exportable within management page
-      // as they are just wrappers around Elasticsearch objects
-      const capabilities = await capabilitiesPromise;
-      const mlCapabilities = await capabilities.resolveCapabilities(req, {
-        capabilityPath: 'ml.*',
-      });
-      const canSeeMLJobs =
-        mlCapabilities.ml.canGetJobs && mlCapabilities.ml.canGetDataFrameAnalytics;
-      const canSeeTrainedModels = mlCapabilities.ml.canGetTrainedModels;
+      if (capabilitiesPromise) {
+        // Check if the user has the capability to see ML objects
+        // if so, add it to the allowed types
+        // ML objects are not importable and exportable within management page
+        // as they are just wrappers around Elasticsearch objects
+        const capabilities = await capabilitiesPromise;
+        const mlCapabilities = await capabilities.resolveCapabilities(req, {
+          capabilityPath: 'ml.*',
+        });
+        const canSeeMLJobs =
+          mlCapabilities.ml.canGetJobs && mlCapabilities.ml.canGetDataFrameAnalytics;
+        const canSeeTrainedModels = mlCapabilities.ml.canGetTrainedModels;
 
-      const [mlJobType, trainedModelType] = await Promise.all([
-        canSeeMLJobs ? (await context.core).savedObjects.typeRegistry.getType('ml-job') : null,
-        canSeeTrainedModels
-          ? (await context.core).savedObjects.typeRegistry.getType('ml-trained-model')
-          : null,
-      ]);
+        const [mlJobType, trainedModelType] = await Promise.all([
+          canSeeMLJobs ? (await context.core).savedObjects.typeRegistry.getType('ml-job') : null,
+          canSeeTrainedModels
+            ? (await context.core).savedObjects.typeRegistry.getType('ml-trained-model')
+            : null,
+        ]);
 
-      if (mlJobType) {
-        allowedTypes.push(convertType(mlJobType));
-      }
-      if (trainedModelType) {
-        allowedTypes.push(convertType(trainedModelType));
+        if (mlJobType) {
+          allowedTypes.push(convertType(mlJobType));
+        }
+        if (trainedModelType) {
+          allowedTypes.push(convertType(trainedModelType));
+        }
       }
 
       return res.ok({
