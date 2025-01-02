@@ -87,7 +87,7 @@ export class ResetSLO {
       );
     } catch (err) {
       this.logger.error(
-        `Cannot reset the SLO [id: ${slo.id}, revision: ${slo.revision}]. Rolling back.`
+        `Cannot reset the SLO [id: ${slo.id}, revision: ${slo.revision}]. Rolling back. ${err}`
       );
 
       await this.summaryTransformManager.stop(summaryTransformId);

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { GroupByField } from '../../../../../pages/slos/components/slo_list_group_by';
+import type { GroupByField } from '../../../../../pages/slos/types';
 
 interface Props {
   kqlQuery: string;

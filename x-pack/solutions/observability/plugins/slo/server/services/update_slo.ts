@@ -103,14 +103,14 @@ export class UpdateSLO {
         );
       } catch (err) {
         this.logger.error(
-          `Cannot update the SLO summary pipeline [id: ${updatedSlo.id}, revision: ${updatedSlo.revision}].`
+          `Cannot update the SLO summary pipeline [id: ${updatedSlo.id}, revision: ${updatedSlo.revision}]. ${err}`
         );
 
         await asyncForEach(rollbackOperations.reverse(), async (operation) => {
           try {
             await operation();
           } catch (rollbackErr) {
-            this.logger.error('Rollback operation failed', rollbackErr);
+            this.logger.error(`Rollback operation failed. ${rollbackErr}`);
           }
         });
 
@@ -182,14 +182,14 @@ export class UpdateSLO {
       );
     } catch (err) {
       this.logger.error(
-        `Cannot update the SLO [id: ${updatedSlo.id}, revision: ${updatedSlo.revision}]. Rolling back.`
+        `Cannot update the SLO [id: ${updatedSlo.id}, revision: ${updatedSlo.revision}]. Rolling back. ${err}`
       );
 
       await asyncForEach(rollbackOperations.reverse(), async (operation) => {
         try {
           await operation();
         } catch (rollbackErr) {
-          this.logger.error('Rollback operation failed', rollbackErr);
+          this.logger.error(`Rollback operation failed. ${rollbackErr}`);
         }
       });
 
