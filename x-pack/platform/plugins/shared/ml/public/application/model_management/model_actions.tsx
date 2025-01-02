@@ -40,15 +40,14 @@ import { ML_PAGES } from '../../../common/constants/locator';
 import { isTestable } from './test_models';
 import { usePermissionCheck } from '../capabilities/check_capabilities';
 import { useCloudCheck } from '../components/node_available_warning/hooks';
+import { useTrainedModelsService } from './trained_models_service';
 
 export function useModelActions({
   onDfaTestAction,
   onTestAction,
   onModelsDeleteRequest,
   onModelDeployRequest,
-  onLoading,
   isLoading,
-  fetchModels,
   modelAndDeploymentIds,
   onModelDownloadRequest,
 }: {
@@ -58,8 +57,6 @@ export function useModelActions({
   onModelsDeleteRequest: (models: TrainedModelUIItem[]) => void;
   onModelDeployRequest: (model: DFAModelItem) => void;
   onModelDownloadRequest: (modelId: string) => void;
-  onLoading: (isLoading: boolean) => void;
-  fetchModels: () => Promise<void>;
   modelAndDeploymentIds: string[];
 }): Array<Action<TrainedModelUIItem>> {
   const isMobileLayout = useIsWithinMaxBreakpoint('l');
@@ -70,7 +67,7 @@ export function useModelActions({
       application: { navigateToUrl },
       overlays,
       docLinks,
-      mlServices: { mlApi },
+      mlServices: { mlApi, httpService },
       ...startServices
     },
   } = useMlKibana();
@@ -79,6 +76,8 @@ export function useModelActions({
   const { nlpSettings } = useMlServerInfo();
 
   const cloudInfo = useCloudCheck();
+
+  const trainedModelsService = useTrainedModelsService();
 
   const [
     canCreateTrainedModels,
@@ -101,8 +100,6 @@ export function useModelActions({
   const { displayErrorToast, displaySuccessToast } = useToastNotificationService();
 
   const urlLocator = useMlLocator()!;
-
-  const trainedModelsApiService = useTrainedModelsApiService();
 
   useEffect(() => {
     mlApi
@@ -132,9 +129,18 @@ export function useModelActions({
         startModelDeploymentDocUrl,
         cloudInfo,
         showNodeInfo,
-        nlpSettings
+        nlpSettings,
+        httpService
       ),
-    [overlays, startServices, startModelDeploymentDocUrl, cloudInfo, showNodeInfo, nlpSettings]
+    [
+      overlays,
+      startServices,
+      startModelDeploymentDocUrl,
+      cloudInfo,
+      showNodeInfo,
+      nlpSettings,
+      httpService,
+    ]
   );
 
   return useMemo<Array<Action<TrainedModelUIItem>>>(
@@ -217,12 +223,17 @@ export function useModelActions({
         },
         available: (item) => {
           return (
-            isNLPModelItem(item) &&
-            item.state !== MODEL_STATE.DOWNLOADING &&
-            item.state !== MODEL_STATE.NOT_DOWNLOADED
+            isNLPModelItem(item) ||
+            (canCreateTrainedModels &&
+              isModelDownloadItem(item) &&
+              item.state === MODEL_STATE.NOT_DOWNLOADED)
           );
         },
         onClick: async (item) => {
+          if (isModelDownloadItem(item) && item.state === MODEL_STATE.NOT_DOWNLOADED) {
+            trainedModelsService.downloadModel(item.model_id);
+          }
+
           const modelDeploymentParams = await getUserInputModelDeploymentParams(
             item as NLPModelItem,
             undefined,
@@ -232,8 +243,7 @@ export function useModelActions({
           if (!modelDeploymentParams) return;
 
           try {
-            onLoading(true);
-            await trainedModelsApiService.startModelAllocation(
+            await trainedModelsService.startModelDeployment(
               item.model_id,
               {
                 priority: modelDeploymentParams.priority!,
@@ -247,7 +257,6 @@ export function useModelActions({
                   : {}),
               }
             );
-            await fetchModels();
           } catch (e) {
             displayErrorToast(
               e,
@@ -258,7 +267,6 @@ export function useModelActions({
                 },
               })
             );
-            onLoading(false);
           }
         },
       },
@@ -295,9 +303,7 @@ export function useModelActions({
           if (!deploymentParams) return;
 
           try {
-            onLoading(true);
-
-            await trainedModelsApiService.updateModelDeployment(
+            await trainedModelsService.updateModelDeployment(
               item.model_id,
               deploymentParams.deployment_id!,
               {
@@ -317,7 +323,6 @@ export function useModelActions({
                 },
               })
             );
-            await fetchModels();
           } catch (e) {
             displayErrorToast(
               e,
@@ -328,7 +333,6 @@ export function useModelActions({
                 },
               })
             );
-            onLoading(false);
           }
         },
       },
@@ -375,8 +379,7 @@ export function useModelActions({
           }
 
           try {
-            onLoading(true);
-            const results = await trainedModelsApiService.stopModelAllocation(
+            const results = await trainedModelsService.stopModelDeployment(
               item.model_id,
               deploymentIds,
               {
@@ -408,32 +411,7 @@ export function useModelActions({
                 },
               })
             );
-            onLoading(false);
           }
-          // Need to fetch model state updates
-          await fetchModels();
-        },
-      },
-      {
-        name: i18n.translate('xpack.ml.inference.modelsList.downloadModelActionLabel', {
-          defaultMessage: 'Download',
-        }),
-        description: i18n.translate('xpack.ml.inference.modelsList.downloadModelActionLabel', {
-          defaultMessage: 'Download',
-        }),
-        'data-test-subj': 'mlModelsTableRowDownloadModelAction',
-        icon: 'download',
-        color: 'text',
-        // @ts-ignore
-        type: isMobileLayout ? 'icon' : 'button',
-        isPrimary: true,
-        available: (item) =>
-          canCreateTrainedModels &&
-          isModelDownloadItem(item) &&
-          item.state === MODEL_STATE.NOT_DOWNLOADED,
-        enabled: (item) => !isLoading,
-        onClick: async (item) => {
-          onModelDownloadRequest(item.model_id);
         },
       },
       {
@@ -587,29 +565,26 @@ export function useModelActions({
       },
     ],
     [
-      canCreateTrainedModels,
-      canDeleteTrainedModels,
-      canManageIngestPipelines,
+      isMobileLayout,
+      urlLocator,
+      navigateToUrl,
+      navigateToPath,
       canStartStopTrainedModels,
-      canTestTrainedModels,
+      isLoading,
+      getUserInputModelDeploymentParams,
+      modelAndDeploymentIds,
+      trainedModelsService,
       displayErrorToast,
       displaySuccessToast,
-      fetchModels,
       getUserConfirmation,
-      getUserInputModelDeploymentParams,
-      isLoading,
-      modelAndDeploymentIds,
-      navigateToPath,
-      navigateToUrl,
-      onDfaTestAction,
-      onLoading,
+      canCreateTrainedModels,
       onModelDeployRequest,
+      canManageIngestPipelines,
       onModelsDeleteRequest,
+      canDeleteTrainedModels,
+      onDfaTestAction,
       onTestAction,
-      trainedModelsApiService,
-      urlLocator,
-      onModelDownloadRequest,
-      isMobileLayout,
+      canTestTrainedModels,
     ]
   );
 }

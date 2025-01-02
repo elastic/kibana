@@ -41,14 +41,20 @@ import type { CoreStart, OverlayStart } from '@kbn/core/public';
 import { css } from '@emotion/react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { dictionaryValidator } from '@kbn/ml-validators';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { NLPSettings } from '../../../common/constants/app';
-import type {
-  NLPModelItem,
-  TrainedModelDeploymentStatsResponse,
+import type { ModelDownloadItem } from '../../../common/types/trained_models';
+import {
+  isModelDownloadItem,
+  type NLPModelItem,
+  type TrainedModelDeploymentStatsResponse,
 } from '../../../common/types/trained_models';
 import { type CloudInfo, getNewJobLimits } from '../services/ml_server_info';
 import type { MlStartTrainedModelDeploymentRequestNew } from './deployment_params_mapper';
 import { DeploymentParamsMapper } from './deployment_params_mapper';
+import { useTrainedModelsService } from './trained_models_service';
+import type { HttpService } from '../services/http_service';
+import { ModelStatusIndicator } from './model_status_indicator';
 
 interface DeploymentSetupProps {
   config: DeploymentParamsUI;
@@ -647,7 +653,7 @@ export const DeploymentSetup: FC<DeploymentSetupProps> = ({
 };
 
 interface StartDeploymentModalProps {
-  model: NLPModelItem;
+  model: NLPModelItem | ModelDownloadItem;
   startModelDeploymentDocUrl: string;
   onConfigChange: (config: DeploymentParamsUI) => void;
   onClose: () => void;
@@ -676,12 +682,25 @@ export const StartUpdateDeploymentModal: FC<StartDeploymentModalProps> = ({
 }) => {
   const isUpdate = !!initialParams;
 
+  const isModelNotDownloaded = isModelDownloadItem(model);
+
   const getDefaultParams = useCallback((): DeploymentParamsUI => {
+    const defaultVCPUUsage: DeploymentParamsUI['vCPUUsage'] = showNodeInfo ? 'medium' : 'low';
+
+    const defaultParams = {
+      deploymentId: `${model.model_id}_ingest`,
+      optimized: 'optimizedForIngest',
+      vCPUUsage: defaultVCPUUsage,
+      adaptiveResources: true,
+    } as const;
+
+    if (isModelNotDownloaded) {
+      return defaultParams;
+    }
+
     const uiParams = model.stats?.deployment_stats.map((v) =>
       deploymentParamsMapper.mapApiToUiDeploymentParams(v)
     );
-
-    const defaultVCPUUsage: DeploymentParamsUI['vCPUUsage'] = showNodeInfo ? 'medium' : 'low';
 
     return uiParams?.some((v) => v.optimized === 'optimizedForIngest')
       ? {
@@ -690,13 +709,8 @@ export const StartUpdateDeploymentModal: FC<StartDeploymentModalProps> = ({
           vCPUUsage: defaultVCPUUsage,
           adaptiveResources: true,
         }
-      : {
-          deploymentId: `${model.model_id}_ingest`,
-          optimized: 'optimizedForIngest',
-          vCPUUsage: defaultVCPUUsage,
-          adaptiveResources: true,
-        };
-  }, [deploymentParamsMapper, model.model_id, model.stats?.deployment_stats, showNodeInfo]);
+      : defaultParams;
+  }, [deploymentParamsMapper, isModelNotDownloaded, model, showNodeInfo]);
 
   const [config, setConfig] = useState<DeploymentParamsUI>(initialParams ?? getDefaultParams());
 
@@ -709,12 +723,12 @@ export const StartUpdateDeploymentModal: FC<StartDeploymentModalProps> = ({
     otherModelAndDeploymentIds.splice(otherModelAndDeploymentIds?.indexOf(model.model_id), 1);
 
     return dictionaryValidator([
-      ...model.deployment_ids,
+      ...(isModelNotDownloaded ? [] : model.deployment_ids),
       ...otherModelAndDeploymentIds,
       // check for deployment with the default ID
-      ...(model.deployment_ids.includes(model.model_id) ? [''] : []),
+      ...(isModelNotDownloaded ? [] : model.deployment_ids.includes(model.model_id) ? [''] : []),
     ]);
-  }, [modelAndDeploymentIds, model.deployment_ids, model.model_id, isUpdate]);
+  }, [modelAndDeploymentIds, model, isUpdate, isModelNotDownloaded]);
 
   const deploymentIdErrors = deploymentIdValidator(config.deploymentId ?? '');
 
@@ -725,21 +739,28 @@ export const StartUpdateDeploymentModal: FC<StartDeploymentModalProps> = ({
   return (
     <EuiModal onClose={onClose} data-test-subj="mlModelsStartDeploymentModal" maxWidth={640}>
       <EuiModalHeader>
-        <EuiModalHeaderTitle size="s">
-          {isUpdate ? (
-            <FormattedMessage
-              id="xpack.ml.trainedModels.modelsList.updateDeployment.modalTitle"
-              defaultMessage="Update {modelId} deployment"
-              values={{ modelId: model.model_id }}
-            />
-          ) : (
-            <FormattedMessage
-              id="xpack.ml.trainedModels.modelsList.startDeployment.modalTitle"
-              defaultMessage="Start {modelId} deployment"
-              values={{ modelId: model.model_id }}
-            />
-          )}
-        </EuiModalHeaderTitle>
+        <EuiFlexGroup direction="column" gutterSize="s">
+          <EuiFlexItem>
+            <EuiModalHeaderTitle size="s">
+              {isUpdate ? (
+                <FormattedMessage
+                  id="xpack.ml.trainedModels.modelsList.updateDeployment.modalTitle"
+                  defaultMessage="Update {modelId} deployment"
+                  values={{ modelId: model.model_id }}
+                />
+              ) : (
+                <FormattedMessage
+                  id="xpack.ml.trainedModels.modelsList.startDeployment.modalTitle"
+                  defaultMessage="Start {modelId} deployment"
+                  values={{ modelId: model.model_id }}
+                />
+              )}
+            </EuiModalHeaderTitle>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <ModelStatusIndicator modelId={model.model_id} />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiModalHeader>
 
       <EuiModalBody>
@@ -754,12 +775,18 @@ export const StartUpdateDeploymentModal: FC<StartDeploymentModalProps> = ({
           disableAdaptiveResourcesControl={
             showNodeInfo ? false : !nlpSettings.modelDeployment.allowStaticAllocations
           }
-          deploymentsParams={model.stats?.deployment_stats.reduce<
-            Record<string, DeploymentParamsUI>
-          >((acc, curr) => {
-            acc[curr.deployment_id] = deploymentParamsMapper.mapApiToUiDeploymentParams(curr);
-            return acc;
-          }, {})}
+          deploymentsParams={
+            isModelNotDownloaded
+              ? {}
+              : model.stats?.deployment_stats.reduce<Record<string, DeploymentParamsUI>>(
+                  (acc, curr) => {
+                    acc[curr.deployment_id] =
+                      deploymentParamsMapper.mapApiToUiDeploymentParams(curr);
+                    return acc;
+                  },
+                  {}
+                )
+          }
         />
 
         <EuiHorizontalRule margin="m" />
@@ -844,7 +871,8 @@ export const getUserInputModelDeploymentParamsProvider =
     startModelDeploymentDocUrl: string,
     cloudInfo: CloudInfo,
     showNodeInfo: boolean,
-    nlpSettings: NLPSettings
+    nlpSettings: NLPSettings,
+    httpService: HttpService
   ) =>
   (
     model: NLPModelItem,
@@ -867,24 +895,26 @@ export const getUserInputModelDeploymentParamsProvider =
       try {
         const modalSession = overlays.openModal(
           toMountPoint(
-            <StartUpdateDeploymentModal
-              nlpSettings={nlpSettings}
-              showNodeInfo={showNodeInfo}
-              deploymentParamsMapper={deploymentParamsMapper}
-              cloudInfo={cloudInfo}
-              startModelDeploymentDocUrl={startModelDeploymentDocUrl}
-              initialParams={params}
-              modelAndDeploymentIds={deploymentIds}
-              model={model}
-              onConfigChange={(config) => {
-                modalSession.close();
-                resolve(deploymentParamsMapper.mapUiToApiDeploymentParams(config));
-              }}
-              onClose={() => {
-                modalSession.close();
-                resolve();
-              }}
-            />,
+            <KibanaContextProvider services={{ mlServices: { httpService } }}>
+              <StartUpdateDeploymentModal
+                nlpSettings={nlpSettings}
+                showNodeInfo={showNodeInfo}
+                deploymentParamsMapper={deploymentParamsMapper}
+                cloudInfo={cloudInfo}
+                startModelDeploymentDocUrl={startModelDeploymentDocUrl}
+                initialParams={params}
+                modelAndDeploymentIds={deploymentIds}
+                model={model}
+                onConfigChange={(config) => {
+                  modalSession.close();
+                  resolve(deploymentParamsMapper.mapUiToApiDeploymentParams(config));
+                }}
+                onClose={() => {
+                  modalSession.close();
+                  resolve();
+                }}
+              />
+            </KibanaContextProvider>,
             startServices
           )
         );

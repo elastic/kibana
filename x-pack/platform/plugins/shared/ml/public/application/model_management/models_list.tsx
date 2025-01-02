@@ -35,10 +35,9 @@ import { ELSER_ID_V1, MODEL_STATE } from '@kbn/ml-trained-models-utils';
 import type { ListingPageUrlState } from '@kbn/ml-url-state';
 import { usePageUrlState } from '@kbn/ml-url-state';
 import { dynamic } from '@kbn/shared-ux-utility';
-import { cloneDeep, isEmpty } from 'lodash';
 import type { FC } from 'react';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import useMountedState from 'react-use/lib/useMountedState';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import useObservable from 'react-use/lib/useObservable';
 import { ML_PAGES } from '../../../common/constants/locator';
 import { ML_ELSER_CALLOUT_DISMISSED } from '../../../common/types/storage';
 import type {
@@ -59,10 +58,8 @@ import type { ModelsBarStats } from '../components/stats_bar';
 import { StatsBar } from '../components/stats_bar';
 import { TechnicalPreviewBadge } from '../components/technical_preview_badge';
 import { useMlKibana } from '../contexts/kibana';
-import { useEnabledFeatures } from '../contexts/ml';
 import { useTableSettings } from '../data_frame_analytics/pages/analytics_management/components/analytics_list/use_table_settings';
 import { useRefresh } from '../routing/use_refresh';
-import { useTrainedModelsApiService } from '../services/ml_api_service/trained_models';
 import { useToastNotificationService } from '../services/toast_notification_service';
 import { ModelsTableToConfigMapping } from './config_mapping';
 import { DeleteModelsModal } from './delete_models_modal';
@@ -70,6 +67,7 @@ import { getModelStateColor } from './get_model_state';
 import { useModelActions } from './model_actions';
 import { TestDfaModelsFlyout } from './test_dfa_models_flyout';
 import { TestModelAndPipelineCreationFlyout } from './test_models';
+import { useTrainedModelsService } from './trained_models_service';
 
 interface PageUrlState {
   pageKey: typeof ML_PAGES.TRAINED_MODELS_MANAGE;
@@ -101,14 +99,10 @@ interface Props {
   updatePageState?: (update: Partial<ListingPageUrlState>) => void;
 }
 
-const DOWNLOAD_POLL_INTERVAL = 3000;
-
 export const ModelsList: FC<Props> = ({
   pageState: pageStateExternal,
   updatePageState: updatePageStateExternal,
 }) => {
-  const isMounted = useMountedState();
-
   const {
     services: {
       application: { capabilities },
@@ -116,9 +110,14 @@ export const ModelsList: FC<Props> = ({
     },
   } = useMlKibana();
 
+  const trainedModelsService = useTrainedModelsService();
+  const isInitialized = trainedModelsService.isInitialized();
+  const items = useObservable(trainedModelsService.models$, trainedModelsService.models);
+  const isLoading = useObservable(trainedModelsService.isLoading$, trainedModelsService.isLoading);
+  const error = useObservable(trainedModelsService.error$, trainedModelsService.error);
+
   const nlpElserDocUrl = docLinks.links.ml.nlpElser;
 
-  const { isNLPEnabled } = useEnabledFeatures();
   const [isElserCalloutDismissed, setIsElserCalloutDismissed] = useStorage(
     ML_ELSER_CALLOUT_DISMISSED,
     false
@@ -145,13 +144,8 @@ export const ModelsList: FC<Props> = ({
 
   const canDeleteTrainedModels = capabilities.ml.canDeleteTrainedModels as boolean;
 
-  const trainedModelsApiService = useTrainedModelsApiService();
-
   const { displayErrorToast } = useToastNotificationService();
 
-  const [isInitialized, setIsInitialized] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [items, setItems] = useState<TrainedModelUIItem[]>([]);
   const [selectedModels, setSelectedModels] = useState<TrainedModelUIItem[]>([]);
   const [modelsToDelete, setModelsToDelete] = useState<TrainedModelUIItem[]>([]);
   const [modelToDeploy, setModelToDeploy] = useState<DFAModelItem | undefined>();
@@ -167,41 +161,8 @@ export const ModelsList: FC<Props> = ({
     return items.filter((i): i is NLPModelItem | DFAModelItem => !isModelDownloadItem(i));
   }, [items]);
 
-  /**
-   * Fetches trained models.
-   */
-  const fetchModelsData = useCallback(async () => {
-    setIsLoading(true);
-    try {
-      const resultItems = await trainedModelsApiService.getTrainedModelsList();
-
-      setItems((prevItems) => {
-        // Need to merge existing items with new items
-        // to preserve state and download status
-        return resultItems.map((item) => {
-          const prevItem = prevItems.find((i) => i.model_id === item.model_id);
-          return {
-            ...item,
-            ...(isBaseNLPModelItem(prevItem) && prevItem?.state === MODEL_STATE.DOWNLOADING
-              ? {
-                  state: prevItem.state,
-                  downloadState: prevItem.downloadState,
-                }
-              : {}),
-          };
-        });
-      });
-
-      setItemIdToExpandedRowMap((prev) => {
-        // Refresh expanded rows
-        return Object.fromEntries(
-          Object.keys(prev).map((modelId) => {
-            const item = resultItems.find((i) => i.model_id === modelId);
-            return item ? [modelId, <ExpandedRow item={item as TrainedModelItem} />] : [];
-          })
-        );
-      });
-    } catch (error) {
+  useEffect(() => {
+    if (error) {
       displayErrorToast(
         error,
         i18n.translate('xpack.ml.trainedModels.modelsList.fetchFailedErrorMessage', {
@@ -209,23 +170,41 @@ export const ModelsList: FC<Props> = ({
         })
       );
     }
+  }, [displayErrorToast, error]);
 
-    setIsInitialized(true);
-
-    setIsLoading(false);
-
-    await fetchDownloadStatus();
-
+  useEffect(() => {
+    return () => {
+      if (trainedModelsService) {
+        trainedModelsService.destroy();
+      }
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [itemIdToExpandedRowMap, isNLPEnabled]);
+  }, []);
 
   useEffect(
     function updateOnTimerRefresh() {
       if (!refresh) return;
-      fetchModelsData();
+
+      // Register callback for expanded rows updates
+      const unsubscribe = trainedModelsService.onFetch((modelItems) => {
+        // Refresh expanded rows
+        setItemIdToExpandedRowMap((prevMap) => {
+          return Object.fromEntries(
+            Object.keys(prevMap).map((modelId) => {
+              const item = modelItems.find((i) => i.model_id === modelId);
+              return item ? [modelId, <ExpandedRow item={item as TrainedModelItem} />] : [];
+            })
+          );
+        });
+      });
+
+      trainedModelsService.fetchModels();
+
+      return () => {
+        unsubscribe();
+      };
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [refresh]
+    [refresh, trainedModelsService]
   );
 
   const modelsStats: ModelsBarStats = useMemo(() => {
@@ -239,80 +218,6 @@ export const ModelsList: FC<Props> = ({
       },
     };
   }, [existingModels]);
-
-  const downLoadStatusFetchInProgress = useRef(false);
-  const abortedDownload = useRef(new Set<string>());
-
-  /**
-   * Updates model list with download status
-   */
-  const fetchDownloadStatus = useCallback(
-    /**
-     * @param downloadInProgress Set of model ids that reports download in progress
-     */
-    async (downloadInProgress: Set<string> = new Set<string>()) => {
-      // Allows only single fetch to be in progress
-      if (downLoadStatusFetchInProgress.current && downloadInProgress.size === 0) return;
-
-      try {
-        downLoadStatusFetchInProgress.current = true;
-
-        const downloadStatus = await trainedModelsApiService.getModelsDownloadStatus();
-
-        if (isMounted()) {
-          setItems((prevItems) => {
-            return prevItems.map((item) => {
-              if (!isBaseNLPModelItem(item)) {
-                return item;
-              }
-              const newItem = cloneDeep(item);
-
-              if (downloadStatus[item.model_id]) {
-                newItem.state = MODEL_STATE.DOWNLOADING;
-                newItem.downloadState = downloadStatus[item.model_id];
-              } else {
-                /* Unfortunately, model download status does not report 100% download state, only from 1 to 99. Hence, there might be 3 cases
-                 * 1. Model is not downloaded at all
-                 * 2. Model download was in progress and finished
-                 * 3. Model download was in progress and aborted
-                 */
-                delete newItem.downloadState;
-
-                if (abortedDownload.current.has(item.model_id)) {
-                  // Change downloading state to not downloaded
-                  newItem.state = MODEL_STATE.NOT_DOWNLOADED;
-                  abortedDownload.current.delete(item.model_id);
-                } else if (downloadInProgress.has(item.model_id) || !newItem.state) {
-                  // Change downloading state to downloaded
-                  newItem.state = MODEL_STATE.DOWNLOADED;
-                }
-
-                downloadInProgress.delete(item.model_id);
-              }
-              return newItem;
-            });
-          });
-        }
-
-        Object.keys(downloadStatus).forEach((modelId) => {
-          if (downloadStatus[modelId]) {
-            downloadInProgress.add(modelId);
-          }
-        });
-
-        if (isEmpty(downloadStatus)) {
-          downLoadStatusFetchInProgress.current = false;
-          return;
-        }
-
-        await new Promise((resolve) => setTimeout(resolve, DOWNLOAD_POLL_INTERVAL));
-        await fetchDownloadStatus(downloadInProgress);
-      } catch (e) {
-        downLoadStatusFetchInProgress.current = false;
-      }
-    },
-    [trainedModelsApiService, isMounted]
-  );
 
   /**
    * Unique inference types from models
@@ -349,10 +254,7 @@ export const ModelsList: FC<Props> = ({
   const onModelDownloadRequest = useCallback(
     async (modelId: string) => {
       try {
-        setIsLoading(true);
-        await trainedModelsApiService.installElasticTrainedModelConfig(modelId);
-        // Need to fetch model state updates
-        await fetchModelsData();
+        await trainedModelsService.downloadModel(modelId);
       } catch (e) {
         displayErrorToast(
           e,
@@ -361,10 +263,9 @@ export const ModelsList: FC<Props> = ({
             values: { modelId },
           })
         );
-        setIsLoading(true);
       }
     },
-    [displayErrorToast, fetchModelsData, trainedModelsApiService]
+    [displayErrorToast, trainedModelsService]
   );
 
   /**
@@ -372,12 +273,10 @@ export const ModelsList: FC<Props> = ({
    */
   const actions = useModelActions({
     isLoading,
-    fetchModels: fetchModelsData,
     onTestAction: setModelToTest,
     onDfaTestAction: setDfaModelToTest,
     onModelsDeleteRequest: setModelsToDelete,
     onModelDeployRequest: setModelToDeploy,
-    onLoading: setIsLoading,
     modelAndDeploymentIds,
     onModelDownloadRequest,
   });
@@ -688,7 +587,10 @@ export const ModelsList: FC<Props> = ({
 
   return (
     <>
-      <SavedObjectsWarning onCloseFlyout={fetchModelsData} forceRefresh={isLoading} />
+      <SavedObjectsWarning
+        onCloseFlyout={trainedModelsService.fetchModels.bind(trainedModelsService)}
+        forceRefresh={isLoading}
+      />
       <EuiFlexGroup justifyContent="spaceBetween">
         {modelsStats ? (
           <EuiFlexItem>
@@ -786,7 +688,7 @@ export const ModelsList: FC<Props> = ({
           onClose={(refreshList) => {
             modelsToDelete.forEach((model) => {
               if (isBaseNLPModelItem(model) && model.state === MODEL_STATE.DOWNLOADING) {
-                abortedDownload.current.add(model.model_id);
+                trainedModelsService.markDownloadAborted(model.model_id);
               }
             });
 
@@ -801,7 +703,7 @@ export const ModelsList: FC<Props> = ({
             setModelsToDelete([]);
 
             if (refreshList) {
-              fetchModelsData();
+              trainedModelsService.fetchModels();
             }
           }}
           models={modelsToDelete}
@@ -813,7 +715,7 @@ export const ModelsList: FC<Props> = ({
           onClose={(refreshList?: boolean) => {
             setModelToTest(null);
             if (refreshList) {
-              fetchModelsData();
+              trainedModelsService.fetchModels();
             }
           }}
         />
