@@ -54,6 +54,8 @@ export class TrainedModelsService {
   private onFetchCallbacks: Array<(items: TrainedModelUIItem[]) => void> = [];
   private downloadStatusFetchInProgress = false;
 
+  private downloadQueue = new Map<string, Promise<void>>();
+
   constructor(private readonly trainedModelsApiService: TrainedModelsApiService) {}
 
   public isInitialized() {
@@ -179,18 +181,27 @@ export class TrainedModelsService {
 
   public async downloadModel(modelId: string) {
     this.setLoading(true);
-    try {
-      await this.trainedModelsApiService.installElasticTrainedModelConfig(modelId);
-      await this.fetchModels();
-    } catch (error) {
-      this.modelState$.next({
-        ...this.modelState$.getValue(),
-        error,
-      });
-      throw error;
-    } finally {
+
+    const downloadPromise = async () => {
+      try {
+        await this.trainedModelsApiService.installElasticTrainedModelConfig(modelId);
+        await this.fetchModels();
+      } catch (error) {
+        this.modelState$.next({
+          ...this.modelState$.getValue(),
+          error,
+        });
+        throw error;
+      }
+    };
+
+    const queuedDownload = downloadPromise().finally(() => {
       this.setLoading(false);
-    }
+      this.downloadQueue.delete(modelId);
+    });
+
+    this.downloadQueue.set(modelId, queuedDownload);
+    return queuedDownload;
   }
 
   public async startModelDeployment(
@@ -200,6 +211,12 @@ export class TrainedModelsService {
   ) {
     this.setLoading(true);
     try {
+      const pendingDownload = this.downloadQueue.get(modelId);
+
+      if (pendingDownload) {
+        await pendingDownload;
+      }
+
       await this.trainedModelsApiService.startModelAllocation(
         modelId,
         deploymentParams,
