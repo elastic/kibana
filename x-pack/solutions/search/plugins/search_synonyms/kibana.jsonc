@@ -13,13 +13,10 @@
       "searchSynonyms"
     ],
     "requiredPlugins": [
-      "licensing",
       "features",
     ],
     "optionalPlugins": [
-      "cloud",
       "console",
-      "usageCollection",
       "searchNavigation",
     ],
     "requiredBundles": [

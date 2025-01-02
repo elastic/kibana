@@ -15,8 +15,5 @@ const configSchema = schema.object({
 export type SearchPlaygroundConfig = TypeOf<typeof configSchema>;
 
 export const config: PluginConfigDescriptor<SearchPlaygroundConfig> = {
-  exposeToBrowser: {
-    enabled: true,
-  },
   schema: configSchema,
 };

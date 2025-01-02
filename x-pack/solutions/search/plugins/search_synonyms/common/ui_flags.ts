@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export const PLUGIN_ID = 'searchSynonyms';
-export const PLUGIN_NAME = 'Synonyms';
+export const SYNONYMS_UI_FLAG = 'searchSynonyms:synonymsEnabled';

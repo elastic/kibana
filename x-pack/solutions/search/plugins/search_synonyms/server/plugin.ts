@@ -22,7 +22,7 @@ import {
 } from './types';
 
 import { defineRoutes } from './routes';
-import { PLUGIN_ID, PLUGIN_NAME } from '../common';
+import { PLUGIN_ID, PLUGIN_TITLE } from '../common';
 
 export class SearchSynonymsPlugin
   implements Plugin<SearchSynonymsPluginSetup, SearchSynonymsPluginStart, {}, {}>
@@ -34,14 +34,13 @@ export class SearchSynonymsPlugin
   }
 
   public setup(core: CoreSetup, plugins: SearchSynonymsPluginSetupDependencies) {
-    this.logger.debug('searchSynonyms: Setup');
     const router = core.http.createRouter();
 
     defineRoutes({ router, logger: this.logger });
 
     plugins.features.registerKibanaFeature({
       id: PLUGIN_ID,
-      name: PLUGIN_NAME,
+      name: PLUGIN_TITLE,
       order: 0,
       category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
       app: ['kibana', PLUGIN_ID],

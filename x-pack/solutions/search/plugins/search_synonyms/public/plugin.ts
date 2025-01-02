@@ -5,49 +5,37 @@
  * 2.0.
  */
 
-import type {
-  CoreSetup,
-  Plugin,
-  PluginInitializerContext,
-  AppMountParameters,
-} from '@kbn/core/public';
-import { i18n } from '@kbn/i18n';
-import { PLUGIN_ID, PLUGIN_NAME } from '../common';
+import type { CoreSetup, Plugin, AppMountParameters } from '@kbn/core/public';
+import { PLUGIN_ID, PLUGIN_NAME, PLUGIN_TITLE } from '../common';
 import {
   AppPluginSetupDependencies,
   AppPluginStartDependencies,
-  SearchSynonymsConfigType,
   SearchSynonymsPluginSetup,
   SearchSynonymsPluginStart,
 } from './types';
-import { SYNONYMS_UI_FLAG } from '.';
+import { SYNONYMS_UI_FLAG } from '../common/ui_flags';
 
 export class SearchSynonymsPlugin
   implements Plugin<SearchSynonymsPluginSetup, SearchSynonymsPluginStart>
 {
-  private config: SearchSynonymsConfigType;
-  constructor(initializerContext: PluginInitializerContext) {
-    this.config = initializerContext.config.get<SearchSynonymsConfigType>();
-  }
+  constructor() {}
 
   public setup(
     core: CoreSetup<AppPluginStartDependencies, SearchSynonymsPluginStart>,
     _: AppPluginSetupDependencies
   ): SearchSynonymsPluginSetup {
-    if (!this.config.enabled || !core.uiSettings.get<boolean>(SYNONYMS_UI_FLAG, false)) {
+    if (!core.settings.client.get<boolean>(SYNONYMS_UI_FLAG, false)) {
       return {};
     }
     core.application.register({
       id: PLUGIN_ID,
       appRoute: '/app/elasticsearch/synonyms',
-      title: PLUGIN_NAME,
+      title: PLUGIN_TITLE,
       deepLinks: [
         {
           id: 'synonyms',
           path: '/',
-          title: i18n.translate('xpack.searchSynonyms.appTitle', {
-            defaultMessage: 'Synonyms',
-          }),
+          title: PLUGIN_TITLE,
           visibleIn: ['globalSearch'],
         },
       ],

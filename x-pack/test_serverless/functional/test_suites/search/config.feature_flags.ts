@@ -38,7 +38,7 @@ export default createTestConfig({
       pathname: '/app/search_playground',
     },
     searchSynonyms: {
-      pathname: '/app/search_synonyms',
+      pathname: '/app/elasticsearch/search_synonyms',
     },
     elasticsearchStart: {
       pathname: '/app/elasticsearch/start',
