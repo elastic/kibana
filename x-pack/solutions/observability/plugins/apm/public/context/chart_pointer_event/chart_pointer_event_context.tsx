@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import React, { createContext, ReactNode, useRef } from 'react';
+import type { ReactNode } from 'react';
+import React, { createContext, useRef } from 'react';
 
-import { PointerEvent } from '@elastic/charts';
+import type { PointerEvent } from '@elastic/charts';
 
 export const UPDATE_POINTER_EVENT = 'updatePointerEvent';
 export const ChartPointerEventContext = createContext<{

@@ -6,10 +6,8 @@
  */
 
 import * as rt from 'io-ts';
-import {
-  metricsExplorerViewAttributesRT,
-  metricsExplorerViewRT,
-} from '../../../metrics_explorer_views';
+import type { metricsExplorerViewRT } from '../../../metrics_explorer_views';
+import { metricsExplorerViewAttributesRT } from '../../../metrics_explorer_views';
 
 export const createMetricsExplorerViewAttributesRequestPayloadRT = rt.intersection([
   metricsExplorerViewAttributesRT,
