@@ -10,6 +10,7 @@ import { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import { Logger } from '@kbn/logging';
 import { badRequest, internal, notFound } from '@hapi/boom';
 import {
+  isRootStream,
   isWiredStream,
   isWiredStreamConfig,
   streamConfigDefinitionSchema,
@@ -17,10 +18,12 @@ import {
   WiredStreamConfigDefinition,
   WiredStreamDefinition,
 } from '@kbn/streams-schema';
+import fastDeepEqual from 'fast-deep-equal';
 import {
   DefinitionNotFound,
   ForkConditionMissing,
   IndexTemplateNotFound,
+  RootStreamImmutabilityException,
   SecurityException,
 } from '../../lib/streams/errors';
 import { createServerRoute } from '../create_server_route';
@@ -67,6 +70,10 @@ export const editStreamRoute = createServerRoute({
           logger,
         });
         return { acknowledged: true };
+      }
+
+      if (isRootStream(streamDefinition)) {
+        await validateRootStreamChanges(scopedClusterClient, streamDefinition);
       }
 
       await validateStreamChildren(scopedClusterClient, params.path.id, params.body.ingest.routing);
@@ -143,7 +150,8 @@ export const editStreamRoute = createServerRoute({
       if (
         e instanceof SecurityException ||
         e instanceof ForkConditionMissing ||
-        e instanceof MalformedStreamId
+        e instanceof MalformedStreamId ||
+        e instanceof RootStreamImmutabilityException
       ) {
         throw badRequest(e);
       }
@@ -205,5 +213,37 @@ async function validateStreamChildren(
     if (!(e instanceof DefinitionNotFound)) {
       throw e;
     }
+  }
+}
+
+/*
+ * Changes to mappings (fields) and processing rules are not allowed on the root stream.
+ * Changes to routing rules are allowed.
+ */
+async function validateRootStreamChanges(
+  scopedClusterClient: IScopedClusterClient,
+  nextStreamDefinition: WiredStreamDefinition
+) {
+  const oldDefinition = (await readStream({
+    scopedClusterClient,
+    id: nextStreamDefinition.name,
+  })) as WiredStreamDefinition;
+
+  const hasFieldChanges = !fastDeepEqual(
+    oldDefinition.stream.ingest.wired.fields,
+    nextStreamDefinition.stream.ingest.wired.fields
+  );
+
+  if (hasFieldChanges) {
+    throw new RootStreamImmutabilityException('Root stream fields cannot be changed');
+  }
+
+  const hasProcessingChanges = !fastDeepEqual(
+    oldDefinition.stream.ingest.processing,
+    nextStreamDefinition.stream.ingest.processing
+  );
+
+  if (hasProcessingChanges) {
+    throw new RootStreamImmutabilityException('Root stream processing rules cannot be changed');
   }
 }
