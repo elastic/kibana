@@ -170,7 +170,7 @@ export const buildESQLTheme = ({
       ),
     ],
     colors: {
-      'editor.foreground': euiTheme.colors.textPrimary,
+      'editor.foreground': euiTheme.colors.textParagraph,
       'editor.background': euiTheme.colors.backgroundBasePlain,
       'editor.lineHighlightBackground': euiTheme.colors.lightestShade,
       'editor.lineHighlightBorder': euiTheme.colors.lightestShade,
@@ -179,7 +179,7 @@ export const buildESQLTheme = ({
       'editorSuggestWidget.background': euiTheme.colors.emptyShade,
       'editorSuggestWidget.border': euiTheme.colors.emptyShade,
       'editorSuggestWidget.focusHighlightForeground': euiTheme.colors.emptyShade,
-      'editorSuggestWidget.foreground': euiTheme.colors.textAccent,
+      'editorSuggestWidget.foreground': euiTheme.colors.textParagraph,
       'editorSuggestWidget.highlightForeground': euiTheme.colors.primary,
       'editorSuggestWidget.selectedBackground': euiTheme.colors.primary,
       'editorSuggestWidget.selectedForeground': euiTheme.colors.emptyShade,
