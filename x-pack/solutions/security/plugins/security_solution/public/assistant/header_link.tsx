@@ -10,7 +10,7 @@ import React, { useCallback } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { useAssistantContext } from '@kbn/elastic-assistant/impl/assistant_context';
-import { AssistantAvatar } from '@kbn/elastic-assistant';
+import { AssistantIcon } from '@kbn/ai-assistant-icon';
 
 const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
 
@@ -45,7 +45,7 @@ export const AssistantHeaderLink = () => {
       <EuiHeaderLink data-test-subj="assistantHeaderLink" color="primary" onClick={showOverlay}>
         <EuiFlexGroup gutterSize="s" alignItems="center">
           <EuiFlexItem grow={false}>
-            <AssistantAvatar size="xs" />
+            <AssistantIcon size="m" />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>{LINK_LABEL}</EuiFlexItem>
         </EuiFlexGroup>

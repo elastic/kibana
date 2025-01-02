@@ -6,9 +6,10 @@
  */
 
 import React, { FC, useCallback } from 'react';
-import { AssistantAvatar, NewChat } from '@kbn/elastic-assistant';
+import { NewChat } from '@kbn/elastic-assistant';
 import styled from 'styled-components';
 
+import { AssistantIcon } from '@kbn/ai-assistant-icon';
 import {
   DATA_QUALITY_DASHBOARD_CONVERSATION_ID,
   DATA_QUALITY_PROMPT_CONTEXT_PILL,
@@ -44,7 +45,7 @@ const ChatActionComponent: FC<Props> = ({ indexName, markdownComment }) => {
       iconType={null}
     >
       <StyledLinkText>
-        <AssistantAvatar size="xs" />
+        <AssistantIcon />
         {ASK_ASSISTANT}
       </StyledLinkText>
     </NewChat>
