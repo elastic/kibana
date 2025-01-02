@@ -162,7 +162,7 @@ export function Statement(props: StatementProps) {
   const { depth } = props.element;
 
   return (
-    <li css={listItemStyle}>
+    <li data-test-subj="pipeline-viewer-list-item" css={listItemStyle}>
       <div css={spaceContainerStyle}>{renderNestingSpacers(depth)}</div>
       {renderStatement(props)}
     </li>

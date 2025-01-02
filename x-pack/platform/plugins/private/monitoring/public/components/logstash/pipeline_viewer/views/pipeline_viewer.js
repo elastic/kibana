@@ -52,7 +52,7 @@ export class PipelineViewer extends React.Component {
               />
             </h1>
           </EuiScreenReaderOnly>
-          <EuiPageSection alignment="center">
+          <EuiPageSection data-test-subj="pipeline-viewer" alignment="center">
             <StatementSection
               iconType="logstashInput"
               headingText={i18n.translate('xpack.monitoring.logstash.pipelineViewer.inputsTitle', {
