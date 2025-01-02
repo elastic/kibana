@@ -25,7 +25,7 @@ export type CspBenchmarksPage = 'rules';
 
 /**
  * All the IDs for the cloud security posture pages.
- * This needs to match the cloud security posture page entries in `SecurityPageName` in `x-pack/plugins/security_solution/common/constants.ts`.
+ * This needs to match the cloud security posture page entries in `SecurityPageName` in `x-pack/solutions/security/plugins/security_solution/common/constants.ts`.
  */
 export type CloudSecurityPosturePageId =
   | 'cloud_security_posture-dashboard'
