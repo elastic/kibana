@@ -764,7 +764,7 @@
     "@kbn/resolver-test-plugin": "link:x-pack/test/plugin_functional/plugins/resolver_test",
     "@kbn/response-ops-feature-flag-service": "link:packages/response-ops/feature_flag_service",
     "@kbn/response-ops-rule-form": "link:packages/response-ops/rule_form",
-    "@kbn/response-ops-rule-params": "link:src/platform/packages/private/response-ops/rule_params",
+    "@kbn/response-ops-rule-params": "link:src/platform/packages/shared/response-ops/rule_params",
     "@kbn/response-stream-plugin": "link:examples/response_stream",
     "@kbn/rison": "link:src/platform/packages/shared/kbn-rison",
     "@kbn/rollup": "link:x-pack/platform/packages/private/rollup",
