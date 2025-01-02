@@ -518,7 +518,10 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
             <>
               {currentDataView.getName()}
               {/* TODO: This management section shouldn't live inside the header */}
-              <DataVisualizerDataViewManagement currentDataView={currentDataView} />
+              <DataVisualizerDataViewManagement
+                currentDataView={currentDataView}
+                useNewFieldsApi={true}
+              />
             </>
           }
           rightSideGroupProps={{
