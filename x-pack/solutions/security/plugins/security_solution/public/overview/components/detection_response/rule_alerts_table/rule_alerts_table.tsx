@@ -17,7 +17,6 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiToolTip,
-  useEuiTheme,
 } from '@elastic/eui';
 import { FormattedRelative } from '@kbn/i18n-react';
 import type { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
@@ -26,7 +25,7 @@ import { SecurityCellActionsTrigger } from '../../../../app/actions/constants';
 import { useNavigateToAlertsPageWithFilters } from '../../../../common/hooks/use_navigate_to_alerts_page_with_filters';
 import { HeaderSection } from '../../../../common/components/header_section';
 
-import { getSeverityColor } from '../utils';
+import { SEVERITY_COLOR } from '../utils';
 import * as i18n from '../translations';
 import type { RuleAlertsItem } from './use_rule_alerts_items';
 import { useRuleAlertsItems } from './use_rule_alerts_items';
@@ -55,90 +54,82 @@ export type GetTableColumns = (params: {
 const DETECTION_RESPONSE_RULE_ALERTS_QUERY_ID =
   'detection-response-rule-alerts-severity-table' as const;
 
-export const useGetTableColumns: GetTableColumns = ({
+export const getTableColumns: GetTableColumns = ({
   getAppUrl,
   navigateTo,
   openRuleInAlertsPage,
-}) => {
-  const { euiTheme } = useEuiTheme();
-  const severityColor = useMemo(() => getSeverityColor(euiTheme), [euiTheme]);
-
-  return useMemo(
-    () => [
-      {
-        field: 'name',
-        name: i18n.RULE_ALERTS_COLUMN_RULE_NAME,
-        render: (name: string, { id }) => {
-          const url = getAppUrl({ deepLinkId: SecurityPageName.rules, path: `id/${id}` });
-          return (
-            <EuiToolTip
-              data-test-subj={`${id}-tooltip`}
-              title={i18n.OPEN_RULE_DETAIL_TOOLTIP}
-              content={name}
-              anchorClassName="eui-textTruncate"
-            >
-              {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
-              <EuiLink
-                data-test-subj="severityRuleAlertsTable-name"
-                href={url}
-                onClick={(ev?: React.MouseEvent) => {
-                  if (ev) {
-                    ev.preventDefault();
-                  }
-                  navigateTo({ url });
-                }}
-              >
-                {name}
-              </EuiLink>
-            </EuiToolTip>
-          );
-        },
-      },
-      {
-        field: 'last_alert_at',
-        name: i18n.RULE_ALERTS_COLUMN_LAST_ALERT,
-        'data-test-subj': 'severityRuleAlertsTable-lastAlertAt',
-        render: (lastAlertAt: string) => <FormattedRelative value={new Date(lastAlertAt)} />,
-      },
-      {
-        field: 'alert_count',
-        name: i18n.RULE_ALERTS_COLUMN_ALERT_COUNT,
-        'data-test-subj': 'severityRuleAlertsTable-alertCount',
-        render: (alertCount: number, { name }) => (
-          <SecurityCellActions
-            data={{
-              value: name,
-              field: ALERT_RULE_NAME,
-            }}
-            mode={CellActionsMode.HOVER_RIGHT}
-            triggerId={SecurityCellActionsTrigger.ALERTS_COUNT}
-            sourcererScopeId={SourcererScopeName.detections}
-            metadata={{
-              andFilters: [{ field: 'kibana.alert.workflow_status', value: 'open' }],
+}) => [
+  {
+    field: 'name',
+    name: i18n.RULE_ALERTS_COLUMN_RULE_NAME,
+    render: (name: string, { id }) => {
+      const url = getAppUrl({ deepLinkId: SecurityPageName.rules, path: `id/${id}` });
+      return (
+        <EuiToolTip
+          data-test-subj={`${id}-tooltip`}
+          title={i18n.OPEN_RULE_DETAIL_TOOLTIP}
+          content={name}
+          anchorClassName="eui-textTruncate"
+        >
+          {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
+          <EuiLink
+            data-test-subj="severityRuleAlertsTable-name"
+            href={url}
+            onClick={(ev?: React.MouseEvent) => {
+              if (ev) {
+                ev.preventDefault();
+              }
+              navigateTo({ url });
             }}
           >
-            <EuiLink
-              data-test-subj="severityRuleAlertsTable-alertCountLink"
-              disabled={alertCount === 0}
-              onClick={() => openRuleInAlertsPage(name)}
-            >
-              <FormattedCount count={alertCount} />
-            </EuiLink>
-          </SecurityCellActions>
-        ),
-      },
-      {
-        field: 'severity',
-        name: i18n.RULE_ALERTS_COLUMN_SEVERITY,
-        'data-test-subj': 'severityRuleAlertsTable-severity',
-        render: (severity: Severity) => (
-          <EuiHealth color={severityColor[severity]}>{capitalize(severity)}</EuiHealth>
-        ),
-      },
-    ],
-    [getAppUrl, navigateTo, openRuleInAlertsPage, severityColor]
-  );
-};
+            {name}
+          </EuiLink>
+        </EuiToolTip>
+      );
+    },
+  },
+  {
+    field: 'last_alert_at',
+    name: i18n.RULE_ALERTS_COLUMN_LAST_ALERT,
+    'data-test-subj': 'severityRuleAlertsTable-lastAlertAt',
+    render: (lastAlertAt: string) => <FormattedRelative value={new Date(lastAlertAt)} />,
+  },
+  {
+    field: 'alert_count',
+    name: i18n.RULE_ALERTS_COLUMN_ALERT_COUNT,
+    'data-test-subj': 'severityRuleAlertsTable-alertCount',
+    render: (alertCount: number, { name }) => (
+      <SecurityCellActions
+        data={{
+          value: name,
+          field: ALERT_RULE_NAME,
+        }}
+        mode={CellActionsMode.HOVER_RIGHT}
+        triggerId={SecurityCellActionsTrigger.ALERTS_COUNT}
+        sourcererScopeId={SourcererScopeName.detections}
+        metadata={{
+          andFilters: [{ field: 'kibana.alert.workflow_status', value: 'open' }],
+        }}
+      >
+        <EuiLink
+          data-test-subj="severityRuleAlertsTable-alertCountLink"
+          disabled={alertCount === 0}
+          onClick={() => openRuleInAlertsPage(name)}
+        >
+          <FormattedCount count={alertCount} />
+        </EuiLink>
+      </SecurityCellActions>
+    ),
+  },
+  {
+    field: 'severity',
+    name: i18n.RULE_ALERTS_COLUMN_SEVERITY,
+    'data-test-subj': 'severityRuleAlertsTable-severity',
+    render: (severity: Severity) => (
+      <EuiHealth color={SEVERITY_COLOR[severity]}>{capitalize(severity)}</EuiHealth>
+    ),
+  },
+];
 
 export const RuleAlertsTable = React.memo<RuleAlertsTableProps>(({ signalIndexName }) => {
   const { getAppUrl, navigateTo } = useNavigation();
@@ -172,7 +163,10 @@ export const RuleAlertsTable = React.memo<RuleAlertsTableProps>(({ signalIndexNa
     });
   }, [openAlertsPageWithFilter]);
 
-  const columns = useGetTableColumns({ getAppUrl, navigateTo, openRuleInAlertsPage });
+  const columns = useMemo(
+    () => getTableColumns({ getAppUrl, navigateTo, openRuleInAlertsPage }),
+    [getAppUrl, navigateTo, openRuleInAlertsPage]
+  );
 
   return (
     <HoverVisibilityContainer show={true} targetClassNames={[INSPECT_BUTTON_CLASS]}>

@@ -83,7 +83,7 @@ export const AlertsPreview = ({
   const alertStats = Array.from(severityMap, ([key, count]) => ({
     key: capitalize(key),
     count,
-    color: getSeverityColor(key, euiTheme),
+    color: getSeverityColor(key),
   }));
 
   const totalAlertsCount = alertStats.reduce((total, item) => total + item.count, 0);

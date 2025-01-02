@@ -11,8 +11,7 @@ import { TestProviders } from '../../../../common/mock';
 import { AlertCountInsight, getFormattedAlertStats } from './alert_count_insight';
 import { useAlertsByStatus } from '../../../../overview/components/detection_response/alerts_by_status/use_alerts_by_status';
 import type { ParsedAlertsData } from '../../../../overview/components/detection_response/alerts_by_status/types';
-import { getSeverityColor } from '../../../../overview/components/detection_response/utils';
-import type { EuiThemeComputed } from '@elastic/eui';
+import { SEVERITY_COLOR } from '../../../../overview/components/detection_response/utils';
 
 jest.mock('../../../../common/lib/kibana');
 
@@ -24,7 +23,7 @@ jest.mock('@kbn/cloud-security-posture/src/hooks/use_misconfiguration_preview');
 jest.mock(
   '../../../../overview/components/detection_response/alerts_by_status/use_alerts_by_status'
 );
-const mockEuiTheme = { colors: { vis: {} } } as EuiThemeComputed;
+
 const fieldName = 'host.name';
 const name = 'test host';
 const testId = 'test';
@@ -112,29 +111,25 @@ describe('AlertCountInsight', () => {
 
 describe('getFormattedAlertStats', () => {
   it('should return alert stats', () => {
-    const severityColors = getSeverityColor(mockEuiTheme);
-    const alertStats = getFormattedAlertStats(mockAlertData, mockEuiTheme);
+    const alertStats = getFormattedAlertStats(mockAlertData);
     expect(alertStats).toEqual([
-      { key: 'High', count: 2, color: severityColors.high },
-      { key: 'Low', count: 2, color: severityColors.low },
-      { key: 'Medium', count: 2, color: severityColors.medium },
-      { key: 'Critical', count: 2, color: severityColors.critical },
+      { key: 'High', count: 2, color: SEVERITY_COLOR.high },
+      { key: 'Low', count: 2, color: SEVERITY_COLOR.low },
+      { key: 'Medium', count: 2, color: SEVERITY_COLOR.medium },
+      { key: 'Critical', count: 2, color: SEVERITY_COLOR.critical },
     ]);
   });
 
   it('should return empty array if no active alerts are available', () => {
-    const alertStats = getFormattedAlertStats(
-      {
-        closed: {
-          total: 2,
-          severities: [
-            { key: 'high', value: 1, label: 'High' },
-            { key: 'low', value: 1, label: 'Low' },
-          ],
-        },
+    const alertStats = getFormattedAlertStats({
+      closed: {
+        total: 2,
+        severities: [
+          { key: 'high', value: 1, label: 'High' },
+          { key: 'low', value: 1, label: 'Low' },
+        ],
       },
-      mockEuiTheme
-    );
+    });
     expect(alertStats).toEqual([]);
   });
 });

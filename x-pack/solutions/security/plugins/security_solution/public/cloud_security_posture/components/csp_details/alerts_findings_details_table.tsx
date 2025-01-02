@@ -8,15 +8,7 @@
 import React, { memo, useCallback, useEffect, useState } from 'react';
 import { capitalize } from 'lodash';
 import type { Criteria, EuiBasicTableColumn } from '@elastic/eui';
-import {
-  EuiSpacer,
-  EuiPanel,
-  EuiText,
-  EuiBasicTable,
-  EuiIcon,
-  EuiLink,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiSpacer, EuiPanel, EuiText, EuiBasicTable, EuiIcon, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { DistributionBar } from '@kbn/security-solution-distribution-bar';
 import {
@@ -72,7 +64,6 @@ interface AlertsDetailsFields {
 
 export const AlertsDetailsTable = memo(
   ({ field, value }: { field: 'host.name' | 'user.name'; value: string }) => {
-    const { euiTheme } = useEuiTheme();
     useEffect(() => {
       uiMetricService.trackUiMetric(
         METRIC_TYPE.COUNT,
@@ -130,7 +121,7 @@ export const AlertsDetailsTable = memo(
     const alertStats = Array.from(severityMap, ([key, count]) => ({
       key: capitalize(key),
       count,
-      color: getSeverityColor(key, euiTheme),
+      color: getSeverityColor(key),
       filter: () => {
         setCurrentFilter(key);
         setQuery(buildEntityAlertsQuery(field, to, from, value, 500, key));
