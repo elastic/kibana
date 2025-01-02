@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { ruleParamsSchemaV1 } from 'src/platform/packages/shared/response-ops/rule_params';
+import { ruleParamsSchemaV1 } from '@kbn/response-ops-rule-params';
 import { adHocRunStatus } from '../../../../constants';
 
 export const statusSchema = schema.oneOf([

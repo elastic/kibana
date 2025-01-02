@@ -10,7 +10,7 @@ import {
 } from '@kbn/core-saved-objects-api-server';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import type { TLSRuleParams } from 'src/platform/packages/shared/response-ops/rule_params/synthetics_tls/latest';
+import type { TLSRuleParams } from '@kbn/response-ops-rule-params/synthetics_tls/latest';
 import moment from 'moment';
 import { FINAL_SUMMARY_FILTER } from '../../../common/constants/client_defaults';
 import { formatFilterString } from '../common';

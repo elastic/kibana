@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { ruleParamsSchema } from 'src/platform/packages/shared/response-ops/rule_params';
+import { ruleParamsSchema } from '@kbn/response-ops-rule-params';
 import {
   ruleLastRunOutcomeValues,
   ruleExecutionStatusValues,
