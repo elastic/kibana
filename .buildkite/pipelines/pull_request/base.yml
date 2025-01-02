@@ -1,52 +1,14 @@
 steps:
   - command: .buildkite/scripts/steps/on_merge_api_docs.sh
-    label: Check Public API Docs 0
-    parallelism: 5
-    agents:
-      image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-prod
-      provider: gcp
-      machineType: c2-highmem-4
-      localSSds: 1
-      preemptible: true
-    timeout_in_minutes: 80
-    retry:
-      automatic:
-        - exit_status: '-1'
-          limit: 3
-        - exit_status: '*'
-          limit: 1
-
-  - command: .buildkite/scripts/steps/on_merge_api_docs.sh
-    label: Check Public API Docs 1
-    parallelism: 5
-    agents:
-      image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-prod
-      provider: gcp
-      machineType: c4-standard-8
-      diskType: 'hyperdisk-balanced'
-      preemptible: true
-      spotZones: us-central1-a,us-central1-b,us-central1-c
-      diskSizeGb: 75
-    timeout_in_minutes: 80
-    retry:
-      automatic:
-        - exit_status: '-1'
-          limit: 3
-        - exit_status: '*'
-          limit: 1
-
-  - command: .buildkite/scripts/steps/on_merge_api_docs.sh
     label: Check Public API Docs 2
     parallelism: 5
     agents:
       image: family/kibana-ubuntu-2004
       imageProject: elastic-images-prod
       provider: gcp
-      machineType: c2-standard-8
-      localSsds: 1
+      machineType: n2-highmem-4
       preemptible: true
+      diskSizeGb: 75
     timeout_in_minutes: 80
     retry:
       automatic:
@@ -62,7 +24,7 @@ steps:
       image: family/kibana-ubuntu-2004
       imageProject: elastic-images-prod
       provider: gcp
-      machineType: c2-standard-8
+      machineType: n2-standard-8
       preemptible: true
       diskSizeGb: 75
     timeout_in_minutes: 80
