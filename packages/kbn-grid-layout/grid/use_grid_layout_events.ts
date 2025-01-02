@@ -105,13 +105,17 @@ export const useGridLayoutEvents = ({
         y: pointerClientPosition.current.y,
       };
       const panelRect = interactionEvent.panelDiv.getBoundingClientRect();
+
+      const { columnCount, gutterSize, rowHeight, columnPixelWidth } = runtimeSettings$.value;
+      const gridWidth = (gutterSize + columnPixelWidth) * columnCount + gutterSize * 2;
+
       const previewRect = {
         left: isResize
           ? panelRect.left
           : pointerClientPixel.x - interactionEvent.pointerOffsets.left,
         top: isResize ? panelRect.top : pointerClientPixel.y - interactionEvent.pointerOffsets.top,
         bottom: pointerClientPixel.y - interactionEvent.pointerOffsets.bottom,
-        right: pointerClientPixel.x - interactionEvent.pointerOffsets.right,
+        right: Math.min(pointerClientPixel.x - interactionEvent.pointerOffsets.right, gridWidth),
       };
 
       gridLayoutStateManager.activePanel$.next({ id: interactionEvent.id, position: previewRect });
@@ -148,7 +152,6 @@ export const useGridLayoutEvents = ({
       }
 
       // calculate the requested grid position
-      const { columnCount, gutterSize, rowHeight, columnPixelWidth } = runtimeSettings$.value;
       const targetedGridRow = gridRowElements[targetRowIndex];
       const targetedGridLeft = targetedGridRow?.getBoundingClientRect().left ?? 0;
       const targetedGridTop = targetedGridRow?.getBoundingClientRect().top ?? 0;
