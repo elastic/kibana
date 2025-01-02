@@ -71,10 +71,13 @@ export function NavControl({ isServerless }: { isServerless?: boolean }) {
   useNavControlScreenContext();
   useNavControlScope();
 
-  const [flyoutSettings, setFlyoutSettings] = useLocalStorage('aiAssistant.flyoutSettings', {
-    mode: FlyoutPositionMode.OVERLAY,
-    isOpen: false,
-  });
+  const [flyoutSettings, setFlyoutSettings] = useLocalStorage(
+    'observabilityAIAssistant.flyoutSettings',
+    {
+      mode: FlyoutPositionMode.OVERLAY,
+      isOpen: false,
+    }
+  );
 
   const [isOpen, setIsOpen] = useState(flyoutSettings.isOpen);
   const [hasBeenOpened, setHasBeenOpened] = useState(isOpen);
