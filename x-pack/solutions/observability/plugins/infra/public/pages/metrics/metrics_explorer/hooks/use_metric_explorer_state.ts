@@ -14,7 +14,7 @@ import type {
   MetricsExplorerView,
   MetricsExplorerViewState,
 } from '../../../../../common/metrics_explorer_views';
-import {
+import type {
   MetricsExplorerMetric,
   MetricsExplorerAggregation,
 } from '../../../../../common/http_api/metrics_explorer';
