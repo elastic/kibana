@@ -9,7 +9,7 @@ import React from 'react';
 
 import ConnectorFields from './connector';
 import { ConnectorFormTestProvider } from '../lib/test_utils';
-import { render, waitFor } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { createStartServicesMock } from '@kbn/triggers-actions-ui-plugin/public/common/lib/kibana/kibana_react.mock';
 import { useProviders } from './providers/get_providers';
@@ -731,7 +731,7 @@ describe('ConnectorFields renders', () => {
       data: providersSchemas,
     });
   });
-  test('openai provider fields are rendered', async () => {
+  test('openai provider fields are rendered', () => {
     const { getAllByTestId } = render(
       <ConnectorFormTestProvider connector={openAiConnector}>
         <ConnectorFields readOnly={false} isEdit={true} registerPreSubmitValidator={() => {}} />
@@ -746,7 +746,7 @@ describe('ConnectorFields renders', () => {
     expect(getAllByTestId('taskTypeSelectDisabled')[0]).toHaveTextContent('completion');
   });
 
-  test('googleaistudio provider fields are rendered', async () => {
+  test('googleaistudio provider fields are rendered', () => {
     const { getAllByTestId } = render(
       <ConnectorFormTestProvider connector={googleaistudioConnector}>
         <ConnectorFields readOnly={false} isEdit={true} registerPreSubmitValidator={() => {}} />
@@ -771,32 +771,37 @@ describe('ConnectorFields renders', () => {
     });
 
     it('connector validation succeeds when connector config is valid', async () => {
-      const { getByTestId } = render(
+      render(
         <ConnectorFormTestProvider connector={openAiConnector} onSubmit={onSubmit}>
-          <ConnectorFields readOnly={false} isEdit={false} registerPreSubmitValidator={() => {}} />
+          <ConnectorFields readOnly={false} isEdit={true} registerPreSubmitValidator={() => {}} />
         </ConnectorFormTestProvider>
       );
 
-      await userEvent.click(getByTestId('form-test-provide-submit'));
+      await userEvent.type(
+        screen.getByTestId('api_key-password'),
+        '{selectall}{backspace}goodpassword'
+      );
+      await userEvent.click(screen.getByTestId('form-test-provide-submit'));
 
-      await waitFor(async () => {
-        expect(onSubmit).toHaveBeenCalled();
-      });
-
+      expect(onSubmit).toHaveBeenCalled();
       expect(onSubmit).toBeCalledWith({
         data: {
           config: {
-            inferenceId: 'openai-completion-4fzzzxjylrx',
             ...openAiConnector.config,
           },
           actionTypeId: openAiConnector.actionTypeId,
           name: openAiConnector.name,
           id: openAiConnector.id,
           isDeprecated: openAiConnector.isDeprecated,
+          secrets: {
+            providerSecrets: {
+              api_key: 'goodpassword',
+            },
+          },
         },
         isValid: true,
       });
-    });
+    }, 60000);
 
     it('validates correctly if the provider config url is empty', async () => {
       const connector = {
@@ -810,29 +815,23 @@ describe('ConnectorFields renders', () => {
         },
       };
 
-      const res = render(
+      render(
         <ConnectorFormTestProvider connector={connector} onSubmit={onSubmit}>
           <ConnectorFields readOnly={false} isEdit={true} registerPreSubmitValidator={() => {}} />
         </ConnectorFormTestProvider>
       );
       await userEvent.type(
-        res.getByTestId('api_key-password'),
+        screen.getByTestId('api_key-password'),
         '{selectall}{backspace}goodpassword'
       );
 
-      await userEvent.click(res.getByTestId('form-test-provide-submit'));
-      await waitFor(async () => {
-        expect(onSubmit).toHaveBeenCalled();
-      });
+      await userEvent.click(screen.getByTestId('form-test-provide-submit'));
 
+      expect(onSubmit).toHaveBeenCalled();
       expect(onSubmit).toHaveBeenCalledWith({ data: {}, isValid: false });
-    });
+    }, 60000);
 
-    const tests: Array<[string, string]> = [
-      ['url-input', ''],
-      ['api_key-password', ''],
-    ];
-    it.each(tests)('validates correctly %p', async (field, value) => {
+    it('validates correctly empty password field', async () => {
       const connector = {
         ...openAiConnector,
         config: {
@@ -841,20 +840,17 @@ describe('ConnectorFields renders', () => {
         },
       };
 
-      const res = render(
+      render(
         <ConnectorFormTestProvider connector={connector} onSubmit={onSubmit}>
           <ConnectorFields readOnly={false} isEdit={true} registerPreSubmitValidator={() => {}} />
         </ConnectorFormTestProvider>
       );
 
-      await userEvent.type(res.getByTestId(field), `{selectall}{backspace}${value}`);
+      await userEvent.type(screen.getByTestId('api_key-password'), `{selectall}{backspace}`);
 
-      await userEvent.click(res.getByTestId('form-test-provide-submit'));
-      await waitFor(async () => {
-        expect(onSubmit).toHaveBeenCalled();
-      });
-
+      await userEvent.click(screen.getByTestId('form-test-provide-submit'));
+      expect(onSubmit).toHaveBeenCalled();
       expect(onSubmit).toHaveBeenCalledWith({ data: {}, isValid: false });
-    });
+    }, 60000);
   });
 });

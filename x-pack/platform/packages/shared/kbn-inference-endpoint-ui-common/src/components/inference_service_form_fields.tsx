@@ -376,6 +376,7 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
             onTaskTypeOptionsSelect={onTaskTypeOptionsSelect}
             taskTypeOptions={taskTypeOptions}
             selectedTaskType={selectedTaskType}
+            isEdit={isEdit}
           />
           <EuiSpacer size="m" />
           <EuiHorizontalRule margin="xs" />
