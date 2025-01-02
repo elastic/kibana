@@ -34,6 +34,7 @@
     "@kbn/react-kibana-mount",
     "@kbn/esql-variables",
     "@kbn/core-test-helpers-kbn-server",
+    "@kbn/i18n-react",
   ],
   "exclude": [
     "target/**/*",
