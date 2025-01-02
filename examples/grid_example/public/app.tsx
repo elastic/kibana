@@ -41,7 +41,6 @@ import {
 import { MockSerializedDashboardState } from './types';
 import { useMockDashboardApi } from './use_mock_dashboard_api';
 import { dashboardInputToGridLayout, gridLayoutToDashboardPanelMap } from './utils';
-import { css } from '@emotion/react';
 
 const DASHBOARD_MARGIN_SIZE = 8;
 const DASHBOARD_GRID_HEIGHT = 20;

@@ -76,14 +76,6 @@ export const GridPanel = forwardRef<HTMLDivElement, GridPanelProps>(
         grid-column-end: ${initialPanel.column + 1 + initialPanel.width};
         grid-row-start: ${initialPanel.row + 1};
         grid-row-end: ${initialPanel.row + 1 + initialPanel.height};
-        &.kbnGridPanel--isExpanded {
-          transform: translate(9999px, 9999px);
-          position: absolute;
-          top: 0;
-          left: 0;
-          width: 100%;
-          height: 100%;
-        }
       `;
     }, [gridLayoutStateManager, rowIndex, panelId]);
 
