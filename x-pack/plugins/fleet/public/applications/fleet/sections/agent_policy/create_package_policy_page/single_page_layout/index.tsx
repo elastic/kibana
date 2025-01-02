@@ -426,14 +426,14 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
           )}
 
           {/* If a package has been loaded, then show UI extension (if any) */}
-          {/* {extensionView && packagePolicy.package?.name && (
+          {extensionView && packagePolicy.package?.name && (
             <ExtensionWrapper>
               <extensionView.Component
                 newPolicy={packagePolicy}
                 onChange={handleExtensionViewOnChange}
               />
             </ExtensionWrapper>
-          )} */}
+          )}
         </>
       ) : (
         <div />
@@ -449,7 +449,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
       formState,
       integrationInfo?.name,
       extensionView,
-      // handleExtensionViewOnChange,
+      handleExtensionViewOnChange,
       spaceSettings?.allowedNamespacePrefixes,
       handleSetupTechnologyChange,
       isAgentlessIntegration,
