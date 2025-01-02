@@ -61,18 +61,18 @@ describe('addPainlessFieldAccess', () => {
     expect(result).toBe('root?.foo');
   });
 
-  it('should add a map-access for invalid identifiers', () => {
+  it('should add a get-access for invalid identifiers', () => {
     const expr = 'root' as SafePainlessExpression;
     const result = addPainlessFieldAccess('foo-bar', expr, false);
     expect(result).toContain('"foo-bar"');
-    expect(result).toBe('root["foo-bar"]');
+    expect(result).toBe('root.get("foo-bar")');
   });
 
-  it('should add a nullable map-access for invalid identifiers', () => {
+  it('should add a nullable get-access for invalid identifiers in the chain', () => {
     const expr = 'root' as SafePainlessExpression;
     const result = addPainlessFieldAccess('foo-bar', expr, true);
     expect(result).toContain('"foo-bar"');
-    expect(result).toBe('(root ?: new Map())["foo-bar"]');
+    expect(result).toBe('root?.get("foo-bar")');
   });
 });
 
@@ -85,13 +85,13 @@ describe('fieldPathToPainlessExpression', () => {
   it('should quote invalid identifiers', () => {
     const result = fieldPathToPainlessExpression(['ip-address']);
     expect(result).toContain('"ip-address"');
-    expect(result).toBe('ctx["ip-address"]');
+    expect(result).toBe('ctx.get("ip-address")');
   });
 
-  it('should use nullable map access for nested invalid identifiers', () => {
+  it('should use nullable get access for nested invalid identifiers', () => {
     const result = fieldPathToPainlessExpression(['field', 'ip-address']);
     expect(result).toContain('"ip-address"');
-    expect(result).toBe('(ctx.field ?: new Map())["ip-address"]');
+    expect(result).toBe('ctx.field?.get("ip-address")');
   });
 
   it('should return just "ctx" if the path is empty', () => {

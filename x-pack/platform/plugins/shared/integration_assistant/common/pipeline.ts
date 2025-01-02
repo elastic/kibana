@@ -140,21 +140,15 @@ export function addPainlessFieldAccess(
   expr: SafePainlessExpression,
   exprNullable: boolean = true
 ): SafePainlessExpression {
-  const accessType: 'dot' | 'map' = isPainlessIdentifier(fieldName) ? 'dot' : 'map';
-  const nonNullableExpr: SafePainlessExpression = !exprNullable
-    ? expr
-    : accessType === 'dot'
-    ? (`${expr}?` as SafePainlessExpression)
-    : (`(${expr} ?: new Map())` as SafePainlessExpression);
+  const nonNullableExpr = exprNullable ? (`${expr}?` as SafePainlessExpression) : expr;
+  const isValidIdentifier = isPainlessIdentifier(fieldName);
 
-  switch (accessType) {
-    case 'dot':
-      return `${nonNullableExpr}.${fieldName}` as SafePainlessExpression;
-    case 'map':
-      return `${nonNullableExpr}[${painlessStringRepresentation(
-        fieldName
-      )}]` as SafePainlessExpression;
+  if (isValidIdentifier) {
+    return `${nonNullableExpr}.${fieldName}` as SafePainlessExpression;
   }
+
+  const representedName = painlessStringRepresentation(fieldName);
+  return `${nonNullableExpr}.get(${representedName})` as SafePainlessExpression;
 }
 
 /**
