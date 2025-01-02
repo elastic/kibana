@@ -23970,6 +23970,7 @@
     },
     "/api/fleet/fleet_server_hosts": {
       "get": {
+        "description": "[Required authorization] Route required privileges: ANY of [fleet-agents-all OR fleet-settings-read].",
         "operationId": "get-fleet-fleet-server-hosts",
         "parameters": [],
         "responses": {
@@ -24074,6 +24075,7 @@
         ]
       },
       "post": {
+        "description": "[Required authorization] Route required privileges: ALL of [fleet-settings-all].",
         "operationId": "post-fleet-fleet-server-hosts",
         "parameters": [
           {
@@ -24220,7 +24222,7 @@
     },
     "/api/fleet/fleet_server_hosts/{itemId}": {
       "delete": {
-        "description": "Delete a Fleet Server host by ID.",
+        "description": "Delete a Fleet Server host by ID.<br/><br/>[Required authorization] Route required privileges: ALL of [fleet-settings-all].",
         "operationId": "delete-fleet-fleet-server-hosts-itemid",
         "parameters": [
           {
@@ -24293,7 +24295,7 @@
         ]
       },
       "get": {
-        "description": "Get a Fleet Server host by ID.",
+        "description": "Get a Fleet Server host by ID.<br/><br/>[Required authorization] Route required privileges: ALL of [fleet-settings-read].",
         "operationId": "get-fleet-fleet-server-hosts-itemid",
         "parameters": [
           {
@@ -24392,7 +24394,7 @@
         ]
       },
       "put": {
-        "description": "Update a Fleet Server host by ID.",
+        "description": "Update a Fleet Server host by ID.<br/><br/>[Required authorization] Route required privileges: ALL of [fleet-settings-all].",
         "operationId": "put-fleet-fleet-server-hosts-itemid",
         "parameters": [
           {
@@ -24897,6 +24899,7 @@
     },
     "/api/fleet/message_signing_service/rotate_key_pair": {
       "post": {
+        "description": "[Required authorization] Route required privileges: ALL of [fleet-agents-all, fleet-agent-policies-all, fleet-settings-all].",
         "operationId": "post-fleet-message-signing-service-rotate-key-pair",
         "parameters": [
           {
