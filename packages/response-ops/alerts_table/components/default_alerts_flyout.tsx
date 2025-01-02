@@ -12,7 +12,7 @@ import { EuiDescriptionList, EuiPanel, EuiTabbedContentTab, EuiTitle } from '@el
 import { ALERT_RULE_NAME } from '@kbn/rule-data-utils';
 import { i18n } from '@kbn/i18n';
 import { ScrollableFlyoutTabbedContent, AlertFieldsTable } from '@kbn/alerts-ui-shared';
-import { AdditionalContext, CellComponentProps, FlyoutSectionProps } from '../types';
+import { AdditionalContext, FlyoutSectionProps } from '../types';
 import { defaultAlertsTableColumns } from '../configuration';
 import { DefaultCellValue } from './default_cell_value';
 
@@ -50,8 +50,9 @@ export const DefaultAlertsFlyoutBody = <AC extends AdditionalContext>(
                 description:
                   value != null ? (
                     <DefaultCellValue
-                      {...(props as unknown as CellComponentProps)}
                       columnId={column.id}
+                      alert={props.alert}
+                      services={props.services}
                     />
                   ) : (
                     '—'
