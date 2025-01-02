@@ -189,7 +189,10 @@ type RouterEvents =
 export class Router<Context extends RequestHandlerContextBase = RequestHandlerContextBase>
   implements IRouter<Context>
 {
-  private static ee = new EventEmitter();
+  /**
+   * Used for global request events at the router level, similar to what we get from Hapi's request lifecycle events.
+   */
+  private static events = new EventEmitter();
   public routes: Array<Readonly<RouterRoute>> = [];
   public pluginId?: symbol;
   public get: InternalRegistrar<'get', Context>;
@@ -253,11 +256,11 @@ export class Router<Context extends RequestHandlerContextBase = RequestHandlerCo
   }
 
   public static on(event: RouterEvents, cb: (req: CoreKibanaRequest, ...args: any[]) => void) {
-    Router.ee.on(event, cb);
+    Router.events.on(event, cb);
   }
 
   public static off(event: RouterEvents, cb: (req: CoreKibanaRequest, ...args: any[]) => void) {
-    Router.ee.off(event, cb);
+    Router.events.off(event, cb);
   }
 
   public getRoutes({ excludeVersionedRoutes }: { excludeVersionedRoutes?: boolean } = {}) {
@@ -298,7 +301,7 @@ export class Router<Context extends RequestHandlerContextBase = RequestHandlerCo
     }
   ) => {
     const postValidate: RouterEvents = 'onPostValidate';
-    Router.ee.emit(postValidate, request, postValidateConext);
+    Router.events.emit(postValidate, request, postValidateConext);
   };
 
   private async handle<P, Q, B>({
