@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import { PluginInitializerContext } from '@kbn/core/public';
-
 import { SearchSynonymsPlugin } from './plugin';
 
-export function plugin(initializerContext: PluginInitializerContext) {
-  return new SearchSynonymsPlugin(initializerContext);
+export function plugin() {
+  return new SearchSynonymsPlugin();
 }
