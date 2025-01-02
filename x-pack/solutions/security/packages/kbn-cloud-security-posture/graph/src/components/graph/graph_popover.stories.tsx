@@ -36,22 +36,17 @@ const useExpandButtonPopover = () => {
 
   const onNodeExpandButtonClick: ExpandButtonClickCallback = useCallback(
     (e, node, unToggleCallback) => {
-      if (selectedNode.current?.id === node.id) {
-        // If the same node is clicked again, close the popover
-        selectedNode.current = null;
-        unToggleCallbackRef.current?.();
-        unToggleCallbackRef.current = null;
-        closePopover();
-      } else {
-        // Close the current popover if open
-        selectedNode.current = null;
-        unToggleCallbackRef.current?.();
-        unToggleCallbackRef.current = null;
+      const lastExpandedNode = selectedNode.current?.id;
 
+      // If the same node is clicked again, close the popover
+      selectedNode.current = null;
+      unToggleCallbackRef.current?.();
+      unToggleCallbackRef.current = null;
+      closePopover();
+
+      if (lastExpandedNode !== node.id) {
         // Set the pending open state
         setPendingOpen({ node, el: e.currentTarget, unToggleCallback });
-
-        closePopover();
       }
     },
     [closePopover]
