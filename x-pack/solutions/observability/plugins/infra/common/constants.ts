@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { AlertConsumers, ValidFeatureId } from '@kbn/rule-data-utils';
+import type { ValidFeatureId } from '@kbn/rule-data-utils';
+import { AlertConsumers } from '@kbn/rule-data-utils';
 
 export const METRICS_INDEX_PATTERN = 'metrics-*,metricbeat-*';
 export const LOGS_INDEX_PATTERN = 'logs-*,filebeat-*,kibana_sample_data_logs*';

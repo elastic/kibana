@@ -6,25 +6,27 @@
  */
 
 import { groupBy } from 'lodash';
-import { Span } from '../../../../../../../../typings/es_schemas/ui/span';
-import { Transaction } from '../../../../../../../../typings/es_schemas/ui/transaction';
-import {
-  getClockSkew,
-  getOrderedWaterfallItems,
-  getWaterfall,
+import type { Span } from '../../../../../../../../typings/es_schemas/ui/span';
+import type { Transaction } from '../../../../../../../../typings/es_schemas/ui/transaction';
+import type {
   IWaterfallItem,
   IWaterfallTransaction,
   IWaterfallError,
   IWaterfallSpanOrTransaction,
+  IWaterfallNode,
+  IWaterfallNodeFlatten,
+} from './waterfall_helpers';
+import {
+  getClockSkew,
+  getOrderedWaterfallItems,
+  getWaterfall,
   getOrphanTraceItemsCount,
   buildTraceTree,
   convertTreeToList,
   updateTraceTreeNode,
-  IWaterfallNode,
-  IWaterfallNodeFlatten,
 } from './waterfall_helpers';
-import { APMError } from '../../../../../../../../typings/es_schemas/ui/apm_error';
-import {
+import type { APMError } from '../../../../../../../../typings/es_schemas/ui/apm_error';
+import type {
   WaterfallSpan,
   WaterfallTransaction,
 } from '../../../../../../../../common/waterfall/typings';

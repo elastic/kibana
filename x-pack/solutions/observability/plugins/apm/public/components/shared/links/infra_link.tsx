@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { EuiLink, EuiLinkAnchorProps } from '@elastic/eui';
-import { IBasePath } from '@kbn/core/public';
+import type { EuiLinkAnchorProps } from '@elastic/eui';
+import { EuiLink } from '@elastic/eui';
+import type { IBasePath } from '@kbn/core/public';
 import React from 'react';
 import url from 'url';
-import { InfraAppId } from '@kbn/observability-shared-plugin/public/infra';
+import type { InfraAppId } from '@kbn/observability-shared-plugin/public/infra';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { fromQuery } from './url_helpers';
 

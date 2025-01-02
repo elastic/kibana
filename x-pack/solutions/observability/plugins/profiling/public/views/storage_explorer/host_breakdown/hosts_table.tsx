@@ -5,10 +5,9 @@
  * 2.0.
  */
 
+import type { CriteriaWithPagination, EuiBasicTableColumn } from '@elastic/eui';
 import {
-  CriteriaWithPagination,
   EuiBadge,
-  EuiBasicTableColumn,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
@@ -19,7 +18,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { asDynamicBytes, asAbsoluteDateTime } from '@kbn/observability-plugin/common';
 import React, { useMemo, useState } from 'react';
-import { StorageExplorerHostDetails } from '../../../../common/storage_explorer';
+import type { StorageExplorerHostDetails } from '../../../../common/storage_explorer';
 import { LabelWithHint } from '../../../components/label_with_hint';
 import { useProfilingParams } from '../../../hooks/use_profiling_params';
 import { useProfilingRouter } from '../../../hooks/use_profiling_router';

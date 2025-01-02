@@ -10,7 +10,7 @@ import React from 'react';
 import { mount } from 'enzyme';
 import { EuiThemeProvider } from '@elastic/eui';
 import * as stories from './exception_stacktrace.stories';
-import { ExceptionStackTraceTitleProps } from './exception_stacktrace_title';
+import type { ExceptionStackTraceTitleProps } from './exception_stacktrace_title';
 
 const { JavaWithLongLines } = composeStories(stories);
 

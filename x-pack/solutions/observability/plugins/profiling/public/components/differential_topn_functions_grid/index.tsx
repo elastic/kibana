@@ -5,22 +5,18 @@
  * 2.0.
  */
 
-import {
-  EuiButtonIcon,
-  EuiDataGrid,
+import type {
   EuiDataGridCellValueElementProps,
   EuiDataGridColumn,
   EuiDataGridSorting,
-  EuiScreenReaderOnly,
-  useEuiTheme,
 } from '@elastic/eui';
+import { EuiButtonIcon, EuiDataGrid, EuiScreenReaderOnly, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import type { StackFrameMetadata, TopNFunctions } from '@kbn/profiling-utils';
 import {
   getCalleeFunction,
-  StackFrameMetadata,
   TopNComparisonFunctionSortField,
-  TopNFunctions,
   TopNFunctionSortField,
 } from '@kbn/profiling-utils';
 import { orderBy } from 'lodash';
@@ -28,12 +24,8 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useCalculateImpactEstimate } from '../../hooks/use_calculate_impact_estimates';
 import { FrameInformationTooltip } from '../frame_information_window/frame_information_tooltip';
 import { FunctionRow } from '../topn_functions/function_row';
-import {
-  convertRowToFrame,
-  getFunctionsRows,
-  getTotalCount,
-  IFunctionRow,
-} from '../topn_functions/utils';
+import type { IFunctionRow } from '../topn_functions/utils';
+import { convertRowToFrame, getFunctionsRows, getTotalCount } from '../topn_functions/utils';
 import { getColumns } from './get_columns';
 import { getCompareFrameAction } from './get_compare_frame_action';
 

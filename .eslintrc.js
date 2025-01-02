@@ -1024,6 +1024,20 @@ module.exports = {
         ],
       },
     },
+    {
+      files: [
+        'x-pack/solutions/observability/plugins/apm/**/*.{js,mjs,ts,tsx}',
+        'x-pack/solutions/observability/plugins/apm_data_access/**/*.{js,mjs,ts,tsx}',
+        'x-pack/solutions/observability/plugins/infra/**/*.{js,mjs,ts,tsx}',
+        'x-pack/solutions/observability/plugins/inventory/**/*.{js,mjs,ts,tsx}',
+        'x-pack/solutions/observability/plugins/metrics_data_access/**/*.{js,mjs,ts,tsx}',
+        'x-pack/solutions/observability/plugins/profiling/**/*.{js,mjs,ts,tsx}',
+        'x-pack/solutions/observability/plugins/profiling_data_access/**/*.{js,mjs,ts,tsx}',
+      ],
+      rules: {
+        '@typescript-eslint/consistent-type-imports': 'error',
+      },
+    },
 
     /**
      * Fleet overrides

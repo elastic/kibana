@@ -5,19 +5,21 @@
  * 2.0.
  */
 
-import { EuiBasicTableColumn, EuiButtonIcon, RIGHT_ALIGNMENT } from '@elastic/eui';
+import type { EuiBasicTableColumn } from '@elastic/eui';
+import { EuiButtonIcon, RIGHT_ALIGNMENT } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { ReactNode } from 'react';
+import type { ReactNode } from 'react';
+import React from 'react';
 import { ActionMenu } from '@kbn/observability-shared-plugin/public';
 import { isTimeComparison } from '../../../shared/time_comparison/get_comparison_options';
-import { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
+import type { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
 import { getServiceNodeName, SERVICE_NODE_NAME_MISSING } from '../../../../../common/service_nodes';
 import {
   asMillisecondDuration,
   asPercent,
   asTransactionRate,
 } from '../../../../../common/utils/formatters';
-import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
+import type { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { MetricOverviewLink } from '../../../shared/links/apm/metric_overview_link';
 import { ListMetric } from '../../../shared/list_metric';
 import { getLatencyColumnLabel } from '../../../shared/transactions_table/get_latency_column_label';

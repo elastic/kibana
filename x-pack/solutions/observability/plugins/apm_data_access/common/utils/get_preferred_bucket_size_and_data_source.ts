@@ -6,7 +6,7 @@
  */
 import { parseInterval } from '@kbn/data-plugin/common';
 import { orderBy, last } from 'lodash';
-import { ApmDataSourceWithSummary } from '../data_source';
+import type { ApmDataSourceWithSummary } from '../data_source';
 import { ApmDocumentType } from '../document_type';
 import { RollupInterval } from '../rollup';
 

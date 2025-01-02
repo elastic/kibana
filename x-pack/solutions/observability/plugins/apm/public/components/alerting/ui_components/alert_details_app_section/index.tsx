@@ -22,7 +22,7 @@ import {
   ALERT_START,
 } from '@kbn/rule-data-utils';
 import { EuiCallOut } from '@elastic/eui';
-import { CoreStart } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
 import {
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
@@ -36,7 +36,7 @@ import FailedTransactionChart from './failed_transaction_chart';
 import { getAggsTypeFromRule } from './helpers';
 import LatencyChart from './latency_chart';
 import ThroughputChart from './throughput_chart';
-import { AlertDetailsAppSectionProps } from './types';
+import type { AlertDetailsAppSectionProps } from './types';
 import { createCallApmApi } from '../../../../services/rest/create_call_apm_api';
 
 export function AlertDetailsAppSection({ rule, alert, timeZone }: AlertDetailsAppSectionProps) {

@@ -6,16 +6,10 @@
  */
 
 import React from 'react';
-import {
-  EuiInMemoryTable,
-  EuiBasicTableColumn,
-  EuiPanel,
-  EuiTitle,
-  EuiSpacer,
-  EuiLink,
-} from '@elastic/eui';
+import type { EuiBasicTableColumn } from '@elastic/eui';
+import { EuiInMemoryTable, EuiPanel, EuiTitle, EuiSpacer, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ValuesType } from 'utility-types';
+import type { ValuesType } from 'utility-types';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
 import { asDynamicBytes, asInteger } from '../../../../../common/utils/formatters';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import type { ProcessorEvent } from '@kbn/observability-plugin/common';
 import type {
   FieldValuePair,
   CommonCorrelationsQueryParams,
@@ -14,7 +14,7 @@ import { TERMS_SIZE } from '../../../../common/correlations/constants';
 
 import { splitAllSettledPromises } from '../utils';
 import { getCommonCorrelationsQuery } from './get_common_correlations_query';
-import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
+import type { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 
 export interface FieldValuePairsResponse {
   fieldValuePairs: FieldValuePair[];

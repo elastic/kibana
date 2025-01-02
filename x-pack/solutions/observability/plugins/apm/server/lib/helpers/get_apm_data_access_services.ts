@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ApmDataAccessServices, APMEventClient } from '@kbn/apm-data-access-plugin/server';
-import { MinimalAPMRouteHandlerResources } from '../../routes/apm_routes/register_apm_server_routes';
+import type { ApmDataAccessServices, APMEventClient } from '@kbn/apm-data-access-plugin/server';
+import type { MinimalAPMRouteHandlerResources } from '../../routes/apm_routes/register_apm_server_routes';
 
 export async function getApmDataAccessServices({
   apmEventClient,

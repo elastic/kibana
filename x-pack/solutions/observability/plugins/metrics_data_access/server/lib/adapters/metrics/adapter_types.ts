@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { InventoryMetric } from '../../../../common/inventory_models/types';
+import type { InventoryMetric } from '../../../../common/inventory_models/types';
 
 export enum InfraMetricModelQueryType {
   lucene = 'lucene',

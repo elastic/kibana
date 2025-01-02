@@ -5,20 +5,16 @@
  * 2.0.
  */
 
-import {
-  EuiContextMenu,
-  EuiContextMenuPanelDescriptor,
-  EuiHeaderLink,
-  EuiPopover,
-} from '@elastic/eui';
+import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
+import { EuiContextMenu, EuiHeaderLink, EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 import { OBSERVABILITY_ONBOARDING_LOCATOR } from '@kbn/deeplinks-observability';
-import { ApmOnboardingLocatorParams } from '../../../../locator/onboarding_locator';
+import type { ApmOnboardingLocatorParams } from '../../../../locator/onboarding_locator';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { useKibana } from '../../../../context/kibana_context/use_kibana';
-import { ApmPluginStartDeps, ApmServices } from '../../../../plugin';
-import { EntityInventoryAddDataParams } from '../../../../services/telemetry';
+import type { ApmPluginStartDeps, ApmServices } from '../../../../plugin';
+import type { EntityInventoryAddDataParams } from '../../../../services/telemetry';
 import {
   associateServiceLogsProps,
   collectServiceLogsProps,

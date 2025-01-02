@@ -6,9 +6,10 @@
  */
 
 import { useEffect } from 'react';
-import { RouteComponentProps } from 'react-router-dom';
+import type { RouteComponentProps } from 'react-router-dom';
 import { getLogsLocatorsFromUrlService } from '@kbn/logs-shared-plugin/common';
-import { findInventoryFields, InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
+import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
+import { findInventoryFields } from '@kbn/metrics-data-access-plugin/common';
 
 import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
 import { getFilterFromLocation, getTimeFromLocation } from './query_params';

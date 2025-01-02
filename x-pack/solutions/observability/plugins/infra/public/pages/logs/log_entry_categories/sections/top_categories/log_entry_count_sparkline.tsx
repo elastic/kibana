@@ -7,8 +7,8 @@
 
 import React, { useMemo } from 'react';
 
-import { LogEntryCategoryHistogram } from '../../../../../../common/log_analysis';
-import { TimeRange } from '../../../../../../common/time';
+import type { LogEntryCategoryHistogram } from '../../../../../../common/log_analysis';
+import type { TimeRange } from '../../../../../../common/time';
 import { SingleMetricComparison } from './single_metric_comparison';
 import { SingleMetricSparkline } from './single_metric_sparkline';
 

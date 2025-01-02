@@ -7,15 +7,20 @@
 
 import Boom from '@hapi/boom';
 import * as t from 'io-ts';
-import { Logger, KibanaRequest, KibanaResponseFactory, RouteRegistrar } from '@kbn/core/server';
+import type {
+  Logger,
+  KibanaRequest,
+  KibanaResponseFactory,
+  RouteRegistrar,
+} from '@kbn/core/server';
 import { errors } from '@elastic/elasticsearch';
 import agent from 'elastic-apm-node';
-import {
+import type {
   DefaultRouteCreateOptions,
   IoTsParamsObject,
   ServerRouteRepository,
-  stripNullishRequestParameters,
 } from '@kbn/server-route-repository';
+import { stripNullishRequestParameters } from '@kbn/server-route-repository';
 import { merge } from 'lodash';
 import {
   decodeRequestParams,
@@ -23,12 +28,12 @@ import {
   passThroughValidationObject,
 } from '@kbn/server-route-repository';
 import { jsonRt, mergeRt } from '@kbn/io-ts-utils';
-import { InspectResponse } from '@kbn/observability-plugin/typings/common';
+import type { InspectResponse } from '@kbn/observability-plugin/typings/common';
 import apm from 'elastic-apm-node';
-import { VersionedRouteRegistrar } from '@kbn/core-http-server';
-import { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
+import type { VersionedRouteRegistrar } from '@kbn/core-http-server';
+import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import type { APMIndices } from '@kbn/apm-data-access-plugin/server';
-import { ApmFeatureFlags } from '../../../common/apm_feature_flags';
+import type { ApmFeatureFlags } from '../../../common/apm_feature_flags';
 import type {
   APMCore,
   APMRouteCreateOptions,

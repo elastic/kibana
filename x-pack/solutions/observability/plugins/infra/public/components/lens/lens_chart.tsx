@@ -13,8 +13,8 @@ import {
   EuiLink,
   type EuiPanelProps,
 } from '@elastic/eui';
-import { Action } from '@kbn/ui-actions-plugin/public';
-import { UserMessage } from '@kbn/lens-plugin/public';
+import type { Action } from '@kbn/ui-actions-plugin/public';
+import type { UserMessage } from '@kbn/lens-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { useLensAttributes, type UseLensAttributesParams } from '../../hooks/use_lens_attributes';

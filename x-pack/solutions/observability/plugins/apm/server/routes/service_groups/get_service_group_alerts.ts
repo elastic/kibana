@@ -7,12 +7,12 @@
 
 import { kqlQuery, termQuery, termsQuery } from '@kbn/observability-plugin/server';
 import { ALERT_RULE_PRODUCER, ALERT_STATUS, ALERT_STATUS_ACTIVE } from '@kbn/rule-data-utils';
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import { Logger } from '@kbn/core/server';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import type { Logger } from '@kbn/core/server';
 import { observabilityFeatureId } from '@kbn/observability-shared-plugin/common';
-import { ApmPluginRequestHandlerContext } from '../typings';
-import { SavedServiceGroup } from '../../../common/service_groups';
-import { ApmAlertsClient } from '../../lib/helpers/get_apm_alerts_client';
+import type { ApmPluginRequestHandlerContext } from '../typings';
+import type { SavedServiceGroup } from '../../../common/service_groups';
+import type { ApmAlertsClient } from '../../lib/helpers/get_apm_alerts_client';
 
 export async function getServiceGroupAlerts({
   serviceGroups,

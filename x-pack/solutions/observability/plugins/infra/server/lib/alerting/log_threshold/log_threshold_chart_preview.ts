@@ -6,23 +6,25 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ResolvedLogView } from '@kbn/logs-shared-plugin/common';
+import type { ResolvedLogView } from '@kbn/logs-shared-plugin/common';
 import { decodeOrThrow } from '@kbn/io-ts-utils';
-import {
+import type {
   ExecutionTimeRange,
   GroupedSearchQueryResponse,
-  GroupedSearchQueryResponseRT,
-  isOptimizedGroupedSearchQueryResponse,
   UngroupedSearchQueryResponse,
-  UngroupedSearchQueryResponseRT,
 } from '../../../../common/alerting/logs/log_threshold/types';
 import {
+  GroupedSearchQueryResponseRT,
+  isOptimizedGroupedSearchQueryResponse,
+  UngroupedSearchQueryResponseRT,
+} from '../../../../common/alerting/logs/log_threshold/types';
+import type {
   GetLogAlertsChartPreviewDataAlertParamsSubset,
   Point,
   Series,
 } from '../../../../common/http_api';
 import type { InfraPluginRequestHandlerContext } from '../../../types';
-import { KibanaFramework } from '../../adapters/framework/kibana_framework_adapter';
+import type { KibanaFramework } from '../../adapters/framework/kibana_framework_adapter';
 import { buildFiltersFromCriteria } from '../../../../common/alerting/logs/log_threshold/query_helpers';
 import { getGroupedESQuery, getUngroupedESQuery } from './log_threshold_executor';
 

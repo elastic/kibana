@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { XYChartElementEvent } from '@elastic/charts';
 import {
   Axis,
   BrushAxis,
@@ -15,14 +16,13 @@ import {
   StackMode,
   timeFormatter,
   Tooltip,
-  XYChartElementEvent,
   TooltipContainer,
 } from '@elastic/charts';
 import { EuiPanel } from '@elastic/eui';
 import { keyBy } from 'lodash';
 import React, { useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { TopNSample, TopNSubchart } from '../../../common/topn';
+import type { TopNSample, TopNSubchart } from '../../../common/topn';
 import { useKibanaTimeZoneSetting } from '../../hooks/use_kibana_timezone_setting';
 import { useProfilingChartsTheme } from '../../hooks/use_profiling_charts_theme';
 import { asPercentage } from '../../utils/formatters/as_percentage';

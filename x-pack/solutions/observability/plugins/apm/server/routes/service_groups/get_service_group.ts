@@ -5,12 +5,9 @@
  * 2.0.
  */
 
-import { SavedObjectsClientContract } from '@kbn/core/server';
-import {
-  ServiceGroup,
-  SavedServiceGroup,
-  APM_SERVICE_GROUP_SAVED_OBJECT_TYPE,
-} from '../../../common/service_groups';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
+import type { ServiceGroup, SavedServiceGroup } from '../../../common/service_groups';
+import { APM_SERVICE_GROUP_SAVED_OBJECT_TYPE } from '../../../common/service_groups';
 
 export async function getServiceGroup({
   savedObjectsClient,

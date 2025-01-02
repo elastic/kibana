@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
+import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 import { withApmSpan } from '../../utils/with_apm_span';
 import { getServiceCount } from './get_service_count';
 import { getTransactionsPerMinute } from './get_transactions_per_minute';

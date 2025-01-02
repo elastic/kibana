@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MetricsUIAggregation } from '../../../types';
+import type { MetricsUIAggregation } from '../../../types';
 export const normalizedLoad1m: MetricsUIAggregation = {
   load_1m: {
     avg: {

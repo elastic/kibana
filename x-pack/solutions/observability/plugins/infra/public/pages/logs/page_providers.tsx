@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { useState, FC, PropsWithChildren } from 'react';
+import type { FC, PropsWithChildren } from 'react';
+import React, { useState } from 'react';
 import {
   LogViewProvider,
   initializeFromUrl as createInitializeFromUrl,

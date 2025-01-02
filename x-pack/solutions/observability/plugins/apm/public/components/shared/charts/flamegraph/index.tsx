@@ -7,7 +7,7 @@
 import { EuiEmptyPrompt } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { EmbeddableFlamegraph } from '@kbn/observability-shared-plugin/public';
-import { BaseFlameGraph } from '@kbn/profiling-utils';
+import type { BaseFlameGraph } from '@kbn/profiling-utils';
 import { isEmpty } from 'lodash';
 import React from 'react';
 import { FETCH_STATUS, isPending } from '../../../../hooks/use_fetcher';

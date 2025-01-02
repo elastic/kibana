@@ -24,7 +24,7 @@ import { ChartContainer } from '../../shared/charts/chart_container';
 import { getTimeZone } from '../../shared/charts/helper/timezone';
 import { isTimeseriesEmpty } from '../../shared/charts/helper/helper';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
-import { Coordinate, TimeSeries } from '../../../../typings/timeseries';
+import type { Coordinate, TimeSeries } from '../../../../typings/timeseries';
 import { asDynamicBytes } from '../../../../common/utils/formatters';
 
 export function StorageChart() {

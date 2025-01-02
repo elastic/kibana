@@ -5,21 +5,15 @@
  * 2.0.
  */
 
-import {
-  EuiBasicTable,
-  EuiDataGridColumnCellAction,
-  EuiDataGridColumnCellActionProps,
-  EuiPopover,
-  EuiPopoverTitle,
-  EuiText,
-  EuiTitle,
-} from '@elastic/eui';
+import type { EuiDataGridColumnCellAction, EuiDataGridColumnCellActionProps } from '@elastic/eui';
+import { EuiBasicTable, EuiPopover, EuiPopoverTitle, EuiText, EuiTitle } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { getCalleeFunction } from '@kbn/profiling-utils';
-import { getFrameIdentification, isComparisonColumn, SelectedFrame } from '.';
-import { IFunctionRow } from '../topn_functions/utils';
+import type { SelectedFrame } from '.';
+import { getFrameIdentification, isComparisonColumn } from '.';
+import type { IFunctionRow } from '../topn_functions/utils';
 
 interface Props {
   baseRows: IFunctionRow[];

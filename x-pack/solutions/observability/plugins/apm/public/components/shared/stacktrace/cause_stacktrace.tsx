@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import styled from '@emotion/styled';
 import { Stacktrace } from '.';
-import { Stackframe } from '../../../../typings/es_schemas/raw/fields/stackframe';
+import type { Stackframe } from '../../../../typings/es_schemas/raw/fields/stackframe';
 
 const Accordion = styled(EuiAccordion)`
   border-top: ${({ theme }) => theme.euiTheme.border.thin};

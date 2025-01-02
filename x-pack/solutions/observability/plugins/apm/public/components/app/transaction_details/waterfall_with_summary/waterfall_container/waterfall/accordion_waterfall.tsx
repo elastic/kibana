@@ -17,11 +17,12 @@ import {
 import { transparentize } from 'polished';
 import React, { useEffect, useRef } from 'react';
 import { WindowScroller, AutoSizer } from 'react-virtualized';
-import { areEqual, ListChildComponentProps, VariableSizeList as List } from 'react-window';
+import type { ListChildComponentProps } from 'react-window';
+import { areEqual, VariableSizeList as List } from 'react-window';
 import { css } from '@emotion/react';
 import { asBigNumber } from '../../../../../../../common/utils/formatters';
-import { Margins } from '../../../../../shared/charts/timeline';
-import {
+import type { Margins } from '../../../../../shared/charts/timeline';
+import type {
   IWaterfallNodeFlatten,
   IWaterfall,
   IWaterfallSpanOrTransaction,

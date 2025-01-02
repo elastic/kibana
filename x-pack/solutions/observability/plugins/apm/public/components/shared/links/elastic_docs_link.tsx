@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { EuiLink, EuiLinkAnchorProps } from '@elastic/eui';
+import type { EuiLinkAnchorProps } from '@elastic/eui';
+import { EuiLink } from '@elastic/eui';
 import React from 'react';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 
