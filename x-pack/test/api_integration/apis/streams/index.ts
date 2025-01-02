@@ -14,5 +14,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./classic'));
     loadTestFile(require.resolve('./flush_config'));
     loadTestFile(require.resolve('./schema'));
+    loadTestFile(require.resolve('./root_stream'));
   });
 }
