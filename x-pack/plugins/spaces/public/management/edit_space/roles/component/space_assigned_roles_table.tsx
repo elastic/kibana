@@ -149,14 +149,13 @@ const getTableColumns = ({
                   isRoleReserved(role)
                     ? i18n.translate(
                         'xpack.spaces.management.spaceDetails.rolesTable.column.actions.notEditableDescription.isReserved',
-                        {
-                          defaultMessage: `You can’t edit the access of reserved roles to this space.`,
-                        }
+                        { defaultMessage: 'This role is reserved.' }
                       )
                     : i18n.translate(
                         'xpack.spaces.management.spaceDetails.rolesTable.column.actions.notEditableDescription.isAssignedToAll',
                         {
-                          defaultMessage: `You can't edit the access of a role that is assigned to all spaces.`,
+                          defaultMessage:
+                            'This role is assigned to all spaces. To change this, go to Roles.',
                         }
                       )
                 }
