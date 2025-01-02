@@ -11,7 +11,9 @@ import { defaultConfig } from '@kbn/storybook';
 
 module.exports = {
   ...defaultConfig,
-  stories: ['../../**/*.stories.+(tsx|mdx)'],
+  stories: [
+    '../../../../src/platform/packages/(private|shared)/kbn-management/**/*.stories.+(tsx|mdx)',
+  ],
   reactOptions: {
     strictMode: true,
   },
