@@ -7,11 +7,10 @@
 
 import type { FC } from 'react';
 import React, { useMemo } from 'react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { useEuiTheme, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { getFieldTypeName } from '@kbn/field-utils';
-import { useCurrentEuiTheme } from '../../../common/hooks/use_current_eui_theme';
 import { FieldTypesHelpPopover } from '../../../common/components/field_types_filter/field_types_help_popover';
 import { FieldTypeIcon } from '../../../common/components/field_type_icon';
 import type { Option } from '../../../common/components/multi_select_picker';
@@ -22,7 +21,7 @@ export const DataVisualizerFieldTypeFilter: FC<{
   setVisibleFieldTypes(q: string[]): void;
   visibleFieldTypes: string[];
 }> = ({ indexedFieldTypes, setVisibleFieldTypes, visibleFieldTypes }) => {
-  const euiTheme = useCurrentEuiTheme();
+  const { euiTheme } = useEuiTheme();
   const options: Option[] = useMemo(() => {
     return indexedFieldTypes.map((indexedFieldName) => {
       const label = getFieldTypeName(indexedFieldName) ?? indexedFieldName;
@@ -61,7 +60,7 @@ export const DataVisualizerFieldTypeFilter: FC<{
         postfix={<FieldTypesHelpPopover fieldTypes={indexedFieldTypes} />}
         cssStyles={{
           filterGroup: css`
-            margin-left: ${euiTheme.euiSizeS};
+            margin-left: ${euiTheme.size.s};
           `,
         }}
       />
