@@ -29,7 +29,7 @@
         "signature": [
           "() => { open: { color: string; label: string; icon: \"folderOpen\"; }; \"in-progress\": { color: string; label: string; icon: \"folderExclamation\"; }; closed: { color: string; label: string; icon: \"folderCheck\"; }; }"
         ],
-        "path": "packages/kbn-cases-components/src/status/config.ts",
+        "path": "src/platform/packages/shared/kbn-cases-components/src/status/config.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -46,7 +46,7 @@
         "signature": [
           "React.NamedExoticComponent<Props>"
         ],
-        "path": "packages/kbn-cases-components/src/status/status.tsx",
+        "path": "src/platform/packages/shared/kbn-cases-components/src/status/status.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -94,7 +94,7 @@
           },
           ">; }"
         ],
-        "path": "packages/kbn-cases-components/src/tooltip/tooltip.tsx",
+        "path": "src/platform/packages/shared/kbn-cases-components/src/tooltip/tooltip.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -125,7 +125,7 @@
         "tags": [],
         "label": "CaseTooltipContentProps",
         "description": [],
-        "path": "packages/kbn-cases-components/src/tooltip/types.ts",
+        "path": "src/platform/packages/shared/kbn-cases-components/src/tooltip/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -136,7 +136,7 @@
             "tags": [],
             "label": "title",
             "description": [],
-            "path": "packages/kbn-cases-components/src/tooltip/types.ts",
+            "path": "src/platform/packages/shared/kbn-cases-components/src/tooltip/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -147,7 +147,7 @@
             "tags": [],
             "label": "description",
             "description": [],
-            "path": "packages/kbn-cases-components/src/tooltip/types.ts",
+            "path": "src/platform/packages/shared/kbn-cases-components/src/tooltip/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -167,7 +167,7 @@
                 "text": "CaseStatuses"
               }
             ],
-            "path": "packages/kbn-cases-components/src/tooltip/types.ts",
+            "path": "src/platform/packages/shared/kbn-cases-components/src/tooltip/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -178,7 +178,7 @@
             "tags": [],
             "label": "totalComments",
             "description": [],
-            "path": "packages/kbn-cases-components/src/tooltip/types.ts",
+            "path": "src/platform/packages/shared/kbn-cases-components/src/tooltip/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -189,7 +189,7 @@
             "tags": [],
             "label": "createdAt",
             "description": [],
-            "path": "packages/kbn-cases-components/src/tooltip/types.ts",
+            "path": "src/platform/packages/shared/kbn-cases-components/src/tooltip/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -203,7 +203,7 @@
             "signature": [
               "{ username?: string | undefined; fullName?: string | undefined; }"
             ],
-            "path": "packages/kbn-cases-components/src/tooltip/types.ts",
+            "path": "src/platform/packages/shared/kbn-cases-components/src/tooltip/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -217,7 +217,7 @@
         "tags": [],
         "label": "CaseTooltipProps",
         "description": [],
-        "path": "packages/kbn-cases-components/src/tooltip/types.ts",
+        "path": "src/platform/packages/shared/kbn-cases-components/src/tooltip/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -231,7 +231,7 @@
             "signature": [
               "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
             ],
-            "path": "packages/kbn-cases-components/src/tooltip/types.ts",
+            "path": "src/platform/packages/shared/kbn-cases-components/src/tooltip/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -251,7 +251,7 @@
                 "text": "CaseTooltipContentProps"
               }
             ],
-            "path": "packages/kbn-cases-components/src/tooltip/types.ts",
+            "path": "src/platform/packages/shared/kbn-cases-components/src/tooltip/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -265,7 +265,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/kbn-cases-components/src/tooltip/types.ts",
+            "path": "src/platform/packages/shared/kbn-cases-components/src/tooltip/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -279,7 +279,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/kbn-cases-components/src/tooltip/types.ts",
+            "path": "src/platform/packages/shared/kbn-cases-components/src/tooltip/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -293,7 +293,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "packages/kbn-cases-components/src/tooltip/types.ts",
+            "path": "src/platform/packages/shared/kbn-cases-components/src/tooltip/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -309,9 +309,9 @@
         "tags": [],
         "label": "CaseStatuses",
         "description": [
-          "\nThis is being used by Cases in\nx-pack/plugins/cases/common/types/domain/case/v1.ts.\nIntroducing a breaking change in this enum will\nforce cases to create a version of the domain object\nwhich in turn will force cases to create a new version\nto most of the Cases APIs."
+          "\nThis is being used by Cases in\nx-pack/platform/plugins/shared/cases/common/types/domain/case/v1.ts.\nIntroducing a breaking change in this enum will\nforce cases to create a version of the domain object\nwhich in turn will force cases to create a new version\nto most of the Cases APIs."
         ],
-        "path": "packages/kbn-cases-components/src/status/types.ts",
+        "path": "src/platform/packages/shared/kbn-cases-components/src/status/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

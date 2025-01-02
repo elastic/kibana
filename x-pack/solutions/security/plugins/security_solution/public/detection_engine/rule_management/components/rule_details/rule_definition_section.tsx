@@ -41,7 +41,6 @@ import { useGetSavedQuery } from '../../../../detections/pages/detection_engine/
 import * as threatMatchI18n from '../../../../common/components/threat_match/translations';
 import * as timelinesI18n from '../../../../timelines/components/timeline/translations';
 import type { Duration } from '../../../../detections/pages/detection_engine/rules/types';
-import { convertHistoryStartToSize } from '../../../../detections/pages/detection_engine/rules/helpers';
 import { MlJobsDescription } from '../../../rule_creation/components/ml_jobs_description/ml_jobs_description';
 import { MlJobLink } from '../../../rule_creation/components/ml_job_link/ml_job_link';
 import { useSecurityJobs } from '../../../../common/components/ml_popover/hooks/use_security_jobs';
@@ -58,6 +57,8 @@ import {
 } from './rule_definition_section.styles';
 import { getQueryLanguageLabel } from './helpers';
 import { useDefaultIndexPattern } from '../../hooks/use_default_index_pattern';
+import { convertDateMathToDuration } from '../../../../common/utils/date_math';
+import { DEFAULT_HISTORY_WINDOW_SIZE } from '../../../../common/constants';
 import {
   EQL_OPTIONS_EVENT_CATEGORY_FIELD_LABEL,
   EQL_OPTIONS_EVENT_TIEBREAKER_FIELD_LABEL,
@@ -435,7 +436,9 @@ interface HistoryWindowSizeProps {
 }
 
 export const HistoryWindowSize = ({ historyWindowStart }: HistoryWindowSizeProps) => {
-  const size = historyWindowStart ? convertHistoryStartToSize(historyWindowStart) : '7d';
+  const size = historyWindowStart
+    ? convertDateMathToDuration(historyWindowStart)
+    : DEFAULT_HISTORY_WINDOW_SIZE;
 
   return (
     <EuiText size="s" data-test-subj={`newTermsWindowSizePropertyValue-${historyWindowStart}`}>
