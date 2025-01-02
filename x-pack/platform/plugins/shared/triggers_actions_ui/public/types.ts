@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { Moment } from 'moment';
 import { ComponentType } from 'react';
+import type { Moment } from 'moment';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { DocLinksStart } from '@kbn/core/public';
 import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
@@ -43,7 +43,6 @@ import {
   RuleTypeParams,
 } from '@kbn/alerting-plugin/common';
 import type { BulkOperationError } from '@kbn/alerting-plugin/server';
-import React from 'react';
 import type { RuleType, RuleTypeIndex } from '@kbn/triggers-actions-ui-types';
 import {
   ValidationResult,
