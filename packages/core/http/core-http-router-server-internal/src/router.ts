@@ -191,6 +191,8 @@ export class Router<Context extends RequestHandlerContextBase = RequestHandlerCo
 {
   /**
    * Used for global request events at the router level, similar to what we get from Hapi's request lifecycle events.
+   *
+   * See {@link RouterEvents}.
    */
   private static events = new EventEmitter();
   public routes: Array<Readonly<RouterRoute>> = [];
