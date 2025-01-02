@@ -8,7 +8,7 @@
  */
 
 import { AlertsTable } from './components/alerts_table';
-export * from './components/alerts_table';
+export { AlertsTable } from './components/alerts_table';
 // Lazy load helper
 // eslint-disable-next-line import/no-default-export
 export default AlertsTable;
