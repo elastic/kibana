@@ -120,6 +120,9 @@ const AvatarWrapper = styled.span`
   }
 `;
 
+/**
+ * @deprecated This component will soon be replaced by `AssistantBeacon` from `@kbn/ai-assistant-icon`.
+ */
 export const AssistantAnimatedIcon = React.memo(() => (
   <Container>
     <Animation />

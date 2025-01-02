@@ -52,4 +52,11 @@ export class SavedObjectsSpacesExtension implements ISavedObjectsSpacesExtension
       );
     }
   }
+
+  asScopedToNamespace(namespace: string) {
+    return new SavedObjectsSpacesExtension({
+      activeSpaceId: namespace,
+      spacesClient: this.spacesClient,
+    });
+  }
 }

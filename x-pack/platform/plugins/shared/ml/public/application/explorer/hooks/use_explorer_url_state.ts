@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import type { PageUrlStateService } from '@kbn/ml-url-state';
-import { usePageUrlState } from '@kbn/ml-url-state';
+import { usePageUrlState, type UrlStateService } from '@kbn/ml-url-state';
 import type { ExplorerAppState } from '../../../../common/types/locator';
 import { ML_PAGES } from '../../../../common/constants/locator';
 
-export type AnomalyExplorerUrlStateService = PageUrlStateService<ExplorerAppState>;
+export type AnomalyExplorerUrlStateService = UrlStateService<ExplorerAppState>;
 
 interface LegacyExplorerPageUrlState {
   pageKey: 'mlExplorerSwimlane';
