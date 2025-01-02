@@ -6,7 +6,7 @@
  */
 import React from 'react';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
-import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
+import type { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import {
   expectTextsInDocument,
   expectTextsNotInDocument,

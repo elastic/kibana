@@ -7,18 +7,14 @@
 import { jsonRt, toBooleanRt, toNumberRt } from '@kbn/io-ts-utils';
 import * as t from 'io-ts';
 import { offsetRt } from '../../../common/comparison_rt';
-import {
-  LatencyAggregationType,
-  latencyAggregationTypeRt,
-} from '../../../common/latency_aggregation_types';
+import type { LatencyAggregationType } from '../../../common/latency_aggregation_types';
+import { latencyAggregationTypeRt } from '../../../common/latency_aggregation_types';
 import { joinByKey } from '../../../common/utils/join_by_key';
 import { getApmAlertsClient } from '../../lib/helpers/get_apm_alerts_client';
 import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
 import { getSearchTransactionsEvents } from '../../lib/helpers/transactions';
-import {
-  ColdstartRateResponse,
-  getColdstartRatePeriods,
-} from '../../lib/transaction_groups/get_coldstart_rate';
+import type { ColdstartRateResponse } from '../../lib/transaction_groups/get_coldstart_rate';
+import { getColdstartRatePeriods } from '../../lib/transaction_groups/get_coldstart_rate';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import {
   environmentRt,
@@ -28,22 +24,19 @@ import {
   serviceTransactionDataSourceRt,
   transactionDataSourceRt,
 } from '../default_api_types';
-import {
-  getServiceTransactionGroups,
-  ServiceTransactionGroupsResponse,
-} from '../services/get_service_transaction_groups';
+import type { ServiceTransactionGroupsResponse } from '../services/get_service_transaction_groups';
+import { getServiceTransactionGroups } from '../services/get_service_transaction_groups';
 import { getServiceTransactionGroupsAlerts } from '../services/get_service_transaction_groups_alerts';
-import {
-  getServiceTransactionGroupDetailedStatisticsPeriods,
-  ServiceTransactionGroupDetailedStatisticsResponse,
-} from '../services/get_service_transaction_group_detailed_statistics';
-import { getTransactionBreakdown, TransactionBreakdownResponse } from './breakdown';
-import {
-  FailedTransactionRateResponse,
-  getFailedTransactionRatePeriods,
-} from './get_failed_transaction_rate_periods';
-import { getLatencyPeriods, TransactionLatencyResponse } from './get_latency_charts';
-import { getTraceSamples, TransactionTraceSamplesResponse } from './trace_samples';
+import type { ServiceTransactionGroupDetailedStatisticsResponse } from '../services/get_service_transaction_group_detailed_statistics';
+import { getServiceTransactionGroupDetailedStatisticsPeriods } from '../services/get_service_transaction_group_detailed_statistics';
+import type { TransactionBreakdownResponse } from './breakdown';
+import { getTransactionBreakdown } from './breakdown';
+import type { FailedTransactionRateResponse } from './get_failed_transaction_rate_periods';
+import { getFailedTransactionRatePeriods } from './get_failed_transaction_rate_periods';
+import type { TransactionLatencyResponse } from './get_latency_charts';
+import { getLatencyPeriods } from './get_latency_charts';
+import type { TransactionTraceSamplesResponse } from './trace_samples';
+import { getTraceSamples } from './trace_samples';
 
 export interface MergedServiceTransactionGroupsResponse
   extends Omit<ServiceTransactionGroupsResponse, 'transactionGroups'> {
