@@ -42,7 +42,7 @@ export const useUnifiedSearch = () => {
   const [error, setError] = useState<Error | null>(null);
   const [searchCriteria, setSearch] = useHostsUrlState();
   const { metricsView } = useMetricsDataViewContext();
-  const { updateSearchSessionId } = useReloadRequestTimeContext();
+  const { updateReloadRequestTime } = useReloadRequestTimeContext();
   const { services } = useKibanaContextForPlugin();
   const kibanaQuerySettings = useKibanaQuerySettings();
 
@@ -72,33 +72,33 @@ export const useUnifiedSearch = () => {
   const onFiltersChange = useCallback(
     (filters: Filter[]) => {
       setSearch({ type: 'SET_FILTERS', filters });
-      updateSearchSessionId();
+      updateReloadRequestTime();
     },
-    [setSearch, updateSearchSessionId]
+    [setSearch, updateReloadRequestTime]
   );
 
   const onPanelFiltersChange = useCallback(
     (panelFilters: Filter[]) => {
       setSearch({ type: 'SET_PANEL_FILTERS', panelFilters });
-      updateSearchSessionId();
+      updateReloadRequestTime();
     },
-    [setSearch, updateSearchSessionId]
+    [setSearch, updateReloadRequestTime]
   );
 
   const onLimitChange = useCallback(
     (limit: number) => {
       setSearch({ type: 'SET_LIMIT', limit });
-      updateSearchSessionId();
+      updateReloadRequestTime();
     },
-    [setSearch, updateSearchSessionId]
+    [setSearch, updateReloadRequestTime]
   );
 
   const onDateRangeChange = useCallback(
     (dateRange: StringDateRange) => {
       setSearch({ type: 'SET_DATE_RANGE', dateRange });
-      updateSearchSessionId();
+      updateReloadRequestTime();
     },
-    [setSearch, updateSearchSessionId]
+    [setSearch, updateReloadRequestTime]
   );
 
   const onQueryChange = useCallback(
@@ -107,12 +107,12 @@ export const useUnifiedSearch = () => {
         setError(null);
         validateQuery(query);
         setSearch({ type: 'SET_QUERY', query });
-        updateSearchSessionId();
+        updateReloadRequestTime();
       } catch (err) {
         setError(err);
       }
     },
-    [validateQuery, setSearch, updateSearchSessionId]
+    [validateQuery, setSearch, updateReloadRequestTime]
   );
 
   const onSubmit = useCallback(
