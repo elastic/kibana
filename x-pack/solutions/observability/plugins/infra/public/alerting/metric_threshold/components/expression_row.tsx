@@ -29,8 +29,8 @@ import {
 import useToggle from 'react-use/lib/useToggle';
 import { COMPARATORS } from '@kbn/alerting-comparators';
 import { convertToBuiltInComparators } from '@kbn/observability-plugin/common';
+import type { DataViewFieldBase } from '@kbn/es-query';
 import { Aggregators } from '../../../../common/alerting/metrics';
-import { useMetricsDataViewContext } from '../../../containers/metrics_source';
 import { decimalToPct, pctToDecimal } from '../../../../common/utils/corrected_percent_convert';
 import type { MetricExpression } from '../types';
 import { AGGREGATION_TYPES } from '../types';
@@ -45,6 +45,7 @@ interface ExpressionRowProps {
   addExpression(): void;
   remove(id: number): void;
   setRuleParams(id: number, params: MetricExpression): void;
+  fields: DataViewFieldBase[];
 }
 
 const NegativeHorizontalMarginDiv = styled.div`
@@ -67,9 +68,9 @@ export const ExpressionRow = ({
   expressionId,
   remove,
   canDelete,
+  fields,
 }: PropsWithChildren<ExpressionRowProps>) => {
   const [isExpanded, toggle] = useToggle(true);
-  const { metricsView } = useMetricsDataViewContext();
 
   const {
     aggType = AGGREGATION_TYPES.MAX,
@@ -196,8 +197,9 @@ export const ExpressionRow = ({
     />
   );
 
-  const normalizedFields = (metricsView?.fields ?? []).map((f) => ({
+  const normalizedFields = fields.map((f) => ({
     normalizedType: f.type,
+    esTypes: f.esTypes,
     name: f.name,
   }));
 

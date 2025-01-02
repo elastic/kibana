@@ -141,7 +141,10 @@ export const createMetricThresholdExecutor =
       executionId,
     });
 
-    const { alertsClient, savedObjectsClient } = services;
+    const { alertsClient, getDataViews } = services;
+
+    const searchSourceClient = await services.getSearchSourceClient();
+
     if (!alertsClient) {
       throw new AlertsClientError();
     }
@@ -178,12 +181,7 @@ export const createMetricThresholdExecutor =
       });
     };
 
-    const {
-      sourceId,
-      alertOnNoData,
-      alertOnGroupDisappear: _alertOnGroupDisappear,
-    } = params as {
-      sourceId?: string;
+    const { alertOnNoData, alertOnGroupDisappear: _alertOnGroupDisappear } = params as {
       alertOnNoData: boolean;
       alertOnGroupDisappear: boolean | undefined;
     };
@@ -232,14 +230,7 @@ export const createMetricThresholdExecutor =
 
     // For backwards-compatibility, interpret undefined alertOnGroupDisappear as true
     const alertOnGroupDisappear = _alertOnGroupDisappear !== false;
-
-    const source = await libs.sources.getSourceConfiguration(
-      savedObjectsClient,
-      sourceId || 'default'
-    );
-    const config = source.configuration;
     const compositeSize = libs.configuration.alerting.metric_threshold.group_by_page_size;
-
     const filterQueryIsSame = isEqual(state.filterQuery, params.filterQuery);
     const groupByIsSame = isEqual(state.groupBy, params.groupBy);
     const previousMissingGroups =
@@ -252,10 +243,29 @@ export const createMetricThresholdExecutor =
           )
         : [];
 
+    let dataView;
+
+    if (params.searchConfiguration) {
+      const initialSearchSource = await searchSourceClient.create(params.searchConfiguration);
+      dataView = initialSearchSource.getField('index')!;
+    } else {
+      dataView = await (await getDataViews()).get('infra_rules_data_view');
+    }
+
+    const { timeFieldName } = dataView;
+    const dataViewIndexPattern = dataView.getIndexPattern();
+
+    if (!dataViewIndexPattern) {
+      throw new Error('No matched data view');
+    } else if (!timeFieldName) {
+      throw new Error('The selected data view does not have a timestamp field');
+    }
+
     const alertResults = await evaluateRule(
       services.scopedClusterClient.asCurrentUser,
       params as EvaluatedRuleParams,
-      config,
+      dataViewIndexPattern,
+      timeFieldName,
       compositeSize,
       alertOnGroupDisappear,
       logger,

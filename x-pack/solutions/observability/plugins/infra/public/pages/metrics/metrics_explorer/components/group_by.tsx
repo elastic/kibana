@@ -8,15 +8,19 @@
 import { EuiComboBox } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback } from 'react';
+import type { DataViewFieldBase } from '@kbn/es-query';
 import { useMetricsDataViewContext } from '../../../../containers/metrics_source';
 import type { MetricsExplorerOptions } from '../hooks/use_metrics_explorer_options';
+
+export type MetricsExplorerFields = Array<DataViewFieldBase & { aggregatable: boolean }>;
 
 interface Props {
   options: MetricsExplorerOptions;
   onChange: (groupBy: string | null | string[]) => void;
+  fields?: MetricsExplorerFields;
 }
 
-export const MetricsExplorerGroupBy = ({ options, onChange }: Props) => {
+export const MetricsExplorerGroupBy = ({ options, onChange, fields }: Props) => {
   const { metricsView } = useMetricsDataViewContext();
   const handleChange = useCallback(
     (selectedOptions: Array<{ label: string }>) => {
@@ -32,7 +36,9 @@ export const MetricsExplorerGroupBy = ({ options, onChange }: Props) => {
     ? [{ label: options.groupBy }]
     : [];
 
-  const comboOptions = (metricsView?.fields ?? [])
+  const dataViewFields = fields ? fields : metricsView?.fields ?? [];
+
+  const comboOptions = dataViewFields
     .filter((f) => f.aggregatable && f.type === 'string')
     .map((f) => ({ label: f.name }));
 
