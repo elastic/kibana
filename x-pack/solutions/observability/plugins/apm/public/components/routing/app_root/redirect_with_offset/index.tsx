@@ -10,10 +10,8 @@ import qs from 'query-string';
 import React from 'react';
 import { useApmRouter } from '../../../../hooks/use_apm_router';
 import { isRouteWithComparison } from '../../../shared/is_route_with_time_range';
-import {
-  TimeRangeComparisonEnum,
-  dayAndWeekBeforeToOffset,
-} from '../../../shared/time_comparison/get_comparison_options';
+import type { TimeRangeComparisonEnum } from '../../../shared/time_comparison/get_comparison_options';
+import { dayAndWeekBeforeToOffset } from '../../../shared/time_comparison/get_comparison_options';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { getComparisonEnabled } from '../../../shared/time_comparison/get_comparison_enabled';
 import { toBoolean } from '../../../../context/url_params_context/helpers';

@@ -7,17 +7,12 @@
 
 import { useReducer } from 'react';
 
-import { IdFormat, JobType } from '../../../../common/http_api/latest';
-import {
-  JobStatus,
-  getDatafeedId,
-  getJobId,
-  isJobStatusWithResults,
-  SetupStatus,
-} from '../../../../common/log_analysis';
-import { FetchJobStatusResponsePayload, JobSummary } from './api/ml_get_jobs_summary_api';
-import { SetupMlModuleResponsePayload } from './api/ml_setup_module_api';
-import { MandatoryProperty } from '../../../../common/utility_types';
+import type { IdFormat, JobType } from '../../../../common/http_api/latest';
+import type { JobStatus, SetupStatus } from '../../../../common/log_analysis';
+import { getDatafeedId, getJobId, isJobStatusWithResults } from '../../../../common/log_analysis';
+import type { FetchJobStatusResponsePayload, JobSummary } from './api/ml_get_jobs_summary_api';
+import type { SetupMlModuleResponsePayload } from './api/ml_setup_module_api';
+import type { MandatoryProperty } from '../../../../common/utility_types';
 
 interface StatusReducerState<T extends JobType> {
   jobStatus: Record<T, JobStatus>;

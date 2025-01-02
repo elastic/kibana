@@ -6,7 +6,7 @@
  */
 
 import React, { createContext } from 'react';
-import { Annotation } from '../../../common/annotations';
+import type { Annotation } from '../../../common/annotations';
 import { useFetcher } from '../../hooks/use_fetcher';
 
 export const AnnotationsContext = createContext({ annotations: [] } as {

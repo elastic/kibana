@@ -13,13 +13,13 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { TypeOf } from '@kbn/typed-react-router-config';
+import type { TypeOf } from '@kbn/typed-react-router-config';
 import React from 'react';
 import { useAnyOfProfilingParams } from '../hooks/use_profiling_params';
 import { useProfilingRouter } from '../hooks/use_profiling_router';
 import { useProfilingRoutePath } from '../hooks/use_profiling_route_path';
 import { useTimeRangeContext } from '../hooks/use_time_range_context';
-import { ProfilingRoutes } from '../routing';
+import type { ProfilingRoutes } from '../routing';
 import { PrimaryProfilingSearchBar } from './profiling_app_page_template/primary_profiling_search_bar';
 import { ProfilingSearchBar } from './profiling_app_page_template/profiling_search_bar';
 

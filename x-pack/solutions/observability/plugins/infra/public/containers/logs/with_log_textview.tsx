@@ -8,11 +8,8 @@
 import React, { useMemo } from 'react';
 
 import { UrlStateContainer } from '../../utils/url_state';
-import {
-  availableTextScales,
-  useLogViewConfigurationContext,
-  TextScale,
-} from './log_view_configuration';
+import type { TextScale } from './log_view_configuration';
+import { availableTextScales, useLogViewConfigurationContext } from './log_view_configuration';
 
 interface LogTextviewUrlState {
   textScale?: TextScale;

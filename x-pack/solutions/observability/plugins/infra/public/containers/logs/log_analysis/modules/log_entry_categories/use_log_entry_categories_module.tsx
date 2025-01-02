@@ -8,11 +8,11 @@
 import createContainer from 'constate';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { useMemo } from 'react';
-import { IdFormat } from '../../../../../../common/http_api/latest';
+import type { IdFormat } from '../../../../../../common/http_api/latest';
 import { useLogAnalysisModule } from '../../log_analysis_module';
 import { useLogAnalysisModuleConfiguration } from '../../log_analysis_module_configuration';
 import { useLogAnalysisModuleDefinition } from '../../log_analysis_module_definition';
-import { ModuleSourceConfiguration } from '../../log_analysis_module_types';
+import type { ModuleSourceConfiguration } from '../../log_analysis_module_types';
 import { logEntryCategoriesModule } from './module_descriptor';
 import { useLogEntryCategoriesQuality } from './use_log_entry_categories_quality';
 

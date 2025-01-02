@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { APMQueryParams } from '../url_helpers';
+import type { APMQueryParams } from '../url_helpers';
 import { useAPMHref } from './apm_link';
 
 const persistedFilters: Array<keyof APMQueryParams> = [

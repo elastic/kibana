@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { SavedObjectsFieldMapping, SavedObjectsType } from '@kbn/core/server';
+import type { SavedObjectsFieldMapping, SavedObjectsType } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
-import { InfraCustomDashboard } from '../../../common/custom_dashboards';
+import type { InfraCustomDashboard } from '../../../common/custom_dashboards';
 
 export const INFRA_CUSTOM_DASHBOARDS_SAVED_OBJECT_TYPE = 'infra-custom-dashboards';
 

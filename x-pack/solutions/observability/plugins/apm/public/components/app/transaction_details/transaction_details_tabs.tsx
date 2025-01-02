@@ -7,7 +7,7 @@
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
-import { XYBrushEvent } from '@elastic/charts';
+import type { XYBrushEvent } from '@elastic/charts';
 import { EuiPanel, EuiSpacer, EuiTab, EuiTabs } from '@elastic/eui';
 import { omit } from 'lodash';
 import { useHistory } from 'react-router-dom';
@@ -17,10 +17,8 @@ import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
 import { useCriticalPathFeatureEnabledSetting } from '../../../hooks/use_critical_path_feature_enabled_setting';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { useSampleChartSelection } from '../../../hooks/use_sample_chart_selection';
-import {
-  TraceSamplesFetchResult,
-  useTransactionTraceSamplesFetcher,
-} from '../../../hooks/use_transaction_trace_samples_fetcher';
+import type { TraceSamplesFetchResult } from '../../../hooks/use_transaction_trace_samples_fetcher';
+import { useTransactionTraceSamplesFetcher } from '../../../hooks/use_transaction_trace_samples_fetcher';
 import { fromQuery, toQuery } from '../../shared/links/url_helpers';
 import { aggregatedCriticalPathTab } from './aggregated_critical_path_tab';
 import { failedTransactionsCorrelationsTab } from './failed_transactions_correlations_tab';

@@ -9,13 +9,13 @@ import { decodeOrThrow } from '@kbn/io-ts-utils';
 import type { MlAnomalyDetectors, MlSystem } from '../../types';
 import { NoLogAnalysisMlJobError } from './errors';
 
+import type { CompositeDatasetKey, LogEntryDatasetBucket } from './queries/log_entry_data_sets';
 import {
-  CompositeDatasetKey,
   createLogEntryDatasetsQuery,
-  LogEntryDatasetBucket,
   logEntryDatasetsResponseRT,
 } from './queries/log_entry_data_sets';
-import { startTracingSpan, TracingSpan } from '../../../common/performance_tracing';
+import type { TracingSpan } from '../../../common/performance_tracing';
+import { startTracingSpan } from '../../../common/performance_tracing';
 
 export async function fetchMlJob(mlAnomalyDetectors: MlAnomalyDetectors, jobId: string) {
   const finalizeMlGetJobSpan = startTracingSpan('Fetch ml job from ES');

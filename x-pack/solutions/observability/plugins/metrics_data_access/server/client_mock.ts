@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MetricsDataClient } from './client/client';
+import type { MetricsDataClient } from './client/client';
 
 export const MetricsDataClientMock = {
   create: () =>

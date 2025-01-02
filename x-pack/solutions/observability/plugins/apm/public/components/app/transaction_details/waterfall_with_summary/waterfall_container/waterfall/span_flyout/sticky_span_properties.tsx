@@ -16,8 +16,8 @@ import {
 } from '../../../../../../../../common/es_fields/apm';
 import { getNextEnvironmentUrlParam } from '../../../../../../../../common/environment_filter_values';
 import { NOT_AVAILABLE_LABEL } from '../../../../../../../../common/i18n';
-import { Span } from '../../../../../../../../typings/es_schemas/ui/span';
-import { Transaction } from '../../../../../../../../typings/es_schemas/ui/transaction';
+import type { Span } from '../../../../../../../../typings/es_schemas/ui/span';
+import type { Transaction } from '../../../../../../../../typings/es_schemas/ui/transaction';
 import { useAnyOfApmParams } from '../../../../../../../hooks/use_apm_params';
 import { DependencyLink } from '../../../../../../shared/links/dependency_link';
 import { TransactionDetailLink } from '../../../../../../shared/links/apm/transaction_detail_link';

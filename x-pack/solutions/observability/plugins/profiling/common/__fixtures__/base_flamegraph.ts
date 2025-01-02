@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { BaseFlameGraph } from '@kbn/profiling-utils';
+import type { BaseFlameGraph } from '@kbn/profiling-utils';
 
 export const baseFlamegraph: BaseFlameGraph = {
   Edges: [

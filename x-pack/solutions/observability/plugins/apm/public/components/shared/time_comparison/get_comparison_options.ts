@@ -7,8 +7,8 @@
 
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
-import { Environment } from '../../../../common/environment_rt';
-import { AnomalyDetectionJobsContextValue } from '../../../context/anomaly_detection_jobs/anomaly_detection_jobs_context';
+import type { Environment } from '../../../../common/environment_rt';
+import type { AnomalyDetectionJobsContextValue } from '../../../context/anomaly_detection_jobs/anomaly_detection_jobs_context';
 import { getOffsetInMs } from '../../../../common/utils/get_offset_in_ms';
 
 export enum TimeRangeComparisonEnum {

@@ -17,7 +17,8 @@ import {
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import styled from '@emotion/styled';
-import { getSeverity, ServiceAnomalyStats } from '../../../../../common/anomaly_detection';
+import type { ServiceAnomalyStats } from '../../../../../common/anomaly_detection';
+import { getSeverity } from '../../../../../common/anomaly_detection';
 import {
   getServiceHealthStatus,
   getServiceHealthStatusColor,

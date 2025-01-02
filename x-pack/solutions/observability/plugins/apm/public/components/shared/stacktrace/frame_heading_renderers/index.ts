@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ComponentType } from 'react';
-import { Stackframe } from '../../../../../typings/es_schemas/raw/fields/stackframe';
+import type { ComponentType } from 'react';
+import type { Stackframe } from '../../../../../typings/es_schemas/raw/fields/stackframe';
 
 export interface FrameHeadingRendererProps {
   fileDetailComponent: ComponentType<React.PropsWithChildren<{}>>;

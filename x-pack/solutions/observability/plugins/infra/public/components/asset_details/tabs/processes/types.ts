@@ -6,7 +6,7 @@
  */
 
 import type { MetricsExplorerSeries } from '../../../../../common/http_api';
-import { STATE_NAMES } from './states';
+import type { STATE_NAMES } from './states';
 
 export interface Process {
   command: string;

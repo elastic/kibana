@@ -5,13 +5,14 @@
  * 2.0.
  */
 import { apm, dedot } from '@kbn/apm-synthtrace-client';
-import { Story } from '@storybook/react';
-import React, { ComponentProps, ComponentType } from 'react';
+import type { Story } from '@storybook/react';
+import type { ComponentProps, ComponentType } from 'react';
+import React from 'react';
 import { TransactionFlyout } from '.';
-import { Transaction } from '../../../../../../../../typings/es_schemas/ui/transaction';
-import { ApmPluginContextValue } from '../../../../../../../context/apm_plugin/apm_plugin_context';
+import type { Transaction } from '../../../../../../../../typings/es_schemas/ui/transaction';
+import type { ApmPluginContextValue } from '../../../../../../../context/apm_plugin/apm_plugin_context';
 import { MockApmPluginStorybook } from '../../../../../../../context/apm_plugin/mock_apm_plugin_storybook';
-import { APIReturnType } from '../../../../../../../services/rest/create_call_apm_api';
+import type { APIReturnType } from '../../../../../../../services/rest/create_call_apm_api';
 
 type Args = ComponentProps<typeof TransactionFlyout>;
 type TransactionDetailsApiReturnType =

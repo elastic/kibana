@@ -13,7 +13,7 @@ import React from 'react';
 import { decorateWithGlobalStorybookThemeProviders } from '../../../test_utils/use_global_storybook_theme';
 import type { HostMetricsTableProps } from './host_metrics_table';
 import { HostMetricsTable } from './host_metrics_table';
-import { HostNodeMetricsRow } from './use_host_metrics_table';
+import type { HostNodeMetricsRow } from './use_host_metrics_table';
 
 const mockServices = {
   application: {

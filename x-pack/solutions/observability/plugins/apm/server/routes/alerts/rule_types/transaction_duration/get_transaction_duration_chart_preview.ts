@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { getParsedFilterQuery, rangeQuery, termQuery } from '@kbn/observability-plugin/server';
 import { ApmRuleType } from '@kbn/rule-data-utils';
 import { AggregationType } from '../../../../../common/rules/apm_rule_types';
@@ -15,7 +15,7 @@ import {
   TRANSACTION_NAME,
 } from '../../../../../common/es_fields/apm';
 import { environmentQuery } from '../../../../../common/utils/environment_query';
-import { AlertParams, PreviewChartResponse } from '../../route';
+import type { AlertParams, PreviewChartResponse } from '../../route';
 import {
   getSearchTransactionsEvents,
   getBackwardCompatibleDocumentTypeFilter,
@@ -23,14 +23,12 @@ import {
   getProcessorEventForTransactions,
 } from '../../../../lib/helpers/transactions';
 import { averageOrPercentileAgg, getMultiTermsSortOrder } from './average_or_percentile_agg';
-import { APMConfig } from '../../../..';
-import { APMEventClient } from '../../../../lib/helpers/create_es_client/create_apm_event_client';
+import type { APMConfig } from '../../../..';
+import type { APMEventClient } from '../../../../lib/helpers/create_es_client/create_apm_event_client';
 import { getGroupByTerms } from '../utils/get_groupby_terms';
 import { getAllGroupByFields } from '../../../../../common/rules/get_all_groupby_fields';
-import {
-  BarSeriesDataMap,
-  getFilteredBarSeries,
-} from '../utils/get_filtered_series_for_preview_chart';
+import type { BarSeriesDataMap } from '../utils/get_filtered_series_for_preview_chart';
+import { getFilteredBarSeries } from '../utils/get_filtered_series_for_preview_chart';
 
 export async function getTransactionDurationChartPreview({
   alertParams,

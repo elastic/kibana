@@ -9,7 +9,7 @@ import { getTransactionBreakdown } from '.';
 import * as constants from './constants';
 import noDataResponse from './mock_responses/no_data.json';
 import dataResponse from './mock_responses/data.json';
-import { APMConfig } from '../../..';
+import type { APMConfig } from '../../..';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 
 const mockConfig = new Proxy(

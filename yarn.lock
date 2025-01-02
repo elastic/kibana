@@ -4077,7 +4077,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/cbor@link:packages/kbn-cbor":
+"@kbn/cbor@link:src/platform/packages/shared/kbn-cbor":
   version "0.0.0"
   uid ""
 
@@ -6721,7 +6721,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/repo-info@link:packages/kbn-repo-info":
+"@kbn/repo-info@link:src/platform/packages/shared/kbn-repo-info":
   version "0.0.0"
   uid ""
 
@@ -6729,7 +6729,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/repo-packages@link:packages/kbn-repo-packages":
+"@kbn/repo-packages@link:src/platform/packages/private/kbn-repo-packages":
   version "0.0.0"
   uid ""
 
@@ -6821,7 +6821,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/rison@link:packages/kbn-rison":
+"@kbn/rison@link:src/platform/packages/shared/kbn-rison":
   version "0.0.0"
   uid ""
 
@@ -7769,15 +7769,15 @@
   version "0.0.0"
   uid ""
 
-"@kbn/ui-shared-deps-npm@link:packages/kbn-ui-shared-deps-npm":
+"@kbn/ui-shared-deps-npm@link:src/platform/packages/private/kbn-ui-shared-deps-npm":
   version "0.0.0"
   uid ""
 
-"@kbn/ui-shared-deps-src@link:packages/kbn-ui-shared-deps-src":
+"@kbn/ui-shared-deps-src@link:src/platform/packages/private/kbn-ui-shared-deps-src":
   version "0.0.0"
   uid ""
 
-"@kbn/ui-theme@link:packages/kbn-ui-theme":
+"@kbn/ui-theme@link:src/platform/packages/shared/kbn-ui-theme":
   version "0.0.0"
   uid ""
 
@@ -7861,7 +7861,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/utility-types-jest@link:packages/kbn-utility-types-jest":
+"@kbn/utility-types-jest@link:src/platform/packages/shared/kbn-utility-types-jest":
   version "0.0.0"
   uid ""
 
@@ -7869,7 +7869,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/utils@link:packages/kbn-utils":
+"@kbn/utils@link:src/platform/packages/shared/kbn-utils":
   version "0.0.0"
   uid ""
 

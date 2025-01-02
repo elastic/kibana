@@ -7,7 +7,7 @@
 
 /* eslint-disable max-classes-per-file */
 
-import { InfraRequestHandlerContext } from '../types';
+import type { InfraRequestHandlerContext } from '../types';
 
 export class MissingContextValuesError extends Error {
   constructor(message?: string) {

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { AgentName } from '@kbn/elastic-agent-utils';
-import { ServiceHealthStatus } from './service_health_status';
+import type { AgentName } from '@kbn/elastic-agent-utils';
+import type { ServiceHealthStatus } from './service_health_status';
 
 export interface ServiceListItem {
   serviceName: string;

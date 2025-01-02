@@ -5,16 +5,17 @@
  * 2.0.
  */
 
-import { Meta, Story } from '@storybook/react';
+import type { Meta, Story } from '@storybook/react';
 import React, { useState } from 'react';
-import { CoreStart } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { TIME_UNITS } from '@kbn/triggers-actions-ui-plugin/public';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { ErrorCountRuleParams, ErrorCountRuleType } from '.';
+import type { ErrorCountRuleParams } from '.';
+import { ErrorCountRuleType } from '.';
 import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
 import { createCallApmApi } from '../../../../services/rest/create_call_apm_api';
-import { AlertMetadata } from '../../utils/helper';
+import type { AlertMetadata } from '../../utils/helper';
 
 const coreMock = {
   http: { get: async () => ({}) },

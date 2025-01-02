@@ -26,10 +26,12 @@ import {
   TELEMETRY_SDK_NAME,
   TELEMETRY_SDK_LANGUAGE,
 } from '../../../common/es_fields/apm';
-import { ContainerType, SERVICE_METADATA_KUBERNETES_KEYS } from '../../../common/service_metadata';
+import type { ContainerType } from '../../../common/service_metadata';
+import { SERVICE_METADATA_KUBERNETES_KEYS } from '../../../common/service_metadata';
 import { getProcessorEventForTransactions } from '../../lib/helpers/transactions';
-import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
-import { ServerlessType, getServerlessTypeFromCloudData } from '../../../common/serverless';
+import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
+import type { ServerlessType } from '../../../common/serverless';
+import { getServerlessTypeFromCloudData } from '../../../common/serverless';
 
 export interface ServiceMetadataIcons {
   agentName?: string;

@@ -6,7 +6,7 @@
  */
 
 import { createInventoryViewsClientMock } from './inventory_views_client.mock';
-import { InventoryViewsServiceStart } from './types';
+import type { InventoryViewsServiceStart } from './types';
 
 export const createInventoryViewsServiceStartMock = () => ({
   getClient: () => Promise.resolve(createInventoryViewsClientMock()),

@@ -34,6 +34,10 @@ export interface CalculateRiskScoreAggregations {
     after_key: EntityAfterKey;
     buckets: RiskScoreBucket[];
   };
+  service?: {
+    after_key: EntityAfterKey;
+    buckets: RiskScoreBucket[];
+  };
 }
 
 export interface SearchHitRiskInput {
@@ -72,6 +76,10 @@ export interface RiskEngineConfiguration {
   pageSize: number;
   range: Range;
   alertSampleSizePerShard?: number;
+  // When the version changes the engine automatically updates the mappings
+  _meta: {
+    mappingsVersion: number;
+  };
 }
 
 export interface CalculateScoresParams {

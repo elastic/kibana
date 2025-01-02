@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SavedObjectMigrationFn } from '@kbn/core/server';
+import type { SavedObjectMigrationFn } from '@kbn/core/server';
 
 type InputAttributesOf<MigrationFn> = MigrationFn extends SavedObjectMigrationFn<
   infer InputAttributes,

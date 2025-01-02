@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CoreStart, Logger } from '@kbn/core/server';
+import type { CoreStart, Logger } from '@kbn/core/server';
 import type {
   AlertDetailsContextualInsight,
   AlertDetailsContextualInsightsHandler,
@@ -18,17 +18,16 @@ import { getApmEventClient } from '../../../lib/helpers/get_apm_event_client';
 import { getMlClient } from '../../../lib/helpers/get_ml_client';
 import { getRandomSampler } from '../../../lib/helpers/get_random_sampler';
 import { getApmServiceSummary } from '../get_apm_service_summary';
-import {
-  APMDownstreamDependency,
-  getAssistantDownstreamDependencies,
-} from '../get_apm_downstream_dependencies';
+import type { APMDownstreamDependency } from '../get_apm_downstream_dependencies';
+import { getAssistantDownstreamDependencies } from '../get_apm_downstream_dependencies';
 import { getLogRateAnalysisForAlert } from '../get_log_rate_analysis_for_alert';
-import { getLogCategories, LogCategory } from '../get_log_categories';
+import type { LogCategory } from '../get_log_categories';
+import { getLogCategories } from '../get_log_categories';
 import { getAnomalies } from '../get_apm_service_summary/get_anomalies';
 import { getServiceNameFromSignals } from './get_service_name_from_signals';
 import { getContainerIdFromSignals } from './get_container_id_from_signals';
 import { getExitSpanChangePoints, getServiceChangePoints } from '../get_changepoints';
-import { APMRouteHandlerResources } from '../../apm_routes/register_apm_server_routes';
+import type { APMRouteHandlerResources } from '../../apm_routes/register_apm_server_routes';
 import { getApmErrors } from './get_apm_errors';
 
 export const getAlertDetailsContextHandler = (

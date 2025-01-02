@@ -6,18 +6,20 @@
  */
 
 import { useState, useCallback, useEffect, useReducer } from 'react';
-import { BehaviorSubject } from 'rxjs';
+import type { BehaviorSubject } from 'rxjs';
 import { decodeOrThrow } from '@kbn/io-ts-utils';
 import { isPending, isFailure, useFetcher } from '../../../../hooks/use_fetcher';
-import {
-  INFA_ML_GET_METRICS_HOSTS_ANOMALIES_PATH,
+import type {
   Sort,
   Pagination,
   PaginationCursor,
-  getMetricsHostsAnomaliesRequestPayloadRT,
   MetricsHostsAnomaly,
-  getMetricsHostsAnomaliesSuccessReponsePayloadRT,
   Metric,
+} from '../../../../../common/http_api/infra_ml';
+import {
+  INFA_ML_GET_METRICS_HOSTS_ANOMALIES_PATH,
+  getMetricsHostsAnomaliesRequestPayloadRT,
+  getMetricsHostsAnomaliesSuccessReponsePayloadRT,
 } from '../../../../../common/http_api/infra_ml';
 
 export type SortOptions = Sort;

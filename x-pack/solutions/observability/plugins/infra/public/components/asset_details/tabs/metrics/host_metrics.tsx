@@ -12,7 +12,7 @@ import { useDataViewsContext } from '../../hooks/use_data_views';
 import { useIntersectingState } from '../../hooks/use_intersecting_state';
 import { MetricsTemplate } from './metrics_template';
 import { HostCharts, KubernetesNodeCharts } from '../../charts';
-import { HostMetricTypes } from '../../charts/types';
+import type { HostMetricTypes } from '../../charts/types';
 
 const METRIC_TYPES: Array<Exclude<HostMetricTypes, 'kpi'>> = [
   'cpu',

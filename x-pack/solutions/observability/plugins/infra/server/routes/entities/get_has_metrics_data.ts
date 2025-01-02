@@ -6,7 +6,7 @@
  */
 
 import { termQuery } from '@kbn/observability-plugin/server';
-import { InfraMetricsClient } from '../../lib/helpers/get_infra_metrics_client';
+import type { InfraMetricsClient } from '../../lib/helpers/get_infra_metrics_client';
 
 export async function getHasMetricsData({
   infraMetricsClient,

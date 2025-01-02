@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { Theme } from '@elastic/charts';
-import { RecursivePartial } from '@elastic/eui';
-import React, { useMemo, ReactElement } from 'react';
+import type { Theme } from '@elastic/charts';
+import type { RecursivePartial } from '@elastic/eui';
+import type { ReactElement } from 'react';
+import React, { useMemo } from 'react';
 import { EuiFlexItem, EuiPanel, EuiFlexGroup, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { BoolQuery } from '@kbn/es-query';
+import type { BoolQuery } from '@kbn/es-query';
 import { getDurationFormatter } from '@kbn/observability-plugin/common';
 import { ALERT_RULE_TYPE_ID, ALERT_EVALUATION_THRESHOLD, ALERT_END } from '@kbn/rule-data-utils';
 import type { TopAlert } from '@kbn/observability-plugin/public';

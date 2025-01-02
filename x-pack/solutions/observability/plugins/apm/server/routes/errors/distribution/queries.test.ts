@@ -6,7 +6,8 @@
  */
 
 import { getErrorDistribution } from './get_distribution';
-import { SearchParamsMock, inspectSearchParams } from '../../../utils/test_helpers';
+import type { SearchParamsMock } from '../../../utils/test_helpers';
+import { inspectSearchParams } from '../../../utils/test_helpers';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 
 describe('error distribution queries', () => {

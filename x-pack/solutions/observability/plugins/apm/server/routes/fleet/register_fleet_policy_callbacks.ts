@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { Logger, CoreStart, SavedObjectsClientContract } from '@kbn/core/server';
-import {
+import type { Logger, CoreStart, SavedObjectsClientContract } from '@kbn/core/server';
+import type {
   FleetStartContract,
   PostPackagePolicyCreateCallback,
   PostPackagePolicyDeleteCallback,
@@ -23,7 +23,7 @@ import {
 } from './get_package_policy_decorators';
 import { createInternalESClient } from '../../lib/helpers/create_es_client/create_internal_es_client';
 import { getInternalSavedObjectsClient } from '../../lib/helpers/get_internal_saved_objects_client';
-import { APMRouteHandlerResources } from '../apm_routes/register_apm_server_routes';
+import type { APMRouteHandlerResources } from '../apm_routes/register_apm_server_routes';
 
 export async function registerFleetPolicyCallbacks({
   logger,

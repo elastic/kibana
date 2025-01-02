@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { RecursivePartial } from '@elastic/eui';
-import { ProfilingCloudSetupOptions } from '../../../common';
-import { CloudSetupState, createDefaultCloudSetupState } from '../../../common/cloud_setup';
+import type { RecursivePartial } from '@elastic/eui';
+import type { ProfilingCloudSetupOptions } from '../../../common';
+import type { CloudSetupState } from '../../../common/cloud_setup';
+import { createDefaultCloudSetupState } from '../../../common/cloud_setup';
 import {
   validateMaximumBuckets,
   validateResourceManagement,

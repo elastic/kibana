@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import {
+import type {
   FailedTransactionsCorrelation,
   FailedTransactionsCorrelationsImpactThreshold,
 } from '../../../../../common/correlations/failed_transactions_correlations/types';

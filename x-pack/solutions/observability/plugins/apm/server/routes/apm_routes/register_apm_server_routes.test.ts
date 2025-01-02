@@ -6,12 +6,13 @@
  */
 
 import { jsonRt } from '@kbn/io-ts-utils';
-import { ServerRoute, ServerRouteRepository } from '@kbn/server-route-repository';
+import type { ServerRoute, ServerRouteRepository } from '@kbn/server-route-repository';
 import * as t from 'io-ts';
-import { CoreSetup, Logger } from '@kbn/core/server';
-import { APMConfig } from '../..';
-import { APMRouteCreateOptions } from '../typings';
-import { APMRouteHandlerResources, registerRoutes } from './register_apm_server_routes';
+import type { CoreSetup, Logger } from '@kbn/core/server';
+import type { APMConfig } from '../..';
+import type { APMRouteCreateOptions } from '../typings';
+import type { APMRouteHandlerResources } from './register_apm_server_routes';
+import { registerRoutes } from './register_apm_server_routes';
 import { NEVER } from 'rxjs';
 
 type RegisterRouteDependencies = Parameters<typeof registerRoutes>[0];

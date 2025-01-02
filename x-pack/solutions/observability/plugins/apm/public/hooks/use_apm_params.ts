@@ -4,9 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { ValuesType } from 'utility-types';
-import { TypeOf, PathsOf, useParams } from '@kbn/typed-react-router-config';
-import { ApmRoutes } from '../components/routing/apm_route_config';
+import type { ValuesType } from 'utility-types';
+import type { TypeOf, PathsOf } from '@kbn/typed-react-router-config';
+import { useParams } from '@kbn/typed-react-router-config';
+import type { ApmRoutes } from '../components/routing/apm_route_config';
 
 // these three different functions exist purely to speed up completions from
 // TypeScript. One overloaded function is expensive because of the size of the

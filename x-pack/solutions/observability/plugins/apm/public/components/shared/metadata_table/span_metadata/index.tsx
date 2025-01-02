@@ -7,7 +7,7 @@
 
 import React, { useMemo } from 'react';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import { Span } from '../../../../../typings/es_schemas/ui/span';
+import type { Span } from '../../../../../typings/es_schemas/ui/span';
 import { getSectionsFromFields } from '../helper';
 import { MetadataTable } from '..';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';

@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { EuiSelect, EuiSelectProps } from '@elastic/eui';
+import type { EuiSelectProps } from '@elastic/eui';
+import { EuiSelect } from '@elastic/eui';
 import { isEmpty } from 'lodash';
 import { i18n } from '@kbn/i18n';
 

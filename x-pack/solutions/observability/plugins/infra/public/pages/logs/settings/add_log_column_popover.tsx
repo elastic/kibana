@@ -5,19 +5,13 @@
  * 2.0.
  */
 
-import {
-  EuiBadge,
-  EuiButton,
-  EuiPopover,
-  EuiPopoverTitle,
-  EuiSelectable,
-  EuiSelectableOption,
-} from '@elastic/eui';
+import type { EuiSelectableOption } from '@elastic/eui';
+import { EuiBadge, EuiButton, EuiPopover, EuiPopoverTitle, EuiSelectable } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useMemo } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import styled from '@emotion/styled';
-import { LogColumnConfiguration } from '../../../utils/source_configuration';
+import type { LogColumnConfiguration } from '../../../utils/source_configuration';
 import { useVisibilityState } from '../../../hooks/use_visibility_state';
 
 interface SelectableColumnOption {
