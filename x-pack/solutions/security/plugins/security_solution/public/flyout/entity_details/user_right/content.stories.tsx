@@ -38,6 +38,7 @@ storiesOf('Components/UserPanelContent', module)
       userName={'test-user-name'}
       onAssetCriticalityChange={() => {}}
       recalculatingScore={false}
+      isLinkEnabled={true}
     />
   ))
   .add('integration disabled', () => (
@@ -56,6 +57,7 @@ storiesOf('Components/UserPanelContent', module)
       userName={'test-user-name'}
       onAssetCriticalityChange={() => {}}
       recalculatingScore={false}
+      isLinkEnabled={true}
     />
   ))
   .add('no managed data', () => (
@@ -74,6 +76,7 @@ storiesOf('Components/UserPanelContent', module)
       userName={'test-user-name'}
       onAssetCriticalityChange={() => {}}
       recalculatingScore={false}
+      isLinkEnabled={true}
     />
   ))
   .add('no observed data', () => (
@@ -112,6 +115,7 @@ storiesOf('Components/UserPanelContent', module)
       userName={'test-user-name'}
       onAssetCriticalityChange={() => {}}
       recalculatingScore={false}
+      isLinkEnabled={true}
     />
   ))
   .add('loading', () => (
@@ -154,5 +158,6 @@ storiesOf('Components/UserPanelContent', module)
       userName={'test-user-name'}
       onAssetCriticalityChange={() => {}}
       recalculatingScore={false}
+      isLinkEnabled={true}
     />
   ));
