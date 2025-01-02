@@ -1230,18 +1230,6 @@
             "path": "src/core/public/index.ts"
           },
           {
-            "plugin": "savedObjectsTagging",
-            "path": "x-pack/plugins/saved_objects_tagging/public/ui_api/get_table_column_definition.tsx"
-          },
-          {
-            "plugin": "savedObjectsTagging",
-            "path": "x-pack/plugins/saved_objects_tagging/public/ui_api/get_table_column_definition.tsx"
-          },
-          {
-            "plugin": "savedObjectsTagging",
-            "path": "x-pack/plugins/saved_objects_tagging/public/ui_api/get_table_column_definition.tsx"
-          },
-          {
             "plugin": "home",
             "path": "src/plugins/home/server/services/sample_data/sample_data_registry.ts"
           },
@@ -1252,6 +1240,18 @@
           {
             "plugin": "home",
             "path": "src/plugins/home/server/services/sample_data/sample_data_registry.ts"
+          },
+          {
+            "plugin": "savedObjectsTagging",
+            "path": "x-pack/plugins/saved_objects_tagging/public/ui_api/get_table_column_definition.tsx"
+          },
+          {
+            "plugin": "savedObjectsTagging",
+            "path": "x-pack/plugins/saved_objects_tagging/public/ui_api/get_table_column_definition.tsx"
+          },
+          {
+            "plugin": "savedObjectsTagging",
+            "path": "x-pack/plugins/saved_objects_tagging/public/ui_api/get_table_column_definition.tsx"
           },
           {
             "plugin": "canvas",
@@ -1632,22 +1632,6 @@
             "path": "src/plugins/saved_objects/public/types.ts"
           },
           {
-            "plugin": "visualizations",
-            "path": "src/plugins/visualizations/public/utils/saved_visualize_utils.ts"
-          },
-          {
-            "plugin": "visualizations",
-            "path": "src/plugins/visualizations/public/utils/saved_visualize_utils.ts"
-          },
-          {
-            "plugin": "visualizations",
-            "path": "src/plugins/visualizations/public/legacy/embeddable/visualize_embeddable.tsx"
-          },
-          {
-            "plugin": "visualizations",
-            "path": "src/plugins/visualizations/public/legacy/embeddable/visualize_embeddable.tsx"
-          },
-          {
             "plugin": "graph",
             "path": "x-pack/plugins/graph/public/services/persistence/saved_workspace_references.ts"
           },
@@ -1662,6 +1646,22 @@
           {
             "plugin": "graph",
             "path": "x-pack/plugins/graph/public/helpers/saved_workspace_utils.ts"
+          },
+          {
+            "plugin": "visualizations",
+            "path": "src/plugins/visualizations/public/utils/saved_visualize_utils.ts"
+          },
+          {
+            "plugin": "visualizations",
+            "path": "src/plugins/visualizations/public/utils/saved_visualize_utils.ts"
+          },
+          {
+            "plugin": "visualizations",
+            "path": "src/plugins/visualizations/public/legacy/embeddable/visualize_embeddable.tsx"
+          },
+          {
+            "plugin": "visualizations",
+            "path": "src/plugins/visualizations/public/legacy/embeddable/visualize_embeddable.tsx"
           },
           {
             "plugin": "canvas",
@@ -1763,6 +1763,14 @@
             "path": "src/core/public/index.ts"
           },
           {
+            "plugin": "savedObjectsTagging",
+            "path": "x-pack/plugins/saved_objects_tagging/public/ui_api/get_table_column_definition.tsx"
+          },
+          {
+            "plugin": "savedObjectsTagging",
+            "path": "x-pack/plugins/saved_objects_tagging/public/ui_api/get_table_column_definition.tsx"
+          },
+          {
             "plugin": "savedObjectsManagement",
             "path": "src/plugins/saved_objects_management/public/services/types/record.ts"
           },
@@ -1795,6 +1803,26 @@
             "path": "src/plugins/saved_objects/public/types.ts"
           },
           {
+            "plugin": "graph",
+            "path": "x-pack/plugins/graph/public/services/persistence/saved_workspace_references.ts"
+          },
+          {
+            "plugin": "graph",
+            "path": "x-pack/plugins/graph/public/services/persistence/saved_workspace_references.ts"
+          },
+          {
+            "plugin": "graph",
+            "path": "x-pack/plugins/graph/public/services/persistence/saved_workspace_references.ts"
+          },
+          {
+            "plugin": "graph",
+            "path": "x-pack/plugins/graph/public/types/persistence.ts"
+          },
+          {
+            "plugin": "graph",
+            "path": "x-pack/plugins/graph/public/types/persistence.ts"
+          },
+          {
             "plugin": "visualizations",
             "path": "src/plugins/visualizations/public/utils/saved_visualization_references/saved_visualization_references.ts"
           },
@@ -1843,12 +1871,16 @@
             "path": "src/plugins/visualizations/public/visualize_app/components/visualize_listing.tsx"
           },
           {
-            "plugin": "savedObjectsTagging",
-            "path": "x-pack/plugins/saved_objects_tagging/public/ui_api/get_table_column_definition.tsx"
+            "plugin": "lens",
+            "path": "x-pack/plugins/lens/public/persistence/saved_object_store.ts"
           },
           {
-            "plugin": "savedObjectsTagging",
-            "path": "x-pack/plugins/saved_objects_tagging/public/ui_api/get_table_column_definition.tsx"
+            "plugin": "lens",
+            "path": "x-pack/plugins/lens/public/persistence/saved_object_store.ts"
+          },
+          {
+            "plugin": "lens",
+            "path": "x-pack/plugins/lens/public/persistence/saved_object_store.ts"
           },
           {
             "plugin": "eventAnnotation",
@@ -1864,15 +1896,11 @@
           },
           {
             "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/persistence/saved_object_store.ts"
+            "path": "x-pack/plugins/lens/public/react_embeddable/types.ts"
           },
           {
             "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/persistence/saved_object_store.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/persistence/saved_object_store.ts"
+            "path": "x-pack/plugins/lens/public/react_embeddable/types.ts"
           },
           {
             "plugin": "lens",
@@ -1901,6 +1929,22 @@
           {
             "plugin": "lens",
             "path": "x-pack/plugins/lens/public/editor_frame_service/editor_frame/state_helpers.ts"
+          },
+          {
+            "plugin": "lens",
+            "path": "x-pack/plugins/lens/public/utils.ts"
+          },
+          {
+            "plugin": "lens",
+            "path": "x-pack/plugins/lens/public/utils.ts"
+          },
+          {
+            "plugin": "lens",
+            "path": "x-pack/plugins/lens/public/utils.ts"
+          },
+          {
+            "plugin": "lens",
+            "path": "x-pack/plugins/lens/public/utils.ts"
           },
           {
             "plugin": "lens",
@@ -1940,19 +1984,55 @@
           },
           {
             "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/utils.ts"
+            "path": "x-pack/plugins/lens/public/app_plugin/save_modal_container.tsx"
           },
           {
             "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/utils.ts"
+            "path": "x-pack/plugins/lens/public/app_plugin/save_modal_container.tsx"
           },
           {
             "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/utils.ts"
+            "path": "x-pack/plugins/lens/public/types.ts"
           },
           {
             "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/utils.ts"
+            "path": "x-pack/plugins/lens/public/types.ts"
+          },
+          {
+            "plugin": "lens",
+            "path": "x-pack/plugins/lens/public/types.ts"
+          },
+          {
+            "plugin": "lens",
+            "path": "x-pack/plugins/lens/public/types.ts"
+          },
+          {
+            "plugin": "lens",
+            "path": "x-pack/plugins/lens/public/types.ts"
+          },
+          {
+            "plugin": "lens",
+            "path": "x-pack/plugins/lens/public/types.ts"
+          },
+          {
+            "plugin": "lens",
+            "path": "x-pack/plugins/lens/public/types.ts"
+          },
+          {
+            "plugin": "lens",
+            "path": "x-pack/plugins/lens/public/types.ts"
+          },
+          {
+            "plugin": "lens",
+            "path": "x-pack/plugins/lens/public/types.ts"
+          },
+          {
+            "plugin": "lens",
+            "path": "x-pack/plugins/lens/public/types.ts"
+          },
+          {
+            "plugin": "lens",
+            "path": "x-pack/plugins/lens/public/types.ts"
           },
           {
             "plugin": "lens",
@@ -1995,66 +2075,6 @@
             "path": "x-pack/plugins/lens/public/datasources/text_based/text_based_languages.tsx"
           },
           {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/app_plugin/save_modal_container.tsx"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/app_plugin/save_modal_container.tsx"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/react_embeddable/types.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/react_embeddable/types.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/types.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/types.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/types.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/types.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/types.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/types.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/types.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/types.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/types.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/types.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/types.ts"
-          },
-          {
             "plugin": "maps",
             "path": "x-pack/platform/plugins/shared/maps/public/routes/map_page/saved_map/load_from_library.ts"
           },
@@ -2069,26 +2089,6 @@
           {
             "plugin": "maps",
             "path": "x-pack/platform/plugins/shared/maps/public/routes/map_page/saved_map/save_to_library.ts"
-          },
-          {
-            "plugin": "graph",
-            "path": "x-pack/plugins/graph/public/services/persistence/saved_workspace_references.ts"
-          },
-          {
-            "plugin": "graph",
-            "path": "x-pack/plugins/graph/public/services/persistence/saved_workspace_references.ts"
-          },
-          {
-            "plugin": "graph",
-            "path": "x-pack/plugins/graph/public/services/persistence/saved_workspace_references.ts"
-          },
-          {
-            "plugin": "graph",
-            "path": "x-pack/plugins/graph/public/types/persistence.ts"
-          },
-          {
-            "plugin": "graph",
-            "path": "x-pack/plugins/graph/public/types/persistence.ts"
           },
           {
             "plugin": "lens",
@@ -2175,6 +2175,74 @@
             "path": "src/plugins/expressions/common/executor/executor.ts"
           },
           {
+            "plugin": "savedObjectsTaggingOss",
+            "path": "src/plugins/saved_objects_tagging_oss/public/api.ts"
+          },
+          {
+            "plugin": "savedObjectsTaggingOss",
+            "path": "src/plugins/saved_objects_tagging_oss/public/api.ts"
+          },
+          {
+            "plugin": "savedObjectsTaggingOss",
+            "path": "src/plugins/saved_objects_tagging_oss/public/api.ts"
+          },
+          {
+            "plugin": "savedObjectsTaggingOss",
+            "path": "src/plugins/saved_objects_tagging_oss/public/api.ts"
+          },
+          {
+            "plugin": "savedObjectsTagging",
+            "path": "x-pack/plugins/saved_objects_tagging/common/references.ts"
+          },
+          {
+            "plugin": "savedObjectsTagging",
+            "path": "x-pack/plugins/saved_objects_tagging/common/references.ts"
+          },
+          {
+            "plugin": "savedObjectsTagging",
+            "path": "x-pack/plugins/saved_objects_tagging/common/references.ts"
+          },
+          {
+            "plugin": "savedObjectsTagging",
+            "path": "x-pack/plugins/saved_objects_tagging/common/references.ts"
+          },
+          {
+            "plugin": "savedObjectsTagging",
+            "path": "x-pack/plugins/saved_objects_tagging/common/references.ts"
+          },
+          {
+            "plugin": "savedObjectsTagging",
+            "path": "x-pack/plugins/saved_objects_tagging/common/references.ts"
+          },
+          {
+            "plugin": "savedObjectsTagging",
+            "path": "x-pack/plugins/saved_objects_tagging/common/references.ts"
+          },
+          {
+            "plugin": "savedObjectsTagging",
+            "path": "x-pack/plugins/saved_objects_tagging/public/utils.ts"
+          },
+          {
+            "plugin": "savedObjectsTagging",
+            "path": "x-pack/plugins/saved_objects_tagging/public/utils.ts"
+          },
+          {
+            "plugin": "savedObjectsTagging",
+            "path": "x-pack/plugins/saved_objects_tagging/public/utils.ts"
+          },
+          {
+            "plugin": "savedObjectsTagging",
+            "path": "x-pack/plugins/saved_objects_tagging/public/utils.ts"
+          },
+          {
+            "plugin": "savedObjectsTagging",
+            "path": "x-pack/plugins/saved_objects_tagging/public/components/connected/tag_list.tsx"
+          },
+          {
+            "plugin": "savedObjectsTagging",
+            "path": "x-pack/plugins/saved_objects_tagging/public/components/connected/tag_list.tsx"
+          },
+          {
             "plugin": "data",
             "path": "src/plugins/data/common/query/filters/persistable_state.ts"
           },
@@ -2197,22 +2265,6 @@
           {
             "plugin": "data",
             "path": "src/plugins/data/common/query/persistable_state.ts"
-          },
-          {
-            "plugin": "savedObjectsTaggingOss",
-            "path": "src/plugins/saved_objects_tagging_oss/public/api.ts"
-          },
-          {
-            "plugin": "savedObjectsTaggingOss",
-            "path": "src/plugins/saved_objects_tagging_oss/public/api.ts"
-          },
-          {
-            "plugin": "savedObjectsTaggingOss",
-            "path": "src/plugins/saved_objects_tagging_oss/public/api.ts"
-          },
-          {
-            "plugin": "savedObjectsTaggingOss",
-            "path": "src/plugins/saved_objects_tagging_oss/public/api.ts"
           },
           {
             "plugin": "embeddable",
@@ -2287,76 +2339,24 @@
             "path": "src/plugins/visualizations/public/utils/saved_visualization_references/timeseries_references.ts"
           },
           {
-            "plugin": "savedObjectsTagging",
-            "path": "x-pack/plugins/saved_objects_tagging/common/references.ts"
-          },
-          {
-            "plugin": "savedObjectsTagging",
-            "path": "x-pack/plugins/saved_objects_tagging/common/references.ts"
-          },
-          {
-            "plugin": "savedObjectsTagging",
-            "path": "x-pack/plugins/saved_objects_tagging/common/references.ts"
-          },
-          {
-            "plugin": "savedObjectsTagging",
-            "path": "x-pack/plugins/saved_objects_tagging/common/references.ts"
-          },
-          {
-            "plugin": "savedObjectsTagging",
-            "path": "x-pack/plugins/saved_objects_tagging/common/references.ts"
-          },
-          {
-            "plugin": "savedObjectsTagging",
-            "path": "x-pack/plugins/saved_objects_tagging/common/references.ts"
-          },
-          {
-            "plugin": "savedObjectsTagging",
-            "path": "x-pack/plugins/saved_objects_tagging/common/references.ts"
-          },
-          {
-            "plugin": "savedObjectsTagging",
-            "path": "x-pack/plugins/saved_objects_tagging/public/utils.ts"
-          },
-          {
-            "plugin": "savedObjectsTagging",
-            "path": "x-pack/plugins/saved_objects_tagging/public/utils.ts"
-          },
-          {
-            "plugin": "savedObjectsTagging",
-            "path": "x-pack/plugins/saved_objects_tagging/public/utils.ts"
-          },
-          {
-            "plugin": "savedObjectsTagging",
-            "path": "x-pack/plugins/saved_objects_tagging/public/utils.ts"
-          },
-          {
-            "plugin": "savedObjectsTagging",
-            "path": "x-pack/plugins/saved_objects_tagging/public/components/connected/tag_list.tsx"
-          },
-          {
-            "plugin": "savedObjectsTagging",
-            "path": "x-pack/plugins/saved_objects_tagging/public/components/connected/tag_list.tsx"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/common/embeddable_factory/index.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/common/embeddable_factory/index.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/common/embeddable_factory/index.ts"
-          },
-          {
             "plugin": "lens",
             "path": "x-pack/plugins/lens/public/react_embeddable/helper.ts"
           },
           {
             "plugin": "lens",
             "path": "x-pack/plugins/lens/public/react_embeddable/helper.ts"
+          },
+          {
+            "plugin": "lens",
+            "path": "x-pack/plugins/lens/common/embeddable_factory/index.ts"
+          },
+          {
+            "plugin": "lens",
+            "path": "x-pack/plugins/lens/common/embeddable_factory/index.ts"
+          },
+          {
+            "plugin": "lens",
+            "path": "x-pack/plugins/lens/common/embeddable_factory/index.ts"
           },
           {
             "plugin": "lens",

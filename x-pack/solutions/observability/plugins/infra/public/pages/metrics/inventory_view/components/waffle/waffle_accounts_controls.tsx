@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { EuiContextMenuPanelDescriptor, EuiPopover, EuiContextMenu } from '@elastic/eui';
+import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
+import { EuiPopover, EuiContextMenu } from '@elastic/eui';
 import React, { useCallback, useState, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { InventoryCloudAccount } from '../../../../../../common/http_api/inventory_meta_api';
+import type { InventoryCloudAccount } from '../../../../../../common/http_api/inventory_meta_api';
 import { DropdownButton } from '../dropdown_button';
 
 interface Props {
