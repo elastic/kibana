@@ -206,7 +206,7 @@ describe('handleSystemColorModeChange', () => {
           expect(notifications.toasts.addSuccess).not.toHaveBeenCalled();
           expect(type).toBe('change');
           cb({ matches: true } as any); // The system changed to dark mode
-          expect(notifications.toasts.addSuccess).toHaveBeenCalledWith(
+          expect(notifications.toasts.addInfo).toHaveBeenCalledWith(
             expect.objectContaining({
               text: expect.any(Function),
               title: 'System color mode updated',
