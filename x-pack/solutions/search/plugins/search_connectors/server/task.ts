@@ -26,8 +26,8 @@ import {
 
 import { SearchConnectorsConfig } from './config';
 
-const AGENTLESS_CONNECTOR_DEPLOYMENTS_SYNC_TASK_ID = 'search:agentless-connectors-sync-task';
-const AGENTLESS_CONNECTOR_DEPLOYMENTS_SYNC_TASK_TYPE = 'search:agentless-connectors-sync';
+const AGENTLESS_CONNECTOR_DEPLOYMENTS_SYNC_TASK_ID = 'search:agentless-connectors-manager-task';
+const AGENTLESS_CONNECTOR_DEPLOYMENTS_SYNC_TASK_TYPE = 'search:agentless-connectors-manager';
 
 const SCHEDULE = { interval: '1m' };
 
@@ -151,7 +151,7 @@ export class AgentlessConnectorDeploymentsSyncService {
 
     taskManager.registerTaskDefinitions({
       [AGENTLESS_CONNECTOR_DEPLOYMENTS_SYNC_TASK_TYPE]: {
-        title: 'Agentless Connector Deployment Check and Sync',
+        title: 'Agentless Connector Deployment Manager',
         description:
           'This task peridocally checks native connectors, agent policies and syncs them if they are out of sync',
         timeout: '1m',
