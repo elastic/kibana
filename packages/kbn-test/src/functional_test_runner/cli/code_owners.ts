@@ -18,7 +18,11 @@ const TEST_DIRECTORIES = ['test', 'x-pack/test', 'x-pack/test_serverless'];
 export async function checkFTRCodeOwnersCLI() {
   await run(
     async ({ log }) => {
-      const matcher = ignore().add(getCodeOwnersEntries().map((entry) => entry.pattern));
+      const matcher = ignore().add(
+        getCodeOwnersEntries()
+          .filter((entry) => entry.teams.length > 0)
+          .map((entry) => entry.pattern)
+      );
       const hasOwner = (path: string): boolean => matcher.test(path).ignored;
 
       const testFiles = await getRepoFiles(TEST_DIRECTORIES);
