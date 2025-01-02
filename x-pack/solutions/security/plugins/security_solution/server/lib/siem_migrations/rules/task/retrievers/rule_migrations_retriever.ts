@@ -32,8 +32,8 @@ export class RuleMigrationsRetriever {
   public async initialize() {
     await Promise.all([
       this.resources.initialize(),
-      this.prebuiltRules.index(),
-      this.integrations.index(),
+      this.prebuiltRules.populateIndex(),
+      this.integrations.populateIndex(),
     ]).catch((error) => {
       throw new Error(`Failed to initialize RuleMigrationsRetriever: ${error}`);
     });

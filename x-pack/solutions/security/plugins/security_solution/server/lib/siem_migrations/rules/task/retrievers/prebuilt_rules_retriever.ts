@@ -15,8 +15,7 @@ export class PrebuiltRulesRetriever {
   // 1. Implement the `initialize` method to retrieve prebuilt rules and keep them in memory.
   // 2. Improve the `retrieveRules` method to return the real prebuilt rules instead of the ELSER index doc.
 
-  // Populates the indices used for RAG searches on prebuilt rules and integrations.
-  public async index() {
+  public async populateIndex() {
     return this.clients.data.prebuiltRules.create({
       rulesClient: this.clients.rules,
       soClient: this.clients.savedObjects,

@@ -11,7 +11,7 @@ import type { RuleMigrationsRetrieverClients } from './rule_migrations_retriever
 export class IntegrationRetriever {
   constructor(private readonly clients: RuleMigrationsRetrieverClients) {}
 
-  public async index() {
+  public async populateIndex() {
     // TODO: use Fleet API client for integration retrieval as an argument once feature is available
     return this.clients.data.integrations.create();
   }
