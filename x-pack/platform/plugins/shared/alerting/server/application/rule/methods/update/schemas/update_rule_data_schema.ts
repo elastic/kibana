@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { ruleParamsSchemaWithDefaultValue } from '@kbn/response-ops-rule-params';
+import { ruleParamsSchemaWithDefaultValue } from 'src/platform/packages/shared/response-ops/rule_params';
 import { validateDuration } from '../../../validation';
 import {
   notifyWhenSchema,
