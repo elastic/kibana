@@ -13,10 +13,10 @@ import { formatDurationFromTimeUnitChar } from '@kbn/observability-plugin/common
 import { ML_ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils/anomaly_severity';
 import { ML_ANOMALY_THRESHOLD } from '@kbn/ml-anomaly-utils/anomaly_threshold';
 import { ApmRuleType } from '@kbn/rule-data-utils';
-import { ErrorCountRuleParams } from '@kbn/response-ops-rule-params/error_count';
-import { TransactionDurationRuleParams } from '@kbn/response-ops-rule-params/transaction_duration';
-import { AnomalyRuleParams } from '@kbn/response-ops-rule-params/apm_anomaly';
-import { TransactionErrorRateRuleParams } from '@kbn/response-ops-rule-params/transaction_error_rate';
+import type { ErrorCountRuleParams } from '@kbn/response-ops-rule-params/error_count';
+import type { TransactionDurationRuleParams } from '@kbn/response-ops-rule-params/transaction_duration';
+import type { AnomalyRuleParams } from '@kbn/response-ops-rule-params/apm_anomaly';
+import type { TransactionErrorRateRuleParams } from '@kbn/response-ops-rule-params/transaction_error_rate';
 import {
   ERROR_GROUP_ID,
   ERROR_GROUP_NAME,

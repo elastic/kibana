@@ -48,11 +48,13 @@ import {
   getEnvironmentEsField,
   getEnvironmentLabel,
 } from '../../../../../common/environment_filter_values';
-import type { THRESHOLD_MET_GROUP } from '../../../../../common/rules/apm_rule_types';
+import type {
+  THRESHOLD_MET_GROUP,
+  ApmRuleParamsType,
+} from '../../../../../common/rules/apm_rule_types';
 import {
   ANOMALY_ALERT_SEVERITY_TYPES,
   APM_SERVER_FEATURE_ID,
-  ApmRuleParamsType,
   formatAnomalyReason,
   RULE_TYPES_CONFIG,
 } from '../../../../../common/rules/apm_rule_types';
