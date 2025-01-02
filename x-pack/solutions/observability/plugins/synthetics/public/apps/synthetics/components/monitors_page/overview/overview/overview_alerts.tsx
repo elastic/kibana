@@ -105,7 +105,7 @@ export const OverviewAlerts = () => {
                   { field: 'kibana.alert.status', values: ['active', 'recovered'] },
                   ...filters,
                 ],
-                color: euiTheme.colors.vis.euiColorVis1,
+                color: euiTheme.colors.vis.euiColorVis6,
               },
             ]}
           />
@@ -135,7 +135,7 @@ export const OverviewAlerts = () => {
                   { field: 'kibana.alert.status', values: ['active', 'recovered'] },
                   ...filters,
                 ],
-                color: euiTheme.colors.vis.euiColorVis1,
+                color: euiTheme.colors.vis.euiColorVis6,
               },
             ]}
           />
