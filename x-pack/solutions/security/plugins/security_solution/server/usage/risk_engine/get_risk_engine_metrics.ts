@@ -40,6 +40,7 @@ const getEntitiesAggregationData = async ({
   logger,
   hostMetricField,
   userMetricField,
+  serviceMetricField,
   lastDay,
 }: {
   esClient: ElasticsearchClient;
@@ -47,6 +48,7 @@ const getEntitiesAggregationData = async ({
   logger: Logger;
   hostMetricField: string;
   userMetricField: string;
+  serviceMetricField: string;
   lastDay: boolean;
 }) => {
   try {
@@ -72,6 +74,9 @@ const getEntitiesAggregationData = async ({
         host_name: {
           value: number;
         };
+        service_name: {
+          value: number;
+        };
       }
     >({
       index,
@@ -81,10 +86,11 @@ const getEntitiesAggregationData = async ({
     return {
       [userMetricField]: riskScoreAggsResponse?.aggregations?.user_name?.value,
       [hostMetricField]: riskScoreAggsResponse?.aggregations?.host_name?.value,
+      [serviceMetricField]: riskScoreAggsResponse?.aggregations?.service_name?.value,
     };
   } catch (err) {
     logger.error(
-      `Error while fetching risk score  metrics for ${hostMetricField} and ${userMetricField}: ${err}`
+      `Error while fetching risk score metrics for ${hostMetricField}, ${userMetricField} and ${serviceMetricField} : ${err}`
     );
     return {};
   }
@@ -141,6 +147,7 @@ export const getRiskEngineMetrics = async ({
         lastDay: false,
         hostMetricField: 'unique_host_risk_score_total',
         userMetricField: 'unique_user_risk_score_total',
+        serviceMetricField: 'unique_service_risk_score_total',
       }),
       getEntitiesAggregationData({
         esClient,
@@ -149,6 +156,7 @@ export const getRiskEngineMetrics = async ({
         lastDay: true,
         hostMetricField: 'unique_host_risk_score_day',
         userMetricField: 'unique_user_risk_score_day',
+        serviceMetricField: 'unique_service_risk_score_day',
       }),
       getEntitiesAggregationData({
         esClient,
@@ -157,6 +165,7 @@ export const getRiskEngineMetrics = async ({
         lastDay: false,
         hostMetricField: 'all_host_risk_scores_total',
         userMetricField: 'all_user_risk_scores_total',
+        serviceMetricField: 'all_service_risk_scores_total',
       }),
       getEntitiesAggregationData({
         esClient,
@@ -165,6 +174,7 @@ export const getRiskEngineMetrics = async ({
         lastDay: true,
         hostMetricField: 'all_host_risk_scores_total_day',
         userMetricField: 'all_user_risk_scores_total_day',
+        serviceMetricField: 'all_service_risk_scores_total_day',
       }),
       getIndexSize({
         esClient,
