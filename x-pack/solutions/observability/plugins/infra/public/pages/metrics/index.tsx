@@ -93,7 +93,7 @@ export const InfrastructurePage = () => {
                         <EuiHeaderLink color={'text'} {...settingsLinkProps}>
                           {settingsTabTitle}
                         </EuiHeaderLink>
-                        <Routes enableExecutionContextTracking={true}>
+                        <Routes>
                           <HeaderLinkAnomalyFlyoutRoute path="/inventory" />
                           <HeaderLinkAnomalyFlyoutRoute path="/hosts" />
                           <HeaderLinkAnomalyFlyoutRoute path="/detail/host/:node" />
@@ -101,7 +101,7 @@ export const InfrastructurePage = () => {
                         {config.featureFlags.alertsAndRulesDropdownEnabled && (
                           <MetricsAlertDropdown />
                         )}
-                        <Routes enableExecutionContextTracking={true}>
+                        <Routes>
                           <HeaderLinkAddDataRoute
                             path="/hosts"
                             onboardingFlow={OnboardingFlow.Hosts}
