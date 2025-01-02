@@ -40,7 +40,7 @@ export type MessageContent = string | Array<MessageContentText | MessageContentI
  */
 export type UserMessage = MessageBase<MessageRole.User> & {
   /**
-   * The text content of the user message
+   * The text or image content of the user message
    */
   content: MessageContent;
 };
