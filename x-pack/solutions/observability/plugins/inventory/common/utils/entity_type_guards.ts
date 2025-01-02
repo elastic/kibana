@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { BUILT_IN_ENTITY_TYPES } from '@kbn/observability-shared-plugin/common';
+import type { BUILT_IN_ENTITY_TYPES } from '@kbn/observability-shared-plugin/common';
 import type { InventoryEntity } from '../entities';
 
 export const isBuiltinEntityOfType = (
