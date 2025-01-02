@@ -11,7 +11,7 @@ export const getEntityDefinitionSourceIndexPatternsByType = createInventoryServe
   endpoint: 'GET /internal/inventory/entity/definitions/sources',
   params: t.type({
     query: t.type({
-      types: t.string,
+      type: t.string,
     }),
   }),
   options: {
@@ -22,28 +22,19 @@ export const getEntityDefinitionSourceIndexPatternsByType = createInventoryServe
       context.core,
       plugins.entityManager.start(),
     ]);
-    const { types } = params.query;
+    const { type } = params.query;
     const entityManagerClient = await entityManagerStart.getScopedClient({ request });
 
-    const entityDefinitionIndexPatterns = await Promise.all(
-      (types.split(',') ?? []).map(async (type) => {
-        const entityDefinitionsSource = await entityManagerClient.v2.readSourceDefinitions({
-          type,
-        });
-        return {
-          [type]: entityDefinitionsSource.flatMap((definition) => definition.index_patterns, []),
-        };
-      })
-    );
-
+    const entityDefinitionIndexPatterns = await entityManagerClient.v2.readSourceDefinitions({
+      type,
+    });
     return {
-      definitionIndexPatterns: entityDefinitionIndexPatterns?.reduce(
-        (prev, current) => ({
-          ...prev,
-          ...current,
-        }),
-        {}
-      ),
+      definitionIndexPatterns: {
+        [type]: entityDefinitionIndexPatterns.flatMap(
+          (definition) => definition.index_patterns,
+          []
+        ),
+      },
     };
   },
 });

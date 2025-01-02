@@ -7,7 +7,7 @@
 import { EuiDataGridSorting } from '@elastic/eui';
 import React from 'react';
 import useEffectOnce from 'react-use/lib/useEffectOnce';
-import { type EntityColumnIds } from '../../../common/entities';
+import { InventoryEntity, type EntityColumnIds } from '../../../common/entities';
 import {
   type EntityTypeCheckOptions,
   entityPaginationRt,
@@ -20,6 +20,7 @@ import { useInventoryRouter } from '../../hooks/use_inventory_router';
 import { useKibana } from '../../hooks/use_kibana';
 import { useUnifiedSearchContext } from '../../hooks/use_unified_search_context';
 import { EntitiesGrid } from '../entities_grid';
+import { useFetchEntityDefinitionIndexPattern } from '../../hooks/use_fetch_entity_definition_index_patterns';
 
 interface Props {
   groupValue: string;
@@ -36,6 +37,8 @@ export function GroupedEntitiesGrid({ groupValue }: Props) {
   const {
     services: { inventoryAPIClient },
   } = useKibana();
+  const { definitionIndexPatterns, isEntityDefinitionIndexPatternsLoading } =
+    useFetchEntityDefinitionIndexPattern(groupValue);
 
   const {
     value = { entities: [] },
@@ -49,7 +52,7 @@ export function GroupedEntitiesGrid({ groupValue }: Props) {
             sortDirection,
             sortField,
             kuery,
-            entityTypes: groupValue?.length ? JSON.stringify([groupValue]) : undefined,
+            entityType: groupValue,
           },
         },
         signal,
@@ -100,7 +103,7 @@ export function GroupedEntitiesGrid({ groupValue }: Props) {
 
   return (
     <EntitiesGrid
-      entities={value.entities}
+      entities={value.entities as InventoryEntity[]}
       loading={loading}
       sortDirection={sortDirection}
       sortField={sortField}
@@ -108,6 +111,8 @@ export function GroupedEntitiesGrid({ groupValue }: Props) {
       onChangeSort={handleSortChange}
       pageIndex={pageIndex}
       onFilterByType={handleEntityTypeFilter}
+      definitionIndexPatterns={definitionIndexPatterns}
+      isEntityDefinitionIndexPatternsLoading={isEntityDefinitionIndexPatternsLoading}
     />
   );
 }

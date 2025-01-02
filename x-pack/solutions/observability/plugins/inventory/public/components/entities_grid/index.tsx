@@ -23,7 +23,6 @@ import { AlertsBadge } from '../alerts_badge/alerts_badge';
 import { EntityName } from './entity_name';
 import { EntityActions } from '../entity_actions';
 import { type EntityTypeCheckOptions } from '../../../common/rt_types';
-import { useFetchEntityDefinitionIndexPattern } from '../../hooks/use_fetch_entity_definition_index_patterns';
 
 interface Props {
   loading: boolean;
@@ -34,6 +33,8 @@ interface Props {
   onChangeSort: (sorting: EuiDataGridSorting['columns'][0]) => void;
   onChangePage: (nextPage: number) => void;
   onFilterByType: (value: string, checked: EntityTypeCheckOptions) => void;
+  definitionIndexPatterns: Record<string, string[]>;
+  isEntityDefinitionIndexPatternsLoading: boolean;
 }
 
 const PAGE_SIZE = 20;
@@ -47,6 +48,8 @@ export function EntitiesGrid({
   onChangePage,
   onChangeSort,
   onFilterByType,
+  definitionIndexPatterns,
+  isEntityDefinitionIndexPatternsLoading,
 }: Props) {
   const [showActions, setShowActions] = useState<boolean>(true);
 
@@ -59,10 +62,6 @@ export function EntitiesGrid({
     },
     [onChangeSort]
   );
-
-  const allEntityTypes = useMemo(() => entities?.map((entity) => entity.entityType), [entities]);
-  const { definitionIndexPatterns, isEntityDefinitionIndexPatternsLoading } =
-    useFetchEntityDefinitionIndexPattern(allEntityTypes.join(','));
 
   const showAlertsColumn = useMemo(
     () => entities?.some((entity) => entity?.alertsCount && entity?.alertsCount > 0),
@@ -85,7 +84,7 @@ export function EntitiesGrid({
       }
 
       const columnEntityTableId = columnId as EntityColumnIds;
-      const entityType = entity.entityType;
+      const { entityType } = entity;
 
       switch (columnEntityTableId) {
         case 'alertsCount':
