@@ -52,6 +52,12 @@ const moveModule = async (module: Package, log: ToolingLog) => {
 
 const relocateModules = async (toMove: Package[], log: ToolingLog): Promise<number> => {
   let relocated: number = 0;
+
+  // filter out modules that are not categorised (lacking group, visibility)
+  toMove = toMove.filter(
+    (module) => module.group && module.group !== 'common' && module.visibility
+  );
+
   for (let i = 0; i < toMove.length; ++i) {
     const module = toMove[i];
 
@@ -102,15 +108,15 @@ const findModules = ({ teams, paths, included, excluded }: FindModulesParams, lo
     modules
       // exclude devOnly modules (they will remain in /packages)
       .filter(({ manifest }) => !manifest.devOnly)
-      // exclude modules that do not specify a group
-      .filter(({ manifest }) => manifest.group)
       // explicit exclusions
       .filter(({ id }) => !EXCLUDED_MODULES.includes(id) && !excluded.includes(id))
-      // we don't want to move test modules (just yet)
+      // we don't want to move test and example modules (just yet)
       .filter(
         ({ directory }) =>
           !directory.includes(`/${KIBANA_FOLDER}/test/`) &&
-          !directory.includes(`/${KIBANA_FOLDER}/x-pack/test/`)
+          !directory.includes(`/${KIBANA_FOLDER}/x-pack/test/`) &&
+          !directory.includes(`/${KIBANA_FOLDER}/examples/`) &&
+          !directory.includes(`/${KIBANA_FOLDER}/x-pack/examples/`)
       )
       // the module is under the umbrella specified by the user
       .filter(

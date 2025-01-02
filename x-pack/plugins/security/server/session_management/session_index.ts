@@ -8,15 +8,13 @@
 import type {
   AggregateName,
   AggregationsMultiTermsAggregate,
+  BulkOperationContainer,
   CreateRequest,
   IndicesCreateRequest,
   MsearchRequestItem,
   SearchHit,
-} from '@elastic/elasticsearch/lib/api/types';
-import type {
-  BulkOperationContainer,
   SortResults,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+} from '@elastic/elasticsearch/lib/api/types';
 import semver from 'semver';
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';

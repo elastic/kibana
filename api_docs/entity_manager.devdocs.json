@@ -2055,6 +2055,38 @@
             }
           ],
           "returnComment": []
+        },
+        {
+          "parentPluginId": "entityManager",
+          "id": "def-server.EntityManagerServerPluginStart.v2",
+          "type": "Object",
+          "tags": [],
+          "label": "v2",
+          "description": [],
+          "signature": [
+            "{ instanceAsFilter: (instance: ",
+            {
+              "pluginId": "@kbn/entities-schema",
+              "scope": "common",
+              "docId": "kibKbnEntitiesSchemaPluginApi",
+              "section": "def-common.EntityV2",
+              "text": "EntityV2"
+            },
+            ", clusterClient: ",
+            "InternalClusterClient",
+            ", logger: ",
+            {
+              "pluginId": "@kbn/logging",
+              "scope": "common",
+              "docId": "kibKbnLoggingPluginApi",
+              "section": "def-common.Logger",
+              "text": "Logger"
+            },
+            ") => Promise<string>; }"
+          ],
+          "path": "x-pack/platform/plugins/shared/entity_manager/server/plugin.ts",
+          "deprecated": false,
+          "trackAdoption": false
         }
       ],
       "lifecycle": "start",

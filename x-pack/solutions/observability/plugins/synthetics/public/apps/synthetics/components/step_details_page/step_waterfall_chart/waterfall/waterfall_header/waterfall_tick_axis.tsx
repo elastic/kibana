@@ -61,7 +61,7 @@ export const WaterfallTickAxis = ({
                         marginBottom: euiTheme.size.s,
                         whiteSpace: 'nowrap',
                         cursor: 'pointer',
-                        color: euiTheme.colors.primaryText,
+                        color: euiTheme.colors.textPrimary,
                       }}
                       onClick={() => {
                         setOnlyHighlighted(!showOnlyHighlightedNetworkRequests);
