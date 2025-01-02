@@ -26,6 +26,6 @@ export default ({ loadTestFile, getService }: FtrProviderContext): void => {
       await deleteSpacesAndUsers(getService);
     });
 
-    loadTestFile(require.resolve('../../common'));
+    loadTestFile(require.resolve('..'));
   });
 };
