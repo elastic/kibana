@@ -37,7 +37,7 @@
           },
           ") => React.JSX.Element"
         ],
-        "path": "packages/kbn-custom-icons/src/components/agent_icon/index.tsx",
+        "path": "src/platform/packages/shared/kbn-custom-icons/src/components/agent_icon/index.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -57,7 +57,7 @@
                 "text": "AgentIconProps"
               }
             ],
-            "path": "packages/kbn-custom-icons/src/components/agent_icon/index.tsx",
+            "path": "src/platform/packages/shared/kbn-custom-icons/src/components/agent_icon/index.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -84,7 +84,7 @@
           },
           ") => React.JSX.Element"
         ],
-        "path": "packages/kbn-custom-icons/src/components/cloud_provider_icon/index.tsx",
+        "path": "src/platform/packages/shared/kbn-custom-icons/src/components/cloud_provider_icon/index.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -104,7 +104,7 @@
                 "text": "CloudProviderIconProps"
               }
             ],
-            "path": "packages/kbn-custom-icons/src/components/cloud_provider_icon/index.tsx",
+            "path": "src/platform/packages/shared/kbn-custom-icons/src/components/cloud_provider_icon/index.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -123,7 +123,7 @@
         "signature": [
           "(agentName: string | undefined, isDarkMode: boolean) => string"
         ],
-        "path": "packages/kbn-custom-icons/src/components/agent_icon/get_agent_icon.ts",
+        "path": "src/platform/packages/shared/kbn-custom-icons/src/components/agent_icon/get_agent_icon.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -137,7 +137,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/kbn-custom-icons/src/components/agent_icon/get_agent_icon.ts",
+            "path": "src/platform/packages/shared/kbn-custom-icons/src/components/agent_icon/get_agent_icon.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -152,7 +152,7 @@
             "signature": [
               "boolean"
             ],
-            "path": "packages/kbn-custom-icons/src/components/agent_icon/get_agent_icon.ts",
+            "path": "src/platform/packages/shared/kbn-custom-icons/src/components/agent_icon/get_agent_icon.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -179,7 +179,7 @@
           },
           ") => \"cloudSunny\" | \"logoAWS\" | \"logoAzure\" | \"logoGCP\""
         ],
-        "path": "packages/kbn-custom-icons/src/components/cloud_provider_icon/get_cloud_provider_icon.ts",
+        "path": "src/platform/packages/shared/kbn-custom-icons/src/components/cloud_provider_icon/get_cloud_provider_icon.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -199,7 +199,7 @@
                 "text": "CloudProvider"
               }
             ],
-            "path": "packages/kbn-custom-icons/src/components/cloud_provider_icon/get_cloud_provider_icon.ts",
+            "path": "src/platform/packages/shared/kbn-custom-icons/src/components/cloud_provider_icon/get_cloud_provider_icon.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -226,7 +226,7 @@
           },
           " | undefined) => string"
         ],
-        "path": "packages/kbn-custom-icons/src/components/agent_icon/get_serverless_icon.ts",
+        "path": "src/platform/packages/shared/kbn-custom-icons/src/components/agent_icon/get_serverless_icon.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -247,7 +247,7 @@
               },
               " | undefined"
             ],
-            "path": "packages/kbn-custom-icons/src/components/agent_icon/get_serverless_icon.ts",
+            "path": "src/platform/packages/shared/kbn-custom-icons/src/components/agent_icon/get_serverless_icon.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -277,7 +277,7 @@
           "EuiIconProps",
           ", \"type\">"
         ],
-        "path": "packages/kbn-custom-icons/src/components/agent_icon/index.tsx",
+        "path": "src/platform/packages/shared/kbn-custom-icons/src/components/agent_icon/index.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -298,7 +298,7 @@
               },
               " | undefined"
             ],
-            "path": "packages/kbn-custom-icons/src/components/agent_icon/index.tsx",
+            "path": "src/platform/packages/shared/kbn-custom-icons/src/components/agent_icon/index.tsx",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -324,7 +324,7 @@
           "EuiIconProps",
           ", \"type\">"
         ],
-        "path": "packages/kbn-custom-icons/src/components/cloud_provider_icon/index.tsx",
+        "path": "src/platform/packages/shared/kbn-custom-icons/src/components/cloud_provider_icon/index.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -338,7 +338,7 @@
             "signature": [
               "\"aws\" | \"azure\" | \"gcp\" | \"unknownProvider\" | null | undefined"
             ],
-            "path": "packages/kbn-custom-icons/src/components/cloud_provider_icon/index.tsx",
+            "path": "src/platform/packages/shared/kbn-custom-icons/src/components/cloud_provider_icon/index.tsx",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -358,7 +358,7 @@
         "signature": [
           "\"aws\" | \"azure\" | \"gcp\" | \"unknownProvider\" | null | undefined"
         ],
-        "path": "packages/kbn-custom-icons/src/components/cloud_provider_icon/get_cloud_provider_icon.ts",
+        "path": "src/platform/packages/shared/kbn-custom-icons/src/components/cloud_provider_icon/get_cloud_provider_icon.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

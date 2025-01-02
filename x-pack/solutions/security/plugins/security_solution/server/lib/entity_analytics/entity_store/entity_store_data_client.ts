@@ -15,7 +15,7 @@ import type {
   AnalyticsServiceSetup,
 } from '@kbn/core/server';
 import { EntityClient } from '@kbn/entityManager-plugin/server/lib/entity_client';
-import type { SortOrder } from '@elastic/elasticsearch/lib/api/types';
+import type { HealthStatus, SortOrder } from '@elastic/elasticsearch/lib/api/types';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { DataViewsService } from '@kbn/data-views-plugin/common';
 import { isEqual } from 'lodash/fp';
@@ -50,7 +50,7 @@ import type {
 } from '../../../../common/api/entity_analytics';
 import { EngineDescriptorClient } from './saved_object/engine_descriptor';
 import { ENGINE_STATUS, ENTITY_STORE_STATUS, MAX_SEARCH_RESPONSE_SIZE } from './constants';
-import { AssetCriticalityEcsMigrationClient } from '../asset_criticality/asset_criticality_migration_client';
+import { AssetCriticalityMigrationClient } from '../asset_criticality/asset_criticality_migration_client';
 import { getUnitedEntityDefinition } from './united_entity_definitions';
 import {
   startEntityStoreFieldRetentionEnrichTask,
@@ -128,7 +128,7 @@ interface SearchEntitiesParams {
 
 export class EntityStoreDataClient {
   private engineClient: EngineDescriptorClient;
-  private assetCriticalityMigrationClient: AssetCriticalityEcsMigrationClient;
+  private assetCriticalityMigrationClient: AssetCriticalityMigrationClient;
   private entityClient: EntityClient;
   private riskScoreDataClient: RiskScoreDataClient;
   private esClient: ElasticsearchClient;
@@ -148,7 +148,7 @@ export class EntityStoreDataClient {
       namespace,
     });
 
-    this.assetCriticalityMigrationClient = new AssetCriticalityEcsMigrationClient({
+    this.assetCriticalityMigrationClient = new AssetCriticalityMigrationClient({
       esClient: this.esClient,
       logger,
       auditLogger,
@@ -288,7 +288,7 @@ export class EntityStoreDataClient {
 
     const { config } = this.options;
 
-    await this.riskScoreDataClient.createRiskScoreLatestIndex().catch((e) => {
+    await this.riskScoreDataClient.createOrUpdateRiskScoreLatestIndex().catch((e) => {
       if (e.meta.body.error.type === 'resource_already_exists_exception') {
         this.options.logger.debug(
           `Risk score index for ${entityType} already exists, skipping creation.`
@@ -465,7 +465,7 @@ export class EntityStoreDataClient {
 
   public getComponentFromEntityDefinition(
     id: string,
-    definition: EntityDefinitionWithState | EntityDefinition
+    definition: EntityDefinitionWithState | EntityDefinition | undefined
   ): EngineComponentStatus[] {
     if (!definition) {
       return [
@@ -478,16 +478,22 @@ export class EntityStoreDataClient {
     }
 
     if ('state' in definition) {
+      const transformHealthToComponentHealth = (
+        health: HealthStatus | undefined
+      ): EngineComponentStatus['health'] =>
+        health ? (health.toLowerCase() as Lowercase<HealthStatus>) : 'unknown';
+
       return [
         {
           id: definition.id,
           installed: definition.state.installed,
           resource: EngineComponentResourceEnum.entity_definition,
         },
-        ...definition.state.components.transforms.map(({ installed, running, stats }) => ({
+        ...definition.state.components.transforms.map(({ installed, stats }) => ({
           id,
           resource: EngineComponentResourceEnum.transform,
           installed,
+          health: transformHealthToComponentHealth(stats?.health?.status),
           errors: (stats?.health as TransformHealth)?.issues?.map(({ issue, details }) => ({
             title: issue,
             message: details,
