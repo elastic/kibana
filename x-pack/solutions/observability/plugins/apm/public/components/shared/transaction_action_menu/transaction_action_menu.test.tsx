@@ -16,8 +16,8 @@ import {
   NODE_LOGS_LOCATOR_ID,
   TRACE_LOGS_LOCATOR_ID,
 } from '@kbn/logs-shared-plugin/common';
-import { Transaction } from '../../../../typings/es_schemas/ui/transaction';
-import { ApmPluginContextValue } from '../../../context/apm_plugin/apm_plugin_context';
+import type { Transaction } from '../../../../typings/es_schemas/ui/transaction';
+import type { ApmPluginContextValue } from '../../../context/apm_plugin/apm_plugin_context';
 import {
   mockApmPluginContextValue,
   MockApmPluginContextWrapper,
@@ -33,11 +33,11 @@ import * as useAdHocApmDataView from '../../../hooks/use_adhoc_apm_data_view';
 import { useProfilingIntegrationSetting } from '../../../hooks/use_profiling_integration_setting';
 import { uptimeOverviewLocatorID } from '@kbn/observability-plugin/common';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
-import {
+import type {
   AssetDetailsLocator,
   AssetDetailsLocatorParams,
-  ASSET_DETAILS_LOCATOR_ID,
 } from '@kbn/observability-shared-plugin/common';
+import { ASSET_DETAILS_LOCATOR_ID } from '@kbn/observability-shared-plugin/common';
 
 const mockAssetDetailsLocator = {
   getRedirectUrl: jest

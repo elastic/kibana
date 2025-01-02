@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { InventoryMetrics } from '../../types';
+import type { InventoryMetrics } from '../../types';
 
 import { cpu } from './snapshot/cpu';
 import { rdsLatency } from './snapshot/rds_latency';
