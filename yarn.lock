@@ -4477,7 +4477,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-elasticsearch-client-server-internal@link:packages/core/elasticsearch/core-elasticsearch-client-server-internal":
+"@kbn/core-elasticsearch-client-server-internal@link:src/core/packages/elasticsearch/client-server-internal":
   version "0.0.0"
   uid ""
 

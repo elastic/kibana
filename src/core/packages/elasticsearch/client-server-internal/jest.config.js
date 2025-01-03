@@ -9,6 +9,6 @@
 
 module.exports = {
   preset: '@kbn/test/jest_node',
-  rootDir: '../../../..',
-  roots: ['<rootDir>/packages/core/elasticsearch/core-elasticsearch-client-server-internal'],
+  rootDir: '../../../../..',
+  roots: ['<rootDir>/src/core/packages/elasticsearch/client-server-internal'],
 };
