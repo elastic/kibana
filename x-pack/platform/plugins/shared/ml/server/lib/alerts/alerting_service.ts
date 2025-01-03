@@ -16,14 +16,13 @@ import {
   type SerializedFieldFormat,
 } from '@kbn/field-formats-plugin/common';
 import { isDefined } from '@kbn/ml-is-defined';
-import type { MlAnomaliesTableRecordExtended } from '@kbn/ml-anomaly-utils';
-import {
-  getEntityFieldName,
-  getEntityFieldValue,
-  type MlAnomalyRecordDoc,
-  type MlAnomalyResultType,
-  ML_ANOMALY_RESULT_TYPE,
+import type {
+  MlAnomaliesTableRecordExtended,
+  MlAnomalyRecordDoc,
+  MlAnomalyResultType,
 } from '@kbn/ml-anomaly-utils';
+import { getEntityFieldName, getEntityFieldValue } from '@kbn/ml-anomaly-utils/anomaly_utils';
+import { ML_ANOMALY_RESULT_TYPE } from '@kbn/ml-anomaly-utils/constants';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { ALERT_REASON, ALERT_URL } from '@kbn/rule-data-utils';
 import type { MlJob } from '@elastic/elasticsearch/lib/api/types';

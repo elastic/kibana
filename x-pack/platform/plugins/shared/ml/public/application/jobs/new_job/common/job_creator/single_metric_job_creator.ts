@@ -6,14 +6,10 @@
  */
 
 import type { DataView } from '@kbn/data-views-plugin/public';
-import {
-  type Aggregation,
-  type AggFieldPair,
-  type Field,
-  DOC_COUNT,
-  ML_JOB_AGGREGATION,
-  ES_AGGREGATION,
-} from '@kbn/ml-anomaly-utils';
+import type { Aggregation, AggFieldPair, Field } from '@kbn/ml-anomaly-utils';
+import { DOC_COUNT } from '@kbn/ml-anomaly-utils/field_types';
+import { ES_AGGREGATION } from '@kbn/ml-anomaly-utils/es_aggregation';
+import { ML_JOB_AGGREGATION } from '@kbn/ml-anomaly-utils/aggregation_types';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { parseInterval } from '@kbn/ml-parse-interval';
 

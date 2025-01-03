@@ -6,10 +6,14 @@
  */
 
 import expect from '@kbn/expect';
+
 import type { ProvidedType } from '@kbn/test';
-import { ML_JOB_FIELD_TYPES } from '@kbn/ml-anomaly-utils';
+import { ML_JOB_FIELD_TYPES } from '@kbn/ml-anomaly-utils/field_types';
+
 import type { FtrProviderContext } from '../../ftr_provider_context';
+
 import type { MlCommonUI } from './common_ui';
+
 export type MlDataVisualizerTable = ProvidedType<typeof MachineLearningDataVisualizerTableProvider>;
 
 export function MachineLearningDataVisualizerTableProvider(

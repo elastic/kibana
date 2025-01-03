@@ -12,10 +12,13 @@ import { forkJoin, of, catchError, map } from 'rxjs';
 import { each, get } from 'lodash';
 
 import type { IUiSettingsClient } from '@kbn/core/public';
-import { aggregationTypeTransform } from '@kbn/ml-anomaly-utils';
-import { isMultiBucketAnomaly, ML_JOB_AGGREGATION } from '@kbn/ml-anomaly-utils';
+import type { MlAnomalyRecordDoc } from '@kbn/ml-anomaly-utils';
+import {
+  aggregationTypeTransform,
+  isMultiBucketAnomaly,
+} from '@kbn/ml-anomaly-utils/anomaly_utils';
+import { ML_JOB_AGGREGATION } from '@kbn/ml-anomaly-utils/aggregation_types';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
-import { type MlAnomalyRecordDoc } from '@kbn/ml-anomaly-utils';
 import type { TimeRangeBounds, TimeBucketsInterval } from '@kbn/ml-time-buckets';
 import { parseInterval } from '@kbn/ml-parse-interval';
 

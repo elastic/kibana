@@ -10,7 +10,7 @@ import { each, get } from 'lodash';
 import type { IScopedClusterClient } from '@kbn/core/server';
 
 import type { estypes } from '@elastic/elasticsearch';
-import { ML_PARTITION_FIELDS } from '@kbn/ml-anomaly-utils';
+import { ML_PARTITION_FIELDS } from '@kbn/ml-anomaly-utils/constants';
 import { ANNOTATION_EVENT_USER } from '@kbn/ml-common-constants/annotations';
 import { ANNOTATION_TYPE } from '@kbn/ml-common-types/annotations';
 import {

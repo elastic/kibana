@@ -6,7 +6,7 @@
  */
 
 import type { IScopedClusterClient } from '@kbn/core/server';
-import { ES_AGGREGATION } from '@kbn/ml-anomaly-utils';
+import { ES_AGGREGATION } from '@kbn/ml-anomaly-utils/es_aggregation';
 
 import type { BucketSpanEstimatorData } from '@kbn/ml-common-types/job_service';
 

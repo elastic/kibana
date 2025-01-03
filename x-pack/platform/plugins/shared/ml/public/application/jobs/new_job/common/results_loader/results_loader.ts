@@ -8,7 +8,8 @@
 import { BehaviorSubject, lastValueFrom } from 'rxjs';
 
 import type { ML_ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils';
-import { getSeverityType, ES_AGGREGATION } from '@kbn/ml-anomaly-utils';
+import { ES_AGGREGATION } from '@kbn/ml-anomaly-utils/es_aggregation';
+import { getSeverityType } from '@kbn/ml-anomaly-utils/get_severity_type';
 import type { TimeBuckets } from '@kbn/ml-time-buckets';
 import { parseInterval } from '@kbn/ml-parse-interval';
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ML_RESULTS_INDEX_PATTERN } from '../../../common/constants/index_patterns';
+import { ML_RESULTS_INDEX_PATTERN } from '@kbn/ml-common-constants/index_patterns';
 import type { GroupObj } from '../components/job_selector/job_selector';
 import type { ExplorerJob } from './explorer_utils';
 import { getIndexPattern, getMergedGroupsAndJobsIds } from './explorer_utils';

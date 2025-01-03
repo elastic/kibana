@@ -13,7 +13,7 @@ import { EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { getTimeFilterRange, useTimefilter } from '@kbn/ml-date-picker';
-import { EVENT_RATE_FIELD_ID } from '@kbn/ml-anomaly-utils';
+import { EVENT_RATE_FIELD_ID } from '@kbn/ml-anomaly-utils/fields_constants';
 import { useTimeBuckets } from '@kbn/ml-time-buckets';
 import {
   JOB_TYPE,

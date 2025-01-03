@@ -13,7 +13,7 @@ import { i18n } from '@kbn/i18n';
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { useTimefilter } from '@kbn/ml-date-picker';
-import { ML_JOB_ID } from '@kbn/ml-anomaly-utils';
+import { ML_JOB_ID } from '@kbn/ml-anomaly-utils/constants';
 import { useTimeBuckets } from '@kbn/ml-time-buckets';
 import type { MlJobWithTimeRange } from '@kbn/ml-common-types/anomaly_detection_jobs/summary_job';
 import { useMlKibana } from '../../../contexts/kibana';

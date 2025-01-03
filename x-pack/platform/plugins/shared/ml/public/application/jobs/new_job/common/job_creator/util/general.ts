@@ -8,18 +8,14 @@
 import { i18n } from '@kbn/i18n';
 
 import { ES_FIELD_TYPES } from '@kbn/field-types';
+import type { Field, AggFieldPair, SparseDataAggregation } from '@kbn/ml-anomaly-utils';
+import { mlCategory } from '@kbn/ml-anomaly-utils/fields';
+import { DOC_COUNT, _DOC_COUNT, MLCATEGORY } from '@kbn/ml-anomaly-utils/field_types';
+import { EVENT_RATE_FIELD_ID } from '@kbn/ml-anomaly-utils/fields_constants';
 import {
-  mlCategory,
-  type Field,
-  type AggFieldPair,
-  type SparseDataAggregation,
-  DOC_COUNT,
-  _DOC_COUNT,
-  EVENT_RATE_FIELD_ID,
-  MLCATEGORY,
   ML_JOB_AGGREGATION,
   SPARSE_DATA_AGGREGATIONS,
-} from '@kbn/ml-anomaly-utils';
+} from '@kbn/ml-anomaly-utils/aggregation_types';
 import { cloneDeep } from 'lodash';
 import type { MlLocatorParams } from '@kbn/ml-common-types/locator';
 import type { Job, Detector } from '@kbn/ml-common-types/anomaly_detection_jobs/job';

@@ -176,5 +176,6 @@
     "@kbn/es-types",
     "@kbn/connector-schemas",
     "@kbn/ml-common-types",
+    "@kbn/ml-common-constants",
   ]
 }

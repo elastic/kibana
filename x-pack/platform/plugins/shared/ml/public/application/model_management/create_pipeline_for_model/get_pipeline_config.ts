@@ -6,9 +6,9 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import type { InferecePipelineCreationState } from './state';
+import type { InferencePipelineCreationState } from './state';
 
-export function getPipelineConfig(state: InferecePipelineCreationState): estypes.IngestPipeline {
+export function getPipelineConfig(state: InferencePipelineCreationState): estypes.IngestPipeline {
   const { ignoreFailure, modelId, onFailure, pipelineDescription, initialPipelineConfig } = state;
   const processor =
     initialPipelineConfig?.processors && initialPipelineConfig.processors?.length

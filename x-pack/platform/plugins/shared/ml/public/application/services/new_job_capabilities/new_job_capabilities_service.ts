@@ -7,13 +7,8 @@
 
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import {
-  type Field,
-  type Aggregation,
-  type AggId,
-  type FieldId,
-  EVENT_RATE_FIELD_ID,
-} from '@kbn/ml-anomaly-utils';
+import type { Field, Aggregation, AggId, FieldId } from '@kbn/ml-anomaly-utils';
+import { EVENT_RATE_FIELD_ID } from '@kbn/ml-anomaly-utils/fields_constants';
 import { DataViewType } from '@kbn/data-views-plugin/public';
 import { useMlApi } from '../../contexts/kibana';
 import { getGeoFields, filterCategoryFields } from '../../../../common/util/fields_utils';
