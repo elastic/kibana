@@ -5485,7 +5485,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/es-errors@link:packages/kbn-es-errors":
+"@kbn/es-errors@link:src/platform/packages/shared/kbn-es-errors":
   version "0.0.0"
   uid ""
 
