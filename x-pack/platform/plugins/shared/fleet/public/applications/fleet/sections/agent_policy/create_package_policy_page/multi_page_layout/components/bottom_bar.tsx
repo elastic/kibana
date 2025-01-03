@@ -123,60 +123,68 @@ export const AgentStandaloneBottomBar: React.FC<{
   );
 };
 
-export const CreatePackagePolicyFinalBottomBar: React.FC<{
+const FinalBottomBar: React.FC<{
   pkgkey: string;
 }> = ({ pkgkey }) => {
   const isK8s = pkgkey.includes(FLEET_KUBERNETES_PACKAGE);
   const { getHref } = useLink();
   const { getAbsolutePath } = useLink();
   return (
-    <CenteredRoundedBottomBar>
-      <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+    <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+      <EuiFlexItem grow={false}>
         <EuiFlexItem grow={false}>
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty color="text" size="s" href={getHref('integrations_all')}>
-              <FormattedMessage
-                id="xpack.fleet.createPackagePolicyBottomBar.addAnotherIntegration"
-                defaultMessage="Add another integration"
-              />
-            </EuiButtonEmpty>
-          </EuiFlexItem>
+          <EuiButtonEmpty color="text" size="s" href={getHref('integrations_all')}>
+            <FormattedMessage
+              id="xpack.fleet.createPackagePolicyBottomBar.addAnotherIntegration"
+              defaultMessage="Add another integration"
+            />
+          </EuiButtonEmpty>
         </EuiFlexItem>
-        {!isK8s && (
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              color="success"
-              fill
-              size="m"
-              href={getHref('integration_details_assets', {
-                pkgkey,
-              })}
-            >
-              <FormattedMessage
-                id="xpack.fleet.confirmIncomingData.viewDataAssetsButtonText'"
-                defaultMessage="View assets"
-              />
-            </EuiButton>
-          </EuiFlexItem>
-        )}
-        {isK8s && (
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              color="success"
-              fill
-              size="m"
-              href={getAbsolutePath(
-                '/app/dashboards#/view/kubernetes-f4dc26db-1b53-4ea2-a78b-1bfab8ea267c'
-              )}
-            >
-              <FormattedMessage
-                id="xpack.fleet.confirmIncomingData. '"
-                defaultMessage="View Kubernetes metrics dashboards"
-              />
-            </EuiButton>
-          </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
+      </EuiFlexItem>
+      {!isK8s && (
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            color="success"
+            fill
+            size="m"
+            href={getHref('integration_details_assets', {
+              pkgkey,
+            })}
+          >
+            <FormattedMessage
+              id="xpack.fleet.confirmIncomingData.viewDataAssetsButtonText'"
+              defaultMessage="View assets"
+            />
+          </EuiButton>
+        </EuiFlexItem>
+      )}
+      {isK8s && (
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            color="success"
+            fill
+            size="m"
+            href={getAbsolutePath(
+              '/app/dashboards#/view/kubernetes-f4dc26db-1b53-4ea2-a78b-1bfab8ea267c'
+            )}
+          >
+            <FormattedMessage
+              id="xpack.fleet.confirmIncomingData. '"
+              defaultMessage="View Kubernetes metrics dashboards"
+            />
+          </EuiButton>
+        </EuiFlexItem>
+      )}
+    </EuiFlexGroup>
+  );
+};
+
+export const CreatePackagePolicyFinalBottomBar: React.FC<{
+  pkgkey: string;
+}> = ({ pkgkey }) => {
+  return (
+    <CenteredRoundedBottomBar>
+      <FinalBottomBar pkgkey={pkgkey} />
     </CenteredRoundedBottomBar>
   );
 };

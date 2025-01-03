@@ -4,11 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { lazy, Suspense, useMemo, useCallback, useEffect, useRef } from 'react';
-import { EuiButtonGroup, EuiFlexGroup, EuiFlexItem, EuiSkeletonText } from '@elastic/eui';
-import type { AvailablePackagesHookType, IntegrationCardItem } from '@kbn/fleet-plugin/public';
-import { noop } from 'lodash';
+import React, { lazy, useMemo, useCallback, useEffect, useRef, useState, Suspense } from 'react';
 
+import { EuiButtonGroup, EuiFlexGroup, EuiFlexItem, EuiSkeletonText } from '@elastic/eui';
+import type {
+  AvailablePackagesHookType,
+  FleetStart,
+  IntegrationCardItem,
+} from '@kbn/fleet-plugin/public';
+import { noop } from 'lodash';
 import { css } from '@emotion/react';
 import { withLazyHook } from '../../../../../common/components/with_lazy_hook';
 import {
@@ -35,6 +39,7 @@ export interface IntegrationsCardGridTabsProps {
   installedIntegrationsCount: number;
   isAgentRequired: boolean;
   useAvailablePackages: AvailablePackagesHookType;
+  fleet: FleetStart;
 }
 
 const emptyStateStyles = { paddingTop: '16px' };
@@ -46,15 +51,16 @@ export const PackageListGrid = lazy(async () => ({
 }));
 
 export const IntegrationsCardGridTabsComponent = React.memo<IntegrationsCardGridTabsProps>(
-  ({ installedIntegrationsCount, isAgentRequired, useAvailablePackages }) => {
+  ({ fleet, installedIntegrationsCount, isAgentRequired, useAvailablePackages }) => {
     const { spaceId } = useOnboardingContext();
+
     const scrollElement = useRef<HTMLDivElement>(null);
     const [toggleIdSelected, setSelectedTabIdToStorage] = useStoredIntegrationTabId(
       spaceId,
       DEFAULT_TAB.id
     );
     const [searchTermFromStorage, setSearchTermToStorage] = useStoredIntegrationSearchTerm(spaceId);
-    const onTabChange = useCallback(
+    const handleTabChange = useCallback(
       (stringId: string) => {
         const id = stringId as IntegrationTabId;
         const trackId = `${TELEMETRY_INTEGRATION_TAB}_${id}`;
@@ -65,6 +71,15 @@ export const IntegrationsCardGridTabsComponent = React.memo<IntegrationsCardGrid
       [setSelectedTabIdToStorage]
     );
 
+    const [isModalVisible, setIsModalVisible] = useState(false);
+    const [integrationName, setIntegrationName] = useState<string>();
+    const handleCloseModal = useCallback(() => {
+      setIsModalVisible(false);
+    }, []);
+    const handleCardClicked = useCallback((name: string) => {
+      setIsModalVisible(true);
+      setIntegrationName(name);
+    }, []);
     const {
       filteredCards,
       isLoading,
@@ -77,8 +92,7 @@ export const IntegrationsCardGridTabsComponent = React.memo<IntegrationsCardGrid
     });
 
     const selectedTab = useMemo(() => INTEGRATION_TABS_BY_ID[toggleIdSelected], [toggleIdSelected]);
-
-    const onSearchTermChanged = useCallback(
+    const handleSearchTermChanged = useCallback(
       (searchQuery: string) => {
         setSearchTerm(searchQuery);
         // Search term is preserved across VISIBLE tabs
@@ -95,7 +109,7 @@ export const IntegrationsCardGridTabsComponent = React.memo<IntegrationsCardGrid
       setSelectedSubCategory(selectedTab.subCategory);
       if (!selectedTab.showSearchTools) {
         // If search box are not shown, clear the search term to avoid unexpected filtering
-        onSearchTermChanged('');
+        handleSearchTermChanged('');
       }
 
       if (
@@ -106,7 +120,7 @@ export const IntegrationsCardGridTabsComponent = React.memo<IntegrationsCardGrid
         setSearchTerm(searchTermFromStorage);
       }
     }, [
-      onSearchTermChanged,
+      handleSearchTermChanged,
       searchTermFromStorage,
       selectedTab.category,
       selectedTab.showSearchTools,
@@ -116,10 +130,10 @@ export const IntegrationsCardGridTabsComponent = React.memo<IntegrationsCardGrid
       setSelectedSubCategory,
       toggleIdSelected,
     ]);
-
     const list: IntegrationCardItem[] = useIntegrationCardList({
       integrationsList: filteredCards,
       featuredCardIds: selectedTab.featuredCardIds,
+      onCardClicked: handleCardClicked,
     });
 
     if (isLoading) {
@@ -131,69 +145,81 @@ export const IntegrationsCardGridTabsComponent = React.memo<IntegrationsCardGrid
         />
       );
     }
+
+    const EmbeddedIntegrationsFlow = fleet.ui.components.EmbeddedIntegrationsFlow;
+
     return (
-      <EuiFlexGroup
-        direction="column"
-        className="step-paragraph"
-        gutterSize={selectedTab.showSearchTools ? 'm' : 'none'}
-        css={css`
-          height: ${selectedTab.showSearchTools
-            ? WITH_SEARCH_BOX_HEIGHT
-            : WITHOUT_SEARCH_BOX_HEIGHT};
-        `}
-      >
-        <EuiFlexItem grow={false}>
-          <EuiButtonGroup
-            buttonSize="compressed"
-            color="primary"
-            idSelected={toggleIdSelected}
-            isFullWidth
-            legend="Categories"
-            onChange={onTabChange}
-            options={INTEGRATION_TABS}
-            type="single"
-          />
-        </EuiFlexItem>
-        <EuiFlexItem
+      <>
+        <EuiFlexGroup
+          direction="column"
+          className="step-paragraph"
+          gutterSize={selectedTab.showSearchTools ? 'm' : 'none'}
           css={css`
-            overflow-y: ${selectedTab.overflow ?? 'auto'};
+            height: ${selectedTab.showSearchTools
+              ? WITH_SEARCH_BOX_HEIGHT
+              : WITHOUT_SEARCH_BOX_HEIGHT};
           `}
-          grow={1}
-          id={SCROLL_ELEMENT_ID}
-          ref={scrollElement}
         >
-          <Suspense
-            fallback={<EuiSkeletonText isLoading={true} lines={LOADING_SKELETON_TEXT_LINES} />}
-          >
-            <PackageListGrid
-              callout={
-                <IntegrationCardTopCallout
-                  isAgentRequired={isAgentRequired}
-                  installedIntegrationsCount={installedIntegrationsCount}
-                  selectedTabId={toggleIdSelected}
-                />
-              }
-              calloutTopSpacerSize="m"
-              categories={SEARCH_FILTER_CATEGORIES} // We do not want to show categories and subcategories as the search bar filter
-              emptyStateStyles={emptyStateStyles}
-              list={list}
-              scrollElementId={SCROLL_ELEMENT_ID}
-              searchTerm={searchTerm}
-              selectedCategory={selectedTab.category ?? ''}
-              selectedSubCategory={selectedTab.subCategory}
-              setCategory={setCategory}
-              setSearchTerm={onSearchTermChanged}
-              setUrlandPushHistory={noop}
-              setUrlandReplaceHistory={noop}
-              showCardLabels={false}
-              showControls={false}
-              showSearchTools={selectedTab.showSearchTools}
-              sortByFeaturedIntegrations={selectedTab.sortByFeaturedIntegrations}
-              spacer={false}
+          <EuiFlexItem grow={false}>
+            <EuiButtonGroup
+              buttonSize="compressed"
+              color="primary"
+              idSelected={toggleIdSelected}
+              isFullWidth
+              legend="Categories"
+              onChange={handleTabChange}
+              options={INTEGRATION_TABS}
+              type="single"
             />
-          </Suspense>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+          </EuiFlexItem>
+          <EuiFlexItem
+            css={css`
+              overflow-y: ${selectedTab.overflow ?? 'auto'};
+            `}
+            grow={1}
+            id={SCROLL_ELEMENT_ID}
+            ref={scrollElement}
+          >
+            <Suspense
+              fallback={<EuiSkeletonText isLoading={true} lines={LOADING_SKELETON_TEXT_LINES} />}
+            >
+              <PackageListGrid
+                callout={
+                  <IntegrationCardTopCallout
+                    isAgentRequired={isAgentRequired}
+                    installedIntegrationsCount={installedIntegrationsCount}
+                    selectedTabId={toggleIdSelected}
+                  />
+                }
+                calloutTopSpacerSize="m"
+                categories={SEARCH_FILTER_CATEGORIES} // We do not want to show categories and subcategories as the search bar filter
+                emptyStateStyles={emptyStateStyles}
+                list={list}
+                scrollElementId={SCROLL_ELEMENT_ID}
+                searchTerm={searchTerm}
+                selectedCategory={selectedTab.category ?? ''}
+                selectedSubCategory={selectedTab.subCategory}
+                setCategory={setCategory}
+                setSearchTerm={handleSearchTermChanged}
+                setUrlandPushHistory={noop}
+                setUrlandReplaceHistory={noop}
+                showCardLabels={false}
+                showControls={false}
+                showSearchTools={selectedTab.showSearchTools}
+                sortByFeaturedIntegrations={selectedTab.sortByFeaturedIntegrations}
+                spacer={false}
+              />
+            </Suspense>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        {isModalVisible && (
+          <EmbeddedIntegrationsFlow
+            integrationName={integrationName}
+            lazyFallback={<EuiSkeletonText isLoading={true} lines={LOADING_SKELETON_TEXT_LINES} />}
+            onClose={handleCloseModal}
+          />
+        )}
+      </>
     );
   }
 );

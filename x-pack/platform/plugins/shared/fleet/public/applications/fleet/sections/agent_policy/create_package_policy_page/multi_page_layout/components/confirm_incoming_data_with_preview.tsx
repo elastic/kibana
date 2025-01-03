@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { PropsWithChildren } from 'react';
 import React from 'react';
 import {
   EuiCallOut,
@@ -124,12 +125,13 @@ const AgentDataPreview: React.FC<{ dataPreview: SearchHit[] }> = ({ dataPreview 
   );
 };
 
-export const ConfirmIncomingDataWithPreview: React.FunctionComponent<Props> = ({
+export const ConfirmIncomingDataWithPreview: React.FunctionComponent<PropsWithChildren<Props>> = ({
   agentIds,
   packageInfo,
   agentDataConfirmed,
   setAgentDataConfirmed,
   troubleshootLink,
+  children,
 }) => {
   const { incomingData, dataPreview, isLoading, hasReachedTimeout } = usePollingIncomingData({
     agentIds,
@@ -218,6 +220,7 @@ export const ConfirmIncomingDataWithPreview: React.FunctionComponent<Props> = ({
       </EuiText>
       <EuiSpacer size="m" />
       <AgentDataPreview dataPreview={dataPreview} />
+      {children}
     </>
   );
 };

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { EuiButtonWithTooltip } from '../../../../../components';
@@ -14,8 +14,8 @@ interface AddIntegrationButtonProps {
   userCanInstallPackages?: boolean;
   missingSecurityConfiguration: boolean;
   packageName: string;
-  href: string;
-  onClick: Function;
+  href: string | undefined;
+  onClick: Function | undefined;
 }
 
 export function AddIntegrationButton(props: AddIntegrationButtonProps) {
@@ -38,15 +38,22 @@ export function AddIntegrationButton(props: AddIntegrationButtonProps) {
       }
     : undefined;
 
+  const optionalProps = useMemo(
+    () => ({
+      ...(href ? { href } : {}),
+      ...(onClick ? { onClick: (e: React.MouseEvent) => onClick(e) } : {}),
+    }),
+    [href, onClick]
+  );
+
   return (
     <EuiButtonWithTooltip
       fill
       isDisabled={!userCanInstallPackages}
       iconType="plusInCircle"
-      href={href}
-      onClick={(e) => onClick(e)}
       data-test-subj="addIntegrationPolicyButton"
       tooltip={tooltip}
+      {...optionalProps}
     >
       <FormattedMessage
         id="xpack.fleet.epm.addPackagePolicyButtonText"
