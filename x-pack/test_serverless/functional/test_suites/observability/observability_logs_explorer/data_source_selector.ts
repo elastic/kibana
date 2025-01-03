@@ -15,7 +15,13 @@ const initialPackageMap = {
 };
 const initialPackagesTexts = Object.values(initialPackageMap);
 
-const expectedDataViews = ['logs-*', 'metrics-*'];
+const expectedDataViews = [
+  'Log Threshold Alerting Rule Source',
+  'Metric AND Inventory Threshold Alerting Rule Source',
+  'logs-*',
+  'metrics-*',
+];
+
 const sortedExpectedDataViews = expectedDataViews.slice().sort();
 
 const uncategorized = ['logs-gaming-*', 'logs-manufacturing-*', 'logs-retail-*'];
@@ -597,8 +603,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           const menu = await PageObjects.observabilityLogsExplorer.getDataViewsContextMenu();
           const menuEntries = await PageObjects.observabilityLogsExplorer.getPanelEntries(menu);
 
-          expect(await menuEntries[0].getVisibleText()).to.be(expectedDataViews[0]);
-          expect(await menuEntries[1].getVisibleText()).to.be(expectedDataViews[1]);
+          expect(await menuEntries[2].getVisibleText()).to.be(expectedDataViews[2]);
+          expect(await menuEntries[3].getVisibleText()).to.be(expectedDataViews[3]);
         });
 
         it('should filter the list of data views by type', async () => {
@@ -610,8 +616,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
                 PageObjects.observabilityLogsExplorer.getPanelEntries(menu)
               );
 
-            expect(menuEntries.length).to.be(1);
-            expect(await menuEntries[0].getVisibleText()).to.be(sortedExpectedDataViews[0]);
+            expect(menuEntries.length).to.be(2);
+            expect(await menuEntries[1].getVisibleText()).to.be(sortedExpectedDataViews[2]);
           });
 
           // Test back all filter
@@ -623,8 +629,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
                 PageObjects.observabilityLogsExplorer.getPanelEntries(menu)
               );
 
-            expect(await menuEntries[0].getVisibleText()).to.be(sortedExpectedDataViews[0]);
-            expect(await menuEntries[1].getVisibleText()).to.be(sortedExpectedDataViews[1]);
+            expect(await menuEntries[2].getVisibleText()).to.be(sortedExpectedDataViews[2]);
+            expect(await menuEntries[3].getVisibleText()).to.be(sortedExpectedDataViews[3]);
           });
         });
 
@@ -636,8 +642,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               .getDataViewsContextMenu()
               .then((menu) => PageObjects.observabilityLogsExplorer.getPanelEntries(menu));
 
-            expect(await menuEntries[0].getVisibleText()).to.be(sortedExpectedDataViews[1]);
-            expect(await menuEntries[1].getVisibleText()).to.be(sortedExpectedDataViews[0]);
+            expect(await menuEntries[0].getVisibleText()).to.be(sortedExpectedDataViews[3]);
+            expect(await menuEntries[1].getVisibleText()).to.be(sortedExpectedDataViews[2]);
+            expect(await menuEntries[2].getVisibleText()).to.be(sortedExpectedDataViews[1]);
+            expect(await menuEntries[3].getVisibleText()).to.be(sortedExpectedDataViews[0]);
           });
 
           // Test back ascending order
@@ -649,6 +657,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
             expect(await menuEntries[0].getVisibleText()).to.be(sortedExpectedDataViews[0]);
             expect(await menuEntries[1].getVisibleText()).to.be(sortedExpectedDataViews[1]);
+            expect(await menuEntries[2].getVisibleText()).to.be(sortedExpectedDataViews[2]);
+            expect(await menuEntries[3].getVisibleText()).to.be(sortedExpectedDataViews[3]);
           });
         });
 
@@ -660,6 +670,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
             expect(await menuEntries[0].getVisibleText()).to.be(expectedDataViews[0]);
             expect(await menuEntries[1].getVisibleText()).to.be(expectedDataViews[1]);
+            expect(await menuEntries[2].getVisibleText()).to.be(expectedDataViews[2]);
+            expect(await menuEntries[3].getVisibleText()).to.be(expectedDataViews[3]);
           });
 
           await PageObjects.observabilityLogsExplorer.typeSearchFieldWith('logs');
