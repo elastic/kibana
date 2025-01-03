@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PLUGIN_ID } from '../../common';
+import { INTEGRATIONS_PLUGIN_ID, PLUGIN_ID } from '../../common';
 
 export const FLEET_API_PRIVILEGES = {
   AGENTS: {
@@ -19,6 +19,10 @@ export const FLEET_API_PRIVILEGES = {
   SETTINGS: {
     READ: `${PLUGIN_ID}-settings-read`,
     ALL: `${PLUGIN_ID}-settings-all`,
+  },
+  INTEGRATIONS: {
+    READ: `${INTEGRATIONS_PLUGIN_ID}-read`,
+    ALL: `${INTEGRATIONS_PLUGIN_ID}-all`,
   },
   SETUP: `fleet-setup`,
 };
