@@ -82,7 +82,6 @@ packages/core/execution-context/core-execution-context-server-mocks @elastic/kib
 packages/core/fatal-errors/core-fatal-errors-browser-mocks @elastic/kibana-core
 packages/core/http/core-http-browser-mocks @elastic/kibana-core
 packages/core/http/core-http-context-server-mocks @elastic/kibana-core
-packages/core/http/core-http-resources-server @elastic/kibana-core
 packages/core/http/core-http-resources-server-internal @elastic/kibana-core
 packages/core/http/core-http-resources-server-mocks @elastic/kibana-core
 packages/core/http/core-http-router-server-internal @elastic/kibana-core
@@ -493,6 +492,7 @@ src/core/packages/http/common @elastic/kibana-core
 src/core/packages/http/context-server-internal @elastic/kibana-core
 src/core/packages/http/request-handler-context-server @elastic/kibana-core
 src/core/packages/http/request-handler-context-server-internal @elastic/kibana-core
+src/core/packages/http/resources-server @elastic/kibana-core
 src/platform/packages/private/analytics/utils/analytics_collection_utils @elastic/kibana-core
 src/platform/packages/private/default-nav/analytics @elastic/kibana-data-discovery @elastic/kibana-presentation @elastic/kibana-visualizations
 src/platform/packages/private/default-nav/devtools @elastic/kibana-management
