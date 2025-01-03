@@ -35,7 +35,6 @@ import { CoreKibanaRequest, getProtocolFromRequest } from './request';
 import { kibanaResponseFactory } from './response';
 import { HapiResponseAdapter } from './response_adapter';
 import { wrapErrors } from './error_wrapper';
-import { Method } from './versioned_router/types';
 import { formatErrorMeta } from './util';
 import { stripIllegalHttp2Headers } from './strip_illegal_http2_headers';
 import { InternalRouteConfig, buildRoute } from './route';
@@ -80,12 +79,6 @@ export type VersionedRouteConfig<P, Q, B, M extends RouteMethod> = Omit<
 > & {
   security?: RouteSecurityGetter;
 };
-
-/** @internal */
-export type InternalRegistrar<M extends Method, C extends RequestHandlerContextBase> = <P, Q, B>(
-  route: InternalRouteConfig<P, Q, B, M>,
-  handler: RequestHandler<P, Q, B, C, M>
-) => ReturnType<RouteRegistrar<M, C>>;
 
 /** @internal */
 type RouterEvents =
