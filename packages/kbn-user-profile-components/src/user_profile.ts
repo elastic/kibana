@@ -15,7 +15,7 @@ import type { UserProfileAvatarData, UserProfileData } from './types';
  * IMPORTANT:
  *
  * The types in this file have been imported from
- * `x-pack/plugins/security/common/model/user_profile.ts`
+ * `x-pack/platform/plugins/shared/security/common/model/user_profile.ts`
  *
  * When making changes please ensure to keep both files in sync.
  */

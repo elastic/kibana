@@ -140,7 +140,7 @@
     "xpack.searchAssistant": "solutions/search/plugins/search_assistant",
     "xpack.searchProfiler": "platform/plugins/shared/searchprofiler",
     "xpack.security": [
-      "plugins/security",
+      "platform/plugins/shared/security",
       "packages/security"
     ],
     "xpack.server": "legacy/server",
