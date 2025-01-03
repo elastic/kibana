@@ -5,6 +5,7 @@
  * 2.0.
  */
 import { v4 as uuidv4 } from 'uuid';
+
 import { COUNT, TOP_VALUE } from '../../translations';
 import type { GetLensAttributes, LensAttributes } from '../../types';
 
@@ -109,11 +110,11 @@ export const getExternalAlertLensAttributes: GetLensAttributes = ({
                   params: { emptyAsNull: true },
                 },
                 [columnTopValue]: {
-                  label: TOP_VALUE(`${stackByField}`), // could be event.category
+                  label: TOP_VALUE(`${stackByField}`),
                   dataType: 'string',
                   operationType: 'terms',
                   scale: 'ordinal',
-                  sourceField: `${stackByField}`, // could be event.category
+                  sourceField: `${stackByField}`,
                   isBucketed: true,
                   params: {
                     size: 10,
@@ -159,5 +160,5 @@ export const getExternalAlertLensAttributes: GetLensAttributes = ({
         id: '{dataViewId}',
       },
     ],
-  } as LensAttributes;
+  } as unknown as LensAttributes;
 };

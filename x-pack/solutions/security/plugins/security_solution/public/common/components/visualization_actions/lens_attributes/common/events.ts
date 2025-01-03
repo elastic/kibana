@@ -6,6 +6,7 @@
  */
 import { v4 as uuidv4 } from 'uuid';
 import type { GetLensAttributes } from '../../types';
+import { COUNT } from '../../translations';
 
 const layerId = uuidv4();
 // Exported for testing purposes
@@ -80,7 +81,7 @@ export const getEventsHistogramLensAttributes: GetLensAttributes = ({
                   },
                 },
                 [columnCountOfRecordsId]: {
-                  label: 'Count of records',
+                  label: COUNT,
                   dataType: 'number',
                   operationType: 'count',
                   isBucketed: false,
