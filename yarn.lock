@@ -4141,7 +4141,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/cloud-experiments-plugin@link:x-pack/plugins/cloud_integrations/cloud_experiments":
+"@kbn/cloud-experiments-plugin@link:x-pack/platform/plugins/shared/cloud_integrations/cloud_experiments":
   version "0.0.0"
   uid ""
 
