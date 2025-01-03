@@ -4629,7 +4629,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-http-server-internal@link:packages/core/http/core-http-server-internal":
+"@kbn/core-http-server-internal@link:src/core/packages/http/server-internal":
   version "0.0.0"
   uid ""
 
