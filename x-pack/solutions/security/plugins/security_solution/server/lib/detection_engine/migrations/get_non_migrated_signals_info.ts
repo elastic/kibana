@@ -17,6 +17,41 @@ import { isOutdated as getIsOutdated, signalsAreOutdated } from './helpers';
 import { getLatestIndexTemplateVersion } from './get_latest_index_template_version';
 import { getIndexAliasPerSpace } from './get_index_alias_per_space';
 
+const REINDEXED_PREFIX = '.reindexed-v8-';
+
+export const checkIfMigratedIndexOutdated = (
+  indexName: string,
+  indexVersionsByIndex: IndexVersionsByIndex,
+  latestTemplateVersion: number
+) => {
+  const isIndexOutdated = getIsOutdated({
+    current: indexVersionsByIndex[indexName] ?? 0,
+    target: latestTemplateVersion,
+  });
+
+  if (!isIndexOutdated) {
+    return false;
+  }
+
+  const nameWithoutPrefix = indexName.replace(REINDEXED_PREFIX, '.');
+
+  const hasOutdatedMigratedIndices = Object.entries(indexVersionsByIndex).every(
+    ([index, version]) => {
+      if (index === indexName) {
+        return true;
+      }
+
+      if (index.startsWith(nameWithoutPrefix) || index.startsWith(indexName)) {
+        return getIsOutdated({ current: version ?? 0, target: latestTemplateVersion });
+      }
+
+      return true;
+    }
+  );
+
+  return hasOutdatedMigratedIndices;
+};
+
 interface OutdatedSpaces {
   isMigrationRequired: boolean;
   spaces: string[];
@@ -84,6 +119,14 @@ export const getNonMigratedSignalsInfo = async ({
       (acc, indexName) => {
         const version = indexVersionsByIndex[indexName] ?? 0;
         const signalVersions = signalVersionsByIndex[indexName] ?? [];
+
+        // filter out migrated from 7.x to 8 indices
+        if (
+          indexName.startsWith(REINDEXED_PREFIX) &&
+          !checkIfMigratedIndexOutdated(indexName, indexVersionsByIndex, latestTemplateVersion)
+        ) {
+          return acc;
+        }
 
         const isOutdated =
           getIsOutdated({ current: version, target: latestTemplateVersion }) ||
