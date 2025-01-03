@@ -10,13 +10,10 @@ import { identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { failure } from 'io-ts/lib/PathReporter';
 import { inRange } from 'lodash';
-import {
-  SavedObject,
-  SavedObjectsClientContract,
-  SavedObjectsErrorHelpers,
-} from '@kbn/core/server';
+import type { SavedObject, SavedObjectsClientContract } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { MetricsDataClient } from '@kbn/metrics-data-access-plugin/server';
-import {
+import type {
   InfraSavedSourceConfiguration,
   InfraSource,
   InfraSourceConfiguration,

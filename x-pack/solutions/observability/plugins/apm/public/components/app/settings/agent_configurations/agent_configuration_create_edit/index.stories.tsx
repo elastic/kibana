@@ -7,15 +7,13 @@
 
 import { storiesOf } from '@storybook/react';
 import React from 'react';
-import { CoreStart } from '@kbn/core/public';
-import { AgentConfiguration } from '../../../../../../common/agent_configuration/configuration_types';
+import type { CoreStart } from '@kbn/core/public';
+import type { AgentConfiguration } from '../../../../../../common/agent_configuration/configuration_types';
 import { FETCH_STATUS } from '../../../../../hooks/use_fetcher';
 import { createCallApmApi } from '../../../../../services/rest/create_call_apm_api';
 import { AgentConfigurationCreateEdit } from '.';
-import {
-  ApmPluginContext,
-  ApmPluginContextValue,
-} from '../../../../../context/apm_plugin/apm_plugin_context';
+import type { ApmPluginContextValue } from '../../../../../context/apm_plugin/apm_plugin_context';
+import { ApmPluginContext } from '../../../../../context/apm_plugin/apm_plugin_context';
 
 storiesOf('app/settings/AgentConfigurations/agent_configuration_create_edit', module)
   .addDecorator((storyFn) => {

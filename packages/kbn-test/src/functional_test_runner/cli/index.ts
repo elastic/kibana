@@ -7,8 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from '../../../common/lib/saved_object_embeddable';
-export { Embeddable } from './embeddable';
-export { EmbeddableErrorHandler } from './embeddable_error_handler';
-export { ErrorEmbeddable } from './error_embeddable';
-export type { EmbeddableInput, EmbeddableOutput, IEmbeddable } from './i_embeddable';
+export { runFtrCli } from './ftr';
+export { checkFTRCodeOwnersCLI } from './code_owners';

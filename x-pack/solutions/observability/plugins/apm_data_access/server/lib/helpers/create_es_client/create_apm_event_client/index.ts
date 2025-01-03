@@ -19,7 +19,7 @@ import type { ESSearchRequest, InferSearchResponseOf } from '@kbn/es-types';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { unwrapEsResponse } from '@kbn/observability-plugin/server';
 import { compact, omit } from 'lodash';
-import { ValuesType } from 'utility-types';
+import type { ValuesType } from 'utility-types';
 import type { APMError, Metric, Span, Transaction, Event } from '@kbn/apm-types/es_schemas_ui';
 import type { InspectResponse } from '@kbn/observability-plugin/typings/common';
 import type { DataTier } from '@kbn/observability-shared-plugin/common';
