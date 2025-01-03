@@ -12,23 +12,23 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 import { extent, max, min } from 'd3';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { isDefined } from '@kbn/ml-is-defined';
+import type {
+  InfluencersFilterQuery,
+  MlAnomalyRecordDoc,
+  MlEntityField,
+  MlRecordForInfluencer,
+} from '@kbn/ml-anomaly-utils';
 import {
   aggregationTypeTransform,
   getEntityFieldList,
   isMultiBucketAnomaly,
-  type InfluencersFilterQuery,
-  type MlAnomalyRecordDoc,
-  type MlEntityField,
-  type MlRecordForInfluencer,
-  _DOC_COUNT,
-  DOC_COUNT,
-  ES_AGGREGATION,
-  ML_JOB_AGGREGATION,
-} from '@kbn/ml-anomaly-utils';
+} from '@kbn/ml-anomaly-utils/anomaly_utils';
+import { _DOC_COUNT, DOC_COUNT } from '@kbn/ml-anomaly-utils/field_types';
+import { ES_AGGREGATION } from '@kbn/ml-anomaly-utils/es_aggregation';
+import { ML_JOB_AGGREGATION } from '@kbn/ml-anomaly-utils/aggregation_types';
 import { isRuntimeMappings } from '@kbn/ml-runtime-field-utils';
 import { parseInterval } from '@kbn/ml-parse-interval';
 
-import type { MlClient } from '../../lib/ml_client';
 import type {
   MetricData,
   ModelPlotOutput,
@@ -39,7 +39,13 @@ import type {
   ChartPoint,
   SeriesConfig,
   ExplorerChartsData,
-} from '../../../common/types/results';
+} from '@kbn/ml-common-types/results';
+import type { ChartType } from '@kbn/ml-common-constants/charts';
+import { CHART_TYPE, SCHEDULE_EVENT_MARKER_ENTITY } from '@kbn/ml-common-constants/charts';
+import type { CombinedJob } from '@kbn/ml-common-types/anomaly_detection_jobs/combined_job';
+import type { Datafeed } from '@kbn/ml-common-types/anomaly_detection_jobs/datafeed';
+import type { Job as MlJob } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
+import type { MlClient } from '../../lib/ml_client';
 import {
   isMappableJob,
   isModelPlotChartableForDetector,
@@ -49,14 +55,10 @@ import {
   mlFunctionToESAggregation,
 } from '../../../common/util/job_utils';
 import type { CriteriaField } from './results_service';
-import type { CombinedJob, Datafeed } from '../../shared';
 
 import { getDatafeedAggregations } from '../../../common/util/datafeed_utils';
 import { findAggField } from '../../../common/util/validation_utils';
-import type { ChartType } from '../../../common/constants/charts';
-import { CHART_TYPE, SCHEDULE_EVENT_MARKER_ENTITY } from '../../../common/constants/charts';
 import { getChartType } from '../../../common/util/chart_utils';
-import type { MlJob } from '../..';
 
 export function chartLimits(data: ChartPoint[] = []) {
   const domain = extent(data, (d) => {

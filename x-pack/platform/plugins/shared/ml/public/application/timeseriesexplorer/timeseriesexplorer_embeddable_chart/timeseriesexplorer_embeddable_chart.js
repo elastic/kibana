@@ -28,11 +28,12 @@ import React, { Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { context } from '@kbn/kibana-react-plugin/public';
-import { ML_JOB_AGGREGATION, aggregationTypeTransform } from '@kbn/ml-anomaly-utils';
+import { ML_JOB_AGGREGATION } from '@kbn/ml-anomaly-utils/aggregation_types';
+import { aggregationTypeTransform } from '@kbn/ml-anomaly-utils/anomaly_utils';
 
 import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 
-import { ANOMALIES_TABLE_DEFAULT_QUERY_SIZE } from '../../../../common/constants/search';
+import { ANOMALIES_TABLE_DEFAULT_QUERY_SIZE } from '@kbn/ml-common-constants/search';
 import {
   isModelPlotEnabled,
   isModelPlotChartableForDetector,

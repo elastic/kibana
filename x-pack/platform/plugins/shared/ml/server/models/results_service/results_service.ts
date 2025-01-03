@@ -5,32 +5,36 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { sortBy, slice, get, cloneDeep } from 'lodash';
 import moment from 'moment';
 import Boom from '@hapi/boom';
+
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+
 import type { IScopedClusterClient } from '@kbn/core/server';
-import {
-  showActualForFunction,
-  showTypicalForFunction,
-  type MlAnomaliesTableRecord,
-  type MlAnomalyCategorizerStatsDoc,
-  type MlAnomalyRecordDoc,
-  ML_JOB_ID,
-  ML_PARTITION_FIELD_VALUE,
+import type {
+  MlAnomaliesTableRecord,
+  MlAnomalyCategorizerStatsDoc,
+  MlAnomalyRecordDoc,
 } from '@kbn/ml-anomaly-utils';
-import { getIndicesOptions } from '../../../common/util/datafeed_utils';
-import { buildAnomalyTableItems } from './build_anomaly_table_items';
-import { ANOMALIES_TABLE_DEFAULT_QUERY_SIZE } from '../../../common/constants/search';
-import { getPartitionFieldsValuesFactory } from './get_partition_fields_values';
+import { showActualForFunction, showTypicalForFunction } from '@kbn/ml-anomaly-utils/anomaly_utils';
+import { ML_JOB_ID, ML_PARTITION_FIELD_VALUE } from '@kbn/ml-anomaly-utils/constants';
+import { ANOMALIES_TABLE_DEFAULT_QUERY_SIZE } from '@kbn/ml-common-constants/search';
 import type {
   GetStoppedPartitionResult,
   GetDatafeedResultsChartDataResult,
   DatafeedResultsChartDataParams,
-} from '../../../common/types/results';
-import { defaultSearchQuery } from '../../../common/types/results';
+} from '@kbn/ml-common-types/results';
+import { defaultSearchQuery } from '@kbn/ml-common-types/results';
+
+import { getIndicesOptions } from '../../../common/util/datafeed_utils';
+
 import type { MlClient } from '../../lib/ml_client';
+
 import { datafeedsProvider } from '../job_service/datafeeds';
+
+import { getPartitionFieldsValuesFactory } from './get_partition_fields_values';
+import { buildAnomalyTableItems } from './build_anomaly_table_items';
 import { annotationServiceProvider } from '../annotation_service';
 import { anomalyChartsDataProvider } from './anomaly_charts';
 

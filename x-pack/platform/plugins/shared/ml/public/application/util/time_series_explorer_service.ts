@@ -12,19 +12,22 @@ import { forkJoin, of, catchError, map } from 'rxjs';
 import { each, get } from 'lodash';
 
 import type { IUiSettingsClient } from '@kbn/core/public';
-import { aggregationTypeTransform } from '@kbn/ml-anomaly-utils';
-import { isMultiBucketAnomaly, ML_JOB_AGGREGATION } from '@kbn/ml-anomaly-utils';
+import type { MlAnomalyRecordDoc } from '@kbn/ml-anomaly-utils';
+import {
+  aggregationTypeTransform,
+  isMultiBucketAnomaly,
+} from '@kbn/ml-anomaly-utils/anomaly_utils';
+import { ML_JOB_AGGREGATION } from '@kbn/ml-anomaly-utils/aggregation_types';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
-import { type MlAnomalyRecordDoc } from '@kbn/ml-anomaly-utils';
 import type { TimeRangeBounds, TimeBucketsInterval } from '@kbn/ml-time-buckets';
 import { parseInterval } from '@kbn/ml-parse-interval';
 
-import type { GetAnnotationsResponse } from '../../../common/types/annotations';
+import type { GetAnnotationsResponse } from '@kbn/ml-common-types/annotations';
+import { ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE } from '@kbn/ml-common-constants/search';
+import type { Job } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
 import { mlFunctionToESAggregation } from '../../../common/util/job_utils';
-import { ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE } from '../../../common/constants/search';
 import { CHARTS_POINT_TARGET } from '../timeseriesexplorer/timeseriesexplorer_constants';
 import { timeBucketsServiceFactory } from './time_buckets_service';
-import type { Job } from '../../../common/types/anomaly_detection_jobs';
 import type { CriteriaField } from '../services/results_service';
 import {
   MAX_SCHEDULED_EVENTS,

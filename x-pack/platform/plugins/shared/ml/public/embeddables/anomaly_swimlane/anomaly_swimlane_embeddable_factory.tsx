@@ -14,23 +14,21 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { useTimeBuckets } from '@kbn/ml-time-buckets';
-import {
-  apiHasExecutionContext,
-  apiHasParentApi,
-  apiPublishesTimeRange,
-  fetch$,
-  initializeTimeRange,
-  initializeTitles,
-  useBatchedPublishingSubjects,
-} from '@kbn/presentation-publishing';
+import { apiHasExecutionContext } from '@kbn/presentation-publishing/interfaces/has_execution_context';
+import { apiHasParentApi } from '@kbn/presentation-publishing/interfaces/has_parent_api';
+import { apiPublishesTimeRange } from '@kbn/presentation-publishing/interfaces/fetch/publishes_unified_search';
+import { fetch$ } from '@kbn/presentation-publishing/interfaces/fetch/fetch';
+import { initializeTimeRange } from '@kbn/presentation-publishing/interfaces/fetch/initialize_time_range';
+import { initializeTitles } from '@kbn/presentation-publishing/interfaces/titles/titles_api';
+import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing/publishing_subject';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import React, { useCallback, useState } from 'react';
 import useUnmount from 'react-use/lib/useUnmount';
 import type { Observable } from 'rxjs';
 import { BehaviorSubject, combineLatest, distinctUntilChanged, map, of, Subscription } from 'rxjs';
 import fastIsEqual from 'fast-deep-equal';
-import type { AnomalySwimlaneEmbeddableServices } from '..';
-import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from '..';
+import type { AnomalySwimlaneEmbeddableServices } from '../types';
+import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from '../constants';
 import type { MlDependencies } from '../../application/app';
 import { Y_AXIS_LABEL_WIDTH } from '../../application/explorer/constants';
 import type { AppStateSelectedCells } from '../../application/explorer/explorer_utils';

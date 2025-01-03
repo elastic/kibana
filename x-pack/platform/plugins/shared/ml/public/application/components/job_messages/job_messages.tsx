@@ -15,7 +15,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { timeFormatter } from '@kbn/ml-date-utils';
 
-import type { JobMessage } from '../../../../common/types/audit_message';
+import type { JobMessage } from '@kbn/ml-common-types/audit_message';
 
 import { blurButtonOnClick } from '../../util/component_utils';
 
