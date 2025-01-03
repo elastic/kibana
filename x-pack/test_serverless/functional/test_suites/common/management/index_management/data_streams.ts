@@ -194,10 +194,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       };
 
       const verifyModeHasBeenChanged = async (indexModeName: string) => {
+        await pageObjects.header.waitUntilLoadingHasFinished();
         expect(await testSubjects.getVisibleText('indexModeValue')).to.be(indexModeName);
 
         // Click update template
         await pageObjects.indexManagement.clickNextButton();
+        await pageObjects.header.waitUntilLoadingHasFinished();
 
         // Verify index mode and close detail tab
         expect(await testSubjects.getVisibleText('indexModeValue')).to.be(indexModeName);
@@ -282,6 +284,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         await testSubjects.click('nextButton');
         await testSubjects.click('nextButton');
+        await pageObjects.header.waitUntilLoadingHasFinished();
         // Modify Index settings
         await testSubjects.setValue('kibanaCodeEditor', '{}', {
           clearWithKeyboard: true,
@@ -304,6 +307,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         await testSubjects.click('nextButton');
         await testSubjects.click('nextButton');
+        await pageObjects.header.waitUntilLoadingHasFinished();
         // Modify Index settings
         await testSubjects.setValue(
           'kibanaCodeEditor',
