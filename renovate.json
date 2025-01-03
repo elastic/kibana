@@ -2249,33 +2249,126 @@
         "cypress"
       ],
       "reviewers": [
-        "Team:apm",
-        "Team: SecuritySolution"
+        "team:apm",
+        "team:security-solution"
       ],
       "matchBaseBranches": [
         "main"
       ],
       "labels": [
         "buildkite-ci",
+        "backport:all-open",
+        "release_note:skip",
         "ci:all-cypress-suites"
       ],
       "minimumReleaseAge": "7 days",
       "enabled": true
     },
     {
-      "groupName": "security solution modules",
+      "groupName": "zod",
       "matchDepNames": [
-        "zod",
-        "langchain"
+        "zod"
       ],
       "reviewers": [
-        "Team: SecuritySolution"
+        "team:security-solution"
       ],
       "matchBaseBranches": [
         "main"
       ],
       "labels": [
-        "Team: SecuritySolution"
+        "Team: SecuritySolution",
+        "backport:all-open",
+        "release_note:skip"
+      ],
+      "minimumReleaseAge": "7 days",
+      "enabled": true
+    },
+    {
+      "groupName": "adm-zip",
+      "matchDepNames": [
+        "adm-zip",
+        "@types/adm-zip"
+      ],
+      "reviewers": [
+        "team:security-solution"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "Team: SecuritySolution",
+        "backport:all-open",
+        "release_note:skip"
+      ],
+      "minimumReleaseAge": "7 days",
+      "enabled": true
+    },
+    {
+      "groupName": "rbush",
+      "matchDepNames": [
+        "rbush",
+        "@types/rbush"
+      ],
+      "reviewers": [
+        "team:security-solution"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "Team: SecuritySolution",
+        "backport:all-open",
+        "release_note:skip"
+      ],
+      "minimumReleaseAge": "7 days",
+      "enabled": true
+    },
+    {
+      "groupName": "buildkite-test-collector",
+      "matchDepNames": [
+        "buildkite-test-collector"
+      ],
+      "reviewers": [
+        "team:security-solution"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "Team: SecuritySolution",
+        "backport:all-open",
+        "release_note:skip"
+      ],
+      "minimumReleaseAge": "7 days",
+      "enabled": true
+    },
+    {
+      "groupName": "misc security solution deps",
+      "matchDepNames": [
+        "camelcase-keys",
+        "copy-to-clipboard",
+        "css-box-model",
+        "i18n-iso-countries",
+        "node-diff3",
+        "re-resizable",
+        "react-diff-view",
+        "snakecase-keys",
+        "suricata-sid-db",
+        "ts-easing",
+        "typescript-fsa",
+        "typescript-fsa-reducers",
+        "unidiff"
+      ],
+      "reviewers": [
+        "team:security-solution"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "Team: SecuritySolution",
+        "backport:all-open",
+        "release_note:skip"
       ],
       "minimumReleaseAge": "7 days",
       "enabled": true
@@ -2732,17 +2825,101 @@
       "enabled": true
     },
     {
-      "groupName": "native-hdr-histogram",
+      "groupName": "@appland/sql-parser",
       "matchDepNames": [
-        "native-hdr-histogram"
+        "@appland/sql-parser"
       ],
       "reviewers": [
-        "team:obs-ux-infra_services-team"
+        "team:security-defend-workflows"
       ],
       "matchBaseBranches": [
         "main"
       ],
       "labels": [
+        "Team:Defend Workflows",
+        "release_note:skip",
+        "backport:all-open"
+      ],
+      "minimumReleaseAge": "7 days",
+      "enabled": true
+    },
+    {
+      "groupName": "langchain",
+      "matchDepNames": [
+        "langchain",
+        "@langchain/community",
+        "@langchain/core",
+        "@langchain/google-genai",
+        "@langchain/langgraph",
+        "@langchain/openai"
+      ],
+      "reviewers": [
+        "team:security-defend-workflows"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "Team:Defend Workflows",
+        "release_note:skip",
+        "backport:all-open"
+      ],
+      "minimumReleaseAge": "7 days",
+      "enabled": true
+    },
+    {
+      "groupName": "@google/generative-ai",
+      "matchDepNames": [
+        "@google/generative-ai"
+      ],
+      "reviewers": [
+        "team:security-defend-workflows"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "Team:Defend Workflows",
+        "release_note:skip",
+        "backport:all-open"
+      ],
+      "minimumReleaseAge": "7 days",
+      "enabled": true
+    },
+    {
+      "groupName": "@smithy",
+      "matchDepNames": [
+        "@smithy/eventstream-codec",
+        "@smithy/util-utf8"
+      ],
+      "reviewers": [
+        "team:security-defend-workflows"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "Team:Defend Workflows",
+        "release_note:skip",
+        "backport:all-open"
+      ],
+      "minimumReleaseAge": "7 days",
+      "enabled": true
+    },
+    {
+      "groupName": "nunjucks",
+      "matchDepNames": [
+        "@types/nunjucks",
+        "nunjucks"
+      ],
+      "reviewers": [
+        "team:security-scalability"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "Team:Security-Scalability",
         "release_note:skip",
         "backport:all-open"
       ],
