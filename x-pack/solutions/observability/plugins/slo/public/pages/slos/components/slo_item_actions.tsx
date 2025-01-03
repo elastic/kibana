@@ -31,6 +31,8 @@ interface Props {
   setIsActionsPopoverOpen: (value: boolean) => void;
   setDeleteConfirmationModalOpen: (value: boolean) => void;
   setResetConfirmationModalOpen: (value: boolean) => void;
+  setEnableConfirmationModalOpen: (value: boolean) => void;
+  setDisableConfirmationModalOpen: (value: boolean) => void;
   setIsAddRuleFlyoutOpen: (value: boolean) => void;
   setIsEditRuleFlyoutOpen: (value: boolean) => void;
   setDashboardAttachmentReady?: (value: boolean) => void;
@@ -65,6 +67,8 @@ export function SloItemActions({
   setIsEditRuleFlyoutOpen,
   setDeleteConfirmationModalOpen,
   setResetConfirmationModalOpen,
+  setEnableConfirmationModalOpen,
+  setDisableConfirmationModalOpen,
   setDashboardAttachmentReady,
   btnProps,
 }: Props) {
@@ -77,13 +81,20 @@ export function SloItemActions({
   const { data: permissions } = usePermissions();
   const navigateToClone = useCloneSlo();
 
-  const { handleNavigateToRules, sloEditUrl, remoteDeleteUrl, remoteResetUrl, sloDetailsUrl } =
-    useSloActions({
-      slo,
-      rules,
-      setIsEditRuleFlyoutOpen,
-      setIsActionsPopoverOpen,
-    });
+  const {
+    handleNavigateToRules,
+    sloEditUrl,
+    remoteDeleteUrl,
+    remoteResetUrl,
+    remoteEnableUrl,
+    remoteDisableUrl,
+    sloDetailsUrl,
+  } = useSloActions({
+    slo,
+    rules,
+    setIsEditRuleFlyoutOpen,
+    setIsActionsPopoverOpen,
+  });
 
   const handleClickActions = () => {
     setIsActionsPopoverOpen(!isActionsPopoverOpen);
@@ -111,6 +122,24 @@ export function SloItemActions({
       window.open(remoteResetUrl, '_blank');
     } else {
       setResetConfirmationModalOpen(true);
+      setIsActionsPopoverOpen(false);
+    }
+  };
+
+  const handleEnable = () => {
+    if (!!remoteEnableUrl) {
+      window.open(remoteEnableUrl, '_blank');
+    } else {
+      setEnableConfirmationModalOpen(true);
+      setIsActionsPopoverOpen(false);
+    }
+  };
+
+  const handleDisable = () => {
+    if (!!remoteDisableUrl) {
+      window.open(remoteDisableUrl, '_blank');
+    } else {
+      setDisableConfirmationModalOpen(true);
       setIsActionsPopoverOpen(false);
     }
   };
@@ -226,7 +255,7 @@ export function SloItemActions({
               key="disable"
               icon="stop"
               disabled={!permissions?.hasAllWriteRequested || hasUndefinedRemoteKibanaUrl}
-              onClick={handleReset}
+              onClick={handleDisable}
               toolTipContent={
                 hasUndefinedRemoteKibanaUrl ? NOT_AVAILABLE_FOR_UNDEFINED_REMOTE_KIBANA_URL : ''
               }
@@ -238,9 +267,9 @@ export function SloItemActions({
           ) : (
             <EuiContextMenuItem
               key="enable"
-              icon="start"
+              icon="play"
               disabled={!permissions?.hasAllWriteRequested || hasUndefinedRemoteKibanaUrl}
-              onClick={handleReset}
+              onClick={handleEnable}
               toolTipContent={
                 hasUndefinedRemoteKibanaUrl ? NOT_AVAILABLE_FOR_UNDEFINED_REMOTE_KIBANA_URL : ''
               }
