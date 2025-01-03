@@ -19,6 +19,7 @@ import {
   overlayServiceMock,
   themeServiceMock,
 } from '@kbn/core/public/mocks';
+import { userProfileServiceMock } from '@kbn/core-user-profile-browser-mocks';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import type { Role, SecurityLicense } from '@kbn/security-plugin-types-common';
 import {
@@ -43,6 +44,7 @@ const privilegeAPIClient = createPrivilegeAPIClientMock();
 const http = httpServiceMock.createStartContract();
 const notifications = notificationServiceMock.createStartContract();
 const overlays = overlayServiceMock.createStartContract();
+const userProfile = userProfileServiceMock.createStart();
 const theme = themeServiceMock.createStartContract();
 const i18n = i18nServiceMock.createStartContract();
 const logger = loggingSystemMock.createLogger();
@@ -89,6 +91,7 @@ const renderPrivilegeRolesForm = ({
             logger,
             i18n,
             http,
+            userProfile,
             theme,
             overlays,
             notifications,

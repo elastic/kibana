@@ -9,7 +9,7 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import type { MountPoint } from '@kbn/core/public';
+import type { MountPoint } from '@kbn/core-mount-utils-browser';
 import {
   KibanaRenderContextProvider,
   KibanaRenderContextProviderProps,
@@ -17,7 +17,7 @@ import {
 
 export type ToMountPointParams = Pick<
   KibanaRenderContextProviderProps,
-  'analytics' | 'i18n' | 'theme'
+  'analytics' | 'i18n' | 'theme' | 'userProfile'
 >;
 
 /**

@@ -8,7 +8,7 @@
 import { BehaviorSubject, Subject } from 'rxjs';
 import deepMerge from 'deepmerge';
 import React from 'react';
-import faker from 'faker';
+import { faker } from '@faker-js/faker';
 import { Query, Filter, AggregateQuery, TimeRange } from '@kbn/es-query';
 import { PhaseEvent, ViewMode } from '@kbn/presentation-publishing';
 import { DataView } from '@kbn/data-views-plugin/common';
@@ -32,24 +32,14 @@ import {
   LensSerializedState,
   VisualizationContext,
 } from '../types';
-import {
-  createMockDatasource,
-  createMockVisualization,
-  defaultDoc,
-  makeDefaultServices,
-} from '../../mocks';
-import {
-  Datasource,
-  DatasourceMap,
-  UserMessage,
-  Visualization,
-  VisualizationMap,
-} from '../../types';
+import { createMockDatasource, createMockVisualization, makeDefaultServices } from '../../mocks';
+import { Datasource, DatasourceMap, Visualization, VisualizationMap } from '../../types';
+import { initializeInternalApi } from '../initializers/initialize_internal_api';
 
 const LensApiMock: LensApi = {
   // Static props
   type: DOC_TYPE,
-  uuid: faker.random.uuid(),
+  uuid: faker.string.uuid(),
   // Shared Embeddable Observables
   panelTitle: new BehaviorSubject<string | undefined>(faker.lorem.words()),
   hidePanelTitle: new BehaviorSubject<boolean | undefined>(false),
@@ -94,7 +84,7 @@ const LensApiMock: LensApi = {
   setPanelTitle: jest.fn(),
   setHidePanelTitle: jest.fn(),
   phase$: new BehaviorSubject<PhaseEvent | undefined>({
-    id: faker.random.uuid(),
+    id: faker.string.uuid(),
     status: 'rendered',
     timeToEvent: 1000,
   }),
@@ -116,6 +106,7 @@ const LensApiMock: LensApi = {
   disabledActionIds: new BehaviorSubject<string[] | undefined>(undefined),
   setDisabledActionIds: jest.fn(),
   rendered$: new BehaviorSubject<boolean>(false),
+  searchSessionId$: new BehaviorSubject<string | undefined>(undefined),
 };
 
 const LensSerializedStateMock: LensSerializedState = createEmptyLensState(
@@ -138,7 +129,7 @@ export function getLensApiMock(overrides: Partial<LensApi> = {}) {
 
 export function getLensSerializedStateMock(overrides: Partial<LensSerializedState> = {}) {
   return {
-    savedObjectId: faker.random.uuid(),
+    savedObjectId: faker.string.uuid(),
     ...LensSerializedStateMock,
     ...overrides,
   };
@@ -262,7 +253,7 @@ export function createExpressionRendererMock(): jest.Mock<
   ));
 }
 
-function getValidExpressionParams(
+export function getValidExpressionParams(
   overrides: Partial<ExpressionWrapperProps> = {}
 ): ExpressionWrapperProps {
   return {
@@ -283,34 +274,11 @@ function getValidExpressionParams(
   };
 }
 
-const LensInternalApiMock: LensInternalApi = {
-  dataViews: new BehaviorSubject<DataView[] | undefined>(undefined),
-  attributes$: new BehaviorSubject<LensRuntimeState['attributes']>(defaultDoc),
-  overrides$: new BehaviorSubject<LensRuntimeState['overrides']>(undefined),
-  disableTriggers$: new BehaviorSubject<LensRuntimeState['disableTriggers']>(undefined),
-  dataLoading$: new BehaviorSubject<boolean | undefined>(undefined),
-  hasRenderCompleted$: new BehaviorSubject<boolean>(true),
-  expressionParams$: new BehaviorSubject<ExpressionWrapperProps | null>(getValidExpressionParams()),
-  expressionAbortController$: new BehaviorSubject<AbortController | undefined>(undefined),
-  renderCount$: new BehaviorSubject<number>(0),
-  messages$: new BehaviorSubject<UserMessage[]>([]),
-  validationMessages$: new BehaviorSubject<UserMessage[]>([]),
-  isNewlyCreated$: new BehaviorSubject<boolean>(true),
-  updateAttributes: jest.fn(),
-  updateOverrides: jest.fn(),
-  dispatchRenderStart: jest.fn(),
-  dispatchRenderComplete: jest.fn(),
-  updateDataLoading: jest.fn(),
-  updateExpressionParams: jest.fn(),
-  updateAbortController: jest.fn(),
-  updateDataViews: jest.fn(),
-  updateMessages: jest.fn(),
-  resetAllMessages: jest.fn(),
-  dispatchError: jest.fn(),
-  updateValidationMessages: jest.fn(),
-  setAsCreated: jest.fn(),
-  getDisplayOptions: jest.fn(() => ({})),
-};
+const LensInternalApiMock = initializeInternalApi(
+  getLensRuntimeStateMock(),
+  {},
+  makeEmbeddableServices()
+);
 
 export function getLensInternalApiMock(overrides: Partial<LensInternalApi> = {}): LensInternalApi {
   return {
@@ -325,6 +293,7 @@ export function getVisualizationContextHelperMock(
 ) {
   return {
     getVisualizationContext: jest.fn(() => ({
+      activeAttributes: getLensAttributesMock(attributesOverrides),
       mergedSearchContext: {},
       indexPatterns: {},
       indexPatternRefs: [],
@@ -332,7 +301,6 @@ export function getVisualizationContextHelperMock(
       activeDatasourceState: undefined,
       activeData: undefined,
       ...contextOverrides,
-      doc: getLensAttributesMock(attributesOverrides),
     })),
     updateVisualizationContext: jest.fn(),
   };

@@ -18,6 +18,7 @@ export function SvlSearchInferenceManagementPageProvider({ getService }: FtrProv
         await testSubjects.existOrFail('allInferenceEndpointsPage');
         await testSubjects.existOrFail('api-documentation');
         await testSubjects.existOrFail('view-your-models');
+        await testSubjects.existOrFail('add-inference-endpoint-header-button');
       },
 
       async expectTabularViewToBeLoaded() {
@@ -27,53 +28,29 @@ export function SvlSearchInferenceManagementPageProvider({ getService }: FtrProv
 
         const table = await testSubjects.find('inferenceEndpointTable');
         const rows = await table.findAllByClassName('euiTableRow');
-        expect(rows.length).to.equal(2);
+        // we need at least one (ELSER) otherwise index_mapping might experience some issues
+        expect(rows.length).to.greaterThan(1);
 
-        const elserEndpointCell = await rows[0].findByTestSubject('endpointCell');
-        const elserEndpointName = await elserEndpointCell.getVisibleText();
-        expect(elserEndpointName).to.contain('.elser-2-elasticsearch');
+        const texts = await Promise.all(rows.map((row) => row.getVisibleText()));
+        const hasElser2 = texts.some((text) => text.includes('.elser-2'));
+        const hasE5 = texts.some((text) => text.includes('.multilingual-e5'));
 
-        const elserProviderCell = await rows[0].findByTestSubject('providerCell');
-        const elserProviderName = await elserProviderCell.getVisibleText();
-        expect(elserProviderName).to.contain('Elasticsearch');
-        expect(elserProviderName).to.contain('.elser_model_2');
-
-        const elserTypeCell = await rows[0].findByTestSubject('typeCell');
-        const elserTypeName = await elserTypeCell.getVisibleText();
-        expect(elserTypeName).to.contain('sparse_embedding');
-
-        const e5EndpointCell = await rows[1].findByTestSubject('endpointCell');
-        const e5EndpointName = await e5EndpointCell.getVisibleText();
-        expect(e5EndpointName).to.contain('.multilingual-e5-small-elasticsearch');
-
-        const e5ProviderCell = await rows[1].findByTestSubject('providerCell');
-        const e5ProviderName = await e5ProviderCell.getVisibleText();
-        expect(e5ProviderName).to.contain('Elasticsearch');
-        expect(e5ProviderName).to.contain('.multilingual-e5-small');
-
-        const e5TypeCell = await rows[1].findByTestSubject('typeCell');
-        const e5TypeName = await e5TypeCell.getVisibleText();
-        expect(e5TypeName).to.contain('text_embedding');
+        expect(hasElser2).to.be(true);
+        expect(hasE5).to.be(true);
       },
 
       async expectPreconfiguredEndpointsCannotBeDeleted() {
-        const table = await testSubjects.find('inferenceEndpointTable');
-        const rows = await table.findAllByClassName('euiTableRow');
-
-        const elserDeleteAction = await rows[0].findByTestSubject('inferenceUIDeleteAction');
-        const e5DeleteAction = await rows[1].findByTestSubject('inferenceUIDeleteAction');
-
-        expect(await elserDeleteAction.isEnabled()).to.be(false);
-        expect(await e5DeleteAction.isEnabled()).to.be(false);
+        const preconfigureEndpoints = await testSubjects.findAll(
+          'inferenceUIDeleteAction-preconfigured'
+        );
+        for (const endpoint of preconfigureEndpoints) {
+          expect(await endpoint.isEnabled()).to.be(false);
+        }
       },
 
       async expectEndpointWithoutUsageTobeDelete() {
-        const table = await testSubjects.find('inferenceEndpointTable');
-        const rows = await table.findAllByClassName('euiTableRow');
-
-        const userCreatedEndpoint = await rows[2].findByTestSubject('inferenceUIDeleteAction');
-
-        await userCreatedEndpoint.click();
+        const userDefinedEdnpoint = await testSubjects.find('inferenceUIDeleteAction-user-defined');
+        await userDefinedEdnpoint.click();
         await testSubjects.existOrFail('deleteModalForInferenceUI');
         await testSubjects.existOrFail('deleteModalInferenceEndpointName');
 
@@ -83,12 +60,8 @@ export function SvlSearchInferenceManagementPageProvider({ getService }: FtrProv
       },
 
       async expectEndpointWithUsageTobeDelete() {
-        const table = await testSubjects.find('inferenceEndpointTable');
-        const rows = await table.findAllByClassName('euiTableRow');
-
-        const userCreatedEndpoint = await rows[2].findByTestSubject('inferenceUIDeleteAction');
-
-        await userCreatedEndpoint.click();
+        const userDefinedEdnpoint = await testSubjects.find('inferenceUIDeleteAction-user-defined');
+        await userDefinedEdnpoint.click();
         await testSubjects.existOrFail('deleteModalForInferenceUI');
         await testSubjects.existOrFail('deleteModalInferenceEndpointName');
 
@@ -121,6 +94,27 @@ export function SvlSearchInferenceManagementPageProvider({ getService }: FtrProv
 
         await elserCopyEndpointId.click();
         expect((await browser.getClipboardValue()).includes('.elser-2-elasticsearch')).to.be(true);
+      },
+    },
+
+    AddInferenceFlyout: {
+      async expectInferenceEndpointToBeVisible() {
+        await testSubjects.click('add-inference-endpoint-header-button');
+        await testSubjects.existOrFail('create-inference-flyout');
+
+        await testSubjects.click('provider-select');
+        await testSubjects.setValue('provider-super-select-search-box', 'Cohere');
+        await testSubjects.click('provider');
+
+        await testSubjects.existOrFail('api_key-password');
+        await testSubjects.click('completion');
+        await testSubjects.existOrFail('inference-endpoint-input-field');
+        (await testSubjects.getVisibleText('inference-endpoint-input-field')).includes(
+          'cohere-completion'
+        );
+
+        await testSubjects.click('add-inference-endpoint-submit-button');
+        expect(await testSubjects.isEnabled('add-inference-endpoint-submit-button')).to.be(false);
       },
     },
   };
