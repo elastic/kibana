@@ -9,7 +9,7 @@ import React, { FunctionComponent } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { EuiFieldNumber, EuiFieldText, EuiFormRow, EuiLink } from '@elastic/eui';
-import { proxySettingsUrl } from '../../../../services/documentation';
+import { proxySettingsUrl } from '../../../../../services/documentation';
 import { Props } from './connection_mode';
 
 export const ProxyConnection: FunctionComponent<Props> = (props) => {
