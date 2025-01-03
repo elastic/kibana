@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { SavedObjectsClientContract } from '@kbn/core/server';
-import { AgentPolicy, PackagePolicy } from '@kbn/fleet-plugin/common';
-import { Maybe } from '../../../typings/common';
-import { APMPluginStartDependencies } from '../../types';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
+import type { AgentPolicy, PackagePolicy } from '@kbn/fleet-plugin/common';
+import type { Maybe } from '../../../typings/common';
+import type { APMPluginStartDependencies } from '../../types';
 import { POLICY_ELASTIC_AGENT_ON_CLOUD } from '../../../common/fleet';
 
 export const APM_PACKAGE_NAME = 'apm';

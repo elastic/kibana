@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { RawSettingDefinition } from './types';
+import type { RawSettingDefinition } from './types';
 
 export const javaSettings: RawSettingDefinition[] = [
   {

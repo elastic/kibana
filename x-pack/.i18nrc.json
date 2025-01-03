@@ -16,7 +16,7 @@
     "xpack.stackConnectors": "platform/plugins/shared/stack_connectors",
     "xpack.apm": "solutions/observability/plugins/apm",
     "xpack.apmDataAccess": "solutions/observability/plugins/apm_data_access",
-    "xpack.banners": "plugins/banners",
+    "xpack.banners": "platform/plugins/private/banners",
     "xpack.canvas": "platform/plugins/private/canvas",
     "xpack.cases": "platform/plugins/shared/cases",
     "xpack.cloud": "plugins/cloud",
@@ -28,7 +28,7 @@
       "packages/kbn-cloud-security-posture-common",
       "packages/kbn-cloud-security-posture"
     ],
-    "xpack.customBranding": "plugins/custom_branding",
+    "xpack.customBranding": "platform/plugins/private/custom_branding",
     "xpack.dashboard": "platform/plugins/shared/dashboard_enhanced",
     "xpack.dataQuality": "platform/plugins/shared/data_quality",
     "xpack.datasetQuality": "platform/plugins/shared/dataset_quality",
@@ -47,10 +47,10 @@
     "xpack.exploratoryView": "solutions/observability/plugins/exploratory_view",
     "xpack.fileUpload": "platform/plugins/private/file_upload",
     "xpack.globalSearch": [
-      "plugins/global_search"
+      "platform/plugins/shared/global_search"
     ],
     "xpack.globalSearchBar": [
-      "plugins/global_search_bar"
+      "platform/plugins/private/global_search_bar"
     ],
     "xpack.graph": [
       "plugins/graph"
@@ -122,7 +122,7 @@
     ],
     "xpack.remoteClusters": "platform/plugins/private/remote_clusters",
     "xpack.reporting": [
-      "plugins/reporting"
+      "platform/plugins/private/reporting"
     ],
     "xpack.rollupJobs": [
       "platform/packages/private/rollup",
@@ -144,7 +144,7 @@
       "packages/security"
     ],
     "xpack.server": "legacy/server",
-    "xpack.serverless": "plugins/serverless",
+    "xpack.serverless": "platform/plugins/shared/serverless",
     "xpack.serverlessSearch": "solutions/search/plugins/serverless_search",
     "xpack.serverlessObservability": "solutions/observability/plugins/serverless_observability",
     "xpack.securitySolution": "solutions/security/plugins/security_solution",
@@ -158,7 +158,7 @@
     "xpack.snapshotRestore": "platform/plugins/private/snapshot_restore",
     "xpack.spaces": "plugins/spaces",
     "xpack.savedObjectsTagging": [
-      "plugins/saved_objects_tagging"
+      "platform/plugins/private/saved_objects_tagging"
     ],
     "xpack.taskManager": "legacy/platform/plugins/shared/task_manager",
     "xpack.threatIntelligence": "solutions/security/plugins/threat_intelligence",

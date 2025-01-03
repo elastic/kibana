@@ -15,7 +15,7 @@ import { useCrashGroupDistributionFetcher } from '../../../../hooks/use_crash_gr
 import { MobileErrorsAndCrashesTreemap } from '../charts/mobile_errors_and_crashes_treemap';
 import { MobileCrashGroupList } from './crash_group_list';
 import { FETCH_STATUS, isPending, useFetcher } from '../../../../hooks/use_fetcher';
-import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
+import type { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { ErrorDistribution } from '../errors_and_crashes_group_details/shared/distribution';
