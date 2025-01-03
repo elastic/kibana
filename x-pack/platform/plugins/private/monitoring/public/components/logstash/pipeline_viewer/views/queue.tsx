@@ -6,17 +6,24 @@
  */
 
 import React from 'react';
-import { StatementListHeading } from './statement_list_heading';
-import { EuiSpacer, EuiText } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { EuiSpacer, EuiText, UseEuiTheme, logicalCSS } from '@elastic/eui';
+
 import { FormattedMessage } from '@kbn/i18n-react';
-import './queue.scss';
+
+import { StatementListHeading } from './statement_list_heading';
+
+const queueMessageStyle = ({ euiTheme }: UseEuiTheme) => css`
+  ${logicalCSS('margin-left', euiTheme.size.l)}
+  color: ${euiTheme.colors.darkShade};
+`;
 
 export function Queue() {
   return (
     <div>
       <StatementListHeading iconType="logstashQueue" title="Queue" />
       <EuiSpacer size="s" />
-      <EuiText className="monPipelineViewer__queueMessage">
+      <EuiText css={queueMessageStyle}>
         <FormattedMessage
           id="xpack.monitoring.logstash.pipeline.queue.noMetricsDescription"
           defaultMessage="Queue metrics not available"

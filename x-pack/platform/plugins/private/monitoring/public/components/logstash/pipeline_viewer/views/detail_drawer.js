@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { last } from 'lodash';
+import { css } from '@emotion/react';
 import {
   EuiBadge,
   EuiCodeBlock,
@@ -24,13 +25,19 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
+
+import { FormattedMessage } from '@kbn/i18n-react';
+
 import { Sparkline } from '../../../sparkline';
 import { formatMetric } from '../../../../lib/format_number';
-import { FormattedMessage } from '@kbn/i18n-react';
-import './detail_drawer.scss';
+
+// TODO: Why is this width here?
+const lspvDetailDrawerSparklineContainerStyle = css`
+  width: 7vw;
+`;
 
 function renderIcon(vertex) {
-  return <EuiIcon type={vertex.iconType} className="lspvDetailDrawerIcon" />;
+  return <EuiIcon type={vertex.iconType} />;
 }
 
 function renderPluginBasicStats(vertex, timeseriesTooltipXValueFormatter) {
@@ -50,7 +57,7 @@ function renderPluginBasicStats(vertex, timeseriesTooltipXValueFormatter) {
           />
         </EuiTableRowCell>
         <EuiTableRowCell>
-          <div className="lspvDetailDrawerSparklineContainer">
+          <div css={lspvDetailDrawerSparklineContainerStyle}>
             <Sparkline
               series={vertex.stats.millis_per_event.data}
               options={{ xaxis: vertex.stats.millis_per_event.timeRange }}
@@ -76,7 +83,7 @@ function renderPluginBasicStats(vertex, timeseriesTooltipXValueFormatter) {
         />
       </EuiTableRowCell>
       <EuiTableRowCell>
-        <div className="lspvDetailDrawerSparklineContainer">
+        <div css={lspvDetailDrawerSparklineContainerStyle}>
           <Sparkline
             series={vertex.eventsPerSecond.data}
             options={{ xaxis: vertex.eventsPerSecond.timeRange }}
@@ -108,7 +115,7 @@ function renderPluginBasicStats(vertex, timeseriesTooltipXValueFormatter) {
           />
         </EuiTableRowCell>
         <EuiTableRowCell>
-          <div className="lspvDetailDrawerSparklineContainer">
+          <div css={lspvDetailDrawerSparklineContainerStyle}>
             <Sparkline
               series={vertex.stats.events_in.data}
               options={{ xaxis: vertex.stats.events_in.timeRange }}
@@ -138,7 +145,7 @@ function renderPluginBasicStats(vertex, timeseriesTooltipXValueFormatter) {
         />
       </EuiTableRowCell>
       <EuiTableRowCell>
-        <div className="lspvDetailDrawerSparklineContainer">
+        <div css={lspvDetailDrawerSparklineContainerStyle}>
           <Sparkline
             series={vertex.stats.events_out.data}
             options={{ xaxis: vertex.stats.events_out.timeRange }}
