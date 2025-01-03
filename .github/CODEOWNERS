@@ -164,7 +164,6 @@ packages/kbn-dev-proc-runner @elastic/kibana-operations
 packages/kbn-dev-utils @elastic/kibana-operations
 packages/kbn-docs-utils @elastic/kibana-operations
 packages/kbn-dom-drag-drop @elastic/kibana-visualizations @elastic/kibana-data-discovery
-packages/kbn-ebt-tools @elastic/kibana-core
 packages/kbn-es @elastic/kibana-operations
 packages/kbn-es-archiver @elastic/kibana-operations @elastic/appex-qa
 packages/kbn-es-errors @elastic/kibana-core
@@ -540,6 +539,7 @@ src/platform/packages/shared/kbn-datemath @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-discover-contextual-components @elastic/obs-ux-logs-team @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-discover-utils @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-doc-links @elastic/docs
+src/platform/packages/shared/kbn-ebt-tools @elastic/kibana-core
 src/platform/packages/shared/kbn-elastic-agent-utils @elastic/obs-ux-logs-team
 src/platform/packages/shared/kbn-es-query @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-esql-ast @elastic/kibana-esql
