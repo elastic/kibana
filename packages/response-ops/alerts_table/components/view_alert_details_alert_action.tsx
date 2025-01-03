@@ -7,17 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { memo } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiContextMenuItem } from '@elastic/eui';
 import { ALERT_UUID } from '@kbn/rule-data-utils';
-import type { AlertActionsProps } from '../types';
+import type { AdditionalContext, AlertActionsProps } from '../types';
+import { typedMemo } from '../utils/react';
 
 /**
  * Alerts table row action to open the selected alert detail page
  */
-export const ViewAlertDetailsAlertAction = memo(
-  ({
+export const ViewAlertDetailsAlertAction = typedMemo(
+  <AC extends AdditionalContext = AdditionalContext>({
     alert,
     openAlertInFlyout,
     onActionExecuted,
@@ -29,7 +30,7 @@ export const ViewAlertDetailsAlertAction = memo(
         basePath: { prepend },
       },
     },
-  }: AlertActionsProps) => {
+  }: AlertActionsProps<AC>) => {
     const alertId = (alert[ALERT_UUID]?.[0] as string) ?? null;
     const pagePath = alertId && tableId && resolveAlertPagePath?.(alertId, tableId);
     const linkToAlert = pagePath ? prepend(pagePath) : null;

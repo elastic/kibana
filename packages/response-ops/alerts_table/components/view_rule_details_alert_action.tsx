@@ -7,12 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { memo } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiContextMenuItem } from '@elastic/eui';
 import { ALERT_RULE_UUID } from '@kbn/rule-data-utils';
 import styled from '@emotion/styled';
-import type { AlertActionsProps } from '../types';
+import type { AdditionalContext, AlertActionsProps } from '../types';
+import { typedMemo } from '../utils/react';
 
 const MenuItem = styled(EuiContextMenuItem)`
   &:hover {
@@ -23,8 +24,8 @@ const MenuItem = styled(EuiContextMenuItem)`
 /**
  * Alerts table row action to open the rule to which the selected alert is associated
  */
-export const ViewRuleDetailsAlertAction = memo(
-  ({
+export const ViewRuleDetailsAlertAction = typedMemo(
+  <AC extends AdditionalContext = AdditionalContext>({
     alert,
     resolveRulePagePath,
     tableId,
@@ -33,7 +34,7 @@ export const ViewRuleDetailsAlertAction = memo(
         basePath: { prepend },
       },
     },
-  }: AlertActionsProps) => {
+  }: AlertActionsProps<AC>) => {
     const ruleId = (alert[ALERT_RULE_UUID]?.[0] as string) ?? null;
     const pagePath = ruleId && tableId && resolveRulePagePath?.(ruleId, tableId);
     const linkToRule = pagePath ? prepend(pagePath) : null;

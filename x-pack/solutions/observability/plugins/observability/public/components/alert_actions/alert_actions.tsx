@@ -22,9 +22,8 @@ import { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { useRouteMatch } from 'react-router-dom';
 import { SLO_ALERTS_TABLE_ID } from '@kbn/observability-shared-plugin/common';
 import { DefaultAlertActions } from '@kbn/response-ops-alerts-table/components/default_alert_actions';
-import { AlertActionsProps } from '@kbn/response-ops-alerts-table/types';
 import type { EventNonEcsData } from '../../../common/typings';
-import type { GetObservabilityAlertsTableProp } from '../alerts_table/types';
+import { GetObservabilityAlertsTableProp } from '../alerts_table/types';
 import { RULE_DETAILS_PAGE_ID } from '../../pages/rule_details/constants';
 import { paths, SLO_DETAIL_PATH } from '../../../common/locators/paths';
 import { parseAlert } from '../../pages/alerts/helpers/parse_alert';
@@ -35,18 +34,47 @@ import { ALERT_DETAILS_PAGE_ID } from '../../pages/alert_details/alert_details';
 export const AlertActions: GetObservabilityAlertsTableProp<'renderActionsCell'> = ({
   config,
   observabilityRuleTypeRegistry,
-  ...customActionsProps
+  alert,
+  id,
+  tableId,
+  dataGridRef,
+  refresh,
+  isLoading,
+  isLoadingAlerts,
+  alerts,
+  oldAlertsData,
+  ecsAlertsData,
+  alertsCount,
+  browserFields,
+  isLoadingMutedAlerts,
+  mutedAlerts,
+  isLoadingCases,
+  cases,
+  isLoadingMaintenanceWindows,
+  maintenanceWindows,
+  pageIndex,
+  pageSize,
+  openAlertInFlyout,
+  showAlertStatusWithFlapping,
+  bulkActionsStore,
+  columns,
+  renderCellValue,
+  renderCellPopover,
+  renderActionsCell,
+  renderFlyoutHeader,
+  renderFlyoutBody,
+  renderFlyoutFooter,
+  services,
 }) => {
   const {
     http: {
       basePath: { prepend },
     },
-  } = customActionsProps.services;
+  } = services;
   const {
     helpers: { getRuleIdFromEvent, canUseCases },
     hooks: { useCasesAddToNewCaseFlyout, useCasesAddToExistingCaseModal },
-  } = customActionsProps.services.cases! as unknown as CasesPublicStart; // Cases is guaranteed to be defined in Observability
-  const { alert, refresh, id } = customActionsProps;
+  } = services.cases! as unknown as CasesPublicStart; // Cases is guaranteed to be defined in Observability
   const isSLODetailsPage = useRouteMatch(SLO_DETAIL_PATH);
 
   const isInApp = Boolean(id === SLO_ALERTS_TABLE_ID && isSLODetailsPage);
@@ -147,10 +175,74 @@ export const AlertActions: GetObservabilityAlertsTableProp<'renderActionsCell'> 
         resolveAlertPagePath={(alertId, currentPageId) =>
           currentPageId !== ALERT_DETAILS_PAGE_ID ? paths.observability.alertDetails(alertId) : null
         }
-        {...(customActionsProps as AlertActionsProps)}
+        tableId={tableId}
+        dataGridRef={dataGridRef}
+        refresh={refresh}
+        isLoading={isLoading}
+        isLoadingAlerts={isLoadingAlerts}
+        alert={alert}
+        alerts={alerts}
+        oldAlertsData={oldAlertsData}
+        ecsAlertsData={ecsAlertsData}
+        alertsCount={alertsCount}
+        browserFields={browserFields}
+        isLoadingMutedAlerts={isLoadingMutedAlerts}
+        mutedAlerts={mutedAlerts}
+        isLoadingCases={isLoadingCases}
+        cases={cases}
+        isLoadingMaintenanceWindows={isLoadingMaintenanceWindows}
+        maintenanceWindows={maintenanceWindows}
+        pageIndex={pageIndex}
+        pageSize={pageSize}
+        openAlertInFlyout={openAlertInFlyout}
+        showAlertStatusWithFlapping={showAlertStatusWithFlapping}
+        bulkActionsStore={bulkActionsStore}
+        columns={columns}
+        renderCellValue={renderCellValue}
+        renderCellPopover={renderCellPopover}
+        renderActionsCell={renderActionsCell}
+        renderFlyoutHeader={renderFlyoutHeader}
+        renderFlyoutBody={renderFlyoutBody}
+        renderFlyoutFooter={renderFlyoutFooter}
+        services={services}
+        config={config}
+        observabilityRuleTypeRegistry={observabilityRuleTypeRegistry}
       />
     ),
-    [customActionsProps]
+    [
+      alert,
+      alerts,
+      alertsCount,
+      browserFields,
+      bulkActionsStore,
+      cases,
+      columns,
+      config,
+      dataGridRef,
+      ecsAlertsData,
+      isLoading,
+      isLoadingAlerts,
+      isLoadingCases,
+      isLoadingMaintenanceWindows,
+      isLoadingMutedAlerts,
+      maintenanceWindows,
+      mutedAlerts,
+      observabilityRuleTypeRegistry,
+      oldAlertsData,
+      openAlertInFlyout,
+      pageIndex,
+      pageSize,
+      refresh,
+      renderActionsCell,
+      renderCellPopover,
+      renderCellValue,
+      renderFlyoutBody,
+      renderFlyoutFooter,
+      renderFlyoutHeader,
+      services,
+      showAlertStatusWithFlapping,
+      tableId,
+    ]
   );
 
   const actionsMenuItems = [

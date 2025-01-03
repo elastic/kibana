@@ -448,20 +448,21 @@ export interface AlertsDataGridProps<AC extends AdditionalContext = AdditionalCo
   onChangePageIndex: (index: number) => void;
 }
 
-export interface AlertActionsProps extends RenderContext<AdditionalContext> {
-  key?: Key;
-  alert: Alert;
-  onActionExecuted?: () => void;
-  isAlertDetailsEnabled?: boolean;
-  /**
-   * Implement this to resolve your app's specific rule page path, return null to avoid showing the link
-   */
-  resolveRulePagePath?: (ruleId: string, currentPageId: string) => string | null;
-  /**
-   * Implement this to resolve your app's specific alert page path, return null to avoid showing the link
-   */
-  resolveAlertPagePath?: (alertId: string, currentPageId: string) => string | null;
-}
+export type AlertActionsProps<AC extends AdditionalContext = AdditionalContext> =
+  RenderContext<AC> & {
+    key?: Key;
+    alert: Alert;
+    onActionExecuted?: () => void;
+    isAlertDetailsEnabled?: boolean;
+    /**
+     * Implement this to resolve your app's specific rule page path, return null to avoid showing the link
+     */
+    resolveRulePagePath?: (ruleId: string, currentPageId: string) => string | null;
+    /**
+     * Implement this to resolve your app's specific alert page path, return null to avoid showing the link
+     */
+    resolveAlertPagePath?: (alertId: string, currentPageId: string) => string | null;
+  };
 
 export interface BulkActionsConfig {
   label: string;
