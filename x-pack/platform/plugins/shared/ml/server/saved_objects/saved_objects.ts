@@ -67,6 +67,12 @@ export function setupSavedObjects(savedObjects: SavedObjectsServiceSetup) {
     namespaceType: 'multiple',
     migrations,
     mappings: mlTrainedModel,
+    management: {
+      icon: 'machineLearningApp',
+      displayName: i18n.translate('xpack.ml.savedObjects.trainedModel.displayName', {
+        defaultMessage: 'Trained model',
+      }),
+    },
   });
   savedObjects.registerType<MlModuleAttributes>({
     name: ML_MODULE_SAVED_OBJECT_TYPE,
@@ -85,9 +91,6 @@ export function setupSavedObjects(savedObjects: SavedObjectsServiceSetup) {
           uiCapabilitiesPath: 'ml.canGetJobs',
         };
       },
-      displayName: i18n.translate('xpack.ml.savedObjects.trainedModel.displayName', {
-        defaultMessage: 'Trained model',
-      }),
     },
     namespaceType: 'agnostic',
     migrations,
