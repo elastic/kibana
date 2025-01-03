@@ -1861,7 +1861,7 @@ module.exports = {
         'packages/kbn-mock-idp-plugin/**/*.{js,mjs,ts,tsx}',
         'packages/kbn-mock-idp-utils/**/*.{js,mjs,ts,tsx}',
         'src/platform/packages/shared/kbn-security-hardening/**/*.{js,mjs,ts,tsx}',
-        'packages/kbn-user-profile-components/**/*.{js,mjs,ts,tsx}',
+        'src/platform/packages/shared/kbn-user-profile-components/**/*.{js,mjs,ts,tsx}',
 
         'x-pack/platform/plugins/shared/encrypted_saved_objects/**/*.{js,mjs,ts,tsx}',
         'x-pack/test/encrypted_saved_objects_api_integration/**/*.{js,mjs,ts,tsx}',
