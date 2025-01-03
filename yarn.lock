@@ -4561,7 +4561,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-feature-flags-server-mocks@link:packages/core/feature-flags/core-feature-flags-server-mocks":
+"@kbn/core-feature-flags-server-mocks@link:src/core/packages/feature-flags/server-mocks":
   version "0.0.0"
   uid ""
 
