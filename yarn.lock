@@ -4341,7 +4341,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-base-common-internal@link:packages/core/base/core-base-common-internal":
+"@kbn/core-base-common-internal@link:src/core/packages/base/common-internal":
   version "0.0.0"
   uid ""
 
