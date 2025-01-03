@@ -188,7 +188,7 @@ export class Router<Context extends RequestHandlerContextBase = RequestHandlerCo
     });
   }
 
-  private async handle<P, Q, B>({
+  private async handle({
     request,
     responseToolkit,
     handler,
