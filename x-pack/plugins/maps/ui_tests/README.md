@@ -13,9 +13,7 @@ Then you can run the tests multiple times in another terminal with:
 
 ```bash
 // ESS
-npx playwright test --config x-pack/plugins/maps/ui_tests/playwright.config.ts --grep @ess
-// Serverless
-npx playwright test --config x-pack/plugins/maps/ui_tests/playwright.config.ts --grep @svlSearch // @svlOblt, @svlSecurity
+npx playwright test --config x-pack/plugins/maps/ui_tests/playwright.config.ts
 ```
 
 Test results are available in `x-pack/plugins/maps/ui_tests/output`
