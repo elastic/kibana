@@ -4441,7 +4441,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-deprecations-server-internal@link:packages/core/deprecations/core-deprecations-server-internal":
+"@kbn/core-deprecations-server-internal@link:src/core/packages/deprecations/server-internal":
   version "0.0.0"
   uid ""
 
