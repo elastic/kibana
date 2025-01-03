@@ -97,6 +97,9 @@ export const calculateEndpointAuthz = (
   const canReadEndpointExceptions = hasAuth('showEndpointExceptions');
   const canWriteEndpointExceptions = hasAuth('crudEndpointExceptions');
 
+  const canReadWorkflowInsights = hasAuth('readWorkflowInsights');
+  const canWriteWorkflowInsights = hasAuth('writeWorkflowInsights');
+
   const authz: EndpointAuthz = {
     canWriteSecuritySolution,
     canReadSecuritySolution,
@@ -122,6 +125,8 @@ export const calculateEndpointAuthz = (
     canWriteActionsLogManagement,
     canReadActionsLogManagement: canReadActionsLogManagement && isEnterpriseLicense,
     canAccessEndpointActionsLogManagement: canReadActionsLogManagement && isPlatinumPlusLicense,
+    canReadWorkflowInsights: canReadWorkflowInsights && isEnterpriseLicense,
+    canWriteWorkflowInsights: canWriteWorkflowInsights && isEnterpriseLicense,
 
     // ---------------------------------------------------------
     // Response Actions
@@ -207,6 +212,8 @@ export const getEndpointAuthzInitialState = (): EndpointAuthz => {
     canReadEventFilters: false,
     canReadEndpointExceptions: false,
     canWriteEndpointExceptions: false,
+    canReadWorkflowInsights: false,
+    canWriteWorkflowInsights: false,
   };
 };
 

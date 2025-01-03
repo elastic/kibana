@@ -30,6 +30,8 @@ export const getSocManager: () => Omit<Role, 'name'> = () => {
             'host_isolation_all',
             'process_operations_all',
             'actions_log_management_all',
+
+            'workflow_insights_all',
           ],
         },
       },
