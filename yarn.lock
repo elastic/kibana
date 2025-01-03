@@ -4177,7 +4177,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/cloud@link:packages/cloud":
+"@kbn/cloud@link:src/platform/packages/shared/cloud":
   version "0.0.0"
   uid ""
 
