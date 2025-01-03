@@ -41,12 +41,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     // TODO: https://github.com/elastic/kibana/issues/192751
     this.tags(['skipMKI']);
     let editorRoleAuthc: RoleCredentials;
-    let adminRoleAuthc: RoleCredentials;
     let internalReqHeader: InternalRequestHeader;
 
     before(async () => {
       editorRoleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('editor');
-      adminRoleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
       internalReqHeader = svlCommonApi.getInternalRequestHeader();
       await createKnowledgeBaseModel(ml);
 
@@ -68,7 +66,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       await clearKnowledgeBase(es);
       await clearConversations(es);
       await svlUserManager.invalidateM2mApiKeyWithRoleScope(editorRoleAuthc);
-      await svlUserManager.invalidateM2mApiKeyWithRoleScope(adminRoleAuthc);
     });
 
     describe('when creating private and public user instructions', () => {
