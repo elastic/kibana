@@ -6,7 +6,7 @@
  */
 
 import { validateName } from './validate_name';
-import { PROXY_MODE, SNIFF_MODE } from '../../../../../../common/constants';
+import { PROXY_MODE, SNIFF_MODE } from '../../../../../../../common/constants';
 import { validateSeeds } from './validate_seeds';
 import { validateProxy } from './validate_proxy';
 import { validateCloudRemoteAddress } from './validate_cloud_url';

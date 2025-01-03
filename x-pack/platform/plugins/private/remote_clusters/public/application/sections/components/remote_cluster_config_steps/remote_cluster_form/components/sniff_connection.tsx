@@ -16,7 +16,7 @@ import {
   EuiLink,
 } from '@elastic/eui';
 
-import { transportPortUrl } from '../../../../services/documentation';
+import { transportPortUrl } from '../../../../../services/documentation';
 import { validateSeed } from '../validators';
 import { Props } from './connection_mode';
 
