@@ -106,6 +106,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       await titleSimulator.status(200);
       await titleSimulator.next('My generated title');
+      await titleSimulator.tokenCount({ completion: 1, prompt: 1, total: 2 });
       await titleSimulator.complete();
 
       await conversationSimulator.status(200);
