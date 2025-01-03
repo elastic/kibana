@@ -26,7 +26,7 @@ import { i18n } from '@kbn/i18n';
 import { TimeRange } from '@kbn/es-query';
 import { isEmpty } from 'lodash';
 import { FieldIcon } from '@kbn/react-field';
-import { FIELD_DEFINITION_TYPES, FieldDefinitionConfig } from '@kbn/streams-schema';
+import { FIELD_DEFINITION_TYPES } from '@kbn/streams-schema';
 import { useController, useFieldArray, useFormContext } from 'react-hook-form';
 import { css } from '@emotion/react';
 import { useStreamsAppFetch } from '../../../hooks/use_streams_app_fetch';
@@ -42,7 +42,7 @@ export const ProcessorOutcomePreview = ({ definition, formFields }) => {
     streams: { streamsRepositoryClient },
   } = dependencies.start;
 
-  const { setValue, watch } = useFormContext();
+  const { setValue } = useFormContext();
 
   const {
     timeRange,
@@ -253,7 +253,7 @@ const OutcomeControls = ({
   };
 
   return (
-    <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
+    <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" wrap>
       <EuiFilterGroup
         aria-label={i18n.translate(
           'xpack.streams.streamDetailView.managementTab.enrichment.processorFlyout.outcomeControlsAriaLabel',
@@ -376,9 +376,14 @@ const OutcomePreviewTable = ({
   return <PreviewTable documents={documents} displayColumns={columns} height={500} />;
 };
 
+interface DetectedField {
+  name: string;
+  type: string;
+}
+
 export const DetectedFields = () => {
   const { euiTheme } = useEuiTheme();
-  const { fields } = useFieldArray({
+  const { fields } = useFieldArray<{ detected_fields: DetectedField[] }>({
     name: 'detected_fields',
   });
 
@@ -402,13 +407,15 @@ export const DetectedFields = () => {
   );
 };
 
-const getDetectedFieldSelectOptions = (field, fieldType): Array<EuiSuperSelectOption<string>> =>
+const getDetectedFieldSelectOptions = (
+  fieldValue: DetectedField
+): Array<EuiSuperSelectOption<string>> =>
   [...FIELD_DEFINITION_TYPES, 'unmapped'].map((type) => ({
     value: type,
     inputDisplay: (
       <EuiFlexGroup alignItems="center" gutterSize="s">
-        <FieldIcon type={field.value.type} size="s" />
-        {field.value.name}
+        <FieldIcon type={fieldValue.type} size="s" />
+        {fieldValue.name}
       </EuiFlexGroup>
     ),
     dropdownDisplay: (
@@ -419,19 +426,16 @@ const getDetectedFieldSelectOptions = (field, fieldType): Array<EuiSuperSelectOp
     ),
   }));
 
-const DetectedFieldSelector = ({ selectorId }) => {
-  const { field: field } = useController({ name: selectorId });
+const DetectedFieldSelector = ({ selectorId }: { selectorId: string }) => {
+  const { field } = useController({ name: selectorId });
   const { field: fieldType } = useController({ name: `${selectorId}.type` });
 
-  const options = useMemo(
-    () => getDetectedFieldSelectOptions(field, fieldType),
-    [field, fieldType]
-  );
+  const options = useMemo(() => getDetectedFieldSelectOptions(field.value), [field.value]);
 
   return (
     <EuiSuperSelect
       options={options}
-      valueOfSelected={fieldType.value ?? 'unmapped'}
+      valueOfSelected={fieldType.value}
       onChange={fieldType.onChange}
       css={css`
         min-inline-size: 180px;

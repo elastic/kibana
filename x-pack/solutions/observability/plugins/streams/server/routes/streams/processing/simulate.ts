@@ -138,7 +138,7 @@ const computeDetectedFields = (
 
   const uniqueFields = [...new Set(diffs)];
 
-  return uniqueFields.map((name) => ({ name, type: null }));
+  return uniqueFields.map((name) => ({ name, type: 'unmapped' }));
 };
 
 const isSuccessfulProcessor = (processorSimulation: IngestSimulatePipelineSimulation) =>
