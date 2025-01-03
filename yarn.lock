@@ -4913,7 +4913,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-rendering-browser@link:packages/core/rendering/core-rendering-browser":
+"@kbn/core-rendering-browser@link:src/core/packages/rendering/browser":
   version "0.0.0"
   uid ""
 
