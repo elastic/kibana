@@ -4425,7 +4425,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-deprecations-browser-internal@link:packages/core/deprecations/core-deprecations-browser-internal":
+"@kbn/core-deprecations-browser-internal@link:src/core/packages/deprecations/browser-internal":
   version "0.0.0"
   uid ""
 
