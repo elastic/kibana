@@ -14,16 +14,42 @@ import {
   AggregationsMultiBucketAggregateBase,
   AggregationsStringRareTermsBucketKeys,
 } from '@elastic/elasticsearch/lib/api/types';
-import type { CspVulnerabilityFinding } from '@kbn/cloud-security-posture-common/schema/vulnerabilities/latest';
+import type {
+  CspVulnerabilityFinding,
+  Vulnerability,
+} from '@kbn/cloud-security-posture-common/schema/vulnerabilities/latest';
 import type { CoreStart } from '@kbn/core/public';
 import type { CspClientPluginStartDeps, UseCspOptions } from '../types';
 import { showErrorToast } from '../..';
 import { getVulnerabilitiesAggregationCount, getVulnerabilitiesQuery } from '../utils/hooks_utils';
 
+export enum VULNERABILITY {
+  ID = 'vulnerability.id',
+  SEVERITY = 'vulnerability.severity',
+  PACKAGE_NAME = 'vulnerability.package.name',
+}
+
 type LatestFindingsRequest = IKibanaSearchRequest<SearchRequest>;
 type LatestFindingsResponse = IKibanaSearchResponse<
   SearchResponse<CspVulnerabilityFinding, FindingsAggs>
 >;
+
+export interface VulnerabilitiesPackage extends Vulnerability {
+  package: {
+    name: string;
+    version: string;
+  };
+}
+
+export interface VulnerabilitiesFindingTableDetailsFields {
+  [VULNERABILITY.ID]: string;
+  [VULNERABILITY.SEVERITY]: string;
+  [VULNERABILITY.PACKAGE_NAME]: string;
+}
+
+export type VulnerabilitiesFindingDetailFields = Pick<Vulnerability, 'score'> &
+  Pick<CspVulnerabilityFinding, 'vulnerability' | 'resource'> &
+  VulnerabilitiesFindingTableDetailsFields;
 
 interface FindingsAggs {
   count: AggregationsMultiBucketAggregateBase<AggregationsStringRareTermsBucketKeys>;
@@ -56,7 +82,11 @@ export const useVulnerabilitiesFindings = (options: UseCspOptions) => {
         rows: hits.hits.map((finding) => ({
           vulnerability: finding._source?.vulnerability,
           resource: finding._source?.resource,
-        })) as Array<Pick<CspVulnerabilityFinding, 'vulnerability' | 'resource'>>,
+          score: finding._source?.vulnerability?.score,
+          [VULNERABILITY.ID]: finding._source?.vulnerability?.id,
+          [VULNERABILITY.SEVERITY]: finding._source?.vulnerability?.severity,
+          [VULNERABILITY.PACKAGE_NAME]: finding._source?.package?.name,
+        })) as VulnerabilitiesFindingDetailFields[],
       };
     },
     {

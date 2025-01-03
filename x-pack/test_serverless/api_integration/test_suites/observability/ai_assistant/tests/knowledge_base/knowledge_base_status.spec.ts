@@ -14,6 +14,9 @@ import {
 } from '@kbn/test-suites-xpack/observability_ai_assistant_api_integration/tests/knowledge_base/helpers';
 import { AI_ASSISTANT_KB_INFERENCE_ID } from '@kbn/observability-ai-assistant-plugin/server/service/inference_endpoint';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
+import { KNOWLEDGE_BASE_SETUP_API_URL } from './knowledge_base_setup.spec';
+
+const KNOWLEDGE_BASE_STATUS_API_URL = '/internal/observability_ai_assistant/kb/status';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const ml = getService('ml');
@@ -27,7 +30,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       await createKnowledgeBaseModel(ml);
       await observabilityAIAssistantAPIClient
         .slsAdmin({
-          endpoint: 'POST /internal/observability_ai_assistant/kb/setup',
+          endpoint: `POST ${KNOWLEDGE_BASE_SETUP_API_URL}`,
           params: {
             query: {
               model_id: TINY_ELSER.id,
@@ -45,7 +48,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     it('returns correct status after knowledge base is setup', async () => {
       const res = await observabilityAIAssistantAPIClient
         .slsEditor({
-          endpoint: 'GET /internal/observability_ai_assistant/kb/status',
+          endpoint: `GET ${KNOWLEDGE_BASE_STATUS_API_URL}`,
         })
         .expect(200);
 
@@ -59,12 +62,22 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       const res = await observabilityAIAssistantAPIClient
         .slsEditor({
-          endpoint: 'GET /internal/observability_ai_assistant/kb/status',
+          endpoint: `GET ${KNOWLEDGE_BASE_STATUS_API_URL}`,
         })
         .expect(200);
 
       expect(res.body.enabled).to.be(true);
       expect(res.body.ready).to.be(false);
+    });
+
+    describe('security roles and access privileges', () => {
+      it('should deny access for users without the ai_assistant privilege', async () => {
+        await observabilityAIAssistantAPIClient
+          .slsUnauthorized({
+            endpoint: `GET ${KNOWLEDGE_BASE_STATUS_API_URL}`,
+          })
+          .expect(403);
+      });
     });
   });
 }
