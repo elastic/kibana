@@ -45,6 +45,9 @@ export interface RunActionParamsSchema {
   signal?: AbortSignal;
   timeout?: number;
 }
+export interface InferenceChatCompleteParamsSchema {
+  body: InvokeAIActionParamsSchema;
+}
 
 export interface TraceOptions {
   evaluationId?: string;

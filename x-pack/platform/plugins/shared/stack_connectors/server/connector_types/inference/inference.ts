@@ -128,11 +128,13 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
     const obs$ = from(eventSourceStreamIntoObservable(res as unknown as Readable)).pipe(
       filter((line) => !!line && line !== '[DONE]'),
       map((line) => {
-        return JSON.parse(line) as OpenAI.ChatCompletionChunk | { error: { message: string } };
+        return JSON.parse(line) as
+          | OpenAI.ChatCompletionChunk
+          | { error: { message?: string; reason?: string } };
       }),
       tap((line) => {
         if ('error' in line) {
-          throw new Error(line.error.message);
+          throw new Error(line.error.message ?? line.error.reason ?? 'Unknown error');
         }
         if (
           'choices' in line &&

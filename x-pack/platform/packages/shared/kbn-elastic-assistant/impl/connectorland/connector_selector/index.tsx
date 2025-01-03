@@ -97,12 +97,10 @@ export const ConnectorSelector: React.FC<Props> = React.memo(
     const connectorOptions = useMemo(
       () =>
         (aiConnectors ?? []).map((connector) => {
-          const connectorTypeTitle =
-            getGenAiConfig(connector)?.apiProvider ??
-            getActionTypeTitle(actionTypeRegistry.get(connector.actionTypeId));
           const connectorDetails = connector.isPreconfigured
             ? i18n.PRECONFIGURED_CONNECTOR
-            : connectorTypeTitle;
+            : getGenAiConfig(connector)?.apiProvider ??
+              getActionTypeTitle(actionTypeRegistry.get(connector.actionTypeId));
           const attackDiscoveryStats =
             stats !== null
               ? stats.statsPerConnector.find((s) => s.connectorId === connector.id) ?? null

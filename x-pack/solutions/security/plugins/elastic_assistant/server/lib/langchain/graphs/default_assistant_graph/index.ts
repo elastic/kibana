@@ -8,7 +8,7 @@
 import { StructuredTool } from '@langchain/core/tools';
 import { getDefaultArguments } from '@kbn/langchain/server';
 import {
-  createOpenAIFunctionsAgent,
+  createOpenAIToolsAgent,
   createStructuredChatAgent,
   createToolCallingAgent,
 } from 'langchain/agents';
@@ -130,30 +130,31 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
     }
   }
 
-  const agentRunnable = isOpenAI
-    ? await createOpenAIFunctionsAgent({
-        llm: createLlmInstance(),
-        tools,
-        prompt: formatPrompt(systemPrompts.openai, systemPrompt),
-        streamRunnable: isStream,
-      })
-    : llmType && ['bedrock', 'gemini'].includes(llmType)
-    ? await createToolCallingAgent({
-        llm: createLlmInstance(),
-        tools,
-        prompt:
-          llmType === 'bedrock'
-            ? formatPrompt(systemPrompts.bedrock, systemPrompt)
-            : formatPrompt(systemPrompts.gemini, systemPrompt),
-        streamRunnable: isStream,
-      })
-    : // used with OSS models
-      await createStructuredChatAgent({
-        llm: createLlmInstance(),
-        tools,
-        prompt: formatPromptStructured(systemPrompts.structuredChat, systemPrompt),
-        streamRunnable: isStream,
-      });
+  const agentRunnable =
+    isOpenAI || llmType === 'inference'
+      ? await createOpenAIToolsAgent({
+          llm: createLlmInstance(),
+          tools,
+          prompt: formatPrompt(systemPrompts.openai, systemPrompt),
+          streamRunnable: isStream,
+        })
+      : llmType && ['bedrock', 'gemini'].includes(llmType)
+      ? await createToolCallingAgent({
+          llm: createLlmInstance(),
+          tools,
+          prompt:
+            llmType === 'bedrock'
+              ? formatPrompt(systemPrompts.bedrock, systemPrompt)
+              : formatPrompt(systemPrompts.gemini, systemPrompt),
+          streamRunnable: isStream,
+        })
+      : // used with OSS models
+        await createStructuredChatAgent({
+          llm: createLlmInstance(),
+          tools,
+          prompt: formatPromptStructured(systemPrompts.structuredChat, systemPrompt),
+          streamRunnable: isStream,
+        });
 
   const apmTracer = new APMTracer({ projectName: traceOptions?.projectName ?? 'default' }, logger);
   const telemetryTracer = telemetryParams

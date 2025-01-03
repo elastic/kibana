@@ -15,7 +15,7 @@ export const allowedExperimentalValues = Object.freeze({
   isMustacheAutocompleteOn: false,
   sentinelOneConnectorOn: true,
   crowdstrikeConnectorOn: true,
-  inferenceConnectorOn: false,
+  inferenceConnectorOn: true,
   crowdstrikeConnectorRTROn: false,
 });
 
