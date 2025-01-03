@@ -118,7 +118,7 @@ export const InfrastructurePage = () => {
                 </HeaderMenuPortal>
               )}
 
-              <Routes>
+              <Routes enableExecutionContextTracking={true}>
                 <Route path="/inventory" component={SnapshotPage} />
                 {config.featureFlags.metricsExplorerEnabled && (
                   <Route path="/explorer" component={MetricsExplorerPage} />
