@@ -386,7 +386,7 @@ import type { FunctionDefinition } from '../types';
 ${
   functionsType === 'scalar'
     ? `import type { ESQLFunction } from '@kbn/esql-ast';
-import { isLiteralItem } from '../../../../../shared/helpers';`
+import { isLiteralItem } from '../../shared/helpers';`
     : ''
 }
 
