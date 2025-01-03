@@ -15,6 +15,7 @@ import { ConcreteTaskInstance, TaskManagerStartContract } from '..';
 import { TaskStatus } from '../task';
 import { REMOVED_TYPES } from '../task_type_dictionary';
 import { TASK_MANAGER_INDEX } from '../constants';
+import { TaskManagerPluginsStart } from '../plugin';
 
 export const TASK_ID = 'mark_removed_tasks_as_unrecognized';
 const TASK_TYPE = `task_manager:${TASK_ID}`;
@@ -40,7 +41,7 @@ export async function scheduleMarkRemovedTasksAsUnrecognizedDefinition(
 
 export function registerMarkRemovedTasksAsUnrecognizedDefinition(
   logger: Logger,
-  coreStartServices: () => Promise<[CoreStart, TaskManagerStartContract, unknown]>,
+  coreStartServices: () => Promise<[CoreStart, TaskManagerPluginsStart, TaskManagerStartContract]>,
   taskTypeDictionary: TaskTypeDictionary
 ) {
   taskTypeDictionary.registerTaskDefinitions({
@@ -53,7 +54,7 @@ export function registerMarkRemovedTasksAsUnrecognizedDefinition(
 
 export function taskRunner(
   logger: Logger,
-  coreStartServices: () => Promise<[CoreStart, TaskManagerStartContract, unknown]>
+  coreStartServices: () => Promise<[CoreStart, TaskManagerPluginsStart, TaskManagerStartContract]>
 ) {
   return () => {
     return {

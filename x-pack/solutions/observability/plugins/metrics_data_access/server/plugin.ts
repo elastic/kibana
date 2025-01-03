@@ -18,7 +18,9 @@ import { KibanaFramework } from './lib/adapters/framework/kibana_framework_adapt
 import { initMetricExplorerRoute } from './routes/metrics_explorer';
 import { initMetricIndicesRoute } from './routes/metric_indices';
 
-export class MetricsDataPlugin implements Plugin<MetricsDataPluginSetup, {}, {}, {}> {
+export class MetricsDataPlugin
+  implements Plugin<MetricsDataPluginSetup, {}, {}, MetricsDataPluginStartDeps>
+{
   private metricsClient: MetricsDataClient | null = null;
 
   constructor(context: PluginInitializerContext) {}

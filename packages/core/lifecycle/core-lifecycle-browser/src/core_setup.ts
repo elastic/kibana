@@ -36,7 +36,7 @@ import type { CoreStart } from './core_start';
  * navigation in the generated docs until there's a fix for
  * https://github.com/Microsoft/web-build-tools/issues/1237
  */
-export interface CoreSetup<TPluginsStart extends object = object, TStart = unknown> {
+export interface CoreSetup<TPluginsStart extends Record<string, any> = {}, TStart = unknown> {
   /** {@link AnalyticsServiceSetup} */
   analytics: AnalyticsServiceSetup;
   /** {@link ApplicationSetup} */

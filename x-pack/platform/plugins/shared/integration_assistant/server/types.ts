@@ -12,6 +12,10 @@ import {
   ActionsClientSimpleChatModel,
 } from '@kbn/langchain/server';
 import type { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/server';
+import type {
+  PluginStartContract as ActionsPluginStart,
+  PluginSetupContract as ActionsPluginSetup,
+} from '@kbn/actions-plugin/server/plugin';
 import { ESProcessorItem, SamplesFormat } from '../common';
 
 export interface IntegrationAssistantPluginSetup {
@@ -22,9 +26,11 @@ export interface IntegrationAssistantPluginStart {}
 
 export interface IntegrationAssistantPluginSetupDependencies {
   licensing: LicensingPluginSetup;
+  actions: ActionsPluginSetup;
 }
 export interface IntegrationAssistantPluginStartDependencies {
   licensing: LicensingPluginStart;
+  actions: ActionsPluginStart;
 }
 
 export interface SimplifiedProcessor {
