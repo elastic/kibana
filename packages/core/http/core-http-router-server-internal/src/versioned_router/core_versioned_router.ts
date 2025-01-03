@@ -86,6 +86,7 @@ export class CoreVersionedRouter implements VersionedRouter {
     (options: VersionedRouteConfig<Method>): VersionedRoute<Method, any> => {
       const route = CoreVersionedRoute.from({
         router: this.router,
+        log: this.log,
         method: routeMethod,
         path: options.path,
         options: {

@@ -48,11 +48,10 @@ export type ContextEnhancer<
   Context extends RequestHandlerContextBase
 > = (handler: RequestHandler<P, Q, B, Context, Method>) => RequestHandlerEnhanced<P, Q, B, Method>;
 
-/**
- * @internal
- */
+/** @internal */
 export type InternalRouteHandler = (request: Request) => Promise<IKibanaResponse>;
 
+/** @internal */
 export type InternalRouterRoute = Omit<RouterRoute, 'handler'> & {
   handler: InternalRouteHandler;
 };

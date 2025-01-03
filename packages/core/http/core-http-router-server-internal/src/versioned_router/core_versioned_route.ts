@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { schema } from '@kbn/config-schema';
 import {
   ELASTIC_HTTP_VERSION_HEADER,
   ELASTIC_HTTP_VERSION_QUERY_PARAM,
@@ -27,6 +26,7 @@ import type {
 } from '@kbn/core-http-server';
 import { Request } from '@hapi/hapi';
 import { Logger } from '@kbn/logging';
+import { Mutable } from 'utility-types';
 import type { HandlerResolutionStrategy, Method, Options } from './types';
 
 import { validate } from './validate';
@@ -35,6 +35,7 @@ import {
   isValidRouteVersion,
   hasQueryVersion,
   readVersion,
+  removeQueryVersion,
 } from './route_version_utils';
 import { injectVersionHeader } from '../util';
 import { validRouteSecurity } from '../security_route_config_validator';
@@ -53,13 +54,6 @@ interface InternalVersionedRouteConfig<M extends RouteMethod> extends VersionedR
   useVersionResolutionStrategyForInternalPaths: Map<string, boolean>;
   defaultHandlerResolutionStrategy: HandlerResolutionStrategy;
 }
-
-// This validation is a pass-through so that we can apply our version-specific validation later
-export const passThroughValidation = {
-  body: schema.nullable(schema.any()),
-  params: schema.nullable(schema.any()),
-  query: schema.nullable(schema.any()),
-};
 
 function extractValidationSchemaFromHandler(handler: VersionedRouterRoute['handlers'][0]) {
   if (handler.options.validate === false) return undefined;
@@ -168,29 +162,27 @@ export class CoreVersionedRoute implements VersionedRoute {
     return version;
   }
 
-  private handle = async (request: Request): Promise<IKibanaResponse> => {
+  private handle = async (hapiRequest: Request): Promise<IKibanaResponse> => {
     if (this.handlers.size <= 0) {
       return responseFactory.custom({
         statusCode: 500,
         body: `No handlers registered for [${this.method}] [${this.path}].`,
       });
     }
-    const version = this.getVersion(request);
-    // request.apiVersion = version;
+    const version = this.getVersion(hapiRequest);
 
     if (!version) {
       return responseFactory.badRequest({
         body: `Please specify a version via ${ELASTIC_HTTP_VERSION_HEADER} header. Available versions: ${this.versionsToString()}`,
       });
     }
-    if (hasQueryVersion(request) && !this.enableQueryVersion) {
-      // if () {
-      //   // This endpoint has opted-in to query versioning, so we remove the query parameter as it is reserved
-      //   removeQueryVersion(req);
-      // } else
-      return responseFactory.badRequest({
-        body: `Use of query parameter "${ELASTIC_HTTP_VERSION_QUERY_PARAM}" is not allowed. Please specify the API version using the "${ELASTIC_HTTP_VERSION_HEADER}" header.`,
-      });
+    if (hasQueryVersion(hapiRequest)) {
+      if (!this.enableQueryVersion) {
+        return responseFactory.badRequest({
+          body: `Use of query parameter "${ELASTIC_HTTP_VERSION_QUERY_PARAM}" is not allowed. Please specify the API version using the "${ELASTIC_HTTP_VERSION_HEADER}" header.`,
+        });
+      }
+      removeQueryVersion(hapiRequest);
     }
 
     const invalidVersionMessage = isValidRouteVersion(this.isPublic, version);
@@ -208,22 +200,26 @@ export class CoreVersionedRoute implements VersionedRoute {
     }
     const validation = extractValidationSchemaFromHandler(handler);
 
-    let kibanaRequest: AnyKibanaRequest;
+    let kibanaRequest: Mutable<AnyKibanaRequest> = CoreKibanaRequest.from(hapiRequest);
+    kibanaRequest.apiVersion = version;
     if (
       validation?.request &&
       Boolean(validation.request.body || validation.request.params || validation.request.query)
     ) {
-      const { error, ok } = validateHapiRequest(
-        request,
-        this.getRouteConfigOptions(),
-        this.router,
-        this.log,
-        RouteValidator.from(validation.request)
-      );
-      if (error) return error;
-      kibanaRequest = ok;
-    } else {
-      kibanaRequest = CoreKibanaRequest.from(request);
+      const { error, ok: validatedRequest } = validateHapiRequest(hapiRequest, {
+        routeInfo: {
+          access: this.options.access,
+          httpResource: this.options.options?.httpResource,
+        },
+        router: this.router,
+        log: this.log,
+        routeSchemas: RouteValidator.from(validation.request),
+        version,
+      });
+      if (error) {
+        return injectVersionHeader(version, error);
+      }
+      kibanaRequest = validatedRequest;
     }
 
     const response = await handler.fn(kibanaRequest, responseFactory);

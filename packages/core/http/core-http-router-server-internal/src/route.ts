@@ -26,6 +26,7 @@ import { isZod } from '@kbn/zod';
 import type { Logger } from '@kbn/logging';
 import type { DeepPartial } from '@kbn/utility-types';
 import { Request } from '@hapi/hapi';
+import { Mutable } from 'utility-types';
 import type { InternalRouterRoute, RequestHandlerEnhanced, Router } from './router';
 import { CoreKibanaRequest } from './request';
 import { RouteValidator } from './validator';
@@ -96,31 +97,37 @@ interface HandlerDependencies extends Dependencies {
   routeSchemas?: RouteValidator<unknown, unknown, unknown>;
 }
 
+interface ValidationContext {
+  routeInfo: Pick<RouteConfigOptions<RouteMethod>, 'access' | 'httpResource'>;
+  router: Router;
+  log: Logger;
+  routeSchemas?: RouteValidator<unknown, unknown, unknown>;
+  version?: string;
+}
+
 /** @internal */
 export function validateHapiRequest(
   request: Request,
-  routeInfo: Pick<RouteConfigOptions<RouteMethod>, 'access' | 'httpResource'>,
-  router: Router,
-  log: Logger,
-  routeSchemas?: RouteValidator<unknown, unknown, unknown>
+  { routeInfo, router, log, routeSchemas, version }: ValidationContext
 ): { ok: AnyKibanaRequest; error?: never } | { ok?: never; error: IKibanaResponse } {
-  let kibanaRequest: AnyKibanaRequest;
+  let kibanaRequest: Mutable<AnyKibanaRequest>;
   try {
     kibanaRequest = CoreKibanaRequest.from(request, routeSchemas);
+    kibanaRequest.apiVersion = version;
   } catch (error) {
     log.error('400 Bad Request', formatErrorMeta(400, { request, error }));
     const isPublicApi = isPublicAccessApiRoute(routeInfo);
+    // Emit onPostValidation even if validation fails.
+    const failedRequest: Mutable<AnyKibanaRequest> = CoreKibanaRequest.from(request);
+    router.emitPostValidate(failedRequest, {
+      deprecated: failedRequest.route.options.deprecated,
+      isInternalApiRequest: failedRequest.isInternalApiRequest,
+      isPublicAccess: isPublicApi,
+    });
+
     const response = kibanaResponseFactory.badRequest({
       body: error.message,
       headers: isPublicApi ? getVersionHeader(BASE_PUBLIC_VERSION) : undefined,
-    });
-
-    // Emit onPostValidation even if validation fails.
-    const req = CoreKibanaRequest.from(request);
-    router.emitPostValidate(req, {
-      deprecated: req.route.options.deprecated,
-      isInternalApiRequest: req.isInternalApiRequest,
-      isPublicAccess: isPublicApi,
     });
     return { error: response };
   }
@@ -138,13 +145,12 @@ export const handle = async (
   request: Request,
   { router, route, handler, routeSchemas, log }: HandlerDependencies
 ) => {
-  const { error, ok: kibanaRequest } = validateHapiRequest(
-    request,
-    { access: route.options?.access, httpResource: route.options?.httpResource },
+  const { error, ok: kibanaRequest } = validateHapiRequest(request, {
+    routeInfo: { access: route.options?.access, httpResource: route.options?.httpResource },
     router,
     log,
-    routeSchemas
-  );
+    routeSchemas,
+  });
   if (error) {
     return error;
   }

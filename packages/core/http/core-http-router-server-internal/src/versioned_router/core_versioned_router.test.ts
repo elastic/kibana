@@ -12,11 +12,12 @@ import { Router } from '../router';
 import { CoreVersionedRouter } from '.';
 import { createRouter } from './mocks';
 
+const pluginId = Symbol('test');
 describe('Versioned router', () => {
   let router: Router;
   let versionedRouter: CoreVersionedRouter;
   beforeEach(() => {
-    router = createRouter();
+    router = createRouter({ pluginId });
     versionedRouter = CoreVersionedRouter.from({
       router,
       log: loggingSystemMock.createLogger(),
@@ -31,7 +32,6 @@ describe('Versioned router', () => {
   });
 
   it('registers pluginId if router has one', () => {
-    const pluginId = Symbol('test');
     expect(versionedRouter.pluginId).toBe(pluginId);
   });
 

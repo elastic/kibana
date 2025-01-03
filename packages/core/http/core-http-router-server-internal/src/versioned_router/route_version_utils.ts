@@ -16,6 +16,7 @@ import { isObject, get } from 'lodash';
 import { KibanaRequest } from '@kbn/core-http-server';
 import moment from 'moment';
 import type { Mutable } from 'utility-types';
+import { Request } from '@hapi/hapi';
 
 const PUBLIC_VERSION_REGEX = /^[0-9]{4}-[0-9]{2}-[0-9]{2}$/;
 const INTERNAL_VERSION_REGEX = /^[1-9][0-9]*$/;
@@ -64,7 +65,7 @@ export function hasQueryVersion(
 ): request is Mutable<KibanaRequestWithQueryVersion> {
   return isObject(request.query) && ELASTIC_HTTP_VERSION_QUERY_PARAM in request.query;
 }
-export function removeQueryVersion(request: Mutable<KibanaRequestWithQueryVersion>): void {
+export function removeQueryVersion(request: Request): void {
   delete request.query[ELASTIC_HTTP_VERSION_QUERY_PARAM];
 }
 
