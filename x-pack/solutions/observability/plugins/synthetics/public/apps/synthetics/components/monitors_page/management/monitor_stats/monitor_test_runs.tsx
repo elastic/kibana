@@ -8,9 +8,9 @@
 import React from 'react';
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { useTheme } from '@kbn/observability-shared-plugin/public';
 import { ReportTypes } from '@kbn/exploratory-view-plugin/public';
 
+import { useEuiTheme } from '@elastic/eui';
 import { useMonitorFilters } from '../../hooks/use_monitor_filters';
 import { useRefreshedRange } from '../../../../hooks';
 import { ClientPluginsStart } from '../../../../../../plugin';
@@ -21,11 +21,11 @@ export const MonitorTestRunsCount = () => {
   const {
     exploratoryView: { ExploratoryViewEmbeddable },
   } = useKibana<ClientPluginsStart>().services;
-  const theme = useTheme();
-
   const { from, to } = useRefreshedRange(30, 'days');
   const filters = useMonitorFilters({});
   const queryFilter = useMonitorQueryFilters();
+
+  const theme = useEuiTheme();
 
   return (
     <ExploratoryViewEmbeddable
@@ -42,7 +42,7 @@ export const MonitorTestRunsCount = () => {
           dataType: 'synthetics',
           selectedMetricField: 'monitor_total_runs',
           name: labels.TEST_RUNS_LABEL,
-          color: theme.eui.euiColorVis1,
+          color: theme.euiTheme.colors.vis.euiColorVis1,
         },
       ]}
     />
