@@ -40,7 +40,7 @@ export const PresentationPanelError = ({
     [api, isEditable]
   );
 
-  const panelTitle = useStateFromPublishingSubject(api?.panelTitle);
+  const panelTitle = useStateFromPublishingSubject(api?.title$);
   const ariaLabel = useMemo(
     () => (panelTitle ? getErrorCallToAction(panelTitle) : label),
     [label, panelTitle]

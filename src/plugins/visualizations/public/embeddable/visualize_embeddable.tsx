@@ -31,7 +31,7 @@ import {
   fetch$,
   getUnchangingComparator,
   initializeTimeRange,
-  initializeTitles,
+  initializeTitleManager,
   useStateFromPublishingSubject,
 } from '@kbn/presentation-publishing';
 import { apiPublishesSearchSession } from '@kbn/presentation-publishing/interfaces/fetch/publishes_search_session';
@@ -80,13 +80,13 @@ export const getVisualizeEmbeddableFactory: (deps: {
     // Initialize dynamic actions
     const dynamicActionsApi = embeddableEnhancedStart?.initializeReactEmbeddableDynamicActions(
       uuid,
-      () => titlesApi.panelTitle.getValue(),
+      () => titleManager.api.title$.getValue(),
       state
     );
     // if it is provided, start the dynamic actions manager
     const maybeStopDynamicActions = dynamicActionsApi?.startDynamicActions();
 
-    const { titlesApi, titleComparators, serializeTitles } = initializeTitles(state);
+    const titleManager = initializeTitleManager(state);
 
     // Count renders; mostly used for testing.
     const renderCount$ = new BehaviorSubject<number>(0);
@@ -169,16 +169,16 @@ export const getVisualizeEmbeddableFactory: (deps: {
 
     const dataLoading$ = new BehaviorSubject<boolean | undefined>(true);
 
-    const defaultPanelTitle = new BehaviorSubject<string | undefined>(initialVisInstance.title);
+    const defaultTitle$ = new BehaviorSubject<string | undefined>(initialVisInstance.title);
 
     const api = buildApi(
       {
         ...customTimeRangeApi,
-        ...titlesApi,
+        ...titleManager.api,
         ...(dynamicActionsApi?.dynamicActionsApi ?? {}),
-        defaultPanelTitle,
-        dataLoading: dataLoading$,
-        dataViews: new BehaviorSubject<DataView[] | undefined>(initialDataViews),
+        defaultTitle$,
+        dataLoading$,
+        dataViews$: new BehaviorSubject<DataView[] | undefined>(initialDataViews),
         rendered$: hasRendered$,
         supportedTriggers: () => [
           ACTION_CONVERT_TO_LENS,
@@ -189,7 +189,7 @@ export const getVisualizeEmbeddableFactory: (deps: {
           const savedObjectProperties = savedObjectProperties$.getValue();
           return serializeState({
             serializedVis: vis$.getValue().serialize(),
-            titles: serializeTitles(),
+            titles: titleManager.serializeTitles(),
             id: savedObjectId$.getValue(),
             linkedToLibrary:
               // In the visualize editor, linkedToLibrary should always be false to force the full state to be serialized,
@@ -205,11 +205,11 @@ export const getVisualizeEmbeddableFactory: (deps: {
         getInspectorAdapters: () => inspectorAdapters$.getValue(),
         ...initializeEditApi({
           customTimeRange$: customTimeRangeApi.timeRange$,
-          description$: titlesApi.panelDescription,
+          description$: titleManager.api.description$,
           parentApi,
           savedObjectId$,
           searchSessionId$,
-          title$: titlesApi.panelTitle,
+          title$: titleManager.api.title$,
           vis$,
           uuid,
         }),
@@ -228,7 +228,7 @@ export const getVisualizeEmbeddableFactory: (deps: {
             },
           } as SerializedVis);
           if (visUpdates.title) {
-            titlesApi.setPanelTitle(visUpdates.title);
+            titleManager.api.setTitle(visUpdates.title);
           }
         },
         openInspector: () => {
@@ -238,7 +238,7 @@ export const getVisualizeEmbeddableFactory: (deps: {
           if (!inspector.isAvailable(adapters)) return;
           return getInspector().open(adapters, {
             title:
-              titlesApi.panelTitle?.getValue() ||
+              titleManager.api.title$?.getValue() ||
               i18n.translate('visualizations.embeddable.inspectorTitle', {
                 defaultMessage: 'Inspector',
               }),
@@ -246,11 +246,11 @@ export const getVisualizeEmbeddableFactory: (deps: {
         },
         // Library transforms
         saveToLibrary: (newTitle: string) => {
-          titlesApi.setPanelTitle(newTitle);
+          titleManager.api.setTitle(newTitle);
           const { rawState, references } = serializeState({
             serializedVis: vis$.getValue().serialize(),
             titles: {
-              ...serializeTitles(),
+              ...titleManager.serializeTitles(),
               title: newTitle,
             },
           });
@@ -265,18 +265,18 @@ export const getVisualizeEmbeddableFactory: (deps: {
         checkForDuplicateTitle: () => false, // Handled by saveToLibrary action
         getByValueState: () => ({
           savedVis: vis$.getValue().serialize(),
-          ...serializeTitles(),
+          ...titleManager.serializeTitles(),
         }),
         getByReferenceState: (libraryId) =>
           serializeState({
             serializedVis: vis$.getValue().serialize(),
-            titles: serializeTitles(),
+            titles: titleManager.serializeTitles(),
             id: libraryId,
             linkedToLibrary: true,
           }).rawState,
       },
       {
-        ...titleComparators,
+        ...titleManager.comparators,
         ...customTimeRangeComparators,
         ...(dynamicActionsApi?.dynamicActionsComparator ?? {
           enhancements: getUnchangingComparator(),
@@ -477,8 +477,8 @@ export const getVisualizeEmbeddableFactory: (deps: {
             data-test-subj="visualizationLoader"
             data-rendering-count={renderCount /* Used for functional tests */}
             data-render-complete={hasRendered}
-            data-title={!api.hidePanelTitle?.getValue() ? api.panelTitle?.getValue() ?? '' : ''}
-            data-description={api.panelDescription?.getValue() ?? ''}
+            data-title={!api.hideTitle$?.getValue() ? api.title$?.getValue() ?? '' : ''}
+            data-description={api.description$?.getValue() ?? ''}
             data-shared-item
           >
             {/* Replicate the loading state for the expression renderer to avoid FOUC  */}

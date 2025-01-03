@@ -15,8 +15,8 @@ import {
   PublishesBlockingError,
   PublishesDataLoading,
   PublishesDisabledActionIds,
-  PublishesPanelDescription,
-  PublishesPanelTitle,
+  PublishesDescription,
+  PublishesTitle,
   PublishesViewMode,
 } from '@kbn/presentation-publishing';
 import { UiActionsService } from '@kbn/ui-actions-plugin/public';
@@ -74,14 +74,14 @@ export interface PresentationPanelInternalProps<
 export interface DefaultPresentationPanelApi
   extends HasUniqueId,
     Partial<
-      PublishesPanelTitle &
+      PublishesTitle &
         PublishesDataLoading &
         PublishesBlockingError &
-        PublishesPanelDescription &
+        PublishesDescription &
         PublishesDisabledActionIds &
         HasParentApi<
           PresentationContainer &
-            Partial<Pick<PublishesPanelTitle, 'hidePanelTitle'> & PublishesViewMode>
+            Partial<Pick<PublishesTitle, 'hideTitle$'> & PublishesViewMode>
         > &
         CanLockHoverActions
     > {}

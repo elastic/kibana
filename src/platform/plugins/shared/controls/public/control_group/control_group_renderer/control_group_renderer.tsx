@@ -116,7 +116,7 @@ export const ControlGroupRenderer = ({
    */
   useEffect(() => {
     if (!controlGroup) return;
-    const stateChangeSubscription = controlGroup.unsavedChanges.subscribe((changes) => {
+    const stateChangeSubscription = controlGroup.unsavedChanges$.subscribe((changes) => {
       runtimeState$.next({ ...runtimeState$.getValue(), ...changes });
     });
     return () => {

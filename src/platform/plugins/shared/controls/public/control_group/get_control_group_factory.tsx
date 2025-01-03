@@ -85,7 +85,7 @@ export const getControlGroupEmbeddableFactory = () => {
         ...controlsManager.api,
         autoApplySelections$,
       });
-      const dataViews = new BehaviorSubject<DataView[] | undefined>(undefined);
+      const dataViews$ = new BehaviorSubject<DataView[] | undefined>(undefined);
       const chainingSystem$ = new BehaviorSubject<ControlGroupChainingSystem>(
         chainingSystem ?? DEFAULT_CONTROL_CHAINING
       );
@@ -130,7 +130,7 @@ export const getControlGroupEmbeddableFactory = () => {
 
       const api = setApi({
         ...controlsManager.api,
-        disabledActionIds: disabledActionIds$,
+        disabledActionIds$,
         ...unsavedChanges.api,
         ...selectionsManager.api,
         controlFetch$: (controlUuid: string) =>
@@ -166,7 +166,7 @@ export const getControlGroupEmbeddableFactory = () => {
         isEditingEnabled: () => true,
         openAddDataControlFlyout: (settings) => {
           const parentDataViewId = apiPublishesDataViews(parentApi)
-            ? parentApi.dataViews.value?.[0]?.id
+            ? parentApi.dataViews$.value?.[0]?.id
             : undefined;
           const newControlState = controlsManager.getNewControlState();
 
@@ -201,7 +201,7 @@ export const getControlGroupEmbeddableFactory = () => {
             references,
           };
         },
-        dataViews,
+        dataViews$,
         labelPosition: labelPosition$,
         saveNotification$: apiHasSaveNotification(parentApi)
           ? parentApi.saveNotification$
@@ -227,8 +227,8 @@ export const getControlGroupEmbeddableFactory = () => {
       const childrenDataViewsSubscription = combineCompatibleChildrenApis<
         PublishesDataViews,
         DataView[]
-      >(api, 'dataViews', apiPublishesDataViews, []).subscribe((newDataViews) =>
-        dataViews.next(newDataViews)
+      >(api, 'dataViews$', apiPublishesDataViews, []).subscribe((newDataViews) =>
+        dataViews$.next(newDataViews)
       );
 
       const saveNotificationSubscription = apiHasSaveNotification(parentApi)

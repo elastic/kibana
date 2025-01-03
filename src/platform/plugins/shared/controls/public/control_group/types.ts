@@ -53,7 +53,7 @@ export type ControlGroupApi = PresentationContainer &
   PublishesDataViews &
   HasSerializedChildState<ControlPanelState> &
   HasEditCapabilities &
-  Pick<PublishesUnsavedChanges<ControlGroupRuntimeState>, 'unsavedChanges'> &
+  Pick<PublishesUnsavedChanges<ControlGroupRuntimeState>, 'unsavedChanges$'> &
   PublishesTimeslice &
   PublishesDisabledActionIds &
   Partial<HasParentApi<PublishesUnifiedSearch> & HasSaveNotification & PublishesReload> & {
