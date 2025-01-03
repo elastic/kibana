@@ -4497,7 +4497,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-environment-server-internal@link:packages/core/environment/core-environment-server-internal":
+"@kbn/core-environment-server-internal@link:src/core/packages/environment/server-internal":
   version "0.0.0"
   uid ""
 

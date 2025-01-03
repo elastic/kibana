@@ -285,7 +285,7 @@
     "@kbn/core-elasticsearch-client-server-internal": "link:src/core/packages/elasticsearch/client-server-internal",
     "@kbn/core-elasticsearch-server": "link:src/core/packages/elasticsearch/server",
     "@kbn/core-elasticsearch-server-internal": "link:src/core/packages/elasticsearch/server-internal",
-    "@kbn/core-environment-server-internal": "link:packages/core/environment/core-environment-server-internal",
+    "@kbn/core-environment-server-internal": "link:src/core/packages/environment/server-internal",
     "@kbn/core-execution-context-browser": "link:packages/core/execution-context/core-execution-context-browser",
     "@kbn/core-execution-context-browser-internal": "link:packages/core/execution-context/core-execution-context-browser-internal",
     "@kbn/core-execution-context-common": "link:packages/core/execution-context/core-execution-context-common",
