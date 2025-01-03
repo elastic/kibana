@@ -5137,7 +5137,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-user-profile-browser@link:packages/core/user-profile/core-user-profile-browser":
+"@kbn/core-user-profile-browser@link:src/core/packages/user-profile/browser":
   version "0.0.0"
   uid ""
 
