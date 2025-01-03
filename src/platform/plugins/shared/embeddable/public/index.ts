@@ -32,7 +32,7 @@ export {
   PANEL_NOTIFICATION_TRIGGER,
   SELECT_RANGE_TRIGGER,
   VALUE_CLICK_TRIGGER,
-} from './triggers/triggers';
+} from './ui_actions/triggers';
 export { ViewMode } from '../common/types';
 export type {
   CellValueContext,
@@ -40,7 +40,7 @@ export type {
   MultiValueClickContext,
   RangeSelectContext,
   ValueClickContext,
-} from './triggers/triggers';
+} from './ui_actions/triggers';
 export type { EmbeddableEditorState, EmbeddablePackageState } from './state_transfer';
 export type { EmbeddableSetup, EmbeddableStart } from './types';
 export type { EnhancementRegistryDefinition } from './enhancements/types';
@@ -59,4 +59,4 @@ export {
   ADD_PANEL_ANNOTATION_GROUP,
   ADD_PANEL_OTHER_GROUP,
   ADD_PANEL_LEGACY_GROUP,
-} from './add_panel_groups';
+} from './ui_actions/add_panel_groups';

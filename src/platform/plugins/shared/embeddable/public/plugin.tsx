@@ -17,7 +17,7 @@ import {
 } from '@kbn/core/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { migrateToLatest } from '@kbn/kibana-utils-plugin/common';
-import { registerTriggers } from './triggers/register_triggers';
+import { registerTriggers } from './ui_actions/register_triggers';
 import { EmbeddableStateTransfer } from './state_transfer';
 import { EmbeddableStateWithType, CommonEmbeddableStartContract } from '../common/types';
 import {
