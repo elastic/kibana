@@ -4637,7 +4637,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-http-server-utils@link:packages/core/http/core-http-server-utils":
+"@kbn/core-http-server-utils@link:src/core/packages/http/server-utils":
   version "0.0.0"
   uid ""
 
