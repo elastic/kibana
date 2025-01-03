@@ -75,12 +75,14 @@ async function queryAllResults(
     index: SLO_DESTINATION_INDEX_PATTERN,
     ...queryAndAggs,
   });
+
   if (!results.aggregations) {
     throw new Error('Elasticsearch query failed to return a valid aggregation');
   }
   if (results.aggregations.instances.buckets.length === 0) {
     return buckets;
   }
+
   return queryAllResults(
     esClient,
     slo,
