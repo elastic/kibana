@@ -34,6 +34,7 @@ export const createAuthorColumn = (): TableColumn => {
       return <Author isPrebuiltRule={!!rule.elastic_rule?.prebuilt_rule_id} />;
     },
     sortable: true,
+    truncateText: true,
     width: '10%',
   };
 };
