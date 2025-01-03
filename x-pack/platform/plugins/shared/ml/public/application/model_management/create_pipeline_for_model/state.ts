@@ -7,7 +7,8 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { IngestInferenceProcessor } from '@elastic/elasticsearch/lib/api/types';
-import type { TrainedModelItem } from '../../../../common/types/trained_models';
+import type { TrainedModelItem } from '@kbn/ml-common-types/trained_models';
+
 import { getDefaultOnFailureConfiguration } from '../../components/ml_inference/state';
 
 export interface InferecePipelineCreationState {
