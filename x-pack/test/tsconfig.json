@@ -164,6 +164,7 @@
     "@kbn/event-log-plugin",
     "@kbn/management-settings-ids",
     "@kbn/intercepts-plugin",
-    "@kbn/ml-common-types"
+    "@kbn/ml-common-types",
+    "@kbn/ml-common-constants"
   ]
 }
