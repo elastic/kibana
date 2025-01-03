@@ -4609,7 +4609,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-http-resources-server-internal@link:packages/core/http/core-http-resources-server-internal":
+"@kbn/core-http-resources-server-internal@link:src/core/packages/http/resources-server-internal":
   version "0.0.0"
   uid ""
 
