@@ -7,8 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { RouteValidatorFullConfigResponse } from '@kbn/core-http-server';
 import { z, ZodObject } from '@kbn/zod';
-import { ZodParamsObject } from '@kbn/server-route-repository-utils';
+import {
+  ZodParamsObject,
+  ServerRouteHandlerReturnType,
+  TRouteResponse,
+} from '@kbn/server-route-repository-utils';
 import { noParamsValidationObject } from './validation_objects';
 
 export function makeZodValidationObject(params: ZodParamsObject) {
@@ -17,6 +22,22 @@ export function makeZodValidationObject(params: ZodParamsObject) {
     query: params.shape.query ? asStrict(params.shape.query) : noParamsValidationObject.query,
     body: params.shape.body ? asStrict(params.shape.body) : noParamsValidationObject.body,
   };
+}
+
+export function makeZodResponseValidationObject<TReturnType extends ServerRouteHandlerReturnType>(
+  responseSchema: TRouteResponse<TReturnType>
+): RouteValidatorFullConfigResponse<TReturnType> {
+  const { unsafe, ...statusCodes } = responseSchema;
+  const response: RouteValidatorFullConfigResponse<TReturnType> = { unsafe };
+
+  for (const [statusCode, validation] of Object.entries(statusCodes)) {
+    response[parseInt(statusCode, 10)] = {
+      ...validation,
+      body: validation.body ? () => validation.body : validation.body,
+    };
+  }
+
+  return response;
 }
 
 function asStrict(schema: z.Schema) {

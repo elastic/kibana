@@ -238,15 +238,15 @@ export interface VersionedRouter<Ctx extends RqCtx = RqCtx> {
 export type VersionedRouteRequestValidation<P, Q, B> = RouteValidatorFullConfigRequest<P, Q, B>;
 
 /** @public */
-export interface VersionedRouteCustomResponseBodyValidation {
+export interface VersionedRouteCustomResponseBodyValidation<B> {
   /** A custom validation function */
-  custom: RouteValidationFunction<unknown>;
+  custom: RouteValidationFunction<B>;
 }
 
 /** @public */
-export type VersionedResponseBodyValidation =
-  | LazyValidator
-  | VersionedRouteCustomResponseBodyValidation;
+export type VersionedResponseBodyValidation<B> =
+  | LazyValidator<B>
+  | VersionedRouteCustomResponseBodyValidation<B>;
 
 /**
  * Map of response status codes to response schemas
@@ -283,7 +283,7 @@ export type VersionedResponseBodyValidation =
  * }
  * @public
  */
-export interface VersionedRouteResponseValidation {
+export interface VersionedRouteResponseValidation<B> {
   [statusCode: number]: {
     /**
      * A description of the response. This is required input for complete OAS documentation.
@@ -293,7 +293,7 @@ export interface VersionedRouteResponseValidation {
      * A string representing the mime type of the response body.
      */
     bodyContentType?: string;
-    body?: VersionedResponseBodyValidation;
+    body?: VersionedResponseBodyValidation<B>;
   };
   unsafe?: { body?: boolean };
 }
@@ -316,7 +316,7 @@ export interface VersionedRouteValidation<P, Q, B> {
    *
    * @public
    */
-  response?: VersionedRouteResponseValidation;
+  response?: VersionedRouteResponseValidation<B>;
 }
 
 /**
