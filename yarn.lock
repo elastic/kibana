@@ -4785,7 +4785,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-notifications-browser@link:packages/core/notifications/core-notifications-browser":
+"@kbn/core-notifications-browser@link:src/core/packages/notifications/browser":
   version "0.0.0"
   uid ""
 

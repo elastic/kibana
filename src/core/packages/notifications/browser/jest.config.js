@@ -9,6 +9,6 @@
 
 module.exports = {
   preset: '@kbn/test',
-  rootDir: '../../../..',
-  roots: ['<rootDir>/packages/core/notifications/core-notifications-browser'],
+  rootDir: '../../../../..',
+  roots: ['<rootDir>/src/core/packages/notifications/browser'],
 };
