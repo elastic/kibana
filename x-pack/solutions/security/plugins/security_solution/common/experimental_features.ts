@@ -115,6 +115,11 @@ export const allowedExperimentalValues = Object.freeze({
   assistantModelEvaluation: false,
 
   /**
+   * Enables filtering of Attack Discovery alerts in a flyout
+   */
+  attackDiscoveryAlertFiltering: false,
+
+  /**
    * Enables the Managed User section inside the new user details flyout.
    */
   newUserDetailsFlyoutManagedUser: false,
@@ -266,7 +271,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables the Asset Inventory feature
    */
-  assetInventoryStoreEnabled: false,
+  assetInventoryUXEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;
