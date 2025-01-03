@@ -563,7 +563,7 @@ Plugin server-side only. Plugin has three main functions:
 adds dynamic actions to every embeddables state, in order to support drilldowns.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/encrypted_saved_objects/README.md[encryptedSavedObjects]
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/shared/encrypted_saved_objects/README.md[encryptedSavedObjects]
 |The purpose of this plugin is to provide a way to encrypt/decrypt attributes on the custom Saved Objects that works with
 security and spaces filtering.
 

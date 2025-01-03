@@ -5,7 +5,7 @@
 The purpose of this plugin is to provide a way to encrypt/decrypt attributes on the custom Saved Objects that works with
 security and spaces filtering.
 
-[RFC #2: Encrypted Saved Objects Attributes](../../../rfcs/text/0002_encrypted_attributes.md).
+[RFC #2: Encrypted Saved Objects Attributes](../../../../../rfcs/text/0002_encrypted_attributes.md).
 
 ## Usage
 
@@ -256,7 +256,7 @@ Run Jest tests:
 Documentation: https://www.elastic.co/guide/en/kibana/current/development-tests.html#_unit_testing
 
 ```
-yarn test:jest x-pack/plugins/encrypted_saved_objects --watch
+yarn test:jest x-pack/platform/plugins/shared/encrypted_saved_objects --watch
 ```
 
 ### API Integration tests

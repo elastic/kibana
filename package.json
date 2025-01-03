@@ -474,7 +474,7 @@
     "@kbn/embeddable-examples-plugin": "link:examples/embeddable_examples",
     "@kbn/embeddable-plugin": "link:src/platform/plugins/shared/embeddable",
     "@kbn/embedded-lens-example-plugin": "link:x-pack/examples/embedded_lens_example",
-    "@kbn/encrypted-saved-objects-plugin": "link:x-pack/plugins/encrypted_saved_objects",
+    "@kbn/encrypted-saved-objects-plugin": "link:x-pack/platform/plugins/shared/encrypted_saved_objects",
     "@kbn/enterprise-search-plugin": "link:x-pack/solutions/search/plugins/enterprise_search",
     "@kbn/entities-data-access-plugin": "link:x-pack/solutions/observability/plugins/observability_solution/entities_data_access",
     "@kbn/entities-schema": "link:x-pack/platform/packages/shared/kbn-entities-schema",

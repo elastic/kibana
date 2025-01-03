@@ -1863,7 +1863,7 @@ module.exports = {
         'packages/kbn-security-hardening/**/*.{js,mjs,ts,tsx}',
         'packages/kbn-user-profile-components/**/*.{js,mjs,ts,tsx}',
 
-        'x-pack/plugins/encrypted_saved_objects/**/*.{js,mjs,ts,tsx}',
+        'x-pack/platform/plugins/shared/encrypted_saved_objects/**/*.{js,mjs,ts,tsx}',
         'x-pack/test/encrypted_saved_objects_api_integration/**/*.{js,mjs,ts,tsx}',
 
         'x-pack/plugins/security/**/*.{js,mjs,ts,tsx}',

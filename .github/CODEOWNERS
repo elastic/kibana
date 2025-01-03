@@ -865,6 +865,7 @@ x-pack/platform/plugins/shared/dashboard_enhanced @elastic/kibana-presentation
 x-pack/platform/plugins/shared/data_quality @elastic/obs-ux-logs-team
 x-pack/platform/plugins/shared/dataset_quality @elastic/obs-ux-logs-team
 x-pack/platform/plugins/shared/embeddable_enhanced @elastic/kibana-presentation
+x-pack/platform/plugins/shared/encrypted_saved_objects @elastic/kibana-security
 x-pack/platform/plugins/shared/entity_manager @elastic/obs-entities
 x-pack/platform/plugins/shared/event_log @elastic/response-ops
 x-pack/platform/plugins/shared/fields_metadata @elastic/obs-ux-logs-team
@@ -896,7 +897,6 @@ x-pack/plugins/cloud_integrations/cloud_experiments @elastic/kibana-core
 x-pack/plugins/cloud_integrations/cloud_full_story @elastic/kibana-core
 x-pack/plugins/cloud_integrations/cloud_links @elastic/kibana-core
 x-pack/plugins/drilldowns/url_drilldown @elastic/appex-sharedux
-x-pack/plugins/encrypted_saved_objects @elastic/kibana-security
 x-pack/plugins/features @elastic/kibana-core
 x-pack/plugins/graph @elastic/kibana-visualizations
 x-pack/plugins/lens @elastic/kibana-visualizations
