@@ -36,7 +36,7 @@ export const buildESQLTheme = ({
           'unquoted_identifier',
           'pipe',
         ],
-        euiTheme.colors.textAccent
+        euiTheme.colors.textParagraph
       ),
 
       // source commands
