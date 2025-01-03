@@ -5141,7 +5141,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-user-profile-common@link:packages/core/user-profile/core-user-profile-common":
+"@kbn/core-user-profile-common@link:src/core/packages/user-profile/common":
   version "0.0.0"
   uid ""
 
