@@ -21,7 +21,7 @@
     "xpack.cases": "platform/plugins/shared/cases",
     "xpack.cloud": "plugins/cloud",
     "xpack.cloudDefend": "solutions/security/plugins/cloud_defend",
-    "xpack.cloudLinks": "plugins/cloud_integrations/cloud_links",
+    "xpack.cloudLinks": "platform/plugins/private/cloud_integrations/cloud_links",
     "xpack.cloudDataMigration": "platform/plugins/private/cloud_integrations/cloud_data_migration",
     "xpack.csp": [
       "solutions/security/plugins/cloud_security_posture",

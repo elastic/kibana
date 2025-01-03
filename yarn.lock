@@ -4153,7 +4153,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/cloud-links-plugin@link:x-pack/plugins/cloud_integrations/cloud_links":
+"@kbn/cloud-links-plugin@link:x-pack/platform/plugins/private/cloud_integrations/cloud_links":
   version "0.0.0"
   uid ""
 
