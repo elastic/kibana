@@ -4701,7 +4701,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-lifecycle-server-internal@link:packages/core/lifecycle/core-lifecycle-server-internal":
+"@kbn/core-lifecycle-server-internal@link:src/core/packages/lifecycle/server-internal":
   version "0.0.0"
   uid ""
 
