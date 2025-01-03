@@ -13,7 +13,6 @@ import {
   EuiComboBox,
   EuiFlexGroup,
   EuiFormRow,
-  EuiSpacer,
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
@@ -50,9 +49,7 @@ export const AuthSelection = React.memo<AuthSelectionProps>(
         <EuiTitle size="s">
           <h2>{i18n.CONFIRM_AUTH}</h2>
         </EuiTitle>
-        <EuiSpacer size="m" />
         <EuiText size="s">{i18n.CONFIRM_AUTH_DESCRIPTION}</EuiText>
-        <EuiSpacer size="m" />
         <EuiFormRow label={i18n.AUTH_SELECTION_TITLE} fullWidth>
           <EuiComboBox
             singleSelection={{ asPlainText: true }}

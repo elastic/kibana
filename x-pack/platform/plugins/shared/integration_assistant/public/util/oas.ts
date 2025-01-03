@@ -167,13 +167,13 @@ export function getAuthDetails(
 ): KeyedSecuritySchemeObject | undefined {
   const auth = authType.toLowerCase();
   if (auth === CelAuthTypeEnum.basic) {
-    return specAuthDetails?.Basic[0];
+    return specAuthDetails?.Basic ? specAuthDetails?.Basic[0] : undefined;
   } else if (auth === CelAuthTypeEnum.oauth2) {
-    return specAuthDetails?.OAuth2[0];
+    return specAuthDetails?.OAuth2 ? specAuthDetails?.OAuth2[0] : undefined;
   } else if (auth === CelAuthTypeEnum.header) {
-    return specAuthDetails?.Header[0];
+    return specAuthDetails?.Header ? specAuthDetails?.Header[0] : undefined;
   } else if (auth === CelAuthTypeEnum.digest) {
-    return specAuthDetails?.http[0];
+    return specAuthDetails?.http ? specAuthDetails?.http[0] : undefined;
   } else {
     // should never get here
     throw new Error('unsupported auth method');

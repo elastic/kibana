@@ -83,9 +83,8 @@ export const EndpointSelection = React.memo<EndpointSelectionProps>(
         </EuiTitle>
         {hasSuggestedPaths && (
           <EuiFlexItem>
-            <EuiSpacer size="m" />
             <EuiText size="s">{i18n.CONFIRM_ENDPOINT_DESCRIPTION}</EuiText>
-            <EuiSpacer size="m" />
+            <EuiSpacer size="s" />
             <EuiFlexItem>
               <EuiRadioGroup
                 options={options}

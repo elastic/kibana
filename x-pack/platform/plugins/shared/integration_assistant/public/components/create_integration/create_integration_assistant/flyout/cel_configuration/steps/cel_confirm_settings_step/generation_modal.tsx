@@ -93,7 +93,7 @@ export const useGeneration = ({
             auth,
             openApiDetails: {
               operation: JSON.stringify(endpointOperation.schema),
-              auth: JSON.stringify(endpointAuth),
+              auth: JSON.stringify(endpointAuth ?? {}),
               schemas: JSON.stringify(schemas ?? {}),
             },
           },
