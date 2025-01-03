@@ -7,10 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './agent_images';
-export * from './buildkite';
-export * as CiStats from './ci-stats';
-export * from './github';
-export * as Slack from './slack';
-export * as TestFailures from './test-failures';
-export * from './utils';
+import { Slack } from '#pipeline-utils';
+
+(async () => {
+  try {
+    await Slack.pingTeam();
+  } catch (ex) {
+    console.error('Ping team for the test failures error', ex.message);
+    if (ex.response) {
+      console.error('HTTP Error Response Status', ex.response.status);
+      console.error('HTTP Error Response Body', ex.response.data);
+    }
+    process.exit(1);
+  }
+})();
