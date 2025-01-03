@@ -45,3 +45,6 @@ export const CATEGORIZATION_INITIAL_BATCH_SIZE = 60;
 export const CATEROGIZATION_REVIEW_BATCH_SIZE = 40;
 export const CATEGORIZATION_REVIEW_MAX_CYCLES = 5;
 export const CATEGORIZATION_RECURSION_LIMIT = 50;
+
+// Name regex pattern
+export const NAME_REGEX_PATTERN = /^[a-z0-9_]+$/;

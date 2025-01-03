@@ -10,6 +10,7 @@ import nunjucks from 'nunjucks';
 import { getDataPath } from '@kbn/utils';
 import { join as joinPath } from 'path';
 import { safeDump } from 'js-yaml';
+import { NAME_REGEX_PATTERN } from '../../common/constants';
 import type { DataStream, Integration } from '../../common';
 import { createSync, ensureDirSync, generateUniqueId, removeDirSync } from '../util';
 import { createAgentInput } from './agent';
@@ -76,8 +77,7 @@ export async function buildPackage(integration: Integration): Promise<Buffer> {
   return zipBuffer;
 }
 export function isValidName(input: string): boolean {
-  const regex = /^[a-zA-Z0-9_]+$/;
-  return input.length > 0 && regex.test(input);
+  return input.length > 0 && NAME_REGEX_PATTERN.test(input);
 }
 function createDirectories(
   workingDir: string,
