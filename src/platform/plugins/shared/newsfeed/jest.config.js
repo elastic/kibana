@@ -9,9 +9,9 @@
 
 module.exports = {
   preset: '@kbn/test',
-  rootDir: '../../..',
-  roots: ['<rootDir>/src/plugins/newsfeed'],
-  coverageDirectory: '<rootDir>/target/kibana-coverage/jest/src/plugins/newsfeed',
+  rootDir: '../../../../..',
+  roots: ['<rootDir>/src/platform/plugins/shared/newsfeed'],
+  coverageDirectory: '<rootDir>/target/kibana-coverage/jest/src/platform/plugins/shared/newsfeed',
   coverageReporters: ['text', 'html'],
-  collectCoverageFrom: ['<rootDir>/src/plugins/newsfeed/{common,public,server}/**/*.{ts,tsx}'],
+  collectCoverageFrom: ['<rootDir>/src/platform/plugins/shared/newsfeed/{common,public,server}/**/*.{ts,tsx}'],
 };

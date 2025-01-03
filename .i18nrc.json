@@ -96,7 +96,7 @@
     "monaco": "packages/kbn-monaco/src",
     "navigation": ["src/platform/plugins/shared/navigation", "packages/solution-nav"],
     "links": "src/platform/plugins/private/links",
-    "newsfeed": "src/plugins/newsfeed",
+    "newsfeed": "src/platform/plugins/shared/newsfeed",
     "presentationUtil": "src/platform/plugins/shared/presentation_util",
     "randomSampling": "x-pack/packages/kbn-random-sampling",
     "reactPackages": "packages/react",
