@@ -12,6 +12,7 @@ import { useEffect, useRef } from 'react';
 import { resolveGridRow } from './utils/resolve_grid_row';
 import { GridPanelData, GridLayoutStateManager } from './types';
 import { isGridDataEqual } from './utils/equality_checks';
+import { isMouseEvent, isTouchEvent } from './utils/sensors';
 
 const MIN_SPEED = 50;
 const MAX_SPEED = 150;
@@ -75,17 +76,17 @@ export const useGridLayoutEvents = ({
     };
 
     const calculateUserEvent = (e: Event, shouldAutoScroll = true) => {
-      if (!interactionEvent$.value) {
+      const interactionEvent = interactionEvent$.value;
+      if (!interactionEvent) {
         // if no interaction event, stop auto scroll (if necessary) and return early
         stopAutoScrollIfNecessary();
         return;
       }
-
       e.stopPropagation();
+      e.preventDefault();
 
       const gridRowElements = gridLayoutStateManager.rowRefs.current;
 
-      const interactionEvent = interactionEvent$.value;
       const isResize = interactionEvent?.type === 'resize';
 
       const currentLayout = gridLayout$.value;
@@ -229,35 +230,32 @@ export const useGridLayoutEvents = ({
       }
     };
 
-    const onMouseMove = (e: MouseEvent) => {
+    const onPointerMove = (e: Event) => {
       // Note: When an item is being interacted with, `mousemove` events continue to be fired, even when the
       // mouse moves out of the window (i.e. when a panel is being dragged around outside the window).
-      pointerClientPosition.current = { x: e.clientX, y: e.clientY };
-      calculateUserEvent(e);
+      pointerClientPosition.current = getPointerClientPosition(e);
+      calculateUserEvent(e, !isTouchEvent(e));
     };
 
-    const onTouchMove = (e: TouchEvent) => {
-      if (!interactionEvent$.value) {
-        return;
-      }
-      if (e.touches.length > 1) return;
-      const touch = e.touches[0];
-      pointerClientPosition.current = { x: touch.clientX, y: touch.clientY };
-      e.preventDefault();
-      e.stopPropagation();
-      // `shouldAutoScroll` is set to false because we don't want the screen to scroll when dragging/resizing the items
-      calculateUserEvent(e, false);
-    };
-
-    document.addEventListener('mousemove', onMouseMove, { passive: true });
+    document.addEventListener('mousemove', onPointerMove, { passive: true });
     document.addEventListener('scroll', calculateUserEvent, { passive: true });
-    document.addEventListener('touchmove', onTouchMove, { passive: false });
+    document.addEventListener('touchmove', onPointerMove, { passive: false });
 
     return () => {
-      document.removeEventListener('mousemove', onMouseMove);
+      document.removeEventListener('mousemove', onPointerMove);
       document.removeEventListener('scroll', calculateUserEvent);
-      document.removeEventListener('touchmove', onTouchMove);
+      document.removeEventListener('touchmove', onPointerMove);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 };
+
+function getPointerClientPosition(e: Event) {
+  if (isTouchEvent(e)) {
+    return { x: e.touches[0].clientX, y: e.touches[0].clientY };
+  }
+  if (isMouseEvent(e)) {
+    return { x: e.clientX, y: e.clientY };
+  }
+  throw new Error('Unknown event type');
+}

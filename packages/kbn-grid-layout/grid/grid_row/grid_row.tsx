@@ -22,10 +22,10 @@ import {
   GridRowData,
   UserInteractionEvent,
   PanelInteractionEvent,
-  UserTouchEvent,
 } from '../types';
 import { getKeysInOrder } from '../utils/resolve_grid_row';
 import { GridRowHeader } from './grid_row_header';
+import { isTouchEvent, isMouseEvent } from '../utils/sensors';
 
 export interface GridRowProps {
   rowIndex: number;
@@ -288,10 +288,6 @@ export const GridRow = forwardRef<HTMLDivElement, GridRowProps>(
   }
 );
 
-const isTouchEvent = (e: UserInteractionEvent): e is UserTouchEvent => {
-  return 'touches' in e;
-};
-
 const defaultPointerOffsets = {
   top: 0,
   left: 0,
@@ -310,10 +306,13 @@ function getPointerOffsets(e: UserInteractionEvent, panelRect: DOMRect) {
       bottom: touch.clientY - panelRect.bottom,
     };
   }
-  return {
-    top: e.clientY - panelRect.top,
-    left: e.clientX - panelRect.left,
-    right: e.clientX - panelRect.right,
-    bottom: e.clientY - panelRect.bottom,
-  };
+  if (isMouseEvent(e)) {
+    return {
+      top: e.clientY - panelRect.top,
+      left: e.clientX - panelRect.left,
+      right: e.clientX - panelRect.right,
+      bottom: e.clientY - panelRect.bottom,
+    };
+  }
+  throw new Error('Invalid event type');
 }
