@@ -9,9 +9,9 @@ import ReactDOM from 'react-dom';
 import { type AppMountParameters, type CoreStart } from '@kbn/core/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import type { InventoryStartDependencies } from './types';
-import { InventoryServices } from './services/types';
+import type { InventoryServices } from './services/types';
 import { AppRoot } from './components/app_root';
-import { KibanaEnvironment } from './hooks/use_kibana';
+import type { KibanaEnvironment } from './hooks/use_kibana';
 
 export const renderApp = (props: {
   coreStart: CoreStart;
