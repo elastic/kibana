@@ -2865,7 +2865,6 @@ src/platform/packages/private/kbn-ui-shared-deps-npm @elastic/kibana-operations
 src/platform/packages/private/kbn-ui-shared-deps-src @elastic/kibana-operations
 src/platform/packages/private/kbn-unsaved-changes-badge @elastic/kibana-data-discovery
 src/platform/packages/private/react/kibana_context/root @elastic/appex-sharedux
-src/platform/packages/private/response-ops/rule_params @elastic/response-ops
 src/platform/packages/private/serverless/project_switcher @elastic/appex-sharedux
 src/platform/packages/private/serverless/settings/common @elastic/appex-sharedux @elastic/kibana-management
 src/platform/packages/private/serverless/types @elastic/appex-sharedux
@@ -3062,6 +3061,7 @@ src/platform/packages/shared/shared-ux/prompt/no_data_views/types @elastic/appex
 src/platform/packages/shared/shared-ux/prompt/not_found @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/router/impl @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/storybook/mock @elastic/appex-sharedux
+src/platform/packages/shared/response-ops/rule_params @elastic/response-ops
 src/platform/plugins/private/advanced_settings @elastic/appex-sharedux @elastic/kibana-management
 src/platform/plugins/private/event_annotation @elastic/kibana-visualizations
 src/platform/plugins/private/event_annotation_listing @elastic/kibana-visualizations
