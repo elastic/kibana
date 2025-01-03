@@ -252,7 +252,6 @@ packages/kbn-scout-info @elastic/appex-qa
 packages/kbn-scout-reporting @elastic/appex-qa
 packages/kbn-screenshotting-server @elastic/appex-sharedux
 packages/kbn-security-hardening @elastic/kibana-security
-packages/kbn-server-http-tools @elastic/kibana-core
 packages/kbn-set-map @elastic/kibana-operations
 packages/kbn-shared-ux-utility @elastic/appex-sharedux
 packages/kbn-some-dev-log @elastic/kibana-operations
@@ -578,6 +577,7 @@ src/platform/packages/shared/kbn-securitysolution-es-utils @elastic/security-det
 src/platform/packages/shared/kbn-securitysolution-io-ts-types @elastic/security-detection-engine
 src/platform/packages/shared/kbn-securitysolution-io-ts-utils @elastic/security-detection-engine
 src/platform/packages/shared/kbn-securitysolution-rules @elastic/security-detection-engine
+src/platform/packages/shared/kbn-server-http-tools @elastic/kibana-core
 src/platform/packages/shared/kbn-server-route-repository @elastic/obs-knowledge-team
 src/platform/packages/shared/kbn-server-route-repository-client @elastic/obs-knowledge-team
 src/platform/packages/shared/kbn-server-route-repository-utils @elastic/obs-knowledge-team
