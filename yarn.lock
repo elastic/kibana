@@ -4653,7 +4653,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-i18n-browser@link:packages/core/i18n/core-i18n-browser":
+"@kbn/core-i18n-browser@link:src/core/packages/i18n/browser":
   version "0.0.0"
   uid ""
 
