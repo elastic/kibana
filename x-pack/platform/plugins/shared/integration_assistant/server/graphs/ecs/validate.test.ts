@@ -5,12 +5,15 @@
  * 2.0.
  */
 
+import { ecsTestState } from '../../../__jest__/fixtures/ecs_mapping';
 import { ECS_RESERVED } from './constants';
 
+import { EcsMappingState } from '../../types';
 import {
   extractECSMapping,
   findDuplicateFields,
   findInvalidEcsFields,
+  handleValidateMappings,
   removeReservedFields,
 } from './validate';
 
@@ -284,5 +287,50 @@ describe('removeReservedFields', () => {
     const result = removeReservedFields(ecsMapping);
     expect(ecsMapping).toEqual(ecsMappingCopy);
     expect(ecsMapping).not.toEqual(result);
+  });
+});
+
+describe('handleValidateMappings', () => {
+  it('should return empty missing fields if none found', () => {
+    const state: EcsMappingState = ecsTestState;
+    state.currentMapping = {
+      test: {
+        test: {
+          event: { target: 'event.action', confidence: 0.95, type: 'string' },
+        },
+      },
+    };
+    state.combinedSamples = JSON.stringify({
+      test: {
+        test: {
+          event: 'cert.create',
+        },
+      },
+    });
+    const { missingKeys } = handleValidateMappings({ state });
+
+    expect(missingKeys).toEqual([]);
+  });
+
+  it('should return missing fields list if any', () => {
+    const state: EcsMappingState = ecsTestState;
+    state.currentMapping = {
+      test: {
+        test: {
+          event: { target: 'event.action', confidence: 0.95, type: 'string' },
+        },
+      },
+    };
+    state.combinedSamples = JSON.stringify({
+      test: {
+        test: {
+          event: 'cert.create',
+          version: '1',
+        },
+      },
+    });
+    const { missingKeys } = handleValidateMappings({ state });
+
+    expect(missingKeys).toEqual(['test.test.version']);
   });
 });
