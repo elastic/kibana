@@ -6,27 +6,24 @@
  */
 
 import type { FC } from 'react';
-import React, { useCallback, useMemo } from 'react';
+import React, { memo, useCallback, useMemo } from 'react';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import type { TableId } from '@kbn/securitysolution-data-table';
 import { EuiPanel } from '@elastic/eui';
-import {
-  ANCESTOR_INDEX,
-  ENTRY_LEADER_ENTITY_ID,
-  ENTRY_LEADER_START,
-} from '../../shared/constants/field_names';
-import { getField } from '../../shared/utils';
+import type { Process } from '@kbn/session-view-plugin/common';
+import type { CustomProcess } from '../../session_view/context';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { SESSION_VIEW_TEST_ID } from './test_ids';
-import { isActiveTimeline } from '../../../../helpers';
 import { useSourcererDataView } from '../../../../sourcerer/containers';
-import { DocumentDetailsPreviewPanelKey } from '../../shared/constants/panel_keys';
+import {
+  DocumentDetailsPreviewPanelKey,
+  DocumentDetailsSessionViewPanelKey,
+} from '../../shared/constants/panel_keys';
 import { useKibana } from '../../../../common/lib/kibana';
 import { useDocumentDetailsContext } from '../../shared/context';
 import { SourcererScopeName } from '../../../../sourcerer/store/model';
-import { detectionsTimelineIds } from '../../../../timelines/containers/helpers';
 import { ALERT_PREVIEW_BANNER } from '../../preview/constants';
 import { useLicense } from '../../../../common/hooks/use_license';
-import { useSessionPreview } from '../../right/hooks/use_session_preview';
+import { useSessionViewConfig } from '../../shared/hooks/use_session_view_config';
 import { SessionViewNoDataMessage } from '../../shared/components/session_view_no_data_message';
 import { DocumentEventTypes } from '../../../../common/lib/telemetry';
 
@@ -35,46 +32,47 @@ export const SESSION_VIEW_ID = 'session-view';
 /**
  * Session view displayed in the document details expandable flyout left section under the Visualize tab
  */
-export const SessionView: FC = () => {
+export const SessionView: FC = memo(() => {
   const { sessionView, telemetry } = useKibana().services;
-  const { getFieldsData, indexName, scopeId, dataFormattedForFieldBrowser } =
-    useDocumentDetailsContext();
+  const {
+    eventId,
+    indexName,
+    getFieldsData,
+    scopeId,
+    dataFormattedForFieldBrowser,
+    jumpToEntityId,
+    jumpToCursor,
+  } = useDocumentDetailsContext();
 
-  const sessionViewConfig = useSessionPreview({ getFieldsData, dataFormattedForFieldBrowser });
+  const { canReadPolicyManagement } = useUserPrivileges().endpointPrivileges;
+
+  const sessionViewConfig = useSessionViewConfig({ getFieldsData, dataFormattedForFieldBrowser });
   const isEnterprisePlus = useLicense().isEnterprise();
   const isEnabled = sessionViewConfig && isEnterprisePlus;
 
-  const ancestorIndex = getField(getFieldsData(ANCESTOR_INDEX)); // e.g in case of alert, we want to grab it's origin index
-  const sessionEntityId = getField(getFieldsData(ENTRY_LEADER_ENTITY_ID)) || '';
-  const sessionStartTime = getField(getFieldsData(ENTRY_LEADER_START)) || '';
-  const index = ancestorIndex || indexName;
-
-  const sourcererScope = useMemo(() => {
-    if (isActiveTimeline(scopeId)) {
-      return SourcererScopeName.timeline;
-    } else if (detectionsTimelineIds.includes(scopeId as TableId)) {
-      return SourcererScopeName.detections;
-    } else {
-      return SourcererScopeName.default;
-    }
-  }, [scopeId]);
-
-  const { selectedPatterns } = useSourcererDataView(sourcererScope);
+  const { selectedPatterns } = useSourcererDataView(SourcererScopeName.detections);
   const eventDetailsIndex = useMemo(() => selectedPatterns.join(','), [selectedPatterns]);
 
-  const { openPreviewPanel } = useExpandableFlyoutApi();
+  const { openPreviewPanel, closePreviewPanel } = useExpandableFlyoutApi();
   const openAlertDetailsPreview = useCallback(
-    (eventId?: string, onClose?: () => void) => {
-      openPreviewPanel({
-        id: DocumentDetailsPreviewPanelKey,
-        params: {
-          id: eventId,
-          indexName: eventDetailsIndex,
-          scopeId,
-          banner: ALERT_PREVIEW_BANNER,
-          isPreviewMode: true,
-        },
-      });
+    (evtId?: string, onClose?: () => void) => {
+      // In the SessionView component, when the user clicks on the
+      // expand button to open a alert in the preview panel, this actually also selects the row and opens
+      // the detailed panel in preview.
+      // In order to NOT modify the SessionView code, the setTimeout here guarantees that the alert details preview
+      // will be opened in second, so that we have a correct order in the opened preview panels
+      setTimeout(() => {
+        openPreviewPanel({
+          id: DocumentDetailsPreviewPanelKey,
+          params: {
+            id: evtId,
+            indexName: eventDetailsIndex,
+            scopeId,
+            banner: ALERT_PREVIEW_BANNER,
+            isPreviewMode: true,
+          },
+        });
+      }, 100);
       telemetry.reportEvent(DocumentEventTypes.DetailsFlyoutOpened, {
         location: scopeId,
         panel: 'preview',
@@ -83,14 +81,63 @@ export const SessionView: FC = () => {
     [openPreviewPanel, eventDetailsIndex, scopeId, telemetry]
   );
 
+  const openDetailsInPreview = useCallback(
+    (selectedProcess: Process | null) => {
+      // We cannot pass the original Process object sent from the SessionView component
+      // as it contains functions (that should not put into Redux)
+      // and also some recursive properties (that will break rison.encode when updating the URL)
+      const simplifiedSelectedProcess: CustomProcess | null = selectedProcess
+        ? {
+            id: selectedProcess.id,
+            details: selectedProcess.getDetails(),
+            endTime: selectedProcess.getEndTime(),
+          }
+        : null;
+
+      openPreviewPanel({
+        id: DocumentDetailsSessionViewPanelKey,
+        params: {
+          eventId,
+          indexName,
+          selectedProcess: simplifiedSelectedProcess,
+          index: sessionViewConfig?.index,
+          sessionEntityId: sessionViewConfig?.sessionEntityId,
+          sessionStartTime: sessionViewConfig?.sessionStartTime,
+          investigatedAlertId: sessionViewConfig?.investigatedAlertId,
+          scopeId,
+          jumpToEntityId,
+          jumpToCursor,
+        },
+      });
+    },
+    [
+      openPreviewPanel,
+      eventId,
+      indexName,
+      sessionViewConfig?.index,
+      sessionViewConfig?.sessionEntityId,
+      sessionViewConfig?.sessionStartTime,
+      sessionViewConfig?.investigatedAlertId,
+      scopeId,
+      jumpToEntityId,
+      jumpToCursor,
+    ]
+  );
+
+  const closeDetailsInPreview = useCallback(() => closePreviewPanel(), [closePreviewPanel]);
+
   return isEnabled ? (
     <div data-test-subj={SESSION_VIEW_TEST_ID}>
       {sessionView.getSessionView({
-        index,
-        sessionEntityId,
-        sessionStartTime,
+        ...sessionViewConfig,
         isFullScreen: true,
         loadAlertDetails: openAlertDetailsPreview,
+        openDetailsInExpandableFlyout: (selectedProcess: Process | null) =>
+          openDetailsInPreview(selectedProcess),
+        closeDetailsInExpandableFlyout: () => closeDetailsInPreview(),
+        canReadPolicyManagement,
+        resetJumpToEntityId: jumpToEntityId,
+        resetJumpToCursor: jumpToCursor,
       })}
     </div>
   ) : (
@@ -101,6 +148,6 @@ export const SessionView: FC = () => {
       />
     </EuiPanel>
   );
-};
+});
 
 SessionView.displayName = 'SessionView';
