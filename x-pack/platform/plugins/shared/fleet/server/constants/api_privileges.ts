@@ -8,6 +8,10 @@
 import { INTEGRATIONS_PLUGIN_ID, PLUGIN_ID } from '../../common';
 
 export const FLEET_API_PRIVILEGES = {
+  FLEET: {
+    READ: `${PLUGIN_ID}-read`,
+    ALL: `${PLUGIN_ID}-all`,
+  },
   AGENTS: {
     READ: `${PLUGIN_ID}-agents-read`,
     ALL: `${PLUGIN_ID}-agents-all`,
