@@ -483,7 +483,7 @@ The plugin exposes the static DefaultEditorController class to consume.
 |This plugin provides cases management in Kibana
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/cloud/README.md[cloud]
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/shared/cloud/README.md[cloud]
 |The cloud plugin exposes Cloud-specific metadata to Kibana.
 
 
