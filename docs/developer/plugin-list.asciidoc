@@ -294,7 +294,7 @@ Content is fetched from the remote (https://feeds.elastic.co) once a day, with p
 |The savedObjectsFinder plugin exposes a UI for finding saved objects on the client side.
 
 
-|{kib-repo}blob/{branch}/src/plugins/saved_objects_management/README.md[savedObjectsManagement]
+|{kib-repo}blob/{branch}/src/platform/plugins/shared/saved_objects_management/README.md[savedObjectsManagement]
 |The savedObjectsManagement plugin manages the Saved Objects management section.
 
 

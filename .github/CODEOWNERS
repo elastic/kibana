@@ -651,6 +651,7 @@ src/platform/plugins/shared/newsfeed @elastic/kibana-core
 src/platform/plugins/shared/presentation_util @elastic/kibana-presentation
 src/platform/plugins/shared/saved_objects @elastic/appex-sharedux
 src/platform/plugins/shared/saved_objects_finder @elastic/kibana-data-discovery
+src/platform/plugins/shared/saved_objects_management @elastic/kibana-core
 src/platform/plugins/shared/saved_objects_tagging_oss @elastic/appex-sharedux
 src/platform/plugins/shared/saved_search @elastic/kibana-data-discovery
 src/platform/plugins/shared/screenshot_mode @elastic/appex-sharedux
@@ -673,7 +674,6 @@ src/plugins/event_annotation @elastic/kibana-visualizations
 src/plugins/event_annotation_listing @elastic/kibana-visualizations
 src/plugins/expressions @elastic/kibana-visualizations
 src/plugins/interactive_setup @elastic/kibana-security
-src/plugins/saved_objects_management @elastic/kibana-core
 src/plugins/telemetry @elastic/kibana-core
 src/plugins/telemetry_collection_manager @elastic/kibana-core
 src/plugins/telemetry_management_section @elastic/kibana-core
