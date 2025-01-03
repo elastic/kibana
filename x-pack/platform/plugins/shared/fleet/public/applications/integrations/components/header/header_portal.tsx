@@ -17,15 +17,21 @@ import type { FleetStartServices } from '../../../../plugin';
 export interface Props {
   children: React.ReactNode;
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
-  startServices: Pick<FleetStartServices, 'analytics' | 'i18n' | 'theme'>;
+  startServices: Pick<FleetStartServices, 'analytics' | 'i18n' | 'theme' | 'userProfile'>;
 }
 
 export const HeaderPortal: FC<Props> = ({ children, setHeaderActionMenu, startServices }) => {
   const portalNode = useMemo(() => createHtmlPortalNode(), []);
+  const { analytics, theme, i18n, userProfile } = startServices;
 
   useEffect(() => {
     setHeaderActionMenu((element) => {
-      const mount = toMountPoint(<OutPortal node={portalNode} />, startServices);
+      const mount = toMountPoint(<OutPortal node={portalNode} />, {
+        analytics,
+        i18n,
+        theme,
+        userProfile,
+      });
       return mount(element);
     });
 
@@ -33,7 +39,7 @@ export const HeaderPortal: FC<Props> = ({ children, setHeaderActionMenu, startSe
       portalNode.unmount();
       setHeaderActionMenu(undefined);
     };
-  }, [portalNode, setHeaderActionMenu, startServices]);
+  }, [portalNode, setHeaderActionMenu, analytics, i18n, theme, userProfile]);
 
   return <InPortal node={portalNode}>{children}</InPortal>;
 };

@@ -32,7 +32,7 @@ export function UXActionMenu({
   appMountParameters: AppMountParameters;
   isDev: boolean;
 }) {
-  const { http, application } = useKibanaServices();
+  const { http, application, ...startServices } = useKibanaServices();
 
   const { urlParams } = useLegacyUrlParams();
   const { rangeTo, rangeFrom, serviceName } = urlParams;
@@ -58,7 +58,7 @@ export function UXActionMenu({
   return (
     <HeaderMenuPortal
       setHeaderActionMenu={appMountParameters.setHeaderActionMenu}
-      theme$={appMountParameters.theme$}
+      {...startServices}
     >
       <EuiFlexGroup responsive={false} gutterSize="s">
         <EuiFlexItem>

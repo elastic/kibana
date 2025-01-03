@@ -52,4 +52,7 @@ export function plugin() {
 
 export type { AddToTimelineButtonProps } from './components/hover_actions/actions/add_to_timeline';
 
-export type TimelinesStartServices = Pick<CoreStart, 'analytics' | 'i18n' | 'theme'>;
+export type TimelinesStartServices = Pick<
+  CoreStart,
+  'analytics' | 'i18n' | 'theme' | 'userProfile'
+>;

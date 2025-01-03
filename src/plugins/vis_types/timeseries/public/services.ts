@@ -15,6 +15,7 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { UserProfileService } from '@kbn/core-user-profile-browser';
 
 export const [getUISettings, setUISettings] = createGetterSetter<IUiSettingsClient>('UISettings');
 
@@ -31,6 +32,9 @@ export const [getDataViewsStart, setDataViewsStart] =
   createGetterSetter<DataViewsPublicPluginStart>('dataViews');
 
 export const [getI18n, setI18n] = createGetterSetter<I18nStart>('I18n');
+
+export const [getUserProfile, setUserProfile] =
+  createGetterSetter<UserProfileService>('UserProfile');
 
 export const [getCharts, setCharts] = createGetterSetter<ChartsPluginStart>('ChartsPluginStart');
 

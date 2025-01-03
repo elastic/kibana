@@ -26,10 +26,9 @@ export interface CreateAnnotationResponse {
 
 export function useUpdateAnnotation() {
   const {
-    i18n: i18nStart,
-    theme,
     http,
     notifications: { toasts },
+    ...startServices
   } = useKibana().services;
   const services = useKibana().services;
 
@@ -65,10 +64,7 @@ export function useUpdateAnnotation() {
                 }}
               />
             </RedirectAppLinks>,
-            {
-              i18n: i18nStart,
-              theme,
-            }
+            startServices
           ),
         });
       },

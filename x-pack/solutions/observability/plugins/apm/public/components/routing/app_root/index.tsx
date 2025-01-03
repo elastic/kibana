@@ -109,11 +109,12 @@ export function ApmAppRoot({
 
 function MountApmHeaderActionMenu() {
   const {
-    appMountParameters: { setHeaderActionMenu, theme$ },
+    appMountParameters: { setHeaderActionMenu },
+    core,
   } = useApmPluginContext();
 
   return (
-    <HeaderMenuPortal setHeaderActionMenu={setHeaderActionMenu} theme$={theme$}>
+    <HeaderMenuPortal setHeaderActionMenu={setHeaderActionMenu} {...core}>
       <EuiFlexGroup responsive={false} gutterSize="s">
         <EuiFlexItem>
           <ApmHeaderActionMenu />

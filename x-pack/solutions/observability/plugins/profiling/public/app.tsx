@@ -34,7 +34,6 @@ interface Props {
   coreSetup: CoreSetup;
   pluginsStart: ProfilingPluginPublicStartDeps;
   pluginsSetup: ProfilingPluginPublicSetupDeps;
-  theme$: AppMountParameters['theme$'];
   history: AppMountParameters['history'];
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
 }
@@ -42,14 +41,14 @@ interface Props {
 const storage = new Storage(localStorage);
 
 function MountProfilingActionMenu({
-  theme$,
+  core,
   setHeaderActionMenu,
 }: {
-  theme$: AppMountParameters['theme$'];
+  core: CoreStart;
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
 }) {
   return (
-    <HeaderMenuPortal setHeaderActionMenu={setHeaderActionMenu} theme$={theme$}>
+    <HeaderMenuPortal setHeaderActionMenu={setHeaderActionMenu} {...core}>
       <EuiFlexGroup responsive={false} gutterSize="s">
         <EuiFlexItem>
           <ProfilingHeaderActionMenu />
@@ -65,7 +64,6 @@ function App({
   pluginsStart,
   pluginsSetup,
   profilingFetchServices,
-  theme$,
   history,
   setHeaderActionMenu,
 }: Props) {
@@ -105,8 +103,8 @@ function App({
                             </RedirectWithDefaultDateRange>
                           </CheckSetup>
                           <MountProfilingActionMenu
+                            core={coreStart}
                             setHeaderActionMenu={setHeaderActionMenu}
-                            theme$={theme$}
                           />
                         </>
                       </LicenseProvider>

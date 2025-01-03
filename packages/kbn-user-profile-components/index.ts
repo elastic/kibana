@@ -25,6 +25,7 @@ export type {
 export type {
   UserProfileData,
   UserSettingsData,
+  ContrastModeValue,
   DarkModeValue,
   UserProfileAvatarData,
 } from './src/types';

@@ -7,17 +7,17 @@
 
 import { render } from '@testing-library/react';
 import React from 'react';
+import { coreMock } from '@kbn/core/public/mocks';
 import HeaderMenuPortal from './header_menu_portal';
-import { themeServiceMock } from '@kbn/core/public/mocks';
 
 describe('HeaderMenuPortal', () => {
   describe('when unmounted', () => {
     it('calls setHeaderActionMenu with undefined', () => {
       const setHeaderActionMenu = jest.fn();
-      const theme$ = themeServiceMock.createTheme$();
+      const coreStart = coreMock.createStart();
 
       const { unmount } = render(
-        <HeaderMenuPortal setHeaderActionMenu={setHeaderActionMenu} theme$={theme$}>
+        <HeaderMenuPortal setHeaderActionMenu={setHeaderActionMenu} {...coreStart}>
           test
         </HeaderMenuPortal>
       );

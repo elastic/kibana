@@ -34,7 +34,7 @@ const queryClient = new QueryClient({
 
 const AllTheProviders: FC<PropsWithChildren<unknown>> = ({ children }) => {
   return (
-    <KibanaThemeProvider theme={core.theme}>
+    <KibanaThemeProvider {...core}>
       <KibanaContextProvider services={{ ...core, ...services }}>
         <QueryClientProvider client={queryClient}>
           <I18nProvider>{children}</I18nProvider>

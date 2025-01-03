@@ -68,7 +68,7 @@ export const ObservabilityLogsExplorerApp = ({
   );
 
   return (
-    <KibanaRenderContextProvider i18n={core.i18n} theme={core.theme}>
+    <KibanaRenderContextProvider {...core}>
       <KibanaContextProviderForPlugin>
         <KbnUrlStateStorageFromRouterProvider>
           <Router history={appParams.history}>

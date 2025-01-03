@@ -43,6 +43,8 @@
     "@kbn/server-route-repository-utils",
     "@kbn/core-application-browser",
     "@kbn/core-plugins-server",
+    "@kbn/core-theme-browser",
+    "@kbn/core-user-profile-browser",
     "@kbn/logs-shared-plugin"
   ],
   "exclude": [

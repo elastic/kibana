@@ -4,12 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { CoreStart, CoreTheme } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
 import { RouteRenderer, RouterProvider } from '@kbn/typed-react-router-config';
 import type { History } from 'history';
 import React from 'react';
-import type { Observable } from 'rxjs';
-import type { AIAssistantAppService } from '@kbn/ai-assistant';
 import type { ObservabilityAIAssistantAppPluginStartDependencies } from './types';
 import { SharedProviders } from './utils/shared_providers';
 import { observabilityAIAssistantRouter } from './routes/config';
@@ -20,22 +18,13 @@ export function Application({
   coreStart,
   history,
   pluginsStart,
-  service,
-  theme$,
 }: {
   coreStart: CoreStart;
   history: History;
   pluginsStart: ObservabilityAIAssistantAppPluginStartDependencies;
-  service: AIAssistantAppService;
-  theme$: Observable<CoreTheme>;
 }) {
   return (
-    <SharedProviders
-      coreStart={coreStart}
-      pluginsStart={pluginsStart}
-      service={service}
-      theme$={theme$}
-    >
+    <SharedProviders coreStart={coreStart} pluginsStart={pluginsStart}>
       <RouterProvider history={history} router={observabilityAIAssistantRouter}>
         <RouteRenderer />
       </RouterProvider>
