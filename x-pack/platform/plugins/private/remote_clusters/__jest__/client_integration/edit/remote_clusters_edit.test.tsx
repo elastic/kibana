@@ -64,14 +64,16 @@ describe('Edit Remote cluster', () => {
   });
 
   test('should populate the form fields with the values from the remote cluster loaded', () => {
-    expect(actions.nameInput.getValue()).toBe(REMOTE_CLUSTER_EDIT_NAME);
+    expect(actions.formStep.nameInput.getValue()).toBe(REMOTE_CLUSTER_EDIT_NAME);
     // seeds input for sniff connection is not shown on Cloud
-    expect(actions.seedsInput.getValue()).toBe(REMOTE_CLUSTER_EDIT.seeds?.join(''));
-    expect(actions.skipUnavailableSwitch.isChecked()).toBe(REMOTE_CLUSTER_EDIT.skipUnavailable);
+    expect(actions.formStep.seedsInput.getValue()).toBe(REMOTE_CLUSTER_EDIT.seeds?.join(''));
+    expect(actions.formStep.skipUnavailableSwitch.isChecked()).toBe(
+      REMOTE_CLUSTER_EDIT.skipUnavailable
+    );
   });
 
   test('should disable the form name input', () => {
-    expect(actions.nameInput.isDisabled()).toBe(true);
+    expect(actions.formStep.nameInput.isDisabled()).toBe(true);
   });
 
   describe('on cloud', () => {
@@ -92,9 +94,11 @@ describe('Edit Remote cluster', () => {
       });
       component.update();
 
-      expect(actions.cloudRemoteAddressInput.exists()).toBe(true);
-      expect(actions.cloudRemoteAddressInput.getValue()).toBe(`${cloudUrl}:${defaultCloudPort}`);
-      expect(actions.tlsServerNameInput.exists()).toBe(false);
+      expect(actions.formStep.cloudRemoteAddressInput.exists()).toBe(true);
+      expect(actions.formStep.cloudRemoteAddressInput.getValue()).toBe(
+        `${cloudUrl}:${defaultCloudPort}`
+      );
+      expect(actions.formStep.tlsServerNameInput.exists()).toBe(false);
     });
 
     test("existing cluster that doesn't have a TLS server name", async () => {
@@ -111,9 +115,9 @@ describe('Edit Remote cluster', () => {
       });
       component.update();
 
-      expect(actions.cloudRemoteAddressInput.exists()).toBe(true);
-      expect(actions.cloudRemoteAddressInput.getValue()).toBe(`${cloudUrl}:9500`);
-      expect(actions.tlsServerNameInput.exists()).toBe(true);
+      expect(actions.formStep.cloudRemoteAddressInput.exists()).toBe(true);
+      expect(actions.formStep.cloudRemoteAddressInput.getValue()).toBe(`${cloudUrl}:9500`);
+      expect(actions.formStep.tlsServerNameInput.exists()).toBe(true);
     });
 
     test('existing cluster that has remote address different from TLS server name)', async () => {
@@ -131,9 +135,11 @@ describe('Edit Remote cluster', () => {
       });
       component.update();
 
-      expect(actions.cloudRemoteAddressInput.exists()).toBe(true);
-      expect(actions.cloudRemoteAddressInput.getValue()).toBe(`${cloudUrl}:${defaultCloudPort}`);
-      expect(actions.tlsServerNameInput.exists()).toBe(true);
+      expect(actions.formStep.cloudRemoteAddressInput.exists()).toBe(true);
+      expect(actions.formStep.cloudRemoteAddressInput.getValue()).toBe(
+        `${cloudUrl}:${defaultCloudPort}`
+      );
+      expect(actions.formStep.tlsServerNameInput.exists()).toBe(true);
     });
   });
 });

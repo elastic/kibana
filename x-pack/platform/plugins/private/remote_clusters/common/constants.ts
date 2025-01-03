@@ -45,3 +45,8 @@ export const getSecurityModel = (type: string) => {
 
 // Hardcoded limit of maximum node connections allowed
 export const MAX_NODE_CONNECTIONS = 2 ** 31 - 1; // 2147483647
+
+export enum SECURITY_MODEL {
+  API = 'api_key',
+  CERTIFICATE = 'certificate',
+}

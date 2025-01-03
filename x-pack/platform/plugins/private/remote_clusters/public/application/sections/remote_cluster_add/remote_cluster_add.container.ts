@@ -6,22 +6,23 @@
  */
 
 import { connect } from 'react-redux';
+import { ClusterPayload } from '../../../../common/lib';
 import { RemoteClusterAdd as RemoteClusterAddView } from './remote_cluster_add';
 
 import { isAddingCluster, getAddClusterError } from '../../store/selectors';
 
 import { addCluster, clearAddClusterErrors } from '../../store/actions';
 
-const mapStateToProps = (state) => {
+const mapStateToProps = (state: any) => {
   return {
     isAddingCluster: isAddingCluster(state),
     addClusterError: getAddClusterError(state),
   };
 };
 
-const mapDispatchToProps = (dispatch) => {
+const mapDispatchToProps = (dispatch: (action: any) => void) => {
   return {
-    addCluster: (cluster) => {
+    addCluster: (cluster: ClusterPayload) => {
       dispatch(addCluster(cluster));
     },
     clearAddClusterErrors: () => {

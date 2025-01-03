@@ -6,6 +6,7 @@
  */
 
 import { connect } from 'react-redux';
+import { ClusterPayload } from '../../../../common/lib';
 import { RemoteClusterEdit as RemoteClusterEditView } from './remote_cluster_edit';
 
 import {
@@ -23,7 +24,7 @@ import {
   openDetailPanel,
 } from '../../store/actions';
 
-const mapStateToProps = (state) => {
+const mapStateToProps = (state: any) => {
   return {
     isLoading: isLoading(state),
     cluster: getEditedCluster(state),
@@ -32,21 +33,21 @@ const mapStateToProps = (state) => {
   };
 };
 
-const mapDispatchToProps = (dispatch) => {
+const mapDispatchToProps = (dispatch: (action: any) => void) => {
   return {
-    startEditingCluster: (clusterName) => {
+    startEditingCluster: (clusterName: string) => {
       dispatch(startEditingCluster({ clusterName }));
     },
     stopEditingCluster: () => {
       dispatch(stopEditingCluster());
     },
-    editCluster: (cluster) => {
+    editCluster: (cluster: ClusterPayload) => {
       dispatch(editCluster(cluster));
     },
     clearEditClusterErrors: () => {
       dispatch(clearEditClusterErrors());
     },
-    openDetailPanel: (clusterName) => {
+    openDetailPanel: (clusterName: string) => {
       dispatch(openDetailPanel({ name: clusterName }));
     },
   };
