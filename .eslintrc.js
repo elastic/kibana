@@ -1942,7 +1942,7 @@ module.exports = {
         'x-pack/plugins/licensing/**',
         'x-pack/platform/plugins/shared/global_search/**',
         'x-pack/platform/plugins/shared/cloud/**',
-        'packages/kbn-config-schema',
+        'src/platform/packages/shared/kbn-config-schema',
         'src/plugins/status_page/**',
         'src/plugins/saved_objects_management/**',
         'src/platform/packages/shared/kbn-analytics/**',

@@ -4201,7 +4201,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/config-schema@link:packages/kbn-config-schema":
+"@kbn/config-schema@link:src/platform/packages/shared/kbn-config-schema":
   version "0.0.0"
   uid ""
 

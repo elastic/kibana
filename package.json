@@ -226,7 +226,7 @@
     "@kbn/coloring": "link:packages/kbn-coloring",
     "@kbn/config": "link:src/platform/packages/shared/kbn-config",
     "@kbn/config-mocks": "link:src/platform/packages/private/kbn-config-mocks",
-    "@kbn/config-schema": "link:packages/kbn-config-schema",
+    "@kbn/config-schema": "link:src/platform/packages/shared/kbn-config-schema",
     "@kbn/console-plugin": "link:src/platform/plugins/shared/console",
     "@kbn/content-management-content-editor": "link:packages/content-management/content_editor",
     "@kbn/content-management-content-insights-public": "link:packages/content-management/content_insights/content_insights_public",
