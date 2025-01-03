@@ -9,8 +9,12 @@
 
 import { BehaviorSubject } from 'rxjs';
 
-import { CoreStart } from '@kbn/core/public';
-import { PresentationPanelStartDependencies } from './plugin';
+import type { CoreStart } from '@kbn/core/public';
+import type { ActionExecutionMeta } from '@kbn/ui-actions-plugin/public';
+import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
+import type { PresentationPanelStartDependencies } from './plugin';
+import { CONTEXT_MENU_TRIGGER } from './panel_actions';
+import { ACTION_EDIT_PANEL } from './panel_actions/edit_panel_action/constants';
 
 export let core: CoreStart;
 export let uiActions: PresentationPanelStartDependencies['uiActions'];
@@ -47,3 +51,11 @@ export const setKibanaServices = (
 
   servicesReady$.next(true);
 };
+
+export async function executeEditPanelAction(api: unknown) {
+  const action = await uiActions.getAction(ACTION_EDIT_PANEL);
+  action.execute({
+    embeddable: api,
+    trigger: { id: CONTEXT_MENU_TRIGGER },
+  } as EmbeddableApiContext & ActionExecutionMeta);
+}

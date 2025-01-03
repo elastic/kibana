@@ -7,13 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export {
-  contextMenuTrigger,
-  CONTEXT_MENU_TRIGGER,
-  panelBadgeTrigger,
-  panelHoverTrigger,
-  panelNotificationTrigger,
-  PANEL_BADGE_TRIGGER,
-  PANEL_HOVER_TRIGGER,
-  PANEL_NOTIFICATION_TRIGGER,
-} from './triggers';
+export { RemovePanelAction } from './remove_panel_action/remove_panel_action';
+export { CustomTimeRangeBadge } from './customize_panel_action';
+export { CustomizePanelAction } from './customize_panel_action';
+export { EditPanelAction } from './edit_panel_action/edit_panel_action';
+export { InspectPanelAction } from './inspect_panel_action/inspect_panel_action';

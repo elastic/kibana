@@ -10,6 +10,7 @@
 import { PrettyDuration } from '@elastic/eui';
 import {
   Action,
+  ActionExecutionMeta,
   FrequentCompatibilityChangeAction,
   IncompatibleActionError,
 } from '@kbn/ui-actions-plugin/public';
@@ -17,10 +18,8 @@ import React from 'react';
 
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { apiPublishesTimeRange, EmbeddableApiContext } from '@kbn/presentation-publishing';
-import { core } from '../../kibana_services';
-import { customizePanelAction } from '../panel_actions';
-
-export const CUSTOM_TIME_RANGE_BADGE = 'CUSTOM_TIME_RANGE_BADGE';
+import { ACTION_CUSTOMIZE_PANEL, CUSTOM_TIME_RANGE_BADGE } from './constants';
+import { core, uiActions } from '../../kibana_services';
 
 export class CustomTimeRangeBadge
   implements Action<EmbeddableApiContext>, FrequentCompatibilityChangeAction<EmbeddableApiContext>
@@ -69,8 +68,9 @@ export class CustomTimeRangeBadge
     });
   }
 
-  public async execute({ embeddable }: EmbeddableApiContext) {
-    customizePanelAction.execute({ embeddable });
+  public async execute(context: ActionExecutionMeta & EmbeddableApiContext) {
+    const action = await uiActions.getAction(ACTION_CUSTOMIZE_PANEL);
+    action.execute(context);
   }
 
   public getIconType() {

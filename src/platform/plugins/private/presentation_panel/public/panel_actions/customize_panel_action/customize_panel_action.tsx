@@ -26,8 +26,7 @@ import {
 } from '@kbn/presentation-publishing';
 import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { openCustomizePanelFlyout } from './open_customize_panel';
-
-export const ACTION_CUSTOMIZE_PANEL = 'ACTION_CUSTOMIZE_PANEL';
+import { ACTION_CUSTOMIZE_PANEL } from './constants';
 
 export type CustomizePanelActionApi = CanAccessViewMode &
   Partial<

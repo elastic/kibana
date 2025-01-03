@@ -11,15 +11,18 @@ import { EuiButtonEmpty, EuiEmptyPrompt, EuiText } from '@elastic/eui';
 import React, { useEffect, useMemo, useState } from 'react';
 
 import { ErrorLike } from '@kbn/expressions-plugin/common';
-import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
+import { EmbeddableApiContext, useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import { renderSearchError } from '@kbn/search-errors';
 import { Markdown } from '@kbn/shared-ux-markdown';
 import { Subscription } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import { useErrorTextStyle } from '@kbn/react-hooks';
-import { editPanelAction } from '../panel_actions/panel_actions';
+import { ActionExecutionMeta } from '@kbn/ui-actions-plugin/public';
 import { getErrorCallToAction } from './presentation_panel_strings';
 import { DefaultPresentationPanelApi } from './types';
+import { executeEditPanelAction, uiActions } from '../kibana_services';
+import { ACTION_EDIT_PANEL } from '../panel_actions/edit_panel_action/constants';
+import { CONTEXT_MENU_TRIGGER } from '../panel_actions';
 
 export const PresentationPanelError = ({
   api,
@@ -32,13 +35,33 @@ export const PresentationPanelError = ({
 
   const [isEditable, setIsEditable] = useState(false);
   const handleErrorClick = useMemo(
-    () => (isEditable ? () => editPanelAction?.execute({ embeddable: api }) : undefined),
+    () => (isEditable ? () => executeEditPanelAction(api) : undefined),
     [api, isEditable]
   );
-  const label = useMemo(
-    () => (isEditable ? editPanelAction?.getDisplayName({ embeddable: api }) : ''),
-    [api, isEditable]
-  );
+
+  const [label, setLabel] = useState('');
+  useEffect(() => {
+    if (!isEditable) {
+      setLabel('');
+      return;
+    }
+
+    const canceled = false;
+    uiActions
+      .getAction(ACTION_EDIT_PANEL)
+      .then((action) => {
+        if (canceled) return;
+        setLabel(
+          action?.getDisplayName({
+            embeddable: api,
+            trigger: { id: CONTEXT_MENU_TRIGGER },
+          } as EmbeddableApiContext & ActionExecutionMeta)
+        );
+      })
+      .catch(() => {
+        // ignore action not found
+      });
+  }, [api, isEditable]);
 
   const panelTitle = useStateFromPublishingSubject(api?.panelTitle);
   const ariaLabel = useMemo(
@@ -48,17 +71,21 @@ export const PresentationPanelError = ({
 
   // Get initial editable state from action and subscribe to changes.
   useEffect(() => {
-    if (!editPanelAction?.couldBecomeCompatible({ embeddable: api })) return;
-
     let canceled = false;
     const subscription = new Subscription();
     (async () => {
-      const initiallyCompatible = await editPanelAction?.isCompatible({ embeddable: api });
+      const editPanelAction = await uiActions.getAction(ACTION_EDIT_PANEL);
+      if (canceled || !editPanelAction?.couldBecomeCompatible?.({ embeddable: api })) return;
+
+      const initiallyCompatible = await editPanelAction?.isCompatible({
+        embeddable: api,
+        trigger: { id: CONTEXT_MENU_TRIGGER },
+      } as EmbeddableApiContext & ActionExecutionMeta);
       if (canceled) return;
       setIsEditable(initiallyCompatible);
 
       subscription.add(
-        editPanelAction?.subscribeToCompatibilityChanges({ embeddable: api }, (isCompatible) => {
+        editPanelAction?.subscribeToCompatibilityChanges?.({ embeddable: api }, (isCompatible) => {
           if (!canceled) setIsEditable(isCompatible);
         })
       );

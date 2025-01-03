@@ -7,13 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export {
-  contextMenuTrigger,
-  CONTEXT_MENU_TRIGGER,
-  panelBadgeTrigger,
-  panelHoverTrigger,
-  panelNotificationTrigger,
-  PANEL_BADGE_TRIGGER,
-  PANEL_HOVER_TRIGGER,
-  PANEL_NOTIFICATION_TRIGGER,
-} from './triggers';
+export const ACTION_EDIT_PANEL = 'editPanel';
