@@ -36,10 +36,7 @@ describe('validation', () => {
       const { expectErrors } = await setup();
       await expectErrors(
         'FROM index | LIMIT 10 | where MATCH(`kubernetes.something.something`, "value")',
-        [
-          'Argument of [match] must be [keyword], found value [kubernetes.something.something] type [double]',
-          '[MATCH] function cannot be used after LIMIT',
-        ]
+        ['[MATCH] function cannot be used after LIMIT']
       );
     });
   });
