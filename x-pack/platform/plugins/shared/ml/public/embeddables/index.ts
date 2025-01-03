@@ -6,12 +6,12 @@
  */
 
 import type { EmbeddableSetup } from '@kbn/embeddable-plugin/public';
-import type { MlCoreSetup } from '../plugin';
 import {
   ANOMALY_SINGLE_METRIC_VIEWER_EMBEDDABLE_TYPE,
   ANOMALY_SWIMLANE_EMBEDDABLE_TYPE,
   ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE,
-} from './constants';
+} from '@kbn/ml-embeddables/constants';
+import type { MlCoreSetup } from '../plugin';
 
 export function registerEmbeddables(embeddable: EmbeddableSetup, core: MlCoreSetup) {
   embeddable.registerReactEmbeddableFactory(ANOMALY_SWIMLANE_EMBEDDABLE_TYPE, async () => {

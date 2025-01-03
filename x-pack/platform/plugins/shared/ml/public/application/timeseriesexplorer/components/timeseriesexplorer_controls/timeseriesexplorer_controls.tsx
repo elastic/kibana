@@ -32,9 +32,9 @@ import { useTimeRangeUpdates } from '@kbn/ml-date-picker';
 import type { CombinedJobWithStats } from '@kbn/ml-common-types/anomaly_detection_jobs/combined_job';
 import type { JobId } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
 
+import { ANOMALY_SINGLE_METRIC_VIEWER_EMBEDDABLE_TYPE } from '@kbn/ml-embeddables/constants';
 import { getDefaultSingleMetricViewerPanelTitle } from '../../../../embeddables/single_metric_viewer/get_default_panel_title';
 import type { MlEntity } from '../../../../embeddables/types';
-import { ANOMALY_SINGLE_METRIC_VIEWER_EMBEDDABLE_TYPE } from '../../../../embeddables/constants';
 import type { SingleMetricViewerEmbeddableState } from '../../../../embeddables/types';
 
 import { CASES_TOAST_MESSAGES_TITLES } from '../../../../cases/constants';

@@ -24,6 +24,23 @@ import { type BehaviorSubject } from 'rxjs';
 import type { TypeOf } from '@kbn/config-schema';
 import type { SeverityThreshold } from '@kbn/ml-common-types/anomalies';
 import type { JobId } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
+import type {
+  AnomalyExplorerChartsEmbeddableType,
+  AnomalySwimLaneEmbeddableType,
+  MlEmbeddableTypes,
+} from '@kbn/ml-embeddables/constants';
+
+import type {
+  anomalyChartsEmbeddableOverridableStateSchema,
+  anomalyChartsEmbeddableRuntimeStateSchema,
+  anomalyChartsEmbeddableStateSchema,
+  anomalySwimlaneEmbeddableCustomInputOverallSchema,
+  anomalySwimlaneEmbeddableCustomInputSchema,
+  anomalySwimlaneEmbeddableCustomInputViewBySchema,
+  anomalySwimlaneEmbeddableUserInputSchema,
+  anomalySwimlaneInitialInputSchema,
+} from '../../server/embeddable/schemas';
+
 import type { MlDependencies } from '../application/app';
 import type { MlCapabilitiesService } from '../application/capabilities/check_capabilities';
 import type { AppStateSelectedCells } from '../application/explorer/explorer_utils';
@@ -36,21 +53,7 @@ import type { MlResultsService } from '../application/services/results_service';
 import type { MlTimeSeriesSearchService } from '../application/timeseriesexplorer/timeseriesexplorer_utils/time_series_search_service';
 import type { TimeSeriesExplorerService } from '../application/util/time_series_explorer_service';
 import type { ToastNotificationService } from '../application/services/toast_notification_service';
-import type {
-  AnomalyExplorerChartsEmbeddableType,
-  AnomalySwimLaneEmbeddableType,
-  MlEmbeddableTypes,
-} from './constants';
-import type {
-  anomalyChartsEmbeddableOverridableStateSchema,
-  anomalyChartsEmbeddableRuntimeStateSchema,
-  anomalyChartsEmbeddableStateSchema,
-  anomalySwimlaneEmbeddableCustomInputOverallSchema,
-  anomalySwimlaneEmbeddableCustomInputSchema,
-  anomalySwimlaneEmbeddableCustomInputViewBySchema,
-  anomalySwimlaneEmbeddableUserInputSchema,
-  anomalySwimlaneInitialInputSchema,
-} from '../../server/embeddable/schemas';
+
 import type {
   MlEntity,
   SingleMetricViewerEmbeddableState,

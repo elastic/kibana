@@ -1,0 +1,5 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/ml-embeddables",
+  "owner": "@elastic/ml-ui"
+}

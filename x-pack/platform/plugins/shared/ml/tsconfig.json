@@ -149,5 +149,6 @@
     "@kbn/presentation-publishing-schemas",
     "@kbn/ml-common-constants",
     "@kbn/ml-common-types",
+    "@kbn/ml-embeddables",
   ]
 }

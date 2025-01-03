@@ -22,7 +22,7 @@ import {
   titleComparators,
 } from '@kbn/presentation-publishing/interfaces/titles/title_manager';
 import { BehaviorSubject, Subscription } from 'rxjs';
-import { ANOMALY_SINGLE_METRIC_VIEWER_EMBEDDABLE_TYPE } from '../constants';
+import { ANOMALY_SINGLE_METRIC_VIEWER_EMBEDDABLE_TYPE } from '@kbn/ml-embeddables/constants';
 import type { MlPluginStart, MlStartDependencies } from '../../plugin';
 import type { SingleMetricViewerEmbeddableApi } from '../types';
 import {
