@@ -29,7 +29,6 @@ import { Logger } from '@kbn/logging';
 import { Mutable } from 'utility-types';
 import type { HandlerResolutionStrategy, Method, Options } from './types';
 
-import { validate } from './validate';
 import {
   isAllowedPublicVersion,
   isValidRouteVersion,
@@ -227,13 +226,11 @@ export class CoreVersionedRoute implements VersionedRoute {
     if (this.isDev && validation?.response?.[response.status]?.body) {
       const { [response.status]: responseValidation, unsafe } = validation.response;
       try {
-        validate(
-          { body: response.payload },
-          {
-            body: unwrapVersionedResponseBodyValidation(responseValidation.body!),
-            unsafe: { body: unsafe?.body },
-          }
-        );
+        const validator = RouteValidator.from({
+          body: unwrapVersionedResponseBodyValidation(responseValidation.body!),
+          unsafe: { body: unsafe?.body },
+        });
+        validator.getBody(response.payload, 'response body');
       } catch (e) {
         return responseFactory.custom({
           statusCode: 500,
