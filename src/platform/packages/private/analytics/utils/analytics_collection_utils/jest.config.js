@@ -9,6 +9,6 @@
 
 module.exports = {
   preset: '@kbn/test',
-  rootDir: '../../../..',
-  roots: ['<rootDir>/packages/analytics/utils/analytics_collection_utils'],
+  rootDir: '../../../../../../..',
+  roots: ['<rootDir>/src/platform/packages/private/analytics/utils/analytics_collection_utils'],
 };

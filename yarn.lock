@@ -3953,7 +3953,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/analytics-collection-utils@link:packages/analytics/utils/analytics_collection_utils":
+"@kbn/analytics-collection-utils@link:src/platform/packages/private/analytics/utils/analytics_collection_utils":
   version "0.0.0"
   uid ""
 
