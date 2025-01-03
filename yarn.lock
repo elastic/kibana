@@ -5033,7 +5033,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-status-common@link:packages/core/status/core-status-common":
+"@kbn/core-status-common@link:src/core/packages/status/common":
   version "0.0.0"
   uid ""
 
