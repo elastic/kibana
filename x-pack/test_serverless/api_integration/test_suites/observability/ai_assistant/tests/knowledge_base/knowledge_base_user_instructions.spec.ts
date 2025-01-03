@@ -67,6 +67,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       await clearKnowledgeBase(es);
       await clearConversations(es);
       await svlUserManager.invalidateM2mApiKeyWithRoleScope(editorRoleAuthc);
+      await svlUserManager.invalidateM2mApiKeyWithRoleScope(adminRoleAuthc);
     });
 
     describe('when creating private and public user instructions', () => {
