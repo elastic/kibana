@@ -998,7 +998,7 @@
     "@kbn/uptime-plugin": "link:x-pack/solutions/observability/plugins/uptime",
     "@kbn/url-drilldown-plugin": "link:x-pack/plugins/drilldowns/url_drilldown",
     "@kbn/url-forwarding-plugin": "link:src/plugins/url_forwarding",
-    "@kbn/usage-collection-plugin": "link:src/plugins/usage_collection",
+    "@kbn/usage-collection-plugin": "link:src/platform/plugins/shared/usage_collection",
     "@kbn/usage-collection-test-plugin": "link:test/plugin_functional/plugins/usage_collection",
     "@kbn/use-tracked-promise": "link:packages/kbn-use-tracked-promise",
     "@kbn/user-profile-components": "link:packages/kbn-user-profile-components",

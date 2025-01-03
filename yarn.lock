@@ -7837,7 +7837,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/usage-collection-plugin@link:src/plugins/usage_collection":
+"@kbn/usage-collection-plugin@link:src/platform/plugins/shared/usage_collection":
   version "0.0.0"
   uid ""
 

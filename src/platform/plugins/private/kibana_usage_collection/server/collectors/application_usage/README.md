@@ -56,7 +56,7 @@ class MyPlugin implements Plugin {
 
 Then, for every component inside the app that requires tracking the time it is on screen, and the number of general clicks:
 ```typescript jsx
-import { TrackApplicationView } from 'src/plugins/usage_collection/public';
+import { TrackApplicationView } from 'src/platform/plugins/shared/usage_collection/public';
 
 const MyTrackedComponent = () => {
   return (
