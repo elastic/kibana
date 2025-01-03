@@ -52,6 +52,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.click('nextButton');
       await testSubjects.click('nextButton');
       await testSubjects.click('nextButton');
+      await pageObjects.header.waitUntilLoadingHasFinished();
 
       expect(await testSubjects.getVisibleText('lifecycleValue')).to.be('7 hours');
 
@@ -76,6 +77,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.click('nextButton');
       await testSubjects.click('nextButton');
       await testSubjects.click('nextButton');
+      await pageObjects.header.waitUntilLoadingHasFinished();
 
       expect(await testSubjects.exists('indexModeTitle')).to.be(true);
       expect(await testSubjects.getVisibleText('indexModeValue')).to.be('LogsDB');
