@@ -19374,7 +19374,6 @@ paths:
                       - data
                       - created_at
                       - ack_data
-                      - agents
                 required:
                   - item
         '400':
@@ -19896,7 +19895,6 @@ paths:
                       - data
                       - created_at
                       - ack_data
-                      - agents
                 required:
                   - item
         '400':
