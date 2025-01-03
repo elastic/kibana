@@ -44,52 +44,20 @@ const INGEST_PIPELINE_PAINLESS_CONTEXT = 'ctx' as const as SafePainlessExpressio
  * - The first character must be an underscore or a letter.
  * - Subsequent characters can be underscores, letters, or digits.
  *
- * @link https://www.elastic.co/guide/en/elasticsearch/painless/8.17/painless-identifiers.html
- * The linked expression has been modified by removing an extra -.
+ * This is the ID and DOTID regexp in the Painless grammar under the following link:
+ * @link packages/kbn-monaco/src/painless/antlr/painless_parser.g4
  */
 const PAINLESS_IDENTIFIER_REGEXP = /^[_a-zA-Z][_a-zA-Z0-9]*$/;
 
 /**
- * A set of reserved words in the Painless scripting language.
- *
- * These words cannot be used as identifiers in Painless scripts because they have special meaning in the language.
- * @link https://www.elastic.co/guide/en/elasticsearch/painless/8.17/painless-keywords.html
- *
- * @constant
- * @type {Set<string>}
- * @default
- * @example
- * // Check if a word is a reserved word in Painless
- * const isReserved = PAINLESS_RESERVED_WORDS.has('if'); // true
- */
-const PAINLESS_RESERVED_WORDS: ReadonlySet<string> = new Set([
-  'if',
-  'else',
-  'while',
-  'do',
-  'for',
-  'in',
-  'continue',
-  'break',
-  'return',
-  'new',
-  'try',
-  'catch',
-  'throw',
-  'this',
-  'instanceof',
-]);
-
-// also implies that it does not need escaping
-/**
- * Checks if a given string is a valid Painless identifier.
+ * Checks if a given string is a valid Painless identifier (though possibly a reserved word).
  *
  * @link https://www.elastic.co/guide/en/elasticsearch/painless/8.17/painless-identifiers.html
  * @param s - The string to check.
- * @returns `true` if the string is a valid Painless identifier and not a reserved word, `false` otherwise.
+ * @returns `true` if the string is a valid Painless identifier, `false` otherwise.
  */
 export function isPainlessIdentifier(s: string): boolean {
-  return PAINLESS_IDENTIFIER_REGEXP.test(s) && !PAINLESS_RESERVED_WORDS.has(s);
+  return PAINLESS_IDENTIFIER_REGEXP.test(s);
 }
 
 /**

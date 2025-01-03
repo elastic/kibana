@@ -20,10 +20,10 @@ describe('isPainlessIdentifier', () => {
   });
 
   it('should return false for invalid identifiers', () => {
-    expect(isPainlessIdentifier('123start')).toBe(false);
-    expect(isPainlessIdentifier('new')).toBe(false);
-    expect(isPainlessIdentifier('throw')).toBe(false);
-    expect(isPainlessIdentifier('invalid-char!')).toBe(false);
+    expect(isPainlessIdentifier('123start')).toBe(false); // Identifiers cannot start with a number
+    expect(isPainlessIdentifier('new')).toBe(true); // Reserved words are valid identifiers
+    expect(isPainlessIdentifier('_source')).toBe(true); // Underscore-prefixed identifiers are valid
+    expect(isPainlessIdentifier('invalid-char!')).toBe(false); // Identifiers cannot contain special characters
   });
 });
 
