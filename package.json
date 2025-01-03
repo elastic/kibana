@@ -994,7 +994,7 @@
     "@kbn/unified-search-plugin": "link:src/plugins/unified_search",
     "@kbn/unsaved-changes-badge": "link:src/platform/packages/private/kbn-unsaved-changes-badge",
     "@kbn/unsaved-changes-prompt": "link:src/platform/packages/shared/kbn-unsaved-changes-prompt",
-    "@kbn/upgrade-assistant-plugin": "link:x-pack/plugins/upgrade_assistant",
+    "@kbn/upgrade-assistant-plugin": "link:x-pack/platform/plugins/private/upgrade_assistant",
     "@kbn/uptime-plugin": "link:x-pack/solutions/observability/plugins/uptime",
     "@kbn/url-drilldown-plugin": "link:x-pack/plugins/drilldowns/url_drilldown",
     "@kbn/url-forwarding-plugin": "link:src/plugins/url_forwarding",
