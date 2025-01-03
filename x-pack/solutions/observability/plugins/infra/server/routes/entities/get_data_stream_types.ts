@@ -6,7 +6,8 @@
  */
 
 import { type EntityClient } from '@kbn/entityManager-plugin/server/lib/entity_client';
-import { InventoryItemType, findInventoryFields } from '@kbn/metrics-data-access-plugin/common';
+import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
+import { findInventoryFields } from '@kbn/metrics-data-access-plugin/common';
 import { EntityDataStreamType } from '@kbn/observability-shared-plugin/common';
 import type { ObservabilityElasticsearchClient } from '@kbn/observability-utils-server/es/client/create_observability_es_client';
 import { castArray } from 'lodash';
