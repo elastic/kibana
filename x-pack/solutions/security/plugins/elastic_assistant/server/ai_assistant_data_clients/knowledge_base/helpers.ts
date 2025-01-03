@@ -47,21 +47,21 @@ export const getKBVectorSearchQuery = ({
 }): QueryDslQueryContainer => {
   const resourceFilter = kbResource
     ? [
-        {
-          term: {
-            kb_resource: kbResource,
-          },
+      {
+        term: {
+          kb_resource: kbResource,
         },
-      ]
+      },
+    ]
     : [];
   const requiredFilter = required
     ? [
-        {
-          term: {
-            required,
-          },
+      {
+        term: {
+          required,
         },
-      ]
+      },
+    ]
     : [];
 
   const userFilter = {
@@ -109,8 +109,8 @@ export const getKBVectorSearchQuery = ({
   let semanticTextFilter:
     | Array<{ semantic: { field: string; query: string } }>
     | Array<{
-        text_expansion: { 'vector.tokens': { model_id: string; model_text: string } };
-      }> = [];
+      text_expansion: { 'vector.tokens': { model_id: string; model_text: string } };
+    }> = [];
 
   if (query) {
     semanticTextFilter = [
@@ -152,10 +152,10 @@ export const getStructuredToolForIndexEntry = ({
       input.fieldType === 'string'
         ? z.string()
         : input.fieldType === 'number'
-        ? z.number()
-        : input.fieldType === 'boolean'
-        ? z.boolean()
-        : z.any();
+          ? z.number()
+          : input.fieldType === 'boolean'
+            ? z.boolean()
+            : z.any();
     return { ...prev, [input.fieldName]: fieldType.describe(input.description) };
   }, {});
 
@@ -236,9 +236,9 @@ export const getStructuredToolForIndexEntry = ({
         logger.debug(() => `Similarity Search Results:\n ${JSON.stringify(result)}`);
         logger.debug(() => `Similarity Text Extract Results:\n ${JSON.stringify(kbDocs)}`);
 
-        return `###\nBelow are all relevant documents in JSON format:\n${JSON.stringify(
-          kbDocs
-        )}\n###`;
+        return `###\nBelow are all relevant documents in JSON format and their citationElement:
+        citationElement: """!{citation[${indexEntry.name}](/app/management/kibana/securityAiAssistantManagement?tab=knowledge_base&entry_search_term=${indexEntry.id}}""", 
+        ${JSON.stringify(kbDocs)}\n###`;
       } catch (e) {
         logger.error(`Error performing IndexEntry KB Similarity Search: ${e.message}`);
         return `I'm sorry, but I was unable to find any information in the knowledge base. Perhaps this error would be useful to deliver to the user. Be sure to print it below your response and in a codeblock so it is rendered nicely: ${e.message}`;

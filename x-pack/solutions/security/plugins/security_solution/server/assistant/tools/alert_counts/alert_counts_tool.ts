@@ -39,7 +39,11 @@ export const ALERT_COUNTS_TOOL: AssistantTool = {
         const query = getAlertsCountQuery(alertsIndexPattern);
         const result = await esClient.search<SearchResponse>(query);
 
-        return JSON.stringify(result);
+        return JSON.stringify({ 
+          citationElement: `!{citation[Alerts](/app/security/alerts}`, 
+          //citationUrl: "/app/security/alerts", 
+          //citationName: "Alerts", 
+          ...result });
       },
       tags: ['alerts', 'alerts-count'],
     });

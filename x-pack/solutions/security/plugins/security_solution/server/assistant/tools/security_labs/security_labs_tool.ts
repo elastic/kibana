@@ -47,7 +47,13 @@ export const SECURITY_LABS_KNOWLEDGE_BASE_TOOL: AssistantTool = {
           query: input.question,
         });
         // TODO: Token pruning
-        return JSON.stringify(docs).substring(0, 20000);
+        return `
+        Below are all relevant documents in JSON format and their citationElement:
+
+        ${JSON.stringify(docs).substring(0, 20000)}
+
+        citationElement: \`!{citation[Elastic Security Labs content](/app/management/kibana/securityAiAssistantManagement?tab=knowledge_base&entry_search_term=securityLabsId)}\`
+        `;
       },
       tags: ['security-labs', 'knowledge-base'],
       // TODO: Remove after ZodAny is fixed https://github.com/langchain-ai/langchainjs/blob/main/langchain-core/src/tools.ts

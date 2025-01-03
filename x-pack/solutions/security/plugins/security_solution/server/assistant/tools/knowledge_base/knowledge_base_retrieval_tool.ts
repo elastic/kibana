@@ -51,7 +51,19 @@ export const KNOWLEDGE_BASE_RETRIEVAL_TOOL: AssistantTool = {
           required: false,
         });
 
-        return JSON.stringify(docs);
+        const citedDocs = docs.map(doc => {
+          return {
+            ...doc,
+            metadata: {
+              ...doc.metadata,
+              //citationUrl: `/app/management/kibana/securityAiAssistantManagement?tab=knowledge_base&entry_search_term=${doc.id}`,
+              //citationName: doc.metadata.name,
+              citationElement: `!{citation[${doc.metadata.name}](/app/management/kibana/securityAiAssistantManagement?tab=knowledge_base&entry_search_term=${doc.id})}`
+            }
+          }
+        })
+
+        return JSON.stringify(citedDocs);
       },
       tags: ['knowledge-base'],
       // TODO: Remove after ZodAny is fixed https://github.com/langchain-ai/langchainjs/blob/main/langchain-core/src/tools.ts

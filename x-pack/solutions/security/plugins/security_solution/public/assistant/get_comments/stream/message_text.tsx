@@ -25,6 +25,8 @@ import { euiThemeVars } from '@kbn/ui-theme';
 import type { Node } from 'unist';
 import { customCodeBlockLanguagePlugin } from '../custom_codeblock/custom_codeblock_markdown_plugin';
 import { CustomCodeBlock } from '../custom_codeblock/custom_code_block';
+import { CustomCitation } from '../custom_citations/custom_citation';
+import { CustomCitationParser } from '../custom_citations/custom_citation_parser';
 
 interface Props {
   content: string;
@@ -109,6 +111,10 @@ const getPluginDependencies = () => {
   processingPlugins[1][1].components = {
     ...components,
     cursor: Cursor,
+    customCitation: (props) => {
+      return (<CustomCitation citationLable={props.citationLable} citationNumber={props.citationIndex} citationUrl={props.citationLink} />)
+
+    },
     customCodeBlock: (props) => {
       return (
         <>
@@ -139,7 +145,7 @@ const getPluginDependencies = () => {
   };
 
   return {
-    parsingPluginList: [loadingCursorPlugin, customCodeBlockLanguagePlugin, ...parsingPlugins],
+    parsingPluginList: [loadingCursorPlugin, customCodeBlockLanguagePlugin, ...parsingPlugins, CustomCitationParser],
     processingPluginList: processingPlugins,
   };
 };

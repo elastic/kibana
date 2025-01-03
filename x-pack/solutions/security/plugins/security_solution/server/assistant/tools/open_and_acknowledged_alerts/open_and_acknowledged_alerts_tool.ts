@@ -80,14 +80,20 @@ export const OPEN_AND_ACKNOWLEDGED_ALERTS_TOOL: AssistantTool = {
         };
 
         return JSON.stringify(
-          result.hits?.hits?.map((x) =>
-            transformRawData({
-              anonymizationFields,
-              currentReplacements: localReplacements, // <-- the latest local replacements
-              getAnonymizedValue,
-              onNewReplacements: localOnNewReplacements, // <-- the local callback
-              rawData: getRawDataOrDefault(x.fields),
-            })
+          result.hits?.hits?.map((hit) => {
+            return {
+              citationElement: `!{citation[Alert](/app/security/alerts/redirect/${hit._id}}`,
+              //citationUrl: `/app/security/alerts/redirect/${hit._id}`,
+              //citationName: 'Alert',
+              content: transformRawData({
+                anonymizationFields,
+                currentReplacements: localReplacements, // <-- the latest local replacements
+                getAnonymizedValue,
+                onNewReplacements: localOnNewReplacements, // <-- the local callback
+                rawData: getRawDataOrDefault(hit.fields)
+              })
+            }
+          }
           )
         );
       },

@@ -384,10 +384,10 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
     const created =
       docsCreated.length > 0
         ? await this.findDocuments<EsKnowledgeBaseEntrySchema>({
-            page: 1,
-            perPage: 10000,
-            filter: docsCreated.map((c) => `_id:${c}`).join(' OR '),
-          })
+          page: 1,
+          perPage: 10000,
+          filter: docsCreated.map((c) => `_id:${c}`).join(' OR '),
+        })
         : undefined;
     // Intentionally no telemetry here - this path only used to install security docs
     // Plans to make this function private in a different PR so no user entry ever is created in this path
@@ -515,11 +515,13 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
 
       const results = result.hits.hits.map((hit) => {
         const metadata = {
+          name: hit?._source?.name,
           source: hit?._source?.source,
           required: hit?._source?.required,
           kbResource: hit?._source?.kb_resource,
         };
         return new Document({
+          id: hit?._id,
           pageContent: hit?._source?.text ?? '',
           metadata,
         });
