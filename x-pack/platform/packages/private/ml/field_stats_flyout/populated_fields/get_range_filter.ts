@@ -5,8 +5,14 @@
  * 2.0.
  */
 
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+
 import type { TimeRange as TimeRangeMs } from '@kbn/ml-date-picker';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+
+interface RangeFilter {
+  range: Record<string, estypes.QueryDslRangeQuery>;
+}
 
 /**
  * Get range filter for datetime field. Both arguments are optional.
@@ -14,18 +20,23 @@ import { isPopulatedObject } from '@kbn/ml-is-populated-object';
  * @param timeRange
  * @returns range filter
  */
-export const getRangeFilter = (datetimeField?: string, timeRange?: TimeRangeMs) => {
-  if (timeRange && datetimeField !== undefined) {
-    if (isPopulatedObject(timeRange, ['from', 'to']) && timeRange.to > timeRange.from) {
-      return {
-        range: {
-          [datetimeField]: {
-            gte: timeRange.from,
-            lte: timeRange.to,
-            format: 'epoch_millis',
-          },
+export const getRangeFilter = (
+  datetimeField?: string,
+  timeRange?: TimeRangeMs
+): RangeFilter | undefined => {
+  if (
+    datetimeField !== undefined &&
+    isPopulatedObject(timeRange, ['from', 'to']) &&
+    timeRange.to > timeRange.from
+  ) {
+    return {
+      range: {
+        [datetimeField]: {
+          gte: timeRange.from,
+          lte: timeRange.to,
+          format: 'epoch_millis',
         },
-      };
-    }
+      },
+    };
   }
 };
