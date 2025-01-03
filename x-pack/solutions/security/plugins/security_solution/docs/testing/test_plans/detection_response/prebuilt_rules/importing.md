@@ -1,6 +1,6 @@
-# Prebuilt Rule Import
+# Detections Rule Import
 
-This is a test plan for the importing of prebuilt rules. This feature is an aspect of `Milestone 3` of the [Rule Immutability/Customization](https://github.com/elastic/security-team/issues/1974) epic.
+This is a test plan for the importing of prebuilt and custom rules. This feature is an aspect of `Milestone 3` of the [Rule Immutability/Customization](https://github.com/elastic/security-team/issues/1974) epic.
 
 Status: `in progress`.
 
@@ -49,7 +49,7 @@ And isCustomized should be true
 CASE: Should work with older, newer, or identical version numbers
 ```
 
-#### Scenario: Importing a customized rule with a matching rule_id and version
+#### Scenario: Importing a custom rule with a matching rule_id and version
 
 **Automation**: 1 cypress test and 1 integration test.
 

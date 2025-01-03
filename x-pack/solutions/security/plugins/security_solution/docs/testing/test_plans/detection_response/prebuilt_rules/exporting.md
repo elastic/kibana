@@ -1,6 +1,6 @@
-# Prebuilt Rule Export
+# Detection Rule Export
 
-This is a test plan for the exporting of prebuilt rules. This feature is an aspect of `Milestone 3` of the [Rule Immutability/Customization](https://github.com/elastic/security-team/issues/1974) epic.
+This is a test plan for the exporting of prebuilt and custom rules. This feature is an aspect of `Milestone 3` of the [Rule Immutability/Customization](https://github.com/elastic/security-team/issues/1974) epic.
 
 Status: `in progress`.
 
@@ -112,23 +112,6 @@ And chooses "Export" from bulk actions
 Then the selected rules should be exported as an NDJSON file
 And they should include an "immutable" field with a value of false
 And their "ruleSource" "type" should be "internal"
-```
-
-#### Scenario: Exporting both prebuilt and custom rules in bulk
-
-**Automation**: 1 cypress test.
-
-```Gherkin
-Given a space with customized prebuilt, non-customized prebuilt and custom rules installed
-When the user selects rules from each type in the rules table
-And chooses "Export" from bulk actions
-Then the selected rules should be exported as an NDJSON file
-And the prebuilt rules should include an "immutable" field with a value of true
-And the custom rules should include an "immutable" field with a value of false
-And the prebuilt rules' "ruleSource" "type" should be "external"
-And the custom rules' "ruleSource" "type" should be "internal"
-And the customized prebuilt rules' "isCustomized" value should be true
-And the non-customized prebuilt rules' "isCustomized" value should be false
 ```
 
 ### Error Handling
