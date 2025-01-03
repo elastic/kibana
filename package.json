@@ -389,7 +389,7 @@
     "@kbn/core-status-common": "link:src/core/packages/status/common",
     "@kbn/core-status-server": "link:src/core/packages/status/server",
     "@kbn/core-status-server-internal": "link:src/core/packages/status/server-internal",
-    "@kbn/core-test-helpers-deprecations-getters": "link:packages/core/test-helpers/core-test-helpers-deprecations-getters",
+    "@kbn/core-test-helpers-deprecations-getters": "link:src/core/packages/test-helpers/deprecations-getters",
     "@kbn/core-test-helpers-http-setup-browser": "link:packages/core/test-helpers/core-test-helpers-http-setup-browser",
     "@kbn/core-test-helpers-so-type-serializer": "link:packages/core/test-helpers/core-test-helpers-so-type-serializer",
     "@kbn/core-test-helpers-test-utils": "link:packages/core/test-helpers/core-test-helpers-test-utils",
