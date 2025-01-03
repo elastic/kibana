@@ -4869,7 +4869,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-plugins-contracts-browser@link:packages/core/plugins/core-plugins-contracts-browser":
+"@kbn/core-plugins-contracts-browser@link:src/core/packages/plugins/contracts-browser":
   version "0.0.0"
   uid ""
 

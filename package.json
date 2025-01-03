@@ -355,7 +355,7 @@
     "@kbn/core-plugins-base-server-internal": "link:src/core/packages/plugins/base-server-internal",
     "@kbn/core-plugins-browser": "link:src/core/packages/plugins/browser",
     "@kbn/core-plugins-browser-internal": "link:src/core/packages/plugins/browser-internal",
-    "@kbn/core-plugins-contracts-browser": "link:packages/core/plugins/core-plugins-contracts-browser",
+    "@kbn/core-plugins-contracts-browser": "link:src/core/packages/plugins/contracts-browser",
     "@kbn/core-plugins-contracts-server": "link:packages/core/plugins/core-plugins-contracts-server",
     "@kbn/core-plugins-server": "link:packages/core/plugins/core-plugins-server",
     "@kbn/core-plugins-server-internal": "link:packages/core/plugins/core-plugins-server-internal",
