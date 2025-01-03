@@ -9,7 +9,9 @@ module.exports = {
   coverageDirectory:
     '<rootDir>/target/kibana-coverage/jest/x-pack/platform/packages/shared/security/form_components',
   coverageReporters: ['text', 'html'],
-  collectCoverageFrom: ['<rootDir>/x-pack/platform/packages/shared/security/form_components/**/*.{ts,tsx}'],
+  collectCoverageFrom: [
+    '<rootDir>/x-pack/platform/packages/shared/security/form_components/**/*.{ts,tsx}',
+  ],
   preset: '@kbn/test',
   rootDir: '../../../../../..',
   roots: ['<rootDir>/x-pack/platform/packages/shared/security/form_components'],

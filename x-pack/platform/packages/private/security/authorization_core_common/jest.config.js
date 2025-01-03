@@ -6,7 +6,8 @@
  */
 
 module.exports = {
-  coverageDirectory: '<rootDir>/x-pack/platform/packages/private/security/authorization_core_common',
+  coverageDirectory:
+    '<rootDir>/x-pack/platform/packages/private/security/authorization_core_common',
   coverageReporters: ['text', 'html'],
   collectCoverageFrom: [
     '<rootDir>/x-pack/platform/packages/private/security/authorization_core_common/**/*.{ts,tsx}',

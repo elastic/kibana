@@ -8,7 +8,9 @@
 module.exports = {
   coverageDirectory: '<rootDir>/x-pack/platform/packages/private/security/authorization_core',
   coverageReporters: ['text', 'html'],
-  collectCoverageFrom: ['<rootDir>/x-pack/platform/packages/private/security/authorization_core/**/*.{ts,tsx}'],
+  collectCoverageFrom: [
+    '<rootDir>/x-pack/platform/packages/private/security/authorization_core/**/*.{ts,tsx}',
+  ],
   preset: '@kbn/test',
   rootDir: '../../../../../..',
   roots: ['<rootDir>/x-pack/platform/packages/private/security/authorization_core'],

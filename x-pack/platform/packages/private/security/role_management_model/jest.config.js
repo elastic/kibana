@@ -9,7 +9,9 @@ module.exports = {
   coverageDirectory:
     '<rootDir>/target/kibana-coverage/jest/x-pack/platform/packages/private/security/role_management_model',
   coverageReporters: ['text', 'html'],
-  collectCoverageFrom: ['<rootDir>/x-pack/platform/packages/private/security/role_management_model/**/*.{ts,tsx}'],
+  collectCoverageFrom: [
+    '<rootDir>/x-pack/platform/packages/private/security/role_management_model/**/*.{ts,tsx}',
+  ],
   preset: '@kbn/test',
   rootDir: '../../../../../..',
   roots: ['<rootDir>/x-pack/platform/packages/private/security/role_management_model'],
