@@ -25,7 +25,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     TIME_SERIES = 'Time series',
   }
 
-  describe('Data Streams', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/205316
+  describe.skip('Data Streams', () => {
     before(async () => {
       log.debug('Creating required data stream');
       try {
