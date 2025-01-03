@@ -20,9 +20,9 @@ import {
   KUBERNETES_CONTAINER_ID,
   KUBERNETES_NAMESPACE,
 } from '../../../common/es_fields/apm';
-import { Kubernetes } from '../../../typings/es_schemas/raw/fields/kubernetes';
+import type { Kubernetes } from '../../../typings/es_schemas/raw/fields/kubernetes';
 import { maybe } from '../../../common/utils/maybe';
-import { InfraMetricsClient } from '../../lib/helpers/create_es_client/create_infra_metrics_client/create_infra_metrics_client';
+import type { InfraMetricsClient } from '../../lib/helpers/create_es_client/create_infra_metrics_client/create_infra_metrics_client';
 
 export type ServiceInstanceContainerMetadataDetails =
   | {

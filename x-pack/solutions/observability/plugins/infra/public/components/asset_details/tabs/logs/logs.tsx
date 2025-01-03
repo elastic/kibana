@@ -11,11 +11,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { EuiFieldSearch, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { LogStream } from '@kbn/logs-shared-plugin/public';
-import {
-  DEFAULT_LOG_VIEW,
-  getLogsLocatorsFromUrlService,
-  LogViewReference,
-} from '@kbn/logs-shared-plugin/common';
+import type { LogViewReference } from '@kbn/logs-shared-plugin/common';
+import { DEFAULT_LOG_VIEW, getLogsLocatorsFromUrlService } from '@kbn/logs-shared-plugin/common';
 import { findInventoryFields } from '@kbn/metrics-data-access-plugin/common';
 import { OpenInLogsExplorerButton } from '@kbn/logs-shared-plugin/public';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
