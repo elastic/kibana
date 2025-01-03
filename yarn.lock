@@ -4929,7 +4929,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-root-server-internal@link:packages/core/root/core-root-server-internal":
+"@kbn/core-root-server-internal@link:src/core/packages/root/server-internal":
   version "0.0.0"
   uid ""
 
