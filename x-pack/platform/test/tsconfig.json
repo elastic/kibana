@@ -169,5 +169,6 @@
     "@kbn/product-intercept-plugin",
     "@kbn/onechat-common",
     "@kbn/ml-common-types",
+    "@kbn/ml-common-constants",
   ]
 }

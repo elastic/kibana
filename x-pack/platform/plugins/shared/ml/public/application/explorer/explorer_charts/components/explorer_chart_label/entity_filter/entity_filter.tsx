@@ -10,7 +10,7 @@ import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import type { MlEntityFieldOperation } from '@kbn/ml-anomaly-utils';
-import { ML_ENTITY_FIELD_OPERATIONS } from '@kbn/ml-anomaly-utils';
+import { ML_ENTITY_FIELD_OPERATIONS } from '@kbn/ml-anomaly-utils/entity_field_operations';
 import { useEntityFilterStyles } from './entity_filter_styles';
 import { blurButtonOnClick } from '../../../../../util/component_utils';
 

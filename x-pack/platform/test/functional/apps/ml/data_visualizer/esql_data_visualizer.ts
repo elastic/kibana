@@ -4,15 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { ML_JOB_FIELD_TYPES } from '@kbn/ml-anomaly-utils';
+
+import { ML_JOB_FIELD_TYPES } from '@kbn/ml-anomaly-utils/field_types';
+
 import type { FtrProviderContext } from '../../../ftr_provider_context';
+
 import type { MetricFieldVisConfig, NonMetricFieldVisConfig } from './types';
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
- */
 
 export interface TestData {
   suiteTitle: string;
