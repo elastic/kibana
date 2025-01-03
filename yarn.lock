@@ -4157,7 +4157,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/cloud-plugin@link:x-pack/plugins/cloud":
+"@kbn/cloud-plugin@link:x-pack/platform/plugins/shared/cloud":
   version "0.0.0"
   uid ""
 
