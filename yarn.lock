@@ -4757,7 +4757,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-mount-utils-browser-internal@link:packages/core/mount-utils/core-mount-utils-browser-internal":
+"@kbn/core-mount-utils-browser-internal@link:src/core/packages/mount-utils/browser-internal":
   version "0.0.0"
   uid ""
 
