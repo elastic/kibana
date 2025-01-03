@@ -33,7 +33,6 @@ export const findUserActionsRoute = createCasesRoute({
       const caseContext = await context.cases;
       const casesClient = await caseContext.getCasesClient();
       const caseId = request.params.case_id;
-
       const options = request.query as userActionApiV1.UserActionFindRequest;
 
       const userActionsResponse: userActionApiV1.UserActionFindResponse =

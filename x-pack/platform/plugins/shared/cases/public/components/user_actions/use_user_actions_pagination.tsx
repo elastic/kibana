@@ -43,6 +43,7 @@ export const useUserActionsPagination = ({
     const userActionsData: UserActionUI[] = [];
     const latestAttachments: AttachmentUI[] = [];
 
+    // TODO: looks like it can be done in one loop
     caseInfiniteUserActionsData.pages.forEach((page) => userActionsData.push(...page.userActions));
     caseInfiniteUserActionsData.pages.forEach((page) =>
       latestAttachments.push(...page.latestAttachments)
