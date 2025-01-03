@@ -6,19 +6,21 @@
  */
 
 import React from 'react';
-import { waitFor } from '@testing-library/react';
+import { act, waitFor } from '@testing-library/react';
 import { timefilterServiceMock } from '@kbn/data-plugin/public/query/timefilter/timefilter_service.mock';
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 
-import { ObservabilityAlertSearchBarProps, Services } from './types';
-import { ObservabilityAlertSearchBar } from './alert_search_bar';
-import { render } from '../../utils/test_helper';
 import { OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES } from '../../../common/constants';
+import { kibanaStartMock } from '../../utils/kibana_react.mock';
+import { render } from '../../utils/test_helper';
+import { ObservabilityAlertSearchBar } from './alert_search_bar';
+import { ObservabilityAlertSearchBarProps, Services } from './types';
 
 const getAlertsSearchBarMock = jest.fn();
 const ALERT_SEARCH_BAR_DATA_TEST_SUBJ = 'alerts-search-bar';
 
 describe('ObservabilityAlertSearchBar', () => {
+  const { http, data, dataViews, notifications, spaces } = kibanaStartMock.startContract().services;
   const renderComponent = (
     props: Partial<ObservabilityAlertSearchBarProps> = {},
     services: Partial<Services> = {}
@@ -33,6 +35,8 @@ describe('ObservabilityAlertSearchBar', () => {
       onStatusChange: jest.fn(),
       onEsQueryChange: jest.fn(),
       onFiltersChange: jest.fn(),
+      onControlConfigsChange: jest.fn(),
+      onControlFiltersChange: jest.fn(),
       setSavedQuery: jest.fn(),
       rangeTo: 'now',
       rangeFrom: 'now-15m',
@@ -44,6 +48,11 @@ describe('ObservabilityAlertSearchBar', () => {
           <div data-test-subj={ALERT_SEARCH_BAR_DATA_TEST_SUBJ} />
         ),
         useToasts: jest.fn(),
+        http,
+        data,
+        dataViews,
+        notifications,
+        spaces,
         ...services,
       },
       ...props,
@@ -83,11 +92,13 @@ describe('ObservabilityAlertSearchBar', () => {
     const mockedFrom = '2022-11-15T09:38:13.604Z';
     const mockedTo = '2022-11-15T09:53:13.604Z';
 
-    renderComponent({
-      onEsQueryChange: mockedOnEsQueryChange,
-      rangeFrom: mockedFrom,
-      rangeTo: mockedTo,
-      status: 'active',
+    await act(async () => {
+      renderComponent({
+        onEsQueryChange: mockedOnEsQueryChange,
+        rangeFrom: mockedFrom,
+        rangeTo: mockedTo,
+        status: 'active',
+      });
     });
 
     expect(mockedOnEsQueryChange).toHaveBeenCalledWith({
@@ -127,12 +138,14 @@ describe('ObservabilityAlertSearchBar', () => {
       },
     ];
 
-    renderComponent({
-      onEsQueryChange: mockedOnEsQueryChange,
-      rangeFrom: mockedFrom,
-      rangeTo: mockedTo,
-      defaultSearchQueries,
-      status: 'all',
+    await act(async () => {
+      renderComponent({
+        onEsQueryChange: mockedOnEsQueryChange,
+        rangeFrom: mockedFrom,
+        rangeTo: mockedTo,
+        defaultSearchQueries,
+        status: 'all',
+      });
     });
 
     const esQueryChangeParams = {

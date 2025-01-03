@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { FilterControlConfig as ControlConfig } from '@kbn/alerts-ui-shared';
 import { Filter } from '@kbn/es-query';
 import {
   createStateContainer,
@@ -33,6 +34,12 @@ interface AlertSearchBarStateTransitions {
   setSavedQueryId: (
     state: AlertSearchBarContainerState
   ) => (savedQueryId?: string) => AlertSearchBarContainerState;
+  setControlFilters: (
+    state: AlertSearchBarContainerState
+  ) => (controlFilters: Filter[]) => AlertSearchBarContainerState;
+  setControlConfigs: (
+    state: AlertSearchBarContainerState
+  ) => (controlConfigs: ControlConfig[]) => AlertSearchBarContainerState;
 }
 
 const DEFAULT_STATE: AlertSearchBarContainerState = {
@@ -41,6 +48,8 @@ const DEFAULT_STATE: AlertSearchBarContainerState = {
   kuery: '',
   status: ALL_ALERTS.status,
   filters: [],
+  controlFilters: [],
+  controlConfigs: [],
 };
 
 const transitions: AlertSearchBarStateTransitions = {
@@ -50,6 +59,8 @@ const transitions: AlertSearchBarStateTransitions = {
   setStatus: (state) => (status) => ({ ...state, status }),
   setFilters: (state) => (filters) => ({ ...state, filters }),
   setSavedQueryId: (state) => (savedQueryId) => ({ ...state, savedQueryId }),
+  setControlFilters: (state) => (controlFilters) => ({ ...state, controlFilters }),
+  setControlConfigs: (state) => (controlConfigs) => ({ ...state, controlConfigs }),
 };
 
 const alertSearchBarStateContainer = createStateContainer(DEFAULT_STATE, transitions);

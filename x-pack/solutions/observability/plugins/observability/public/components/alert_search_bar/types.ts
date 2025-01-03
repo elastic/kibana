@@ -6,8 +6,16 @@
  */
 
 import { ReactElement } from 'react';
-import { ToastsStart } from '@kbn/core-notifications-browser';
-import { type SavedQuery, TimefilterContract } from '@kbn/data-plugin/public';
+import { FilterControlConfig as ControlConfig } from '@kbn/alerts-ui-shared';
+import type { HttpStart } from '@kbn/core-http-browser';
+import { type NotificationsStart, ToastsStart } from '@kbn/core-notifications-browser';
+import {
+  DataPublicPluginStart,
+  type SavedQuery,
+  TimefilterContract,
+} from '@kbn/data-plugin/public';
+import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { AlertsSearchBarProps } from '@kbn/triggers-actions-ui-plugin/public/application/sections/alerts_search_bar';
 import { BoolQuery, Filter, Query } from '@kbn/es-query';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
@@ -37,6 +45,11 @@ export interface Dependencies {
 export interface Services {
   timeFilterService: TimefilterContract;
   AlertsSearchBar: (props: AlertsSearchBarProps) => ReactElement<AlertsSearchBarProps>;
+  http: HttpStart;
+  data: DataPublicPluginStart;
+  dataViews: DataViewsPublicPluginStart;
+  notifications: NotificationsStart;
+  spaces?: SpacesPluginStart;
   useToasts: () => ToastsStart;
   uiSettings: IUiSettingsClient;
 }
@@ -57,6 +70,8 @@ export interface AlertSearchBarContainerState {
   status: AlertStatus;
   filters?: Filter[];
   savedQueryId?: string;
+  controlFilters?: Filter[];
+  controlConfigs?: ControlConfig[];
 }
 
 interface AlertSearchBarStateTransitions {
@@ -66,6 +81,8 @@ interface AlertSearchBarStateTransitions {
   onStatusChange: (status: AlertStatus) => void;
   onFiltersChange?: (filters: Filter[]) => void;
   setSavedQuery?: (savedQueryId?: SavedQuery) => void;
+  onControlFiltersChange: (controlFilters: Filter[]) => void;
+  onControlConfigsChange: (controlConfigs: ControlConfig[]) => void;
 }
 
 interface CommonAlertSearchBarProps {
