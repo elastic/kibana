@@ -4,17 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { v4 as uuidv4 } from 'uuid';
 import { FAIL_CHART_LABEL, SUCCESS_CHART_LABEL } from '../../translations';
 import type { LensAttributes, GetLensAttributes } from '../../types';
 
-const columnEventOutcomeFailure = '2b27c80e-a20d-46f1-8fb2-79626ef4563c';
-const columnEventOutcomeFailureTimestamp = '33a6163d-0c0a-451d-aa38-8ca6010dd5bf';
+const columnEventOutcomeFailure = uuidv4();
+const columnEventOutcomeFailureTimestamp = uuidv4();
 
-const columnEventOutcomeSuccess = '0eb97c09-a351-4280-97da-944e4bd30dd7';
-const columnEventOutcomeSuccessTimestamp = '49a42fe6-ebe8-4adb-8eed-1966a5297b7e';
-const layoutEventOutcomeSuccess = '4590dafb-4ac7-45aa-8641-47a3ff0b817c';
-const layoutEventOutcomeFailure = '31213ae3-905b-4e88-b987-0cccb1f3209f';
+const columnEventOutcomeSuccess = uuidv4();
+const columnEventOutcomeSuccessTimestamp = uuidv4();
+const layoutEventOutcomeSuccess = uuidv4();
+const layoutEventOutcomeFailure = uuidv4();
 
 export const getKpiUserAuthenticationsAreaLensAttributes: GetLensAttributes = ({ euiTheme }) =>
   ({

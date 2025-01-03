@@ -4,12 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { v4 as uuidv4 } from 'uuid';
 import {
   AUTHENTICATION_FAILURE_CHART_LABEL,
   AUTHENTICATION_SUCCESS_CHART_LABEL,
 } from '../../translations';
 import type { LensAttributes, GetLensAttributes } from '../../types';
+
+const layerAuthenticationSuccess = uuidv4();
+const layerAuthenticationFailure = uuidv4();
+const columnTimestampFailure = uuidv4();
+const columnEventOutcomeFailure = uuidv4();
+const columnTimestampSuccess = uuidv4();
+const columnEventOutcomeSuccess = uuidv4();
 
 export const getAuthenticationLensAttributes: GetLensAttributes = ({ euiTheme }) =>
   ({
@@ -28,29 +35,29 @@ export const getAuthenticationLensAttributes: GetLensAttributes = ({ euiTheme })
         preferredSeriesType: 'bar_stacked',
         layers: [
           {
-            layerId: '3fd0c5d5-f762-4a27-8c56-14eee0223e13',
-            accessors: ['5417777d-d9d9-4268-9cdc-eb29b873bd65'],
+            layerId: layerAuthenticationSuccess,
+            accessors: [columnEventOutcomeSuccess],
             position: 'top',
             seriesType: 'bar_stacked',
             showGridlines: false,
             layerType: 'data',
-            xAccessor: 'b41a2958-650b-470a-84c4-c6fd8f0c6d37',
+            xAccessor: columnTimestampSuccess,
             yConfig: [
               {
-                forAccessor: '5417777d-d9d9-4268-9cdc-eb29b873bd65',
+                forAccessor: columnEventOutcomeSuccess,
                 color: euiTheme.colors.vis.euiColorVis0,
               },
             ],
           },
           {
-            layerId: 'bef502be-e5ff-442f-9e3e-229f86ca2afa',
+            layerId: layerAuthenticationFailure,
             seriesType: 'bar_stacked',
-            accessors: ['a3bf9dc1-c8d2-42d6-9e60-31892a4c509e'],
+            accessors: [columnEventOutcomeFailure],
             layerType: 'data',
-            xAccessor: 'cded27f7-8ef8-458c-8d9b-70db48ae340d',
+            xAccessor: columnTimestampFailure,
             yConfig: [
               {
-                forAccessor: 'a3bf9dc1-c8d2-42d6-9e60-31892a4c509e',
+                forAccessor: columnEventOutcomeFailure,
                 color: euiTheme.colors.vis.euiColorVis7,
               },
             ],
@@ -102,9 +109,9 @@ export const getAuthenticationLensAttributes: GetLensAttributes = ({ euiTheme })
       datasourceStates: {
         formBased: {
           layers: {
-            '3fd0c5d5-f762-4a27-8c56-14eee0223e13': {
+            [layerAuthenticationSuccess]: {
               columns: {
-                'b41a2958-650b-470a-84c4-c6fd8f0c6d37': {
+                [columnTimestampSuccess]: {
                   label: '@timestamp',
                   dataType: 'date',
                   operationType: 'date_histogram',
@@ -115,7 +122,7 @@ export const getAuthenticationLensAttributes: GetLensAttributes = ({ euiTheme })
                     interval: 'auto',
                   },
                 },
-                '5417777d-d9d9-4268-9cdc-eb29b873bd65': {
+                [columnEventOutcomeSuccess]: {
                   label: AUTHENTICATION_SUCCESS_CHART_LABEL,
                   dataType: 'number',
                   operationType: 'count',
@@ -129,15 +136,12 @@ export const getAuthenticationLensAttributes: GetLensAttributes = ({ euiTheme })
                   customLabel: true,
                 },
               },
-              columnOrder: [
-                'b41a2958-650b-470a-84c4-c6fd8f0c6d37',
-                '5417777d-d9d9-4268-9cdc-eb29b873bd65',
-              ],
+              columnOrder: [columnTimestampSuccess, columnEventOutcomeSuccess],
               incompleteColumns: {},
             },
-            'bef502be-e5ff-442f-9e3e-229f86ca2afa': {
+            [layerAuthenticationFailure]: {
               columns: {
-                'cded27f7-8ef8-458c-8d9b-70db48ae340d': {
+                [columnTimestampFailure]: {
                   label: '@timestamp',
                   dataType: 'date',
                   operationType: 'date_histogram',
@@ -148,7 +152,7 @@ export const getAuthenticationLensAttributes: GetLensAttributes = ({ euiTheme })
                     interval: 'auto',
                   },
                 },
-                'a3bf9dc1-c8d2-42d6-9e60-31892a4c509e': {
+                [columnEventOutcomeFailure]: {
                   label: AUTHENTICATION_FAILURE_CHART_LABEL,
                   dataType: 'number',
                   operationType: 'count',
@@ -162,10 +166,7 @@ export const getAuthenticationLensAttributes: GetLensAttributes = ({ euiTheme })
                   customLabel: true,
                 },
               },
-              columnOrder: [
-                'cded27f7-8ef8-458c-8d9b-70db48ae340d',
-                'a3bf9dc1-c8d2-42d6-9e60-31892a4c509e',
-              ],
+              columnOrder: [columnTimestampFailure, columnEventOutcomeFailure],
               incompleteColumns: {},
             },
           },
@@ -181,12 +182,12 @@ export const getAuthenticationLensAttributes: GetLensAttributes = ({ euiTheme })
       {
         type: 'index-pattern',
         id: '{dataViewId}',
-        name: 'indexpattern-datasource-layer-3fd0c5d5-f762-4a27-8c56-14eee0223e13',
+        name: `indexpattern-datasource-layer-${layerAuthenticationSuccess}`,
       },
       {
         type: 'index-pattern',
         id: '{dataViewId}',
-        name: 'indexpattern-datasource-layer-bef502be-e5ff-442f-9e3e-229f86ca2afa',
+        name: `indexpattern-datasource-layer-${layerAuthenticationFailure}`,
       },
       {
         type: 'index-pattern',

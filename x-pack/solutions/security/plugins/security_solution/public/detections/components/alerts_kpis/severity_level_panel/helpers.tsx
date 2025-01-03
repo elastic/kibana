@@ -6,7 +6,6 @@
  */
 import type { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
 import { has } from 'lodash';
-
 import type { AlertsBySeverityAgg } from './types';
 import type { AlertSearchResponse } from '../../../containers/detection_engine/alerts/types';
 import type { SeverityBuckets as SeverityData } from '../../../../overview/components/detection_response/alerts_by_status/types';

@@ -4,18 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { v4 as uuidv4 } from 'uuid';
 import { SOURCE_CHART_LABEL, DESTINATION_CHART_LABEL, UNIQUE_COUNT } from '../../translations';
 import type { LensAttributes, GetLensAttributes } from '../../types';
 
-const columnSourceIp = '5acd4c9d-dc3b-4b21-9632-e4407944c36d';
-const columnSourceIpFilter = 'd9c438c5-f776-4436-9d20-d62dc8c03be8';
+const columnSourceIp = uuidv4();
+const columnSourceIpFilter = uuidv4();
 
-const columnDestinationIp = 'd27e0966-daf9-41f4-9033-230cf1e76dc9';
-const columnDestinationIpFilter = '4607c585-3af3-43b9-804f-e49b27796d79';
+const columnDestinationIp = uuidv4();
+const columnDestinationIpFilter = uuidv4();
 
-const layerSourceIp = 'e406bf4f-942b-41ac-b516-edb5cef06ec8';
-const layerDestinationIp = '38aa6532-6bf9-4c8f-b2a6-da8d32f7d0d7';
+const layerSourceIp = uuidv4();
+const layerDestinationIp = uuidv4();
 
 export const getKpiUniquePrivateIpsBarLensAttributes: GetLensAttributes = ({ euiTheme }) => {
   return {
