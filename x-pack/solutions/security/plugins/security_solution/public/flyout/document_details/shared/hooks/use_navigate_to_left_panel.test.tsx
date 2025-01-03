@@ -8,7 +8,7 @@
 import { useNavigateToLeftPanel } from './use_navigate_to_left_panel';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { useDocumentDetailsContext } from '../context';
 import { mockFlyoutApi } from '../mocks/mock_flyout_context';
 import { DocumentDetailsRightPanelKey, DocumentDetailsLeftPanelKey } from '../constants/panel_keys';

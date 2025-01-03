@@ -7,18 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { useShareTabsContext } from '.';
 
 describe('share menu context', () => {
   describe('useShareTabsContext', () => {
     it('throws an error if used outside of ShareMenuProvider tree', () => {
-      const { result } = renderHook(() => useShareTabsContext());
-
-      expect(result.error?.message).toEqual(
-        expect.stringContaining(
-          'Failed to call `useShareTabsContext` because the context from ShareMenuProvider is missing.'
-        )
+      expect(() => renderHook(() => useShareTabsContext())).toThrow(
+        /^Failed to call `useShareTabsContext` because the context from ShareMenuProvider is missing./
       );
     });
   });

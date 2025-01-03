@@ -5,10 +5,15 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { useFetchGraphData } from './use_fetch_graph_data';
 
-const mockUseQuery = jest.fn();
+const mockUseQuery = jest.fn((...args: unknown[]) => ({
+  isLoading: true,
+  data: null,
+  isError: false,
+  isFetching: true,
+}));
 
 jest.mock('@tanstack/react-query', () => {
   return {
