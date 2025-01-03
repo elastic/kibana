@@ -13,6 +13,8 @@ import {
   type RouteValidatorFullConfigResponse,
   type RouteMethod,
   type RouteValidator,
+  getRequestValidation,
+  validBodyOutput,
 } from '@kbn/core-http-server';
 import type { Mutable } from 'utility-types';
 import type { IKibanaResponse, ResponseHeaders, SafeRouteMethod } from '@kbn/core-http-server';
@@ -122,4 +124,47 @@ export function getRouteFullPath(routerPath: string, routePath: string) {
 
 export function isSafeMethod(method: RouteMethod): method is SafeRouteMethod {
   return method === 'get' || method === 'options';
+}
+
+/**
+ * Create a valid options object with "sensible" defaults + adding some validation to the options fields
+ *
+ * @param method HTTP verb for these options
+ * @param routeConfig The route config definition
+ */
+export function validOptions(
+  method: RouteMethod,
+  routeConfig: InternalRouteConfig<unknown, unknown, unknown, typeof method>
+) {
+  const shouldNotHavePayload = ['head', 'get'].includes(method);
+  const { options = {}, validate } = routeConfig;
+  const shouldValidateBody = (validate && !!getRequestValidation(validate).body) || !!options.body;
+
+  const { output } = options.body || {};
+  if (typeof output === 'string' && !validBodyOutput.includes(output)) {
+    throw new Error(
+      `[options.body.output: '${output}'] in route ${method.toUpperCase()} ${
+        routeConfig.path
+      } is not valid. Only '${validBodyOutput.join("' or '")}' are valid.`
+    );
+  }
+
+  // @ts-expect-error to eliminate problems with `security` in the options for route factories abstractions
+  if (options.security) {
+    throw new Error('`options.security` is not allowed in route config. Use `security` instead.');
+  }
+
+  const body = shouldNotHavePayload
+    ? undefined
+    : {
+        // If it's not a GET (requires payload) but no body validation is required (or no body options are specified),
+        // We assume the route does not care about the body => use the memory-cheapest approach (stream and no parsing)
+        output: !shouldValidateBody ? ('stream' as const) : undefined,
+        parse: !shouldValidateBody ? false : undefined,
+
+        // User's settings should overwrite any of the "desired" values
+        ...options.body,
+      };
+
+  return { ...options, body };
 }

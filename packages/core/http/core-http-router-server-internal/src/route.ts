@@ -11,20 +11,28 @@ import {
   type RouteMethod,
   type SafeRouteMethod,
   type RouteConfig,
-  type KibanaRequest,
   getRequestValidation,
 } from '@kbn/core-http-server';
-import type { RouteSecurityGetter, RouteSecurity } from '@kbn/core-http-server';
-import type { Request } from '@hapi/hapi';
+import type { RouteSecurityGetter, RouteSecurity, AnyKibanaRequest } from '@kbn/core-http-server';
 import { isConfigSchema } from '@kbn/config-schema';
 import { isZod } from '@kbn/zod';
 import type { Logger } from '@kbn/logging';
-import { RequestHandlerEnhanced, Router } from './router';
+import type { DeepPartial } from '@kbn/utility-types';
+import { Request } from '@hapi/hapi';
+import type { InternalRouterRoute, RequestHandlerEnhanced, Router } from './router';
 import { CoreKibanaRequest } from './request';
 import { RouteValidator } from './validator';
 import { BASE_PUBLIC_VERSION } from './versioned_router';
 import { kibanaResponseFactory } from './response';
-import { getVersionHeader, injectVersionHeader, formatErrorMeta } from './util';
+import {
+  getVersionHeader,
+  injectVersionHeader,
+  formatErrorMeta,
+  getRouteFullPath,
+  validOptions,
+  prepareRouteConfigValidation,
+} from './util';
+import { validRouteSecurity } from './security_route_config_validator';
 
 export function isSafeMethod(method: RouteMethod): method is SafeRouteMethod {
   return method === 'get' || method === 'options';
@@ -39,30 +47,54 @@ export type InternalRouteConfig<P, Q, B, M extends RouteMethod> = Omit<
 };
 
 /** @internal */
-interface InternalRouteHandlerArgs<P, Q, B, Method extends RouteMethod> {
+interface Dependencies {
   router: Router;
-  route: InternalRouteConfig<P, Q, B, Method>;
-  request: Request;
+  route: InternalRouteConfig<unknown, unknown, unknown, RouteMethod>;
+  handler: RequestHandlerEnhanced<unknown, unknown, unknown, RouteMethod>;
   log: Logger;
-  handler: RequestHandlerEnhanced<P, Q, B, Method>;
+  method: RouteMethod;
+}
+
+export function buildRoute({
+  handler,
+  log,
+  route,
+  router,
+  method,
+}: Dependencies): InternalRouterRoute {
+  route = prepareRouteConfigValidation(route);
+  const routeSchemas = routeSchemasFromRouteConfig(route, method);
+  return {
+    handler: async (req) => {
+      return await handle(req, {
+        handler,
+        log,
+        method,
+        route,
+        router,
+        routeSchemas,
+      });
+    },
+    method,
+    path: getRouteFullPath(router.routerPath, route.path),
+    options: validOptions(method, route),
+    security: validRouteSecurity(route.security as DeepPartial<RouteSecurity>, route.options),
+    validationSchemas: route.validate,
+    isVersioned: false,
+  };
 }
 
 /** @internal */
-export async function handle<P, Q, B, Method extends RouteMethod>({
-  router,
-  route,
-  request,
-  handler,
-  log,
-}: InternalRouteHandlerArgs<P, Q, B, Method>) {
-  const routeSchemas = routeSchemasFromRouteConfig(route, request.method as Method);
+interface HandlerDependencies extends Dependencies {
+  routeSchemas?: RouteValidator<unknown, unknown, unknown>;
+}
 
-  let kibanaRequest: KibanaRequest<
-    P,
-    Q,
-    B,
-    typeof request.method extends RouteMethod ? typeof request.method : any
-  >;
+/** @internal */
+export const handle = async (
+  request: Request,
+  { router, route, handler, routeSchemas, log }: HandlerDependencies
+) => {
+  let kibanaRequest: AnyKibanaRequest;
   try {
     kibanaRequest = CoreKibanaRequest.from(request, routeSchemas);
   } catch (error) {
@@ -95,7 +127,7 @@ export async function handle<P, Q, B, Method extends RouteMethod>({
   }
 
   return kibanaResponse;
-}
+};
 
 function isPublicAccessRoute<Method extends RouteMethod>({
   options,
