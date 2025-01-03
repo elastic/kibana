@@ -5493,7 +5493,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/es-types@link:packages/kbn-es-types":
+"@kbn/es-types@link:src/platform/packages/shared/kbn-es-types":
   version "0.0.0"
   uid ""
 
