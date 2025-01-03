@@ -21,7 +21,7 @@ import {
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import { proxySettingsUrl } from '../../../../services/documentation';
+import { proxySettingsUrl } from '../../../../../services/documentation';
 
 import { ClusterErrors } from '../validators';
 import { FormFields } from '../remote_cluster_form';
