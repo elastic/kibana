@@ -9,6 +9,6 @@
 
 module.exports = {
   preset: '@kbn/test',
-  rootDir: '../../../..',
-  roots: ['<rootDir>/packages/core/deprecations/core-deprecations-common'],
+  rootDir: '../../../../..',
+  roots: ['<rootDir>/src/core/packages/deprecations/common'],
 };
