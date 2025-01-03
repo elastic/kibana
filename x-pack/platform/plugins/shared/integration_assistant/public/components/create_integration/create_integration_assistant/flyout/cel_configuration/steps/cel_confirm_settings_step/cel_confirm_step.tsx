@@ -7,7 +7,7 @@
 
 import React, { useCallback, useEffect, useState } from 'react';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer } from '@elastic/eui';
 import type { CelAuthType } from '../../../../../../../../common';
 import { useActions, type State } from '../../../../state';
 import type { OnComplete } from './generation_modal';
@@ -112,18 +112,13 @@ export const CelConfirmStep = React.memo<CelConfirmStepProps>(
     );
     const onGenerationClosed = useCallback(() => {
       setIsFlyoutGenerating(false); // aborts generation
-    }, [setIsFlyoutGenerating]);
+      setIntegrationValues({ celPath: undefined, celAuth: undefined }); // resets selected settings
+    }, [setIntegrationValues, setIsFlyoutGenerating]);
 
     return (
       <EuiFlexGroup direction="column" gutterSize="l" data-test-subj="celConfirmStep">
         <EuiPanel hasShadow={false} hasBorder={false}>
           <EuiFlexItem>
-            <EuiTitle size="s">
-              <h2>{i18n.CONFIRM_ENDPOINT}</h2>
-            </EuiTitle>
-            <EuiSpacer size="m" />
-            <EuiText size="s">{i18n.CONFIRM_ENDPOINT_DESCRIPTION}</EuiText>
-            <EuiSpacer size="m" />
             <EndpointSelection
               integrationSettings={integrationSettings}
               pathSuggestions={suggestedPaths}
@@ -136,12 +131,6 @@ export const CelConfirmStep = React.memo<CelConfirmStepProps>(
           </EuiFlexItem>
           <EuiSpacer size="xl" />
           <EuiFlexItem>
-            <EuiTitle size="s">
-              <h2>{i18n.CONFIRM_AUTH}</h2>
-            </EuiTitle>
-            <EuiSpacer size="m" />
-            <EuiText size="s">{i18n.CONFIRM_AUTH_DESCRIPTION}</EuiText>
-            <EuiSpacer size="m" />
             <AuthSelection
               selectedAuth={selectedAuth}
               specifiedAuthForPath={specifiedAuthForPath}

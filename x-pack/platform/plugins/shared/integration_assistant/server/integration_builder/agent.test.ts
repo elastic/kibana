@@ -62,7 +62,6 @@ describe('createAgentInput', () => {
     expect(createSync).not.toHaveBeenCalled();
   });
 
-  // todo verify passing
   it('Should create generated cel agent file if provided', async () => {
     const inputTypes: InputType[] = ['cel'];
     const celInput = {

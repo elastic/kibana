@@ -25,3 +25,5 @@ export const DEFAULT_CEL_PROGRAM = `# // Fetch the agent's public IP every minut
 #     })],
 #     "cursor": {"last_requested_at": now}
 # })`;
+
+export const DEFAULT_URL = 'https://server.example.com:8089/api';

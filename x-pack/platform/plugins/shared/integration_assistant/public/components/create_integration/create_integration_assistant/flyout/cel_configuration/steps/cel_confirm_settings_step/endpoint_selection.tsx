@@ -14,7 +14,9 @@ import {
   EuiFlexItem,
   EuiFormRow,
   EuiRadioGroup,
+  EuiSpacer,
   EuiText,
+  EuiTitle,
 } from '@elastic/eui';
 import * as i18n from './translations';
 import type { IntegrationSettings } from '../../../../types';
@@ -50,10 +52,11 @@ export const EndpointSelection = React.memo<EndpointSelectionProps>(
     const allPaths = loadPaths(integrationSettings);
     const otherPathOptions = allPaths.map<EuiComboBoxOptionOption>((p) => ({ label: p }));
 
-    const isShowingAllOptions = pathSuggestions.length === allPaths.length;
+    const hasSuggestedPaths = pathSuggestions.length > 0;
+    const isShowingAllPaths = pathSuggestions.length === allPaths.length;
 
     const options = (
-      isShowingAllOptions ? pathSuggestions : pathSuggestions.concat([i18n.ENTER_MANUALLY])
+      isShowingAllPaths ? pathSuggestions : pathSuggestions.concat([i18n.ENTER_MANUALLY])
     ).map<EuiRadioGroupOption>((option, index) =>
       // The LLM returns the path in preference order, so we know the first option is the recommended one
       index === 0
@@ -75,16 +78,24 @@ export const EndpointSelection = React.memo<EndpointSelectionProps>(
 
     return (
       <EuiFlexGroup direction="column" gutterSize="l" data-test-subj="confirmPath">
-        <EuiFlexGroup>
+        <EuiTitle size="s">
+          <h2>{i18n.CONFIRM_ENDPOINT}</h2>
+        </EuiTitle>
+        {hasSuggestedPaths && (
           <EuiFlexItem>
-            <EuiRadioGroup
-              options={options}
-              idSelected={selectedPath}
-              onChange={onChangeSuggestedPath}
-            />
+            <EuiSpacer size="m" />
+            <EuiText size="s">{i18n.CONFIRM_ENDPOINT_DESCRIPTION}</EuiText>
+            <EuiSpacer size="m" />
+            <EuiFlexItem>
+              <EuiRadioGroup
+                options={options}
+                idSelected={selectedPath}
+                onChange={onChangeSuggestedPath}
+              />
+            </EuiFlexItem>
           </EuiFlexItem>
-        </EuiFlexGroup>
-        {useOtherEndpoint && !isShowingAllOptions && (
+        )}
+        {(!hasSuggestedPaths || (useOtherEndpoint && !isShowingAllPaths)) && (
           <EuiFlexGroup direction="column">
             <EuiFormRow fullWidth>
               <EuiComboBox

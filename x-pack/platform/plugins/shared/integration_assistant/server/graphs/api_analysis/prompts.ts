@@ -30,7 +30,14 @@ You ALWAYS follow these guidelines when writing your response:
  - Your response must only include exact paths specified in the path_options.
  </guidelines>
 
-Please respond with a string array of the suggested paths.`,
+Please respond with a string array of the suggested paths.
+
+ <example_response>
+ A: Please find the suggested paths below:
+ \`\`\`
+{ex_answer}
+ \`\`\`
+ </example_response>`,
   ],
   ['ai', `Please find the suggested paths below:`],
 ]);

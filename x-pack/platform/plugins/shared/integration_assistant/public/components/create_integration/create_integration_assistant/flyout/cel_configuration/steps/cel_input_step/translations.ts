@@ -29,19 +29,6 @@ export const ANALYZING = i18n.translate(
   }
 );
 
-export const CEL_INPUT_TITLE = i18n.translate(
-  'xpack.integrationAssistant.celFlyout.step.celInput.celInputTitle',
-  {
-    defaultMessage: 'Generate CEL input configuration',
-  }
-);
-export const CEL_INPUT_DESCRIPTION = i18n.translate(
-  'xpack.integrationAssistant.celFlyout.step.celInput.celInputDescription',
-  {
-    defaultMessage: 'Upload an OpenAPI spec file to generate a configuration for the CEL input',
-  }
-);
-
 export const API_DEFINITION_TITLE = i18n.translate(
   'xpack.integrationAssistant.celFlyout.step.celInput.apiDefinition.title',
   {

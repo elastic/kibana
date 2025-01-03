@@ -9,7 +9,7 @@ import nunjucks from 'nunjucks';
 import { join as joinPath } from 'path';
 import { load } from 'js-yaml';
 import type { CelInput, DataStream } from '../../common';
-import { CEL_EXISTING_AUTH_CONFIG_FIELDS, DEFAULT_CEL_PROGRAM } from './constants';
+import { CEL_EXISTING_AUTH_CONFIG_FIELDS, DEFAULT_CEL_PROGRAM, DEFAULT_URL } from './constants';
 import { copySync, createSync, ensureDirSync, listDirSync, readSync } from '../util';
 import { Field } from '../util/samples';
 
@@ -141,7 +141,7 @@ function prepareCelValues(mappedValues: object, celInput: CelInput | undefined) 
     return {
       ...mappedValues,
       program: DEFAULT_CEL_PROGRAM.split('\n'),
-      url: 'https://server.example.com:8089/api',
+      url: DEFAULT_URL,
       showAll: true,
     };
   }

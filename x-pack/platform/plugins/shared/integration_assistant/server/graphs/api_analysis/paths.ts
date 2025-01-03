@@ -8,6 +8,7 @@ import { JsonOutputParser } from '@langchain/core/output_parsers';
 import { ApiAnalysisState } from '../../types';
 import { ApiAnalysisNodeParams } from './types';
 import { SUGGESTED_PATHS_PROMPT } from './prompts';
+import { EX_ANSWER_PATHS } from './constants';
 
 export async function handleGetSuggestedPaths({
   state,
@@ -19,6 +20,7 @@ export async function handleGetSuggestedPaths({
   const paths = await suggestedPathsGraph.invoke({
     data_stream_title: state.dataStreamName,
     path_options: state.pathOptions,
+    ex_answer: EX_ANSWER_PATHS,
   });
 
   return {

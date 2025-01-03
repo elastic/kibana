@@ -7,7 +7,16 @@
 
 import React from 'react';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
-import { EuiBadge, EuiCallOut, EuiComboBox, EuiFlexGroup, EuiFormRow } from '@elastic/eui';
+import {
+  EuiBadge,
+  EuiCallOut,
+  EuiComboBox,
+  EuiFlexGroup,
+  EuiFormRow,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
+} from '@elastic/eui';
 import * as i18n from './translations';
 import { translatedAuthValue } from './cel_confirm_step';
 
@@ -38,6 +47,12 @@ export const AuthSelection = React.memo<AuthSelectionProps>(
 
     return (
       <EuiFlexGroup direction="column" gutterSize="l" data-test-subj="confirmAuth">
+        <EuiTitle size="s">
+          <h2>{i18n.CONFIRM_AUTH}</h2>
+        </EuiTitle>
+        <EuiSpacer size="m" />
+        <EuiText size="s">{i18n.CONFIRM_AUTH_DESCRIPTION}</EuiText>
+        <EuiSpacer size="m" />
         <EuiFormRow label={i18n.AUTH_SELECTION_TITLE} fullWidth>
           <EuiComboBox
             singleSelection={{ asPlainText: true }}
