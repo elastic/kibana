@@ -605,6 +605,7 @@ src/platform/packages/shared/serverless/settings/search_project @elastic/search-
 src/platform/packages/shared/serverless/settings/security_project @elastic/security-solution @elastic/kibana-management
 src/platform/plugins/private/advanced_settings @elastic/appex-sharedux @elastic/kibana-management
 src/platform/plugins/private/files_management @elastic/appex-sharedux
+src/platform/plugins/private/ftr_apis @elastic/kibana-core
 src/platform/plugins/private/image_embeddable @elastic/appex-sharedux
 src/platform/plugins/private/input_control_vis @elastic/kibana-presentation
 src/platform/plugins/private/kibana_overview @elastic/appex-sharedux
@@ -669,7 +670,6 @@ src/plugins/data @elastic/kibana-visualizations @elastic/kibana-data-discovery
 src/plugins/event_annotation @elastic/kibana-visualizations
 src/plugins/event_annotation_listing @elastic/kibana-visualizations
 src/plugins/expressions @elastic/kibana-visualizations
-src/plugins/ftr_apis @elastic/kibana-core
 src/plugins/interactive_setup @elastic/kibana-security
 src/plugins/kibana_usage_collection @elastic/kibana-core
 src/plugins/newsfeed @elastic/kibana-core

@@ -204,7 +204,7 @@ for use in their own application.
 |Minimal interface for admins to manage files in Kibana.
 
 
-|{kib-repo}blob/{branch}/src/plugins/ftr_apis/README.md[ftrApis]
+|{kib-repo}blob/{branch}/src/platform/plugins/private/ftr_apis/README.md[ftrApis]
 |This plugin exposes a set of APIs used internally during functional tests by the FTR.
 
 
