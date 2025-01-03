@@ -119,9 +119,9 @@ export const FieldStatisticsTable = React.memo((props: FieldStatisticsTableProps
 
   const totalHitsComplete$ = useMemo(() => {
     return stateContainer
-      ? stateContainer.dataState.data$.totalHits$.pipe(
-          filter((d) => d.fetchStatus === 'complete'),
-          map((d) => d?.result)
+      ? stateContainer.internalState.state$.pipe(
+          filter((d) => d.dataTotalHits?.fetchStatus === 'complete'),
+          map((d) => d?.dataTotalHits?.result)
         )
       : fallbackTotalHits;
   }, [stateContainer]);

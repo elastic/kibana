@@ -9,32 +9,27 @@
 
 import { useEffect } from 'react';
 import { isOfAggregateQueryType } from '@kbn/es-query';
-import { DiscoverSavedSearchContainer } from '../state_management/discover_saved_search_container';
+import { useInternalStateSelector } from '../state_management/discover_internal_state_container';
 import { useDiscoverServices } from '../../../hooks/use_discover_services';
 
 /**
  * Enable/disable kbn url tracking (That's the URL used when selecting Discover in the side menu)
  */
-export function useUrlTracking(savedSearchContainer: DiscoverSavedSearchContainer) {
+export function useUrlTracking() {
   const { urlTracker } = useDiscoverServices();
+  const savedSearch = useInternalStateSelector((state) => state.discoverSessionEdited!);
 
   useEffect(() => {
-    const subscription = savedSearchContainer.getCurrent$().subscribe((savedSearch) => {
-      const dataView = savedSearch.searchSource.getField('index');
-      if (!dataView) {
-        return;
-      }
-      const trackingEnabled =
-        // Disable for ad-hoc data views as it can't be restored after a page refresh
-        Boolean(dataView.isPersisted() || savedSearch.id) ||
-        // Enable for ES|QL, although it uses ad-hoc data views
-        isOfAggregateQueryType(savedSearch.searchSource.getField('query'));
+    const dataView = savedSearch.searchSource.getField('index');
+    if (!dataView) {
+      return;
+    }
+    const trackingEnabled =
+      // Disable for ad-hoc data views as it can't be restored after a page refresh
+      Boolean(dataView.isPersisted() || savedSearch.id) ||
+      // Enable for ES|QL, although it uses ad-hoc data views
+      isOfAggregateQueryType(savedSearch.searchSource.getField('query'));
 
-      urlTracker.setTrackingEnabled(trackingEnabled);
-    });
-
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, [savedSearchContainer, urlTracker]);
+    urlTracker.setTrackingEnabled(trackingEnabled);
+  }, [savedSearch, urlTracker]);
 }

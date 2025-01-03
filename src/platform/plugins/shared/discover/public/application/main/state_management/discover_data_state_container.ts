@@ -13,7 +13,6 @@ import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { AggregateQuery, isOfAggregateQueryType, Query } from '@kbn/es-query';
-import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
@@ -26,7 +25,7 @@ import type { DiscoverSearchSessionManager } from './discover_search_session';
 import { FetchStatus } from '../../types';
 import { validateTimeRange } from './utils/validate_time_range';
 import { fetchAll, fetchMoreDocuments } from '../data_fetching/fetch_all';
-import { sendResetMsg } from '../hooks/use_saved_search_messages';
+import { sendErrorMsg, sendResetMsg } from '../hooks/use_saved_search_messages';
 import { getFetch$ } from '../data_fetching/get_fetch_observable';
 import type { DiscoverInternalStateContainer } from './discover_internal_state_container';
 import { getDefaultProfileState } from './utils/get_default_profile_state';
@@ -66,27 +65,19 @@ export interface DataTotalHitsMsg extends DataMsg {
   result?: number;
 }
 
-export interface DataChartsMessage extends DataMsg {
-  response?: SearchResponse;
-}
-
-export interface DataAvailableFieldsMsg extends DataMsg {
-  fields?: string[];
-}
-
 export interface DiscoverDataStateContainer {
   /**
    * Implicitly starting fetching data from ES
    */
   fetch: () => void;
   /**
-   * Fetch more data from ES
-   */
-  fetchMore: () => void;
-  /**
    * Container of data observables (orchestration, data table, total hits, available fields)
    */
   data$: SavedSearchData;
+  /**
+   * Fetch more data from ES
+   */
+  fetchMore: () => void;
   /**
    * Observable triggering fetching data from ES
    */
@@ -106,7 +97,7 @@ export interface DiscoverDataStateContainer {
   /**
    * resetting all data observable to initial state
    */
-  reset: () => void;
+  reset: (status?: FetchStatus) => void;
 
   /**
    * cancels the running queries
@@ -180,6 +171,10 @@ export function getDataStateContainer({
     documents$: new BehaviorSubject<DataDocumentsMsg>(initialState),
     totalHits$: new BehaviorSubject<DataTotalHitsMsg>(initialState),
   };
+  internalStateContainer.transitions.setDataMain(dataSubjects.main$.getValue());
+  internalStateContainer.transitions.setDataResults(dataSubjects.documents$.getValue());
+  internalStateContainer.transitions.setDataTotalHits(dataSubjects.totalHits$.getValue());
+
   // This is debugging code, helping you to understand which messages are sent to the data observables
   // Adding a debugger in the functions can be helpful to understand what triggers a message
   // dataSubjects.main$.subscribe((msg) => addLog('dataSubjects.main$', msg));
@@ -220,6 +215,21 @@ export function getDataStateContainer({
   let abortControllerFetchMore: AbortController;
 
   function subscribe() {
+    const mainSubscription = dataSubjects.main$.subscribe((value) => {
+      internalStateContainer.transitions.setDataMain(value);
+    });
+    const resultSubscription = dataSubjects.documents$.subscribe((value) => {
+      if (value.fetchStatus === FetchStatus.PARTIAL) {
+        // omitting UI updates in ES|QL which lead to be partial as the latest state
+        return;
+      }
+
+      internalStateContainer.transitions.setDataResults(value);
+    });
+    const totalHitsSubscription = dataSubjects.totalHits$.subscribe((value) => {
+      internalStateContainer.transitions.setDataTotalHits(value);
+    });
+
     const subscription = fetch$
       .pipe(
         mergeMap(async ({ options, searchSessionId }) => {
@@ -253,6 +263,11 @@ export function getDataStateContainer({
 
             return;
           }
+
+          internalStateContainer.transitions.setDataRequestParams({
+            timeRangeAbsolute: timefilter.getAbsoluteTime(),
+            timeRangeRelative: timefilter.getTime(),
+          });
 
           await profilesManager.resolveDataSourceProfile({
             dataSource: appStateContainer.getState().dataSource,
@@ -338,6 +353,9 @@ export function getDataStateContainer({
       abortController?.abort();
       abortControllerFetchMore?.abort();
       subscription.unsubscribe();
+      mainSubscription.unsubscribe();
+      resultSubscription.unsubscribe();
+      totalHitsSubscription.unsubscribe();
     };
   }
 
@@ -366,13 +384,16 @@ export function getDataStateContainer({
     return refetch$;
   };
 
-  const reset = () => {
-    sendResetMsg(dataSubjects, getInitialFetchStatus());
+  const reset = (status?: FetchStatus) => {
+    const fetchStatus = status || getInitialFetchStatus();
+    sendResetMsg(dataSubjects, fetchStatus);
   };
 
   const cancel = () => {
     abortController?.abort();
     abortControllerFetchMore?.abort();
+    sendErrorMsg(dataSubjects.documents$);
+    sendErrorMsg(dataSubjects.main$);
   };
 
   const getAbortController = () => {

@@ -31,11 +31,9 @@ import { UseColumnsProps, popularizeField, useColumns } from '@kbn/unified-data-
 import { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import { BehaviorSubject } from 'rxjs';
 import { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
-import { useSavedSearchInitial } from '../../state_management/discover_state_provider';
 import { DiscoverStateContainer } from '../../state_management/discover_state';
 import { VIEW_MODE } from '../../../../../common/constants';
 import { useInternalStateSelector } from '../../state_management/discover_internal_state_container';
-import { useAppStateSelector } from '../../state_management/discover_app_state_container';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { DiscoverNoResults } from '../no_results';
 import { LoadingSpinner } from '../loading_spinner/loading_spinner';
@@ -45,14 +43,12 @@ import { getResultState } from '../../utils/get_result_state';
 import { DiscoverUninitialized } from '../uninitialized/uninitialized';
 import { DataMainMsg } from '../../state_management/discover_data_state_container';
 import { FetchStatus, SidebarToggleState } from '../../../types';
-import { useDataState } from '../../hooks/use_data_state';
 import { SavedSearchURLConflictCallout } from '../../../../components/saved_search_url_conflict_callout/saved_search_url_conflict_callout';
 import { DiscoverHistogramLayout } from './discover_histogram_layout';
 import { ErrorCallout } from '../../../../components/common/error_callout';
 import { addLog } from '../../../../utils/add_log';
 import { DiscoverResizableLayout } from './discover_resizable_layout';
 import { PanelsToggle, PanelsToggleProps } from '../../../../components/panels_toggle';
-import { sendErrorMsg } from '../../hooks/use_saved_search_messages';
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
 
 const SidebarMemoized = React.memo(DiscoverSidebarResponsive);
@@ -63,6 +59,7 @@ export interface DiscoverLayoutProps {
 }
 
 export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
+  const services = useDiscoverServices();
   const {
     trackUiMetric,
     capabilities,
@@ -76,35 +73,33 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     dataVisualizer: dataVisualizerService,
     ebtManager,
     fieldsMetadata,
-  } = useDiscoverServices();
+  } = services;
   const pageBackgroundColor = useEuiBackgroundColor('plain');
   const globalQueryState = data.query.getState();
-  const { main$ } = stateContainer.dataState.data$;
-  const [query, savedQuery, columns, sort, grid] = useAppStateSelector((state) => [
-    state.query,
-    state.savedQuery,
-    state.columns,
-    state.sort,
-    state.grid,
+  const [query, savedQuery, columns, sort, grid] = useInternalStateSelector((state) => [
+    state.appState?.query,
+    state.appState?.savedQuery,
+    state.appState?.columns,
+    state.appState?.sort,
+    state.appState?.grid,
   ]);
   const isEsqlMode = useIsEsqlMode();
 
-  const viewMode: VIEW_MODE = useAppStateSelector((state) => {
+  const viewMode: VIEW_MODE = useInternalStateSelector((state) => {
     const fieldStatsNotAvailable =
       !uiSettings.get(SHOW_FIELD_STATISTICS) && !!dataVisualizerService;
-    if (state.viewMode === VIEW_MODE.AGGREGATED_LEVEL && fieldStatsNotAvailable) {
+    if (state.appState?.viewMode === VIEW_MODE.AGGREGATED_LEVEL && fieldStatsNotAvailable) {
       return VIEW_MODE.DOCUMENT_LEVEL;
     }
-    return state.viewMode ?? VIEW_MODE.DOCUMENT_LEVEL;
+    return state.appState?.viewMode ?? VIEW_MODE.DOCUMENT_LEVEL;
   });
   const [dataView, dataViewLoading] = useInternalStateSelector((state) => [
     state.dataView!,
     state.isDataViewLoading,
   ]);
   const customFilters = useInternalStateSelector((state) => state.customFilters);
-
-  const dataState: DataMainMsg = useDataState(main$);
-  const savedSearch = useSavedSearchInitial();
+  const dataState: DataMainMsg = useInternalStateSelector((state) => state.dataMain!);
+  const savedSearch = useInternalStateSelector((state) => state.discoverSessionInitial!);
 
   const fetchCounter = useRef<number>(0);
 
@@ -285,7 +280,7 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
   }, [filterManager]);
 
   const contentCentered = resultState === 'uninitialized' || resultState === 'none';
-  const documentState = useDataState(stateContainer.dataState.data$.documents$);
+  const documentState = useInternalStateSelector((state) => state.dataResults!);
 
   const esqlModeWarning = useMemo(() => {
     if (isEsqlMode) {
@@ -324,9 +319,10 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
         sidebarToggleState$={sidebarToggleState$}
         renderedFor="root"
         isChartAvailable={undefined}
+        services={services}
       />
     );
-  }, [stateContainer, sidebarToggleState$]);
+  }, [stateContainer, sidebarToggleState$, services]);
 
   const mainDisplay = useMemo(() => {
     if (resultState === 'uninitialized') {
@@ -369,8 +365,6 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
 
   const onCancelClick = useCallback(() => {
     stateContainer.dataState.cancel();
-    sendErrorMsg(stateContainer.dataState.data$.documents$);
-    sendErrorMsg(stateContainer.dataState.data$.main$);
   }, [stateContainer.dataState]);
 
   return (
@@ -433,7 +427,6 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
               <SidebarMemoized
                 additionalFilters={customFilters}
                 columns={currentColumns}
-                documents$={stateContainer.dataState.data$.documents$}
                 onAddBreakdownField={canSetBreakdownField ? onAddBreakdownField : undefined}
                 onAddField={onAddColumnWithTracking}
                 onAddFilter={onFilter}
