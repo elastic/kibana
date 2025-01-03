@@ -5021,7 +5021,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-security-server-internal@link:packages/core/security/core-security-server-internal":
+"@kbn/core-security-server-internal@link:src/core/packages/security/server-internal":
   version "0.0.0"
   uid ""
 
