@@ -101,7 +101,7 @@ export const handle = async (
     log.error('400 Bad Request', formatErrorMeta(400, { request, error }));
     const response = kibanaResponseFactory.badRequest({
       body: error.message,
-      headers: isPublicAccessRoute(route) ? getVersionHeader(BASE_PUBLIC_VERSION) : undefined,
+      headers: isPublicAccessApiRoute(route) ? getVersionHeader(BASE_PUBLIC_VERSION) : undefined,
     });
 
     // Emit onPostValidation even if validation fails.
@@ -109,7 +109,7 @@ export const handle = async (
     router.emitPostValidate(req, {
       deprecated: req.route.options.deprecated,
       isInternalApiRequest: req.isInternalApiRequest,
-      isPublicAccess: isPublicAccessRoute(route),
+      isPublicAccess: isPublicAccessApiRoute(route),
     });
     return response;
   }
@@ -117,22 +117,22 @@ export const handle = async (
   router.emitPostValidate(kibanaRequest, {
     deprecated: kibanaRequest.route.options.deprecated,
     isInternalApiRequest: kibanaRequest.isInternalApiRequest,
-    isPublicAccess: isPublicAccessRoute(route),
+    isPublicAccess: isPublicAccessApiRoute(route),
   });
 
   const kibanaResponse = await handler(kibanaRequest, kibanaResponseFactory);
 
-  if (isPublicAccessRoute(route)) {
+  if (isPublicAccessApiRoute(route)) {
     injectVersionHeader(BASE_PUBLIC_VERSION, kibanaResponse);
   }
 
   return kibanaResponse;
 };
 
-function isPublicAccessRoute<Method extends RouteMethod>({
+function isPublicAccessApiRoute<Method extends RouteMethod>({
   options,
 }: InternalRouteConfig<unknown, unknown, unknown, Method>): boolean {
-  return options?.access === 'public';
+  return !options?.httpResource && options?.access === 'public';
 }
 
 /**

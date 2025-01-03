@@ -100,8 +100,7 @@ describe('Router', () => {
           path: '/versioned',
           validate: { body: validation, query: validation, params: validation },
         },
-        (context, req, res) => res.ok(),
-        { isVersioned: true, events: false }
+        (context, req, res) => res.ok()
       );
       router.get(
         {
