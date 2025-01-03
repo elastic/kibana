@@ -10,16 +10,18 @@ export function MonitoringLogstashPipelineViewerProvider({ getService }) {
   const retry = getService('retry');
   const find = getService('find');
 
+  const PIPELINE_VIEWER_SELECTOR = '[data-test-subj*="pipeline-viewer"]';
   const SUBJ_PIPELINE_SECTION_PREFIX = 'pipelineViewerSection_';
+  const PIPELINE_SECTION_ITEM_CLS = 'monPipelineViewer__listItem';
 
   return new (class LogstashPipelineViewer {
     isOnPipelineViewer() {
-      return retry.try(() => find.existsByCssSelector('[data-test-subj*="pipeline-viewer"]'));
+      return retry.try(() => find.existsByCssSelector(PIPELINE_VIEWER_SELECTOR));
     }
 
     async getPipelineDefinition() {
-      const getSectionItems = async () => {
-        const items = await find.allByCssSelector('[data-test-subj*="pipeline-viewer-list-item"]');
+      const getSectionItems = async (section) => {
+        const items = await section.findAllByClassName(PIPELINE_SECTION_ITEM_CLS);
 
         return Promise.all(
           items.map(async (item) => {
