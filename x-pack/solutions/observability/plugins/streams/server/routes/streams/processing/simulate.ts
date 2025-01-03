@@ -9,7 +9,10 @@ import { z } from '@kbn/zod';
 import { notFound, internal } from '@hapi/boom';
 import { getProcessorType, processingDefinitionSchema } from '@kbn/streams-schema';
 import { get } from 'lodash';
-import { IngestSimulateResponse } from '@elastic/elasticsearch/lib/api/types';
+import {
+  IngestSimulatePipelineSimulation,
+  IngestSimulateResponse,
+} from '@elastic/elasticsearch/lib/api/types';
 import { flattenObject } from '../../../../common/utils/flatten_object';
 import { calculateObjectDiff } from '../../../../common/utils/calculate_object_diff';
 import { createServerRoute } from '../../create_server_route';
@@ -68,11 +71,7 @@ export const simulateProcessorRoute = createServerRoute({
       });
 
       const documents = simulationResult.docs.map((doc, id) => {
-        if (
-          doc.processor_results?.every(
-            (proc) => proc.status === 'success' || proc.status === 'error_ignored'
-          )
-        ) {
+        if (doc.processor_results?.every(isSuccessfulProcessor)) {
           return {
             value: flattenObject(
               doc.processor_results?.at(-1)?.doc?._source ?? params.body.documents[id]
@@ -91,9 +90,7 @@ export const simulateProcessorRoute = createServerRoute({
 
       const successRate =
         simulationResult.docs.reduce((rate, doc) => {
-          return (rate += doc.processor_results?.every((proc) => proc.status === 'success')
-            ? 1
-            : 0);
+          return (rate += doc.processor_results?.every(isSuccessfulProcessor) ? 1 : 0);
         }, 0) / simulationResult.docs.length;
 
       const failureRate = 1 - successRate;
@@ -122,7 +119,7 @@ const computeDetectedFields = (
 
   const diffs = simulation.docs
     .filter((doc) => {
-      return doc.processor_results?.every((proc) => proc.status === 'success');
+      return doc.processor_results?.every(isSuccessfulProcessor);
     })
     .map((doc) => {
       const sample = samplesToSimulationMap.get(doc);
@@ -141,3 +138,6 @@ const computeDetectedFields = (
 
   return [...new Set(diffs)];
 };
+
+const isSuccessfulProcessor = (processorSimulation: IngestSimulatePipelineSimulation) =>
+  processorSimulation.status === 'success';
