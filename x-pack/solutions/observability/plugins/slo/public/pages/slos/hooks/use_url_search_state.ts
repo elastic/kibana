@@ -6,25 +6,19 @@
  */
 
 import type { Filter } from '@kbn/es-query';
-import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
+import {
+  createKbnUrlStateStorage,
+  createSessionStorageStateStorage,
+} from '@kbn/kibana-utils-plugin/public';
 import deepmerge from 'deepmerge';
+import { pick } from 'lodash';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { DEFAULT_SLO_PAGE_SIZE } from '../../../../common/constants';
-import type { GroupByField } from '../components/slo_list_group_by';
-import type { SLOView } from '../components/toggle_slo_view';
+import type { GroupByField, SortDirection, SortField, ViewType } from '../types';
 
 export const SLO_LIST_SEARCH_URL_STORAGE_KEY = 'search';
-export type SortField =
-  | 'sli_value'
-  | 'error_budget_consumed'
-  | 'error_budget_remaining'
-  | 'status'
-  | 'burn_rate_5m'
-  | 'burn_rate_1h'
-  | 'burn_rate_1d';
-
-export type SortDirection = 'asc' | 'desc';
+export const SLO_LIST_SEARCH_SESSION_STORAGE_KEY = 'slo.list_page_search_state';
 
 export interface SearchState {
   kqlQuery: string;
@@ -34,7 +28,7 @@ export interface SearchState {
     by: SortField;
     direction: SortDirection;
   };
-  view: SLOView;
+  view: ViewType;
   groupBy: GroupByField;
   filters: Filter[];
   lastRefresh?: number;
@@ -42,13 +36,13 @@ export interface SearchState {
   statusFilter?: Filter;
 }
 
-export const DEFAULT_STATE = {
+export const DEFAULT_STATE: SearchState = {
   kqlQuery: '',
   page: 0,
   perPage: DEFAULT_SLO_PAGE_SIZE,
-  sort: { by: 'status' as const, direction: 'desc' as const },
-  view: 'cardView' as const,
-  groupBy: 'ungrouped' as const,
+  sort: { by: 'status', direction: 'desc' },
+  view: 'cardView',
+  groupBy: 'ungrouped',
   filters: [],
   lastRefresh: 0,
 };
@@ -67,6 +61,8 @@ export function useUrlSearchState(): {
     })
   );
 
+  const sessionStorage = useRef(createSessionStorageStateStorage(window.localStorage));
+
   useEffect(() => {
     const sub = urlStateStorage.current
       ?.change$<SearchState>(SLO_LIST_SEARCH_URL_STORAGE_KEY)
@@ -77,21 +73,30 @@ export function useUrlSearchState(): {
       });
 
     setState(
-      urlStateStorage.current?.get<SearchState>(SLO_LIST_SEARCH_URL_STORAGE_KEY) ?? DEFAULT_STATE
+      urlStateStorage.current?.get<SearchState>(SLO_LIST_SEARCH_URL_STORAGE_KEY) ??
+        sessionStorage.current?.get<SearchState>(SLO_LIST_SEARCH_SESSION_STORAGE_KEY) ??
+        DEFAULT_STATE
     );
 
     return () => {
       sub?.unsubscribe();
     };
-  }, [urlStateStorage]);
+  }, [urlStateStorage, sessionStorage]);
 
   const onStateChange = useCallback(
     (newState: Partial<SearchState>) => {
       const updatedState = { ...state, page: 0, ...newState };
-      setState((stateN) => updatedState);
+      setState(() => updatedState);
+
       urlStateStorage.current?.set(SLO_LIST_SEARCH_URL_STORAGE_KEY, updatedState, {
         replace: true,
       });
+
+      // Discard search itself from session storage. Keep only view preferences
+      sessionStorage.current?.set(
+        SLO_LIST_SEARCH_SESSION_STORAGE_KEY,
+        pick(updatedState, 'sort', 'view', 'groupBy')
+      );
     },
     [state]
   );

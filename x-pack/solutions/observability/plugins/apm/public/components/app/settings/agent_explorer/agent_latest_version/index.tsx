@@ -9,7 +9,7 @@ import { EuiSkeletonRectangle, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { NOT_AVAILABLE_LABEL } from '../../../../../../common/i18n';
-import { AgentName } from '../../../../../../typings/es_schemas/ui/fields/agent';
+import type { AgentName } from '../../../../../../typings/es_schemas/ui/fields/agent';
 
 export function AgentLatestVersion({
   agentName,

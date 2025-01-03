@@ -8,17 +8,19 @@
 import { useMemo } from 'react';
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
 import { useUiTracker } from '@kbn/observability-shared-plugin/public';
-import {
+import type {
   LogDataViewReference,
   LogIndexNameReference,
-  logIndexNameReferenceRT,
   LogSourcesKibanaAdvancedSettingReference,
+} from '@kbn/logs-shared-plugin/common';
+import {
+  logIndexNameReferenceRT,
   logSourcesKibanaAdvancedSettingRT,
 } from '@kbn/logs-shared-plugin/common';
 import { useKibanaIndexPatternService } from '../../../hooks/use_kibana_index_patterns';
 import { useFormElement } from './form_elements';
+import type { FormValidationError } from './validation_errors';
 import {
-  FormValidationError,
   validateIndexPattern,
   validateStringNotEmpty,
   validateStringNoSpaces,
