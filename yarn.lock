@@ -5081,7 +5081,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-theme-browser@link:packages/core/theme/core-theme-browser":
+"@kbn/core-theme-browser@link:src/core/packages/theme/browser":
   version "0.0.0"
   uid ""
 
