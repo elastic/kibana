@@ -7,4 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from '@kbn/ui-actions-plugin/public';
+import { i18n } from '@kbn/i18n';
+
+export class PanelIncompatibleError extends Error {
+  code = 'PANEL_INCOMPATIBLE';
+
+  constructor() {
+    super(
+      i18n.translate('embeddableApi.errors.panelIncompatibleError', {
+        defaultMessage: 'Panel api is incompatible',
+      })
+    );
+  }
+}

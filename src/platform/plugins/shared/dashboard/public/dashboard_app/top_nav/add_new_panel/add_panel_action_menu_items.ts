@@ -13,7 +13,7 @@ import {
   addPanelMenuTrigger,
 } from '@kbn/ui-actions-plugin/public';
 import { PresentationContainer } from '@kbn/presentation-containers';
-import { COMMON_EMBEDDABLE_GROUPING } from '@kbn/embeddable-plugin/public';
+import { ADD_PANEL_OTHER_GROUP } from '@kbn/embeddable-plugin/public';
 import type { IconType, CommonProps } from '@elastic/eui';
 import React, { type MouseEventHandler } from 'react';
 
@@ -98,12 +98,12 @@ export const getAddPanelActionMenuItemsGroup = (
       });
     } else {
       // use other group as the default for definitions that don't have a group
-      const fallbackGroup = COMMON_EMBEDDABLE_GROUPING.other;
+      const fallbackGroup = ADD_PANEL_OTHER_GROUP;
 
       if (!grouped[fallbackGroup.id]) {
         grouped[fallbackGroup.id] = {
           id: fallbackGroup.id,
-          title: fallbackGroup.getDisplayName?.({ embeddable: api }) || '',
+          title: fallbackGroup.getDisplayName?.() || '',
           'data-test-subj': `dashboardEditorMenu-${fallbackGroup.id}Group`,
           order: fallbackGroup.order || 0,
           items: [],
