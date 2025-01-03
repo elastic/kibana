@@ -9120,6 +9120,7 @@
     },
     "/api/fleet/agent_policies": {
       "get": {
+        "description": "[Required authorization] Route required privileges: ANY of [fleet-agent-policies-read OR fleet-agents-read].",
         "operationId": "get-fleet-agent-policies",
         "parameters": [
           {
@@ -9957,6 +9958,7 @@
         ]
       },
       "post": {
+        "description": "[Required authorization] Route required privileges: ALL of [fleet-agent-policies-all].",
         "operationId": "post-fleet-agent-policies",
         "parameters": [
           {
@@ -10957,6 +10959,7 @@
     },
     "/api/fleet/agent_policies/_bulk_get": {
       "post": {
+        "description": "[Required authorization] Route required privileges: ANY of [fleet-agent-policies-read OR fleet-agents-read].",
         "operationId": "post-fleet-agent-policies-bulk-get",
         "parameters": [
           {
@@ -11743,7 +11746,7 @@
     },
     "/api/fleet/agent_policies/delete": {
       "post": {
-        "description": "Delete an agent policy by ID.",
+        "description": "Delete an agent policy by ID.<br/><br/>[Required authorization] Route required privileges: ALL of [fleet-agent-policies-all].",
         "operationId": "post-fleet-agent-policies-delete",
         "parameters": [
           {
@@ -11836,7 +11839,7 @@
     },
     "/api/fleet/agent_policies/outputs": {
       "post": {
-        "description": "Get a list of outputs associated with agent policies.",
+        "description": "Get a list of outputs associated with agent policies.<br/><br/>[Required authorization] Route required privileges: ALL of [fleet-agent-policies-read, fleet-settings-read].",
         "operationId": "post-fleet-agent-policies-outputs",
         "parameters": [
           {
@@ -12009,7 +12012,7 @@
     },
     "/api/fleet/agent_policies/{agentPolicyId}": {
       "get": {
-        "description": "Get an agent policy by ID.",
+        "description": "Get an agent policy by ID.<br/><br/>[Required authorization] Route required privileges: ANY of [fleet-agent-policies-read OR fleet-agents-read].",
         "operationId": "get-fleet-agent-policies-agentpolicyid",
         "parameters": [
           {
@@ -12760,7 +12763,7 @@
         ]
       },
       "put": {
-        "description": "Update an agent policy by ID.",
+        "description": "Update an agent policy by ID.<br/><br/>[Required authorization] Route required privileges: ALL of [fleet-agent-policies-all].",
         "operationId": "put-fleet-agent-policies-agentpolicyid",
         "parameters": [
           {
@@ -13773,7 +13776,7 @@
     },
     "/api/fleet/agent_policies/{agentPolicyId}/copy": {
       "post": {
-        "description": "Copy an agent policy by ID.",
+        "description": "Copy an agent policy by ID.<br/><br/>[Required authorization] Route required privileges: ALL of [fleet-agent-policies-all].",
         "operationId": "post-fleet-agent-policies-agentpolicyid-copy",
         "parameters": [
           {
@@ -14558,7 +14561,7 @@
     },
     "/api/fleet/agent_policies/{agentPolicyId}/download": {
       "get": {
-        "description": "Download an agent policy by ID.",
+        "description": "Download an agent policy by ID.<br/><br/>[Required authorization] Route required privileges: ALL of [fleet-agent-policies-read].",
         "operationId": "get-fleet-agent-policies-agentpolicyid-download",
         "parameters": [
           {
@@ -14663,7 +14666,7 @@
     },
     "/api/fleet/agent_policies/{agentPolicyId}/full": {
       "get": {
-        "description": "Get a full agent policy by ID.",
+        "description": "Get a full agent policy by ID.<br/><br/>[Required authorization] Route required privileges: ALL of [fleet-agent-policies-read].",
         "operationId": "get-fleet-agent-policies-agentpolicyid-full",
         "parameters": [
           {
@@ -15189,7 +15192,7 @@
     },
     "/api/fleet/agent_policies/{agentPolicyId}/outputs": {
       "get": {
-        "description": "Get a list of outputs associated with agent policy by policy id.",
+        "description": "Get a list of outputs associated with agent policy by policy id.<br/><br/>[Required authorization] Route required privileges: ALL of [fleet-agent-policies-read, fleet-settings-read].",
         "operationId": "get-fleet-agent-policies-agentpolicyid-outputs",
         "parameters": [
           {
@@ -19945,6 +19948,7 @@
     },
     "/api/fleet/epm/bulk_assets": {
       "post": {
+        "description": "[Required authorization] Route required privileges: ALL of [integrations-read].",
         "operationId": "post-fleet-epm-bulk-assets",
         "parameters": [
           {
@@ -20083,6 +20087,7 @@
     },
     "/api/fleet/epm/categories": {
       "get": {
+        "description": "[Required authorization] Route required privileges: ALL of [integrations-read].",
         "operationId": "get-fleet-epm-categories",
         "parameters": [
           {
@@ -20181,6 +20186,7 @@
     },
     "/api/fleet/epm/custom_integrations": {
       "post": {
+        "description": "[Required authorization] Route required privileges: ALL of [integrations-all, fleet-agent-policies-all].",
         "operationId": "post-fleet-epm-custom-integrations",
         "parameters": [
           {
@@ -20377,6 +20383,7 @@
     },
     "/api/fleet/epm/data_streams": {
       "get": {
+        "description": "[Required authorization] Route required privileges: ALL of [integrations-read].",
         "operationId": "get-fleet-epm-data-streams",
         "parameters": [
           {
@@ -20490,6 +20497,7 @@
     },
     "/api/fleet/epm/packages": {
       "get": {
+        "description": "[Required authorization] Route required privileges: ALL of [integrations-read].",
         "operationId": "get-fleet-epm-packages",
         "parameters": [
           {
@@ -21049,6 +21057,7 @@
         ]
       },
       "post": {
+        "description": "[Required authorization] Route required privileges: ALL of [integrations-all, fleet-agent-policies-all].",
         "operationId": "post-fleet-epm-packages",
         "parameters": [
           {
@@ -21225,6 +21234,7 @@
     },
     "/api/fleet/epm/packages/_bulk": {
       "post": {
+        "description": "[Required authorization] Route required privileges: ALL of [integrations-all, fleet-agent-policies-all].",
         "operationId": "post-fleet-epm-packages-bulk",
         "parameters": [
           {
@@ -21490,6 +21500,7 @@
     },
     "/api/fleet/epm/packages/installed": {
       "get": {
+        "description": "[Required authorization] Route required privileges: ALL of [integrations-read].",
         "operationId": "get-fleet-epm-packages-installed",
         "parameters": [
           {
@@ -21718,6 +21729,7 @@
     },
     "/api/fleet/epm/packages/limited": {
       "get": {
+        "description": "[Required authorization] Route required privileges: ALL of [integrations-read].",
         "operationId": "get-fleet-epm-packages-limited",
         "parameters": [],
         "responses": {
@@ -21776,6 +21788,7 @@
     },
     "/api/fleet/epm/packages/{pkgName}/stats": {
       "get": {
+        "description": "[Required authorization] Route required privileges: ALL of [integrations-read].",
         "operationId": "get-fleet-epm-packages-pkgname-stats",
         "parameters": [
           {
@@ -21849,6 +21862,7 @@
     },
     "/api/fleet/epm/packages/{pkgName}/{pkgVersion}": {
       "delete": {
+        "description": "[Required authorization] Route required privileges: ALL of [integrations-all, fleet-agent-policies-all].",
         "operationId": "delete-fleet-epm-packages-pkgname-pkgversion",
         "parameters": [
           {
@@ -22685,6 +22699,7 @@
         ]
       },
       "post": {
+        "description": "[Required authorization] Route required privileges: ALL of [integrations-all, fleet-agent-policies-all].",
         "operationId": "post-fleet-epm-packages-pkgname-pkgversion",
         "parameters": [
           {
@@ -22894,6 +22909,7 @@
         ]
       },
       "put": {
+        "description": "[Required authorization] Route required privileges: ALL of [integrations-all, fleet-agent-policies-all].",
         "operationId": "put-fleet-epm-packages-pkgname-pkgversion",
         "parameters": [
           {
@@ -23689,6 +23705,7 @@
     },
     "/api/fleet/epm/packages/{pkgName}/{pkgVersion}/{filePath}": {
       "get": {
+        "description": "[Required authorization] Route required privileges: ALL of [integrations-read].",
         "operationId": "get-fleet-epm-packages-pkgname-pkgversion-filepath",
         "parameters": [
           {
@@ -23758,6 +23775,7 @@
     },
     "/api/fleet/epm/templates/{pkgName}/{pkgVersion}/inputs": {
       "get": {
+        "description": "[Required authorization] Route required privileges: ALL of [integrations-read].",
         "operationId": "get-fleet-epm-templates-pkgname-pkgversion-inputs",
         "parameters": [
           {
@@ -23914,6 +23932,7 @@
     },
     "/api/fleet/epm/verification_key_id": {
       "get": {
+        "description": "[Required authorization] Route required privileges: ALL of [integrations-read].",
         "operationId": "get-fleet-epm-verification-key-id",
         "parameters": [],
         "responses": {
@@ -24656,6 +24675,7 @@
     },
     "/api/fleet/kubernetes": {
       "get": {
+        "description": "[Required authorization] Route required privileges: ALL of [fleet-agent-policies-read].",
         "operationId": "get-fleet-kubernetes",
         "parameters": [
           {
@@ -24736,6 +24756,7 @@
     },
     "/api/fleet/kubernetes/download": {
       "get": {
+        "description": "[Required authorization] Route required privileges: ALL of [fleet-agent-policies-read].",
         "operationId": "get-fleet-kubernetes-download",
         "parameters": [
           {
@@ -34210,6 +34231,7 @@
     },
     "/api/fleet/package_policies/delete": {
       "post": {
+        "description": "[Required authorization] Route required privileges: ALL of [fleet-agent-policies-all, integrations-all].",
         "operationId": "post-fleet-package-policies-delete",
         "parameters": [
           {
@@ -34401,7 +34423,7 @@
     },
     "/api/fleet/package_policies/upgrade": {
       "post": {
-        "description": "Upgrade a package policy to a newer package version.",
+        "description": "Upgrade a package policy to a newer package version.<br/><br/>[Required authorization] Route required privileges: ALL of [fleet-agent-policies-all, integrations-all].",
         "operationId": "post-fleet-package-policies-upgrade",
         "parameters": [
           {
@@ -34514,6 +34536,7 @@
     },
     "/api/fleet/package_policies/upgrade/dryrun": {
       "post": {
+        "description": "[Required authorization] Route required privileges: ALL of [fleet-agent-policies-read, integrations-read].",
         "operationId": "post-fleet-package-policies-upgrade-dryrun",
         "parameters": [
           {
@@ -35699,7 +35722,7 @@
     },
     "/api/fleet/package_policies/{packagePolicyId}": {
       "delete": {
-        "description": "Delete a package policy by ID.",
+        "description": "Delete a package policy by ID.<br/><br/>[Required authorization] Route required privileges: ALL of [fleet-agent-policies-all, integrations-all].",
         "operationId": "delete-fleet-package-policies-packagepolicyid",
         "parameters": [
           {
@@ -38466,6 +38489,7 @@
     },
     "/api/fleet/settings": {
       "get": {
+        "description": "[Required authorization] Route required privileges: ALL of [fleet-settings-read].",
         "operationId": "get-fleet-settings",
         "parameters": [],
         "responses": {
@@ -38598,6 +38622,7 @@
         ]
       },
       "put": {
+        "description": "[Required authorization] Route required privileges: ALL of [fleet-settings-all].",
         "operationId": "put-fleet-settings",
         "parameters": [
           {
