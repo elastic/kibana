@@ -13,6 +13,11 @@
   .embPanel__hoverActionsLeft {
     visibility: hidden;
   }
+
+  .dshDashboardGrid__item--expanded {
+    position: absolute;
+    width: 100%;
+  }
 }
 
 // Remove padding in fullscreen mode

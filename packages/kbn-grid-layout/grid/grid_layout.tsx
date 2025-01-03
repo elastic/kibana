@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import classNames from 'classnames';
 import { cloneDeep } from 'lodash';
 import React, { useEffect, useMemo, useState } from 'react';
-import classNames from 'classnames';
 import { combineLatest, distinctUntilChanged, filter, map, pairwise, skip } from 'rxjs';
 
 import { css } from '@emotion/react';

@@ -23,10 +23,8 @@ export const GridHeightSmoother = ({
       gridLayoutStateManager.gridDimensions$,
       gridLayoutStateManager.interactionEvent$,
     ]).subscribe(([dimensions, interactionEvent]) => {
-      if (!smoothHeightRef.current || Boolean(gridLayoutStateManager.expandedPanelId$)) return;
-      if (gridLayoutStateManager.expandedPanelId$.getValue()) {
-        return;
-      }
+      if (!smoothHeightRef.current || gridLayoutStateManager.expandedPanelId$.getValue()) return;
+
       if (!interactionEvent) {
         smoothHeightRef.current.style.height = `${dimensions.height}px`;
         smoothHeightRef.current.style.userSelect = 'auto';
@@ -45,8 +43,20 @@ export const GridHeightSmoother = ({
       smoothHeightRef.current.style.userSelect = 'none';
     });
 
+    const expandedPanelStyleSubscription = gridLayoutStateManager.expandedPanelId$.subscribe(
+      (expandedPanelId) => {
+        if (!smoothHeightRef.current) return;
+        if (expandedPanelId) {
+          smoothHeightRef.current.classList.add('kbnGridWrapper--hasExpandedPanel');
+        } else {
+          smoothHeightRef.current.classList.remove('kbnGridWrapper--hasExpandedPanel');
+        }
+      }
+    );
+
     return () => {
       interactionStyleSubscription.unsubscribe();
+      expandedPanelStyleSubscription.unsubscribe();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -54,12 +64,17 @@ export const GridHeightSmoother = ({
   return (
     <div
       ref={smoothHeightRef}
+      className={'kbnGridWrapper'}
       css={css`
-        height: 100%;
         // the guttersize cannot currently change, so it's safe to set it just once
         padding: ${gridLayoutStateManager.runtimeSettings$.getValue().gutterSize}px;
         overflow-anchor: none;
         transition: height 500ms linear;
+
+        &.kbnGridWrapper--hasExpandedPanel {
+          height: 100% !important;
+          position: relative;
+        }
       `}
     >
       {children}
