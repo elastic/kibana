@@ -28,7 +28,7 @@ export interface InvestigateInTimelineProps {
 }
 
 /**
- * Investigate in timeline button, uses the InvestigateInTimelineAction component (x-pack/plugins/security_solution/public/detections/components/alerts_table/timeline_actions/investigate_in_timeline_action.tsx)
+ * Investigate in timeline button, uses the InvestigateInTimelineAction component (x-pack/solutions/security/plugins/security_solution/public/detections/components/alerts_table/timeline_actions/investigate_in_timeline_action.tsx)
  * retrieved from the SecuritySolutionContext.
  *
  * This component renders an {@link EuiContextMenu}.
@@ -65,7 +65,7 @@ export const InvestigateInTimelineContextMenu: VFC<InvestigateInTimelineProps> =
 };
 
 /**
- * Investigate in timeline button uses the InvestigateInTimelineAction component (x-pack/plugins/security_solution/public/detections/components/alerts_table/timeline_actions/investigate_in_timeline_action.tsx)
+ * Investigate in timeline button uses the InvestigateInTimelineAction component (x-pack/solutions/security/plugins/security_solution/public/detections/components/alerts_table/timeline_actions/investigate_in_timeline_action.tsx)
  * retrieved from the SecuritySolutionContext.
  *
  * This component renders an {@link EuiButtonIcon}.

@@ -47,6 +47,8 @@ export function runEvaluations<KibanaClientType extends KibanaClient>(
             kibana: argv.kibana,
           });
 
+          log.info(`Elasticsearch URL: ${serviceUrls.esUrl}`);
+
           const kibanaClient = kbnClient
             ? new kbnClient(log, serviceUrls.kibanaUrl, argv.spaceId)
             : new KibanaClient(log, serviceUrls.kibanaUrl, argv.spaceId);
@@ -112,7 +114,7 @@ export function runEvaluations<KibanaClientType extends KibanaClient>(
             evaluationConnectorId: evaluationConnector.id!,
             persist: argv.persist,
             suite: mocha.suite,
-            scopes: ['all'],
+            scopes: ['observability'],
           });
 
           const header: string[][] = [

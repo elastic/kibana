@@ -31,7 +31,15 @@ export const getDataStreamsHandler = (
         core.elasticsearch.client.asSecondaryAuthUser
       );
 
-      const nonSystemDataStreams = meteringStatsDataStreams?.filter((dataStream) => {
+      if (!meteringStatsDataStreams || !meteringStatsDataStreams.length) {
+        return errorHandler(
+          logger,
+          response,
+          new CustomHttpRequestError('No data streams found', 404)
+        );
+      }
+
+      const nonSystemDataStreams = meteringStatsDataStreams.filter((dataStream) => {
         return !dataStream.name?.startsWith('.');
       });
 
@@ -54,6 +62,17 @@ export const getDataStreamsHandler = (
           return acc;
         }, [])
         .sort((a, b) => b.storageSizeBytes - a.storageSizeBytes);
+
+      if (!body || !body.length) {
+        return errorHandler(
+          logger,
+          response,
+          new CustomHttpRequestError(
+            'No relevant user defined data streams found with storage size greater than zero',
+            404
+          )
+        );
+      }
 
       return response.ok({
         body,

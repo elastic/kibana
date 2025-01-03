@@ -427,4 +427,10 @@ export interface SavedObjectsClientContract {
    * Returns the namespace associated with the client. If the namespace is the default one, this method returns `undefined`.
    */
   getCurrentNamespace(): string | undefined;
+
+  /**
+   * Returns a clone of the current Saved Objects client but scoped to the specified namespace.
+   * @param namespace Space to which the client should be scoped to.
+   */
+  asScopedToNamespace(namespace: string): SavedObjectsClientContract;
 }

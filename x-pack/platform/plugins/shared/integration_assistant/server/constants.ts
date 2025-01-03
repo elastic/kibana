@@ -15,3 +15,6 @@ export enum LogFormat {
   STRUCTURED = 'structured',
   UNSTRUCTURED = 'unstructured',
 }
+export const FLEET_ALL_ROLE = 'fleet-all' as const;
+export const INTEGRATIONS_ALL_ROLE = 'integrations-all' as const;
+export const ACTIONS_AND_CONNECTORS_ALL_ROLE = 'actions:execute-advanced-connectors' as const;

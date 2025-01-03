@@ -169,18 +169,20 @@ export interface AuditMessage {
 
 export type MlSummaryJobs = MlSummaryJob[];
 
+export interface MlJobTimeRange {
+  from: number;
+  to: number;
+  fromPx: number;
+  toPx: number;
+  fromMoment: Moment | null;
+  toMoment: Moment | null;
+  widthPx: number | null;
+  label?: string;
+}
+
 export interface MlJobWithTimeRange extends CombinedJobWithStats {
   id: string;
   isRunning?: boolean;
   isNotSingleMetricViewerJobMessage?: string;
-  timeRange: {
-    from: number;
-    to: number;
-    fromPx: number;
-    toPx: number;
-    fromMoment: Moment;
-    toMoment: Moment;
-    widthPx: number;
-    label: string;
-  };
+  timeRange: MlJobTimeRange;
 }

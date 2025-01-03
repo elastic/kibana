@@ -3,7 +3,7 @@ info:
   title: Automatic Import CEL Input API endpoint
   version: "1"
 paths:
-  /api/integration_assistant/cel:
+  /internal/automatic_import/cel:
     post:
       summary: Builds CEL input configuration
       operationId: CelInput

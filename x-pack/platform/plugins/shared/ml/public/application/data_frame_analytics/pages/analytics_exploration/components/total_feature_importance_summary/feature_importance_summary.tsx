@@ -8,7 +8,7 @@
 import type { FC } from 'react';
 import React, { useCallback, useMemo } from 'react';
 
-import { EuiButtonEmpty, EuiSpacer, EuiText, EuiCallOut } from '@elastic/eui';
+import { useEuiTheme, EuiButtonEmpty, EuiSpacer, EuiText, EuiCallOut } from '@elastic/eui';
 import type { RecursivePartial, AxisStyle, PartialTheme, BarSeriesProps } from '@elastic/charts';
 import {
   Chart,
@@ -22,7 +22,6 @@ import {
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { euiLightVars as euiVars } from '@kbn/ui-theme';
 import {
   getAnalysisType,
   isClassificationAnalysis,
@@ -39,40 +38,6 @@ import {
 import { useMlKibana } from '../../../../../contexts/kibana';
 
 import { ExpandableSection } from '../expandable_section';
-
-const { euiColorMediumShade } = euiVars;
-const axisColor = euiColorMediumShade;
-
-const axes: RecursivePartial<AxisStyle> = {
-  axisLine: {
-    stroke: axisColor,
-  },
-  tickLabel: {
-    fontSize: 12,
-    fill: axisColor,
-  },
-  tickLine: {
-    stroke: axisColor,
-  },
-  gridLine: {
-    horizontal: {
-      dash: [1, 2],
-    },
-    vertical: {
-      strokeWidth: 0,
-    },
-  },
-};
-const theme: PartialTheme = {
-  axes,
-  legend: {
-    /**
-     * Added buffer between label and value.
-     * Smaller values render a more compact legend
-     */
-    spacingBuffer: 100,
-  },
-};
 
 export interface FeatureImportanceSummaryPanelProps {
   totalFeatureImportance: TotalFeatureImportance[];
@@ -94,21 +59,60 @@ const calculateTotalMeanImportance = (featureClass: ClassificationTotalFeatureIm
   );
 };
 
+interface Datum {
+  featureName: string;
+  meanImportance: number;
+  className?: FeatureImportanceClassName;
+}
+type PlotData = Datum[];
+type SeriesProps = Omit<BarSeriesProps, 'id' | 'xScaleType' | 'yScaleType' | 'data'>;
+
 export const FeatureImportanceSummaryPanel: FC<FeatureImportanceSummaryPanelProps> = ({
   totalFeatureImportance,
   jobConfig,
 }) => {
+  const { euiTheme } = useEuiTheme();
   const {
     services: { docLinks },
   } = useMlKibana();
 
-  interface Datum {
-    featureName: string;
-    meanImportance: number;
-    className?: FeatureImportanceClassName;
-  }
-  type PlotData = Datum[];
-  type SeriesProps = Omit<BarSeriesProps, 'id' | 'xScaleType' | 'yScaleType' | 'data'>;
+  const theme: PartialTheme = useMemo(() => {
+    const euiColorMediumShade = euiTheme.colors.mediumShade;
+    const axisColor = euiColorMediumShade;
+
+    const axes: RecursivePartial<AxisStyle> = {
+      axisLine: {
+        stroke: axisColor,
+      },
+      tickLabel: {
+        fontSize: 12,
+        fill: axisColor,
+      },
+      tickLine: {
+        stroke: axisColor,
+      },
+      gridLine: {
+        horizontal: {
+          dash: [1, 2],
+        },
+        vertical: {
+          strokeWidth: 0,
+        },
+      },
+    };
+
+    return {
+      axes,
+      legend: {
+        /**
+         * Added buffer between label and value.
+         * Smaller values render a more compact legend
+         */
+        spacingBuffer: 100,
+      },
+    };
+  }, [euiTheme]);
+
   const [plotData, barSeriesSpec, showLegend, chartHeight] = useMemo<
     [plotData: PlotData, barSeriesSpec: SeriesProps, showLegend?: boolean, chartHeight?: number]
   >(() => {
