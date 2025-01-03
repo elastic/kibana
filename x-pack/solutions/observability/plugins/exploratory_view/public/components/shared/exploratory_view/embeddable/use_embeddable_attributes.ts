@@ -6,7 +6,8 @@
  */
 
 import { useMemo } from 'react';
-import { useKibanaSpace, useTheme } from '@kbn/observability-shared-plugin/public';
+import { useKibanaSpace } from '@kbn/observability-shared-plugin/public';
+import { useEuiTheme } from '@elastic/eui';
 import { ExploratoryEmbeddableComponentProps } from './embeddable';
 import { LayerConfig, LensAttributes } from '../configurations/lens_attributes';
 import { getLayerConfigs } from '../hooks/use_lens_attributes';
@@ -14,7 +15,6 @@ import { obsvReportConfigMap } from '../obsv_exploratory_view';
 import { ReportTypes } from '../../../..';
 import { SingleMetricLensAttributes } from '../configurations/lens_attributes/single_metric_attributes';
 import { HeatMapLensAttributes } from '../configurations/lens_attributes/heatmap_attributes';
-
 export const useEmbeddableAttributes = ({
   attributes,
   dataViewState,
@@ -24,14 +24,14 @@ export const useEmbeddableAttributes = ({
   dslFilters,
 }: ExploratoryEmbeddableComponentProps) => {
   const spaceId = useKibanaSpace();
-  const theme = useTheme();
+  const { euiTheme } = useEuiTheme();
 
   return useMemo(() => {
     try {
       const layerConfigs: LayerConfig[] = getLayerConfigs(
         attributes,
         reportType,
-        theme,
+        euiTheme,
         dataViewState,
         { ...reportConfigMap, ...obsvReportConfigMap },
         spaceId.space?.id
@@ -68,10 +68,10 @@ export const useEmbeddableAttributes = ({
     attributes,
     dataViewState,
     dslFilters,
+    euiTheme,
     lensFormulaHelper,
     reportConfigMap,
     reportType,
     spaceId.space?.id,
-    theme,
   ]);
 };

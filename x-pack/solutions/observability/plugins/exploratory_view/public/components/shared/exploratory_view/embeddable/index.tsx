@@ -7,11 +7,11 @@
 
 import React, { useCallback, useMemo, useState, useEffect } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
-import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
+import { EuiThemeProvider } from '@elastic/eui';
 import type { AnalyticsServiceSetup, CoreStart } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { EuiErrorBoundary } from '@elastic/eui';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { FormulaPublicApi } from '@kbn/lens-plugin/public';
 import { i18n } from '@kbn/i18n';
@@ -70,8 +70,6 @@ export function getExploratoryViewEmbeddable(
     }
 
     const series = attributes[0];
-
-    const isDarkMode = theme?.getTheme().darkMode ?? false;
 
     const { data: lensHelper, loading: lensLoading } = useFetcher(async () => {
       if (lenStateHelperPromise) {
@@ -132,7 +130,7 @@ export function getExploratoryViewEmbeddable(
 
     return (
       <EuiErrorBoundary>
-        <EuiThemeProvider darkMode={isDarkMode}>
+        <EuiThemeProvider>
           <KibanaContextProvider services={services}>
             <Wrapper customHeight={props.customHeight} data-test-subj={props.dataTestSubj}>
               <ExploratoryViewEmbeddable
