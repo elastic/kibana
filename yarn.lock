@@ -5113,7 +5113,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-usage-data-base-server-internal@link:packages/core/usage-data/core-usage-data-base-server-internal":
+"@kbn/core-usage-data-base-server-internal@link:src/core/packages/usage-data/base-server-internal":
   version "0.0.0"
   uid ""
 
