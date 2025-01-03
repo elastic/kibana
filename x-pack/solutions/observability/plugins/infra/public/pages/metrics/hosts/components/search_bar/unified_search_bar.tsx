@@ -61,7 +61,6 @@ export const UnifiedSearchBar = () => {
             useDefaultBehaviors
             isAutoRefreshDisabled
             isRefreshPaused
-            refreshInterval={0}
           />
         </EuiFlexItem>
         <EuiFlexItem>
