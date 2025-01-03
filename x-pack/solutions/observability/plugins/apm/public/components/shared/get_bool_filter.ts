@@ -14,9 +14,9 @@ import {
   TRANSACTION_TYPE,
 } from '../../../common/es_fields/apm';
 import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
-import { UIProcessorEvent } from '../../../common/processor_event';
+import type { UIProcessorEvent } from '../../../common/processor_event';
 import { environmentQuery } from '../../../common/utils/environment_query';
-import { ApmUrlParams } from '../../context/url_params_context/types';
+import type { ApmUrlParams } from '../../context/url_params_context/types';
 
 export function getBoolFilter({
   groupId,

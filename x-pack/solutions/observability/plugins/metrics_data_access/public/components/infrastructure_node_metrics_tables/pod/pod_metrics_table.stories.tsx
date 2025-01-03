@@ -13,7 +13,7 @@ import React from 'react';
 import { decorateWithGlobalStorybookThemeProviders } from '../../../test_utils/use_global_storybook_theme';
 import type { PodMetricsTableProps } from './pod_metrics_table';
 import { PodMetricsTable } from './pod_metrics_table';
-import { PodNodeMetricsRow } from './use_pod_metrics_table';
+import type { PodNodeMetricsRow } from './use_pod_metrics_table';
 
 const mockServices = {
   application: {

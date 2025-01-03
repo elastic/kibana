@@ -6,15 +6,8 @@
  */
 
 import React from 'react';
-import {
-  EuiFlexGroupProps,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLink,
-  EuiPanel,
-  EuiSpacer,
-  EuiTitle,
-} from '@elastic/eui';
+import type { EuiFlexGroupProps } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { AnnotationsContextProvider } from '../../../../context/annotations/annotations_context';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';

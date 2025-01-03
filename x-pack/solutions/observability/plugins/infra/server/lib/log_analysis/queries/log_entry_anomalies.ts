@@ -14,7 +14,7 @@ import {
   defaultRequestParameters,
   createDatasetsFilters,
 } from './common';
-import {
+import type {
   AnomaliesSort,
   LogEntryAnomalyDatasets,
   Pagination,

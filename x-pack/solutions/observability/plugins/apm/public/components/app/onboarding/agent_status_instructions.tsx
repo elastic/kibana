@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { EuiButton, EuiCallOut, EuiMarkdownFormat, EuiSpacer } from '@elastic/eui';
 import React from 'react';
-import { EuiStepStatus } from '@elastic/eui/src/components/steps/step_number';
+import type { EuiStepStatus } from '@elastic/eui/src/components/steps/step_number';
 
 function AgentStatusWarningCallout() {
   return (
