@@ -7605,7 +7605,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/telemetry-collection-manager-plugin@link:src/plugins/telemetry_collection_manager":
+"@kbn/telemetry-collection-manager-plugin@link:src/platform/plugins/shared/telemetry_collection_manager":
   version "0.0.0"
   uid ""
 
