@@ -9,6 +9,6 @@
 
 module.exports = {
   preset: '@kbn/test',
-  rootDir: '../../../..',
-  roots: ['<rootDir>/packages/core/fatal-errors/core-fatal-errors-browser-internal'],
+  rootDir: '../../../../..',
+  roots: ['<rootDir>/src/core/packages/fatal-errors/browser-internal'],
 };
