@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { MAX_NODE_CONNECTIONS } from '../../../../../../common/constants';
+import { MAX_NODE_CONNECTIONS } from '../../../../../../../common/constants';
 
 export function validateNodeConnections(connections?: number | null): null | JSX.Element {
   if (connections && connections > MAX_NODE_CONNECTIONS) {
