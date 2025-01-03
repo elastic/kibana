@@ -69,15 +69,22 @@ export const simulateProcessorRoute = createServerRoute({
 
       const documents = simulationResult.docs.map((doc, id) => {
         if (
-          doc.processor_results?.every((proc) => ['success', 'error_ignored'].includes(proc.status))
+          doc.processor_results?.every(
+            (proc) => proc.status === 'success' || proc.status === 'error_ignored'
+          )
         ) {
-          return flattenObject(
-            doc.processor_results?.at(-1)?.doc?._source ?? params.body.documents[id]
-          );
+          return {
+            value: flattenObject(
+              doc.processor_results?.at(-1)?.doc?._source ?? params.body.documents[id]
+            ),
+            isMatch: true,
+          };
         }
-        console.log(doc.processor_results);
 
-        return flattenObject(params.body.documents[id]);
+        return {
+          value: flattenObject(params.body.documents[id]),
+          isMatch: false,
+        };
       });
 
       const detectedFields = computeDetectedFields(docs, simulationResult);

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useDateRange } from '@kbn/observability-utils-browser/hooks/use_date_range';
 import {
   EuiPanel,
@@ -39,6 +39,9 @@ export const ProcessorOutcomePreview = ({ definition, formFields }) => {
     absoluteTimeRange: { start, end },
     setTimeRange,
   } = useDateRange({ data });
+
+  const [selectedDocsFilter, setSelectedDocsFilter] =
+    useState<DocsFilterOption>('outcome_filter_all');
 
   const {
     value: samples,
@@ -99,9 +102,31 @@ export const ProcessorOutcomePreview = ({ definition, formFields }) => {
         },
       });
     },
-    [definition, samples, streamsRepositoryClient, start, end],
+    [definition, samples, streamsRepositoryClient],
     { disableToastOnError: true }
   );
+
+  const simulationDocuments = useMemo(() => {
+    if (!simulation?.documents) {
+      return [];
+    }
+
+    let docs = simulation.documents;
+
+    if (selectedDocsFilter === 'outcome_filter_all') {
+      docs = simulation.documents;
+    }
+
+    if (selectedDocsFilter === 'outcome_filter_matched') {
+      docs = simulation.documents.filter((doc) => doc.isMatch);
+    }
+
+    if (selectedDocsFilter === 'outcome_filter_unmatched') {
+      docs = simulation.documents.filter((doc) => !doc.isMatch);
+    }
+
+    return docs.map((doc) => doc.value);
+  }, [simulation?.documents, selectedDocsFilter]);
 
   return (
     <EuiPanel hasShadow={false} paddingSize="none">
@@ -130,6 +155,8 @@ export const ProcessorOutcomePreview = ({ definition, formFields }) => {
       <EuiSpacer />
       {/* TODO: Add Detected Fields sections */}
       <OutcomeControls
+        docsFilter={selectedDocsFilter}
+        onDocsFilterChange={setSelectedDocsFilter}
         timeRange={timeRange}
         onTimeRangeChange={setTimeRange}
         onTimeRangeRefresh={refreshSamples}
@@ -138,7 +165,7 @@ export const ProcessorOutcomePreview = ({ definition, formFields }) => {
       />
       <EuiSpacer size="m" />
       <OutcomePreviewTable
-        documents={simulation?.documents}
+        documents={simulationDocuments}
         columns={[formFields.field, ...(simulation?.detected_fields ?? [])]}
         error={simulationError}
         isLoading={isLoadingSimulation}
@@ -174,7 +201,9 @@ const docsFilterOptions = {
 type DocsFilterOption = keyof typeof docsFilterOptions;
 
 interface OutcomeControlsProps {
+  docsFilter: DocsFilterOption;
   timeRange: TimeRange;
+  onDocsFilterChange: (filter: DocsFilterOption) => void;
   onTimeRangeChange: (timeRange: TimeRange) => void;
   onTimeRangeRefresh: () => void;
   simulationFailureRate?: number;
@@ -182,15 +211,14 @@ interface OutcomeControlsProps {
 }
 
 const OutcomeControls = ({
+  docsFilter,
   timeRange,
+  onDocsFilterChange,
   onTimeRangeChange,
   onTimeRangeRefresh,
   simulationFailureRate,
   simulationSuccessRate,
 }: OutcomeControlsProps) => {
-  const [selectedDocsFilter, setSelectedDocsFilter] =
-    useState<DocsFilterOption>('outcome_filter_all');
-
   const handleQuerySubmit: StreamsAppSearchBarProps['onQuerySubmit'] = (
     { dateRange },
     isUpdate
@@ -217,14 +245,14 @@ const OutcomeControls = ({
         )}
       >
         <EuiFilterButton
-          hasActiveFilters={selectedDocsFilter === docsFilterOptions.outcome_filter_all.id}
-          onClick={() => setSelectedDocsFilter(docsFilterOptions.outcome_filter_all.id)}
+          hasActiveFilters={docsFilter === docsFilterOptions.outcome_filter_all.id}
+          onClick={() => onDocsFilterChange(docsFilterOptions.outcome_filter_all.id)}
         >
           {docsFilterOptions.outcome_filter_all.label}
         </EuiFilterButton>
         <EuiFilterButton
-          hasActiveFilters={selectedDocsFilter === docsFilterOptions.outcome_filter_matched.id}
-          onClick={() => setSelectedDocsFilter(docsFilterOptions.outcome_filter_matched.id)}
+          hasActiveFilters={docsFilter === docsFilterOptions.outcome_filter_matched.id}
+          onClick={() => onDocsFilterChange(docsFilterOptions.outcome_filter_matched.id)}
           badgeColor="success"
           numActiveFilters={
             simulationSuccessRate ? parseFloat((simulationSuccessRate * 100).toFixed(2)) : undefined
@@ -233,8 +261,8 @@ const OutcomeControls = ({
           {docsFilterOptions.outcome_filter_matched.label}
         </EuiFilterButton>
         <EuiFilterButton
-          hasActiveFilters={selectedDocsFilter === docsFilterOptions.outcome_filter_unmatched.id}
-          onClick={() => setSelectedDocsFilter(docsFilterOptions.outcome_filter_unmatched.id)}
+          hasActiveFilters={docsFilter === docsFilterOptions.outcome_filter_unmatched.id}
+          onClick={() => onDocsFilterChange(docsFilterOptions.outcome_filter_unmatched.id)}
           badgeColor="accent"
           numActiveFilters={
             simulationFailureRate ? parseFloat((simulationFailureRate * 100).toFixed(2)) : undefined
@@ -243,7 +271,6 @@ const OutcomeControls = ({
           {docsFilterOptions.outcome_filter_unmatched.label}
         </EuiFilterButton>
       </EuiFilterGroup>
-
       <StreamsAppSearchBar
         onQuerySubmit={handleQuerySubmit}
         onRefresh={onTimeRangeRefresh}
