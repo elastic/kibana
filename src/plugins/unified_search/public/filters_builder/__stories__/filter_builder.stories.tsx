@@ -14,6 +14,7 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import { action } from '@storybook/addon-actions';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { Filter } from '@kbn/es-query';
+import type { StoryObj } from '@storybook/react';
 import { getFiltersMock, getFiltersMockOrHide } from '../__mock__/filters';
 import FiltersBuilder from '../filters_builder';
 
@@ -23,7 +24,23 @@ export default {
   decorators: [(story: Function) => <EuiForm>{story()}</EuiForm>],
 };
 
-export const Default = {
+const filters = getFiltersMock();
+const mockedDataView = {
+  id: 'ff959d40-b880-11e8-a6d9-e546fe2bba5f',
+  title: 'logstash-*',
+  fields: [
+    {
+      name: 'category.keyword',
+      type: 'string',
+      esTypes: ['integer'],
+      aggregatable: true,
+      filterable: true,
+      searchable: true,
+    },
+  ],
+} as DataView;
+
+export const Default: StoryObj = {
   decorators: [
     (Story) => (
       <I18nProvider>
@@ -42,24 +59,7 @@ export const Default = {
   },
 };
 
-const mockedDataView = {
-  id: 'ff959d40-b880-11e8-a6d9-e546fe2bba5f',
-  title: 'logstash-*',
-  fields: [
-    {
-      name: 'category.keyword',
-      type: 'string',
-      esTypes: ['integer'],
-      aggregatable: true,
-      filterable: true,
-      searchable: true,
-    },
-  ],
-} as DataView;
-
-const filters = getFiltersMock();
-
-export const withoutOR = {
+export const withoutOR: StoryObj = {
   args: { ...Default.args, filters: getFiltersMockOrHide(), hideOr: true },
 
   decorators: [
