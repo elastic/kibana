@@ -9,6 +9,6 @@
 
 module.exports = {
   preset: '@kbn/test/jest_node',
-  rootDir: '../../../..',
-  roots: ['<rootDir>/packages/core/feature-flags/core-feature-flags-server-mocks'],
+  rootDir: '../../../../..',
+  roots: ['<rootDir>/src/core/packages/feature-flags/server-mocks'],
 };
