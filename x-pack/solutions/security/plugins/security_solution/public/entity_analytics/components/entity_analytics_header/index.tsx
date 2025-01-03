@@ -265,7 +265,7 @@ const CriticalEntitiesCount = ({
   return (
     <EuiFlexGroup direction="column" gutterSize="s" responsive={false}>
       <EuiFlexItem className="eui-textCenter">
-        <StyledEuiTitle data-test-subj="critical_users_quantity" size="l">
+        <StyledEuiTitle data-test-subj={`critical_${entityType}s_quantity`} size="l">
           <span>
             {severityCount ? <FormattedCount count={severityCount[RiskSeverity.Critical]} /> : '-'}
           </span>
@@ -273,7 +273,7 @@ const CriticalEntitiesCount = ({
       </EuiFlexItem>
       <EuiFlexItem>
         {href || onClick ? (
-          <LinkAnchor onClick={onClick} href={href} data-test-subj="critical_users_link">
+          <LinkAnchor onClick={onClick} href={href} data-test-subj={`critical_${entityType}s_link`}>
             {CriticalEntitiesText}
           </LinkAnchor>
         ) : (

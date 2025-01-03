@@ -15,6 +15,7 @@ import { useAppToastsMock } from '../../../common/hooks/use_app_toasts.mock';
 import { useRiskScoreFeatureStatus } from './use_risk_score_feature_status';
 import { useIsNewRiskScoreModuleInstalled } from './use_risk_engine_status';
 import { EntityType } from '../../../../common/entity_analytics/types';
+import { EntityRiskQueries } from '../../../../common/api/search_strategy';
 jest.mock('../../../common/containers/use_search_strategy', () => ({
   useSearchStrategy: jest.fn(),
 }));
@@ -184,7 +185,7 @@ describe.each([EntityType.host, EntityType.user])('useRiskScore entityType: %s',
     expect(mockSearch).toHaveBeenCalledTimes(1);
     expect(mockSearch).toHaveBeenCalledWith({
       defaultIndex: [`ml_${riskEntity}_risk_score_latest_default`],
-      factoryQueryType: `${riskEntity}sRiskScore`,
+      factoryQueryType: EntityRiskQueries.list,
       riskScoreEntity: riskEntity,
       includeAlertsCount: false,
     });
@@ -203,7 +204,7 @@ describe.each([EntityType.host, EntityType.user])('useRiskScore entityType: %s',
     expect(mockSearch).toHaveBeenCalledTimes(1);
     expect(mockSearch).toHaveBeenCalledWith({
       defaultIndex: ['risk-score.risk-score-latest-default'],
-      factoryQueryType: `${riskEntity}sRiskScore`,
+      factoryQueryType: EntityRiskQueries.list,
       riskScoreEntity: riskEntity,
       includeAlertsCount: false,
     });

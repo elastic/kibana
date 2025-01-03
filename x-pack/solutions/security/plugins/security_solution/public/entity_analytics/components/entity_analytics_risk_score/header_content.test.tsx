@@ -21,7 +21,7 @@ jest.mock('../../../common/components/links', () => {
 });
 const mockGetSecuritySolutionLinkProps = jest
   .fn()
-  .mockReturnValue({ onClick: jest.fn(), href: '' });
+  .mockReturnValue({ onClick: jest.fn(), href: '/test' });
 
 describe('RiskScoreHeaderContent', () => {
   let res: RenderResult;

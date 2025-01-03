@@ -12,8 +12,8 @@ export enum LegacyEntityType {
 }
 
 export enum EntityType {
-  host = 'host',
   user = 'user',
+  host = 'host',
   service = 'service',
 }
 

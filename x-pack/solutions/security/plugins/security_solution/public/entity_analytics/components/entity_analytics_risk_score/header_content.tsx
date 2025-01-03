@@ -39,6 +39,7 @@ const RiskScoreHeaderContentComponent = ({
       entityLinkProps ? getSecuritySolutionLinkProps(entityLinkProps) : {};
     return [onClick, href];
   }, [entityLinkProps, getSecuritySolutionLinkProps]);
+
   return toggleStatus ? (
     <EuiFlexGroup
       alignItems="center"
@@ -58,7 +59,7 @@ const RiskScoreHeaderContentComponent = ({
         </EuiFilterGroup>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        {entityRiskTabUrl && entityRiskTabUrl && (
+        {entityRiskTabUrl && (
           <LinkButton
             data-test-subj="view-all-button"
             onClick={goToEntityRiskTab}

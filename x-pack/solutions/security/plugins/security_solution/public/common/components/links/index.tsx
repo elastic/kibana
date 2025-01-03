@@ -218,11 +218,12 @@ export const EntityDetailsLink = ({
   entityName,
   ...props
 }: EntityDetailsLinkProps) => {
-  if (entityName === EntityType.host) {
+  if (entityType === EntityType.host) {
     return <HostDetailsLink {...props} hostTab={tab as HostsTableType} hostName={entityName} />;
-  } else if (entityName === EntityType.user) {
+  } else if (entityType === EntityType.user) {
     return <UserDetailsLink {...props} userTab={tab as UsersTableType} userName={entityName} />;
   }
+
   return entityName;
 };
 

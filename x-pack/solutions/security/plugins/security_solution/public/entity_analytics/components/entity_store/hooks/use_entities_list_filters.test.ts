@@ -47,10 +47,21 @@ describe('useEntitiesListFilters', () => {
       {
         bool: {
           should: [
-            { term: { 'host.risk.calculated_level': RiskSeverity.Low } },
-            { term: { 'user.risk.calculated_level': RiskSeverity.Low } },
-            { term: { 'host.risk.calculated_level': RiskSeverity.High } },
-            { term: { 'user.risk.calculated_level': RiskSeverity.High } },
+            {
+              terms: {
+                'host.risk.calculated_level': ['Low', 'High'],
+              },
+            },
+            {
+              terms: {
+                'user.risk.calculated_level': ['Low', 'High'],
+              },
+            },
+            {
+              terms: {
+                'service.risk.calculated_level': ['Low', 'High'],
+              },
+            },
           ],
         },
       },
@@ -173,8 +184,21 @@ describe('useEntitiesListFilters', () => {
       {
         bool: {
           should: [
-            { term: { 'host.risk.calculated_level': RiskSeverity.Low } },
-            { term: { 'user.risk.calculated_level': RiskSeverity.Low } },
+            {
+              terms: {
+                'host.risk.calculated_level': ['Low'],
+              },
+            },
+            {
+              terms: {
+                'user.risk.calculated_level': ['Low'],
+              },
+            },
+            {
+              terms: {
+                'service.risk.calculated_level': ['Low'],
+              },
+            },
           ],
         },
       },

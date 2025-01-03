@@ -22,7 +22,7 @@ describe('useEntityInfo', () => {
     const { result } = renderHook(() => useEntityInfo(EntityType.host));
     expect(result?.current).toMatchInlineSnapshot(`
       Object {
-        "kpiQueryId": "headerHostRiskScoreKpiQuery",
+        "kpiQueryId": "hostHeaderRiskScoreKpiQuery",
         "linkProps": Object {
           "deepLinkId": "hosts",
           "onClick": [Function],
@@ -36,7 +36,7 @@ describe('useEntityInfo', () => {
     const { result } = renderHook(() => useEntityInfo(EntityType.user));
     expect(result?.current).toMatchInlineSnapshot(`
       Object {
-        "kpiQueryId": "headerUserRiskScoreKpiQuery",
+        "kpiQueryId": "userHeaderRiskScoreKpiQuery",
         "linkProps": Object {
           "deepLinkId": "users",
           "onClick": [Function],

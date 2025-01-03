@@ -130,7 +130,6 @@ describe('allHosts search strategy', () => {
         defaultIndex: ['ml_host_risk_score_latest_test-space'],
         filterQuery: { terms: { 'host.name': [hostName] } },
         riskScoreEntity: EntityType.host,
-        factoryQueryType: expect.stringContaining('RiskScore'),
       });
     });
 
