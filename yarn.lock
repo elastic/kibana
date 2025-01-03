@@ -4713,7 +4713,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-logging-browser-internal@link:packages/core/logging/core-logging-browser-internal":
+"@kbn/core-logging-browser-internal@link:src/core/packages/logging/browser-internal":
   version "0.0.0"
   uid ""
 
