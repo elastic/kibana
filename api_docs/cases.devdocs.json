@@ -317,7 +317,7 @@
             "section": "def-common.ConnectorTypes",
             "text": "ConnectorTypes"
           },
-          ".serviceNowITSM; fields: { impact: string | null; severity: string | null; urgency: string | null; category: string | null; subcategory: string | null; } | null; } & { name: string; }) | ({ type: ",
+          ".serviceNowITSM; fields: ({ impact: string | null; severity: string | null; urgency: string | null; category: string | null; subcategory: string | null; } & { additionalFields?: string | null | undefined; }) | null; } & { name: string; }) | ({ type: ",
           {
             "pluginId": "cases",
             "scope": "common",
@@ -325,7 +325,7 @@
             "section": "def-common.ConnectorTypes",
             "text": "ConnectorTypes"
           },
-          ".serviceNowSIR; fields: { category: string | null; destIp: boolean | null; malwareHash: boolean | null; malwareUrl: boolean | null; priority: string | null; sourceIp: boolean | null; subcategory: string | null; } | null; } & { name: string; }) | ({ type: ",
+          ".serviceNowSIR; fields: ({ category: string | null; destIp: boolean | null; malwareHash: boolean | null; malwareUrl: boolean | null; priority: string | null; sourceIp: boolean | null; subcategory: string | null; } & { additionalFields?: string | null | undefined; }) | null; } & { name: string; }) | ({ type: ",
           {
             "pluginId": "cases",
             "scope": "common",
@@ -539,7 +539,7 @@
               "section": "def-common.ConnectorTypes",
               "text": "ConnectorTypes"
             },
-            ".serviceNowITSM; fields: { impact: string | null; severity: string | null; urgency: string | null; category: string | null; subcategory: string | null; } | null; } & { name: string; }) | ({ type: ",
+            ".serviceNowITSM; fields: ({ impact: string | null; severity: string | null; urgency: string | null; category: string | null; subcategory: string | null; } & { additionalFields?: string | null | undefined; }) | null; } & { name: string; }) | ({ type: ",
             {
               "pluginId": "cases",
               "scope": "common",
@@ -547,7 +547,7 @@
               "section": "def-common.ConnectorTypes",
               "text": "ConnectorTypes"
             },
-            ".serviceNowSIR; fields: { category: string | null; destIp: boolean | null; malwareHash: boolean | null; malwareUrl: boolean | null; priority: string | null; sourceIp: boolean | null; subcategory: string | null; } | null; } & { name: string; }) | ({ type: ",
+            ".serviceNowSIR; fields: ({ category: string | null; destIp: boolean | null; malwareHash: boolean | null; malwareUrl: boolean | null; priority: string | null; sourceIp: boolean | null; subcategory: string | null; } & { additionalFields?: string | null | undefined; }) | null; } & { name: string; }) | ({ type: ",
             {
               "pluginId": "cases",
               "scope": "common",
@@ -2004,7 +2004,7 @@
             "section": "def-common.ConnectorTypes",
             "text": "ConnectorTypes"
           },
-          ".serviceNowITSM; fields: { impact: string | null; severity: string | null; urgency: string | null; category: string | null; subcategory: string | null; } | null; } & { name: string; }) | ({ type: ",
+          ".serviceNowITSM; fields: ({ impact: string | null; severity: string | null; urgency: string | null; category: string | null; subcategory: string | null; } & { additionalFields?: string | null | undefined; }) | null; } & { name: string; }) | ({ type: ",
           {
             "pluginId": "cases",
             "scope": "common",
@@ -2012,7 +2012,7 @@
             "section": "def-common.ConnectorTypes",
             "text": "ConnectorTypes"
           },
-          ".serviceNowSIR; fields: { category: string | null; destIp: boolean | null; malwareHash: boolean | null; malwareUrl: boolean | null; priority: string | null; sourceIp: boolean | null; subcategory: string | null; } | null; } & { name: string; }) | ({ type: ",
+          ".serviceNowSIR; fields: ({ category: string | null; destIp: boolean | null; malwareHash: boolean | null; malwareUrl: boolean | null; priority: string | null; sourceIp: boolean | null; subcategory: string | null; } & { additionalFields?: string | null | undefined; }) | null; } & { name: string; }) | ({ type: ",
           {
             "pluginId": "cases",
             "scope": "common",
@@ -2208,7 +2208,7 @@
             "section": "def-common.ConnectorTypes",
             "text": "ConnectorTypes"
           },
-          ".serviceNowITSM; fields: { impact: string | null; severity: string | null; urgency: string | null; category: string | null; subcategory: string | null; } | null; } & { name: string; }) | ({ type: ",
+          ".serviceNowITSM; fields: ({ impact: string | null; severity: string | null; urgency: string | null; category: string | null; subcategory: string | null; } & { additionalFields?: string | null | undefined; }) | null; } & { name: string; }) | ({ type: ",
           {
             "pluginId": "cases",
             "scope": "common",
@@ -2216,7 +2216,7 @@
             "section": "def-common.ConnectorTypes",
             "text": "ConnectorTypes"
           },
-          ".serviceNowSIR; fields: { category: string | null; destIp: boolean | null; malwareHash: boolean | null; malwareUrl: boolean | null; priority: string | null; sourceIp: boolean | null; subcategory: string | null; } | null; } & { name: string; }) | ({ type: ",
+          ".serviceNowSIR; fields: ({ category: string | null; destIp: boolean | null; malwareHash: boolean | null; malwareUrl: boolean | null; priority: string | null; sourceIp: boolean | null; subcategory: string | null; } & { additionalFields?: string | null | undefined; }) | null; } & { name: string; }) | ({ type: ",
           {
             "pluginId": "cases",
             "scope": "common",
@@ -2309,7 +2309,7 @@
             "section": "def-common.ConnectorTypes",
             "text": "ConnectorTypes"
           },
-          ".serviceNowITSM; fields: { impact: string | null; severity: string | null; urgency: string | null; category: string | null; subcategory: string | null; } | null; } & { name: string; }) | ({ type: ",
+          ".serviceNowITSM; fields: ({ impact: string | null; severity: string | null; urgency: string | null; category: string | null; subcategory: string | null; } & { additionalFields?: string | null | undefined; }) | null; } & { name: string; }) | ({ type: ",
           {
             "pluginId": "cases",
             "scope": "common",
@@ -2317,7 +2317,7 @@
             "section": "def-common.ConnectorTypes",
             "text": "ConnectorTypes"
           },
-          ".serviceNowSIR; fields: { category: string | null; destIp: boolean | null; malwareHash: boolean | null; malwareUrl: boolean | null; priority: string | null; sourceIp: boolean | null; subcategory: string | null; } | null; } & { name: string; }) | ({ type: ",
+          ".serviceNowSIR; fields: ({ category: string | null; destIp: boolean | null; malwareHash: boolean | null; malwareUrl: boolean | null; priority: string | null; sourceIp: boolean | null; subcategory: string | null; } & { additionalFields?: string | null | undefined; }) | null; } & { name: string; }) | ({ type: ",
           {
             "pluginId": "cases",
             "scope": "common",
@@ -2402,7 +2402,7 @@
             "section": "def-common.ConnectorTypes",
             "text": "ConnectorTypes"
           },
-          ".serviceNowITSM; fields: { impact: string | null; severity: string | null; urgency: string | null; category: string | null; subcategory: string | null; } | null; } & { name: string; }) | ({ type: ",
+          ".serviceNowITSM; fields: ({ impact: string | null; severity: string | null; urgency: string | null; category: string | null; subcategory: string | null; } & { additionalFields?: string | null | undefined; }) | null; } & { name: string; }) | ({ type: ",
           {
             "pluginId": "cases",
             "scope": "common",
@@ -2410,7 +2410,7 @@
             "section": "def-common.ConnectorTypes",
             "text": "ConnectorTypes"
           },
-          ".serviceNowSIR; fields: { category: string | null; destIp: boolean | null; malwareHash: boolean | null; malwareUrl: boolean | null; priority: string | null; sourceIp: boolean | null; subcategory: string | null; } | null; } & { name: string; }) | ({ type: ",
+          ".serviceNowSIR; fields: ({ category: string | null; destIp: boolean | null; malwareHash: boolean | null; malwareUrl: boolean | null; priority: string | null; sourceIp: boolean | null; subcategory: string | null; } & { additionalFields?: string | null | undefined; }) | null; } & { name: string; }) | ({ type: ",
           {
             "pluginId": "cases",
             "scope": "common",
@@ -2653,7 +2653,7 @@
             "section": "def-common.ConnectorTypes",
             "text": "ConnectorTypes"
           },
-          ".serviceNowITSM; fields: { impact: string | null; severity: string | null; urgency: string | null; category: string | null; subcategory: string | null; } | null; } & { name: string; }) | ({ type: ",
+          ".serviceNowITSM; fields: ({ impact: string | null; severity: string | null; urgency: string | null; category: string | null; subcategory: string | null; } & { additionalFields?: string | null | undefined; }) | null; } & { name: string; }) | ({ type: ",
           {
             "pluginId": "cases",
             "scope": "common",
@@ -2661,7 +2661,7 @@
             "section": "def-common.ConnectorTypes",
             "text": "ConnectorTypes"
           },
-          ".serviceNowSIR; fields: { category: string | null; destIp: boolean | null; malwareHash: boolean | null; malwareUrl: boolean | null; priority: string | null; sourceIp: boolean | null; subcategory: string | null; } | null; } & { name: string; }) | ({ type: ",
+          ".serviceNowSIR; fields: ({ category: string | null; destIp: boolean | null; malwareHash: boolean | null; malwareUrl: boolean | null; priority: string | null; sourceIp: boolean | null; subcategory: string | null; } & { additionalFields?: string | null | undefined; }) | null; } & { name: string; }) | ({ type: ",
           {
             "pluginId": "cases",
             "scope": "common",
@@ -2842,7 +2842,7 @@
             "section": "def-common.ConnectorTypes",
             "text": "ConnectorTypes"
           },
-          ".serviceNowITSM; fields: { impact: string | null; severity: string | null; urgency: string | null; category: string | null; subcategory: string | null; } | null; name: string; } | { id: string; type: ",
+          ".serviceNowITSM; fields: { impact: string | null; severity: string | null; urgency: string | null; category: string | null; subcategory: string | null; additionalFields?: string | null | undefined; } | null; name: string; } | { id: string; type: ",
           {
             "pluginId": "cases",
             "scope": "common",
@@ -2850,7 +2850,7 @@
             "section": "def-common.ConnectorTypes",
             "text": "ConnectorTypes"
           },
-          ".serviceNowSIR; fields: { category: string | null; destIp: boolean | null; malwareHash: boolean | null; malwareUrl: boolean | null; priority: string | null; sourceIp: boolean | null; subcategory: string | null; } | null; name: string; } | { id: string; type: ",
+          ".serviceNowSIR; fields: { category: string | null; destIp: boolean | null; malwareHash: boolean | null; malwareUrl: boolean | null; priority: string | null; sourceIp: boolean | null; subcategory: string | null; additionalFields?: string | null | undefined; } | null; name: string; } | { id: string; type: ",
           {
             "pluginId": "cases",
             "scope": "common",
@@ -3052,7 +3052,7 @@
             "section": "def-common.ConnectorTypes",
             "text": "ConnectorTypes"
           },
-          ".serviceNowITSM; fields: { impact: string | null; severity: string | null; urgency: string | null; category: string | null; subcategory: string | null; } | null; name: string; } | { id: string; type: ",
+          ".serviceNowITSM; fields: { impact: string | null; severity: string | null; urgency: string | null; category: string | null; subcategory: string | null; additionalFields?: string | null | undefined; } | null; name: string; } | { id: string; type: ",
           {
             "pluginId": "cases",
             "scope": "common",
@@ -3060,7 +3060,7 @@
             "section": "def-common.ConnectorTypes",
             "text": "ConnectorTypes"
           },
-          ".serviceNowSIR; fields: { category: string | null; destIp: boolean | null; malwareHash: boolean | null; malwareUrl: boolean | null; priority: string | null; sourceIp: boolean | null; subcategory: string | null; } | null; name: string; } | { id: string; type: ",
+          ".serviceNowSIR; fields: { category: string | null; destIp: boolean | null; malwareHash: boolean | null; malwareUrl: boolean | null; priority: string | null; sourceIp: boolean | null; subcategory: string | null; additionalFields?: string | null | undefined; } | null; name: string; } | { id: string; type: ",
           {
             "pluginId": "cases",
             "scope": "common",
@@ -3658,7 +3658,7 @@
             "section": "def-common.ConnectorTypes",
             "text": "ConnectorTypes"
           },
-          ".serviceNowITSM; fields: { impact: string | null; severity: string | null; urgency: string | null; category: string | null; subcategory: string | null; } | null; } & { name: string; }) | ({ type: ",
+          ".serviceNowITSM; fields: ({ impact: string | null; severity: string | null; urgency: string | null; category: string | null; subcategory: string | null; } & { additionalFields?: string | null | undefined; }) | null; } & { name: string; }) | ({ type: ",
           {
             "pluginId": "cases",
             "scope": "common",
@@ -3666,7 +3666,7 @@
             "section": "def-common.ConnectorTypes",
             "text": "ConnectorTypes"
           },
-          ".serviceNowSIR; fields: { category: string | null; destIp: boolean | null; malwareHash: boolean | null; malwareUrl: boolean | null; priority: string | null; sourceIp: boolean | null; subcategory: string | null; } | null; } & { name: string; }) | ({ type: ",
+          ".serviceNowSIR; fields: ({ category: string | null; destIp: boolean | null; malwareHash: boolean | null; malwareUrl: boolean | null; priority: string | null; sourceIp: boolean | null; subcategory: string | null; } & { additionalFields?: string | null | undefined; }) | null; } & { name: string; }) | ({ type: ",
           {
             "pluginId": "cases",
             "scope": "common",
@@ -3728,7 +3728,7 @@
             "section": "def-common.ConnectorTypes",
             "text": "ConnectorTypes"
           },
-          ".serviceNowITSM; fields: { impact: string | null; severity: string | null; urgency: string | null; category: string | null; subcategory: string | null; } | null; } & { name: string; }) | ({ type: ",
+          ".serviceNowITSM; fields: ({ impact: string | null; severity: string | null; urgency: string | null; category: string | null; subcategory: string | null; } & { additionalFields?: string | null | undefined; }) | null; } & { name: string; }) | ({ type: ",
           {
             "pluginId": "cases",
             "scope": "common",
@@ -3736,7 +3736,7 @@
             "section": "def-common.ConnectorTypes",
             "text": "ConnectorTypes"
           },
-          ".serviceNowSIR; fields: { category: string | null; destIp: boolean | null; malwareHash: boolean | null; malwareUrl: boolean | null; priority: string | null; sourceIp: boolean | null; subcategory: string | null; } | null; } & { name: string; }) | ({ type: ",
+          ".serviceNowSIR; fields: ({ category: string | null; destIp: boolean | null; malwareHash: boolean | null; malwareUrl: boolean | null; priority: string | null; sourceIp: boolean | null; subcategory: string | null; } & { additionalFields?: string | null | undefined; }) | null; } & { name: string; }) | ({ type: ",
           {
             "pluginId": "cases",
             "scope": "common",
