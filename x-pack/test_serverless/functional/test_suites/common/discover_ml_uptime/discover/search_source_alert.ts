@@ -557,6 +557,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         clearWithKeyboard: true,
         typeCharByChar: true,
       });
+      await PageObjects.header.waitUntilLoadingHasFinished();
       await testSubjects.click('saveIndexPatternButton');
       await testSubjects.click('confirmModalConfirmButton');
       await PageObjects.header.waitUntilLoadingHasFinished();
