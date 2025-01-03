@@ -255,7 +255,7 @@ describe.each([EntityType.host, EntityType.user])(
       ];
       mockUseRiskScore.mockReturnValue({ ...defaultProps, data });
 
-      const { getByTestId, queryByTestId, debug } = render(
+      const { getByTestId, queryByTestId } = render(
         <TestProviders>
           <EntityAnalyticsRiskScores riskEntity={riskEntity} />
         </TestProviders>
