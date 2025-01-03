@@ -4145,7 +4145,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/cloud-full-story-plugin@link:x-pack/plugins/cloud_integrations/cloud_full_story":
+"@kbn/cloud-full-story-plugin@link:x-pack/platform/plugins/private/cloud_integrations/cloud_full_story":
   version "0.0.0"
   uid ""
 

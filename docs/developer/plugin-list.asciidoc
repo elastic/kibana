@@ -505,7 +505,7 @@ It was removed, but the plugin was left behind to register no longer used config
 This plugin no-longer exposes any evaluation APIs. Refer to <DocLink id="kibFeatureFlagsService" /> for more information about how to interact with feature flags.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/cloud_integrations/cloud_full_story/README.md[cloudFullStory]
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/private/cloud_integrations/cloud_full_story/README.md[cloudFullStory]
 |Integrates with FullStory in order to provide better product analytics, so we can understand how our users make use of Kibana. This plugin should only run on Elastic Cloud.
 
 
