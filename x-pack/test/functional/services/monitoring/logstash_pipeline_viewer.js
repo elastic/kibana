@@ -14,7 +14,7 @@ export function MonitoringLogstashPipelineViewerProvider({ getService }) {
 
   return new (class LogstashPipelineViewer {
     isOnPipelineViewer() {
-      return retry.try(() => find.byCssSelector('[data-test-subj*="pipeline-viewer"]'));
+      return retry.try(() => find.existsByCssSelector('[data-test-subj*="pipeline-viewer"]'));
     }
 
     async getPipelineDefinition() {
