@@ -15,11 +15,7 @@
     "public/**/*.json",
     "../../../../../typings/**/*"
   ],
-  "exclude": [
-    "target/**/*",
-    "**/cypress/**",
-    "public/management/cypress.config.ts"
-  ],
+  "exclude": ["target/**/*", "**/cypress/**", "public/management/cypress.config.ts"],
   "kbn_references": [
     "@kbn/core",
     {
@@ -215,7 +211,6 @@
     "@kbn/cbor",
     "@kbn/zod",
     "@kbn/cloud-security-posture",
-    "@kbn/asset-inventory-plugin",
     "@kbn/security-solution-distribution-bar",
     "@kbn/cloud-security-posture-common",
     "@kbn/cloud-security-posture-graph",

@@ -16,7 +16,10 @@ const AssetInventoryApp = () => {
           <EuiPageTemplate.Header>
             <EuiTitle size="l">
               <h1>
-                <FormattedMessage id="assetInventory.allAssets" defaultMessage="All Assets" />
+                <FormattedMessage
+                  id="xpack.securitySolution.assetInventory.allAssets"
+                  defaultMessage="All Assets"
+                />
               </h1>
             </EuiTitle>
           </EuiPageTemplate.Header>
