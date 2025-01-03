@@ -37,6 +37,7 @@ export function deleteTestSuiteFactory({ getService }: DeploymentAgnosticFtrProv
   const esArchiver = getService('esArchiver');
   const es = getService('es');
   const roleScopedSupertest = getService('roleScopedSupertest');
+  const retry = getService('retry');
 
   const createExpectResult = (expectedResult: any) => (resp: { [key: string]: any }) => {
     expect(resp.body).to.eql(expectedResult);
@@ -44,6 +45,23 @@ export function deleteTestSuiteFactory({ getService }: DeploymentAgnosticFtrProv
 
   const expectEmptyResult = async (resp: { [key: string]: any }) => {
     expect(resp.body).to.eql('');
+
+    await retry.waitForWithTimeout('space_2 to be deleted', 5000, async () => {
+      const response = await getAggregatedSpaceData(es, [
+        'visualization',
+        'dashboard',
+        'space',
+        'index-pattern',
+        'legacy-url-alias',
+      ]);
+
+      // @ts-expect-error @elastic/elasticsearch doesn't defined `count.buckets`.
+      const buckets = response.aggregations?.count.buckets;
+
+      const isSpace2Found = buckets?.some((bucket: any) => bucket.key === 'space_2');
+
+      return !isSpace2Found;
+    });
 
     // Query ES to ensure that we deleted everything we expected, and nothing we didn't
     // Grouping first by namespace, then by saved object type
