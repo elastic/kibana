@@ -4505,7 +4505,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-execution-context-browser-internal@link:packages/core/execution-context/core-execution-context-browser-internal":
+"@kbn/core-execution-context-browser-internal@link:src/core/packages/execution-context/browser-internal":
   version "0.0.0"
   uid ""
 
