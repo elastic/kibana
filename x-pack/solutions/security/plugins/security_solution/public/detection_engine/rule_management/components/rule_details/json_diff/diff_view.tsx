@@ -88,7 +88,7 @@ const useTokens = (
 
   try {
     /*
-      Synchroniously apply all the enhancers to the hunks and return an array of tokens.
+      Synchronously apply all the enhancers to the hunks and return an array of tokens.
     */
     return tokenize(hunks, options);
   } catch (ex) {
@@ -127,7 +127,7 @@ const convertChangesToUnifiedDiffString = (changes: Change[]): string => {
   return unifiedDiff;
 };
 
-const convertToDiffFile = (oldSource: string, newSource: string) => {
+const convertToDiffFile = (oldSource: string, newSource: string, zip?: boolean) => {
   /*
     "diffLines" call converts two strings of text into an array of Change objects.
   */
@@ -155,7 +155,7 @@ const convertToDiffFile = (oldSource: string, newSource: string) => {
     Hunks represent changed lines of code plus a few unchanged lines above and below for context.
   */
   const [diffFile] = parseDiff(unifiedDiff, {
-    nearbySequences: 'zip',
+    nearbySequences: zip ? 'zip' : undefined,
   });
 
   return diffFile;
@@ -254,18 +254,25 @@ const CustomStyles: FC<PropsWithChildren<unknown>> = ({ children }) => {
   );
 };
 
-interface DiffViewProps extends Partial<DiffProps> {
+export interface DiffViewProps extends Partial<DiffProps> {
   oldSource: string;
   newSource: string;
   diffMethod?: DiffMethod;
   viewType?: 'split' | 'unified';
+  /*
+    When "zip" is set to true, the change lines will be rendered in an interlaced style.
+    For an example, refer to:
+    https://github.com/otakustay/react-diff-view/blob/8a2dbdf97af0890aff6e563ed435e7da13c5e7b1/README.md#parse-diff-text
+  */
+  zip?: boolean;
 }
 
 export const DiffView = ({
   oldSource,
   newSource,
-  diffMethod = DiffMethod.WORDS,
+  diffMethod = DiffMethod.WORDS_WITH_SPACE,
   viewType = 'split',
+  zip = false,
 }: DiffViewProps) => {
   /*
     "react-diff-view" components consume diffs not as a strings, but as something they call "hunks".
@@ -276,7 +283,10 @@ export const DiffView = ({
   /*
     "diffFile" is essentially an object containing an array of hunks plus some metadata.
   */
-  const diffFile = useMemo(() => convertToDiffFile(oldSource, newSource), [oldSource, newSource]);
+  const diffFile = useMemo(
+    () => convertToDiffFile(oldSource, newSource, zip),
+    [oldSource, newSource, zip]
+  );
 
   /*
     Sections of diff without changes are hidden by default, because they are not present in the "hunks" array.
