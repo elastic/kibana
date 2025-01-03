@@ -7053,7 +7053,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/security-form-components@link:x-pack/packages/security/form_components":
+"@kbn/security-form-components@link:x-pack/platform/packages/shared/security/form_components":
   version "0.0.0"
   uid ""
 
