@@ -4317,7 +4317,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
           }
         ),
         options: [],
-        order: 5,
+        order: 6,
         required: true,
         sensitive: true,
         tooltip: null,
@@ -4342,7 +4342,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
           }
         ),
         options: [],
-        order: 6,
+        order: 7,
         required: true,
         sensitive: true,
         tooltip: null,
@@ -4362,7 +4362,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
           }
         ),
         options: [],
-        order: 7,
+        order: 8,
         required: true,
         sensitive: false,
         tooltip: translate(
@@ -4378,13 +4378,63 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         validations: [],
         value: '*',
       },
+      enumerate_all_sites: {
+        default_value: true,
+        depends_on: [],
+        display: TOGGLE,
+        label: translate(
+          'searchConnectors.nativeConnectors.sharepoint_online.configuration.enumerateAllSitesLabel',
+          { defaultMessage: 'Enumerate all sites?' }
+        ),
+        options: [],
+        order: 9,
+        required: false,
+        sensitive: false,
+        tooltip: translate(
+          'searchConnectors.nativeConnectors.sharepoint_online.configuration.enumerateAllSitesTooltip',
+          {
+            defaultMessage:
+              'If enabled, sites will be fetched in bulk, then filtered down to the configured list of sites. This is efficient when syncing many sites. If disabled, each configured site will be fetched with an individual request. This is efficient when syncing fewer sites.',
+          }
+        ),
+        type: BOOLEAN,
+        ui_restrictions: [],
+        validations: [],
+        value: true,
+      },
+      fetch_subsites: {
+        default_value: false,
+        depends_on: [{ field: 'enumerate_all_sites', value: false }],
+        display: TOGGLE,
+        label: translate(
+          'searchConnectors.nativeConnectors.sharepoint_online.configuration.fetchSubsitesLabel',
+          {
+            defaultMessage: 'Fetch sub-sites of configured sites?',
+          }
+        ),
+        options: [],
+        order: 10,
+        required: false,
+        sensitive: false,
+        tooltip: translate(
+          'searchConnectors.nativeConnectors.sharepoint_online.configuration.fetchSubsitesTooltip',
+          {
+            defaultMessage:
+              'Whether subsites of the configured site(s) should be automatically fetched.',
+          }
+        ),
+        type: BOOLEAN,
+        ui_restrictions: [],
+        validations: [],
+        value: true,
+      },
       use_text_extraction_service: {
         default_value: false,
         depends_on: [],
         display: TOGGLE,
         label: USE_TEXT_EXTRACTION_SERVICE_LABEL,
         options: [],
-        order: 8,
+        order: 11,
         required: true,
         sensitive: false,
         tooltip: USE_TEXT_EXTRACTION_SERVICE_TOOLTIP,
@@ -4404,7 +4454,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
           }
         ),
         options: [],
-        order: 9,
+        order: 12,
         required: true,
         sensitive: false,
         tooltip: translate(
@@ -4435,7 +4485,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
           }
         ),
         options: [],
-        order: 10,
+        order: 13,
         required: true,
         sensitive: false,
         tooltip: translate(
@@ -4466,7 +4516,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
           }
         ),
         options: [],
-        order: 11,
+        order: 14,
         required: true,
         sensitive: false,
         tooltip: translate(
@@ -4497,7 +4547,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
           }
         ),
         options: [],
-        order: 12,
+        order: 15,
         required: true,
         sensitive: false,
         tooltip: translate(
@@ -4528,7 +4578,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
           }
         ),
         options: [],
-        order: 13,
+        order: 16,
         required: true,
         sensitive: false,
         tooltip: translate(
@@ -4536,56 +4586,6 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
           {
             defaultMessage:
               'Enable this option to fetch unique list item permissions. This setting can increase sync time. If this setting is disabled a list item will inherit permissions from its parent site.',
-          }
-        ),
-        type: BOOLEAN,
-        ui_restrictions: [],
-        validations: [],
-        value: true,
-      },
-      enumerate_all_sites: {
-        default_value: true,
-        depends_on: [],
-        display: TOGGLE,
-        label: translate(
-          'searchConnectors.nativeConnectors.sharepoint_online.configuration.enumerateAllSitesLabel',
-          { defaultMessage: 'Enumerate all sites?' }
-        ),
-        options: [],
-        order: 8,
-        required: false,
-        sensitive: false,
-        tooltip: translate(
-          'searchConnectors.nativeConnectors.sharepoint_online.configuration.enumerateAllSitesTooltip',
-          {
-            defaultMessage:
-              'If enabled, sites will be fetched in bulk, then filtered down to the configured list of sites. This is efficient when syncing many sites. If disabled, each configured site will be fetched with an individual request. This is efficient when syncing fewer sites.',
-          }
-        ),
-        type: BOOLEAN,
-        ui_restrictions: [],
-        validations: [],
-        value: true,
-      },
-      fetch_subsites: {
-        default_value: false,
-        depends_on: [{ field: 'enumerate_all_sites', value: false }],
-        display: TOGGLE,
-        label: translate(
-          'searchConnectors.nativeConnectors.sharepoint_online.configuration.fetchSubsitesLabel',
-          {
-            defaultMessage: 'Fetch sub-sites of configured sites?',
-          }
-        ),
-        options: [],
-        order: 9,
-        required: false,
-        sensitive: false,
-        tooltip: translate(
-          'searchConnectors.nativeConnectors.sharepoint_online.configuration.fetchSubsitesTooltip',
-          {
-            defaultMessage:
-              'Whether subsites of the configured site(s) should be automatically fetched.',
           }
         ),
         type: BOOLEAN,
