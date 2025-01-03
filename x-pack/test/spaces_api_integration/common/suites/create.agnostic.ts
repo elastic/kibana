@@ -177,7 +177,7 @@ export function createTestSuiteFactory({ getService }: DeploymentAgnosticFtrProv
             });
           });
 
-          describe('when solution is specified', () => {
+          describe('@skipInServerless when solution is specified', () => {
             it(`should return ${tests.solutionSpecified.statusCode}`, async () => {
               return supertest
                 .post(`${urlPrefix}/api/spaces/space`)

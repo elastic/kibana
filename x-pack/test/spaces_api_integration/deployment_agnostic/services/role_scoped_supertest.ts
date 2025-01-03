@@ -29,8 +29,9 @@ export function RoleScopedSupertestProvider({ getService }: DeploymentAgnosticFt
       }
     ) {
       const license = config.get('esTestCluster.license');
+      const isServerless = config.get('serverless');
 
-      if (!user || license !== 'trial') {
+      if (!user || (license === 'basic' && !isServerless)) {
         return new SupertestWithBasicAuth(supertestWithoutAuth, user);
       }
 
