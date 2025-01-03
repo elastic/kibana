@@ -9,13 +9,14 @@
 
 import './_presentation_panel.scss';
 
-import { EuiEmptyPrompt, EuiErrorBoundary, EuiFlexGroup, useEuiTheme } from '@elastic/eui';
+import { EuiErrorBoundary, EuiFlexGroup, useEuiTheme } from '@elastic/eui';
 import { PanelLoader } from '@kbn/panel-loader';
 import { isPromise } from '@kbn/std';
 import React from 'react';
 import useAsync from 'react-use/lib/useAsync';
 import { css } from '@emotion/react';
 import { untilPluginStartServicesReady } from '../kibana_services';
+import { PresentationPanelError } from './presentation_panel_error';
 import { DefaultPresentationPanelApi, PresentationPanelProps } from './types';
 import { getErrorLoadingPanel } from './presentation_panel_strings';
 
@@ -75,13 +76,7 @@ export const PresentationPanel = <
         data-test-subj="embeddableError"
         justifyContent="center"
       >
-        <EuiEmptyPrompt
-          body={error?.message?.length ? error.message : getErrorLoadingPanel()}
-          data-test-subj="embeddableStackError"
-          iconType="warning"
-          iconColor="danger"
-          layout="vertical"
-        />
+        <PresentationPanelError error={error ?? new Error(getErrorLoadingPanel())} />
       </EuiFlexGroup>
     );
   }
