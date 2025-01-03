@@ -593,7 +593,7 @@ activities.
 |A shared component for visualizing observability data types via lens embeddable. For further details.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/features/README.md[features]
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/shared/features/README.md[features]
 |The features plugin enhance Kibana with a per-feature privilege system.
 
 

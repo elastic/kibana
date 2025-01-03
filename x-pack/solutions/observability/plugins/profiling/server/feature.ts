@@ -20,7 +20,7 @@ export const PROFILING_FEATURE = {
   category: DEFAULT_APP_CATEGORIES.observability,
   scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
   app: [PROFILING_SERVER_FEATURE_ID, 'ux', 'kibana'],
-  // see x-pack/plugins/features/common/feature_kibana_privileges.ts
+  // see x-pack/platform/plugins/shared/features/common/feature_kibana_privileges.ts
   privileges: {
     all: {
       app: [PROFILING_SERVER_FEATURE_ID, 'ux', 'kibana'],

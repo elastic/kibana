@@ -71,7 +71,7 @@ export interface FeatureKibanaPrivileges {
    *  }
    * ```
    *
-   * NOTE: It is important to name your tags in a way that will not collide with other plugins/features.
+   * NOTE: It is important to name your tags in a way that will not collide with other platform/plugins/shared/features.
    * A generic tag name like "access:read" could be used elsewhere, and access to that API endpoint would also
    * extend to any routes you have also tagged with that name.
    */
