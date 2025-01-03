@@ -10,7 +10,7 @@
 /**
  * The types are exact duplicates of the ops metrics types declared in core needed for reporting in the stats api.
  * We use a copy of these to detect changes in the ops metrics reported from core
- * See packages/core/metrics/core-metrics-server/index.ts
+ * See src/core/packages/metrics/server/index.ts
  */
 
 /**
