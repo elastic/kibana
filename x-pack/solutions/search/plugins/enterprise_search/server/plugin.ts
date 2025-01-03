@@ -104,6 +104,7 @@ import { getIndicesSearchResultProvider } from './utils/indices_search_result_pr
 import { getSearchResultProvider } from './utils/search_result_provider';
 
 import { ConfigType } from '.';
+import { getRegisteredDeprecations } from './deprecations';
 
 interface PluginsSetup {
   cloud: CloudSetup;
@@ -152,6 +153,7 @@ export class EnterpriseSearchPlugin implements Plugin<void, void, PluginsSetup, 
   public setup(
     {
       capabilities,
+      deprecations,
       elasticsearch,
       http,
       savedObjects,
@@ -440,6 +442,11 @@ export class EnterpriseSearchPlugin implements Plugin<void, void, PluginsSetup, 
       globalSearch.registerResultProvider(getIndicesSearchResultProvider(http.staticAssets));
       globalSearch.registerResultProvider(getConnectorsSearchResultProvider(http.staticAssets));
     }
+
+    /**
+     * Register deprecations
+     */
+    deprecations.registerDeprecations(getRegisteredDeprecations());
   }
 
   public start() {}
