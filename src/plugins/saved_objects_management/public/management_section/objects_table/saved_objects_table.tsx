@@ -48,9 +48,10 @@ import {
   DeleteConfirmModal,
   ExportModal,
 } from './components';
+import { ML_SAVED_OBJECT_TYPES } from '../../../common/constants/ml_saved_object_types';
 
 // Saved objects for ML job are not importable/exportable because they are wrappers around ES objects
-const DISABLED_TYPES_FOR_EXPORT = new Set(['ml-job', 'trained-model']);
+const DISABLED_TYPES_FOR_EXPORT = ML_SAVED_OBJECT_TYPES;
 
 interface ExportAllOption {
   id: string;
@@ -258,9 +259,34 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
         if (activeQuery.text !== query.text) {
           return null;
         }
+        let filteredSavedObjects = resp.saved_objects;
+        const mlCapabilities = this.props.applications.capabilities.ml;
+
+        const mlFilters = {
+          'anomaly-detector-': mlCapabilities.canGetJobs,
+          'data-frame-analytics-': mlCapabilities.canGetDataFrameAnalytics,
+          'ml-trained-model': mlCapabilities.canGetTrainedModels,
+        };
+
+        // Apply all ML filters at once
+        filteredSavedObjects = filteredSavedObjects.filter((so) => {
+          // Check if object matches any ML type
+          const matchesMlType = Object.entries(mlFilters).some(
+            ([prefix, hasPermission]) => so.id.startsWith(prefix) || so.type === prefix
+          );
+
+          // Keep non-ML objects or ML objects where user has permission
+          return (
+            !matchesMlType ||
+            mlFilters[so.type] ||
+            Object.entries(mlFilters).some(
+              ([prefix, hasPermission]) => so.id.startsWith(prefix) && hasPermission
+            )
+          );
+        });
 
         return {
-          savedObjects: resp.saved_objects,
+          savedObjects: filteredSavedObjects,
           filteredItemCount: resp.total,
           isSearching: false,
         };
@@ -687,6 +713,9 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       sort,
     } = this.state;
     const { http, taggingApi, allowedTypes, applications } = this.props;
+
+    // @TODO: remove
+    // console.log(`--@@applications.capabilities`, applications?.capabilities);
 
     const selectionConfig = {
       onSelectionChange: this.onSelectionChanged,

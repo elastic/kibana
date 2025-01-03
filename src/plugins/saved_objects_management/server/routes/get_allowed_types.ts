@@ -51,7 +51,7 @@ export const registerGetAllowedTypesRoute = (
           capabilityPath: 'ml.*',
         });
         const canSeeMLJobs =
-          mlCapabilities.ml.canGetJobs && mlCapabilities.ml.canGetDataFrameAnalytics;
+          mlCapabilities.ml.canGetJobs || mlCapabilities.ml.canGetDataFrameAnalytics;
         const canSeeTrainedModels = mlCapabilities.ml.canGetTrainedModels;
 
         const [mlJobType, trainedModelType] = await Promise.all([

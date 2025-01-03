@@ -39,6 +39,7 @@ import {
   SavedObjectsManagementAction,
   SavedObjectsManagementColumnServiceStart,
 } from '../../../services';
+import { ML_SAVED_OBJECT_TYPES } from '../../../../common/constants/ml_saved_object_types';
 
 export type ItemId<T> = string | number | ((item: T) => string);
 
@@ -389,7 +390,7 @@ export class Table extends PureComponent<TableProps, TableState> {
     const activeActionContents = this.state.activeAction?.render() ?? null;
     const exceededResultCount = totalItemCount > MAX_PAGINATED_ITEM;
 
-    const hasMlObjects = selectedSavedObjects.some(({ type }) => type === 'ml-job');
+    const hasMlObjects = selectedSavedObjects.some(({ type }) => ML_SAVED_OBJECT_TYPES.has(type));
 
     const anySelected = selectedSavedObjects.length > 0;
     const allHidden =
@@ -400,7 +401,7 @@ export class Table extends PureComponent<TableProps, TableState> {
         return (
           <FormattedMessage
             id="savedObjectsManagement.objectsTable.table.hasMlObjects.deleteDisabledTooltip"
-            defaultMessage="Machine learning objects can only be deleted in the Machine Learning management page."
+            defaultMessage="Navigate to the Machine Learning management page to delete machine learning objects."
           />
         );
       }

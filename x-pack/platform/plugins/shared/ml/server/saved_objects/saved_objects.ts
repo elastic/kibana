@@ -57,7 +57,7 @@ export function setupSavedObjects(savedObjects: SavedObjectsServiceSetup) {
       },
       icon: 'machineLearningApp',
       displayName: i18n.translate('xpack.ml.savedObjects.mlJob.displayName', {
-        defaultMessage: 'Machine Learning',
+        defaultMessage: 'Machine learning model',
       }),
     },
   });
@@ -89,5 +89,8 @@ export function setupSavedObjects(savedObjects: SavedObjectsServiceSetup) {
     namespaceType: 'agnostic',
     migrations,
     mappings: mlModule,
+    displayName: i18n.translate('xpack.ml.savedObjects.trainedModel.displayName', {
+      defaultMessage: 'Trained model',
+    }),
   });
 }
