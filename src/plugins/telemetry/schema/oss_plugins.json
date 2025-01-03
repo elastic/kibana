@@ -9944,83 +9944,6 @@
         }
       }
     },
-    "files": {
-      "properties": {
-        "countByExtension": {
-          "type": "array",
-          "items": {
-            "properties": {
-              "extension": {
-                "type": "keyword"
-              },
-              "count": {
-                "type": "long"
-              }
-            }
-          }
-        },
-        "countByStatus": {
-          "properties": {
-            "AWAITING_UPLOAD": {
-              "type": "long",
-              "_meta": {
-                "description": "Number of files awaiting upload"
-              }
-            },
-            "DELETED": {
-              "type": "long",
-              "_meta": {
-                "description": "Number of files that are marked as deleted"
-              }
-            },
-            "READY": {
-              "type": "long",
-              "_meta": {
-                "description": "Number of files that are ready for download"
-              }
-            },
-            "UPLOADING": {
-              "type": "long",
-              "_meta": {
-                "description": "Number of files that are currently uploading"
-              }
-            },
-            "UPLOAD_ERROR": {
-              "type": "long",
-              "_meta": {
-                "description": "Number of files that failed to upload"
-              }
-            }
-          }
-        },
-        "storage": {
-          "properties": {
-            "esFixedSizeIndex": {
-              "properties": {
-                "capacity": {
-                  "type": "long",
-                  "_meta": {
-                    "description": "Capacity of the fixed size index"
-                  }
-                },
-                "available": {
-                  "type": "long",
-                  "_meta": {
-                    "description": "Available storage in bytes"
-                  }
-                },
-                "used": {
-                  "type": "long",
-                  "_meta": {
-                    "description": "Used storage in bytes"
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "kibana": {
       "properties": {
         "index": {
@@ -10116,34 +10039,6 @@
           "type": "long",
           "_meta": {
             "description": "The number of translated labels"
-          }
-        }
-      }
-    },
-    "sample-data": {
-      "properties": {
-        "installed": {
-          "type": "array",
-          "items": {
-            "type": "keyword"
-          }
-        },
-        "last_install_date": {
-          "type": "date"
-        },
-        "last_install_set": {
-          "type": "keyword"
-        },
-        "last_uninstall_date": {
-          "type": "date"
-        },
-        "last_uninstall_set": {
-          "type": "keyword"
-        },
-        "uninstalled": {
-          "type": "array",
-          "items": {
-            "type": "keyword"
           }
         }
       }
