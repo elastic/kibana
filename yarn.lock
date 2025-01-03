@@ -4949,7 +4949,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-saved-objects-base-server-internal@link:packages/core/saved-objects/core-saved-objects-base-server-internal":
+"@kbn/core-saved-objects-base-server-internal@link:src/core/packages/saved-objects/base-server-internal":
   version "0.0.0"
   uid ""
 
