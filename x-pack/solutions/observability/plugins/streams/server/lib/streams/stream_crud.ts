@@ -45,6 +45,7 @@ import {
 } from './ingest_pipelines/manage_ingest_pipelines';
 import { getProcessingPipelineName, getReroutePipelineName } from './ingest_pipelines/name';
 import { otelFields, otelMappings, otelPrefixes } from './component_templates/otel_layer';
+import { convertToOtelConfig, generateOtelReroutePipeline } from './otel/as_otel_config';
 
 interface BaseParams {
   scopedClusterClient: IScopedClusterClient;
@@ -159,6 +160,19 @@ async function upsertInternalStream({ definition, scopedClusterClient }: BasePar
 }
 
 type ListStreamsParams = BaseParams;
+
+export async function getAllWiredStreams({
+  scopedClusterClient,
+}: {
+  scopedClusterClient: IScopedClusterClient;
+}) {
+  const response = await scopedClusterClient.asInternalUser.search<WiredStreamDefinition>({
+    index: STREAMS_INDEX,
+    size: 10000,
+    sort: [{ name: 'asc' }],
+  });
+  return response.hits.hits.map((hit) => ({ ...hit._source! })) as WiredStreamDefinition[];
+}
 
 export async function listStreams({
   scopedClusterClient,
@@ -582,6 +596,13 @@ export async function syncStream({
     logger,
     mappings: componentTemplate.template.mappings?.properties,
   });
+  const allWiredStreams = await getAllWiredStreams({ scopedClusterClient });
+  await upsertIngestPipeline({
+    esClient: scopedClusterClient.asCurrentUser,
+    logger,
+    pipeline: generateOtelReroutePipeline(allWiredStreams),
+  });
+  convertToOtelConfig(allWiredStreams);
 }
 
 interface ExecutionPlanStep {
