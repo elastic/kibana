@@ -23,7 +23,7 @@ import {
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { createProxyActionConnector, deleteActionConnector } from '../../common/action_connectors';
 import type { InternalRequestHeader, RoleCredentials } from '../../../../../../shared/services';
-import { deleteAllConversations } from '../conversations/helpers';
+import { deleteAllConversations } from '../helpers';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertestWithoutAuth');
