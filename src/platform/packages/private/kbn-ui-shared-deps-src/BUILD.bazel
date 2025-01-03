@@ -23,7 +23,7 @@ webpack_cli(
     # packages included in the shared deps src bundle
     "//src/platform/packages/shared/kbn-ui-theme",
     "//src/platform/packages/shared/kbn-i18n",
-    "//packages/kbn-i18n-react",
+    "//src/platform/packages/shared/kbn-i18n-react",
     "//src/platform/packages/shared/kbn-ebt-tools",
     "//src/platform/packages/shared/kbn-esql-ast",
     "//packages/kbn-monaco",
