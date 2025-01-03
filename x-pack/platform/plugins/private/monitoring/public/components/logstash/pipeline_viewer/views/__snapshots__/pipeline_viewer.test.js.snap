@@ -13,6 +13,7 @@ exports[`PipelineViewer component passes expected props 1`] = `
     </EuiScreenReaderOnly>
     <EuiPageSection
       alignment="center"
+      data-test-subj="pipeline-viewer"
     >
       <StatementSection
         elements={
@@ -87,6 +88,7 @@ exports[`PipelineViewer component renders DetailDrawer when selected vertex is n
     </EuiScreenReaderOnly>
     <EuiPageSection
       alignment="center"
+      data-test-subj="pipeline-viewer"
     >
       <StatementSection
         elements={
