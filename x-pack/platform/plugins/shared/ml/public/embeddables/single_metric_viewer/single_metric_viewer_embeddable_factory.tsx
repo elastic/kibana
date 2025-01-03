@@ -16,7 +16,7 @@ import { initializeTimeRange } from '@kbn/presentation-publishing/interfaces/fet
 import { initializeTitles } from '@kbn/presentation-publishing/interfaces/titles/titles_api';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing/publishing_subject';
 import { BehaviorSubject, Subscription } from 'rxjs';
-import { ANOMALY_SINGLE_METRIC_VIEWER_EMBEDDABLE_TYPE } from '../constants';
+import { ANOMALY_SINGLE_METRIC_VIEWER_EMBEDDABLE_TYPE } from '@kbn/ml-embeddables/constants';
 import type { MlPluginStart, MlStartDependencies } from '../../plugin';
 import type {
   SingleMetricViewerRuntimeState,
