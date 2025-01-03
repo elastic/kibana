@@ -9,7 +9,7 @@ import type { FC } from 'react';
 import React, { useState, useContext, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiSwitch } from '@elastic/eui';
-import { ML_JOB_AGGREGATION } from '@kbn/ml-anomaly-utils';
+import { ML_JOB_AGGREGATION } from '@kbn/ml-anomaly-utils/aggregation_types';
 import { JobCreatorContext } from '../../../../../job_creator_context';
 import { Description } from './description';
 import { MMLCallout } from '../mml_callout';

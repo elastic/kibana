@@ -23,7 +23,7 @@ import {
   ALERT_UUID,
 } from '@kbn/rule-data-utils';
 import { isDefined } from '@kbn/ml-is-defined';
-import { getSeverityColor } from '@kbn/ml-anomaly-utils';
+import { getSeverityColor } from '@kbn/ml-anomaly-utils/get_severity_color';
 import {
   ALERT_ANOMALY_DETECTION_JOB_ID,
   ALERT_ANOMALY_SCORE,

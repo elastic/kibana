@@ -6,7 +6,7 @@
  */
 
 import type { RuleTypeParams, Rule } from '@kbn/alerting-plugin/common';
-import { type MlAnomalyResultType } from '@kbn/ml-anomaly-utils';
+import type { MlAnomalyResultType } from '@kbn/ml-anomaly-utils';
 import { ML_ANOMALY_RESULT_TYPE } from '@kbn/ml-anomaly-utils/constants';
 import { ML_ANOMALY_DETECTION_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 
