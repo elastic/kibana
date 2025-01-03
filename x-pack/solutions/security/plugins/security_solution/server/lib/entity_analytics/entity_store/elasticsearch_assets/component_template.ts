@@ -10,18 +10,24 @@ import {
   EngineComponentResourceEnum,
   type EngineComponentStatus,
 } from '../../../../../common/api/entity_analytics';
-import type { UnitedEntityDefinition } from '../united_entity_definitions';
+import type { EntityEngineInstallationDescriptor } from '../installation/types';
 
 const getComponentTemplateName = (definitionId: string) => `${definitionId}-latest@platform`;
 
 interface Options {
-  unitedDefinition: UnitedEntityDefinition;
+  /**
+   * The entity engine description id
+   **/
+  id: string;
   esClient: ElasticsearchClient;
 }
 
-export const createEntityIndexComponentTemplate = ({ unitedDefinition, esClient }: Options) => {
-  const { entityManagerDefinition, indexMappings } = unitedDefinition;
-  const name = getComponentTemplateName(entityManagerDefinition.id);
+export const createEntityIndexComponentTemplate = (
+  description: EntityEngineInstallationDescriptor,
+  esClient: ElasticsearchClient
+) => {
+  const { id, indexMappings } = description;
+  const name = getComponentTemplateName(id);
   return esClient.cluster.putComponentTemplate({
     name,
     body: {
@@ -35,9 +41,8 @@ export const createEntityIndexComponentTemplate = ({ unitedDefinition, esClient 
   });
 };
 
-export const deleteEntityIndexComponentTemplate = ({ unitedDefinition, esClient }: Options) => {
-  const { entityManagerDefinition } = unitedDefinition;
-  const name = getComponentTemplateName(entityManagerDefinition.id);
+export const deleteEntityIndexComponentTemplate = ({ id, esClient }: Options) => {
+  const name = getComponentTemplateName(id);
   return esClient.cluster.deleteComponentTemplate(
     { name },
     {
