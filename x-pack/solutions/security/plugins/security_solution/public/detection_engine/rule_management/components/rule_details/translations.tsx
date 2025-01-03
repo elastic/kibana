@@ -5,7 +5,9 @@
  * 2.0.
  */
 
+import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 export const OVERVIEW_TAB_LABEL = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetails.overviewTabLabel',
@@ -364,11 +366,29 @@ export const INTERVAL_FIELD_LABEL = i18n.translate(
   }
 );
 
-export const FROM_FIELD_LABEL = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleDetails.fromFieldLabel',
+export const LOOK_BACK_FIELD_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.lookBackFieldLabel',
   {
     defaultMessage: 'Additional look-back time',
   }
+);
+
+export const RULE_SOURCE_EVENTS_TIME_RANGE_FIELD_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.ruleSourceEventsTimeRangeFieldLabel',
+  {
+    defaultMessage: 'Analyzed time range',
+  }
+);
+
+export const RULE_SOURCE_EVENTS_TIME_RANGE = (from: string, to: string) => (
+  <FormattedMessage
+    id="xpack.securitySolution.detectionEngine.ruleDetails.ruleSourceEventsTimeRange"
+    defaultMessage="From {from} to {to}"
+    values={{
+      from: <strong>{from}</strong>,
+      to: <strong>{to}</strong>,
+    }}
+  />
 );
 
 export const MAX_SIGNALS_FIELD_LABEL = i18n.translate(
@@ -417,5 +437,12 @@ export const LUCENE_LANGUAGE_LABEL = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetails.luceneLanguageLabel',
   {
     defaultMessage: 'Lucene',
+  }
+);
+
+export const RULE_MAY_HAVE_GAPS_WARNING = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.lookbackInconsistencyWarning',
+  {
+    defaultMessage: 'Rule may run with gaps.',
   }
 );

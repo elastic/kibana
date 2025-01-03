@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import type { EuiSelectProps, EuiFieldNumberProps } from '@elastic/eui';
 import {
   EuiFlexGroup,
@@ -14,8 +15,6 @@ import {
   EuiSelect,
   transparentize,
 } from '@elastic/eui';
-import { isEmpty } from 'lodash/fp';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
 import type { FieldHook } from '../../../../shared_imports';
@@ -28,7 +27,8 @@ interface ScheduleItemProps {
   dataTestSubj: string;
   idAria: string;
   isDisabled: boolean;
-  minimumValue?: number;
+  minValue?: number;
+  maxValue?: number;
   timeTypes?: string[];
   fullWidth?: boolean;
 }
@@ -67,24 +67,16 @@ const MyEuiSelect = styled(EuiSelect)`
   box-shadow: none;
 `;
 
-const getNumberFromUserInput = (input: string, minimumValue = 0): number => {
-  const number = parseInt(input, 10);
-  if (Number.isNaN(number)) {
-    return minimumValue;
-  } else {
-    return Math.max(minimumValue, Math.min(number, Number.MAX_SAFE_INTEGER));
-  }
-};
-
-export const ScheduleItemField = ({
-  dataTestSubj,
+export function ScheduleItemField({
   field,
-  idAria,
   isDisabled,
-  minimumValue = 0,
-  timeTypes = ['s', 'm', 'h'],
+  dataTestSubj,
+  idAria,
+  minValue = Number.MIN_SAFE_INTEGER,
+  maxValue = Number.MAX_SAFE_INTEGER,
+  timeTypes = DEFAULT_TIME_DURATION_UNITS,
   fullWidth = false,
-}: ScheduleItemProps) => {
+}: ScheduleItemProps): JSX.Element {
   const [timeType, setTimeType] = useState(timeTypes[0]);
   const [timeVal, setTimeVal] = useState<number>(0);
   const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
@@ -100,38 +92,38 @@ export const ScheduleItemField = ({
 
   const onChangeTimeVal = useCallback<NonNullable<EuiFieldNumberProps['onChange']>>(
     (e) => {
-      const sanitizedValue = getNumberFromUserInput(e.target.value, minimumValue);
+      const sanitizedValue = parseDuration(e.target.value, minValue, maxValue);
+
+      if (sanitizedValue === undefined) {
+        return;
+      }
+
       setTimeVal(sanitizedValue);
       setValue(`${sanitizedValue}${timeType}`);
     },
-    [minimumValue, setValue, timeType]
+    [minValue, maxValue, setValue, timeType]
   );
 
   useEffect(() => {
-    if (value !== `${timeVal}${timeType}`) {
-      const filterTimeVal = value.match(/\d+/g);
-      const filterTimeType = value.match(/[a-zA-Z]+/g);
-      if (
-        !isEmpty(filterTimeVal) &&
-        filterTimeVal != null &&
-        !isNaN(Number(filterTimeVal[0])) &&
-        Number(filterTimeVal[0]) !== Number(timeVal)
-      ) {
-        setTimeVal(Number(filterTimeVal[0]));
-      }
-      if (
-        !isEmpty(filterTimeType) &&
-        filterTimeType != null &&
-        timeTypes.includes(filterTimeType[0]) &&
-        filterTimeType[0] !== timeType
-      ) {
-        setTimeType(filterTimeType[0]);
-      }
+    if (value === `${timeVal}${timeType}`) {
+      return;
     }
+
+    const isNegative = value.startsWith('-');
+    const durationRegexp = new RegExp(`^\\-?(\\d+)(${timeTypes.join('|')})$`);
+    const durationMatchArray = value.match(durationRegexp);
+
+    if (!durationMatchArray) {
+      return;
+    }
+
+    const [, timeStr, unit] = durationMatchArray;
+    const time = parseInt(timeStr, 10) * (isNegative ? -1 : 1);
+
+    setTimeVal(time);
+    setTimeType(unit);
   }, [timeType, timeTypes, timeVal, value]);
 
-  // EUI missing some props
-  const rest = { disabled: isDisabled };
   const label = useMemo(
     () => (
       <EuiFlexGroup gutterSize="s" justifyContent="flexStart" alignItems="center">
@@ -161,21 +153,36 @@ export const ScheduleItemField = ({
           <MyEuiSelect
             fullWidth
             options={timeTypeOptions.filter((type) => timeTypes.includes(type.value))}
-            onChange={onChangeTimeType}
             value={timeType}
+            onChange={onChangeTimeType}
+            disabled={isDisabled}
             aria-label={field.label}
             data-test-subj="timeType"
-            {...rest}
           />
         }
         fullWidth
-        min={minimumValue}
+        min={minValue}
         max={Number.MAX_SAFE_INTEGER}
-        onChange={onChangeTimeVal}
         value={timeVal}
+        onChange={onChangeTimeVal}
+        disabled={isDisabled}
         data-test-subj="interval"
-        {...rest}
       />
     </StyledEuiFormRow>
   );
-};
+}
+
+const DEFAULT_TIME_DURATION_UNITS = ['s', 'm', 'h'];
+
+function parseDuration(
+  durationStr: string,
+  minValue: number,
+  maxValue: number
+): number | undefined {
+  const number = parseInt(durationStr, 10);
+  if (Number.isNaN(number)) {
+    return;
+  }
+
+  return Math.max(minValue, Math.min(number, maxValue));
+}

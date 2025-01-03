@@ -17,15 +17,12 @@ import {
   EuiIconTip,
 } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
+import { normalizeDateMath } from '@kbn/securitysolution-utils/date_math';
 import { normalizeMachineLearningJobIds } from '../../../../../common/detection_engine/utils';
-import {
-  formatScheduleStepData,
-  filterEmptyThreats,
-} from '../../../rule_creation_ui/pages/rule_creation/helpers';
+import { filterEmptyThreats } from '../../../rule_creation_ui/pages/rule_creation/helpers';
 import type { RuleResponse } from '../../../../../common/api/detection_engine/model/rule_schema/rule_schemas.gen';
 import { DiffView } from './json_diff/diff_view';
 import * as i18n from './json_diff/translations';
-import { getHumanizedDuration } from '../../../../detections/pages/detection_engine/rules/helpers';
 
 /* Inclding these properties in diff display might be confusing to users. */
 const HIDDEN_PROPERTIES: Array<keyof RuleResponse> = [
@@ -87,11 +84,7 @@ const normalizeRule = (originalRule: RuleResponse): RuleResponse => {
     The same helper is used in the rule editing UI to format "from" before submitting the edits.
     So, after the rule is saved, the "from" property unit/value might differ from what's in the package.
   */
-  rule.from = formatScheduleStepData({
-    interval: rule.interval,
-    from: getHumanizedDuration(rule.from, rule.interval),
-    to: rule.to,
-  }).from;
+  rule.from = normalizeDateMath(rule.from);
 
   /*
     Default "note" to an empty string if it's not present.

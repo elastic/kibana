@@ -71,7 +71,7 @@ describe('ScheduleItemField', () => {
     expect(mockField.setValue).toHaveBeenCalledWith(expectedValue);
   });
 
-  it('converts a non-numeric value to 0', () => {
+  it('skips updating a non-numeric values', () => {
     const unsafeInput = 'this is not a number';
 
     const mockField = useFormFieldMock<string>();
@@ -91,6 +91,6 @@ describe('ScheduleItemField', () => {
       .last()
       .simulate('change', { target: { value: unsafeInput } });
 
-    expect(mockField.setValue).toHaveBeenCalledWith('0s');
+    expect(mockField.setValue).not.toHaveBeenCalled();
   });
 });
