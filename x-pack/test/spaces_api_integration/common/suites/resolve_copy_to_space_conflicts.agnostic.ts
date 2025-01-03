@@ -14,13 +14,9 @@ import type {
   DeploymentAgnosticFtrProviderContext,
   SupertestWithRoleScopeType,
 } from '../../deployment_agnostic/ftr_provider_context';
-import {
-  getTestDataLoader,
-  SPACE_1,
-  SPACE_2,
-} from '../services/test_data_loader';
 import { getUrlPrefix } from '../lib/space_test_utils';
 import type { DescribeFn, TestDefinitionAuthentication } from '../lib/types';
+import { getTestDataLoader, SPACE_1, SPACE_2 } from '../services/test_data_loader';
 
 type TestResponse = Record<string, any>;
 
