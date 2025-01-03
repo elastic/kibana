@@ -9,7 +9,7 @@ import type { FleetAuthzRouter } from '../../services/security';
 
 import { FLEET_DEBUG_ROUTES } from '../../constants';
 import { API_VERSIONS } from '../../../common/constants';
-
+import { FLEET_API_PRIVILEGES } from '../../constants/api_privileges';
 import {
   FetchIndexRequestSchema,
   FetchSavedObjectNamesRequestSchema,
@@ -27,8 +27,14 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .post({
       path: FLEET_DEBUG_ROUTES.INDEX_PATTERN,
       access: 'internal',
-      fleetAuthz: {
-        fleet: { all: true },
+      security: {
+        authz: {
+          requiredPrivileges: [
+            FLEET_API_PRIVILEGES.AGENTS.ALL,
+            FLEET_API_PRIVILEGES.AGENT_POLICIES.ALL,
+            FLEET_API_PRIVILEGES.SETTINGS.ALL,
+          ],
+        },
       },
     })
     .addVersion(
@@ -43,8 +49,14 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .post({
       path: FLEET_DEBUG_ROUTES.SAVED_OBJECTS_PATTERN,
       access: 'internal',
-      fleetAuthz: {
-        fleet: { all: true },
+      security: {
+        authz: {
+          requiredPrivileges: [
+            FLEET_API_PRIVILEGES.AGENTS.ALL,
+            FLEET_API_PRIVILEGES.AGENT_POLICIES.ALL,
+            FLEET_API_PRIVILEGES.SETTINGS.ALL,
+          ],
+        },
       },
     })
     .addVersion(
@@ -59,8 +71,14 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .post({
       path: FLEET_DEBUG_ROUTES.SAVED_OBJECT_NAMES_PATTERN,
       access: 'internal',
-      fleetAuthz: {
-        fleet: { all: true },
+      security: {
+        authz: {
+          requiredPrivileges: [
+            FLEET_API_PRIVILEGES.AGENTS.ALL,
+            FLEET_API_PRIVILEGES.AGENT_POLICIES.ALL,
+            FLEET_API_PRIVILEGES.SETTINGS.ALL,
+          ],
+        },
       },
     })
     .addVersion(

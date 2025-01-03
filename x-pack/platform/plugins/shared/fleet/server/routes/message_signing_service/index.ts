@@ -10,6 +10,7 @@ import type { FleetAuthzRouter } from '../../services/security';
 import { API_VERSIONS } from '../../../common/constants';
 import { MESSAGE_SIGNING_SERVICE_API_ROUTES } from '../../constants';
 import { RotateKeyPairSchema } from '../../types';
+import { FLEET_API_PRIVILEGES } from '../../constants/api_privileges';
 
 import { genericErrorResponse } from '../schema/errors';
 
@@ -20,8 +21,14 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
   router.versioned
     .post({
       path: MESSAGE_SIGNING_SERVICE_API_ROUTES.ROTATE_KEY_PAIR,
-      fleetAuthz: {
-        fleet: { all: true },
+      security: {
+        authz: {
+          requiredPrivileges: [
+            FLEET_API_PRIVILEGES.AGENTS.ALL,
+            FLEET_API_PRIVILEGES.AGENT_POLICIES.ALL,
+            FLEET_API_PRIVILEGES.SETTINGS.ALL,
+          ],
+        },
       },
       summary: 'Rotate a Fleet message signing key pair',
       options: {

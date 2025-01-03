@@ -7,7 +7,7 @@
 
 import { UNINSTALL_TOKEN_ROUTES, API_VERSIONS } from '../../../common/constants';
 import type { FleetConfigType } from '../../config';
-
+import { FLEET_API_PRIVILEGES } from '../../constants/api_privileges';
 import type { FleetAuthzRouter } from '../../services/security';
 import {
   GetUninstallTokenRequestSchema,
@@ -28,8 +28,10 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
     router.versioned
       .get({
         path: UNINSTALL_TOKEN_ROUTES.LIST_PATTERN,
-        fleetAuthz: {
-          fleet: { allAgents: true },
+        security: {
+          authz: {
+            requiredPrivileges: [FLEET_API_PRIVILEGES.AGENTS.ALL],
+          },
         },
         summary: 'Get metadata for latest uninstall tokens',
         description: 'List the metadata for the latest uninstall tokens per agent policy.',
@@ -58,8 +60,10 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
     router.versioned
       .get({
         path: UNINSTALL_TOKEN_ROUTES.INFO_PATTERN,
-        fleetAuthz: {
-          fleet: { allAgents: true },
+        security: {
+          authz: {
+            requiredPrivileges: [FLEET_API_PRIVILEGES.AGENTS.ALL],
+          },
         },
         summary: 'Get a decrypted uninstall token',
         description: 'Get one decrypted uninstall token by its ID.',

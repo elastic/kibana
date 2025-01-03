@@ -7,7 +7,7 @@
 import { schema } from '@kbn/config-schema';
 
 import type { FleetAuthzRouter } from '../../services/security';
-
+import { FLEET_API_PRIVILEGES } from '../../constants/api_privileges';
 import { AGENTS_SETUP_API_ROUTES, SETUP_API_ROUTE } from '../../constants';
 import { API_VERSIONS } from '../../../common/constants';
 
@@ -39,8 +39,19 @@ export const registerFleetSetupRoute = (router: FleetAuthzRouter) => {
   router.versioned
     .post({
       path: SETUP_API_ROUTE,
-      fleetAuthz: {
-        fleet: { setup: true },
+      security: {
+        authz: {
+          requiredPrivileges: [
+            {
+              anyRequired: [
+                FLEET_API_PRIVILEGES.AGENTS.READ,
+                FLEET_API_PRIVILEGES.AGENT_POLICIES.READ,
+                FLEET_API_PRIVILEGES.SETTINGS.READ,
+                FLEET_API_PRIVILEGES.SETUP,
+              ],
+            },
+          ],
+        },
       },
       summary: `Initiate Fleet setup`,
       options: {
@@ -101,8 +112,19 @@ export const registerCreateFleetSetupRoute = (router: FleetAuthzRouter) => {
   router.versioned
     .post({
       path: AGENTS_SETUP_API_ROUTES.CREATE_PATTERN,
-      fleetAuthz: {
-        fleet: { setup: true },
+      security: {
+        authz: {
+          requiredPrivileges: [
+            {
+              anyRequired: [
+                FLEET_API_PRIVILEGES.AGENTS.READ,
+                FLEET_API_PRIVILEGES.AGENT_POLICIES.READ,
+                FLEET_API_PRIVILEGES.SETTINGS.READ,
+                FLEET_API_PRIVILEGES.SETUP,
+              ],
+            },
+          ],
+        },
       },
       summary: `Initiate agent setup`,
       options: {
@@ -132,8 +154,19 @@ export const registerGetFleetStatusRoute = (router: FleetAuthzRouter) => {
   router.versioned
     .get({
       path: AGENTS_SETUP_API_ROUTES.INFO_PATTERN,
-      fleetAuthz: {
-        fleet: { setup: true },
+      security: {
+        authz: {
+          requiredPrivileges: [
+            {
+              anyRequired: [
+                FLEET_API_PRIVILEGES.AGENTS.READ,
+                FLEET_API_PRIVILEGES.AGENT_POLICIES.READ,
+                FLEET_API_PRIVILEGES.SETTINGS.READ,
+                FLEET_API_PRIVILEGES.SETUP,
+              ],
+            },
+          ],
+        },
       },
       summary: `Get agent setup info`,
       options: {

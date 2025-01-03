@@ -55,7 +55,7 @@ import {
   PostNewAgentActionResponseSchema,
   PostRetrieveAgentsByActionsResponseSchema,
 } from '../../types/rest_spec/agent';
-
+import { FLEET_API_PRIVILEGES } from '../../constants/api_privileges';
 import { calculateRouteAuthz } from '../../services/security/security';
 
 import { genericErrorResponse } from '../schema/errors';
@@ -95,8 +95,10 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
   router.versioned
     .get({
       path: AGENT_API_ROUTES.INFO_PATTERN,
-      fleetAuthz: {
-        fleet: { readAgents: true },
+      security: {
+        authz: {
+          requiredPrivileges: [FLEET_API_PRIVILEGES.AGENTS.READ],
+        },
       },
       summary: `Get an agent`,
       description: `Get an agent by ID.`,
@@ -126,8 +128,10 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
   router.versioned
     .put({
       path: AGENT_API_ROUTES.UPDATE_PATTERN,
-      fleetAuthz: {
-        fleet: { allAgents: true },
+      security: {
+        authz: {
+          requiredPrivileges: [FLEET_API_PRIVILEGES.AGENTS.ALL],
+        },
       },
       summary: `Update an agent`,
       description: `Update an agent by ID.`,
@@ -157,8 +161,10 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
   router.versioned
     .post({
       path: AGENT_API_ROUTES.BULK_UPDATE_AGENT_TAGS_PATTERN,
-      fleetAuthz: {
-        fleet: { allAgents: true },
+      security: {
+        authz: {
+          requiredPrivileges: [FLEET_API_PRIVILEGES.AGENTS.ALL],
+        },
       },
       summary: `Bulk update agent tags`,
       options: {
@@ -187,8 +193,10 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
   router.versioned
     .delete({
       path: AGENT_API_ROUTES.DELETE_PATTERN,
-      fleetAuthz: {
-        fleet: { allAgents: true },
+      security: {
+        authz: {
+          requiredPrivileges: [FLEET_API_PRIVILEGES.AGENTS.ALL],
+        },
       },
       summary: `Delete an agent`,
       description: `Delete an agent by ID.`,
@@ -218,9 +226,10 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
   router.versioned
     .get({
       path: AGENT_API_ROUTES.LIST_PATTERN,
-
-      fleetAuthz: {
-        fleet: { readAgents: true },
+      security: {
+        authz: {
+          requiredPrivileges: [FLEET_API_PRIVILEGES.AGENTS.READ],
+        },
       },
       summary: `Get agents`,
       options: {
@@ -249,8 +258,10 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
   router.versioned
     .get({
       path: AGENT_API_ROUTES.LIST_TAGS_PATTERN,
-      fleetAuthz: {
-        fleet: { readAgents: true },
+      security: {
+        authz: {
+          requiredPrivileges: [FLEET_API_PRIVILEGES.AGENTS.READ],
+        },
       },
       summary: `Get agent tags`,
       options: {
@@ -279,8 +290,10 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
   router.versioned
     .post({
       path: AGENT_API_ROUTES.ACTIONS_PATTERN,
-      fleetAuthz: {
-        fleet: { allAgents: true },
+      security: {
+        authz: {
+          requiredPrivileges: [FLEET_API_PRIVILEGES.AGENTS.ALL],
+        },
       },
       summary: `Create an agent action`,
       options: {
@@ -313,8 +326,10 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
   router.versioned
     .post({
       path: AGENT_API_ROUTES.CANCEL_ACTIONS_PATTERN,
-      fleetAuthz: {
-        fleet: { allAgents: true },
+      security: {
+        authz: {
+          requiredPrivileges: [FLEET_API_PRIVILEGES.AGENTS.ALL],
+        },
       },
       summary: `Cancel an agent action`,
       options: {
@@ -348,8 +363,10 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
   router.versioned
     .post({
       path: AGENT_API_ROUTES.LIST_PATTERN,
-      fleetAuthz: {
-        fleet: { readAgents: true },
+      security: {
+        authz: {
+          requiredPrivileges: [FLEET_API_PRIVILEGES.AGENTS.READ],
+        },
       },
       summary: `Get agents by action ids`,
       options: {
@@ -377,8 +394,10 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
   router.versioned
     .post({
       path: AGENT_API_ROUTES.UNENROLL_PATTERN,
-      fleetAuthz: {
-        fleet: { allAgents: true },
+      security: {
+        authz: {
+          requiredPrivileges: [FLEET_API_PRIVILEGES.AGENTS.ALL],
+        },
       },
       summary: `Unenroll an agent`,
       options: {
@@ -396,8 +415,10 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
   router.versioned
     .post({
       path: AGENT_API_ROUTES.REASSIGN_PATTERN,
-      fleetAuthz: {
-        fleet: { allAgents: true },
+      security: {
+        authz: {
+          requiredPrivileges: [FLEET_API_PRIVILEGES.AGENTS.ALL],
+        },
       },
       summary: `Reassign an agent`,
       options: {
@@ -425,8 +446,10 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
   router.versioned
     .post({
       path: AGENT_API_ROUTES.REQUEST_DIAGNOSTICS_PATTERN,
-      fleetAuthz: {
-        fleet: { readAgents: true },
+      security: {
+        authz: {
+          requiredPrivileges: [FLEET_API_PRIVILEGES.AGENTS.READ],
+        },
       },
       summary: `Request agent diagnostics`,
       options: {
@@ -454,8 +477,10 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
   router.versioned
     .post({
       path: AGENT_API_ROUTES.BULK_REQUEST_DIAGNOSTICS_PATTERN,
-      fleetAuthz: {
-        fleet: { readAgents: true },
+      security: {
+        authz: {
+          requiredPrivileges: [FLEET_API_PRIVILEGES.AGENTS.READ],
+        },
       },
       summary: `Bulk request diagnostics from agents`,
       options: {
@@ -483,8 +508,10 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
   router.versioned
     .get({
       path: AGENT_API_ROUTES.LIST_UPLOADS_PATTERN,
-      fleetAuthz: {
-        fleet: { readAgents: true },
+      security: {
+        authz: {
+          requiredPrivileges: [FLEET_API_PRIVILEGES.AGENTS.READ],
+        },
       },
       summary: `Get agent uploads`,
       options: {
@@ -512,8 +539,10 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
   router.versioned
     .get({
       path: AGENT_API_ROUTES.GET_UPLOAD_FILE_PATTERN,
-      fleetAuthz: {
-        fleet: { readAgents: true },
+      security: {
+        authz: {
+          requiredPrivileges: [FLEET_API_PRIVILEGES.AGENTS.READ],
+        },
       },
       summary: `Get an uploaded file`,
       description: `Get a file uploaded by an agent.`,
@@ -542,8 +571,10 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
   router.versioned
     .delete({
       path: AGENT_API_ROUTES.DELETE_UPLOAD_FILE_PATTERN,
-      fleetAuthz: {
-        fleet: { allAgents: true },
+      security: {
+        authz: {
+          requiredPrivileges: [FLEET_API_PRIVILEGES.AGENTS.ALL],
+        },
       },
       summary: `Delete an uploaded file`,
       description: `Delete a file uploaded by an agent.`,
@@ -568,11 +599,11 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
       },
       deleteAgentUploadFileHandler
     );
-
   // Get agent status for policy
   router.versioned
     .get({
       path: AGENT_API_ROUTES.STATUS_PATTERN,
+      // TODO move to kibana authz https://github.com/elastic/kibana/issues/203170
       fleetAuthz: (fleetAuthz: FleetAuthz): boolean =>
         calculateRouteAuthz(
           fleetAuthz,
@@ -604,8 +635,10 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
   router.versioned
     .get({
       path: AGENT_API_ROUTES.DATA_PATTERN,
-      fleetAuthz: {
-        fleet: { readAgents: true },
+      security: {
+        authz: {
+          requiredPrivileges: [FLEET_API_PRIVILEGES.AGENTS.READ],
+        },
       },
       summary: `Get incoming agent data`,
       options: {
@@ -634,8 +667,10 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
   router.versioned
     .post({
       path: AGENT_API_ROUTES.UPGRADE_PATTERN,
-      fleetAuthz: {
-        fleet: { allAgents: true },
+      security: {
+        authz: {
+          requiredPrivileges: [FLEET_API_PRIVILEGES.AGENTS.ALL],
+        },
       },
       summary: `Upgrade an agent`,
       options: {
@@ -663,8 +698,10 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
   router.versioned
     .post({
       path: AGENT_API_ROUTES.BULK_UPGRADE_PATTERN,
-      fleetAuthz: {
-        fleet: { allAgents: true },
+      security: {
+        authz: {
+          requiredPrivileges: [FLEET_API_PRIVILEGES.AGENTS.ALL],
+        },
       },
       summary: `Bulk upgrade agents`,
       options: {
@@ -693,8 +730,10 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
   router.versioned
     .get({
       path: AGENT_API_ROUTES.ACTION_STATUS_PATTERN,
-      fleetAuthz: {
-        fleet: { readAgents: true },
+      security: {
+        authz: {
+          requiredPrivileges: [FLEET_API_PRIVILEGES.AGENTS.READ],
+        },
       },
       summary: `Get an agent action status`,
       options: {
@@ -723,8 +762,10 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
   router.versioned
     .post({
       path: AGENT_API_ROUTES.BULK_REASSIGN_PATTERN,
-      fleetAuthz: {
-        fleet: { allAgents: true },
+      security: {
+        authz: {
+          requiredPrivileges: [FLEET_API_PRIVILEGES.AGENTS.ALL],
+        },
       },
       summary: `Bulk reassign agents`,
       options: {
@@ -753,8 +794,10 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
   router.versioned
     .post({
       path: AGENT_API_ROUTES.BULK_UNENROLL_PATTERN,
-      fleetAuthz: {
-        fleet: { allAgents: true },
+      security: {
+        authz: {
+          requiredPrivileges: [FLEET_API_PRIVILEGES.AGENTS.ALL],
+        },
       },
       summary: `Bulk unenroll agents`,
       options: {
@@ -783,8 +826,10 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
   router.versioned
     .get({
       path: AGENT_API_ROUTES.AVAILABLE_VERSIONS_PATTERN,
-      fleetAuthz: {
-        fleet: { readAgents: true },
+      security: {
+        authz: {
+          requiredPrivileges: [FLEET_API_PRIVILEGES.AGENTS.READ],
+        },
       },
       summary: `Get available agent versions`,
       options: {
@@ -817,8 +862,10 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
       .get({
         path: '/internal/fleet/agents/status_runtime_field',
         access: 'internal',
-        fleetAuthz: {
-          fleet: { readAgents: true },
+        security: {
+          authz: {
+            requiredPrivileges: [FLEET_API_PRIVILEGES.AGENTS.READ],
+          },
         },
       })
       .addVersion(

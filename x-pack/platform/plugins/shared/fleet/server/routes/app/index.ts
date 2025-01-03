@@ -21,6 +21,7 @@ import { CheckPermissionsRequestSchema, CheckPermissionsResponseSchema } from '.
 import { enableSpaceAwarenessMigration } from '../../services/spaces/enable_space_awareness';
 import { type FleetConfigType } from '../../config';
 import { genericErrorResponse } from '../schema/errors';
+import { FLEET_API_PRIVILEGES } from '../../constants/api_privileges';
 
 export const getCheckPermissionsHandler: FleetRequestHandler<
   unknown,
@@ -194,8 +195,14 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
       .post({
         path: '/internal/fleet/enable_space_awareness',
         access: 'internal',
-        fleetAuthz: {
-          fleet: { all: true },
+        security: {
+          authz: {
+            requiredPrivileges: [
+              FLEET_API_PRIVILEGES.AGENTS.ALL,
+              FLEET_API_PRIVILEGES.AGENT_POLICIES.ALL,
+              FLEET_API_PRIVILEGES.SETTINGS.ALL,
+            ],
+          },
         },
       })
       .addVersion(
@@ -236,8 +243,10 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
     .get({
       path: APP_API_ROUTES.AGENT_POLICIES_SPACES,
       access: 'internal',
-      fleetAuthz: {
-        fleet: { readAgentPolicies: true },
+      security: {
+        authz: {
+          requiredPrivileges: [FLEET_API_PRIVILEGES.AGENT_POLICIES.READ],
+        },
       },
     })
     .addVersion(
@@ -251,8 +260,10 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
   router.versioned
     .post({
       path: APP_API_ROUTES.GENERATE_SERVICE_TOKEN_PATTERN,
-      fleetAuthz: {
-        fleet: { allAgents: true },
+      security: {
+        authz: {
+          requiredPrivileges: [FLEET_API_PRIVILEGES.AGENTS.ALL],
+        },
       },
       summary: `Create a service token`,
       options: {

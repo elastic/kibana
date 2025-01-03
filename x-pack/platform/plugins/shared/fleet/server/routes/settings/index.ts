@@ -20,7 +20,7 @@ import {
   GetEnrollmentSettingsResponseSchema,
 } from '../../types';
 import type { FleetConfigType } from '../../config';
-
+import { FLEET_API_PRIVILEGES } from '../../constants/api_privileges';
 import { genericErrorResponse, notFoundResponse } from '../schema/errors';
 
 import { getEnrollmentSettingsHandler } from './enrollment_settings_handler';
@@ -39,6 +39,7 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
       .get({
         path: SETTINGS_API_ROUTES.SPACE_INFO_PATTERN,
         fleetAuthz: (authz) => {
+          // TODO move to kibana authz https://github.com/elastic/kibana/issues/203170
           return (
             authz.fleet.readSettings ||
             authz.integrations.writeIntegrationPolicies ||
@@ -65,8 +66,10 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
     router.versioned
       .put({
         path: SETTINGS_API_ROUTES.SPACE_UPDATE_PATTERN,
-        fleetAuthz: {
-          fleet: { allSettings: true },
+        security: {
+          authz: {
+            requiredPrivileges: [FLEET_API_PRIVILEGES.SETTINGS.ALL],
+          },
         },
         summary: `Create space settings`,
       })
@@ -89,8 +92,10 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
   router.versioned
     .get({
       path: SETTINGS_API_ROUTES.INFO_PATTERN,
-      fleetAuthz: {
-        fleet: { readSettings: true },
+      security: {
+        authz: {
+          requiredPrivileges: [FLEET_API_PRIVILEGES.SETTINGS.READ],
+        },
       },
       summary: `Get settings`,
       options: {
@@ -120,8 +125,10 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
   router.versioned
     .put({
       path: SETTINGS_API_ROUTES.UPDATE_PATTERN,
-      fleetAuthz: {
-        fleet: { allSettings: true },
+      security: {
+        authz: {
+          requiredPrivileges: [FLEET_API_PRIVILEGES.SETTINGS.ALL],
+        },
       },
       summary: `Update settings`,
       options: {
@@ -151,8 +158,10 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
   router.versioned
     .get({
       path: SETTINGS_API_ROUTES.ENROLLMENT_INFO_PATTERN,
-      fleetAuthz: (authz) => {
-        return authz.fleet.addAgents || authz.fleet.addFleetServers;
+      security: {
+        authz: {
+          requiredPrivileges: [FLEET_API_PRIVILEGES.AGENTS.ALL],
+        },
       },
       summary: `Get enrollment settings`,
       options: {
