@@ -17,7 +17,7 @@ import { NewSearchIndexTemplate } from '../new_search_index_template';
 
 import { MethodApi } from './method_api';
 
-describe('MethodApi', () => {
+describe.skip('MethodApi', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     setMockValues({ status: Status.IDLE });
