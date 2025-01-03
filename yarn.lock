@@ -3841,7 +3841,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/advanced-settings-plugin@link:src/plugins/advanced_settings":
+"@kbn/advanced-settings-plugin@link:src/platform/plugins/private/advanced_settings":
   version "0.0.0"
   uid ""
 
@@ -4041,7 +4041,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/banners-plugin@link:x-pack/plugins/banners":
+"@kbn/banners-plugin@link:x-pack/platform/plugins/private/banners":
   version "0.0.0"
   uid ""
 
@@ -4241,7 +4241,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/content-management-plugin@link:src/plugins/content_management":
+"@kbn/content-management-plugin@link:src/platform/plugins/shared/content_management":
   version "0.0.0"
   uid ""
 
@@ -5185,7 +5185,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/custom-branding-plugin@link:x-pack/plugins/custom_branding":
+"@kbn/custom-branding-plugin@link:x-pack/platform/plugins/private/custom_branding":
   version "0.0.0"
   uid ""
 
@@ -5733,11 +5733,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/files-management-plugin@link:src/plugins/files_management":
+"@kbn/files-management-plugin@link:src/platform/plugins/private/files_management":
   version "0.0.0"
   uid ""
 
-"@kbn/files-plugin@link:src/plugins/files":
+"@kbn/files-plugin@link:src/platform/plugins/shared/files":
   version "0.0.0"
   uid ""
 
@@ -5805,15 +5805,15 @@
   version "0.0.0"
   uid ""
 
-"@kbn/global-search-bar-plugin@link:x-pack/plugins/global_search_bar":
+"@kbn/global-search-bar-plugin@link:x-pack/platform/plugins/private/global_search_bar":
   version "0.0.0"
   uid ""
 
-"@kbn/global-search-plugin@link:x-pack/plugins/global_search":
+"@kbn/global-search-plugin@link:x-pack/platform/plugins/shared/global_search":
   version "0.0.0"
   uid ""
 
-"@kbn/global-search-providers-plugin@link:x-pack/plugins/global_search_providers":
+"@kbn/global-search-providers-plugin@link:x-pack/platform/plugins/private/global_search_providers":
   version "0.0.0"
   uid ""
 
@@ -5845,7 +5845,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/guided-onboarding-plugin@link:src/plugins/guided_onboarding":
+"@kbn/guided-onboarding-plugin@link:src/platform/plugins/shared/guided_onboarding":
   version "0.0.0"
   uid ""
 
@@ -5873,7 +5873,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/home-plugin@link:src/plugins/home":
+"@kbn/home-plugin@link:src/platform/plugins/shared/home":
   version "0.0.0"
   uid ""
 
@@ -5901,7 +5901,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/image-embeddable-plugin@link:src/plugins/image_embeddable":
+"@kbn/image-embeddable-plugin@link:src/platform/plugins/private/image_embeddable":
   version "0.0.0"
   uid ""
 
@@ -6065,11 +6065,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/kibana-overview-plugin@link:src/plugins/kibana_overview":
+"@kbn/kibana-overview-plugin@link:src/platform/plugins/private/kibana_overview":
   version "0.0.0"
   uid ""
 
-"@kbn/kibana-react-plugin@link:src/plugins/kibana_react":
+"@kbn/kibana-react-plugin@link:src/platform/plugins/shared/kibana_react":
   version "0.0.0"
   uid ""
 
@@ -6077,7 +6077,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/kibana-utils-plugin@link:src/plugins/kibana_utils":
+"@kbn/kibana-utils-plugin@link:src/platform/plugins/shared/kibana_utils":
   version "0.0.0"
   uid ""
 
@@ -6425,7 +6425,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/navigation-plugin@link:src/plugins/navigation":
+"@kbn/navigation-plugin@link:src/platform/plugins/shared/navigation":
   version "0.0.0"
   uid ""
 
@@ -6437,11 +6437,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/no-data-page-plugin@link:src/plugins/no_data_page":
+"@kbn/no-data-page-plugin@link:src/platform/plugins/private/no_data_page":
   version "0.0.0"
   uid ""
 
-"@kbn/notifications-plugin@link:x-pack/plugins/notifications":
+"@kbn/notifications-plugin@link:x-pack/platform/plugins/shared/notifications":
   version "0.0.0"
   uid ""
 
@@ -6781,7 +6781,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/reporting-plugin@link:x-pack/plugins/reporting":
+"@kbn/reporting-plugin@link:x-pack/platform/plugins/private/reporting":
   version "0.0.0"
   uid ""
 
@@ -6905,7 +6905,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/saved-objects-plugin@link:src/plugins/saved_objects":
+"@kbn/saved-objects-plugin@link:src/platform/plugins/shared/saved_objects":
   version "0.0.0"
   uid ""
 
@@ -6913,11 +6913,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/saved-objects-tagging-oss-plugin@link:src/plugins/saved_objects_tagging_oss":
+"@kbn/saved-objects-tagging-oss-plugin@link:src/platform/plugins/shared/saved_objects_tagging_oss":
   version "0.0.0"
   uid ""
 
-"@kbn/saved-objects-tagging-plugin@link:x-pack/plugins/saved_objects_tagging":
+"@kbn/saved-objects-tagging-plugin@link:x-pack/platform/plugins/private/saved_objects_tagging":
   version "0.0.0"
   uid ""
 
@@ -6945,7 +6945,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/screenshot-mode-plugin@link:src/plugins/screenshot_mode":
+"@kbn/screenshot-mode-plugin@link:src/platform/plugins/shared/screenshot_mode":
   version "0.0.0"
   uid ""
 
@@ -7261,7 +7261,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/serverless@link:x-pack/plugins/serverless":
+"@kbn/serverless@link:x-pack/platform/plugins/shared/serverless":
   version "0.0.0"
   uid ""
 
@@ -7281,7 +7281,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/share-plugin@link:src/plugins/share":
+"@kbn/share-plugin@link:src/platform/plugins/shared/share":
   version "0.0.0"
   uid ""
 
@@ -7749,7 +7749,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/ui-actions-enhanced-plugin@link:src/plugins/ui_actions_enhanced":
+"@kbn/ui-actions-enhanced-plugin@link:src/platform/plugins/shared/ui_actions_enhanced":
   version "0.0.0"
   uid ""
 
@@ -7761,7 +7761,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/ui-actions-plugin@link:src/plugins/ui_actions":
+"@kbn/ui-actions-plugin@link:src/platform/plugins/shared/ui_actions":
   version "0.0.0"
   uid ""
 
