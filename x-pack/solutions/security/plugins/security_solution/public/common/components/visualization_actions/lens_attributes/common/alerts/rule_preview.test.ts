@@ -15,7 +15,13 @@ const mockInternalReferenceId = 'mockInternalReferenceId';
 const mockRuleId = 'mockRuleId';
 
 jest.mock('uuid', () => ({
-  v4: jest.fn().mockReturnValueOnce('mockLayerId').mockReturnValueOnce('mockInternalReferenceId'),
+  v4: jest
+    .fn()
+    .mockReturnValueOnce('mockLayerId')
+    .mockReturnValueOnce('mockInternalReferenceId')
+    .mockReturnValueOnce('mockColumnCountOfRecordsId')
+    .mockReturnValueOnce('mockColumnTimestampId')
+    .mockReturnValueOnce('mockColumnTopValuesId'),
 }));
 
 jest.mock('../../../../../../sourcerer/containers', () => ({

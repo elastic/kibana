@@ -4,13 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { v4 as uuidv4 } from 'uuid';
 
 import { COUNT, TOP_VALUE } from '../../translations';
 import type { GetLensAttributes, LensAttributes } from '../../types';
 
-export const getExternalAlertLensAttributes: GetLensAttributes = (
-  stackByField = 'event.module'
-) => {
+const layerId = uuidv4();
+const columnTimestamp = uuidv4();
+const columnCount = uuidv4();
+const columnTopValue = uuidv4();
+
+export const getExternalAlertLensAttributes: GetLensAttributes = ({
+  stackByField = 'event.module',
+}) => {
   return {
     title: 'External alerts',
     description: '',
@@ -28,14 +34,14 @@ export const getExternalAlertLensAttributes: GetLensAttributes = (
         preferredSeriesType: 'bar_stacked',
         layers: [
           {
-            layerId: 'a3c54471-615f-4ff9-9fda-69b5b2ea3eef',
-            accessors: ['0a923af2-c880-4aa3-aa93-a0b9c2801f6d'],
+            layerId,
+            accessors: [columnCount],
             position: 'top',
             seriesType: 'bar_stacked',
             showGridlines: false,
             layerType: 'data',
-            xAccessor: '37bdf546-3c11-4b08-8c5d-e37debc44f1d',
-            splitAccessor: '42334c6e-98d9-47a2-b4cb-a445abb44c93',
+            xAccessor: columnTimestamp,
+            splitAccessor: columnTopValue,
           },
         ],
         yRightExtent: {
@@ -80,9 +86,9 @@ export const getExternalAlertLensAttributes: GetLensAttributes = (
       datasourceStates: {
         formBased: {
           layers: {
-            'a3c54471-615f-4ff9-9fda-69b5b2ea3eef': {
+            [layerId]: {
               columns: {
-                '37bdf546-3c11-4b08-8c5d-e37debc44f1d': {
+                [columnTimestamp]: {
                   label: '@timestamp',
                   dataType: 'date',
                   operationType: 'date_histogram',
@@ -94,7 +100,7 @@ export const getExternalAlertLensAttributes: GetLensAttributes = (
                     includeEmptyRows: true,
                   },
                 },
-                '0a923af2-c880-4aa3-aa93-a0b9c2801f6d': {
+                [columnCount]: {
                   label: COUNT,
                   dataType: 'number',
                   operationType: 'count',
@@ -103,18 +109,18 @@ export const getExternalAlertLensAttributes: GetLensAttributes = (
                   sourceField: '___records___',
                   params: { emptyAsNull: true },
                 },
-                '42334c6e-98d9-47a2-b4cb-a445abb44c93': {
-                  label: TOP_VALUE(`${stackByField}`), // could be event.category
+                [columnTopValue]: {
+                  label: TOP_VALUE(`${stackByField}`),
                   dataType: 'string',
                   operationType: 'terms',
                   scale: 'ordinal',
-                  sourceField: `${stackByField}`, // could be event.category
+                  sourceField: `${stackByField}`,
                   isBucketed: true,
                   params: {
                     size: 10,
                     orderBy: {
                       type: 'column',
-                      columnId: '0a923af2-c880-4aa3-aa93-a0b9c2801f6d',
+                      columnId: columnCount,
                     },
                     orderDirection: 'desc',
                     otherBucket: true,
@@ -125,11 +131,7 @@ export const getExternalAlertLensAttributes: GetLensAttributes = (
                   },
                 },
               },
-              columnOrder: [
-                '42334c6e-98d9-47a2-b4cb-a445abb44c93',
-                '37bdf546-3c11-4b08-8c5d-e37debc44f1d',
-                '0a923af2-c880-4aa3-aa93-a0b9c2801f6d',
-              ],
+              columnOrder: [columnTopValue, columnTimestamp, columnCount],
               incompleteColumns: {},
             },
           },
@@ -145,7 +147,7 @@ export const getExternalAlertLensAttributes: GetLensAttributes = (
       {
         type: 'index-pattern',
         id: '{dataViewId}',
-        name: 'indexpattern-datasource-layer-a3c54471-615f-4ff9-9fda-69b5b2ea3eef',
+        name: `indexpattern-datasource-layer-${layerId}`,
       },
       {
         type: 'index-pattern',
@@ -158,5 +160,5 @@ export const getExternalAlertLensAttributes: GetLensAttributes = (
         id: '{dataViewId}',
       },
     ],
-  } as LensAttributes;
+  } as unknown as LensAttributes;
 };

@@ -7,11 +7,14 @@
 import { v4 as uuidv4 } from 'uuid';
 import type { GetLensAttributes } from '../../../types';
 const layerId = uuidv4();
+const columnCountOfRecords = uuidv4();
+const columnTopValues = uuidv4();
+const columnTimestamp = uuidv4();
 
-export const getAlertsHistogramLensAttributes: GetLensAttributes = (
+export const getAlertsHistogramLensAttributes: GetLensAttributes = ({
   stackByField = 'kibana.alert.rule.name',
-  extraOptions
-) => {
+  extraOptions,
+}) => {
   return {
     title: 'Alerts',
     description: '',
@@ -30,13 +33,13 @@ export const getAlertsHistogramLensAttributes: GetLensAttributes = (
         layers: [
           {
             layerId,
-            accessors: ['e09e0380-0740-4105-becc-0a4ca12e3944'],
+            accessors: [columnCountOfRecords],
             position: 'top',
             seriesType: 'bar_stacked',
             showGridlines: false,
             layerType: 'data',
-            xAccessor: 'aac9d7d0-13a3-480a-892b-08207a787926',
-            splitAccessor: '34919782-4546-43a5-b668-06ac934d3acd',
+            xAccessor: columnTimestamp,
+            splitAccessor: columnTopValues,
           },
         ],
         yRightExtent: {
@@ -61,7 +64,7 @@ export const getAlertsHistogramLensAttributes: GetLensAttributes = (
           layers: {
             [layerId]: {
               columns: {
-                'aac9d7d0-13a3-480a-892b-08207a787926': {
+                [columnTimestamp]: {
                   label: '@timestamp',
                   dataType: 'date',
                   operationType: 'date_histogram',
@@ -73,7 +76,7 @@ export const getAlertsHistogramLensAttributes: GetLensAttributes = (
                     includeEmptyRows: true,
                   },
                 },
-                'e09e0380-0740-4105-becc-0a4ca12e3944': {
+                [columnCountOfRecords]: {
                   label: 'Count of records',
                   dataType: 'number',
                   operationType: 'count',
@@ -82,7 +85,7 @@ export const getAlertsHistogramLensAttributes: GetLensAttributes = (
                   sourceField: '___records___',
                   params: { emptyAsNull: true },
                 },
-                '34919782-4546-43a5-b668-06ac934d3acd': {
+                [columnTopValues]: {
                   label: `Top values of ${stackByField}`,
                   dataType: 'string',
                   operationType: 'terms',
@@ -93,7 +96,7 @@ export const getAlertsHistogramLensAttributes: GetLensAttributes = (
                     size: 1000,
                     orderBy: {
                       type: 'column',
-                      columnId: 'e09e0380-0740-4105-becc-0a4ca12e3944',
+                      columnId: columnCountOfRecords,
                     },
                     orderDirection: 'desc',
                     otherBucket: true,
@@ -105,11 +108,7 @@ export const getAlertsHistogramLensAttributes: GetLensAttributes = (
                   },
                 },
               },
-              columnOrder: [
-                '34919782-4546-43a5-b668-06ac934d3acd',
-                'aac9d7d0-13a3-480a-892b-08207a787926',
-                'e09e0380-0740-4105-becc-0a4ca12e3944',
-              ],
+              columnOrder: [columnTopValues, columnTimestamp, columnCountOfRecords],
               incompleteColumns: {},
             },
           },
