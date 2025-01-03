@@ -128,6 +128,35 @@ describe('createCustomFieldsUserActionBuilder ', () => {
     expect(screen.getByText('changed Unknown to "My text test value 1"')).toBeInTheDocument();
   });
 
+  it('renders the label of a field with a custom convertValueToDisplayText function', () => {
+    const userAction = getUserAction('customFields', UserActionActions.update, {
+      payload: {
+        customFields: [
+          {
+            type: CustomFieldTypes.TOGGLE,
+            key: 'test_key_2',
+            value: true,
+          },
+        ],
+      },
+    });
+
+    const builder = createCustomFieldsUserActionBuilder({
+      ...builderArgs,
+      userAction,
+    });
+
+    const createdUserAction = builder.build();
+
+    render(
+      <TestProviders>
+        <EuiCommentList comments={createdUserAction} />
+      </TestProviders>
+    );
+
+    expect(screen.getByText('changed My test label 2 to "On"')).toBeInTheDocument();
+  });
+
   it('does not build any user actions if the payload is an empty array', () => {
     const userAction = getUserAction('customFields', UserActionActions.update);
 

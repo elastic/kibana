@@ -397,7 +397,7 @@ describe('CommonFlyout ', () => {
             type: CustomFieldTypes.TEXT,
             label: 'First custom field',
             required: true,
-          },
+          } as CustomFieldConfiguration,
         ],
       };
 
@@ -623,6 +623,16 @@ describe('CommonFlyout ', () => {
                 type: 'number',
                 value: null,
               },
+              {
+                key: 'test_key_7',
+                type: 'list',
+                value: { option_1: 'Option 1' },
+              },
+              {
+                key: 'test_key_8',
+                type: 'list',
+                value: null,
+              },
             ],
           },
         });
@@ -702,7 +712,7 @@ describe('CommonFlyout ', () => {
             type: CustomFieldTypes.TEXT,
             label: 'First custom field',
             required: true,
-          },
+          } as CustomFieldConfiguration,
         ],
         connector: {
           id: 'servicenow-1',

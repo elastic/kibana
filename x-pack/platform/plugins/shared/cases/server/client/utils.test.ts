@@ -791,7 +791,7 @@ describe('utils', () => {
         );
 
         expect(kqlFilter).toMatchInlineSnapshot(
-          `"cases.attributes.customFields: { (key: first_key AND value.string: hello) }"`
+          `"cases.attributes.customFields: { (key: first_key AND value.text: hello) }"`
         );
       });
 
