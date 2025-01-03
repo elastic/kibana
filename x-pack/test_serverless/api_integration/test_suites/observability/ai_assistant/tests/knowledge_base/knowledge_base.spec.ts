@@ -212,6 +212,47 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expect(entries[0].title).to.eql('My title b');
       });
     });
+
+    describe('security roles and access privileges', () => {
+      describe('should deny access for users without the ai_assistant privilege', () => {
+        it('POST /internal/observability_ai_assistant/kb/entries/save', async () => {
+          await observabilityAIAssistantAPIClient
+            .slsUnauthorized({
+              endpoint: 'POST /internal/observability_ai_assistant/kb/entries/save',
+              params: {
+                body: {
+                  id: 'my-doc-id-1',
+                  title: 'My title',
+                  text: 'My content',
+                },
+              },
+            })
+            .expect(403);
+        });
+
+        it('GET /internal/observability_ai_assistant/kb/entries', async () => {
+          await observabilityAIAssistantAPIClient
+            .slsUnauthorized({
+              endpoint: 'GET /internal/observability_ai_assistant/kb/entries',
+              params: {
+                query: { query: '', sortBy: 'title', sortDirection: 'asc' },
+              },
+            })
+            .expect(403);
+        });
+
+        it('DELETE /internal/observability_ai_assistant/kb/entries/{entryId}', async () => {
+          await observabilityAIAssistantAPIClient
+            .slsUnauthorized({
+              endpoint: 'DELETE /internal/observability_ai_assistant/kb/entries/{entryId}',
+              params: {
+                path: { entryId: 'my-doc-id-1' },
+              },
+            })
+            .expect(403);
+        });
+      });
+    });
   });
 }
 
