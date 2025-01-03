@@ -5,10 +5,14 @@
  * 2.0.
  */
 
-import type { DataViewField } from '@kbn/data-views-plugin/common';
+import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 
 import type { MultiColumnSorter } from './common';
-import { getDataGridSchemaFromKibanaFieldType, multiColumnSortFactory } from './common';
+import {
+  getDataGridSchemaFromKibanaFieldType,
+  getPopulatedFieldsFromKibanaDataView,
+  multiColumnSortFactory,
+} from './common';
 
 const data = [
   { s: 'a', n: 1 },
@@ -18,6 +22,24 @@ const data = [
 ];
 
 describe('Data Grid Common', () => {
+  describe('getPopulatedFieldsFromKibanaDataView', () => {
+    it('returns populated fields from a kibana data view', () => {
+      const populatedFields = getPopulatedFieldsFromKibanaDataView(
+        {
+          fields: [
+            { name: '_source', type: 'json' },
+            { name: 'airline', type: 'string' },
+            { name: 'response', type: 'number' },
+          ],
+          metaFields: ['_source'],
+        } as DataView,
+        ['airline', 'response', 'does_not_exist']
+      );
+
+      expect(populatedFields).toStrictEqual(['airline', 'response']);
+    });
+  });
+
   describe('multiColumnSortFactory', () => {
     it('returns desc sorted by one column', () => {
       const sortingColumns1: MultiColumnSorter[] = [{ id: 's', direction: 'desc', type: 'number' }];

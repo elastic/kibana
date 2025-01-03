@@ -87,7 +87,7 @@ export const FieldStatsFlyoutProvider: FC<FieldStatsFlyoutProviderProps> = (prop
   const isMounted = useMountedState();
 
   useEffect(
-    function fetchSampleDocsEffect() {
+    function fetchPopulatedFieldsEffect() {
       if (disablePopulatedFields) return;
 
       if (abortController.current) {
@@ -97,7 +97,7 @@ export const FieldStatsFlyoutProvider: FC<FieldStatsFlyoutProviderProps> = (prop
 
       const indexPattern = dataView.getIndexPattern();
       const indexFilter = getRangeFilter(dataView.getTimeField()?.name, timeRangeMs);
-      const cacheKey = stringHash(JSON.stringify(indexFilter)).toString();
+      const cacheKey = stringHash(JSON.stringify(indexFilter ?? '')).toString();
 
       const fetchPopulatedFields = async function () {
         try {
@@ -105,6 +105,7 @@ export const FieldStatsFlyoutProvider: FC<FieldStatsFlyoutProviderProps> = (prop
             pattern: indexPattern,
             includeEmptyFields: false,
             indexFilter: getRangeFilter(dataView.getTimeField()?.name, timeRangeMs),
+            metaFields: [],
           });
 
           const fieldsWithData = new Set([...nonEmptyFields.map((field) => field.name)]);
