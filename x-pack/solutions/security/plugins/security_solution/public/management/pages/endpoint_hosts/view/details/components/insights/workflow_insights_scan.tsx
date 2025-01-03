@@ -8,7 +8,6 @@
 import React, { useCallback, useMemo } from 'react';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText, EuiToolTip } from '@elastic/eui';
 import {
-  AssistantAvatar,
   DEFEND_INSIGHTS_STORAGE_KEY,
   ConnectorSelectorInline,
   DEFAULT_ASSISTANT_NAMESPACE,
@@ -17,6 +16,7 @@ import {
 import { noop } from 'lodash/fp';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { some } from 'lodash';
+import { AssistantBeacon } from '@kbn/ai-assistant-icon';
 import { useUserPrivileges } from '../../../../../../../common/components/user_privileges';
 import { useSpaceId } from '../../../../../../../common/hooks/use_space_id';
 import { WORKFLOW_INSIGHTS } from '../../../translations';
@@ -120,7 +120,7 @@ export const WorkflowInsightsScanSection = ({
         <EuiFlexItem grow={false}>
           <EuiFlexGroup alignItems="center" gutterSize="s">
             <EuiFlexItem grow={false}>
-              <AssistantAvatar size={'xs'} />
+              <AssistantBeacon />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiText size="s">

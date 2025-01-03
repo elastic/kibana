@@ -5,17 +5,17 @@
  * 2.0.
  */
 import { PerformanceContextProvider } from '@kbn/ebt-tools';
-import { History } from 'history';
-import { CoreStart } from '@kbn/core/public';
+import type { History } from 'history';
+import type { CoreStart } from '@kbn/core/public';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
-import { AppMountParameters } from '@kbn/core/public';
+import type { AppMountParameters } from '@kbn/core/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
-import { InfraPublicConfig } from '../../common/plugin_config_types';
+import type { InfraPublicConfig } from '../../common/plugin_config_types';
 import { LinkToMetricsPage } from '../pages/link_to/link_to_metrics';
 import { InfrastructurePage } from '../pages/metrics';
-import { InfraClientStartDeps, InfraClientStartExports } from '../types';
+import type { InfraClientStartDeps, InfraClientStartExports } from '../types';
 import { CommonInfraProviders, CoreProviders } from './common_providers';
 import { prepareMountElement } from './common_styles';
 import { SourceProvider, MetricsDataViewProvider } from '../containers/metrics_source';

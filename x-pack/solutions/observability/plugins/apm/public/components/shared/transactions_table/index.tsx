@@ -13,10 +13,8 @@ import { compact } from 'lodash';
 import React, { useEffect, useMemo, useState } from 'react';
 import { apmEnableTableSearchBar } from '@kbn/observability-plugin/common';
 import { ApmDocumentType } from '../../../../common/document_type';
-import {
-  getLatencyAggregationType,
-  LatencyAggregationType,
-} from '../../../../common/latency_aggregation_types';
+import type { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
+import { getLatencyAggregationType } from '../../../../common/latency_aggregation_types';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
 import { useApmRouter } from '../../../hooks/use_apm_router';
@@ -24,9 +22,10 @@ import { useBreakpoints } from '../../../hooks/use_breakpoints';
 import { useStateDebounced } from '../../../hooks/use_debounce';
 import { FETCH_STATUS, isPending, useFetcher } from '../../../hooks/use_fetcher';
 import { usePreferredDataSourceAndBucketSize } from '../../../hooks/use_preferred_data_source_and_bucket_size';
-import { APIReturnType } from '../../../services/rest/create_call_apm_api';
+import type { APIReturnType } from '../../../services/rest/create_call_apm_api';
 import { TransactionOverviewLink } from '../links/apm/transaction_overview_link';
-import { ManagedTable, TableSearchBar } from '../managed_table';
+import type { TableSearchBar } from '../managed_table';
+import { ManagedTable } from '../managed_table';
 import { OverviewTableContainer } from '../overview_table_container';
 import { isTimeComparison } from '../time_comparison/get_comparison_options';
 import { getColumns } from './get_columns';
