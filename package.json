@@ -369,7 +369,7 @@
     "@kbn/core-root-server-internal": "link:src/core/packages/root/server-internal",
     "@kbn/core-saved-objects-api-browser": "link:src/core/packages/saved-objects/api-browser",
     "@kbn/core-saved-objects-api-server": "link:src/core/packages/saved-objects/api-server",
-    "@kbn/core-saved-objects-api-server-internal": "link:packages/core/saved-objects/core-saved-objects-api-server-internal",
+    "@kbn/core-saved-objects-api-server-internal": "link:src/core/packages/saved-objects/api-server-internal",
     "@kbn/core-saved-objects-base-server-internal": "link:packages/core/saved-objects/core-saved-objects-base-server-internal",
     "@kbn/core-saved-objects-browser": "link:packages/core/saved-objects/core-saved-objects-browser",
     "@kbn/core-saved-objects-browser-internal": "link:packages/core/saved-objects/core-saved-objects-browser-internal",
