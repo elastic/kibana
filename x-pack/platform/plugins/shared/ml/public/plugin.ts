@@ -75,6 +75,7 @@ import type { MlApi } from './application/services/ml_api_service';
 import { renderApp } from './application/render_app';
 import { AnomalySwimLane } from './shared_components';
 import { MlManagementLocatorInternal } from './locator/ml_management_locator';
+import type { getMlManagementLocator } from './locator/get_ml_management_locator';
 import { TelemetryService } from './application/services/telemetry/telemetry_service';
 import type { ITelemetryClient } from './application/services/telemetry/types';
 import { registerEmbeddables } from './embeddables';
@@ -129,9 +130,7 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
   private appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
 
   private getLocator: undefined | (() => ReturnType<typeof getMlLocator>);
-  private getManagementLocator: undefined | (() => ReturnType<typeof getManagementLocator>);
-
-  private sharedMlServices: MlSharedServices | undefined;
+  private getManagementLocator: undefined | (() => ReturnType<typeof getMlManagementLocator>);
 
   private isServerless: boolean = false;
   private enabledFeatures: MlFeatures = {
@@ -176,10 +175,9 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
     pluginsSetup: MlSetupDependencies
   ): {
     getLocator?: () => ReturnType<typeof getMlLocator>;
-    getManagementLocator?: () => ReturnType<typeof getManagementLocator>;
+    getManagementLocator?: () => ReturnType<typeof getMlManagementLocator>;
     elasticModels?: ElasticModels;
   } {
-    this.sharedMlServices = getMlSharedServices(core.http);
     const deps = {
       home: pluginsSetup.home,
       licenseManagement: pluginsSetup.licenseManagement,
@@ -245,18 +243,6 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
       this.getLocator = async () => await getMlLocator(pluginsSetup.share);
       this.getManagementLocator = async () =>
         await new MlManagementLocatorInternal(pluginsSetup.share);
-    }
-
-    if (pluginsSetup.management) {
-      registerManagementSection(
-        pluginsSetup.management,
-        core,
-        {
-          usageCollection: pluginsSetup.usageCollection,
-        },
-        this.isServerless,
-        this.enabledFeatures
-      ).enable();
     }
 
     const licensing = pluginsSetup.licensing.license$.pipe(take(1));
@@ -367,8 +353,7 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
     deps: MlStartDependencies
   ): {
     getLocator?: () => ReturnType<typeof getMlLocator>;
-    locator?: LocatorPublic<MlLocatorParams>;
-    getManagementLocator?: () => ReturnType<typeof getManagementLocator>;
+    getManagementLocator?: () => ReturnType<typeof getMlManagementLocator>;
     elasticModels?: ElasticModels;
     getMlApi: () => Promise<MlApi>;
     components: { AnomalySwimLane: typeof AnomalySwimLane };
