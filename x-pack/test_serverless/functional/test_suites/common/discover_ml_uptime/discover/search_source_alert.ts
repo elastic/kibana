@@ -555,7 +555,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.click('editIndexPatternButton');
       await PageObjects.header.waitUntilLoadingHasFinished();
       await retry.try(async () => {
-        await PageObjects.settings.setIndexPatternField('search-s');
+        await PageObjects.settings.setIndexPatternField('search-s*');
       });
       await testSubjects.click('saveIndexPatternButton');
       await testSubjects.click('confirmModalConfirmButton');
