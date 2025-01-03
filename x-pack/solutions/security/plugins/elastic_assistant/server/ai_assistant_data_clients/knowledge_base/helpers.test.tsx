@@ -159,7 +159,6 @@ describe('getStructuredToolForIndexEntry', () => {
       indexEntry: mockIndexEntry,
       esClient: mockEsClient,
       logger: mockLogger,
-      elserId: 'elser123',
     });
 
     expect(tool).toBeInstanceOf(DynamicStructuredTool);
@@ -202,7 +201,6 @@ describe('getStructuredToolForIndexEntry', () => {
       indexEntry: mockIndexEntry,
       esClient: mockEsClient,
       logger: mockLogger,
-      elserId: 'elser123',
     });
 
     const input = { query: 'testQuery', field1: 'value1', field2: 2 };
@@ -220,7 +218,6 @@ describe('getStructuredToolForIndexEntry', () => {
       indexEntry: mockIndexEntry,
       esClient: mockEsClient,
       logger: mockLogger,
-      elserId: 'elser123',
     });
 
     const input = { query: 'testQuery', field1: 'value1', field2: 2 };
