@@ -62,7 +62,8 @@
       "fieldFormats",
       "charts",
       "esqlDataGrid",
-      "esql"
+      "esql",
+      "esqlVariables",
     ],
     "extraPublicDirs": [
       "common/constants"

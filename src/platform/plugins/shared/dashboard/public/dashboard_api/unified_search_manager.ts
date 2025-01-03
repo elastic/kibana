@@ -33,6 +33,7 @@ import fastIsEqual from 'fast-deep-equal';
 import { PublishingSubject, StateComparators } from '@kbn/presentation-publishing';
 import { ControlGroupApi } from '@kbn/controls-plugin/public';
 import { cloneDeep } from 'lodash';
+import { esqlVariablesService } from '@kbn/esql-variables/common';
 import type { SavedObjectReference } from '@kbn/core-saved-objects-api-server';
 import {
   GlobalQueryStateFromUrl,
@@ -118,6 +119,9 @@ export function initializeUnifiedSearchManager(
   );
   const controlGroupTimeslice$ = controlGroupApi$.pipe(
     switchMap((controlGroupApi) => (controlGroupApi ? controlGroupApi.timeslice$ : of(undefined)))
+  );
+  controlGroupSubscriptions.add(
+    esqlVariablesService.esqlVariables$.subscribe(() => panelsReload$.next())
   );
   controlGroupSubscriptions.add(
     combineLatest([unifiedSearchFilters$, controlGroupFilters$]).subscribe(

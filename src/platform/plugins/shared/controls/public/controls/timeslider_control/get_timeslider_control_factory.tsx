@@ -229,6 +229,7 @@ export const getTimesliderControlFactory = (): ControlFactory<
             setTimeslice(undefined);
             hasTimeSliceSelection$.next(false);
           },
+          clearVariables: () => {},
           hasSelections$: hasTimeSliceSelection$ as PublishingSubject<boolean | undefined>,
           CustomPrependComponent: () => {
             const [autoApplySelections, viewMode] = useBatchedPublishingSubjects(

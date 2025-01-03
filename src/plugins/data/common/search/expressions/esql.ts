@@ -15,9 +15,15 @@ import type {
   IKibanaSearchResponse,
   ISearchGeneric,
 } from '@kbn/search-types';
-import type { Datatable, ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
+import { esqlVariablesService } from '@kbn/esql-variables/common';
+import type {
+  Datatable,
+  DatatableColumn,
+  ExpressionFunctionDefinition,
+} from '@kbn/expressions-plugin/common';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
-import { getIndexPatternFromESQLQuery, getStartEndParams } from '@kbn/esql-utils';
+import { getNamedParams, mapVariableToColumn } from '@kbn/esql-utils';
+import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import { zipObject } from 'lodash';
 import { catchError, defer, map, Observable, switchMap, tap, throwError } from 'rxjs';
 import { buildEsQuery, type Filter } from '@kbn/es-query';
@@ -185,8 +191,9 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
             const esQueryConfigs = getEsQueryConfig(
               uiSettings as Parameters<typeof getEsQueryConfig>[0]
             );
+            const variables = esqlVariablesService.getVariables();
 
-            const namedParams = getStartEndParams(query, input.timeRange);
+            const namedParams = getNamedParams(query, input.timeRange, variables);
 
             if (namedParams.length) {
               params.params = namedParams;
@@ -318,6 +325,7 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
           );
         }),
         map(({ rawResponse: body, warning }) => {
+          const variables = esqlVariablesService.getVariables();
           // all_columns in the response means that there is a separation between
           // columns with data and empty columns
           // columns contain only columns with data while all_columns everything
@@ -349,11 +357,17 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
               isNull: hasEmptyColumns ? !lookup.has(name) : false,
             })) ?? [];
 
+          const updatedWithVariablesColumns = mapVariableToColumn(
+            query,
+            variables,
+            allColumns as DatatableColumn[]
+          );
+
           // sort only in case of empty columns to correctly align columns to items in values array
           if (hasEmptyColumns) {
-            allColumns.sort((a, b) => Number(a.isNull) - Number(b.isNull));
+            updatedWithVariablesColumns.sort((a, b) => Number(a.isNull) - Number(b.isNull));
           }
-          const columnNames = allColumns?.map(({ name }) => name);
+          const columnNames = updatedWithVariablesColumns?.map(({ name }) => name);
 
           const rows = body.values.map((row) => zipObject(columnNames, row));
 
@@ -366,7 +380,7 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
                 totalCount: body.values.length,
               },
             },
-            columns: allColumns,
+            columns: updatedWithVariablesColumns,
             rows,
             warning,
           } as Datatable;

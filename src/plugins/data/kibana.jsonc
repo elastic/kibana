@@ -33,7 +33,8 @@
     "requiredBundles": [
       "kibanaUtils",
       "kibanaReact",
-      "inspector"
+      "inspector",
+      "esqlVariables"
     ],
     "extraPublicDirs": [
       "common"

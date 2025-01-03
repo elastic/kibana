@@ -9,6 +9,7 @@
 
 import { FieldType, FunctionReturnType } from '../../definitions/types';
 import { ESQL_COMMON_NUMERIC_TYPES, ESQL_NUMBER_TYPES } from '../../shared/esql_types';
+import { ESQLVariableType } from '../../shared/types';
 import { getDateHistogramCompletionItem } from '../commands/stats/util';
 import { allStarConstant } from '../complete_items';
 import { roundParameterTypes } from './constants';
@@ -355,6 +356,83 @@ describe('autocomplete.suggest', () => {
           const suggestions = await suggest('FROM a | STATS BY /');
 
           expect(suggestions).toContainEqual(expectedCompletionItem);
+        });
+      });
+
+      describe('create control suggestion', () => {
+        test('suggests `Create control` option', async () => {
+          const { suggest } = await setup();
+
+          const suggestions = await suggest('FROM a | STATS BY /', {
+            callbacks: {
+              canSuggestVariables: () => true,
+              getVariablesByType: () => [],
+              getColumnsFor: () => Promise.resolve([{ name: 'clientip', type: 'ip' }]),
+            },
+          });
+
+          expect(suggestions).toContainEqual({
+            label: 'Create control',
+            text: '',
+            kind: 'Issue',
+            detail: 'Click to create',
+            command: { id: 'esql.control.fields.create', title: 'Click to create' },
+            sortText: '11A',
+          });
+        });
+
+        test('suggests `?field` option', async () => {
+          const { suggest } = await setup();
+
+          const suggestions = await suggest('FROM a | STATS BY /', {
+            callbacks: {
+              canSuggestVariables: () => true,
+              getVariablesByType: () => [
+                {
+                  key: 'field',
+                  value: 'clientip',
+                  type: ESQLVariableType.FIELDS,
+                },
+              ],
+              getColumnsFor: () => Promise.resolve([{ name: 'clientip', type: 'ip' }]),
+            },
+          });
+
+          expect(suggestions).toContainEqual({
+            label: '?field',
+            text: '?field',
+            kind: 'Constant',
+            detail: 'Named parameter',
+            command: undefined,
+            sortText: '11A',
+          });
+        });
+
+        test('suggests `?interval` option', async () => {
+          const { suggest } = await setup();
+
+          const suggestions = await suggest('FROM a | STATS BY BUCKET(@timestamp, /)', {
+            callbacks: {
+              canSuggestVariables: () => true,
+              getVariablesByType: () => [
+                {
+                  key: 'interval',
+                  value: '1 hour',
+                  type: ESQLVariableType.TIME_LITERAL,
+                },
+              ],
+              getColumnsFor: () => Promise.resolve([{ name: '@timestamp', type: 'date' }]),
+            },
+          });
+
+          expect(suggestions).toContainEqual({
+            label: '?interval',
+            text: '?interval',
+            kind: 'Constant',
+            detail: 'Named parameter',
+            command: undefined,
+            sortText: '1A',
+          });
         });
       });
     });

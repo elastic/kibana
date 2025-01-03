@@ -48,7 +48,8 @@
       "kibanaUtils",
       "presentationUtil",
       "presentationPanel",
-      "savedObjects"
+      "savedObjects",
+      "esqlVariables"
     ]
   }
 }

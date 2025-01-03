@@ -16,7 +16,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import { createKbnUrlStateStorage, withNotifyOnErrors } from '@kbn/kibana-utils-plugin/public';
-
+import { esqlVariablesService } from '@kbn/esql-variables/common';
 import { ViewMode } from '@kbn/presentation-publishing';
 import { DashboardApi, DashboardCreationOptions, DashboardRenderer } from '..';
 import { SharedDashboardState } from '../../common';
@@ -207,6 +207,8 @@ export function DashboardApp({
    */
   useEffect(() => {
     if (!dashboardApi) return;
+    // clean up any existing variables on dashboard initialization
+    esqlVariablesService.clearVariables();
     const appStateSubscription = kbnUrlStateStorage
       .change$(DASHBOARD_STATE_STORAGE_KEY)
       .pipe(debounceTime(10)) // debounce URL updates so react has time to unsubscribe when changing URLs
