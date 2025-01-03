@@ -14,9 +14,9 @@ import type {
   SupertestWithoutAuthProviderType,
 } from '@kbn/ftr-common-functional-services';
 
-import { SupertestWithBasicAuth } from './basic_auth_supertest';
 import { getRoleDefinitionForUser, isBuiltInRole } from '../../common/lib/authentication';
 import type { TestDefinitionAuthentication as User } from '../../common/lib/types';
+import { SupertestWithBasicAuth } from '../../common/services/basic_auth_supertest';
 import type { DeploymentAgnosticFtrProviderContext } from '../ftr_provider_context';
 
 export interface RequestHeadersOptions {

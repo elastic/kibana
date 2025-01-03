@@ -20,11 +20,11 @@ export default function ({ loadTestFile, getService }: DeploymentAgnosticFtrProv
         await createUsersAndRoles(es, supertest);
       }
     });
-    loadTestFile(require.resolve('./resolve_copy_to_space_conflicts')); // PASS
-    loadTestFile(require.resolve('./create')); // PASS
+    loadTestFile(require.resolve('./resolve_copy_to_space_conflicts'));
+    loadTestFile(require.resolve('./create'));
     loadTestFile(require.resolve('./delete'));
-    loadTestFile(require.resolve('./get_all')); // PASS
-    loadTestFile(require.resolve('./get')); // PASS
-    loadTestFile(require.resolve('./update')); // PASS
+    loadTestFile(require.resolve('./get_all'));
+    loadTestFile(require.resolve('./get'));
+    loadTestFile(require.resolve('./update'));
   });
 }

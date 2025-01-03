@@ -10,7 +10,7 @@ import Fs from 'fs/promises';
 import type { LegacyUrlAlias } from '@kbn/core-saved-objects-base-server-internal';
 import { ALL_SAVED_OBJECT_INDICES } from '@kbn/core-saved-objects-server';
 
-import type { DeploymentAgnosticFtrProviderContext } from '../ftr_provider_context';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 export const SPACE_1 = {
   id: 'space_1',
@@ -80,9 +80,7 @@ const OBJECTS_TO_SHARE: Array<{
   },
 ];
 
-export function getTestDataLoader({
-  getService,
-}: Pick<DeploymentAgnosticFtrProviderContext, 'getService'>) {
+export function getTestDataLoader({ getService }: Pick<FtrProviderContext, 'getService'>) {
   const spacesService = getService('spaces');
   const kbnServer = getService('kibanaServer');
   const supertest = getService('supertest');

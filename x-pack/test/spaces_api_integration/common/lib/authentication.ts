@@ -343,9 +343,7 @@ export const isBuiltInRole = (role: string) =>
     'monitoring_user',
     'machine_learning_admin',
     'machine_learning_user',
-    'apm_user',
   ].includes(role);
 
-export const getRoleDefinitionForUser = (user: { role: string }) => {
-  return ROLES[user.role as keyof typeof ROLES];
-};
+export const getRoleDefinitionForUser = (user: { role: string }) =>
+  ROLES[user.role as keyof typeof ROLES];

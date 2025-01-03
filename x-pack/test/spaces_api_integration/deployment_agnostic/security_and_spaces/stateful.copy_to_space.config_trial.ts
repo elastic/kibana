@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { createTestConfig } from './common/config';
+import { createTestConfig } from '../common/config';
 
-export default createTestConfig({
-  license: 'trial',
-  testFiles: [require.resolve('./security_and_spaces/apis/copy_to_space')],
-});
+export default createTestConfig('copy_to_space - trial license', [
+  require.resolve('./apis/copy_to_space'),
+]);

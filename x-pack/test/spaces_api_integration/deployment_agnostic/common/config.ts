@@ -13,13 +13,7 @@ import type { FtrConfigProviderContext } from '@kbn/test';
 import { createStatefulTestConfig } from '../../../api_integration/deployment_agnostic/default_configs/stateful.config.base';
 import { services } from '../services';
 
-export function createTestConfig({
-  license = 'trial',
-  testFiles,
-}: {
-  license: string;
-  testFiles?: string[];
-}) {
+export function createTestConfig(name: string, testFiles?: string[]) {
   return async (context: FtrConfigProviderContext) => {
     const { readConfigFile } = context;
     const config = {
@@ -50,7 +44,7 @@ export function createTestConfig({
       },
       testFiles: testFiles ?? [require.resolve('../security_and_spaces/apis')],
       junit: {
-        reportName: 'X-Pack Spaces API Integration Tests -- ',
+        reportName: `X-Pack Spaces API Deployment Agnostic Integration Tests -- ${name}`,
       },
     })(context);
 

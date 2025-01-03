@@ -9,7 +9,7 @@ import type { Test } from 'supertest';
 
 import type { SupertestWithoutAuthProviderType } from '@kbn/ftr-common-functional-services';
 
-import type { TestDefinitionAuthentication as User } from '../../common/lib/types';
+import type { TestDefinitionAuthentication as User } from '../lib/types';
 
 export class SupertestWithBasicAuth {
   private readonly supertestWithoutAuth: SupertestWithoutAuthProviderType;
