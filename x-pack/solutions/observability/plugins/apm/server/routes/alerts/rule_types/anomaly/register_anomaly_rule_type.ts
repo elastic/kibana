@@ -36,6 +36,7 @@ import type { ObservabilityApmAlert } from '@kbn/alerts-as-data-utils';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
 import { asyncForEach } from '@kbn/std';
 import { compact } from 'lodash';
+import { anomalyParamsSchema } from '@kbn/response-ops-rule-params/apm_anomaly';
 import { getSeverity } from '../../../../../common/anomaly_detection';
 import {
   PROCESSOR_EVENT,
@@ -47,7 +48,10 @@ import {
   getEnvironmentEsField,
   getEnvironmentLabel,
 } from '../../../../../common/environment_filter_values';
-import type { THRESHOLD_MET_GROUP } from '../../../../../common/rules/apm_rule_types';
+import type {
+  THRESHOLD_MET_GROUP,
+  ApmRuleParamsType,
+} from '../../../../../common/rules/apm_rule_types';
 import {
   ANOMALY_ALERT_SEVERITY_TYPES,
   APM_SERVER_FEATURE_ID,
@@ -61,8 +65,6 @@ import { apmActionVariables } from '../../action_variables';
 import type { RegisterRuleDependencies } from '../../register_apm_rule_types';
 import { ApmRuleTypeAlertDefinition } from '../../register_apm_rule_types';
 import { getServiceGroupFieldsForAnomaly } from './get_service_group_fields_for_anomaly';
-import type { ApmRuleParamsType } from '../../../../../common/rules/schema';
-import { anomalyParamsSchema } from '../../../../../common/rules/schema';
 import {
   getAnomalyDetectorIndex,
   getAnomalyDetectorType,

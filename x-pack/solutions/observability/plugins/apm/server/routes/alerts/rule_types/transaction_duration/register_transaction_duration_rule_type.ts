@@ -33,6 +33,7 @@ import {
 } from '@kbn/rule-data-utils';
 import type { ObservabilityApmAlert } from '@kbn/alerts-as-data-utils';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
+import { transactionDurationParamsSchema } from '@kbn/response-ops-rule-params/transaction_duration';
 import { getGroupByTerms } from '../utils/get_groupby_terms';
 import { SearchAggregatedTransactionSetting } from '../../../../../common/aggregated_transactions';
 import { getEnvironmentEsField } from '../../../../../common/environment_filter_values';
@@ -43,14 +44,15 @@ import {
   TRANSACTION_NAME,
   TRANSACTION_TYPE,
 } from '../../../../../common/es_fields/apm';
-import type { THRESHOLD_MET_GROUP } from '../../../../../common/rules/apm_rule_types';
+import type {
+  THRESHOLD_MET_GROUP,
+  ApmRuleParamsType,
+} from '../../../../../common/rules/apm_rule_types';
 import {
   APM_SERVER_FEATURE_ID,
   formatTransactionDurationReason,
   RULE_TYPES_CONFIG,
 } from '../../../../../common/rules/apm_rule_types';
-import type { ApmRuleParamsType } from '../../../../../common/rules/schema';
-import { transactionDurationParamsSchema } from '../../../../../common/rules/schema';
 import { environmentQuery } from '../../../../../common/utils/environment_query';
 import {
   getAlertUrlTransaction,
