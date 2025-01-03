@@ -13,8 +13,8 @@ import { services as commonServices } from '../../../common/services';
 export type { SupertestWithRoleScopeType } from './role_scoped_supertest';
 
 export const services = {
-  ...deploymentAgnosticServices,
   ...commonServices,
+  ...deploymentAgnosticServices,
   usageAPI: apiIntegrationServices.usageAPI,
   roleScopedSupertest: RoleScopedSupertestProvider,
 };
