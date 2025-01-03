@@ -4473,7 +4473,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-doc-links-server@link:packages/core/doc-links/core-doc-links-server":
+"@kbn/core-doc-links-server@link:src/core/packages/doc-links/server":
   version "0.0.0"
   uid ""
 

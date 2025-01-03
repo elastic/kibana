@@ -73,7 +73,6 @@ packages/core/custom-branding/core-custom-branding-server-mocks @elastic/appex-s
 packages/core/deprecations/core-deprecations-browser-mocks @elastic/kibana-core
 packages/core/deprecations/core-deprecations-server-mocks @elastic/kibana-core
 packages/core/doc-links/core-doc-links-browser-mocks @elastic/kibana-core
-packages/core/doc-links/core-doc-links-server @elastic/kibana-core
 packages/core/doc-links/core-doc-links-server-internal @elastic/kibana-core
 packages/core/doc-links/core-doc-links-server-mocks @elastic/kibana-core
 packages/core/elasticsearch/core-elasticsearch-client-server-internal @elastic/kibana-core
@@ -493,6 +492,7 @@ src/core/packages/deprecations/server @elastic/kibana-core
 src/core/packages/deprecations/server-internal @elastic/kibana-core
 src/core/packages/doc-links/browser @elastic/kibana-core
 src/core/packages/doc-links/browser-internal @elastic/kibana-core
+src/core/packages/doc-links/server @elastic/kibana-core
 src/platform/packages/private/analytics/utils/analytics_collection_utils @elastic/kibana-core
 src/platform/packages/private/default-nav/analytics @elastic/kibana-data-discovery @elastic/kibana-presentation @elastic/kibana-visualizations
 src/platform/packages/private/default-nav/devtools @elastic/kibana-management
