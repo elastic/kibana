@@ -6861,7 +6861,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/safer-lodash-set@link:packages/kbn-safer-lodash-set":
+"@kbn/safer-lodash-set@link:src/platform/packages/shared/kbn-safer-lodash-set":
   version "0.0.0"
   uid ""
 
