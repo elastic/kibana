@@ -6,12 +6,16 @@
  */
 
 import { expect } from '@kbn/scout';
-import { test } from '../../fixtures';
+import { type ExtendedScoutTestFixtures, test } from '../../fixtures';
 
 const CUSTOM_INTEGRATION_NAME = 'mylogs';
 
-function setupPage({ isAdmin }) {
-  return async ({ browserAuth, pageObjects: { customLogsPage }, page }) => {
+function setupPage({ isAdmin }: { isAdmin: boolean }) {
+  return async ({
+    browserAuth,
+    pageObjects: { customLogsPage },
+    page,
+  }: ExtendedScoutTestFixtures) => {
     await browserAuth.loginAsAdmin();
     await customLogsPage.deleteIntegration(CUSTOM_INTEGRATION_NAME);
 
@@ -69,13 +73,9 @@ test.describe(
               }),
             });
           });
-
-          await setupPage({ isAdmin: true })({
-            browserAuth,
-            pageObjects: { customLogsPage },
-            page,
-          });
         });
+
+        test.beforeEach(setupPage({ isAdmin: true }));
 
         test('apiKey is not generated', async ({ pageObjects: { customLogsPage } }) => {
           await expect(customLogsPage.apiKeyCreateErrorCallout()).toBeVisible();
