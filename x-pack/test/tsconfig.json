@@ -130,7 +130,6 @@
     "@kbn/telemetry-tools",
     "@kbn/profiling-plugin",
     "@kbn/observability-onboarding-plugin",
-    "@kbn/bfetch-plugin",
     "@kbn/uptime-plugin",
     "@kbn/ml-category-validator",
     "@kbn/observability-ai-assistant-plugin",
@@ -190,6 +189,8 @@
     "@kbn/sse-utils-server",
     "@kbn/gen-ai-functional-testing",
     "@kbn/integration-assistant-plugin",
-    "@kbn/core-elasticsearch-server"
+    "@kbn/core-elasticsearch-server",
+    "@kbn/streams-schema",
+    "@kbn/response-ops-rule-params"
   ]
 }
