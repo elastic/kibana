@@ -14,10 +14,16 @@ import { merge as webpackMerge } from 'webpack-merge';
 import { NodeLibsBrowserPlugin } from '@kbn/node-libs-browser-webpack-plugin';
 import { REPO_ROOT } from './lib/constants';
 import { IgnoreNotFoundExportPlugin } from './ignore_not_found_export_plugin';
+import 'webpack-dev-server'; // Extends webpack configuration with `devServer` property
 
 // eslint-disable-next-line import/no-default-export
 export default ({ config: storybookConfig }: { config: Configuration }) => {
   const config: Configuration = {
+    devServer: {
+      devMiddleware: {
+        stats: 'errors-only',
+      },
+    },
     externals,
     module: {
       // no parse rules for a few known large packages which have no require() statements
@@ -25,6 +31,11 @@ export default ({ config: storybookConfig }: { config: Configuration }) => {
       // already bundled with all its necessary dependencies
       noParse: [/[\/\\]node_modules[\/\\]vega[\/\\]build-es5[\/\\]vega\.js$/],
       rules: [
+        {
+          test: /\.mjs$/,
+          include: /node_modules/,
+          type: 'javascript/auto',
+        },
         {
           test: /\.(html|md|txt|tmpl)$/,
           type: 'asset/source',
@@ -39,7 +50,7 @@ export default ({ config: storybookConfig }: { config: Configuration }) => {
     },
     plugins: [new NodeLibsBrowserPlugin(), new IgnoreNotFoundExportPlugin()],
     resolve: {
-      extensions: ['.js', '.ts', '.tsx', '.json', '.mdx'],
+      extensions: ['.js', '.mjs', '.ts', '.tsx', '.json', '.mdx'],
       mainFields: ['browser', 'main'],
       alias: {
         core_app_image_assets: resolve(REPO_ROOT, 'src/core/public/styles/core_app/images'),

@@ -60,7 +60,16 @@ async function fetchPolicies(client: ElasticsearchClient): Promise<TransportResu
 
 export function registerFetchRoute({ router, license, lib: { handleEsError } }: RouteDependencies) {
   router.get(
-    { path: addBasePath('/policies'), validate: false },
+    {
+      path: addBasePath('/policies'),
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Relies on es client for authorization',
+        },
+      },
+      validate: false,
+    },
     license.guardApiRoute(async (context, request, response) => {
       const { asCurrentUser } = (await context.core).elasticsearch.client;
 

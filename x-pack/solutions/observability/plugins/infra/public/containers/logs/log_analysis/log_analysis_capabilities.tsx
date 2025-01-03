@@ -9,10 +9,8 @@ import createContainer from 'constate';
 import { useMemo, useState, useEffect } from 'react';
 import { decodeOrThrow } from '@kbn/io-ts-utils';
 import { useTrackedPromise } from '../../../hooks/use_tracked_promise';
-import {
-  getMlCapabilitiesResponsePayloadRT,
-  GetMlCapabilitiesResponsePayload,
-} from './api/ml_api_types';
+import type { GetMlCapabilitiesResponsePayload } from './api/ml_api_types';
+import { getMlCapabilitiesResponsePayloadRT } from './api/ml_api_types';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 
 export const useLogAnalysisCapabilities = () => {
