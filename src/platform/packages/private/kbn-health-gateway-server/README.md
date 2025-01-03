@@ -59,7 +59,7 @@ two different Kibana instances for testing. Before using it, you'll want to crea
 a `.env` file:
 
 ```bash
-# From the /packages/kbn-health-gateway-server/scripts directory
+# From the /src/platform/packages/private/kbn-health-gateway-server/scripts directory
 $ cp .env.example .env
 # (modify the .env settings if desired)
 $ docker-compose up
@@ -69,7 +69,7 @@ This will automatically run Kibana on the ports from the sample `gateway.yml`
 above (5605-5606).
 
 Once you have your `gateway.yml` and have started docker-compose, you can run the
-server from the `/packages/kbn-health-gateway-server` directory with `yarn start`. Then you should
+server from the `/src/platform/packages/private/kbn-health-gateway-server` directory with `yarn start`. Then you should
 be able to make requests to the `/` endpoint:
 
 ```bash

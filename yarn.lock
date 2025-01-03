@@ -5865,7 +5865,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/health-gateway-server@link:packages/kbn-health-gateway-server":
+"@kbn/health-gateway-server@link:src/platform/packages/private/kbn-health-gateway-server":
   version "0.0.0"
   uid ""
 
