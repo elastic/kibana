@@ -15,13 +15,19 @@ import { ASSET_VERSION } from '../../../../common/constants';
 import { logsSettings } from './logs_layer';
 import { isRoot } from '../helpers/hierarchy';
 import { getComponentTemplateName } from './name';
+import { otelFields, otelMappings, otelPrefixes, otelSettings } from './otel_layer';
+import { getSortedFields } from '../helpers/field_sorting';
 
 export function generateLayer(
   id: string,
   definition: WiredStreamDefinition
 ): ClusterPutComponentTemplateRequest {
   const properties: Record<string, MappingProperty> = {};
-  Object.entries(definition.stream.ingest.wired.fields).forEach(([field, props]) => {
+  const fields = {
+    ...definition.stream.ingest.wired.fields,
+    ...(definition.stream.ingest.wired.otel_compat_mode ? otelFields : {}),
+  };
+  getSortedFields(fields).forEach(([field, props]) => {
     const property: MappingProperty = {
       type: props.type,
     };
@@ -33,15 +39,31 @@ export function generateLayer(
       (property as MappingDateProperty).format = props.format;
     }
     properties[field] = property;
+    if (
+      definition.stream.ingest.wired.otel_compat_mode &&
+      otelPrefixes.some((prefix) => field.startsWith(prefix))
+    ) {
+      properties[field.replace(new RegExp(`^(${otelPrefixes.join('|')})`), '')] = {
+        type: 'alias',
+        path: field,
+      };
+    }
   });
   return {
     name: getComponentTemplateName(id),
     template: {
-      settings: isRoot(definition.name) ? logsSettings : {},
+      settings: isRoot(definition.name)
+        ? logsSettings
+        : definition.stream.ingest.wired.otel_compat_mode
+        ? otelSettings
+        : {},
       mappings: {
         subobjects: false,
         dynamic: false,
-        properties,
+        properties: {
+          ...properties,
+          ...(definition.stream.ingest.wired.otel_compat_mode ? otelMappings : {}),
+        },
       },
     },
     version: ASSET_VERSION,

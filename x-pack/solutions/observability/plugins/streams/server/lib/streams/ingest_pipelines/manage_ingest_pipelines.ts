@@ -42,7 +42,7 @@ export async function upsertIngestPipeline({
     await retryTransientEsErrors(() => esClient.ingest.putPipeline(pipeline), { logger });
     logger.debug(() => `Installed index template: ${JSON.stringify(pipeline)}`);
   } catch (error: any) {
-    logger.error(`Error updating index template: ${error.message}`);
+    logger.error(`Error updating ingest pipeline ${pipeline.id}: ${error.message}`);
     throw error;
   }
 }

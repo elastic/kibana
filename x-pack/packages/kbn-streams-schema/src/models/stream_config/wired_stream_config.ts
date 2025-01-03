@@ -8,12 +8,16 @@
 import { z } from '@kbn/zod';
 import { fieldDefinitionSchema, processingDefinitionSchema, streamChildSchema } from '../common';
 
+export const otelProcessingDefinitionSchema = z.record(z.string(), z.any());
+
 export const wiredStreamConfigDefinitonSchema = z
   .object({
     ingest: z.object({
       processing: z.array(processingDefinitionSchema).default([]),
       wired: z.object({
         fields: fieldDefinitionSchema.default({}),
+        otel_compat_mode: z.optional(z.boolean().default(false)),
+        otel_processing: z.optional(z.array(otelProcessingDefinitionSchema)),
       }),
       routing: z.array(streamChildSchema).default([]),
     }),
