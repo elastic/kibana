@@ -10,8 +10,8 @@
 import React, { forwardRef, useEffect, useMemo, useState } from 'react';
 import { combineLatest, skip } from 'rxjs';
 
+import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { euiThemeVars } from '@kbn/ui-theme';
 
 import { GridLayoutStateManager } from '../types';
 import { DragHandle, DragHandleApi } from './drag_handle';
@@ -30,6 +30,7 @@ export interface GridPanelProps {
 export const GridPanel = forwardRef<HTMLDivElement, GridPanelProps>(
   ({ panelId, rowIndex, renderPanelContents, gridLayoutStateManager }, panelRef) => {
     const [dragHandleApi, setDragHandleApi] = useState<DragHandleApi | null>(null);
+    const { euiTheme } = useEuiTheme();
 
     /** Set initial styles based on state at mount to prevent styles from "blipping" */
     const initialStyles = useMemo(() => {
@@ -74,7 +75,7 @@ export const GridPanel = forwardRef<HTMLDivElement, GridPanelProps>(
               const { position: draggingPosition } = activePanel;
               const runtimeSettings = gridLayoutStateManager.runtimeSettings$.getValue();
 
-              ref.style.zIndex = `${euiThemeVars.euiZModal}`;
+              ref.style.zIndex = `${euiTheme.levels.modal}`;
               if (currentInteractionEvent?.type === 'resize') {
                 // if the current panel is being resized, ensure it is not shrunk past the size of a single cell
                 ref.style.width = `${Math.max(

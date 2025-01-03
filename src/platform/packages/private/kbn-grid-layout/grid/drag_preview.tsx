@@ -10,6 +10,7 @@
 import React, { useEffect, useRef } from 'react';
 import { combineLatest, skip } from 'rxjs';
 
+import { transparentize, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 
 import { GridLayoutStateManager } from './types';
@@ -22,6 +23,7 @@ export const DragPreview = ({
   gridLayoutStateManager: GridLayoutStateManager;
 }) => {
   const dragPreviewRef = useRef<HTMLDivElement | null>(null);
+  const { euiTheme } = useEuiTheme();
 
   useEffect(
     () => {
