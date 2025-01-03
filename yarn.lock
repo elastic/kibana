@@ -4665,7 +4665,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-i18n-server@link:packages/core/i18n/core-i18n-server":
+"@kbn/core-i18n-server@link:src/core/packages/i18n/server":
   version "0.0.0"
   uid ""
 
