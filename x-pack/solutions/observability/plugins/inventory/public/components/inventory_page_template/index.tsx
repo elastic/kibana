@@ -15,7 +15,6 @@ import { useKibana } from '../../hooks/use_kibana';
 import { SearchBar } from '../search_bar';
 import { getEntityManagerEnablement } from './no_data_config';
 import { useEntityManager } from '../../hooks/use_entity_manager';
-import { Welcome } from '../entity_enablement/welcome_modal';
 import { useInventoryAbortableAsync } from '../../hooks/use_inventory_abortable_async';
 import { EmptyState } from '../empty_states/empty_state';
 import { useIsLoadingComplete } from '../../hooks/use_is_loading_complete';
@@ -41,17 +40,10 @@ export function InventoryPageTemplate({ children }: { children: React.ReactNode 
   } = useKibana();
 
   const { PageTemplate: ObservabilityPageTemplate } = observabilityShared.navigation;
-  const {
-    isEntityManagerEnabled,
-    isEnablementLoading,
-    refresh,
-    showWelcomedModal,
-    toggleWelcomedModal,
-  } = useEntityManager();
+  const { isEntityManagerEnabled, isEnablementLoading, refresh } = useEntityManager();
 
   const handleSuccess = () => {
     refresh();
-    toggleWelcomedModal();
   };
 
   const { value = { hasData: false }, loading: hasDataLoading } = useInventoryAbortableAsync(
@@ -117,12 +109,7 @@ export function InventoryPageTemplate({ children }: { children: React.ReactNode 
           <EuiFlexItem>
             <SearchBar />
           </EuiFlexItem>
-          <EuiFlexItem>
-            {children}
-            {showWelcomedModal ? (
-              <Welcome onClose={toggleWelcomedModal} onConfirm={toggleWelcomedModal} />
-            ) : null}
-          </EuiFlexItem>
+          <EuiFlexItem>{children}</EuiFlexItem>
         </EuiFlexGroup>
       ) : (
         <EmptyState />

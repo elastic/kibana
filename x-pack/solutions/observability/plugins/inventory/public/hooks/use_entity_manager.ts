@@ -6,15 +6,12 @@
  */
 
 import { useAbortableAsync } from '@kbn/observability-utils-browser/hooks/use_abortable_async';
-import { useState } from 'react';
 import { useKibana } from './use_kibana';
 
 export const useEntityManager = () => {
   const {
     services: { entityManager },
   } = useKibana();
-
-  const [showWelcomedModal, setWelcomedModal] = useState(false);
 
   const {
     value = { enabled: false },
@@ -31,7 +28,5 @@ export const useEntityManager = () => {
     isEntityManagerEnabled: value.enabled,
     isEnablementLoading: loading,
     refresh,
-    showWelcomedModal,
-    toggleWelcomedModal: () => setWelcomedModal((state) => !state),
   };
 };
