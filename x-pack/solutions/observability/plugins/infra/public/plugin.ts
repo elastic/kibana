@@ -141,45 +141,45 @@ export class Plugin implements InfraClientPluginClass {
           return [
             ...(logs.show
               ? [
-                {
-                  label: logsTitle,
-                  sortKey: 200,
-                  entries: getLogsNavigationEntries({
-                    isLogsExplorerAccessible,
-                    config: this.config,
-                    routes: logRoutes,
-                  }),
-                },
-              ]
+                  {
+                    label: logsTitle,
+                    sortKey: 200,
+                    entries: getLogsNavigationEntries({
+                      isLogsExplorerAccessible,
+                      config: this.config,
+                      routes: logRoutes,
+                    }),
+                  },
+                ]
               : []),
             ...(infrastructure.show
               ? [
-                {
-                  label: metricsTitle,
-                  sortKey: 300,
-                  entries: [
-                    {
-                      label: inventoryTitle,
-                      app: 'metrics',
-                      path: '/inventory',
-                    },
-                    ...(this.config.featureFlags.metricsExplorerEnabled
-                      ? [
-                        {
-                          label: metricsExplorerTitle,
-                          app: 'metrics',
-                          path: '/explorer',
-                        },
-                      ]
-                      : []),
-                    {
-                      label: hostsTitle,
-                      app: 'metrics',
-                      path: '/hosts',
-                    },
-                  ],
-                },
-              ]
+                  {
+                    label: metricsTitle,
+                    sortKey: 300,
+                    entries: [
+                      {
+                        label: inventoryTitle,
+                        app: 'metrics',
+                        path: '/inventory',
+                      },
+                      ...(this.config.featureFlags.metricsExplorerEnabled
+                        ? [
+                            {
+                              label: metricsExplorerTitle,
+                              app: 'metrics',
+                              path: '/explorer',
+                            },
+                          ]
+                        : []),
+                      {
+                        label: hostsTitle,
+                        app: 'metrics',
+                        path: '/hosts',
+                      },
+                    ],
+                  },
+                ]
               : []),
           ];
         })
@@ -252,14 +252,14 @@ export class Plugin implements InfraClientPluginClass {
         },
         ...(metricsExplorerEnabled
           ? [
-            {
-              id: 'metrics-explorer',
-              title: i18n.translate('xpack.infra.homePage.metricsExplorerTabTitle', {
-                defaultMessage: 'Metrics Explorer',
-              }),
-              path: '/explorer',
-            },
-          ]
+              {
+                id: 'metrics-explorer',
+                title: i18n.translate('xpack.infra.homePage.metricsExplorerTabTitle', {
+                  defaultMessage: 'Metrics Explorer',
+                }),
+                path: '/explorer',
+              },
+            ]
           : []),
         {
           id: 'settings',
@@ -339,7 +339,7 @@ export class Plugin implements InfraClientPluginClass {
     return startContract;
   }
 
-  stop() { }
+  stop() {}
 }
 
 const getLogsNavigationEntries = ({
