@@ -80,7 +80,6 @@ packages/core/environment/core-environment-server-mocks @elastic/kibana-core
 packages/core/execution-context/core-execution-context-browser-mocks @elastic/kibana-core
 packages/core/execution-context/core-execution-context-server-mocks @elastic/kibana-core
 packages/core/fatal-errors/core-fatal-errors-browser-mocks @elastic/kibana-core
-packages/core/feature-flags/core-feature-flags-browser @elastic/kibana-core
 packages/core/feature-flags/core-feature-flags-browser-internal @elastic/kibana-core
 packages/core/feature-flags/core-feature-flags-browser-mocks @elastic/kibana-core
 packages/core/feature-flags/core-feature-flags-server @elastic/kibana-core
@@ -493,6 +492,7 @@ src/core/packages/execution-context/server @elastic/kibana-core
 src/core/packages/execution-context/server-internal @elastic/kibana-core
 src/core/packages/fatal-errors/browser @elastic/kibana-core
 src/core/packages/fatal-errors/browser-internal @elastic/kibana-core
+src/core/packages/feature-flags/browser @elastic/kibana-core
 src/platform/packages/private/analytics/utils/analytics_collection_utils @elastic/kibana-core
 src/platform/packages/private/default-nav/analytics @elastic/kibana-data-discovery @elastic/kibana-presentation @elastic/kibana-visualizations
 src/platform/packages/private/default-nav/devtools @elastic/kibana-management
