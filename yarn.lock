@@ -4797,7 +4797,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-overlays-browser@link:packages/core/overlays/core-overlays-browser":
+"@kbn/core-overlays-browser@link:src/core/packages/overlays/browser":
   version "0.0.0"
   uid ""
 
