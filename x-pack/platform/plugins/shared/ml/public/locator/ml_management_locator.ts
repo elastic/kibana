@@ -10,7 +10,7 @@ import type { SharePublicSetup, SharePublicStart } from '@kbn/share-plugin/publi
 import type { LocatorPublic } from '@kbn/share-plugin/public';
 import type { SerializableRecord } from '@kbn/utility-types';
 import type { AnomalyDetectionQueryState, MlLocatorParams } from '@kbn/ml-common-types/locator';
-import { ML_PAGES } from '@kbn/ml-common-types/locator';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 import {
   formatAnomalyDetectionCreateJobSelectIndex,
   formatAnomalyDetectionCreateJobSelectType,
