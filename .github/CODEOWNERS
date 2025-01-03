@@ -109,7 +109,6 @@ packages/core/saved-objects/core-saved-objects-browser-mocks @elastic/kibana-cor
 packages/core/saved-objects/core-saved-objects-import-export-server-mocks @elastic/kibana-core
 packages/core/saved-objects/core-saved-objects-migration-server-mocks @elastic/kibana-core
 packages/core/saved-objects/core-saved-objects-server-mocks @elastic/kibana-core
-packages/core/status/core-status-server-internal @elastic/kibana-core
 packages/core/status/core-status-server-mocks @elastic/kibana-core
 packages/core/test-helpers/core-test-helpers-deprecations-getters @elastic/kibana-core
 packages/core/test-helpers/core-test-helpers-http-setup-browser @elastic/kibana-core
@@ -493,6 +492,7 @@ src/core/packages/security/server-internal @elastic/kibana-core
 src/core/packages/security/server-mocks @elastic/kibana-core
 src/core/packages/status/common @elastic/kibana-core
 src/core/packages/status/server @elastic/kibana-core
+src/core/packages/status/server-internal @elastic/kibana-core
 src/platform/packages/private/analytics/utils/analytics_collection_utils @elastic/kibana-core
 src/platform/packages/private/default-nav/analytics @elastic/kibana-data-discovery @elastic/kibana-presentation @elastic/kibana-visualizations
 src/platform/packages/private/default-nav/devtools @elastic/kibana-management
