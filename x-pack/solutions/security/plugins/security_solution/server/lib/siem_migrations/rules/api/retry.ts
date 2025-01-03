@@ -10,13 +10,14 @@ import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import { APMTracer } from '@kbn/langchain/server/tracers/apm';
 import { getLangSmithTracer } from '@kbn/langchain/server/tracers/langsmith';
 import {
-  StartRuleMigrationRequestBody,
-  StartRuleMigrationRequestParams,
-  type StartRuleMigrationResponse,
+  RetryRuleMigrationRequestBody,
+  RetryRuleMigrationRequestParams,
+  type RetryRuleMigrationResponse,
 } from '../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
 import { SIEM_RULE_MIGRATION_RETRY_PATH } from '../../../../../common/siem_migrations/constants';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { withLicense } from './util/with_license';
+import type { RuleMigrationFilters } from '../data/rule_migrations_data_rules_client';
 
 export const registerSiemRuleMigrationsRetryRoute = (
   router: SecuritySolutionPluginRouter,
@@ -33,15 +34,20 @@ export const registerSiemRuleMigrationsRetryRoute = (
         version: '1',
         validate: {
           request: {
-            params: buildRouteValidationWithZod(StartRuleMigrationRequestParams),
-            body: buildRouteValidationWithZod(StartRuleMigrationRequestBody),
+            params: buildRouteValidationWithZod(RetryRuleMigrationRequestParams),
+            body: buildRouteValidationWithZod(RetryRuleMigrationRequestBody),
           },
         },
       },
       withLicense(
-        async (context, req, res): Promise<IKibanaResponse<StartRuleMigrationResponse>> => {
+        async (context, req, res): Promise<IKibanaResponse<RetryRuleMigrationResponse>> => {
           const migrationId = req.params.migration_id;
-          const { langsmith_options: langsmithOptions, connector_id: connectorId } = req.body;
+          const {
+            langsmith_options: langsmithOptions,
+            connector_id: connectorId,
+            failed,
+            not_fully_translated: notFullyTranslated,
+          } = req.body;
 
           try {
             const ctx = await context.resolve(['core', 'actions', 'alerting', 'securitySolution']);
@@ -59,7 +65,8 @@ export const registerSiemRuleMigrationsRetryRoute = (
               ],
             };
 
-            const { updated } = await ruleMigrationsClient.task.updateToRetry(migrationId);
+            const filters: RuleMigrationFilters = { failed, notFullyTranslated };
+            const { updated } = await ruleMigrationsClient.task.updateToRetry(migrationId, filters);
             if (!updated) {
               return res.ok({ body: { started: false } });
             }

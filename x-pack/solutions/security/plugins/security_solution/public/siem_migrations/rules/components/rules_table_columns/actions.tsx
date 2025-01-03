@@ -7,12 +7,19 @@
 
 import React from 'react';
 import { EuiLink } from '@elastic/eui';
+import {
+  RuleTranslationResult,
+  SiemMigrationStatus,
+} from '../../../../../common/siem_migrations/constants';
 import { getRuleDetailsUrl } from '../../../../common/components/link_to';
 import { useKibana } from '../../../../common/lib/kibana';
 import { APP_UI_ID, SecurityPageName } from '../../../../../common';
-import type { RuleMigration } from '../../../../../common/siem_migrations/model/rule_migration.gen';
+import {
+  RuleMigrationStatusEnum,
+  type RuleMigration,
+} from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import * as i18n from './translations';
-import type { TableColumn } from './constants';
+import { type TableColumn } from './constants';
 
 interface ActionNameProps {
   disableActions?: boolean;
@@ -46,7 +53,7 @@ const ActionName = ({
     );
   }
 
-  if (migrationRule.status === 'failed') {
+  if (migrationRule.status === SiemMigrationStatus.FAILED) {
     return (
       <EuiLink disabled={disableActions} onClick={() => {}} data-test-subj="restartRule">
         {i18n.ACTIONS_RESTART_LABEL}
@@ -54,7 +61,7 @@ const ActionName = ({
     );
   }
 
-  if (migrationRule.translation_result === 'full') {
+  if (migrationRule.translation_result === RuleTranslationResult.FULL) {
     return (
       <EuiLink
         disabled={disableActions}
@@ -95,11 +102,11 @@ export const createActionsColumn = ({
   return {
     field: 'elastic_rule',
     name: i18n.COLUMN_ACTIONS,
-    render: (value: RuleMigration['elastic_rule'], migrationRule: RuleMigration) => {
-      return (
+    render: (_, rule: RuleMigration) => {
+      return rule.status === RuleMigrationStatusEnum.failed ? null : (
         <ActionName
           disableActions={disableActions}
-          migrationRule={migrationRule}
+          migrationRule={rule}
           openMigrationRuleDetails={openMigrationRuleDetails}
           installMigrationRule={installMigrationRule}
         />
