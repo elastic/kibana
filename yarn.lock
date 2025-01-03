@@ -4617,7 +4617,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-http-resources-server@link:packages/core/http/core-http-resources-server":
+"@kbn/core-http-resources-server@link:src/core/packages/http/resources-server":
   version "0.0.0"
   uid ""
 
