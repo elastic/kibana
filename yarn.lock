@@ -3965,7 +3965,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/analytics@link:packages/kbn-analytics":
+"@kbn/analytics@link:src/platform/packages/shared/kbn-analytics":
   version "0.0.0"
   uid ""
 
