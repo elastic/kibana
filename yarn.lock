@@ -4529,7 +4529,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-execution-context-server@link:packages/core/execution-context/core-execution-context-server":
+"@kbn/core-execution-context-server@link:src/core/packages/execution-context/server":
   version "0.0.0"
   uid ""
 
