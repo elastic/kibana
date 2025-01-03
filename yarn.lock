@@ -4197,7 +4197,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/config-mocks@link:packages/kbn-config-mocks":
+"@kbn/config-mocks@link:src/platform/packages/private/kbn-config-mocks":
   version "0.0.0"
   uid ""
 
