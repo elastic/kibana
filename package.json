@@ -319,7 +319,7 @@
     "@kbn/core-i18n-server-internal": "link:src/core/packages/i18n/server-internal",
     "@kbn/core-injected-metadata-browser-internal": "link:src/core/packages/injected-metadata/browser-internal",
     "@kbn/core-injected-metadata-common-internal": "link:src/core/packages/injected-metadata/common-internal",
-    "@kbn/core-integrations-browser-internal": "link:packages/core/integrations/core-integrations-browser-internal",
+    "@kbn/core-integrations-browser-internal": "link:src/core/packages/integrations/browser-internal",
     "@kbn/core-lifecycle-browser": "link:packages/core/lifecycle/core-lifecycle-browser",
     "@kbn/core-lifecycle-browser-internal": "link:packages/core/lifecycle/core-lifecycle-browser-internal",
     "@kbn/core-lifecycle-server": "link:packages/core/lifecycle/core-lifecycle-server",
