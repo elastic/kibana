@@ -4721,7 +4721,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-logging-common-internal@link:packages/core/logging/core-logging-common-internal":
+"@kbn/core-logging-common-internal@link:src/core/packages/logging/common-internal":
   version "0.0.0"
   uid ""
 
