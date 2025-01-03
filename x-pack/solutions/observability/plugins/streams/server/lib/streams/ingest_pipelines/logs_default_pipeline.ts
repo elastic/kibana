@@ -23,6 +23,31 @@ export const logsDefaultPipelineProcessors = [
   {
     dot_expander: {
       field: '*',
+      ignore_failure: true,
+    },
+  },
+  {
+    dot_expander: {
+      field: 'attributes',
+      ignore_failure: true,
+    },
+  },
+  {
+    dot_expander: {
+      field: 'body.structured',
+      ignore_failure: true,
+    },
+  },
+  {
+    dot_expander: {
+      field: 'resource.attributes',
+      ignore_failure: true,
+    },
+  },
+  {
+    dot_expander: {
+      field: 'scope.attributes',
+      ignore_failure: true,
     },
   },
 ];
