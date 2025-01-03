@@ -7609,7 +7609,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/telemetry-collection-xpack-plugin@link:x-pack/plugins/telemetry_collection_xpack":
+"@kbn/telemetry-collection-xpack-plugin@link:x-pack/platform/plugins/private/telemetry_collection_xpack":
   version "0.0.0"
   uid ""
 

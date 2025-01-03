@@ -931,7 +931,7 @@ in their infrastructure.
 |The task manager is a generic system for running background tasks.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/telemetry_collection_xpack/README.md[telemetryCollectionXpack]
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/private/telemetry_collection_xpack/README.md[telemetryCollectionXpack]
 |Gathers all usage collection, retrieving them from both: OSS and X-Pack plugins.
 
 
