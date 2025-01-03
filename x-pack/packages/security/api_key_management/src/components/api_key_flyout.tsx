@@ -40,7 +40,7 @@ import { CodeEditorField } from '@kbn/code-editor';
 import type { AuthenticatedUser, CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedDate, FormattedMessage } from '@kbn/i18n-react';
-import { useDarkMode, useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { KibanaServerError } from '@kbn/kibana-utils-plugin/public';
 import { FormField, FormRow } from '@kbn/security-form-components';
 import type {
@@ -185,7 +185,6 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
   isLoadingCurrentUser,
 }) => {
   const { euiTheme } = useEuiTheme();
-  const isDarkMode = useDarkMode();
   const {
     services: { http },
   } = useKibana();
@@ -743,7 +742,6 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
                       fullWidth
                       languageId="xjson"
                       height={200}
-                      useDarkTheme={isDarkMode}
                     />
                   </FormRow>
                 </EuiPanel>
@@ -882,7 +880,6 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
                           fullWidth
                           languageId="xjson"
                           height={200}
-                          useDarkTheme={isDarkMode}
                         />
                       </FormRow>
                     </>
@@ -967,7 +964,6 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
                         fullWidth
                         languageId="xjson"
                         height={200}
-                        useDarkTheme={isDarkMode}
                       />
                     </FormRow>
                   </>

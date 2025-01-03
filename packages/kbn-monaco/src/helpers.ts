@@ -15,6 +15,10 @@ export function registerLanguage(language: LangModuleType | CustomLangModuleType
 
   monaco.languages.register({ id: ID });
 
+  if ('languageThemeResolver' in language) {
+    monaco.editor.registerLanguageThemeResolver(ID, language.languageThemeResolver);
+  }
+
   monaco.languages.onLanguage(ID, async () => {
     if (lexerRules) {
       monaco.languages.setMonarchTokensProvider(ID, lexerRules);
@@ -34,6 +38,10 @@ export function registerLanguage(language: LangModuleType | CustomLangModuleType
   });
 }
 
+/**
+ *
+ * @deprecated avoid using this function, use `monaco.editor.registerLanguageThemeDefinition` instead
+ */
 export function registerTheme(id: string, themeData: monaco.editor.IStandaloneThemeData) {
   try {
     monaco.editor.defineTheme(id, themeData);
