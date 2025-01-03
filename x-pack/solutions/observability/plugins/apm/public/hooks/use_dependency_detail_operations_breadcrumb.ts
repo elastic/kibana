@@ -10,7 +10,7 @@ import { castArray } from 'lodash';
 import { useBreadcrumb } from '../context/breadcrumbs/use_breadcrumb';
 import { useAnyOfApmParams } from './use_apm_params';
 import { useApmRouter } from './use_apm_router';
-import { Breadcrumb } from '../context/breadcrumbs/context';
+import type { Breadcrumb } from '../context/breadcrumbs/context';
 
 export function useDependencyDetailOperationsBreadcrumb(
   extraBreadCrumbs: Breadcrumb | Breadcrumb[] = []

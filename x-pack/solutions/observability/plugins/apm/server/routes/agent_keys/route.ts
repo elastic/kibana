@@ -7,10 +7,14 @@
 
 import * as t from 'io-ts';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
-import { AgentKeysResponse, getAgentKeys } from './get_agent_keys';
-import { AgentKeysPrivilegesResponse, getAgentKeysPrivileges } from './get_agent_keys_privileges';
-import { invalidateAgentKey, InvalidateAgentKeyResponse } from './invalidate_agent_key';
-import { createAgentKey, CreateAgentKeyResponse } from './create_agent_key';
+import type { AgentKeysResponse } from './get_agent_keys';
+import { getAgentKeys } from './get_agent_keys';
+import type { AgentKeysPrivilegesResponse } from './get_agent_keys_privileges';
+import { getAgentKeysPrivileges } from './get_agent_keys_privileges';
+import type { InvalidateAgentKeyResponse } from './invalidate_agent_key';
+import { invalidateAgentKey } from './invalidate_agent_key';
+import type { CreateAgentKeyResponse } from './create_agent_key';
+import { createAgentKey } from './create_agent_key';
 import { privilegesTypeRt } from '../../../common/privilege_type';
 
 const agentKeysRoute = createApmServerRoute({
