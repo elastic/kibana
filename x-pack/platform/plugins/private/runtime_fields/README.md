@@ -152,7 +152,7 @@ import React, { useRef } from 'react';
 import { EuiButton } from '@elastic/eui';
 import { OverlayRef } from 'src/core/public';
 
-import { createKibanaReactContext, toMountPoint } from '../../../../src/plugins/kibana_react/public';
+import { createKibanaReactContext, toMountPoint } from '../../../../src/platform/plugins/shared/kibana_react/public';
 import { RuntimeFieldEditorFlyoutContent, RuntimeField } from '../runtime_fields/public';
 
 const MyComponent = () => {

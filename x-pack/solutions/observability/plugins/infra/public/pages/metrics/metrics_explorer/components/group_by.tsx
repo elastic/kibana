@@ -9,7 +9,7 @@ import { EuiComboBox } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback } from 'react';
 import { useMetricsDataViewContext } from '../../../../containers/metrics_source';
-import { MetricsExplorerOptions } from '../hooks/use_metrics_explorer_options';
+import type { MetricsExplorerOptions } from '../hooks/use_metrics_explorer_options';
 
 interface Props {
   options: MetricsExplorerOptions;
