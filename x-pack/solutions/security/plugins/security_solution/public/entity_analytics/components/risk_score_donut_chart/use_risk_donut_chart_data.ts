@@ -6,7 +6,7 @@
  */
 import { sum } from 'lodash/fp';
 import { useMemo } from 'react';
-import { RISK_SEVERITY_COLOUR } from '../../common/utils';
+import { useRiskSeverityColors } from '../../common/utils';
 import type { LegendItem } from '../../../common/components/charts/legend_item';
 import type { SeverityCount } from '../severity/types';
 import type { DonutChartProps } from '../../../common/components/charts/donutchart';
@@ -17,8 +17,9 @@ const legendField = 'kibana.alert.severity';
 export const useRiskDonutChartData = (
   severityCount: SeverityCount
 ): [DonutChartProps['data'], LegendItem[], number] => {
+  const riskSeverityColor = useRiskSeverityColors();
   const [donutChartData, legendItems, total] = useMemo(() => {
-    const severities = Object.keys(RISK_SEVERITY_COLOUR) as RiskSeverity[];
+    const severities = Object.keys(riskSeverityColor) as RiskSeverity[];
 
     return [
       severities.map((status) => ({
@@ -26,13 +27,13 @@ export const useRiskDonutChartData = (
         value: severityCount[status],
       })),
       severities.map((status) => ({
-        color: RISK_SEVERITY_COLOUR[status],
+        color: riskSeverityColor[status],
         field: legendField,
         value: status,
       })),
       sum(Object.values(severityCount)),
     ];
-  }, [severityCount]);
+  }, [riskSeverityColor, severityCount]);
 
   return [donutChartData, legendItems, total];
 };
