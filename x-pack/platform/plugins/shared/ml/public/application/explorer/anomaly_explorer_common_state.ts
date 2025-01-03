@@ -24,7 +24,7 @@ import { StateService } from '../services/state_service';
 import type { MlJobService } from '../services/job_service';
 import type { GroupObj } from '../components/job_selector/job_selector';
 
-import { createJobs, type ExplorerJob } from './explorer_utils';
+import { createJobs } from './explorer_utils';
 import type { ExplorerJob } from './explorer_utils';
 import type { AnomalyExplorerUrlStateService } from './hooks/use_explorer_url_state';
 import type { KQLFilterSettings } from './components/explorer_query_bar/explorer_query_bar';

@@ -33,8 +33,12 @@ import { APP_ID as CASE_APP_ID, FEATURE_ID as CASE_GENERAL_ID } from '@kbn/cases
 import type { SortOrder } from '@elastic/elasticsearch/lib/api/types';
 import { AlertsTable } from '@kbn/response-ops-alerts-table';
 import type { AlertsTableSortCombinations } from '@kbn/response-ops-alerts-table/types';
-import { ML_RULE_TYPE_IDS } from '../../../../common';
-import { ML_VALID_CONSUMERS } from '../../../../common/constants/alerts';
+import { ML_RULE_TYPE_IDS, ML_VALID_CONSUMERS } from '@kbn/ml-common-constants/alerts';
+import {
+  ALERT_ANOMALY_DETECTION_JOB_ID,
+  ALERT_ANOMALY_SCORE,
+  ALERT_ANOMALY_TIMESTAMP,
+} from '@kbn/ml-common-constants/alerts';
 import { AlertActions } from '../../../alerting/anomaly_detection_alerts_table/alert_actions';
 import { AlertsTableFlyout } from '../../../alerting/anomaly_detection_alerts_table/alerts_table_flyout';
 import { CollapsiblePanel } from '../../components/collapsible_panel';
@@ -43,11 +47,6 @@ import { useAnomalyExplorerContext } from '../anomaly_explorer_context';
 import { AlertsSummary } from './alerts_summary';
 import { AnomalyDetectionAlertsOverviewChart } from './chart';
 import { statusNameMap } from './const';
-import {
-  ALERT_ANOMALY_DETECTION_JOB_ID,
-  ALERT_ANOMALY_SCORE,
-  ALERT_ANOMALY_TIMESTAMP,
-} from '../../../../common/constants/alerts';
 import { AlertsTableCellValue } from '../../../alerting/anomaly_detection_alerts_table/render_cell_value';
 
 const columns: EuiDataGridColumn[] = [
