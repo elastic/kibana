@@ -14,11 +14,8 @@ import type { Observable } from 'rxjs';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { throttle } from 'lodash';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
-import {
-  type MlEntityField,
-  type MlEntityFieldOperation,
-  ML_ANOMALY_THRESHOLD,
-} from '@kbn/ml-anomaly-utils';
+import type { MlEntityField, MlEntityFieldOperation } from '@kbn/ml-anomaly-utils';
+import { ML_ANOMALY_THRESHOLD } from '@kbn/ml-anomaly-utils/anomaly_threshold';
 import { TimeBuckets } from '@kbn/ml-time-buckets';
 import useObservable from 'react-use/lib/useObservable';
 import type { TimeRange } from '@kbn/es-query';

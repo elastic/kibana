@@ -17,14 +17,14 @@ import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
-import {
-  getEntityFieldList,
-  type MlEntityField,
-  type MlInfluencer,
-  type MlRecordForInfluencer,
-  ML_JOB_AGGREGATION,
+import { ML_JOB_AGGREGATION } from '@kbn/ml-anomaly-utils/aggregation_types';
+import { getEntityFieldList } from '@kbn/ml-anomaly-utils/anomaly_utils';
+import type {
+  InfluencersFilterQuery,
+  MlEntityField,
+  MlInfluencer,
+  MlRecordForInfluencer,
 } from '@kbn/ml-anomaly-utils';
-import type { InfluencersFilterQuery, MlAnomaliesTableRecordExtended } from '@kbn/ml-anomaly-utils';
 import type { TimeRangeBounds } from '@kbn/ml-time-buckets';
 import type { IUiSettingsClient } from '@kbn/core/public';
 import { parseInterval } from '@kbn/ml-parse-interval';
@@ -35,6 +35,7 @@ import {
 } from '@kbn/ml-common-constants/search';
 import type { CombinedJob } from '@kbn/ml-common-types/anomaly_detection_jobs/combined_job';
 import type { Annotations, AnnotationsTable } from '@kbn/ml-common-types/annotations';
+import { ML_RESULTS_INDEX_PATTERN } from '@kbn/ml-common-constants/index_patterns';
 
 import type { MlIndexUtils } from '../util/index_service';
 import {
@@ -55,7 +56,6 @@ import {
 import type { MlResultsService } from '../services/results_service';
 import { useMlKibana } from '../contexts/kibana';
 import type { MlApi } from '../services/ml_api_service';
-import { ML_RESULTS_INDEX_PATTERN } from '../../../common/constants/index_patterns';
 import type { GroupObj } from '../components/job_selector/job_selector';
 
 export interface ExplorerJob {

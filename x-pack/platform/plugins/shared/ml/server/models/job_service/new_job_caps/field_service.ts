@@ -11,13 +11,11 @@ import type { IScopedClusterClient } from '@kbn/core/server';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import type { DataViewsService } from '@kbn/data-views-plugin/common';
 import { TIME_SERIES_METRIC_TYPES } from '@kbn/ml-agg-utils';
+import type { Field, NewJobCaps, RollupFields } from '@kbn/ml-anomaly-utils';
 import {
-  type Field,
-  type NewJobCaps,
-  type RollupFields,
   mlJobAggregations,
   mlJobAggregationsWithoutEsEquivalent,
-} from '@kbn/ml-anomaly-utils';
+} from '@kbn/ml-anomaly-utils/aggregation_types';
 import { combineFieldsAndAggs } from '../../../../common/util/fields_utils';
 import { rollupServiceProvider } from './rollup';
 

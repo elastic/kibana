@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { type Field, type Aggregation, EVENT_RATE_FIELD_ID } from '@kbn/ml-anomaly-utils';
+import type { Field, Aggregation } from '@kbn/ml-anomaly-utils';
+import { EVENT_RATE_FIELD_ID } from '@kbn/ml-anomaly-utils/fields_constants';
 import type { IndexPatternTitle } from '@kbn/ml-common-types/kibana';
 import type { Job, Detector } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
 import type { Datafeed } from '@kbn/ml-common-types/anomaly_detection_jobs/datafeed';

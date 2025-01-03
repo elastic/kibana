@@ -12,15 +12,13 @@ import Boom from '@hapi/boom';
 import type { estypes } from '@elastic/elasticsearch';
 
 import type { IScopedClusterClient } from '@kbn/core/server';
-import {
-  showActualForFunction,
-  showTypicalForFunction,
-  type MlAnomaliesTableRecord,
-  type MlAnomalyCategorizerStatsDoc,
-  type MlAnomalyRecordDoc,
-  ML_JOB_ID,
-  ML_PARTITION_FIELD_VALUE,
+import type {
+  MlAnomaliesTableRecord,
+  MlAnomalyCategorizerStatsDoc,
+  MlAnomalyRecordDoc,
 } from '@kbn/ml-anomaly-utils';
+import { showActualForFunction, showTypicalForFunction } from '@kbn/ml-anomaly-utils/anomaly_utils';
+import { ML_JOB_ID, ML_PARTITION_FIELD_VALUE } from '@kbn/ml-anomaly-utils/constants';
 import { ANOMALIES_TABLE_DEFAULT_QUERY_SIZE } from '@kbn/ml-common-constants/search';
 import type {
   GetStoppedPartitionResult,
