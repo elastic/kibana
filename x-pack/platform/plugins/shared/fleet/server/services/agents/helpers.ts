@@ -26,7 +26,6 @@ export function searchHitToAgent(
     fields?: { status?: AgentStatus[] };
   }
 ): Agent {
-  console.log('search hit to agent called, and here is the hit:', hit);
   const outputs: OutputMap | undefined = hit._source?.outputs
     ? Object.entries(hit._source?.outputs).reduce((acc, [key, val]) => {
         acc[key] = {
@@ -108,7 +107,6 @@ export function searchHitToAgent(
   } else {
     agent.status = hit.fields.status[0];
   }
-  console.log('returning the afent from searchHitToAgent:', agent);
   return agent;
 }
 

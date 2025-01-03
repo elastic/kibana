@@ -97,7 +97,6 @@ export async function getAgents(
   soClient: SavedObjectsClientContract,
   options: GetAgentsOptions
 ) {
-  console.log('get agents called');
   let agents: Agent[] = [];
   if ('agentIds' in options) {
     agents = (await getAgentsById(esClient, soClient, options.agentIds)).filter(
@@ -113,7 +112,6 @@ export async function getAgents(
   } else {
     throw new FleetError('Either options.agentIds or options.kuery are required to get agents');
   }
-
   return agents;
 }
 
@@ -401,7 +399,7 @@ export async function getAgentById(
   agentId: string
 ) {
   const [agentHit] = await getAgentsById(esClient, soClient, [agentId]);
-  console.log('agent hit', agentHit);
+
   if ('notFound' in agentHit) {
     throw new AgentNotFoundError(`Agent ${agentId} not found`);
   }
@@ -469,7 +467,6 @@ async function _filterAgents(
   page: number;
   perPage: number;
 }> {
-  console.log('_filterAgents called');
   const { page = 1, perPage = 20, sortField = 'enrolled_at', sortOrder = 'desc' } = options;
   const runtimeFields = await buildAgentStatusRuntimeField(soClient);
   const currentSpaceId = getCurrentNamespace(soClient);
@@ -492,7 +489,6 @@ async function _filterAgents(
     appContextService.getLogger().error(`Error querying agents: ${JSON.stringify(err)}`);
     throw err;
   }
-
   const agents = res.hits.hits.map(searchHitToAgent);
   const total = res.hits.total as number;
 
@@ -509,7 +505,6 @@ export async function getAgentsById(
   soClient: SavedObjectsClientContract,
   agentIds: string[]
 ): Promise<Array<Agent | { id: string; notFound: true }>> {
-  console.log('get agents by id called');
   if (!agentIds.length) {
     return [];
   }

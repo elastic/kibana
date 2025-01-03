@@ -144,7 +144,6 @@ class AgentClientImpl implements AgentClient {
 
   public async getAgent(agentId: string) {
     await this.#runPreflight();
-    console.log('top level getAgent called');
     return getAgentById(this.internalEsClient, this.soClient, agentId);
   }
 
