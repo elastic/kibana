@@ -867,10 +867,10 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
     actionId: string,
     fileId: string
   ): Promise<GetFileDownloadMethodResponse> {
-    throw new ResponseActionsClientError(`Method getFileDownload() not implemented`, 501);
+    throw new ResponseActionsNotSupportedError('getFileDownload');
   }
 
   public async getFileInfo(actionId: string, fileId: string): Promise<UploadedFileInfo> {
-    throw new ResponseActionsClientError(`Method getFileInfo() not implemented`, 501);
+    throw new ResponseActionsNotSupportedError('getFileInfo');
   }
 }
