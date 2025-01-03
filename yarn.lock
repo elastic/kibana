@@ -5181,7 +5181,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/crypto@link:packages/kbn-crypto":
+"@kbn/crypto@link:src/platform/packages/shared/kbn-crypto":
   version "0.0.0"
   uid ""
 
@@ -5449,7 +5449,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/encrypted-saved-objects-plugin@link:x-pack/plugins/encrypted_saved_objects":
+"@kbn/encrypted-saved-objects-plugin@link:x-pack/platform/plugins/shared/encrypted_saved_objects":
   version "0.0.0"
   uid ""
 
@@ -5853,7 +5853,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/handlebars@link:packages/kbn-handlebars":
+"@kbn/handlebars@link:src/platform/packages/private/kbn-handlebars":
   version "0.0.0"
   uid ""
 
@@ -5977,7 +5977,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/interactive-setup-plugin@link:src/plugins/interactive_setup":
+"@kbn/interactive-setup-plugin@link:src/platform/plugins/private/interactive_setup":
   version "0.0.0"
   uid ""
 
@@ -6861,7 +6861,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/safer-lodash-set@link:packages/kbn-safer-lodash-set":
+"@kbn/safer-lodash-set@link:src/platform/packages/shared/kbn-safer-lodash-set":
   version "0.0.0"
   uid ""
 
@@ -7041,43 +7041,43 @@
   version "0.0.0"
   uid ""
 
-"@kbn/security-api-key-management@link:x-pack/packages/security/api_key_management":
+"@kbn/security-api-key-management@link:x-pack/platform/packages/shared/security/api_key_management":
   version "0.0.0"
   uid ""
 
-"@kbn/security-authorization-core-common@link:x-pack/packages/security/authorization_core_common":
+"@kbn/security-authorization-core-common@link:x-pack/platform/packages/private/security/authorization_core_common":
   version "0.0.0"
   uid ""
 
-"@kbn/security-authorization-core@link:x-pack/packages/security/authorization_core":
+"@kbn/security-authorization-core@link:x-pack/platform/packages/private/security/authorization_core":
   version "0.0.0"
   uid ""
 
-"@kbn/security-form-components@link:x-pack/packages/security/form_components":
+"@kbn/security-form-components@link:x-pack/platform/packages/shared/security/form_components":
   version "0.0.0"
   uid ""
 
-"@kbn/security-hardening@link:packages/kbn-security-hardening":
+"@kbn/security-hardening@link:src/platform/packages/shared/kbn-security-hardening":
   version "0.0.0"
   uid ""
 
-"@kbn/security-plugin-types-common@link:x-pack/packages/security/plugin_types_common":
+"@kbn/security-plugin-types-common@link:x-pack/platform/packages/shared/security/plugin_types_common":
   version "0.0.0"
   uid ""
 
-"@kbn/security-plugin-types-public@link:x-pack/packages/security/plugin_types_public":
+"@kbn/security-plugin-types-public@link:x-pack/platform/packages/shared/security/plugin_types_public":
   version "0.0.0"
   uid ""
 
-"@kbn/security-plugin-types-server@link:x-pack/packages/security/plugin_types_server":
+"@kbn/security-plugin-types-server@link:x-pack/platform/packages/shared/security/plugin_types_server":
   version "0.0.0"
   uid ""
 
-"@kbn/security-plugin@link:x-pack/plugins/security":
+"@kbn/security-plugin@link:x-pack/platform/plugins/shared/security":
   version "0.0.0"
   uid ""
 
-"@kbn/security-role-management-model@link:x-pack/packages/security/role_management_model":
+"@kbn/security-role-management-model@link:x-pack/platform/packages/private/security/role_management_model":
   version "0.0.0"
   uid ""
 
@@ -7125,7 +7125,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/security-ui-components@link:x-pack/packages/security/ui_components":
+"@kbn/security-ui-components@link:x-pack/platform/packages/private/security/ui_components":
   version "0.0.0"
   uid ""
 
@@ -7513,7 +7513,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/spaces-plugin@link:x-pack/plugins/spaces":
+"@kbn/spaces-plugin@link:x-pack/platform/plugins/shared/spaces":
   version "0.0.0"
   uid ""
 
@@ -7849,7 +7849,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/user-profile-components@link:packages/kbn-user-profile-components":
+"@kbn/user-profile-components@link:src/platform/packages/shared/kbn-user-profile-components":
   version "0.0.0"
   uid ""
 
