@@ -7,10 +7,8 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
-import {
-  jobsSelectionSchema,
-  mlAnomalyDetectionAlertParamsSchema,
-} from '@kbn/response-ops-rule-params/anomaly_detection';
+import { mlAnomalyDetectionAlertParamsSchema } from '@kbn/response-ops-rule-params/anomaly_detection';
+import type { anomalyDetectionJobsHealthRuleParamsSchema } from '@kbn/response-ops-rule-params/anomaly_detection_jobs_health';
 
 import { ALERT_PREVIEW_SAMPLE_SIZE } from '../../../common/constants/alerts';
 
@@ -32,45 +30,8 @@ export type MlAnomalyDetectionAlertPreviewRequest = TypeOf<
   typeof mlAnomalyDetectionAlertPreviewRequest
 >;
 
-export const anomalyDetectionJobsHealthRuleParams = schema.object({
-  includeJobs: jobsSelectionSchema,
-  excludeJobs: schema.nullable(jobsSelectionSchema),
-  testsConfig: schema.nullable(
-    schema.object({
-      datafeed: schema.nullable(
-        schema.object({
-          enabled: schema.boolean({ defaultValue: true }),
-        })
-      ),
-      mml: schema.nullable(
-        schema.object({
-          enabled: schema.boolean({ defaultValue: true }),
-        })
-      ),
-      delayedData: schema.nullable(
-        schema.object({
-          enabled: schema.boolean({ defaultValue: true }),
-          docsCount: schema.nullable(schema.number({ min: 1 })),
-          timeInterval: schema.nullable(schema.string()),
-        })
-      ),
-      behindRealtime: schema.nullable(
-        schema.object({
-          enabled: schema.boolean({ defaultValue: true }),
-          timeInterval: schema.nullable(schema.string()),
-        })
-      ),
-      errorMessages: schema.nullable(
-        schema.object({
-          enabled: schema.boolean({ defaultValue: true }),
-        })
-      ),
-    })
-  ),
-});
-
 export type AnomalyDetectionJobsHealthRuleParams = TypeOf<
-  typeof anomalyDetectionJobsHealthRuleParams
+  typeof anomalyDetectionJobsHealthRuleParamsSchema
 >;
 
 export type TestsConfig = AnomalyDetectionJobsHealthRuleParams['testsConfig'];

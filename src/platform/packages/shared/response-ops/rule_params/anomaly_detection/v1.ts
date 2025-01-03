@@ -8,24 +8,9 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { i18n } from '@kbn/i18n';
 import { ML_ANOMALY_RESULT_TYPE } from '@kbn/ml-anomaly-utils';
 
-export const jobsSelectionSchema = schema.object(
-  {
-    jobIds: schema.arrayOf(schema.string(), { defaultValue: [] }),
-    groupIds: schema.arrayOf(schema.string(), { defaultValue: [] }),
-  },
-  {
-    validate: (v) => {
-      if (!v.jobIds?.length && !v.groupIds?.length) {
-        return i18n.translate('xpack.ml.alertTypes.anomalyDetection.jobSelection.errorMessage', {
-          defaultMessage: 'Job selection is required',
-        });
-      }
-    },
-  }
-);
+import { jobsSelectionSchema } from '../common/utils';
 
 export const mlAnomalyDetectionAlertParamsSchema = schema.object({
   jobSelection: jobsSelectionSchema,
