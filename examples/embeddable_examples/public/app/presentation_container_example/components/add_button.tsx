@@ -10,13 +10,14 @@
 import React, { ReactElement, useEffect, useState } from 'react';
 import { EuiButton, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
 import { ADD_PANEL_TRIGGER, UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import { asyncMap } from '@kbn/std';
 
 export function AddButton({ pageApi, uiActions }: { pageApi: unknown; uiActions: UiActionsStart }) {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [items, setItems] = useState<ReactElement[]>([]);
 
   useEffect(() => {
-    let cancelled = false;
+    let canceled = false;
 
     const actionContext = {
       embeddable: pageApi,
@@ -24,19 +25,16 @@ export function AddButton({ pageApi, uiActions }: { pageApi: unknown; uiActions:
         id: ADD_PANEL_TRIGGER,
       },
     };
-    const actionsPromises = uiActions.getTriggerActions(ADD_PANEL_TRIGGER).map(async (action) => {
-      return {
-        isCompatible: await action.isCompatible(actionContext),
-        action,
-      };
-    });
 
-    Promise.all(actionsPromises).then((actions) => {
-      if (cancelled) {
-        return;
-      }
-
-      const nextItems = actions
+    (async () => {
+      const actions = await uiActions.getTriggerActions(ADD_PANEL_TRIGGER);
+      if (canceled) return;
+      const nextItems = (
+        await asyncMap(actions, async (action) => ({
+          isCompatible: await action.isCompatible(actionContext),
+          action,
+        }))
+      )
         .filter(
           ({ action, isCompatible }) => isCompatible && action.id !== 'ACTION_CREATE_ESQL_CHART'
         )
@@ -54,11 +52,11 @@ export function AddButton({ pageApi, uiActions }: { pageApi: unknown; uiActions:
             </EuiContextMenuItem>
           );
         });
-      setItems(nextItems);
-    });
+      if (!canceled) setItems(nextItems);
+    })();
 
     return () => {
-      cancelled = true;
+      canceled = true;
     };
   }, [pageApi, uiActions]);
 
