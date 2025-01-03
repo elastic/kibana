@@ -10,7 +10,6 @@
 import React, { ReactElement, useEffect, useState } from 'react';
 import { EuiButton, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
 import { ADD_PANEL_TRIGGER, UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import { asyncMap } from '@kbn/std';
 
 export function AddButton({ pageApi, uiActions }: { pageApi: unknown; uiActions: UiActionsStart }) {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
@@ -26,34 +25,25 @@ export function AddButton({ pageApi, uiActions }: { pageApi: unknown; uiActions:
       },
     };
 
-    (async () => {
-      const actions = await uiActions.getTriggerActions(ADD_PANEL_TRIGGER);
+    uiActions.getTriggerCompatibleActions(ADD_PANEL_TRIGGER, actionContext).then((actions) => {
       if (canceled) return;
-      const nextItems = (
-        await asyncMap(actions, async (action) => ({
-          isCompatible: await action.isCompatible(actionContext),
-          action,
-        }))
-      )
-        .filter(
-          ({ action, isCompatible }) => isCompatible && action.id !== 'ACTION_CREATE_ESQL_CHART'
-        )
-        .map(({ action }) => {
-          return (
-            <EuiContextMenuItem
-              key={action.id}
-              icon="share"
-              onClick={() => {
-                action.execute(actionContext);
-                setIsPopoverOpen(false);
-              }}
-            >
-              {action.getDisplayName(actionContext)}
-            </EuiContextMenuItem>
-          );
-        });
-      if (!canceled) setItems(nextItems);
-    })();
+
+      const nextItems = actions.map((action) => {
+        return (
+          <EuiContextMenuItem
+            key={action.id}
+            icon="share"
+            onClick={() => {
+              action.execute(actionContext);
+              setIsPopoverOpen(false);
+            }}
+          >
+            {action.getDisplayName(actionContext)}
+          </EuiContextMenuItem>
+        );
+      });
+      setItems(nextItems);
+    });
 
     return () => {
       canceled = true;
