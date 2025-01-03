@@ -265,7 +265,7 @@ const getPipeline = (filename: string, removeSteps = true) => {
         /^x-pack\/platform\/plugins\/shared\/triggers_actions_ui\/public\/application\/context\/actions_connectors_context\.tsx/,
         /^x-pack\/platform\/plugins\/shared\/triggers_actions_ui\/server\/connector_types\/openai/,
         /^x-pack\/platform\/plugins\/shared\/triggers_actions_ui\/server\/connector_types\/bedrock/,
-        /^x-pack\/plugins\/usage_collection\/public/,
+        /^x-pack\/platform\/plugins\/shared\/usage_collection\/public/,
         /^x-pack\/solutions\/security\/plugins\/elastic_assistant/,
         /^x-pack\/solutions\/security\/packages/,
         /^x-pack\/platform\/packages\/shared\/kbn-elastic-assistant/,
@@ -348,7 +348,7 @@ const getPipeline = (filename: string, removeSteps = true) => {
         /^x-pack\/solutions\/security\/plugins\/threat_intelligence/,
         /^x-pack\/solutions\/security\/plugins\/timelines/,
         /^x-pack\/platform\/plugins\/shared\/triggers_actions_ui/,
-        /^x-pack\/plugins\/usage_collection\/public/,
+        /^x-pack\/platform\/plugins\/shared\/usage_collection\/public/,
         /^x-pack\/test\/functional\/es_archives\/security_solution/,
         /^x-pack\/test\/security_solution_cypress/,
       ])) ||

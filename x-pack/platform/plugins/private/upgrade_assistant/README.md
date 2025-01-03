@@ -342,7 +342,7 @@ This is a non-exhaustive list of different error scenarios in Upgrade Assistant.
 
 ### Telemetry
 
-The Upgrade Assistant tracks several triggered events in the UI, using Kibana Usage Collection service's [UI counters](https://github.com/elastic/kibana/blob/main/src/plugins/usage_collection/README.mdx#ui-counters).
+The Upgrade Assistant tracks several triggered events in the UI, using Kibana Usage Collection service's [UI counters](https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/usage_collection/README.mdx#ui-counters).
 
 **Overview page**
 - Component loaded
@@ -361,6 +361,6 @@ The Upgrade Assistant tracks several triggered events in the UI, using Kibana Us
 - Component loaded
 - Click event for "Quick resolve" button
 
-In addition to UI counters, the Upgrade Assistant has a [custom usage collector](https://github.com/elastic/kibana/blob/main/src/plugins/usage_collection/README.mdx#custom-collector). It currently is only responsible for tracking whether the user has deprecation logging enabled or not.
+In addition to UI counters, the Upgrade Assistant has a [custom usage collector](https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/usage_collection/README.mdx#custom-collector). It currently is only responsible for tracking whether the user has deprecation logging enabled or not.
 
-For testing instructions, refer to the [Kibana Usage Collection service README](https://github.com/elastic/kibana/blob/main/src/plugins/usage_collection/README.mdx#testing).
+For testing instructions, refer to the [Kibana Usage Collection service README](https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/usage_collection/README.mdx#testing).

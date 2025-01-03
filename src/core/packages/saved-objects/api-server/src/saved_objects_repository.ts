@@ -351,7 +351,7 @@ export interface ISavedObjectsRepository {
    *
    * When using incrementCounter you need to ensure
    * that usage collection happens on a best-effort basis and doesn't
-   * negatively affect your plugin or users. See https://github.com/elastic/kibana/blob/main/src/plugins/usage_collection/README.mdx#tracking-interactions-with-incrementcounter)
+   * negatively affect your plugin or users. See https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/usage_collection/README.mdx#tracking-interactions-with-incrementcounter)
    *
    * @example
    * ```ts

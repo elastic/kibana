@@ -374,7 +374,7 @@ It manages its own state and data fetching, and can easily be dropped into pages
 |This plugins contains helpers to redirect legacy URLs. It can be used to forward old URLs to their new counterparts.
 
 
-|{kib-repo}blob/{branch}/src/plugins/usage_collection/README.mdx[usageCollection]
+|{kib-repo}blob/{branch}/src/platform/plugins/shared/usage_collection/README.mdx[usageCollection]
 |The Usage Collection Service defines a set of APIs for other plugins to report the usage of their features. At the same time, it provides necessary the APIs for other services (i.e.: telemetry, monitoring, ...) to consume that usage data.
 
 

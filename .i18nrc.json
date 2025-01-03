@@ -140,7 +140,7 @@
     "uiActions": ["src/platform/plugins/shared/ui_actions", "packages/kbn-ui-actions-browser"],
     "uiActionsEnhanced": "src/platform/plugins/shared/ui_actions_enhanced",
     "uiActionsExamples": "examples/ui_action_examples",
-    "usageCollection": "src/plugins/usage_collection",
+    "usageCollection": "src/platform/plugins/shared/usage_collection",
     "userProfileComponents": "packages/kbn-user-profile-components",
     "utils": "x-pack/solutions/security/packages/kbn-securitysolution-utils/src",
     "visDefaultEditor": "src/plugins/vis_default_editor",
