@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { of } from 'rxjs';
 import { TaskStore } from './task_store';
 
 interface TaskStoreOptions {
@@ -38,6 +39,7 @@ export const taskStoreMock = {
       msearch: jest.fn(),
       index,
       taskManagerId,
+      errors$: of(),
     } as unknown as jest.Mocked<TaskStore>;
     return mocked;
   },
