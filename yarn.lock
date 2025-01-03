@@ -4733,7 +4733,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-logging-server@link:packages/core/logging/core-logging-server":
+"@kbn/core-logging-server@link:src/core/packages/logging/server":
   version "0.0.0"
   uid ""
 

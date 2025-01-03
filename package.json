@@ -326,7 +326,7 @@
     "@kbn/core-lifecycle-server-internal": "link:src/core/packages/lifecycle/server-internal",
     "@kbn/core-logging-browser-internal": "link:src/core/packages/logging/browser-internal",
     "@kbn/core-logging-common-internal": "link:src/core/packages/logging/common-internal",
-    "@kbn/core-logging-server": "link:packages/core/logging/core-logging-server",
+    "@kbn/core-logging-server": "link:src/core/packages/logging/server",
     "@kbn/core-logging-server-internal": "link:packages/core/logging/core-logging-server-internal",
     "@kbn/core-metrics-collectors-server-internal": "link:packages/core/metrics/core-metrics-collectors-server-internal",
     "@kbn/core-metrics-server": "link:packages/core/metrics/core-metrics-server",
