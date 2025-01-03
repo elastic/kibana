@@ -70,10 +70,10 @@ unsafe given our backward compatibility requirements.
 
 ## Defining model versions
 
-As for old migrations, model versions are bound to a given [savedObject type](https://github.com/elastic/kibana/blob/9b330e493216e8dde3166451e4714966f63f5ab7/packages/core/saved-objects/core-saved-objects-server/src/saved_objects_type.ts#L22-L27)
+As for old migrations, model versions are bound to a given [savedObject type](https://github.com/elastic/kibana/blob/9b330e493216e8dde3166451e4714966f63f5ab7/src/core/packages/saved-objects/server/src/saved_objects_type.ts#L22-L27)
 
-When registering a SO type, a new [modelVersions](https://github.com/elastic/kibana/blob/9a6a2ccdff619f827b31c40dd9ed30cb27203da7/packages/core/saved-objects/core-saved-objects-server/src/saved_objects_type.ts#L138-L177)
-property is available. This attribute is a map of [SavedObjectsModelVersion](https://github.com/elastic/kibana/blob/9a6a2ccdff619f827b31c40dd9ed30cb27203da7/packages/core/saved-objects/core-saved-objects-server/src/model_version/model_version.ts#L12-L20)
+When registering a SO type, a new [modelVersions](https://github.com/elastic/kibana/blob/9a6a2ccdff619f827b31c40dd9ed30cb27203da7/src/core/packages/saved-objects/server/src/saved_objects_type.ts#L138-L177)
+property is available. This attribute is a map of [SavedObjectsModelVersion](https://github.com/elastic/kibana/blob/9a6a2ccdff619f827b31c40dd9ed30cb27203da7/src/core/packages/saved-objects/server/src/model_version/model_version.ts#L12-L20)
 which is the top-level type/container to define model versions.
 
 This map follows a similar `{ [version number] => version definition }` format as the old migration map, however 
@@ -113,7 +113,7 @@ const myType: SavedObjectsType = {
 
 ## Structure of a model version
 
-[Model versions](https://github.com/elastic/kibana/blob/9b330e493216e8dde3166451e4714966f63f5ab7/packages/core/saved-objects/core-saved-objects-server/src/model_version/model_version.ts#L12-L20)
+[Model versions](https://github.com/elastic/kibana/blob/9b330e493216e8dde3166451e4714966f63f5ab7/src/core/packages/saved-objects/server/src/model_version/model_version.ts#L12-L20)
 are not just functions as the previous migrations were, but structured objects describing how the version behaves and what changed since the last one.
 
 *A base example of what a model version can look like:*
@@ -175,7 +175,7 @@ It's currently composed of two main properties:
 
 ### changes
 
-[link to the TS doc for `changes`](https://github.com/elastic/kibana/blob/9b330e493216e8dde3166451e4714966f63f5ab7/packages/core/saved-objects/core-saved-objects-server/src/model_version/model_version.ts#L21-L51)
+[link to the TS doc for `changes`](https://github.com/elastic/kibana/blob/9b330e493216e8dde3166451e4714966f63f5ab7/src/core/packages/saved-objects/server/src/model_version/model_version.ts#L21-L51)
 
 Describes the list of changes applied during this version. 
 
@@ -281,7 +281,7 @@ let change: SavedObjectsModelUnsafeTransformChange = {
 
 ### schemas
 
-[link to the TS doc for `schemas`](https://github.com/elastic/kibana/blob/9b330e493216e8dde3166451e4714966f63f5ab7/packages/core/saved-objects/core-saved-objects-server/src/model_version/schemas.ts#L11-L16)
+[link to the TS doc for `schemas`](https://github.com/elastic/kibana/blob/9b330e493216e8dde3166451e4714966f63f5ab7/src/core/packages/saved-objects/server/src/model_version/schemas.ts#L11-L16)
 
 The schemas associated with this version. Schemas are used to validate or convert SO documents at various
 stages of their lifecycle.
@@ -335,7 +335,7 @@ const versionSchema: SavedObjectModelVersionEvictionFn = (attributes) => {
 
 #### create
 
-This is a direct replacement for [the old SavedObjectType.schemas](https://github.com/elastic/kibana/blob/9b330e493216e8dde3166451e4714966f63f5ab7/packages/core/saved-objects/core-saved-objects-server/src/saved_objects_type.ts#L75-L82)
+This is a direct replacement for [the old SavedObjectType.schemas](https://github.com/elastic/kibana/blob/9b330e493216e8dde3166451e4714966f63f5ab7/src/core/packages/saved-objects/server/src/saved_objects_type.ts#L75-L82)
 definition, now directly included in the model version definition.
 
 As a refresher the `create` schema is a `@kbn/config-schema` object-type schema, and is used to validate the properties of the document

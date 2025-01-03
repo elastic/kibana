@@ -376,7 +376,7 @@
     "@kbn/core-saved-objects-common": "link:src/core/packages/saved-objects/common",
     "@kbn/core-saved-objects-import-export-server-internal": "link:src/core/packages/saved-objects/import-export-server-internal",
     "@kbn/core-saved-objects-migration-server-internal": "link:src/core/packages/saved-objects/migration-server-internal",
-    "@kbn/core-saved-objects-server": "link:packages/core/saved-objects/core-saved-objects-server",
+    "@kbn/core-saved-objects-server": "link:src/core/packages/saved-objects/server",
     "@kbn/core-saved-objects-server-internal": "link:packages/core/saved-objects/core-saved-objects-server-internal",
     "@kbn/core-saved-objects-utils-server": "link:packages/core/saved-objects/core-saved-objects-utils-server",
     "@kbn/core-security-browser": "link:packages/core/security/core-security-browser",
