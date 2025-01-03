@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MAX_NODE_CONNECTIONS } from '../../../../../../common/constants';
+import { MAX_NODE_CONNECTIONS } from '../../../../../../../common/constants';
 import { validateNodeConnections } from './validate_node_connections';
 
 describe('validateNodeConnections', () => {

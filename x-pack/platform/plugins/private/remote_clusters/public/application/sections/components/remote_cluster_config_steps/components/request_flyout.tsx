@@ -20,7 +20,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import { ClusterPayload, serializeCluster } from '../../../../../common/lib';
+import { ClusterPayload, serializeCluster } from '../../../../../../common/lib';
 
 interface Props {
   close: () => void;

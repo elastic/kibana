@@ -18,8 +18,8 @@ import {
   EuiButtonEmpty,
 } from '@elastic/eui';
 
-import * as docs from '../../../services/documentation';
-import { AppContext } from '../../../app_context';
+import * as docs from '../../../../services/documentation';
+import { AppContext } from '../../../../app_context';
 import { ConfirmTrustSetupModal } from './confirm_modal';
 
 const MIN_ALLOWED_VERSION_API_KEYS_METHOD = '8.10';

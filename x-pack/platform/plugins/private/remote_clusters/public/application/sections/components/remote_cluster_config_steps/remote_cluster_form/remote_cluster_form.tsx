@@ -31,14 +31,14 @@ import {
   EuiSwitchEvent,
 } from '@elastic/eui';
 
-import { Cluster, ClusterPayload } from '../../../../../common/lib';
-import { SNIFF_MODE, PROXY_MODE } from '../../../../../common/constants';
+import { Cluster, ClusterPayload } from '../../../../../../common/lib';
+import { SNIFF_MODE, PROXY_MODE } from '../../../../../../common/constants';
 
-import { AppContext, Context } from '../../../app_context';
+import { AppContext, Context } from '../../../../app_context';
 
-import { skippingDisconnectedClustersUrl } from '../../../services/documentation';
+import { skippingDisconnectedClustersUrl } from '../../../../services/documentation';
 
-import { RequestFlyout } from './request_flyout';
+import { RequestFlyout } from '../components/request_flyout';
 import { ConnectionMode } from './components';
 import {
   ClusterErrors,

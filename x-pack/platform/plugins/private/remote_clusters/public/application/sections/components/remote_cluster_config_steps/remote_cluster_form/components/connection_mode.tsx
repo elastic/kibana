@@ -10,8 +10,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import { EuiDescribedFormGroup, EuiTitle, EuiFormRow, EuiSwitch } from '@elastic/eui';
 
-import { SNIFF_MODE, PROXY_MODE } from '../../../../../../common/constants';
-import { useAppContext } from '../../../../app_context';
+import { SNIFF_MODE, PROXY_MODE } from '../../../../../../../common/constants';
+import { useAppContext } from '../../../../../app_context';
 
 import { ClusterErrors } from '../validators';
 import { ConnectionModeCloud } from './connection_mode_cloud';
