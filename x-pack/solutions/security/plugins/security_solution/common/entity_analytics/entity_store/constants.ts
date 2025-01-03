@@ -31,6 +31,7 @@ export const IDENTITY_FIELD_MAP: Record<EntityType, IdField> = {
   [EntityTypeEnum.host]: 'host.name',
   [EntityTypeEnum.user]: 'user.name',
   [EntityTypeEnum.service]: 'service.name',
+  [EntityTypeEnum.universal]: 'related.entity',
 };
 
 export const getAvailableEntityTypes = (): EntityType[] =>

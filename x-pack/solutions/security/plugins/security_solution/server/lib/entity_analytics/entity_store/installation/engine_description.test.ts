@@ -5,22 +5,29 @@
  * 2.0.
  */
 
-import { getUnitedEntityDefinition } from './get_united_definition';
+import { duration } from 'moment';
+import { createEngineDescription } from './engine_description';
+import { convertToEntityManagerDefinition } from '../entity_definitions/entity_manager_conversion';
 
 describe('getUnitedEntityDefinition', () => {
-  const indexPatterns = ['test*'];
+  const defaultIndexPatterns = ['test*'];
   describe('host', () => {
-    const unitedDefinition = getUnitedEntityDefinition({
+    const description = createEngineDescription({
       entityType: 'host',
       namespace: 'test',
-      fieldHistoryLength: 10,
-      indexPatterns,
-      syncDelay: '1m',
-      frequency: '1m',
+      requestParams: {
+        fieldHistoryLength: 10,
+      },
+      defaultIndexPatterns,
+      config: {
+        syncDelay: duration(60, 'seconds'),
+        frequency: duration(60, 'seconds'),
+        developer: { pipelineDebugMode: false },
+      },
     });
 
     it('mapping', () => {
-      expect(unitedDefinition.indexMappings).toMatchInlineSnapshot(`
+      expect(description.indexMappings).toMatchInlineSnapshot(`
         Object {
           "properties": Object {
             "@timestamp": Object {
@@ -93,83 +100,14 @@ describe('getUnitedEntityDefinition', () => {
         }
       `);
     });
-    it('fieldRetentionDefinition', () => {
-      expect(unitedDefinition.fieldRetentionDefinition).toMatchInlineSnapshot(`
-        Object {
-          "entityType": "host",
-          "fields": Array [
-            Object {
-              "field": "host.domain",
-              "maxLength": 10,
-              "operation": "collect_values",
-            },
-            Object {
-              "field": "host.hostname",
-              "maxLength": 10,
-              "operation": "collect_values",
-            },
-            Object {
-              "field": "host.id",
-              "maxLength": 10,
-              "operation": "collect_values",
-            },
-            Object {
-              "field": "host.os.name",
-              "maxLength": 10,
-              "operation": "collect_values",
-            },
-            Object {
-              "field": "host.os.type",
-              "maxLength": 10,
-              "operation": "collect_values",
-            },
-            Object {
-              "field": "host.ip",
-              "maxLength": 10,
-              "operation": "collect_values",
-            },
-            Object {
-              "field": "host.mac",
-              "maxLength": 10,
-              "operation": "collect_values",
-            },
-            Object {
-              "field": "host.type",
-              "maxLength": 10,
-              "operation": "collect_values",
-            },
-            Object {
-              "field": "host.architecture",
-              "maxLength": 10,
-              "operation": "collect_values",
-            },
-            Object {
-              "field": "entity.source",
-              "operation": "prefer_oldest_value",
-            },
-            Object {
-              "field": "asset.criticality",
-              "operation": "prefer_newest_value",
-            },
-            Object {
-              "field": "host.risk.calculated_level",
-              "operation": "prefer_newest_value",
-            },
-            Object {
-              "field": "host.risk.calculated_score",
-              "operation": "prefer_newest_value",
-            },
-            Object {
-              "field": "host.risk.calculated_score_norm",
-              "operation": "prefer_newest_value",
-            },
-          ],
-          "matchField": "host.name",
-        }
-      `);
-    });
+
     it('entityManagerDefinition', () => {
-      expect(unitedDefinition.entityManagerDefinition).toMatchInlineSnapshot(`
+      const entityManagerDefinition = convertToEntityManagerDefinition(description, {
+        namespace: 'test',
+        filter: '',
+      });
+
+      expect(entityManagerDefinition).toMatchInlineSnapshot(`
         Object {
           "displayNameTemplate": "{{host.name}}",
           "id": "security_host_test",
@@ -183,10 +121,10 @@ describe('getUnitedEntityDefinition', () => {
             "test*",
           ],
           "latest": Object {
-            "lookbackPeriod": "24h",
+            "lookbackPeriod": "1d",
             "settings": Object {
-              "frequency": "1m",
-              "syncDelay": "1m",
+              "frequency": "60s",
+              "syncDelay": "60s",
             },
             "timestampField": "@timestamp",
           },
@@ -323,17 +261,22 @@ describe('getUnitedEntityDefinition', () => {
     });
   });
   describe('user', () => {
-    const unitedDefinition = getUnitedEntityDefinition({
+    const description = createEngineDescription({
       entityType: 'user',
       namespace: 'test',
-      fieldHistoryLength: 10,
-      indexPatterns,
-      syncDelay: '1m',
-      frequency: '1m',
+      requestParams: {
+        fieldHistoryLength: 10,
+      },
+      defaultIndexPatterns,
+      config: {
+        syncDelay: duration(60, 'seconds'),
+        frequency: duration(60, 'seconds'),
+        developer: { pipelineDebugMode: false },
+      },
     });
 
     it('mapping', () => {
-      expect(unitedDefinition.indexMappings).toMatchInlineSnapshot(`
+      expect(description.indexMappings).toMatchInlineSnapshot(`
         Object {
           "properties": Object {
             "@timestamp": Object {
@@ -397,68 +340,12 @@ describe('getUnitedEntityDefinition', () => {
         }
       `);
     });
-    it('fieldRetentionDefinition', () => {
-      expect(unitedDefinition.fieldRetentionDefinition).toMatchInlineSnapshot(`
-        Object {
-          "entityType": "user",
-          "fields": Array [
-            Object {
-              "field": "user.domain",
-              "maxLength": 10,
-              "operation": "collect_values",
-            },
-            Object {
-              "field": "user.email",
-              "maxLength": 10,
-              "operation": "collect_values",
-            },
-            Object {
-              "field": "user.full_name",
-              "maxLength": 10,
-              "operation": "collect_values",
-            },
-            Object {
-              "field": "user.hash",
-              "maxLength": 10,
-              "operation": "collect_values",
-            },
-            Object {
-              "field": "user.id",
-              "maxLength": 10,
-              "operation": "collect_values",
-            },
-            Object {
-              "field": "user.roles",
-              "maxLength": 10,
-              "operation": "collect_values",
-            },
-            Object {
-              "field": "entity.source",
-              "operation": "prefer_oldest_value",
-            },
-            Object {
-              "field": "asset.criticality",
-              "operation": "prefer_newest_value",
-            },
-            Object {
-              "field": "user.risk.calculated_level",
-              "operation": "prefer_newest_value",
-            },
-            Object {
-              "field": "user.risk.calculated_score",
-              "operation": "prefer_newest_value",
-            },
-            Object {
-              "field": "user.risk.calculated_score_norm",
-              "operation": "prefer_newest_value",
-            },
-          ],
-          "matchField": "user.name",
-        }
-      `);
-    });
     it('entityManagerDefinition', () => {
-      expect(unitedDefinition.entityManagerDefinition).toMatchInlineSnapshot(`
+      const entityManagerDefinition = convertToEntityManagerDefinition(description, {
+        namespace: 'test',
+        filter: '',
+      });
+      expect(entityManagerDefinition).toMatchInlineSnapshot(`
         Object {
           "displayNameTemplate": "{{user.name}}",
           "id": "security_user_test",
@@ -472,10 +359,10 @@ describe('getUnitedEntityDefinition', () => {
             "test*",
           ],
           "latest": Object {
-            "lookbackPeriod": "24h",
+            "lookbackPeriod": "1d",
             "settings": Object {
-              "frequency": "1m",
-              "syncDelay": "1m",
+              "frequency": "60s",
+              "syncDelay": "60s",
             },
             "timestampField": "@timestamp",
           },
@@ -589,17 +476,22 @@ describe('getUnitedEntityDefinition', () => {
   });
 
   describe('service', () => {
-    const unitedDefinition = getUnitedEntityDefinition({
+    const description = createEngineDescription({
       entityType: 'service',
       namespace: 'test',
-      fieldHistoryLength: 10,
-      indexPatterns,
-      syncDelay: '1m',
-      frequency: '1m',
+      requestParams: {
+        fieldHistoryLength: 10,
+      },
+      defaultIndexPatterns,
+      config: {
+        syncDelay: duration(60, 'seconds'),
+        frequency: duration(60, 'seconds'),
+        developer: { pipelineDebugMode: false },
+      },
     });
 
     it('mapping', () => {
-      expect(unitedDefinition.indexMappings).toMatchInlineSnapshot(`
+      expect(description.indexMappings).toMatchInlineSnapshot(`
         Object {
           "properties": Object {
             "@timestamp": Object {
@@ -645,15 +537,6 @@ describe('getUnitedEntityDefinition', () => {
             "service.node.roles": Object {
               "type": "keyword",
             },
-            "service.risk.calculated_level": Object {
-              "type": "keyword",
-            },
-            "service.risk.calculated_score": Object {
-              "type": "float",
-            },
-            "service.risk.calculated_score_norm": Object {
-              "type": "float",
-            },
             "service.state": Object {
               "type": "keyword",
             },
@@ -667,81 +550,13 @@ describe('getUnitedEntityDefinition', () => {
         }
       `);
     });
-    it('fieldRetentionDefinition', () => {
-      expect(unitedDefinition.fieldRetentionDefinition).toMatchInlineSnapshot(`
-        Object {
-          "entityType": "service",
-          "fields": Array [
-            Object {
-              "field": "service.address",
-              "maxLength": 10,
-              "operation": "collect_values",
-            },
-            Object {
-              "field": "service.environment",
-              "maxLength": 10,
-              "operation": "collect_values",
-            },
-            Object {
-              "field": "service.ephemeral_id",
-              "maxLength": 10,
-              "operation": "collect_values",
-            },
-            Object {
-              "field": "service.id",
-              "maxLength": 10,
-              "operation": "collect_values",
-            },
-            Object {
-              "field": "service.node.name",
-              "maxLength": 10,
-              "operation": "collect_values",
-            },
-            Object {
-              "field": "service.node.roles",
-              "maxLength": 10,
-              "operation": "collect_values",
-            },
-            Object {
-              "field": "service.state",
-              "operation": "prefer_newest_value",
-            },
-            Object {
-              "field": "service.type",
-              "maxLength": 10,
-              "operation": "collect_values",
-            },
-            Object {
-              "field": "service.version",
-              "operation": "prefer_newest_value",
-            },
-            Object {
-              "field": "entity.source",
-              "operation": "prefer_oldest_value",
-            },
-            Object {
-              "field": "asset.criticality",
-              "operation": "prefer_newest_value",
-            },
-            Object {
-              "field": "service.risk.calculated_level",
-              "operation": "prefer_newest_value",
-            },
-            Object {
-              "field": "service.risk.calculated_score",
-              "operation": "prefer_newest_value",
-            },
-            Object {
-              "field": "service.risk.calculated_score_norm",
-              "operation": "prefer_newest_value",
-            },
-          ],
-          "matchField": "service.name",
-        }
-      `);
-    });
+
     it('entityManagerDefinition', () => {
-      expect(unitedDefinition.entityManagerDefinition).toMatchInlineSnapshot(`
+      const entityManagerDefinition = convertToEntityManagerDefinition(description, {
+        namespace: 'test',
+        filter: '',
+      });
+      expect(entityManagerDefinition).toMatchInlineSnapshot(`
         Object {
           "displayNameTemplate": "{{service.name}}",
           "id": "security_service_test",
@@ -755,10 +570,10 @@ describe('getUnitedEntityDefinition', () => {
             "test*",
           ],
           "latest": Object {
-            "lookbackPeriod": "24h",
+            "lookbackPeriod": "1d",
             "settings": Object {
-              "frequency": "1m",
-              "syncDelay": "1m",
+              "frequency": "60s",
+              "syncDelay": "60s",
             },
             "timestampField": "@timestamp",
           },
@@ -839,56 +654,6 @@ describe('getUnitedEntityDefinition', () => {
               },
               "destination": "service.version",
               "source": "service.version",
-            },
-            Object {
-              "aggregation": Object {
-                "sort": Object {
-                  "@timestamp": "asc",
-                },
-                "type": "top_value",
-              },
-              "destination": "entity.source",
-              "source": "_index",
-            },
-            Object {
-              "aggregation": Object {
-                "sort": Object {
-                  "@timestamp": "desc",
-                },
-                "type": "top_value",
-              },
-              "destination": "asset.criticality",
-              "source": "asset.criticality",
-            },
-            Object {
-              "aggregation": Object {
-                "sort": Object {
-                  "@timestamp": "desc",
-                },
-                "type": "top_value",
-              },
-              "destination": "service.risk.calculated_level",
-              "source": "service.risk.calculated_level",
-            },
-            Object {
-              "aggregation": Object {
-                "sort": Object {
-                  "@timestamp": "desc",
-                },
-                "type": "top_value",
-              },
-              "destination": "service.risk.calculated_score",
-              "source": "service.risk.calculated_score",
-            },
-            Object {
-              "aggregation": Object {
-                "sort": Object {
-                  "@timestamp": "desc",
-                },
-                "type": "top_value",
-              },
-              "destination": "service.risk.calculated_score_norm",
-              "source": "service.risk.calculated_score_norm",
             },
           ],
           "name": "Security 'service' Entity Store Definition",
