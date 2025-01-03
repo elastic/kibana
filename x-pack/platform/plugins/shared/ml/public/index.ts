@@ -32,8 +32,6 @@ export type {
   AnomalySwimLaneEmbeddableState,
 } from './embeddables/types';
 
-// export { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from './embeddables/constants';
-
 // export type { MlLocator } from './locator/ml_locator';
 // export { useMlManagementHref } from './locator/use_ml_management_href';
 // export { MlManagementLocatorInternal } from './locator/ml_management_locator';
