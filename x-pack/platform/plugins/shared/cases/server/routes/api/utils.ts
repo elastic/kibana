@@ -51,7 +51,7 @@ export const getWarningHeader = (
 
 /**
  * Taken from
- * https://github.com/elastic/kibana/blob/ec30f2aeeb10fb64b507935e558832d3ef5abfaa/x-pack/plugins/spaces/server/usage_stats/usage_stats_client.ts#L113-L118
+ * https://github.com/elastic/kibana/blob/ec30f2aeeb10fb64b507935e558832d3ef5abfaa/x-pack/platform/plugins/shared/spaces/server/usage_stats/usage_stats_client.ts#L113-L118
  */
 
 export const getIsKibanaRequest = (headers?: Headers): boolean => {

@@ -899,7 +899,7 @@ This plugin is only enabled when the application is built for serverless project
 |or
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/spaces/README.md[spaces]
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/shared/spaces/README.md[spaces]
 |See Configuring Kibana Spaces.
 
 

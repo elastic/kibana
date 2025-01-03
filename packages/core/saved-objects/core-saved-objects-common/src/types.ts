@@ -19,7 +19,7 @@ export interface SavedObjectTypeIdTuple {
   type: string;
 }
 
-// NOTE: moved from x-pack/plugins/spaces/common/types.ts for use by SO security ext
+// NOTE: moved from x-pack/platform/plugins/shared/spaces/common/types.ts for use by SO security ext
 /**
  * Client interface for interacting with legacy URL aliases.
  */
