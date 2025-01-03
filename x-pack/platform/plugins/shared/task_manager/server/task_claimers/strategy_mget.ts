@@ -154,7 +154,8 @@ async function claimAvailableTasks(opts: TaskClaimerOpts): Promise<ClaimOwnershi
   const tasksToRun: ConcreteTaskInstance[] = [];
   const leftOverTasks: ConcreteTaskInstance[] = [];
 
-  logger.info(`tasksToRun ${JSON.stringify(tasksToRun)}`);
+  // eslint-disable-next-line no-console
+  console.warn(`tasksToRun ${JSON.stringify(tasksToRun)}`);
 
   let capacityAccumulator = 0;
   for (const task of candidateTasks) {

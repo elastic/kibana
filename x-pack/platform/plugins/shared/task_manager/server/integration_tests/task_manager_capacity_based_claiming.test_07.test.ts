@@ -162,7 +162,7 @@ describe('capacity based claiming', () => {
     mockTaskTypeNormalCostRunFn.mockImplementation(() => {
       const now = new Date();
       // eslint-disable-next-line no-console
-      console.log(`runAt Date ${now.toISOString()}`);
+      console.warn(`runAt Date ${now.toISOString()}`);
       taskRunAtDates.push(now);
       return { state: { foo: 'test' } };
     });
@@ -199,7 +199,7 @@ describe('capacity based claiming', () => {
     expect(taskRunAtDates.length).toBe(10);
 
     // eslint-disable-next-line no-console
-    console.log(`taskRunAtDates: ${JSON.stringify(taskRunAtDates)}`);
+    console.warn(`taskRunAtDates: ${JSON.stringify(taskRunAtDates)}`);
 
     // run at dates should be within a few seconds of each other
     const firstRunAt = taskRunAtDates[0].getTime();
