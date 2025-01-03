@@ -134,7 +134,7 @@
     "esql": "src/platform/plugins/shared/esql",
     "esqlDataGrid": "src/platform/plugins/shared/esql_datagrid",
     "statusPage": "src/legacy/core_plugins/status_page",
-    "telemetry": ["src/plugins/telemetry", "src/plugins/telemetry_management_section"],
+    "telemetry": ["src/plugins/telemetry", "src/platform/plugins/shared/telemetry_management_section"],
     "timelion": ["src/plugins/vis_types/timelion"],
     "tryInConsole": "src/platform/packages/shared/kbn-try-in-console/",
     "uiActions": ["src/platform/plugins/shared/ui_actions", "packages/kbn-ui-actions-browser"],

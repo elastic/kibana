@@ -7613,7 +7613,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/telemetry-management-section-plugin@link:src/plugins/telemetry_management_section":
+"@kbn/telemetry-management-section-plugin@link:src/platform/plugins/shared/telemetry_management_section":
   version "0.0.0"
   uid ""
 

@@ -325,7 +325,7 @@ generating deep links to other apps using locators, and creating short URLs.
 |Telemetry's collection manager to go through all the telemetry sources when fetching it before reporting.
 
 
-|{kib-repo}blob/{branch}/src/plugins/telemetry_management_section/README.md[telemetryManagementSection]
+|{kib-repo}blob/{branch}/src/platform/plugins/shared/telemetry_management_section/README.md[telemetryManagementSection]
 |This plugin adds the Advanced Settings section for the Usage and Security Data collection (aka Telemetry).
 
 
