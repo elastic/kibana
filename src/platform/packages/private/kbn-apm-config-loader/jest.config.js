@@ -9,6 +9,6 @@
 
 module.exports = {
   preset: '@kbn/test',
-  rootDir: '../..',
-  roots: ['<rootDir>/packages/kbn-apm-config-loader'],
+  rootDir: '../../../../..',
+  roots: ['<rootDir>/src/platform/packages/private/kbn-apm-config-loader'],
 };
