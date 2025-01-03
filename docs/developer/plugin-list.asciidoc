@@ -321,7 +321,7 @@ generating deep links to other apps using locators, and creating short URLs.
 |Telemetry allows Kibana features to have usage tracked in the wild. The general term "telemetry" refers to multiple things:
 
 
-|{kib-repo}blob/{branch}/src/plugins/telemetry_collection_manager/README.md[telemetryCollectionManager]
+|{kib-repo}blob/{branch}/src/platform/plugins/shared/telemetry_collection_manager/README.md[telemetryCollectionManager]
 |Telemetry's collection manager to go through all the telemetry sources when fetching it before reporting.
 
 
