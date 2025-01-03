@@ -276,7 +276,7 @@
     "@kbn/core-deprecations-browser": "link:src/core/packages/deprecations/browser",
     "@kbn/core-deprecations-browser-internal": "link:src/core/packages/deprecations/browser-internal",
     "@kbn/core-deprecations-common": "link:src/core/packages/deprecations/common",
-    "@kbn/core-deprecations-server": "link:packages/core/deprecations/core-deprecations-server",
+    "@kbn/core-deprecations-server": "link:src/core/packages/deprecations/server",
     "@kbn/core-deprecations-server-internal": "link:packages/core/deprecations/core-deprecations-server-internal",
     "@kbn/core-doc-links-browser": "link:packages/core/doc-links/core-doc-links-browser",
     "@kbn/core-doc-links-browser-internal": "link:packages/core/doc-links/core-doc-links-browser-internal",
