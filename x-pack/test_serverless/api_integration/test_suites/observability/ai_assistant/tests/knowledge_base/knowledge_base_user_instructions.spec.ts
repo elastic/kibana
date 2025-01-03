@@ -38,6 +38,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const retry = getService('retry');
 
   describe('Knowledge base user instructions', function () {
+    // TODO: https://github.com/elastic/kibana/issues/192751
     this.tags(['skipMKI']);
     let editorRoleAuthc: RoleCredentials;
     let adminRoleAuthc: RoleCredentials;
@@ -117,6 +118,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           });
 
           const instructions = res.body.userInstructions;
+          // TODO: gets 4 in serverless, bufferFlush event?
           expect(instructions).to.have.length(3);
 
           const sortById = (data: Array<Instruction & { public?: boolean }>) => sortBy(data, 'id');
