@@ -276,8 +276,8 @@ describe('useComparisonCellValue', () => {
     expect(comparisonCell1.getCell()).not.toHaveClass(BASE_CELL_CLASS);
     expect(comparisonCell1.getCell()).not.toHaveClass(MATCH_CELL_CLASS);
     expect(comparisonCell1.getCell()).not.toHaveClass(DIFF_CELL_CLASS);
-    expect(comparisonCell1.getAllSegments()).toHaveLength(12);
-    expect(comparisonCell1.getAddedSegments()).toHaveLength(3);
+    expect(comparisonCell1.getAllSegments()).toHaveLength(13);
+    expect(comparisonCell1.getAddedSegments()).toHaveLength(4);
     expect(comparisonCell1.getRemovedSegments()).toHaveLength(3);
     expect(comparisonCell1.getCell()).toMatchSnapshot();
     const comparisonCell2 = renderComparisonCell({
