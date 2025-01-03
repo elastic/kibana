@@ -822,12 +822,12 @@ export function copyToSpaceTestSuiteFactory(context: DeploymentAgnosticFtrProvid
           await supertest.destroy();
         });
 
-        describe.skip('single-namespace types', () => {
+        describe('single-namespace types', () => {
           beforeEach(
             async () => await testDataLoader.createFtrSavedObjectsData(SPACE_DATA_TO_LOAD)
           );
 
-          afterEach(async () => await await testDataLoader.deleteFtrSavedObjectsData());
+          afterEach(async () => await testDataLoader.deleteFtrSavedObjectsData());
 
           const dashboardObject = { type: 'dashboard', id: `cts_dashboard_${spaceId}` };
 
@@ -957,7 +957,7 @@ export function copyToSpaceTestSuiteFactory(context: DeploymentAgnosticFtrProvid
           [false, false],
           [false, true], // createNewCopies enabled
           [true, false], // overwrite enabled
-          // we don't specify tese cases with both overwrite and createNewCopies enabled, since overwrite won't matter in that scenario
+          // we don't specify test cases with both overwrite and createNewCopies enabled, since overwrite won't matter in that scenario
         ].forEach(([overwrite, createNewCopies]) => {
           const spaces = ['space_2'];
           const includeReferences = false;

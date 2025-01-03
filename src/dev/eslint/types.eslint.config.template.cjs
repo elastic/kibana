@@ -34,5 +34,11 @@ module.exports = {
         '@typescript-eslint/no-floating-promises': 'error',
       },
     },
+    {
+      files: ['*spaces_api_integration/deployment_agnostic/services/basic_auth_supertest.ts'],
+      rules: {
+        '@typescript-eslint/no-floating-promises': 'off',
+      },
+    },
   ],
 };
