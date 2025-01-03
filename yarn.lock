@@ -6157,7 +6157,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/logging@link:packages/kbn-logging":
+"@kbn/logging@link:src/platform/packages/shared/kbn-logging":
   version "0.0.0"
   uid ""
 
