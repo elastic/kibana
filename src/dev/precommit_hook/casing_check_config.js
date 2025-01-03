@@ -38,7 +38,7 @@ export const IGNORE_FILE_GLOBS = [
   'x-pack/docs/**/*',
   'src/core/packages/apps/server-internal/assets/fonts/**/*',
   'src/dev/code_coverage/ingest_coverage/integration_tests/mocks/**/*',
-  'packages/kbn-utility-types/test-d/**/*',
+  'src/platform/packages/shared/kbn-utility-types/test-d/**/*',
   'Dockerfile*',
   'vars/*',
   'packages/kbn-test/jest-preset.js',
