@@ -4965,7 +4965,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-saved-objects-browser@link:packages/core/saved-objects/core-saved-objects-browser":
+"@kbn/core-saved-objects-browser@link:src/core/packages/saved-objects/browser":
   version "0.0.0"
   uid ""
 
