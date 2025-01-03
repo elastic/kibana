@@ -1854,7 +1854,7 @@ module.exports = {
      */
     {
       files: [
-        'src/plugins/interactive_setup/**/*.{js,mjs,ts,tsx}',
+        'src/platform/plugins/private/interactive_setup/**/*.{js,mjs,ts,tsx}',
         'test/interactive_setup_api_integration/**/*.{js,mjs,ts,tsx}',
         'test/interactive_setup_functional/**/*.{js,mjs,ts,tsx}',
 

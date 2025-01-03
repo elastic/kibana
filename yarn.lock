@@ -5977,7 +5977,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/interactive-setup-plugin@link:src/plugins/interactive_setup":
+"@kbn/interactive-setup-plugin@link:src/platform/plugins/private/interactive_setup":
   version "0.0.0"
   uid ""
 
