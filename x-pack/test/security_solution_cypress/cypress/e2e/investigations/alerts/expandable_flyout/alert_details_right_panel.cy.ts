@@ -65,7 +65,11 @@ import { ALERTS_URL } from '../../../../urls/navigation';
 import { waitForAlertsToPopulate } from '../../../../tasks/create_new_rule';
 import { TOASTER } from '../../../../screens/alerts_detection_rules';
 import { ELASTICSEARCH_USERNAME, IS_SERVERLESS } from '../../../../env_var_names_constants';
-import { goToAcknowledgedAlerts, goToClosedAlerts } from '../../../../tasks/alerts';
+import {
+  goToAcknowledgedAlerts,
+  goToClosedAlerts,
+  toggleKPICharts,
+} from '../../../../tasks/alerts';
 import {
   DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_WORKFLOW_STATUS_DETAILS,
   DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_WORKFLOW_STATUS_TITLE,
@@ -177,9 +181,12 @@ describe('Alert details expandable flyout right panel', { tags: ['@ess', '@serve
     cy.get(TOASTER).should('have.text', 'Successfully marked 1 alert as acknowledged.');
     cy.get(EMPTY_ALERT_TABLE).should('exist');
 
+    // collapsing the KPI section prevents the test from being flaky, as when the KPI is expanded, the view
+    // scrolls to the bottom of the page (for some unknown reason) and the test can't select the page filter...
+    toggleKPICharts();
     goToAcknowledgedAlerts();
-    waitForAlertsToPopulate();
     expandAlertAtIndexExpandableFlyout();
+
     cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_WORKFLOW_STATUS_TITLE).should(
       'have.text',
       'Last alert status change'
@@ -199,9 +206,12 @@ describe('Alert details expandable flyout right panel', { tags: ['@ess', '@serve
     cy.get(TOASTER).should('have.text', 'Successfully closed 1 alert.');
     cy.get(EMPTY_ALERT_TABLE).should('exist');
 
+    // collapsing the KPI section prevents the test from being flaky, as when the KPI is expanded, the view
+    // scrolls to the bottom of the page (for some unknown reason) and the test can't select the page filter...
+    toggleKPICharts();
     goToClosedAlerts();
-    waitForAlertsToPopulate();
     expandAlertAtIndexExpandableFlyout();
+
     cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_WORKFLOW_STATUS_TITLE).should(
       'have.text',
       'Last alert status change'
