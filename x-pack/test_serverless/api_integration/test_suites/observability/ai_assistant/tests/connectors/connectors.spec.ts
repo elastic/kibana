@@ -14,8 +14,6 @@ import type {
   SupertestWithoutAuthProviderType,
 } from '../../../../../../shared/services';
 
-const CONNECTOR_API_URL = '/internal/observability_ai_assistant/connectors';
-
 export default function ApiTest({ getService }: FtrProviderContext) {
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantAPIClient');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
@@ -49,14 +47,14 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     it('Returns a 2xx for enterprise license', async () => {
       await observabilityAIAssistantAPIClient
         .slsEditor({
-          endpoint: `GET ${CONNECTOR_API_URL}`,
+          endpoint: `GET /internal/observability_ai_assistant/connectors`,
         })
         .expect(200);
     });
 
     it('returns an empty list of connectors', async () => {
       const res = await observabilityAIAssistantAPIClient.slsEditor({
-        endpoint: `GET ${CONNECTOR_API_URL}`,
+        endpoint: `GET /internal/observability_ai_assistant/connectors`,
       });
 
       expect(res.body.length).to.be(0);
@@ -72,7 +70,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
 
       const res = await observabilityAIAssistantAPIClient.slsEditor({
-        endpoint: `GET ${CONNECTOR_API_URL}`,
+        endpoint: `GET /internal/observability_ai_assistant/connectors`,
       });
 
       expect(res.body.length).to.be(1);
@@ -90,7 +88,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       it('should deny access for users without the ai_assistant privilege', async () => {
         await observabilityAIAssistantAPIClient
           .slsUnauthorized({
-            endpoint: `GET ${CONNECTOR_API_URL}`,
+            endpoint: `GET /internal/observability_ai_assistant/connectors`,
           })
           .expect(403);
       });
