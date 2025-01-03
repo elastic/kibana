@@ -4357,7 +4357,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-capabilities-browser-internal@link:packages/core/capabilities/core-capabilities-browser-internal":
+"@kbn/core-capabilities-browser-internal@link:src/core/packages/capabilities/browser-internal":
   version "0.0.0"
   uid ""
 
