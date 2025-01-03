@@ -5013,7 +5013,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-security-browser@link:packages/core/security/core-security-browser":
+"@kbn/core-security-browser@link:src/core/packages/security/browser":
   version "0.0.0"
   uid ""
 

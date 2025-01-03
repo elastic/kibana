@@ -9,6 +9,6 @@
 
 module.exports = {
   preset: '@kbn/test',
-  rootDir: '../../../..',
-  roots: ['<rootDir>/packages/core/security/core-security-browser'],
+  rootDir: '../../../../..',
+  roots: ['<rootDir>/src/core/packages/security/browser'],
 };
