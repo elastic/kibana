@@ -59,7 +59,6 @@ packages/core/apps/core-apps-browser-mocks @elastic/kibana-core
 packages/core/base/core-base-browser-mocks @elastic/kibana-core
 packages/core/base/core-base-server-mocks @elastic/kibana-core
 packages/core/capabilities/core-capabilities-browser-mocks @elastic/kibana-core
-packages/core/capabilities/core-capabilities-common @elastic/kibana-core
 packages/core/capabilities/core-capabilities-server @elastic/kibana-core
 packages/core/capabilities/core-capabilities-server-internal @elastic/kibana-core
 packages/core/capabilities/core-capabilities-server-mocks @elastic/kibana-core
@@ -493,6 +492,7 @@ src/core/packages/base/common @elastic/kibana-core
 src/core/packages/base/common-internal @elastic/kibana-core
 src/core/packages/base/server-internal @elastic/kibana-core
 src/core/packages/capabilities/browser-internal @elastic/kibana-core
+src/core/packages/capabilities/common @elastic/kibana-core
 src/platform/packages/private/analytics/utils/analytics_collection_utils @elastic/kibana-core
 src/platform/packages/private/default-nav/analytics @elastic/kibana-data-discovery @elastic/kibana-presentation @elastic/kibana-visualizations
 src/platform/packages/private/default-nav/devtools @elastic/kibana-management

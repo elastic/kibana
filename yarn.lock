@@ -4365,7 +4365,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-capabilities-common@link:packages/core/capabilities/core-capabilities-common":
+"@kbn/core-capabilities-common@link:src/core/packages/capabilities/common":
   version "0.0.0"
   uid ""
 
