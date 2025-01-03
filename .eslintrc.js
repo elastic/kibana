@@ -1923,7 +1923,7 @@ module.exports = {
       files: [
         'src/platform/packages/shared/kbn-analytics/**',
         // 'packages/kbn-telemetry-tools/**',
-        'src/plugins/kibana_usage_collection/**',
+        'src/platform/plugins/private/kibana_usage_collection/**',
         'src/plugins/usage_collection/**',
         'src/plugins/telemetry/**',
         'src/plugins/telemetry_collection_manager/**',
@@ -1947,7 +1947,7 @@ module.exports = {
         'src/plugins/saved_objects_management/**',
         'src/platform/packages/shared/kbn-analytics/**',
         'packages/kbn-telemetry-tools/**',
-        'src/plugins/kibana_usage_collection/**',
+        'src/platform/plugins/private/kibana_usage_collection/**',
         'src/plugins/usage_collection/**',
         'src/plugins/telemetry/**',
         'src/plugins/telemetry_collection_manager/**',
