@@ -5005,7 +5005,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-security-browser-internal@link:packages/core/security/core-security-browser-internal":
+"@kbn/core-security-browser-internal@link:src/core/packages/security/browser-internal":
   version "0.0.0"
   uid ""
 
