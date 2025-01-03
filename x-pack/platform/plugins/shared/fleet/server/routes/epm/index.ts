@@ -101,6 +101,10 @@ export const INSTALL_PACKAGES_SECURITY: RouteSecurity = {
   },
 };
 
+export const READ_PACKAGE_INFO_AUTHZ: FleetAuthzRouteConfig['fleetAuthz'] = {
+  integrations: { readPackageInfo: true },
+};
+
 export const READ_PACKAGE_INFO_SECURITY: RouteSecurity = {
   authz: {
     requiredPrivileges: [FLEET_API_PRIVILEGES.INTEGRATIONS.READ],
