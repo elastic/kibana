@@ -14033,7 +14033,7 @@ axe-core@^4.2.0, axe-core@^4.6.2:
   resolved "https://registry.yarnpkg.com/axe-core/-/axe-core-4.7.2.tgz#040a7342b20765cb18bb50b628394c21bccc17a0"
   integrity sha512-zIURGIS1E1Q4pcrMjp+nnEh+16G56eG/MUllJH8yEvw7asDo7Ac9uhC9KIH5jzpITueEZolfYglnCGIuSBz39g==
 
-axios@^1.0.0, axios@^1.3.4, axios@^1.6.0, axios@^1.7.4, axios@^1.7.9:
+axios@^1.3.4, axios@^1.6.0, axios@^1.6.8, axios@^1.7.4, axios@^1.7.9:
   version "1.7.9"
   resolved "https://registry.yarnpkg.com/axios/-/axios-1.7.9.tgz#d7d071380c132a24accda1b2cfc1535b79ec650a"
   integrity sha512-LhLcE7Hbiryz8oMDdDptSrWowmB4Bl6RCt6sIJKpRB4XtVf0iEgewX3au/pJqm+Py1kCASkb/FFKjxQaLtxJvw==
@@ -14799,12 +14799,12 @@ buffer@^6.0.3:
     base64-js "^1.3.1"
     ieee754 "^1.2.1"
 
-buildkite-test-collector@^1.7.0:
-  version "1.7.0"
-  resolved "https://registry.yarnpkg.com/buildkite-test-collector/-/buildkite-test-collector-1.7.0.tgz#3fdd753b185045c7aed0136a0e0713a77313164b"
-  integrity sha512-R2t3KfBmGCu8fllmZ5GBzOyLJxfB2CEwwgOOtLTleKrHLDPXDal+YLz09okOVL0DE+d5GaGhELwY1MD3xfwE4A==
+buildkite-test-collector@^1.7.3:
+  version "1.7.3"
+  resolved "https://registry.yarnpkg.com/buildkite-test-collector/-/buildkite-test-collector-1.7.3.tgz#8f6fad99f68fbb0f7fa887d8629eb5bdb5d5d79a"
+  integrity sha512-4NJFY9h6r1gpF6Faxpxd/OPesHJQZNbFDtHSHDgzT6mJ8zteKM2jvNXRu0hP/+SO1pJ4oFyWr44x2WmbTTCn9Q==
   dependencies:
-    axios "^1.0.0"
+    axios "^1.6.8"
     dotenv "^16.0.2"
     request-spy "^0.0.10"
     strip-ansi "^6.0.0"
