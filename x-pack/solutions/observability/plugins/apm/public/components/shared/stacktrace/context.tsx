@@ -26,10 +26,9 @@ function getStartLineNumber(stackframe: StackframeWithLineContext) {
 interface Props {
   stackframe: StackframeWithLineContext;
   codeLanguage?: string;
-  isLibraryFrame: boolean;
 }
 
-export function Context({ stackframe, codeLanguage, isLibraryFrame }: Props) {
+export function Context({ stackframe, codeLanguage }: Props) {
   const lines = getStackframeLines(stackframe);
   const start = getStartLineNumber(stackframe);
   const highlightedLine = start + (stackframe.context?.pre || []).length;
@@ -44,7 +43,7 @@ export function Context({ stackframe, codeLanguage, isLibraryFrame }: Props) {
         start,
         highlight: `${highlightedLine}`,
       }}
-      transparentBackground={isLibraryFrame}
+      transparentBackground
     >
       {lines}
     </EuiCodeBlock>
