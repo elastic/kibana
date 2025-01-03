@@ -15,7 +15,7 @@ import {
   DEFAULT_LOG_VIEW,
   getLogsLocatorFromUrlService,
   getNodeQuery,
-  LogViewReference,
+  type LogViewReference,
 } from '@kbn/logs-shared-plugin/common';
 import { findInventoryFields } from '@kbn/metrics-data-access-plugin/common';
 import { OpenInLogsExplorerButton } from '@kbn/logs-shared-plugin/public';

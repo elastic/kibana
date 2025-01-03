@@ -18,12 +18,13 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { useChartThemes } from '@kbn/observability-shared-plugin/public';
-import { Chart, Partition, Settings, Datum, PartitionLayout } from '@elastic/charts';
+import type { Datum } from '@elastic/charts';
+import { Chart, Partition, Settings, PartitionLayout } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { useEuiTheme } from '@elastic/eui';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import { IndexLifecyclePhaseSelectOption } from '../../../../../common/storage_explorer_types';
+import type { IndexLifecyclePhaseSelectOption } from '../../../../../common/storage_explorer_types';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { useTimeRange } from '../../../../hooks/use_time_range';
 import { isPending } from '../../../../hooks/use_fetcher';

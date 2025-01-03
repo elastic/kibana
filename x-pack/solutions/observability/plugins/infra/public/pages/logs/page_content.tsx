@@ -11,9 +11,9 @@ import React, { useContext } from 'react';
 import { Routes, Route } from '@kbn/shared-ux-router';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { HeaderMenuPortal, useLinkProps } from '@kbn/observability-shared-plugin/public';
-import { SharePublicStart } from '@kbn/share-plugin/public/plugin';
+import type { SharePublicStart } from '@kbn/share-plugin/public/plugin';
 import {
-  ObservabilityOnboardingLocatorParams,
+  type ObservabilityOnboardingLocatorParams,
   OBSERVABILITY_ONBOARDING_LOCATOR,
 } from '@kbn/deeplinks-observability';
 import { dynamic } from '@kbn/shared-ux-utility';

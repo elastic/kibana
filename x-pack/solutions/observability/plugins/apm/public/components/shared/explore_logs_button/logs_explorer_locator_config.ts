@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { LocatorPublic } from '@kbn/share-plugin/common';
+import type { LocatorPublic } from '@kbn/share-plugin/common';
 import { getRouterLinkProps } from '@kbn/router-utils';
-import { RouterLinkProps } from '@kbn/router-utils/src/get_router_link_props';
-import { type LogsLocatorParams } from '@kbn/logs-shared-plugin/common';
+import type { RouterLinkProps } from '@kbn/router-utils/src/get_router_link_props';
+import type { LogsLocatorParams } from '@kbn/logs-shared-plugin/common';
 
 export const buildLogsExplorerLocatorConfig = ({
   locator,

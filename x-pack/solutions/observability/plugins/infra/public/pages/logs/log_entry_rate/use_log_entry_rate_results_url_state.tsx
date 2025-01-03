@@ -13,7 +13,7 @@ import * as rt from 'io-ts';
 import type { TimeRange as KibanaTimeRange } from '@kbn/es-query';
 import { decodeOrThrow } from '@kbn/io-ts-utils';
 import { useUrlState } from '@kbn/observability-shared-plugin/public';
-import { TimeRange } from '../../../../common/time/time_range';
+import type { TimeRange } from '../../../../common/time/time_range';
 import {
   useKibanaTimefilterTime,
   useSyncKibanaTimeFilterTime,

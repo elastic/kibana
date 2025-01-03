@@ -5,7 +5,10 @@
  * 2.0.
  */
 import React from 'react';
-import { getLogsLocatorFromUrlService, LogViewReference } from '@kbn/logs-shared-plugin/common';
+import {
+  getLogsLocatorFromUrlService,
+  type LogViewReference,
+} from '@kbn/logs-shared-plugin/common';
 import { OpenInLogsExplorerButton } from '@kbn/logs-shared-plugin/public';
 import moment from 'moment';
 import { useKibanaContextForPlugin } from '../../../../../../hooks/use_kibana';

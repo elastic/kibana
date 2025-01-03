@@ -6,24 +6,20 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { HttpHandler } from '@kbn/core/public';
+import type { HttpHandler } from '@kbn/core/public';
 import MemoryJob from '@kbn/ml-plugin/server/models/data_recognizer/modules/metrics_ui_hosts/ml/hosts_memory_usage.json';
 import MemoryDatafeed from '@kbn/ml-plugin/server/models/data_recognizer/modules/metrics_ui_hosts/ml/datafeed_hosts_memory_usage.json';
 import NetworkInJob from '@kbn/ml-plugin/server/models/data_recognizer/modules/metrics_ui_hosts/ml/hosts_network_in.json';
 import NetworkInDatafeed from '@kbn/ml-plugin/server/models/data_recognizer/modules/metrics_ui_hosts/ml/datafeed_hosts_network_in.json';
 import NetworkOutJob from '@kbn/ml-plugin/server/models/data_recognizer/modules/metrics_ui_hosts/ml/hosts_network_out.json';
 import NetworkOutDatafeed from '@kbn/ml-plugin/server/models/data_recognizer/modules/metrics_ui_hosts/ml/datafeed_hosts_network_out.json';
-import { ModuleDescriptor, SetUpModuleArgs } from '../../infra_ml_module_types';
+import type { ModuleDescriptor, SetUpModuleArgs } from '../../infra_ml_module_types';
 import { cleanUpJobsAndDatafeeds } from '../../infra_ml_cleanup';
 import { callJobsSummaryAPI } from '../../api/ml_get_jobs_summary_api';
 import { callGetMlModuleAPI } from '../../api/ml_get_module';
 import { callSetupMlModuleAPI } from '../../api/ml_setup_module_api';
-import {
-  metricsHostsJobTypes,
-  getJobId,
-  MetricsHostsJobType,
-  bucketSpan,
-} from '../../../../../common/infra_ml';
+import type { MetricsHostsJobType } from '../../../../../common/infra_ml';
+import { metricsHostsJobTypes, getJobId, bucketSpan } from '../../../../../common/infra_ml';
 import { TIMESTAMP_FIELD } from '../../../../../common/constants';
 
 type JobType = 'hosts_memory_usage' | 'hosts_network_in' | 'hosts_network_out';
