@@ -101,7 +101,6 @@ packages/core/overlays/core-overlays-browser-mocks @elastic/kibana-core
 packages/core/plugins/core-plugins-browser-mocks @elastic/kibana-core
 packages/core/plugins/core-plugins-server-mocks @elastic/kibana-core
 packages/core/preboot/core-preboot-server-mocks @elastic/kibana-core
-packages/core/rendering/core-rendering-browser-internal @elastic/kibana-core
 packages/core/rendering/core-rendering-browser-mocks @elastic/kibana-core
 packages/core/rendering/core-rendering-server-internal @elastic/kibana-core
 packages/core/rendering/core-rendering-server-mocks @elastic/kibana-core
@@ -493,6 +492,7 @@ src/core/packages/plugins/server-internal @elastic/kibana-core
 src/core/packages/preboot/server @elastic/kibana-core
 src/core/packages/preboot/server-internal @elastic/kibana-core
 src/core/packages/rendering/browser @elastic/kibana-core
+src/core/packages/rendering/browser-internal @elastic/kibana-core
 src/platform/packages/private/analytics/utils/analytics_collection_utils @elastic/kibana-core
 src/platform/packages/private/default-nav/analytics @elastic/kibana-data-discovery @elastic/kibana-presentation @elastic/kibana-visualizations
 src/platform/packages/private/default-nav/devtools @elastic/kibana-management
