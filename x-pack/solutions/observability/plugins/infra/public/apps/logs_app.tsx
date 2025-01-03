@@ -12,8 +12,7 @@ import ReactDOM from 'react-dom';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import type { AppMountParameters } from '@kbn/core/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
-import type { AllDatasetsLocatorParams } from '@kbn/deeplinks-observability';
-import { ALL_DATASETS_LOCATOR_ID } from '@kbn/deeplinks-observability';
+import { type LogsLocatorParams, LOGS_LOCATOR_ID } from '@kbn/logs-shared-plugin/common';
 import { LinkToLogsPage } from '../pages/link_to/link_to_logs';
 import { LogsPage } from '../pages/logs';
 import type { InfraClientStartDeps, InfraClientStartExports } from '../types';
@@ -93,7 +92,7 @@ const LogsApp: React.FC<{
                   exact
                   render={() => {
                     plugins.share.url.locators
-                      .get<AllDatasetsLocatorParams>(ALL_DATASETS_LOCATOR_ID)
+                      .get<LogsLocatorParams>(LOGS_LOCATOR_ID)
                       ?.navigate({});
 
                     return null;

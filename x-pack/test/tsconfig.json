@@ -147,7 +147,6 @@
     "@kbn/reporting-common",
     "@kbn/observability-logs-explorer-plugin",
     "@kbn/io-ts-utils",
-    "@kbn/logs-explorer-plugin",
     "@kbn/security-plugin-types-common",
     "@kbn/slo-schema",
     "@kbn/typed-react-router-config",

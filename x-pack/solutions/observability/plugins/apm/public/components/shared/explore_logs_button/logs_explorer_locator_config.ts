@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { AllDatasetsLocatorParams } from '@kbn/deeplinks-observability';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
 import { getRouterLinkProps } from '@kbn/router-utils';
 import type { RouterLinkProps } from '@kbn/router-utils/src/get_router_link_props';
+import type { LogsLocatorParams } from '@kbn/logs-shared-plugin/common';
 
 export const buildLogsExplorerLocatorConfig = ({
   locator,
@@ -16,14 +16,14 @@ export const buildLogsExplorerLocatorConfig = ({
   from,
   to,
 }: {
-  locator: LocatorPublic<AllDatasetsLocatorParams>;
+  locator: LocatorPublic<LogsLocatorParams>;
   kuery?: string;
   from: string;
   to: string;
 }): {
   logsExplorerLinkProps: RouterLinkProps;
 } => {
-  const params: AllDatasetsLocatorParams = {
+  const params: LogsLocatorParams = {
     timeRange: {
       from,
       to,

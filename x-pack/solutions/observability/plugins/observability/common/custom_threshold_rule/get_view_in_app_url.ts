@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { LogsExplorerLocatorParams } from '@kbn/deeplinks-observability';
 import type { TimeRange } from '@kbn/es-query';
 import { getPaddedAlertTimeRange } from '@kbn/observability-get-padded-alert-time-range-util';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
+import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import { getGroupFilters } from './helpers/get_group';
 import { SearchConfigurationWithExtractedReferenceType } from './types';
 import type { CustomThresholdExpressionMetric } from './types';
@@ -19,7 +19,7 @@ export interface GetViewInAppUrlArgs {
   dataViewId?: string;
   endedAt?: string;
   groups?: Group[];
-  logsExplorerLocator?: LocatorPublic<LogsExplorerLocatorParams>;
+  logsLocator?: LocatorPublic<DiscoverAppLocatorParams>;
   metrics?: CustomThresholdExpressionMetric[];
   startedAt?: string;
   spaceId?: string;
@@ -29,15 +29,14 @@ export const getViewInAppUrl = ({
   dataViewId,
   endedAt,
   groups,
-  logsExplorerLocator,
+  logsLocator,
   metrics = [],
   searchConfiguration,
   startedAt = new Date().toISOString(),
   spaceId,
 }: GetViewInAppUrlArgs) => {
-  if (!logsExplorerLocator) return '';
+  if (!logsLocator) return '';
 
-  const dataset = searchConfiguration?.index.title ?? dataViewId;
   const searchConfigurationQuery = searchConfiguration?.query.query;
   const searchConfigurationFilters = searchConfiguration?.filter || [];
   const groupFilters = getGroupFilters(groups);
@@ -58,9 +57,10 @@ export const getViewInAppUrl = ({
     query.query = searchConfigurationQuery;
   }
 
-  return logsExplorerLocator?.getRedirectUrl(
+  return logsLocator.getRedirectUrl(
     {
-      dataset,
+      dataViewId,
+      dataViewSpec: searchConfiguration?.index,
       timeRange,
       query,
       filters: [...searchConfigurationFilters, ...groupFilters],

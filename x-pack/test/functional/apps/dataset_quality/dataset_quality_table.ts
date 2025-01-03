@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import originalExpect from 'expect';
 import { DatasetQualityFtrProviderContext } from './config';
 import {
   datasetNames,
@@ -19,6 +20,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
   const PageObjects = getPageObjects([
     'common',
     'navigationalSearch',
+    'discover',
     'observabilityLogsExplorer',
     'datasetQuality',
   ]);
@@ -139,9 +141,9 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
       await (await actionsCol.getCellChildren('a'))[rowIndexToOpen].click(); // Click "Open"
 
       // Confirm dataset selector text in observability logs explorer
-      const datasetSelectorText =
-        await PageObjects.observabilityLogsExplorer.getDataSourceSelectorButtonText();
-      expect(datasetSelectorText).to.eql(datasetName);
+      const datasetSelectorText = await PageObjects.discover.getCurrentDataViewId();
+
+      originalExpect(datasetSelectorText).toMatch(datasetName);
 
       // Return to Dataset Quality Page
       await PageObjects.datasetQuality.navigateTo();

@@ -33,9 +33,7 @@ import {
   degradedFieldMessageIssueDoesNotExistInLatestIndex,
   discoverAriaText,
   fieldIgnoredText,
-  logsExplorerAriaText,
   openInDiscoverText,
-  openInLogsExplorerText,
   overviewDegradedFieldsSectionTitle,
 } from '../../../../common/translations';
 import { DegradedFieldInfo } from './field_info';
@@ -95,21 +93,11 @@ export default function DegradedFieldFlyout() {
               {expandedDegradedField} <span style={{ fontWeight: 400 }}>{fieldIgnoredText}</span>
             </EuiText>
           </EuiTitle>
-          <EuiToolTip
-            content={
-              redirectLinkProps.isLogsExplorerAvailable
-                ? openInLogsExplorerText
-                : openInDiscoverText
-            }
-          >
+          <EuiToolTip content={openInDiscoverText}>
             <EuiButtonIcon
               display="base"
-              iconType={
-                redirectLinkProps.isLogsExplorerAvailable ? 'logoObservability' : 'discoverApp'
-              }
-              aria-label={
-                redirectLinkProps.isLogsExplorerAvailable ? logsExplorerAriaText : discoverAriaText
-              }
+              iconType="discoverApp"
+              aria-label={discoverAriaText}
               size="s"
               data-test-subj="datasetQualityDetailsDegradedFieldFlyoutTitleLinkToDiscover"
               {...redirectLinkProps.linkProps}

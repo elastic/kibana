@@ -162,7 +162,6 @@ export const applicationUsageSchema = {
   monitoring: commonSchema,
   'observability-log-explorer': commonSchema,
   'observability-logs-explorer': commonSchema,
-  'last-used-logs-viewer': commonSchema,
   'observability-overview': commonSchema,
   observabilityOnboarding: commonSchema,
   observabilityAIAssistant: commonSchema,

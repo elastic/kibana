@@ -10,7 +10,12 @@ import type { Location } from 'history';
 import type { IBasePath } from '@kbn/core/public';
 import { isEmpty, pickBy } from 'lodash';
 import moment from 'moment';
-import type { getLogsLocatorsFromUrlService } from '@kbn/logs-shared-plugin/common';
+import {
+  type LogsLocatorParams,
+  getNodeQuery,
+  getTraceQuery,
+  getTimeRange,
+} from '@kbn/logs-shared-plugin/common';
 import { findInventoryFields } from '@kbn/metrics-data-access-plugin/common';
 import type { ProfilingLocators } from '@kbn/observability-shared-plugin/public';
 import type { AssetDetailsLocator } from '@kbn/observability-shared-plugin/common';
@@ -46,7 +51,7 @@ export const getSections = ({
   rangeFrom,
   rangeTo,
   environment,
-  logsLocators,
+  logsLocator,
   dataViewId,
   assetDetailsLocator,
 }: {
@@ -60,7 +65,7 @@ export const getSections = ({
   rangeFrom: string;
   rangeTo: string;
   environment: Environment;
-  logsLocators: ReturnType<typeof getLogsLocatorsFromUrlService>;
+  logsLocator: LocatorPublic<LogsLocatorParams>;
   dataViewId?: string;
   assetDetailsLocator?: AssetDetailsLocator;
 }) => {
@@ -85,25 +90,31 @@ export const getSections = ({
   );
 
   // Logs hrefs
-  const podLogsHref = logsLocators.nodeLogsLocator.getRedirectUrl({
-    nodeField: findInventoryFields('pod').id,
-    nodeId: podId!,
-    time,
+  const podLogsHref = logsLocator.getRedirectUrl({
+    query: getNodeQuery({
+      nodeField: findInventoryFields('pod').id,
+      nodeId: podId!,
+    }),
+    timeRange: getTimeRange(time),
   });
-  const containerLogsHref = logsLocators.nodeLogsLocator.getRedirectUrl({
-    nodeField: findInventoryFields('container').id,
-    nodeId: containerId!,
-    time,
+  const containerLogsHref = logsLocator.getRedirectUrl({
+    query: getNodeQuery({
+      nodeField: findInventoryFields('container').id,
+      nodeId: containerId!,
+    }),
+    timeRange: getTimeRange(time),
   });
-  const hostLogsHref = logsLocators.nodeLogsLocator.getRedirectUrl({
-    nodeField: findInventoryFields('host').id,
-    nodeId: hostName!,
-    time,
+  const hostLogsHref = logsLocator.getRedirectUrl({
+    query: getNodeQuery({
+      nodeField: findInventoryFields('host').id,
+      nodeId: hostName!,
+    }),
+    timeRange: getTimeRange(time),
   });
 
-  const traceLogsHref = logsLocators.traceLogsLocator.getRedirectUrl({
-    traceId: transaction.trace.id!,
-    time,
+  const traceLogsHref = logsLocator.getRedirectUrl({
+    query: getTraceQuery({ traceId: transaction.trace.id! }),
+    timeRange: getTimeRange(time),
   });
 
   const hasPodLink = !!podId && infraLinksAvailable && !!assetDetailsLocator;

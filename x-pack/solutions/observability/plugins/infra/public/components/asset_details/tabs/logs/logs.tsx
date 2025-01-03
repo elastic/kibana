@@ -11,10 +11,15 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { EuiFieldSearch, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { LogStream } from '@kbn/logs-shared-plugin/public';
-import type { LogViewReference } from '@kbn/logs-shared-plugin/common';
-import { DEFAULT_LOG_VIEW, getLogsLocatorsFromUrlService } from '@kbn/logs-shared-plugin/common';
+import {
+  DEFAULT_LOG_VIEW,
+  getLogsLocatorFromUrlService,
+  getNodeQuery,
+  type LogViewReference,
+} from '@kbn/logs-shared-plugin/common';
 import { findInventoryFields } from '@kbn/metrics-data-access-plugin/common';
 import { OpenInLogsExplorerButton } from '@kbn/logs-shared-plugin/public';
+import moment from 'moment';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { InfraLoadingPanel } from '../../../loading';
 import { useAssetDetailsRenderPropsContext } from '../../hooks/use_asset_details_render_props';
@@ -35,7 +40,7 @@ export const Logs = () => {
   const { loading: logViewLoading, reference: logViewReference } = logs ?? {};
 
   const { services } = useKibanaContextForPlugin();
-  const { nodeLogsLocator } = getLogsLocatorsFromUrlService(services.share.url);
+  const logsLocator = getLogsLocatorFromUrlService(services.share.url)!;
   const [textQuery, setTextQuery] = useState(urlState?.logsSearch ?? '');
   const [textQueryDebounced, setTextQueryDebounced] = useState(urlState?.logsSearch ?? '');
 
@@ -78,14 +83,27 @@ export const Logs = () => {
   );
 
   const logsUrl = useMemo(() => {
-    return nodeLogsLocator.getRedirectUrl({
-      nodeField: findInventoryFields(asset.type).id,
-      nodeId: asset.id,
-      time: state.startTimestamp,
-      filter: textQueryDebounced,
+    return logsLocator.getRedirectUrl({
+      query: getNodeQuery({
+        nodeField: findInventoryFields(asset.type).id,
+        nodeId: asset.id,
+        filter: textQueryDebounced,
+      }),
+      timeRange: {
+        from: moment(state.startTimestamp).toISOString(),
+        to: moment(state.currentTimestamp).toISOString(),
+      },
       logView,
     });
-  }, [nodeLogsLocator, asset.id, asset.type, state.startTimestamp, textQueryDebounced, logView]);
+  }, [
+    logsLocator,
+    asset.id,
+    asset.type,
+    state.startTimestamp,
+    state.currentTimestamp,
+    textQueryDebounced,
+    logView,
+  ]);
 
   return (
     <EuiFlexGroup direction="column" ref={ref}>
