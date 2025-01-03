@@ -317,7 +317,7 @@ This object is created when a user saves their current session in the Discover a
 generating deep links to other apps using locators, and creating short URLs.
 
 
-|{kib-repo}blob/{branch}/src/plugins/telemetry/README.md[telemetry]
+|{kib-repo}blob/{branch}/src/platform/plugins/shared/telemetry/README.md[telemetry]
 |Telemetry allows Kibana features to have usage tracked in the wild. The general term "telemetry" refers to multiple things:
 
 

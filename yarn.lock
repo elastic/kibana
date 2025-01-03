@@ -7617,7 +7617,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/telemetry-plugin@link:src/plugins/telemetry":
+"@kbn/telemetry-plugin@link:src/platform/plugins/shared/telemetry":
   version "0.0.0"
   uid ""
 
