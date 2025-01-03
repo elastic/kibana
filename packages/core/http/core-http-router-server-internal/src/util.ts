@@ -15,8 +15,9 @@ import {
   type RouteValidator,
 } from '@kbn/core-http-server';
 import type { Mutable } from 'utility-types';
-import type { IKibanaResponse, ResponseHeaders } from '@kbn/core-http-server';
+import type { IKibanaResponse, ResponseHeaders, SafeRouteMethod } from '@kbn/core-http-server';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
+import { Request } from '@hapi/hapi';
 import type { InternalRouteConfig } from './route';
 
 function isStatusCode(key: string) {
@@ -91,4 +92,34 @@ export function getVersionHeader(version: string): ResponseHeaders {
 
 export function injectVersionHeader(version: string, response: IKibanaResponse): IKibanaResponse {
   return injectResponseHeaders(getVersionHeader(version), response);
+}
+
+export function formatErrorMeta(
+  statusCode: number,
+  {
+    error,
+    request,
+  }: {
+    request: Request;
+    error: Error;
+  }
+) {
+  return {
+    http: {
+      response: { status_code: statusCode },
+      request: { method: request.route?.method, path: request.route?.path },
+    },
+    error: { message: error.message },
+  };
+}
+
+export function getRouteFullPath(routerPath: string, routePath: string) {
+  // If router's path ends with slash and route's path starts with slash,
+  // we should omit one of them to have a valid concatenated path.
+  const routePathStartIndex = routerPath.endsWith('/') && routePath.startsWith('/') ? 1 : 0;
+  return `${routerPath}${routePath.slice(routePathStartIndex)}`;
+}
+
+export function isSafeMethod(method: RouteMethod): method is SafeRouteMethod {
+  return method === 'get' || method === 'options';
 }

@@ -41,7 +41,14 @@ import { kibanaResponseFactory } from './response';
 import { HapiResponseAdapter } from './response_adapter';
 import { wrapErrors } from './error_wrapper';
 import { Method } from './versioned_router/types';
-import { getVersionHeader, injectVersionHeader, prepareRouteConfigValidation } from './util';
+import {
+  getVersionHeader,
+  injectVersionHeader,
+  prepareRouteConfigValidation,
+  getRouteFullPath,
+  isSafeMethod,
+  formatErrorMeta,
+} from './util';
 import { stripIllegalHttp2Headers } from './strip_illegal_http2_headers';
 import { validRouteSecurity } from './security_route_config_validator';
 import { InternalRouteConfig } from './route';
@@ -53,13 +60,6 @@ export type ContextEnhancer<
   Method extends RouteMethod,
   Context extends RequestHandlerContextBase
 > = (handler: RequestHandler<P, Q, B, Context, Method>) => RequestHandlerEnhanced<P, Q, B, Method>;
-
-export function getRouteFullPath(routerPath: string, routePath: string) {
-  // If router's path ends with slash and route's path starts with slash,
-  // we should omit one of them to have a valid concatenated path.
-  const routePathStartIndex = routerPath.endsWith('/') && routePath.startsWith('/') ? 1 : 0;
-  return `${routerPath}${routePath.slice(routePathStartIndex)}`;
-}
 
 /**
  * Create the validation schemas for a route
@@ -274,26 +274,6 @@ export class Router<Context extends RequestHandlerContextBase = RequestHandlerCo
 
   public handleLegacyErrors = wrapErrors;
 
-  private logError(
-    msg: string,
-    statusCode: number,
-    {
-      error,
-      request,
-    }: {
-      request: Request;
-      error: Error;
-    }
-  ) {
-    this.log.error(msg, {
-      http: {
-        response: { status_code: statusCode },
-        request: { method: request.route?.method, path: request.route?.path },
-      },
-      error: { message: error.message },
-    });
-  }
-
   /** Should be private, just exposed for convenience for the versioned router */
   public emitPostValidate = (
     request: KibanaRequest,
@@ -339,7 +319,7 @@ export class Router<Context extends RequestHandlerContextBase = RequestHandlerCo
     try {
       kibanaRequest = CoreKibanaRequest.from(request, routeSchemas);
     } catch (error) {
-      this.logError('400 Bad Request', 400, { request, error });
+      this.log.error('400 Bad Request', formatErrorMeta(400, { request, error }));
       const response = hapiResponseAdapter.toBadRequest(error.message);
       if (isPublicUnversionedRoute) {
         response.output.headers = {
@@ -384,14 +364,14 @@ export class Router<Context extends RequestHandlerContextBase = RequestHandlerCo
 
       // forward 401 errors from ES client
       if (isElasticsearchUnauthorizedError(error)) {
-        this.logError('401 Unauthorized', 401, { request, error });
+        this.log.error('401 Unauthorized', formatErrorMeta(401, { request, error }));
         return hapiResponseAdapter.handle(
           kibanaResponseFactory.unauthorized(convertEsUnauthorized(error))
         );
       }
 
       // return a generic 500 to avoid error info / stack trace surfacing
-      this.logError('500 Server Error', 500, { request, error });
+      this.log.error('500 Server Error', formatErrorMeta(500, { request, error }));
       return hapiResponseAdapter.toInternalError();
     }
   }
