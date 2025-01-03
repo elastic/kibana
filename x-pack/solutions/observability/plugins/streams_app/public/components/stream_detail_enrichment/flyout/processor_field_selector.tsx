@@ -5,36 +5,19 @@
  * 2.0.
  */
 
-import { EuiSuperSelectOption, EuiFlexGroup, EuiFormRow, EuiSuperSelect } from '@elastic/eui';
+import { EuiFormRow, EuiFieldText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FieldIcon } from '@kbn/react-field';
 import { FieldDefinitionConfig } from '@kbn/streams-schema';
-import React, { useMemo } from 'react';
-import { useController } from 'react-hook-form';
+import React from 'react';
+import { useFormContext } from 'react-hook-form';
 
 interface ProcessorFieldSelectorProps {
   fields: Array<{ name: string; type: FieldDefinitionConfig['type'] }>;
 }
 
 export const ProcessorFieldSelector = ({ fields }: ProcessorFieldSelectorProps) => {
-  const { field, fieldState } = useController({ name: 'field', rules: { required: true } });
-
-  // Should we filter the available options by "match_only_text" only?
-  const options: Array<EuiSuperSelectOption<string>> = useMemo(
-    () =>
-      fields.map(({ name, type }) => ({
-        value: name,
-        inputDisplay: type ? (
-          <EuiFlexGroup alignItems="center" gutterSize="s">
-            {type && <FieldIcon type={type} size="s" />}
-            {name}
-          </EuiFlexGroup>
-        ) : (
-          name
-        ),
-      })),
-    [fields]
-  );
+  const { register } = useFormContext();
+  const { ref, ...inputProps } = register(`field`);
 
   return (
     <EuiFormRow
@@ -47,17 +30,7 @@ export const ProcessorFieldSelector = ({ fields }: ProcessorFieldSelectorProps) 
         { defaultMessage: 'Field to search for matches.' }
       )}
     >
-      <EuiSuperSelect
-        isInvalid={fieldState.invalid}
-        options={options}
-        valueOfSelected={field.value as string}
-        onChange={field.onChange}
-        fullWidth
-        placeholder={i18n.translate(
-          'xpack.streams.streamDetailView.managementTab.enrichment.processorFlyout.fieldSelectorPlaceholder',
-          { defaultMessage: 'message, event.original ...' }
-        )}
-      />
+      <EuiFieldText {...inputProps} inputRef={ref} />
     </EuiFormRow>
   );
 };

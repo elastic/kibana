@@ -10,9 +10,14 @@ import deepEqual from 'fast-deep-equal';
 import { i18n } from '@kbn/i18n';
 import { useAbortController } from '@kbn/observability-utils-browser/hooks/use_abort_controller';
 import { useBoolean } from '@kbn/react-hooks';
-import { ReadStreamDefinition, ProcessingDefinition } from '@kbn/streams-schema';
+import {
+  ReadStreamDefinition,
+  ProcessingDefinition,
+  isWiredReadStream,
+  FieldDefinition,
+} from '@kbn/streams-schema';
 import { htmlIdGenerator } from '@elastic/eui';
-import { ProcessorDefinition } from '../types';
+import { DetectedField, ProcessorDefinition } from '../types';
 import { useKibana } from '../../../hooks/use_kibana';
 
 export const useDefinition = (definition: ReadStreamDefinition, refreshDefinition: () => void) => {
@@ -26,6 +31,9 @@ export const useDefinition = (definition: ReadStreamDefinition, refreshDefinitio
   const [isSavingChanges, { on: startsSaving, off: endsSaving }] = useBoolean();
 
   const [processors, setProcessors] = useState(() => createProcessorsList(processing));
+  const [fields, setFields] = useState(() =>
+    isWiredReadStream(definition) ? definition.stream.ingest.wired.fields : {}
+  );
 
   const httpProcessing = useMemo(() => processors.map(removeIdFromProcessor), [processors]);
 
@@ -38,8 +46,20 @@ export const useDefinition = (definition: ReadStreamDefinition, refreshDefinitio
     [processing, httpProcessing]
   );
 
-  const addProcessor = (newProcessing: ProcessingDefinition) => {
+  const addProcessor = (newProcessing: ProcessingDefinition, newFields?: DetectedField[]) => {
     setProcessors(processors.concat(createProcessorWithId(newProcessing)));
+
+    if (isWiredReadStream(definition) && newFields) {
+      setFields({
+        ...definition.stream.ingest.wired.fields,
+        ...newFields.reduce((acc, field) => {
+          if (!(field.name in fields) && field.type !== 'unmapped') {
+            acc[field.name] = { type: field.type };
+          }
+          return acc;
+        }, {} as FieldDefinition),
+      });
+    }
   };
 
   const updateProcessor = (id: string, processorUpdate: ProcessorDefinition) => {
@@ -77,6 +97,7 @@ export const useDefinition = (definition: ReadStreamDefinition, refreshDefinitio
             ingest: {
               ...definition.stream.ingest,
               processing: httpProcessing,
+              ...(isWiredReadStream(definition) && { wired: { fields } }),
             },
           },
         },

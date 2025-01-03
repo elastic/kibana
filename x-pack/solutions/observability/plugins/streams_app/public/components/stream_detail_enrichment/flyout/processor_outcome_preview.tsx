@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useDateRange } from '@kbn/observability-utils-browser/hooks/use_date_range';
 import {
   EuiPanel,
@@ -26,7 +26,7 @@ import { i18n } from '@kbn/i18n';
 import { TimeRange } from '@kbn/es-query';
 import { isEmpty } from 'lodash';
 import { FieldIcon } from '@kbn/react-field';
-import { FIELD_DEFINITION_TYPES } from '@kbn/streams-schema';
+import { FIELD_DEFINITION_TYPES, isWiredReadStream } from '@kbn/streams-schema';
 import { useController, useFieldArray, useFormContext } from 'react-hook-form';
 import { css } from '@emotion/react';
 import { useStreamsAppFetch } from '../../../hooks/use_streams_app_fetch';
@@ -34,6 +34,7 @@ import { useKibana } from '../../../hooks/use_kibana';
 import { StreamsAppSearchBar, StreamsAppSearchBarProps } from '../../streams_app_search_bar';
 import { PreviewTable } from '../../preview_table';
 import { convertFormStateToProcessing, isCompleteProcessingDefinition } from '../utils';
+import { DetectedField } from '../types';
 
 export const ProcessorOutcomePreview = ({ definition, formFields }) => {
   const { dependencies } = useKibana();
@@ -144,6 +145,9 @@ export const ProcessorOutcomePreview = ({ definition, formFields }) => {
     ? simulation.detected_fields.map((field) => field.name)
     : [];
 
+  const detectedFieldsEnabled =
+    isWiredReadStream(definition) && simulation && simulation.detected_fields.length > 0;
+
   return (
     <EuiPanel hasShadow={false} paddingSize="none">
       <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
@@ -169,7 +173,7 @@ export const ProcessorOutcomePreview = ({ definition, formFields }) => {
         </EuiButton>
       </EuiFlexGroup>
       <EuiSpacer />
-      {simulation && simulation.detected_fields.length > 0 && <DetectedFields />}
+      {detectedFieldsEnabled && <DetectedFields detectedFields={simulation.detected_fields} />}
       <OutcomeControls
         docsFilter={selectedDocsFilter}
         onDocsFilterChange={setSelectedDocsFilter}
@@ -376,16 +380,15 @@ const OutcomePreviewTable = ({
   return <PreviewTable documents={documents} displayColumns={columns} height={500} />;
 };
 
-interface DetectedField {
-  name: string;
-  type: string;
-}
-
-export const DetectedFields = () => {
+export const DetectedFields = ({ detectedFields }: { detectedFields: DetectedField[] }) => {
   const { euiTheme } = useEuiTheme();
-  const { fields } = useFieldArray<{ detected_fields: DetectedField[] }>({
+  const { fields, replace } = useFieldArray<{ detected_fields: DetectedField[] }>({
     name: 'detected_fields',
   });
+
+  useEffect(() => {
+    replace(detectedFields);
+  }, [detectedFields, replace]);
 
   return (
     <EuiFormRow

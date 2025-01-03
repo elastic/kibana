@@ -7,6 +7,8 @@
 
 import {
   DissectProcessingDefinition,
+  FieldDefinition,
+  FieldDefinitionConfig,
   GrokProcessingDefinition,
   ProcessingDefinition,
 } from '@kbn/streams-schema';
@@ -35,6 +37,7 @@ export interface ProcessingDefinitionDissect extends BaseProcessingDefinition {
 
 interface BaseFormState {
   condition?: ProcessingDefinition['condition'];
+  detected_fields?: DetectedField[];
 }
 
 export type GrokFormState = BaseFormState &
@@ -47,3 +50,8 @@ export type DissectFormState = DissectProcessingDefinition['dissect'] &
   BaseFormState & { type: 'dissect' };
 
 export type ProcessorFormState = GrokFormState | DissectFormState;
+
+export interface DetectedField {
+  name: string;
+  type: FieldDefinitionConfig['type'] | 'unmapped';
+}

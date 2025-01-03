@@ -23,7 +23,7 @@ import {
 } from '@kbn/streams-schema';
 import { ProcessorTypeSelector } from './processor_type_selector';
 import { ProcessorFlyoutTemplate } from './processor_flyout_template';
-import { GrokFormState, ProcessorDefinition, ProcessorFormState } from '../types';
+import { DetectedField, GrokFormState, ProcessorDefinition, ProcessorFormState } from '../types';
 import { DangerZone } from './danger_zone';
 import { DissectProcessorForm } from './dissect';
 import { GrokProcessorForm } from './grok';
@@ -51,7 +51,7 @@ export interface ProcessorFlyoutProps {
 }
 
 export interface AddProcessorFlyoutProps extends ProcessorFlyoutProps {
-  onAddProcessor: (_newProcessing: ProcessingDefinition) => void;
+  onAddProcessor: (_newProcessing: ProcessingDefinition, newFields?: DetectedField[]) => void;
 }
 export interface EditProcessorFlyoutProps extends ProcessorFlyoutProps {
   onDeleteProcessor: (id: string) => void;
@@ -75,7 +75,7 @@ export function AddProcessorFlyout({
   const handleSubmit: SubmitHandler<ProcessorFormState> = (data) => {
     const processingDefinition = convertFormStateToProcessing(data);
 
-    onAddProcessor(processingDefinition);
+    onAddProcessor(processingDefinition, data.detected_fields);
 
     onClose();
   };
