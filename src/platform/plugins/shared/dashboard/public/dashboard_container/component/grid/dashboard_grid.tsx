@@ -125,13 +125,11 @@ export const DashboardGrid = () => {
           id={id}
           type={type}
           setDragHandles={setDragHandles}
-          expandedPanelId={expandedPanelId}
-          focusedPanelId={focusedPanelId}
           appFixedViewport={appFixedViewport}
         />
       );
     },
-    [expandedPanelId, focusedPanelId, appFixedViewport, dashboardApi]
+    [appFixedViewport, dashboardApi]
   );
 
   const gridSettings = useMemo(() => {

@@ -29,8 +29,6 @@ export interface Props extends DivProps {
   id: DashboardPanelState['explicitInput']['id'];
   index?: number;
   type: DashboardPanelState['type'];
-  expandedPanelId?: string;
-  focusedPanelId?: string;
   key: string;
   isRenderable?: boolean;
   setDragHandles?: (refs: Array<HTMLElement | null>) => void;
@@ -41,8 +39,6 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
     {
       appFixedViewport,
       dashboardContainer,
-      expandedPanelId,
-      focusedPanelId,
       id,
       index,
       type,
@@ -58,9 +54,18 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
   ) => {
     const dashboardApi = useDashboardApi();
     const dashboardInternalApi = useDashboardInternalApi();
-    const [highlightPanelId, scrollToPanelId, useMargins, viewMode] = useBatchedPublishingSubjects(
+    const [
+      highlightPanelId,
+      scrollToPanelId,
+      expandedPanelId,
+      focusedPanelId,
+      useMargins,
+      viewMode,
+    ] = useBatchedPublishingSubjects(
       dashboardApi.highlightPanelId$,
       dashboardApi.scrollToPanelId$,
+      dashboardApi.expandedPanelId,
+      dashboardApi.focusedPanelId$,
       dashboardApi.settings.useMargins$,
       dashboardApi.viewMode
     );
