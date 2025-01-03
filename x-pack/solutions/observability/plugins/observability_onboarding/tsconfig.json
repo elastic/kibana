@@ -9,7 +9,6 @@
     "../../../../../typings/**/*",
     "public/**/*.json",
     "server/**/*",
-    "ui_tests/**/*",
     "e2e/**/*"
   ],
   "kbn_references": [
@@ -46,7 +45,6 @@
     "@kbn/server-route-repository-utils",
     "@kbn/core-application-browser",
     "@kbn/core-plugins-server",
-    "@kbn/scout",
     "@kbn/tooling-log"
   ],
   "exclude": [
