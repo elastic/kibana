@@ -855,6 +855,7 @@ x-pack/platform/plugins/private/rollup @elastic/kibana-management
 x-pack/platform/plugins/private/runtime_fields @elastic/kibana-management
 x-pack/platform/plugins/private/saved_objects_tagging @elastic/appex-sharedux
 x-pack/platform/plugins/private/snapshot_restore @elastic/kibana-management
+x-pack/platform/plugins/private/telemetry_collection_xpack @elastic/kibana-core
 x-pack/platform/plugins/private/transform @elastic/ml-ui
 x-pack/platform/plugins/private/translations @elastic/kibana-localization
 x-pack/platform/plugins/private/watcher @elastic/kibana-management
@@ -903,7 +904,6 @@ x-pack/plugins/graph @elastic/kibana-visualizations
 x-pack/plugins/lens @elastic/kibana-visualizations
 x-pack/plugins/security @elastic/kibana-security
 x-pack/plugins/spaces @elastic/kibana-security
-x-pack/plugins/telemetry_collection_xpack @elastic/kibana-core
 x-pack/plugins/upgrade_assistant @elastic/kibana-core
 x-pack/solutions/observability/packages/alert_details @elastic/obs-ux-management-team
 x-pack/solutions/observability/packages/alerting_test_data @elastic/obs-ux-management-team
@@ -1845,7 +1845,7 @@ packages/kbn-monaco/src/esql @elastic/kibana-esql
 /.telemetryrc.json @elastic/kibana-core
 /x-pack/.telemetryrc.json @elastic/kibana-core
 /src/plugins/telemetry/schema/ @elastic/kibana-core
-/x-pack/plugins/telemetry_collection_xpack/schema/ @elastic/kibana-core
+/x-pack/platform/plugins/private/telemetry_collection_xpack/schema/ @elastic/kibana-core
 x-pack/platform/plugins/private/cloud_integrations/cloud_full_story/server/config.ts @elastic/kibana-core @shahinakmal
 
 # Kibana Localization
