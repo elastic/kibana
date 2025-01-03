@@ -22,7 +22,7 @@ import { FETCH_STATUS } from '../../../../../hooks/use_fetcher';
 import { useProgressiveFetcher } from '../../../../../hooks/use_progressive_fetcher';
 import { useTimeRange } from '../../../../../hooks/use_time_range';
 import { ResponsiveFlyout } from '../../../transaction_details/waterfall_with_summary/waterfall_container/waterfall/responsive_flyout';
-import { AgentExplorerItem } from '../agent_list';
+import type { AgentExplorerItem } from '../agent_list';
 import { AgentContextualInformation } from './agent_contextual_information';
 import { AgentInstancesDetails } from './agent_instances_details';
 
