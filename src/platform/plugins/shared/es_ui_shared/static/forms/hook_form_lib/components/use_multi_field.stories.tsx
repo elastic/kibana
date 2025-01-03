@@ -54,6 +54,6 @@ export default {
       );
     },
   ],
-} as Meta<typeof UseField>;
+} as Meta<Partial<typeof UseField>>;
 
 export { UseMultiFieldBasic };
