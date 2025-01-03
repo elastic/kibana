@@ -92,7 +92,6 @@ packages/core/integrations/core-integrations-browser-mocks @elastic/kibana-core
 packages/core/lifecycle/core-lifecycle-browser-mocks @elastic/kibana-core
 packages/core/lifecycle/core-lifecycle-server-mocks @elastic/kibana-core
 packages/core/logging/core-logging-browser-mocks @elastic/kibana-core
-packages/core/logging/core-logging-server @elastic/kibana-core
 packages/core/logging/core-logging-server-internal @elastic/kibana-core
 packages/core/logging/core-logging-server-mocks @elastic/kibana-core
 packages/core/metrics/core-metrics-collectors-server-internal @elastic/kibana-core
@@ -493,6 +492,7 @@ src/core/packages/lifecycle/server @elastic/kibana-core
 src/core/packages/lifecycle/server-internal @elastic/kibana-core
 src/core/packages/logging/browser-internal @elastic/kibana-core
 src/core/packages/logging/common-internal @elastic/kibana-core
+src/core/packages/logging/server @elastic/kibana-core
 src/platform/packages/private/analytics/utils/analytics_collection_utils @elastic/kibana-core
 src/platform/packages/private/default-nav/analytics @elastic/kibana-data-discovery @elastic/kibana-presentation @elastic/kibana-visualizations
 src/platform/packages/private/default-nav/devtools @elastic/kibana-management
