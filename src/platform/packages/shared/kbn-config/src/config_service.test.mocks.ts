@@ -12,7 +12,7 @@ import type { DocLinks } from '@kbn/doc-links';
 export const mockPackage = new Proxy({ raw: {} as any }, { get: (obj, prop) => obj.raw[prop] });
 import type { applyDeprecations } from './deprecation/apply_deprecations';
 
-jest.mock('../../../package.json', () => mockPackage);
+jest.mock('../../../../../../package.json', () => mockPackage);
 
 const changedPaths = {
   set: ['foo'],

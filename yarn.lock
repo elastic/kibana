@@ -4205,7 +4205,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/config@link:packages/kbn-config":
+"@kbn/config@link:src/platform/packages/shared/kbn-config":
   version "0.0.0"
   uid ""
 

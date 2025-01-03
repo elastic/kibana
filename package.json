@@ -224,7 +224,7 @@
     "@kbn/code-editor": "link:packages/shared-ux/code_editor/impl",
     "@kbn/code-editor-mock": "link:packages/shared-ux/code_editor/mocks",
     "@kbn/coloring": "link:packages/kbn-coloring",
-    "@kbn/config": "link:packages/kbn-config",
+    "@kbn/config": "link:src/platform/packages/shared/kbn-config",
     "@kbn/config-mocks": "link:packages/kbn-config-mocks",
     "@kbn/config-schema": "link:packages/kbn-config-schema",
     "@kbn/console-plugin": "link:src/platform/plugins/shared/console",
