@@ -100,7 +100,7 @@ module.exports = {
     /x-pack[\/\\]platform[\/\\]plugins[\/\\]shared[\/\\]fleet[\/\\]public[\/\\]components[\/\\]manage_agent_policies_modal.tsx/,
     /x-pack[\/\\]platform[\/\\]plugins[\/\\]shared[\/\\]fleet[\/\\]public[\/\\]components[\/\\]package_icon.tsx/,
     /x-pack[\/\\]platform[\/\\]plugins[\/\\]shared[\/\\]fleet[\/\\]public[\/\\]layouts[\/\\]without_header.tsx/,
-    /x-pack[\/\\]plugins[\/\\]triggers_actions_ui[\/\\]public[\/\\]application[\/\\]sections[\/\\]actions_connectors_list[\/\\]components[\/\\]actions_connectors_list.test.tsx/,
+    /x-pack[\/\\]platform[\/\\]plugins[\/\\]shared[\/\\]triggers_actions_ui[\/\\]public[\/\\]application[\/\\]sections[\/\\]actions_connectors_list[\/\\]components[\/\\]actions_connectors_list.test.tsx/,
     /x-pack[\/\\]solutions[\/\\]observability[\/\\]plugins[\/\\]exploratory_view[\/\\]public[\/\\]components[\/\\]shared[\/\\]exploratory_view[\/\\]components[\/\\]empty_view.tsx/,
     /x-pack[\/\\]solutions[\/\\]observability[\/\\]plugins[\/\\]exploratory_view[\/\\]public[\/\\]components[\/\\]shared[\/\\]exploratory_view[\/\\]embeddable[\/\\]embeddable.tsx/,
     /x-pack[\/\\]solutions[\/\\]observability[\/\\]plugins[\/\\]exploratory_view[\/\\]public[\/\\]components[\/\\]shared[\/\\]exploratory_view[\/\\]embeddable[\/\\]index.tsx/,
