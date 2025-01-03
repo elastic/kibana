@@ -28,7 +28,7 @@ export async function fetchSavedObjectNames(soClient: SavedObjectsClientContract
     type,
     aggs: {
       names: {
-        terms: { field: `${type}.attributes.name` }, // cf. SavedObjectsFindOptions definition in packages/core/saved-objects/core-saved-objects-api-server/src/apis/find.ts
+        terms: { field: `${type}.attributes.name` }, // cf. SavedObjectsFindOptions definition in src/core/packages/saved-objects/api-server/src/apis/find.ts
       },
     },
   });
