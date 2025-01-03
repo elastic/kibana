@@ -15,7 +15,6 @@ import type {
 export default function ApiTest({ getService }: FtrProviderContext) {
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantAPIClient');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
-  const log = getService('log');
   const svlUserManager = getService('svlUserManager');
   const svlCommonApi = getService('svlCommonApi');
 

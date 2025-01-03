@@ -118,9 +118,63 @@ function createObservabilityAIAssistantApiClient({
     };
   }
 
+  async function deleteAllActionConnectors(): Promise<any> {
+    const internalReqHeader = samlAuth.getInternalRequestHeader();
+    const roleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('admin');
+    const res = await supertestWithoutAuth
+      .get(`/api/actions/connectors`)
+      .set(roleAuthc.apiKeyHeader)
+      .set(internalReqHeader);
+
+    const body = res.body as Array<{ id: string; connector_type_id: string; name: string }>;
+    return Promise.all(body.map(({ id }) => deleteActionConnector({ actionId: id })));
+  }
+
+  async function deleteActionConnector({ actionId }: { actionId: string }) {
+    const internalReqHeader = samlAuth.getInternalRequestHeader();
+    const roleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('admin');
+    return supertestWithoutAuth
+      .delete(`/api/actions/connector/${actionId}`)
+      .set(roleAuthc.apiKeyHeader)
+      .set(internalReqHeader);
+  }
+
+  async function createProxyActionConnector({ port }: { port: number }) {
+    const internalReqHeader = samlAuth.getInternalRequestHeader();
+    const roleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('admin');
+    try {
+      const res = await supertestWithoutAuth
+        .post('/api/actions/connector')
+        .set(roleAuthc.apiKeyHeader)
+        .set(internalReqHeader)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          name: 'OpenAI Proxy',
+          connector_type_id: '.gen-ai',
+          config: {
+            apiProvider: 'OpenAI',
+            apiUrl: `http://localhost:${port}`,
+          },
+          secrets: {
+            apiKey: 'my-api-key',
+          },
+        })
+        .expect(200);
+
+      const connectorId = res.body.id as string;
+      return connectorId;
+    } catch (e) {
+      logger.error(`Failed to create action connector due to: ${e}`);
+      throw e;
+    }
+  }
+
   return {
     makeInternalApiRequest,
     makePublicApiRequest,
+    deleteAllActionConnectors,
+    deleteActionConnector,
+    createProxyActionConnector,
   };
 }
 
@@ -148,6 +202,9 @@ export function ObservabilityAIAssistantApiProvider(context: DeploymentAgnosticF
     viewer: observabilityAIAssistantApiClient.makeInternalApiRequest('viewer'),
     editor: observabilityAIAssistantApiClient.makeInternalApiRequest('editor'),
     publicApi: observabilityAIAssistantApiClient.makePublicApiRequest(),
+    deleteAllActionConnectors: observabilityAIAssistantApiClient.deleteAllActionConnectors,
+    createProxyActionConnector: observabilityAIAssistantApiClient.createProxyActionConnector,
+    deleteActionConnector: observabilityAIAssistantApiClient.deleteActionConnector,
   };
 }
 
