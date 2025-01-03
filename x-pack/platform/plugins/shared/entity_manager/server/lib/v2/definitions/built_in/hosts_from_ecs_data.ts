@@ -12,6 +12,7 @@ export const builtInHostsFromEcsEntityDefinition: BuiltInDefinition = {
   type: {
     id: `${BUILT_IN_ID_PREFIX}hosts_from_ecs_data`,
     display_name: 'Hosts',
+    dashboard_id: '2e0c5f85-3599-40a9-9280-b60c6f2145dc',
   },
   sources: [
     {
