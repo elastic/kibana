@@ -266,10 +266,11 @@ export const PresentationPanelHoverActions = ({
       }
 
       // subscribe to any frequently changing notification actions
-      const frequentlyChangingNotifications = await uiActions.getFrequentlyChangingActionsForTrigger(
-        PANEL_NOTIFICATION_TRIGGER,
-        apiContext
-      );
+      const frequentlyChangingNotifications =
+        await uiActions.getFrequentlyChangingActionsForTrigger(
+          PANEL_NOTIFICATION_TRIGGER,
+          apiContext
+        );
       if (canceled) return;
 
       for (const frequentlyChangingNotification of frequentlyChangingNotifications) {

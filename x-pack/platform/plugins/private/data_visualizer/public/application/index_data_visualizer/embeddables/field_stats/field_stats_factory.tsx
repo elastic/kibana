@@ -278,7 +278,10 @@ export const getFieldStatsChartEmbeddableFactory = (
         }
       };
 
-      const addFilters = async (filters: Filter[], actionId: string = ACTION_GLOBAL_APPLY_FILTER) => {
+      const addFilters = async (
+        filters: Filter[],
+        actionId: string = ACTION_GLOBAL_APPLY_FILTER
+      ) => {
         if (!pluginStart.uiActions) {
           toasts.addWarning(ERROR_MSG.APPLY_FILTER_ERR);
           return;
