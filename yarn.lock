@@ -4369,7 +4369,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-capabilities-server-internal@link:packages/core/capabilities/core-capabilities-server-internal":
+"@kbn/core-capabilities-server-internal@link:src/core/packages/capabilities/server-internal":
   version "0.0.0"
   uid ""
 
