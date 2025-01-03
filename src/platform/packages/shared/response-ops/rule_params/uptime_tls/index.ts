@@ -7,13 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { TypeOf, schema } from '@kbn/config-schema';
+export { uptimeTLSRuleParamsSchema } from './latest';
+export { uptimeTLSRuleParamsSchema as uptimeTLSRuleParamsSchemaV1 } from './v1';
 
-export const uptimeTLSRuleParamsSchema = schema.object({
-  stackVersion: schema.maybe(schema.string()),
-  search: schema.maybe(schema.string()),
-  certExpirationThreshold: schema.maybe(schema.number()),
-  certAgeThreshold: schema.maybe(schema.number()),
-});
-
-export type UptimeTLSRuleParams = TypeOf<typeof uptimeTLSRuleParamsSchema>;
+export type { UptimeTLSRuleParams } from './latest';
+export type { UptimeTLSRuleParams as UptimeTLSRuleParamsV1 } from './v1';

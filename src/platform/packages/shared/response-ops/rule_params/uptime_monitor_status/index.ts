@@ -7,13 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { TypeOf, schema } from '@kbn/config-schema';
+export { uptimeMonitorStatusRuleParamsSchema } from './latest';
+export { uptimeMonitorStatusRuleParamsSchema as uptimeMonitorStatusRuleParamsSchemaV1 } from './v1';
 
-export const uptimeTLSRuleParamsSchema = schema.object({
-  stackVersion: schema.maybe(schema.string()),
-  search: schema.maybe(schema.string()),
-  certExpirationThreshold: schema.maybe(schema.number()),
-  certAgeThreshold: schema.maybe(schema.number()),
-});
-
-export type UptimeTLSRuleParams = TypeOf<typeof uptimeTLSRuleParamsSchema>;
+export type { UptimeMonitorStatusParams } from './latest';
+export type { UptimeMonitorStatusParams as UptimeMonitorStatusParamsV1 } from './v1';

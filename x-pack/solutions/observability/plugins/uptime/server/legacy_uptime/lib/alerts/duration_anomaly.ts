@@ -20,7 +20,7 @@ import {
 import { ActionGroupIdsOf } from '@kbn/alerting-plugin/common';
 import type { MlAnomaliesTableRecord } from '@kbn/ml-anomaly-utils';
 import { getSeverityType } from '@kbn/ml-anomaly-utils';
-import { UptimeDurationAnomalyRuleParamsSchema } from '@kbn/response-ops-rule-params/uptime_duration_anomaly/latest';
+import { uptimeDurationAnomalyRuleParamsSchema } from '@kbn/response-ops-rule-params/uptime_duration_anomaly';
 import {
   alertsLocatorID,
   AlertsLocatorParams,
@@ -109,7 +109,7 @@ export const durationAnomalyAlertFactory: UptimeAlertTypeFactory<ActionGroupIds>
   producer: 'uptime',
   name: durationAnomalyTranslations.alertFactoryName,
   validate: {
-    params: UptimeDurationAnomalyRuleParamsSchema,
+    params: uptimeDurationAnomalyRuleParamsSchema,
   },
   defaultActionGroupId: DURATION_ANOMALY.id,
   actionGroups: [

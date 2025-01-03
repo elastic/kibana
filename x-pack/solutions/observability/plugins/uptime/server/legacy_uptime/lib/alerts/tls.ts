@@ -19,7 +19,7 @@ import { LocatorPublic } from '@kbn/share-plugin/common';
 import { ALERT_REASON, ALERT_UUID } from '@kbn/rule-data-utils';
 import { asyncForEach } from '@kbn/std';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import { UptimeTLSRuleParamsSchema } from '@kbn/response-ops-rule-params/uptime_tls/latest';
+import { uptimeTLSRuleParamsSchema } from '@kbn/response-ops-rule-params/uptime_tls';
 
 import { uptimeRuleFieldMap } from '../../../../common/rules/uptime_rule_field_map';
 import { formatFilterString } from './status_check';
@@ -124,7 +124,7 @@ export const tlsAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (
   producer: 'uptime',
   name: tlsTranslations.alertFactoryName,
   validate: {
-    params: UptimeTLSRuleParamsSchema,
+    params: uptimeTLSRuleParamsSchema,
   },
   defaultActionGroupId: TLS.id,
   actionGroups: [

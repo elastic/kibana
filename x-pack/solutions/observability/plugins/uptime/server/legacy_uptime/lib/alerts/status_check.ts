@@ -15,7 +15,7 @@ import { JsonObject } from '@kbn/utility-types';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { ALERT_REASON } from '@kbn/rule-data-utils';
 import { ActionGroupIdsOf } from '@kbn/alerting-plugin/common';
-import { UptimeMonitorStatusRuleParamsSchema } from '@kbn/response-ops-rule-params/uptime_monitor_status/latest';
+import { uptimeMonitorStatusRuleParamsSchema } from '@kbn/response-ops-rule-params/uptime_monitor_status';
 import {
   alertsLocatorID,
   AlertsLocatorParams,
@@ -294,7 +294,7 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (
     defaultMessage: 'Uptime monitor status',
   }),
   validate: {
-    params: UptimeMonitorStatusRuleParamsSchema,
+    params: uptimeMonitorStatusRuleParamsSchema,
   },
   defaultActionGroupId: MONITOR_STATUS.id,
   actionGroups: [

@@ -9,10 +9,10 @@
 
 import { TypeOf, schema } from '@kbn/config-schema';
 
-export const UptimeDurationAnomalyRuleParamsSchema = schema.object({
+export const uptimeDurationAnomalyRuleParamsSchema = schema.object({
   stackVersion: schema.maybe(schema.string()),
   monitorId: schema.string(),
   severity: schema.number(),
 });
 
-export type UptimeDurationAnomalyRuleParams = TypeOf<typeof UptimeDurationAnomalyRuleParamsSchema>;
+export type UptimeDurationAnomalyRuleParams = TypeOf<typeof uptimeDurationAnomalyRuleParamsSchema>;
