@@ -11,7 +11,7 @@ import {
   AlertInstanceContext as AlertContext,
   RuleExecutorOptions,
 } from '@kbn/alerting-plugin/server';
-import { SyntheticsMonitorStatusRuleParams as StatusRuleParams } from '@kbn/response-ops-rule-params/synthetics_monitor_status/latest';
+import { SyntheticsMonitorStatusRuleParams as StatusRuleParams } from '@kbn/response-ops-rule-params/synthetics_monitor_status';
 import { MONITOR_STATUS } from '../../../common/constants/synthetics_alerts';
 import {
   SyntheticsCommonState,

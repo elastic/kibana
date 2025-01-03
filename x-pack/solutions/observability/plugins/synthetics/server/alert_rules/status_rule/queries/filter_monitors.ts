@@ -7,7 +7,7 @@
 
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import { SyntheticsMonitorStatusRuleParams as StatusRuleParams } from '@kbn/response-ops-rule-params/synthetics_monitor_status/latest';
+import { SyntheticsMonitorStatusRuleParams as StatusRuleParams } from '@kbn/response-ops-rule-params/synthetics_monitor_status';
 import { SyntheticsEsClient } from '../../../lib';
 import {
   FINAL_SUMMARY_FILTER,

@@ -9,7 +9,7 @@ import { ForLastExpression, TIME_UNITS } from '@kbn/triggers-actions-ui-plugin/p
 import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFieldNumber, EuiPopoverTitle } from '@elastic/eui';
-import { TimeWindow } from '@kbn/response-ops-rule-params/synthetics_monitor_status/latest';
+import { TimeWindow } from '@kbn/response-ops-rule-params/synthetics_monitor_status';
 import { PopoverExpression } from './popover_expression';
 import { getConditionType } from '../../../../../../common/rules/status_rule';
 import { StatusRuleParamsProps } from '../status_rule_ui';

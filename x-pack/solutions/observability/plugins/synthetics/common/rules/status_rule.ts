@@ -8,7 +8,7 @@
 import {
   StatusRuleCondition,
   TimeWindow,
-} from '@kbn/response-ops-rule-params/synthetics_monitor_status/latest';
+} from '@kbn/response-ops-rule-params/synthetics_monitor_status';
 import { isEmpty } from 'lodash';
 
 export const getConditionType = (condition?: StatusRuleCondition) => {

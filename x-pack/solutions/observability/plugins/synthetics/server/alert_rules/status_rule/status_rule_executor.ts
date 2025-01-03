@@ -12,7 +12,7 @@ import {
 import { Logger } from '@kbn/core/server';
 import { intersection, isEmpty, uniq } from 'lodash';
 import { getAlertDetailsUrl } from '@kbn/observability-plugin/common';
-import { SyntheticsMonitorStatusRuleParams as StatusRuleParams } from '@kbn/response-ops-rule-params/synthetics_monitor_status/latest';
+import { SyntheticsMonitorStatusRuleParams as StatusRuleParams } from '@kbn/response-ops-rule-params/synthetics_monitor_status';
 import {
   AlertOverviewStatus,
   AlertStatusConfigs,

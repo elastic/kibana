@@ -9,7 +9,7 @@
 
 import { TypeOf, schema } from '@kbn/config-schema';
 
-export const TimeWindowSchema = schema.object({
+const TimeWindowSchema = schema.object({
   unit: schema.oneOf(
     [schema.literal('s'), schema.literal('m'), schema.literal('h'), schema.literal('d')],
     {
@@ -21,7 +21,7 @@ export const TimeWindowSchema = schema.object({
   }),
 });
 
-export const NumberOfChecksSchema = schema.object({
+const NumberOfChecksSchema = schema.object({
   numberOfChecks: schema.number({
     defaultValue: 5,
     min: 1,
@@ -29,7 +29,7 @@ export const NumberOfChecksSchema = schema.object({
   }),
 });
 
-export const StatusRuleConditionSchema = schema.object({
+const StatusRuleConditionSchema = schema.object({
   groupBy: schema.maybe(
     schema.string({
       defaultValue: 'locationId',
@@ -54,7 +54,7 @@ export const StatusRuleConditionSchema = schema.object({
   includeRetests: schema.maybe(schema.boolean()),
 });
 
-export const SyntheticsMonitorStatusRuleParamsSchema = schema.object(
+export const syntheticsMonitorStatusRuleParamsSchema = schema.object(
   {
     condition: schema.maybe(StatusRuleConditionSchema),
     monitorIds: schema.maybe(schema.arrayOf(schema.string())),
@@ -70,7 +70,7 @@ export const SyntheticsMonitorStatusRuleParamsSchema = schema.object(
 );
 
 export type SyntheticsMonitorStatusRuleParams = TypeOf<
-  typeof SyntheticsMonitorStatusRuleParamsSchema
+  typeof syntheticsMonitorStatusRuleParamsSchema
 >;
 export type TimeWindow = TypeOf<typeof TimeWindowSchema>;
 export type StatusRuleCondition = TypeOf<typeof StatusRuleConditionSchema>;

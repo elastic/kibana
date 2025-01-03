@@ -7,17 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { TypeOf, schema } from '@kbn/config-schema';
+export { tlsRuleParamsSchema } from './latest';
+export { tlsRuleParamsSchema as tlsRuleParamsSchemaV1 } from './v1';
 
-export const tlsRuleParamsSchema = schema.object(
-  {
-    search: schema.maybe(schema.string()),
-    certExpirationThreshold: schema.maybe(schema.number()),
-    certAgeThreshold: schema.maybe(schema.number()),
-  },
-  {
-    meta: { description: 'The parameters for the rule.' },
-  }
-);
-
-export type TLSRuleParams = TypeOf<typeof tlsRuleParamsSchema>;
+export type { TLSRuleParams } from './latest';
+export type { TLSRuleParams as TLSRuleParamsV1 } from './v1';
