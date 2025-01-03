@@ -6833,7 +6833,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/router-to-openapispec@link:packages/kbn-router-to-openapispec":
+"@kbn/router-to-openapispec@link:src/platform/packages/shared/kbn-router-to-openapispec":
   version "0.0.0"
   uid ""
 

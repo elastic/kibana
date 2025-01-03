@@ -9,6 +9,6 @@
 
 module.exports = {
   preset: '@kbn/test/jest_node',
-  rootDir: '../..',
-  roots: ['<rootDir>/packages/kbn-router-to-openapispec'],
+  rootDir: '../../../../..',
+  roots: ['<rootDir>/src/platform/packages/shared/kbn-router-to-openapispec'],
 };
