@@ -7069,7 +7069,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/security-plugin-types-server@link:x-pack/packages/security/plugin_types_server":
+"@kbn/security-plugin-types-server@link:x-pack/platform/packages/shared/security/plugin_types_server":
   version "0.0.0"
   uid ""
 
