@@ -67,6 +67,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
               anyRequired: [
                 FLEET_API_PRIVILEGES.AGENT_POLICIES.READ,
                 FLEET_API_PRIVILEGES.AGENTS.READ,
+                FLEET_API_PRIVILEGES.SETUP,
               ],
             },
           ],
@@ -106,6 +107,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
               anyRequired: [
                 FLEET_API_PRIVILEGES.AGENT_POLICIES.READ,
                 FLEET_API_PRIVILEGES.AGENTS.READ,
+                FLEET_API_PRIVILEGES.SETUP,
               ],
             },
           ],
@@ -145,6 +147,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
               anyRequired: [
                 FLEET_API_PRIVILEGES.AGENT_POLICIES.READ,
                 FLEET_API_PRIVILEGES.AGENTS.READ,
+                FLEET_API_PRIVILEGES.SETUP,
               ],
             },
           ],
@@ -344,7 +347,10 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       path: AGENT_POLICY_API_ROUTES.FULL_INFO_DOWNLOAD_PATTERN,
       security: {
         authz: {
-          requiredPrivileges: [FLEET_API_PRIVILEGES.AGENT_POLICIES.READ],
+          requiredPrivileges: [
+            FLEET_API_PRIVILEGES.AGENT_POLICIES.READ,
+            FLEET_API_PRIVILEGES.SETUP,
+          ],
         },
       },
       enableQueryVersion: true,
@@ -381,7 +387,10 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       path: K8S_API_ROUTES.K8S_INFO_PATTERN,
       security: {
         authz: {
-          requiredPrivileges: [FLEET_API_PRIVILEGES.AGENT_POLICIES.READ],
+          requiredPrivileges: [
+            FLEET_API_PRIVILEGES.AGENT_POLICIES.READ,
+            FLEET_API_PRIVILEGES.SETUP,
+          ],
         },
       },
       summary: `Get a full K8s agent manifest`,
@@ -413,7 +422,10 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       path: K8S_API_ROUTES.K8S_DOWNLOAD_PATTERN,
       security: {
         authz: {
-          requiredPrivileges: [FLEET_API_PRIVILEGES.AGENT_POLICIES.READ],
+          requiredPrivileges: [
+            FLEET_API_PRIVILEGES.AGENT_POLICIES.READ,
+            FLEET_API_PRIVILEGES.SETUP,
+          ],
         },
       },
       enableQueryVersion: true,
