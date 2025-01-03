@@ -5,26 +5,22 @@
  * 2.0.
  */
 
-import type { BaseFieldRetentionOperator, FieldRetentionOperatorBuilder } from './types';
+import type { FieldRetentionOperatorBuilder } from './types';
 import { isFieldMissingOrEmpty } from '../painless';
-
-export interface PreferOldestValue extends BaseFieldRetentionOperator {
-  operation: 'prefer_oldest_value';
-}
 
 /**
  * A field retention operator that prefers the oldest value of the specified field.
  * If the historical field is missing or empty, the latest value is used.
  */
-export const preferOldestValueProcessor: FieldRetentionOperatorBuilder<PreferOldestValue> = (
-  { field },
+export const preferOldestValueProcessor: FieldRetentionOperatorBuilder = (
+  { destination },
   { enrichField }
 ) => {
-  const historicalField = `${enrichField}.${field}`;
+  const historicalField = `${enrichField}.${destination}`;
   return {
     set: {
       if: `!(${isFieldMissingOrEmpty(`ctx.${historicalField}`)})`,
-      field,
+      field: destination,
       value: `{{${historicalField}}}`,
     },
   };
