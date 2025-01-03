@@ -105,7 +105,7 @@
     "reporting": "packages/kbn-reporting",
     "savedObjects": "src/platform/plugins/shared/saved_objects",
     "savedObjectsFinder": "src/platform/plugins/shared/saved_objects_finder",
-    "savedObjectsManagement": "src/plugins/saved_objects_management",
+    "savedObjectsManagement": "src/platform/plugins/shared/saved_objects_management",
     "searchConnectors": "src/platform/packages/shared/kbn-search-connectors",
     "searchConnectorsPlugin": "x-pack/solutions/search/plugins/search_connectors",
     "server": "src/legacy/server",

@@ -1944,7 +1944,7 @@ module.exports = {
         'x-pack/platform/plugins/shared/cloud/**',
         'src/platform/packages/shared/kbn-config-schema',
         'src/plugins/status_page/**',
-        'src/plugins/saved_objects_management/**',
+        'src/platform/plugins/shared/saved_objects_management/**',
         'src/platform/packages/shared/kbn-analytics/**',
         'packages/kbn-telemetry-tools/**',
         'src/platform/plugins/private/kibana_usage_collection/**',
