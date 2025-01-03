@@ -68,7 +68,7 @@ export function HeaderControl({ slo }: Props) {
   const [isEnableConfirmationModalOpen, setEnableConfirmationModalOpen] = useState(false);
   const [isDisableConfirmationModalOpen, setDisableConfirmationModalOpen] = useState(false);
 
-  const { mutateAsync: resetSlo, isLoading: isResetLoading } = useResetSlo();
+  const { mutate: resetSlo, isLoading: isResetLoading } = useResetSlo();
   const { mutate: enableSlo, isLoading: isEnableLoading } = useEnableSlo();
   const { mutate: disableSlo, isLoading: isDisableLoading } = useDisableSlo();
 
@@ -162,8 +162,8 @@ export function HeaderControl({ slo }: Props) {
     }
   };
 
-  const handleResetConfirm = async () => {
-    await resetSlo({ id: slo.id, name: slo.name });
+  const handleResetConfirm = () => {
+    resetSlo({ id: slo.id, name: slo.name });
     removeResetQueryParam();
     setResetConfirmationModalOpen(false);
   };
