@@ -4917,7 +4917,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-rendering-server-internal@link:packages/core/rendering/core-rendering-server-internal":
+"@kbn/core-rendering-server-internal@link:src/core/packages/rendering/server-internal":
   version "0.0.0"
   uid ""
 
