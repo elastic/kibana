@@ -7,8 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { QueryBuilder } from './builder';
-
 export interface Command {
   body: string;
 }
@@ -20,7 +18,7 @@ export type NamedParameter = Record<string, string> | NamedParameterWithIdentifi
 
 export type Params = NamedParameter | FieldValue | Array<FieldValue | NamedParameter>;
 export interface QueryPipeline {
-  pipe: (...args: Array<QueryOperator | QueryOperatorConvertible>) => QueryPipeline;
+  pipe: (...args: QueryOperator[]) => QueryPipeline;
   asRequest: () => QueryRequest;
   asString: () => string;
 }
@@ -35,18 +33,3 @@ export interface QueryRequest {
 }
 
 export type QueryOperator = (sourceQuery: Query) => Query;
-export interface BuilderCommand<TType extends string = string> {
-  command: string | (() => QueryBuilder);
-  params?: Params;
-  type: TType;
-  nested?: boolean;
-}
-
-export interface ChainedCommand {
-  command: string;
-  params?: Params;
-}
-
-export interface QueryOperatorConvertible {
-  toQueryOperator(): QueryOperator;
-}

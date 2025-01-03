@@ -8,22 +8,8 @@
  */
 
 import { isObject } from 'lodash';
-import {
-  Query,
-  QueryOperatorConvertible,
-  QueryOperator,
-  QueryPipeline,
-  QueryRequest,
-  NamedParameter,
-  Params,
-} from './types';
+import { Query, QueryPipeline, QueryRequest, NamedParameter, Params } from './types';
 import { escapeIdentifier, formatValue } from './utils/formatters';
-
-function isQueryOperatorConvertible(
-  value: QueryOperator | QueryOperatorConvertible
-): value is QueryOperatorConvertible {
-  return (value as QueryOperatorConvertible).toQueryOperator !== undefined;
-}
 
 export function createPipeline(source: Query): QueryPipeline {
   const asRequest = (): QueryRequest => {
@@ -70,10 +56,6 @@ export function createPipeline(source: Query): QueryPipeline {
   return {
     pipe: (...operators) => {
       const nextSource = operators.reduce((previousQuery, operator) => {
-        if (isQueryOperatorConvertible(operator)) {
-          return operator.toQueryOperator()(previousQuery);
-        }
-
         return operator(previousQuery);
       }, source);
 

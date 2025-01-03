@@ -45,22 +45,4 @@ describe('evaluate', () => {
       'FROM `logs-*`\n\t| EVAL hour = DATE_TRUNC(1 hour, `@timestamp`)'
     );
   });
-
-  it('handles chained EVAL with params', () => {
-    const ids = ['aws', 'host1'];
-    const pipeline = source.pipe(
-      evaluate('entity.type = ?', 'host')
-        .concat('entity.display_name = COALESCE(?, entity.id)', 'some_host')
-        .concat(`entity.id = CONCAT(${ids.map(() => '?').join()})`, ids)
-    );
-    const queryRequest = pipeline.asRequest();
-
-    expect(queryRequest.query).toEqual(
-      'FROM `logs-*`\n\t| EVAL entity.type = ?, entity.display_name = COALESCE(?, entity.id), entity.id = CONCAT(?,?)'
-    );
-    expect(queryRequest.params).toEqual(['host', 'some_host', 'aws', 'host1']);
-    expect(pipeline.asString()).toEqual(
-      'FROM `logs-*`\n\t| EVAL entity.type = "host", entity.display_name = COALESCE("some_host", entity.id), entity.id = CONCAT("aws","host1")'
-    );
-  });
 });
