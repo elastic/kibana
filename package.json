@@ -142,7 +142,7 @@
     "@formatjs/intl-relativetimeformat": "^11.2.12",
     "@formatjs/intl-utils": "^3.8.4",
     "@formatjs/ts-transformer": "^3.13.14",
-    "@google/generative-ai": "^0.7.0",
+    "@google/generative-ai": "^0.21.0",
     "@grpc/grpc-js": "^1.8.22",
     "@hapi/accept": "^6.0.3",
     "@hapi/boom": "^10.0.1",
