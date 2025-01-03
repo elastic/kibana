@@ -9,6 +9,7 @@ import React, { useState, useEffect } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import { isEqual } from 'lodash';
 import usePrevious from 'react-use/lib/usePrevious';
+import { KibanaSectionErrorBoundary } from '@kbn/shared-ux-error-boundary';
 import { VersionsPicker, VersionsPickerOptionEnum } from './versions_picker/versions_picker';
 import { FieldUpgradeSideHeader } from '../field_upgrade_side_header';
 import { useFieldUpgradeContext } from '../rule_upgrade/field_upgrade_context';
@@ -77,7 +78,9 @@ export function FieldComparisonSide(): JSX.Element {
           </EuiFlexItem>
         </EuiFlexGroup>
       </FieldUpgradeSideHeader>
-      <SubfieldChanges fieldName={fieldName} subfieldChanges={subfieldChanges} />
+      <KibanaSectionErrorBoundary sectionName={i18n.TITLE}>
+        <SubfieldChanges fieldName={fieldName} subfieldChanges={subfieldChanges} />
+      </KibanaSectionErrorBoundary>
     </>
   );
 }

@@ -24,6 +24,7 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import type { EuiTabbedContentTab, EuiTabbedContentProps, EuiFlyoutProps } from '@elastic/eui';
+import { KibanaSectionErrorBoundary } from '@kbn/shared-ux-error-boundary';
 
 import type { RuleResponse } from '../../../../../common/api/detection_engine/model/rule_schema';
 import { RuleOverviewTab, useOverviewTabSections } from './rule_overview_tab';
@@ -207,35 +208,37 @@ export function RuleDetailsFlyout({
       aria-labelledby={prebuiltRulesFlyoutTitleId}
       ownFocus
     >
-      <EuiFlyoutHeader>
-        <EuiTitle size="m">
-          <h2 id={prebuiltRulesFlyoutTitleId}>{rule.name}</h2>
-        </EuiTitle>
-        <EuiSpacer size="s" />
-        {subHeader && (
-          <>
-            {subHeader}
-            <EuiSpacer size="s" />
-          </>
-        )}
-      </EuiFlyoutHeader>
-      <StyledEuiFlyoutBody>
-        <ScrollableFlyoutTabbedContent
-          tabs={tabs}
-          selectedTab={selectedTab}
-          onTabClick={onTabClick}
-        />
-      </StyledEuiFlyoutBody>
-      <EuiFlyoutFooter>
-        <EuiFlexGroup justifyContent="spaceBetween">
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty onClick={closeFlyout} flush="left">
-              {i18n.DISMISS_BUTTON_LABEL}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>{ruleActions}</EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlyoutFooter>
+      <KibanaSectionErrorBoundary sectionName={i18n.RULE_DETAILS_FLYOUT_LABEL}>
+        <EuiFlyoutHeader>
+          <EuiTitle size="m">
+            <h2 id={prebuiltRulesFlyoutTitleId}>{rule.name}</h2>
+          </EuiTitle>
+          <EuiSpacer size="s" />
+          {subHeader && (
+            <>
+              {subHeader}
+              <EuiSpacer size="s" />
+            </>
+          )}
+        </EuiFlyoutHeader>
+        <StyledEuiFlyoutBody>
+          <ScrollableFlyoutTabbedContent
+            tabs={tabs}
+            selectedTab={selectedTab}
+            onTabClick={onTabClick}
+          />
+        </StyledEuiFlyoutBody>
+        <EuiFlyoutFooter>
+          <EuiFlexGroup justifyContent="spaceBetween">
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty onClick={closeFlyout} flush="left">
+                {i18n.DISMISS_BUTTON_LABEL}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>{ruleActions}</EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlyoutFooter>
+      </KibanaSectionErrorBoundary>
     </EuiFlyout>
   );
 }
