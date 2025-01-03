@@ -97,7 +97,6 @@ packages/core/metrics/core-metrics-collectors-server-mocks @elastic/kibana-core
 packages/core/metrics/core-metrics-server-mocks @elastic/kibana-core
 packages/core/node/core-node-server-mocks @elastic/kibana-core
 packages/core/notifications/core-notifications-browser-mocks @elastic/kibana-core
-packages/core/overlays/core-overlays-browser-internal @elastic/kibana-core
 packages/core/overlays/core-overlays-browser-mocks @elastic/kibana-core
 packages/core/plugins/core-plugins-base-server-internal @elastic/kibana-core
 packages/core/plugins/core-plugins-browser @elastic/kibana-core
@@ -493,6 +492,7 @@ src/core/packages/node/server-internal @elastic/kibana-core
 src/core/packages/notifications/browser @elastic/kibana-core
 src/core/packages/notifications/browser-internal @elastic/kibana-core
 src/core/packages/overlays/browser @elastic/kibana-core
+src/core/packages/overlays/browser-internal @elastic/kibana-core
 src/platform/packages/private/analytics/utils/analytics_collection_utils @elastic/kibana-core
 src/platform/packages/private/default-nav/analytics @elastic/kibana-data-discovery @elastic/kibana-presentation @elastic/kibana-visualizations
 src/platform/packages/private/default-nav/devtools @elastic/kibana-management
