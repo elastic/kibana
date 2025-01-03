@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AggregationsTopHitsAggregation } from '@elastic/elasticsearch/lib/api/types';
+import type { AggregationsTopHitsAggregation } from '@elastic/elasticsearch/lib/api/types';
 import { LABELS, SERVICE_GROUP_SUPPORTED_FIELDS } from '../../../../common/service_groups';
 
 export interface SourceDoc {

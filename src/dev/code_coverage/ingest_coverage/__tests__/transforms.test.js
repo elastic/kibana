@@ -33,13 +33,13 @@ describe(`Transform fns`, () => {
       it(`should remove the jenkins workspace path`, () => {
         const obj = {
           staticSiteUrl:
-            '/var/lib/jenkins/workspace/elastic+kibana+code-coverage/kibana/x-pack/plugins/reporting/server/browsers/extract/unzip.ts',
+            '/var/lib/jenkins/workspace/elastic+kibana+code-coverage/kibana/x-pack/platform/plugins/private/reporting/server/browsers/extract/unzip.ts',
           COVERAGE_INGESTION_KIBANA_ROOT:
             '/var/lib/jenkins/workspace/elastic+kibana+code-coverage/kibana',
         };
         expect(coveredFilePath(obj)).toHaveProperty(
           'coveredFilePath',
-          'x-pack/plugins/reporting/server/browsers/extract/unzip.ts'
+          'x-pack/platform/plugins/private/reporting/server/browsers/extract/unzip.ts'
         );
       });
     });
@@ -47,13 +47,13 @@ describe(`Transform fns`, () => {
       it(`should remove the jenkins workspace path`, () => {
         const obj = {
           staticSiteUrl:
-            '/var/lib/jenkins/workspace/elastic+kibana+qa-research/kibana/x-pack/plugins/reporting/server/browsers/extract/unzip.ts',
+            '/var/lib/jenkins/workspace/elastic+kibana+qa-research/kibana/x-pack/platform/plugins/private/reporting/server/browsers/extract/unzip.ts',
           COVERAGE_INGESTION_KIBANA_ROOT:
             '/var/lib/jenkins/workspace/elastic+kibana+qa-research/kibana',
         };
         expect(coveredFilePath(obj)).toHaveProperty(
           'coveredFilePath',
-          'x-pack/plugins/reporting/server/browsers/extract/unzip.ts'
+          'x-pack/platform/plugins/private/reporting/server/browsers/extract/unzip.ts'
         );
       });
     });
@@ -83,7 +83,8 @@ describe(`Transform fns`, () => {
   describe(`teamAssignment`, () => {
     const teamAssignmentsPathMOCK =
       'src/dev/code_coverage/ingest_coverage/__tests__/mocks/team_assign_mock.txt';
-    const coveredFilePath = 'x-pack/plugins/reporting/server/browsers/extract/unzip.ts';
+    const coveredFilePath =
+      'x-pack/platform/plugins/private/reporting/server/browsers/extract/unzip.ts';
     const obj = { coveredFilePath };
     const log = new ToolingLog({
       level: 'info',
