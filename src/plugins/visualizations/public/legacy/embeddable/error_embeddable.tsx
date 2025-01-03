@@ -7,7 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ReactNode } from 'react';
+import React, { ReactNode } from 'react';
+
+import { PresentationPanelError } from '@kbn/presentation-panel-plugin/public';
 
 import { Embeddable } from './embeddable';
 import { EmbeddableInput, EmbeddableOutput } from './i_embeddable';
@@ -28,6 +30,16 @@ export class ErrorEmbeddable extends Embeddable<EmbeddableInput, EmbeddableOutpu
   public reload() {}
 
   public render() {
-    return typeof this.error === 'string' ? this.error : this.error.message;
+    const error = typeof this.error === 'string' ? { message: this.error, name: '' } : this.error;
+
+    return (
+      <PresentationPanelError
+        api={{
+          uuid: this.id,
+          ...this,
+        }}
+        error={error}
+      />
+    );
   }
 }

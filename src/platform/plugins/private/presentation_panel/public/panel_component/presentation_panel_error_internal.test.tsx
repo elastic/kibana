@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
-import { PresentationPanelError } from './presentation_panel_error';
+import { PresentationPanelError } from './presentation_panel_error_internal';
 
 describe('PresentationPanelError', () => {
   test('should display error', async () => {
