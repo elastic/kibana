@@ -260,9 +260,9 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
           return null;
         }
         let filteredSavedObjects = resp.saved_objects;
-        const mlCapabilities = this.props.applications.capabilities.ml;
+        const mlCapabilities = this.props.applications.capabilities.ml as Record<string, boolean>;
 
-        const mlFilters = {
+        const mlFilters: Record<string, boolean> = {
           'anomaly-detector-': mlCapabilities.canGetJobs,
           'data-frame-analytics-': mlCapabilities.canGetDataFrameAnalytics,
           'ml-trained-model': mlCapabilities.canGetTrainedModels,

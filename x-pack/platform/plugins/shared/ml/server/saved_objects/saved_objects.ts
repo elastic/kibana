@@ -85,12 +85,12 @@ export function setupSavedObjects(savedObjects: SavedObjectsServiceSetup) {
           uiCapabilitiesPath: 'ml.canGetJobs',
         };
       },
+      displayName: i18n.translate('xpack.ml.savedObjects.trainedModel.displayName', {
+        defaultMessage: 'Trained model',
+      }),
     },
     namespaceType: 'agnostic',
     migrations,
     mappings: mlModule,
-    displayName: i18n.translate('xpack.ml.savedObjects.trainedModel.displayName', {
-      defaultMessage: 'Trained model',
-    }),
   });
 }
