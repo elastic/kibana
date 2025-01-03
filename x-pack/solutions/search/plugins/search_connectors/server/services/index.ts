@@ -10,6 +10,7 @@ import { PACKAGE_POLICY_SAVED_OBJECT_TYPE, PackagePolicy } from '@kbn/fleet-plug
 import { AgentPolicyServiceInterface, PackagePolicyClient } from '@kbn/fleet-plugin/server';
 import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import { NATIVE_CONNECTOR_DEFINITIONS, fetchConnectors } from '@kbn/search-connectors';
+import { getPackageInfo } from '@kbn/fleet-plugin/server/services/epm/packages';
 
 export interface ConnectorMetadata {
   id: string;
@@ -25,7 +26,6 @@ export interface PackagePolicyMetadata {
 
 const connectorsInputName = 'connectors-py';
 const pkgName = 'elastic_connectors';
-const pkgVersion = '0.0.4';
 const pkgTitle = 'Elastic Connectors';
 
 export class AgentlessConnectorsInfraService {
@@ -100,10 +100,12 @@ export class AgentlessConnectorsInfraService {
                 // No need to skip, that's fine
               }
 
-              if (policy.supports_agentless !== true) {
-                this.logger.debug(`Policy ${policy.id} does not support agentless, skipping`);
-                continue;
-              }
+              // TODO: We manage all policies here, not only agentless.
+              // Return this code back once this logic is ironed out
+              // if (policy.supports_agentless !== true) {
+              //   this.logger.debug(`Policy ${policy.id} does not support agentless, skipping`);
+              //   continue;
+              // }
 
               policiesMetadata.push({
                 package_policy_id: policy.id,
@@ -141,6 +143,9 @@ export class AgentlessConnectorsInfraService {
         `Connector ${connector.id} service_type is incompatible with agentless or unsupported`
       );
     }
+    this.logger.debug(`Getting package version for connectors package ${pkgName}`);
+    const pkgVersion = await this.getPackageVersion();
+    this.logger.debug(`Latest package version for ${pkgName} is ${pkgVersion}`);
 
     const createdPolicy = await this.agentPolicyService.create(this.soClient, this.esClient, {
       name: `${connector.service_type} connector: ${connector.id}`,
@@ -208,6 +213,25 @@ export class AgentlessConnectorsInfraService {
       this.logger.info(`Deleting agent policy ${agentPolicyId}`);
       await this.agentPolicyService.delete(this.soClient, this.esClient, agentPolicyId);
     }
+  };
+
+  private getPackageVersion = async (): Promise<string> => {
+    this.logger.debug(`Fetching ${pkgName} version`);
+
+    // This will raise an error if package is not there.
+    // Situation is exceptional, so we can just show
+    // the error message from getPackageInfo in this case
+    const packageInfo = await getPackageInfo({
+      savedObjectsClient: this.soClient,
+      pkgName,
+      pkgVersion: '',
+      skipArchive: true,
+      ignoreUnverified: true,
+      prerelease: true,
+    });
+    this.logger.debug(`Found ${pkgName} version: ${packageInfo.version}`);
+
+    return packageInfo.version;
   };
 }
 

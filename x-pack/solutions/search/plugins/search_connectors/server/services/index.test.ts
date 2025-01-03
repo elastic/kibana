@@ -27,6 +27,48 @@ import { AgentPolicyServiceInterface, PackagePolicyClient } from '@kbn/fleet-plu
 import { AgentPolicy, PackagePolicy, PackagePolicyInput } from '@kbn/fleet-plugin/common';
 import { createAgentPolicyMock, createPackagePolicyMock } from '@kbn/fleet-plugin/common/mocks';
 
+jest.mock('@kbn/fleet-plugin/server/services/epm/packages', () => {
+  const mockedGetPackageInfo = ({ pkgName }: { pkgName: string }) => {
+    if (pkgName === 'elastic_connectors') {
+      const pkg = {
+        version: '0.0.5',
+        policy_templates: [
+          {
+            name: 'github_elastic_connectors',
+            inputs: [
+              {
+                type: 'connectors-py',
+                vars: [
+                  {
+                    name: 'connector_id',
+                    required: false,
+                    type: 'string',
+                  },
+                  {
+                    name: 'connector_name',
+                    required: false,
+                    type: 'string',
+                  },
+                  {
+                    name: 'service_type',
+                    required: false,
+                    type: 'string',
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      };
+
+      return Promise.resolve(pkg);
+    }
+  };
+  return {
+    getPackageInfo: jest.fn().mockImplementation(mockedGetPackageInfo),
+  };
+});
+
 describe('AgentlessConnectorsInfraService', () => {
   let soClient: jest.Mocked<SavedObjectsClientContract>;
   let esClient: ElasticsearchClientMock;
@@ -49,9 +91,7 @@ describe('AgentlessConnectorsInfraService', () => {
       agentPolicyInterface,
       logger
     );
-  });
 
-  beforeEach(() => {
     jest.clearAllMocks();
   });
 
