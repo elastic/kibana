@@ -12,7 +12,7 @@ import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
 import { StreamsAppPageHeader } from '../streams_app_page_header';
 import { StreamsAppPageHeaderTitle } from '../streams_app_page_header/streams_app_page_header_title';
 import { StreamsAppPageBody } from '../streams_app_page_body';
-import { StreamsTable } from '../streams_table';
+import { StreamsList } from '../streams_list';
 
 export function StreamListView() {
   const {
@@ -61,7 +61,7 @@ export function StreamListView() {
             />
           </EuiFlexItem>
           <EuiFlexItem grow>
-            <StreamsTable listFetch={streamsListFetch} query={query} />
+            <StreamsList definitions={streamsListFetch.value?.streams} query={query} showControls />
           </EuiFlexItem>
         </EuiFlexGroup>
       </StreamsAppPageBody>
