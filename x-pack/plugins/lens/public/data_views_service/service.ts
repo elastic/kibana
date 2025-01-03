@@ -115,7 +115,7 @@ export const createIndexPatternService = ({
         applyImmediately: true,
       });
       const trigger = uiActions.getTrigger(UPDATE_FILTER_REFERENCES_TRIGGER);
-      const action = uiActions.getAction(UPDATE_FILTER_REFERENCES_ACTION);
+      const action = await uiActions.getAction(UPDATE_FILTER_REFERENCES_ACTION);
 
       action?.execute({
         trigger,

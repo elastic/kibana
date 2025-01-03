@@ -60,7 +60,7 @@ export interface RenderTooltipContentParams {
     layerId: string;
     featureId?: string | number;
   }) => Geometry | null;
-  onSingleValueTrigger?: (actionId: string, key: string, value: RawValue) => void;
+  onSingleValueTrigger?: (actionId: string, key: string, value: RawValue) => Promise<void>;
 }
 
 export type RenderToolTipContent = (params: RenderTooltipContentParams) => JSX.Element;
