@@ -5065,7 +5065,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-test-helpers-so-type-serializer@link:packages/core/test-helpers/core-test-helpers-so-type-serializer":
+"@kbn/core-test-helpers-so-type-serializer@link:src/core/packages/test-helpers/so-type-serializer":
   version "0.0.0"
   uid ""
 
