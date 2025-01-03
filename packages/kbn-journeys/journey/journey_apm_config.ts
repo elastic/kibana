@@ -16,7 +16,7 @@ export const JOURNEY_APM_CONFIG = {
   secretToken: APM_PUBLIC_TOKEN,
   active: 'true',
   contextPropagationOnly: 'false',
-  environment: process.env.CI ? 'ci' : 'development',
+  environment: process.env.ELASTIC_APM_ENVIRONMENT || (process.env.CI ? 'ci' : 'development'),
   transactionSampleRate: '1.0',
   // capture request body for both errors and request transactions
   // https://www.elastic.co/guide/en/apm/agent/nodejs/current/configuration.html#capture-body
