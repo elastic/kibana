@@ -39,9 +39,13 @@ import { ProviderConfigHiddenField } from './hidden_fields/provider_config_hidde
 
 interface InferenceServicesProps {
   providers: InferenceProvider[];
+  isEdit?: boolean;
 }
 
-export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({ providers }) => {
+export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
+  providers,
+  isEdit,
+}) => {
   const [isProviderPopoverOpen, setProviderPopoverOpen] = useState(false);
   const [providerSchema, setProviderSchema] = useState<ConfigEntryView[]>([]);
   const [taskTypeOptions, setTaskTypeOptions] = useState<TaskTypeOption[]>([]);
@@ -213,8 +217,9 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({ p
   const providerSuperSelect = useCallback(
     (isInvalid: boolean) => (
       <EuiFormControlLayout
-        clear={{ onClick: onClearProvider }}
+        clear={isEdit ? undefined : { onClick: onClearProvider }}
         isDropdown
+        isDisabled={isEdit}
         isInvalid={isInvalid}
         fullWidth
         icon={!config?.provider ? { type: 'sparkles', side: 'left' } : providerIcon}
@@ -223,6 +228,7 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({ p
           onClick={toggleProviderPopover}
           data-test-subj="provider-select"
           isInvalid={isInvalid}
+          disabled={isEdit}
           onKeyDown={handleProviderKeyboardOpen}
           value={config?.provider ? providerName : ''}
           fullWidth
@@ -239,15 +245,30 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({ p
       </EuiFormControlLayout>
     ),
     [
-      config?.provider,
-      handleProviderKeyboardOpen,
-      toggleProviderPopover,
-      isProviderPopoverOpen,
+      isEdit,
       onClearProvider,
+      config?.provider,
       providerIcon,
+      toggleProviderPopover,
+      handleProviderKeyboardOpen,
       providerName,
+      isProviderPopoverOpen,
     ]
   );
+
+  useEffect(() => {
+    if (config?.provider && isEdit) {
+      const newProvider = providers?.find((p) => p.service === config.provider);
+      // Update connector providerSchema
+      const newProviderSchema = Object.keys(newProvider?.configurations ?? {}).map((k) => ({
+        key: k,
+        isValid: true,
+        ...newProvider?.configurations[k],
+      })) as ConfigEntryView[];
+
+      setProviderSchema(newProviderSchema);
+    }
+  }, [config?.provider, config?.taskType, isEdit, providers]);
 
   useEffect(() => {
     if (isSubmitting) {
@@ -355,6 +376,7 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({ p
             onTaskTypeOptionsSelect={onTaskTypeOptionsSelect}
             taskTypeOptions={taskTypeOptions}
             selectedTaskType={selectedTaskType}
+            isEdit={isEdit}
           />
           <EuiSpacer size="m" />
           <EuiHorizontalRule margin="xs" />
