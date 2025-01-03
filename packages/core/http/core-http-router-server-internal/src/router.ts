@@ -10,7 +10,6 @@
 import { EventEmitter } from 'node:events';
 import type { Request, ResponseToolkit } from '@hapi/hapi';
 import apm from 'elastic-apm-node';
-import { isConfigSchema } from '@kbn/config-schema';
 import type { Logger } from '@kbn/logging';
 import {
   isUnauthorizedError as isElasticsearchUnauthorizedError,
@@ -30,10 +29,7 @@ import type {
   PostValidationMetadata,
   IKibanaResponse,
 } from '@kbn/core-http-server';
-import { isZod } from '@kbn/zod';
-import { getRequestValidation } from '@kbn/core-http-server';
 import type { RouteSecurityGetter } from '@kbn/core-http-server';
-import { RouteValidator } from './validator';
 import { CoreVersionedRouter } from './versioned_router';
 import { CoreKibanaRequest, getProtocolFromRequest } from './request';
 import { kibanaResponseFactory } from './response';
@@ -60,37 +56,6 @@ export type InternalRouteHandler = (request: Request) => Promise<IKibanaResponse
 export type InternalRouterRoute = Omit<RouterRoute, 'handler'> & {
   handler: InternalRouteHandler;
 };
-
-/**
- * Create the validation schemas for a route
- *
- * @returns Route schemas if `validate` is specified on the route, otherwise
- * undefined.
- */
-function routeSchemasFromRouteConfig<P, Q, B>(
-  route: InternalRouteConfig<P, Q, B, typeof routeMethod>,
-  routeMethod: RouteMethod
-) {
-  // The type doesn't allow `validate` to be undefined, but it can still
-  // happen when it's used from JavaScript.
-  if (route.validate === undefined) {
-    throw new Error(
-      `The [${routeMethod}] at [${route.path}] does not have a 'validate' specified. Use 'false' as the value if you want to bypass validation.`
-    );
-  }
-
-  if (route.validate !== false) {
-    const validation = getRequestValidation(route.validate);
-    Object.entries(validation).forEach(([key, schema]) => {
-      if (!(isConfigSchema(schema) || isZod(schema) || typeof schema === 'function')) {
-        throw new Error(
-          `Expected a valid validation logic declared with '@kbn/config-schema' package, '@kbn/zod' package or a RouteValidationFunction at key: [${key}].`
-        );
-      }
-    });
-    return RouteValidator.from(validation);
-  }
-}
 
 /** @internal */
 export interface RouterOptions {
@@ -196,7 +161,6 @@ export class Router<Context extends RequestHandlerContextBase = RequestHandlerCo
 
   public handleLegacyErrors = wrapErrors;
 
-  /** Should be private, just exposed for convenience for the versioned router */
   public emitPostValidate = (
     request: KibanaRequest,
     postValidateConext: PostValidationMetadata = {
