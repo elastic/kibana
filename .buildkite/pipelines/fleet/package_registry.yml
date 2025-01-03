@@ -90,7 +90,7 @@ steps:
     depends_on:
       - ftr-configs
       - jest-integration
-      - defend-worfklows-stateful
+      - defend-workflows-stateful
       - defend-workflows-serverless
 
   - wait: ~
