@@ -206,7 +206,9 @@ export class SummaryActionScheduler<
         actionToEnqueue: formatActionToEnqueue({
           action: actionToRun,
           apiKey: this.context.apiKey,
+          apiKeyId: this.context.apiKeyId,
           executionId: this.context.executionId,
+          priority: this.context.priority,
           ruleConsumer: this.context.ruleConsumer,
           ruleId: this.context.rule.id,
           ruleTypeId: this.context.ruleType.id,
