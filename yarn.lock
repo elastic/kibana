@@ -4453,7 +4453,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-doc-links-browser-internal@link:packages/core/doc-links/core-doc-links-browser-internal":
+"@kbn/core-doc-links-browser-internal@link:src/core/packages/doc-links/browser-internal":
   version "0.0.0"
   uid ""
 
