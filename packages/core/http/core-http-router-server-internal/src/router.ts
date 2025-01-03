@@ -46,7 +46,6 @@ import {
   injectVersionHeader,
   prepareRouteConfigValidation,
   getRouteFullPath,
-  isSafeMethod,
   formatErrorMeta,
 } from './util';
 import { stripIllegalHttp2Headers } from './strip_illegal_http2_headers';
