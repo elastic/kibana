@@ -50,7 +50,22 @@ export type ContextEnhancer<
 /** @internal */
 export type InternalRouteHandler = (request: Request) => Promise<IKibanaResponse>;
 
-/** @internal */
+/**
+ * We have at least two implementations of InternalRouterRoutes:
+ * (1) Router route
+ * (2) Versioned router route {@link CoreVersionedRoute}
+ *
+ * The former registers internal handlers when users call `route.put(...)` while
+ * the latter registers an internal handler for `router.versioned.put(...)`.
+ *
+ * This enables us to expose internal details to each of these types routes so
+ * that implementation has freedom to change what it needs to in each case, like:
+ *
+ * validation: versioned routes only know what validation to run after inspecting
+ * special version values, whereas "regular" routes only ever have one validation
+ * that is predetermined to always run.
+ * @internal
+ */
 export type InternalRouterRoute = Omit<RouterRoute, 'handler'> & {
   handler: InternalRouteHandler;
 };
