@@ -407,7 +407,7 @@
     "@kbn/core-user-profile-browser-internal": "link:src/core/packages/user-profile/browser-internal",
     "@kbn/core-user-profile-browser-mocks": "link:src/core/packages/user-profile/browser-mocks",
     "@kbn/core-user-profile-common": "link:src/core/packages/user-profile/common",
-    "@kbn/core-user-profile-server": "link:packages/core/user-profile/core-user-profile-server",
+    "@kbn/core-user-profile-server": "link:src/core/packages/user-profile/server",
     "@kbn/core-user-profile-server-internal": "link:packages/core/user-profile/core-user-profile-server-internal",
     "@kbn/core-user-profile-server-mocks": "link:packages/core/user-profile/core-user-profile-server-mocks",
     "@kbn/core-user-settings-server": "link:packages/core/user-settings/core-user-settings-server",

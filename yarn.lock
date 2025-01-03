@@ -5153,7 +5153,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-user-profile-server@link:packages/core/user-profile/core-user-profile-server":
+"@kbn/core-user-profile-server@link:src/core/packages/user-profile/server":
   version "0.0.0"
   uid ""
 
