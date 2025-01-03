@@ -8,7 +8,6 @@
  */
 import React from 'react';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
-import { isOfAggregateQueryType } from '@kbn/es-query';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import type { CoreStart } from '@kbn/core/public';
@@ -34,8 +33,7 @@ interface Context {
 }
 
 export async function isActionCompatible(queryString: string) {
-  // we want to make sure that the current query is an ES|QL query
-  return isOfAggregateQueryType({ esql: queryString });
+  return Boolean(queryString && queryString.trim().length > 0);
 }
 
 export async function executeAction({

@@ -27,7 +27,7 @@ export function ChooseColumnPopover({
   const closePopover = () => setIsPopoverOpen(false);
 
   const button = (
-    <EuiLink onClick={onButtonClick}>
+    <EuiLink onClick={onButtonClick} data-test-subj="chooseColumnBtn">
       {i18n.translate('esql.flyout.chooseColumnBtn.label', {
         defaultMessage: 'here',
       })}
@@ -56,9 +56,13 @@ export function ChooseColumnPopover({
         searchProps={{
           'data-test-subj': 'selectableColumnSearch',
         }}
+        listProps={{
+          'data-test-subj': 'selectableColumnList',
+        }}
         singleSelection="always"
         options={options}
         onChange={onColumnChange}
+        data-test-subj="selectableColumnContainer"
       >
         {(list, search) => (
           <>
