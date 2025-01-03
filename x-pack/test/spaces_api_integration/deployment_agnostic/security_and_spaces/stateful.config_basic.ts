@@ -11,6 +11,9 @@
  * 2.0.
  */
 
-import { createTestConfig } from '../common/config';
+import { createTestConfig } from '../../common/config';
 
-export default createTestConfig('security_and_spaces - basic license', [require.resolve('./apis')]);
+export default createTestConfig('security_and_spaces - basic license', {
+  license: 'basic',
+  testFiles: [require.resolve('./apis')],
+});
