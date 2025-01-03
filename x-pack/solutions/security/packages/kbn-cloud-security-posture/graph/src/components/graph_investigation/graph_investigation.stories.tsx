@@ -12,8 +12,7 @@ import { GraphInvestigation, type GraphInvestigationProps } from './graph_invest
 import {
   KibanaReactStorybookDecorator,
   ReactQueryStorybookDecorator,
-  SecuritySolutionStorybookDecorator,
-} from '../../../../.storybook/decorators';
+} from '../../../.storybook/decorators';
 import { mockDataView } from '../mock/data_view.mock';
 
 export default {
@@ -27,11 +26,7 @@ export default {
       control: { type: 'boolean' },
     },
   },
-  decorators: [
-    SecuritySolutionStorybookDecorator,
-    ReactQueryStorybookDecorator,
-    KibanaReactStorybookDecorator,
-  ],
+  decorators: [ReactQueryStorybookDecorator, KibanaReactStorybookDecorator],
 };
 
 const hourAgo = new Date(new Date().getTime() - 60 * 60 * 1000);

@@ -7,4 +7,3 @@
 
 export { KibanaReactStorybookDecorator } from './kibana_react_decorator';
 export { ReactQueryStorybookDecorator } from './react_query_decorator';
-export { SecuritySolutionStorybookDecorator } from './security_solution_decorator';

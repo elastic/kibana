@@ -9,7 +9,6 @@ import { action } from '@storybook/addon-actions';
 import { createKibanaReactContext, type KibanaServices } from '@kbn/kibana-react-plugin/public';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { of } from 'rxjs';
-import { KibanaServices as SecuritySolutionKibanaServices } from '@kbn/security-solution-plugin/public/common/lib/kibana';
 
 const createMockWebStorage = () => ({
   clear: action('clear'),
@@ -142,10 +141,7 @@ const services: Partial<KibanaServices> = {
 
 export const KibanaReactStorybookDecorator = (Story: ComponentType) => {
   const KibanaReactContext = createKibanaReactContext(services);
-  // @ts-ignore
-  SecuritySolutionKibanaServices.init({
-    ...services,
-  });
+
   return (
     <KibanaReactContext.Provider>
       <Story />

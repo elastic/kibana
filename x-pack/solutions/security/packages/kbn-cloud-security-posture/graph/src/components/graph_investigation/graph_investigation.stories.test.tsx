@@ -13,7 +13,7 @@ import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import * as stories from './graph_investigation.stories';
 import { type GraphInvestigationProps } from './graph_investigation';
 import { GRAPH_INVESTIGATION_TEST_ID, GRAPH_ACTIONS_INVESTIGATE_IN_TIMELINE_ID } from '../test_ids';
-import * as previewAnnotations from '../../../../.storybook/preview';
+import * as previewAnnotations from '../../../.storybook/preview';
 
 setProjectAnnotations(previewAnnotations);
 

@@ -15,7 +15,7 @@ const graphWebpack: Configuration = {
     alias: {
       '../../hooks/use_fetch_graph_data': resolve(
         __dirname,
-        '../graph/src/components/mock/use_fetch_graph_data.mock.ts'
+        '../src/components/mock/use_fetch_graph_data.mock.ts'
       ),
     },
   },
