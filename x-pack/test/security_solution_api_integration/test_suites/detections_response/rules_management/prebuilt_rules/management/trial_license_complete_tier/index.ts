@@ -8,7 +8,7 @@
 import { FtrProviderContext } from '../../../../../../ftr_provider_context';
 
 export default ({ loadTestFile }: FtrProviderContext): void => {
-  describe('Rules Management - Prebuilt Rules - Prebuilt Rules Management', function () {
+  describe('Rules Management - Prebuilt Rules - Prebuilt Rules Management - ', function () {
     loadTestFile(require.resolve('./bootstrap_prebuilt_rules'));
     loadTestFile(require.resolve('./get_prebuilt_rules_status'));
     loadTestFile(require.resolve('./get_prebuilt_timelines_status'));
@@ -20,6 +20,7 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
     loadTestFile(require.resolve('./upgrade_perform_prebuilt_rules.all_rules_mode'));
     loadTestFile(require.resolve('./upgrade_perform_prebuilt_rules.specific_rules_mode'));
     loadTestFile(require.resolve('./upgrade_review_prebuilt_rules.rule_type_fields'));
+    loadTestFile(require.resolve('./upgrade_review_prebuilt_rules.simple_fields'));
     loadTestFile(require.resolve('./upgrade_review_prebuilt_rules.number_fields'));
     loadTestFile(require.resolve('./upgrade_review_prebuilt_rules.single_line_string_fields'));
     loadTestFile(require.resolve('./upgrade_review_prebuilt_rules.scalar_array_fields'));
