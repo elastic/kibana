@@ -7,7 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 import * as rt from 'io-ts';
-import { commonSearchSuccessResponseFieldsRT } from '../../../utils/elasticsearch_runtime_types';
 import {
   Comparator,
   criterionRT,
@@ -25,6 +24,7 @@ import type {
   RatioRuleParams,
   CountRuleParams,
 } from '@kbn/response-ops-rule-params/log_threshold';
+import { commonSearchSuccessResponseFieldsRT } from '../../../utils/elasticsearch_runtime_types';
 
 export { LOG_THRESHOLD_ALERT_TYPE_ID as LOG_DOCUMENT_COUNT_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 export {

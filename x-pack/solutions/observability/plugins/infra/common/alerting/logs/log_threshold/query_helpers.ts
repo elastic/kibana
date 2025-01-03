@@ -6,8 +6,8 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { LogThresholdParams } from '@kbn/response-ops-rule-params/log_threshold';
 import type { CountCriteria, Criterion, ExecutionTimeRange } from '.';
-import { LogThresholdParams } from '@kbn/response-ops-rule-params/log_threshold';
 import { Comparator } from '.';
 import { getIntervalInSeconds } from '../../../utils/get_interval_in_seconds';
 

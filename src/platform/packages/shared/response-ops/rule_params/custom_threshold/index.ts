@@ -9,4 +9,3 @@
 
 export { customThresholdParamsSchema } from './latest';
 export { customThresholdParamsSchema as customThresholdParamsSchemaV1 } from './v1';
-
