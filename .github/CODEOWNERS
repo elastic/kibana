@@ -656,6 +656,7 @@ src/platform/plugins/shared/saved_objects_tagging_oss @elastic/appex-sharedux
 src/platform/plugins/shared/saved_search @elastic/kibana-data-discovery
 src/platform/plugins/shared/screenshot_mode @elastic/appex-sharedux
 src/platform/plugins/shared/share @elastic/appex-sharedux
+src/platform/plugins/shared/telemetry @elastic/kibana-core
 src/platform/plugins/shared/telemetry_collection_manager @elastic/kibana-core
 src/platform/plugins/shared/telemetry_management_section @elastic/kibana-core
 src/platform/plugins/shared/ui_actions @elastic/appex-sharedux
@@ -676,7 +677,6 @@ src/plugins/event_annotation @elastic/kibana-visualizations
 src/plugins/event_annotation_listing @elastic/kibana-visualizations
 src/plugins/expressions @elastic/kibana-visualizations
 src/plugins/interactive_setup @elastic/kibana-security
-src/plugins/telemetry @elastic/kibana-core
 src/plugins/unified_search @elastic/kibana-visualizations
 src/plugins/url_forwarding @elastic/kibana-visualizations
 src/plugins/usage_collection @elastic/kibana-core
@@ -1764,7 +1764,7 @@ packages/kbn-monaco/src/esql @elastic/kibana-esql
 /x-pack/test/functional_cors @elastic/kibana-core
 /x-pack/test/stack_functional_integration/apps/telemetry @elastic/kibana-core
 /test/plugin_functional/plugins/core* @elastic/kibana-core
-/test/plugin_functional/plugins/telemetry @elastic/kibana-core
+/test/plugin_functional/platform/plugins/shared/telemetry @elastic/kibana-core
 /test/plugin_functional/plugins/session_notifications @elastic/kibana-core
 /test/plugin_functional/plugins/kbn_top_nav/ @elastic/kibana-core
 /test/plugin_functional/plugins/app_link_test @elastic/kibana-core
@@ -1844,7 +1844,7 @@ packages/kbn-monaco/src/esql @elastic/kibana-esql
 # Kibana Telemetry
 /.telemetryrc.json @elastic/kibana-core
 /x-pack/.telemetryrc.json @elastic/kibana-core
-/src/plugins/telemetry/schema/ @elastic/kibana-core
+/src/platform/plugins/shared/telemetry/schema/ @elastic/kibana-core
 /x-pack/platform/plugins/private/telemetry_collection_xpack/schema/ @elastic/kibana-core
 x-pack/platform/plugins/private/cloud_integrations/cloud_full_story/server/config.ts @elastic/kibana-core @shahinakmal
 
@@ -1890,7 +1890,7 @@ x-pack/platform/plugins/private/cloud_integrations/cloud_full_story/server/confi
 /.github/workflows/codeql-stats.yml @elastic/kibana-security
 /src/dev/eslint/security_eslint_rule_tests.ts @elastic/kibana-security
 /src/core/server/integration_tests/config/check_dynamic_config.test.ts @elastic/kibana-security
-/src/plugins/telemetry/server/config/telemetry_labels.ts @elastic/kibana-security
+/src/platform/plugins/shared/telemetry/server/config/telemetry_labels.ts @elastic/kibana-security
 /src/platform/packages/shared/kbn-std/src/is_internal_url.test.ts @elastic/kibana-core @elastic/kibana-security
 /src/platform/packages/shared/kbn-std/src/is_internal_url.ts @elastic/kibana-core @elastic/kibana-security
 /src/platform/packages/shared/kbn-std/src/parse_next_url.test.ts @elastic/kibana-core @elastic/kibana-security

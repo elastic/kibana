@@ -1,6 +1,6 @@
 # X-Pack Telemetry Schemas
 
-This is an extension of the [OSS Telemetry Schemas](../../../../../../src/plugins/telemetry/schema) to add the X-Pack-related data. The payloads described in these `.json` files must be merged to the OSS ones to get the structure of the full payload sent to the Remote Telemetry Service. All the files follow the schema convention as defined in the `usage_collection` plugin and `@kbn/telemetry-tools`.
+This is an extension of the [OSS Telemetry Schemas](../../../../../../src/platform/plugins/shared/telemetry/schema) to add the X-Pack-related data. The payloads described in these `.json` files must be merged to the OSS ones to get the structure of the full payload sent to the Remote Telemetry Service. All the files follow the schema convention as defined in the `usage_collection` plugin and `@kbn/telemetry-tools`.
 
 There are currently 7 files:
 
@@ -19,4 +19,4 @@ NOTE: Despite its similarities to ES mappings, the intention of these files is n
 
 ## Testing
 
-Functional tests are defined at `x-pack/test/api_integration/apis/telemetry/telemetry_local.ts`. They merge these files (+ the [OSS definitions](../../../../../../src/plugins/telemetry/schema)), and validates the actual output of the telemetry endpoint against the final schema.
+Functional tests are defined at `x-pack/test/api_integration/apis/telemetry/telemetry_local.ts`. They merge these files (+ the [OSS definitions](../../../../../../src/platform/plugins/shared/telemetry/schema)), and validates the actual output of the telemetry endpoint against the final schema.
