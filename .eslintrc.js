@@ -1927,7 +1927,7 @@ module.exports = {
         'src/plugins/usage_collection/**',
         'src/plugins/telemetry/**',
         'src/platform/plugins/shared/telemetry_collection_manager/**',
-        'src/plugins/telemetry_management_section/**',
+        'src/platform/plugins/shared/telemetry_management_section/**',
         'x-pack/platform/plugins/private/telemetry_collection_xpack/**',
       ],
       rules: {
@@ -1951,7 +1951,7 @@ module.exports = {
         'src/plugins/usage_collection/**',
         'src/plugins/telemetry/**',
         'src/platform/plugins/shared/telemetry_collection_manager/**',
-        'src/plugins/telemetry_management_section/**',
+        'src/platform/plugins/shared/telemetry_management_section/**',
         'x-pack/platform/plugins/private/telemetry_collection_xpack/**',
       ],
       rules: {
