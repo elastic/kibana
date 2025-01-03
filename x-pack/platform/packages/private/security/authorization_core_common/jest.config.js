@@ -6,12 +6,12 @@
  */
 
 module.exports = {
-  coverageDirectory: '<rootDir>/x-pack/packages/security/authorization_core_common',
+  coverageDirectory: '<rootDir>/x-pack/platform/packages/private/security/authorization_core_common',
   coverageReporters: ['text', 'html'],
   collectCoverageFrom: [
-    '<rootDir>/x-pack/packages/security/authorization_core_common/**/*.{ts,tsx}',
+    '<rootDir>/x-pack/platform/packages/private/security/authorization_core_common/**/*.{ts,tsx}',
   ],
   preset: '@kbn/test',
-  rootDir: '../../../..',
-  roots: ['<rootDir>/x-pack/packages/security/authorization_core_common'],
+  rootDir: '../../../../../..',
+  roots: ['<rootDir>/x-pack/platform/packages/private/security/authorization_core_common'],
 };
