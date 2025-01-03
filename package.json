@@ -280,7 +280,7 @@
     "@kbn/core-deprecations-server-internal": "link:src/core/packages/deprecations/server-internal",
     "@kbn/core-doc-links-browser": "link:src/core/packages/doc-links/browser",
     "@kbn/core-doc-links-browser-internal": "link:src/core/packages/doc-links/browser-internal",
-    "@kbn/core-doc-links-server": "link:packages/core/doc-links/core-doc-links-server",
+    "@kbn/core-doc-links-server": "link:src/core/packages/doc-links/server",
     "@kbn/core-doc-links-server-internal": "link:packages/core/doc-links/core-doc-links-server-internal",
     "@kbn/core-elasticsearch-client-server-internal": "link:packages/core/elasticsearch/core-elasticsearch-client-server-internal",
     "@kbn/core-elasticsearch-server": "link:packages/core/elasticsearch/core-elasticsearch-server",
