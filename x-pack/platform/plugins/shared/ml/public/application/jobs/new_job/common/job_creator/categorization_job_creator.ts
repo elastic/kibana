@@ -7,12 +7,9 @@
 
 import { isEqual } from 'lodash';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import {
-  type Field,
-  type Aggregation,
-  mlCategory,
-  ML_JOB_AGGREGATION,
-} from '@kbn/ml-anomaly-utils';
+import type { Field, Aggregation } from '@kbn/ml-anomaly-utils';
+import { ML_JOB_AGGREGATION } from '@kbn/ml-anomaly-utils/aggregation_types';
+import { mlCategory } from '@kbn/ml-anomaly-utils/fields';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import {
   type CategorizationAnalyzer,

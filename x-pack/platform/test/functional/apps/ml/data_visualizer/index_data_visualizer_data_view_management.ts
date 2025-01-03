@@ -5,9 +5,12 @@
  * 2.0.
  */
 
-import { ML_JOB_FIELD_TYPES } from '@kbn/ml-anomaly-utils';
+import { ML_JOB_FIELD_TYPES } from '@kbn/ml-anomaly-utils/field_types';
+
 import { FtrProviderContext } from '../../../ftr_provider_context';
+
 import { MetricFieldVisConfig, NonMetricFieldVisConfig } from './types';
+
 interface TestData {
   suiteTitle: string;
   sourceIndexOrSavedSearch: string;

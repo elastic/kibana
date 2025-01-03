@@ -12,7 +12,9 @@
 
 import { get } from 'lodash';
 
-import { ES_AGGREGATION, ML_JOB_AGGREGATION, DOC_COUNT, _DOC_COUNT } from '@kbn/ml-anomaly-utils';
+import { ES_AGGREGATION } from '@kbn/ml-anomaly-utils/es_aggregation';
+import { ML_JOB_AGGREGATION } from '@kbn/ml-anomaly-utils/aggregation_types';
+import { DOC_COUNT, _DOC_COUNT } from '@kbn/ml-anomaly-utils/field_types';
 
 import type { SeriesConfig } from '@kbn/ml-common-types/results';
 import type { Job } from '@kbn/ml-common-types/anomaly_detection_jobs/job';

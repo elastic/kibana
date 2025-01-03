@@ -20,8 +20,8 @@ import {
 
 import { i18n } from '@kbn/i18n';
 import { extractErrorProperties } from '@kbn/ml-error-utils';
+import type { DFAModelItem } from '@kbn/ml-common-types/trained_models';
 
-import type { DFAModelItem } from '../../../../common/types/trained_models';
 import type { AddInferencePipelineSteps } from './types';
 import { ADD_INFERENCE_PIPELINE_STEPS } from './constants';
 import { AddInferencePipelineFooter } from '../shared';

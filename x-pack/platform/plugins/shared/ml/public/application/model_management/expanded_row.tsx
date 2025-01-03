@@ -34,12 +34,12 @@ import type {
   TrainedModelItem,
   TrainedModelStat,
 } from '@kbn/ml-common-types/trained_models';
+import { isNLPModelItem } from '@kbn/ml-common-types/trained_models';
 import { InferenceApi } from './inference_api_tab';
 import { ModelPipelines } from './pipelines';
 import { AllocatedModels } from '../memory_usage/nodes_overview/allocated_models';
 import { useFieldFormatter } from '../contexts/kibana/use_field_formatter';
 import { useEnabledFeatures } from '../contexts/ml';
-import { isNLPModelItem } from '../../../common/types/trained_models';
 
 interface ExpandedRowProps {
   item: TrainedModelItem;

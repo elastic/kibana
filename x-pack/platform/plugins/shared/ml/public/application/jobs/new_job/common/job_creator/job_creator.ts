@@ -14,14 +14,12 @@ import { ES_FIELD_TYPES } from '@kbn/field-types';
 import type { Query } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { addExcludeFrozenToQuery } from '@kbn/ml-query-utils';
+import type { Aggregation, Field, MlUrlConfig } from '@kbn/ml-anomaly-utils';
 import {
-  type Aggregation,
-  type Field,
-  type MlUrlConfig,
   ML_JOB_AGGREGATION,
   mlJobAggregations,
   mlJobAggregationsWithoutEsEquivalent,
-} from '@kbn/ml-anomaly-utils';
+} from '@kbn/ml-anomaly-utils/aggregation_types';
 import type { RuntimeMappings } from '@kbn/ml-runtime-field-utils';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';

@@ -7,7 +7,7 @@
 import type { estypes } from '@elastic/elasticsearch';
 import numeral from '@elastic/numeral';
 import type { IScopedClusterClient } from '@kbn/core/server';
-import { MLCATEGORY } from '@kbn/ml-anomaly-utils';
+import { MLCATEGORY } from '@kbn/ml-anomaly-utils/field_types';
 import type { AnalysisConfig } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
 import type { Datafeed } from '@kbn/ml-common-types/anomaly_detection_jobs/datafeed';
 import { fieldsServiceProvider } from '../fields_service';
