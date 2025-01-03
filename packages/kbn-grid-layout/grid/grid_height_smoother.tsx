@@ -67,7 +67,7 @@ export const GridHeightSmoother = ({
       className={'kbnGridWrapper'}
       css={css`
         // the guttersize cannot currently change, so it's safe to set it just once
-        padding: ${gridLayoutStateManager.runtimeSettings$.getValue().gutterSize}px;
+        margin: ${gridLayoutStateManager.runtimeSettings$.getValue().gutterSize}px;
         overflow-anchor: none;
         transition: height 500ms linear;
 
@@ -75,6 +75,9 @@ export const GridHeightSmoother = ({
           height: 100% !important;
           position: relative;
           transition: none;
+          // switch to padding so that the panel does not extend the height of the parent
+          margin: 0px;
+          padding: ${gridLayoutStateManager.runtimeSettings$.getValue().gutterSize}px;
         }
       `}
     >

@@ -39,10 +39,9 @@ export const DashboardGrid = () => {
   const animatePanelTransforms = useStateFromPublishingSubject(
     dashboardInternalApi.animatePanelTransforms$
   );
-  const [expandedPanelId, focusedPanelId, panels, useMargins, viewMode, controlGroupApi] =
+  const [expandedPanelId, panels, useMargins, viewMode, controlGroupApi] =
     useBatchedPublishingSubjects(
       dashboardApi.expandedPanelId,
-      dashboardApi.focusedPanelId$,
       dashboardApi.panels$,
       dashboardApi.settings.useMargins$,
       dashboardApi.viewMode,
