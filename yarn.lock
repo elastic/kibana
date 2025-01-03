@@ -5177,7 +5177,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/crypto-browser@link:packages/kbn-crypto-browser":
+"@kbn/crypto-browser@link:src/platform/packages/shared/kbn-crypto-browser":
   version "0.0.0"
   uid ""
 
