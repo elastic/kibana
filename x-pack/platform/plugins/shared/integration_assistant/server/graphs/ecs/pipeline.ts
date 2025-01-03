@@ -12,10 +12,8 @@ import { Pipeline, ESProcessorItem } from '../../../common';
 import type { EcsMappingState } from '../../types';
 import { ECS_TYPES } from './constants';
 import { deepCopy } from '../../util/util';
-
-interface IngestPipeline {
-  [key: string]: unknown;
-}
+import { type FieldPath, fieldPathToProcessorString } from '../../util/fields';
+import { fieldPathToPainlessExpression, SafePainlessExpression } from '../../util/painless';
 
 interface ECSField {
   target: string;
@@ -24,16 +22,36 @@ interface ECSField {
   type: string;
 }
 
+const KNOWN_ES_TYPES = ['long', 'float', 'scaled_float', 'ip', 'boolean', 'keyword'];
+type KnownESType = (typeof KNOWN_ES_TYPES)[number];
+
+/**
+ * Clarifies the types of specific fields in pipeline processors.
+ *
+ * This includes safety requirements for Painless script fields.
+ * Restricted to the processors that we generate in this file.
+ */
+interface SafeESProcessorItem extends ESProcessorItem {
+  [k: string]: {
+    field?: string;
+    if?: SafePainlessExpression;
+    ignore_missing?: boolean;
+    target_field?: string;
+    type?: KnownESType;
+    formats?: string[];
+  };
+}
+
 function generateProcessor(
-  currentPath: string,
+  currentPath: FieldPath,
   ecsField: ECSField,
   expectedEcsType: string,
   sampleValue: unknown
-): object {
+): SafeESProcessorItem {
   if (needsTypeConversion(sampleValue, expectedEcsType)) {
     return {
       convert: {
-        field: currentPath,
+        field: fieldPathToProcessorString(currentPath),
         target_field: ecsField.target,
         type: getConvertProcessorType(expectedEcsType),
         ignore_missing: true,
@@ -44,17 +62,17 @@ function generateProcessor(
   if (ecsField.type === 'date') {
     return {
       date: {
-        field: currentPath,
+        field: fieldPathToProcessorString(currentPath),
         target_field: ecsField.target,
         formats: convertIfIsoDate(ecsField.date_formats),
-        if: currentPath.replace(/\./g, '?.'),
+        if: fieldPathToPainlessExpression(currentPath),
       },
     };
   }
 
   return {
     rename: {
-      field: currentPath,
+      field: fieldPathToProcessorString(currentPath),
       target_field: ecsField.target,
       ignore_missing: true,
     },
@@ -74,10 +92,9 @@ function convertIfIsoDate(date: string[]): string[] {
   return date;
 }
 
-function getSampleValue(key: string, samples: Record<string, any>): unknown {
-  const keyList = key.split('.');
+function getSampleValue(fieldPath: FieldPath, samples: Record<string, any>): unknown {
   let value: any = samples;
-  for (const k of keyList) {
+  for (const k of fieldPath) {
     if (value === undefined || value === null) {
       return null;
     }
@@ -91,7 +108,7 @@ function getEcsType(ecsField: ECSField, ecsTypes: Record<string, string>): strin
   return ecsTypes[ecsTarget];
 }
 
-function getConvertProcessorType(expectedEcsType: string): string {
+function getConvertProcessorType(expectedEcsType: KnownESType): KnownESType {
   if (expectedEcsType === 'long') {
     return 'long';
   }
@@ -107,7 +124,7 @@ function getConvertProcessorType(expectedEcsType: string): string {
   return 'string';
 }
 
-function needsTypeConversion(sample: unknown, expected: string): boolean {
+function needsTypeConversion(sample: unknown, expected: KnownESType): boolean {
   if (sample === null || sample === undefined) {
     return false;
   }
@@ -136,16 +153,20 @@ function needsTypeConversion(sample: unknown, expected: string): boolean {
   return false;
 }
 
-function generateProcessors(ecsMapping: object, samples: object, basePath: string = ''): object[] {
+function generateProcessors(
+  ecsMapping: object,
+  samples: object,
+  basePath: FieldPath = []
+): SafeESProcessorItem[] {
   if (Object.keys(ecsMapping).length === 0) {
     return [];
   }
   const ecsTypes = ECS_TYPES;
   const valueFieldKeys = new Set(['target', 'confidence', 'date_formats', 'type']);
-  const results: object[] = [];
+  const results: SafeESProcessorItem[] = [];
 
   for (const [key, value] of Object.entries(ecsMapping)) {
-    const currentPath = basePath ? `${basePath}.${key}` : key;
+    const currentPath = [...basePath, key];
 
     if (value !== null && typeof value === 'object' && value?.target !== null) {
       const valueKeys = new Set(Object.keys(value));
@@ -162,10 +183,11 @@ function generateProcessors(ecsMapping: object, samples: object, basePath: strin
       }
     }
   }
+
   return results;
 }
 
-export function createPipeline(state: EcsMappingState): IngestPipeline {
+export function createPipeline(state: EcsMappingState): Pipeline {
   const samples = JSON.parse(state.combinedSamples);
 
   const processors = generateProcessors(state.finalMapping, samples);

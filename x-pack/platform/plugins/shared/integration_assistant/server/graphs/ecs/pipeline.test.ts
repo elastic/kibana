@@ -79,7 +79,7 @@ describe('Testing pipeline templates', () => {
           target_field: '@timestamp',
           formats: ["yyyy-MM-dd'T'HH:mm:ss.SSSSSSSSS'Z'", 'ISO8601'],
           tag: 'date_processor_xdfsfs.ds.@timestamp',
-          if: 'ctx.xdfsfs?.ds?.@timestamp != null',
+          if: 'ctx.xdfsfs?.ds?.get("@timestamp") != null',
         },
       },
       {
