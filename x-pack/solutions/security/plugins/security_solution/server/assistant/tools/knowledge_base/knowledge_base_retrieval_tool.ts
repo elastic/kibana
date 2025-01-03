@@ -56,8 +56,6 @@ export const KNOWLEDGE_BASE_RETRIEVAL_TOOL: AssistantTool = {
             ...doc,
             metadata: {
               ...doc.metadata,
-              //citationUrl: `/app/management/kibana/securityAiAssistantManagement?tab=knowledge_base&entry_search_term=${doc.id}`,
-              //citationName: doc.metadata.name,
               citationElement: `!{citation[${doc.metadata.name}](/app/management/kibana/securityAiAssistantManagement?tab=knowledge_base&entry_search_term=${doc.id})}`
             }
           }

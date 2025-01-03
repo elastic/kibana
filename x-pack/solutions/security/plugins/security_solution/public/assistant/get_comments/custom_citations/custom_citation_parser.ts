@@ -9,7 +9,7 @@ export interface CustomCitationNodeDetails extends Node {
     citationIndex?: number
 }
 
-const startSignal = '!{citation'
+const START_SIGNAL = '!{citation'
 
 /**
  * Parses `!{citation[citationLabel](citationLink)` into customCitation node 
@@ -24,13 +24,13 @@ export const CustomCitationParser: Plugin = function CustomCitationParser() {
         value,
         silent
     ) {
-        if (value.startsWith(startSignal) === false) return false;
+        if (value.startsWith(START_SIGNAL) === false) return false;
         
-        const nextChar = value[startSignal.length];
+        const nextChar = value[START_SIGNAL.length];
         
         if (nextChar !== '[') return false;
         
-        let index = startSignal.length;
+        let index = START_SIGNAL.length;
         
         function readArg(open: string, close: string) {
             if (value[index] !== open) return ''
@@ -66,14 +66,14 @@ export const CustomCitationParser: Plugin = function CustomCitationParser() {
         if (!citationLabel) {
             this.file.info('No citation lable found', {
                 line: now.line,
-                column: now.column + startSignal.length + 1
+                column: now.column + START_SIGNAL.length + 1
             });
         }
 
         if (!citationLink) {
             this.file.info('No citation link found', {
                 line: now.line,
-                column: now.column + startSignal.length + 3 + citationLabel.length
+                column: now.column + START_SIGNAL.length + 3 + citationLabel.length
             });
         }
 
@@ -83,8 +83,8 @@ export const CustomCitationParser: Plugin = function CustomCitationParser() {
             return true;
         }
 
-        now.column += startSignal.length + 1;
-        now.offset += startSignal.length + 1;
+        now.column += START_SIGNAL.length + 1;
+        now.offset += START_SIGNAL.length + 1;
 
         return eat(`!{citation[${citationLabel}](${citationLink})}`)({
             type: 'customCitation',
@@ -97,7 +97,7 @@ export const CustomCitationParser: Plugin = function CustomCitationParser() {
     tokenizeCustomCitation.notInLink = true;
 
     tokenizeCustomCitation.locator = (value, fromIndex) => {
-        return value.indexOf('!{citation', fromIndex);
+        return value.indexOf(START_SIGNAL, fromIndex);
     };
 
     tokenizers.customCitation = tokenizeCustomCitation;

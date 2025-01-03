@@ -237,8 +237,10 @@ export const getStructuredToolForIndexEntry = ({
         logger.debug(() => `Similarity Text Extract Results:\n ${JSON.stringify(kbDocs)}`);
 
         return `###\nBelow are all relevant documents in JSON format and their citationElement:
-        citationElement: """!{citation[${indexEntry.name}](/app/management/kibana/securityAiAssistantManagement?tab=knowledge_base&entry_search_term=${indexEntry.id}}""", 
-        ${JSON.stringify(kbDocs)}\n###`;
+        ${JSON.stringify(kbDocs)}\n###
+        
+        citationElement: \`!{citation[${indexEntry.name}](/app/management/kibana/securityAiAssistantManagement?tab=knowledge_base&entry_search_term=${indexEntry.id}}\` 
+        `;
       } catch (e) {
         logger.error(`Error performing IndexEntry KB Similarity Search: ${e.message}`);
         return `I'm sorry, but I was unable to find any information in the knowledge base. Perhaps this error would be useful to deliver to the user. Be sure to print it below your response and in a codeblock so it is rendered nicely: ${e.message}`;
