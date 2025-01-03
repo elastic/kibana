@@ -16,3 +16,4 @@ export function plugin() {
 export { ACTION_CUSTOMIZE_PANEL } from './panel_actions/customize_panel_action/constants';
 export { PresentationPanel } from './panel_component';
 export type { PresentationPanelProps } from './panel_component/types';
+export { PresentationPanelError } from './panel_component/presentation_panel_error';
