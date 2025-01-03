@@ -140,3 +140,37 @@ export const RULE_MODIFIED_BADGE_DESCRIPTION = i18n.translate(
       'The rule was edited after installation and field values differs from the values upon installation',
   }
 );
+
+export const RULE_NEW_REVISION_DETECTED_WARNING = i18n.translate(
+  'xpack.securitySolution.detectionEngine.upgradeFlyout.ruleNewRevisionDetectedWarning',
+  {
+    defaultMessage: 'Installed rule changed',
+  }
+);
+
+export const RULE_NEW_REVISION_DETECTED_WARNING_DESCRIPTION = (ruleName: string) =>
+  i18n.translate(
+    'xpack.securitySolution.detectionEngine.upgradeFlyout.ruleNewVersionDetectedWarningDescription',
+    {
+      defaultMessage:
+        'Someone edited the installed rule "{ruleName}". Upgrade resolved conflicts were reset.',
+      values: { ruleName },
+    }
+  );
+
+export const RULE_NEW_VERSION_DETECTED_WARNING = i18n.translate(
+  'xpack.securitySolution.detectionEngine.upgradeFlyout.ruleNewRevisionDetectedWarning',
+  {
+    defaultMessage: 'New prebuilt rules package was installed',
+  }
+);
+
+export const RULE_NEW_VERSION_DETECTED_WARNING_DESCRIPTION = (ruleName: string) =>
+  i18n.translate(
+    'xpack.securitySolution.detectionEngine.upgradeFlyout.ruleNewRevisionDetectedWarningDescription',
+    {
+      defaultMessage:
+        'Newer prebuilt rules package were installed in background. It contains a newer rule version for "{ruleName}". Upgrade resolved conflicts were reset.',
+      values: { ruleName },
+    }
+  );
