@@ -14,9 +14,12 @@ import type {
 import type { SearchRequestHandlerContext } from '@kbn/data-plugin/server';
 import type { MlPluginSetup } from '@kbn/ml-plugin/server';
 import type { EntityManagerServerPluginStart } from '@kbn/entityManager-plugin/server';
-import { InfraServerPluginStartDeps } from './lib/adapters/framework';
-import { InventoryViewsServiceSetup, InventoryViewsServiceStart } from './services/inventory_views';
-import {
+import type { InfraServerPluginStartDeps } from './lib/adapters/framework';
+import type {
+  InventoryViewsServiceSetup,
+  InventoryViewsServiceStart,
+} from './services/inventory_views';
+import type {
   MetricsExplorerViewsServiceSetup,
   MetricsExplorerViewsServiceStart,
 } from './services/metrics_explorer_views';
