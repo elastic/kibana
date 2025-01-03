@@ -4669,7 +4669,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-injected-metadata-browser-internal@link:packages/core/injected-metadata/core-injected-metadata-browser-internal":
+"@kbn/core-injected-metadata-browser-internal@link:src/core/packages/injected-metadata/browser-internal":
   version "0.0.0"
   uid ""
 
