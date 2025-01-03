@@ -47,9 +47,8 @@ import {
   HiddenField,
   UseField,
   useFormData,
-  UseMultiFields,
 } from '../../../../shared_imports';
-import type { FormHook, FieldHook } from '../../../../shared_imports';
+import type { FormHook } from '../../../../shared_imports';
 import { schema } from './schema';
 import { useExperimentalFeatureFieldsTransform } from './use_experimental_feature_fields_transform';
 import * as i18n from './translations';
@@ -65,7 +64,6 @@ import {
 } from '../../../../../common/detection_engine/utils';
 import { EqlQueryEdit } from '../../../rule_creation/components/eql_query_edit';
 import { DataViewSelectorField } from '../data_view_selector_field';
-import { ThreatMatchInput } from '../threatmatch_input';
 import { useFetchIndex } from '../../../../common/containers/source';
 import { RequiredFields } from '../../../rule_creation/components/required_fields';
 import { DocLink } from '../../../../common/components/links_to_docs/doc_link';
@@ -89,12 +87,14 @@ import { AnomalyThresholdEdit } from '../../../rule_creation/components/anomaly_
 import { HistoryWindowStartEdit } from '../../../rule_creation/components/history_window_start_edit';
 import { NewTermsFieldsEdit } from '../../../rule_creation/components/new_terms_fields_edit';
 import { EsqlQueryEdit } from '../../../rule_creation/components/esql_query_edit';
+import { CreateCustomMlJobButton } from '../../../rule_creation/components/create_ml_job_button/create_ml_job_button';
+import { ThreatMatchEdit } from '../threat_match_edit';
 import { usePersistentNewTermsState } from './use_persistent_new_terms_state';
 import { usePersistentAlertSuppressionState } from './use_persistent_alert_suppression_state';
 import { usePersistentThresholdState } from './use_persistent_threshold_state';
 import { usePersistentQuery } from './use_persistent_query';
 import { usePersistentMachineLearningState } from './use_persistent_machine_learning_state';
-import { CreateCustomMlJobButton } from '../../../rule_creation/components/create_ml_job_button/create_ml_job_button';
+import { usePersistentThreatMatchState } from './use_persistent_threat_match_state';
 
 const CommonUseField = getUseField({ component: Field });
 
@@ -103,14 +103,12 @@ const StyledVisibleContainer = styled.div<{ isVisible: boolean }>`
 `;
 export interface StepDefineRuleProps extends RuleStepProps {
   indicesConfig: string[];
-  threatIndicesConfig: string[];
   defaultSavedQuery?: SavedQuery;
   form: FormHook<DefineStepRule>;
   indexPattern: DataViewBase;
   isIndexPatternLoading: boolean;
   isQueryBarValid: boolean;
   setIsQueryBarValid: (valid: boolean) => void;
-  setIsThreatQueryBarValid: (valid: boolean) => void;
   index: string[];
   threatIndex: string[];
   alertSuppressionFields?: string[];
@@ -162,10 +160,8 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   queryBarSavedId,
   queryBarTitle,
   setIsQueryBarValid,
-  setIsThreatQueryBarValid,
   shouldLoadQueryDynamically,
   threatIndex,
-  threatIndicesConfig,
 }) => {
   const [{ ruleType, queryBar, machineLearningJobId, threshold }] = useFormData<DefineStepRule>({
     form,
@@ -174,7 +170,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
 
   const [openTimelineSearch, setOpenTimelineSearch] = useState(false);
   const [indexModified, setIndexModified] = useState(false);
-  const [threatIndexModified, setThreatIndexModified] = useState(false);
   const license = useLicense();
 
   const {
@@ -229,10 +224,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     setIndexModified(!isEqual(index, indicesConfig));
   }, [index, indicesConfig]);
 
-  useEffect(() => {
-    setThreatIndexModified(!isEqual(threatIndex, threatIndicesConfig));
-  }, [threatIndex, threatIndicesConfig]);
-
   const { setPersistentEqlQuery, setPersistentEqlOptions } = usePersistentQuery({
     form,
   });
@@ -250,6 +241,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     newTermsFieldsPath: 'newTermsFields',
     historyWindowStartPath: 'historyWindowSize',
   });
+  usePersistentThreatMatchState({ form });
 
   const handleSetRuleFromTimeline = useCallback<SetRuleQuery>(
     ({ index: timelineIndex, queryBar: timelineQueryBar, eqlOptions }) => {
@@ -296,11 +288,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     indexField.setValue(indicesConfig);
   }, [getFields, indicesConfig]);
 
-  const handleResetThreatIndices = useCallback(() => {
-    const threatIndexField = getFields().threatIndex;
-    threatIndexField.setValue(threatIndicesConfig);
-  }, [getFields, threatIndicesConfig]);
-
   const handleOpenTimelineSearch = useCallback(() => {
     setOpenTimelineSearch(true);
   }, []);
@@ -308,28 +295,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   const handleCloseTimelineSearch = useCallback(() => {
     setOpenTimelineSearch(false);
   }, []);
-
-  const ThreatMatchInputChildren = useCallback(
-    ({ threatMapping }: Record<string, FieldHook>) => (
-      <ThreatMatchInput
-        handleResetThreatIndices={handleResetThreatIndices}
-        indexPatterns={indexPattern}
-        threatIndexModified={threatIndexModified}
-        threatIndexPatterns={threatIndexPatterns}
-        threatIndexPatternsLoading={threatIndexPatternsLoading}
-        threatMapping={threatMapping}
-        onValidityChange={setIsThreatQueryBarValid}
-      />
-    ),
-    [
-      handleResetThreatIndices,
-      indexPattern,
-      setIsThreatQueryBarValid,
-      threatIndexModified,
-      threatIndexPatterns,
-      threatIndexPatternsLoading,
-    ]
-  );
 
   const { fields: esqlSuppressionFields, isLoading: isEsqlSuppressionLoading } =
     useAllEsqlRuleFields({
@@ -678,23 +643,16 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
               <ThresholdEdit esFields={indexPattern.fields as FieldSpec[]} path="threshold" />
             </EuiFormRow>
           )}
-          <RuleTypeEuiFormRow
-            $isVisible={isThreatMatchRule(ruleType)}
-            data-test-subj="threatMatchInput"
-            fullWidth
-          >
-            <>
-              <UseMultiFields
-                fields={{
-                  threatMapping: {
-                    path: 'threatMapping',
-                  },
-                }}
-              >
-                {ThreatMatchInputChildren}
-              </UseMultiFields>
-            </>
-          </RuleTypeEuiFormRow>
+          {isThreatMatchRule(ruleType) && (
+            <ThreatMatchEdit
+              indexPatternPath="threatIndex"
+              queryPath="threatQueryBar"
+              mappingPath="threatMapping"
+              indexPatterns={indexPattern}
+              threatIndexPatterns={threatIndexPatterns}
+              loading={threatIndexPatternsLoading}
+            />
+          )}
           {isNewTermsRule(ruleType) && (
             <EuiFormRow data-test-subj="newTermsInput" fullWidth>
               <>
