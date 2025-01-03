@@ -17732,10 +17732,10 @@ elastic-apm-node@3.46.0:
     traverse "^0.6.6"
     unicode-byte-truncate "^1.0.0"
 
-elastic-apm-node@^4.9.0:
-  version "4.9.0"
-  resolved "https://registry.yarnpkg.com/elastic-apm-node/-/elastic-apm-node-4.9.0.tgz#8ca807fdf64404b615b60c4090bd9c9aad5b78ed"
-  integrity sha512-VUbrahqHmqpfwGHtUysWJ7aeCIUm61hAw8tSu0gE9AYdriVSPod4Ki11X4K8sBri0bIc/FTHxOrg7kudhGoqHQ==
+elastic-apm-node@^4.10.0:
+  version "4.10.0"
+  resolved "https://registry.yarnpkg.com/elastic-apm-node/-/elastic-apm-node-4.10.0.tgz#b0560f1f49ac4f7633a810d4d7f727e45f8ebe20"
+  integrity sha512-QmnKLArA84lJ4mNoUTi9qMUfLE1nUeFLB+VO/7iG6UOTiAdR5Wxk0nu3SpcgFe+tr+4GkyXM2xXdmL2XYfQ1Qg==
   dependencies:
     "@elastic/ecs-pino-format" "^1.5.0"
     "@opentelemetry/api" "^1.4.1"
