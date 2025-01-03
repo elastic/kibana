@@ -123,18 +123,29 @@ export async function getFailedAndUnrecognizedTasksPerDay({
     };
   } catch (err) {
     const errorMessage = err && err.message ? err.message : err.toString();
-    logger.warn(
-      `Error executing alerting telemetry task: getFailedAndUnrecognizedTasksPerDay - ${JSON.stringify(
-        err
-      )}`,
-      {
-        tags: ['alerting', 'telemetry-failed'],
-        error: { stack_trace: err.stack },
+    let returnedErrorMessage = errorMessage;
+    const errorStr = JSON.stringify(err);
+    const logMessage = `Error executing alerting telemetry task: getFailedAndUnrecognizedTasksPerDay - ${err}`;
+    const logOptions = {
+      tags: ['alerting', 'telemetry-failed'],
+      error: { stack_trace: err.stack },
+    };
+
+    // If error string contains "no_shard_available_action_exception", debug log it
+    if (errorStr.includes('no_shard_available_action_exception')) {
+      // the no_shard_available_action_exception can be wordy and the error message returned from this function
+      // gets stored in the task state so lets simplify
+      returnedErrorMessage = 'no_shard_available_action_exception';
+      if (logger.isLevelEnabled('debug')) {
+        logger.debug(logMessage, logOptions);
       }
-    );
+    } else {
+      logger.warn(logMessage, logOptions);
+    }
+
     return {
       hasErrors: true,
-      errorMessage,
+      errorMessage: returnedErrorMessage,
       countFailedAndUnrecognizedTasks: 0,
       countFailedAndUnrecognizedTasksByStatus: {},
       countFailedAndUnrecognizedTasksByStatusByType: {},
