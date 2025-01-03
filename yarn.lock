@@ -5893,7 +5893,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/i18n@link:packages/kbn-i18n":
+"@kbn/i18n@link:src/platform/packages/shared/kbn-i18n":
   version "0.0.0"
   uid ""
 

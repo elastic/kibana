@@ -27,7 +27,7 @@ dependency and account for the relative location of the Kibana repo, so it would
 instead be:
 
 ```
-"@kbn/i18n": "link:../../kibana/packages/kbn-i18n"
+"@kbn/i18n": "link:../../kibana/src/platform/packages/shared/kbn-i18n"
 ```
 
 then run `yarn kbn bootstrap` from the plugin directory.
