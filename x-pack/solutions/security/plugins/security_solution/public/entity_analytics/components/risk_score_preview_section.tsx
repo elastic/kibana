@@ -22,7 +22,8 @@ import {
 } from '@elastic/eui';
 import type { BoolQuery } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EntityTypeToIdentifierField, EntityType } from '../../../common/entity_analytics/types';
+import type { EntityType } from '../../../common/entity_analytics/types';
+import { EntityTypeToIdentifierField } from '../../../common/entity_analytics/types';
 import type { EntityRiskScoreRecord } from '../../../common/api/entity_analytics/common';
 import { RISK_SCORE_INDEX_PATTERN } from '../../../common/entity_analytics/risk_engine';
 import { RiskScorePreviewTable } from './risk_score_preview_table';
@@ -33,7 +34,7 @@ import { useSourcererDataView } from '../../sourcerer/containers';
 import type { RiskEngineMissingPrivilegesResponse } from '../hooks/use_missing_risk_engine_privileges';
 import { userHasRiskEngineReadPermissions } from '../common';
 import { EntityIconByType } from './entity_store/helpers';
-import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
+import { useEnabledEntityTypes } from '../../common/hooks/use_enabled_entity_types';
 interface IRiskScorePreviewPanel {
   showMessage: React.ReactNode;
   hideMessage: React.ReactNode;
@@ -141,12 +142,7 @@ const RiskEnginePreview: React.FC<{ includeClosedAlerts: boolean; from: string; 
   from,
   to,
 }) => {
-  const isServiceEntityStoreEnabled = useIsExperimentalFeatureEnabled('serviceEntityStoreEnabled');
-  const allEntityTypes = Object.values(EntityType);
-
-  const entityTypes = isServiceEntityStoreEnabled
-    ? allEntityTypes
-    : allEntityTypes.filter((value) => value !== EntityType.service);
+  const entityTypes = useEnabledEntityTypes();
 
   const [filters] = useState<{ bool: BoolQuery }>({
     bool: { must: [], filter: [], should: [], must_not: [] },

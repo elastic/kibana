@@ -13,7 +13,7 @@ import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import { getAvailableEntityTypes } from '../../../../../common/entity_analytics/entity_store/constants';
+import { getAllEntityTypes } from '../../../../../common/entity_analytics/types';
 import {
   EngineComponentResourceEnum,
   type EntityType,
@@ -202,7 +202,7 @@ export const runTask = async ({
       return { state: updatedState };
     }
 
-    const entityTypes = getAvailableEntityTypes();
+    const entityTypes = getAllEntityTypes();
 
     for (const entityType of entityTypes) {
       const start = Date.now();

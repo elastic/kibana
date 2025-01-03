@@ -28,3 +28,5 @@ export const EntityTypeToIdentifierField: Record<EntityType, EntityIdentifierFie
   [EntityType.user]: EntityIdentifierFields.userName,
   [EntityType.service]: EntityIdentifierFields.serviceName,
 };
+
+export const getAllEntityTypes = (): EntityType[] => Object.values(EntityType);

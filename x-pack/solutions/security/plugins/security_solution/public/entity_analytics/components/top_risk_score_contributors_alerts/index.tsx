@@ -61,7 +61,7 @@ export const TopRiskScoreContributorsAlerts = <T extends EntityType>({
   const filters = useDeepEqualSelector(getGlobalFiltersQuerySelector);
 
   const inputFilters = useMemo(() => {
-    // TODO support services
+    // TODO Add support for services on a follow-up PR
     const riskScoreEntity =
       riskEntity === EntityType.host
         ? (riskScore as HostRiskScore).host

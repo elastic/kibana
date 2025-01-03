@@ -11,12 +11,11 @@ import { noop } from 'lodash/fp';
 import { i18n } from '@kbn/i18n';
 import { useErrorToast } from '../../../common/hooks/use_error_toast';
 import type { CriticalityLevels } from '../../../../common/constants';
-import type { RiskSeverity } from '../../../../common/search_strategy';
+import { EntityType, type RiskSeverity } from '../../../../common/search_strategy';
 import { useQueryInspector } from '../../../common/components/page/manage_query';
 import { Direction } from '../../../../common/search_strategy/common';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { useQueryToggle } from '../../../common/containers/query_toggle';
-import { EntityType } from '../../../../common/api/entity_analytics/entity_store/common.gen';
 import type { Criteria } from '../../../explore/components/paginated_table';
 import { PaginatedTable } from '../../../explore/components/paginated_table';
 import { SeverityFilter } from '../severity/severity_filter';
@@ -69,7 +68,7 @@ export const EntitiesList: React.FC = () => {
 
   const searchParams = useMemo(
     () => ({
-      entitiesTypes: [EntityType.Enum.user, EntityType.Enum.host, EntityType.Enum.service],
+      entitiesTypes: Object.values(EntityType),
       page: activePage + 1,
       perPage: limit,
       sortField: sorting.field,

@@ -23,7 +23,7 @@ export const useEntityRiskIndex = (riskEntity: EntityType, onlyLatest: boolean =
       return onlyLatest ? getRiskScoreLatestIndex(spaceId) : getRiskScoreTimeSeriesIndex(spaceId);
     }
 
-    // TODO Delete this when the old risk score module is removed
+    // TODO Delete this when the old risk score module is removed https://github.com/elastic/kibana/pull/201810
     return riskEntity === EntityType.host
       ? getHostRiskIndex(spaceId, onlyLatest, isNewRiskScoreModuleInstalled)
       : getUserRiskIndex(spaceId, onlyLatest, isNewRiskScoreModuleInstalled);

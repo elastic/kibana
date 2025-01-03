@@ -60,7 +60,7 @@ const RiskDetailsTabBodyComponent = <T extends EntityType>({
 }) => {
   const queryId = useMemo(
     () =>
-      // TODO support services
+      // TODO Add support for services on a follow-up PR
       riskEntity === EntityType.host
         ? HostRiskScoreQueryId.HOST_DETAILS_RISK_SCORE
         : UserRiskScoreQueryId.USER_DETAILS_RISK_SCORE,
@@ -68,7 +68,7 @@ const RiskDetailsTabBodyComponent = <T extends EntityType>({
   );
 
   const severitySelectionRedux = useDeepEqualSelector((state: State) =>
-    // TODO support services
+    // TODO Add support for services on a follow-up PR
     riskEntity === EntityType.host
       ? hostsSelectors.hostRiskScoreSeverityFilterSelector()(state, hostsModel.HostsType.details)
       : usersSelectors.userRiskScoreSeverityFilterSelector()(state)
@@ -107,7 +107,7 @@ const RiskDetailsTabBodyComponent = <T extends EntityType>({
   const rules = useMemo(() => {
     const lastRiskItem = data && data.length > 0 ? data[data.length - 1] : null;
     if (lastRiskItem) {
-      // TODO support services
+      // TODO Add support for services on a follow-up PR
       return riskEntity === EntityType.host
         ? (lastRiskItem as HostRiskScore).host.risk.rule_risks
         : (lastRiskItem as UserRiskScore).user.risk.rule_risks;

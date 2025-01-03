@@ -58,7 +58,7 @@ export const RiskInputsTab = <T extends EntityType>({
   const [selectedItems, setSelectedItems] = useState<InputAlert[]>([]);
 
   const nameFilterQuery = useMemo(() => {
-    // TODO support services
+    // TODO Add support for services on a follow-up PR
     if (entityType === EntityType.host) {
       return buildHostNamesFilter([entityName]);
     } else if (entityType === EntityType.user) {

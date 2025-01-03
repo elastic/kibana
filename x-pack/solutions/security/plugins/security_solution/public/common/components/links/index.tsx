@@ -96,7 +96,7 @@ const UserDetailsLinkComponent: React.FC<{
 
   const onClick = useCallback(
     (e: SyntheticEvent) => {
-      telemetry.reportEvent(EntityEventTypes.EntityDetailsClicked, { entity: 'user' });
+      telemetry.reportEvent(EntityEventTypes.EntityDetailsClicked, { entity: EntityType.user });
       const callback = onClickParam ?? goToUsersDetails;
       callback(e);
     },
@@ -173,7 +173,7 @@ const HostDetailsLinkComponent: React.FC<HostDetailsLinkProps> = ({
 
   const onClick = useCallback(
     (e: SyntheticEvent) => {
-      telemetry.reportEvent(EntityEventTypes.EntityDetailsClicked, { entity: 'host' });
+      telemetry.reportEvent(EntityEventTypes.EntityDetailsClicked, { entity: EntityType.host });
 
       const callback = onClickParam ?? goToHostDetails;
       callback(e);

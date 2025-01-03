@@ -45,11 +45,9 @@ export const buildHostNamesFilter = (hostNames: string[]) => {
   return buildEntityNameFilter(EntityType.host, hostNames);
 };
 
-export const buildUserNamesFilter = (hostNames: string[]) => {
-  return buildEntityNameFilter(EntityType.user, hostNames);
+export const buildUserNamesFilter = (userNames: string[]) => {
+  return buildEntityNameFilter(EntityType.user, userNames);
 };
-
-export const buildEntityNamesFilter = (entityType: EntityType, names: string[]) => {};
 
 export const buildEntityNameFilter = (riskEntity: EntityType, entityNames: string[]): ESQuery => {
   return { terms: { [EntityTypeToIdentifierField[riskEntity]]: entityNames } };

@@ -23,7 +23,7 @@ import moment from 'moment';
 import type { EntityDefinitionWithState } from '@kbn/entityManager-plugin/server/lib/entities/types';
 import type { EntityDefinition } from '@kbn/entities-schema';
 import type { estypes } from '@elastic/elasticsearch';
-import { EntityType } from '../../../../common/entity_analytics/types';
+import { EntityType, getAllEntityTypes } from '../../../../common/entity_analytics/types';
 import type { ExperimentalFeatures } from '../../../../common';
 import type {
   GetEntityStoreStatusRequestQuery,
@@ -210,7 +210,7 @@ export class EntityStoreDataClient {
 
     const { experimentalFeatures } = this.options;
     const enginesTypes = experimentalFeatures.serviceEntityStoreEnabled
-      ? [EntityType.host, EntityType.user, EntityType.service]
+      ? getAllEntityTypes()
       : [EntityType.host, EntityType.user];
 
     const promises = enginesTypes.map((entity) =>

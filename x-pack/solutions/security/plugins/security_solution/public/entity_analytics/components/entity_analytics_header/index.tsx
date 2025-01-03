@@ -10,6 +10,7 @@ import styled from 'styled-components';
 import { useDispatch } from 'react-redux';
 import { capitalize, sumBy } from 'lodash/fp';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { SEVERITY_COLOR } from '../../../overview/components/detection_response/utils';
 import { LinkAnchor, useGetSecuritySolutionLinkProps } from '../../../common/components/links';
 import {
@@ -56,6 +57,7 @@ export const EntityAnalyticsHeader = () => {
     }),
     [from, to]
   );
+  const isServiceEntityStoreEnabled = useIsExperimentalFeatureEnabled('serviceEntityStoreEnabled');
 
   const {
     severityCount: hostsSeverityCount,
@@ -215,12 +217,14 @@ export const EntityAnalyticsHeader = () => {
               />
             </EuiFlexItem>
 
-            <EuiFlexItem grow={false}>
-              <CriticalEntitiesCount
-                entityType={EntityType.service}
-                severityCount={servicesSeverityCount}
-              />
-            </EuiFlexItem>
+            {isServiceEntityStoreEnabled && (
+              <EuiFlexItem grow={false}>
+                <CriticalEntitiesCount
+                  entityType={EntityType.service}
+                  severityCount={servicesSeverityCount}
+                />
+              </EuiFlexItem>
+            )}
           </>
         )}
 

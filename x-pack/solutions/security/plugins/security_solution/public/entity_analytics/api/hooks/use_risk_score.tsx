@@ -27,7 +27,6 @@ import { useSearchStrategy } from '../../../common/containers/use_search_strateg
 import { useEntityRiskIndex } from './use_risk_score_index';
 
 export interface RiskScoreState<T extends EntityType> {
-  // data: undefined | StrategyResponseType<EntityRiskQueries.list>['data'];
   data: RiskScoreStrategyResponse<T>['data'];
   inspect: InspectResponse;
   isInspected: boolean;

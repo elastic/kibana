@@ -7,31 +7,27 @@
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { IconType } from '@elastic/eui';
-import { EntityType } from '../../../../common/entity_analytics/types';
+import { get } from 'lodash/fp';
+import { EntityType, getAllEntityTypes } from '../../../../common/entity_analytics/types';
 
 import {
   ASSET_CRITICALITY_INDEX_PATTERN,
   RISK_SCORE_INDEX_PATTERN,
 } from '../../../../common/constants';
-import type {
-  Entity,
-  HostEntity,
-  UserEntity,
-  ServiceEntity,
-} from '../../../../common/api/entity_analytics/entity_store/entities/common.gen';
+import type { Entity } from '../../../../common/api/entity_analytics/entity_store/entities/common.gen';
 
 export const getEntityType = (record: Entity): EntityType => {
-  if ((record as UserEntity)?.user) {
-    return EntityType.user;
-  }
-  if ((record as HostEntity)?.host) {
-    return EntityType.host;
+  const allEntityTypes = getAllEntityTypes();
+
+  const entityType = allEntityTypes.find((type) => {
+    return get(type, record) !== undefined;
+  });
+
+  if (!entityType) {
+    throw new Error(`Unexpected entity: ${JSON.stringify(record)}`);
   }
 
-  if ((record as ServiceEntity)?.service) {
-    return EntityType.service;
-  }
-  throw new Error(`Unexpected entity: ${JSON.stringify(record)}`);
+  return entityType;
 };
 
 export const EntityIconByType: Record<EntityType, IconType> = {

@@ -8,8 +8,7 @@ import { i18n } from '@kbn/i18n';
 import type { CriticalityLevels } from './constants';
 import { ValidCriticalityLevels } from './constants';
 import { type AssetCriticalityUpsert, type CriticalityLevel } from './types';
-import { getAvailableEntityTypes } from '../entity_store/constants';
-import { EntityTypeToIdentifierField, type EntityType } from '../types';
+import { EntityTypeToIdentifierField, type EntityType, getAllEntityTypes } from '../types';
 
 const MAX_COLUMN_CHARS = 1000;
 
@@ -100,13 +99,13 @@ export const parseAssetCriticalityCsvRow = (row: string[]): ReturnType => {
     );
   }
 
-  if (!getAvailableEntityTypes().includes(entityType as EntityType)) {
+  if (!getAllEntityTypes().includes(entityType as EntityType)) {
     return validationErrorWithMessage(
       i18n.translate('xpack.securitySolution.assetCriticality.csvUpload.invalidEntityTypeError', {
         defaultMessage: 'Invalid entity type "{entityType}", expected to be one of: {validTypes}',
         values: {
           entityType: trimColumn(entityType),
-          validTypes: getAvailableEntityTypes().join(', '),
+          validTypes: getAllEntityTypes().join(', '),
         },
       })
     );
