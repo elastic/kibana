@@ -67,11 +67,12 @@
         "team:kibana-operations"
       ],
       "matchBaseBranches": [
-        "main"
+        "*"
       ],
       "labels": [
         "Team:Operations",
-        "release_note:skip"
+        "release_note:skip",
+        "backport:skip"
       ],
       "enabled": true
     },
@@ -93,11 +94,11 @@
         "team:kibana-operations"
       ],
       "matchBaseBranches": [
-        "main"
+        "*"
       ],
       "labels": [
         "Team:Operations",
-        "backport:all-open",
+        "backport:skip",
         "release_note:skip"
       ],
       "enabled": true
