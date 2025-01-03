@@ -5049,7 +5049,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-test-helpers-deprecations-getters@link:packages/core/test-helpers/core-test-helpers-deprecations-getters":
+"@kbn/core-test-helpers-deprecations-getters@link:src/core/packages/test-helpers/deprecations-getters":
   version "0.0.0"
   uid ""
 
