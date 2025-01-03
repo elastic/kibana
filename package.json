@@ -302,7 +302,7 @@
     "@kbn/core-history-block-plugin": "link:test/plugin_functional/plugins/core_history_block",
     "@kbn/core-http-browser": "link:src/core/packages/http/browser",
     "@kbn/core-http-browser-internal": "link:src/core/packages/http/browser-internal",
-    "@kbn/core-http-common": "link:packages/core/http/core-http-common",
+    "@kbn/core-http-common": "link:src/core/packages/http/common",
     "@kbn/core-http-context-server-internal": "link:packages/core/http/core-http-context-server-internal",
     "@kbn/core-http-plugin": "link:test/plugin_functional/plugins/core_http",
     "@kbn/core-http-request-handler-context-server": "link:packages/core/http/core-http-request-handler-context-server",
