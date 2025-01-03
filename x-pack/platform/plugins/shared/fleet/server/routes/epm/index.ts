@@ -107,7 +107,15 @@ export const READ_PACKAGE_INFO_AUTHZ: FleetAuthzRouteConfig['fleetAuthz'] = {
 
 export const READ_PACKAGE_INFO_SECURITY: RouteSecurity = {
   authz: {
-    requiredPrivileges: [FLEET_API_PRIVILEGES.INTEGRATIONS.READ],
+    requiredPrivileges: [
+      {
+        anyRequired: [
+          FLEET_API_PRIVILEGES.INTEGRATIONS.READ,
+          FLEET_API_PRIVILEGES.SETUP,
+          FLEET_API_PRIVILEGES.FLEET.ALL,
+        ],
+      },
+    ],
   },
 };
 
