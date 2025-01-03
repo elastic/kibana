@@ -13,7 +13,7 @@ import deepEqual from 'fast-deep-equal';
 import useEffectOnce from 'react-use/lib/useEffectOnce';
 import { useKibanaQuerySettings } from '@kbn/observability-shared-plugin/public';
 import { useTimeRange } from '../../../../hooks/use_time_range';
-import { useSearchSessionContext } from '../../../../hooks/use_search_session';
+import { useReloadRequestTimeContext } from '../../../../hooks/use_reload_request_time';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { telemetryTimeRangeFormatter } from '../../../../../common/formatters/telemetry_time_range';
 import { useMetricsDataViewContext } from '../../../../containers/metrics_source';
@@ -43,7 +43,7 @@ export const useUnifiedSearch = () => {
   const [error, setError] = useState<Error | null>(null);
   const [searchCriteria, setSearch] = useHostsUrlState();
   const { metricsView } = useMetricsDataViewContext();
-  const { updateSearchSessionId } = useSearchSessionContext();
+  const { updateReloadRequestTime } = useReloadRequestTimeContext();
   const { services } = useKibanaContextForPlugin();
   const kibanaQuerySettings = useKibanaQuerySettings();
 
@@ -73,33 +73,33 @@ export const useUnifiedSearch = () => {
   const onFiltersChange = useCallback(
     (filters: Filter[]) => {
       setSearch({ type: 'SET_FILTERS', filters });
-      updateSearchSessionId();
+      updateReloadRequestTime();
     },
-    [setSearch, updateSearchSessionId]
+    [setSearch, updateReloadRequestTime]
   );
 
   const onPanelFiltersChange = useCallback(
     (panelFilters: Filter[]) => {
       setSearch({ type: 'SET_PANEL_FILTERS', panelFilters });
-      updateSearchSessionId();
+      updateReloadRequestTime();
     },
-    [setSearch, updateSearchSessionId]
+    [setSearch, updateReloadRequestTime]
   );
 
   const onLimitChange = useCallback(
     (limit: number) => {
       setSearch({ type: 'SET_LIMIT', limit });
-      updateSearchSessionId();
+      updateReloadRequestTime();
     },
-    [setSearch, updateSearchSessionId]
+    [setSearch, updateReloadRequestTime]
   );
 
   const onDateRangeChange = useCallback(
     (dateRange: StringDateRange) => {
       setSearch({ type: 'SET_DATE_RANGE', dateRange });
-      updateSearchSessionId();
+      updateReloadRequestTime();
     },
-    [setSearch, updateSearchSessionId]
+    [setSearch, updateReloadRequestTime]
   );
 
   const onQueryChange = useCallback(
@@ -108,12 +108,12 @@ export const useUnifiedSearch = () => {
         setError(null);
         validateQuery(query);
         setSearch({ type: 'SET_QUERY', query });
-        updateSearchSessionId();
+        updateReloadRequestTime();
       } catch (err) {
         setError(err);
       }
     },
-    [validateQuery, setSearch, updateSearchSessionId]
+    [validateQuery, setSearch, updateReloadRequestTime]
   );
 
   const onSubmit = useCallback(
