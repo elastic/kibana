@@ -7557,7 +7557,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/std@link:packages/kbn-std":
+"@kbn/std@link:src/platform/packages/shared/kbn-std":
   version "0.0.0"
   uid ""
 
