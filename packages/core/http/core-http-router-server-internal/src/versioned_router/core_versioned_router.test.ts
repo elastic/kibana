@@ -7,18 +7,23 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { Router } from '../router';
 import { CoreVersionedRouter } from '.';
 import { createRouter } from './mocks';
 
 describe('Versioned router', () => {
   let router: Router;
+  let versionedRouter: CoreVersionedRouter;
   beforeEach(() => {
     router = createRouter();
+    versionedRouter = CoreVersionedRouter.from({
+      router,
+      log: loggingSystemMock.createLogger(),
+    });
   });
 
   it('can register multiple routes', () => {
-    const versionedRouter = CoreVersionedRouter.from({ router });
     versionedRouter.get({ path: '/test/{id}', access: 'internal' });
     versionedRouter.post({ path: '/test', access: 'internal' });
     versionedRouter.delete({ path: '/test', access: 'internal' });
@@ -27,12 +32,10 @@ describe('Versioned router', () => {
 
   it('registers pluginId if router has one', () => {
     const pluginId = Symbol('test');
-    const versionedRouter = CoreVersionedRouter.from({ router: createRouter({ pluginId }) });
     expect(versionedRouter.pluginId).toBe(pluginId);
   });
 
   it('provides the expected metadata', () => {
-    const versionedRouter = CoreVersionedRouter.from({ router });
     versionedRouter.get({
       path: '/test/{id}',
       access: 'internal',

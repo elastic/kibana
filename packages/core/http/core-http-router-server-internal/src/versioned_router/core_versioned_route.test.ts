@@ -24,9 +24,11 @@ import { Method } from './types';
 import { createRequest } from './core_versioned_route.test.util';
 import { isConfigSchema } from '@kbn/config-schema';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 
 describe('Versioned route', () => {
   let router: Router;
+  let versionedRouter: CoreVersionedRouter;
   let responseFactory: jest.Mocked<KibanaResponseFactory>;
   let testValidation: ReturnType<typeof createFooValidation>;
   const handlerFn: RequestHandler = async (ctx, req, res) => res.ok({ body: { foo: 1 } });
@@ -46,6 +48,10 @@ describe('Versioned route', () => {
       })),
     } as any;
     router = createRouter();
+    versionedRouter = CoreVersionedRouter.from({
+      router,
+      log: loggingSystemMock.createLogger(),
+    });
   });
 
   afterEach(() => {
@@ -54,7 +60,6 @@ describe('Versioned route', () => {
 
   describe('#getRoutes', () => {
     it('returns the expected metadata', () => {
-      const versionedRouter = CoreVersionedRouter.from({ router });
       versionedRouter
         .get({
           path: '/test/{id}',
@@ -93,7 +98,6 @@ describe('Versioned route', () => {
   });
 
   it('can register multiple handlers', () => {
-    const versionedRouter = CoreVersionedRouter.from({ router });
     versionedRouter
       .get({ path: '/test/{id}', access: 'internal' })
       .addVersion({ version: '1', validate: false }, handlerFn)
@@ -108,7 +112,6 @@ describe('Versioned route', () => {
   });
 
   it('does not allow specifying a handler for the same version more than once', () => {
-    const versionedRouter = CoreVersionedRouter.from({ router });
     expect(() =>
       versionedRouter
         .get({ path: '/test/{id}', access: 'internal' })
@@ -121,7 +124,6 @@ describe('Versioned route', () => {
   });
 
   it('only allows versions that are numbers greater than 0 for internal APIs', () => {
-    const versionedRouter = CoreVersionedRouter.from({ router });
     expect(() =>
       versionedRouter
         .get({ path: '/test/{id}', access: 'internal' })
@@ -145,7 +147,6 @@ describe('Versioned route', () => {
   });
 
   it('only allows correctly formatted version date strings for public APIs', () => {
-    const versionedRouter = CoreVersionedRouter.from({ router });
     expect(() =>
       versionedRouter
         .get({ path: '/test/{id}', access: 'public' })
@@ -169,7 +170,6 @@ describe('Versioned route', () => {
   });
 
   it('passes through the expected values to the IRouter registrar', () => {
-    const versionedRouter = CoreVersionedRouter.from({ router });
     const opts: Parameters<typeof versionedRouter.post>[0] = {
       path: '/test/{id}',
       access: 'internal',
@@ -204,7 +204,7 @@ describe('Versioned route', () => {
 
   it('allows public versions other than "2023-10-31"', () => {
     expect(() =>
-      CoreVersionedRouter.from({ router, isDev: false })
+      CoreVersionedRouter.from({ router, log: loggingSystemMock.createLogger(), isDev: false })
         .get({ access: 'public', path: '/foo' })
         .addVersion({ version: '2023-01-31', validate: false }, (ctx, req, res) => res.ok())
     ).not.toThrow();
@@ -218,7 +218,6 @@ describe('Versioned route', () => {
         testValidation;
 
       (router.post as jest.Mock).mockImplementation((opts: unknown, fn) => (handler = fn));
-      const versionedRouter = CoreVersionedRouter.from({ router });
       versionedRouter.post({ path: '/test/{id}', access: 'internal' }).addVersion(
         {
           version: '1',
@@ -259,7 +258,6 @@ describe('Versioned route', () => {
     fooValidation.response[404].body = lazyResponse404;
 
     (router.post as jest.Mock).mockImplementation((opts: unknown, fn) => (handler = fn));
-    const versionedRouter = CoreVersionedRouter.from({ router });
     const lazyValidation = jest.fn(() => fooValidation);
     versionedRouter.post({ path: '/test/{id}', access: 'internal' }).addVersion(
       {
@@ -309,7 +307,7 @@ describe('Versioned route', () => {
     // NOTE: Temporary test to ensure single public API version is enforced
     it('only allows "2023-10-31" as public route versions', () => {
       expect(() =>
-        CoreVersionedRouter.from({ router, isDev: true })
+        CoreVersionedRouter.from({ router, isDev: true, log: loggingSystemMock.createLogger() })
           .get({ access: 'public', path: '/foo' })
           .addVersion({ version: '2023-01-31', validate: false }, (ctx, req, res) => res.ok())
       ).toThrow(/Invalid public version/);
@@ -321,7 +319,6 @@ describe('Versioned route', () => {
         testValidation;
 
       (router.post as jest.Mock).mockImplementation((opts: unknown, fn) => (handler = fn));
-      const versionedRouter = CoreVersionedRouter.from({ router, isDev: true });
       versionedRouter.post({ path: '/test/{id}', access: 'internal' }).addVersion(
         {
           version: '1',
@@ -352,7 +349,11 @@ describe('Versioned route', () => {
       let handler: RequestHandler;
 
       (router.post as jest.Mock).mockImplementation((opts: unknown, fn) => (handler = fn));
-      const versionedRouter = CoreVersionedRouter.from({ router, isDev: true });
+      versionedRouter = CoreVersionedRouter.from({
+        router,
+        isDev: true,
+        log: loggingSystemMock.createLogger(),
+      });
       versionedRouter.post({ path: '/test/{id}', access: 'internal' }).addVersion(
         {
           version: '1',
@@ -383,7 +384,11 @@ describe('Versioned route', () => {
       const custom = jest.fn(() => ({ value: 1 }));
       fooValidation.response[200].body = { custom } as any;
       (router.post as jest.Mock).mockImplementation((opts: unknown, fn) => (handler = fn));
-      const versionedRouter = CoreVersionedRouter.from({ router, isDev: true });
+      versionedRouter = CoreVersionedRouter.from({
+        router,
+        isDev: true,
+        log: loggingSystemMock.createLogger(),
+      });
       versionedRouter.post({ path: '/test/{id}', access: 'internal' }).addVersion(
         {
           version: '1',
@@ -413,9 +418,10 @@ describe('Versioned route', () => {
   });
 
   it('allows using default resolution for specific internal routes', async () => {
-    const versionedRouter = CoreVersionedRouter.from({
+    versionedRouter = CoreVersionedRouter.from({
       router,
       isDev: true,
+      log: loggingSystemMock.createLogger(),
       useVersionResolutionStrategyForInternalPaths: ['/bypass_me/{id?}'],
     });
 
@@ -477,7 +483,6 @@ describe('Versioned route', () => {
   });
 
   it('can register multiple handlers with different security configurations', () => {
-    const versionedRouter = CoreVersionedRouter.from({ router });
     const securityConfig1: RouteSecurity = {
       authz: {
         requiredPrivileges: ['foo'],
@@ -537,7 +542,6 @@ describe('Versioned route', () => {
   });
 
   it('falls back to default security configuration if it is not specified for specific version', () => {
-    const versionedRouter = CoreVersionedRouter.from({ router });
     const securityConfigDefault: RouteSecurity = {
       authz: {
         requiredPrivileges: ['foo', 'bar', 'baz'],
@@ -620,7 +624,6 @@ describe('Versioned route', () => {
   });
 
   it('validates security configuration', () => {
-    const versionedRouter = CoreVersionedRouter.from({ router });
     const validSecurityConfig: RouteSecurity = {
       authz: {
         requiredPrivileges: ['foo'],

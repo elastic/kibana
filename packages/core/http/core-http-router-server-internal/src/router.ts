@@ -116,7 +116,7 @@ export class Router<Context extends RequestHandlerContextBase = RequestHandlerCo
   constructor(
     public readonly routerPath: string,
     private readonly log: Logger,
-    private readonly enhanceWithContext: ContextEnhancer<any, any, any, any, any>,
+    public readonly enhanceWithContext: ContextEnhancer<any, any, any, any, any>,
     private readonly options: RouterOptions
   ) {
     this.pluginId = options.pluginId;
@@ -227,6 +227,7 @@ export class Router<Context extends RequestHandlerContextBase = RequestHandlerCo
       this.versionedRouter = CoreVersionedRouter.from({
         router: this,
         isDev: this.options.isDev,
+        log: this.log,
         ...this.options.versionedRouterOptions,
       });
     }

@@ -14,9 +14,6 @@ import {
 } from '@kbn/core-http-common';
 import type {
   RequestHandler,
-  RequestHandlerContextBase,
-  KibanaRequest,
-  KibanaResponseFactory,
   ApiVersion,
   VersionedRoute,
   VersionedRouteConfig,
@@ -26,9 +23,10 @@ import type {
   RouteSecurity,
   RouteMethod,
   VersionedRouterRoute,
-  PostValidationMetadata,
+  AnyKibanaRequest,
 } from '@kbn/core-http-server';
-import type { Mutable } from 'utility-types';
+import { Request } from '@hapi/hapi';
+import { Logger } from '@kbn/logging';
 import type { HandlerResolutionStrategy, Method, Options } from './types';
 
 import { validate } from './validate';
@@ -37,15 +35,18 @@ import {
   isValidRouteVersion,
   hasQueryVersion,
   readVersion,
-  removeQueryVersion,
 } from './route_version_utils';
-import { getVersionHeader, injectVersionHeader } from '../util';
+import { injectVersionHeader } from '../util';
 import { validRouteSecurity } from '../security_route_config_validator';
 
 import { resolvers } from './handler_resolvers';
 import { prepareVersionedRouteValidation, unwrapVersionedResponseBodyValidation } from './util';
 import type { RequestLike } from './route_version_utils';
-import { Router } from '../router';
+import { RequestHandlerEnhanced, Router } from '../router';
+import { kibanaResponseFactory as responseFactory } from '../response';
+import { validateHapiRequest } from '../route';
+import { RouteValidator } from '../validator';
+import { CoreKibanaRequest } from '../request';
 
 interface InternalVersionedRouteConfig<M extends RouteMethod> extends VersionedRouteConfig<M> {
   isDev: boolean;
@@ -70,23 +71,25 @@ export class CoreVersionedRoute implements VersionedRoute {
   public readonly handlers = new Map<
     ApiVersion,
     {
-      fn: RequestHandler;
+      fn: RequestHandlerEnhanced<unknown, unknown, unknown, RouteMethod>;
       options: Options;
     }
   >();
 
   public static from({
     router,
+    log,
     method,
     path,
     options,
   }: {
     router: Router;
+    log: Logger;
     method: Method;
     path: string;
     options: InternalVersionedRouteConfig<Method>;
   }) {
-    return new CoreVersionedRoute(router, method, path, options);
+    return new CoreVersionedRoute(router, log, method, path, options);
   }
 
   public readonly options: VersionedRouteConfig<Method>;
@@ -99,6 +102,7 @@ export class CoreVersionedRoute implements VersionedRoute {
   private defaultHandlerResolutionStrategy: HandlerResolutionStrategy;
   private constructor(
     private readonly router: Router,
+    private readonly log: Logger,
     public readonly method: Method,
     public readonly path: string,
     internalOptions: InternalVersionedRouteConfig<Method>
@@ -117,17 +121,14 @@ export class CoreVersionedRoute implements VersionedRoute {
     this.enableQueryVersion = options.enableQueryVersion === true;
     this.defaultSecurityConfig = validRouteSecurity(options.security, options.options);
     this.options = options;
-    this.router[this.method](
-      {
-        path: this.path,
-        validate: passThroughValidation,
-        // @ts-expect-error upgrade typescript v5.1.6
-        options: this.getRouteConfigOptions(),
-        security: this.getSecurity,
-      },
-      this.requestHandler,
-      { isVersioned: true, events: false }
-    );
+    this.router.registerRoute({
+      path: this.path,
+      options: this.getRouteConfigOptions(),
+      security: this.getSecurity,
+      handler: (request) => this.handle(request),
+      isVersioned: true,
+      method: this.method,
+    });
   }
 
   private getRouteConfigOptions(): RouteConfigOptions<Method> {
@@ -167,81 +168,65 @@ export class CoreVersionedRoute implements VersionedRoute {
     return version;
   }
 
-  private requestHandler = async (
-    ctx: RequestHandlerContextBase,
-    originalReq: KibanaRequest,
-    res: KibanaResponseFactory
-  ): Promise<IKibanaResponse> => {
+  private handle = async (request: Request): Promise<IKibanaResponse> => {
     if (this.handlers.size <= 0) {
-      return res.custom({
+      return responseFactory.custom({
         statusCode: 500,
         body: `No handlers registered for [${this.method}] [${this.path}].`,
       });
     }
-    const req = originalReq as Mutable<KibanaRequest>;
-    const version = this.getVersion(req);
-    req.apiVersion = version;
+    const version = this.getVersion(request);
+    // request.apiVersion = version;
 
     if (!version) {
-      return res.badRequest({
+      return responseFactory.badRequest({
         body: `Please specify a version via ${ELASTIC_HTTP_VERSION_HEADER} header. Available versions: ${this.versionsToString()}`,
       });
     }
-    if (hasQueryVersion(req)) {
-      if (this.enableQueryVersion) {
-        // This endpoint has opted-in to query versioning, so we remove the query parameter as it is reserved
-        removeQueryVersion(req);
-      } else
-        return res.badRequest({
-          body: `Use of query parameter "${ELASTIC_HTTP_VERSION_QUERY_PARAM}" is not allowed. Please specify the API version using the "${ELASTIC_HTTP_VERSION_HEADER}" header.`,
-        });
+    if (hasQueryVersion(request) && !this.enableQueryVersion) {
+      // if () {
+      //   // This endpoint has opted-in to query versioning, so we remove the query parameter as it is reserved
+      //   removeQueryVersion(req);
+      // } else
+      return responseFactory.badRequest({
+        body: `Use of query parameter "${ELASTIC_HTTP_VERSION_QUERY_PARAM}" is not allowed. Please specify the API version using the "${ELASTIC_HTTP_VERSION_HEADER}" header.`,
+      });
     }
 
     const invalidVersionMessage = isValidRouteVersion(this.isPublic, version);
     if (invalidVersionMessage) {
-      return res.badRequest({ body: invalidVersionMessage });
+      return responseFactory.badRequest({ body: invalidVersionMessage });
     }
 
     const handler = this.handlers.get(version);
     if (!handler) {
-      return res.badRequest({
+      return responseFactory.badRequest({
         body: `No version "${version}" available for [${this.method}] [${
           this.path
         }]. Available versions are: ${this.versionsToString()}`,
       });
     }
     const validation = extractValidationSchemaFromHandler(handler);
-    const postValidateMetadata: PostValidationMetadata = {
-      deprecated: handler.options.options?.deprecated,
-      isInternalApiRequest: req.isInternalApiRequest,
-      isPublicAccess: this.isPublic,
-    };
 
+    let kibanaRequest: AnyKibanaRequest;
     if (
       validation?.request &&
       Boolean(validation.request.body || validation.request.params || validation.request.query)
     ) {
-      try {
-        const { body, params, query } = validate(req, validation.request);
-        req.body = body;
-        req.params = params;
-        req.query = query;
-      } catch (e) {
-        // Emit onPostValidation even if validation fails.
-
-        this.router.emitPostValidate(req, postValidateMetadata);
-        return res.badRequest({ body: e.message, headers: getVersionHeader(version) });
-      }
+      const { error, ok } = validateHapiRequest(
+        request,
+        this.getRouteConfigOptions(),
+        this.router,
+        this.log,
+        RouteValidator.from(validation.request)
+      );
+      if (error) return error;
+      kibanaRequest = ok;
     } else {
-      // Preserve behavior of not passing through unvalidated data
-      req.body = {};
-      req.params = {};
-      req.query = {};
+      kibanaRequest = CoreKibanaRequest.from(request);
     }
 
-    this.router.emitPostValidate(req, postValidateMetadata);
-
-    const response = await handler.fn(ctx, req, res);
+    const response = await handler.fn(kibanaRequest, responseFactory);
 
     if (this.isDev && validation?.response?.[response.status]?.body) {
       const { [response.status]: responseValidation, unsafe } = validation.response;
@@ -254,7 +239,7 @@ export class CoreVersionedRoute implements VersionedRoute {
           }
         );
       } catch (e) {
-        return res.custom({
+        return responseFactory.custom({
           statusCode: 500,
           body: `Failed output validation: ${e.message}`,
         });
@@ -292,13 +277,16 @@ export class CoreVersionedRoute implements VersionedRoute {
     this.validateVersion(options.version);
     options = prepareVersionedRouteValidation(options);
     this.handlers.set(options.version, {
-      fn: handler,
+      fn: this.router.enhanceWithContext(handler),
       options,
     });
     return this;
   }
 
-  public getHandlers(): Array<{ fn: RequestHandler; options: Options }> {
+  public getHandlers(): Array<{
+    fn: RequestHandlerEnhanced<unknown, unknown, unknown, RouteMethod>;
+    options: Options;
+  }> {
     return [...this.handlers.values()];
   }
 

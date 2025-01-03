@@ -13,7 +13,14 @@ import {
   type RouteConfig,
   getRequestValidation,
 } from '@kbn/core-http-server';
-import type { RouteSecurityGetter, RouteSecurity, AnyKibanaRequest } from '@kbn/core-http-server';
+import type {
+  RouteSecurityGetter,
+  RouteSecurity,
+  AnyKibanaRequest,
+  IKibanaResponse,
+  RouteAccess,
+  RouteConfigOptions,
+} from '@kbn/core-http-server';
 import { isConfigSchema } from '@kbn/config-schema';
 import { isZod } from '@kbn/zod';
 import type { Logger } from '@kbn/logging';
@@ -90,18 +97,22 @@ interface HandlerDependencies extends Dependencies {
 }
 
 /** @internal */
-export const handle = async (
+export function validateHapiRequest(
   request: Request,
-  { router, route, handler, routeSchemas, log }: HandlerDependencies
-) => {
+  routeInfo: Pick<RouteConfigOptions<RouteMethod>, 'access' | 'httpResource'>,
+  router: Router,
+  log: Logger,
+  routeSchemas?: RouteValidator<unknown, unknown, unknown>
+): { ok: AnyKibanaRequest; error?: never } | { ok?: never; error: IKibanaResponse } {
   let kibanaRequest: AnyKibanaRequest;
   try {
     kibanaRequest = CoreKibanaRequest.from(request, routeSchemas);
   } catch (error) {
     log.error('400 Bad Request', formatErrorMeta(400, { request, error }));
+    const isPublicApi = isPublicAccessApiRoute(routeInfo);
     const response = kibanaResponseFactory.badRequest({
       body: error.message,
-      headers: isPublicAccessApiRoute(route) ? getVersionHeader(BASE_PUBLIC_VERSION) : undefined,
+      headers: isPublicApi ? getVersionHeader(BASE_PUBLIC_VERSION) : undefined,
     });
 
     // Emit onPostValidation even if validation fails.
@@ -109,30 +120,49 @@ export const handle = async (
     router.emitPostValidate(req, {
       deprecated: req.route.options.deprecated,
       isInternalApiRequest: req.isInternalApiRequest,
-      isPublicAccess: isPublicAccessApiRoute(route),
+      isPublicAccess: isPublicApi,
     });
-    return response;
+    return { error: response };
   }
 
   router.emitPostValidate(kibanaRequest, {
     deprecated: kibanaRequest.route.options.deprecated,
     isInternalApiRequest: kibanaRequest.isInternalApiRequest,
-    isPublicAccess: isPublicAccessApiRoute(route),
+    isPublicAccess: isPublicAccessApiRoute(routeInfo),
   });
+  return { ok: kibanaRequest };
+}
 
+/** @internal */
+export const handle = async (
+  request: Request,
+  { router, route, handler, routeSchemas, log }: HandlerDependencies
+) => {
+  const { error, ok: kibanaRequest } = validateHapiRequest(
+    request,
+    { access: route.options?.access, httpResource: route.options?.httpResource },
+    router,
+    log,
+    routeSchemas
+  );
+  if (error) {
+    return error;
+  }
   const kibanaResponse = await handler(kibanaRequest, kibanaResponseFactory);
-
-  if (isPublicAccessApiRoute(route)) {
+  if (isPublicAccessApiRoute(route.options)) {
     injectVersionHeader(BASE_PUBLIC_VERSION, kibanaResponse);
   }
-
   return kibanaResponse;
 };
 
-function isPublicAccessApiRoute<Method extends RouteMethod>({
-  options,
-}: InternalRouteConfig<unknown, unknown, unknown, Method>): boolean {
-  return !options?.httpResource && options?.access === 'public';
+function isPublicAccessApiRoute({
+  access,
+  httpResource,
+}: {
+  access?: RouteAccess;
+  httpResource?: boolean;
+} = {}): boolean {
+  return !httpResource && access === 'public';
 }
 
 /**

@@ -60,7 +60,7 @@ export interface RequestLike {
 }
 
 export function hasQueryVersion(
-  request: Mutable<KibanaRequest>
+  request: RequestLike
 ): request is Mutable<KibanaRequestWithQueryVersion> {
   return isObject(request.query) && ELASTIC_HTTP_VERSION_QUERY_PARAM in request.query;
 }
