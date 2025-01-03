@@ -92,6 +92,7 @@ interface AgentBase {
   enrolled_at: string;
   unenrolled_at?: string;
   unenrollment_started_at?: string;
+  audit_unenrolled_reason?: string;
   upgraded_at?: string | null;
   upgrade_started_at?: string | null;
   upgrade_details?: AgentUpgradeDetails;
@@ -254,6 +255,10 @@ export interface FleetServerAgent {
   unenrollment_started_at?: string;
   /**
    * Date/time the Elastic Agent was last upgraded
+   */
+  audit_unenrolled_reason?: string;
+  /**
+   * Reason for agent unenrollment
    */
   upgraded_at?: string | null;
   /**
