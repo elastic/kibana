@@ -1938,7 +1938,7 @@ module.exports = {
       files: [
         // core-team owned code
         'src/core/**',
-        'x-pack/plugins/features/**',
+        'x-pack/platform/plugins/shared/features/**',
         'x-pack/plugins/licensing/**',
         'x-pack/platform/plugins/shared/global_search/**',
         'x-pack/platform/plugins/shared/cloud/**',

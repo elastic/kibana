@@ -5693,7 +5693,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/features-plugin@link:x-pack/plugins/features":
+"@kbn/features-plugin@link:x-pack/platform/plugins/shared/features":
   version "0.0.0"
   uid ""
 
