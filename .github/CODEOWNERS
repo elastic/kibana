@@ -99,7 +99,6 @@ packages/core/node/core-node-server-mocks @elastic/kibana-core
 packages/core/notifications/core-notifications-browser-mocks @elastic/kibana-core
 packages/core/overlays/core-overlays-browser-mocks @elastic/kibana-core
 packages/core/plugins/core-plugins-browser-mocks @elastic/kibana-core
-packages/core/plugins/core-plugins-server @elastic/kibana-core
 packages/core/plugins/core-plugins-server-internal @elastic/kibana-core
 packages/core/plugins/core-plugins-server-mocks @elastic/kibana-core
 packages/core/preboot/core-preboot-server @elastic/kibana-core
@@ -429,6 +428,7 @@ src/core/packages/core-plugins-browser @elastic/kibana-core
 src/core/packages/core-plugins-browser-internal @elastic/kibana-core
 src/core/packages/core-plugins-contracts-browser @elastic/kibana-core
 src/core/packages/core-plugins-contracts-server @elastic/kibana-core
+src/core/packages/core-plugins-server @elastic/kibana-core
 src/core/packages/deprecations/browser @elastic/kibana-core
 src/core/packages/deprecations/browser-internal @elastic/kibana-core
 src/core/packages/deprecations/common @elastic/kibana-core
