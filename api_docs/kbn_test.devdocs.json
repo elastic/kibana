@@ -2169,6 +2169,23 @@
     "functions": [
       {
         "parentPluginId": "@kbn/test",
+        "id": "def-common.checkFTRCodeOwnersCLI",
+        "type": "Function",
+        "tags": [],
+        "label": "checkFTRCodeOwnersCLI",
+        "description": [],
+        "signature": [
+          "() => Promise<void>"
+        ],
+        "path": "packages/kbn-test/src/functional_test_runner/cli/code_owners.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/test",
         "id": "def-common.cleanupElasticsearch",
         "type": "Function",
         "tags": [],
@@ -3228,23 +3245,6 @@
       },
       {
         "parentPluginId": "@kbn/test",
-        "id": "def-common.runCheckFtrCodeOwnersCli",
-        "type": "Function",
-        "tags": [],
-        "label": "runCheckFtrCodeOwnersCli",
-        "description": [],
-        "signature": [
-          "() => Promise<void>"
-        ],
-        "path": "packages/kbn-test/src/functional_test_runner/run_check_ftr_code_owners.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/test",
         "id": "def-common.runCheckFtrConfigsCli",
         "type": "Function",
         "tags": [],
@@ -3320,7 +3320,7 @@
         "signature": [
           "() => void"
         ],
-        "path": "packages/kbn-test/src/functional_test_runner/cli.ts",
+        "path": "packages/kbn-test/src/functional_test_runner/cli/ftr.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [],

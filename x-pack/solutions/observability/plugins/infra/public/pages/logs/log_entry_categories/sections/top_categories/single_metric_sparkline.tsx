@@ -9,7 +9,7 @@ import React, { useMemo } from 'react';
 import { Chart, Settings, AreaSeries, ScaleType, TooltipType, Tooltip } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
 import { useKibanaTimeZoneSetting } from '../../../../../hooks/use_kibana_time_zone_setting';
-import { TimeRange } from '../../../../../../common/time';
+import type { TimeRange } from '../../../../../../common/time';
 import { useChartThemes } from '../../../../../hooks/use_chart_themes';
 
 interface TimeSeriesPoint {

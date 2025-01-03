@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import type { GetServicesRequestQuery } from '../../../common/http_api/host_details';
 import {
-  GetServicesRequestQuery,
   GetServicesRequestQueryRT,
   ServicesAPIResponseRT,
 } from '../../../common/http_api/host_details';
-import { InfraBackendLibs } from '../../lib/infra_types';
+import type { InfraBackendLibs } from '../../lib/infra_types';
 import { validateStringAssetFilters } from './lib/utils';
 import { buildRouteValidationWithExcess } from '../../utils/route_validation';
 import { getApmDataAccessClient } from '../../lib/helpers/get_apm_data_access_client';

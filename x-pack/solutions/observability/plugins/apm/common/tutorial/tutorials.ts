@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { CustomIntegration } from '@kbn/custom-integrations-plugin/common';
+import type { CustomIntegration } from '@kbn/custom-integrations-plugin/common';
 
 const APM_INTEGRATION_CATEGORIES = ['observability', 'apm'];
 

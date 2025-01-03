@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { CloudStart } from '@kbn/cloud-plugin/server';
-import { FleetStartContract } from '@kbn/fleet-plugin/server';
+import type { CloudStart } from '@kbn/cloud-plugin/server';
+import type { FleetStartContract } from '@kbn/fleet-plugin/server';
 
 export interface ProfilingPluginStartDeps {
   fleet?: FleetStartContract;

@@ -11,7 +11,7 @@ import {
   SourceConfigurationRT,
   SourceStatusRuntimeType,
 } from '../source_configuration/source_configuration';
-import { DeepPartial } from '../utility_types';
+import type { DeepPartial } from '../utility_types';
 
 /**
  * Properties specific to the Metrics Source Configuration.

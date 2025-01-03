@@ -4,10 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { RecursivePartial } from '@elastic/eui';
+import type { RecursivePartial } from '@elastic/eui';
 import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import { merge } from 'lodash';
-import { ProfilingESClient } from './profiling_es_client';
+import type { ProfilingESClient } from './profiling_es_client';
 
 export interface ProfilingSetupOptions {
   client: ProfilingESClient;

@@ -6,7 +6,8 @@
  */
 
 import { createMemoryHistory } from 'history';
-import React, { FC, PropsWithChildren } from 'react';
+import type { FC, PropsWithChildren } from 'react';
+import React from 'react';
 import { Router } from '@kbn/shared-ux-router';
 import { mountHook } from '@kbn/test-jest-helpers';
 import { CoreScopedHistory } from '@kbn/core/public';

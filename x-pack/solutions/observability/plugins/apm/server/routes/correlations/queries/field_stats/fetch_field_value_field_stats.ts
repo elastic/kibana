@@ -5,22 +5,22 @@
  * 2.0.
  */
 
-import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import {
+import type { ProcessorEvent } from '@kbn/observability-plugin/common';
+import type {
   AggregationsAggregationContainer,
   AggregationsSamplerAggregate,
   AggregationsSingleBucketAggregateBase,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import {
+import type {
   CommonCorrelationsQueryParams,
   FieldValuePair,
 } from '../../../../../common/correlations/types';
-import {
+import type {
   FieldValueFieldStats,
   TopValueBucket,
 } from '../../../../../common/correlations/field_stats_types';
 import { getCommonCorrelationsQuery } from '../get_common_correlations_query';
-import { APMEventClient } from '../../../../lib/helpers/create_es_client/create_apm_event_client';
+import type { APMEventClient } from '../../../../lib/helpers/create_es_client/create_apm_event_client';
 
 export const fetchFieldValueFieldStats = async ({
   apmEventClient,

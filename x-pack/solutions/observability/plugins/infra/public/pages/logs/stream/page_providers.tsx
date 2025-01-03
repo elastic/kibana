@@ -6,7 +6,8 @@
  */
 
 import stringify from 'json-stable-stringify';
-import React, { useMemo, FC, PropsWithChildren } from 'react';
+import type { FC, PropsWithChildren } from 'react';
+import React, { useMemo } from 'react';
 import {
   LogHighlightsStateProvider,
   LogPositionStateProvider,
@@ -15,8 +16,8 @@ import {
   useLogStreamContext,
   useLogViewContext,
 } from '@kbn/logs-shared-plugin/public';
-import { MatchedStateFromActor } from '@kbn/xstate-utils';
-import {
+import type { MatchedStateFromActor } from '@kbn/xstate-utils';
+import type {
   LogStreamPageActorRef,
   LogStreamPageCallbacks,
 } from '../../../observability_logs/log_stream_page/state';

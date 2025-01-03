@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { Alert } from '@kbn/alerts-as-data-utils';
+import type { Alert } from '@kbn/alerts-as-data-utils';
 import { ALERT_ACTION_GROUP } from '@kbn/rule-data-utils';
-import { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
-import { ParsedExperimentalFields } from '@kbn/rule-registry-plugin/common/parse_experimental_fields';
+import type { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
+import type { ParsedExperimentalFields } from '@kbn/rule-registry-plugin/common/parse_experimental_fields';
 
 export const getOriginalActionGroup = <
   T extends Alert | (ParsedTechnicalFields & ParsedExperimentalFields)

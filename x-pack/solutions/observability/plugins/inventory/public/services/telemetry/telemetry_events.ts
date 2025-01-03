@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { TelemetryEventTypes, TelemetryEvent } from './types';
+import type { TelemetryEvent } from './types';
+import { TelemetryEventTypes } from './types';
 
 const inventoryAddDataEventType: TelemetryEvent = {
   eventType: TelemetryEventTypes.INVENTORY_ADD_DATA_CLICKED,

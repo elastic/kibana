@@ -17,20 +17,18 @@ import { isActivePlatinumLicense } from '../../../common/license_check';
 
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { environmentRt, kueryRt, rangeRt } from '../default_api_types';
-import {
-  DurationFieldCandidatesResponse,
-  fetchDurationFieldCandidates,
-} from './queries/fetch_duration_field_candidates';
+import type { DurationFieldCandidatesResponse } from './queries/fetch_duration_field_candidates';
+import { fetchDurationFieldCandidates } from './queries/fetch_duration_field_candidates';
 import { SERVICE_NAME, TRANSACTION_NAME, TRANSACTION_TYPE } from '../../../common/es_fields/apm';
 import { fetchFieldValueFieldStats } from './queries/field_stats/fetch_field_value_field_stats';
-import { fetchFieldValuePairs, FieldValuePairsResponse } from './queries/fetch_field_value_pairs';
-import {
-  fetchSignificantCorrelations,
-  SignificantCorrelationsResponse,
-} from './queries/fetch_significant_correlations';
-import { fetchPValues, PValuesResponse } from './queries/fetch_p_values';
+import type { FieldValuePairsResponse } from './queries/fetch_field_value_pairs';
+import { fetchFieldValuePairs } from './queries/fetch_field_value_pairs';
+import type { SignificantCorrelationsResponse } from './queries/fetch_significant_correlations';
+import { fetchSignificantCorrelations } from './queries/fetch_significant_correlations';
+import type { PValuesResponse } from './queries/fetch_p_values';
+import { fetchPValues } from './queries/fetch_p_values';
 import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
-import { TopValuesStats } from '../../../common/correlations/field_stats_types';
+import type { TopValuesStats } from '../../../common/correlations/field_stats_types';
 
 const INVALID_LICENSE = i18n.translate('xpack.apm.correlations.license.text', {
   defaultMessage:

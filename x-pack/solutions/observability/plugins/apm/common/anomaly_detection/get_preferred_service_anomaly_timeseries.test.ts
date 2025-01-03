@@ -6,10 +6,10 @@
  */
 import { v4 as uuidv4 } from 'uuid';
 import { ENVIRONMENT_ALL } from '../environment_filter_values';
-import { Environment } from '../environment_rt';
+import type { Environment } from '../environment_rt';
 import { AnomalyDetectorType } from './apm_ml_detectors';
 import { getPreferredServiceAnomalyTimeseries } from './get_preferred_service_anomaly_timeseries';
-import { ServiceAnomalyTimeseries } from './service_anomaly_timeseries';
+import type { ServiceAnomalyTimeseries } from './service_anomaly_timeseries';
 
 const PROD = 'production' as Environment;
 const DEV = 'development' as Environment;

@@ -141,6 +141,7 @@ export const applicationUsageSchema = {
   enterpriseSearchAnalytics: commonSchema,
   enterpriseSearchApplications: commonSchema,
   enterpriseSearchAISearch: commonSchema,
+  enterpriseSearchRedirect: commonSchema,
   enterpriseSearchSemanticSearch: commonSchema,
   enterpriseSearchVectorSearch: commonSchema,
   enterpriseSearchElasticsearch: commonSchema,

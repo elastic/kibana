@@ -160,8 +160,8 @@ export class SLOPlugin
         const sloInstaller = new DefaultSLOInstaller(sloResourceInstaller, this.logger);
         await sloInstaller.install();
       })
-      .catch((error) => {
-        this.logger.error(`Failed to install the default SLOs: ${error}`);
+      .catch(() => {
+        // noop - error already logged from the installer
       });
 
     this.sloOrphanCleanupTask = new SloOrphanSummaryCleanupTask(

@@ -9,9 +9,10 @@
 
 import { Client } from '@elastic/elasticsearch';
 import fs from 'fs/promises';
-import axios, { AxiosRequestConfig } from 'axios';
+import type { AxiosRequestConfig } from 'axios';
+import axios from 'axios';
 import type { APMIndices } from '@kbn/apm-data-access-plugin/server';
-import { APIReturnType } from '../../public/services/rest/create_call_apm_api';
+import type { APIReturnType } from '../../public/services/rest/create_call_apm_api';
 import { getDiagnosticsBundle } from '../../server/routes/diagnostics/get_diagnostics_bundle';
 
 type DiagnosticsBundle = APIReturnType<'GET /internal/apm/diagnostics'>;

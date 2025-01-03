@@ -18,10 +18,8 @@ import {
   EuiText,
 } from '@elastic/eui';
 
-import {
-  ObservabilityOnboardingLocatorParams,
-  OBSERVABILITY_ONBOARDING_LOCATOR,
-} from '@kbn/deeplinks-observability';
+import type { ObservabilityOnboardingLocatorParams } from '@kbn/deeplinks-observability';
+import { OBSERVABILITY_ONBOARDING_LOCATOR } from '@kbn/deeplinks-observability';
 import { i18n } from '@kbn/i18n';
 import { useBoolean } from '@kbn/react-hooks';
 

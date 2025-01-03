@@ -60,3 +60,15 @@ export async function deleteStream(supertest: Agent, id: string) {
   const response = await req.send().expect(200);
   return response.body;
 }
+
+export async function getUnmappedFieldsForStream(supertest: Agent, id: string) {
+  const req = supertest.get(`/api/streams/${id}/schema/unmapped_fields`).set('kbn-xsrf', 'xxx');
+  const response = await req.send().expect(200);
+  return response.body;
+}
+
+export async function simulateFieldsForStream(supertest: Agent, id: string, body: JsonObject) {
+  const req = supertest.post(`/api/streams/${id}/schema/fields_simulation`).set('kbn-xsrf', 'xxx');
+  const response = await req.send(body).expect(200);
+  return response.body;
+}

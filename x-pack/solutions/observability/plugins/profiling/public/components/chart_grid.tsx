@@ -8,7 +8,7 @@
 import { EuiFlexGrid, EuiFlexItem, EuiPanel, EuiSpacer } from '@elastic/eui';
 import { take } from 'lodash';
 import React, { useMemo } from 'react';
-import { TopNSubchart } from '../../common/topn';
+import type { TopNSubchart } from '../../common/topn';
 import { SubChart } from './subchart';
 
 export interface ChartGridProps {

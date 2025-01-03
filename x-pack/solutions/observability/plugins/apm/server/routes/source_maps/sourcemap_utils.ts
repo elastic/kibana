@@ -6,9 +6,10 @@
  */
 
 import { deflate } from 'zlib';
-import { BinaryLike, createHash } from 'crypto';
+import type { BinaryLike } from 'crypto';
+import { createHash } from 'crypto';
 import { promisify } from 'util';
-import { SourceMap } from './route';
+import type { SourceMap } from './route';
 
 const deflateAsync = promisify(deflate);
 

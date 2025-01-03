@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useApmRouter } from '../../../../hooks/use_apm_router';
 import { useDateRangeRedirect } from '../../../../hooks/use_date_range_redirect';

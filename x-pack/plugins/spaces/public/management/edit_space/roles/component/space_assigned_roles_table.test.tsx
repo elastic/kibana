@@ -120,8 +120,6 @@ describe('SpaceAssignedRolesTable', () => {
     expect(screen.getByTestId('checkboxSelectAll')).toBeInTheDocument();
   });
 
-  // it('will not render the bulk actions context menu when the table is in readOnly mode', () => {})
-
   it('prevents modification of reserved roles', () => {
     renderTestComponent({
       assignedRoles: spaceAssignedRoles,
@@ -134,8 +132,7 @@ describe('SpaceAssignedRolesTable', () => {
 
     expect(trisolarisRow).toBeInTheDocument();
 
-    // We expect a length of 2 because EUI also adds a second node for screen readers
-    expect(within(trisolarisRow).getAllByText('Reserved')).toHaveLength(2);
+    expect(within(trisolarisRow).getAllByText('Reserved')).toHaveLength(1);
     expect(within(trisolarisRow).getByTestId('spaceRoleCellActionLocked')).toBeInTheDocument();
     expect(within(trisolarisRow).getByTestId('spaceRoleCellActionLocked')).toBeDisabled();
     expect(

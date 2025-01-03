@@ -7,7 +7,7 @@
 import React, { useMemo } from 'react';
 import { ApmDocumentType } from '../../../common/document_type';
 import { RollupInterval } from '../../../common/rollup';
-import { TimeRangeMetadata } from '../../../common/time_range_metadata';
+import type { TimeRangeMetadata } from '../../../common/time_range_metadata';
 import { mockApmApiCallResponse } from '../../services/rest/call_apm_api_spy';
 
 const DEFAULTS = {

@@ -5,11 +5,11 @@
  * 2.0.
  */
 import React, { useState } from 'react';
-import { Meta, Story } from '@storybook/react';
-import { CoreStart } from '@kbn/core/public';
+import type { Meta, Story } from '@storybook/react';
+import type { CoreStart } from '@kbn/core/public';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { EditAPMPolicyForm } from './edit_apm_policy_form';
-import { NewPackagePolicy, PackagePolicy } from './typings';
+import type { NewPackagePolicy, PackagePolicy } from './typings';
 
 const coreMock = {
   http: { get: async () => ({}) },

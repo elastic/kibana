@@ -17,14 +17,12 @@ import {
 import { i18n } from '@kbn/i18n';
 import { apmEnableServiceInventoryTableSearchBar } from '@kbn/observability-plugin/common';
 import { ALERT_STATUS_ACTIVE } from '@kbn/rule-data-utils';
-import { TypeOf } from '@kbn/typed-react-router-config';
+import type { TypeOf } from '@kbn/typed-react-router-config';
 import { omit } from 'lodash';
 import React, { useMemo } from 'react';
 import { ServiceHealthStatus } from '../../../../../common/service_health_status';
-import {
-  ServiceInventoryFieldName,
-  ServiceListItem,
-} from '../../../../../common/service_inventory';
+import type { ServiceListItem } from '../../../../../common/service_inventory';
+import { ServiceInventoryFieldName } from '../../../../../common/service_inventory';
 import { isDefaultTransactionType } from '../../../../../common/transaction_types';
 import {
   asMillisecondDuration,
@@ -34,23 +32,21 @@ import {
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { useApmRouter } from '../../../../hooks/use_apm_router';
-import { Breakpoints, useBreakpoints } from '../../../../hooks/use_breakpoints';
+import type { Breakpoints } from '../../../../hooks/use_breakpoints';
+import { useBreakpoints } from '../../../../hooks/use_breakpoints';
 import { useFallbackToTransactionsFetcher } from '../../../../hooks/use_fallback_to_transactions_fetcher';
-import { FETCH_STATUS, isFailure, isPending } from '../../../../hooks/use_fetcher';
-import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
+import type { FETCH_STATUS } from '../../../../hooks/use_fetcher';
+import { isFailure, isPending } from '../../../../hooks/use_fetcher';
+import type { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { unit } from '../../../../utils/style';
-import { ApmRoutes } from '../../../routing/apm_route_config';
+import type { ApmRoutes } from '../../../routing/apm_route_config';
 import { AggregatedTransactionsBadge } from '../../../shared/aggregated_transactions_badge';
 import { ChartType, getTimeSeriesColor } from '../../../shared/charts/helper/get_timeseries_color';
 import { EnvironmentBadge } from '../../../shared/environment_badge';
 import { ServiceLink } from '../../../shared/links/apm/service_link';
 import { ListMetric } from '../../../shared/list_metric';
-import {
-  ITableColumn,
-  ManagedTable,
-  SortFunction,
-  TableSearchBar,
-} from '../../../shared/managed_table';
+import type { ITableColumn, SortFunction, TableSearchBar } from '../../../shared/managed_table';
+import { ManagedTable } from '../../../shared/managed_table';
 import { ColumnHeaderWithTooltip } from './column_header_with_tooltip';
 import { HealthBadge } from './health_badge';
 

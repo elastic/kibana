@@ -45,7 +45,8 @@
       "kibanaUtils",
       "kibanaReact",
       "charts",
-      "savedObjects"
+      "savedObjects",
+      "presentationPanel"
     ],
     "extraPublicDirs": [
       "common/constants",

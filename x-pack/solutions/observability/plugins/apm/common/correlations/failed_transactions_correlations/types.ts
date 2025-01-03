@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { FieldValuePair, HistogramItem } from '../types';
+import type { FieldValuePair, HistogramItem } from '../types';
 
-import { CORRELATIONS_IMPACT_THRESHOLD } from './constants';
+import type { CORRELATIONS_IMPACT_THRESHOLD } from './constants';
 
 export interface FailedTransactionsCorrelation extends FieldValuePair {
   doc_count: number;

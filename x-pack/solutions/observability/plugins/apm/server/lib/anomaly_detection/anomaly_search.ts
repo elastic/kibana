@@ -6,7 +6,7 @@
  */
 
 import type { ESSearchRequest, ESSearchResponse } from '@kbn/es-types';
-import { MlClient } from '../helpers/get_ml_client';
+import type { MlClient } from '../helpers/get_ml_client';
 
 export const ML_SERVICE_NAME_FIELD = 'partition_field_value';
 export const ML_TRANSACTION_TYPE_FIELD = 'by_field_value';

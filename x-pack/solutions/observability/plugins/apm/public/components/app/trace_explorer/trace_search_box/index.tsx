@@ -5,9 +5,11 @@
  * 2.0.
  */
 import React from 'react';
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSelect, EuiSelectOption } from '@elastic/eui';
+import type { EuiSelectOption } from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { TraceSearchQuery, TraceSearchType } from '../../../../../common/trace_explorer';
+import type { TraceSearchQuery } from '../../../../../common/trace_explorer';
+import { TraceSearchType } from '../../../../../common/trace_explorer';
 import { useAdHocApmDataView } from '../../../../hooks/use_adhoc_apm_data_view';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 

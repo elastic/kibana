@@ -26,14 +26,19 @@ import {
   riskScoreFieldMap,
   totalFieldsLimit,
 } from './configurations';
-import { createDataStream } from '../utils/create_datastream';
+import { createDataStream, updateUnderlyingMapping } from '../utils/create_datastream';
 import type { RiskEngineDataWriter as Writer } from './risk_engine_data_writer';
 import { RiskEngineDataWriter } from './risk_engine_data_writer';
 import {
   getRiskScoreLatestIndex,
   getRiskScoreTimeSeriesIndex,
 } from '../../../../common/entity_analytics/risk_engine';
-import { createTransform, getLatestTransformId } from '../utils/transforms';
+import {
+  createTransform,
+  deleteTransform,
+  stopTransform,
+  getLatestTransformId,
+} from '../utils/transforms';
 import { getRiskInputsIndex } from './get_risk_inputs_index';
 
 import { createOrUpdateIndex } from '../utils/create_or_update_index';
@@ -88,7 +93,7 @@ export class RiskScoreDataClient {
       soClient: this.options.soClient,
     });
 
-  public createRiskScoreLatestIndex = async () => {
+  public createOrUpdateRiskScoreLatestIndex = async () => {
     await createOrUpdateIndex({
       esClient: this.options.esClient,
       logger: this.options.logger,
@@ -98,6 +103,30 @@ export class RiskScoreDataClient {
       },
     });
   };
+
+  public createOrUpdateRiskScoreIndexTemplate = async () =>
+    createOrUpdateComponentTemplate({
+      logger: this.options.logger,
+      esClient: this.options.esClient,
+      template: {
+        name: nameSpaceAwareMappingsComponentName(this.options.namespace),
+        _meta: {
+          managed: true,
+        },
+        template: {
+          settings: {},
+          mappings: mappingFromFieldMap(riskScoreFieldMap, 'strict'),
+        },
+      } as ClusterPutComponentTemplateRequest,
+      totalFieldsLimit,
+    });
+
+  public updateRiskScoreTimeSeriesIndexMappings = async () =>
+    updateUnderlyingMapping({
+      esClient: this.options.esClient,
+      logger: this.options.logger,
+      index: getRiskScoreTimeSeriesIndex(this.options.namespace),
+    });
 
   public async init() {
     const namespace = this.options.namespace;
@@ -116,32 +145,15 @@ export class RiskScoreDataClient {
       };
 
       // Check if there are any existing component templates with the namespace in the name
-
       const oldComponentTemplateExists = await esClient.cluster.existsComponentTemplate({
         name: mappingComponentName,
       });
       if (oldComponentTemplateExists) {
-        await this.updateComponentTemplateNamewithNamespace(namespace);
+        await this.updateComponentTemplateNameWithNamespace(namespace);
       }
 
       // Update the new component template with the required data
-      await Promise.all([
-        createOrUpdateComponentTemplate({
-          logger: this.options.logger,
-          esClient,
-          template: {
-            name: nameSpaceAwareMappingsComponentName(namespace),
-            _meta: {
-              managed: true,
-            },
-            template: {
-              settings: {},
-              mappings: mappingFromFieldMap(riskScoreFieldMap, 'strict'),
-            },
-          } as ClusterPutComponentTemplateRequest,
-          totalFieldsLimit,
-        }),
-      ]);
+      await this.createOrUpdateRiskScoreIndexTemplate();
 
       // Reference the new component template in the index template
       await createOrUpdateIndexTemplate({
@@ -183,7 +195,7 @@ export class RiskScoreDataClient {
         indexPatterns,
       });
 
-      await this.createRiskScoreLatestIndex();
+      await this.createOrUpdateRiskScoreLatestIndex();
 
       const transformId = getLatestTransformId(namespace);
       await createTransform({
@@ -226,16 +238,12 @@ export class RiskScoreDataClient {
     const errors: Error[] = [];
     const addError = (e: Error) => errors.push(e);
 
-    await esClient.transform
-      .deleteTransform(
-        {
-          transform_id: getLatestTransformId(namespace),
-          delete_dest_index: true,
-          force: true,
-        },
-        { ignore: [404] }
-      )
-      .catch(addError);
+    await deleteTransform({
+      esClient,
+      logger: this.options.logger,
+      transformId: getLatestTransformId(namespace),
+      deleteData: true,
+    }).catch(addError);
 
     await esClient.indices
       .deleteDataStream(
@@ -316,7 +324,7 @@ export class RiskScoreDataClient {
     );
   }
 
-  private async updateComponentTemplateNamewithNamespace(namespace: string): Promise<void> {
+  private async updateComponentTemplateNameWithNamespace(namespace: string): Promise<void> {
     const esClient = this.options.esClient;
     const oldComponentTemplateResponse = await esClient.cluster.getComponentTemplate(
       {
@@ -329,6 +337,27 @@ export class RiskScoreDataClient {
     await esClient.cluster.putComponentTemplate({
       name: newComponentTemplateName,
       body: oldComponentTemplate.component_template,
+    });
+  }
+
+  public async reinstallTransform() {
+    const esClient = this.options.esClient;
+    const namespace = this.options.namespace;
+    const transformId = getLatestTransformId(namespace);
+    const indexPatterns = getIndexPatternDataStream(namespace);
+
+    await stopTransform({ esClient, logger: this.options.logger, transformId });
+    await deleteTransform({ esClient, logger: this.options.logger, transformId });
+    await createTransform({
+      esClient,
+      logger: this.options.logger,
+      transform: {
+        transform_id: transformId,
+        ...getTransformOptions({
+          dest: getRiskScoreLatestIndex(namespace),
+          source: [indexPatterns.alias],
+        }),
+      },
     });
   }
 }

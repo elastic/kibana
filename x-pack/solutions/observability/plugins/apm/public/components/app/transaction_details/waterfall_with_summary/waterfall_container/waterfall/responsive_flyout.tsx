@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { EuiFlyout, EuiFlyoutProps } from '@elastic/eui';
+import type { EuiFlyoutProps } from '@elastic/eui';
+import { EuiFlyout } from '@elastic/eui';
 import styled, { type StyledComponent } from '@emotion/styled';
 
 // The return type of this component needs to be specified because the inferred

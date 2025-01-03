@@ -7,16 +7,15 @@
 
 import { fromKueryExpression } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
-import { ValidationResult } from '@kbn/triggers-actions-ui-plugin/public';
+import type { ValidationResult } from '@kbn/triggers-actions-ui-plugin/public';
 import { isEmpty } from 'lodash';
 import { COMPARATORS } from '@kbn/alerting-comparators';
-import {
-  Aggregators,
+import type {
   CustomMetricExpressionParams,
   FilterQuery,
   MetricExpressionParams,
-  QUERY_INVALID,
 } from '../../../../common/alerting/metrics';
+import { Aggregators, QUERY_INVALID } from '../../../../common/alerting/metrics';
 export const EQUATION_REGEX = /[^A-Z|+|\-|\s|\d+|\.|\(|\)|\/|\*|>|<|=|\?|\:|&|\!|\|]+/g;
 
 const isCustomMetricExpressionParams = (
