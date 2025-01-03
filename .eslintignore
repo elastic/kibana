@@ -25,8 +25,8 @@ snapshots.js
 /x-pack/platform/plugins/private/canvas/canvas_plugin
 /x-pack/platform/plugins/private/canvas/shareable_runtime/build
 /x-pack/platform/plugins/private/canvas/storybook/build
-/x-pack/plugins/reporting/server/export_types/printable_pdf/server/lib/pdf/assets/**
-/x-pack/plugins/reporting/server/export_types/printable_pdf_v2/server/lib/pdf/assets/**
+/x-pack/platform/plugins/private/reporting/server/export_types/printable_pdf/server/lib/pdf/assets/**
+/x-pack/platform/plugins/private/reporting/server/export_types/printable_pdf_v2/server/lib/pdf/assets/**
 /x-pack/plugins/cloud_integrations/cloud_full_story/server/assets/**
 
 # package overrides

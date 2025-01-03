@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
-import { LensConfigWithId } from '../../../../types';
+import type { LensConfigWithId } from '../../../../types';
 import { formulas } from '../formulas';
 import {
   DEFAULT_XY_FITTING_FUNCTION,

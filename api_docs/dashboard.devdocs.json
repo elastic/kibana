@@ -662,79 +662,6 @@
       },
       {
         "parentPluginId": "dashboard",
-        "id": "def-public.IProvidesLegacyPanelPlacementSettings",
-        "type": "Interface",
-        "tags": [],
-        "label": "IProvidesLegacyPanelPlacementSettings",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "dashboard",
-            "scope": "public",
-            "docId": "kibDashboardPluginApi",
-            "section": "def-public.IProvidesLegacyPanelPlacementSettings",
-            "text": "IProvidesLegacyPanelPlacementSettings"
-          },
-          "<InputType, AttributesType>"
-        ],
-        "path": "src/platform/plugins/shared/dashboard/public/dashboard_container/panel_placement/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "dashboard",
-            "id": "def-public.IProvidesLegacyPanelPlacementSettings.getLegacyPanelPlacementSettings",
-            "type": "Function",
-            "tags": [],
-            "label": "getLegacyPanelPlacementSettings",
-            "description": [],
-            "signature": [
-              "(input: InputType, attributes?: AttributesType | undefined) => Partial<",
-              "PanelPlacementSettings",
-              ">"
-            ],
-            "path": "src/platform/plugins/shared/dashboard/public/dashboard_container/panel_placement/types.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "dashboard",
-                "id": "def-public.IProvidesLegacyPanelPlacementSettings.getLegacyPanelPlacementSettings.$1",
-                "type": "Uncategorized",
-                "tags": [],
-                "label": "input",
-                "description": [],
-                "signature": [
-                  "InputType"
-                ],
-                "path": "src/platform/plugins/shared/dashboard/public/dashboard_container/panel_placement/types.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "dashboard",
-                "id": "def-public.IProvidesLegacyPanelPlacementSettings.getLegacyPanelPlacementSettings.$2",
-                "type": "Uncategorized",
-                "tags": [],
-                "label": "attributes",
-                "description": [],
-                "signature": [
-                  "AttributesType | undefined"
-                ],
-                "path": "src/platform/plugins/shared/dashboard/public/dashboard_container/panel_placement/types.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": false
-              }
-            ],
-            "returnComment": []
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "dashboard",
         "id": "def-public.SearchDashboardsResponse",
         "type": "Interface",
         "tags": [],
@@ -1224,39 +1151,7 @@
             "section": "def-common.Filter",
             "text": "Filter"
           },
-          "[] | undefined>; untilEmbeddableLoaded: (id: string) => Promise<",
-          {
-            "pluginId": "embeddable",
-            "scope": "public",
-            "docId": "kibEmbeddablePluginApi",
-            "section": "def-public.IEmbeddable",
-            "text": "IEmbeddable"
-          },
-          "<",
-          {
-            "pluginId": "embeddable",
-            "scope": "common",
-            "docId": "kibEmbeddablePluginApi",
-            "section": "def-common.EmbeddableInput",
-            "text": "EmbeddableInput"
-          },
-          ", ",
-          {
-            "pluginId": "embeddable",
-            "scope": "public",
-            "docId": "kibEmbeddablePluginApi",
-            "section": "def-public.EmbeddableOutput",
-            "text": "EmbeddableOutput"
-          },
-          ", any> | ",
-          {
-            "pluginId": "embeddable",
-            "scope": "public",
-            "docId": "kibEmbeddablePluginApi",
-            "section": "def-public.ErrorEmbeddable",
-            "text": "ErrorEmbeddable"
-          },
-          ">; }"
+          "[] | undefined>; untilEmbeddableLoaded: (id: string) => Promise<unknown>; }"
         ],
         "path": "src/platform/plugins/shared/dashboard/public/dashboard_api/types.ts",
         "deprecated": false,
