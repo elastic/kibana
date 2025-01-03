@@ -4349,7 +4349,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-base-server-internal@link:packages/core/base/core-base-server-internal":
+"@kbn/core-base-server-internal@link:src/core/packages/base/server-internal":
   version "0.0.0"
   uid ""
 
