@@ -1,14 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { schema } from '@kbn/config-schema';
 import { RouteValidator } from '@kbn/core-http-server';
-import { prepareResponseValidation } from './util';
+import { injectResponseHeaders, prepareResponseValidation } from './util';
+import { kibanaResponseFactory } from './response';
 
 describe('prepareResponseValidation', () => {
   it('wraps only expected values in "once"', () => {
@@ -46,5 +48,19 @@ describe('prepareResponseValidation', () => {
     expect(validation.response![200].body).toHaveBeenCalledTimes(1);
     expect(validation.response![404].body).toHaveBeenCalledTimes(1);
     expect(validation.response![500].body).toBeUndefined();
+  });
+});
+
+describe('injectResponseHeaders', () => {
+  it('injects an empty value as expected', () => {
+    const result = injectResponseHeaders({}, kibanaResponseFactory.ok());
+    expect(result.options.headers).toEqual({});
+  });
+  it('merges values as expected', () => {
+    const result = injectResponseHeaders(
+      { foo: 'false', baz: 'true' },
+      kibanaResponseFactory.ok({ headers: { foo: 'true', bar: 'false' } })
+    );
+    expect(result.options.headers).toEqual({ foo: 'false', bar: 'false', baz: 'true' });
   });
 });

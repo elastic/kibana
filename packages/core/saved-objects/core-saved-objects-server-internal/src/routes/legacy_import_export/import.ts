@@ -1,15 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { schema } from '@kbn/config-schema';
 import type { Logger } from '@kbn/logging';
 import type { SavedObject } from '@kbn/core-saved-objects-server';
 import type { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-base-server-internal';
+import type { RouteAccess, RouteDeprecationInfo } from '@kbn/core-http-server';
 import type { InternalSavedObjectRouter } from '../../internal_types';
 import { importDashboards } from './lib';
 
@@ -19,7 +21,15 @@ export const registerLegacyImportRoute = (
     maxImportPayloadBytes,
     coreUsageData,
     logger,
-  }: { maxImportPayloadBytes: number; coreUsageData: InternalCoreUsageDataSetup; logger: Logger }
+    access,
+    legacyDeprecationInfo,
+  }: {
+    maxImportPayloadBytes: number;
+    coreUsageData: InternalCoreUsageDataSetup;
+    logger: Logger;
+    access: RouteAccess;
+    legacyDeprecationInfo: RouteDeprecationInfo;
+  }
 ) => {
   router.post(
     {
@@ -37,10 +47,12 @@ export const registerLegacyImportRoute = (
         }),
       },
       options: {
+        access,
         tags: ['api'],
         body: {
           maxBytes: maxImportPayloadBytes,
         },
+        deprecated: legacyDeprecationInfo,
       },
     },
     async (context, request, response) => {

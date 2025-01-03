@@ -168,6 +168,7 @@ describe('Features Plugin', () => {
                   "config",
                   "config-global",
                   "url",
+                  "tag",
                 ],
               },
               "ui": Array [],
@@ -183,11 +184,15 @@ describe('Features Plugin', () => {
                   "config-global",
                   "telemetry",
                   "url",
+                  "tag",
                 ],
               },
               "ui": Array [],
             },
           },
+          "scope": Array [
+            "security",
+          ],
         },
         "subFeatures": Array [],
       }

@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { PaletteRegistry } from '@kbn/coloring';
+import { PaletteRegistry, getOverridePaletteStops } from '@kbn/coloring';
 import { ThemeServiceStart } from '@kbn/core/public';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 import { euiLightVars, euiThemeVars } from '@kbn/ui-theme';
@@ -58,11 +58,9 @@ const isSupportedDynamicMetric = (op: OperationMetadata) =>
 export const metricLabel = i18n.translate('xpack.lens.metric.label', {
   defaultMessage: 'Metric',
 });
-const metricGroupLabel = i18n.translate('xpack.lens.metric.groupLabel', {
-  defaultMessage: 'Goal and single value',
-});
 
 const getMetricLayerConfiguration = (
+  paletteService: PaletteRegistry,
   props: VisualizationConfigProps<MetricVisualizationState>
 ): {
   groups: VisualizationDimensionGroupConfig[];
@@ -76,17 +74,20 @@ const getMetricLayerConfiguration = (
 
   const getPrimaryAccessorDisplayConfig = (): Partial<AccessorConfig> => {
     const hasDynamicColoring = Boolean(isMetricNumeric && props.state.palette);
-    const stops = props.state.palette?.params?.stops || [];
 
-    return hasDynamicColoring
-      ? {
-          triggerIconType: 'colorBy',
-          palette: stops.map(({ color }) => color),
-        }
-      : {
-          triggerIconType: 'color',
-          color: props.state.color ?? getDefaultColor(props.state, isMetricNumeric),
-        };
+    if (hasDynamicColoring) {
+      const stops = getOverridePaletteStops(paletteService, props.state.palette);
+
+      return {
+        triggerIconType: 'colorBy',
+        palette: stops?.map(({ color }) => color),
+      };
+    }
+
+    return {
+      triggerIconType: 'color',
+      color: props.state.color ?? getDefaultColor(props.state, isMetricNumeric),
+    };
   };
 
   const isBucketed = (op: OperationMetadata) => op.isBucketed;
@@ -304,20 +305,20 @@ export const getMetricVisualization = ({
 }): Visualization<MetricVisualizationState> => ({
   id: LENS_METRIC_ID,
 
+  getVisualizationTypeId() {
+    return this.id;
+  },
   visualizationTypes: [
     {
       id: LENS_METRIC_ID,
       icon: IconChartMetric,
       label: metricLabel,
-      groupLabel: metricGroupLabel,
-      showExperimentalBadge: true,
-      sortPriority: 3,
+      sortPriority: 4,
+      description: i18n.translate('xpack.lens.metric.visualizationDescription', {
+        defaultMessage: 'Present individual key metrics or KPIs.',
+      }),
     },
   ],
-
-  getVisualizationTypeId() {
-    return LENS_METRIC_ID;
-  },
 
   clearLayer(state) {
     const newState = { ...state };
@@ -357,7 +358,7 @@ export const getMetricVisualization = ({
 
   getConfiguration(props) {
     return props.layerId === props.state.layerId
-      ? getMetricLayerConfiguration(props)
+      ? getMetricLayerConfiguration(paletteService, props)
       : getTrendlineLayerConfiguration(props);
   },
 

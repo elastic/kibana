@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { ByteSizeValue, offeringBasedSchema, schema } from '@kbn/config-schema';
@@ -59,7 +60,7 @@ const CaptureSchema = schema.object({
 const CsvSchema = schema.object({
   checkForFormulas: schema.boolean({ defaultValue: true }),
   escapeFormulaValues: schema.boolean({ defaultValue: false }),
-  enablePanelActionDownload: schema.boolean({ defaultValue: false }),
+  enablePanelActionDownload: schema.maybe(schema.boolean({ defaultValue: false })), // unused as of 9.0
   maxSizeBytes: schema.oneOf([schema.number(), schema.byteSize()], {
     defaultValue: ByteSizeValue.parse('250mb'),
   }),
@@ -93,16 +94,12 @@ const EncryptionKeySchema = schema.conditional(
   schema.string({ defaultValue: 'a'.repeat(32) })
 );
 
-const RolesSchema = schema.object({
-  enabled: offeringBasedSchema({
-    serverless: schema.boolean({ defaultValue: false }),
-    traditional: schema.boolean({ defaultValue: true }),
-  }), // true: use ES API for access control (deprecated in 7.x). false: use Kibana API for application features (8.0)
-  allow: offeringBasedSchema({
-    serverless: schema.arrayOf(schema.string(), { defaultValue: [] }),
-    traditional: schema.arrayOf(schema.string(), { defaultValue: ['reporting_user'] }),
-  }),
-});
+const RolesSchema = schema.maybe(
+  schema.object({
+    enabled: schema.boolean(),
+    allow: schema.arrayOf(schema.string()),
+  })
+); // unused as of 9.0
 
 // Browser side polling: job completion notifier, management table auto-refresh
 // NOTE: can not use schema.duration, a bug prevents it being passed to the browser correctly

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { FC } from 'react';
@@ -20,11 +21,16 @@ interface Context {
   selectedUsers: string[];
   allUsers: string[];
   showNoUserOption: boolean;
+  isKibanaVersioningEnabled: boolean;
+  entityNamePlural: string;
 }
 
 const UserFilterContext = React.createContext<Context | null>(null);
 
-export const UserFilterContextProvider: FC<Context> = ({ children, ...props }) => {
+export const UserFilterContextProvider: FC<React.PropsWithChildren<Context>> = ({
+  children,
+  ...props
+}) => {
   if (!props.enabled) {
     return <>{children}</>;
   }
@@ -40,7 +46,13 @@ export const UserFilterPanel: FC<{}> = () => {
   if (!componentContext)
     throw new Error('UserFilterPanel must be used within a UserFilterContextProvider');
 
-  const { onSelectedUsersChange, selectedUsers, showNoUserOption } = componentContext;
+  const {
+    onSelectedUsersChange,
+    selectedUsers,
+    showNoUserOption,
+    isKibanaVersioningEnabled,
+    entityNamePlural,
+  } = componentContext;
 
   const [isPopoverOpen, setPopoverOpen] = React.useState(false);
   const [searchTerm, setSearchTerm] = React.useState('');
@@ -122,7 +134,12 @@ export const UserFilterPanel: FC<{}> = () => {
                 id="contentManagement.tableList.listing.userFilter.emptyMessage"
                 defaultMessage="None of the dashboards have creators"
               />
-              {<NoCreatorTip />}
+              {
+                <NoCreatorTip
+                  includeVersionTip={isKibanaVersioningEnabled}
+                  entityNamePlural={entityNamePlural}
+                />
+              }
             </p>
           ),
           nullOptionLabel: i18n.translate(
@@ -132,7 +149,12 @@ export const UserFilterPanel: FC<{}> = () => {
             }
           ),
           nullOptionProps: {
-            append: <NoCreatorTip />,
+            append: (
+              <NoCreatorTip
+                includeVersionTip={isKibanaVersioningEnabled}
+                entityNamePlural={entityNamePlural}
+              />
+            ),
           },
           clearButtonLabel: (
             <FormattedMessage

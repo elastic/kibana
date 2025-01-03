@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { EOL, hostname } from 'node:os';
@@ -204,17 +205,15 @@ const configSchema = schema.object(
         },
       }
     ),
-    // allow access to internal routes by default to prevent breaking changes in current offerings
-    restrictInternalApis: offeringBasedSchema({
-      serverless: schema.boolean({ defaultValue: false }),
-    }),
+    // disable access to internal routes by default
+    restrictInternalApis: schema.boolean({ defaultValue: true }),
 
     versioned: schema.object({
       /**
        * Which handler resolution algo to use for public routes: "newest" or "oldest".
        *
        * @note Internal routes always require a version to be specified.
-       * @note in development we have an additional option "none" which is also the default in dev.
+       * @note in development we have an additional option "none".
        *       This prevents any fallbacks and requires that a version specified.
        *       Useful for ensuring that a given client always specifies a version.
        */
@@ -222,7 +221,7 @@ const configSchema = schema.object(
         schema.contextRef('dev'),
         true,
         schema.oneOf([schema.literal('newest'), schema.literal('oldest'), schema.literal('none')], {
-          defaultValue: 'none',
+          defaultValue: 'oldest',
         }),
         schema.oneOf([schema.literal('newest'), schema.literal('oldest')], {
           defaultValue: 'oldest',
@@ -383,8 +382,8 @@ export class HttpConfig implements IHttpConfig {
     this.requestId = rawHttpConfig.requestId;
     this.shutdownTimeout = rawHttpConfig.shutdownTimeout;
 
-    // default to `false` to prevent breaking changes in current offerings
-    this.restrictInternalApis = rawHttpConfig.restrictInternalApis ?? false;
+    // defaults to `true` if not set through config.
+    this.restrictInternalApis = rawHttpConfig.restrictInternalApis;
     this.eluMonitor = rawHttpConfig.eluMonitor;
     this.versioned = rawHttpConfig.versioned;
     this.oas = rawHttpConfig.oas;

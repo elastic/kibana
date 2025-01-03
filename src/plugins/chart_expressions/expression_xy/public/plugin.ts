@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import moment from 'moment';
@@ -30,7 +31,7 @@ import {
   extendedAnnotationLayerFunction,
   referenceLineDecorationConfigFunction,
 } from '../common/expression_functions';
-import { GetStartDepsFn, getXyChartRenderer } from './expression_renderers';
+import { GetStartDeps, getXyChartRenderer } from './expression_renderers';
 import { eventAnnotationsResult } from '../common/expression_functions/event_annotations_result';
 
 export interface XYPluginStartDependencies {
@@ -70,7 +71,7 @@ export class ExpressionXyPlugin {
     expressions.registerFunction(xyVisFunction);
     expressions.registerFunction(layeredXyVisFunction);
 
-    const getStartDeps: GetStartDepsFn = async () => {
+    const getStartDeps = async () => {
       const [coreStart, deps] = await core.getStartServices();
       const {
         data,
@@ -99,7 +100,7 @@ export class ExpressionXyPlugin {
         timeZone: getTimeZone(core.uiSettings),
         timeFormat: core.uiSettings.get('dateFormat'),
         startServices: coreStart,
-      };
+      } satisfies GetStartDeps;
     };
 
     expressions.registerRenderer(getXyChartRenderer({ getStartDeps }));

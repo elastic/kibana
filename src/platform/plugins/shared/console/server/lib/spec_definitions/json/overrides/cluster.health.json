@@ -1,0 +1,10 @@
+{
+  "cluster.health": {
+    "url_params": {
+      "master_timeout": "",
+      "timeout": "",
+      "wait_for_active_shards": "",
+      "wait_for_nodes": ""
+    }
+  }
+}

@@ -1,19 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import React, { useCallback, useRef, useState, useEffect } from 'react';
-import useObservable from 'react-use/lib/useObservable';
-import { i18n } from '@kbn/i18n';
 import { merge } from 'lodash';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import useObservable from 'react-use/lib/useObservable';
 
-import type { UserProfileData } from '../types';
+import { i18n } from '@kbn/i18n';
+
 import { useUserProfiles } from '../services';
+import type { UserProfileData } from '../types';
 
 interface Props {
   notificationSuccess?: {
@@ -53,7 +55,7 @@ export const useUpdateUserProfile = ({
   pageReloadChecker,
 }: Props = {}) => {
   const { userProfileApiClient, notifySuccess } = useUserProfiles();
-  const { userProfile$, enabled$ } = userProfileApiClient;
+  const { userProfile$, enabled$, userProfileLoaded$ } = userProfileApiClient;
   const {
     enabled: notificationSuccessEnabled = true,
     title: notificationTitle = i18nTexts.notificationSuccess.title,
@@ -62,6 +64,7 @@ export const useUpdateUserProfile = ({
   const [isLoading, setIsLoading] = useState(false);
   const userProfileData = useObservable(userProfile$);
   const userProfileEnabled = useObservable(enabled$);
+  const userProfileLoaded = useObservable(userProfileLoaded$, false);
   // Keep a snapshot before updating the user profile so we can compare previous and updated values
   const userProfileSnapshot = useRef<UserProfileData | null>();
   const isMounted = useRef(false);
@@ -73,23 +76,25 @@ export const useUpdateUserProfile = ({
           {
             title: notificationTitle,
             text: (
-              <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
-                <EuiFlexItem grow={false}>
-                  <p>{pageReloadText}</p>
-                  <EuiButton
-                    size="s"
-                    onClick={() => window.location.reload()}
-                    data-test-subj="windowReloadButton"
-                  >
-                    {i18n.translate(
-                      'userProfileComponents.updateUserProfile.notification.requiresPageReloadButtonLabel',
-                      {
-                        defaultMessage: 'Reload page',
-                      }
-                    )}
-                  </EuiButton>
-                </EuiFlexItem>
-              </EuiFlexGroup>
+              <>
+                <p>{pageReloadText}</p>
+                <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
+                  <EuiFlexItem grow={false}>
+                    <EuiButton
+                      size="s"
+                      onClick={() => window.location.reload()}
+                      data-test-subj="windowReloadButton"
+                    >
+                      {i18n.translate(
+                        'userProfileComponents.updateUserProfile.notification.requiresPageReloadButtonLabel',
+                        {
+                          defaultMessage: 'Reload page',
+                        }
+                      )}
+                    </EuiButton>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </>
             ),
           },
           {
@@ -121,9 +126,10 @@ export const useUpdateUserProfile = ({
     <D extends Partial<UserProfileData>>(updatedData: D) => {
       userProfileSnapshot.current = merge({}, userProfileData);
       setIsLoading(true);
-      return userProfileApiClient
-        .partialUpdate(updatedData)
-        .then(() => onUserProfileUpdate(updatedData));
+      return userProfileApiClient.partialUpdate(updatedData).then(() => {
+        onUserProfileUpdate(updatedData);
+        return updatedData;
+      });
     },
     [userProfileApiClient, onUserProfileUpdate, userProfileData]
   );
@@ -146,6 +152,8 @@ export const useUpdateUserProfile = ({
     isLoading,
     /** Flag to indicate if user profile is enabled */
     userProfileEnabled,
+    /** Flag to indicate if the user profile has been loaded */
+    userProfileLoaded,
   };
 };
 

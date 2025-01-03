@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { schema } from '@kbn/config-schema';
@@ -42,6 +43,11 @@ export function registerSavedQueryRoutes({ http }: CoreSetup): void {
   router.versioned.post({ path: `${SAVED_QUERY_BASE_URL}/_is_duplicate_title`, access }).addVersion(
     {
       version,
+      security: {
+        authz: {
+          requiredPrivileges: ['savedQuery:read'],
+        },
+      },
       validate: {
         request: {
           body: schema.object({
@@ -74,6 +80,11 @@ export function registerSavedQueryRoutes({ http }: CoreSetup): void {
   router.versioned.post({ path: `${SAVED_QUERY_BASE_URL}/_create`, access }).addVersion(
     {
       version,
+      security: {
+        authz: {
+          requiredPrivileges: ['savedQuery:manage'],
+        },
+      },
       validate: {
         request: {
           body: SAVED_QUERY_ATTRS_CONFIG,
@@ -100,6 +111,11 @@ export function registerSavedQueryRoutes({ http }: CoreSetup): void {
   router.versioned.put({ path: `${SAVED_QUERY_BASE_URL}/{id}`, access }).addVersion(
     {
       version,
+      security: {
+        authz: {
+          requiredPrivileges: ['savedQuery:manage'],
+        },
+      },
       validate: {
         request: {
           params: SAVED_QUERY_ID_CONFIG,
@@ -128,6 +144,11 @@ export function registerSavedQueryRoutes({ http }: CoreSetup): void {
   router.versioned.get({ path: `${SAVED_QUERY_BASE_URL}/{id}`, access }).addVersion(
     {
       version,
+      security: {
+        authz: {
+          requiredPrivileges: ['savedQuery:read'],
+        },
+      },
       validate: {
         request: {
           params: SAVED_QUERY_ID_CONFIG,
@@ -155,6 +176,11 @@ export function registerSavedQueryRoutes({ http }: CoreSetup): void {
   router.versioned.get({ path: `${SAVED_QUERY_BASE_URL}/_count`, access }).addVersion(
     {
       version,
+      security: {
+        authz: {
+          requiredPrivileges: ['savedQuery:read'],
+        },
+      },
       validate: {
         request: {},
         response: {
@@ -179,6 +205,11 @@ export function registerSavedQueryRoutes({ http }: CoreSetup): void {
   router.versioned.post({ path: `${SAVED_QUERY_BASE_URL}/_find`, access }).addVersion(
     {
       version,
+      security: {
+        authz: {
+          requiredPrivileges: ['savedQuery:read'],
+        },
+      },
       validate: {
         request: {
           body: schema.object({
@@ -213,6 +244,11 @@ export function registerSavedQueryRoutes({ http }: CoreSetup): void {
   router.versioned.delete({ path: `${SAVED_QUERY_BASE_URL}/{id}`, access }).addVersion(
     {
       version,
+      security: {
+        authz: {
+          requiredPrivileges: ['savedQuery:manage'],
+        },
+      },
       validate: {
         request: {
           params: SAVED_QUERY_ID_CONFIG,

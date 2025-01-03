@@ -1,8 +1,6 @@
 .visEditor {
-  @include flexParent();
-
   height: 100%;
-
+  @include flexParent();
   @include euiBreakpoint('xs', 's', 'm') {
     .visualization {
       // While we are on a small screen the visualization is below the
@@ -23,7 +21,7 @@ a tilemap in an iframe: https://github.com/elastic/kibana/issues/16457 */
 }
 
 .visEditor__content {
-  @include flexParent();
   width: 100%;
   z-index: 0;
+  @include flexParent();
 }

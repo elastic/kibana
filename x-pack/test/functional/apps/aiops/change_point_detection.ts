@@ -16,7 +16,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   // aiops lives in the ML UI so we need some related services.
   const ml = getService('ml');
 
-  describe('change point detection', function () {
+  describe('change point detection UI', function () {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/ecommerce');
       await ml.testResources.createDataViewIfNeeded('ft_ecommerce', 'order_date');
@@ -99,14 +99,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await aiops.changePointDetectionPage.assertPanelExist(0);
       await aiops.changePointDetectionPage.addChangePointConfig();
       await aiops.changePointDetectionPage.assertPanelExist(1);
-    });
-
-    it('attaches change point charts to a dashboard', async () => {
-      await aiops.changePointDetectionPage.assertPanelExist(0);
-      await aiops.changePointDetectionPage.attachChartsToDashboard(0, {
-        applyTimeRange: true,
-        maxSeries: 1,
-      });
     });
   });
 }

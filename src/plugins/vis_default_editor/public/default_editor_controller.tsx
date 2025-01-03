@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { Suspense, lazy } from 'react';
@@ -14,7 +15,7 @@ import { EuiErrorBoundary, EuiLoadingChart } from '@elastic/eui';
 import { Vis, VisualizeEmbeddableContract } from '@kbn/visualizations-plugin/public';
 import { IEditorController, EditorRenderProps } from '@kbn/visualizations-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import { getAnalytics, getI18n, getTheme } from './services';
+import { getCoreStart } from './services';
 
 // @ts-ignore
 const DefaultEditor = lazy(() => import('./default_editor'));
@@ -29,12 +30,12 @@ class DefaultEditorController implements IEditorController {
 
   render(props: EditorRenderProps) {
     render(
-      <KibanaRenderContextProvider analytics={getAnalytics()} i18n={getI18n()} theme={getTheme()}>
+      <KibanaRenderContextProvider {...getCoreStart()}>
         <EuiErrorBoundary>
           <Suspense
             fallback={
               <div
-                style={{
+                css={{
                   display: 'flex',
                   flex: '1 1 auto',
                   justifyContent: 'center',

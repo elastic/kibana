@@ -156,7 +156,8 @@ exports[`Inspector Data View component should render loading state 1`] = `
           "_events": Object {},
           "_eventsCount": 0,
           "_maxListeners": undefined,
-          "_tables": Object {},
+          "allowCsvExport": false,
+          "initialSelectedTable": undefined,
           Symbol(shapeMode): false,
           Symbol(kCapture): false,
         },
@@ -430,29 +431,31 @@ Array [
         <div
           class="euiFlexItem emotion-euiFlexItem-grow-1"
         >
-          <div
-            class="euiPopover emotion-euiPopover-inline-block"
-            id="inspectorTableChooser"
-          >
-            <button
-              class="euiButtonEmpty emotion-euiButtonDisplay-euiButtonEmpty-s-empty-primary"
-              data-test-subj="inspectorTableChooser"
-              type="button"
+          <div>
+            <div
+              class="euiPopover emotion-euiPopover-inline-block"
+              id="inspectorTableChooser"
             >
-              <span
-                class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
+              <button
+                class="euiButtonEmpty emotion-euiButtonDisplay-euiButtonEmpty-s-empty-primary"
+                data-test-subj="inspectorTableChooser"
+                type="button"
               >
                 <span
-                  class="eui-textTruncate euiButtonEmpty__text"
+                  class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
                 >
-                  Table 1
+                  <span
+                    class="eui-textTruncate euiButtonEmpty__text"
+                  >
+                    Table 1
+                  </span>
+                  <span
+                    color="inherit"
+                    data-euiicon-type="arrowDown"
+                  />
                 </span>
-                <span
-                  color="inherit"
-                  data-euiicon-type="arrowDown"
-                />
-              </span>
-            </button>
+              </button>
+            </div>
           </div>
         </div>
       </div>

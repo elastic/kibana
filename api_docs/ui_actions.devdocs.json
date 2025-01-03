@@ -767,31 +767,11 @@
               },
               {
                 "plugin": "discover",
-                "path": "src/plugins/discover/public/plugin.tsx"
+                "path": "src/platform/plugins/shared/discover/public/plugin.tsx"
               },
               {
                 "plugin": "imageEmbeddable",
                 "path": "src/plugins/image_embeddable/public/components/image_embeddable.tsx"
-              },
-              {
-                "plugin": "embeddable",
-                "path": "src/plugins/embeddable/public/tests/helpers.ts"
-              },
-              {
-                "plugin": "embeddable",
-                "path": "src/plugins/embeddable/public/tests/container.test.ts"
-              },
-              {
-                "plugin": "embeddable",
-                "path": "src/plugins/embeddable/public/tests/container.test.ts"
-              },
-              {
-                "plugin": "embeddable",
-                "path": "src/plugins/embeddable/public/tests/container.test.ts"
-              },
-              {
-                "plugin": "embeddable",
-                "path": "src/plugins/embeddable/public/tests/explicit_input.test.ts"
               }
             ],
             "children": [
@@ -2199,7 +2179,7 @@
             "section": "def-common.Presentable",
             "text": "Presentable"
           },
-          "<Context>, \"order\" | \"getDisplayName\" | \"getIconType\" | \"getDisplayNameTooltip\">>"
+          "<Context>, \"order\" | \"getIconType\" | \"getDisplayName\" | \"getDisplayNameTooltip\">>"
         ],
         "path": "packages/kbn-ui-actions-browser/src/types/presentable.ts",
         "deprecated": false,
@@ -2420,13 +2400,7 @@
                 "text": "RuntimeFieldSpec"
               },
               "> | undefined; fieldAttrs?: ",
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.FieldAttrs",
-                "text": "FieldAttrs"
-              },
+              "FieldAttrsAsObject",
               " | undefined; allowNoIndex?: boolean | undefined; namespaces?: string[] | undefined; name?: string | undefined; allowHidden?: boolean | undefined; }"
             ],
             "path": "src/plugins/ui_actions/public/types.ts",

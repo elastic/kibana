@@ -21,7 +21,7 @@ import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { createRuleRoute, editRuleRoute, RuleForm } from '@kbn/alerts-ui-shared/src/rule_form';
+import { CREATE_RULE_ROUTE, EDIT_RULE_ROUTE, RuleForm } from '@kbn/response-ops-rule-form';
 import { TriggersActionsUiExamplePublicStartDeps } from './plugin';
 
 import { Page } from './components/page';
@@ -38,16 +38,15 @@ import { RuleStatusFilterSandbox } from './components/rule_status_filter_sandbox
 import { AlertsTableSandbox } from './components/alerts_table_sandbox';
 import { RulesSettingsLinkSandbox } from './components/rules_settings_link_sandbox';
 
-import { RuleActionsSandbox } from './components/rule_form/rule_actions_sandbox';
-import { RuleDetailsSandbox } from './components/rule_form/rule_details_sandbox';
-
 export interface TriggersActionsUiExampleComponentParams {
   http: CoreStart['http'];
-  notification: CoreStart['notifications'];
+  notifications: CoreStart['notifications'];
   application: CoreStart['application'];
   docLinks: CoreStart['docLinks'];
   i18n: CoreStart['i18n'];
   theme: CoreStart['theme'];
+  userProfile: CoreStart['userProfile'];
+  settings: CoreStart['settings'];
   history: ScopedHistory;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   data: DataPublicPluginStart;
@@ -62,14 +61,14 @@ const TriggersActionsUiExampleApp = ({
   triggersActionsUi,
   http,
   application,
-  notification,
+  notifications,
+  settings,
   docLinks,
-  i18n,
-  theme,
   data,
   charts,
   dataViews,
   unifiedSearch,
+  ...startServices
 }: TriggersActionsUiExampleComponentParams) => {
   return (
     <Router history={history}>
@@ -185,67 +184,49 @@ const TriggersActionsUiExampleApp = ({
           />
           <Route
             exact
-            path={createRuleRoute}
+            path={CREATE_RULE_ROUTE}
             render={() => (
               <Page title="Rule Create">
                 <RuleForm
                   plugins={{
                     http,
                     application,
-                    notification,
+                    notifications,
                     docLinks,
-                    i18n,
-                    theme,
                     charts,
                     data,
                     dataViews,
                     unifiedSearch,
+                    settings,
                     ruleTypeRegistry: triggersActionsUi.ruleTypeRegistry,
+                    actionTypeRegistry: triggersActionsUi.actionTypeRegistry,
+                    ...startServices,
                   }}
-                  returnUrl={application.getUrlForApp('triggersActionsUiExample')}
                 />
               </Page>
             )}
           />
           <Route
             exact
-            path={editRuleRoute}
+            path={EDIT_RULE_ROUTE}
             render={() => (
               <Page title="Rule Edit">
                 <RuleForm
                   plugins={{
                     http,
                     application,
-                    notification,
+                    notifications,
                     docLinks,
-                    theme,
-                    i18n,
                     charts,
                     data,
                     dataViews,
                     unifiedSearch,
+                    settings,
                     ruleTypeRegistry: triggersActionsUi.ruleTypeRegistry,
+                    actionTypeRegistry: triggersActionsUi.actionTypeRegistry,
+                    ...startServices,
                   }}
-                  returnUrl={application.getUrlForApp('triggersActionsUiExample')}
                 />
-              </Page>
-            )}
-          />
-          <Route
-            exact
-            path="/rule_actions"
-            render={() => (
-              <Page title="Rule Actions">
-                <RuleActionsSandbox />
-              </Page>
-            )}
-          />
-          <Route
-            exact
-            path="/rule_details"
-            render={() => (
-              <Page title="Rule Details">
-                <RuleDetailsSandbox />
               </Page>
             )}
           />
@@ -262,7 +243,6 @@ export const renderApp = (
   deps: TriggersActionsUiExamplePublicStartDeps,
   { appBasePath, element, history }: AppMountParameters
 ) => {
-  const { http, notifications, docLinks, application, i18n, theme } = core;
   const { triggersActionsUi } = deps;
   const { ruleTypeRegistry, actionTypeRegistry } = triggersActionsUi;
 
@@ -280,18 +260,13 @@ export const renderApp = (
           <IntlProvider locale="en">
             <TriggersActionsUiExampleApp
               history={history}
-              http={http}
-              notification={notifications}
-              application={application}
-              docLinks={docLinks}
-              i18n={i18n}
-              theme={theme}
               triggersActionsUi={deps.triggersActionsUi}
               data={deps.data}
               charts={deps.charts}
               dataViews={deps.dataViews}
               dataViewsEditor={deps.dataViewsEditor}
               unifiedSearch={deps.unifiedSearch}
+              {...core}
             />
           </IntlProvider>
         </QueryClientProvider>

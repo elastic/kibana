@@ -6,131 +6,107 @@
  */
 
 import expect from 'expect';
-import { InternalRequestHeader, RoleCredentials } from '../../../../shared/services';
+import { SupertestWithRoleScopeType } from '@kbn/test-suites-xpack/api_integration/deployment_agnostic/services';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const svlCommonApi = getService('svlCommonApi');
-  const svlUserManager = getService('svlUserManager');
-  const supertestWithoutAuth = getService('supertestWithoutAuth');
-  let roleAuthc: RoleCredentials;
-  let internalReqHeader: InternalRequestHeader;
+  const roleScopedSupertest = getService('roleScopedSupertest');
+  let supertestAdminWithCookieCredentials: SupertestWithRoleScopeType;
 
   describe('security/views', function () {
     before(async () => {
-      roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
-      internalReqHeader = svlCommonApi.getInternalRequestHeader();
+      supertestAdminWithCookieCredentials = await roleScopedSupertest.getSupertestWithRoleScope(
+        'admin',
+        {
+          useCookieHeader: true,
+          withInternalHeaders: true,
+        }
+      );
     });
-    after(async () => {
-      await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
-    });
+
     describe('route access', () => {
       describe('disabled', () => {
         // ToDo: unskip these when we disable login routes
         xit('login', async () => {
-          const { body, status } = await supertestWithoutAuth
-            .get('/login')
-            .set(svlCommonApi.getInternalRequestHeader())
-            .set(roleAuthc.apiKeyHeader);
+          const { body, status } = await supertestAdminWithCookieCredentials.get('/login');
           svlCommonApi.assertApiNotFound(body, status);
         });
 
         // ToDo: unskip these when we disable login routes
         xit('get login state', async () => {
-          const { body, status } = await supertestWithoutAuth
-            .get('/internal/security/login_state')
-            .set(svlCommonApi.getInternalRequestHeader())
-            .set(roleAuthc.apiKeyHeader);
+          const { body, status } = await supertestAdminWithCookieCredentials.get(
+            '/internal/security/login_state'
+          );
           svlCommonApi.assertApiNotFound(body, status);
         });
 
         it('access agreement', async () => {
-          const { body, status } = await supertestWithoutAuth
-            .get('/security/access_agreement')
-            .set(svlCommonApi.getInternalRequestHeader())
-            .set(roleAuthc.apiKeyHeader);
+          const { body, status } = await supertestAdminWithCookieCredentials.get(
+            '/security/access_agreement'
+          );
           svlCommonApi.assertApiNotFound(body, status);
         });
 
         it('get access agreement state', async () => {
-          const { body, status } = await supertestWithoutAuth
-            .get('/internal/security/access_agreement/state')
-            .set(svlCommonApi.getInternalRequestHeader())
-            .set(roleAuthc.apiKeyHeader);
+          const { body, status } = await supertestAdminWithCookieCredentials.get(
+            '/internal/security/access_agreement/state'
+          );
           svlCommonApi.assertApiNotFound(body, status);
         });
       });
 
       describe('public', () => {
         it('login', async () => {
-          const { status } = await supertestWithoutAuth
-            .get('/login')
-            .set(svlCommonApi.getInternalRequestHeader())
-            .set(roleAuthc.apiKeyHeader);
+          const { status } = await supertestAdminWithCookieCredentials.get('/login');
           expect(status).toBe(302);
         });
 
         it('get login state', async () => {
-          const { status } = await supertestWithoutAuth
-            .get('/internal/security/login_state')
-            .set(svlCommonApi.getInternalRequestHeader())
-            .set(roleAuthc.apiKeyHeader);
+          const { status } = await supertestAdminWithCookieCredentials.get(
+            '/internal/security/login_state'
+          );
           expect(status).toBe(200);
         });
 
         it('capture URL', async () => {
-          const { status } = await supertestWithoutAuth
-            .get('/internal/security/capture-url')
-            .set(internalReqHeader)
-            .set(roleAuthc.apiKeyHeader);
+          const { status } = await supertestAdminWithCookieCredentials.get(
+            '/internal/security/capture-url'
+          );
           expect(status).toBe(200);
         });
 
         it('space selector', async () => {
-          const { status } = await supertestWithoutAuth
-            .get('/spaces/space_selector')
-            .set(internalReqHeader)
-            .set(roleAuthc.apiKeyHeader);
+          const { status } = await supertestAdminWithCookieCredentials.get(
+            '/spaces/space_selector'
+          );
           expect(status).toBe(200);
         });
 
         it('enter space', async () => {
-          const { status } = await supertestWithoutAuth
-            .get('/spaces/enter')
-            .set(internalReqHeader)
-            .set(roleAuthc.apiKeyHeader);
+          const { status } = await supertestAdminWithCookieCredentials.get('/spaces/enter');
           expect(status).toBe(302);
         });
 
         it('account', async () => {
-          const { status } = await supertestWithoutAuth
-            .get('/security/account')
-            .set(internalReqHeader)
-            .set(roleAuthc.apiKeyHeader);
+          const { status } = await supertestAdminWithCookieCredentials.get('/security/account');
           expect(status).toBe(200);
         });
 
         it('logged out', async () => {
-          const { status } = await supertestWithoutAuth
-            .get('/security/logged_out')
-            .set(internalReqHeader)
-            .set(roleAuthc.apiKeyHeader);
-          expect(status).toBe(200);
+          const { status } = await supertestAdminWithCookieCredentials.get('/security/logged_out');
+          expect(status).toBe(302);
         });
 
         it('logout', async () => {
-          const { status } = await supertestWithoutAuth
-            .get('/logout')
-            .set(internalReqHeader)
-            .set(roleAuthc.apiKeyHeader);
+          const { status } = await supertestAdminWithCookieCredentials.get('/logout');
           expect(status).toBe(200);
         });
 
         it('overwritten session', async () => {
-          const { status } = await supertestWithoutAuth
-            .get('/security/overwritten_session')
-            .set(internalReqHeader)
-            .set(roleAuthc.apiKeyHeader);
+          const { status } = await supertestAdminWithCookieCredentials.get(
+            '/security/overwritten_session'
+          );
           expect(status).toBe(200);
         });
       });

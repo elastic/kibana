@@ -1,0 +1,68 @@
+openapi: 3.0.0
+info:
+  version: '1'
+  title: Risk Scoring API
+  description: These APIs allow the consumer to manage Entity Risk Scores within Entity Analytics.
+paths:
+  /internal/risk_score/engine/status:
+    get:
+      x-labels: [ess, serverless]
+      x-internal: true
+      x-codegen-enabled: true
+      operationId: GetRiskEngineStatus
+      summary: Get the status of the Risk Engine
+      description: Returns the status of both the legacy transform-based risk engine, as well as the new risk engine
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RiskEngineStatusResponse'
+components:
+  schemas:
+    RiskEngineStatus:
+      type: string
+      enum:
+        - 'NOT_INSTALLED'
+        - 'DISABLED'
+        - 'ENABLED'
+
+    RiskEngineTaskStatusValues:
+      type: string
+      enum:
+        - 'idle'
+        - 'claiming'
+        - 'running'
+        - 'failed'
+        - 'should_delete'
+        - 'unrecognized'
+        - 'dead_letter'
+
+    RiskEngineTaskStatus:
+      type: object
+      required:
+        - status
+        - runAt
+      properties:
+        status:
+          $ref: '#/components/schemas/RiskEngineTaskStatusValues'
+        runAt:
+          type: string
+          format: date-time
+        startedAt:
+          type: string
+          format: date-time
+
+    RiskEngineStatusResponse:
+      type: object
+      required:
+        - legacy_risk_engine_status
+        - risk_engine_status
+      properties:
+        legacy_risk_engine_status:
+          $ref: '#/components/schemas/RiskEngineStatus'
+        risk_engine_status:
+          $ref: '#/components/schemas/RiskEngineStatus'
+        risk_engine_task_status:
+          $ref: '#/components/schemas/RiskEngineTaskStatus'

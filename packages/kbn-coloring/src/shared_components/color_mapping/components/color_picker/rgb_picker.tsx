@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import {
@@ -21,24 +22,19 @@ import chromajs from 'chroma-js';
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { i18n } from '@kbn/i18n';
+import { KbnPalettes } from '@kbn/palettes';
 import { ColorMapping } from '../../config';
 
 import { hasEnoughContrast } from '../../color/color_math';
-import { getPalette } from '../../palettes';
 
 export function RGBPicker({
-  isDarkMode,
   color,
-  getPaletteFn,
+  palettes,
   selectColor,
-  close,
 }: {
-  palette: ColorMapping.CategoricalPalette;
-  isDarkMode: boolean;
   color: ColorMapping.CategoricalColor | ColorMapping.ColorCode;
-  getPaletteFn: ReturnType<typeof getPalette>;
+  palettes: KbnPalettes;
   selectColor: (color: ColorMapping.CategoricalColor | ColorMapping.ColorCode) => void;
-  close: () => void;
 }) {
   const [customColorMappingColor, setCustomColorMappingColor] = useState<
     ColorMapping.CategoricalColor | ColorMapping.ColorCode
@@ -46,11 +42,7 @@ export function RGBPicker({
 
   const customColorHex =
     customColorMappingColor.type === 'categorical'
-      ? getPaletteFn(customColorMappingColor.paletteId).getColor(
-          customColorMappingColor.colorIndex,
-          isDarkMode,
-          false
-        )
+      ? palettes.get(customColorMappingColor.paletteId).getColor(customColorMappingColor.colorIndex)
       : customColorMappingColor.colorCode;
 
   const [colorTextInput, setColorTextInput] = useState<string>(customColorHex);

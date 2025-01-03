@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { createParser } from './parser';
@@ -50,5 +51,50 @@ describe('console parser', () => {
     const { startOffset, endOffset } = requests[0];
     expect(startOffset).toBe(0);
     expect(endOffset).toBe(52);
+  });
+
+  describe('case insensitive methods', () => {
+    const expectedRequests = [
+      {
+        startOffset: 0,
+        endOffset: 11,
+      },
+      {
+        startOffset: 12,
+        endOffset: 24,
+      },
+      {
+        startOffset: 25,
+        endOffset: 38,
+      },
+      {
+        startOffset: 39,
+        endOffset: 50,
+      },
+      {
+        startOffset: 51,
+        endOffset: 63,
+      },
+    ];
+    it('allows upper case methods', () => {
+      const input = 'GET _search\nPOST _search\nPATCH _search\nPUT _search\nHEAD _search';
+      const { requests, errors } = parser(input) as ConsoleParserResult;
+      expect(errors.length).toBe(0);
+      expect(requests).toEqual(expectedRequests);
+    });
+
+    it('allows lower case methods', () => {
+      const input = 'get _search\npost _search\npatch _search\nput _search\nhead _search';
+      const { requests, errors } = parser(input) as ConsoleParserResult;
+      expect(errors.length).toBe(0);
+      expect(requests).toEqual(expectedRequests);
+    });
+
+    it('allows mixed case methods', () => {
+      const input = 'GeT _search\npOSt _search\nPaTch _search\nPut _search\nheAD _search';
+      const { requests, errors } = parser(input) as ConsoleParserResult;
+      expect(errors.length).toBe(0);
+      expect(requests).toEqual(expectedRequests);
+    });
   });
 });

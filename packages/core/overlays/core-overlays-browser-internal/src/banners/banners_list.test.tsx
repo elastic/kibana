@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -32,7 +33,7 @@ describe('BannersList', () => {
     ]);
 
     expect(mount(<BannersList banners$={banners$} />).html()).toMatchInlineSnapshot(
-      `"<div class=\\"kbnGlobalBannerList\\"><div data-test-priority=\\"0\\" class=\\"kbnGlobalBannerList__item\\" data-test-subj=\\"global-banner-item\\"><h1>Hello!</h1></div></div>"`
+      `"<div class=\\"kbnGlobalBannerList\\"><div data-test-priority=\\"0\\" data-test-subj=\\"global-banner-item\\"><h1>Hello!</h1></div></div>"`
     );
   });
 
@@ -74,7 +75,7 @@ describe('BannersList', () => {
 
     // Two new banners should be rendered
     expect(component.html()).toMatchInlineSnapshot(
-      `"<div class=\\"kbnGlobalBannerList\\"><div data-test-priority=\\"1\\" class=\\"kbnGlobalBannerList__item\\" data-test-subj=\\"global-banner-item\\"><h1>First Banner!</h1></div><div data-test-priority=\\"0\\" class=\\"kbnGlobalBannerList__item\\" data-test-subj=\\"global-banner-item\\"><h1>Second banner!</h1></div></div>"`
+      `"<div class=\\"kbnGlobalBannerList\\"><div data-test-priority=\\"1\\" data-test-subj=\\"global-banner-item\\"><h1>First Banner!</h1></div><div data-test-priority=\\"0\\" data-test-subj=\\"global-banner-item\\"><h1>Second banner!</h1></div></div>"`
     );
     // Original banner should be unmounted
     expect(unmount).toHaveBeenCalled();

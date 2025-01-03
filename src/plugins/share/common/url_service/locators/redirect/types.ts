@@ -1,12 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { SerializableRecord } from '@kbn/utility-types';
+import type { FormatSearchParamsOptions } from './format_search_params';
 
 /**
  * @public
@@ -25,4 +27,14 @@ export interface RedirectOptions<P extends SerializableRecord = unknown & Serial
 
   /** Locator params. */
   params: P;
+}
+
+export interface GetRedirectUrlOptions extends FormatSearchParamsOptions {
+  /**
+   * Optional space ID to use when generating the URL.
+   * If not provided:
+   * - on the client the current space ID will be used.
+   * - on the server the URL will be generated without a space ID.
+   */
+  spaceId?: string;
 }

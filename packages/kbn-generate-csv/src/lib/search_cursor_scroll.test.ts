@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import * as Rx from 'rxjs';
@@ -15,6 +16,7 @@ import { createSearchSourceMock } from '@kbn/data-plugin/common/search/search_so
 import { createSearchRequestHandlerContext } from '@kbn/data-plugin/server/search/mocks';
 import type { SearchCursorSettings } from './search_cursor';
 import { SearchCursorScroll } from './search_cursor_scroll';
+import type { OpenPointInTimeResponse } from '@elastic/elasticsearch/lib/api/types';
 
 class TestSearchCursorScroll extends SearchCursorScroll {
   constructor(...args: ConstructorParameters<typeof SearchCursorScroll>) {
@@ -46,7 +48,9 @@ describe('CSV Export Search Cursor', () => {
 
     es = elasticsearchServiceMock.createScopedClusterClient();
     data = createSearchRequestHandlerContext();
-    jest.spyOn(es.asCurrentUser, 'openPointInTime').mockResolvedValue({ id: 'simply-scroll-id' });
+    jest
+      .spyOn(es.asCurrentUser, 'openPointInTime')
+      .mockResolvedValue({ id: 'simply-scroll-id' } as OpenPointInTimeResponse);
 
     logger = loggingSystemMock.createLogger();
   });

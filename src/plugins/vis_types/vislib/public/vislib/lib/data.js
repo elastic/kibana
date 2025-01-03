@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import d3 from 'd3';
@@ -44,15 +45,11 @@ class D3MappableObject {
  * @param attr {Object|*} Visualization options
  */
 export class Data {
-  constructor(data, uiState, createColorLookupFunction) {
+  constructor(data, uiState) {
     this.uiState = uiState;
-    this.createColorLookupFunction = createColorLookupFunction;
     this.data = this.copyDataObj(data);
     this.type = this.getDataType();
     this.labels = this._getLabels(this.data);
-    this.color = this.labels
-      ? createColorLookupFunction(this.labels, uiState.get('vis.colors'))
-      : undefined;
     this._normalizeOrdered();
   }
 
@@ -384,7 +381,7 @@ export class Data {
     const defaultColors = this.uiState.get('vis.defaultColors');
     const overwriteColors = this.uiState.get('vis.colors');
     const colors = defaultColors ? _.defaults({}, overwriteColors, defaultColors) : overwriteColors;
-    return this.createColorLookupFunction(this.getLabels(), colors);
+    return (value) => colors[value];
   }
 
   /**

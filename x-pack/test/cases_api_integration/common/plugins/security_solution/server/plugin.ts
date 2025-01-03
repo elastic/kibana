@@ -10,6 +10,7 @@ import { hiddenTypes as filesSavedObjectTypes } from '@kbn/files-plugin/server/s
 import { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { SecurityPluginStart } from '@kbn/security-plugin/server';
+import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 
 export interface FixtureSetupDeps {
   features: FeaturesPluginSetup;
@@ -36,6 +37,7 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
       name: 'SecuritySolutionFixture',
       app: ['kibana'],
       category: { id: 'cases-fixtures', label: 'Cases Fixtures' },
+      scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
       cases: ['securitySolutionFixture'],
       privileges: {
         all: {
@@ -113,6 +115,52 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
             },
           ],
         },
+        {
+          name: 'Add comments',
+          privilegeGroups: [
+            {
+              groupType: 'independent',
+              privileges: [
+                {
+                  name: 'Add comments to cases',
+                  id: 'create_comment',
+                  includeIn: 'all',
+                  cases: {
+                    createComment: ['securitySolutionFixture'],
+                  },
+                  savedObject: {
+                    all: [...filesSavedObjectTypes],
+                    read: [...filesSavedObjectTypes],
+                  },
+                  ui: [],
+                },
+              ],
+            },
+          ],
+        },
+        {
+          name: 'Re-open closed cases',
+          privilegeGroups: [
+            {
+              groupType: 'independent',
+              privileges: [
+                {
+                  name: 'Re-open closed cases',
+                  id: 'case_reopen',
+                  includeIn: 'all',
+                  savedObject: {
+                    all: [],
+                    read: [],
+                  },
+                  cases: {
+                    reopenCase: ['securitySolutionFixture'],
+                  },
+                  ui: [],
+                },
+              ],
+            },
+          ],
+        },
       ],
     });
 
@@ -121,6 +169,7 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
       name: 'TestDisabledFixture',
       app: ['kibana'],
       category: { id: 'cases-fixtures', label: 'Cases Fixtures' },
+      scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
       // testDisabledFixture is disabled in space1
       cases: ['testDisabledFixture'],
       privileges: {

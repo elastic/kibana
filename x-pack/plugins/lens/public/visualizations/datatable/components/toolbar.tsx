@@ -72,6 +72,7 @@ export function DataTableToolbar(props: VisualizationToolbarProps<DatatableVisua
         type="visualOptions"
         groupPosition="none"
         buttonDataTestSubj="lnsVisualOptionsButton"
+        data-test-subj="lnsVisualOptionsPopover"
       >
         <RowHeightSettings
           rowHeight={state.headerRowHeight ?? DEFAULT_HEADER_ROW_HEIGHT}
@@ -111,7 +112,7 @@ export function DataTableToolbar(props: VisualizationToolbarProps<DatatableVisua
           label={i18n.translate('xpack.lens.table.visualOptionsPaginateTable', {
             defaultMessage: 'Paginate table',
           })}
-          display="columnCompressedSwitch"
+          display="columnCompressed"
         >
           <EuiToolTip
             content={i18n.translate('xpack.lens.table.visualOptionsPaginateTableTooltip', {

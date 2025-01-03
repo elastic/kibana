@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { i18n } from '@kbn/i18n';
@@ -31,6 +32,7 @@ import {
   extractVisualizationType,
 } from '@kbn/chart-expressions-common';
 
+import { ThemeServiceSetup } from '@kbn/core/public';
 import type { getDataLayers } from '../helpers';
 import { LayerTypes, SeriesTypes } from '../../common/constants';
 import type { CommonXYDataLayerConfig, XYChartProps } from '../../common';
@@ -42,10 +44,11 @@ import type {
   StartServices,
 } from '../types';
 
-export type GetStartDepsFn = () => Promise<{
+export interface GetStartDeps {
   data: DataPublicPluginStart;
   formatFactory: FormatFactory;
   theme: ChartsPluginStart['theme'];
+  kibanaTheme: ThemeServiceSetup;
   activeCursor: ChartsPluginStart['activeCursor'];
   paletteService: PaletteRegistry;
   timeZone: string;
@@ -54,10 +57,10 @@ export type GetStartDepsFn = () => Promise<{
   usageCollection?: UsageCollectionStart;
   timeFormat: string;
   startServices: StartServices;
-}>;
+}
 
 interface XyChartRendererDeps {
-  getStartDeps: GetStartDepsFn;
+  getStartDeps: () => Promise<GetStartDeps>;
 }
 
 export const extractCounterEvents = (

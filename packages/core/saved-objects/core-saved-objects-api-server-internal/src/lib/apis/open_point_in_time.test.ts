@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 /* eslint-disable @typescript-eslint/no-shadow */
@@ -35,6 +36,7 @@ import {
   createGenericNotFoundErrorPayload,
 } from '../../test_helpers/repository.test.common';
 import { PointInTimeFinder } from '../point_in_time_finder';
+import { OpenPointInTimeResponse } from '@elastic/elasticsearch/lib/api/types';
 
 describe('SavedObjectsRepository', () => {
   let client: ReturnType<typeof elasticsearchClientMock.createElasticsearchClient>;
@@ -80,7 +82,7 @@ describe('SavedObjectsRepository', () => {
   describe('#openPointInTimeForType', () => {
     const type = 'index-pattern';
 
-    const generateResults = (id?: string) => ({ id: id || 'id' });
+    const generateResults = (id?: string) => ({ id: id || 'id' } as OpenPointInTimeResponse);
     const successResponse = async (type: string, options?: SavedObjectsOpenPointInTimeOptions) => {
       client.openPointInTime.mockResponseOnce(generateResults());
       const result = await repository.openPointInTimeForType(type, options);
@@ -135,7 +137,7 @@ describe('SavedObjectsRepository', () => {
       it(`throws when ES is unable to find the index`, async () => {
         client.openPointInTime.mockResolvedValueOnce(
           elasticsearchClientMock.createSuccessTransportRequestPromise(
-            { id: 'error' },
+            { id: 'error' } as OpenPointInTimeResponse,
             { statusCode: 404 }
           )
         );

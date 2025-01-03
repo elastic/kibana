@@ -321,23 +321,6 @@ steps:
         - exit_status: '-1'
           limit: 1
 
-  - command: .buildkite/scripts/steps/functional/threat_intelligence.sh
-    label: 'Threat Intelligence Cypress Tests'
-    agents:
-      image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-prod
-      provider: gcp
-      machineType: n2-standard-4
-      preemptible: true
-    depends_on:
-      - build
-    timeout_in_minutes: 60
-    parallelism: 1
-    retry:
-      automatic:
-        - exit_status: '-1'
-          limit: 1
-
   - command: .buildkite/scripts/steps/functional/osquery_cypress.sh
     label: 'Osquery Cypress Tests'
     agents:
@@ -356,7 +339,7 @@ steps:
           limit: 1
 
   - command: .buildkite/scripts/steps/functional/security_serverless_osquery.sh
-    label: 'Serverless Osquery Cypress Tests'
+    label: 'Osquery Cypress Tests on Serverless'
     agents:
       image: family/kibana-ubuntu-2004
       imageProject: elastic-images-prod
@@ -379,8 +362,6 @@ steps:
       imageProject: elastic-images-prod
       provider: gcp
       enableNestedVirtualization: true
-      localSsds: 1
-      localSsdInterface: nvme
       machineType: n2-standard-4
     depends_on:
       - build
@@ -398,8 +379,6 @@ steps:
       imageProject: elastic-images-prod
       provider: gcp
       enableNestedVirtualization: true
-      localSsds: 1
-      localSsdInterface: nvme
       machineType: n2-standard-4
     depends_on:
       - build

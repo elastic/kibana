@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import {
@@ -31,7 +32,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import { EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { euiThemeVars } from '@kbn/ui-theme';
 
 export interface OnSaveProps {
   newTitle: string;
@@ -275,7 +275,28 @@ export class SavedObjectSaveModal extends React.Component<Props, SaveModalState>
     });
   };
 
+  private handleTitleDuplication = () => {
+    const regex = /\s*\[(\d+)\]$/;
+    const match = this.state.title.match(regex);
+
+    if (match) {
+      const newNumber = Number(match[1]) + 1;
+
+      this.setState({
+        title: this.state.title.replace(regex, ` [${newNumber}]`),
+      });
+    } else {
+      this.setState({
+        title: this.state.title + ' [1]',
+      });
+    }
+  };
+
   private onCopyOnSaveChange = (event: EuiSwitchEvent) => {
+    if (this.props.title === this.state.title && event.target.checked) {
+      this.handleTitleDuplication();
+    }
+
     this.setState({
       copyOnSave: event.target.checked,
     });
@@ -383,7 +404,10 @@ export class SavedObjectSaveModal extends React.Component<Props, SaveModalState>
           />
         </EuiFlexItem>
         {this.props.mustCopyOnSaveMessage && (
-          <EuiFlexItem css={{ marginLeft: `-${euiThemeVars.euiSize}` }} grow={false}>
+          <EuiFlexItem
+            css={({ euiTheme }) => ({ marginLeft: `-${euiTheme.size.base}` })}
+            grow={false}
+          >
             <EuiIconTip type="iInCircle" content={this.props.mustCopyOnSaveMessage} />
           </EuiFlexItem>
         )}

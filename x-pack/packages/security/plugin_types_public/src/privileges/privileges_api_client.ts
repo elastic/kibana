@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { RawKibanaPrivileges } from '@kbn/security-authorization-core';
+import type { RawKibanaPrivileges } from '@kbn/security-plugin-types-common';
 
 export interface PrivilegesAPIClientGetAllArgs {
   includeActions: boolean;
@@ -15,7 +15,7 @@ export interface PrivilegesAPIClientGetAllArgs {
    */
   respectLicenseLevel: boolean;
 }
-// TODO: Eyo include the proper return types for contract
+
 export abstract class PrivilegesAPIClientPublicContract {
   abstract getAll(args: PrivilegesAPIClientGetAllArgs): Promise<RawKibanaPrivileges>;
 }

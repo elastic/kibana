@@ -6,7 +6,7 @@
  */
 
 import type { GlobalSearchResult } from '@kbn/global-search-plugin/common/types';
-import { Tag } from '@kbn/saved-objects-tagging-plugin/public';
+import type { Tag } from '@kbn/saved-objects-tagging-oss-plugin/common';
 import { resultToOption } from './result_to_option';
 
 const createSearchResult = (parts: Partial<GlobalSearchResult> = {}): GlobalSearchResult => ({

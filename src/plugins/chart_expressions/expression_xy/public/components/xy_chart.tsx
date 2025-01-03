@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -37,6 +38,7 @@ import { IconType } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { PaletteRegistry } from '@kbn/coloring';
 import { RenderMode } from '@kbn/expressions-plugin/common';
+import { useKbnPalettes } from '@kbn/palettes';
 import { ESQL_TABLE_TYPE } from '@kbn/data-plugin/common';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { EmptyPlaceholder, LegendToggle } from '@kbn/charts-plugin/public';
@@ -54,6 +56,7 @@ import {
 } from '@kbn/visualizations-plugin/common/constants';
 import { PersistedState } from '@kbn/visualizations-plugin/public';
 import { getOverridesFor, ChartSizeSpec } from '@kbn/chart-expressions-common';
+import { useAppFixedViewport } from '@kbn/core-rendering-browser';
 import type {
   FilterEvent,
   BrushEvent,
@@ -231,6 +234,8 @@ export function XYChart({
   const chartRef = useRef<Chart>(null);
   const chartBaseTheme = chartsThemeService.useChartsBaseTheme();
   const darkMode = chartsThemeService.useDarkMode();
+  const palettes = useKbnPalettes();
+  const appFixedViewport = useAppFixedViewport();
   const filteredLayers = getFilteredLayers(layers);
   const layersById = filteredLayers.reduce<Record<string, CommonXYLayerConfig>>(
     (hashMap, layer) => ({ ...hashMap, [layer.layerId]: layer }),
@@ -766,7 +771,7 @@ export function XYChart({
       >
         <Chart ref={chartRef} {...getOverridesFor(overrides, 'chart')}>
           <Tooltip<Record<string, string | number>, XYChartSeriesIdentifier>
-            boundary={document.getElementById('app-fixed-viewport') ?? undefined}
+            boundary={appFixedViewport}
             headerFormatter={
               !args.detailedTooltip && xAxisColumn
                 ? ({ value }) => (
@@ -986,6 +991,7 @@ export function XYChart({
               minBarHeight={args.minBarHeight}
               formatFactory={formatFactory}
               paletteService={paletteService}
+              palettes={palettes}
               fittingFunction={fittingFunction}
               emphasizeFitting={emphasizeFitting}
               yAxesConfiguration={yAxesConfiguration}

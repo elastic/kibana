@@ -1,7 +1,11 @@
 {
   "type": "plugin",
   "id": "@kbn/upgrade-assistant-plugin",
-  "owner": "@elastic/kibana-management",
+  "owner": [
+    "@elastic/kibana-core"
+  ],
+  "group": "platform",
+  "visibility": "private",
   "plugin": {
     "id": "upgradeAssistant",
     "server": true,
@@ -21,7 +25,6 @@
       "usageCollection",
       "cloud",
       "security",
-      "infra",
       "logsShared"
     ],
     "requiredBundles": [

@@ -18,25 +18,38 @@ import { RiskScoreEntity } from '../../../tasks/risk_scores/common';
 import { ENTITY_ANALYTICS_URL } from '../../../urls/navigation';
 import { PAGE_TITLE } from '../../../screens/entity_analytics_management';
 
-describe('Enable risk scores from dashboard', { tags: ['@ess', '@serverless'] }, () => {
-  beforeEach(() => {
-    login();
-    visit(ENTITY_ANALYTICS_URL);
-  });
+describe(
+  'Enable risk scores from dashboard',
+  {
+    tags: ['@ess', '@serverless'],
+    env: {
+      ftrConfig: {
+        kbnServerArgs: [
+          `--xpack.securitySolution.enableExperimental=${JSON.stringify(['entityStoreDisabled'])}`,
+        ],
+      },
+    },
+  },
+  () => {
+    beforeEach(() => {
+      login();
+      visit(ENTITY_ANALYTICS_URL);
+    });
 
-  it('host risk enable button  should redirect to entity management page', () => {
-    cy.get(ENABLE_HOST_RISK_SCORE_BUTTON).should('exist');
+    it('host risk enable button  should redirect to entity management page', () => {
+      cy.get(ENABLE_HOST_RISK_SCORE_BUTTON).should('exist');
 
-    clickEnableRiskScore(RiskScoreEntity.host);
+      clickEnableRiskScore(RiskScoreEntity.host);
 
-    cy.get(PAGE_TITLE).should('have.text', 'Entity Risk Score');
-  });
+      cy.get(PAGE_TITLE).should('have.text', 'Entity Risk Score');
+    });
 
-  it('user risk enable button should redirect to entity management page', () => {
-    cy.get(ENABLE_USER_RISK_SCORE_BUTTON).should('exist');
+    it('user risk enable button should redirect to entity management page', () => {
+      cy.get(ENABLE_USER_RISK_SCORE_BUTTON).should('exist');
 
-    clickEnableRiskScore(RiskScoreEntity.user);
+      clickEnableRiskScore(RiskScoreEntity.user);
 
-    cy.get(PAGE_TITLE).should('have.text', 'Entity Risk Score');
-  });
-});
+      cy.get(PAGE_TITLE).should('have.text', 'Entity Risk Score');
+    });
+  }
+);

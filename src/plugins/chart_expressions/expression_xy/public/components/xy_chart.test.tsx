@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -797,7 +798,7 @@ describe('XYChart component', () => {
     expect(lineArea.prop('markSizeAccessor')).toEqual(markSizeAccessorArg.markSizeAccessor);
     const expectedSeriesStyle = expect.objectContaining({
       point: expect.objectContaining({
-        visible: true,
+        visible: 'always',
         fill: ColorVariant.Series,
       }),
     });
@@ -841,7 +842,7 @@ describe('XYChart component', () => {
       const lineArea = dataLayers.find(LineSeries).at(0);
       const expectedSeriesStyle = expect.objectContaining({
         point: expect.objectContaining({
-          visible: showPoints,
+          visible: showPoints ? 'always' : 'auto',
         }),
       });
       expect(lineArea.prop('areaSeriesStyle')).toEqual(expectedSeriesStyle);
@@ -3198,7 +3199,7 @@ describe('XYChart component', () => {
       // styles are passed because they are shared, dataValues is rounded to the interval
       expect(groupedAnnotation).toMatchSnapshot();
       // renders numeric icon for grouped annotations
-      const marker = mount(<div>{groupedAnnotation.prop('marker')}</div>);
+      const marker = mount(<div>{groupedAnnotation.prop('marker') as React.ReactNode}</div>);
       const numberIcon = marker.find('NumberIcon');
       expect(numberIcon.length).toEqual(1);
       expect(numberIcon.text()).toEqual('3');

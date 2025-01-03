@@ -2,4 +2,6 @@
   "type": "shared-common",
   "id": "@kbn/reporting-common",
   "owner": "@elastic/appex-sharedux",
+  "group": "platform",
+  "visibility": "private"
 }

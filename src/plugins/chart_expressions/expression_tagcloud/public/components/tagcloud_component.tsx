@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useCallback, useEffect, useState, useMemo } from 'react';
@@ -22,19 +23,13 @@ import {
   WordCloudElementEvent,
 } from '@elastic/charts';
 import { EmptyPlaceholder } from '@kbn/charts-plugin/public';
-import {
-  PaletteRegistry,
-  PaletteOutput,
-  getColorFactory,
-  getPalette,
-  AVAILABLE_PALETTES,
-  NeutralPalette,
-} from '@kbn/coloring';
+import { PaletteRegistry, PaletteOutput, getColorFactory } from '@kbn/coloring';
 import { IInterpreterRenderHandlers, DatatableRow } from '@kbn/expressions-plugin/public';
 import { getColorCategories, getOverridesFor } from '@kbn/chart-expressions-common';
 import type { AllowedSettingsOverrides, AllowedChartOverrides } from '@kbn/charts-plugin/common';
 import { getColumnByAccessor, getFormatByAccessor } from '@kbn/visualizations-plugin/common/utils';
 import { isMultiFieldKey } from '@kbn/data-plugin/common';
+import { KbnPalettes, useKbnPalettes } from '@kbn/palettes';
 import { getFormatService } from '../format_service';
 import { TagcloudRendererConfig } from '../../common/types';
 import { ScaleOptions, Orientation } from '../../common/constants';
@@ -55,13 +50,13 @@ const calculateWeight = (value: number, x1: number, y1: number, x2: number, y2: 
   ((value - x1) * (y2 - x2)) / (y1 - x1) + x2;
 
 const getColor = (
-  palettes: PaletteRegistry,
+  paletteService: PaletteRegistry,
   activePalette: PaletteOutput,
   text: string,
   values: string[],
   syncColors: boolean
 ) => {
-  return palettes?.get(activePalette?.name)?.getCategoricalColor(
+  return paletteService?.get(activePalette?.name)?.getCategoricalColor(
     [
       {
         name: text,
@@ -105,6 +100,7 @@ export const TagCloudChart = ({
   isDarkMode,
 }: TagCloudChartProps) => {
   const [warning, setWarning] = useState(false);
+  const palettes = useKbnPalettes();
   const { bucket, metric, scale, palette, showLabel, orientation, colorMapping } = visParams;
 
   const bucketFormatter = useMemo(() => {
@@ -127,6 +123,7 @@ export const TagCloudChart = ({
     const colorFromMappingFn = getColorFromMappingFactory(
       tagColumn,
       visData.rows,
+      palettes,
       isDarkMode,
       colorMapping
     );
@@ -148,15 +145,16 @@ export const TagCloudChart = ({
     });
   }, [
     bucket,
-    bucketFormatter,
-    metric,
-    palette,
-    palettesRegistry,
-    syncColors,
     visData.columns,
     visData.rows,
-    colorMapping,
+    metric,
+    palettes,
     isDarkMode,
+    colorMapping,
+    bucketFormatter,
+    palettesRegistry,
+    palette,
+    syncColors,
   ]);
 
   useEffect(() => {
@@ -319,6 +317,7 @@ export { TagCloudChart as default };
 function getColorFromMappingFactory(
   tagColumn: string | undefined,
   rows: DatatableRow[],
+  palettes: KbnPalettes,
   isDarkMode: boolean,
   colorMapping?: string
 ): undefined | ((category: string | string[]) => string) {
@@ -326,13 +325,8 @@ function getColorFromMappingFactory(
     // return undefined, we will use the legacy color mapping instead
     return undefined;
   }
-  return getColorFactory(
-    JSON.parse(colorMapping),
-    getPalette(AVAILABLE_PALETTES, NeutralPalette),
-    isDarkMode,
-    {
-      type: 'categories',
-      categories: getColorCategories(rows, tagColumn),
-    }
-  );
+  return getColorFactory(JSON.parse(colorMapping), palettes, isDarkMode, {
+    type: 'categories',
+    categories: getColorCategories(rows, tagColumn),
+  });
 }

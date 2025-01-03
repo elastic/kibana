@@ -6,11 +6,18 @@
  */
 
 import React, { FC, ReactNode } from 'react';
-import { EuiInMemoryTable, EuiBasicTableColumn, EuiLink, Query, EuiIconTip } from '@elastic/eui';
+import {
+  EuiInMemoryTable,
+  EuiBasicTableColumn,
+  EuiLink,
+  Query,
+  EuiIconTip,
+  useEuiTheme,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { euiThemeVars } from '@kbn/ui-theme';
-import { TagsCapabilities, TagWithRelations } from '../../../common';
+import { TagsCapabilities } from '../../../common';
+import type { TagWithRelations } from '../../../common/types';
 import { TagBadge } from '../../components';
 import { TagAction } from '../actions';
 
@@ -58,6 +65,7 @@ export const TagTable: FC<TagTableProps> = ({
   actionBar,
   actions,
 }) => {
+  const { euiTheme } = useEuiTheme();
   const columns: Array<EuiBasicTableColumn<TagWithRelations>> = [
     {
       field: 'name',
@@ -71,7 +79,7 @@ export const TagTable: FC<TagTableProps> = ({
           <>
             <TagBadge tag={tag} />
             {tag.managed && (
-              <div css={{ marginLeft: euiThemeVars.euiSizeS }}>
+              <div css={{ marginLeft: euiTheme.size.s }}>
                 <EuiIconTip
                   type="lock"
                   content="This tag is managed by Elastic and cannot be deleted, edited, or assigned to objects."

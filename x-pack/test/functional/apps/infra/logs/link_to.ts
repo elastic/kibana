@@ -11,7 +11,6 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 
 const ONE_HOUR = 60 * 60 * 1000;
 const LOG_VIEW_ID = 'testView';
-const LOG_VIEW_REFERENCE = `(logViewId:${LOG_VIEW_ID},type:log-view-reference)`;
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['common']);
@@ -30,7 +29,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       it('redirects to the logs app and parses URL search params correctly', async () => {
         const location = {
           hash: '',
-          pathname: `/link-to/${LOG_VIEW_ID}`,
+          pathname: `/link-to`,
           search: `time=${timestamp}&filter=trace.id:${traceId}`,
           state: undefined,
         };
@@ -43,20 +42,18 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             ensureCurrentUrl: false,
           }
         );
+
         return await retry.tryForTime(5000, async () => {
           const currentUrl = await browser.getCurrentUrl();
           const parsedUrl = new URL(currentUrl);
-          const documentTitle = await browser.getTitle();
 
-          expect(parsedUrl.pathname).to.be('/app/logs/stream');
-          expect(parsedUrl.searchParams.get('logFilter')).to.be(
-            `(query:(language:kuery,query:\'trace.id:${traceId}'),refreshInterval:(pause:!t,value:5000),timeRange:(from:'${startDate}',to:'${endDate}'))`
+          expect(parsedUrl.pathname).to.be('/app/observability-logs-explorer/');
+          expect(parsedUrl.searchParams.get('pageState')).to.contain(
+            `query:(language:kuery,query:\'trace.id:${traceId}')`
           );
-          expect(parsedUrl.searchParams.get('logPosition')).to.be(
-            `(position:(tiebreaker:0,time:'${date.toISOString()}'))`
+          expect(parsedUrl.searchParams.get('pageState')).to.contain(
+            `time:(from:'${startDate}',to:'${endDate}')`
           );
-          expect(parsedUrl.searchParams.get('logView')).to.be(LOG_VIEW_REFERENCE);
-          expect(documentTitle).to.contain('Stream - Logs - Observability - Elastic');
         });
       });
     });
@@ -81,17 +78,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await retry.tryForTime(5000, async () => {
           const currentUrl = await browser.getCurrentUrl();
           const parsedUrl = new URL(currentUrl);
-          const documentTitle = await browser.getTitle();
 
-          expect(parsedUrl.pathname).to.be('/app/logs/stream');
-          expect(parsedUrl.searchParams.get('logFilter')).to.be(
-            `(query:(language:kuery,query:\'(kubernetes.pod.uid: 1234) and (trace.id:${traceId})\'),refreshInterval:(pause:!t,value:5000),timeRange:(from:'${startDate}',to:'${endDate}'))`
+          expect(parsedUrl.pathname).to.be('/app/observability-logs-explorer/');
+          expect(parsedUrl.searchParams.get('pageState')).to.contain(
+            `query:(language:kuery,query:\'(kubernetes.pod.uid: 1234) and (trace.id:${traceId})\')`
           );
-          expect(parsedUrl.searchParams.get('logPosition')).to.be(
-            `(position:(tiebreaker:0,time:'${date.toISOString()}'))`
+          expect(parsedUrl.searchParams.get('pageState')).to.contain(
+            `time:(from:'${startDate}',to:'${endDate}')`
           );
-          expect(parsedUrl.searchParams.get('logView')).to.be(LOG_VIEW_REFERENCE);
-          expect(documentTitle).to.contain('Stream - Logs - Observability - Elastic');
         });
       });
     });

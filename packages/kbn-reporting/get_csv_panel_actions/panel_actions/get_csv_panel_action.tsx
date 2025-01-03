@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { firstValueFrom, Observable } from 'rxjs';
@@ -14,7 +15,6 @@ import {
   CoreStart,
   I18nStart,
   NotificationsSetup,
-  ThemeServiceSetup,
 } from '@kbn/core/public';
 import { DataPublicPluginStart, SerializedSearchSourceFields } from '@kbn/data-plugin/public';
 import {
@@ -58,6 +58,7 @@ type StartServices = [
     | 'analytics'
     | 'i18n'
     | 'theme'
+    | 'userProfile'
     // used extensively in Reporting share panel action
     | 'application'
     | 'uiSettings'
@@ -71,7 +72,6 @@ interface Params {
   csvConfig: ClientConfigType['csv'];
   core: CoreSetup;
   startServices$: Observable<StartServices>;
-  usesUiCapabilities: boolean;
 }
 
 interface ExecutionParams {
@@ -101,19 +101,13 @@ export class ReportingCsvPanelAction implements ActionDefinition<EmbeddableApiCo
   private readonly i18nStrings: ReturnType<typeof getI18nStrings>;
   private readonly notifications: NotificationsSetup;
   private readonly apiClient: ReportingAPIClient;
-  private readonly enablePanelActionDownload: boolean;
-  private readonly theme: ThemeServiceSetup;
-  private readonly startServices$: Params['startServices$'];
-  private readonly usesUiCapabilities: boolean;
+  private readonly startServices$: Observable<StartServices>;
 
-  constructor({ core, csvConfig, apiClient, startServices$, usesUiCapabilities }: Params) {
+  constructor({ core, apiClient, startServices$ }: Params) {
     this.isDownloading = false;
     this.apiClient = apiClient;
-    this.enablePanelActionDownload = csvConfig.enablePanelActionDownload === true;
     this.notifications = core.notifications;
-    this.theme = core.theme;
     this.startServices$ = startServices$;
-    this.usesUiCapabilities = usesUiCapabilities;
     this.i18nStrings = getI18nStrings(apiClient);
   }
 
@@ -122,9 +116,7 @@ export class ReportingCsvPanelAction implements ActionDefinition<EmbeddableApiCo
   }
 
   public getDisplayName() {
-    return this.enablePanelActionDownload
-      ? this.i18nStrings.download.displayName
-      : this.i18nStrings.generate.displayName;
+    return this.i18nStrings.generate.displayName;
   }
 
   public async getSharingData(savedSearch: SavedSearch) {
@@ -145,10 +137,7 @@ export class ReportingCsvPanelAction implements ActionDefinition<EmbeddableApiCo
     const licenseHasCsvReporting = checkLicense(license.check('reporting', 'basic')).showLinks;
 
     // NOTE: For historical reasons capability identifier is called `downloadCsv. It can not be renamed.
-    const capabilityHasCsvReporting = this.usesUiCapabilities
-      ? application.capabilities.dashboard?.downloadCsv === true
-      : true; // if we're using the deprecated "xpack.reporting.roles.enabled=true" setting, the panel action is always visible
-
+    const capabilityHasCsvReporting = application.capabilities.dashboard?.downloadCsv === true;
     if (!licenseHasCsvReporting || !capabilityHasCsvReporting) {
       return false;
     }
@@ -156,72 +145,9 @@ export class ReportingCsvPanelAction implements ActionDefinition<EmbeddableApiCo
     return getInheritedViewMode(embeddable) !== ViewMode.EDIT;
   };
 
-  /**
-   * Requires `xpack.reporting.csv.enablePanelActionDownload: true` in kibana.yml
-   * @deprecated
-   */
-  private executeDownload = async (params: ExecutionParams) => {
-    const { searchSource, columns, title, analytics, i18nStart } = params;
-    const immediateJobParams = this.apiClient.getDecoratedJobParams({
-      searchSource,
-      columns,
-      title,
-      objectType: 'downloadCsv', // FIXME: added for typescript, but immediate download job does not need objectType
-    });
-
-    this.isDownloading = true;
-
-    this.notifications.toasts.addSuccess({
-      title: this.i18nStrings.download.toasts.success.title,
-      text: toMountPoint(this.i18nStrings.download.toasts.success.body, {
-        analytics,
-        i18n: i18nStart,
-        theme: this.theme,
-      }),
-      'data-test-subj': 'csvDownloadStarted',
-    });
-
-    await this.apiClient
-      .createImmediateReport(immediateJobParams)
-      .then(({ body, response }) => {
-        this.isDownloading = false;
-
-        const download = `${title}.csv`;
-        const blob = new Blob([body as BlobPart], {
-          type: response?.headers.get('content-type') || undefined,
-        });
-
-        // Hack for IE11 Support
-        // @ts-expect-error
-        if (window.navigator.msSaveOrOpenBlob) {
-          // @ts-expect-error
-          return window.navigator.msSaveOrOpenBlob(blob, download);
-        }
-
-        const a = window.document.createElement('a');
-        const downloadObject = window.URL.createObjectURL(blob);
-
-        a.href = downloadObject;
-        a.download = download;
-        document.body.appendChild(a);
-        a.click();
-        window.URL.revokeObjectURL(downloadObject);
-        document.body.removeChild(a);
-      })
-      .catch((error: unknown) => {
-        // eslint-disable-next-line no-console
-        console.error(error);
-        this.isDownloading = false;
-        this.notifications.toasts.addDanger({
-          title: this.i18nStrings.download.toasts.error.title,
-          text: this.i18nStrings.download.toasts.error.body,
-          'data-test-subj': 'downloadCsvFail',
-        });
-      });
-  };
-
   private executeGenerate = async (params: ExecutionParams) => {
-    const { searchSource, columns, title, analytics, i18nStart } = params;
+    const [startServices] = await firstValueFrom(this.startServices$);
+    const { searchSource, columns, title } = params;
     const csvJobParams = this.apiClient.getDecoratedJobParams<JobAppParamsCSV>({
       searchSource,
       columns,
@@ -235,11 +161,7 @@ export class ReportingCsvPanelAction implements ActionDefinition<EmbeddableApiCo
         if (job) {
           this.notifications.toasts.addSuccess({
             title: this.i18nStrings.generate.toasts.success.title,
-            text: toMountPoint(this.i18nStrings.generate.toasts.success.body, {
-              analytics,
-              i18n: i18nStart,
-              theme: this.theme,
-            }),
+            text: toMountPoint(this.i18nStrings.generate.toasts.success.body, startServices),
             'data-test-subj': 'csvReportStarted',
           });
         }
@@ -277,9 +199,6 @@ export class ReportingCsvPanelAction implements ActionDefinition<EmbeddableApiCo
     const title = savedSearch.title || '';
     const executionParams = { searchSource, columns, title, savedSearch, i18nStart, analytics };
 
-    if (this.enablePanelActionDownload) {
-      return this.executeDownload(executionParams);
-    }
     return this.executeGenerate(executionParams);
   };
 }

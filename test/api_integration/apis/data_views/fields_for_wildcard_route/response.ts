@@ -1,12 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
+import {
+  ELASTIC_HTTP_VERSION_HEADER,
+  X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
+} from '@kbn/core-http-common';
 import { INITIAL_REST_VERSION_INTERNAL } from '@kbn/data-views-plugin/server/constants';
 import { FIELDS_FOR_WILDCARD_PATH } from '@kbn/data-views-plugin/common/constants';
 import expect from '@kbn/expect';
@@ -17,6 +21,7 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
   const esClient = getService('es');
+  const log = getService('log');
 
   const ensureFieldsAreSorted = (resp: { body: { fields: { name: string } } }) => {
     expect(resp.body.fields).to.eql(sortBy(resp.body.fields, 'name'));
@@ -88,6 +93,7 @@ export default function ({ getService }: FtrProviderContext) {
       await supertest
         .get(FIELDS_FOR_WILDCARD_PATH)
         .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION_INTERNAL)
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .query({ pattern: 'basic_index' })
         .expect(200, {
           fields: testFields,
@@ -100,6 +106,7 @@ export default function ({ getService }: FtrProviderContext) {
       await supertest
         .get(FIELDS_FOR_WILDCARD_PATH)
         .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION_INTERNAL)
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .query({ pattern: 'basic_index', fields: JSON.stringify(['bar']) })
         .expect(200, {
           fields: [testFields[0]],
@@ -111,6 +118,7 @@ export default function ({ getService }: FtrProviderContext) {
       await supertest
         .get(FIELDS_FOR_WILDCARD_PATH)
         .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION_INTERNAL)
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .query({
           pattern: 'basic_index',
           meta_fields: JSON.stringify(['_id', '_source', 'crazy_meta_field']),
@@ -204,6 +212,7 @@ export default function ({ getService }: FtrProviderContext) {
       await supertest
         .get(FIELDS_FOR_WILDCARD_PATH)
         .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION_INTERNAL)
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .query({ pattern: 'bad_index,basic_index' })
         .expect(200, {
           fields: testFields,
@@ -215,6 +224,7 @@ export default function ({ getService }: FtrProviderContext) {
       await supertest
         .get(FIELDS_FOR_WILDCARD_PATH)
         .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION_INTERNAL)
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .query({ pattern: 'bad_index,bad_index_2' })
         .expect(404);
     });
@@ -223,13 +233,14 @@ export default function ({ getService }: FtrProviderContext) {
       await supertest
         .get(FIELDS_FOR_WILDCARD_PATH)
         .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION_INTERNAL)
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .query({
           pattern: 'bad_index',
         })
         .expect(404);
     });
 
-    it('returns 200 when index is closed', async () => {
+    it('returns 200 when index is closed and allow_no_index is true', async () => {
       const es = getService('es');
 
       await es.indices.close({ index: 'basic_index' });
@@ -237,11 +248,35 @@ export default function ({ getService }: FtrProviderContext) {
       await supertest
         .get(FIELDS_FOR_WILDCARD_PATH)
         .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION_INTERNAL)
-        .query({ pattern: 'basic_index' })
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .query({ pattern: 'basic_index', allow_no_index: true })
+        .expect((response) => {
+          if (response.statusCode !== 200) {
+            log.debug(response.body);
+          }
+        })
         .expect(200, {
           fields: [],
           indices: [],
         });
+    });
+
+    it('returns 404 when index is closed and allow_no_index is false', async () => {
+      const es = getService('es');
+
+      await es.indices.close({ index: 'basic_index' });
+
+      await supertest
+        .get(FIELDS_FOR_WILDCARD_PATH)
+        .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION_INTERNAL)
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .query({ pattern: 'basic_index' })
+        .expect((response) => {
+          if (response.statusCode !== 404) {
+            log.debug(response.body);
+          }
+        })
+        .expect(404);
     });
 
     it('returns empty set when no fields even if meta fields are supplied', async () => {
@@ -250,6 +285,7 @@ export default function ({ getService }: FtrProviderContext) {
       await supertest
         .get(FIELDS_FOR_WILDCARD_PATH)
         .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION_INTERNAL)
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .query({
           pattern: 'fields-for-wildcard-000001',
           meta_fields: ['_id', '_index'],

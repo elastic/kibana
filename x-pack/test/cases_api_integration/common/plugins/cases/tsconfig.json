@@ -18,6 +18,7 @@
     "@kbn/features-plugin",
     "@kbn/spaces-plugin",
     "@kbn/security-plugin",
+    "@kbn/task-manager-plugin",
   ],
   "exclude": [
     "target/**/*",

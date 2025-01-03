@@ -93,7 +93,15 @@
                     "section": "def-server.CoreUsageStats",
                     "text": "CoreUsageStats"
                   },
-                  ">, [], unknown>; incrementSavedObjectsBulkCreate: jest.MockInstance<Promise<void>, [options: ",
+                  ">, [], unknown>; getDeprecatedApiUsageStats: jest.MockInstance<Promise<",
+                  {
+                    "pluginId": "@kbn/core-usage-data-server",
+                    "scope": "server",
+                    "docId": "kibKbnCoreUsageDataServerPluginApi",
+                    "section": "def-server.CoreDeprecatedApiUsageStats",
+                    "text": "CoreDeprecatedApiUsageStats"
+                  },
+                  "[]>, [], unknown>; incrementDeprecatedApi: jest.MockInstance<Promise<void>, [counterName: string, options: { resolved?: boolean | undefined; incrementBy?: number | undefined; }], unknown>; incrementSavedObjectsBulkCreate: jest.MockInstance<Promise<void>, [options: ",
                   "BaseIncrementOptions",
                   "], unknown>; incrementSavedObjectsBulkGet: jest.MockInstance<Promise<void>, [options: ",
                   "BaseIncrementOptions",

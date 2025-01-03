@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { i18n } from '@kbn/i18n';
@@ -69,9 +70,7 @@ export const redirectToSavedObjectPage = (
   savedVisualizationsId?: string
 ) => {
   const {
-    history,
     setActiveUrl,
-    toastNotifications,
     http: { basePath },
     application: { navigateToApp },
   } = services;
@@ -80,9 +79,7 @@ export const redirectToSavedObjectPage = (
     path: `kibana/objects/savedVisualizations/${savedVisualizationsId}`,
   };
   redirectWhenMissing({
-    history,
     navigateToApp,
-    toastNotifications,
     basePath,
     mapping: {
       visualization: VisualizeConstants.LANDING_PAGE_PATH,
@@ -93,7 +90,7 @@ export const redirectToSavedObjectPage = (
     onBeforeRedirect() {
       setActiveUrl(VisualizeConstants.LANDING_PAGE_PATH);
     },
-    theme: services.theme,
+    ...services,
   })(error);
 };
 

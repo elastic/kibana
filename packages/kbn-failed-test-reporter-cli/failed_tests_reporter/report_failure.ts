@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { TestFailure } from './get_failures';
@@ -16,9 +17,15 @@ export async function createFailureIssue(
   failure: TestFailure,
   api: GithubApi,
   branch: string,
-  pipeline: string
+  pipeline: string,
+  prependTitle: string = ''
 ) {
-  const title = `Failing test: ${failure.classname} - ${failure.name}`;
+  // PrependTitle is introduced to provide some clarity by prepending the failing test title
+  // in order to give the whole info in the title according to each team's preference.
+  const title =
+    prependTitle && prependTitle.trim() !== ''
+      ? `Failing test: ${prependTitle} ${failure.classname} - ${failure.name}`
+      : `Failing test: ${failure.classname} - ${failure.name}`;
 
   // Github API body length maximum is 65536 characters
   // Let's keep consistency with Mocha output that is truncated to 8192 characters

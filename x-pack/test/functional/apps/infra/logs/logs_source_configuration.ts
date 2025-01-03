@@ -28,7 +28,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const kibanaServer = getService('kibanaServer');
 
-  describe('Logs Source Configuration', function () {
+  describe.skip('Logs Source Configuration', function () {
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
     });

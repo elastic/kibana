@@ -454,7 +454,7 @@
             "label": "buttonColor",
             "description": [],
             "signature": [
-              "\"text\" | \"warning\" | \"success\" | \"primary\" | \"accent\" | \"danger\" | undefined"
+              "\"text\" | \"warning\" | \"success\" | \"primary\" | \"accent\" | \"accentSecondary\" | \"danger\" | undefined"
             ],
             "path": "packages/core/overlays/core-overlays-browser/src/modal.ts",
             "deprecated": false,
@@ -1072,7 +1072,7 @@
           "EuiFlyoutProps",
           "<\"div\"> | ",
           "EuiFlyoutResizableProps",
-          ", \"onClose\"> & { onClose?: ((flyout: ",
+          ", \"onResize\" | \"onClose\"> & { onClose?: ((flyout: ",
           {
             "pluginId": "@kbn/core-mount-utils-browser",
             "scope": "public",

@@ -29,6 +29,7 @@ export function SourcePicker({
 }: SourcePickerProps) {
   return (
     <SavedObjectFinder
+      id="graphSourcePicker"
       services={{ contentClient: contentManagement.client, uiSettings }}
       onChoose={(_id, _type, _name, indexPattern) => {
         onIndexPatternSelected(indexPattern as IndexPatternSavedObject);

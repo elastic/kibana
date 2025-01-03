@@ -1,11 +1,15 @@
 {
   "type": "plugin",
   "id": "@kbn/cloud-plugin",
-  "owner": "@elastic/kibana-core",
+  "owner": [
+    "@elastic/kibana-core"
+  ],
+  "group": "platform",
+  "visibility": "shared",
   "plugin": {
     "id": "cloud",
-    "server": true,
     "browser": true,
+    "server": true,
     "configPath": [
       "xpack",
       "cloud"

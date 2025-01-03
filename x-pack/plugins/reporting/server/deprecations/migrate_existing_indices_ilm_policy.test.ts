@@ -6,7 +6,11 @@
  */
 
 import type { GetDeprecationsContext } from '@kbn/core/server';
-import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
+import {
+  elasticsearchServiceMock,
+  httpServerMock,
+  savedObjectsClientMock,
+} from '@kbn/core/server/mocks';
 
 import { getDeprecationsInfo } from './migrate_existing_indices_ilm_policy';
 
@@ -20,7 +24,11 @@ describe("Migrate existing indices' ILM policy deprecations", () => {
 
   beforeEach(async () => {
     esClient = elasticsearchServiceMock.createScopedClusterClient();
-    deprecationsCtx = { esClient, savedObjectsClient: savedObjectsClientMock.create() };
+    deprecationsCtx = {
+      esClient,
+      savedObjectsClient: savedObjectsClientMock.create(),
+      request: httpServerMock.createKibanaRequest(),
+    };
   });
 
   const createIndexSettings = (lifecycleName: string) => ({
@@ -54,7 +62,7 @@ describe("Migrate existing indices' ILM policy deprecations", () => {
             ],
           },
           "level": "warning",
-          "message": "New reporting indices will be managed by the \\"kibana-reporting\\" provisioned ILM policy. You must edit this policy to manage the report lifecycle. This change targets the hidden system index pattern \\".kibana-reporting*\\".",
+          "message": "New reporting indices will be managed by the \\"kibana-reporting\\" provisioned ILM policy. You must edit this policy to manage the report lifecycle. This change targets the hidden system index pattern \\".reporting-*,.kibana-reporting*\\".",
           "title": "Found reporting indices managed by custom ILM policy.",
         },
       ]

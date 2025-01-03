@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { concatMap, firstValueFrom, from, Observable, of, throwError } from 'rxjs';
@@ -27,7 +28,6 @@ import type {
   IEsSearchRequest,
   IEsSearchResponse,
 } from '@kbn/search-types';
-import { BfetchServerSetup } from '@kbn/bfetch-plugin/server';
 import { ExpressionsServerSetup } from '@kbn/expressions-plugin/server';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
@@ -92,7 +92,6 @@ import {
 import { aggShardDelay } from '../../common/search/aggs/buckets/shard_delay_fn';
 import { ConfigSchema } from '../config';
 import { SearchSessionService } from './session';
-import { registerBsearchRoute } from './routes/bsearch';
 import { enhancedEsSearchStrategyProvider } from './strategies/ese_search';
 import { eqlSearchStrategyProvider } from './strategies/eql_search';
 import { NoSearchIdInSessionError } from './errors/no_search_id_in_session';
@@ -106,7 +105,6 @@ type StrategyMap = Record<string, ISearchStrategy<any, any>>;
 
 /** @internal */
 export interface SearchServiceSetupDependencies {
-  bfetch: BfetchServerSetup;
   expressions: ExpressionsServerSetup;
   usageCollection?: UsageCollectionSetup;
 }
@@ -145,7 +143,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
 
   public setup(
     core: CoreSetup<DataPluginStartDependencies, DataPluginStart>,
-    { bfetch, expressions, usageCollection }: SearchServiceSetupDependencies
+    { expressions, usageCollection }: SearchServiceSetupDependencies
   ): ISearchSetup {
     core.savedObjects.registerType(searchSessionSavedObjectType);
     const usage = usageCollection ? usageProvider(core) : undefined;
@@ -189,7 +187,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
 
     // We don't want to register this because we don't want the client to be able to access this
     // strategy, but we do want to expose it to other server-side plugins
-    // see x-pack/plugins/security_solution/server/search_strategy/timeline/index.ts
+    // see x-pack/solutions/security/plugins/security_solution/server/search_strategy/timeline/index.ts
     // for example use case
     this.searchAsInternalUser = enhancedEsSearchStrategyProvider(
       this.initializerContext.config.legacy.globalConfig$,
@@ -206,12 +204,6 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     this.registerSearchStrategy(
       SQL_SEARCH_STRATEGY,
       sqlSearchStrategyProvider(this.initializerContext.config.get().search, this.logger)
-    );
-
-    registerBsearchRoute(
-      bfetch,
-      (request: KibanaRequest) => this.asScoped(request),
-      core.executionContext
     );
 
     core.savedObjects.registerType(searchTelemetry);

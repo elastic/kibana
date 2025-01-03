@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 export type ByteSizeValueUnit = 'b' | 'kb' | 'mb' | 'gb';
@@ -22,7 +23,11 @@ function renderUnit(value: number, unit: string) {
 
 export class ByteSizeValue {
   public static parse(text: string): ByteSizeValue {
-    const match = /([1-9][0-9]*)(b|kb|mb|gb)/i.exec(text);
+    if (text.length > 18) {
+      // Exit early on large input where <count> uses more than 16 digits and is therefore larger than Number.MAX_SAFE_INTEGER
+      throw new Error('Value in bytes is expected to be a safe positive integer.');
+    }
+    const match = /(^[1-9]\d*)(b|kb|mb|gb)$/i.exec(text);
     if (!match) {
       const number = Number(text);
       if (typeof number !== 'number' || isNaN(number)) {

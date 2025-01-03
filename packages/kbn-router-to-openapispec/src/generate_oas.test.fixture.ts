@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { z } from '@kbn/zod';
@@ -33,22 +34,12 @@ export const sharedOas = {
     '/bar': {
       get: {
         deprecated: true,
-        operationId: '%2Fbar#0',
-        parameters: [
-          {
-            description: 'The version of the API to use',
-            in: 'header',
-            name: 'elastic-api-version',
-            schema: {
-              default: 'oas-test-version-2',
-              enum: ['oas-test-version-1', 'oas-test-version-2'],
-              type: 'string',
-            },
-          },
-        ],
+        'x-discontinued': 'route discontinued version or date',
+        operationId: 'get-bar',
+        parameters: [],
         requestBody: {
           content: {
-            'application/json; Elastic-Api-Version=oas-test-version-1': {
+            'application/json': {
               schema: {
                 additionalProperties: false,
                 properties: {
@@ -105,25 +96,13 @@ export const sharedOas = {
                 type: 'object',
               },
             },
-            'application/json; Elastic-Api-Version=oas-test-version-2': {
-              schema: {
-                additionalProperties: false,
-                properties: {
-                  foo: {
-                    type: 'string',
-                  },
-                },
-                required: ['foo'],
-                type: 'object',
-              },
-            },
           },
         },
         responses: {
           '200': {
-            description: 'OK response oas-test-version-1\nOK response oas-test-version-2',
+            description: 'OK response 2023-10-31',
             content: {
-              'application/json; Elastic-Api-Version=oas-test-version-1': {
+              'application/json': {
                 schema: {
                   additionalProperties: false,
                   description: 'fooResponse',
@@ -136,12 +115,6 @@ export const sharedOas = {
                   type: 'object',
                 },
               },
-              'application/octet-stream; Elastic-Api-Version=oas-test-version-2': {
-                schema: {
-                  description: 'stream response',
-                  type: 'object',
-                },
-              },
             },
           },
         },
@@ -149,21 +122,11 @@ export const sharedOas = {
         tags: ['versioned'],
       },
     },
-    '/foo/{id}/{path*}': {
+    '/foo/{id}/{path}': {
       get: {
         description: 'route description',
-        operationId: '%2Ffoo%2F%7Bid%7D%2F%7Bpath*%7D#0',
+        operationId: 'get-foo-id-path',
         parameters: [
-          {
-            description: 'The version of the API to use',
-            in: 'header',
-            name: 'elastic-api-version',
-            schema: {
-              default: '2023-10-31',
-              enum: ['2023-10-31'],
-              type: 'string',
-            },
-          },
           {
             description: 'id',
             in: 'path',
@@ -199,7 +162,7 @@ export const sharedOas = {
         ],
         requestBody: {
           content: {
-            'application/json; Elastic-Api-Version=2023-10-31': {
+            'application/json': {
               schema: {
                 additionalProperties: false,
                 properties: {
@@ -261,7 +224,7 @@ export const sharedOas = {
         responses: {
           '200': {
             content: {
-              'application/json; Elastic-Api-Version=2023-10-31': {
+              'application/json': {
                 schema: {
                   maxLength: 10,
                   minLength: 1,
@@ -276,18 +239,8 @@ export const sharedOas = {
       },
       post: {
         description: 'route description',
-        operationId: '%2Ffoo%2F%7Bid%7D%2F%7Bpath*%7D#1',
+        operationId: 'post-foo-id-path',
         parameters: [
-          {
-            description: 'The version of the API to use',
-            in: 'header',
-            name: 'elastic-api-version',
-            schema: {
-              default: '2023-10-31',
-              enum: ['2023-10-31'],
-              type: 'string',
-            },
-          },
           {
             description: 'A required header to protect against CSRF attacks',
             in: 'header',
@@ -333,7 +286,7 @@ export const sharedOas = {
         ],
         requestBody: {
           content: {
-            'application/json; Elastic-Api-Version=2023-10-31': {
+            'application/json': {
               schema: {
                 additionalProperties: false,
                 properties: {
@@ -395,7 +348,7 @@ export const sharedOas = {
         responses: {
           '200': {
             content: {
-              'application/json; Elastic-Api-Version=2023-10-31': {
+              'application/json': {
                 schema: {
                   maxLength: 10,
                   minLength: 1,

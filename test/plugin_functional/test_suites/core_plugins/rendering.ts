@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import _ from 'lodash';
@@ -101,7 +102,6 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         // When plugin owners make a change that exposes additional config values, the changes will be reflected in this test assertion.
         // Ensure that your change does not unintentionally expose any sensitive values!
         'console.autocompleteDefinitions.endpointsAvailability (stack?|serverless?)',
-        'console.dev.enableMonaco (boolean?)',
         'console.ui.enabled (boolean?)',
         'console.ui.embeddedEnabled (boolean?)',
         'dashboard.allowByValueEmbeddables (boolean?)',
@@ -128,7 +128,6 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'data_visualizer.resultLinks.fileBeat.enabled (boolean)',
         'dev_tools.deeplinks.navLinkStatus (string?)',
         'discover.experimental.enabledProfiles (array?)',
-        'enterpriseSearch.canDeployEntSearch (boolean?)',
         'enterpriseSearch.host (string?)',
         'enterpriseSearch.ui.enabled (boolean?)',
         'home.disableWelcomeScreen (boolean?)',
@@ -163,6 +162,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'monitoring.ui.enabled (boolean?)',
         'monitoring.ui.min_interval_seconds (number?)',
         'monitoring.ui.show_license_expiration (boolean?)',
+        'monitoring.ui.logs.index (string?)',
         'newsfeed.fetchInterval (duration?)',
         'newsfeed.mainInterval (duration?)',
         'newsfeed.service.pathTemplate (string?)',
@@ -228,14 +228,11 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.ccr.ui.enabled (boolean?)',
         'xpack.cloud.base_url (string?)',
         'xpack.cloud.cname (string?)',
+        'xpack.cloud.csp (string?)',
         'xpack.cloud.deployment_url (string?)',
         'xpack.cloud.deployments_url (string?)',
         'xpack.cloud.is_elastic_staff_owned (boolean?)',
         'xpack.cloud.trial_end_date (string?)',
-        'xpack.cloud_integrations.chat.chatURL (string?)',
-        'xpack.cloud_integrations.chat.trialBuffer (number?)',
-        // No PII. This is an escape patch to override LaunchDarkly's flag resolution mechanism for testing or quick fix.
-        'xpack.cloud_integrations.experiments.flag_overrides (record?)',
         // Commented because it's inside a schema conditional, and the test is not able to resolve it. But it's shared.
         // Added here for documentation purposes.
         // 'xpack.cloud_integrations.experiments.launch_darkly.client_id (string)',
@@ -276,6 +273,8 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.index_management.ui.enabled (boolean?)',
         'xpack.infra.sources.default.fields.message (array?)',
         'xpack.index_management.enableTogglingDataRetention (boolean?|never)',
+        'xpack.index_management.enableProjectLevelRetentionChecks (boolean?|never)',
+        'xpack.integration_assistant.enableExperimental (array?)',
         /**
          * Feature flags bellow are conditional based on traditional/serverless offering
          */
@@ -293,6 +292,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.index_management.enableLegacyTemplates (boolean?|never)',
         'xpack.index_management.enableIndexStats (boolean?|never)',
         'xpack.index_management.enableDataStreamStats (boolean?|never)',
+        'xpack.index_management.enableSizeAndDocCount (boolean?|never)',
         'xpack.index_management.editableIndexSettings (all?|limited?|never)',
         'xpack.index_management.enableMappingsSourceFieldSection (boolean?|never)',
         'xpack.index_management.dev.enableSemanticText (boolean?)',
@@ -302,21 +302,31 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.ml.ad.enabled (boolean)',
         'xpack.ml.dfa.enabled (boolean)',
         'xpack.ml.nlp.enabled (boolean)',
+        'xpack.ml.nlp.modelDeployment.allowStaticAllocations (boolean)',
+        'xpack.ml.nlp.modelDeployment.vCPURange.high.max (number)',
+        'xpack.ml.nlp.modelDeployment.vCPURange.high.min (number)',
+        'xpack.ml.nlp.modelDeployment.vCPURange.high.static (number?)',
+        'xpack.ml.nlp.modelDeployment.vCPURange.low.max (number)',
+        'xpack.ml.nlp.modelDeployment.vCPURange.low.min (number)',
+        'xpack.ml.nlp.modelDeployment.vCPURange.low.static (number?)',
+        'xpack.ml.nlp.modelDeployment.vCPURange.medium.max (number)',
+        'xpack.ml.nlp.modelDeployment.vCPURange.medium.min (number)',
+        'xpack.ml.nlp.modelDeployment.vCPURange.medium.static (number?)',
         'xpack.osquery.actionEnabled (boolean?)',
         'xpack.remote_clusters.ui.enabled (boolean?)',
+        'xpack.ingest_pipelines.enableManageProcessors (boolean?|never)',
         /**
          * NOTE: The Reporting plugin is currently disabled in functional tests (see test/functional/config.base.js).
          * It will be re-enabled once #102552 is completed.
          */
-        // 'xpack.reporting.roles.allow (array)',
-        // 'xpack.reporting.roles.enabled (boolean)',
         // 'xpack.reporting.poll.jobCompletionNotifier.interval (number)',
         // 'xpack.reporting.poll.jobCompletionNotifier.intervalErrorMultiplier (number)',
         // 'xpack.reporting.poll.jobsRefresh.interval (number)',
         // 'xpack.reporting.poll.jobsRefresh.intervalErrorMultiplier (number)',
         'xpack.rollup.ui.enabled (boolean?)',
         'xpack.saved_object_tagging.cache_refresh_interval (duration?)',
-        'xpack.search.homepage.ui.enabled (boolean?)',
+
+        'xpack.searchAssistant.ui.enabled (boolean?)',
         'xpack.searchInferenceEndpoints.ui.enabled (boolean?)',
         'xpack.searchPlayground.ui.enabled (boolean?)',
         'xpack.security.loginAssistanceMessage (string?)',
@@ -341,6 +351,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.upgrade_assistant.featureSet.migrateSystemIndices (boolean?)',
         'xpack.upgrade_assistant.featureSet.mlSnapshots (boolean?)',
         'xpack.upgrade_assistant.featureSet.reindexCorrectiveActions (boolean?)',
+        'xpack.upgrade_assistant.featureSet.migrateDataStreams (boolean?)',
         'xpack.upgrade_assistant.ui.enabled (boolean?)',
         'xpack.observability.unsafe.alertDetails.metrics.enabled (boolean?)',
         'xpack.observability.unsafe.alertDetails.logs.enabled (boolean?)',
@@ -349,6 +360,10 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.observability.unsafe.thresholdRule.enabled (boolean?)',
         'xpack.observability_onboarding.ui.enabled (boolean?)',
         'xpack.observabilityLogsExplorer.navigation.showAppLink (boolean?|never)',
+        'xpack.observabilityAIAssistant.scope (observability?|search?)',
+        'xpack.observabilityAiAssistantManagement.logSourcesEnabled (boolean?)',
+        'xpack.observabilityAiAssistantManagement.spacesEnabled (boolean?)',
+        'xpack.observabilityAiAssistantManagement.visibilityEnabled (boolean?)',
         'share.new_version.enabled (boolean?)',
         'aiAssistantManagementSelection.preferredAIAssistantType (default?|never?|observability?)',
         /**

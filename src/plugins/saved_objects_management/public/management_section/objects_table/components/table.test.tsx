@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -112,7 +113,7 @@ describe('Table', () => {
     expect(component.state().isSearchTextValid).toBe(true);
   });
 
-  it(`prevents hidden saved objects from being deleted`, () => {
+  it(`prevents hidden saved objects from being deleted`, async () => {
     const selectedSavedObjects = [
       { type: 'visualization', meta: { hiddenType: true } },
       { type: 'search', meta: { hiddenType: true } },
@@ -123,9 +124,33 @@ describe('Table', () => {
       selectedSavedObjects,
       capabilities: { savedObjectsManagement: { delete: false } } as any,
     };
-    const component = shallowWithI18nProvider(<Table {...customizedProps} />);
+    render(
+      <I18nProvider>
+        <Table {...customizedProps} />
+      </I18nProvider>
+    );
 
-    expect(component).toMatchSnapshot();
+    await waitFor(() => {
+      expect(screen.getByTestId('savedObjectsManagementDelete')).toBeDisabled();
+    });
+  });
+
+  it(`disables delete when no objects are selected `, async () => {
+    const selectedSavedObjects = [] as any;
+    const customizedProps = {
+      ...defaultProps,
+      selectedSavedObjects,
+      capabilities: { savedObjectsManagement: { delete: true } } as any,
+    };
+    render(
+      <I18nProvider>
+        <Table {...customizedProps} />
+      </I18nProvider>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId('savedObjectsManagementDelete')).toBeDisabled();
+    });
   });
 
   it(`allows for automatic refreshing after an action`, () => {

@@ -13,14 +13,13 @@ import {
 } from '@kbn/management-plugin/public/mocks';
 
 import { SpacesPlugin } from './plugin';
-// import { ConfigSchema } from './config';
 
 describe('Spaces plugin', () => {
   describe('#setup', () => {
     it('should register the space selector app when buildFlavor is traditional', () => {
       const coreSetup = coreMock.createSetup();
       const mockInitializerContext = coreMock.createPluginInitializerContext(
-        {},
+        { allowSolutionVisibility: true },
         { buildFlavor: 'traditional' }
       );
 
@@ -40,7 +39,7 @@ describe('Spaces plugin', () => {
     it('should not register the space selector app when buildFlavor is serverless and maxSpaces is 1', () => {
       const coreSetup = coreMock.createSetup();
       const mockInitializerContext = coreMock.createPluginInitializerContext(
-        { maxSpaces: 1 },
+        { maxSpaces: 1, allowSolutionVisibility: true },
         { buildFlavor: 'serverless' }
       );
 
@@ -60,7 +59,7 @@ describe('Spaces plugin', () => {
     it('should register the space selector app when buildFlavor is serverless and and maxSpaces is >1', () => {
       const coreSetup = coreMock.createSetup();
       const mockInitializerContext = coreMock.createPluginInitializerContext(
-        { maxSpaces: 2 },
+        { maxSpaces: 2, allowSolutionVisibility: true },
         { buildFlavor: 'serverless' }
       );
 
@@ -88,7 +87,7 @@ describe('Spaces plugin', () => {
       management.sections.section.kibana = mockSection;
 
       const mockInitializerContext = coreMock.createPluginInitializerContext(
-        {},
+        { allowSolutionVisibility: true },
         { buildFlavor: 'traditional' }
       );
 
@@ -122,7 +121,9 @@ describe('Spaces plugin', () => {
 
       management.sections.section.kibana = mockSection;
 
-      const plugin = new SpacesPlugin(coreMock.createPluginInitializerContext({ maxSpaces: 1 }));
+      const plugin = new SpacesPlugin(
+        coreMock.createPluginInitializerContext({ maxSpaces: 1, allowSolutionVisibility: true })
+      );
       plugin.setup(coreSetup, {
         management,
         home,
@@ -152,7 +153,9 @@ describe('Spaces plugin', () => {
 
       management.sections.section.kibana = mockSection;
 
-      const plugin = new SpacesPlugin(coreMock.createPluginInitializerContext({ maxSpaces: 2 }));
+      const plugin = new SpacesPlugin(
+        coreMock.createPluginInitializerContext({ maxSpaces: 2, allowSolutionVisibility: true })
+      );
       plugin.setup(coreSetup, {
         management,
         home,
@@ -179,7 +182,7 @@ describe('Spaces plugin', () => {
       const coreStart = coreMock.createStart();
 
       const mockInitializerContext = coreMock.createPluginInitializerContext(
-        {},
+        { allowSolutionVisibility: true },
         { buildFlavor: 'traditional' }
       );
 
@@ -196,7 +199,7 @@ describe('Spaces plugin', () => {
       const coreStart = coreMock.createStart();
 
       const mockInitializerContext = coreMock.createPluginInitializerContext(
-        { maxSpaces: 1 },
+        { maxSpaces: 1, allowSolutionVisibility: true },
         { buildFlavor: 'serverless' }
       );
 
@@ -209,27 +212,76 @@ describe('Spaces plugin', () => {
     });
   });
 
-  it('determines hasOnlyDefaultSpace correctly when maxSpaces=1', () => {
-    const coreSetup = coreMock.createSetup();
-    const coreStart = coreMock.createStart();
+  describe('hasOnlyDefaultSpace', () => {
+    it('determines hasOnlyDefaultSpace correctly when maxSpaces=1', () => {
+      const coreSetup = coreMock.createSetup();
+      const coreStart = coreMock.createStart();
 
-    const plugin = new SpacesPlugin(coreMock.createPluginInitializerContext({ maxSpaces: 1 }));
-    const spacesSetup = plugin.setup(coreSetup, {});
-    const spacesStart = plugin.start(coreStart);
+      const plugin = new SpacesPlugin(
+        coreMock.createPluginInitializerContext({ maxSpaces: 1, allowSolutionVisibility: true })
+      );
+      const spacesSetup = plugin.setup(coreSetup, {});
+      const spacesStart = plugin.start(coreStart);
 
-    expect(spacesSetup.hasOnlyDefaultSpace).toBe(true);
-    expect(spacesStart.hasOnlyDefaultSpace).toBe(true);
+      expect(spacesSetup.hasOnlyDefaultSpace).toBe(true);
+      expect(spacesStart.hasOnlyDefaultSpace).toBe(true);
+    });
+
+    it('determines hasOnlyDefaultSpace correctly when maxSpaces=1000', () => {
+      const coreSetup = coreMock.createSetup();
+      const coreStart = coreMock.createStart();
+
+      const plugin = new SpacesPlugin(
+        coreMock.createPluginInitializerContext({ maxSpaces: 1000, allowSolutionVisibility: true })
+      );
+      const spacesSetup = plugin.setup(coreSetup, {});
+      const spacesStart = plugin.start(coreStart);
+
+      expect(spacesSetup.hasOnlyDefaultSpace).toBe(false);
+      expect(spacesStart.hasOnlyDefaultSpace).toBe(false);
+    });
   });
 
-  it('determines hasOnlyDefaultSpace correctly when maxSpaces=1000', () => {
-    const coreSetup = coreMock.createSetup();
-    const coreStart = coreMock.createStart();
+  describe('isSolutionViewEnabled', () => {
+    it('when allowSolutionVisibility is "true"', () => {
+      const coreSetup = coreMock.createSetup();
+      const coreStart = coreMock.createStart();
 
-    const plugin = new SpacesPlugin(coreMock.createPluginInitializerContext({ maxSpaces: 1000 }));
-    const spacesSetup = plugin.setup(coreSetup, {});
-    const spacesStart = plugin.start(coreStart);
+      const plugin = new SpacesPlugin(
+        coreMock.createPluginInitializerContext({ allowSolutionVisibility: true })
+      );
+      const spacesSetup = plugin.setup(coreSetup, {});
+      const spacesStart = plugin.start(coreStart);
 
-    expect(spacesSetup.hasOnlyDefaultSpace).toBe(false);
-    expect(spacesStart.hasOnlyDefaultSpace).toBe(false);
+      expect(spacesSetup.isSolutionViewEnabled).toBe(true);
+      expect(spacesStart.isSolutionViewEnabled).toBe(true);
+    });
+
+    it('when allowSolutionVisibility is "false"', () => {
+      const coreSetup = coreMock.createSetup();
+      const coreStart = coreMock.createStart();
+
+      {
+        const plugin = new SpacesPlugin(
+          coreMock.createPluginInitializerContext({ allowSolutionVisibility: false })
+        );
+        const spacesSetup = plugin.setup(coreSetup, {});
+        const spacesStart = plugin.start(coreStart);
+
+        expect(spacesSetup.isSolutionViewEnabled).toBe(false);
+        expect(spacesStart.isSolutionViewEnabled).toBe(false);
+      }
+    });
+
+    it('when allowSolutionVisibility is "undefined"', () => {
+      const coreSetup = coreMock.createSetup();
+
+      const plugin = new SpacesPlugin(
+        coreMock.createPluginInitializerContext({ allowSolutionVisibility: undefined })
+      );
+      expect(() => plugin.setup(coreSetup, {})).toThrowErrorMatchingInlineSnapshot(
+        `"allowSolutionVisibility has not been set in the Spaces plugin config."`
+      );
+    });
   });
 });

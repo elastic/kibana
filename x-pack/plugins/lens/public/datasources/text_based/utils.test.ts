@@ -129,6 +129,7 @@ describe('Text based languages utils', () => {
         {
           fieldName: 'timestamp',
           columnId: 'timestamp',
+          label: 'timestamp',
           meta: {
             type: 'date',
           },
@@ -136,6 +137,7 @@ describe('Text based languages utils', () => {
         {
           fieldName: 'memory',
           columnId: 'memory',
+          label: 'memory',
           meta: {
             type: 'number',
           },
@@ -291,7 +293,7 @@ describe('Text based languages utils', () => {
       const expressionsMock = expressionsPluginMock.createStartContract();
       const updatedState = await getStateFromAggregateQuery(
         state,
-        { esql: 'FROM my-fake-index-pattern | WHERE time <= ?t_end' },
+        { esql: 'FROM my-fake-index-pattern | WHERE time <= ?_tend' },
         {
           ...dataViewsMock,
           getIdsWithTitle: jest.fn().mockReturnValue(
@@ -361,7 +363,7 @@ describe('Text based languages utils', () => {
             errors: [],
             index: '4',
             query: {
-              esql: 'FROM my-fake-index-pattern | WHERE time <= ?t_end',
+              esql: 'FROM my-fake-index-pattern | WHERE time <= ?_tend',
             },
             timeField: 'time',
           },

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { SerializableRecord } from '@kbn/utility-types';
@@ -14,7 +15,7 @@ import {
   PersistableStateService,
   VersionedState,
 } from '@kbn/kibana-utils-plugin/common';
-import type { FormatSearchParamsOptions } from './redirect';
+import type { GetRedirectUrlOptions } from './redirect';
 
 /**
  * URL locator registry.
@@ -87,7 +88,7 @@ export interface LocatorPublic<P extends SerializableRecord> extends Persistable
    * @param params URL locator parameters.
    * @param options URL serialization options.
    */
-  getRedirectUrl(params: P, options?: FormatSearchParamsOptions): string;
+  getRedirectUrl(params: P, options?: GetRedirectUrlOptions): string;
 
   /**
    * Navigate using the `core.application.navigateToApp()` method to a Kibana

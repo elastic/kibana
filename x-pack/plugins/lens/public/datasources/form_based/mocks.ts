@@ -8,101 +8,83 @@
 import { getFieldByNameFactory } from './pure_helpers';
 import type { IndexPattern, IndexPatternField } from '../../types';
 
+export function createMockedField(
+  someProps: Partial<IndexPatternField> & Pick<IndexPatternField, 'name' | 'type'>
+) {
+  return {
+    displayName: someProps.name,
+    aggregatable: true,
+    searchable: true,
+    ...someProps,
+  };
+}
+
 export const createMockedIndexPattern = (
   someProps?: Partial<IndexPattern>,
   customFields: IndexPatternField[] = []
 ): IndexPattern => {
   const fields = [
-    {
+    createMockedField({
       name: 'timestamp',
       displayName: 'timestampLabel',
       type: 'date',
-      aggregatable: true,
-      searchable: true,
-    },
-    {
+    }),
+    createMockedField({
       name: 'start_date',
-      displayName: 'start_date',
       type: 'date',
-      aggregatable: true,
-      searchable: true,
-    },
-    {
+    }),
+    createMockedField({
       name: 'bytes',
-      displayName: 'bytes',
       type: 'number',
-      aggregatable: true,
-      searchable: true,
-    },
-    {
+    }),
+    createMockedField({
       name: 'memory',
-      displayName: 'memory',
       type: 'number',
-      aggregatable: true,
-      searchable: true,
       esTypes: ['float'],
-    },
-    {
+    }),
+    createMockedField({
       name: 'source',
-      displayName: 'source',
       type: 'string',
-      aggregatable: true,
-      searchable: true,
       esTypes: ['keyword'],
-    },
-    {
+    }),
+    createMockedField({
       name: 'unsupported',
-      displayName: 'unsupported',
       type: 'geo',
-      aggregatable: true,
-      searchable: true,
-    },
-    {
+    }),
+    createMockedField({
       name: 'dest',
-      displayName: 'dest',
       type: 'string',
-      aggregatable: true,
-      searchable: true,
       esTypes: ['keyword'],
-    },
-    {
+    }),
+    createMockedField({
       name: 'geo.src',
-      displayName: 'geo.src',
       type: 'string',
-      aggregatable: true,
-      searchable: true,
       esTypes: ['keyword'],
-    },
-    {
+    }),
+    createMockedField({
       name: 'scripted',
       displayName: 'Scripted',
       type: 'string',
-      searchable: true,
-      aggregatable: true,
       scripted: true,
       lang: 'painless' as const,
       script: '1234',
-    },
-    {
+    }),
+    createMockedField({
       name: 'runtime-keyword',
       displayName: 'Runtime keyword field',
       type: 'string',
-      searchable: true,
-      aggregatable: true,
       runtime: true,
       lang: 'painless' as const,
       script: 'emit("123")',
-    },
-    {
+    }),
+    createMockedField({
       name: 'runtime-number',
       displayName: 'Runtime number field',
       type: 'number',
-      searchable: true,
-      aggregatable: true,
       runtime: true,
       lang: 'painless' as const,
       script: 'emit(123)',
-    },
+    }),
     ...(customFields || []),
   ];
   return {
@@ -112,6 +94,7 @@ export const createMockedIndexPattern = (
     hasRestrictions: false,
     fields,
     getFieldByName: getFieldByNameFactory(fields),
+    getFormatterForField: () => ({ convert: (v: unknown) => v }),
     isPersisted: true,
     spec: {},
     ...someProps,
@@ -120,31 +103,23 @@ export const createMockedIndexPattern = (
 
 export const createMockedRestrictedIndexPattern = () => {
   const fields = [
-    {
+    createMockedField({
       name: 'timestamp',
       displayName: 'timestampLabel',
       type: 'date',
-      aggregatable: true,
-      searchable: true,
-    },
-    {
+    }),
+    createMockedField({
       name: 'bytes',
-      displayName: 'bytes',
       type: 'number',
-      aggregatable: true,
-      searchable: true,
-    },
-    {
+    }),
+    createMockedField({
       name: 'source',
-      displayName: 'source',
       type: 'string',
-      aggregatable: true,
-      searchable: true,
       scripted: true,
       esTypes: ['keyword'],
       lang: 'painless' as const,
       script: '1234',
-    },
+    }),
   ];
   return {
     id: '2',
@@ -154,6 +129,7 @@ export const createMockedRestrictedIndexPattern = () => {
     fieldFormatMap: { bytes: { id: 'bytes', params: { pattern: '0.0' } } },
     fields,
     getFieldByName: getFieldByNameFactory(fields),
+    getFormatterForField: () => ({ convert: (v: unknown) => v }),
     isPersisted: true,
     spec: {},
     typeMeta: {
@@ -214,6 +190,7 @@ export const createMockedIndexPatternWithoutType = (
     ...otherIndexPatternProps,
     fields: filteredFields,
     getFieldByName: getFieldByNameFactory(filteredFields),
+    getFormatterForField: () => ({ convert: (v: unknown) => v }),
   };
 };
 
@@ -226,5 +203,6 @@ export const createMockedIndexPatternWithAdditionalFields = (
     ...otherIndexPatternProps,
     fields: completeFields,
     getFieldByName: getFieldByNameFactory(completeFields),
+    getFormatterForField: () => ({ convert: (v: unknown) => v }),
   };
 };

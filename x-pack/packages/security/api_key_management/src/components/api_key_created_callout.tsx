@@ -6,10 +6,13 @@
  */
 
 import { EuiCallOut } from '@elastic/eui';
+import type { FunctionComponent } from 'react';
+import React from 'react';
+
 import { i18n } from '@kbn/i18n';
-import React, { FunctionComponent } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { CreateAPIKeyResult } from './api_keys_api_client';
+
+import type { CreateAPIKeyResult } from './api_keys_api_client';
 import { SelectableTokenField } from './token_field';
 
 export interface ApiKeyCreatedCalloutProps {

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { useCallback, useMemo, useState, useEffect } from 'react';
@@ -91,12 +92,12 @@ export const useAccordionState = ({ navNode }: { navNode: ChromeProjectNavigatio
   const getAccordionProps = useCallback(
     (
       path: string,
-      _accordionProps?: Partial<EuiAccordionProps>
+      accordionProps?: Partial<EuiAccordionProps>
     ): Partial<EuiAccordionProps> | undefined => {
       const isCollapsed = accordionStateById[path]?.isCollapsed;
       const isCollapsible = accordionStateById[path]?.isCollapsible;
 
-      if (isCollapsed === undefined) return _accordionProps; // No state set yet
+      if (isCollapsed === undefined) return accordionProps; // No state set yet
 
       let forceState: EuiAccordionProps['forceState'] = isCollapsed ? 'closed' : 'open';
       if (!isCollapsible) forceState = 'open'; // Allways open if the accordion is not collapsible
@@ -107,9 +108,9 @@ export const useAccordionState = ({ navNode }: { navNode: ChromeProjectNavigatio
       };
 
       const updated: Partial<EuiAccordionProps & { isCollapsible?: boolean }> = {
-        ..._accordionProps,
+        buttonProps: { 'data-test-subj': 'accordionToggleBtn' },
+        ...accordionProps,
         arrowProps,
-        isCollapsible,
         forceState,
         onToggle: isCollapsible
           ? () => {

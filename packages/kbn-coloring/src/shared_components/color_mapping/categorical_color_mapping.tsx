@@ -1,15 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
 import { Provider } from 'react-redux';
 import { type EnhancedStore, configureStore } from '@reduxjs/toolkit';
 import { isEqual } from 'lodash';
+import { KbnPalettes } from '@kbn/palettes';
 import { colorMappingReducer, updateModel } from './state/color_mapping';
 import { Container } from './components/container/container';
 import { ColorMapping } from './config';
@@ -42,8 +44,8 @@ export type ColorMappingInputData =
 export interface ColorMappingProps {
   /** The initial color mapping model, usually coming from a the visualization saved object */
   model: ColorMapping.Config;
-  /** A map of paletteId and palette configuration */
-  palettes: Map<string, ColorMapping.CategoricalPalette>;
+  /** A collection of palette configurations */
+  palettes: KbnPalettes;
   /** A data description of what needs to be colored */
   data: ColorMappingInputData;
   /** Theme dark mode */

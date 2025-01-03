@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { Observable } from 'rxjs';
@@ -14,6 +15,7 @@ import type {
   ChromeNavLink,
   ChromeProjectNavigationNode,
   ChromeRecentlyAccessedHistoryItem,
+  PanelSelectedNode,
 } from '@kbn/core-chrome-browser';
 import { EventTracker } from './analytics';
 
@@ -32,11 +34,13 @@ export type NavigateToUrlFn = ApplicationStart['navigateToUrl'];
 export interface NavigationServices {
   basePath: BasePathService;
   recentlyAccessed$: Observable<ChromeRecentlyAccessedHistoryItem[]>;
-  navIsOpen: boolean;
   navigateToUrl: NavigateToUrlFn;
   activeNodes$: Observable<ChromeProjectNavigationNode[][]>;
   isSideNavCollapsed: boolean;
   eventTracker: EventTracker;
+  selectedPanelNode?: PanelSelectedNode | null;
+  setSelectedPanelNode?: (node: PanelSelectedNode | null) => void;
+  isFeedbackBtnVisible$: Observable<boolean>;
 }
 
 /**
@@ -52,7 +56,12 @@ export interface NavigationKibanaDependencies {
       navLinks: {
         getNavLinks$: () => Observable<Readonly<ChromeNavLink[]>>;
       };
-      getIsSideNavCollapsed$: () => Observable<boolean>;
+      sideNav: {
+        getIsCollapsed$: () => Observable<boolean>;
+        getPanelSelectedNode$: () => Observable<PanelSelectedNode | null>;
+        setPanelSelectedNode(node: string | PanelSelectedNode | null): void;
+        getIsFeedbackBtnVisible$: () => Observable<boolean>;
+      };
     };
     http: {
       basePath: BasePathService;

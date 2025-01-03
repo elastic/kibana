@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { of } from 'rxjs';
@@ -18,6 +19,7 @@ describe('convertUserProfileAPI', () => {
   beforeEach(() => {
     source = {
       userProfile$: of(null),
+      enabled$: of(false),
       getCurrent: jest.fn(),
       bulkGet: jest.fn(),
       suggest: jest.fn(),
@@ -30,6 +32,12 @@ describe('convertUserProfileAPI', () => {
   describe('getUserProfile$', () => {
     it('returns the observable from the source', () => {
       expect(output.getUserProfile$()).toBe(source.userProfile$);
+    });
+  });
+
+  describe('getEnabled$', () => {
+    it('returns the observable from the source', () => {
+      expect(output.getEnabled$()).toBe(source.enabled$);
     });
   });
 

@@ -11,7 +11,13 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { Ast } from '@kbn/interpreter';
 import { Position } from '@elastic/charts';
 import { IconChartHeatmap } from '@kbn/chart-icons';
-import { CUSTOM_PALETTE, PaletteRegistry, CustomPaletteParams } from '@kbn/coloring';
+import {
+  CUSTOM_PALETTE,
+  PaletteRegistry,
+  CustomPaletteParams,
+  PaletteOutput,
+  getOverridePaletteStops,
+} from '@kbn/coloring';
 import { ThemeServiceStart } from '@kbn/core/public';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
@@ -39,10 +45,6 @@ import { HeatmapDimensionEditor } from './dimension_editor';
 import { getSafePaletteParams } from './utils';
 import { FormBasedPersistedState } from '../..';
 import { HEATMAP_RENDER_ARRAY_VALUES, HEATMAP_X_MISSING_AXIS } from '../../user_messages_ids';
-
-const groupLabelForHeatmap = i18n.translate('xpack.lens.heatmapVisualization.heatmapGroupLabel', {
-  defaultMessage: 'Magnitude',
-});
 
 interface HeatmapVisualizationDeps {
   paletteService: PaletteRegistry;
@@ -92,12 +94,17 @@ function getInitialState(): Omit<HeatmapVisualizationState, 'layerId' | 'layerTy
   };
 }
 
-function computePaletteParams(params: CustomPaletteParams) {
+function computePaletteParams(
+  paletteService: PaletteRegistry,
+  palette: PaletteOutput<CustomPaletteParams>
+) {
+  const stops = getOverridePaletteStops(paletteService, palette);
+
   return {
-    ...params,
+    ...palette.params,
     // rewrite colors and stops as two distinct arguments
-    colors: (params?.stops || []).map(({ color }) => color),
-    stops: params?.name === 'custom' ? (params?.stops || []).map(({ stop }) => stop) : [],
+    colors: stops?.map(({ color }) => color),
+    stops: palette.params?.name === 'custom' ? stops?.map(({ stop }) => stop) : [],
     reverse: false, // managed at UI level
   };
 }
@@ -108,6 +115,9 @@ export const getHeatmapVisualization = ({
 }: HeatmapVisualizationDeps): Visualization<HeatmapVisualizationState> => ({
   id: LENS_HEATMAP_ID,
 
+  getVisualizationTypeId(state) {
+    return state.shape;
+  },
   visualizationTypes: [
     {
       id: 'heatmap',
@@ -115,15 +125,12 @@ export const getHeatmapVisualization = ({
       label: i18n.translate('xpack.lens.heatmapVisualization.heatmapLabel', {
         defaultMessage: 'Heat map',
       }),
-      groupLabel: groupLabelForHeatmap,
-      showExperimentalBadge: false,
-      sortPriority: 1,
+      sortPriority: 8,
+      description: i18n.translate('xpack.lens.heatmap.visualizationDescription', {
+        defaultMessage: 'Show density or distribution across two dimensions.',
+      }),
     },
   ],
-
-  getVisualizationTypeId(state) {
-    return state.shape;
-  },
 
   getLayerIds(state) {
     return [state.layerId];
@@ -319,6 +326,8 @@ export const getHeatmapVisualization = ({
         isVisible: state.legend.isVisible,
         position: state.legend.position,
         legendSize: state.legend.legendSize,
+        shouldTruncate: state.legend.shouldTruncate,
+        maxLines: state.legend.maxLines,
       }
     );
 
@@ -351,7 +360,7 @@ export const getHeatmapVisualization = ({
       palette: state.palette?.params
         ? paletteService
             .get(CUSTOM_PALETTE)
-            .toExpression(computePaletteParams(state.palette?.params))
+            .toExpression(computePaletteParams(paletteService, state.palette))
         : paletteService.get(DEFAULT_PALETTE_NAME).toExpression(),
       legend: buildExpression([legendFn]),
       gridConfig: buildExpression([gridConfigFn]),
@@ -409,7 +418,7 @@ export const getHeatmapVisualization = ({
       palette: state.palette?.params
         ? paletteService
             .get(CUSTOM_PALETTE)
-            .toExpression(computePaletteParams(state.palette?.params))
+            .toExpression(computePaletteParams(paletteService, state.palette))
         : paletteService.get(DEFAULT_PALETTE_NAME).toExpression(),
     });
 

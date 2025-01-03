@@ -1,13 +1,20 @@
 {
   "type": "plugin",
   "id": "@kbn/guided-onboarding-plugin",
-  "owner": "@elastic/appex-sharedux",
+  "owner": [
+    "@elastic/appex-sharedux"
+  ],
+  "group": "platform",
+  "visibility": "shared",
   "description": "Guided onboarding framework",
   "plugin": {
     "id": "guidedOnboarding",
-    "server": true,
     "browser": true,
-    "optionalPlugins": ["cloud", "features"],
+    "server": true,
+    "optionalPlugins": [
+      "cloud",
+      "features"
+    ],
     "requiredBundles": []
   }
 }

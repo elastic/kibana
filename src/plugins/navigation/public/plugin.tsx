@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import React from 'react';
 import { of, ReplaySubject, take, map, Observable, switchMap } from 'rxjs';
 import {
@@ -16,7 +18,7 @@ import {
 } from '@kbn/core/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { Space } from '@kbn/spaces-plugin/public';
-import type { SolutionNavigationDefinition } from '@kbn/core-chrome-browser';
+import type { SolutionId, SolutionNavigationDefinition } from '@kbn/core-chrome-browser';
 import { InternalChromeStart } from '@kbn/core-chrome-browser-internal';
 import type { PanelContentProvider } from '@kbn/shared-ux-chrome-navigation';
 import type {
@@ -46,11 +48,17 @@ export class NavigationPublicPlugin
   private coreStart?: CoreStart;
   private depsStart?: NavigationPublicStartDependencies;
   private isSolutionNavEnabled = false;
+  private isCloudTrialUser = false;
 
   constructor(private initializerContext: PluginInitializerContext) {}
 
-  public setup(core: CoreSetup): NavigationPublicSetup {
+  public setup(core: CoreSetup, deps: NavigationPublicSetupDependencies): NavigationPublicSetup {
     registerNavigationEventTypes(core);
+
+    const cloudTrialEndDate = deps.cloud?.trialEndDate;
+    if (cloudTrialEndDate) {
+      this.isCloudTrialUser = cloudTrialEndDate.getTime() > Date.now();
+    }
 
     return {
       registerMenuItem: this.topNavMenuExtensionsRegistry.register.bind(
@@ -70,10 +78,8 @@ export class NavigationPublicPlugin
     const extensions = this.topNavMenuExtensionsRegistry.getAll();
     const chrome = core.chrome as InternalChromeStart;
     const activeSpace$: Observable<Space | undefined> = spaces?.getActiveSpace$() ?? of(undefined);
-    const onCloud = cloud !== undefined; // The new side nav will initially only be available to cloud users
     const isServerless = this.initializerContext.env.packageInfo.buildFlavor === 'serverless';
-
-    this.isSolutionNavEnabled = onCloud && !isServerless;
+    this.isSolutionNavEnabled = spaces?.isSolutionViewEnabled ?? false;
 
     /*
      *
@@ -183,9 +189,13 @@ export class NavigationPublicPlugin
     // On serverless the chrome style is already set by the serverless plugin
     if (!isServerless) {
       chrome.setChromeStyle(isProjectNav ? 'project' : 'classic');
+
+      if (isProjectNav) {
+        chrome.sideNav.setIsFeedbackBtnVisible(!this.isCloudTrialUser);
+      }
     }
 
-    if (isProjectNav) {
+    if (isProjectNav && solutionView !== 'classic') {
       chrome.project.changeActiveSolutionNavigation(solutionView!);
     }
   }
@@ -200,6 +210,6 @@ function getIsProjectNav(solutionView?: string) {
   return Boolean(solutionView) && isKnownSolutionView(solutionView);
 }
 
-function isKnownSolutionView(solution?: string) {
+function isKnownSolutionView(solution?: string): solution is SolutionId {
   return Boolean(solution) && ['oblt', 'es', 'security'].includes(solution!);
 }

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { Component } from 'react';
@@ -26,6 +27,10 @@ import { SearchFilterConfig } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { IBasePath } from '@kbn/core/public';
+import {
+  withEuiTablePersist,
+  type EuiTablePersistInjectedProps,
+} from '@kbn/shared-ux-table-persist';
 import type { SavedObjectManagementTypeInfo } from '../../../../common/types';
 import { getDefaultTitle, getSavedObjectLabel } from '../../../lib';
 import type { v1 } from '../../../../common';
@@ -82,8 +87,11 @@ const relationshipColumn = {
   },
 };
 
-export class Relationships extends Component<RelationshipsProps, RelationshipsState> {
-  constructor(props: RelationshipsProps) {
+export class RelationshipsClass extends Component<
+  RelationshipsProps & EuiTablePersistInjectedProps<SavedObjectRelation>,
+  RelationshipsState
+> {
+  constructor(props: RelationshipsProps & EuiTablePersistInjectedProps<SavedObjectRelation>) {
     super(props);
 
     this.state = {
@@ -217,7 +225,14 @@ export class Relationships extends Component<RelationshipsProps, RelationshipsSt
   }
 
   renderRelationshipsTable() {
-    const { goInspectObject, basePath, savedObject, allowedTypes, showPlainSpinner } = this.props;
+    const {
+      goInspectObject,
+      basePath,
+      savedObject,
+      allowedTypes,
+      showPlainSpinner,
+      euiTablePersist: { pageSize, onTableChange },
+    } = this.props;
     const { relations, isLoading, error } = this.state;
 
     if (error) {
@@ -384,7 +399,8 @@ export class Relationships extends Component<RelationshipsProps, RelationshipsSt
         <EuiInMemoryTable
           items={relations}
           columns={columns as any}
-          pagination={true}
+          pagination={{ pageSize }}
+          onTableChange={onTableChange}
           search={search}
           rowProps={() => ({
             'data-test-subj': `relationshipsTableRow`,
@@ -419,3 +435,8 @@ export class Relationships extends Component<RelationshipsProps, RelationshipsSt
     );
   }
 }
+
+export const Relationships = withEuiTablePersist(RelationshipsClass, {
+  tableId: 'savedObjectsMgmtRelationships',
+  initialPageSize: 10,
+});

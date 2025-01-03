@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { renderOptInStatusNoticeBanner } from './render_opt_in_status_notice_banner';
@@ -14,6 +15,7 @@ import {
   overlayServiceMock,
   themeServiceMock,
 } from '@kbn/core/public/mocks';
+import { userProfileServiceMock } from '@kbn/core-user-profile-browser-mocks';
 import { mockTelemetryConstants, mockTelemetryService } from '../../mocks';
 
 describe('renderOptInStatusNoticeBanner', () => {
@@ -24,6 +26,7 @@ describe('renderOptInStatusNoticeBanner', () => {
     const analytics = analyticsServiceMock.createAnalyticsServiceStart();
     const i18n = i18nServiceMock.createStartContract();
     const theme = themeServiceMock.createStartContract();
+    const userProfile = userProfileServiceMock.createStart();
     const telemetryConstants = mockTelemetryConstants();
     const telemetryService = mockTelemetryService();
     overlays.banners.add.mockReturnValue(bannerID);
@@ -35,6 +38,7 @@ describe('renderOptInStatusNoticeBanner', () => {
       analytics,
       i18n,
       theme,
+      userProfile,
       telemetryConstants,
       telemetryService,
     });

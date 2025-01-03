@@ -71,8 +71,14 @@ export const FeatureTableExpandedRow = ({
   };
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="s">
-      <EuiFlexItem>
+    <EuiFlexGroup
+      direction="column"
+      gutterSize="s"
+      data-test-subj={`${feature.category.id}_${feature.id}_subFeaturesTable`}
+    >
+      <EuiFlexItem
+        data-test-subj={`${feature.category.id}_${feature.id}_customizeSubFeaturesSwitchContainer`}
+      >
         <div>
           <EuiSwitch
             label={
@@ -121,6 +127,7 @@ export const FeatureTableExpandedRow = ({
               privilegeCalculator={privilegeCalculator}
               privilegeIndex={privilegeIndex}
               featureId={feature.id}
+              categoryId={feature.category.id}
               subFeature={subFeature}
               onChange={(updatedPrivileges) => onChange(feature.id, updatedPrivileges)}
               selectedFeaturePrivileges={selectedFeaturePrivileges}

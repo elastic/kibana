@@ -1,0 +1,98 @@
+openapi: 3.0.3
+info:
+  title: Response Schemas.
+  version: "not applicable"
+paths: {}
+components:
+  x-codegen-enabled: true
+  schemas:
+    EcsMappingAPIResponse:
+      type: object
+      required:
+        - results
+      properties:
+        results:
+          type: object
+          required:
+            - mapping
+            - pipeline
+          properties:
+            mapping:
+              $ref: "./common_attributes.schema.yaml#/components/schemas/Mapping"
+            pipeline:
+              $ref: "./common_attributes.schema.yaml#/components/schemas/Pipeline"
+
+    CategorizationAPIResponse:
+      type: object
+      required:
+        - results
+      properties:
+        results:
+          type: object
+          required:
+            - docs
+            - pipeline
+          properties:
+            docs:
+              $ref: "./common_attributes.schema.yaml#/components/schemas/Docs"
+            pipeline:
+              $ref: "./common_attributes.schema.yaml#/components/schemas/Pipeline"
+
+    RelatedAPIResponse:
+      type: object
+      required:
+        - results
+      properties:
+        results:
+          type: object
+          required:
+            - docs
+            - pipeline
+          properties:
+            docs:
+              $ref: "./common_attributes.schema.yaml#/components/schemas/Docs"
+            pipeline:
+              $ref: "./common_attributes.schema.yaml#/components/schemas/Pipeline"
+
+    CheckPipelineAPIResponse:
+      type: object
+      required:
+        - results
+      properties:
+        results:
+          type: object
+          required:
+            - docs
+          properties:
+            docs:
+              $ref: "./common_attributes.schema.yaml#/components/schemas/Docs"
+    
+    AnalyzeLogsAPIResponse:
+      type: object
+      required:
+        - results
+      properties:
+        additionalProcessors:
+          type: array
+          items:
+            $ref: "./processor_attributes.schema.yaml#/components/schemas/ESProcessorItem"
+        results:
+          type: object
+          required:
+            - parsedSamples
+            - samplesFormat
+          properties:
+            samplesFormat:
+              $ref: "./common_attributes.schema.yaml#/components/schemas/SamplesFormat"
+            parsedSamples:
+              type: array
+              items:
+                type: string
+
+    CelInputAPIResponse:
+      type: object
+      required:
+        - results
+      properties:
+        results:
+          $ref: "./cel_input_attributes.schema.yaml#/components/schemas/CelInput"

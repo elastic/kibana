@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useEffect, useMemo, useState } from 'react';
@@ -314,10 +315,7 @@ export const ReactControlExample = ({
                   <EuiCodeBlock language="json">
                     {JSON.stringify(controlGroupApi?.serializeState(), null, 2)}
                   </EuiCodeBlock>,
-                  {
-                    theme: core.theme,
-                    i18n: core.i18n,
-                  }
+                  core
                 )
               );
             }}
@@ -373,10 +371,10 @@ export const ReactControlExample = ({
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButton
-                onClick={async () => {
+                onClick={() => {
                   if (controlGroupApi) {
                     saveNotification$.next();
-                    setControlGroupSerializedState(await controlGroupApi.serializeState());
+                    setControlGroupSerializedState(controlGroupApi.serializeState());
                   }
                 }}
               >

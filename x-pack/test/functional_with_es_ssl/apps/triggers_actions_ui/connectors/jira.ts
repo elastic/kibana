@@ -50,7 +50,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       it('should create the connector', async () => {
         const connectorName = generateUniqueKey();
         const createdAction = await createJiraConnector(connectorName);
-        objectRemover.add(createdAction.id, 'action', 'actions');
+        objectRemover.add(createdAction.id, 'connector', 'actions');
         await browser.refresh();
 
         await pageObjects.triggersActionsUI.searchConnectors(connectorName);
@@ -72,7 +72,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         const connectorName = generateUniqueKey();
         const createdAction = await createJiraConnector(connectorName);
         connectorId = createdAction.id;
-        objectRemover.add(connectorId, 'action', 'actions');
+        objectRemover.add(connectorId, 'connector', 'actions');
       });
 
       beforeEach(async () => {

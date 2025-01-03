@@ -1,16 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useEffect, useRef, useState } from 'react';
 import { Observable } from 'rxjs';
 import type { OverlayBanner } from './banners_service';
-
-import './banners_list.scss';
 
 interface Props {
   banners$: Observable<OverlayBanner[]>;
@@ -51,7 +50,9 @@ const BannerItem: React.FunctionComponent<{ banner: OverlayBanner }> = ({ banner
   return (
     <div
       data-test-priority={banner.priority}
-      className="kbnGlobalBannerList__item"
+      css={({ euiTheme }) => ({
+        '& + &': { marginTop: euiTheme.size.s },
+      })}
       ref={element}
       data-test-subj="global-banner-item"
     />

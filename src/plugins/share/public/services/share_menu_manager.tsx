@@ -1,19 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { CoreStart, ThemeServiceStart, ToastsSetup } from '@kbn/core/public';
-import { ShareMenuItem, ShowShareMenuOptions } from '../types';
+import { CoreStart, ThemeServiceStart, ToastsSetup, UserProfileService } from '@kbn/core/public';
+import { ShowShareMenuOptions } from '../types';
 import { ShareMenuRegistryStart } from './share_menu_registry';
 import { AnonymousAccessServiceContract } from '../../common/anonymous_access';
-import type { BrowserUrlService } from '../types';
+import type { BrowserUrlService, ShareMenuItemV2 } from '../types';
 import { ShareMenu } from '../components/share_tabs';
 
 export class ShareMenuManager {
@@ -48,10 +49,9 @@ export class ShareMenuManager {
           menuItems,
           urlService,
           anonymousAccess,
-          theme: core.theme,
-          i18n: core.i18n,
           toasts: core.notifications.toasts,
           publicAPIEnabled: !disableEmbed,
+          ...core,
         });
       },
     };
@@ -74,28 +74,28 @@ export class ShareMenuManager {
     shareableUrl,
     shareableUrlLocatorParams,
     embedUrlParamExtensions,
-    theme,
     showPublicUrlSwitch,
     urlService,
     anonymousAccess,
     snapshotShareWarning,
     onClose,
     disabledShareUrl,
-    i18n,
     isDirty,
     toasts,
     delegatedShareUrlHandler,
     publicAPIEnabled,
+    ...startServices
   }: ShowShareMenuOptions & {
     anchorElement: HTMLElement;
-    menuItems: ShareMenuItem[];
+    menuItems: ShareMenuItemV2[];
     urlService: BrowserUrlService;
     anonymousAccess: AnonymousAccessServiceContract | undefined;
-    theme: ThemeServiceStart;
     onClose: () => void;
-    i18n: CoreStart['i18n'];
     isDirty: boolean;
     toasts: ToastsSetup;
+    userProfile: UserProfileService;
+    theme: ThemeServiceStart;
+    i18n: CoreStart['i18n'];
   }) {
     if (this.isOpen) {
       onClose();
@@ -128,18 +128,16 @@ export class ShareMenuManager {
           snapshotShareWarning,
           disabledShareUrl,
           isDirty,
-          isEmbedded: allowEmbed,
           shareMenuItems: menuItems,
           toasts,
           onClose: () => {
             onClose();
             unmount();
           },
-          theme,
-          i18n,
+          ...startServices,
         }}
       />,
-      { i18n, theme }
+      startServices
     );
 
     const openModal = () => {

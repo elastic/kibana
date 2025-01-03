@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { BuildFlavor } from '@kbn/config';
 import { i18n } from '@kbn/i18n';
 
 import type {
@@ -13,10 +14,11 @@ import type {
   RoleRemoteClusterPrivilege,
   RoleRemoteIndexPrivilege,
 } from '../../../../common';
-import { MAX_NAME_LENGTH, NAME_REGEX } from '../../../../common/constants';
+import { MAX_NAME_LENGTH, NAME_REGEX, SERVERLESS_NAME_REGEX } from '../../../../common/constants';
 
 interface RoleValidatorOptions {
   shouldValidate?: boolean;
+  buildFlavor?: BuildFlavor;
 }
 
 export interface RoleValidationResult {
@@ -26,9 +28,11 @@ export interface RoleValidationResult {
 
 export class RoleValidator {
   private shouldValidate?: boolean;
+  private buildFlavor?: BuildFlavor;
 
   constructor(options: RoleValidatorOptions = {}) {
     this.shouldValidate = options.shouldValidate;
+    this.buildFlavor = options.buildFlavor;
   }
 
   public enableValidation() {
@@ -72,7 +76,17 @@ export class RoleValidator {
         )
       );
     }
-    if (!role.name.match(NAME_REGEX)) {
+    if (this.buildFlavor === 'serverless' && !role.name.match(SERVERLESS_NAME_REGEX)) {
+      return invalid(
+        i18n.translate(
+          'xpack.security.management.editRole.validateRole.serverlessNameAllowedCharactersWarningMessage',
+          {
+            defaultMessage:
+              'Name must contain only alphanumeric characters, and non-leading dots, hyphens, or underscores.',
+          }
+        )
+      );
+    } else if (this.buildFlavor !== 'serverless' && !role.name.match(NAME_REGEX)) {
       return invalid(
         i18n.translate(
           'xpack.security.management.editRole.validateRole.nameAllowedCharactersWarningMessage',
@@ -83,6 +97,7 @@ export class RoleValidator {
         )
       );
     }
+
     return valid();
   }
   public validateRemoteClusterPrivileges(role: Role): RoleValidationResult {

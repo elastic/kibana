@@ -88,6 +88,7 @@ Object {
     "allowFromAnyIp": false,
     "ipAllowlist": Array [],
   },
+  "restrictInternalApis": true,
   "rewriteBasePath": false,
   "securityResponseHeaders": Object {
     "crossOriginOpenerPolicy": "same-origin",
@@ -130,7 +131,6 @@ Object {
     "enabled": false,
     "keystore": Object {},
     "supportedProtocols": Array [
-      "TLSv1.1",
       "TLSv1.2",
       "TLSv1.3",
     ],

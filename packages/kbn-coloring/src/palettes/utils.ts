@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import {
@@ -12,6 +13,7 @@ import {
   CustomPaletteParams,
   DataBounds,
   ColorStop,
+  PaletteOutput,
 } from './types';
 
 import {
@@ -19,9 +21,10 @@ import {
   DEFAULT_PALETTE_NAME,
   DEFAULT_MAX_STOP,
   DEFAULT_MIN_STOP,
+  CUSTOM_PALETTE,
+  COMPLEMENTARY_PALETTE,
   DEFAULT_FALLBACK_PALETTE,
   LEGACY_COMPLIMENTARY_PALETTE,
-  COMPLEMENTARY_PALETTE,
 } from './constants';
 
 /** @internal **/
@@ -202,4 +205,47 @@ export function getActivePaletteName(name?: string): string {
     paletteName = COMPLEMENTARY_PALETTE;
   }
   return paletteName;
+}
+
+export function applyPaletteParams<T extends PaletteOutput<CustomPaletteParams>>(
+  palettes: PaletteRegistry,
+  activePalette: T,
+  dataBounds: DataBounds
+) {
+  // make a copy of it as they have to be manipulated later on
+  const displayStops = getPaletteStops(palettes, activePalette?.params || {}, {
+    dataBounds,
+    defaultPaletteName: activePalette?.name,
+  });
+
+  if (activePalette?.params?.reverse && activePalette?.params?.name !== CUSTOM_PALETTE) {
+    return reversePalette(displayStops);
+  }
+  return displayStops;
+}
+
+/**
+ * Returns color stops for given palette type:
+ *
+ * - custom - User has modified the stops in some way - return stops as is
+ * - non-custom - Default palette stops - Return new stops based on palette
+ *
+ * > This is needed for BWC when switching between kibana themes.
+ */
+export function getOverridePaletteStops<T extends PaletteOutput<CustomPaletteParams>>(
+  paletteService: PaletteRegistry,
+  activePalette?: T
+) {
+  if (!activePalette || activePalette.name === CUSTOM_PALETTE || !activePalette.params?.stops) {
+    return activePalette?.params?.stops;
+  }
+
+  const { stops, ...otherParams } = activePalette.params;
+  const colors = paletteService
+    .get(activePalette.name ?? DEFAULT_PALETTE_NAME)
+    .getCategoricalColors(stops.length, otherParams);
+  return stops.map((stop, i) => ({
+    ...stop,
+    color: colors[i],
+  }));
 }

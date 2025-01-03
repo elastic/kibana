@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -154,7 +155,7 @@ describe('Saved query management list component', () => {
 
   it('should render the saved queries on the selectable component', async () => {
     render(wrapSavedQueriesListComponentInContext(props));
-    expect(await screen.findAllByRole('option')).toHaveLength(1);
+    await waitFor(() => expect(screen.queryAllByRole('option')).toHaveLength(1));
     expect(screen.getByRole('option', { name: 'Test' })).toBeInTheDocument();
   });
 
@@ -172,7 +173,7 @@ describe('Saved query management list component', () => {
     render(wrapSavedQueriesListComponentInContext(newProps));
     expect(await screen.findByText('6 queries')).toBeInTheDocument();
     expect(screen.queryByText('6 queries | 1 selected')).not.toBeInTheDocument();
-    userEvent.click(screen.getByRole('option', { name: 'Test 0' }));
+    await userEvent.click(screen.getByRole('option', { name: 'Test 0' }));
     expect(screen.queryByText('6 queries')).not.toBeInTheDocument();
     expect(screen.getByText('6 queries | 1 selected')).toBeInTheDocument();
   });
@@ -212,10 +213,10 @@ describe('Saved query management list component', () => {
     render(wrapSavedQueriesListComponentInContext(newProps));
     expect(await screen.findByLabelText('Load query')).toBeDisabled();
     expect(screen.getByRole('button', { name: 'Delete query' })).toBeDisabled();
-    userEvent.click(screen.getByRole('option', { name: 'Test' }));
+    await userEvent.click(screen.getByRole('option', { name: 'Test' }));
     expect(screen.getByLabelText('Load query')).toBeEnabled();
     expect(screen.getByRole('button', { name: 'Delete query' })).toBeEnabled();
-    userEvent.click(screen.getByLabelText('Load query'));
+    await userEvent.click(screen.getByLabelText('Load query'));
     expect(onLoadSpy).toBeCalled();
     expect(onCloseSpy).toBeCalled();
   });
@@ -239,8 +240,8 @@ describe('Saved query management list component', () => {
 
   it('should render the modal on delete', async () => {
     render(wrapSavedQueriesListComponentInContext(props));
-    userEvent.click(await screen.findByRole('option', { name: 'Test' }));
-    userEvent.click(screen.getByRole('button', { name: 'Delete query' }));
+    await userEvent.click(await screen.findByRole('option', { name: 'Test' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Delete query' }));
     expect(screen.getByRole('heading', { name: 'Delete "Test"?' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Cancel' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Delete' })).toBeInTheDocument();
@@ -260,8 +261,8 @@ describe('Saved query management list component', () => {
       },
     };
     render(wrapSavedQueriesListComponentInContext(newProps));
-    userEvent.click(await screen.findByRole('option', { name: 'Test' }));
-    userEvent.click(screen.getByRole('button', { name: 'Delete query' }));
+    await userEvent.click(await screen.findByRole('option', { name: 'Test' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Delete query' }));
     expect(screen.getByRole('heading', { name: 'Delete "Test"?' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Cancel' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Delete' })).toBeInTheDocument();
@@ -289,8 +290,8 @@ describe('Saved query management list component', () => {
     expect(screen.getAllByRole('option')).toHaveLength(2);
     expect(screen.getByLabelText('Load query')).toBeEnabled();
     expect(screen.getByRole('button', { name: 'Delete query' })).toBeEnabled();
-    userEvent.click(screen.getByRole('button', { name: 'Delete query' }));
-    userEvent.click(screen.getByRole('button', { name: 'Delete' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Delete query' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Delete' }));
     expect(screen.getByText('1 query')).toBeInTheDocument();
     expect(screen.getAllByRole('option')).toHaveLength(1);
     expect(screen.getByLabelText('Load query')).toBeDisabled();
@@ -343,7 +344,7 @@ describe('Saved query management list component', () => {
       total: 6,
       queries: generateSavedQueries(1),
     });
-    userEvent.click(screen.getByRole('button', { name: 'Next page' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Next page' }));
     await waitFor(() => {
       expect(findSavedQueriesSpy).toHaveBeenLastCalledWith(undefined, 5, 2);
     });
@@ -353,7 +354,7 @@ describe('Saved query management list component', () => {
       total: 6,
       queries: generateSavedQueries(5),
     });
-    userEvent.click(screen.getByRole('button', { name: 'Previous page' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Previous page' }));
     await waitFor(() => {
       expect(findSavedQueriesSpy).toHaveBeenLastCalledWith(undefined, 5, 1);
     });
@@ -378,13 +379,13 @@ describe('Saved query management list component', () => {
       expect(findSavedQueriesSpy).toHaveBeenLastCalledWith(undefined, 5, 1);
     });
     expect(screen.getByRole('option', { name: 'Test 0', checked: false })).toBeInTheDocument();
-    userEvent.click(screen.getByRole('option', { name: 'Test 0' }));
+    await userEvent.click(screen.getByRole('option', { name: 'Test 0' }));
     expect(screen.getByRole('option', { name: 'Test 0', checked: true })).toBeInTheDocument();
     findSavedQueriesSpy.mockResolvedValue({
       total: 6,
       queries: generateSavedQueries(1),
     });
-    userEvent.click(screen.getByRole('button', { name: 'Next page' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Next page' }));
     await waitFor(() => {
       expect(findSavedQueriesSpy).toHaveBeenLastCalledWith(undefined, 5, 2);
     });
@@ -392,7 +393,7 @@ describe('Saved query management list component', () => {
       total: 6,
       queries: generateSavedQueries(5),
     });
-    userEvent.click(screen.getByRole('button', { name: 'Previous page' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Previous page' }));
     await waitFor(() => {
       expect(findSavedQueriesSpy).toHaveBeenLastCalledWith(undefined, 5, 1);
     });
@@ -421,7 +422,7 @@ describe('Saved query management list component', () => {
       total: 6,
       queries: generateSavedQueries(1),
     });
-    userEvent.click(screen.getByRole('button', { name: 'Next page' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Next page' }));
     await waitFor(() => {
       expect(findSavedQueriesSpy).toHaveBeenLastCalledWith(undefined, 5, 2);
     });
@@ -431,7 +432,7 @@ describe('Saved query management list component', () => {
       total: 1,
       queries: generateSavedQueries(1),
     });
-    userEvent.type(screen.getByRole('combobox', { name: 'Query list' }), ' Test And Search ');
+    await userEvent.type(screen.getByRole('combobox', { name: 'Query list' }), ' Test And Search ');
     await waitFor(() => {
       expect(findSavedQueriesSpy).toHaveBeenLastCalledWith('Test And Search', 5, 1);
     });
@@ -474,14 +475,14 @@ describe('Saved query management list component', () => {
     });
     expect(screen.getByText(/1 of 3/)).toBeInTheDocument();
     expect(screen.getAllByRole('option')).toHaveLength(5);
-    userEvent.click(screen.getByRole('button', { name: 'Next page' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Next page' }));
     await waitFor(() => {
       expect(findSavedQueriesSpy).toHaveBeenLastCalledWith(undefined, 5, 2);
     });
     expect(completionOrder).toEqual([1]);
     expect(screen.getByText(/2 of 3/)).toBeInTheDocument();
     expect(screen.getAllByRole('option')).toHaveLength(5);
-    userEvent.click(screen.getByRole('button', { name: 'Next page' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Next page' }));
     await waitFor(() => {
       expect(findSavedQueriesSpy).toHaveBeenLastCalledWith(undefined, 5, 3);
     });
@@ -492,14 +493,14 @@ describe('Saved query management list component', () => {
     });
     expect(screen.getByText(/3 of 3/)).toBeInTheDocument();
     expect(screen.getAllByRole('option')).toHaveLength(1);
-    userEvent.click(screen.getByRole('button', { name: 'Previous page' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Previous page' }));
     await waitFor(() => {
       expect(findSavedQueriesSpy).toHaveBeenLastCalledWith(undefined, 5, 2);
     });
     expect(completionOrder).toEqual([1, 3, 2]);
     expect(screen.getByText(/2 of 3/)).toBeInTheDocument();
     expect(screen.getAllByRole('option')).toHaveLength(1);
-    userEvent.click(screen.getByRole('button', { name: 'Previous page' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Previous page' }));
     await waitFor(() => {
       expect(findSavedQueriesSpy).toHaveBeenLastCalledWith(undefined, 5, 1);
     });
@@ -583,7 +584,10 @@ describe('Saved query management list component', () => {
     expect(await screen.findAllByRole('option')).toHaveLength(2);
     expect(screen.getAllByRole('option')[0]).toHaveTextContent('Foo');
     expect(screen.getAllByRole('option')[0]).toHaveTextContent('Active');
-    userEvent.type(screen.getByRole('searchbox', { name: 'Query list' }), ' Test And Search ');
+    await userEvent.type(
+      screen.getByRole('searchbox', { name: 'Query list' }),
+      ' Test And Search '
+    );
     await waitFor(() => {
       expect(findSavedQueriesSpy).toHaveBeenLastCalledWith('Test And Search', 5, 1);
     });
@@ -609,7 +613,7 @@ describe('Saved query management list component', () => {
     expect(await screen.findAllByRole('option')).toHaveLength(6);
     expect(screen.getAllByRole('option')[0]).toHaveTextContent('Foo');
     expect(screen.getAllByRole('option')[0]).toHaveTextContent('Active');
-    userEvent.click(screen.getByRole('button', { name: 'Next page' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Next page' }));
     await waitFor(() => {
       expect(findSavedQueriesSpy).toHaveBeenLastCalledWith(undefined, 5, 2);
     });

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -15,7 +16,7 @@ import { SearchSessionsMgmtMain } from '../components/main';
 
 export const renderApp = (
   elem: HTMLElement | null,
-  { i18n, uiSettings, ...homeDeps }: AppDependencies
+  { uiSettings, ...homeDeps }: AppDependencies
 ) => {
   if (!elem) {
     return () => undefined;
@@ -27,7 +28,7 @@ export const renderApp = (
   });
 
   render(
-    <KibanaRenderContextProvider theme={homeDeps.core.theme} i18n={i18n}>
+    <KibanaRenderContextProvider {...homeDeps.core}>
       <KibanaReactContextProvider>
         <SearchSessionsMgmtMain {...homeDeps} timezone={uiSettings.get('dateFormat:tz')} />
       </KibanaReactContextProvider>

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { i18n } from '@kbn/i18n';
@@ -11,6 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { Subscription } from 'rxjs';
 import type { AnalyticsServiceStart, AnalyticsServiceSetup } from '@kbn/core-analytics-browser';
 import type { ThemeServiceStart } from '@kbn/core-theme-browser';
+import type { UserProfileService } from '@kbn/core-user-profile-browser';
 import type { I18nStart } from '@kbn/core-i18n-browser';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import type { OverlayStart } from '@kbn/core-overlays-browser';
@@ -28,6 +30,7 @@ export interface StartDeps {
   i18n: I18nStart;
   overlays: OverlayStart;
   theme: ThemeServiceStart;
+  userProfile: UserProfileService;
   analytics: AnalyticsServiceStart;
   targetDomElement: HTMLElement;
 }
@@ -61,36 +64,26 @@ export class NotificationsService {
     return notificationSetup;
   }
 
-  public start({
-    analytics,
-    i18n: i18nDep,
-    overlays,
-    theme,
-    targetDomElement,
-  }: StartDeps): NotificationsStart {
+  public start({ overlays, targetDomElement, ...startDeps }: StartDeps): NotificationsStart {
     this.targetDomElement = targetDomElement;
     const toastsContainer = document.createElement('div');
     targetDomElement.appendChild(toastsContainer);
 
-    const eventReporter = new EventReporter({ analytics });
+    const eventReporter = new EventReporter({ analytics: startDeps.analytics });
 
     return {
       toasts: this.toasts.start({
         eventReporter,
-        i18n: i18nDep,
         overlays,
-        analytics,
-        theme,
         targetDomElement: toastsContainer,
+        ...startDeps,
       }),
       showErrorDialog: ({ title, error }) =>
         showErrorDialog({
           title,
           error,
           openModal: overlays.openModal,
-          analytics,
-          i18n: i18nDep,
-          theme,
+          ...startDeps,
         }),
     };
   }

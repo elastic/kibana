@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 /* eslint-disable max-classes-per-file */
 import { Entity, Fields } from '../entity';
 import { Serializable } from '../serializable';
@@ -25,7 +27,7 @@ interface HostDocument extends Fields {
   'cloud.provider'?: string;
 }
 
-class Host extends Entity<HostDocument> {
+export class Host extends Entity<HostDocument> {
   cpu({ cpuTotalValue }: { cpuTotalValue?: number } = {}) {
     return new HostMetrics({
       ...this.fields,
@@ -171,5 +173,13 @@ export function host(name: string): Host {
     'host.os.platform': 'ubuntu',
     'host.os.version': '4.19.76-linuxkit',
     'cloud.provider': 'gcp',
+  });
+}
+
+export function minimalHost(name: string): Host {
+  return new Host({
+    'agent.id': 'synthtrace',
+    'host.hostname': name,
+    'host.name': name,
   });
 }

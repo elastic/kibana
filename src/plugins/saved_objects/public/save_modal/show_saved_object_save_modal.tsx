@@ -1,15 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { FC, PropsWithChildren } from 'react';
 
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { getAnalytics, getI18n, getTheme } from '../kibana_services';
+import { getAnalytics, getI18n, getTheme, getUserProfile } from '../kibana_services';
 
 /**
  * Represents the result of trying to persist the saved object.
@@ -67,7 +68,7 @@ export function showSaveModal(
         children: augmentedElement,
       });
     }),
-    { analytics: getAnalytics(), theme: getTheme(), i18n: getI18n() }
+    { analytics: getAnalytics(), theme: getTheme(), i18n: getI18n(), userProfile: getUserProfile() }
   );
 
   unmount = mount(document.createElement('div'));

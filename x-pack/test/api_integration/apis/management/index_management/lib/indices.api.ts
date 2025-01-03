@@ -40,8 +40,6 @@ export function indicesApi(getService: FtrProviderContext['getService']) {
   const forceMerge = (index: string, args?: { maxNumSegments: number }) =>
     executeActionOnIndices({ index, urlParam: 'forcemerge', args });
 
-  const unfreeze = (index: string) => executeActionOnIndices({ index, urlParam: 'unfreeze' });
-
   const clearCache = (index: string) => executeActionOnIndices({ index, urlParam: 'clear_cache' });
 
   const list = () => supertest.get(`${API_BASE_PATH}/indices`);
@@ -56,7 +54,6 @@ export function indicesApi(getService: FtrProviderContext['getService']) {
     flushIndex,
     refreshIndex,
     forceMerge,
-    unfreeze,
     list,
     reload,
     clearCache,

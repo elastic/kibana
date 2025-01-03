@@ -2,8 +2,7 @@
 
 exports[`EnabledFeatures renders as expected 1`] = `
 <SectionPanel
-  data-test-subj="enabled-features-panel"
-  title="Features"
+  dataTestSubj="enabled-features-panel"
 >
   <EuiFlexGroup>
     <EuiFlexItem>
@@ -26,13 +25,13 @@ exports[`EnabledFeatures renders as expected 1`] = `
       >
         <p>
           <MemoizedFormattedMessage
-            defaultMessage="Hidden features are removed from the user interface, but not disabled. To secure access to features, {manageRolesLink}."
-            id="xpack.spaces.management.enabledSpaceFeatures.notASecurityMechanismMessage"
+            defaultMessage="Choose the features to display in the navigation menu for users of this space. If you want to focus on a single solution, you can simplify the navigation even more by selecting a {solutionView}."
+            id="xpack.spaces.management.enabledSpaceFeatures.chooseFeaturesToDisplayMessage"
             values={
               Object {
-                "manageRolesLink": <Memo(MemoizedFormattedMessage)
-                  defaultMessage="manage security roles"
-                  id="xpack.spaces.management.enabledSpaceFeatures.manageRolesLinkText"
+                "solutionView": <Memo(MemoizedFormattedMessage)
+                  defaultMessage="Solution view"
+                  id="xpack.spaces.management.enabledSpaceFeatures.chooseFeaturesToDisplaySolutionViewText"
                 />,
               }
             }
@@ -55,6 +54,10 @@ exports[`EnabledFeatures renders as expected 1`] = `
               "id": "feature-1",
               "name": "Feature 1",
               "privileges": null,
+              "scope": Array [
+                "spaces",
+                "security",
+              ],
             },
             Object {
               "app": Array [],
@@ -67,6 +70,10 @@ exports[`EnabledFeatures renders as expected 1`] = `
               "id": "feature-2",
               "name": "Feature 2",
               "privileges": null,
+              "scope": Array [
+                "spaces",
+                "security",
+              ],
             },
           ]
         }

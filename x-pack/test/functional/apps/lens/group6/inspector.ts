@@ -8,31 +8,30 @@ import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['visualize', 'lens', 'common', 'header']);
+  const { visualize, lens } = getPageObjects(['visualize', 'lens']);
   const elasticChart = getService('elasticChart');
   const inspector = getService('inspector');
   const testSubjects = getService('testSubjects');
 
   describe('lens inspector', () => {
     before(async () => {
-      await PageObjects.visualize.navigateToNewVisualization();
-      await PageObjects.visualize.clickVisType('lens');
+      await visualize.navigateToNewVisualization();
+      await visualize.clickVisType('lens');
       await elasticChart.setNewChartUiDebugFlag(true);
-      await PageObjects.lens.goToTimeRange();
 
-      await PageObjects.lens.configureDimension({
+      await lens.configureDimension({
         dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
         operation: 'terms',
         field: 'clientip',
       });
 
-      await PageObjects.lens.configureDimension({
+      await lens.configureDimension({
         dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
         operation: 'max',
         field: 'bytes',
       });
 
-      await PageObjects.lens.waitForVisualization('xyVisChart');
+      await lens.waitForVisualization('xyVisChart');
 
       await inspector.open('lnsApp_inspectButton');
     });
@@ -58,7 +57,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should close the inspector when navigating away from Lens', async () => {
-      await PageObjects.visualize.navigateToNewVisualization();
+      await visualize.navigateToNewVisualization();
       expect(await testSubjects.exists('inspectorPanel')).to.be(false);
     });
   });

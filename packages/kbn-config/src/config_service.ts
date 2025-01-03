@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
@@ -11,7 +12,7 @@ import { SchemaTypeError, Type, ValidationError } from '@kbn/config-schema';
 import { cloneDeep, isEqual, merge, unset } from 'lodash';
 import { set } from '@kbn/safer-lodash-set';
 import { BehaviorSubject, combineLatest, firstValueFrom, Observable, identity } from 'rxjs';
-import { distinctUntilChanged, first, map, shareReplay, tap } from 'rxjs';
+import { distinctUntilChanged, map, shareReplay, tap } from 'rxjs';
 import { Logger, LoggerFactory } from '@kbn/logging';
 import { getDocLinks, DocLinks } from '@kbn/doc-links';
 
@@ -208,9 +209,30 @@ export class ConfigService {
       throw new Error(`No validation schema has been defined for [${namespace}]`);
     }
 
-    const validatedConfig = hasSchema
-      ? await this.atPath<{ enabled?: boolean }>(path).pipe(first()).toPromise()
+    let validatedConfig = hasSchema
+      ? await firstValueFrom(
+          this.getValidatedConfigAtPath$(
+            path,
+            // At this point we don't care about how valid the config is: we just want to read `enabled`
+            { stripUnknownKeys: true }
+          ) as Observable<{ enabled?: boolean }>,
+          { defaultValue: undefined }
+        )
       : undefined;
+
+    // Special use case: when the provided config includes `enabled` and the validated config doesn't,
+    // it's quite likely that's not an allowed config and it should fail.
+    // Applying "normal" validation (not stripping unknowns) in that case.
+    if (
+      hasSchema &&
+      typeof config.get(path)?.enabled !== 'undefined' &&
+      typeof validatedConfig?.enabled === 'undefined'
+    ) {
+      validatedConfig = await firstValueFrom(
+        this.getValidatedConfigAtPath$(path) as Observable<{ enabled?: boolean }>,
+        { defaultValue: undefined }
+      );
+    }
 
     const isDisabled = validatedConfig?.enabled === false;
     if (isDisabled) {
@@ -324,7 +346,13 @@ export class ConfigService {
     });
   }
 
-  private validateAtPath(path: ConfigPath, config: Record<string, unknown>) {
+  private validateAtPath(
+    path: ConfigPath,
+    config: Record<string, unknown>,
+    validateOptions?: { stripUnknownKeys?: boolean }
+  ) {
+    const stripUnknownKeys = validateOptions?.stripUnknownKeys || this.stripUnknownKeys;
+
     const namespace = pathToString(path);
     const schema = this.schemas.get(namespace);
     if (!schema) {
@@ -339,18 +367,21 @@ export class ConfigService {
         ...this.env.packageInfo,
       },
       `config validation of [${namespace}]`,
-      this.stripUnknownKeys ? { stripUnknownKeys: this.stripUnknownKeys } : {}
+      stripUnknownKeys ? { stripUnknownKeys } : {}
     );
   }
 
   private getValidatedConfigAtPath$(
     path: ConfigPath,
-    { ignoreUnchanged = true }: { ignoreUnchanged?: boolean } = {}
+    {
+      ignoreUnchanged = true,
+      stripUnknownKeys,
+    }: { ignoreUnchanged?: boolean; stripUnknownKeys?: boolean } = {}
   ) {
     return this.config$.pipe(
       map((config) => config.get(path)),
       ignoreUnchanged ? distinctUntilChanged(isEqual) : identity,
-      map((config) => this.validateAtPath(path, config))
+      map((config) => this.validateAtPath(path, config, { stripUnknownKeys }))
     );
   }
 

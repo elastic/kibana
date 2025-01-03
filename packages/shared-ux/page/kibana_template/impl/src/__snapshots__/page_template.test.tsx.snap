@@ -18,10 +18,10 @@ exports[`KibanaPageTemplate render basic template 1`] = `
         style="max-width:1200px"
       >
         <div
-          class="euiFlexGroup euiPageHeaderContent__top emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
+          class="euiFlexGroup euiPageHeaderContent__top emotion-euiFlexGroup-responsive-wrap-l-flexStart-stretch-row-euiPageHeaderContent__top"
         >
           <div
-            class="euiFlexItem emotion-euiFlexItem-grow-1"
+            class="euiFlexItem emotion-euiFlexItem-grow-2-euiPageHeaderContent__leftSideItems"
           >
             <div
               class="euiText emotion-euiText-constrainedWidth-m"
@@ -32,16 +32,12 @@ exports[`KibanaPageTemplate render basic template 1`] = `
             </div>
           </div>
           <div
-            class="euiFlexItem emotion-euiFlexItem-growZero"
+            class="euiFlexGroup emotion-euiFlexGroup-wrap-l-flexStart-stretch-row-euiPageHeaderContent__rightSideItems"
           >
             <div
-              class="euiFlexGroup emotion-euiFlexGroup-wrap-l-flexStart-stretch-row"
+              class="euiFlexItem emotion-euiFlexItem-growZero-euiPageHeaderContent__rightSideItem"
             >
-              <div
-                class="euiFlexItem emotion-euiFlexItem-growZero"
-              >
-                test
-              </div>
+              test
             </div>
           </div>
         </div>

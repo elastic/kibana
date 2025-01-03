@@ -1,18 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
-import { ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
+import type { ChromeProjectNavigationNode, PanelSelectedNode } from '@kbn/core-chrome-browser';
 import React, { Fragment, type FC } from 'react';
 
 import { PanelGroup } from './panel_group';
 import { PanelNavItem } from './panel_nav_item';
-import type { PanelNavNode } from './types';
 
 function isGroupNode({ children }: Pick<ChromeProjectNavigationNode, 'children'>) {
   return children !== undefined;
@@ -32,7 +32,7 @@ function isItemNode({ children }: Pick<ChromeProjectNavigationNode, 'children'>)
  * @param node The current active node
  * @returns The children serialized
  */
-function serializeChildren(node: PanelNavNode): ChromeProjectNavigationNode[] | undefined {
+function serializeChildren(node: PanelSelectedNode): ChromeProjectNavigationNode[] | undefined {
   if (!node.children) return undefined;
 
   const allChildrenAreItems = node.children.every((_node) => {
@@ -68,7 +68,7 @@ function serializeChildren(node: PanelNavNode): ChromeProjectNavigationNode[] | 
 
 interface Props {
   /** The selected node is the node in the main panel that opens the Panel */
-  selectedNode: PanelNavNode;
+  selectedNode: PanelSelectedNode;
 }
 
 export const DefaultContent: FC<Props> = ({ selectedNode }) => {

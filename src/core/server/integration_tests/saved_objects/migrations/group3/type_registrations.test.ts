@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { REMOVED_TYPES } from '@kbn/core-saved-objects-migration-server-internal';
@@ -31,6 +32,7 @@ const previouslyRegisteredTypes = [
   'canvas-element',
   'canvas-workpad',
   'canvas-workpad-template',
+  'cloud',
   'cloud-security-posture-settings',
   'cases',
   'cases-comments',
@@ -114,6 +116,7 @@ const previouslyRegisteredTypes = [
   'osquery-usage-metric',
   'osquery-manager-usage-metric',
   'policy-settings-protection-updates-note',
+  'product-doc-install-status',
   'query',
   'rules-settings',
   'sample-data-telemetry',
@@ -123,6 +126,7 @@ const previouslyRegisteredTypes = [
   'security-rule',
   'security-solution-signals-migration',
   'risk-engine-configuration',
+  'entity-engine-status',
   'server',
   'siem-detection-engine-rule-actions',
   'siem-detection-engine-rule-execution-info',
@@ -137,6 +141,7 @@ const previouslyRegisteredTypes = [
   'synthetics-monitor',
   'synthetics-param',
   'synthetics-privates-locations',
+  'synthetics-private-location',
   'tag',
   'task',
   'telemetry',

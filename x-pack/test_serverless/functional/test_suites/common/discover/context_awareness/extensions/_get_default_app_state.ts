@@ -43,8 +43,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     }
 
+    function expectBreakdown(breakdown: string) {
+      return retry.try(async () => {
+        const breakdownFieldValue = await PageObjects.discover.getBreakdownFieldValue();
+        expect(breakdownFieldValue).to.be(breakdown);
+      });
+    }
+
     describe('ES|QL mode', () => {
-      it('should render default columns and row height', async () => {
+      it('should render default state', async () => {
         const state = kbnRison.encode({
           dataSource: { type: 'esql' },
           query: {
@@ -60,9 +67,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(rowHeightValue).to.be('Custom');
         const rowHeightNumber = await dataGrid.getCustomRowHeightNumber();
         expect(rowHeightNumber).to.be(5);
+        await expectBreakdown('Breakdown by log.level');
       });
 
-      it('should render default columns and row height when switching index patterns', async () => {
+      it('should render default state when switching index patterns', async () => {
         const state = kbnRison.encode({
           dataSource: { type: 'esql' },
           query: {
@@ -72,7 +80,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.common.navigateToActualUrl('discover', `?_a=${state}`, {
           ensureCurrentUrl: false,
         });
-        await expectColumns(['@timestamp', 'Document']);
+        await expectColumns(['@timestamp', 'Summary']);
         await dataGrid.clickGridSettings();
         let rowHeightValue = await dataGrid.getCurrentRowHeightValue();
         expect(rowHeightValue).to.be('Custom');
@@ -86,9 +94,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(rowHeightValue).to.be('Custom');
         rowHeightNumber = await dataGrid.getCustomRowHeightNumber();
         expect(rowHeightNumber).to.be(5);
+        await expectBreakdown('Breakdown by log.level');
       });
 
-      it('should reset default columns and row height when clicking "New"', async () => {
+      it('should reset default state when clicking "New"', async () => {
         const state = kbnRison.encode({
           dataSource: { type: 'esql' },
           query: {
@@ -98,10 +107,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.common.navigateToActualUrl('discover', `?_a=${state}`, {
           ensureCurrentUrl: false,
         });
+        await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.discover.waitUntilSearchingHasFinished();
         await PageObjects.unifiedFieldList.clickFieldListItemRemove('log.level');
         await PageObjects.unifiedFieldList.clickFieldListItemRemove('message');
-        await expectColumns(['@timestamp', 'Document']);
+        await expectColumns(['@timestamp', 'Summary']);
         await dataGrid.clickGridSettings();
         await dataGrid.changeRowHeightValue('Single');
         let rowHeightValue = await dataGrid.getCurrentRowHeightValue();
@@ -113,6 +123,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(rowHeightValue).to.be('Custom');
         const rowHeightNumber = await dataGrid.getCustomRowHeightNumber();
         expect(rowHeightNumber).to.be(5);
+        await expectBreakdown('Breakdown by log.level');
       });
 
       it('should merge and dedup configured default columns with default profile columns', async () => {
@@ -132,50 +143,58 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/191260
-    describe.skip('data view mode', () => {
-      it('should render default columns and row height', async () => {
+    describe('data view mode', () => {
+      it('should render default state', async () => {
         await PageObjects.common.navigateToActualUrl('discover', undefined, {
           ensureCurrentUrl: false,
         });
-        await dataViews.switchTo('my-example-logs');
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.discover.waitUntilSearchingHasFinished();
+        await dataViews.switchToAndValidate('my-example-logs');
         await expectColumns(['@timestamp', 'log.level', 'message']);
         await dataGrid.clickGridSettings();
         const rowHeightValue = await dataGrid.getCurrentRowHeightValue();
         expect(rowHeightValue).to.be('Custom');
         const rowHeightNumber = await dataGrid.getCustomRowHeightNumber();
         expect(rowHeightNumber).to.be(5);
+        await expectBreakdown('Breakdown by log.level');
       });
 
-      it('should render default columns and row height when switching data views', async () => {
+      it('should render default state when switching data views', async () => {
         await PageObjects.common.navigateToActualUrl('discover', undefined, {
           ensureCurrentUrl: false,
         });
-        await dataViews.switchTo('my-example-*');
-        await expectColumns(['@timestamp', 'Document']);
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.discover.waitUntilSearchingHasFinished();
+        await dataViews.switchToAndValidate('my-example-*');
+        await expectColumns(['@timestamp', 'Summary']);
         await dataGrid.clickGridSettings();
         let rowHeightValue = await dataGrid.getCurrentRowHeightValue();
         expect(rowHeightValue).to.be('Custom');
         let rowHeightNumber = await dataGrid.getCustomRowHeightNumber();
         expect(rowHeightNumber).to.be(3);
-        await dataViews.switchTo('my-example-logs');
+        await dataViews.switchToAndValidate('my-example-logs');
         await expectColumns(['@timestamp', 'log.level', 'message']);
         await dataGrid.clickGridSettings();
         rowHeightValue = await dataGrid.getCurrentRowHeightValue();
         expect(rowHeightValue).to.be('Custom');
         rowHeightNumber = await dataGrid.getCustomRowHeightNumber();
         expect(rowHeightNumber).to.be(5);
+        await expectBreakdown('Breakdown by log.level');
       });
 
-      it('should reset default columns and row height when clicking "New"', async () => {
+      it('should reset default state when clicking "New"', async () => {
         await PageObjects.common.navigateToActualUrl('discover', undefined, {
           ensureCurrentUrl: false,
         });
-        await dataViews.switchTo('my-example-logs');
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.discover.waitUntilSearchingHasFinished();
+        await dataViews.switchToAndValidate('my-example-logs');
+        await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.discover.waitUntilSearchingHasFinished();
         await PageObjects.unifiedFieldList.clickFieldListItemRemove('log.level');
         await PageObjects.unifiedFieldList.clickFieldListItemRemove('message');
-        await expectColumns(['@timestamp', 'Document']);
+        await expectColumns(['@timestamp', 'Summary']);
         await dataGrid.clickGridSettings();
         await dataGrid.changeRowHeightValue('Single');
         let rowHeightValue = await dataGrid.getCurrentRowHeightValue();
@@ -187,6 +206,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(rowHeightValue).to.be('Custom');
         const rowHeightNumber = await dataGrid.getCustomRowHeightNumber();
         expect(rowHeightNumber).to.be(5);
+        await expectBreakdown('Breakdown by log.level');
       });
 
       it('should merge and dedup configured default columns with default profile columns', async () => {
@@ -196,7 +216,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.common.navigateToActualUrl('discover', undefined, {
           ensureCurrentUrl: false,
         });
-        await dataViews.switchTo('my-example-logs');
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.discover.waitUntilSearchingHasFinished();
+        await dataViews.switchToAndValidate('my-example-logs');
         await expectColumns(['@timestamp', 'log.level', 'message', 'data_stream.type']);
       });
     });

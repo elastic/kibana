@@ -183,4 +183,32 @@ describe('SpacesManager', () => {
       });
     });
   });
+
+  describe('#getRolesForSpace', () => {
+    it('retrieves roles for the specified space', async () => {
+      const coreStart = coreMock.createStart();
+      const rolesForSpace = [Symbol()];
+      coreStart.http.get.mockResolvedValue(rolesForSpace);
+      const spacesManager = new SpacesManager(coreStart.http);
+
+      const result = await spacesManager.getRolesForSpace('foo');
+      expect(coreStart.http.get).toHaveBeenCalledTimes(1);
+      expect(coreStart.http.get).toHaveBeenLastCalledWith('/internal/security/roles/foo');
+      expect(result).toEqual(rolesForSpace);
+    });
+  });
+
+  describe('#getContentForSpace', () => {
+    it('retrieves content for the specified space', async () => {
+      const coreStart = coreMock.createStart();
+      const spaceContent = [Symbol()];
+      coreStart.http.get.mockResolvedValue({ summary: spaceContent, total: spaceContent.length });
+      const spacesManager = new SpacesManager(coreStart.http);
+
+      const result = await spacesManager.getContentForSpace('foo');
+      expect(coreStart.http.get).toHaveBeenCalledTimes(1);
+      expect(coreStart.http.get).toHaveBeenLastCalledWith('/internal/spaces/foo/content_summary');
+      expect(result).toEqual({ summary: spaceContent, total: spaceContent.length });
+    });
+  });
 });

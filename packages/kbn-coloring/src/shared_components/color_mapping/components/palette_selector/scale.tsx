@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useCallback, useState } from 'react';
@@ -11,12 +12,12 @@ import { useSelector, useDispatch } from 'react-redux';
 import { EuiButtonGroup, EuiConfirmModal, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
+import { KbnPalettes } from '@kbn/palettes';
 import { RootState, updatePalette } from '../../state/color_mapping';
 import { ColorMapping } from '../../config';
 import { updateAssignmentsPalette } from '../../config/assignments';
-import { getPalette } from '../../palettes';
 
-export function ScaleMode({ getPaletteFn }: { getPaletteFn: ReturnType<typeof getPalette> }) {
+export function ScaleMode({ palettes }: { palettes: KbnPalettes }) {
   const dispatch = useDispatch();
   const colorMode = useSelector((state: RootState) => state.colorMapping.colorMode);
   const model = useSelector((state: RootState) => state.colorMapping);
@@ -45,12 +46,12 @@ export function ScaleMode({ getPaletteFn }: { getPaletteFn: ReturnType<typeof ge
         model.assignments,
         updatedColorMode,
         paletteId,
-        getPaletteFn,
+        palettes,
         preserveColorChanges
       );
       dispatch(updatePalette({ paletteId, assignments, colorMode: updatedColorMode }));
     },
-    [getPaletteFn, model, dispatch, paletteId]
+    [paletteId, model.assignments, palettes, dispatch]
   );
 
   const [colorScaleModalId, setColorScaleModalId] = useState<'gradient' | 'categorical' | null>(

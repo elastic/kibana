@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useCallback, useState } from 'react';
@@ -62,7 +63,7 @@ export function LinkedSearch({ savedSearch, eventEmitter }: LinkedSearchProps) {
   const linkButtonAriaLabel = i18n.translate(
     'visDefaultEditor.sidebar.savedSearch.linkButtonAriaLabel',
     {
-      defaultMessage: 'Link to saved search. Click to learn more or break link.',
+      defaultMessage: 'Link to Discover session. Click to learn more or break link.',
     }
   );
 
@@ -81,7 +82,7 @@ export function LinkedSearch({ savedSearch, eventEmitter }: LinkedSearchProps) {
         <EuiTitle size="xs" className="eui-textTruncate">
           <h2
             title={i18n.translate('visDefaultEditor.sidebar.savedSearch.titleAriaLabel', {
-              defaultMessage: 'Saved search: {title}',
+              defaultMessage: 'Discover session: {title}',
               values: {
                 title: savedSearch.title,
               },
@@ -112,10 +113,10 @@ export function LinkedSearch({ savedSearch, eventEmitter }: LinkedSearchProps) {
           <EuiPopoverTitle>
             <FormattedMessage
               id="visDefaultEditor.sidebar.savedSearch.popoverTitle"
-              defaultMessage="Linked to saved search"
+              defaultMessage="Linked to Discover session"
             />
           </EuiPopoverTitle>
-          <div style={{ width: 260 }}>
+          <div css={{ width: 260 }}>
             <EuiText size="s">
               <p>
                 <EuiButtonEmpty
@@ -133,7 +134,7 @@ export function LinkedSearch({ savedSearch, eventEmitter }: LinkedSearchProps) {
               <p>
                 <FormattedMessage
                   id="visDefaultEditor.sidebar.savedSearch.popoverHelpText"
-                  defaultMessage="Subsequent modifications to this saved search are reflected in the visualization. To disable automatic updates, remove the link."
+                  defaultMessage="Subsequent modifications to this Discover session are reflected in the visualization. To disable automatic updates, remove the link."
                 />
               </p>
               <p>
@@ -146,7 +147,7 @@ export function LinkedSearch({ savedSearch, eventEmitter }: LinkedSearchProps) {
                 >
                   <FormattedMessage
                     id="visDefaultEditor.sidebar.savedSearch.unlinkSavedSearchButtonText"
-                    defaultMessage="Remove link to saved search"
+                    defaultMessage="Remove link to Discover session"
                   />
                 </EuiButton>
               </p>

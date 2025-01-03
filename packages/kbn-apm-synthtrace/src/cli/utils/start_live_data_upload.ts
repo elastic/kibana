@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { timerange } from '@kbn/apm-synthtrace-client';
@@ -25,14 +26,33 @@ export async function startLiveDataUpload({
 }) {
   const file = runOptions.file;
 
-  const { logger, apmEsClient, logsEsClient, infraEsClient, assetsEsClient } = await bootstrap(
-    runOptions
-  );
+  const {
+    logger,
+    apmEsClient,
+    logsEsClient,
+    infraEsClient,
+    syntheticsEsClient,
+    otelEsClient,
+    entitiesEsClient,
+    entitiesKibanaClient,
+  } = await bootstrap(runOptions);
 
   const scenario = await getScenario({ file, logger });
-  const { generate } = await scenario({ ...runOptions, logger });
+  const { generate, bootstrap: scenarioBootsrap } = await scenario({ ...runOptions, logger });
 
-  const bucketSizeInMs = 1000 * 60;
+  if (scenarioBootsrap) {
+    await scenarioBootsrap({
+      apmEsClient,
+      logsEsClient,
+      infraEsClient,
+      otelEsClient,
+      syntheticsEsClient,
+      entitiesEsClient,
+      entitiesKibanaClient,
+    });
+  }
+
+  const bucketSizeInMs = runOptions.liveBucketSize;
   let requestedUntil = start;
 
   let currentStreams: PassThrough[] = [];
@@ -65,7 +85,14 @@ export async function startLiveDataUpload({
 
       const generatorsAndClients = generate({
         range: timerange(bucketFrom.getTime(), bucketTo.getTime()),
-        clients: { logsEsClient, apmEsClient, infraEsClient, assetsEsClient },
+        clients: {
+          logsEsClient,
+          apmEsClient,
+          infraEsClient,
+          entitiesEsClient,
+          syntheticsEsClient,
+          otelEsClient,
+        },
       });
 
       const generatorsAndClientsArray = castArray(generatorsAndClients);

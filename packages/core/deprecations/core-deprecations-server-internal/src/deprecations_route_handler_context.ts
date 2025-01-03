@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { CoreElasticsearchRouteHandlerContext } from '@kbn/core-elasticsearch-server-internal';
@@ -12,6 +13,7 @@ import type {
   DeprecationsRequestHandlerContext,
   DeprecationsClient,
 } from '@kbn/core-deprecations-server';
+import type { KibanaRequest } from '@kbn/core-http-server';
 import type { InternalDeprecationsServiceStart } from './deprecations_service';
 
 /**
@@ -24,14 +26,16 @@ export class CoreDeprecationsRouteHandlerContext implements DeprecationsRequestH
   constructor(
     private readonly deprecationsStart: InternalDeprecationsServiceStart,
     private readonly elasticsearchRouterHandlerContext: CoreElasticsearchRouteHandlerContext,
-    private readonly savedObjectsRouterHandlerContext: CoreSavedObjectsRouteHandlerContext
+    private readonly savedObjectsRouterHandlerContext: CoreSavedObjectsRouteHandlerContext,
+    private readonly request: KibanaRequest
   ) {}
 
   public get client() {
     if (this.#client == null) {
       this.#client = this.deprecationsStart.asScopedToClient(
         this.elasticsearchRouterHandlerContext.client,
-        this.savedObjectsRouterHandlerContext.client
+        this.savedObjectsRouterHandlerContext.client,
+        this.request
       );
     }
     return this.#client;

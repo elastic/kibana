@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import execa from 'execa';
 import { readFileSync } from 'fs';
 import Path from 'path';
@@ -23,6 +25,10 @@ const THIS_REL = Path.relative(REPO_ROOT, THIS_PATH);
 const IGNORED_PATHS = [
   THIS_PATH,
   Path.resolve(REPO_ROOT, 'packages/kbn-test/src/jest/run_check_jest_configs_cli.ts'),
+  Path.resolve(
+    REPO_ROOT,
+    'x-pack/solutions/observability/plugins/observability_onboarding/e2e/playwright/playwright.config.ts'
+  ),
 ];
 
 export async function runCheckFtrConfigsCli() {
@@ -45,6 +51,11 @@ export async function runCheckFtrConfigsCli() {
 
       const possibleConfigs = files.filter((file) => {
         if (IGNORED_PATHS.includes(file)) {
+          return false;
+        }
+
+        // playwright config files
+        if (file.match(/\/ui_tests\/*playwright*.config.ts$/)) {
           return false;
         }
 

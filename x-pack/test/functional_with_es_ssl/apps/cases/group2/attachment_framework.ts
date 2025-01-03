@@ -255,7 +255,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
              * The flyout close automatically after submitting a case
              */
             await cases.create.createCase({ owner });
-            await cases.common.expectToasterToContain('has been updated');
+            await cases.common.expectToasterToContain('updated');
             await toasts.dismissAllWithChecks();
           }
 
@@ -352,7 +352,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
             await cases.casesTable.getCaseById(currentCaseId);
             await testSubjects.click(`cases-table-row-select-${currentCaseId}`);
 
-            await cases.common.expectToasterToContain('has been updated');
+            await cases.common.expectToasterToContain('updated');
             await toasts.dismissAllWithChecks();
             await ensureFirstCommentOwner(currentCaseId, owner);
           }
@@ -402,7 +402,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await common.navigateToApp('dashboard');
         await dashboard.preserveCrossAppState();
         await dashboard.loadSavedDashboard(myDashboardName);
-        await dashboardPanelActions.clickContextMenuItem(ADD_TO_EXISTING_CASE_DATA_TEST_SUBJ);
+        await dashboardPanelActions.clickPanelAction(ADD_TO_EXISTING_CASE_DATA_TEST_SUBJ);
         await testSubjects.click('cases-table-add-case-filter-bar');
 
         await cases.create.createCase({
@@ -412,7 +412,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         });
         await testSubjects.click('create-case-submit');
 
-        await cases.common.expectToasterToContain(`${caseTitle} has been updated`);
+        await cases.common.expectToasterToContain(`Case ${caseTitle} updated`);
         await testSubjects.click('toaster-content-case-view-link');
         await toasts.dismissAllWithChecks();
 
@@ -434,11 +434,11 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await dashboard.preserveCrossAppState();
         await dashboard.loadSavedDashboard(myDashboardName);
 
-        await dashboardPanelActions.clickContextMenuItem(ADD_TO_EXISTING_CASE_DATA_TEST_SUBJ);
+        await dashboardPanelActions.clickPanelAction(ADD_TO_EXISTING_CASE_DATA_TEST_SUBJ);
 
         await testSubjects.click(`cases-table-row-select-${theCase.id}`);
 
-        await cases.common.expectToasterToContain(`${theCaseTitle} has been updated`);
+        await cases.common.expectToasterToContain(`Case ${theCaseTitle} updated`);
         await testSubjects.click('toaster-content-case-view-link');
         await toasts.dismissAllWithChecks();
 

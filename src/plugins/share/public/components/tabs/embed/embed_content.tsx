@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import {
@@ -22,18 +23,18 @@ import useMountedState from 'react-use/lib/useMountedState';
 import { format as formatUrl, parse as parseUrl } from 'url';
 import { AnonymousAccessState } from '../../../../common';
 
-import { type IShareContext } from '../../context';
+import type { IShareContext, ShareContextObjectTypeConfig } from '../../context';
 
 type EmbedProps = Pick<
   IShareContext,
   | 'shareableUrlLocatorParams'
   | 'shareableUrlForSavedObject'
   | 'shareableUrl'
-  | 'isEmbedded'
   | 'embedUrlParamExtensions'
   | 'objectType'
+  | 'isDirty'
 > & {
-  setIsNotSaved: () => void;
+  objectConfig?: ShareContextObjectTypeConfig;
 };
 
 interface UrlParams {
@@ -51,9 +52,9 @@ export const EmbedContent = ({
   embedUrlParamExtensions: urlParamExtensions,
   shareableUrlForSavedObject,
   shareableUrl,
-  isEmbedded,
   objectType,
-  setIsNotSaved,
+  objectConfig = {},
+  isDirty,
 }: EmbedProps) => {
   const isMounted = useMountedState();
   const [urlParams, setUrlParams] = useState<UrlParams | undefined>(undefined);
@@ -64,9 +65,16 @@ export const EmbedContent = ({
   const [anonymousAccessParameters] = useState<AnonymousAccessState['accessURLParameters']>(null);
   const [usePublicUrl] = useState<boolean>(false);
 
-  useEffect(() => {
-    if (objectType !== 'dashboard') setIsNotSaved();
-  }, [url, setIsNotSaved, objectType]);
+  const makeUrlEmbeddable = useCallback((tempUrl: string): string => {
+    const embedParam = '?embed=true';
+    const urlHasQueryString = tempUrl.indexOf('?') !== -1;
+
+    if (urlHasQueryString) {
+      return tempUrl.replace('?', `${embedParam}&`);
+    }
+
+    return `${tempUrl}${embedParam}`;
+  }, []);
 
   const getUrlParamExtensions = useCallback(
     (tempUrl: string): string => {
@@ -89,10 +97,11 @@ export const EmbedContent = ({
 
   const updateUrlParams = useCallback(
     (tempUrl: string) => {
+      tempUrl = makeUrlEmbeddable(tempUrl);
       tempUrl = urlParams ? getUrlParamExtensions(tempUrl) : tempUrl;
       return tempUrl;
     },
-    [getUrlParamExtensions, urlParams]
+    [makeUrlEmbeddable, getUrlParamExtensions, urlParams]
   );
 
   const getSnapshotUrl = useCallback(
@@ -179,16 +188,14 @@ export const EmbedContent = ({
       tempUrl = addUrlAnonymousAccessParameters(tempUrl!);
     }
 
-    if (isEmbedded) {
-      tempUrl = makeIframeTag(tempUrl!);
-    }
+    tempUrl = makeIframeTag(tempUrl!);
+
     setUrl(tempUrl!);
   }, [
     addUrlAnonymousAccessParameters,
     exportUrlAs,
     getSavedObjectUrl,
     getSnapshotUrl,
-    isEmbedded,
     shortUrlCache,
     useShortUrl,
   ]);
@@ -243,12 +250,20 @@ export const EmbedContent = ({
       />
     );
 
+  const { draftModeCallOut: DraftModeCallout } = objectConfig;
+
   return (
     <>
       <EuiForm>
         <EuiText size="s">{helpText}</EuiText>
         <EuiSpacer />
         {renderUrlParamExtensions()}
+        {isDirty && DraftModeCallout && (
+          <>
+            <EuiSpacer size="m" />
+            {DraftModeCallout}
+          </>
+        )}
         <EuiSpacer />
       </EuiForm>
       <EuiFlexGroup justifyContent="flexEnd" responsive={false}>

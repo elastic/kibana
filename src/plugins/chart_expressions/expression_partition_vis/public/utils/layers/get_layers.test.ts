@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { ArrayEntry, ArrayNode } from '@elastic/charts';
@@ -12,8 +13,11 @@ import { BucketColumns, ChartTypes } from '../../../common/types';
 import { createMockPieParams, createMockVisData } from '../../mocks';
 import { getPaletteRegistry } from '../../__mocks__/palettes';
 import { getLayers } from './get_layers';
+import { getKbnPalettes } from '@kbn/palettes';
 
 describe('getLayers', () => {
+  const palettes = getKbnPalettes({ name: 'amsterdam', darkMode: false });
+
   it('preserves slice order for multi-metric layer', () => {
     const visData = createMockVisData();
     const columns: BucketColumns[] = [
@@ -42,6 +46,7 @@ describe('getLayers', () => {
       {},
       [],
       getPaletteRegistry(),
+      palettes,
       {},
       fieldFormatsMock,
       false,
@@ -152,6 +157,7 @@ describe('getLayers', () => {
       {},
       [],
       getPaletteRegistry(),
+      palettes,
       {},
       fieldFormatsMock,
       false,

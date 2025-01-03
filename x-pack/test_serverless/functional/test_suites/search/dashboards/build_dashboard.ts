@@ -56,9 +56,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     it('can edit a Lens panel by value and save changes', async () => {
       await PageObjects.dashboard.waitForRenderComplete();
-      await dashboardPanelActions.openContextMenu();
-      await dashboardPanelActions.clickEdit();
-      await PageObjects.lens.switchToVisualization('donut');
+      await dashboardPanelActions.navigateToEditorFromFlyout();
+      await PageObjects.lens.switchToVisualization('pie');
       await PageObjects.lens.saveAndReturn();
       await PageObjects.dashboard.waitForRenderComplete();
 

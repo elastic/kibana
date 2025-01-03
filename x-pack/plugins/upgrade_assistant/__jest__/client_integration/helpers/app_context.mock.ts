@@ -21,6 +21,7 @@ import { apiService } from '../../../public/application/lib/api';
 import { breadcrumbService } from '../../../public/application/lib/breadcrumbs';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
+import { OBS_LOGS_EXPLORER_DATA_VIEW_LOCATOR_ID } from '@kbn/deeplinks-observability';
 
 const data = dataPluginMock.createStartContract();
 const dataViews = { ...data.dataViews };
@@ -51,10 +52,11 @@ const servicesMock = {
 const idToUrlMap = {
   SNAPSHOT_RESTORE_LOCATOR: 'snapshotAndRestoreUrl',
   DISCOVER_APP_LOCATOR: 'discoverUrl',
+  [OBS_LOGS_EXPLORER_DATA_VIEW_LOCATOR_ID]: 'logsExplorerUrl',
 };
 type IdKey = keyof typeof idToUrlMap;
 
-const stringifySearchParams = (params: Record<string, any>) => {
+export const stringifySearchParams = (params: Record<string, any>) => {
   const stringifiedParams = Object.keys(params).reduce((list, key) => {
     const value = typeof params[key] === 'object' ? JSON.stringify(params[key]) : params[key];
 
@@ -70,12 +72,15 @@ shareMock.url.locators.get = (id: IdKey) => ({
   useUrl: (): string | undefined => idToUrlMap[id],
   getUrl: (params: Record<string, any>): string | undefined =>
     `${idToUrlMap[id]}?${stringifySearchParams(params)}`,
+  getRedirectUrl: (params: Record<string, any>): string | undefined =>
+    `${idToUrlMap[id]}?${stringifySearchParams(params)}`,
 });
 
 export const getAppContextMock = (kibanaVersion: SemVer) => ({
   featureSet: {
     mlSnapshots: true,
     migrateSystemIndices: true,
+    migrateDataStreams: true,
     reindexCorrectiveActions: true,
   },
   kibanaVersionInfo: {
@@ -104,7 +109,6 @@ export const getAppContextMock = (kibanaVersion: SemVer) => ({
   },
   plugins: {
     share: shareMock,
-    infra: undefined,
     cloud: {
       ...cloudMock.createSetup(),
       isCloudEnabled: false,

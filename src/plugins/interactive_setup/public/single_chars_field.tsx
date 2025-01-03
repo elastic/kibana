@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { EuiFieldText, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
@@ -72,13 +73,13 @@ export const SingleCharsField: FunctionComponent<SingleCharsFieldProps> = ({
         <EuiFlexItem
           key={`${i}separator`}
           grow={false}
-          style={{ width: parseInt(euiThemeVars.euiFormControlHeight, 10) / 8 }}
+          css={{ width: parseInt(euiThemeVars.euiFormControlHeight, 10) / 8 }}
         />
       );
     }
 
     children.push(
-      <EuiFlexItem key={i} grow={false} style={{ width: euiThemeVars.euiFormControlHeight }}>
+      <EuiFlexItem key={i} grow={false} css={{ width: euiThemeVars.euiFormControlHeight }}>
         <EuiFieldText
           inputRef={(el) => {
             inputRefs.current[i] = el;
@@ -124,7 +125,7 @@ export const SingleCharsField: FunctionComponent<SingleCharsFieldProps> = ({
           }}
           maxLength={1}
           isInvalid={isInvalid}
-          style={{ textAlign: 'center' }}
+          css={{ textAlign: 'center' }}
           aria-label={i18n.translate('interactiveSetup.singleCharsField.digitLabel', {
             defaultMessage: 'Digit {index}',
             values: { index: i + 1 },

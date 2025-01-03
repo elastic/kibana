@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { memo, useCallback, useMemo, useState, useEffect, useRef } from 'react';
@@ -40,6 +41,8 @@ import {
 } from '@kbn/expressions-plugin/public';
 import type { FieldFormat } from '@kbn/field-formats-plugin/common';
 import { getOverridesFor } from '@kbn/chart-expressions-common';
+import { useKbnPalettes } from '@kbn/palettes';
+import { useAppFixedViewport } from '@kbn/core-rendering-browser';
 import { consolidateMetricColumns } from '../../common/utils';
 import { DEFAULT_PERCENT_DECIMALS } from '../../common/constants';
 import {
@@ -115,6 +118,7 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
   } = props;
   const visParams = useMemo(() => filterOutConfig(visType, preVisParams), [preVisParams, visType]);
   const chartBaseTheme = props.chartsThemeService.useChartsBaseTheme();
+  const palettes = useKbnPalettes();
 
   const {
     table: visData,
@@ -310,6 +314,7 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
         { ...props.uiState?.get('vis.colors', {}), ...props.visParams.labels.colorOverrides },
         visData.rows,
         props.palettesRegistry,
+        palettes,
         formatters,
         services.fieldFormats,
         syncColors,
@@ -323,6 +328,7 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
       props.uiState,
       props.visParams.labels.colorOverrides,
       props.palettesRegistry,
+      palettes,
       formatters,
       services.fieldFormats,
       syncColors,
@@ -377,22 +383,14 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
       getPartitionTheme(
         visType,
         visParams,
-        chartBaseTheme,
         containerDimensions,
         rescaleFactor,
         hasOpenedOnAggBasedEditor
       ),
-    [
-      visType,
-      visParams,
-      chartBaseTheme,
-      containerDimensions,
-      rescaleFactor,
-      hasOpenedOnAggBasedEditor,
-    ]
+    [visType, visParams, containerDimensions, rescaleFactor, hasOpenedOnAggBasedEditor]
   );
 
-  const fixedViewPort = document.getElementById('app-fixed-viewport');
+  const fixedViewPort = useAppFixedViewport();
 
   const legendPosition = visParams.legendPosition ?? Position.Right;
 

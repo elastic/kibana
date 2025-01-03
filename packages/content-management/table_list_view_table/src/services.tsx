@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { FC, PropsWithChildren } from 'react';
@@ -23,7 +24,7 @@ import type { I18nStart } from '@kbn/core-i18n-browser';
 import type { MountPoint, OverlayRef } from '@kbn/core-mount-utils-browser';
 import type { OverlayFlyoutOpenOptions } from '@kbn/core-overlays-browser';
 import type { ThemeServiceStart } from '@kbn/core-theme-browser';
-import type { UserProfileServiceStart } from '@kbn/core-user-profile-browser';
+import type { UserProfileService, UserProfileServiceStart } from '@kbn/core-user-profile-browser';
 import type { FormattedRelative } from '@kbn/i18n-react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { RedirectAppLinksKibanaProvider } from '@kbn/shared-ux-link-redirect-app';
@@ -72,12 +73,15 @@ export interface Services {
   /** Predicate to indicate if tagging features is enabled */
   isTaggingEnabled: () => boolean;
   /** Predicate to indicate if favorites features is enabled */
-  isFavoritesEnabled: () => boolean;
+  isFavoritesEnabled: () => Promise<boolean>;
   /** Predicate function to indicate if some of the saved object references are tags */
   itemHasTags: (references: SavedObjectsReference[]) => boolean;
   /** Handler to return the url to navigate to the kibana tags management */
   getTagManagementUrl: () => string;
   getTagIdsFromReferences: (references: SavedObjectsReference[]) => string[];
+  /** Whether versioning is enabled for the current kibana instance. (aka is Serverless)
+   This is used to determine if we should show the version mentions in the help text.*/
+  isKibanaVersioningEnabled: boolean;
 }
 
 const TableListViewContext = React.createContext<Services | null>(null);
@@ -99,6 +103,7 @@ interface TableListViewStartServices {
   analytics: Pick<AnalyticsServiceStart, 'reportEvent'>;
   i18n: I18nStart;
   theme: Pick<ThemeServiceStart, 'theme$'>;
+  userProfile: UserProfileService;
 }
 
 /**
@@ -183,6 +188,12 @@ export interface TableListViewKibanaDependencies {
    * Content insights client to enable content insights features.
    */
   contentInsightsClient?: ContentInsightsClientPublic;
+
+  /**
+   * Flag to indicate if Kibana versioning is enabled. (aka not Serverless)
+   * Used to determine if we should show the version mentions in the help text.
+   */
+  isKibanaVersioningEnabled?: boolean;
 }
 
 /**
@@ -249,7 +260,10 @@ export const TableListViewKibanaProvider: FC<
     <RedirectAppLinksKibanaProvider coreStart={core}>
       <UserProfilesKibanaProvider core={core}>
         <ContentEditorKibanaProvider core={core} savedObjectsTagging={savedObjectsTagging}>
-          <ContentInsightsProvider contentInsightsClient={services.contentInsightsClient}>
+          <ContentInsightsProvider
+            contentInsightsClient={services.contentInsightsClient}
+            isKibanaVersioningEnabled={services.isKibanaVersioningEnabled}
+          >
             <FavoritesContextProvider
               favoritesClient={services.favorites}
               notifyError={(title, text) => {
@@ -274,12 +288,13 @@ export const TableListViewKibanaProvider: FC<
                 currentAppId$={application.currentAppId$}
                 navigateToUrl={application.navigateToUrl}
                 isTaggingEnabled={() => Boolean(savedObjectsTagging)}
-                isFavoritesEnabled={() => Boolean(services.favorites)}
+                isFavoritesEnabled={async () => services.favorites?.isAvailable() ?? false}
                 getTagList={getTagList}
                 TagList={TagList}
                 itemHasTags={itemHasTags}
                 getTagIdsFromReferences={getTagIdsFromReferences}
                 getTagManagementUrl={() => core.http.basePath.prepend(TAG_MANAGEMENT_APP_URL)}
+                isKibanaVersioningEnabled={services.isKibanaVersioningEnabled ?? false}
               >
                 {children}
               </TableListViewProvider>

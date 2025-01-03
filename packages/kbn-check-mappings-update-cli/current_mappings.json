@@ -585,6 +585,17 @@
           }
         }
       },
+      "observables": {
+        "properties": {
+          "typeKey": {
+            "type": "keyword"
+          },
+          "value": {
+            "type": "keyword"
+          }
+        },
+        "type": "nested"
+      },
       "owner": {
         "type": "keyword"
       },
@@ -787,6 +798,10 @@
         "type": "keyword"
       }
     }
+  },
+  "cloud": {
+    "dynamic": false,
+    "properties": {}
   },
   "cloud-security-posture-settings": {
     "dynamic": false,
@@ -1054,6 +1069,27 @@
     "properties": {
       "apiKey": {
         "type": "binary"
+      }
+    }
+  },
+  "entity-engine-status": {
+    "dynamic": false,
+    "properties": {
+      "fieldHistoryLength": {
+        "index": false,
+        "type": "integer"
+      },
+      "filter": {
+        "type": "keyword"
+      },
+      "indexPattern": {
+        "type": "keyword"
+      },
+      "status": {
+        "type": "keyword"
+      },
+      "type": {
+        "type": "keyword"
       }
     }
   },
@@ -1488,6 +1524,10 @@
       "favoriteIds": {
         "type": "keyword"
       },
+      "favoriteMetadata": {
+        "dynamic": false,
+        "type": "object"
+      },
       "type": {
         "type": "keyword"
       },
@@ -1564,6 +1604,7 @@
     }
   },
   "fleet-agent-policies": {
+    "dynamic": false,
     "properties": {
       "advanced_settings": {
         "index": false,
@@ -1686,6 +1727,9 @@
   },
   "fleet-package-policies": {
     "properties": {
+      "bump_agent_policy_revision": {
+        "type": "boolean"
+      },
       "created_at": {
         "type": "date"
       },
@@ -1753,6 +1797,9 @@
             "type": "keyword"
           }
         }
+      },
+      "supports_agentless": {
+        "type": "boolean"
       },
       "updated_at": {
         "type": "date"
@@ -1927,6 +1974,7 @@
     "properties": {}
   },
   "ingest-agent-policies": {
+    "dynamic": false,
     "properties": {
       "advanced_settings": {
         "index": false,
@@ -1979,12 +2027,24 @@
       "keep_monitoring_alive": {
         "type": "boolean"
       },
+      "monitoring_diagnostics": {
+        "index": false,
+        "type": "flattened"
+      },
       "monitoring_enabled": {
         "index": false,
         "type": "keyword"
       },
+      "monitoring_http": {
+        "index": false,
+        "type": "flattened"
+      },
       "monitoring_output_id": {
         "type": "keyword"
+      },
+      "monitoring_pprof_enabled": {
+        "index": false,
+        "type": "boolean"
       },
       "name": {
         "type": "keyword"
@@ -2259,6 +2319,9 @@
   },
   "ingest-package-policies": {
     "properties": {
+      "bump_agent_policy_revision": {
+        "type": "boolean"
+      },
       "created_at": {
         "type": "date"
       },
@@ -2327,6 +2390,9 @@
           }
         }
       },
+      "supports_agentless": {
+        "type": "boolean"
+      },
       "updated_at": {
         "type": "date"
       },
@@ -2340,6 +2406,18 @@
   },
   "ingest_manager_settings": {
     "properties": {
+      "delete_unenrolled_agents": {
+        "properties": {
+          "enabled": {
+            "index": false,
+            "type": "boolean"
+          },
+          "is_preconfigured": {
+            "index": false,
+            "type": "boolean"
+          }
+        }
+      },
       "fleet_server_hosts": {
         "type": "keyword"
       },
@@ -2454,6 +2532,20 @@
       "events": {
         "format": "epoch_millis||strict_date_optional_time",
         "type": "date_range"
+      },
+      "expirationDate": {
+        "type": "date"
+      },
+      "title": {
+        "fields": {
+          "keyword": {
+            "type": "keyword"
+          }
+        },
+        "type": "text"
+      },
+      "updatedAt": {
+        "type": "date"
       }
     }
   },
@@ -2792,6 +2884,26 @@
       }
     }
   },
+  "product-doc-install-status": {
+    "dynamic": false,
+    "properties": {
+      "index_name": {
+        "type": "keyword"
+      },
+      "installation_status": {
+        "type": "keyword"
+      },
+      "last_installation_date": {
+        "type": "date"
+      },
+      "product_name": {
+        "type": "keyword"
+      },
+      "product_version": {
+        "type": "keyword"
+      }
+    }
+  },
   "query": {
     "dynamic": false,
     "properties": {
@@ -2817,6 +2929,9 @@
       },
       "enabled": {
         "type": "boolean"
+      },
+      "excludeAlertStatuses": {
+        "type": "keyword"
       },
       "filter": {
         "dynamic": false,
@@ -3501,6 +3616,10 @@
     }
   },
   "synthetics-param": {
+    "dynamic": false,
+    "properties": {}
+  },
+  "synthetics-private-location": {
     "dynamic": false,
     "properties": {}
   },

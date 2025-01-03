@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import stripAnsi from 'strip-ansi';
@@ -323,6 +324,21 @@ describe('schema', () => {
           patternSchema.validate('%date{ISO8601_TZ}{Europe/Berlin}%message%date{HH}')
         ).toThrowErrorMatchingInlineSnapshot(
           `"Date format expected one of ISO8601, ISO8601_TZ, ABSOLUTE, UNIX, UNIX_MILLIS, but given: HH"`
+        );
+      });
+
+      it('fails on %date with schema too long', () => {
+        const generateLongFormat = () => {
+          const longFormat = [];
+          for (let i = 1; i < 1001; i++) {
+            longFormat.push(`${i}`);
+          }
+          return longFormat.join('');
+        };
+        expect(() =>
+          patternSchema.validate(`%date${generateLongFormat()}`)
+        ).toThrowErrorMatchingInlineSnapshot(
+          `"value has length [2898] but it must have a maximum length of [1000]."`
         );
       });
     });

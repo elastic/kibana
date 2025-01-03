@@ -1,13 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import moment from 'moment-timezone';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import {
@@ -20,12 +22,15 @@ import {
 import { getUserDisplayName } from '@kbn/user-profile-components';
 
 import { Item } from '../types';
+import { useServices } from '../services';
 
 export interface ActivityViewProps {
   item: Pick<Partial<Item>, 'createdBy' | 'createdAt' | 'updatedBy' | 'updatedAt' | 'managed'>;
+  entityNamePlural?: string;
 }
 
-export const ActivityView = ({ item }: ActivityViewProps) => {
+export const ActivityView = ({ item, entityNamePlural }: ActivityViewProps) => {
+  const isKibanaVersioningEnabled = useServices()?.isKibanaVersioningEnabled ?? false;
   const showLastUpdated = Boolean(item.updatedAt && item.updatedAt !== item.createdAt);
 
   const UnknownUserLabel = (
@@ -60,7 +65,10 @@ export const ActivityView = ({ item }: ActivityViewProps) => {
             ) : (
               <>
                 {UnknownUserLabel}
-                <NoCreatorTip />
+                <NoCreatorTip
+                  includeVersionTip={isKibanaVersioningEnabled}
+                  entityNamePlural={entityNamePlural}
+                />
               </>
             )
           }
@@ -83,7 +91,10 @@ export const ActivityView = ({ item }: ActivityViewProps) => {
               ) : (
                 <>
                   {UnknownUserLabel}
-                  <NoUpdaterTip />
+                  <NoUpdaterTip
+                    includeVersionTip={isKibanaVersioningEnabled}
+                    entityNamePlural={entityNamePlural}
+                  />
                 </>
               )
             }
@@ -96,10 +107,16 @@ export const ActivityView = ({ item }: ActivityViewProps) => {
   );
 };
 
-const dateFormatter = new Intl.DateTimeFormat(i18n.getLocale(), {
-  dateStyle: 'long',
-  timeStyle: 'short',
-});
+const formatDate = (time: string) => {
+  const locale = i18n.getLocale();
+  const timeZone = moment().tz();
+
+  return new Intl.DateTimeFormat(locale, {
+    dateStyle: 'long',
+    timeStyle: 'short',
+    timeZone,
+  }).format(new Date(time));
+};
 
 const ActivityCard = ({
   what,
@@ -129,7 +146,7 @@ const ActivityCard = ({
               id="contentManagement.contentEditor.activity.lastUpdatedByDateTime"
               defaultMessage="on {dateTime}"
               values={{
-                dateTime: dateFormatter.format(new Date(when)),
+                dateTime: formatDate(when),
               }}
             />
           </EuiText>

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { CoreStart } from '@kbn/core/public';
@@ -12,11 +13,11 @@ import { I18nProvider } from '@kbn/i18n-react';
 import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 import type { FetchResult } from '@kbn/newsfeed-plugin/public';
 import { Route, Routes } from '@kbn/shared-ux-router';
+import { withSuspense } from '@kbn/shared-ux-utility';
 import React, { useEffect, useState } from 'react';
 import { HashRouter as Router } from 'react-router-dom';
 import useObservable from 'react-use/lib/useObservable';
 import type { Observable } from 'rxjs';
-import { Overview } from './overview';
 
 interface KibanaOverviewAppDeps {
   basename: string;
@@ -46,6 +47,14 @@ export const KibanaOverviewApp = ({
       return () => subscription.unsubscribe();
     }
   }, [newsfeed$]);
+
+  const Overview = withSuspense(
+    React.lazy(() =>
+      import('./overview').then(({ Overview: OverviewComponent }) => {
+        return { default: OverviewComponent };
+      })
+    )
+  );
 
   return (
     <Router basename={basename}>

@@ -1,0 +1,15 @@
+## FROM_BASE64
+
+Decodes a base64 string.
+
+### Examples
+
+```esql
+ROW a = "ZWxhc3RpYw=="
+| EVAL d = FROM_BASE64(a)
+```
+
+```esql
+ROW encoded = "U29tZSBzYW1wbGUgdGV4dA=="
+| EVAL decoded = FROM_BASE64(encoded)
+```

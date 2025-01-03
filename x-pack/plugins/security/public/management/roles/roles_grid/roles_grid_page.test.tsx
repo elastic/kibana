@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiBasicTable, EuiIcon } from '@elastic/eui';
+import { EuiIcon, EuiInMemoryTable } from '@elastic/eui';
 import type { ReactWrapper } from 'enzyme';
 import React from 'react';
 
@@ -44,7 +44,7 @@ const waitForRender = async (
 describe('<RolesGridPage />', () => {
   let apiClientMock: jest.Mocked<PublicMethodsOf<RolesAPIClient>>;
   let history: ReturnType<typeof scopedHistoryMock.create>;
-  const { theme, i18n, analytics, notifications } = coreMock.createStart();
+  const { userProfile, theme, i18n, analytics, notifications } = coreMock.createStart();
 
   beforeEach(() => {
     history = scopedHistoryMock.create();
@@ -93,6 +93,7 @@ describe('<RolesGridPage />', () => {
         buildFlavor={'traditional'}
         analytics={analytics}
         theme={theme}
+        userProfile={userProfile}
       />
     );
     const initialIconCount = wrapper.find(EuiIcon).length;
@@ -115,6 +116,7 @@ describe('<RolesGridPage />', () => {
         buildFlavor={'traditional'}
         analytics={analytics}
         theme={theme}
+        userProfile={userProfile}
       />
     );
     const initialIconCount = wrapper.find(EuiIcon).length;
@@ -139,6 +141,7 @@ describe('<RolesGridPage />', () => {
         buildFlavor={'traditional'}
         analytics={analytics}
         theme={theme}
+        userProfile={userProfile}
       />
     );
     await waitForRender(wrapper, (updatedWrapper) => {
@@ -157,6 +160,7 @@ describe('<RolesGridPage />', () => {
         buildFlavor={'traditional'}
         analytics={analytics}
         theme={theme}
+        userProfile={userProfile}
       />
     );
     const initialIconCount = wrapper.find(EuiIcon).length;
@@ -201,6 +205,7 @@ describe('<RolesGridPage />', () => {
         buildFlavor={'traditional'}
         analytics={analytics}
         theme={theme}
+        userProfile={userProfile}
       />
     );
     const initialIconCount = wrapper.find(EuiIcon).length;
@@ -209,7 +214,7 @@ describe('<RolesGridPage />', () => {
       return updatedWrapper.find(EuiIcon).length > initialIconCount;
     });
 
-    expect(wrapper.find(EuiBasicTable).props().items).toEqual([
+    expect(wrapper.find(EuiInMemoryTable).props().items).toEqual([
       {
         name: 'test-role-1',
         elasticsearch: {
@@ -296,7 +301,7 @@ describe('<RolesGridPage />', () => {
 
     findTestSubject(wrapper, 'showReservedRolesSwitch').simulate('click');
 
-    expect(wrapper.find(EuiBasicTable).props().items).toEqual([
+    expect(wrapper.find(EuiInMemoryTable).props().items).toEqual([
       {
         name: 'test-role-1',
         elasticsearch: { cluster: [], indices: [], run_as: [] },
@@ -322,6 +327,116 @@ describe('<RolesGridPage />', () => {
     ]);
   });
 
+  it('sorts columns on clicking the column header', async () => {
+    const wrapper = mountWithIntl(
+      <RolesGridPage
+        rolesAPIClient={apiClientMock}
+        history={history}
+        notifications={notifications}
+        i18n={i18n}
+        buildFlavor={'traditional'}
+        analytics={analytics}
+        theme={theme}
+        userProfile={userProfile}
+      />
+    );
+    const initialIconCount = wrapper.find(EuiIcon).length;
+
+    await waitForRender(wrapper, (updatedWrapper) => {
+      return updatedWrapper.find(EuiIcon).length > initialIconCount;
+    });
+
+    expect(wrapper.find(EuiInMemoryTable).props().items).toEqual([
+      {
+        name: 'test-role-1',
+        elasticsearch: {
+          cluster: [],
+          indices: [],
+          run_as: [],
+        },
+        kibana: [
+          {
+            base: [],
+            spaces: [],
+            feature: {},
+          },
+        ],
+      },
+      {
+        name: 'test-role-with-description',
+        description: 'role-description',
+        elasticsearch: {
+          cluster: [],
+          indices: [],
+          run_as: [],
+        },
+        kibana: [
+          {
+            base: [],
+            spaces: [],
+            feature: {},
+          },
+        ],
+      },
+      {
+        name: 'reserved-role',
+        elasticsearch: {
+          cluster: [],
+          indices: [],
+          run_as: [],
+        },
+        kibana: [
+          {
+            base: [],
+            spaces: [],
+            feature: {},
+          },
+        ],
+        metadata: {
+          _reserved: true,
+        },
+      },
+      {
+        name: 'disabled-role',
+        elasticsearch: {
+          cluster: [],
+          indices: [],
+          run_as: [],
+        },
+        kibana: [
+          {
+            base: [],
+            spaces: [],
+            feature: {},
+          },
+        ],
+        transient_metadata: {
+          enabled: false,
+        },
+      },
+      {
+        name: 'special%chars%role',
+        elasticsearch: {
+          cluster: [],
+          indices: [],
+          run_as: [],
+        },
+        kibana: [
+          {
+            base: [],
+            spaces: [],
+            feature: {},
+          },
+        ],
+      },
+    ]);
+
+    findTestSubject(wrapper, 'tableHeaderCell_name_0').simulate('click');
+
+    const firstRowElement = findTestSubject(wrapper, 'roleRowName').first();
+    expect(firstRowElement.text()).toBe('disabled-role');
+  });
+
   it('hides controls when `readOnly` is enabled', async () => {
     const wrapper = mountWithIntl(
       <RolesGridPage
@@ -332,6 +447,7 @@ describe('<RolesGridPage />', () => {
         buildFlavor={'traditional'}
         analytics={analytics}
         theme={theme}
+        userProfile={userProfile}
         readOnly
       />
     );

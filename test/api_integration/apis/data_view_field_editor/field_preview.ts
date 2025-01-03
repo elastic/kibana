@@ -1,14 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import expect from '@kbn/expect';
 
-import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
+import {
+  ELASTIC_HTTP_VERSION_HEADER,
+  X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
+} from '@kbn/core-http-common';
 import { getErrorCodeFromErrorReason } from '@kbn/data-view-field-editor-plugin/public/lib/runtime_field_validation';
 import {
   FIELD_PREVIEW_PATH,
@@ -91,6 +95,7 @@ export default function ({ getService }: FtrProviderContext) {
             .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION)
             .send(payload)
             .set('kbn-xsrf', 'xxx')
+            .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
             .expect(200);
 
           expect(response.values).eql([test.expected]);
@@ -108,6 +113,7 @@ export default function ({ getService }: FtrProviderContext) {
             index: INDEX_NAME,
           })
           .set('kbn-xsrf', 'xxx')
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
           .expect(400);
       });
 
@@ -120,6 +126,7 @@ export default function ({ getService }: FtrProviderContext) {
             index: INDEX_NAME,
           })
           .set('kbn-xsrf', 'xxx')
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
           .expect(400);
       });
 
@@ -132,6 +139,7 @@ export default function ({ getService }: FtrProviderContext) {
             context: 'keyword_field',
           })
           .set('kbn-xsrf', 'xxx')
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
           .expect(400);
       });
     });
@@ -149,7 +157,8 @@ export default function ({ getService }: FtrProviderContext) {
             context: 'keyword_field',
             index: INDEX_NAME,
           })
-          .set('kbn-xsrf', 'xxx');
+          .set('kbn-xsrf', 'xxx')
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
 
         const errorCode = getErrorCodeFromErrorReason(response.error?.caused_by?.reason);
 

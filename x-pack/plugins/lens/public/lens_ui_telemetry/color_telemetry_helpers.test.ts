@@ -8,12 +8,11 @@
 import { getColorMappingTelemetryEvents } from './color_telemetry_helpers';
 import {
   ColorMapping,
-  EUIAmsterdamColorBlindPalette,
-  ElasticBrandPalette,
   DEFAULT_COLOR_MAPPING_CONFIG,
   DEFAULT_OTHER_ASSIGNMENT_INDEX,
 } from '@kbn/coloring';
-import faker from 'faker';
+import { KbnPalette } from '@kbn/palettes';
+import { faker } from '@faker-js/faker';
 
 const exampleAssignment = (
   valuesCount = 1,
@@ -24,7 +23,7 @@ const exampleAssignment = (
     type === 'categorical'
       ? {
           type: 'categorical',
-          paletteId: ElasticBrandPalette.id,
+          paletteId: KbnPalette.ElasticClassic,
           colorIndex: 0,
         }
       : {
@@ -35,7 +34,7 @@ const exampleAssignment = (
   return {
     rule: {
       type: 'matchExactly',
-      values: Array.from({ length: valuesCount }, () => faker.random.alpha()),
+      values: Array.from({ length: valuesCount }, () => faker.string.alpha()),
     },
     color,
     touched: false,
@@ -57,13 +56,13 @@ const MANUAL_COLOR_MAPPING_CONFIG: ColorMapping.Config = {
       },
       color: {
         type: 'categorical',
-        paletteId: ElasticBrandPalette.id,
+        paletteId: KbnPalette.ElasticClassic,
         colorIndex: 2,
       },
       touched: true,
     },
   ],
-  paletteId: ElasticBrandPalette.id,
+  paletteId: KbnPalette.ElasticClassic,
   colorMode: {
     type: 'categorical',
   },
@@ -74,7 +73,7 @@ const specialAssignmentsPalette: ColorMapping.Config['specialAssignments'] = [
     ...DEFAULT_COLOR_MAPPING_CONFIG.specialAssignments[DEFAULT_OTHER_ASSIGNMENT_INDEX],
     color: {
       type: 'categorical',
-      paletteId: EUIAmsterdamColorBlindPalette.id,
+      paletteId: KbnPalette.Kibana7,
       colorIndex: 0,
     },
   },
@@ -112,8 +111,8 @@ describe('color_telemetry_helpers', () => {
   });
   it('settings (default): unassigned terms loop, default palette returns correct events', () => {
     expect(getColorMappingTelemetryEvents(DEFAULT_COLOR_MAPPING_CONFIG)).toEqual([
-      'lens_color_mapping_palette_eui_amsterdam_color_blind',
-      'lens_color_mapping_unassigned_terms_loop',
+      'color_mapping_palette_default',
+      'color_mapping_unassigned_terms_loop',
     ]);
   });
   it('gradient event when user changed colorMode to gradient', () => {
@@ -126,7 +125,7 @@ describe('color_telemetry_helpers', () => {
             steps: [
               {
                 type: 'categorical',
-                paletteId: EUIAmsterdamColorBlindPalette.id,
+                paletteId: KbnPalette.Kibana7,
                 colorIndex: 0,
                 touched: false,
               },
@@ -136,33 +135,33 @@ describe('color_telemetry_helpers', () => {
         },
         DEFAULT_COLOR_MAPPING_CONFIG
       )
-    ).toEqual(['lens_color_mapping_gradient']);
+    ).toEqual(['color_mapping_gradient']);
   });
   it('settings: custom palette, unassigned terms from palette, 2 colors with 5 terms in total', () => {
     expect(getColorMappingTelemetryEvents(MANUAL_COLOR_MAPPING_CONFIG)).toEqual([
-      'lens_color_mapping_palette_elastic_brand_2023',
-      'lens_color_mapping_unassigned_terms_palette',
-      'lens_color_mapping_colors_2_to_4',
-      'lens_color_mapping_custom_colors_2',
-      'lens_color_mapping_avg_count_terms_per_color_2_to_4',
+      'color_mapping_palette_elastic_brand_2023',
+      'color_mapping_unassigned_terms_palette',
+      'color_mapping_colors_2_to_4',
+      'color_mapping_custom_colors_2',
+      'color_mapping_avg_count_terms_per_color_2_to_4',
     ]);
     expect(
       getColorMappingTelemetryEvents(MANUAL_COLOR_MAPPING_CONFIG, DEFAULT_COLOR_MAPPING_CONFIG)
     ).toEqual([
-      'lens_color_mapping_palette_elastic_brand_2023',
-      'lens_color_mapping_unassigned_terms_palette',
-      'lens_color_mapping_colors_2_to_4',
-      'lens_color_mapping_custom_colors_2',
-      'lens_color_mapping_avg_count_terms_per_color_2_to_4',
+      'color_mapping_palette_elastic_brand_2023',
+      'color_mapping_unassigned_terms_palette',
+      'color_mapping_colors_2_to_4',
+      'color_mapping_custom_colors_2',
+      'color_mapping_avg_count_terms_per_color_2_to_4',
     ]);
   });
   it('color, custom color and count of terms changed (even if the same event would be returned)', () => {
     const config = { ...MANUAL_COLOR_MAPPING_CONFIG };
     config.assignments = config.assignments.slice(0, 3);
     expect(getColorMappingTelemetryEvents(config, MANUAL_COLOR_MAPPING_CONFIG)).toEqual([
-      'lens_color_mapping_colors_2_to_4',
-      'lens_color_mapping_custom_colors_1',
-      'lens_color_mapping_avg_count_terms_per_color_2_to_4',
+      'color_mapping_colors_2_to_4',
+      'color_mapping_custom_colors_1',
+      'color_mapping_avg_count_terms_per_color_2_to_4',
     ]);
   });
 
@@ -177,9 +176,9 @@ describe('color_telemetry_helpers', () => {
 
       config.assignments = [exampleAssignment(4, 'custom')];
       expect(getColorMappingTelemetryEvents(config, MANUAL_COLOR_MAPPING_CONFIG)).toEqual([
-        'lens_color_mapping_colors_up_to_2',
-        'lens_color_mapping_custom_colors_1',
-        'lens_color_mapping_avg_count_terms_per_color_2_to_4',
+        'color_mapping_colors_up_to_2',
+        'color_mapping_custom_colors_1',
+        'color_mapping_avg_count_terms_per_color_2_to_4',
       ]);
     });
     it('2 colors', () => {
@@ -187,8 +186,8 @@ describe('color_telemetry_helpers', () => {
 
       config.assignments = [exampleAssignment(1), exampleAssignment(1)];
       expect(getColorMappingTelemetryEvents(config, MANUAL_COLOR_MAPPING_CONFIG)).toEqual([
-        'lens_color_mapping_colors_2',
-        'lens_color_mapping_avg_count_terms_per_color_1',
+        'color_mapping_colors_2',
+        'color_mapping_avg_count_terms_per_color_1',
       ]);
     });
     it('3 colors, 10 terms per assignment', () => {
@@ -196,8 +195,8 @@ describe('color_telemetry_helpers', () => {
 
       config.assignments = Array.from({ length: 3 }, () => exampleAssignment(10));
       expect(getColorMappingTelemetryEvents(config, MANUAL_COLOR_MAPPING_CONFIG)).toEqual([
-        'lens_color_mapping_colors_2_to_4',
-        'lens_color_mapping_avg_count_terms_per_color_above_4',
+        'color_mapping_colors_2_to_4',
+        'color_mapping_avg_count_terms_per_color_above_4',
       ]);
     });
     it('7 colors, 2 terms per assignment, all custom', () => {
@@ -205,9 +204,9 @@ describe('color_telemetry_helpers', () => {
 
       config.assignments = Array.from({ length: 7 }, () => exampleAssignment(2, 'custom'));
       expect(getColorMappingTelemetryEvents(config, MANUAL_COLOR_MAPPING_CONFIG)).toEqual([
-        'lens_color_mapping_colors_4_to_8',
-        'lens_color_mapping_custom_colors_4_to_8',
-        'lens_color_mapping_avg_count_terms_per_color_2',
+        'color_mapping_colors_4_to_8',
+        'color_mapping_custom_colors_4_to_8',
+        'color_mapping_avg_count_terms_per_color_2',
       ]);
     });
     it('12 colors', () => {
@@ -215,18 +214,18 @@ describe('color_telemetry_helpers', () => {
 
       config.assignments = Array.from({ length: 12 }, () => exampleAssignment(3, 'custom'));
       expect(getColorMappingTelemetryEvents(config, MANUAL_COLOR_MAPPING_CONFIG)).toEqual([
-        'lens_color_mapping_colors_8_to_16',
-        'lens_color_mapping_custom_colors_8_to_16',
-        'lens_color_mapping_avg_count_terms_per_color_2_to_4',
+        'color_mapping_colors_8_to_16',
+        'color_mapping_custom_colors_8_to_16',
+        'color_mapping_avg_count_terms_per_color_2_to_4',
       ]);
     });
     it('27 colors', () => {
       const config = { ...MANUAL_COLOR_MAPPING_CONFIG };
       config.assignments = Array.from({ length: 27 }, () => exampleAssignment(3, 'custom'));
       expect(getColorMappingTelemetryEvents(config, MANUAL_COLOR_MAPPING_CONFIG)).toEqual([
-        'lens_color_mapping_colors_above_16',
-        'lens_color_mapping_custom_colors_above_16',
-        'lens_color_mapping_avg_count_terms_per_color_2_to_4',
+        'color_mapping_colors_above_16',
+        'color_mapping_custom_colors_above_16',
+        'color_mapping_avg_count_terms_per_color_2_to_4',
       ]);
     });
   });
@@ -241,7 +240,7 @@ describe('color_telemetry_helpers', () => {
           },
           DEFAULT_COLOR_MAPPING_CONFIG
         )
-      ).toEqual(['lens_color_mapping_unassigned_terms_palette']);
+      ).toEqual(['color_mapping_unassigned_terms_palette']);
     });
     it('unassigned terms changed from palette to loop', () => {
       expect(
@@ -249,7 +248,7 @@ describe('color_telemetry_helpers', () => {
           ...DEFAULT_COLOR_MAPPING_CONFIG,
           specialAssignments: specialAssignmentsPalette,
         })
-      ).toEqual(['lens_color_mapping_unassigned_terms_loop']);
+      ).toEqual(['color_mapping_unassigned_terms_loop']);
     });
     it('unassigned terms changed from loop to another custom color', () => {
       expect(
@@ -260,7 +259,7 @@ describe('color_telemetry_helpers', () => {
           },
           DEFAULT_COLOR_MAPPING_CONFIG
         )
-      ).toEqual(['lens_color_mapping_unassigned_terms_custom']);
+      ).toEqual(['color_mapping_unassigned_terms_custom']);
     });
     it('unassigned terms changed from custom color to another custom color', () => {
       expect(
@@ -271,7 +270,7 @@ describe('color_telemetry_helpers', () => {
             specialAssignments: specialAssignmentsCustom2,
           }
         )
-      ).toEqual(['lens_color_mapping_unassigned_terms_custom']);
+      ).toEqual(['color_mapping_unassigned_terms_custom']);
     });
   });
 });

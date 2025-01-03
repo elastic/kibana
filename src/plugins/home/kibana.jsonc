@@ -1,19 +1,28 @@
 {
   "type": "plugin",
   "id": "@kbn/home-plugin",
-  "owner": "@elastic/kibana-core",
+  "owner": [
+    "@elastic/appex-sharedux"
+  ],
+  "group": "platform",
+  "visibility": "shared",
   "plugin": {
     "id": "home",
-    "server": true,
     "browser": true,
-    "requiredPlugins": ["dataViews", "share", "urlForwarding"],
-    "requiredBundles": ["kibanaReact"],
+    "server": true,
+    "requiredPlugins": [
+      "dataViews",
+      "share",
+      "urlForwarding"
+    ],
     "optionalPlugins": [
       "usageCollection",
       "customIntegrations",
       "cloud",
-      "guidedOnboarding",
-      "cloudExperiments"
+      "guidedOnboarding"
+    ],
+    "requiredBundles": [
+      "kibanaReact"
     ]
   }
 }

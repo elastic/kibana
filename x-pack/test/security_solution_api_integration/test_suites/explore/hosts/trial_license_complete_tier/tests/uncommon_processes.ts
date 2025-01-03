@@ -12,7 +12,7 @@ import {
   HostsUncommonProcessesStrategyResponse,
 } from '@kbn/security-solution-plugin/common/search_strategy';
 import TestAgent from 'supertest/lib/agent';
-import { BsearchService } from '@kbn/test-suites-src/common/services/bsearch';
+import { SearchService } from '@kbn/ftr-common-functional-services';
 import { FtrProviderContextWithSpaces } from '../../../../../ftr_provider_context_with_spaces';
 
 const FROM = '2000-01-01T00:00:00.000Z';
@@ -27,10 +27,10 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
 
   describe('hosts', () => {
     let supertest: TestAgent;
-    let bsearch: BsearchService;
+    let search: SearchService;
     before(async () => {
       supertest = await utils.createSuperTest();
-      bsearch = await utils.createBsearch();
+      search = await utils.createSearch();
       await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/uncommon_processes');
     });
     after(async () => {
@@ -38,7 +38,7 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
     });
 
     it('should return an edge of length 1 when given a pagination of length 1', async () => {
-      const response = await bsearch.send<HostsUncommonProcessesStrategyResponse>({
+      const response = await search.send<HostsUncommonProcessesStrategyResponse>({
         supertest,
         options: {
           factoryQueryType: HostsQueries.uncommonProcesses,
@@ -65,7 +65,7 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
 
     describe('when given a pagination of length 2', () => {
       it('should return an edge of length 2 ', async () => {
-        const response = await bsearch.send<HostsUncommonProcessesStrategyResponse>({
+        const response = await search.send<HostsUncommonProcessesStrategyResponse>({
           supertest,
           options: {
             factoryQueryType: HostsQueries.uncommonProcesses,
@@ -93,7 +93,7 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
     describe('when given a pagination of length 1', () => {
       let response: HostsUncommonProcessesStrategyResponse | null = null;
       before(async () => {
-        response = await bsearch.send<HostsUncommonProcessesStrategyResponse>({
+        response = await search.send<HostsUncommonProcessesStrategyResponse>({
           supertest,
           options: {
             factoryQueryType: HostsQueries.uncommonProcesses,

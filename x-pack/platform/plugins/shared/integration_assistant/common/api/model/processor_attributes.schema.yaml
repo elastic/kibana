@@ -1,0 +1,36 @@
+openapi: 3.0.3
+info:
+  title: Common Rule Attributes
+  version: "not applicable"
+paths: {}
+components:
+  x-codegen-enabled: true
+  schemas:
+    ESProcessorItem:
+      type: object
+      description: Processor item for the Elasticsearch processor.
+      additionalProperties:
+        $ref: "#/components/schemas/ESProcessorOptions"
+
+    ESProcessorOptions:
+      type: object
+      description: Processor options for the Elasticsearch processor.
+      properties:
+        on_failure:
+          type: array
+          items:
+            $ref: "#/components/schemas/ESProcessorItem"
+          description: An array of items to execute if the processor fails.
+        ignore_failure:
+          type: boolean
+          description: If true, the processor continues to the next processor if the current processor fails.
+        ignore_missing:
+          type: boolean
+          description: If true, the processor continues to the next processor if the field is missing.
+        if:
+          type: string
+          description: Conditionally execute the processor.
+        tag:
+          type: string
+          description: A tag to assign to the document after processing.
+      additionalProperties: true

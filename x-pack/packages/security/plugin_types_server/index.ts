@@ -50,6 +50,7 @@ export type {
   CheckUserProfilesPrivileges,
   AuthorizationMode,
   AuthorizationServiceSetup,
+  EsSecurityConfig,
 } from './src/authorization';
 export type { SecurityPluginSetup, SecurityPluginStart } from './src/plugin';
 export type {
@@ -88,3 +89,4 @@ export {
   getRestApiKeyWithKibanaPrivilegesSchema,
 } from './src/authentication';
 export { getKibanaRoleSchema, elasticsearchRoleSchema, GLOBAL_RESOURCE } from './src/authorization';
+export { ApiOperation } from './src/authorization';

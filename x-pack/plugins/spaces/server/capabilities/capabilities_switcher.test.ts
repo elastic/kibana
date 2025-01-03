@@ -20,11 +20,14 @@ const features = [
     id: 'feature_1',
     name: 'Feature 1',
     app: [],
+    category: { id: 'enterpriseSearch' },
+    scope: ['spaces', 'security'],
   },
   {
     id: 'feature_2',
     name: 'Feature 2',
     app: ['feature2'],
+    scope: ['spaces', 'security'],
     catalogue: ['feature2Entry'],
     management: {
       kibana: ['somethingElse'],
@@ -39,11 +42,13 @@ const features = [
         },
       },
     },
+    category: { id: 'observability' },
   },
   {
     id: 'feature_3',
     name: 'Feature 3',
     app: ['feature3_app'],
+    scope: ['spaces', 'security'],
     catalogue: ['feature3Entry'],
     management: {
       kibana: ['indices'],
@@ -58,12 +63,14 @@ const features = [
         },
       },
     },
+    category: { id: 'securitySolution' },
   },
   {
-    // feature 4 intentionally delcares the same items as feature 3
+    // feature 4 intentionally declares the same items as feature 3
     id: 'feature_4',
     name: 'Feature 4',
     app: ['feature3', 'feature3_app'],
+    scope: ['spaces', 'security'],
     catalogue: ['feature3Entry'],
     management: {
       kibana: ['indices'],
@@ -76,6 +83,33 @@ const features = [
           all: [],
           read: [],
         },
+      },
+    },
+    category: { id: 'observability' },
+  },
+  {
+    deprecated: { notice: 'It was a mistake.' },
+    id: 'deprecated_feature',
+    name: 'Deprecated Feature',
+    // Expose the same `app` and `catalogue` entries as `feature_2` to make sure they are disabled
+    // when `feature_2` is disabled even if the deprecated feature isn't explicitly disabled.
+    app: ['feature2'],
+    catalogue: ['feature2Entry'],
+    category: { id: 'deprecated', label: 'deprecated' },
+    privileges: {
+      all: {
+        savedObject: { all: [], read: [] },
+        ui: ['ui_deprecated_all'],
+        app: ['feature2'],
+        catalogue: ['feature2Entry'],
+        replacedBy: [{ feature: 'feature_2', privileges: ['all'] }],
+      },
+      read: {
+        savedObject: { all: [], read: [] },
+        ui: ['ui_deprecated_read'],
+        app: ['feature2'],
+        catalogue: ['feature2Entry'],
+        replacedBy: [{ feature: 'feature_2', privileges: ['all'] }],
       },
     },
   },
@@ -316,5 +350,80 @@ describe('capabilitiesSwitcher', () => {
     expectedCapabilities.feature_3.foo = false;
 
     expect(result).toEqual(expectedCapabilities);
+  });
+
+  describe('when the space has a solution set', () => {
+    it('does toggles capabilities of the solutions different from the space one even when the space has no disabled features', async () => {
+      const space: Space = {
+        id: 'space',
+        name: '',
+        disabledFeatures: [],
+      };
+
+      const capabilities = buildCapabilities();
+
+      const { switcher } = setup(space);
+      const request = httpServerMock.createKibanaRequest();
+
+      {
+        space.solution = 'es';
+
+        // It should disable observability and securitySolution features
+        // which correspond to feature_2 and feature_3
+        const result = await switcher(request, capabilities, false);
+
+        const expectedCapabilities = buildCapabilities();
+
+        expectedCapabilities.navLinks.feature2 = false;
+        expectedCapabilities.catalogue.feature2Entry = false;
+        expectedCapabilities.navLinks.feature3 = false;
+        expectedCapabilities.catalogue.feature3Entry = false;
+        expectedCapabilities.navLinks.feature3_app = false;
+        expectedCapabilities.management.kibana.indices = false;
+        expectedCapabilities.management.kibana.somethingElse = false;
+        expectedCapabilities.feature_2.bar = false;
+        expectedCapabilities.feature_2.foo = false;
+        expectedCapabilities.feature_3.bar = false;
+        expectedCapabilities.feature_3.foo = false;
+
+        expect(result).toEqual(expectedCapabilities);
+      }
+
+      {
+        space.solution = 'oblt';
+
+        // It should disable securitySolution features
+        // which corresponds to feature_3
+        const result = await switcher(request, capabilities, false);
+
+        const expectedCapabilities = buildCapabilities();
+
+        expectedCapabilities.feature_3.bar = false;
+        expectedCapabilities.feature_3.foo = false;
+
+        expect(result).toEqual(expectedCapabilities);
+      }
+
+      {
+        space.solution = 'security';
+
+        // It should disable enterpriseSearch and observability features
+        // which correspond to feature_1 and feature_2
+        const result = await switcher(request, capabilities, false);
+
+        const expectedCapabilities = buildCapabilities();
+
+        expectedCapabilities.navLinks.feature2 = false;
+        expectedCapabilities.catalogue.feature2Entry = false;
+        expectedCapabilities.navLinks.feature3 = false;
+        expectedCapabilities.management.kibana.somethingElse = false;
+        expectedCapabilities.feature_1.bar = false;
+        expectedCapabilities.feature_1.foo = false;
+        expectedCapabilities.feature_2.bar = false;
+        expectedCapabilities.feature_2.foo = false;
+
+        expect(result).toEqual(expectedCapabilities);
+      }
+    });
   });
 });

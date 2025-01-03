@@ -7,5 +7,4 @@
 
 export type { PrivilegesService } from './privileges';
 export type { CasesSupportedOperations } from './feature_privilege_builder';
-export { privilegesFactory } from './privileges';
-export type { RawKibanaPrivileges, RawKibanaFeaturePrivileges } from './raw_kibana_privileges';
+export { privilegesFactory, getReplacedByForPrivilege } from './privileges';

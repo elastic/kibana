@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 /**
@@ -24,4 +25,9 @@ export interface ISavedObjectsSpacesExtension {
    * If a wildcard '*' is used, it is expanded to an explicit list of namespace strings.
    */
   getSearchableNamespaces: (namespaces: string[] | undefined) => Promise<string[]>;
+  /**
+   * Returns a new Saved Objects Spaces Extension scoped to the specified namespace.
+   * @param namespace Space to which the extension should be scoped to.
+   */
+  asScopedToNamespace(namespace: string): ISavedObjectsSpacesExtension;
 }

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 // eslint-disable-next-line import/no-extraneous-dependencies
@@ -16,7 +17,7 @@ import {
   type RouterRoute,
   type RouteValidatorConfig,
 } from '@kbn/core-http-server';
-import { KnownParameters } from './type';
+import { CustomOperationObject, KnownParameters } from './type';
 import type { GenerateOpenApiDocumentOptionsFilters } from './generate_oas';
 
 const tagPrefix = 'oas-tag:';
@@ -61,7 +62,7 @@ export const buildGlobalTags = (paths: OpenAPIV3.PathsObject, additionalTags: st
 };
 
 export const getPathParameters = (path: string): KnownParameters => {
-  return Array.from(path.matchAll(/\{(.+?)\}/g)).reduce<KnownParameters>((acc, [_, key]) => {
+  return Array.from(path.matchAll(/\{([^{}?]+\??)\}/g)).reduce<KnownParameters>((acc, [_, key]) => {
     const optional = key.endsWith('?');
     acc[optional ? key.slice(0, key.length - 1) : key] = { optional };
     return acc;
@@ -77,9 +78,15 @@ export const extractContentType = (body: undefined | RouteConfigOptionsBody) => 
 
 export const getVersionedContentTypeString = (
   version: string,
+  access: 'public' | 'internal',
   acceptedContentTypes: string[]
 ): string => {
-  return `${acceptedContentTypes.join('; ')}; Elastic-Api-Version=${version}`;
+  if (access === 'internal') {
+    return `${acceptedContentTypes.join('; ')}; Elastic-Api-Version=${version}`;
+  }
+  // Exclude Elastic-Api-Version header for public routes for now, this means public routes
+  // can only generate spec for one version at a time.
+  return `${acceptedContentTypes.join('; ')}`;
 };
 
 export const extractValidationSchemaFromRoute = (
@@ -104,13 +111,14 @@ export const getVersionedHeaderParam = (
 });
 
 export const prepareRoutes = <
-  R extends { path: string; options: { access?: 'public' | 'internal' } }
+  R extends { path: string; options: { access?: 'public' | 'internal'; excludeFromOAS?: boolean } }
 >(
   routes: R[],
-  filters: GenerateOpenApiDocumentOptionsFilters = {}
+  filters: GenerateOpenApiDocumentOptionsFilters
 ): R[] => {
   if (Object.getOwnPropertyNames(filters).length === 0) return routes;
   return routes.filter((route) => {
+    if (route.options.excludeFromOAS) return false;
     if (
       filters.excludePathsMatching &&
       filters.excludePathsMatching.some((ex) => route.path.startsWith(ex))
@@ -120,7 +128,16 @@ export const prepareRoutes = <
     if (filters.pathStartsWith && !filters.pathStartsWith.some((p) => route.path.startsWith(p))) {
       return false;
     }
-    if (filters.access && route.options.access !== filters.access) return false;
+    if (filters.access === 'public' && route.options.access !== 'public') {
+      return false;
+    }
+    if (
+      filters.access === 'internal' &&
+      route.options.access != null &&
+      route.options.access !== 'internal'
+    ) {
+      return false;
+    }
     return true;
   });
 };
@@ -130,7 +147,7 @@ export const assignToPaths = (
   path: string,
   pathObject: OpenAPIV3.PathItemObject
 ): void => {
-  const pathName = path.replace('?', '');
+  const pathName = path.replace(/[\?\*]/g, '');
   paths[pathName] = { ...paths[pathName], ...pathObject };
 };
 
@@ -162,4 +179,59 @@ export const getXsrfHeaderForMethod = (
       },
     },
   ];
+};
+
+export const setXState = (
+  availability: RouteConfigOptions<RouteMethod>['availability'],
+  operation: CustomOperationObject
+): void => {
+  if (availability) {
+    if (availability.stability === 'experimental') {
+      operation['x-state'] = 'Technical Preview';
+    }
+    if (availability.stability === 'beta') {
+      operation['x-state'] = 'Beta';
+    }
+  }
+};
+
+export type GetOpId = (input: { path: string; method: string }) => string;
+
+/**
+ * Best effort to generate operation IDs from route values
+ */
+export const createOpIdGenerator = (): GetOpId => {
+  const idMap = new Map<string, number>();
+  return function getOpId({ path, method }) {
+    if (!method || !path) {
+      throw new Error(
+        `Must provide method and path, received: method: "${method}", path: "${path}"`
+      );
+    }
+
+    path = path
+      .trim()
+      .replace(/^[\/]+/, '')
+      .replace(/[\/]+$/, '')
+      .toLowerCase();
+
+    const removePrefixes = ['internal/api/', 'internal/', 'api/']; // longest to shortest
+    for (const prefix of removePrefixes) {
+      if (path.startsWith(prefix)) {
+        path = path.substring(prefix.length);
+        break;
+      }
+    }
+
+    path = path
+      .replace(/[\{\}\?\*]/g, '') // remove special chars
+      .replace(/[\/_]/g, '-') // everything else to dashes
+      .replace(/[-]+/g, '-'); // single dashes
+
+    const opId = `${method.toLowerCase()}-${path}`;
+
+    const cachedCount = idMap.get(opId) ?? 0;
+    idMap.set(opId, cachedCount + 1);
+    return cachedCount > 0 ? `${opId}-${cachedCount + 1}` : opId;
+  };
 };

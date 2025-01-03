@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { ValuesType, UnionToIntersection } from 'utility-types';
@@ -22,20 +23,15 @@ type InvalidAggregationRequest = unknown;
 // Union keys are not included in keyof, but extends iterates over the types in a union.
 type ValidAggregationKeysOf<T extends Record<string, any>> = T extends T ? keyof T : never;
 
-type KeyOfSource<T> = Record<
-  keyof T,
-  (T extends Record<string, { terms: { missing_bucket: true } }> ? null : never) | string | number
->;
+type KeyOfSource<T> = {
+  [key in keyof T]:
+    | (T[key] extends Record<string, { terms: { missing_bucket: true } }> ? null : never)
+    | string
+    | number;
+};
 
-type KeysOfSources<T extends any[]> = T extends [any]
-  ? KeyOfSource<T[0]>
-  : T extends [any, any]
-  ? KeyOfSource<T[0]> & KeyOfSource<T[1]>
-  : T extends [any, any, any]
-  ? KeyOfSource<T[0]> & KeyOfSource<T[1]> & KeyOfSource<T[2]>
-  : T extends [any, any, any, any]
-  ? KeyOfSource<T[0]> & KeyOfSource<T[1]> & KeyOfSource<T[2]> & KeyOfSource<T[3]>
-  : Record<string, null | string | number>;
+// convert to intersection to be able to get all the keys
+type KeysOfSources<T extends any[]> = UnionToIntersection<KeyOfSource<ValuesType<Pick<T, number>>>>;
 
 type CompositeKeysOf<TAggregationContainer extends AggregationsAggregationContainer> =
   TAggregationContainer extends {
@@ -88,7 +84,7 @@ export type SearchHit<
     ? {
         fields: Partial<Record<ValueTypeOfField<TFields>, unknown[]>>;
       }
-    : {}) &
+    : { fields?: Record<string, unknown[]> }) &
   (TDocValueFields extends DocValueFields
     ? {
         fields: Partial<Record<ValueTypeOfField<TDocValueFields>, unknown[]>>;
@@ -680,6 +676,8 @@ export interface ESQLSearchResponse {
   // while columns only the available ones (non nulls)
   all_columns?: ESQLColumn[];
   values: ESQLRow[];
+  took?: number;
+  _clusters?: estypes.ClusterStatistics;
 }
 
 export interface ESQLSearchParams {
@@ -690,6 +688,7 @@ export interface ESQLSearchParams {
   query: string;
   filter?: unknown;
   locale?: string;
+  include_ccs_metadata?: boolean;
   dropNullColumns?: boolean;
-  params?: Array<Record<string, string | undefined>>;
+  params?: estypesWithoutBodyKey.ScalarValue[] | Array<Record<string, string | undefined>>;
 }

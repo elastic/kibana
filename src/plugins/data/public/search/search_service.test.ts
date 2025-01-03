@@ -1,12 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { bfetchPluginMock } from '@kbn/bfetch-plugin/public/mocks';
 import { CoreSetup, CoreStart } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
 import { DataViewsContract } from '@kbn/data-views-plugin/common';
@@ -37,10 +37,8 @@ describe('Search service', () => {
 
   describe('setup()', () => {
     it('exposes proper contract', async () => {
-      const bfetch = bfetchPluginMock.createSetupContract();
       const setup = searchService.setup(mockCoreSetup, {
         packageInfo: { version: '8' },
-        bfetch,
         expressions: { registerFunction: jest.fn(), registerType: jest.fn() },
         management: managementPluginMock.createSetupContract(),
       } as unknown as SearchServiceSetupDependencies);
@@ -54,10 +52,8 @@ describe('Search service', () => {
   describe('start()', () => {
     let data: ISearchStart;
     beforeEach(() => {
-      const bfetch = bfetchPluginMock.createSetupContract();
       searchService.setup(mockCoreSetup, {
         packageInfo: { version: '8' },
-        bfetch,
         expressions: { registerFunction: jest.fn(), registerType: jest.fn() },
         management: managementPluginMock.createSetupContract(),
       } as unknown as SearchServiceSetupDependencies);

@@ -1,5 +1,9 @@
 {
   "type": "shared-common",
   "id": "@kbn/shared-ux-error-boundary",
-  "owner": "@elastic/appex-sharedux"
+  "owner": [
+    "@elastic/appex-sharedux"
+  ],
+  "group": "platform",
+  "visibility": "shared"
 }

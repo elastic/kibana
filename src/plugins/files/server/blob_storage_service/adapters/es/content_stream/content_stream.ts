@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { createId } from '@paralleldrive/cuid2';
@@ -14,7 +15,7 @@ import { ByteSizeValue } from '@kbn/config-schema';
 import { defaults } from 'lodash';
 import { Duplex, Writable, Readable } from 'stream';
 
-import { GetResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { GetResponse } from '@elastic/elasticsearch/lib/api/types';
 import { inspect } from 'util';
 import { wrapErrorAndReThrow } from '../../../../file_client/utils';
 import type { FileChunkDocument } from '../mappings';

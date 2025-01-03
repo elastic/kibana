@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -26,7 +27,8 @@ import { CustomPaletteState } from '@kbn/charts-plugin/common/expressions/palett
 import { DimensionsVisParam, MetricVisParam } from '../../common';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { DEFAULT_TRENDLINE_NAME } from '../../common/constants';
-import faker from 'faker';
+import { PaletteOutput } from '@kbn/coloring';
+import { faker } from '@faker-js/faker';
 
 const mockDeserialize = jest.fn(({ id }: { id: string }) => {
   const convertFn = (v: unknown) => `${id}-${v}`;
@@ -560,6 +562,7 @@ describe('MetricVisComponent', function () {
         componentWithSecondaryDimension
           .find(Metric)
           .props()
+          // @ts-expect-error @types/react@18 - Parameter 'datum' implicitly has an 'any' type.
           .data?.[0].map((datum) => datum?.extra)
       ).toMatchInlineSnapshot(`
         Array [
@@ -601,6 +604,7 @@ describe('MetricVisComponent', function () {
         componentWithExtraText
           .find(Metric)
           .props()
+          // @ts-expect-error @types/react@18 - Parameter 'datum' implicitly has an 'any' type.
           .data?.[0].map((datum) => datum?.extra)
       ).toMatchInlineSnapshot(`
         Array [
@@ -822,47 +826,47 @@ describe('MetricVisComponent', function () {
       // Raw values here, not formatted
       const trends: Record<string, MetricWTrend['trend']> = {
         Friday: [
-          { x: faker.random.number(), y: faker.random.number() },
-          { x: faker.random.number(), y: faker.random.number() },
-          { x: faker.random.number(), y: faker.random.number() },
-          { x: faker.random.number(), y: faker.random.number() },
+          { x: faker.number.int(), y: faker.number.int() },
+          { x: faker.number.int(), y: faker.number.int() },
+          { x: faker.number.int(), y: faker.number.int() },
+          { x: faker.number.int(), y: faker.number.int() },
         ],
         Wednesday: [
-          { x: faker.random.number(), y: faker.random.number() },
-          { x: faker.random.number(), y: faker.random.number() },
-          { x: faker.random.number(), y: faker.random.number() },
-          { x: faker.random.number(), y: faker.random.number() },
+          { x: faker.number.int(), y: faker.number.int() },
+          { x: faker.number.int(), y: faker.number.int() },
+          { x: faker.number.int(), y: faker.number.int() },
+          { x: faker.number.int(), y: faker.number.int() },
         ],
         Saturday: [
-          { x: faker.random.number(), y: faker.random.number() },
-          { x: faker.random.number(), y: faker.random.number() },
-          { x: faker.random.number(), y: faker.random.number() },
-          { x: faker.random.number(), y: faker.random.number() },
+          { x: faker.number.int(), y: faker.number.int() },
+          { x: faker.number.int(), y: faker.number.int() },
+          { x: faker.number.int(), y: faker.number.int() },
+          { x: faker.number.int(), y: faker.number.int() },
         ],
         Sunday: [
-          { x: faker.random.number(), y: faker.random.number() },
-          { x: faker.random.number(), y: faker.random.number() },
-          { x: faker.random.number(), y: faker.random.number() },
-          { x: faker.random.number(), y: faker.random.number() },
+          { x: faker.number.int(), y: faker.number.int() },
+          { x: faker.number.int(), y: faker.number.int() },
+          { x: faker.number.int(), y: faker.number.int() },
+          { x: faker.number.int(), y: faker.number.int() },
         ],
         Thursday: [
-          { x: faker.random.number(), y: faker.random.number() },
-          { x: faker.random.number(), y: faker.random.number() },
-          { x: faker.random.number(), y: faker.random.number() },
-          { x: faker.random.number(), y: faker.random.number() },
+          { x: faker.number.int(), y: faker.number.int() },
+          { x: faker.number.int(), y: faker.number.int() },
+          { x: faker.number.int(), y: faker.number.int() },
+          { x: faker.number.int(), y: faker.number.int() },
         ],
         __other__: [
-          { x: faker.random.number(), y: faker.random.number() },
-          { x: faker.random.number(), y: faker.random.number() },
-          { x: faker.random.number(), y: faker.random.number() },
-          { x: faker.random.number(), y: faker.random.number() },
+          { x: faker.number.int(), y: faker.number.int() },
+          { x: faker.number.int(), y: faker.number.int() },
+          { x: faker.number.int(), y: faker.number.int() },
+          { x: faker.number.int(), y: faker.number.int() },
         ],
         // this one shouldn't show up!
         [DEFAULT_TRENDLINE_NAME]: [
-          { x: faker.random.number(), y: faker.random.number() },
-          { x: faker.random.number(), y: faker.random.number() },
-          { x: faker.random.number(), y: faker.random.number() },
-          { x: faker.random.number(), y: faker.random.number() },
+          { x: faker.number.int(), y: faker.number.int() },
+          { x: faker.number.int(), y: faker.number.int() },
+          { x: faker.number.int(), y: faker.number.int() },
+          { x: faker.number.int(), y: faker.number.int() },
         ],
       };
 
@@ -1001,7 +1005,7 @@ describe('MetricVisComponent', function () {
   });
 
   it('should convert null values to NaN', () => {
-    const metricId = faker.random.word();
+    const metricId = faker.lorem.word();
 
     const tableWNull: Datatable = {
       type: 'datatable',
@@ -1157,12 +1161,16 @@ describe('MetricVisComponent', function () {
                 // should be overridden
                 color: 'static-color',
                 palette: {
-                  colors: [],
-                  gradient: true,
-                  stops: [],
-                  range: 'number',
-                  rangeMin: 2,
-                  rangeMax: 10,
+                  type: 'palette',
+                  name: 'default',
+                  params: {
+                    colors: [],
+                    gradient: true,
+                    stops: [],
+                    range: 'number',
+                    rangeMin: 2,
+                    rangeMax: 10,
+                  },
                 },
               },
             }}
@@ -1197,7 +1205,7 @@ describe('MetricVisComponent', function () {
 
       describe('percent-based', () => {
         const renderWithPalette = (
-          palette: CustomPaletteState,
+          palette: PaletteOutput<CustomPaletteState>,
           dimensions: MetricVisComponentProps['config']['dimensions']
         ) =>
           shallow(
@@ -1235,13 +1243,17 @@ describe('MetricVisComponent', function () {
 
             renderWithPalette(
               {
-                range: 'percent',
-                // the rest of these params don't matter
-                colors: [],
-                gradient: false,
-                stops: [],
-                rangeMin: 2,
-                rangeMax: 10,
+                type: 'palette',
+                name: 'default',
+                params: {
+                  range: 'percent',
+                  // the rest of these params don't matter
+                  colors: [],
+                  gradient: false,
+                  stops: [],
+                  rangeMin: 2,
+                  rangeMax: 10,
+                },
               },
               dimensions as DimensionsVisParam
             );

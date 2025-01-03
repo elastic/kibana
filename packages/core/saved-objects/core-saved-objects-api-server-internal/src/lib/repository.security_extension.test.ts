@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import {
@@ -65,6 +66,7 @@ import {
 import { savedObjectsExtensionsMock } from '../mocks/saved_objects_extensions.mock';
 import { arrayMapsAreEqual } from '@kbn/core-saved-objects-utils-server';
 import { mockAuthenticatedUser } from '@kbn/core-security-common/mocks';
+import { OpenPointInTimeResponse } from '@elastic/elasticsearch/lib/api/types';
 
 describe('SavedObjectsRepository Security Extension', () => {
   let client: ReturnType<typeof elasticsearchClientMock.createElasticsearchClient>;
@@ -675,7 +677,7 @@ describe('SavedObjectsRepository Security Extension', () => {
     test(`returns result when partially authorized`, async () => {
       setupAuthorizeFunc(mockSecurityExt.authorizeOpenPointInTime, 'partially_authorized');
 
-      client.openPointInTime.mockResponseOnce({ id });
+      client.openPointInTime.mockResponseOnce({ id } as OpenPointInTimeResponse);
       const result = await repository.openPointInTimeForType(type);
 
       expect(mockSecurityExt.authorizeOpenPointInTime).toHaveBeenCalledTimes(1);
@@ -686,7 +688,7 @@ describe('SavedObjectsRepository Security Extension', () => {
     test(`returns result when fully authorized`, async () => {
       setupAuthorizeFunc(mockSecurityExt.authorizeOpenPointInTime, 'fully_authorized');
 
-      client.openPointInTime.mockResponseOnce({ id });
+      client.openPointInTime.mockResponseOnce({ id } as OpenPointInTimeResponse);
       const result = await repository.openPointInTimeForType(type);
 
       expect(mockSecurityExt.authorizeOpenPointInTime).toHaveBeenCalledTimes(1);
@@ -701,7 +703,7 @@ describe('SavedObjectsRepository Security Extension', () => {
 
     test(`calls authorizeOpenPointInTime with correct parameters`, async () => {
       setupAuthorizeFunc(mockSecurityExt.authorizeOpenPointInTime, 'fully_authorized');
-      client.openPointInTime.mockResponseOnce({ id });
+      client.openPointInTime.mockResponseOnce({ id } as OpenPointInTimeResponse);
       const namespaces = [namespace, 'x', 'y', 'z'];
       await repository.openPointInTimeForType(type, { namespaces });
       expect(mockSecurityExt.authorizeOpenPointInTime).toHaveBeenCalledTimes(1);

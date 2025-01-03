@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { MockedKeys } from '@kbn/utility-types-jest';
@@ -15,7 +16,6 @@ import { createFieldFormatsStartMock } from '@kbn/field-formats-plugin/server/mo
 import { createIndexPatternsStartMock } from '../data_views/mocks';
 
 import { SearchService, SearchServiceSetupDependencies } from './search_service';
-import { bfetchPluginMock } from '@kbn/bfetch-plugin/server/mocks';
 import { lastValueFrom, of } from 'rxjs';
 
 import type {
@@ -67,10 +67,8 @@ describe('Search service', () => {
 
   describe('setup()', () => {
     it('exposes proper contract', async () => {
-      const bfetch = bfetchPluginMock.createSetupContract();
       const setup = plugin.setup(mockCoreSetup, {
         packageInfo: { version: '8' },
-        bfetch,
         expressions: {
           registerFunction: jest.fn(),
           registerType: jest.fn(),
@@ -114,7 +112,6 @@ describe('Search service', () => {
       mockSessionClient = createSearchSessionsClientMock();
 
       const pluginSetup = plugin.setup(mockCoreSetup, {
-        bfetch: bfetchPluginMock.createSetupContract(),
         expressions: expressionsPluginMock.createSetupContract(),
       });
       pluginSetup.registerSearchStrategy(ENHANCED_ES_SEARCH_STRATEGY, mockStrategy);

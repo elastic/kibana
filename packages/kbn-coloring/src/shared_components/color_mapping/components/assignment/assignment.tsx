@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -12,6 +13,7 @@ import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
+import { IKbnPalette, KbnPalettes } from '@kbn/palettes';
 import {
   removeAssignment,
   updateAssignmentColor,
@@ -20,7 +22,6 @@ import {
 import { ColorMapping } from '../../config';
 import { Range } from './range';
 import { Match } from './match';
-import { getPalette } from '../../palettes';
 
 import { ColorMappingInputData } from '../../categorical_color_mapping';
 import { ColorSwatch } from '../color_picker/color_swatch';
@@ -32,8 +33,8 @@ export function Assignment({
   index,
   total,
   palette,
+  palettes,
   colorMode,
-  getPaletteFn,
   isDarkMode,
   specialTokens,
   assignmentValuesCounter,
@@ -44,8 +45,8 @@ export function Assignment({
   colorMode: ColorMapping.Config['colorMode'];
   assignment: ColorMapping.Config['assignments'][number];
   disableDelete: boolean;
-  palette: ColorMapping.CategoricalPalette;
-  getPaletteFn: ReturnType<typeof getPalette>;
+  palette: IKbnPalette;
+  palettes: KbnPalettes;
   isDarkMode: boolean;
   specialTokens: Map<string, string>;
   assignmentValuesCounter: Map<string | string[], number>;
@@ -61,9 +62,9 @@ export function Assignment({
           swatchShape="square"
           colorMode={colorMode}
           assignmentColor={assignment.color}
-          getPaletteFn={getPaletteFn}
           index={index}
           palette={palette}
+          palettes={palettes}
           total={total}
           onColorChange={(color) => {
             dispatch(updateAssignmentColor({ assignmentIndex: index, color }));

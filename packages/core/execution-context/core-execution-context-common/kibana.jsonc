@@ -1,5 +1,9 @@
 {
   "type": "shared-common",
   "id": "@kbn/core-execution-context-common",
-  "owner": "@elastic/kibana-core"
+  "owner": [
+    "@elastic/kibana-core"
+  ],
+  "group": "platform",
+  "visibility": "shared"
 }

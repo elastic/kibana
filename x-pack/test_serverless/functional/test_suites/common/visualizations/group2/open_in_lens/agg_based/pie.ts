@@ -85,13 +85,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await pieChart.expectPieChartLabels(expectedTableData);
     });
 
-    it('should convert Donut type correctly', async () => {
+    it('should convert pie with hole type correctly', async () => {
       await panelActions.convertToLensByTitle('Pie - Basic count');
       await lens.waitForVisualization('partitionVisChart');
 
       const chartSwitcher = await testSubjects.find('lnsChartSwitchPopover');
       const type = await chartSwitcher.getVisibleText();
-      expect(type).to.be('Donut');
+      expect(type).to.be('Pie');
+      const donutHole = await lens.getDonutHoleSize();
+      expect(donutHole).to.be('Small');
     });
 
     it('should convert Pie types correctly', async () => {

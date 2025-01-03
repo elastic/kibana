@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import { Datatable, DatatableColumn } from '@kbn/expressions-plugin/public';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 import {
@@ -16,7 +18,7 @@ import {
 import { createMockBucketColumns, createMockVisData, createMockPieParams } from '../mocks';
 import { consolidateMetricColumns } from '../../common/utils';
 import { LayerValue } from '@elastic/charts';
-import faker from 'faker';
+import { faker } from '@faker-js/faker';
 
 const bucketColumns = createMockBucketColumns();
 const visData = createMockVisData();
@@ -184,26 +186,26 @@ describe('getFilterClickData', () => {
         const clickedLayers: LayerValue[] = [
           {
             groupByRollup: 'circle',
-            value: faker.random.number(),
-            depth: faker.random.number(),
+            value: faker.number.int(),
+            depth: faker.number.int(),
             path: [],
-            sortIndex: faker.random.number(),
+            sortIndex: faker.number.int(),
             smAccessorValue: '',
           },
           {
             groupByRollup: 'green',
-            value: faker.random.number(),
-            depth: faker.random.number(),
+            value: faker.number.int(),
+            depth: faker.number.int(),
             path: [],
-            sortIndex: faker.random.number(),
+            sortIndex: faker.number.int(),
             smAccessorValue: '',
           },
           {
             groupByRollup: 'metric2',
-            value: faker.random.number(),
-            depth: faker.random.number(),
+            value: faker.number.int(),
+            depth: faker.number.int(),
             path: [],
-            sortIndex: faker.random.number(),
+            sortIndex: faker.number.int(),
             smAccessorValue: '',
           },
         ];

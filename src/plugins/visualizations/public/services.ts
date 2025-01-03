@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
@@ -20,6 +21,8 @@ import type {
   ExecutionContextSetup,
   AnalyticsServiceStart,
   I18nStart,
+  NotificationsStart,
+  UserProfileService,
 } from '@kbn/core/public';
 import type { DataPublicPluginStart, TimefilterContract } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
@@ -41,8 +44,13 @@ export const [getUISettings, setUISettings] = createGetterSetter<IUiSettingsClie
 export const [getAnalytics, setAnalytics] = createGetterSetter<AnalyticsServiceStart>('Analytics');
 export const [getI18n, setI18n] = createGetterSetter<I18nStart>('I18n');
 export const [getTheme, setTheme] = createGetterSetter<ThemeServiceStart>('Theme');
+export const [getNotifications, setNotifications] =
+  createGetterSetter<NotificationsStart>('Notifications');
 
 export const [getCapabilities, setCapabilities] = createGetterSetter<Capabilities>('Capabilities');
+
+export const [getUserProfile, setUserProfile] =
+  createGetterSetter<UserProfileService>('UserProfile');
 
 export const [getHttp, setHttp] = createGetterSetter<HttpStart>('Http');
 

@@ -5,33 +5,26 @@
  * 2.0.
  */
 
-import { encode } from '@kbn/rison';
 import React, { FunctionComponent, useState, useEffect } from 'react';
 import { buildPhrasesFilter, PhrasesFilter } from '@kbn/es-query';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { METRIC_TYPE } from '@kbn/analytics';
-import { EuiLink, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiPanel, EuiText } from '@elastic/eui';
-
+import { EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
+import { DataView } from '@kbn/data-views-plugin/common';
 import {
   APPS_WITH_DEPRECATION_LOGS,
   DEPRECATION_LOGS_ORIGIN_FIELD,
 } from '../../../../../common/constants';
 import { DataPublicPluginStart } from '../../../../shared_imports';
 import { useAppContext } from '../../../app_context';
-import {
-  uiMetricService,
-  UIM_OBSERVABILITY_CLICK,
-  UIM_DISCOVER_CLICK,
-} from '../../../lib/ui_metric';
+import { uiMetricService, UIM_DISCOVER_CLICK } from '../../../lib/ui_metric';
 
-import {
-  DEPRECATION_LOGS_INDEX_PATTERN,
-  DEPRECATION_LOGS_SOURCE_ID,
-} from '../../../../../common/constants';
+import { DEPRECATION_LOGS_INDEX_PATTERN } from '../../../../../common/constants';
 
 interface Props {
   checkpoint: string;
+  deprecationDataView: DataView;
 }
 
 export const getDeprecationDataView = async (dataService: DataPublicPluginStart) => {
@@ -63,7 +56,7 @@ export const getDeprecationDataView = async (dataService: DataPublicPluginStart)
   }
 };
 
-const DiscoverAppLink: FunctionComponent<Props> = ({ checkpoint }) => {
+const DiscoverAppLink: FunctionComponent<Props> = ({ checkpoint, deprecationDataView }) => {
   const {
     services: { data: dataService },
     plugins: { share },
@@ -78,19 +71,22 @@ const DiscoverAppLink: FunctionComponent<Props> = ({ checkpoint }) => {
         return;
       }
 
-      const dataView = await getDeprecationDataView(dataService);
-      const field = dataView.getFieldByName(DEPRECATION_LOGS_ORIGIN_FIELD);
+      const field = deprecationDataView.getFieldByName(DEPRECATION_LOGS_ORIGIN_FIELD);
 
       let filters: PhrasesFilter[] = [];
 
       if (field !== undefined) {
-        const filter = buildPhrasesFilter(field!, [...APPS_WITH_DEPRECATION_LOGS], dataView);
+        const filter = buildPhrasesFilter(
+          field!,
+          [...APPS_WITH_DEPRECATION_LOGS],
+          deprecationDataView
+        );
         filter.meta.negate = true;
         filters = [filter];
       }
 
       const url = await locator?.getUrl({
-        indexPatternId: dataView.id,
+        indexPatternId: deprecationDataView.id,
         query: {
           language: 'kuery',
           query: `@timestamp > "${checkpoint}"`,
@@ -102,7 +98,7 @@ const DiscoverAppLink: FunctionComponent<Props> = ({ checkpoint }) => {
     };
 
     getDiscoveryUrl();
-  }, [dataService, checkpoint, share.url.locators]);
+  }, [dataService, checkpoint, share.url.locators, deprecationDataView]);
 
   if (discoveryUrl === undefined) {
     return null;
@@ -125,80 +121,38 @@ const DiscoverAppLink: FunctionComponent<Props> = ({ checkpoint }) => {
   );
 };
 
-const ObservabilityAppLink: FunctionComponent<Props> = ({ checkpoint }) => {
+export const ExternalLinks: FunctionComponent<Omit<Props, 'deprecationDataView'>> = ({
+  checkpoint,
+}) => {
   const {
-    services: {
-      core: { http },
-    },
+    services: { data: dataService },
+    plugins: { share },
   } = useAppContext();
 
-  // Ideally we don't want to hardcode the path to the Log Stream app and use the UrlService.locator instead.
-  // Issue opened: https://github.com/elastic/kibana/issues/104855
-  const streamAppPath = '/app/logs/stream';
+  const [deprecationDataView, setDeprecationDataView] = useState<DataView | undefined>();
 
-  const sourceId = DEPRECATION_LOGS_SOURCE_ID;
-  const logPosition = `(end:now,start:${encode(checkpoint)})`;
-  const logFilter = encodeURI(
-    `(language:kuery,query:'not ${DEPRECATION_LOGS_ORIGIN_FIELD} : (${APPS_WITH_DEPRECATION_LOGS.join(
-      ' or '
-    )})')`
-  );
-  const queryParams = `sourceId=${sourceId}&logPosition=${logPosition}&logFilter=${logFilter}`;
-
-  const logStreamUrl = http?.basePath?.prepend(`${streamAppPath}?${queryParams}`);
+  useEffect(() => {
+    const getDataView = async () => {
+      const dataView = await getDeprecationDataView(dataService);
+      setDeprecationDataView(dataView);
+    };
+    getDataView();
+  }, [dataService, checkpoint, share.url.locators]);
 
   return (
-    // eslint-disable-next-line @elastic/eui/href-or-on-click
-    <EuiLink
-      href={logStreamUrl}
-      onClick={() => {
-        uiMetricService.trackUiMetric(METRIC_TYPE.CLICK, UIM_OBSERVABILITY_CLICK);
-      }}
-      data-test-subj="viewObserveLogs"
-    >
-      <FormattedMessage
-        id="xpack.upgradeAssistant.overview.viewObservabilityResultsAction"
-        defaultMessage="View deprecation logs in Observability"
-      />
-    </EuiLink>
-  );
-};
-
-export const ExternalLinks: FunctionComponent<Props> = ({ checkpoint }) => {
-  const { infra: hasInfraPlugin } = useAppContext().plugins;
-
-  return (
-    <EuiFlexGroup>
-      {hasInfraPlugin && (
-        <EuiFlexItem>
-          <EuiPanel>
-            <EuiText size="s">
-              <p>
-                <FormattedMessage
-                  id="xpack.upgradeAssistant.overview.observe.observabilityDescription"
-                  defaultMessage="Get insight into which deprecated APIs are being used and what applications you need to update."
-                />
-              </p>
-            </EuiText>
-            <EuiSpacer size="m" />
-            <ObservabilityAppLink checkpoint={checkpoint} />
-          </EuiPanel>
-        </EuiFlexItem>
-      )}
-      <EuiFlexItem>
-        <EuiPanel>
-          <EuiText size="s">
-            <p>
-              <FormattedMessage
-                id="xpack.upgradeAssistant.overview.observe.discoveryDescription"
-                defaultMessage="Search and filter the deprecation logs to understand the types of changes you need to make."
-              />
-            </p>
-          </EuiText>
-          <EuiSpacer size="m" />
-          <DiscoverAppLink checkpoint={checkpoint} />
-        </EuiPanel>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <>
+      <EuiText size="s">
+        <p>
+          <FormattedMessage
+            id="xpack.upgradeAssistant.overview.observe.discoveryDescription"
+            defaultMessage="Search and filter the deprecation logs to understand the types of changes you need to make."
+          />
+        </p>
+      </EuiText>
+      <EuiSpacer size="m" />
+      {deprecationDataView ? (
+        <DiscoverAppLink checkpoint={checkpoint} deprecationDataView={deprecationDataView} />
+      ) : null}
+    </>
   );
 };

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import {
@@ -28,9 +29,8 @@ import type { TelemetryCollectionManagerPluginStart } from '@kbn/telemetry-colle
 import {
   type PluginInitializerContext,
   type Logger,
-  type SavedObjectsClientContract,
-  SavedObjectsClient,
   type CoreStart,
+  type ISavedObjectsRepository,
 } from '@kbn/core/server';
 import { getTelemetryChannelEndpoint } from '../common/telemetry_config';
 import {
@@ -76,7 +76,7 @@ export class FetcherTask {
   private readonly subscriptions = new Subscription();
   private readonly isOnline$ = new BehaviorSubject<boolean>(false); // Let's initially assume we are not online
   private readonly lastReported$ = new BehaviorSubject<number>(0);
-  private internalRepository?: SavedObjectsClientContract;
+  private internalRepository?: ISavedObjectsRepository;
   private telemetryCollectionManager?: TelemetryCollectionManagerPluginStart;
 
   constructor(initializerContext: PluginInitializerContext<TelemetryConfigType>) {
@@ -86,9 +86,7 @@ export class FetcherTask {
   }
 
   public start({ savedObjects }: CoreStart, { telemetryCollectionManager }: FetcherTaskDepsStart) {
-    this.internalRepository = new SavedObjectsClient(
-      savedObjects.createInternalRepository([TELEMETRY_SAVED_OBJECT_TYPE])
-    );
+    this.internalRepository = savedObjects.createInternalRepository([TELEMETRY_SAVED_OBJECT_TYPE]);
     this.telemetryCollectionManager = telemetryCollectionManager;
 
     this.subscriptions.add(this.validateConnectivity());

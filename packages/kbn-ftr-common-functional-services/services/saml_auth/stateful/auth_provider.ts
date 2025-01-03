@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { readRolesDescriptorsFromResource, STATEFUL_ROLES_ROOT_PATH } from '@kbn/es';
@@ -17,12 +18,31 @@ import {
 
 export class StatefulAuthProvider implements AuthProvider {
   private readonly rolesDefinitionPath = resolve(REPO_ROOT, STATEFUL_ROLES_ROOT_PATH, 'roles.yml');
-  getSupportedRoleDescriptors(): Record<string, unknown> {
-    return readRolesDescriptorsFromResource(this.rolesDefinitionPath);
+
+  getSupportedRoleDescriptors() {
+    const roleDescriptors = new Map<string, any>(
+      Object.entries(
+        readRolesDescriptorsFromResource(this.rolesDefinitionPath) as Record<string, unknown>
+      )
+    );
+    // no privileges set by default
+    roleDescriptors.set(this.getCustomRole(), null);
+
+    return roleDescriptors;
   }
+
   getDefaultRole() {
     return 'editor';
   }
+
+  isCustomRoleEnabled() {
+    return true;
+  }
+
+  getCustomRole() {
+    return 'customRole';
+  }
+
   getRolesDefinitionPath() {
     return this.rolesDefinitionPath;
   }

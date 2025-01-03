@@ -1,13 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { QueryPointEventAnnotationOutput } from '@kbn/event-annotation-plugin/common';
-import { Datatable, ExecutionContext } from '@kbn/expressions-plugin/common';
+import {
+  Datatable,
+  DefaultInspectorAdapters,
+  ExecutionContext,
+} from '@kbn/expressions-plugin/common';
 import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
 import { Dimension, prepareLogTable } from '@kbn/visualizations-plugin/common/utils';
 import { LayerTypes, REFERENCE_LINE } from '../constants';
@@ -22,7 +27,7 @@ import {
 
 export const logDatatables = (
   layers: CommonXYLayerConfig[],
-  handlers: ExecutionContext,
+  handlers: ExecutionContext<DefaultInspectorAdapters>,
   splitColumnAccessor?: string | ExpressionValueVisDimension,
   splitRowAccessor?: string | ExpressionValueVisDimension,
   annotations?: ExpressionAnnotationResult
@@ -87,7 +92,7 @@ const getLogAnnotationTable = (data: Datatable, layer: AnnotationLayerConfigResu
 export const logDatatable = (
   data: Datatable,
   layers: CommonXYLayerConfig[],
-  handlers: ExecutionContext,
+  handlers: ExecutionContext<DefaultInspectorAdapters>,
   splitColumnAccessor?: string | ExpressionValueVisDimension,
   splitRowAccessor?: string | ExpressionValueVisDimension
 ) => {

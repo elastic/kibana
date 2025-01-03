@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import * as React from 'react';
@@ -20,6 +21,7 @@ const createOpts = async (props: KibanaConnectionDetailsProviderProps) => {
   const { http, docLinks, analytics } = start.core;
   const locator = start.plugins?.share?.url?.locators.get('MANAGEMENT_APP_LOCATOR');
   const manageKeysLink = await locator?.getUrl({ sectionId: 'security', appId: 'api_keys' });
+  const elasticsearchConfig = await start.plugins?.cloud?.fetchElasticsearchConfig();
   const result: ConnectionDetailsOpts = {
     ...options,
     navigateToUrl: start.core.application
@@ -34,7 +36,7 @@ const createOpts = async (props: KibanaConnectionDetailsProviderProps) => {
     },
     endpoints: {
       id: start.plugins?.cloud?.cloudId,
-      url: start.plugins?.cloud?.elasticsearchUrl,
+      url: elasticsearchConfig?.elasticsearchUrl,
       cloudIdLearMoreLink: docLinks?.links?.cloud?.beatsAndLogstashConfiguration,
       ...options?.endpoints,
     },
@@ -137,9 +139,9 @@ export interface KibanaConnectionDetailsProviderProps {
   };
 }
 
-export const KibanaConnectionDetailsProvider: React.FC<KibanaConnectionDetailsProviderProps> = (
-  props
-) => {
+export const KibanaConnectionDetailsProvider: React.FC<
+  React.PropsWithChildren<KibanaConnectionDetailsProviderProps>
+> = (props) => {
   const opts = useAsyncMemo(
     () => createOpts(props),
     [props.onNavigation, props.options, props.start]

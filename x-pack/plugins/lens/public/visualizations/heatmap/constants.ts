@@ -13,10 +13,6 @@ export const LENS_HEATMAP_RENDERER = 'lens_heatmap_renderer';
 export const LENS_HEATMAP_ID = 'lnsHeatmap';
 export const DEFAULT_PALETTE_NAME = 'temperature';
 
-const groupLabel = i18n.translate('xpack.lens.heatmap.groupLabel', {
-  defaultMessage: 'Heatmap',
-});
-
 export const CHART_SHAPES = {
   HEATMAP: 'heatmap',
 } as const;
@@ -28,7 +24,6 @@ export const CHART_NAMES = {
     label: i18n.translate('xpack.lens.heatmap.heatmapLabel', {
       defaultMessage: 'Heat map',
     }),
-    groupLabel,
   },
 };
 

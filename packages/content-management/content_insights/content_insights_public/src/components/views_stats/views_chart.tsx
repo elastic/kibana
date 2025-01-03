@@ -1,16 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
-import { Chart, Settings, DARK_THEME, LIGHT_THEME, BarSeries, Axis } from '@elastic/charts';
-import { formatDate, useEuiTheme } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import moment from 'moment';
+
+import { Chart, Settings, BarSeries, Axis } from '@elastic/charts';
+import { formatDate } from '@elastic/eui';
+
+import { i18n } from '@kbn/i18n';
+import { useElasticChartsTheme } from '@kbn/charts-theme';
 
 const dateFormatter = (d: Date) => formatDate(d, `MM/DD`);
 
@@ -25,8 +29,7 @@ const weekOfFormatter = (date: Date) =>
   });
 
 export const ViewsChart = ({ data }: { data: Array<[week: number, views: number]> }) => {
-  const { colorMode } = useEuiTheme();
-
+  const baseTheme = useElasticChartsTheme();
   const momentDow = moment().localeData().firstDayOfWeek(); // configured from advanced settings
   const isoDow = momentDow === 0 ? 7 : momentDow;
 
@@ -34,11 +37,7 @@ export const ViewsChart = ({ data }: { data: Array<[week: number, views: number]
 
   return (
     <Chart size={{ height: 240 }}>
-      <Settings
-        baseTheme={colorMode === 'DARK' ? DARK_THEME : LIGHT_THEME}
-        showLegend={false}
-        dow={isoDow}
-      />
+      <Settings baseTheme={baseTheme} showLegend={false} dow={isoDow} />
       <BarSeries
         id="viewsOverTime"
         name={seriesName}

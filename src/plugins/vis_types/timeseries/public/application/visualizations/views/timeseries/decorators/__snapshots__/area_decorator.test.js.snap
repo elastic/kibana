@@ -18,7 +18,7 @@ exports[`src/legacy/core_plugins/metrics/public/visualizations/views/timeseries/
         "radius": 1,
         "stroke": "rgb(0, 156, 224)",
         "strokeWidth": 5,
-        "visible": false,
+        "visible": "never",
       },
     }
   }

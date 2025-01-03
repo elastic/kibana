@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -16,13 +17,17 @@ import type { InternalChromeStart } from '@kbn/core-chrome-browser-internal';
 import type { I18nStart } from '@kbn/core-i18n-browser';
 import type { OverlayStart } from '@kbn/core-overlays-browser';
 import type { ThemeServiceStart } from '@kbn/core-theme-browser';
+import type { UserProfileService } from '@kbn/core-user-profile-browser';
 import { KibanaRootContextProvider } from '@kbn/react-kibana-context-root';
+import { APP_FIXED_VIEWPORT_ID } from '@kbn/core-rendering-browser';
+import { GlobalAppStyle } from '@kbn/core-application-common';
 import { AppWrapper } from './app_containers';
 
 interface StartServices {
   analytics: AnalyticsServiceStart;
   i18n: I18nStart;
   theme: ThemeServiceStart;
+  userProfile: UserProfileService;
 }
 
 export interface StartDeps extends StartServices {
@@ -58,6 +63,9 @@ export class RenderingService {
     ReactDOM.render(
       <KibanaRootContextProvider {...startServices} globalStyles={true}>
         <>
+          {/* Global Styles that apply across the entire app */}
+          <GlobalAppStyle />
+
           {/* Fixed headers */}
           {chromeHeader}
 
@@ -67,7 +75,7 @@ export class RenderingService {
           {/* The App Wrapper outside of the fixed headers that accepts custom class names from apps */}
           <AppWrapper chromeVisible$={chrome.getIsVisible$()}>
             {/* Affixes a div to restrict the position of charts tooltip to the visible viewport minus the header */}
-            <div id="app-fixed-viewport" />
+            <div id={APP_FIXED_VIEWPORT_ID} />
 
             {/* The actual plugin/app */}
             {appComponent}

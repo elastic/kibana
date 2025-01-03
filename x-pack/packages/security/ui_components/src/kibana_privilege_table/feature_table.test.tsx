@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { EuiAccordion, EuiIconTip } from '@elastic/eui';
+import { EuiAccordion, EuiIconTip, EuiThemeProvider } from '@elastic/eui';
 import React from 'react';
 
 import type { KibanaFeature, SubFeatureConfig } from '@kbn/features-plugin/public';
+import type { Role } from '@kbn/security-plugin-types-common';
 import {
   createFeature,
   createKibanaPrivileges,
@@ -18,7 +19,6 @@ import { findTestSubject, mountWithIntl } from '@kbn/test-jest-helpers';
 
 import { getDisplayedFeaturePrivileges } from './__fixtures__';
 import { FeatureTable } from './feature_table';
-import type { Role } from '@kbn/security-plugin-types-common';
 import { PrivilegeFormCalculator } from '../privilege_form_calculator';
 
 const createRole = (kibana: Role['kibana'] = []): Role => {
@@ -47,16 +47,19 @@ const setup = (config: TestConfig) => {
   const onChange = jest.fn();
   const onChangeAll = jest.fn();
   const wrapper = mountWithIntl(
-    <FeatureTable
-      role={config.role}
-      privilegeCalculator={calculator}
-      kibanaPrivileges={kibanaPrivileges}
-      onChange={onChange}
-      onChangeAll={onChangeAll}
-      canCustomizeSubFeaturePrivileges={config.canCustomizeSubFeaturePrivileges}
-      privilegeIndex={config.privilegeIndex}
-      allSpacesSelected={true}
-    />
+    <EuiThemeProvider>
+      <FeatureTable
+        role={config.role}
+        privilegeCalculator={calculator}
+        kibanaPrivileges={kibanaPrivileges}
+        onChange={onChange}
+        onChangeAll={onChangeAll}
+        showAdditionalPermissionsMessage={true}
+        canCustomizeSubFeaturePrivileges={config.canCustomizeSubFeaturePrivileges}
+        privilegeIndex={config.privilegeIndex}
+        allSpacesSelected={true}
+      />
+    </EuiThemeProvider>
   );
 
   const displayedPrivileges = config.calculateDisplayedPrivileges

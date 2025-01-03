@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { ApplicationStart, IBasePath } from '@kbn/core/public';
@@ -385,18 +386,26 @@ export class Table extends PureComponent<TableProps, TableState> {
     const activeActionContents = this.state.activeAction?.render() ?? null;
     const exceededResultCount = totalItemCount > MAX_PAGINATED_ITEM;
 
-    const allHidden = selectedSavedObjects.every(({ meta: { hiddenType } }) => hiddenType);
-
+    const anySelected = selectedSavedObjects.length > 0;
+    const allHidden =
+      anySelected && selectedSavedObjects.every(({ meta: { hiddenType } }) => hiddenType);
     return (
       <Fragment>
         {activeActionContents}
         <EuiSearchBar
-          box={{ 'data-test-subj': 'savedObjectSearchBar' }}
+          box={{
+            'data-test-subj': 'savedObjectSearchBar',
+            schema: {
+              recognizedFields: ['type', 'tag'],
+            },
+          }}
           filters={filters as any}
           onChange={this.onChange}
           defaultQuery={this.props.initialQuery}
           toolsRight={[
             <EuiToolTip
+              data-test-subj="deleteSOToolTip"
+              key="deleteSOToolTip"
               content={
                 allHidden ? (
                   <FormattedMessage
@@ -411,7 +420,9 @@ export class Table extends PureComponent<TableProps, TableState> {
                 iconType="trash"
                 color="danger"
                 onClick={onDelete}
-                isDisabled={allHidden || !capabilities.savedObjectsManagement.delete}
+                isDisabled={
+                  !anySelected || allHidden || !capabilities.savedObjectsManagement.delete
+                }
                 title={
                   capabilities.savedObjectsManagement.delete
                     ? undefined

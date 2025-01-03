@@ -6,6 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { i18n } from '@kbn/i18n';
 
 import type { RouteDefinitionParams } from '..';
 import { SAMLAuthenticationProvider, SAMLLogin } from '../../authentication';
@@ -20,6 +21,7 @@ export function defineSAMLRoutes({
   basePath,
   logger,
   buildFlavor,
+  docLinks,
 }: RouteDefinitionParams) {
   // Generate two identical routes with new and deprecated URL and issue a warning if route with deprecated URL is ever used.
   // For a serverless build, do not register deprecated versioned routes
@@ -27,9 +29,16 @@ export function defineSAMLRoutes({
     '/api/security/saml/callback',
     ...(buildFlavor !== 'serverless' ? ['/api/security/v1/saml'] : []),
   ]) {
+    const isDeprecated = path === '/api/security/v1/saml';
     router.post(
       {
         path,
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route must remain accessible to 3rd-party SAML providers',
+          },
+        },
         validate: {
           body: schema.object(
             { SAMLResponse: schema.string(), RelayState: schema.maybe(schema.string()) },
@@ -38,17 +47,34 @@ export function defineSAMLRoutes({
         },
         options: {
           access: 'public',
+          excludeFromOAS: true,
           authRequired: false,
           xsrfRequired: false,
           tags: [ROUTE_TAG_CAN_REDIRECT, ROUTE_TAG_AUTH_FLOW],
+          ...(isDeprecated && {
+            deprecated: {
+              documentationUrl: docLinks.links.security.deprecatedV1Endpoints,
+              severity: 'warning',
+              message: i18n.translate('xpack.security.deprecations.samlPostRouteMessage', {
+                defaultMessage:
+                  'The "{path}" URL is deprecated and will be removed in the next major version. Use "/api/security/saml/callback" instead.',
+                values: { path },
+              }),
+              reason: {
+                type: 'migrate',
+                newApiMethod: 'POST',
+                newApiPath: '/api/security/saml/callback',
+              },
+            },
+          }),
         },
       },
       async (context, request, response) => {
-        if (path === '/api/security/v1/saml') {
+        if (isDeprecated) {
           const serverBasePath = basePath.serverBasePath;
           logger.warn(
             // When authenticating using SAML we _expect_ to redirect to the SAML Identity provider.
-            `The "${serverBasePath}${path}" URL is deprecated and might stop working in a future release. Please use "${serverBasePath}/api/security/saml/callback" URL instead.`
+            `The "${serverBasePath}${path}" URL is deprecated and might stop working in a future release. Use "${serverBasePath}/api/security/saml/callback" URL instead.`
           );
         }
 

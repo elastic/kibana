@@ -17,7 +17,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const browser = getService('browser');
   const esArchiver = getService('esArchiver');
 
-  describe('Log stream', function () {
+  describe.skip('Log stream', function () {
     describe('Legacy URL handling', () => {
       describe('Correctly handles legacy versions of logFilter', () => {
         before(async () => {

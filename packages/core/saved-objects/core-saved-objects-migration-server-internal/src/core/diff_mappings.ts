@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { IndexMapping, VirtualVersionMap } from '@kbn/core-saved-objects-base-server-internal';
-import { getUpdatedRootFields, getUpdatedTypes } from './compare_mappings';
+import { getNewAndUpdatedTypes, getUpdatedRootFields } from './compare_mappings';
 
 /**
  * Diffs the stored vs app mappings.
@@ -55,8 +56,9 @@ export function diffMappings({
 }
 
 /**
- * Finds a property that has changed its schema with respect to the mappings stored in the SO index
- * It can either be a root field or a SO type
+ * Finds a property (either a root field or a SO type) that either:
+ * - is new (did not exist in the current mappings)
+ * - has changed its schema with respect to the mappings stored in the SO index
  * @returns the name of the property (if any)
  */
 function findChangedProp({
@@ -75,7 +77,7 @@ function findChangedProp({
     return updatedFields[0];
   }
 
-  const updatedTypes = getUpdatedTypes({
+  const { newTypes, updatedTypes } = getNewAndUpdatedTypes({
     indexMeta: indexMappings._meta,
     indexTypes,
     latestMappingsVersions,
@@ -83,6 +85,8 @@ function findChangedProp({
   });
   if (updatedTypes.length) {
     return updatedTypes[0];
+  } else if (newTypes.length) {
+    return newTypes[0];
   }
 
   return undefined;

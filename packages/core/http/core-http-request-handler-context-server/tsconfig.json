@@ -17,7 +17,8 @@
     "@kbn/core-deprecations-server",
     "@kbn/core-ui-settings-server",
     "@kbn/core-security-server",
-    "@kbn/core-user-profile-server"
+    "@kbn/core-user-profile-server",
+    "@kbn/core-feature-flags-server"
   ],
   "exclude": [
     "target/**/*",

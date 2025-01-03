@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { Client } from '@elastic/elasticsearch';
@@ -16,6 +17,10 @@ import { Logger } from '../utils/create_logger';
 
 export type InfraSynthtraceEsClientOptions = Omit<SynthtraceEsClientOptions, 'pipeline'>;
 
+interface Pipeline {
+  includeSerialization?: boolean;
+}
+
 export class InfraSynthtraceEsClient extends SynthtraceEsClient<InfraDocument> {
   constructor(options: { client: Client; logger: Logger } & InfraSynthtraceEsClientOptions) {
     super({
@@ -27,17 +32,28 @@ export class InfraSynthtraceEsClient extends SynthtraceEsClient<InfraDocument> {
       'metrics-kubernetes*',
       'metrics-docker*',
       'metrics-aws*',
-      'metricbeat-*',
-      'logs-*',
     ];
+  }
+
+  getDefaultPipeline(
+    {
+      includeSerialization,
+    }: {
+      includeSerialization?: boolean;
+    } = { includeSerialization: true }
+  ) {
+    return infraPipeline({ includeSerialization });
   }
 }
 
-function infraPipeline() {
+function infraPipeline({ includeSerialization }: Pipeline = { includeSerialization: true }) {
   return (base: Readable) => {
+    const serializationTransform = includeSerialization ? [getSerializeTransform()] : [];
+
     return pipeline(
+      // @ts-expect-error Some weird stuff here with the type definition for pipeline. We have tests!
       base,
-      getSerializeTransform(),
+      ...serializationTransform,
       getRoutingTransform(),
       getDedotTransform(),
       (err: unknown) => {

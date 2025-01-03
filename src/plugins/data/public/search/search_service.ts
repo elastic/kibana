@@ -1,14 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { i18n } from '@kbn/i18n';
 import { estypes } from '@elastic/elasticsearch';
-import { BfetchPublicSetup } from '@kbn/bfetch-plugin/public';
 import { handleWarnings } from '@kbn/search-response-warnings';
 import {
   CoreSetup,
@@ -77,7 +77,6 @@ import { ISearchSetup, ISearchStart } from './types';
 
 /** @internal */
 export interface SearchServiceSetupDependencies {
-  bfetch: BfetchPublicSetup;
   expressions: ExpressionsSetup;
   usageCollection?: UsageCollectionSetup;
   management: ManagementSetup;
@@ -105,13 +104,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
 
   public setup(
     core: CoreSetup,
-    {
-      bfetch,
-      expressions,
-      usageCollection,
-      nowProvider,
-      management,
-    }: SearchServiceSetupDependencies
+    { expressions, usageCollection, nowProvider, management }: SearchServiceSetupDependencies
   ): ISearchSetup {
     const { http, getStartServices, notifications, uiSettings, executionContext } = core;
     this.usageCollector = createUsageCollector(getStartServices, usageCollection);
@@ -129,7 +122,6 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
      * all pending search requests, as well as getting the number of pending search requests.
      */
     this.searchInterceptor = new SearchInterceptor({
-      bfetch,
       toasts: notifications.toasts,
       executionContext,
       http,
@@ -225,16 +217,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
   }
 
   public start(
-    {
-      analytics,
-      http,
-      theme,
-      uiSettings,
-      chrome,
-      application,
-      notifications,
-      i18n: i18nStart,
-    }: CoreStart,
+    { http, uiSettings, chrome, application, notifications, ...startServices }: CoreStart,
     {
       fieldFormats,
       indexPatterns,
@@ -253,11 +236,9 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     const aggs = this.aggsService.start({ fieldFormats, indexPatterns });
 
     const warningsServices = {
-      analytics,
-      i18n: i18nStart,
       inspector,
       notifications,
-      theme,
+      ...startServices,
     };
 
     const searchSourceDependencies: SearchSourceDependencies = {
@@ -313,7 +294,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
               tourDisabled: screenshotMode.isScreenshotMode(),
             })
           ),
-          { analytics, i18n: i18nStart, theme }
+          startServices
         ),
       });
     }

@@ -32,7 +32,7 @@ interface State {
   collapsed: boolean;
 }
 
-export class CollapsiblePanel extends Component<Props, State> {
+export class CollapsiblePanel extends Component<React.PropsWithChildren<Props>, State> {
   public state = {
     collapsed: false,
   };

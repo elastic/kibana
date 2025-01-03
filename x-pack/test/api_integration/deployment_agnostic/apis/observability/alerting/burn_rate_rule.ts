@@ -33,6 +33,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     let dataForgeIndices: string[];
     let actionId: string;
     let ruleId: string;
+    let dependencyRuleId: string;
     let adminRoleAuthc: RoleCredentials;
     let internalHeaders: InternalRequestHeader;
 
@@ -76,6 +77,18 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         .delete(`/api/actions/connector/${actionId}`)
         .set(adminRoleAuthc.apiKeyHeader)
         .set(internalHeaders);
+      await esClient.deleteByQuery({
+        index: RULE_ALERT_INDEX,
+        query: {
+          bool: {
+            should: [
+              { term: { 'kibana.alert.rule.uuid': ruleId } },
+              { term: { 'kibana.alert.rule.uuid': dependencyRuleId } },
+            ],
+          },
+        },
+        conflicts: 'proceed',
+      });
       await esClient.deleteByQuery({
         index: '.kibana-event-log-*',
         query: { term: { 'rule.id': ruleId } },
@@ -202,6 +215,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           actions: [],
         });
 
+        dependencyRuleId = dependencyRule.id;
         const createdRule = await alertingApi.createRule({
           roleAuthc: adminRoleAuthc,
           tags: ['observability'],
@@ -306,7 +320,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('should find the created rule with correct information about the consumer', async () => {
-        const match = await alertingApi.findRule(ruleId, adminRoleAuthc);
+        const match = await alertingApi.findInRules(adminRoleAuthc, ruleId);
         expect(match).not.to.be(undefined);
         expect(match.consumer).to.be(expectedConsumer);
       });

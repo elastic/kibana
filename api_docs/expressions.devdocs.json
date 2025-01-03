@@ -6135,13 +6135,52 @@
         "children": [
           {
             "parentPluginId": "expressions",
+            "id": "def-public.TablesAdapter.tables",
+            "type": "Object",
+            "tags": [],
+            "label": "#tables",
+            "description": [],
+            "path": "src/plugins/expressions/common/util/tables_adapter.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": []
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-public.TablesAdapter.allowCsvExport",
+            "type": "boolean",
+            "tags": [],
+            "label": "allowCsvExport",
+            "description": [],
+            "path": "src/plugins/expressions/common/util/tables_adapter.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-public.TablesAdapter.initialSelectedTable",
+            "type": "string",
+            "tags": [],
+            "label": "initialSelectedTable",
+            "description": [
+              "Key of table to set as initial selection"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/expressions/common/util/tables_adapter.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "expressions",
             "id": "def-public.TablesAdapter.logDatatable",
             "type": "Function",
             "tags": [],
             "label": "logDatatable",
             "description": [],
             "signature": [
-              "(name: string, datatable: ",
+              "(key: string, datatable: ",
               {
                 "pluginId": "expressions",
                 "scope": "common",
@@ -6160,7 +6199,7 @@
                 "id": "def-public.TablesAdapter.logDatatable.$1",
                 "type": "string",
                 "tags": [],
-                "label": "name",
+                "label": "key",
                 "description": [],
                 "signature": [
                   "string"
@@ -7590,7 +7629,7 @@
               "\nTracks state of execution.\n\n- `not-started` - before .start() method was called.\n- `pending` - immediately after .start() method is called.\n- `result` - when expression execution completed.\n- `error` - when execution failed with error."
             ],
             "signature": [
-              "\"error\" | \"pending\" | \"not-started\" | \"result\""
+              "\"error\" | \"pending\" | \"result\" | \"not-started\""
             ],
             "path": "src/plugins/expressions/common/execution/container.ts",
             "deprecated": false,
@@ -8626,31 +8665,31 @@
             "references": [
               {
                 "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/server/demodata/index.ts"
+                "path": "x-pack/platform/plugins/private/canvas/canvas_plugin_src/functions/server/demodata/index.ts"
               },
               {
                 "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/external/embeddable.ts"
+                "path": "x-pack/platform/plugins/private/canvas/canvas_plugin_src/functions/external/embeddable.ts"
               },
               {
                 "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/browser/esdocs.ts"
+                "path": "x-pack/platform/plugins/private/canvas/canvas_plugin_src/functions/browser/escount.ts"
               },
               {
                 "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/browser/escount.ts"
+                "path": "x-pack/platform/plugins/private/canvas/canvas_plugin_src/functions/browser/esdocs.ts"
               },
               {
                 "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/common/functions/filters.ts"
+                "path": "x-pack/platform/plugins/private/canvas/common/functions/filters.ts"
               },
               {
                 "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/common/neq.ts"
+                "path": "x-pack/platform/plugins/private/canvas/canvas_plugin_src/functions/common/neq.ts"
               },
               {
                 "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/server/pointseries/index.ts"
+                "path": "x-pack/platform/plugins/private/canvas/canvas_plugin_src/functions/server/pointseries/index.ts"
               }
             ]
           }
@@ -9506,7 +9545,7 @@
             "label": "onData$",
             "description": [],
             "signature": [
-              "(<TData, TInspectorAdapters>(data: TData, adapters?: TInspectorAdapters | undefined, partial?: boolean | undefined) => void) | undefined"
+              "(<TData, TInspectorAdapters extends unknown>(data: TData, adapters?: TInspectorAdapters | undefined, partial?: boolean | undefined) => void) | undefined"
             ],
             "path": "src/plugins/expressions/public/react_expression_renderer/use_expression_renderer.ts",
             "deprecated": false,
@@ -12282,14 +12321,14 @@
           {
             "parentPluginId": "expressions",
             "id": "def-public.ExpressionRendererComponent.$1",
-            "type": "CompoundType",
+            "type": "Uncategorized",
             "tags": [],
             "label": "props",
             "description": [],
             "signature": [
-              "P & { children?: React.ReactNode; }"
+              "P"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -12303,7 +12342,7 @@
             "signature": [
               "any"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -12984,7 +13023,7 @@
           "references": [
             {
               "plugin": "canvas",
-              "path": "x-pack/plugins/canvas/public/setup_expressions.ts"
+              "path": "x-pack/platform/plugins/private/canvas/public/setup_expressions.ts"
             }
           ],
           "children": [
@@ -13049,15 +13088,15 @@
           "references": [
             {
               "plugin": "canvas",
-              "path": "x-pack/plugins/canvas/server/routes/functions/functions.ts"
+              "path": "x-pack/platform/plugins/private/canvas/server/routes/functions/functions.ts"
             },
             {
               "plugin": "canvas",
-              "path": "x-pack/plugins/canvas/server/routes/functions/functions.ts"
+              "path": "x-pack/platform/plugins/private/canvas/server/routes/functions/functions.ts"
             },
             {
               "plugin": "canvas",
-              "path": "x-pack/plugins/canvas/server/routes/functions/functions.test.ts"
+              "path": "x-pack/platform/plugins/private/canvas/server/routes/functions/functions.test.ts"
             }
           ],
           "children": [
@@ -13107,15 +13146,15 @@
           "references": [
             {
               "plugin": "canvas",
-              "path": "x-pack/plugins/canvas/public/setup_expressions.ts"
+              "path": "x-pack/platform/plugins/private/canvas/public/setup_expressions.ts"
             },
             {
               "plugin": "canvas",
-              "path": "x-pack/plugins/canvas/public/application.tsx"
+              "path": "x-pack/platform/plugins/private/canvas/public/application.tsx"
             },
             {
               "plugin": "canvas",
-              "path": "x-pack/plugins/canvas/server/routes/functions/functions.ts"
+              "path": "x-pack/platform/plugins/private/canvas/server/routes/functions/functions.ts"
             }
           ],
           "children": [],
@@ -13588,7 +13627,7 @@
               "section": "def-public.ReactExpressionRendererProps",
               "text": "ReactExpressionRendererProps"
             },
-            ") => JSX.Element"
+            ") => React.JSX.Element"
           ],
           "path": "src/plugins/expressions/public/plugin.ts",
           "deprecated": false,
@@ -19098,7 +19137,7 @@
               "\nTracks state of execution.\n\n- `not-started` - before .start() method was called.\n- `pending` - immediately after .start() method is called.\n- `result` - when expression execution completed.\n- `error` - when execution failed with error."
             ],
             "signature": [
-              "\"error\" | \"pending\" | \"not-started\" | \"result\""
+              "\"error\" | \"pending\" | \"result\" | \"not-started\""
             ],
             "path": "src/plugins/expressions/common/execution/container.ts",
             "deprecated": false,
@@ -20103,31 +20142,31 @@
             "references": [
               {
                 "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/server/demodata/index.ts"
+                "path": "x-pack/platform/plugins/private/canvas/canvas_plugin_src/functions/server/demodata/index.ts"
               },
               {
                 "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/external/embeddable.ts"
+                "path": "x-pack/platform/plugins/private/canvas/canvas_plugin_src/functions/external/embeddable.ts"
               },
               {
                 "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/browser/esdocs.ts"
+                "path": "x-pack/platform/plugins/private/canvas/canvas_plugin_src/functions/browser/escount.ts"
               },
               {
                 "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/browser/escount.ts"
+                "path": "x-pack/platform/plugins/private/canvas/canvas_plugin_src/functions/browser/esdocs.ts"
               },
               {
                 "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/common/functions/filters.ts"
+                "path": "x-pack/platform/plugins/private/canvas/common/functions/filters.ts"
               },
               {
                 "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/common/neq.ts"
+                "path": "x-pack/platform/plugins/private/canvas/canvas_plugin_src/functions/common/neq.ts"
               },
               {
                 "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/server/pointseries/index.ts"
+                "path": "x-pack/platform/plugins/private/canvas/canvas_plugin_src/functions/server/pointseries/index.ts"
               }
             ]
           }
@@ -28261,13 +28300,52 @@
         "children": [
           {
             "parentPluginId": "expressions",
+            "id": "def-common.TablesAdapter.tables",
+            "type": "Object",
+            "tags": [],
+            "label": "#tables",
+            "description": [],
+            "path": "src/plugins/expressions/common/util/tables_adapter.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": []
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-common.TablesAdapter.allowCsvExport",
+            "type": "boolean",
+            "tags": [],
+            "label": "allowCsvExport",
+            "description": [],
+            "path": "src/plugins/expressions/common/util/tables_adapter.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-common.TablesAdapter.initialSelectedTable",
+            "type": "string",
+            "tags": [],
+            "label": "initialSelectedTable",
+            "description": [
+              "Key of table to set as initial selection"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/expressions/common/util/tables_adapter.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "expressions",
             "id": "def-common.TablesAdapter.logDatatable",
             "type": "Function",
             "tags": [],
             "label": "logDatatable",
             "description": [],
             "signature": [
-              "(name: string, datatable: ",
+              "(key: string, datatable: ",
               {
                 "pluginId": "expressions",
                 "scope": "common",
@@ -28286,7 +28364,7 @@
                 "id": "def-common.TablesAdapter.logDatatable.$1",
                 "type": "string",
                 "tags": [],
-                "label": "name",
+                "label": "key",
                 "description": [],
                 "signature": [
                   "string"
@@ -31534,7 +31612,7 @@
               "\nTracks state of execution.\n\n- `not-started` - before .start() method was called.\n- `pending` - immediately after .start() method is called.\n- `result` - when expression execution completed.\n- `error` - when execution failed with error."
             ],
             "signature": [
-              "\"error\" | \"pending\" | \"not-started\" | \"result\""
+              "\"error\" | \"pending\" | \"result\" | \"not-started\""
             ],
             "path": "src/plugins/expressions/common/execution/container.ts",
             "deprecated": false,
@@ -33130,31 +33208,31 @@
             "references": [
               {
                 "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/server/demodata/index.ts"
+                "path": "x-pack/platform/plugins/private/canvas/canvas_plugin_src/functions/server/demodata/index.ts"
               },
               {
                 "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/external/embeddable.ts"
+                "path": "x-pack/platform/plugins/private/canvas/canvas_plugin_src/functions/external/embeddable.ts"
               },
               {
                 "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/browser/esdocs.ts"
+                "path": "x-pack/platform/plugins/private/canvas/canvas_plugin_src/functions/browser/escount.ts"
               },
               {
                 "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/browser/escount.ts"
+                "path": "x-pack/platform/plugins/private/canvas/canvas_plugin_src/functions/browser/esdocs.ts"
               },
               {
                 "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/common/functions/filters.ts"
+                "path": "x-pack/platform/plugins/private/canvas/common/functions/filters.ts"
               },
               {
                 "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/common/neq.ts"
+                "path": "x-pack/platform/plugins/private/canvas/canvas_plugin_src/functions/common/neq.ts"
               },
               {
                 "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/server/pointseries/index.ts"
+                "path": "x-pack/platform/plugins/private/canvas/canvas_plugin_src/functions/server/pointseries/index.ts"
               }
             ]
           }
@@ -34043,7 +34121,7 @@
             "references": [
               {
                 "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/public/setup_expressions.ts"
+                "path": "x-pack/platform/plugins/private/canvas/public/setup_expressions.ts"
               }
             ],
             "children": [
@@ -34108,15 +34186,15 @@
             "references": [
               {
                 "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/server/routes/functions/functions.ts"
+                "path": "x-pack/platform/plugins/private/canvas/server/routes/functions/functions.ts"
               },
               {
                 "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/server/routes/functions/functions.ts"
+                "path": "x-pack/platform/plugins/private/canvas/server/routes/functions/functions.ts"
               },
               {
                 "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/server/routes/functions/functions.test.ts"
+                "path": "x-pack/platform/plugins/private/canvas/server/routes/functions/functions.test.ts"
               }
             ],
             "children": [
@@ -34166,15 +34244,15 @@
             "references": [
               {
                 "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/public/setup_expressions.ts"
+                "path": "x-pack/platform/plugins/private/canvas/public/setup_expressions.ts"
               },
               {
                 "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/public/application.tsx"
+                "path": "x-pack/platform/plugins/private/canvas/public/application.tsx"
               },
               {
                 "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/server/routes/functions/functions.ts"
+                "path": "x-pack/platform/plugins/private/canvas/server/routes/functions/functions.ts"
               }
             ],
             "children": [],
@@ -38155,51 +38233,51 @@
         "references": [
           {
             "plugin": "canvas",
-            "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/browser/markdown.ts"
+            "path": "x-pack/platform/plugins/private/canvas/canvas_plugin_src/functions/browser/markdown.ts"
           },
           {
             "plugin": "canvas",
-            "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/browser/markdown.ts"
+            "path": "x-pack/platform/plugins/private/canvas/canvas_plugin_src/functions/browser/markdown.ts"
           },
           {
             "plugin": "canvas",
-            "path": "x-pack/plugins/canvas/types/state.ts"
+            "path": "x-pack/platform/plugins/private/canvas/types/state.ts"
           },
           {
             "plugin": "canvas",
-            "path": "x-pack/plugins/canvas/types/state.ts"
+            "path": "x-pack/platform/plugins/private/canvas/types/state.ts"
           },
           {
             "plugin": "canvas",
-            "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/common/timefilterControl.ts"
+            "path": "x-pack/platform/plugins/private/canvas/public/functions/plot/index.ts"
           },
           {
             "plugin": "canvas",
-            "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/common/timefilterControl.ts"
+            "path": "x-pack/platform/plugins/private/canvas/public/functions/plot/index.ts"
           },
           {
             "plugin": "canvas",
-            "path": "x-pack/plugins/canvas/public/functions/pie.ts"
+            "path": "x-pack/platform/plugins/private/canvas/public/functions/pie.ts"
           },
           {
             "plugin": "canvas",
-            "path": "x-pack/plugins/canvas/public/functions/pie.ts"
+            "path": "x-pack/platform/plugins/private/canvas/public/functions/pie.ts"
           },
           {
             "plugin": "canvas",
-            "path": "x-pack/plugins/canvas/public/functions/plot/index.ts"
+            "path": "x-pack/platform/plugins/private/canvas/canvas_plugin_src/functions/common/table.ts"
           },
           {
             "plugin": "canvas",
-            "path": "x-pack/plugins/canvas/public/functions/plot/index.ts"
+            "path": "x-pack/platform/plugins/private/canvas/canvas_plugin_src/functions/common/table.ts"
           },
           {
             "plugin": "canvas",
-            "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/common/table.ts"
+            "path": "x-pack/platform/plugins/private/canvas/canvas_plugin_src/functions/common/timefilterControl.ts"
           },
           {
             "plugin": "canvas",
-            "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/common/table.ts"
+            "path": "x-pack/platform/plugins/private/canvas/canvas_plugin_src/functions/common/timefilterControl.ts"
           }
         ],
         "initialIsOpen": false
@@ -39704,9 +39782,7 @@
                 "section": "def-common.SerializedDatatable",
                 "text": "SerializedDatatable"
               },
-              ") => { rows: ",
-              "Dictionary",
-              "<string>[]; type: \"datatable\"; columns: ",
+              ") => { rows: _.Dictionary<string>[]; type: \"datatable\"; columns: ",
               {
                 "pluginId": "expressions",
                 "scope": "common",
@@ -45633,7 +45709,7 @@
                 "section": "def-common.Adapters",
                 "text": "Adapters"
               },
-              ">) => any"
+              ">) => string | number | boolean | undefined"
             ],
             "path": "src/plugins/expressions/common/expression_functions/specs/theme.ts",
             "deprecated": false,

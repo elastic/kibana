@@ -14,6 +14,7 @@ import { EuiButtonGroup, EuiFormRow, htmlIdGenerator } from '@elastic/eui';
 import { PaletteRegistry, ColorMapping, PaletteOutput } from '@kbn/coloring';
 import { getColorCategories } from '@kbn/chart-expressions-common';
 import type { ValuesType } from 'utility-types';
+import { KbnPalette, KbnPalettes } from '@kbn/palettes';
 import type { VisualizationDimensionEditorProps } from '../../../types';
 import { State, XYState, XYDataLayerConfig, YConfig, YAxisMode } from '../types';
 import { FormatFactory } from '../../../../common/types';
@@ -45,6 +46,7 @@ export function DataDimensionEditor(
   props: VisualizationDimensionEditorProps<State> & {
     formatFactory: FormatFactory;
     paletteService: PaletteRegistry;
+    palettes: KbnPalettes;
     isDarkMode: boolean;
   }
 ) {
@@ -134,8 +136,8 @@ export function DataDimensionEditor(
   const { splitAccessor } = layer;
   const splitCategories = getColorCategories(table?.rows ?? [], splitAccessor);
 
-  if (props.groupId === 'breakdown' && !layer.collapseFn) {
-    return (
+  if (props.groupId === 'breakdown') {
+    return !layer.collapseFn ? (
       <ColorMappingByTerms
         isDarkMode={isDarkMode}
         colorMapping={layer.colorMapping}
@@ -144,10 +146,11 @@ export function DataDimensionEditor(
         setPalette={setPalette}
         setColorMapping={setColorMapping}
         paletteService={props.paletteService}
+        palettes={props.palettes}
         panelRef={props.panelRef}
         categories={splitCategories}
       />
-    );
+    ) : null;
   }
 
   const isHorizontal = isHorizontalChart(state.layers);
@@ -165,6 +168,7 @@ export function DataDimensionEditor(
         overwriteColor={overwriteColor}
         defaultColor={assignedColor}
         disabledMessage={disabledMessage}
+        swatches={props.palettes.get(KbnPalette.Default).colors(10)}
         setConfig={setConfig}
       />
 

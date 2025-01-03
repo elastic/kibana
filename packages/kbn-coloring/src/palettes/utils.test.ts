@@ -1,13 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { getPaletteRegistry } from './mocks/palettes_registry';
 import {
+  applyPaletteParams,
   getDataMinMax,
   getPaletteStops,
   getStepValue,
@@ -309,5 +311,45 @@ describe('getStepValue', () => {
         100
       )
     ).toBe(1);
+  });
+});
+
+describe('applyPaletteParams', () => {
+  const paletteRegistry = getPaletteRegistry();
+  it('should return a palette stops array only by the name', () => {
+    expect(
+      applyPaletteParams(
+        paletteRegistry,
+        { name: 'default', type: 'palette', params: { name: 'default' } },
+        { min: 0, max: 100 }
+      )
+    ).toEqual([
+      // stops are 0 and 50 by with a 20 offset (100 divided by 5 steps) for display
+      // the mock palette service has only 2 colors so tests are a bit off by that
+      { color: 'red', stop: 20 },
+      { color: 'black', stop: 70 },
+    ]);
+  });
+
+  it('should return a palette stops array reversed', () => {
+    expect(
+      applyPaletteParams(
+        paletteRegistry,
+        { name: 'default', type: 'palette', params: { name: 'default', reverse: true } },
+        { min: 0, max: 100 }
+      )
+    ).toEqual([
+      { color: 'black', stop: 20 },
+      { color: 'red', stop: 70 },
+    ]);
+  });
+
+  it('should pick the default palette from the activePalette object when passed', () => {
+    expect(
+      applyPaletteParams(paletteRegistry, { name: 'mocked', type: 'palette' }, { min: 0, max: 100 })
+    ).toEqual([
+      { color: 'blue', stop: 20 },
+      { color: 'yellow', stop: 70 },
+    ]);
   });
 });

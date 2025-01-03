@@ -10,7 +10,7 @@ import { XYLegendValue } from '@kbn/visualizations-plugin/common';
 import { nonNullable } from '../../utils';
 import { shouldDisplayTable } from '../../shared_components/legend/legend_settings_popover';
 
-const LEGEND_STATS_PREFIX = 'lens_legend_stats';
+const LEGEND_STATS_PREFIX = 'legend_stats';
 const constructName = (eventName: string) => `${LEGEND_STATS_PREFIX}${eventName}`;
 
 export const getLegendStatsTelemetryEvents = (

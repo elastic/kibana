@@ -1,29 +1,34 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useEuiTheme } from '@elastic/eui';
 import type { ReactWrapper } from 'enzyme';
 import type { FC } from 'react';
 import React, { useEffect } from 'react';
 import { act } from 'react-dom/test-utils';
 import { BehaviorSubject, of } from 'rxjs';
 
+import { useEuiTheme } from '@elastic/eui';
+import type { UserProfileService } from '@kbn/core-user-profile-browser';
+import { userProfileServiceMock } from '@kbn/core-user-profile-browser-mocks';
+import type { KibanaTheme } from '@kbn/react-kibana-context-common';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 
-import type { KibanaTheme } from '@kbn/react-kibana-context-common';
 import { KibanaEuiProvider } from './eui_provider';
 
 describe('KibanaEuiProvider', () => {
   let euiTheme: ReturnType<typeof useEuiTheme> | undefined;
+  let userProfile: UserProfileService;
   let consoleWarnMock: jest.SpyInstance;
 
   beforeEach(() => {
     euiTheme = undefined;
+    userProfile = userProfileServiceMock.createStart();
     consoleWarnMock = jest.spyOn(global.console, 'warn').mockImplementation(() => {});
   });
 
@@ -53,10 +58,14 @@ describe('KibanaEuiProvider', () => {
   };
 
   it('exposes the EUI theme provider', async () => {
-    const coreTheme: KibanaTheme = { darkMode: true };
+    const coreTheme: KibanaTheme = { darkMode: true, name: 'amsterdam' };
 
     const wrapper = mountWithIntl(
-      <KibanaEuiProvider theme={{ theme$: of(coreTheme) }} modify={{ breakpoint: { xxl: 1600 } }}>
+      <KibanaEuiProvider
+        theme={{ theme$: of(coreTheme) }}
+        modify={{ breakpoint: { xxl: 1600 } }}
+        userProfile={userProfile}
+      >
         <InnerComponent />
       </KibanaEuiProvider>
     );
@@ -69,10 +78,10 @@ describe('KibanaEuiProvider', () => {
   });
 
   it('propagates changes of the coreTheme observable', async () => {
-    const coreTheme$ = new BehaviorSubject<KibanaTheme>({ darkMode: true });
+    const coreTheme$ = new BehaviorSubject<KibanaTheme>({ darkMode: true, name: 'amsterdam' });
 
     const wrapper = mountWithIntl(
-      <KibanaEuiProvider theme={{ theme$: coreTheme$ }}>
+      <KibanaEuiProvider theme={{ theme$: coreTheme$ }} userProfile={userProfile}>
         <InnerComponent />
       </KibanaEuiProvider>
     );
@@ -82,7 +91,7 @@ describe('KibanaEuiProvider', () => {
     expect(euiTheme!.colorMode).toEqual('DARK');
 
     await act(async () => {
-      coreTheme$.next({ darkMode: false });
+      coreTheme$.next({ darkMode: false, name: 'amsterdam' });
     });
 
     await refresh(wrapper);

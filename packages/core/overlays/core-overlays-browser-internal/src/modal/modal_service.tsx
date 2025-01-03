@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 /* eslint-disable max-classes-per-file */
@@ -15,6 +16,7 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import { Subject } from 'rxjs';
 import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
 import type { ThemeServiceStart } from '@kbn/core-theme-browser';
+import type { UserProfileService } from '@kbn/core-user-profile-browser';
 import type { I18nStart } from '@kbn/core-i18n-browser';
 import type { MountPoint, OverlayRef } from '@kbn/core-mount-utils-browser';
 import { MountWrapper } from '@kbn/core-mount-utils-browser-internal';
@@ -57,6 +59,7 @@ class ModalRef implements OverlayRef {
 interface StartDeps {
   i18n: I18nStart;
   theme: ThemeServiceStart;
+  userProfile: UserProfileService;
   analytics: AnalyticsServiceStart;
   targetDomElement: Element;
 }
@@ -66,7 +69,7 @@ export class ModalService {
   private activeModal: ModalRef | null = null;
   private targetDomElement: Element | null = null;
 
-  public start({ analytics, i18n, theme, targetDomElement }: StartDeps): OverlayModalStart {
+  public start({ targetDomElement, ...startDeps }: StartDeps): OverlayModalStart {
     this.targetDomElement = targetDomElement;
 
     return {
@@ -89,7 +92,7 @@ export class ModalService {
         this.activeModal = modal;
 
         render(
-          <KibanaRenderContextProvider analytics={analytics} i18n={i18n} theme={theme}>
+          <KibanaRenderContextProvider {...startDeps}>
             <EuiModal {...options} onClose={() => modal.close()}>
               <MountWrapper mount={mount} className="kbnOverlayMountWrapper" />
             </EuiModal>
@@ -149,7 +152,7 @@ export class ModalService {
           };
 
           render(
-            <KibanaRenderContextProvider analytics={analytics} i18n={i18n} theme={theme}>
+            <KibanaRenderContextProvider {...startDeps}>
               <EuiConfirmModal {...props} />
             </KibanaRenderContextProvider>,
             targetDomElement

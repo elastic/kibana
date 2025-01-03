@@ -14,7 +14,7 @@ import {
   NetworkDnsStrategyResponse,
 } from '@kbn/security-solution-plugin/common/search_strategy';
 import TestAgent from 'supertest/lib/agent';
-import { BsearchService } from '@kbn/test-suites-src/common/services/bsearch';
+import { SearchService } from '@kbn/ftr-common-functional-services';
 import { FtrProviderContextWithSpaces } from '../../../../../ftr_provider_context_with_spaces';
 
 export default function ({ getService }: FtrProviderContextWithSpaces) {
@@ -23,11 +23,11 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
 
   describe('Network DNS', () => {
     let supertest: TestAgent;
-    let bsearch: BsearchService;
+    let search: SearchService;
     describe('With packetbeat', () => {
       before(async () => {
         supertest = await utils.createSuperTest();
-        bsearch = await utils.createBsearch();
+        search = await utils.createSearch();
         await esArchiver.load('x-pack/test/functional/es_archives/packetbeat/dns');
       });
       after(
@@ -38,7 +38,7 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
       const TO = '3000-01-01T00:00:00.000Z';
 
       it('Make sure that we get Dns data and sorting by uniqueDomains ascending', async () => {
-        const networkDns = await bsearch.send<NetworkDnsStrategyResponse>({
+        const networkDns = await search.send<NetworkDnsStrategyResponse>({
           supertest,
           options: {
             defaultIndex: ['packetbeat-*'],
@@ -66,7 +66,7 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
       });
 
       it('Make sure that we get Dns data and sorting by uniqueDomains descending', async () => {
-        const networkDns = await bsearch.send<NetworkDnsStrategyResponse>({
+        const networkDns = await search.send<NetworkDnsStrategyResponse>({
           supertest,
           options: {
             ip: '151.205.0.17',

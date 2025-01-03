@@ -51,7 +51,7 @@ describe('Bulk get profile routes', () => {
     });
 
     it('correctly defines route.', () => {
-      expect(routeConfig.options).toEqual({ tags: ['access:bulkGetUserProfiles'] });
+      expect(routeConfig.security?.authz).toEqual({ requiredPrivileges: ['bulkGetUserProfiles'] });
 
       const bodySchema = (routeConfig.validate as any).body as ObjectType;
       expect(() => bodySchema.validate(0)).toThrowErrorMatchingInlineSnapshot(

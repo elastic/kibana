@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -48,22 +49,23 @@ export class SearchSelection extends React.Component<SearchSelectionProps> {
           <DialogNavigation goBack={this.props.goBack} />
           <SavedObjectFinder
             key="searchSavedObjectFinder"
+            id="visSearchSelection"
             onChoose={this.props.onSearchSelected}
             showFilter
             noItemsMessage={i18n.translate(
               'visualizations.newVisWizard.searchSelection.notFoundLabel',
               {
-                defaultMessage: 'No matching indices or saved searches found.',
+                defaultMessage: 'No matching indices or Discover sessions found.',
               }
             )}
             savedObjectMetaData={[
               {
                 type: 'search',
-                getIconForSavedObject: () => 'search',
+                getIconForSavedObject: () => 'discoverApp',
                 name: i18n.translate(
                   'visualizations.newVisWizard.searchSelection.savedObjectType.search',
                   {
-                    defaultMessage: 'Saved search',
+                    defaultMessage: 'Discover session',
                   }
                 ),
                 // ignore the saved searches that have text-based languages queries

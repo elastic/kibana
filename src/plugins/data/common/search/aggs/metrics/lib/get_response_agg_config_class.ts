@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { assignIn } from 'lodash';
@@ -30,6 +31,15 @@ export interface IResponseAggConfig extends IMetricAggConfig {
   parentId: IMetricAggConfig['id'];
 }
 
+export function getResponseAggId(parentId: string, key: string) {
+  const subId = String(key);
+  if (subId.indexOf('.') > -1) {
+    return parentId + "['" + subId.replace(/[\\']/g, '\\$&') + "']"; // $& means the whole matched string
+  } else {
+    return parentId + '.' + subId;
+  }
+}
+
 export const create = (parentAgg: IMetricAggConfig, props: Partial<IMetricAggConfig>) => {
   /**
    * AggConfig "wrapper" for multi-value metric aggs which
@@ -40,17 +50,7 @@ export const create = (parentAgg: IMetricAggConfig, props: Partial<IMetricAggCon
    */
   function ResponseAggConfig(this: IResponseAggConfig, key: string) {
     const parentId = parentAgg.id;
-    let id;
-
-    const subId = String(key);
-
-    if (subId.indexOf('.') > -1) {
-      id = parentId + "['" + subId.replace(/'/g, "\\'") + "']";
-    } else {
-      id = parentId + '.' + subId;
-    }
-
-    this.id = id;
+    this.id = getResponseAggId(parentId, key);
     this.key = key;
     this.parentId = parentId;
   }

@@ -7,6 +7,7 @@
 
 import { RecursiveReadonly } from '@kbn/utility-types';
 import { LicenseType } from '@kbn/licensing-plugin/common/types';
+import { FeatureKibanaPrivilegesReference } from './feature_kibana_privileges_reference';
 import { FeatureKibanaPrivileges } from './feature_kibana_privileges';
 
 /**
@@ -70,7 +71,7 @@ export interface SubFeaturePrivilegeGroupConfig {
  * Configuration for a sub-feature privilege.
  */
 export interface SubFeaturePrivilegeConfig
-  extends Omit<FeatureKibanaPrivileges, 'excludeFromBasePrivileges' | 'composedOf'> {
+  extends Omit<FeatureKibanaPrivileges, 'excludeFromBasePrivileges' | 'composedOf' | 'replacedBy'> {
   /**
    * Identifier for this privilege. Must be unique across all other privileges within a feature.
    */
@@ -93,6 +94,13 @@ export interface SubFeaturePrivilegeConfig
    * that are valid for the overall feature.
    */
   minimumLicense?: LicenseType;
+
+  /**
+   * An optional list of other registered feature or sub-feature privileges that, when combined, grant equivalent access
+   * if the feature this sub-feature privilege belongs to becomes deprecated. This property can only be set if the
+   * feature is marked as deprecated.
+   */
+  replacedBy?: readonly FeatureKibanaPrivilegesReference[];
 }
 
 export class SubFeature {

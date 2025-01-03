@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { FC, PropsWithChildren, useContext } from 'react';
@@ -16,6 +17,11 @@ import { ContentInsightsClientPublic } from './client';
  */
 export interface ContentInsightsServices {
   contentInsightsClient: ContentInsightsClientPublic;
+  /**
+   * Whether versioning is enabled for the current kibana instance. (aka is Serverless)
+   * This is used to determine if we should show the version mentions in the help text.
+   */
+  isKibanaVersioningEnabled: boolean;
 }
 
 const ContentInsightsContext = React.createContext<ContentInsightsServices | null>(null);
@@ -33,7 +39,10 @@ export const ContentInsightsProvider: FC<PropsWithChildren<Partial<ContentInsigh
 
   return (
     <ContentInsightsContext.Provider
-      value={{ contentInsightsClient: services.contentInsightsClient }}
+      value={{
+        contentInsightsClient: services.contentInsightsClient,
+        isKibanaVersioningEnabled: services.isKibanaVersioningEnabled ?? false,
+      }}
     >
       {children}
     </ContentInsightsContext.Provider>

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -11,6 +12,7 @@ import { render, unmountComponentAtNode } from 'react-dom';
 
 import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
 import type { ThemeServiceStart } from '@kbn/core-theme-browser';
+import type { UserProfileService } from '@kbn/core-user-profile-browser';
 import type { I18nStart } from '@kbn/core-i18n-browser';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import type { OverlayStart } from '@kbn/core-overlays-browser';
@@ -28,6 +30,7 @@ interface StartDeps {
   i18n: I18nStart;
   overlays: OverlayStart;
   theme: ThemeServiceStart;
+  userProfile: UserProfileService;
   eventReporter: EventReporter;
   targetDomElement: HTMLElement;
 }
@@ -41,12 +44,12 @@ export class ToastsService {
     return this.api!;
   }
 
-  public start({ eventReporter, analytics, i18n, overlays, theme, targetDomElement }: StartDeps) {
-    this.api!.start({ overlays, i18n, theme });
+  public start({ eventReporter, overlays, targetDomElement, ...startDeps }: StartDeps) {
+    this.api!.start({ overlays, ...startDeps });
     this.targetDomElement = targetDomElement;
 
     render(
-      <KibanaRenderContextProvider analytics={analytics} i18n={i18n} theme={theme}>
+      <KibanaRenderContextProvider {...startDeps}>
         <GlobalToastList
           dismissToast={(toastId: string) => this.api!.remove(toastId)}
           toasts$={this.api!.get$()}

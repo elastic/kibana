@@ -1,0 +1,35 @@
+# PERCENTILE
+
+The PERCENTILE function calculates the value at a specified percentile of observed values.
+
+## Syntax
+
+`PERCENTILE(number, percentile)`
+
+### Parameters
+
+#### number
+
+The numeric expression that represents the set of values to be analyzed.
+
+#### percentile
+
+The percentile to compute. The value should be between 0 and 100.
+
+## Examples
+
+```esql
+FROM employees
+| STATS p0 = PERCENTILE(salary, 0), p50 = PERCENTILE(salary, 50), p99 = PERCENTILE(salary, 99)
+```
+
+```esql
+FROM employees
+| STATS p80_max_salary_change = PERCENTILE(MV_MAX(salary_change), 80)
+```
+
+## Notes
+
+- PERCENTILE is usually approximate.
+
+- PERCENTILE is also non-deterministic. This means you can get slightly different results using the same data.

@@ -1,16 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
 import { EuiContextMenuPanel, EuiContextMenuItem, EuiButtonEmpty } from '@elastic/eui';
 import type {
   AppDeepLinkId,
-  ChromeProjectBreadcrumb,
   ChromeProjectNavigationNode,
   ChromeSetProjectBreadcrumbsParams,
   ChromeBreadcrumb,
@@ -29,14 +29,14 @@ export function buildBreadcrumbs({
 }: {
   projectName?: string;
   projectBreadcrumbs: {
-    breadcrumbs: ChromeProjectBreadcrumb[];
+    breadcrumbs: ChromeBreadcrumb[];
     params: ChromeSetProjectBreadcrumbsParams;
   };
   chromeBreadcrumbs: ChromeBreadcrumb[];
   cloudLinks: CloudLinks;
   activeNodes: ChromeProjectNavigationNode[][];
   isServerless: boolean;
-}): ChromeProjectBreadcrumb[] {
+}): ChromeBreadcrumb[] {
   const rootCrumb = buildRootCrumb({
     projectName,
     cloudLinks,
@@ -53,7 +53,7 @@ export function buildBreadcrumbs({
     (n) => Boolean(n.title) && n.breadcrumbStatus !== 'hidden'
   );
   const navBreadcrumbs = navBreadcrumbPath.map(
-    (node): ChromeProjectBreadcrumb => ({
+    (node): ChromeBreadcrumb => ({
       href: node.deepLink?.url ?? node.href,
       deepLinkId: node.deepLink?.id as AppDeepLinkId,
       text: node.title,
@@ -98,7 +98,7 @@ function buildRootCrumb({
   projectName?: string;
   cloudLinks: CloudLinks;
   isServerless: boolean;
-}): ChromeProjectBreadcrumb {
+}): ChromeBreadcrumb {
   if (isServerless) {
     return {
       text:

@@ -1,18 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import moment from 'moment';
 import dateMath from '@kbn/datemath';
-import { scheme, loader, logger, Warn, version as vegaVersion, expressionFunction } from 'vega';
+import { loader, logger, Warn, version as vegaVersion, expressionFunction } from 'vega';
 import { expressionInterpreter } from 'vega-interpreter';
 import { version as vegaLiteVersion } from 'vega-lite';
 import { Utils } from '../data_model/utils';
-import { euiPaletteColorBlind } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { buildQueryFilter, compareFilters } from '@kbn/es-query';
 import { TooltipHandler } from './vega_tooltip';
@@ -20,8 +20,6 @@ import { TooltipHandler } from './vega_tooltip';
 import { getEnableExternalUrls, getDataViews } from '../services';
 import { extractIndexPatternsFromSpec } from '../lib/extract_index_pattern';
 import { normalizeDate, normalizeString, normalizeObject } from './utils';
-
-scheme('elastic', euiPaletteColorBlind());
 
 // Vega's extension functions are global. When called,
 // we forward execution to the instance-specific handler
@@ -281,9 +279,9 @@ export class VegaBaseView {
     }
   }
 
-  async resize() {
+  async resize(dimensions) {
     if (this._parser.useResize && this._view) {
-      this.updateVegaSize(this._view);
+      this.updateVegaSize(this._view, dimensions);
       await this._view.runAsync();
 
       // The derived class should create this method
@@ -292,12 +290,8 @@ export class VegaBaseView {
   }
 
   updateVegaSize(view, dimensions) {
-    const width = Math.floor(
-      Math.max(0, dimensions?.width ?? this._container.getBoundingClientRect().width)
-    );
-    const height = Math.floor(
-      Math.max(0, dimensions?.height ?? this._container.getBoundingClientRect().height)
-    );
+    const width = Math.floor(Math.max(0, dimensions?.width ?? this._container.clientWidth - 1));
+    const height = Math.floor(Math.max(0, dimensions?.height ?? this._container.clientHeight - 1));
 
     if (view.width() !== width || view.height() !== height) {
       view.width(width).height(height);

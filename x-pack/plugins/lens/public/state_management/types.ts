@@ -7,10 +7,10 @@
 
 import type { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import type { EmbeddableEditorState } from '@kbn/embeddable-plugin/public';
-import type { Filter, Query } from '@kbn/es-query';
+import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
 import type { SavedQuery } from '@kbn/data-plugin/public';
 import type { MainHistoryLocationState } from '../../common/locator/locator';
-import type { Document } from '../persistence';
+import type { LensDocument } from '../persistence';
 
 import type { TableInspectorAdapter } from '../editor_frame_service/types';
 import type { DateRange } from '../../common/types';
@@ -54,14 +54,14 @@ export interface EditorFrameState extends PreviewState {
   isFullscreenDatasource?: boolean;
 }
 export interface LensAppState extends EditorFrameState {
-  persistedDoc?: Document;
+  persistedDoc?: LensDocument;
 
   // Determines whether the lens editor shows the 'save and return' button, and the originating app breadcrumb.
   isLinkedToOriginatingApp?: boolean;
   isSaveable: boolean;
 
   isLoading: boolean;
-  query: Query;
+  query: Query | AggregateQuery;
   filters: Filter[];
   savedQuery?: SavedQuery;
   searchSessionId: string;

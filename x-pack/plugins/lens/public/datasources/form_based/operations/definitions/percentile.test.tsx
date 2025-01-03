@@ -12,7 +12,7 @@ import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
-import faker from 'faker';
+import { faker } from '@faker-js/faker';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { createMockedIndexPattern } from '../../mocks';
@@ -402,7 +402,7 @@ describe('percentile', () => {
     it('should update order-by references for any terms columns', () => {
       const field1 = 'foo';
       const field2 = 'bar';
-      const percentile = faker.random.number(100);
+      const percentile = faker.number.int(100);
 
       const aggs = [
         makeEsAggBuilder('aggTerms', {
@@ -614,7 +614,9 @@ describe('percentile', () => {
       expect(input).toHaveValue(23);
     });
 
-    it('should update state on change', () => {
+    it('should update state on change', async () => {
+      // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
+      const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
       const updateLayerSpy = jest.fn();
       render(
         <InlineOptions
@@ -626,8 +628,8 @@ describe('percentile', () => {
         />
       );
       const input = screen.getByRole('spinbutton', { name: 'Percentile' });
-      userEvent.clear(input);
-      userEvent.type(input, '27');
+      await user.clear(input);
+      await user.type(input, '27');
       jest.advanceTimersByTime(256);
       expect(input).toHaveValue(27);
       expect(updateLayerSpy).toHaveBeenCalledTimes(1);
@@ -640,7 +642,9 @@ describe('percentile', () => {
       });
     });
 
-    it('should update on decimals input up to 2 digits', () => {
+    it('should update on decimals input up to 2 digits', async () => {
+      // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
+      const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
       const updateLayerSpy = jest.fn();
       render(
         <InlineOptions
@@ -652,14 +656,16 @@ describe('percentile', () => {
         />
       );
       const input = screen.getByRole('spinbutton', { name: 'Percentile' });
-      userEvent.clear(input);
-      userEvent.type(input, '12.12');
+      await user.clear(input);
+      await user.type(input, '12.12');
       jest.advanceTimersByTime(256);
       expect(input).toHaveValue(12.12);
       expect(updateLayerSpy).toHaveBeenCalled();
     });
 
-    it('should not update on invalid input, but show invalid value locally', () => {
+    it('should not update on invalid input, but show invalid value locally', async () => {
+      // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
+      const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
       const updateLayerSpy = jest.fn();
       render(
         <InlineOptions
@@ -671,13 +677,13 @@ describe('percentile', () => {
         />
       );
       const input = screen.getByRole('spinbutton', { name: 'Percentile' });
-      userEvent.clear(input);
-      userEvent.type(input, '12.1212312312312312');
+      await user.clear(input);
+      await user.type(input, '12.1212312312312312');
       jest.advanceTimersByTime(256);
       expect(input).toHaveValue(12.1212312312312312);
       expect(updateLayerSpy).not.toHaveBeenCalled();
       expect(
-        screen.getByText('Percentile has to be an integer between 0.0001 and 99.9999')
+        screen.getByText('Only 4 numbers allowed after the decimal point.')
       ).toBeInTheDocument();
 
       // expect(

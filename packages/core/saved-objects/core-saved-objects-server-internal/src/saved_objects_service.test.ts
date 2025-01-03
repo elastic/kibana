@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { setImmediate } from 'timers/promises';
@@ -97,6 +98,7 @@ describe('SavedObjectsService', () => {
       elasticsearch: elasticsearchMock,
       deprecations: deprecationsSetup,
       coreUsageData: createCoreUsageDataSetupMock(),
+      docLinks: docLinksServiceMock.createSetupContract(),
     };
   };
 
@@ -177,6 +179,18 @@ describe('SavedObjectsService', () => {
       await soService.setup(createSetupDeps());
 
       expect(registerRoutesMock).toHaveBeenCalledWith(expect.objectContaining({ kibanaVersion }));
+    });
+
+    it('calls registerRoutes with docLinks', async () => {
+      const coreContext = createCoreContext();
+      const mockedLinks = docLinksServiceMock.createSetupContract();
+
+      const soService = new SavedObjectsService(coreContext);
+      await soService.setup(createSetupDeps());
+
+      expect(registerRoutesMock).toHaveBeenCalledWith(
+        expect.objectContaining({ docLinks: mockedLinks })
+      );
     });
 
     describe('#setClientFactoryProvider', () => {

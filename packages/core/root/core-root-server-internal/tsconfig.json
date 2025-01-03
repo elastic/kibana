@@ -76,6 +76,7 @@
     "@kbn/core-usage-data-server-mocks",
     "@kbn/core-user-profile-server-mocks",
     "@kbn/core-user-profile-server-internal",
+    "@kbn/core-feature-flags-server-internal",
   ],
   "exclude": [
     "target/**/*",

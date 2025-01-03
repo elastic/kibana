@@ -35,14 +35,14 @@
           {
             "parentPluginId": "@kbn/shared-ux-page-kibana-template",
             "id": "def-public.KibanaPageTemplate.$1",
-            "type": "CompoundType",
+            "type": "Uncategorized",
             "tags": [],
             "label": "props",
             "description": [],
             "signature": [
-              "P & { children?: React.ReactNode; }"
+              "P"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -56,7 +56,7 @@
             "signature": [
               "any"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -73,9 +73,9 @@
           "\nKibana-specific Provider that maps dependencies to services."
         ],
         "signature": [
-          "({ children, ...dependencies }: React.PropsWithChildren<React.PropsWithChildren<",
+          "({ children, ...dependencies }: React.PropsWithChildren<",
           "NoDataCardKibanaDependencies",
-          ">>) => JSX.Element"
+          ">) => React.JSX.Element"
         ],
         "path": "packages/shared-ux/page/kibana_template/impl/src/services.tsx",
         "deprecated": false,
@@ -89,9 +89,9 @@
             "label": "{ children, ...dependencies }",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<React.PropsWithChildren<",
+              "React.PropsWithChildren<",
               "NoDataCardKibanaDependencies",
-              ">>"
+              ">"
             ],
             "path": "packages/shared-ux/page/kibana_template/impl/src/services.tsx",
             "deprecated": false,
@@ -112,9 +112,9 @@
           "\nA Context Provider that provides services to the component and its dependencies."
         ],
         "signature": [
-          "({ children, ...services }: React.PropsWithChildren<React.PropsWithChildren<",
+          "({ children, ...services }: React.PropsWithChildren<",
           "NoDataCardServices",
-          ">>) => JSX.Element"
+          ">) => React.JSX.Element"
         ],
         "path": "packages/shared-ux/page/kibana_template/impl/src/services.tsx",
         "deprecated": false,
@@ -128,9 +128,9 @@
             "label": "{\n  children,\n  ...services\n}",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<React.PropsWithChildren<",
+              "React.PropsWithChildren<",
               "NoDataCardServices",
-              ">>"
+              ">"
             ],
             "path": "packages/shared-ux/page/kibana_template/impl/src/services.tsx",
             "deprecated": false,
@@ -171,11 +171,13 @@
         "description": [],
         "signature": [
           "_EuiPageOuterProps",
-          " & Omit<any, \"border\" | \"component\"> & ",
+          " & Omit<",
+          "_EuiPageInnerProps",
+          "<\"main\">, \"border\" | \"component\"> & ",
           "_EuiPageRestrictWidth",
           " & ",
           "_EuiPageBottomBorder",
-          " & { contentBorder?: any; minHeight?: ",
+          " & { contentBorder?: boolean | undefined; minHeight?: ",
           "Property",
           ".MinHeight<string | number> | undefined; offset?: number | undefined; mainProps?: (",
           "CommonProps",

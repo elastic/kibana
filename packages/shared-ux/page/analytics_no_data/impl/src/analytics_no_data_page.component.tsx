@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useMemo } from 'react';
@@ -21,12 +22,14 @@ import { getHasApiKeys$ } from '../lib/get_has_api_keys';
 export interface Props {
   /** Handler for successfully creating a new data view. */
   onDataViewCreated: (dataView: unknown) => void;
-  /** Handler for when try ES|QL is clicked and user has been navigated to try ES|QL in discover. */
-  onESQLNavigationComplete?: () => void;
   /** if set to true allows creation of an ad-hoc dataview from data view editor */
   allowAdHocDataView?: boolean;
   /** if the kibana instance is customly branded */
   showPlainSpinner: boolean;
+  /** If the cluster has data, this handler allows the user to try ES|QL */
+  onTryESQL?: () => void;
+  /** Handler for when try ES|QL is clicked and user has been navigated to try ES|QL in discover. */
+  onESQLNavigationComplete?: () => void;
 }
 
 type AnalyticsNoDataPageProps = Props &
@@ -118,9 +121,10 @@ const flavors: {
  */
 export const AnalyticsNoDataPage: React.FC<AnalyticsNoDataPageProps> = ({
   onDataViewCreated,
-  onESQLNavigationComplete,
   allowAdHocDataView,
   showPlainSpinner,
+  onTryESQL,
+  onESQLNavigationComplete,
   ...services
 }) => {
   const { prependBasePath, kibanaGuideDocLink, getHttp: get, pageFlavor } = services;
@@ -137,8 +141,9 @@ export const AnalyticsNoDataPage: React.FC<AnalyticsNoDataPageProps> = ({
       {...{
         noDataConfig,
         onDataViewCreated,
-        onESQLNavigationComplete,
         allowAdHocDataView,
+        onTryESQL,
+        onESQLNavigationComplete,
         showPlainSpinner,
       }}
     />

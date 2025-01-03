@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { KibanaRequest } from '@kbn/core/server';
@@ -16,7 +17,7 @@ import type {
 } from '@kbn/search-types';
 import type { Datatable, ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
-import { getStartEndParams } from '@kbn/esql-utils';
+import { getIndexPatternFromESQLQuery, getStartEndParams } from '@kbn/esql-utils';
 import { zipObject } from 'lodash';
 import { catchError, defer, map, Observable, switchMap, tap, throwError } from 'rxjs';
 import { buildEsQuery, type Filter } from '@kbn/es-query';
@@ -57,6 +58,7 @@ interface Arguments {
    */
   titleForInspector?: string;
   descriptionForInspector?: string;
+  ignoreGlobalFilters?: boolean;
 }
 
 export type EsqlExpressionFunctionDefinition = ExpressionFunctionDefinition<
@@ -139,10 +141,24 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
           defaultMessage: 'The description to show in Inspector.',
         }),
       },
+      ignoreGlobalFilters: {
+        types: ['boolean'],
+        default: false,
+        help: i18n.translate('data.search.esql.ignoreGlobalFilters.help', {
+          defaultMessage: 'Whether to ignore or use global query and filters',
+        }),
+      },
     },
     fn(
       input,
-      { query, /* timezone, */ timeField, locale, titleForInspector, descriptionForInspector },
+      {
+        query,
+        /* timezone, */ timeField,
+        locale,
+        titleForInspector,
+        descriptionForInspector,
+        ignoreGlobalFilters,
+      },
       { abortSignal, inspectorAdapters, getKibanaRequest }
     ) {
       return defer(() =>
@@ -163,6 +179,7 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
             query,
             // time_zone: timezone,
             locale,
+            include_ccs_metadata: true,
           };
           if (input) {
             const esQueryConfigs = getEsQueryConfig(
@@ -200,7 +217,7 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
               : undefined;
 
             const filters = [
-              ...(input.filters ?? []),
+              ...(ignoreGlobalFilters ? [] : input.filters ?? []),
               ...(timeFilter ? [timeFilter] : []),
               ...(delayFilter ? [delayFilter] : []),
             ];
@@ -270,9 +287,25 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
                         defaultMessage: 'The number of documents returned by the query.',
                       }),
                     },
+                    ...(rawResponse?.took && {
+                      queryTime: {
+                        label: i18n.translate('data.search.es_search.queryTimeLabel', {
+                          defaultMessage: 'Query time',
+                        }),
+                        value: i18n.translate('data.search.es_search.queryTimeValue', {
+                          defaultMessage: '{queryTime}ms',
+                          values: { queryTime: rawResponse.took },
+                        }),
+                        description: i18n.translate('data.search.es_search.queryTimeDescription', {
+                          defaultMessage:
+                            'The time it took to process the query. ' +
+                            'Does not include the time to send the request or parse it in the browser.',
+                        }),
+                      },
+                    }),
                   })
                   .json(params)
-                  .ok({ json: rawResponse, requestParams });
+                  .ok({ json: { rawResponse }, requestParams });
               },
               error(error) {
                 logInspectorRequest()
@@ -293,11 +326,26 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
           const lookup = new Set(
             hasEmptyColumns ? body.columns?.map(({ name }) => name) || [] : []
           );
+          const indexPattern = getIndexPatternFromESQLQuery(query);
+
           const allColumns =
             (body.all_columns ?? body.columns)?.map(({ name, type }) => ({
               id: name,
               name,
-              meta: { type: esFieldTypeToKibanaFieldType(type), esType: type },
+              meta: {
+                type: esFieldTypeToKibanaFieldType(type),
+                esType: type,
+                sourceParams:
+                  type === 'date'
+                    ? {
+                        appliedTimeRange: input?.timeRange,
+                        params: {},
+                        indexPattern,
+                      }
+                    : {
+                        indexPattern,
+                      },
+              },
               isNull: hasEmptyColumns ? !lookup.has(name) : false,
             })) ?? [];
 
@@ -313,6 +361,10 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
             type: 'datatable',
             meta: {
               type: ESQL_TABLE_TYPE,
+              query,
+              statistics: {
+                totalCount: body.values.length,
+              },
             },
             columns: allColumns,
             rows,

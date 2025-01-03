@@ -331,18 +331,20 @@ export class SecurityPlugin
       getSession: this.getSession,
       getFeatures: () =>
         startServicesPromise.then((services) => services.features.getKibanaFeatures()),
+      subFeaturePrivilegeIterator: features.subFeaturePrivilegeIterator,
       getFeatureUsageService: this.getFeatureUsageService,
       getAuthenticationService: this.getAuthentication,
       getAnonymousAccessService: this.getAnonymousAccess,
       getUserProfileService: this.getUserProfileService,
       analyticsService: this.analyticsService.setup({ analytics: core.analytics }),
       buildFlavor: this.initializerContext.env.packageInfo.buildFlavor,
+      docLinks: core.docLinks,
     });
 
     return Object.freeze<SecurityPluginSetup>({
       audit: this.auditSetup,
       authc: {
-        getCurrentUser: (request) => this.getAuthentication().getCurrentUser(request),
+        getCurrentUser,
       },
       authz: {
         actions: this.authorizationSetup.actions,

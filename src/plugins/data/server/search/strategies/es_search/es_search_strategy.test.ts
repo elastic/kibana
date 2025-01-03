@@ -1,15 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { pluginInitializerContextConfigMock } from '@kbn/core/server/mocks';
-import { esSearchStrategyProvider } from './es_search_strategy';
+import { esSearchStrategyProvider, toKibanaSearchResponse } from './es_search_strategy';
 import { SearchStrategyDependencies } from '../../types';
 
 import indexNotFoundException from '../../../../common/search/test_data/index_not_found_exception.json';
@@ -208,5 +209,33 @@ describe('ES search strategy', () => {
       expect(e.statusCode).toBe(400);
       expect(e.errBody).toBe(undefined);
     }
+  });
+});
+
+describe('toKibanaSearchResponse', () => {
+  it('returns rawResponse, isPartial, isRunning, total, and loaded', () => {
+    const result = toKibanaSearchResponse({
+      _shards: {
+        successful: 10,
+        failed: 5,
+        skipped: 5,
+        total: 100,
+      },
+    } as unknown as estypes.SearchResponse<unknown>);
+
+    expect(result).toEqual({
+      rawResponse: {
+        _shards: {
+          successful: 10,
+          failed: 5,
+          skipped: 5,
+          total: 100,
+        },
+      },
+      isRunning: false,
+      isPartial: false,
+      total: 100,
+      loaded: 15,
+    });
   });
 });

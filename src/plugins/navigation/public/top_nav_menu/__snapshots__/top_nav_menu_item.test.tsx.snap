@@ -1,5 +1,23 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`TopNavMenu Should render an icon-only item 1`] = `
+<EuiToolTip
+  content="Test"
+  delay="long"
+  display="inlineBlock"
+  position="bottom"
+>
+  <EuiButtonIcon
+    aria-label="Test"
+    color="primary"
+    iconType="share"
+    isDisabled={false}
+    onClick={[Function]}
+    size="s"
+  />
+</EuiToolTip>
+`;
+
 exports[`TopNavMenu Should render emphasized item which should be clickable 1`] = `
 <EuiButton
   color="primary"

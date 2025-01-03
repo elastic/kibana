@@ -1,0 +1,35 @@
+# MV_SORT
+
+The MV_SORT function sorts a multivalued field in lexicographical order.
+
+## Syntax
+
+`MV_SORT(field, order)`
+
+### Parameters
+
+#### field
+
+This is a multivalue expression. If the value is `null`, the function will return `null`.
+
+#### order
+
+This parameter determines the sort order. The valid options are `ASC` and `DESC`. If not specified, the default is `ASC`.
+
+## Examples
+
+Without order parameter
+
+```esql
+ROW names = ["Alice", "Bob", "Charlie"]
+| EVAL sorted_names = mv_sort(names)
+```
+
+With order parameter
+
+```esql
+ROW a = [4, 2, -3, 2]
+| EVAL sa = mv_sort(a), sd = mv_sort(a, "DESC")
+```
+
+

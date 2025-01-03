@@ -5,14 +5,16 @@
  * 2.0.
  */
 
-import { SUPERHERO_SYSTEM_PROMPT_NON_I18N } from '@kbn/security-solution-plugin/public/assistant/content/prompts/system/translations';
 import { EXPLAIN_THEN_SUMMARIZE_SUGGEST_INVESTIGATION_GUIDE_NON_I18N } from '@kbn/security-solution-plugin/public/assistant/content/prompts/user/translations';
+import { PromptCreateProps } from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
 import { QUICK_PROMPT_BADGE, USER_PROMPT } from '../../screens/ai_assistant';
 import { createRule } from '../../tasks/api_calls/rules';
 import {
+  assertEmptySystemPrompt,
   assertErrorResponse,
   assertMessageSent,
-  assertSystemPrompt,
+  assertSystemPromptSelected,
+  assertSystemPromptSent,
   clearSystemPrompt,
   createQuickPrompt,
   createSystemPrompt,
@@ -23,7 +25,11 @@ import {
   sendQuickPrompt,
   typeAndSendMessage,
 } from '../../tasks/assistant';
-import { deleteConversations, deletePrompts } from '../../tasks/api_calls/assistant';
+import {
+  deleteConversations,
+  deletePrompts,
+  waitForCreatePrompts,
+} from '../../tasks/api_calls/assistant';
 import { createAzureConnector } from '../../tasks/api_calls/connectors';
 import { deleteConnectors } from '../../tasks/api_calls/common';
 import { login } from '../../tasks/login';
@@ -33,10 +39,23 @@ import { ALERTS_URL } from '../../urls/navigation';
 import { waitForAlertsToPopulate } from '../../tasks/create_new_rule';
 import { expandFirstAlert } from '../../tasks/alerts';
 
+const promptType: PromptCreateProps['promptType'] = 'system';
 const testPrompt = {
-  title: 'Cool prompt',
-  prompt: 'This is a super cool prompt.',
+  name: 'Cool prompt',
+  content: 'This is a super cool prompt.',
 };
+
+const customPrompt1 = {
+  name: 'Custom system prompt',
+  content: 'This is a custom system prompt.',
+  promptType,
+};
+const customPrompt2 = {
+  name: 'Enhanced system prompt',
+  content: 'This is an enhanced system prompt.',
+  promptType,
+};
+
 describe('AI Assistant Prompts', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
     deleteConnectors();
@@ -47,84 +66,103 @@ describe('AI Assistant Prompts', { tags: ['@ess', '@serverless'] }, () => {
   });
 
   describe('System Prompts', () => {
-    it('Deselecting default system prompt prevents prompt from being sent. When conversation is then cleared, the prompt is reset.', () => {
+    beforeEach(() => {
+      waitForCreatePrompts([customPrompt2, customPrompt1]);
+    });
+    it('No prompt is selected by default, custom prompts can be selected and deselected', () => {
       visitGetStartedPage();
       openAssistant();
+      assertEmptySystemPrompt();
+      selectSystemPrompt(customPrompt2.name);
+      selectSystemPrompt(customPrompt1.name);
+      clearSystemPrompt();
+    });
+    it('Deselecting a system prompt prevents prompt from being sent. When conversation is then cleared, the prompt remains cleared.', () => {
+      visitGetStartedPage();
+      openAssistant();
+      selectSystemPrompt(customPrompt2.name);
       clearSystemPrompt();
       typeAndSendMessage('hello');
       assertMessageSent('hello');
       // ensure response before clearing convo
       assertErrorResponse();
       resetConversation();
+      assertEmptySystemPrompt();
       typeAndSendMessage('hello');
-      assertMessageSent('hello', true);
+      assertMessageSent('hello');
     });
 
     it('Last selected system prompt persists in conversation', () => {
       visitGetStartedPage();
       openAssistant();
-      selectSystemPrompt('Enhanced system prompt');
+      selectSystemPrompt(customPrompt2.name);
       typeAndSendMessage('hello');
-      assertMessageSent('hello', true, SUPERHERO_SYSTEM_PROMPT_NON_I18N);
+      assertSystemPromptSent(customPrompt2.content);
+      assertMessageSent('hello', true);
       resetConversation();
-      assertSystemPrompt('Enhanced system prompt');
-      selectConversation('Alert summary');
-      assertSystemPrompt('Default system prompt');
+      assertSystemPromptSelected(customPrompt2.name);
+      selectConversation('Timeline');
+      assertEmptySystemPrompt();
       selectConversation('Welcome');
-      assertSystemPrompt('Enhanced system prompt');
+      assertSystemPromptSelected(customPrompt2.name);
     });
 
     it('Add prompt from system prompt selector without setting a default conversation', () => {
       visitGetStartedPage();
       openAssistant();
-      createSystemPrompt(testPrompt.title, testPrompt.prompt);
+      createSystemPrompt(testPrompt.name, testPrompt.content);
       // we did not set a default conversation, so the prompt should not be set
-      assertSystemPrompt('Default system prompt');
-      selectSystemPrompt(testPrompt.title);
+      assertEmptySystemPrompt();
+      selectSystemPrompt(testPrompt.name);
       typeAndSendMessage('hello');
-      assertMessageSent('hello', true, testPrompt.prompt);
+      assertSystemPromptSent(testPrompt.content);
+      assertMessageSent('hello', true);
     });
 
     it('Add prompt from system prompt selector and set multiple conversations (including current) as default conversation', () => {
       visitGetStartedPage();
       openAssistant();
-      createSystemPrompt(testPrompt.title, testPrompt.prompt, ['Welcome', 'Alert summary']);
-      assertSystemPrompt(testPrompt.title);
+      createSystemPrompt(testPrompt.name, testPrompt.content, ['Welcome', 'Timeline']);
+      assertSystemPromptSelected(testPrompt.name);
       typeAndSendMessage('hello');
-      assertMessageSent('hello', true, testPrompt.prompt);
+
+      assertSystemPromptSent(testPrompt.content);
+      assertMessageSent('hello', true);
       // ensure response before changing convo
       assertErrorResponse();
-      selectConversation('Alert summary');
-      assertSystemPrompt(testPrompt.title);
+      selectConversation('Timeline');
+      assertSystemPromptSelected(testPrompt.name);
       typeAndSendMessage('hello');
-      assertMessageSent('hello', true, testPrompt.prompt);
+
+      assertSystemPromptSent(testPrompt.content);
+      assertMessageSent('hello', true);
     });
   });
-  describe('User Prompts', () => {
+  describe('Quick Prompts', () => {
     it('Add a quick prompt and send it in the conversation', () => {
       visitGetStartedPage();
       openAssistant();
-      createQuickPrompt(testPrompt.title, testPrompt.prompt);
-      sendQuickPrompt(testPrompt.title);
-      assertMessageSent(testPrompt.prompt, true);
+      createQuickPrompt(testPrompt.name, testPrompt.content);
+      sendQuickPrompt(testPrompt.name);
+      assertMessageSent(testPrompt.content);
     });
     it('Add a quick prompt with context and it is only available in the selected context', () => {
       visitGetStartedPage();
       openAssistant();
-      createQuickPrompt(testPrompt.title, testPrompt.prompt, ['Alert (from view)']);
-      cy.get(QUICK_PROMPT_BADGE(testPrompt.title)).should('not.exist');
+      createQuickPrompt(testPrompt.name, testPrompt.content, ['Alert (from view)']);
+      cy.get(QUICK_PROMPT_BADGE(testPrompt.name)).should('not.exist');
       createRule(getNewRule());
       visit(ALERTS_URL);
       waitForAlertsToPopulate();
       expandFirstAlert();
       openAssistant('alert');
-      cy.get(QUICK_PROMPT_BADGE(testPrompt.title)).should('be.visible');
+      cy.get(QUICK_PROMPT_BADGE(testPrompt.name)).should('be.visible');
       cy.get(USER_PROMPT).should(
         'have.text',
         EXPLAIN_THEN_SUMMARIZE_SUGGEST_INVESTIGATION_GUIDE_NON_I18N
       );
-      cy.get(QUICK_PROMPT_BADGE(testPrompt.title)).click();
-      cy.get(USER_PROMPT).should('have.text', testPrompt.prompt);
+      cy.get(QUICK_PROMPT_BADGE(testPrompt.name)).click();
+      cy.get(USER_PROMPT).should('have.text', testPrompt.content);
     });
     // TODO delete quick prompt
     // I struggled to do this since the element is hidden with css and I cannot get it to show

@@ -5,18 +5,13 @@
  * 2.0.
  */
 
-import type {
-  CriteriaWithPagination,
-  EuiBasicTableColumn,
-  EuiSwitchEvent,
-  Query,
-} from '@elastic/eui';
+import type { EuiBasicTableColumn, EuiSwitchEvent } from '@elastic/eui';
 import {
-  EuiBasicTable,
   EuiButton,
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiInMemoryTable,
   EuiLink,
   EuiSearchBar,
   EuiSpacer,
@@ -59,12 +54,6 @@ export interface Props extends StartServices {
   cloudOrgUrl?: string;
 }
 
-interface RolesTableState {
-  query: Query;
-  from: number;
-  size: number;
-}
-
 const getRoleManagementHref = (action: 'edit' | 'clone', roleName?: string) => {
   return `/${action}${roleName ? `/${encodeURIComponent(roleName)}` : ''}`;
 };
@@ -79,17 +68,6 @@ const getVisibleRoles = (roles: Role[], filter: string, includeReservedRoles: bo
   });
 };
 
-const DEFAULT_TABLE_STATE = {
-  query: EuiSearchBar.Query.MATCH_ALL,
-  sort: {
-    field: 'creation' as const,
-    direction: 'desc' as const,
-  },
-  from: 0,
-  size: 25,
-  filters: {},
-};
-
 export const RolesGridPage: FC<Props> = ({
   notifications,
   rolesAPIClient,
@@ -97,9 +75,7 @@ export const RolesGridPage: FC<Props> = ({
   readOnly,
   buildFlavor,
   cloudOrgUrl,
-  analytics,
-  theme,
-  i18n: i18nStart,
+  ...startServices
 }) => {
   const [roles, setRoles] = useState<Role[]>([]);
   const [visibleRoles, setVisibleRoles] = useState<Role[]>([]);
@@ -109,7 +85,6 @@ export const RolesGridPage: FC<Props> = ({
   const [permissionDenied, setPermissionDenied] = useState<boolean>(false);
   const [includeReservedRoles, setIncludeReservedRoles] = useState<boolean>(true);
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [tableState, setTableState] = useState<RolesTableState>(DEFAULT_TABLE_STATE);
 
   useEffect(() => {
     loadRoles();
@@ -235,15 +210,6 @@ export const RolesGridPage: FC<Props> = ({
     }
   };
 
-  const onTableChange = ({ page, sort }: CriteriaWithPagination<Role>) => {
-    const newState = {
-      ...tableState,
-      from: page?.index! * page?.size!,
-      size: page?.size!,
-    };
-    setTableState(newState);
-  };
-
   const getColumnConfig = (): Array<EuiBasicTableColumn<Role>> => {
     const config: Array<EuiBasicTableColumn<Role>> = [
       {
@@ -365,12 +331,6 @@ export const RolesGridPage: FC<Props> = ({
     setShowDeleteConfirmation(false);
   };
 
-  const pagination = {
-    pageIndex: tableState.from / tableState.size,
-    pageSize: tableState.size,
-    totalItemCount: visibleRoles.length,
-    pageSizeOptions: [25, 50, 100],
-  };
   return permissionDenied ? (
     <PermissionDenied />
   ) : (
@@ -447,9 +407,7 @@ export const RolesGridPage: FC<Props> = ({
             notifications={notifications}
             rolesAPIClient={rolesAPIClient}
             buildFlavor={buildFlavor}
-            theme={theme}
-            analytics={analytics}
-            i18n={i18nStart}
+            {...startServices}
           />
         ) : null}
 
@@ -466,7 +424,7 @@ export const RolesGridPage: FC<Props> = ({
           toolsRight={renderToolsRight()}
         />
         <EuiSpacer size="s" />
-        <EuiBasicTable
+        <EuiInMemoryTable
           data-test-subj="rolesTable"
           itemId="name"
           columns={getColumnConfig()}
@@ -481,9 +439,11 @@ export const RolesGridPage: FC<Props> = ({
                   selected: selection,
                 }
           }
-          onChange={onTableChange}
-          pagination={pagination}
-          noItemsMessage={
+          pagination={{
+            initialPageSize: 20,
+            pageSizeOptions: [10, 20, 30, 50, 100],
+          }}
+          message={
             buildFlavor === 'serverless' ? (
               <FormattedMessage
                 id="xpack.security.management.roles.noCustomRolesFound"

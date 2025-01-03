@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import {
@@ -17,10 +18,10 @@ import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
+import { IKbnPalette, KbnPalettes } from '@kbn/palettes';
 import { ColorPicker } from './color_picker';
 import { getAssignmentColor } from '../../color/color_handling';
 import { ColorMapping } from '../../config';
-import { getPalette } from '../../palettes';
 import { removeGradientColorStep } from '../../state/color_mapping';
 
 import { selectColorPickerVisibility } from '../../state/selectors';
@@ -30,22 +31,23 @@ import { getValidColor } from '../../color/color_math';
 interface ColorPickerSwatchProps {
   colorMode: ColorMapping.Config['colorMode'];
   assignmentColor: ColorMapping.Config['assignments'][number]['color'];
-  getPaletteFn: ReturnType<typeof getPalette>;
   index: number;
   total: number;
-  palette: ColorMapping.CategoricalPalette;
+  palette: IKbnPalette;
+  palettes: KbnPalettes;
   onColorChange: (color: ColorMapping.CategoricalColor | ColorMapping.ColorCode) => void;
   swatchShape: 'square' | 'round';
   isDarkMode: boolean;
   forType: 'assignment' | 'specialAssignment' | 'gradient';
 }
+
 export const ColorSwatch = ({
   colorMode,
   assignmentColor,
-  getPaletteFn,
   index,
   total,
   palette,
+  palettes,
   onColorChange,
   swatchShape,
   isDarkMode,
@@ -60,7 +62,7 @@ export const ColorSwatch = ({
   const colorHex = getAssignmentColor(
     colorMode,
     assignmentColor,
-    getPaletteFn,
+    palettes,
     isDarkMode,
     index,
     total
@@ -146,11 +148,9 @@ export const ColorSwatch = ({
         }
         color={assignmentColor}
         palette={palette}
-        getPaletteFn={getPaletteFn}
+        palettes={palettes}
         close={() => dispatch(hideColorPickerVisibility())}
-        isDarkMode={isDarkMode}
         selectColor={(color) => {
-          // dispatch update
           onColorChange(color);
         }}
         deleteStep={

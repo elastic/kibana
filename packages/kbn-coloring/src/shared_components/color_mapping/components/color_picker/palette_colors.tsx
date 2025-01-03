@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import React from 'react';
 import {
   EuiColorPickerSwatch,
@@ -17,35 +19,33 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { IKbnPalette, KbnPalette, KbnPalettes } from '@kbn/palettes';
 import { ColorMapping } from '../../config';
-import { getPalette } from '../../palettes';
 import { isSameColor } from '../../color/color_math';
-import { NeutralPalette } from '../../palettes/neutral';
 
 export function PaletteColors({
   palette,
-  isDarkMode,
+  palettes,
   color,
-  getPaletteFn,
   selectColor,
 }: {
-  palette: ColorMapping.CategoricalPalette;
-  isDarkMode: boolean;
+  palette: IKbnPalette;
+  palettes: KbnPalettes;
   color: ColorMapping.CategoricalColor | ColorMapping.ColorCode;
-  getPaletteFn: ReturnType<typeof getPalette>;
   selectColor: (color: ColorMapping.CategoricalColor | ColorMapping.ColorCode) => void;
 }) {
   const colors = Array.from({ length: palette.colorCount }, (d, i) => {
-    return palette.getColor(i, isDarkMode, false);
+    return palette.getColor(i);
   });
-  const neutralColors = Array.from({ length: NeutralPalette.colorCount }, (d, i) => {
-    return NeutralPalette.getColor(i, isDarkMode, false);
+  const neutralPalette = palettes.get(KbnPalette.Neutral);
+  const neutralColors = Array.from({ length: neutralPalette.colorCount }, (d, i) => {
+    return neutralPalette.getColor(i);
   });
   const originalColor =
     color.type === 'categorical'
-      ? color.paletteId === NeutralPalette.id
-        ? NeutralPalette.getColor(color.colorIndex, isDarkMode, false)
-        : getPaletteFn(color.paletteId).getColor(color.colorIndex, isDarkMode, false)
+      ? color.paletteId === neutralPalette.id
+        ? neutralPalette.getColor(color.colorIndex)
+        : palettes.get(color.paletteId).getColor(color.colorIndex)
       : color.colorCode;
   return (
     <>
@@ -124,7 +124,7 @@ export function PaletteColors({
                   onClick={() =>
                     selectColor({
                       type: 'categorical',
-                      paletteId: NeutralPalette.id,
+                      paletteId: neutralPalette.id,
                       colorIndex: index,
                     })
                   }

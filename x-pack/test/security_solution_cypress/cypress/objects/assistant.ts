@@ -11,6 +11,7 @@ import {
   ConversationResponse,
   Provider,
 } from '@kbn/elastic-assistant-common';
+import { PromptCreateProps } from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
 
 export const getMockConversation = (body?: Partial<ConversationCreateProps>) => ({
   title: 'Test Conversation',
@@ -37,4 +38,12 @@ export const getMockConversationResponse = (
   users: [{ id: 'elastic', name: 'elastic@elastic.co' }],
   namespace: 'default',
   ...getMockConversation(body),
+});
+
+export const getMockCreatePrompt = (body?: Partial<PromptCreateProps>): PromptCreateProps => ({
+  name: 'Mock Prompt Name',
+  promptType: 'quick',
+  content: 'Mock Prompt Content',
+  consumer: 'securitySolutionUI',
+  ...body,
 });

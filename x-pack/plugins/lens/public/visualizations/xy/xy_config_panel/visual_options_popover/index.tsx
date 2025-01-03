@@ -8,12 +8,22 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { TooltipWrapper } from '@kbn/visualization-utils';
-import { ToolbarPopover, ValueLabelsSettings } from '../../../../shared_components';
+import { BarOrientationSettings } from '../../../../shared_components/bar_orientation';
+import { ToolbarDivider } from '../../../../shared_components/toolbar_divider';
+import { ToolbarPopover } from '../../../../shared_components';
 import { MissingValuesOptions } from './missing_values_option';
 import { LineCurveOption } from './line_curve_option';
 import { FillOpacityOption } from './fill_opacity_option';
 import { XYState } from '../../types';
-import { hasHistogramSeries } from '../../state_helpers';
+import {
+  flipSeriesType,
+  getBarSeriesLayers,
+  hasAreaSeries,
+  hasHistogramSeries,
+  hasNonBarSeries,
+  isBarLayer,
+  isHorizontalChart,
+} from '../../state_helpers';
 import type { FramePublicAPI } from '../../../../types';
 import { getDataLayers } from '../../visualization_helpers';
 
@@ -39,6 +49,10 @@ function getValueLabelDisableReason({
   });
 }
 
+const PANEL_STYLE = {
+  width: 500,
+};
+
 export interface VisualOptionsPopoverProps {
   state: XYState;
   setState: (newState: XYState) => void;
@@ -55,38 +69,78 @@ export const VisualOptionsPopover: React.FC<VisualOptionsPopoverProps> = ({
     ({ seriesType }) => seriesType === 'area_percentage_stacked'
   );
 
-  const hasNonBarSeries = dataLayers.some(({ seriesType }) =>
-    ['area_stacked', 'area', 'line', 'area_percentage_stacked'].includes(seriesType)
-  );
-
-  const hasAreaSeries = dataLayers.some(({ seriesType }) =>
-    ['area_stacked', 'area', 'area_percentage_stacked'].includes(seriesType)
-  );
-
+  const isHasNonBarSeries = hasNonBarSeries(dataLayers);
   const isHistogramSeries = Boolean(hasHistogramSeries(dataLayers, datasourceLayers));
 
-  const isValueLabelsEnabled = !hasNonBarSeries;
-  const isFittingEnabled = hasNonBarSeries && !isAreaPercentage;
-  const isCurveTypeEnabled = hasNonBarSeries || isAreaPercentage;
+  const isFittingEnabled = isHasNonBarSeries && !isAreaPercentage;
+  const isCurveTypeEnabled = isHasNonBarSeries || isAreaPercentage;
 
   const valueLabelsDisabledReason = getValueLabelDisableReason({
     isAreaPercentage,
     isHistogramSeries,
   });
+  const isHorizontal = isHorizontalChart(state.layers);
 
-  const isDisabled = !isValueLabelsEnabled && !isFittingEnabled && !isCurveTypeEnabled;
+  const isDisabled = !isFittingEnabled && !isCurveTypeEnabled && isHasNonBarSeries;
+
+  const barSeriesLayers = getBarSeriesLayers(dataLayers);
+
+  const hasAnyBarSetting = !!barSeriesLayers.length;
+  const hasAreaSettings = hasAreaSeries(dataLayers);
+  const shouldDisplayDividerHr = !!(hasAnyBarSetting && hasAreaSettings);
 
   return (
     <TooltipWrapper tooltipContent={valueLabelsDisabledReason} condition={isDisabled}>
       <ToolbarPopover
-        title={i18n.translate('xpack.lens.shared.visualOptionsLabel', {
-          defaultMessage: 'Visual options',
+        title={i18n.translate('xpack.lens.shared.appearanceLabel', {
+          defaultMessage: 'Appearance',
         })}
         type="visualOptions"
-        groupPosition="left"
+        groupPosition="none"
         buttonDataTestSubj="lnsVisualOptionsButton"
+        data-test-subj="lnsVisualOptionsPopover"
         isDisabled={isDisabled}
+        panelStyle={PANEL_STYLE}
       >
+        {hasAnyBarSetting ? (
+          <BarOrientationSettings
+            isDisabled={isHasNonBarSeries}
+            barOrientation={isHorizontal ? 'horizontal' : 'vertical'}
+            onBarOrientationChange={() => {
+              const newSeriesType = flipSeriesType(dataLayers[0].seriesType);
+              setState({
+                ...state,
+                layers: state.layers.map((layer) =>
+                  isBarLayer(layer)
+                    ? {
+                        ...layer,
+                        seriesType: newSeriesType,
+                      }
+                    : layer
+                ),
+              });
+            }}
+          />
+        ) : null}
+
+        {shouldDisplayDividerHr ? <ToolbarDivider /> : null}
+
+        {hasAreaSettings ? (
+          <>
+            <FillOpacityOption
+              isFillOpacityEnabled={true}
+              value={state?.fillOpacity ?? 0.3}
+              onChange={(newValue) => {
+                setState({
+                  ...state,
+                  fillOpacity: newValue,
+                });
+              }}
+            />
+
+            <ToolbarDivider />
+          </>
+        ) : null}
         <LineCurveOption
           enabled={isCurveTypeEnabled}
           value={state?.curveType}
@@ -97,15 +151,6 @@ export const VisualOptionsPopover: React.FC<VisualOptionsPopoverProps> = ({
             });
           }}
         />
-
-        <ValueLabelsSettings
-          isVisible={isValueLabelsEnabled}
-          valueLabels={state?.valueLabels ?? 'hide'}
-          onValueLabelChange={(newMode) => {
-            setState({ ...state, valueLabels: newMode });
-          }}
-        />
-
         <MissingValuesOptions
           isFittingEnabled={isFittingEnabled}
           fittingFunction={state?.fittingFunction}
@@ -119,17 +164,6 @@ export const VisualOptionsPopover: React.FC<VisualOptionsPopoverProps> = ({
           }}
           onEndValueChange={(newVal) => {
             setState({ ...state, endValue: newVal });
-          }}
-        />
-
-        <FillOpacityOption
-          isFillOpacityEnabled={hasAreaSeries}
-          value={state?.fillOpacity ?? 0.3}
-          onChange={(newValue) => {
-            setState({
-              ...state,
-              fillOpacity: newValue,
-            });
           }}
         />
       </ToolbarPopover>

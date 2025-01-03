@@ -1,0 +1,29 @@
+# SUM
+
+The SUM function calculates the total sum of a numeric expression.
+
+## Syntax
+
+`SUM(number)`
+
+### Parameters
+
+#### number
+
+The numeric expression that you want to calculate the sum of.
+
+## Examples
+
+Calculate the sum of a numeric field:
+
+```esql
+FROM employees
+| STATS SUM(languages)
+```
+
+The SUM function can be used with inline functions:
+
+```esql
+FROM employees
+| STATS total_salary_changes = SUM(MV_MAX(salary_change))
+```

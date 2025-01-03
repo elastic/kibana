@@ -1,0 +1,16 @@
+title: Connector request properties for a TheHive connector
+description: Defines configuration properties for connectors when type is `.thehive`.
+type: object
+required:
+  - url
+properties:
+  organisation:
+    type: string
+    description: >
+      The organisation in TheHive that will contain the alerts or cases.
+      By default, the connector uses the default organisation of the user account that created the API key.
+  url:
+    type: string
+    description: >
+      The instance URL in TheHive.
+      If you are using the `xpack.actions.allowedHosts` setting, add the hostname to the allowed hosts.

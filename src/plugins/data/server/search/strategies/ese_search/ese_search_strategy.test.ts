@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { BehaviorSubject, firstValueFrom } from 'rxjs';
@@ -32,6 +33,11 @@ const mockAsyncStatusResponse = (isComplete = false) => ({
       failed: 0,
     },
   },
+  headers: {
+    'x-elasticsearch-async-id':
+      'FlVYVkw0clJIUS1TMHpHdXA3a29pZUEedldKX1c1bnBRVXFmalZ4emV1cjFCUToxNjYzMDgx',
+    'x-elasticsearch-async-is-running': isComplete ? '?0' : '?1',
+  },
 });
 
 const mockAsyncResponse = {
@@ -45,6 +51,10 @@ const mockAsyncResponse = {
         successful: 7,
       },
     },
+  },
+  headers: {
+    'x-elasticsearch-async-id': 'foo',
+    'x-elasticsearch-async-is-running': '?0',
   },
 };
 
@@ -334,6 +344,10 @@ describe('ES search strategy', () => {
             ...mockAsyncResponse.body,
             is_running: true,
           },
+          headers: {
+            ...mockAsyncResponse.headers,
+            'x-elasticsearch-async-is-running': '?1',
+          },
         });
 
         const params = { index: 'logstash-*', body: { query: {} } };
@@ -365,6 +379,10 @@ describe('ES search strategy', () => {
           body: {
             ...mockAsyncResponse.body,
             is_running: true,
+          },
+          headers: {
+            ...mockAsyncResponse.headers,
+            'x-elasticsearch-async-is-running': '?1',
           },
         });
 
@@ -516,6 +534,10 @@ describe('ES search strategy', () => {
           body: {
             ...mockAsyncResponse.body,
             is_running: true,
+          },
+          headers: {
+            ...mockAsyncResponse.headers,
+            'x-elasticsearch-async-is-running': '?1',
           },
         });
 

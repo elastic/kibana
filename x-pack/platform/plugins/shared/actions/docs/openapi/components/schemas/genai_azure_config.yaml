@@ -1,0 +1,15 @@
+title: Connector request properties for an OpenAI connector that uses Azure OpenAI
+description: >
+  Defines properties for connectors when type is `.gen-ai` and the API provider is `Azure OpenAI`.
+type: object
+required:
+  - apiProvider
+  - apiUrl
+properties:
+  apiProvider:
+    type: string
+    description: The OpenAI API provider.
+    enum: ['Azure OpenAI']
+  apiUrl:
+    type: string
+    description: The OpenAI API endpoint.

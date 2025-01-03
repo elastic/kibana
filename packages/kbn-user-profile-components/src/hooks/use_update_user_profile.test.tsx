@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { act, renderHook, waitFor } from '@testing-library/react';
 import React from 'react';
-import { act, renderHook, type WrapperComponent } from '@testing-library/react-hooks';
 import { BehaviorSubject, first, lastValueFrom, of } from 'rxjs';
 
 import { coreMock } from '@kbn/core/public/mocks';
@@ -34,7 +35,7 @@ const security = {
 
 const { http, notifications } = core;
 
-const wrapper: WrapperComponent<void> = ({ children }) => (
+const wrapper = ({ children }: React.PropsWithChildren<unknown>) => (
   <UserProfilesKibanaProvider
     core={core}
     security={security}
@@ -77,7 +78,7 @@ describe('useUpdateUserProfile() hook', () => {
       await lastValueFrom(updateDone.pipe(first((v) => v === true)));
     });
 
-    const { result, waitForNextUpdate } = renderHook(() => useUpdateUserProfile(), { wrapper });
+    const { result } = renderHook(() => useUpdateUserProfile(), { wrapper });
     const { update } = result.current;
 
     expect(result.current.isLoading).toBeFalsy();
@@ -89,9 +90,7 @@ describe('useUpdateUserProfile() hook', () => {
     expect(result.current.isLoading).toBeTruthy();
 
     updateDone.next(true); // Resolve the http.post promise
-    await waitForNextUpdate();
-
-    expect(result.current.isLoading).toBeFalsy();
+    await waitFor(() => expect(result.current.isLoading).toBeFalsy());
   });
 
   test('should show a success notification by default', async () => {
@@ -117,7 +116,9 @@ describe('useUpdateUserProfile() hook', () => {
       return true;
     };
 
-    const { result } = renderHook(() => useUpdateUserProfile({ pageReloadChecker }), { wrapper });
+    const { result } = renderHook(() => useUpdateUserProfile({ pageReloadChecker }), {
+      wrapper,
+    });
     const { update } = result.current;
 
     await act(async () => {
@@ -145,7 +146,9 @@ describe('useUpdateUserProfile() hook', () => {
       userProfile$: of(initialValue),
     };
 
-    const { result } = renderHook(() => useUpdateUserProfile({ pageReloadChecker }), { wrapper });
+    const { result } = renderHook(() => useUpdateUserProfile({ pageReloadChecker }), {
+      wrapper,
+    });
     const { update } = result.current;
 
     const nextValue = { userSettings: { darkMode: 'light' as const } };

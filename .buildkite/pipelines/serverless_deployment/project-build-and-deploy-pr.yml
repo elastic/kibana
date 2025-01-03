@@ -1,0 +1,72 @@
+env:
+  ELASTIC_PR_COMMENTS_ENABLED: 'true'
+  GITHUB_BUILD_COMMIT_STATUS_ENABLED: 'true'
+  GITHUB_BUILD_COMMIT_STATUS_CONTEXT: kibana-deploy-project-from-pr
+
+steps:
+  - group: 'Project Deployment'
+    if: "build.env('GITHUB_PR_LABELS') =~ /ci:project-deploy-(elasticsearch|observability|security)/"
+
+    steps:
+      - command: .buildkite/scripts/lifecycle/pre_build.sh
+        label: Pre-Build
+        timeout_in_minutes: 10
+        agents:
+          provider: gcp
+          image: family/kibana-ubuntu-2004
+          imageProject: elastic-images-prod
+          machineType: n2-standard-2
+        retry:
+          automatic:
+            - exit_status: '*'
+              limit: 1
+
+      - command: |
+          ts-node .buildkite/scripts/lifecycle/comment_on_pr.ts "PR Project deployment started at: $BUILDKITE_BUILD_URL"
+        label: Comment with job URL
+        agents:
+          provider: gcp
+          image: family/kibana-ubuntu-2004
+          imageProject: elastic-images-prod
+          machineType: n2-standard-2
+        timeout_in_minutes: 5
+
+      - wait: ~
+
+      - command: .buildkite/scripts/steps/artifacts/docker_image.sh
+        label: 'Build Project Image'
+        key: build_project_image
+        agents:
+          provider: gcp
+          image: family/kibana-ubuntu-2004
+          imageProject: elastic-images-prod
+          machineType: n2-standard-16
+          preemptible: true
+        timeout_in_minutes: 60
+        retry:
+          automatic:
+            - exit_status: '-1'
+              limit: 3
+
+      - wait: ~
+      - command: .buildkite/scripts/steps/serverless/deploy.sh
+        label: 'Deploy Project'
+        agents:
+          provider: gcp
+          image: family/kibana-ubuntu-2004
+          imageProject: elastic-images-prod
+          machineType: n2-standard-4
+          preemptible: true
+        timeout_in_minutes: 10
+
+      - wait: ~
+
+      - command: |
+          ts-node .buildkite/scripts/lifecycle/comment_on_pr.ts "Project deployed, see credentials at: $BUILDKITE_BUILD_URL"
+        label: Comment with job URL
+        agents:
+          provider: gcp
+          image: family/kibana-ubuntu-2004
+          imageProject: elastic-images-prod
+          machineType: n2-standard-2
+        timeout_in_minutes: 5

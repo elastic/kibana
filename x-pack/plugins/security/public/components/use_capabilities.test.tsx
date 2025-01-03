@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import React from 'react';
 
 import { coreMock } from '@kbn/core/public/mocks';
@@ -17,8 +17,8 @@ describe('useCapabilities', () => {
   it('should return capabilities', async () => {
     const coreStart = coreMock.createStart();
 
-    const { result } = renderHook(useCapabilities, {
-      wrapper: ({ children }) => (
+    const { result } = renderHook(() => useCapabilities(), {
+      wrapper: ({ children }: React.PropsWithChildren<{}>) => (
         <KibanaContextProvider services={coreStart}>{children}</KibanaContextProvider>
       ),
     });
@@ -35,8 +35,8 @@ describe('useCapabilities', () => {
       },
     };
 
-    const { result } = renderHook(useCapabilities, {
-      initialProps: 'users',
+    const { result } = renderHook(({ featureId }) => useCapabilities(featureId), {
+      initialProps: { featureId: 'users' } as React.PropsWithChildren<{ featureId: string }>,
       wrapper: ({ children }) => (
         <KibanaContextProvider services={coreStart}>{children}</KibanaContextProvider>
       ),

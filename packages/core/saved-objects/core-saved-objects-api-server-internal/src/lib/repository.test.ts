@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import {
@@ -14,24 +15,23 @@ import {
 
 import { SavedObjectsRepository } from './repository';
 import { loggerMock } from '@kbn/logging-mocks';
-import { SavedObjectsSerializer } from '@kbn/core-saved-objects-base-server-internal';
 import { kibanaMigratorMock } from '../mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 
 import {
   mockTimestamp,
-  mappings,
   createRegistry,
   createDocumentMigrator,
-  createSpySerializer,
 } from '../test_helpers/repository.test.common';
+import type { ISavedObjectsRepository } from '@kbn/core-saved-objects-api-server';
+import { ISavedObjectsSpacesExtension } from '@kbn/core-saved-objects-server';
+import { savedObjectsExtensionsMock } from '../mocks/saved_objects_extensions.mock';
 
 describe('SavedObjectsRepository', () => {
   let client: ReturnType<typeof elasticsearchClientMock.createElasticsearchClient>;
-  let repository: SavedObjectsRepository;
+  let repository: ISavedObjectsRepository;
   let migrator: ReturnType<typeof kibanaMigratorMock.create>;
   let logger: ReturnType<typeof loggerMock.create>;
-  let serializer: jest.Mocked<SavedObjectsSerializer>;
 
   const registry = createRegistry();
   const documentMigrator = createDocumentMigrator(registry);
@@ -45,23 +45,13 @@ describe('SavedObjectsRepository', () => {
     migrator.runMigrations = jest.fn().mockResolvedValue([{ status: 'skipped' }]);
     logger = loggerMock.create();
 
-    // create a mock serializer "shim" so we can track function calls, but use the real serializer's implementation
-    serializer = createSpySerializer(registry);
-
-    const allTypes = registry.getAllTypes().map((type) => type.name);
-    const allowedTypes = [...new Set(allTypes.filter((type) => !registry.isHidden(type)))];
-
-    // @ts-expect-error must use the private constructor to use the mocked serializer
-    repository = new SavedObjectsRepository({
-      index: '.kibana-test',
-      mappings,
-      client,
+    repository = SavedObjectsRepository.createRepository(
       migrator,
-      typeRegistry: registry,
-      serializer,
-      allowedTypes,
-      logger,
-    });
+      registry,
+      '.kibana-test',
+      client,
+      logger
+    );
 
     mockGetCurrentTime.mockReturnValue(mockTimestamp);
     mockGetSearchDsl.mockClear();
@@ -84,6 +74,62 @@ describe('SavedObjectsRepository', () => {
 
     it('properly handles non-`default` namespace', async () => {
       expect(repository.getCurrentNamespace('space-a')).toBe('space-a');
+    });
+  });
+
+  describe('#asScopedToNamespace', () => {
+    it('returns a new client with undefined spacesExtensions (not available)', () => {
+      const scopedRepository = repository.asScopedToNamespace('space-a');
+      expect(scopedRepository).toBeInstanceOf(SavedObjectsRepository);
+      expect(scopedRepository).not.toStrictEqual(repository);
+
+      // Checking extensions.spacesExtension are both undefined
+      // @ts-expect-error type is ISavedObjectsRepository, but in reality is SavedObjectsRepository
+      expect(repository.extensions.spacesExtension).toBeUndefined();
+      // @ts-expect-error type is ISavedObjectsRepository, but in reality is SavedObjectsRepository
+      expect(scopedRepository.extensions.spacesExtension).toBeUndefined();
+      // @ts-expect-error type is ISavedObjectsRepository, but in reality is SavedObjectsRepository
+      expect(scopedRepository.extensions.spacesExtension).toStrictEqual(
+        // @ts-expect-error type is ISavedObjectsRepository, but in reality is SavedObjectsRepository
+        repository.extensions.spacesExtension
+      );
+    });
+  });
+
+  describe('with spacesExtension', () => {
+    let spacesExtension: jest.Mocked<ISavedObjectsSpacesExtension>;
+
+    beforeEach(() => {
+      spacesExtension = savedObjectsExtensionsMock.createSpacesExtension();
+      repository = SavedObjectsRepository.createRepository(
+        migrator,
+        registry,
+        '.kibana-test',
+        client,
+        logger,
+        [],
+        { spacesExtension }
+      );
+    });
+
+    describe('#asScopedToNamespace', () => {
+      it('returns a new client with space-scoped spacesExtensions', () => {
+        const scopedRepository = repository.asScopedToNamespace('space-a');
+        expect(scopedRepository).toBeInstanceOf(SavedObjectsRepository);
+        expect(scopedRepository).not.toStrictEqual(repository);
+        expect(spacesExtension.asScopedToNamespace).toHaveBeenCalledWith('space-a');
+
+        // Checking extensions.spacesExtension are both defined but different
+        // @ts-expect-error type is ISavedObjectsRepository, but in reality is SavedObjectsRepository
+        expect(repository.extensions.spacesExtension).not.toBeUndefined();
+        // @ts-expect-error type is ISavedObjectsRepository, but in reality is SavedObjectsRepository
+        expect(scopedRepository.extensions.spacesExtension).not.toBeUndefined();
+        // @ts-expect-error type is ISavedObjectsRepository, but in reality is SavedObjectsRepository
+        expect(scopedRepository.extensions.spacesExtension).not.toStrictEqual(
+          // @ts-expect-error type is ISavedObjectsRepository, but in reality is SavedObjectsRepository
+          repository.extensions.spacesExtension
+        );
+      });
     });
   });
 });

@@ -1,21 +1,23 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { SeriesColorAccessorFn } from '@elastic/charts';
 import { getColorFactory, type ColorMapping, type ColorMappingInputData } from '@kbn/coloring';
 import { MULTI_FIELD_KEY_SEPARATOR } from '@kbn/data-plugin/common';
+import { KbnPalettes } from '@kbn/palettes';
 
 /**
  * Return a color accessor function for XY charts depending on the split accessors received.
  */
 export function getColorSeriesAccessorFn(
   config: ColorMapping.Config,
-  getPaletteFn: (paletteId: string) => ColorMapping.CategoricalPalette,
+  palettes: KbnPalettes,
   isDarkMode: boolean,
   mappingData: ColorMappingInputData,
   fieldId: string,
@@ -27,7 +29,7 @@ export function getColorSeriesAccessorFn(
     [...specialTokens.entries()].map((d) => [d[1], d[0]])
   );
 
-  const getColor = getColorFactory(config, getPaletteFn, isDarkMode, mappingData);
+  const getColor = getColorFactory(config, palettes, isDarkMode, mappingData);
 
   return ({ splitAccessors }) => {
     const splitValue = splitAccessors.get(fieldId);
