@@ -4461,7 +4461,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-doc-links-browser@link:packages/core/doc-links/core-doc-links-browser":
+"@kbn/core-doc-links-browser@link:src/core/packages/doc-links/browser":
   version "0.0.0"
   uid ""
 
