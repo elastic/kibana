@@ -1314,13 +1314,7 @@
             "text": "VisualizeEmbeddable"
           },
           " extends ",
-          {
-            "pluginId": "embeddable",
-            "scope": "public",
-            "docId": "kibEmbeddablePluginApi",
-            "section": "def-public.Embeddable",
-            "text": "Embeddable"
-          },
+          "Embeddable",
           "<",
           {
             "pluginId": "visualizations",
@@ -1336,20 +1330,7 @@
         "path": "src/plugins/visualizations/public/legacy/embeddable/visualize_embeddable.tsx",
         "deprecated": true,
         "trackAdoption": false,
-        "references": [
-          {
-            "plugin": "maps",
-            "path": "x-pack/platform/plugins/shared/maps/public/legacy_visualizations/is_legacy_map.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/platform/plugins/shared/maps/public/legacy_visualizations/is_legacy_map.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/platform/plugins/shared/maps/public/legacy_visualizations/is_legacy_map.ts"
-          }
-        ],
+        "references": [],
         "children": [
           {
             "parentPluginId": "visualizations",
