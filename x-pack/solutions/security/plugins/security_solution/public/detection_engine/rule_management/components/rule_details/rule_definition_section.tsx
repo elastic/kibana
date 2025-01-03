@@ -14,6 +14,8 @@ import {
   EuiFlexItem,
   EuiFlexGroup,
   EuiLoadingSpinner,
+  EuiButtonIcon,
+  EuiPopover,
 } from '@elastic/eui';
 import type { EuiDescriptionListProps } from '@elastic/eui';
 import type {
@@ -24,6 +26,7 @@ import type { Filter } from '@kbn/es-query';
 import type { SavedQuery } from '@kbn/data-plugin/public';
 import { mapAndFlattenFilters } from '@kbn/data-plugin/public';
 import { FilterItems } from '@kbn/unified-search-plugin/public';
+import useToggle from 'react-use/lib/useToggle';
 import { isDataView } from '../../../../common/components/query_bar';
 import type {
   AlertSuppressionMissingFieldsStrategy,
@@ -237,7 +240,7 @@ interface MachineLearningJobListProps {
 }
 
 export const MachineLearningJobList = ({ jobIds, isInteractive }: MachineLearningJobListProps) => {
-  const { jobs } = useSecurityJobs();
+  const { jobs: availableJobs } = useSecurityJobs();
 
   if (!jobIds) {
     return null;
@@ -245,11 +248,20 @@ export const MachineLearningJobList = ({ jobIds, isInteractive }: MachineLearnin
 
   const jobIdsArray = Array.isArray(jobIds) ? jobIds : [jobIds];
 
+  const unavailableJobIds = jobIdsArray.filter(
+    (jobId) => !availableJobs.some((job) => job.id === jobId)
+  );
+
   if (isInteractive) {
-    return <MlJobsDescription jobIds={jobIdsArray} />;
+    return (
+      <>
+        <MlJobsDescription jobIds={jobIdsArray} />
+        <UnavailableMlJobs unavailableJobIds={unavailableJobIds} />
+      </>
+    );
   }
 
-  const relevantJobs = jobs.filter((job) => jobIdsArray.includes(job.id));
+  const relevantJobs = availableJobs.filter((job) => jobIdsArray.includes(job.id));
 
   return (
     <>
@@ -260,7 +272,45 @@ export const MachineLearningJobList = ({ jobIds, isInteractive }: MachineLearnin
           jobName={job.customSettings?.security_app_display_name}
         />
       ))}
+      <UnavailableMlJobs unavailableJobIds={unavailableJobIds} />
     </>
+  );
+};
+
+interface UnavailableMlJobsProps {
+  unavailableJobIds: string[];
+}
+
+const UnavailableMlJobs = ({ unavailableJobIds }: UnavailableMlJobsProps) => {
+  return unavailableJobIds.map((jobId) => (
+    <div key={jobId}>
+      <UnavailableMlJobLink jobId={jobId} />
+    </div>
+  ));
+};
+
+interface UnavailableMlJobLinkProps {
+  jobId: string;
+}
+
+const UnavailableMlJobLink: React.FC<UnavailableMlJobLinkProps> = ({ jobId }) => {
+  const [isPopoverOpen, togglePopover] = useToggle(false);
+
+  const button = (
+    <EuiButtonIcon
+      iconType="questionInCircle"
+      onClick={togglePopover}
+      aria-label={i18n.MACHINE_LEARNING_JOB_NOT_AVAILABLE}
+    />
+  );
+
+  return (
+    <EuiText component="span" color="subdued" size="s">
+      {jobId}
+      <EuiPopover button={button} isOpen={isPopoverOpen} closePopover={togglePopover}>
+        {i18n.MACHINE_LEARNING_JOB_NOT_AVAILABLE}
+      </EuiPopover>
+    </EuiText>
   );
 };
 
