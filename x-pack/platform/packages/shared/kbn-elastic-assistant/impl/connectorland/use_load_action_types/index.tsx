@@ -41,7 +41,8 @@ export const useLoadActionTypes = ({
         featureId: GenerativeAIForSecurityConnectorFeatureId,
       });
 
-      const actionTypes = ['.bedrock', '.gen-ai', '.gemini', '.inference'];
+      // TODO add .inference once it is available
+      const actionTypes = ['.bedrock', '.gen-ai', '.gemini'];
 
       return queryResult
         .filter((p) => actionTypes.includes(p.id))

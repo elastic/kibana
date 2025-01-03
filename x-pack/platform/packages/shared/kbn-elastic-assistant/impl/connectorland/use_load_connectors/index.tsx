@@ -40,7 +40,10 @@ export const useLoadConnectors = ({
       return queryResult.reduce(
         (acc: AIConnector[], connector) => [
           ...acc,
-          ...(!connector.isMissingSecrets && actionTypes.includes(connector.actionTypeId)
+          ...(!connector.isMissingSecrets &&
+          actionTypes.includes(connector.actionTypeId) &&
+          // only include preconfigured .inference connectors
+          (connector.actionTypeId !== '.inference' || connector.isPreconfigured)
             ? [
                 {
                   ...connector,
