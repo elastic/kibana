@@ -17,8 +17,17 @@ export const useNavigateToAlertsPageWithFilters = () => {
   const { navigateTo } = useNavigation();
 
   return (
+    /**
+     * Pass one or more filter control configurations to be applied to the alerts page filters
+     */
     filterItems: FilterControlConfig | FilterControlConfig[],
+    /**
+     * If true, the alerts page will be opened in a new tab
+     */
     openInNewTab = false,
+    /**
+     * Allows to customize the timerange url parameter. Should only be used in combination with the openInNewTab=true parameter
+     */
     timerange?: string
   ) => {
     const urlFilterParams = encode(
