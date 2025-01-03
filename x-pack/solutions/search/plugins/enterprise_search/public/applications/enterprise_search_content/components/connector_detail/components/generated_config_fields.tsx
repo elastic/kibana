@@ -97,6 +97,9 @@ export const GeneratedConfigFields: React.FC<GeneratedConfigFieldsProps> = ({
     setIsModalVisible(false);
   };
 
+  const showApiKeyInfoForSelfManagedConnector = !connector.is_native;
+  const showApiKeyBanner = showApiKeyInfoForSelfManagedConnector && apiKey?.encoded;
+
   return (
     <>
       {isModalVisible && <ConfirmModal onCancel={onCancel} onConfirm={onConfirm} />}
@@ -193,96 +196,99 @@ export const GeneratedConfigFields: React.FC<GeneratedConfigFieldsProps> = ({
             )}
           </EuiFlexItem>
           <EuiFlexItem />
-          <EuiFlexItem>
-            <EuiFlexGroup responsive={false} gutterSize="xs">
+          {showApiKeyInfoForSelfManagedConnector && (
+            <>
+              <EuiFlexItem>
+                <EuiFlexGroup responsive={false} gutterSize="xs">
+                  <EuiFlexItem grow={false}>
+                    <EuiIcon type="check" />
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    {i18n.translate(
+                      'xpack.enterpriseSearch.connectorDeployment.apiKeyCreatedFlexItemLabel',
+                      { defaultMessage: 'API key created' }
+                    )}
+                    {apiKey?.encoded && ` *`}
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiIcon type="check" />
+                <EuiLink
+                  data-test-subj="enterpriseSearchConnectorDeploymentLink"
+                  href={generateEncodedPath(MANAGE_API_KEYS_URL, {})}
+                  external
+                  target="_blank"
+                >
+                  {apiKey?.name}
+                </EuiLink>
               </EuiFlexItem>
               <EuiFlexItem>
-                {i18n.translate(
-                  'xpack.enterpriseSearch.connectorDeployment.apiKeyCreatedFlexItemLabel',
-                  { defaultMessage: 'API key created' }
-                )}
-                {apiKey?.encoded && ` *`}
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiLink
-              data-test-subj="enterpriseSearchConnectorDeploymentLink"
-              href={generateEncodedPath(MANAGE_API_KEYS_URL, {})}
-              external
-              target="_blank"
-            >
-              {apiKey?.name}
-            </EuiLink>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiFlexGroup
-              responsive={false}
-              gutterSize="xs"
-              justifyContent="flexEnd"
-              alignItems="center"
-            >
-              {apiKey?.encoded ? (
-                <EuiFlexItem>
-                  <EuiCopy textToCopy={apiKey?.encoded}>
-                    {(copy) => (
-                      <EuiFlexGroup responsive={false} alignItems="center" gutterSize="xs">
-                        <EuiFlexItem>
-                          <EuiCode>{apiKey?.encoded}</EuiCode>
-                        </EuiFlexItem>
-                        {generateApiKey && (
-                          <EuiFlexItem grow={false}>
-                            <EuiButtonIcon
-                              data-test-subj="enterpriseSearchGeneratedConfigFieldsButton"
-                              size="xs"
-                              iconType="refresh"
-                              isLoading={isGenerateLoading}
-                              onClick={refreshButtonClick}
-                              disabled={!connector.index_name}
-                              aria-label={i18n.translate(
-                                'xpack.enterpriseSearch.connectorDeployment.refreshAPIKey',
-                                { defaultMessage: 'Refresh an Elasticsearch API key' }
-                              )}
-                            />
-                          </EuiFlexItem>
-                        )}
-                        <EuiFlexItem grow={false}>
-                          <EuiButtonIcon
-                            size="xs"
-                            data-test-subj="enterpriseSearchConnectorDeploymentButton"
-                            iconType="copyClipboard"
-                            onClick={copy}
-                            aria-label={i18n.translate(
-                              'xpack.enterpriseSearch.connectorDeployment.copyIndexName',
-                              { defaultMessage: 'Copy index name' }
+                <EuiFlexGroup
+                  responsive={false}
+                  gutterSize="xs"
+                  justifyContent="flexEnd"
+                  alignItems="center"
+                >
+                  {apiKey?.encoded ? (
+                    <EuiFlexItem>
+                      <EuiCopy textToCopy={apiKey?.encoded}>
+                        {(copy) => (
+                          <EuiFlexGroup responsive={false} alignItems="center" gutterSize="xs">
+                            <EuiFlexItem>
+                              <EuiCode>{apiKey?.encoded}</EuiCode>
+                            </EuiFlexItem>
+                            {generateApiKey && (
+                              <EuiFlexItem grow={false}>
+                                <EuiButtonIcon
+                                  data-test-subj="enterpriseSearchGeneratedConfigFieldsButton"
+                                  size="xs"
+                                  iconType="refresh"
+                                  isLoading={isGenerateLoading}
+                                  onClick={refreshButtonClick}
+                                  disabled={!connector.index_name}
+                                  aria-label={i18n.translate(
+                                    'xpack.enterpriseSearch.connectorDeployment.refreshAPIKey',
+                                    { defaultMessage: 'Refresh an Elasticsearch API key' }
+                                  )}
+                                />
+                              </EuiFlexItem>
                             )}
-                          />
-                        </EuiFlexItem>
-                      </EuiFlexGroup>
-                    )}
-                  </EuiCopy>
-                </EuiFlexItem>
-              ) : (
-                generateApiKey && (
-                  <EuiFlexItem grow={false}>
-                    <EuiButtonIcon
-                      data-test-subj="enterpriseSearchGeneratedConfigFieldsButton"
-                      size="xs"
-                      iconType="refresh"
-                      isLoading={isGenerateLoading}
-                      onClick={refreshButtonClick}
-                      disabled={!connector.index_name}
-                    />
-                  </EuiFlexItem>
-                )
-              )}
-            </EuiFlexGroup>
-          </EuiFlexItem>
+                            <EuiFlexItem grow={false}>
+                              <EuiButtonIcon
+                                size="xs"
+                                data-test-subj="enterpriseSearchConnectorDeploymentButton"
+                                iconType="copyClipboard"
+                                onClick={copy}
+                                aria-label={i18n.translate(
+                                  'xpack.enterpriseSearch.connectorDeployment.copyIndexName',
+                                  { defaultMessage: 'Copy index name' }
+                                )}
+                              />
+                            </EuiFlexItem>
+                          </EuiFlexGroup>
+                        )}
+                      </EuiCopy>
+                    </EuiFlexItem>
+                  ) : (
+                    generateApiKey && (
+                      <EuiFlexItem grow={false}>
+                        <EuiButtonIcon
+                          data-test-subj="enterpriseSearchGeneratedConfigFieldsButton"
+                          size="xs"
+                          iconType="refresh"
+                          isLoading={isGenerateLoading}
+                          onClick={refreshButtonClick}
+                          disabled={!connector.index_name}
+                        />
+                      </EuiFlexItem>
+                    )
+                  )}
+                </EuiFlexGroup>
+              </EuiFlexItem>
+            </>
+          )}
         </EuiFlexGrid>
-
-        {apiKey?.encoded && (
+        {showApiKeyBanner && (
           <>
             <EuiSpacer size="m" />
             <EuiCallOut

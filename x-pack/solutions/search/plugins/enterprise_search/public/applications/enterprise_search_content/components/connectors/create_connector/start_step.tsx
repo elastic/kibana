@@ -107,7 +107,7 @@ export const StartStep: React.FC<StartStepProps> = ({
                     { defaultMessage: 'Connector' }
                   )}
                 >
-                  <ChooseConnector selfManaged={selfManagePreference} />
+                  <ChooseConnector selfManaged={selfManagePreference} disabled={!!connector} />
                 </EuiFormRow>
               </EuiFlexItem>
               <EuiFlexItem grow={5}>
@@ -138,7 +138,7 @@ export const StartStep: React.FC<StartStepProps> = ({
                   <EuiFieldText
                     data-test-subj="enterpriseSearchStartStepFieldText"
                     fullWidth
-                    name="first"
+                    name="connectorName"
                     value={rawName}
                     onChange={handleNameChange}
                     disabled={!!connector}
@@ -173,9 +173,10 @@ export const StartStep: React.FC<StartStepProps> = ({
                 }
               >
                 <EuiFieldText
+                  disabled={!!connector}
                   data-test-subj="enterpriseSearchStartStepFieldText"
                   fullWidth
-                  name="first"
+                  name="connectorDescription"
                 />
               </EuiFormRow>
             </EuiFlexItem>
