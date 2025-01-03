@@ -46,7 +46,6 @@ function mergeStackTracesByDepth(response) {
     }
   });
 
-  let totalFrames = 0;
   const stackTraceEvents = {};
   const stackTraces = {};
 
@@ -54,7 +53,6 @@ function mergeStackTracesByDepth(response) {
     const { event, count } = eventsByFrameDepth[depth];
     stackTraces[event] = response.stack_traces[event];
     stackTraceEvents[event] = count;
-    totalFrames += stackTraces[event].frame_ids.length * count;
   });
 
   return {
@@ -62,7 +60,6 @@ function mergeStackTracesByDepth(response) {
     stack_traces: stackTraces,
     stack_frames: response.stack_frames,
     executables: response.executables,
-    total_frames: totalFrames,
     sampling_rate: response.sampling_rate,
   };
 }
@@ -97,7 +94,6 @@ function purgeUnusedFramesAndExecutables(response) {
     stack_traces: response.stack_traces,
     stack_frames: stackFrames,
     executables: executables,
-    total_frames: response.total_frames,
     sampling_rate: response.sampling_rate,
   };
 }
