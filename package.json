@@ -365,7 +365,7 @@
     "@kbn/core-rendering-browser": "link:src/core/packages/rendering/browser",
     "@kbn/core-rendering-browser-internal": "link:src/core/packages/rendering/browser-internal",
     "@kbn/core-rendering-server-internal": "link:src/core/packages/rendering/server-internal",
-    "@kbn/core-root-browser-internal": "link:packages/core/root/core-root-browser-internal",
+    "@kbn/core-root-browser-internal": "link:src/core/packages/root/browser-internal",
     "@kbn/core-root-server-internal": "link:packages/core/root/core-root-server-internal",
     "@kbn/core-saved-objects-api-browser": "link:packages/core/saved-objects/core-saved-objects-api-browser",
     "@kbn/core-saved-objects-api-server": "link:packages/core/saved-objects/core-saved-objects-api-server",

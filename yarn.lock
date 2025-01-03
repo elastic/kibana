@@ -4925,7 +4925,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-root-browser-internal@link:packages/core/root/core-root-browser-internal":
+"@kbn/core-root-browser-internal@link:src/core/packages/root/browser-internal":
   version "0.0.0"
   uid ""
 
