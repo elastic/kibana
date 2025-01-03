@@ -107,7 +107,9 @@
     "@kbn/core-rendering-browser",
     "@kbn/index-lifecycle-management-common-shared",
     "@kbn/core-http-server-utils",
-    "@kbn/apm-data-access-plugin"
+    "@kbn/apm-data-access-plugin",
+    "@kbn/charts-theme",
+    "@kbn/response-ops-rule-params"
   ],
   "exclude": ["target/**/*"]
 }
