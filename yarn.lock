@@ -6429,7 +6429,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/newsfeed-plugin@link:src/plugins/newsfeed":
+"@kbn/newsfeed-plugin@link:src/platform/plugins/shared/newsfeed":
   version "0.0.0"
   uid ""
 

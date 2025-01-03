@@ -647,6 +647,7 @@ src/platform/plugins/shared/kibana_react @elastic/appex-sharedux
 src/platform/plugins/shared/kibana_utils @elastic/appex-sharedux
 src/platform/plugins/shared/management @elastic/kibana-management
 src/platform/plugins/shared/navigation @elastic/appex-sharedux
+src/platform/plugins/shared/newsfeed @elastic/kibana-core
 src/platform/plugins/shared/presentation_util @elastic/kibana-presentation
 src/platform/plugins/shared/saved_objects @elastic/appex-sharedux
 src/platform/plugins/shared/saved_objects_finder @elastic/kibana-data-discovery
@@ -672,7 +673,6 @@ src/plugins/event_annotation @elastic/kibana-visualizations
 src/plugins/event_annotation_listing @elastic/kibana-visualizations
 src/plugins/expressions @elastic/kibana-visualizations
 src/plugins/interactive_setup @elastic/kibana-security
-src/plugins/newsfeed @elastic/kibana-core
 src/plugins/saved_objects_management @elastic/kibana-core
 src/plugins/telemetry @elastic/kibana-core
 src/plugins/telemetry_collection_manager @elastic/kibana-core
@@ -1791,7 +1791,7 @@ packages/kbn-monaco/src/esql @elastic/kibana-esql
 /test/functional/apps/bundles @elastic/kibana-core # Assigned per https://github.com/elastic/kibana/pull/64367
 /test/examples/hello_world @elastic/kibana-core
 /test/examples/routing/index.ts @elastic/kibana-core # Assigned per https://github.com/elastic/kibana/pull/69581
-/test/common/plugins/newsfeed @elastic/kibana-core
+/test/common/platform/plugins/shared/newsfeed @elastic/kibana-core
 /test/common/configure_http2.ts @elastic/kibana-core
 /test/api_integration/apis/ui_counters @elastic/kibana-core
 /test/api_integration/apis/telemetry @elastic/kibana-core
@@ -1829,7 +1829,7 @@ packages/kbn-monaco/src/esql @elastic/kibana-esql
 #CC# /x-pack/platform/plugins/shared/cloud/ @elastic/kibana-core
 #CC# /x-pack/platform/plugins/shared/features/ @elastic/kibana-core
 #CC# /x-pack/plugins/global_search/ @elastic/kibana-core
-#CC# /src/plugins/newsfeed @elastic/kibana-core
+#CC# /src/platform/plugins/shared/newsfeed @elastic/kibana-core
 #CC# /x-pack/plugins/global_search_providers/ @elastic/kibana-core
 
 # AppEx AI Infra
