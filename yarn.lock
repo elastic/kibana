@@ -4765,7 +4765,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-node-server-internal@link:packages/core/node/core-node-server-internal":
+"@kbn/core-node-server-internal@link:src/core/packages/node/server-internal":
   version "0.0.0"
   uid ""
 
