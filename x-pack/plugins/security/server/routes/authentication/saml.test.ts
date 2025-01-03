@@ -43,19 +43,9 @@ describe('SAML authentication routes', () => {
       routeHandler = acsRouteHandler;
     });
 
-    it('additionally registers BWC route', () => {
-      expect(
-        router.post.mock.calls.find(([{ path }]) => path === '/api/security/saml/callback')
-      ).toBeDefined();
-      expect(
-        router.post.mock.calls.find(([{ path }]) => path === '/api/security/v1/saml')
-      ).toBeDefined();
-    });
-
     it('correctly defines route.', () => {
       expect(routeConfig.options).toEqual({
         access: 'public',
-        authRequired: false,
         excludeFromOAS: true,
         xsrfRequired: false,
         tags: [ROUTE_TAG_CAN_REDIRECT, ROUTE_TAG_AUTH_FLOW],
@@ -64,6 +54,16 @@ describe('SAML authentication routes', () => {
         body: expect.any(Type),
         query: undefined,
         params: undefined,
+      });
+      expect(routeConfig.security).toEqual({
+        authz: {
+          enabled: false,
+          reason: 'This route must remain accessible to 3rd-party SAML providers',
+        },
+        authc: {
+          enabled: false,
+          reason: 'This route must remain accessible to 3rd-party SAML providers',
+        },
       });
 
       const bodyValidator = (routeConfig.validate as any).body as Type<any>;
