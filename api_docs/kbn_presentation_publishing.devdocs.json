@@ -2024,6 +2024,46 @@
       },
       {
         "parentPluginId": "@kbn/presentation-publishing",
+        "id": "def-public.isEmbeddableApiContext",
+        "type": "Function",
+        "tags": [],
+        "label": "isEmbeddableApiContext",
+        "description": [],
+        "signature": [
+          "(context: unknown) => context is ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.EmbeddableApiContext",
+            "text": "EmbeddableApiContext"
+          }
+        ],
+        "path": "src/platform/packages/shared/presentation/presentation_publishing/embeddable_api_context.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/presentation-publishing",
+            "id": "def-public.isEmbeddableApiContext.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "context",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "src/platform/packages/shared/presentation/presentation_publishing/embeddable_api_context.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/presentation-publishing",
         "id": "def-public.runComparators",
         "type": "Function",
         "tags": [],
@@ -2837,7 +2877,7 @@
         "tags": [],
         "label": "EmbeddableApiContext",
         "description": [],
-        "path": "src/platform/packages/shared/presentation/presentation_publishing/index.ts",
+        "path": "src/platform/packages/shared/presentation/presentation_publishing/embeddable_api_context.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2853,7 +2893,7 @@
             "signature": [
               "unknown"
             ],
-            "path": "src/platform/packages/shared/presentation/presentation_publishing/index.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_publishing/embeddable_api_context.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3845,7 +3885,7 @@
             "label": "status",
             "description": [],
             "signature": [
-              "\"error\" | \"loading\" | \"rendered\" | \"loaded\""
+              "\"error\" | \"loading\" | \"loaded\" | \"rendered\""
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/publishes_phase_events.ts",
             "deprecated": false,
@@ -8168,7 +8208,7 @@
           "------------------------------------------------------------------------------------------\nPerformance Tracking Types\n------------------------------------------------------------------------------------------"
         ],
         "signature": [
-          "\"error\" | \"loading\" | \"rendered\" | \"loaded\""
+          "\"error\" | \"loading\" | \"loaded\" | \"rendered\""
         ],
         "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/publishes_phase_events.ts",
         "deprecated": false,

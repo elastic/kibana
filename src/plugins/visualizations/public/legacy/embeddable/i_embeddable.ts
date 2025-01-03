@@ -10,7 +10,7 @@
 import { ErrorLike } from '@kbn/expressions-plugin/common';
 import { Adapters } from '@kbn/inspector-plugin/public';
 import { Observable } from 'rxjs';
-import { EmbeddableInput } from '../../../common/types';
+import type { EmbeddableInput } from '@kbn/embeddable-plugin/common';
 
 export type EmbeddableError = ErrorLike;
 export type { EmbeddableInput };
