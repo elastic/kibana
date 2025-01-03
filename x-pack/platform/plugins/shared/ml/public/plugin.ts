@@ -74,7 +74,7 @@ import type { MlApi } from './application/services/ml_api_service';
 import { renderApp } from './application/render_app';
 import { AnomalySwimLane } from './shared_components';
 
-import { registerCasesAttachments } from './cases';
+import { registerCasesAttachments } from './cases/register_cases_attachments';
 import { registerEmbeddables } from './embeddables';
 import { registerHomeFeature } from './register_helper/register_home_feature';
 import { registerManagementSection } from './application/management';
