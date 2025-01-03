@@ -4773,7 +4773,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-node-server@link:packages/core/node/core-node-server":
+"@kbn/core-node-server@link:src/core/packages/node/server":
   version "0.0.0"
   uid ""
 
