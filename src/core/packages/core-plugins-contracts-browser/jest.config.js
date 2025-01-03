@@ -10,5 +10,5 @@
 module.exports = {
   preset: '@kbn/test/jest_node',
   rootDir: '../../../..',
-  roots: ['<rootDir>/packages/core/plugins/core-plugins-contracts-browser'],
+  roots: ['<rootDir>/src/core/packages/core-plugins-contracts-browser'],
 };
