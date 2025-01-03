@@ -18957,7 +18957,7 @@ paths:
       x-beta: true
   /api/fleet/epm/bulk_assets:
     post:
-      description: '[Required authorization] Route required privileges: ALL of [integrations-read].'
+      description: '[Required authorization] Route required privileges: ANY of [integrations-read OR fleet-setup OR fleet-all].'
       operationId: post-fleet-epm-bulk-assets
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -19049,7 +19049,7 @@ paths:
       x-beta: true
   /api/fleet/epm/categories:
     get:
-      description: '[Required authorization] Route required privileges: ALL of [integrations-read].'
+      description: '[Required authorization] Route required privileges: ANY of [integrations-read OR fleet-setup OR fleet-all].'
       operationId: get-fleet-epm-categories
       parameters:
         - in: query
@@ -19250,7 +19250,7 @@ paths:
       x-beta: true
   /api/fleet/epm/data_streams:
     get:
-      description: '[Required authorization] Route required privileges: ALL of [integrations-read].'
+      description: '[Required authorization] Route required privileges: ANY of [integrations-read OR fleet-setup OR fleet-all].'
       operationId: get-fleet-epm-data-streams
       parameters:
         - in: query
@@ -19326,7 +19326,7 @@ paths:
       x-beta: true
   /api/fleet/epm/packages:
     get:
-      description: '[Required authorization] Route required privileges: ALL of [integrations-read].'
+      description: '[Required authorization] Route required privileges: ANY of [integrations-read OR fleet-setup OR fleet-all].'
       operationId: get-fleet-epm-packages
       parameters:
         - in: query
@@ -21202,7 +21202,7 @@ paths:
       x-beta: true
   /api/fleet/epm/packages/{pkgName}/{pkgVersion}/{filePath}:
     get:
-      description: '[Required authorization] Route required privileges: ALL of [integrations-read].'
+      description: '[Required authorization] Route required privileges: ANY of [integrations-read OR fleet-setup OR fleet-all].'
       operationId: get-fleet-epm-packages-pkgname-pkgversion-filepath
       parameters:
         - in: path
@@ -21332,7 +21332,7 @@ paths:
       x-beta: true
   /api/fleet/epm/packages/{pkgName}/stats:
     get:
-      description: '[Required authorization] Route required privileges: ALL of [integrations-read].'
+      description: '[Required authorization] Route required privileges: ANY of [integrations-read OR fleet-setup OR fleet-all].'
       operationId: get-fleet-epm-packages-pkgname-stats
       parameters:
         - in: path
@@ -21380,7 +21380,7 @@ paths:
       x-beta: true
   /api/fleet/epm/packages/installed:
     get:
-      description: '[Required authorization] Route required privileges: ALL of [integrations-read].'
+      description: '[Required authorization] Route required privileges: ANY of [integrations-read OR fleet-setup OR fleet-all].'
       operationId: get-fleet-epm-packages-installed
       parameters:
         - in: query
@@ -21527,7 +21527,7 @@ paths:
       x-beta: true
   /api/fleet/epm/packages/limited:
     get:
-      description: '[Required authorization] Route required privileges: ALL of [integrations-read].'
+      description: '[Required authorization] Route required privileges: ANY of [integrations-read OR fleet-setup OR fleet-all].'
       operationId: get-fleet-epm-packages-limited
       parameters: []
       responses:
@@ -21566,7 +21566,7 @@ paths:
       x-beta: true
   /api/fleet/epm/templates/{pkgName}/{pkgVersion}/inputs:
     get:
-      description: '[Required authorization] Route required privileges: ALL of [integrations-read].'
+      description: '[Required authorization] Route required privileges: ANY of [integrations-read OR fleet-setup OR fleet-all].'
       operationId: get-fleet-epm-templates-pkgname-pkgversion-inputs
       parameters:
         - in: path
@@ -21667,7 +21667,7 @@ paths:
       x-beta: true
   /api/fleet/epm/verification_key_id:
     get:
-      description: '[Required authorization] Route required privileges: ALL of [integrations-read].'
+      description: '[Required authorization] Route required privileges: ANY of [integrations-read OR fleet-setup OR fleet-all].'
       operationId: get-fleet-epm-verification-key-id
       parameters: []
       responses:
