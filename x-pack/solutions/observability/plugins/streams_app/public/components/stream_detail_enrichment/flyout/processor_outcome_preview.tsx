@@ -17,10 +17,18 @@ import {
   EuiEmptyPrompt,
   EuiLoadingLogo,
   EuiButton,
+  EuiFormRow,
+  EuiSuperSelectOption,
+  EuiSuperSelect,
+  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { TimeRange } from '@kbn/es-query';
 import { isEmpty } from 'lodash';
+import { FieldIcon } from '@kbn/react-field';
+import { FIELD_DEFINITION_TYPES, FieldDefinitionConfig } from '@kbn/streams-schema';
+import { useController, useFieldArray, useFormContext } from 'react-hook-form';
+import { css } from '@emotion/react';
 import { useStreamsAppFetch } from '../../../hooks/use_streams_app_fetch';
 import { useKibana } from '../../../hooks/use_kibana';
 import { StreamsAppSearchBar, StreamsAppSearchBarProps } from '../../streams_app_search_bar';
@@ -34,6 +42,8 @@ export const ProcessorOutcomePreview = ({ definition, formFields }) => {
     streams: { streamsRepositoryClient },
   } = dependencies.start;
 
+  const { setValue, watch } = useFormContext();
+
   const {
     timeRange,
     absoluteTimeRange: { start, end },
@@ -43,12 +53,7 @@ export const ProcessorOutcomePreview = ({ definition, formFields }) => {
   const [selectedDocsFilter, setSelectedDocsFilter] =
     useState<DocsFilterOption>('outcome_filter_all');
 
-  const {
-    value: samples,
-    loading: isLoadingSamples,
-    error: samplesError,
-    refresh: refreshSamples,
-  } = useStreamsAppFetch(
+  const { value: samples, refresh: refreshSamples } = useStreamsAppFetch(
     ({ signal }) => {
       if (!definition) {
         return Promise.resolve({ documents: [] });
@@ -78,7 +83,7 @@ export const ProcessorOutcomePreview = ({ definition, formFields }) => {
     error: simulationError,
     refresh: refreshSimulation,
   } = useStreamsAppFetch(
-    ({ signal }) => {
+    async ({ signal }) => {
       if (!definition || !samples || isEmpty(samples.documents)) {
         return Promise.resolve(null);
       }
@@ -89,18 +94,25 @@ export const ProcessorOutcomePreview = ({ definition, formFields }) => {
         return Promise.resolve(null);
       }
 
-      return streamsRepositoryClient.fetch('POST /api/streams/{id}/processing/_simulate', {
-        signal,
-        params: {
-          path: {
-            id: definition.name,
+      const simulationResult = await streamsRepositoryClient.fetch(
+        'POST /api/streams/{id}/processing/_simulate',
+        {
+          signal,
+          params: {
+            path: {
+              id: definition.name,
+            },
+            body: {
+              documents: samples.documents as Array<Record<PropertyKey, unknown>>,
+              processing: [processingDefinition],
+            },
           },
-          body: {
-            documents: samples.documents as Array<Record<PropertyKey, unknown>>,
-            processing: [processingDefinition],
-          },
-        },
-      });
+        }
+      );
+
+      setValue('detected_fields', simulationResult.detected_fields);
+
+      return simulationResult;
     },
     [definition, samples, streamsRepositoryClient],
     { disableToastOnError: true }
@@ -128,6 +140,10 @@ export const ProcessorOutcomePreview = ({ definition, formFields }) => {
     return docs.map((doc) => doc.value);
   }, [simulation?.documents, selectedDocsFilter]);
 
+  const detectedFieldsColumns = simulation?.detected_fields
+    ? simulation.detected_fields.map((field) => field.name)
+    : [];
+
   return (
     <EuiPanel hasShadow={false} paddingSize="none">
       <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
@@ -153,7 +169,7 @@ export const ProcessorOutcomePreview = ({ definition, formFields }) => {
         </EuiButton>
       </EuiFlexGroup>
       <EuiSpacer />
-      {/* TODO: Add Detected Fields sections */}
+      {simulation && simulation.detected_fields.length > 0 && <DetectedFields />}
       <OutcomeControls
         docsFilter={selectedDocsFilter}
         onDocsFilterChange={setSelectedDocsFilter}
@@ -166,7 +182,7 @@ export const ProcessorOutcomePreview = ({ definition, formFields }) => {
       <EuiSpacer size="m" />
       <OutcomePreviewTable
         documents={simulationDocuments}
-        columns={[formFields.field, ...(simulation?.detected_fields ?? [])]}
+        columns={[formFields.field, ...detectedFieldsColumns]}
         error={simulationError}
         isLoading={isLoadingSimulation}
       />
@@ -358,4 +374,68 @@ const OutcomePreviewTable = ({
   }
 
   return <PreviewTable documents={documents} displayColumns={columns} height={500} />;
+};
+
+export const DetectedFields = () => {
+  const { euiTheme } = useEuiTheme();
+  const { fields } = useFieldArray({
+    name: 'detected_fields',
+  });
+
+  return (
+    <EuiFormRow
+      label={i18n.translate(
+        'xpack.streams.streamDetailView.managementTab.enrichment.processorFlyout.detectedFieldsLabel',
+        { defaultMessage: 'Detected fields' }
+      )}
+      css={css`
+        margin-bottom: ${euiTheme.size.l};
+      `}
+      fullWidth
+    >
+      <EuiFlexGroup gutterSize="s" wrap>
+        {fields.map((field, id) => (
+          <DetectedFieldSelector key={field.name} selectorId={`detected_fields.${id}`} />
+        ))}
+      </EuiFlexGroup>
+    </EuiFormRow>
+  );
+};
+
+const getDetectedFieldSelectOptions = (field, fieldType): Array<EuiSuperSelectOption<string>> =>
+  [...FIELD_DEFINITION_TYPES, 'unmapped'].map((type) => ({
+    value: type,
+    inputDisplay: (
+      <EuiFlexGroup alignItems="center" gutterSize="s">
+        <FieldIcon type={field.value.type} size="s" />
+        {field.value.name}
+      </EuiFlexGroup>
+    ),
+    dropdownDisplay: (
+      <EuiFlexGroup alignItems="center" gutterSize="s">
+        <FieldIcon type={type} size="s" />
+        {type}
+      </EuiFlexGroup>
+    ),
+  }));
+
+const DetectedFieldSelector = ({ selectorId }) => {
+  const { field: field } = useController({ name: selectorId });
+  const { field: fieldType } = useController({ name: `${selectorId}.type` });
+
+  const options = useMemo(
+    () => getDetectedFieldSelectOptions(field, fieldType),
+    [field, fieldType]
+  );
+
+  return (
+    <EuiSuperSelect
+      options={options}
+      valueOfSelected={fieldType.value ?? 'unmapped'}
+      onChange={fieldType.onChange}
+      css={css`
+        min-inline-size: 180px;
+      `}
+    />
+  );
 };
