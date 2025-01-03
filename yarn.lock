@@ -4585,7 +4585,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-http-common@link:packages/core/http/core-http-common":
+"@kbn/core-http-common@link:src/core/packages/http/common":
   version "0.0.0"
   uid ""
 
