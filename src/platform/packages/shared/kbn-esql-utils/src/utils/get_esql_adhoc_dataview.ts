@@ -68,7 +68,10 @@ export async function getIndexForESQLQuery(deps: {
       isRollupIndex: () => false,
     })
   )
-    .filter((index) => !index.name.startsWith('.'))
+    .filter(
+      (index) =>
+        !index.name.startsWith('.') && !Boolean(index.tags.find((tag) => tag.key === 'alias'))
+    )
     .map((index) => index.name);
 
   let indexName = indices[0];
