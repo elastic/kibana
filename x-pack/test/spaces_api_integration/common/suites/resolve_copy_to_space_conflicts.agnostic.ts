@@ -18,7 +18,7 @@ import {
   getTestDataLoader,
   SPACE_1,
   SPACE_2,
-} from '../../deployment_agnostic/services/test_data_loader';
+} from '../services/test_data_loader';
 import { getUrlPrefix } from '../lib/space_test_utils';
 import type { DescribeFn, TestDefinitionAuthentication } from '../lib/types';
 

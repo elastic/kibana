@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { createTestConfig } from '../common/config';
+import { createTestConfig } from '../../common/config';
 
 export default createTestConfig('copy_to_space - basic license', {
   license: 'basic',
-  testFiles: [require.resolve('./security_and_spaces/apis/copy_to_space')],
+  testFiles: [require.resolve('./apis/copy_to_space')],
 });
