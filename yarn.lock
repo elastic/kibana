@@ -4601,7 +4601,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-http-request-handler-context-server-internal@link:packages/core/http/core-http-request-handler-context-server-internal":
+"@kbn/core-http-request-handler-context-server-internal@link:src/core/packages/http/request-handler-context-server-internal":
   version "0.0.0"
   uid ""
 
