@@ -25,6 +25,11 @@ import type {
 import { type BehaviorSubject } from 'rxjs';
 import type { SeverityThreshold } from '@kbn/ml-common-types/anomalies';
 import type { JobId } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
+import type {
+  AnomalyExplorerChartsEmbeddableType,
+  AnomalySwimLaneEmbeddableType,
+  MlEmbeddableTypes,
+} from '@kbn/ml-embeddables/constants';
 import type { MlDependencies } from '../application/app';
 import type { MlCapabilitiesService } from '../application/capabilities/check_capabilities';
 import type { SwimlaneType } from '../application/explorer/explorer_constants';
@@ -38,11 +43,6 @@ import type { MlResultsService } from '../application/services/results_service';
 import type { MlTimeSeriesSearchService } from '../application/timeseriesexplorer/timeseriesexplorer_utils/time_series_search_service';
 import type { TimeSeriesExplorerService } from '../application/util/time_series_explorer_service';
 import type { ToastNotificationService } from '../application/services/toast_notification_service';
-import type {
-  AnomalyExplorerChartsEmbeddableType,
-  AnomalySwimLaneEmbeddableType,
-  MlEmbeddableTypes,
-} from './constants';
 
 export type {
   AnomalySwimLaneEmbeddableState,
