@@ -48,10 +48,15 @@ import {
   DeleteConfirmModal,
   ExportModal,
 } from './components';
+import { ML_SAVED_OBJECT_TYPES } from '../../../common/constants/ml_saved_object_types';
+
+// Saved objects for ML job are not importable/exportable because they are wrappers around ES objects
+const DISABLED_TYPES_FOR_EXPORT = ML_SAVED_OBJECT_TYPES;
 
 interface ExportAllOption {
   id: string;
   label: string;
+  disabled?: boolean;
 }
 
 export interface SavedObjectsTableProps {
@@ -186,18 +191,18 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       ([id, count]) => ({
         id,
         label: `${id} (${count || 0})`,
+        disabled: DISABLED_TYPES_FOR_EXPORT.has(id),
       })
     );
     const exportAllSelectedOptions: Record<string, boolean> = exportAllOptions.reduce(
       (record, { id }) => {
         return {
           ...record,
-          [id]: true,
+          [id]: DISABLED_TYPES_FOR_EXPORT.has(id) ? false : true,
         };
       },
       {}
     );
-
     // Fetch all the saved objects that exist so we can accurately populate the counts within
     // the table filter dropdown.
     const savedObjectCounts = await getSavedObjectCounts({
@@ -254,9 +259,34 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
         if (activeQuery.text !== query.text) {
           return null;
         }
+        let filteredSavedObjects = resp.saved_objects;
+        const mlCapabilities = this.props.applications.capabilities.ml as Record<string, boolean>;
+
+        const mlFilters: Record<string, boolean> = {
+          'anomaly-detector-': mlCapabilities.canGetJobs,
+          'data-frame-analytics-': mlCapabilities.canGetDataFrameAnalytics,
+          'ml-trained-model': mlCapabilities.canGetTrainedModels,
+        };
+
+        // Apply all ML filters at once
+        filteredSavedObjects = filteredSavedObjects.filter((so) => {
+          // Check if object matches any ML type
+          const matchesMlType = Object.entries(mlFilters).some(
+            ([prefix, hasPermission]) => so.id.startsWith(prefix) || so.type === prefix
+          );
+
+          // Keep non-ML objects or ML objects where user has permission
+          return (
+            !matchesMlType ||
+            mlFilters[so.type] ||
+            Object.entries(mlFilters).some(
+              ([prefix, hasPermission]) => so.id.startsWith(prefix) && hasPermission
+            )
+          );
+        });
 
         return {
-          savedObjects: resp.saved_objects,
+          savedObjects: filteredSavedObjects,
           filteredItemCount: resp.total,
           isSearching: false,
         };
@@ -420,7 +450,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
     const { notifications, http, taggingApi, allowedTypes } = this.props;
     const { queryText, selectedTags } = parseQuery(activeQuery, allowedTypes);
     const exportTypes = Object.entries(exportAllSelectedOptions).reduce((accum, [id, selected]) => {
-      if (selected) {
+      if (selected && !DISABLED_TYPES_FOR_EXPORT.has(id)) {
         accum.push(id);
       }
       return accum;
@@ -683,6 +713,9 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       sort,
     } = this.state;
     const { http, taggingApi, allowedTypes, applications } = this.props;
+
+    // @TODO: remove
+    // console.log(`--@@applications.capabilities`, applications?.capabilities);
 
     const selectionConfig = {
       onSelectionChange: this.onSelectionChanged,

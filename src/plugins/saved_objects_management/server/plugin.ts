@@ -9,6 +9,7 @@
 
 import { firstValueFrom, Subject } from 'rxjs';
 import { CoreSetup, CoreStart, Logger, Plugin, PluginInitializerContext } from '@kbn/core/server';
+import type { CapabilitiesStart } from '@kbn/core-capabilities-server/src/contracts';
 import { SavedObjectsManagementPluginSetup, SavedObjectsManagementPluginStart } from './types';
 import { SavedObjectsManagement } from './services';
 import { registerRoutes } from './routes';
@@ -19,16 +20,18 @@ export class SavedObjectsManagementPlugin
 {
   private readonly logger: Logger;
   private managementService$ = new Subject<SavedObjectsManagement>();
+  private capabilitiesService$ = new Subject<CapabilitiesStart>();
 
   constructor(private readonly context: PluginInitializerContext) {
     this.logger = this.context.logger.get();
   }
 
-  public setup({ http, capabilities }: CoreSetup) {
+  public async setup({ http, capabilities, getStartServices }: CoreSetup) {
     this.logger.debug('Setting up SavedObjectsManagement plugin');
     registerRoutes({
       http,
       managementServicePromise: firstValueFrom(this.managementService$),
+      capabilitiesPromise: firstValueFrom(this.capabilitiesService$),
     });
 
     capabilities.registerProvider(capabilitiesProvider);
@@ -36,11 +39,12 @@ export class SavedObjectsManagementPlugin
     return {};
   }
 
-  public start(core: CoreStart) {
+  public async start(core: CoreStart) {
     this.logger.debug('Starting up SavedObjectsManagement plugin');
     const managementService = new SavedObjectsManagement(core.savedObjects.getTypeRegistry());
-    this.managementService$.next(managementService);
 
+    this.managementService$.next(managementService);
+    this.capabilitiesService$.next(core.capabilities);
     return {};
   }
 }

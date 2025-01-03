@@ -7,10 +7,13 @@
 
 import type { SavedObjectsServiceSetup } from '@kbn/core/server';
 import rison from '@kbn/rison';
+import { i18n } from '@kbn/i18n';
 import { mlJob, mlTrainedModel, mlModule } from './mappings';
 
 import { migrations } from './migrations';
 import {
+  AD_SAVED_OBJECT_TYPE,
+  DFA_SAVED_OBJECT_TYPE,
   ML_JOB_SAVED_OBJECT_TYPE,
   ML_MODULE_SAVED_OBJECT_TYPE,
   ML_TRAINED_MODEL_SAVED_OBJECT_TYPE,
@@ -27,6 +30,9 @@ interface MlModuleAttributes {
   datafeeds: object[];
 }
 
+const AD_PREFIX = `${AD_SAVED_OBJECT_TYPE}-`;
+const DFA_PREFIX = `${DFA_SAVED_OBJECT_TYPE}-`;
+
 export function setupSavedObjects(savedObjects: SavedObjectsServiceSetup) {
   savedObjects.registerType({
     name: ML_JOB_SAVED_OBJECT_TYPE,
@@ -34,6 +40,26 @@ export function setupSavedObjects(savedObjects: SavedObjectsServiceSetup) {
     namespaceType: 'multiple',
     migrations,
     mappings: mlJob,
+    management: {
+      importableAndExportable: false,
+      getTitle(obj) {
+        return obj.id;
+      },
+      getInAppUrl(obj) {
+        if (obj.id.startsWith(AD_PREFIX)) {
+          // @TODO: Temporarily hide link until new management link is ready
+          // const jobId = obj.id.slice(AD_PREFIX.length);
+        }
+        if (obj.id.startsWith(DFA_PREFIX)) {
+          // @TODO: Temporarily hide link until new management link is ready
+        }
+        return undefined;
+      },
+      icon: 'machineLearningApp',
+      displayName: i18n.translate('xpack.ml.savedObjects.mlJob.displayName', {
+        defaultMessage: 'Machine learning model',
+      }),
+    },
   });
   savedObjects.registerType({
     name: ML_TRAINED_MODEL_SAVED_OBJECT_TYPE,
@@ -41,6 +67,12 @@ export function setupSavedObjects(savedObjects: SavedObjectsServiceSetup) {
     namespaceType: 'multiple',
     migrations,
     mappings: mlTrainedModel,
+    management: {
+      icon: 'machineLearningApp',
+      displayName: i18n.translate('xpack.ml.savedObjects.trainedModel.displayName', {
+        defaultMessage: 'Trained model',
+      }),
+    },
   });
   savedObjects.registerType<MlModuleAttributes>({
     name: ML_MODULE_SAVED_OBJECT_TYPE,

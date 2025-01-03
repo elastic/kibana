@@ -378,7 +378,8 @@ export const ShareToSpaceFlyoutInternal = (props: ShareToSpaceFlyoutProps) => {
         enableCreateCopyCallout &&
         spaces.length > 1 &&
         savedObjectTarget.namespaces.length === 1 &&
-        !arraysAreEqual(savedObjectTarget.namespaces, [ALL_SPACES_ID]);
+        !arraysAreEqual(savedObjectTarget.namespaces, [ALL_SPACES_ID]) &&
+        !savedObjectTarget.type.startsWith('ml');
       // Step 2: Share has not been initiated yet; User must fill out form to continue.
       return (
         <ShareToSpaceForm

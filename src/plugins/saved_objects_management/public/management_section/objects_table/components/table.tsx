@@ -39,6 +39,7 @@ import {
   SavedObjectsManagementAction,
   SavedObjectsManagementColumnServiceStart,
 } from '../../../services';
+import { ML_SAVED_OBJECT_TYPES } from '../../../../common/constants/ml_saved_object_types';
 
 export type ItemId<T> = string | number | ((item: T) => string);
 
@@ -328,6 +329,9 @@ export class Table extends PureComponent<TableProps, TableState> {
             icon: 'kqlSelector',
             onClick: (object) => onShowRelationships(object),
             'data-test-subj': 'savedObjectsTableAction-relationships',
+            available: (object) => {
+              return !object.type.startsWith('ml');
+            },
           },
           ...actionRegistry.getAll().map((action) => {
             action.setActionContext({ capabilities });
@@ -386,9 +390,30 @@ export class Table extends PureComponent<TableProps, TableState> {
     const activeActionContents = this.state.activeAction?.render() ?? null;
     const exceededResultCount = totalItemCount > MAX_PAGINATED_ITEM;
 
+    const hasMlObjects = selectedSavedObjects.some(({ type }) => ML_SAVED_OBJECT_TYPES.has(type));
+
     const anySelected = selectedSavedObjects.length > 0;
     const allHidden =
       anySelected && selectedSavedObjects.every(({ meta: { hiddenType } }) => hiddenType);
+
+    const deleteTooltip = () => {
+      if (hasMlObjects) {
+        return (
+          <FormattedMessage
+            id="savedObjectsManagement.objectsTable.table.hasMlObjects.deleteDisabledTooltip"
+            defaultMessage="Navigate to the Machine Learning management page to delete machine learning objects."
+          />
+        );
+      }
+      if (allHidden) {
+        return (
+          <FormattedMessage
+            id="savedObjectsManagement.objectsTable.table.deleteDisabledTooltip"
+            defaultMessage="Selected objects can’t be deleted because they are hidden objects."
+          />
+        );
+      }
+    };
     return (
       <Fragment>
         {activeActionContents}
@@ -406,14 +431,7 @@ export class Table extends PureComponent<TableProps, TableState> {
             <EuiToolTip
               data-test-subj="deleteSOToolTip"
               key="deleteSOToolTip"
-              content={
-                allHidden ? (
-                  <FormattedMessage
-                    id="savedObjectsManagement.objectsTable.table.deleteDisabledTooltip"
-                    defaultMessage="Selected objects can’t be deleted because they are hidden objects."
-                  />
-                ) : undefined
-              }
+              content={deleteTooltip()}
             >
               <EuiButton
                 key="deleteSO"
@@ -421,7 +439,10 @@ export class Table extends PureComponent<TableProps, TableState> {
                 color="danger"
                 onClick={onDelete}
                 isDisabled={
-                  !anySelected || allHidden || !capabilities.savedObjectsManagement.delete
+                  hasMlObjects ||
+                  !anySelected ||
+                  allHidden ||
+                  !capabilities.savedObjectsManagement.delete
                 }
                 title={
                   capabilities.savedObjectsManagement.delete

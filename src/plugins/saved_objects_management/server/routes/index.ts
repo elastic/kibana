@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { HttpServiceSetup } from '@kbn/core/server';
+import type { HttpServiceSetup, CapabilitiesStart } from '@kbn/core/server';
 import { ISavedObjectsManagement } from '../services';
 import { registerFindRoute } from './find';
 import { registerBulkDeleteRoute } from './bulk_delete';
@@ -19,14 +19,19 @@ import { registerGetAllowedTypesRoute } from './get_allowed_types';
 interface RegisterRouteOptions {
   http: HttpServiceSetup;
   managementServicePromise: Promise<ISavedObjectsManagement>;
+  capabilitiesPromise?: Promise<CapabilitiesStart>;
 }
 
-export function registerRoutes({ http, managementServicePromise }: RegisterRouteOptions) {
+export function registerRoutes({
+  http,
+  managementServicePromise,
+  capabilitiesPromise,
+}: RegisterRouteOptions) {
   const router = http.createRouter();
   registerFindRoute(router, managementServicePromise);
   registerBulkDeleteRoute(router);
   registerBulkGetRoute(router, managementServicePromise);
   registerScrollForCountRoute(router);
   registerRelationshipsRoute(router, managementServicePromise);
-  registerGetAllowedTypesRoute(router);
+  registerGetAllowedTypesRoute(router, capabilitiesPromise);
 }
