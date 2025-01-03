@@ -4641,7 +4641,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-http-server@link:packages/core/http/core-http-server":
+"@kbn/core-http-server@link:src/core/packages/http/server":
   version "0.0.0"
   uid ""
 
