@@ -221,6 +221,35 @@ export function SloItemActions({
             })}
             {showRemoteLinkIcon}
           </EuiContextMenuItem>,
+          slo.enabled ? (
+            <EuiContextMenuItem
+              key="disable"
+              icon="stop"
+              disabled={!permissions?.hasAllWriteRequested || hasUndefinedRemoteKibanaUrl}
+              onClick={handleReset}
+              toolTipContent={
+                hasUndefinedRemoteKibanaUrl ? NOT_AVAILABLE_FOR_UNDEFINED_REMOTE_KIBANA_URL : ''
+              }
+              data-test-subj="sloActionsDisable"
+            >
+              {i18n.translate('xpack.slo.item.actions.disable', { defaultMessage: 'Disable' })}
+              {showRemoteLinkIcon}
+            </EuiContextMenuItem>
+          ) : (
+            <EuiContextMenuItem
+              key="enable"
+              icon="start"
+              disabled={!permissions?.hasAllWriteRequested || hasUndefinedRemoteKibanaUrl}
+              onClick={handleReset}
+              toolTipContent={
+                hasUndefinedRemoteKibanaUrl ? NOT_AVAILABLE_FOR_UNDEFINED_REMOTE_KIBANA_URL : ''
+              }
+              data-test-subj="sloActionsEnable"
+            >
+              {i18n.translate('xpack.slo.item.actions.enable', { defaultMessage: 'Enable' })}
+              {showRemoteLinkIcon}
+            </EuiContextMenuItem>
+          ),
           <EuiContextMenuItem
             key="clone"
             disabled={!permissions?.hasAllWriteRequested || hasUndefinedRemoteKibanaUrl}
