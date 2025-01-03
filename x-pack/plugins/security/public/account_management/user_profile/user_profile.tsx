@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { EuiFlexItemProps } from '@elastic/eui';
 import {
   EuiBadge,
   EuiBadgeGroup,
@@ -96,6 +97,18 @@ const rightSideItemsCSS = css`
 
 const rightSideItemCSS = css`
   min-width: 160px;
+`;
+
+const usernameTextCSS = css`
+  max-width: 160px;
+`;
+
+const fullnameTextCSS = css`
+  max-width: 300px;
+`;
+
+const emailTextCSS = css`
+  max-width: 420px;
 `;
 
 export interface UserProfileProps {
@@ -756,7 +769,10 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
       ),
       description:
         user.username &&
-        ((<EuiTextTruncate text={user.username} />) as string | undefined | JSX.Element),
+        ((<EuiTextTruncate text={user.username} css={usernameTextCSS} />) as
+          | string
+          | undefined
+          | JSX.Element),
       helpText: (
         <FormattedMessage
           id="xpack.security.accountManagement.userProfile.usernameHelpText"
@@ -764,6 +780,7 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
         />
       ),
       testSubj: 'username',
+      grow: 0 as EuiFlexItemProps['grow'],
     },
   ];
 
@@ -775,7 +792,9 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
           defaultMessage="Full name"
         />
       ),
-      description: user.full_name && <EuiTextTruncate text={user.full_name} />,
+      description: user.full_name && (
+        <EuiTextTruncate text={user.full_name} css={fullnameTextCSS} />
+      ),
       helpText: (
         <FormattedMessage
           id="xpack.security.accountManagement.userProfile.fullNameHelpText"
@@ -783,6 +802,7 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
         />
       ),
       testSubj: 'full_name',
+      grow: 1,
     });
 
     rightSideItems.push({
@@ -792,7 +812,7 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
           defaultMessage="Email address"
         />
       ),
-      description: user.email && <EuiTextTruncate text={user.email} />,
+      description: user.email && <EuiTextTruncate text={user.email} css={emailTextCSS} />,
       helpText: (
         <FormattedMessage
           id="xpack.security.accountManagement.userProfile.emailHelpText"
@@ -800,6 +820,7 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
         />
       ),
       testSubj: 'email',
+      grow: 2,
     });
   }
 
@@ -822,6 +843,7 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
       />
     ),
     testSubj: 'userRoles',
+    grow: 1,
   });
 
   return (
@@ -854,44 +876,45 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
                   </EuiTitle>
                 </EuiPageHeaderSection>
                 <EuiPageHeaderSection>
-                  <EuiFlexGroup alignItems="flexStart" css={rightSideItemsCSS}>
+                  <EuiFlexGroup alignItems="center" css={rightSideItemsCSS}>
                     {rightSideItems.map((item) => (
-                      <EuiDescriptionList
-                        key={item.testSubj}
-                        textStyle="reverse"
-                        css={rightSideItemCSS}
-                        listItems={[
-                          {
-                            title: (
-                              <EuiText color={euiTheme.colors.darkestShade} size="s">
-                                <EuiFlexGroup
-                                  responsive={false}
-                                  alignItems="center"
-                                  gutterSize="none"
-                                >
-                                  <EuiFlexItem grow={false}>{item.title}</EuiFlexItem>
-                                  <EuiFlexItem grow={false}>
-                                    <EuiIconTip type="questionInCircle" content={item.helpText} />
-                                  </EuiFlexItem>
-                                </EuiFlexGroup>
-                              </EuiText>
-                            ),
-                            description: (
-                              <span data-test-subj={item.testSubj}>
-                                {item.description || (
-                                  <EuiText color={euiTheme.colors.textDisabled} size="s">
-                                    <FormattedMessage
-                                      id="xpack.security.accountManagement.userProfile.noneProvided"
-                                      defaultMessage="None provided"
-                                    />
-                                  </EuiText>
-                                )}
-                              </span>
-                            ),
-                          },
-                        ]}
-                        compressed
-                      />
+                      <EuiFlexItem key={item.testSubj} grow={item.grow}>
+                        <EuiDescriptionList
+                          textStyle="reverse"
+                          css={rightSideItemCSS}
+                          listItems={[
+                            {
+                              title: (
+                                <EuiText color={euiTheme.colors.darkestShade} size="s">
+                                  <EuiFlexGroup
+                                    responsive={false}
+                                    alignItems="center"
+                                    gutterSize="none"
+                                  >
+                                    <EuiFlexItem grow={false}>{item.title}</EuiFlexItem>
+                                    <EuiFlexItem grow={false}>
+                                      <EuiIconTip type="questionInCircle" content={item.helpText} />
+                                    </EuiFlexItem>
+                                  </EuiFlexGroup>
+                                </EuiText>
+                              ),
+                              description: (
+                                <span data-test-subj={item.testSubj}>
+                                  {item.description || (
+                                    <EuiText color={euiTheme.colors.textDisabled} size="s">
+                                      <FormattedMessage
+                                        id="xpack.security.accountManagement.userProfile.noneProvided"
+                                        defaultMessage="None provided"
+                                      />
+                                    </EuiText>
+                                  )}
+                                </span>
+                              ),
+                            },
+                          ]}
+                          compressed
+                        />
+                      </EuiFlexItem>
                     ))}
                   </EuiFlexGroup>
                 </EuiPageHeaderSection>
