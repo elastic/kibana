@@ -184,13 +184,7 @@ export const allowedExperimentalValues = Object.freeze({
    */
   jamfDataInAnalyzerEnabled: true,
 
-  /*
-   * Disables discover esql tab within timeline
-   *
-   */
-  timelineEsqlTabDisabled: false,
-
-  /*
+  /**
    * Disables date pickers and sourcerer in analyzer if needed.
    *
    */
