@@ -10,12 +10,12 @@ import {
 } from '@kbn/core-saved-objects-api-server';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import type { TLSRuleParams } from '@kbn/response-ops-rule-params/synthetics_tls';
 import moment from 'moment';
 import { FINAL_SUMMARY_FILTER } from '../../../common/constants/client_defaults';
 import { formatFilterString } from '../common';
 import { SyntheticsServerSetup } from '../../types';
 import { getSyntheticsCerts } from '../../queries/get_certs';
-import { TLSParams } from '../../../common/runtime_types/alerts/tls';
 import { savedObjectsAdapter } from '../../saved_objects';
 import { DYNAMIC_SETTINGS_DEFAULTS, SYNTHETICS_INDEX_PATTERN } from '../../../common/constants';
 import {
@@ -35,7 +35,7 @@ import { SyntheticsEsClient } from '../../lib';
 
 export class TLSRuleExecutor {
   previousStartedAt: Date | null;
-  params: TLSParams;
+  params: TLSRuleParams;
   esClient: SyntheticsEsClient;
   soClient: SavedObjectsClientContract;
   server: SyntheticsServerSetup;
@@ -44,7 +44,7 @@ export class TLSRuleExecutor {
 
   constructor(
     previousStartedAt: Date | null,
-    p: TLSParams,
+    p: TLSRuleParams,
     soClient: SavedObjectsClientContract,
     scopedClient: ElasticsearchClient,
     server: SyntheticsServerSetup,

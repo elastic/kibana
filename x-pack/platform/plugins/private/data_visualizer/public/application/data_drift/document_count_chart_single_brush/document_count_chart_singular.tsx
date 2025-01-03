@@ -19,6 +19,8 @@ import type {
   BarStyleAccessor,
   RectAnnotationSpec,
 } from '@elastic/charts/dist/chart_types/xy_chart/utils/specs';
+import { useEuiTheme } from '@elastic/eui';
+
 import { getTimeZone } from '@kbn/visualization-utils';
 import { i18n } from '@kbn/i18n';
 import type { IUiSettingsClient } from '@kbn/core/public';
@@ -27,10 +29,10 @@ import { MULTILAYER_TIME_AXIS_STYLE } from '@kbn/charts-plugin/common';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-
 import { DualBrushAnnotation } from '@kbn/aiops-components';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiText } from '@elastic/eui';
+
 import {
   SingleBrush,
   getSingleBrushWindowParameters,
@@ -173,6 +175,8 @@ export const DocumentCountChartWithBrush: FC<DocumentCountChartProps> = (props) 
   } = props;
 
   const { data, uiSettings, fieldFormats, charts } = dependencies;
+
+  const { euiTheme } = useEuiTheme();
 
   const chartBaseTheme = charts.theme.useChartsBaseTheme();
 
@@ -374,7 +378,7 @@ export const DocumentCountChartWithBrush: FC<DocumentCountChartProps> = (props) 
     mlBrushWidth &&
     mlBrushWidth > 0;
 
-  const barColor = barColorOverride ? [barColorOverride] : undefined;
+  const barColor = barColorOverride ? [barColorOverride] : euiTheme.colors.vis.euiColorVis0;
   const barHighlightColor = barHighlightColorOverride ? [barHighlightColorOverride] : ['orange'];
 
   return (

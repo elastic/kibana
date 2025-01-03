@@ -31,7 +31,7 @@
         "signature": [
           "({ option: { name, label }, searchValue, }: { option: { name?: string | undefined; label: string; }; searchValue: string; }) => boolean"
         ],
-        "path": "packages/kbn-field-utils/src/utils/field_name_wildcard_matcher.ts",
+        "path": "src/platform/packages/shared/kbn-field-utils/src/utils/field_name_wildcard_matcher.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -42,7 +42,7 @@
             "tags": [],
             "label": "{\n  option: { name, label },\n  searchValue,\n}",
             "description": [],
-            "path": "packages/kbn-field-utils/src/utils/field_name_wildcard_matcher.ts",
+            "path": "src/platform/packages/shared/kbn-field-utils/src/utils/field_name_wildcard_matcher.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -56,7 +56,7 @@
                 "signature": [
                   "{ name?: string | undefined; label: string; }"
                 ],
-                "path": "packages/kbn-field-utils/src/utils/field_name_wildcard_matcher.ts",
+                "path": "src/platform/packages/shared/kbn-field-utils/src/utils/field_name_wildcard_matcher.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -67,7 +67,7 @@
                 "tags": [],
                 "label": "searchValue",
                 "description": [],
-                "path": "packages/kbn-field-utils/src/utils/field_name_wildcard_matcher.ts",
+                "path": "src/platform/packages/shared/kbn-field-utils/src/utils/field_name_wildcard_matcher.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -95,7 +95,7 @@
           },
           ") => React.JSX.Element"
         ],
-        "path": "packages/kbn-field-utils/src/components/field_description/field_description.tsx",
+        "path": "src/platform/packages/shared/kbn-field-utils/src/components/field_description/field_description.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -115,7 +115,7 @@
                 "text": "FieldDescriptionProps"
               }
             ],
-            "path": "packages/kbn-field-utils/src/components/field_description/field_description.tsx",
+            "path": "src/platform/packages/shared/kbn-field-utils/src/components/field_description/field_description.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -158,7 +158,7 @@
           },
           ") => React.JSX.Element"
         ],
-        "path": "packages/kbn-field-utils/src/components/field_icon/index.tsx",
+        "path": "src/platform/packages/shared/kbn-field-utils/src/components/field_icon/index.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -179,7 +179,7 @@
                 "text": "FieldIconProps"
               }
             ],
-            "path": "packages/kbn-field-utils/src/components/field_icon/index.tsx",
+            "path": "src/platform/packages/shared/kbn-field-utils/src/components/field_icon/index.tsx",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -198,7 +198,7 @@
         "signature": [
           "(field: { name: string; displayName?: string | undefined; }, fieldSearchHighlight: string) => boolean"
         ],
-        "path": "packages/kbn-field-utils/src/utils/field_name_wildcard_matcher.ts",
+        "path": "src/platform/packages/shared/kbn-field-utils/src/utils/field_name_wildcard_matcher.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -209,7 +209,7 @@
             "tags": [],
             "label": "field",
             "description": [],
-            "path": "packages/kbn-field-utils/src/utils/field_name_wildcard_matcher.ts",
+            "path": "src/platform/packages/shared/kbn-field-utils/src/utils/field_name_wildcard_matcher.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -220,7 +220,7 @@
                 "tags": [],
                 "label": "name",
                 "description": [],
-                "path": "packages/kbn-field-utils/src/utils/field_name_wildcard_matcher.ts",
+                "path": "src/platform/packages/shared/kbn-field-utils/src/utils/field_name_wildcard_matcher.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -234,7 +234,7 @@
                 "signature": [
                   "string | undefined"
                 ],
-                "path": "packages/kbn-field-utils/src/utils/field_name_wildcard_matcher.ts",
+                "path": "src/platform/packages/shared/kbn-field-utils/src/utils/field_name_wildcard_matcher.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -250,7 +250,7 @@
             "signature": [
               "string"
             ],
-            "path": "packages/kbn-field-utils/src/utils/field_name_wildcard_matcher.ts",
+            "path": "src/platform/packages/shared/kbn-field-utils/src/utils/field_name_wildcard_matcher.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -277,7 +277,7 @@
           },
           ") => boolean"
         ],
-        "path": "packages/kbn-field-utils/src/utils/field_supports_breakdown.ts",
+        "path": "src/platform/packages/shared/kbn-field-utils/src/utils/field_supports_breakdown.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -297,7 +297,7 @@
                 "text": "DataViewField"
               }
             ],
-            "path": "packages/kbn-field-utils/src/utils/field_supports_breakdown.ts",
+            "path": "src/platform/packages/shared/kbn-field-utils/src/utils/field_supports_breakdown.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -323,7 +323,7 @@
             "text": "FieldIconProps"
           }
         ],
-        "path": "packages/kbn-field-utils/src/components/field_icon/get_field_icon_props.ts",
+        "path": "src/platform/packages/shared/kbn-field-utils/src/components/field_icon/get_field_icon_props.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -337,7 +337,7 @@
             "signature": [
               "T"
             ],
-            "path": "packages/kbn-field-utils/src/components/field_icon/get_field_icon_props.ts",
+            "path": "src/platform/packages/shared/kbn-field-utils/src/components/field_icon/get_field_icon_props.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -360,7 +360,7 @@
           "GetCustomFieldType",
           "<T> | undefined) => string"
         ],
-        "path": "packages/kbn-field-utils/src/utils/get_field_icon_type.ts",
+        "path": "src/platform/packages/shared/kbn-field-utils/src/utils/get_field_icon_type.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -374,7 +374,7 @@
             "signature": [
               "T"
             ],
-            "path": "packages/kbn-field-utils/src/utils/get_field_icon_type.ts",
+            "path": "src/platform/packages/shared/kbn-field-utils/src/utils/get_field_icon_type.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -390,7 +390,7 @@
               "GetCustomFieldType",
               "<T> | undefined"
             ],
-            "path": "packages/kbn-field-utils/src/utils/get_field_icon_type.ts",
+            "path": "src/platform/packages/shared/kbn-field-utils/src/utils/get_field_icon_type.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -411,7 +411,7 @@
         "signature": [
           "(displayName: string, fieldSearchHighlight: string | undefined) => string"
         ],
-        "path": "packages/kbn-field-utils/src/utils/field_name_wildcard_matcher.ts",
+        "path": "src/platform/packages/shared/kbn-field-utils/src/utils/field_name_wildcard_matcher.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -425,7 +425,7 @@
             "signature": [
               "string"
             ],
-            "path": "packages/kbn-field-utils/src/utils/field_name_wildcard_matcher.ts",
+            "path": "src/platform/packages/shared/kbn-field-utils/src/utils/field_name_wildcard_matcher.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -440,7 +440,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/kbn-field-utils/src/utils/field_name_wildcard_matcher.ts",
+            "path": "src/platform/packages/shared/kbn-field-utils/src/utils/field_name_wildcard_matcher.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -461,7 +461,7 @@
         "signature": [
           "(field: T) => string"
         ],
-        "path": "packages/kbn-field-utils/src/utils/get_field_type.ts",
+        "path": "src/platform/packages/shared/kbn-field-utils/src/utils/get_field_type.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -475,7 +475,7 @@
             "signature": [
               "T"
             ],
-            "path": "packages/kbn-field-utils/src/utils/get_field_type.ts",
+            "path": "src/platform/packages/shared/kbn-field-utils/src/utils/get_field_type.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -496,7 +496,7 @@
         "signature": [
           "(type: string | undefined) => string"
         ],
-        "path": "packages/kbn-field-utils/src/utils/get_field_type_description.ts",
+        "path": "src/platform/packages/shared/kbn-field-utils/src/utils/get_field_type_description.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -510,7 +510,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/kbn-field-utils/src/utils/get_field_type_description.ts",
+            "path": "src/platform/packages/shared/kbn-field-utils/src/utils/get_field_type_description.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -531,7 +531,7 @@
         "signature": [
           "(type: string | undefined) => string"
         ],
-        "path": "packages/kbn-field-utils/src/utils/get_field_type_name.ts",
+        "path": "src/platform/packages/shared/kbn-field-utils/src/utils/get_field_type_name.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -545,7 +545,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/kbn-field-utils/src/utils/get_field_type_name.ts",
+            "path": "src/platform/packages/shared/kbn-field-utils/src/utils/get_field_type_name.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -572,7 +572,7 @@
           },
           "; esType?: string | undefined; } | null | undefined) => string | null"
         ],
-        "path": "packages/kbn-field-utils/src/utils/get_text_based_column_icon_type.ts",
+        "path": "src/platform/packages/shared/kbn-field-utils/src/utils/get_text_based_column_icon_type.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -594,7 +594,7 @@
               },
               "; esType?: string | undefined; } | null | undefined"
             ],
-            "path": "packages/kbn-field-utils/src/utils/get_text_based_column_icon_type.ts",
+            "path": "src/platform/packages/shared/kbn-field-utils/src/utils/get_text_based_column_icon_type.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -613,7 +613,7 @@
         "signature": [
           "(type?: string | undefined) => type is string"
         ],
-        "path": "packages/kbn-field-utils/src/utils/field_types.ts",
+        "path": "src/platform/packages/shared/kbn-field-utils/src/utils/field_types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -627,7 +627,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/kbn-field-utils/src/utils/field_types.ts",
+            "path": "src/platform/packages/shared/kbn-field-utils/src/utils/field_types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -645,7 +645,7 @@
         "tags": [],
         "label": "FieldBase",
         "description": [],
-        "path": "packages/kbn-field-utils/src/types.ts",
+        "path": "src/platform/packages/shared/kbn-field-utils/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -656,7 +656,7 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "path": "packages/kbn-field-utils/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-field-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -670,7 +670,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/kbn-field-utils/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-field-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -684,7 +684,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/kbn-field-utils/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-field-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -698,7 +698,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/kbn-field-utils/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-field-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -712,7 +712,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/kbn-field-utils/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-field-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -727,7 +727,7 @@
               "MappingTimeSeriesMetricType",
               " | undefined"
             ],
-            "path": "packages/kbn-field-utils/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-field-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -741,7 +741,7 @@
             "signature": [
               "string[] | undefined"
             ],
-            "path": "packages/kbn-field-utils/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-field-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -755,7 +755,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "packages/kbn-field-utils/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-field-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -769,7 +769,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "packages/kbn-field-utils/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-field-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -783,7 +783,7 @@
             "signature": [
               "Record<string, string[]> | undefined"
             ],
-            "path": "packages/kbn-field-utils/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-field-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -808,7 +808,7 @@
           " extends ",
           "FieldDescriptionContentProps"
         ],
-        "path": "packages/kbn-field-utils/src/components/field_description/field_description.tsx",
+        "path": "src/platform/packages/shared/kbn-field-utils/src/components/field_description/field_description.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -829,7 +829,7 @@
               },
               " | undefined"
             ],
-            "path": "packages/kbn-field-utils/src/components/field_description/field_description.tsx",
+            "path": "src/platform/packages/shared/kbn-field-utils/src/components/field_description/field_description.tsx",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -847,7 +847,7 @@
         "description": [
           "\nField types for which name and description are defined"
         ],
-        "path": "packages/kbn-field-utils/src/utils/field_types.ts",
+        "path": "src/platform/packages/shared/kbn-field-utils/src/utils/field_types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -861,7 +861,7 @@
         "tags": [],
         "label": "FieldIconProps",
         "description": [],
-        "path": "packages/kbn-field-utils/src/components/field_icon/field_icon.tsx",
+        "path": "src/platform/packages/shared/kbn-field-utils/src/components/field_icon/field_icon.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -876,7 +876,7 @@
         "signature": [
           "string"
         ],
-        "path": "packages/kbn-field-utils/src/types.ts",
+        "path": "src/platform/packages/shared/kbn-field-utils/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -891,7 +891,7 @@
         "signature": [
           "string[]"
         ],
-        "path": "packages/kbn-field-utils/src/utils/field_types.ts",
+        "path": "src/platform/packages/shared/kbn-field-utils/src/utils/field_types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -905,7 +905,7 @@
         "description": [
           "\nA user-friendly name of an unknown field type"
         ],
-        "path": "packages/kbn-field-utils/src/utils/get_field_type_name.ts",
+        "path": "src/platform/packages/shared/kbn-field-utils/src/utils/get_field_type_name.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

@@ -15,6 +15,9 @@ import type { DomainDeprecationDetails } from '@kbn/core-deprecations-common';
  * @public
  */
 export interface DeprecationsClient {
+  /**
+   * Fetch all Kibana deprecations.
+   */
   getAllDeprecations: () => Promise<DomainDeprecationDetails[]>;
 }
 
@@ -23,5 +26,8 @@ export interface DeprecationsClient {
  * @public
  */
 export interface DeprecationsRequestHandlerContext {
+  /**
+   * {@link DeprecationsClient | Deprecations client} exposed in the request handler context.
+   */
   client: DeprecationsClient;
 }

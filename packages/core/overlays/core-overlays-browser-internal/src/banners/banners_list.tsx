@@ -11,8 +11,6 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Observable } from 'rxjs';
 import type { OverlayBanner } from './banners_service';
 
-import './banners_list.scss';
-
 interface Props {
   banners$: Observable<OverlayBanner[]>;
 }
@@ -52,7 +50,9 @@ const BannerItem: React.FunctionComponent<{ banner: OverlayBanner }> = ({ banner
   return (
     <div
       data-test-priority={banner.priority}
-      className="kbnGlobalBannerList__item"
+      css={({ euiTheme }) => ({
+        '& + &': { marginTop: euiTheme.size.s },
+      })}
       ref={element}
       data-test-subj="global-banner-item"
     />

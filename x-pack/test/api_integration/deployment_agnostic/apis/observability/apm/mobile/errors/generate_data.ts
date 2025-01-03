@@ -33,6 +33,9 @@ export async function generateData({
 }) {
   const serviceGoProdInstance = apm
     .service({ name: serviceName, environment: 'production', agentName: 'swift' })
+    .defaults({
+      'service.language.name': 'swift',
+    })
     .instance('instance-a');
 
   const interval = '1m';
@@ -59,7 +62,11 @@ export async function generateData({
             .transaction({ transactionName: transaction.name })
             .errors(
               serviceGoProdInstance
-                .error({ message: `Error ${index}`, type: transaction.name })
+                .error({
+                  message: `Error ${index}`,
+                  type: transaction.name,
+                  culprit: `Error culprit ${index}`,
+                })
                 .timestamp(timestamp)
             )
             .duration(1000)

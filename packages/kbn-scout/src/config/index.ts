@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { loadConfig } from './loader/config_load';
-export { getConfigFilePath } from './get_config_file';
-export { loadServersConfig } from './utils';
+export { readConfigFile } from './loader';
+export { getConfigFilePath, loadServersConfig } from './utils';
 export type { Config } from './config';

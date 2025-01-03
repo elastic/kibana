@@ -13,7 +13,7 @@
         "signature": [
           "({ hasUnsavedChanges, openConfirm, history, http, navigateToUrl, messageText, titleText, confirmButtonText, cancelButtonText, }: Props) => void"
         ],
-        "path": "packages/kbn-unsaved-changes-prompt/src/unsaved_changes_prompt/unsaved_changes_prompt.tsx",
+        "path": "src/platform/packages/shared/kbn-unsaved-changes-prompt/src/unsaved_changes_prompt/unsaved_changes_prompt.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -27,7 +27,7 @@
             "signature": [
               "Props"
             ],
-            "path": "packages/kbn-unsaved-changes-prompt/src/unsaved_changes_prompt/unsaved_changes_prompt.tsx",
+            "path": "src/platform/packages/shared/kbn-unsaved-changes-prompt/src/unsaved_changes_prompt/unsaved_changes_prompt.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true

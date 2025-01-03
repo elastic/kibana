@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { omit } from 'lodash';
 import type { Aggregation, Datafeed } from '../types/anomaly_detection_jobs';
 
 export function getAggregations<T>(obj: any): T | undefined {
@@ -18,3 +19,10 @@ export const getDatafeedAggregations = (
 ): Aggregation | undefined => {
   return getAggregations<Aggregation>(datafeedConfig);
 };
+
+export function getIndicesOptions(datafeedConfig?: Datafeed) {
+  // remove ignore_throttled from indices_options to avoid deprecation warnings in the logs
+  return datafeedConfig?.indices_options
+    ? omit(datafeedConfig.indices_options, 'ignore_throttled')
+    : {};
+}

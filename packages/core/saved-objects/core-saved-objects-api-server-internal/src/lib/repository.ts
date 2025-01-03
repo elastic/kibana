@@ -168,7 +168,7 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
     });
   }
 
-  private constructor(options: SavedObjectsRepositoryOptions) {
+  private constructor(private readonly options: SavedObjectsRepositoryOptions) {
     const {
       index,
       mappings,
@@ -563,5 +563,18 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
    */
   getCurrentNamespace(namespace?: string) {
     return this.helpers.common.getCurrentNamespace(namespace);
+  }
+
+  /**
+   * {@inheritDoc ISavedObjectsRepository.asScopedToNamespace}
+   */
+  asScopedToNamespace(namespace: string) {
+    return new SavedObjectsRepository({
+      ...this.options,
+      extensions: {
+        ...this.options.extensions,
+        spacesExtension: this.extensions.spacesExtension?.asScopedToNamespace(namespace),
+      },
+    });
   }
 }

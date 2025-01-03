@@ -23,7 +23,7 @@
           },
           "): React.JSX.Element | null; displayName: string | undefined; }"
         ],
-        "path": "packages/kbn-expandable-flyout/src/index.tsx",
+        "path": "x-pack/solutions/security/packages/expandable-flyout/src/index.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -43,7 +43,7 @@
                 "text": "ExpandableFlyoutProps"
               }
             ],
-            "path": "packages/kbn-expandable-flyout/src/index.tsx",
+            "path": "x-pack/solutions/security/packages/expandable-flyout/src/index.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -64,7 +64,7 @@
         "signature": [
           "({ children, urlKey, }: React.PropsWithChildren<ExpandableFlyoutProviderProps>) => React.JSX.Element"
         ],
-        "path": "packages/kbn-expandable-flyout/src/provider.tsx",
+        "path": "x-pack/solutions/security/packages/expandable-flyout/src/provider.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -78,7 +78,7 @@
             "signature": [
               "React.PropsWithChildren<ExpandableFlyoutProviderProps>"
             ],
-            "path": "packages/kbn-expandable-flyout/src/provider.tsx",
+            "path": "x-pack/solutions/security/packages/expandable-flyout/src/provider.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -106,7 +106,7 @@
             "text": "ExpandableFlyoutApi"
           }
         ],
-        "path": "packages/kbn-expandable-flyout/src/hooks/use_expandable_flyout_api.ts",
+        "path": "x-pack/solutions/security/packages/expandable-flyout/src/hooks/use_expandable_flyout_api.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -133,7 +133,7 @@
           },
           "[]"
         ],
-        "path": "packages/kbn-expandable-flyout/src/hooks/use_expandable_flyout_history.ts",
+        "path": "x-pack/solutions/security/packages/expandable-flyout/src/hooks/use_expandable_flyout_history.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -159,7 +159,7 @@
             "text": "FlyoutPanels"
           }
         ],
-        "path": "packages/kbn-expandable-flyout/src/hooks/use_expandable_flyout_state.ts",
+        "path": "x-pack/solutions/security/packages/expandable-flyout/src/hooks/use_expandable_flyout_state.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -175,7 +175,7 @@
         "tags": [],
         "label": "ExpandableFlyoutApi",
         "description": [],
-        "path": "packages/kbn-expandable-flyout/src/types.ts",
+        "path": "x-pack/solutions/security/packages/expandable-flyout/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -215,7 +215,7 @@
               },
               " | undefined; }) => void"
             ],
-            "path": "packages/kbn-expandable-flyout/src/types.ts",
+            "path": "x-pack/solutions/security/packages/expandable-flyout/src/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -226,7 +226,7 @@
                 "tags": [],
                 "label": "panels",
                 "description": [],
-                "path": "packages/kbn-expandable-flyout/src/types.ts",
+                "path": "x-pack/solutions/security/packages/expandable-flyout/src/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -247,7 +247,7 @@
                       },
                       " | undefined"
                     ],
-                    "path": "packages/kbn-expandable-flyout/src/types.ts",
+                    "path": "x-pack/solutions/security/packages/expandable-flyout/src/types.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -268,7 +268,7 @@
                       },
                       " | undefined"
                     ],
-                    "path": "packages/kbn-expandable-flyout/src/types.ts",
+                    "path": "x-pack/solutions/security/packages/expandable-flyout/src/types.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -289,7 +289,7 @@
                       },
                       " | undefined"
                     ],
-                    "path": "packages/kbn-expandable-flyout/src/types.ts",
+                    "path": "x-pack/solutions/security/packages/expandable-flyout/src/types.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -318,7 +318,7 @@
               },
               ") => void"
             ],
-            "path": "packages/kbn-expandable-flyout/src/types.ts",
+            "path": "x-pack/solutions/security/packages/expandable-flyout/src/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -338,7 +338,7 @@
                     "text": "FlyoutPanelProps"
                   }
                 ],
-                "path": "packages/kbn-expandable-flyout/src/types.ts",
+                "path": "x-pack/solutions/security/packages/expandable-flyout/src/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -366,7 +366,7 @@
               },
               ") => void"
             ],
-            "path": "packages/kbn-expandable-flyout/src/types.ts",
+            "path": "x-pack/solutions/security/packages/expandable-flyout/src/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -386,7 +386,7 @@
                     "text": "FlyoutPanelProps"
                   }
                 ],
-                "path": "packages/kbn-expandable-flyout/src/types.ts",
+                "path": "x-pack/solutions/security/packages/expandable-flyout/src/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -414,7 +414,7 @@
               },
               ") => void"
             ],
-            "path": "packages/kbn-expandable-flyout/src/types.ts",
+            "path": "x-pack/solutions/security/packages/expandable-flyout/src/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -434,7 +434,7 @@
                     "text": "FlyoutPanelProps"
                   }
                 ],
-                "path": "packages/kbn-expandable-flyout/src/types.ts",
+                "path": "x-pack/solutions/security/packages/expandable-flyout/src/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -454,7 +454,7 @@
             "signature": [
               "() => void"
             ],
-            "path": "packages/kbn-expandable-flyout/src/types.ts",
+            "path": "x-pack/solutions/security/packages/expandable-flyout/src/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -472,7 +472,7 @@
             "signature": [
               "() => void"
             ],
-            "path": "packages/kbn-expandable-flyout/src/types.ts",
+            "path": "x-pack/solutions/security/packages/expandable-flyout/src/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -490,7 +490,7 @@
             "signature": [
               "() => void"
             ],
-            "path": "packages/kbn-expandable-flyout/src/types.ts",
+            "path": "x-pack/solutions/security/packages/expandable-flyout/src/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -508,7 +508,7 @@
             "signature": [
               "() => void"
             ],
-            "path": "packages/kbn-expandable-flyout/src/types.ts",
+            "path": "x-pack/solutions/security/packages/expandable-flyout/src/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -526,7 +526,7 @@
             "signature": [
               "() => void"
             ],
-            "path": "packages/kbn-expandable-flyout/src/types.ts",
+            "path": "x-pack/solutions/security/packages/expandable-flyout/src/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -554,7 +554,7 @@
           "EuiFlyoutResizableProps",
           ", \"onClose\">"
         ],
-        "path": "packages/kbn-expandable-flyout/src/index.tsx",
+        "path": "x-pack/solutions/security/packages/expandable-flyout/src/index.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -571,7 +571,7 @@
               "Panel",
               "[]"
             ],
-            "path": "packages/kbn-expandable-flyout/src/index.tsx",
+            "path": "x-pack/solutions/security/packages/expandable-flyout/src/index.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -596,7 +596,7 @@
               "Theme",
               ">"
             ],
-            "path": "packages/kbn-expandable-flyout/src/index.tsx",
+            "path": "x-pack/solutions/security/packages/expandable-flyout/src/index.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -612,7 +612,7 @@
             "signature": [
               "((event: KeyboardEvent | MouseEvent | TouchEvent) => void) | undefined"
             ],
-            "path": "packages/kbn-expandable-flyout/src/index.tsx",
+            "path": "x-pack/solutions/security/packages/expandable-flyout/src/index.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -629,7 +629,7 @@
               "FlyoutCustomProps",
               " | undefined"
             ],
-            "path": "packages/kbn-expandable-flyout/src/index.tsx",
+            "path": "x-pack/solutions/security/packages/expandable-flyout/src/index.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -645,7 +645,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/kbn-expandable-flyout/src/index.tsx",
+            "path": "x-pack/solutions/security/packages/expandable-flyout/src/index.tsx",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -659,7 +659,7 @@
         "tags": [],
         "label": "FlyoutPanelProps",
         "description": [],
-        "path": "packages/kbn-expandable-flyout/src/types.ts",
+        "path": "x-pack/solutions/security/packages/expandable-flyout/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -672,7 +672,7 @@
             "description": [
               "\nUnique key to identify the panel"
             ],
-            "path": "packages/kbn-expandable-flyout/src/types.ts",
+            "path": "x-pack/solutions/security/packages/expandable-flyout/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -688,7 +688,7 @@
             "signature": [
               "Record<string, unknown> | undefined"
             ],
-            "path": "packages/kbn-expandable-flyout/src/types.ts",
+            "path": "x-pack/solutions/security/packages/expandable-flyout/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -711,7 +711,7 @@
               },
               " | undefined"
             ],
-            "path": "packages/kbn-expandable-flyout/src/types.ts",
+            "path": "x-pack/solutions/security/packages/expandable-flyout/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -727,7 +727,7 @@
             "signature": [
               "Record<string, unknown> | undefined"
             ],
-            "path": "packages/kbn-expandable-flyout/src/types.ts",
+            "path": "x-pack/solutions/security/packages/expandable-flyout/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -741,7 +741,7 @@
         "tags": [],
         "label": "FlyoutPanels",
         "description": [],
-        "path": "packages/kbn-expandable-flyout/src/store/state.ts",
+        "path": "x-pack/solutions/security/packages/expandable-flyout/src/store/state.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -764,7 +764,7 @@
               },
               " | undefined"
             ],
-            "path": "packages/kbn-expandable-flyout/src/store/state.ts",
+            "path": "x-pack/solutions/security/packages/expandable-flyout/src/store/state.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -787,7 +787,7 @@
               },
               " | undefined"
             ],
-            "path": "packages/kbn-expandable-flyout/src/store/state.ts",
+            "path": "x-pack/solutions/security/packages/expandable-flyout/src/store/state.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -810,7 +810,7 @@
               },
               "[] | undefined"
             ],
-            "path": "packages/kbn-expandable-flyout/src/store/state.ts",
+            "path": "x-pack/solutions/security/packages/expandable-flyout/src/store/state.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -831,7 +831,7 @@
               },
               "[]"
             ],
-            "path": "packages/kbn-expandable-flyout/src/store/state.ts",
+            "path": "x-pack/solutions/security/packages/expandable-flyout/src/store/state.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -845,7 +845,7 @@
         "tags": [],
         "label": "PanelPath",
         "description": [],
-        "path": "packages/kbn-expandable-flyout/src/types.ts",
+        "path": "x-pack/solutions/security/packages/expandable-flyout/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -858,7 +858,7 @@
             "description": [
               "\nTop level tab that to be displayed"
             ],
-            "path": "packages/kbn-expandable-flyout/src/types.ts",
+            "path": "x-pack/solutions/security/packages/expandable-flyout/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -874,7 +874,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/kbn-expandable-flyout/src/types.ts",
+            "path": "x-pack/solutions/security/packages/expandable-flyout/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }

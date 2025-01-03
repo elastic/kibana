@@ -18,6 +18,7 @@ import xpackObservabilityTelemetrySchema from '@kbn/telemetry-collection-xpack-p
 import xpackSearchTelemetrySchema from '@kbn/telemetry-collection-xpack-plugin/schema/xpack_search.json';
 import xpackSecurityTelemetrySchema from '@kbn/telemetry-collection-xpack-plugin/schema/xpack_security.json';
 import { assertTelemetryPayload } from '@kbn/telemetry-tools';
+import type { TelemetrySchemaObject } from '@kbn/telemetry-tools/src/schema_ftr_validations/schema_to_config_schema';
 import {
   ELASTIC_HTTP_VERSION_HEADER,
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
@@ -62,7 +63,8 @@ export default function ({ getService }: FtrProviderContext) {
 
     it('should pass the schema validation', () => {
       const root = deepmerge(ossRootTelemetrySchema, xpackRootTelemetrySchema);
-      const plugins = [
+
+      const schemas = [
         ossPluginsTelemetrySchema,
         ossPackagesTelemetrySchema,
         ossPlatformTelemetrySchema,
@@ -71,7 +73,8 @@ export default function ({ getService }: FtrProviderContext) {
         xpackObservabilityTelemetrySchema,
         xpackSearchTelemetrySchema,
         xpackSecurityTelemetrySchema,
-      ].reduce((acc, schema) => deepmerge(acc, schema));
+      ] as TelemetrySchemaObject[];
+      const plugins = schemas.reduce((acc, schema) => deepmerge(acc, schema));
 
       try {
         assertTelemetryPayload({ root, plugins }, stats);

@@ -124,7 +124,7 @@ export class AnomalyTimelineStateService extends StateService {
       update: AnomalyExplorerSwimLaneUrlState,
       replaceState?: boolean
     ) => {
-      const explorerUrlState = this.anomalyExplorerUrlStateService.getPageUrlState();
+      const explorerUrlState = this.anomalyExplorerUrlStateService.getUrlState();
       const mlExplorerSwimLaneState = explorerUrlState?.mlExplorerSwimlane;
       const resultUpdate = replaceState ? update : { ...mlExplorerSwimLaneState, ...update };
       return this.anomalyExplorerUrlStateService.updateUrlState({
@@ -145,7 +145,7 @@ export class AnomalyTimelineStateService extends StateService {
 
     subscription.add(
       this.anomalyExplorerUrlStateService
-        .getPageUrlState$()
+        .getUrlState$()
         .pipe(
           map((v) => v?.mlExplorerSwimlane),
           distinctUntilChanged(isEqual)
@@ -171,7 +171,7 @@ export class AnomalyTimelineStateService extends StateService {
 
     subscription.add(
       combineLatest([
-        this.anomalyExplorerCommonStateService.getSelectedJobs$(),
+        this.anomalyExplorerCommonStateService.selectedJobs$,
         this.getContainerWidth$(),
         this._timeBounds$,
       ]).subscribe(([selectedJobs, containerWidth]) => {
@@ -192,8 +192,8 @@ export class AnomalyTimelineStateService extends StateService {
         map((v) => v?.viewByFieldName),
         distinctUntilChanged()
       ),
-      this.anomalyExplorerCommonStateService.getSelectedJobs$(),
-      this.anomalyExplorerCommonStateService.getFilterSettings$(),
+      this.anomalyExplorerCommonStateService.selectedJobs$,
+      this.anomalyExplorerCommonStateService.filterSettings$,
       this._selectedCells$,
     ]).subscribe(([currentlySelected, selectedJobs, filterSettings, selectedCells]) => {
       const { viewBySwimlaneFieldName, viewBySwimlaneOptions } = this._getViewBySwimlaneOptions(
@@ -220,7 +220,7 @@ export class AnomalyTimelineStateService extends StateService {
         }),
         distinctUntilChanged(isEqual)
       ),
-      this.anomalyExplorerCommonStateService.getInfluencerFilterQuery$(),
+      this.anomalyExplorerCommonStateService.influencerFilterQuery$,
       this._timeBounds$,
     ]).subscribe(([pagination, influencersFilerQuery]) => {
       let resultPaginaiton: SwimLanePagination = pagination;
@@ -233,7 +233,7 @@ export class AnomalyTimelineStateService extends StateService {
 
   private _initOverallSwimLaneData() {
     return combineLatest([
-      this.anomalyExplorerCommonStateService.getSelectedJobs$(),
+      this.anomalyExplorerCommonStateService.selectedJobs$,
       this._swimLaneSeverity$,
       this.getSwimLaneBucketInterval$(),
       this._timeBounds$,
@@ -263,8 +263,8 @@ export class AnomalyTimelineStateService extends StateService {
   private _initTopFieldValues() {
     return (
       combineLatest([
-        this.anomalyExplorerCommonStateService.getSelectedJobs$(),
-        this.anomalyExplorerCommonStateService.getInfluencerFilterQuery$(),
+        this.anomalyExplorerCommonStateService.selectedJobs$,
+        this.anomalyExplorerCommonStateService.influencerFilterQuery$,
         this.getViewBySwimlaneFieldName$(),
         this.getSwimLanePagination$(),
         this.getSwimLaneCardinality$(),
@@ -331,8 +331,8 @@ export class AnomalyTimelineStateService extends StateService {
   private _initViewBySwimLaneData() {
     return combineLatest([
       this._overallSwimLaneData$.pipe(skipWhile((v) => !v)),
-      this.anomalyExplorerCommonStateService.getSelectedJobs$(),
-      this.anomalyExplorerCommonStateService.getInfluencerFilterQuery$(),
+      this.anomalyExplorerCommonStateService.selectedJobs$,
+      this.anomalyExplorerCommonStateService.influencerFilterQuery$,
       this._swimLaneSeverity$,
       this.getSwimLaneBucketInterval$(),
       this.getViewBySwimlaneFieldName$(),
@@ -671,7 +671,7 @@ export class AnomalyTimelineStateService extends StateService {
    */
   public getSwimLaneJobs$(): Observable<ExplorerJob[]> {
     return combineLatest([
-      this.anomalyExplorerCommonStateService.getSelectedJobs$(),
+      this.anomalyExplorerCommonStateService.selectedJobs$,
       this.getViewBySwimlaneFieldName$(),
       this._viewBySwimLaneData$,
       this._selectedCells$,

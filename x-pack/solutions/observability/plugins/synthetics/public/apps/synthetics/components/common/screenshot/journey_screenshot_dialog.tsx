@@ -27,8 +27,7 @@ import {
   EuiOutsideClickDetector,
   useIsWithinMaxBreakpoint,
 } from '@elastic/eui';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
-
+import styled from '@emotion/styled';
 import { SYNTHETICS_API_URLS } from '../../../../../../common/constants';
 import { SyntheticsSettingsContext } from '../../../contexts';
 import { useRetrieveStepImage } from '../monitor_test_result/use_retrieve_step_image';
@@ -173,7 +172,7 @@ export const JourneyScreenshotDialog = ({
               </EuiButtonEmpty>
             </EuiFlexItem>
             <EuiFlexItem grow={false} css={{ flexBasis: 'fit-content' }}>
-              <EuiText color={euiTheme.colors.text}>
+              <EuiText color={euiTheme.colors.textParagraph}>
                 {i18n.translate('xpack.synthetics.monitor.stepOfSteps', {
                   defaultMessage: 'Step: {stepNumber} of {totalSteps}',
                   values: {
@@ -201,7 +200,7 @@ export const JourneyScreenshotDialog = ({
             </EuiFlexItem>
           </EuiFlexGroup>
           <EuiText
-            color={euiTheme.colors.text}
+            color={euiTheme.colors.textParagraph}
             css={{
               outline: 0,
               padding: euiTheme.size.m,
@@ -221,7 +220,7 @@ export const JourneyScreenshotDialog = ({
   ) : null;
 };
 
-const ModalBodyStyled = euiStyled(EuiModalBody)`
+const ModalBodyStyled = styled(EuiModalBody)`
   &&& {
     & > div {
       display: flex;

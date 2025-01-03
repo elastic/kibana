@@ -329,5 +329,32 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expect(conversation.messages.length).to.be(5);
       });
     });
+
+    describe('security roles and access privileges', () => {
+      describe('should deny access for users without the ai_assistant privilege', () => {
+        it('PUT /internal/observability_ai_assistant/kb/user_instructions', async () => {
+          await observabilityAIAssistantAPIClient
+            .slsUnauthorized({
+              endpoint: 'PUT /internal/observability_ai_assistant/kb/user_instructions',
+              params: {
+                body: {
+                  id: 'test-instruction',
+                  text: 'Test user instruction',
+                  public: true,
+                },
+              },
+            })
+            .expect(403);
+        });
+
+        it('GET /internal/observability_ai_assistant/kb/user_instructions', async () => {
+          await observabilityAIAssistantAPIClient
+            .slsUnauthorized({
+              endpoint: 'GET /internal/observability_ai_assistant/kb/user_instructions',
+            })
+            .expect(403);
+        });
+      });
+    });
   });
 }

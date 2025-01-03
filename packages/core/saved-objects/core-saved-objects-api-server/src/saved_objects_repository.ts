@@ -552,4 +552,10 @@ export interface ISavedObjectsRepository {
    * namespace.
    */
   getCurrentNamespace(namespace?: string): string | undefined;
+
+  /**
+   * Returns a new Saved Objects repository scoped to the specified namespace.
+   * @param namespace Space to which the repository should be scoped to.
+   */
+  asScopedToNamespace(namespace: string): ISavedObjectsRepository;
 }

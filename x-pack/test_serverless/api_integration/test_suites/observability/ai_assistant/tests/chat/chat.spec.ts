@@ -23,6 +23,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const svlCommonApi = getService('svlCommonApi');
   const log = getService('log');
   const roleScopedSupertest = getService('roleScopedSupertest');
+  const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantAPIClient');
 
   let supertestEditorWithCookieCredentials: SupertestWithRoleScope;
 
@@ -170,57 +171,23 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       ]);
     });
 
-    it.skip('returns a useful error if the request fails', async () => {
-      const interceptor = proxy.intercept('conversation', () => true);
-
-      const passThrough = new PassThrough();
-
-      supertestWithoutAuth
-        .post(CHAT_API_URL)
-        .set(roleAuthc.apiKeyHeader)
-        .set(internalReqHeader)
-        .set('kbn-xsrf', 'foo')
-        .send({
-          name: 'my_api_call',
-          messages,
-          connectorId,
-          functions: [],
-          scopes: ['all'],
-        })
-        .expect(200)
-        .pipe(passThrough);
-
-      let data: string = '';
-
-      passThrough.on('data', (chunk) => {
-        data += chunk.toString('utf-8');
+    describe('security roles and access privileges', () => {
+      it('should deny access for users without the ai_assistant privilege', async () => {
+        await observabilityAIAssistantAPIClient
+          .slsUnauthorized({
+            endpoint: `POST ${CHAT_API_URL}`,
+            params: {
+              body: {
+                name: 'my_api_call',
+                messages,
+                connectorId,
+                functions: [],
+                scopes: ['all'],
+              },
+            },
+          })
+          .expect(403);
       });
-
-      const simulator = await interceptor.waitForIntercept();
-
-      await simulator.status(400);
-
-      await simulator.rawWrite(
-        JSON.stringify({
-          error: {
-            code: 'context_length_exceeded',
-            message:
-              "This model's maximum context length is 8192 tokens. However, your messages resulted in 11036 tokens. Please reduce the length of the messages.",
-            param: 'messages',
-            type: 'invalid_request_error',
-          },
-        })
-      );
-
-      await simulator.rawEnd();
-
-      await new Promise<void>((resolve) => passThrough.on('end', () => resolve()));
-
-      const response = JSON.parse(data.trim());
-
-      expect(response.error.message).to.be(
-        `Token limit reached. Token limit is 8192, but the current conversation has 11036 tokens.`
-      );
     });
   });
 }

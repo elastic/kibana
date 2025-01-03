@@ -14,7 +14,7 @@
       "tags": [],
       "label": "AssetInventoryPluginSetup",
       "description": [],
-      "path": "x-pack/plugins/asset_inventory/public/types.ts",
+      "path": "x-pack/solutions/security/plugins/asset_inventory/public/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -28,10 +28,45 @@
       "tags": [],
       "label": "AssetInventoryPluginStart",
       "description": [],
-      "path": "x-pack/plugins/asset_inventory/public/types.ts",
+      "path": "x-pack/solutions/security/plugins/asset_inventory/public/types.ts",
       "deprecated": false,
       "trackAdoption": false,
-      "children": [],
+      "children": [
+        {
+          "parentPluginId": "assetInventory",
+          "id": "def-public.AssetInventoryPluginStart.getAssetInventoryPage",
+          "type": "Function",
+          "tags": [],
+          "label": "getAssetInventoryPage",
+          "description": [],
+          "signature": [
+            "(assetInventoryStartDeps: ",
+            "AppPluginStartDependencies",
+            ") => JSX.Element"
+          ],
+          "path": "x-pack/solutions/security/plugins/asset_inventory/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "assetInventory",
+              "id": "def-public.AssetInventoryPluginStart.getAssetInventoryPage.$1",
+              "type": "Object",
+              "tags": [],
+              "label": "assetInventoryStartDeps",
+              "description": [],
+              "signature": [
+                "AppPluginStartDependencies"
+              ],
+              "path": "x-pack/solutions/security/plugins/asset_inventory/public/types.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": []
+        }
+      ],
       "lifecycle": "start",
       "initialIsOpen": true
     }
@@ -50,7 +85,7 @@
       "tags": [],
       "label": "AssetInventoryPluginSetup",
       "description": [],
-      "path": "x-pack/plugins/asset_inventory/server/types.ts",
+      "path": "x-pack/solutions/security/plugins/asset_inventory/server/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -64,7 +99,7 @@
       "tags": [],
       "label": "AssetInventoryPluginStart",
       "description": [],
-      "path": "x-pack/plugins/asset_inventory/server/types.ts",
+      "path": "x-pack/solutions/security/plugins/asset_inventory/server/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -88,7 +123,7 @@
         "signature": [
           "\"assetInventory\""
         ],
-        "path": "x-pack/plugins/asset_inventory/common/index.ts",
+        "path": "x-pack/solutions/security/plugins/asset_inventory/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -103,7 +138,7 @@
         "signature": [
           "\"assetInventory\""
         ],
-        "path": "x-pack/plugins/asset_inventory/common/index.ts",
+        "path": "x-pack/solutions/security/plugins/asset_inventory/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

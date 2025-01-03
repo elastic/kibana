@@ -7,8 +7,8 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiToken } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FieldDefinition } from '@kbn/streams-plugin/common/types';
 import React from 'react';
+import { FieldDefinitionConfig } from '@kbn/streams-schema';
 
 export const FIELD_TYPE_MAP = {
   boolean: {
@@ -55,7 +55,7 @@ export const FIELD_TYPE_MAP = {
   },
 };
 
-export const FieldType = ({ type }: { type: FieldDefinition['type'] }) => {
+export const FieldType = ({ type }: { type: FieldDefinitionConfig['type'] }) => {
   return (
     <EuiFlexGroup alignItems="center" gutterSize="s">
       <EuiFlexItem grow={false}>

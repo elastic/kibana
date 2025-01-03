@@ -69,6 +69,41 @@ export default ({ getService }: FtrProviderContext): void => {
           expect(reviewResponse.stats.num_rules_with_conflicts).toBe(0);
           expect(reviewResponse.stats.num_rules_with_non_solvable_conflicts).toBe(0);
         });
+
+        it('should trim all whitespace before version comparison', async () => {
+          // Install base prebuilt detection rule
+          await createHistoricalPrebuiltRuleAssetSavedObjects(es, getRuleAssetSavedObjects());
+          await installPrebuiltRules(es, supertest);
+
+          // Customize a single line string field on the installed rule
+          await patchRule(supertest, log, {
+            rule_id: 'rule-1',
+            name: 'A\n',
+          });
+
+          // Increment the version of the installed rule, do NOT update the related single line string field, and create the new rule assets
+          const updatedRuleAssetSavedObjects = [
+            createRuleAssetSavedObject({
+              rule_id: 'rule-1',
+              name: '\nA',
+              version: 2,
+            }),
+          ];
+          await createHistoricalPrebuiltRuleAssetSavedObjects(es, updatedRuleAssetSavedObjects);
+
+          // Call the upgrade review prebuilt rules endpoint and check that there is 1 rule eligible for update
+          // but single line string field (name) is NOT returned
+          const reviewResponse = await reviewPrebuiltRulesToUpgrade(supertest);
+          expect(reviewResponse.rules[0].diff.fields.name).toBeUndefined();
+
+          expect(reviewResponse.rules[0].diff.num_fields_with_updates).toBe(1);
+          expect(reviewResponse.rules[0].diff.num_fields_with_conflicts).toBe(0);
+          expect(reviewResponse.rules[0].diff.num_fields_with_non_solvable_conflicts).toBe(0);
+
+          expect(reviewResponse.stats.num_rules_to_upgrade_total).toBe(1);
+          expect(reviewResponse.stats.num_rules_with_conflicts).toBe(0);
+          expect(reviewResponse.stats.num_rules_with_non_solvable_conflicts).toBe(0);
+        });
       });
 
       describe("when rule field doesn't have an update but has a custom value - scenario ABA", () => {

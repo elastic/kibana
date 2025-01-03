@@ -233,12 +233,12 @@ export default ({ getService }: FtrProviderContext): void => {
           '48bdf505176b47705da896fb58bc2070768c072778f5412f162abec2ff6ca67b',
         ],
         index: [
-          '.siem-signals-default-000001',
-          '.siem-signals-default-000001',
-          '.siem-signals-default-000001',
-          '.siem-signals-default-000001',
-          '.siem-signals-default-000001',
-          '.siem-signals-default-000001',
+          'siem-signals-default-000001',
+          'siem-signals-default-000001',
+          'siem-signals-default-000001',
+          'siem-signals-default-000001',
+          'siem-signals-default-000001',
+          'siem-signals-default-000001',
         ],
       },
     });

@@ -56,7 +56,6 @@ describe('server config', () => {
           "enabled": false,
           "keystore": Object {},
           "supportedProtocols": Array [
-            "TLSv1.1",
             "TLSv1.2",
             "TLSv1.3",
           ],

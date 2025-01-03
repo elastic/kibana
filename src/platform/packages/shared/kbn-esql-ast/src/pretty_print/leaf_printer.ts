@@ -16,6 +16,7 @@ import {
   ESQLParamLiteral,
   ESQLProperNode,
   ESQLSource,
+  ESQLStringLiteral,
   ESQLTimeInterval,
 } from '../types';
 
@@ -27,7 +28,16 @@ const regexUnquotedIdPattern = /^([a-z\*_\@]{1})[a-z0-9_\*]*$/i;
  * atomic short string.
  */
 export const LeafPrinter = {
-  source: (node: ESQLSource) => node.name,
+  source: (node: ESQLSource): string => {
+    const { index, name, cluster } = node;
+    let text = index || name || '';
+
+    if (cluster) {
+      text = `${cluster}:${text}`;
+    }
+
+    return text;
+  },
 
   identifier: (node: ESQLIdentifier) => {
     const name = node.name;
@@ -72,6 +82,21 @@ export const LeafPrinter = {
     return formatted;
   },
 
+  string: (node: ESQLStringLiteral) => {
+    const str = node.valueUnquoted;
+    const strFormatted =
+      '"' +
+      str
+        .replace(/\\/g, '\\\\')
+        .replace(/"/g, '\\"')
+        .replace(/\n/g, '\\n')
+        .replace(/\r/g, '\\r')
+        .replace(/\t/g, '\\t') +
+      '"';
+
+    return strFormatted;
+  },
+
   literal: (node: ESQLLiteral) => {
     switch (node.literalType) {
       case 'null': {
@@ -84,7 +109,7 @@ export const LeafPrinter = {
         return LeafPrinter.param(node);
       }
       case 'keyword': {
-        return String(node.value);
+        return LeafPrinter.string(node);
       }
       case 'double': {
         const isRounded = node.value % 1 === 0;

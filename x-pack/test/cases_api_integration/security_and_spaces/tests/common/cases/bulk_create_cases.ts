@@ -41,7 +41,7 @@ export default ({ getService }: FtrProviderContext): void => {
    * There is no official route that supports
    * bulk creating cases. The purpose of this test
    * is to test the bulkCreate method of the cases client in
-   * x-pack/plugins/cases/server/client/cases/bulk_create.ts
+   * x-pack/platform/plugins/shared/cases/server/client/cases/bulk_create.ts
    *
    * The test route is configured here x-pack/test/cases_api_integration/common/plugins/cases/server/routes.ts
    */

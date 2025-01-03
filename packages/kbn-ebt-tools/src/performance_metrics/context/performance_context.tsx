@@ -10,38 +10,19 @@
 import React, { useMemo, useState } from 'react';
 import { afterFrame } from '@elastic/apm-rum-core';
 import { useLocation } from 'react-router-dom';
-import { perfomanceMarkers } from '../performance_markers';
 import { PerformanceApi, PerformanceContext } from './use_performance_context';
 import { PerformanceMetricEvent } from '../../performance_metric_events';
+import { measureInteraction } from './measure_interaction';
 
 export type CustomMetrics = Omit<PerformanceMetricEvent, 'eventName' | 'meta' | 'duration'>;
 
-function measureInteraction() {
-  performance.mark(perfomanceMarkers.startPageChange);
-  const trackedRoutes: string[] = [];
-  return {
-    /**
-     * Marks the end of the page ready state and measures the performance between the start of the page change and the end of the page ready state.
-     * @param pathname - The pathname of the page.
-     * @param customMetrics - Custom metrics to be included in the performance measure.
-     */
-    pageReady(pathname: string, customMetrics?: CustomMetrics) {
-      performance.mark(perfomanceMarkers.endPageReady);
-
-      if (!trackedRoutes.includes(pathname)) {
-        performance.measure(pathname, {
-          detail: {
-            eventName: 'kibana:plugin_render_time',
-            type: 'kibana:performance',
-            customMetrics,
-          },
-          start: perfomanceMarkers.startPageChange,
-          end: perfomanceMarkers.endPageReady,
-        });
-        trackedRoutes.push(pathname);
-      }
-    },
-  };
+export interface Meta {
+  rangeFrom: string;
+  rangeTo: string;
+}
+export interface EventData {
+  customMetrics?: CustomMetrics;
+  meta?: Meta;
 }
 
 export function PerformanceContextProvider({ children }: { children: React.ReactElement }) {
@@ -61,9 +42,9 @@ export function PerformanceContextProvider({ children }: { children: React.React
 
   const api = useMemo<PerformanceApi>(
     () => ({
-      onPageReady(customMetrics) {
+      onPageReady(eventData) {
         if (isRendered) {
-          interaction.pageReady(location.pathname, customMetrics);
+          interaction.pageReady(location.pathname, eventData);
         }
       },
     }),

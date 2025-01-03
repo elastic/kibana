@@ -20,8 +20,6 @@ export async function getClusterStats(esClient: ElasticsearchClient) {
   return await esClient.cluster.stats(
     {
       timeout: CLUSTER_STAT_TIMEOUT,
-
-      // @ts-expect-error
       include_remotes: true,
     },
     {

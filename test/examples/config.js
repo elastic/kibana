@@ -19,7 +19,6 @@ export default async function ({ readConfigFile }) {
     rootTags: ['runOutsideOfCiGroups'],
     testFiles: [
       require.resolve('./hello_world'),
-      require.resolve('./bfetch_explorer'),
       require.resolve('./ui_actions'),
       require.resolve('./state_sync'),
       require.resolve('./routing'),

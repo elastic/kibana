@@ -55,17 +55,17 @@ export class SearchSelection extends React.Component<SearchSelectionProps> {
             noItemsMessage={i18n.translate(
               'visualizations.newVisWizard.searchSelection.notFoundLabel',
               {
-                defaultMessage: 'No matching indices or saved searches found.',
+                defaultMessage: 'No matching indices or Discover sessions found.',
               }
             )}
             savedObjectMetaData={[
               {
                 type: 'search',
-                getIconForSavedObject: () => 'search',
+                getIconForSavedObject: () => 'discoverApp',
                 name: i18n.translate(
                   'visualizations.newVisWizard.searchSelection.savedObjectType.search',
                   {
-                    defaultMessage: 'Saved search',
+                    defaultMessage: 'Discover session',
                   }
                 ),
                 // ignore the saved searches that have text-based languages queries

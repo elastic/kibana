@@ -526,7 +526,8 @@ export class WrappingPrettyPrinter {
 
       switch (node.subtype) {
         case 'unary-expression': {
-          txt = `${operator} ${ctx.visitArgument(0, inp).txt}`;
+          const separator = operator === '-' || operator === '+' ? '' : ' ';
+          txt = `${operator}${separator}${ctx.visitArgument(0, inp).txt}`;
           break;
         }
         case 'postfix-unary-expression': {

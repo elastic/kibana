@@ -76,7 +76,7 @@ export const DataUsageMetrics = memo(
       if (!metricTypesFromUrl && isFirstPageLoad) {
         setUrlMetricTypesFilter(metricsFilters.metricTypes.join(','));
       }
-      if (!dataStreamsFromUrl && dataStreams && isFirstPageLoad) {
+      if (!dataStreamsFromUrl && !!dataStreams && dataStreams.length > 0 && isFirstPageLoad) {
         const hasMoreThan50 = dataStreams.length > 50;
         const _dataStreams = hasMoreThan50 ? dataStreams.slice(0, 50) : dataStreams;
         setUrlDataStreamsFilter(_dataStreams.map((ds) => ds.name).join(','));

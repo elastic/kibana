@@ -7,10 +7,9 @@
 
 import * as t from 'io-ts';
 
+// This should be replaced by TLSParams from @kbn/response-ops-rule-params
 export const TLSParamsType = t.partial({
   search: t.string,
   certAgeThreshold: t.number,
   certExpirationThreshold: t.number,
 });
-
-export type TLSParams = t.TypeOf<typeof TLSParamsType>;

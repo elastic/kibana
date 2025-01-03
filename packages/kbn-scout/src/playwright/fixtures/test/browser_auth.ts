@@ -14,6 +14,11 @@ import { serviceLoadedMsg } from '../../utils';
 
 type LoginFunction = (role: string) => Promise<void>;
 
+/**
+ * The "browserAuth" fixture simplifies the process of logging into Kibana with
+ * different roles during tests. It uses the "samlAuth" fixture to create an authentication session
+ * for the specified role and the "context" fixture to update the cookie with the role-scoped session.
+ */
 export const browserAuthFixture = base.extend<{ browserAuth: LoginFixture }, ScoutWorkerFixtures>({
   browserAuth: async ({ log, context, samlAuth, config }, use) => {
     const setSessionCookie = async (cookieValue: string) => {

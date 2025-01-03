@@ -47,7 +47,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       .set('kbn-xsrf', 'foo')
       .send(getTestAlertData(overwrites))
       .expect(200);
-    objectRemover.add(createdRule.id, 'alert', 'alerts');
+    objectRemover.add(createdRule.id, 'rule', 'alerting');
     return createdRule;
   }
 
@@ -62,7 +62,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         })
       )
       .expect(200);
-    objectRemover.add(createdRule.id, 'alert', 'alerts');
+    objectRemover.add(createdRule.id, 'rule', 'alerting');
     return createdRule;
   }
 

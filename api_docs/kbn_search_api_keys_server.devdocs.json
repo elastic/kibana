@@ -39,7 +39,7 @@
           },
           ") => void"
         ],
-        "path": "packages/kbn-search-api-keys-server/src/routes/routes.ts",
+        "path": "x-pack/solutions/search/packages/kbn-search-api-keys-server/src/routes/routes.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -62,7 +62,7 @@
               },
               ">"
             ],
-            "path": "packages/kbn-search-api-keys-server/src/routes/routes.ts",
+            "path": "x-pack/solutions/search/packages/kbn-search-api-keys-server/src/routes/routes.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -83,7 +83,7 @@
                 "text": "Logger"
               }
             ],
-            "path": "packages/kbn-search-api-keys-server/src/routes/routes.ts",
+            "path": "x-pack/solutions/search/packages/kbn-search-api-keys-server/src/routes/routes.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true

@@ -22,6 +22,7 @@ export const sizeMap = {
   xs: 16,
 };
 
+/** @deprecated This component will soon be replaced by `AssistantIcon` from `@kbn/ai-assistant-icon`. */
 export function AssistantAvatar({ size = 's', css, className }: AssistantAvatarProps) {
   const { euiTheme } = useEuiTheme();
   const sizePx = sizeMap[size];

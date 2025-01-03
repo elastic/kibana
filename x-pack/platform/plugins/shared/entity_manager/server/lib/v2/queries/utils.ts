@@ -33,8 +33,8 @@ function mergeEntities(
     merged['entity.last_seen_timestamp'] = latestTimestamp;
   }
 
-  for (const [key, value] of Object.entries(entity2).filter(([_key]) =>
-    mergeableFields.includes(_key)
+  for (const [key, value] of Object.entries(entity2).filter(
+    ([_key]) => mergeableFields.includes(_key) && entity2[_key]
   )) {
     if (merged[key]) {
       // we want to keep identity fields as single-value properties.

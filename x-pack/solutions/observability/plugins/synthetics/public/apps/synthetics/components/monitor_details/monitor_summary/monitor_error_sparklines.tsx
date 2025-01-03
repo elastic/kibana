@@ -7,7 +7,7 @@
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import React, { useMemo } from 'react';
-import { useEuiTheme } from '@elastic/eui';
+import { euiPaletteColorBlindBehindText, useEuiTheme } from '@elastic/eui';
 import { useMonitorQueryFilters } from '../hooks/use_monitor_query_filters';
 import { ERRORS_LABEL } from './monitor_errors_count';
 import { ClientPluginsStart } from '../../../../../plugin';
@@ -23,6 +23,7 @@ export const MonitorErrorSparklines = ({ from, to, id }: Props) => {
   } = useKibana<ClientPluginsStart>().services;
 
   const { euiTheme } = useEuiTheme();
+  const isAmsterdam = euiTheme.flags.hasVisColorAdjustment;
   const { queryIdFilter, locationFilter } = useMonitorQueryFilters();
 
   const time = useMemo(() => ({ from, to }), [from, to]);
@@ -47,8 +48,10 @@ export const MonitorErrorSparklines = ({ from, to, id }: Props) => {
           dataType: 'synthetics',
           selectedMetricField: 'monitor_errors',
           name: ERRORS_LABEL,
-          color: euiTheme.colors.danger,
           operationType: 'unique_count',
+          color: isAmsterdam
+            ? euiPaletteColorBlindBehindText()[1]
+            : euiTheme.colors.vis.euiColorVis6,
         },
       ]}
     />

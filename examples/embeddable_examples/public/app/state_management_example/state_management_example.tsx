@@ -21,7 +21,6 @@ import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { ViewMode } from '@kbn/presentation-publishing';
 import { ReactEmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import { BehaviorSubject, Subject } from 'rxjs';
-import useMountedState from 'react-use/lib/useMountedState';
 import { SAVED_BOOK_ID } from '../../react_embeddables/saved_book/constants';
 import {
   BookApi,
@@ -32,7 +31,6 @@ import { lastSavedStateSessionStorage } from './last_saved_state';
 import { unsavedChangesSessionStorage } from './unsaved_changes';
 
 export const StateManagementExample = ({ uiActions }: { uiActions: UiActionsStart }) => {
-  const isMounted = useMountedState();
   const saveNotification$ = useMemo(() => {
     return new Subject<void>();
   }, []);
@@ -123,16 +121,13 @@ export const StateManagementExample = ({ uiActions }: { uiActions: UiActionsStar
         <EuiFlexItem grow={false}>
           <EuiButton
             disabled={isSaving || !hasUnsavedChanges}
-            onClick={async () => {
+            onClick={() => {
               if (!bookApi) {
                 return;
               }
 
               setIsSaving(true);
-              const bookSerializedState = await bookApi.serializeState();
-              if (!isMounted()) {
-                return;
-              }
+              const bookSerializedState = bookApi.serializeState();
               lastSavedStateSessionStorage.save(bookSerializedState);
               saveNotification$.next(); // signals embeddable unsaved change tracking to update last saved state
               setHasUnsavedChanges(false);

@@ -27,7 +27,7 @@ export interface UserProfileAvatarData {
   imageUrl?: string | null;
 }
 
-export type DarkModeValue = '' | 'dark' | 'light';
+export type DarkModeValue = 'system' | 'dark' | 'light' | 'space_default';
 
 /**
  * User settings stored in the data object of the User Profile
@@ -46,5 +46,6 @@ export interface UserProfileData {
 export interface UserProfileAPIClient {
   userProfile$: Observable<UserProfileData | null>;
   enabled$: Observable<boolean>;
+  userProfileLoaded$: Observable<boolean>;
   partialUpdate: <D extends Partial<UserProfileData>>(data: D) => Promise<void>;
 }

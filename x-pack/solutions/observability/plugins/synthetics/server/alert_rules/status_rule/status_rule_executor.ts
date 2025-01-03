@@ -12,6 +12,7 @@ import {
 import { Logger } from '@kbn/core/server';
 import { intersection, isEmpty, uniq } from 'lodash';
 import { getAlertDetailsUrl } from '@kbn/observability-plugin/common';
+import { SyntheticsMonitorStatusRuleParams as StatusRuleParams } from '@kbn/response-ops-rule-params/synthetics_monitor_status';
 import {
   AlertOverviewStatus,
   AlertStatusConfigs,
@@ -41,7 +42,7 @@ import {
   getAllMonitors,
   processMonitors,
 } from '../../saved_objects/synthetics_monitor/get_all_monitors';
-import { getConditionType, StatusRuleParams } from '../../../common/rules/status_rule';
+import { getConditionType } from '../../../common/rules/status_rule';
 import { ConfigKey, EncryptedSyntheticsMonitorAttributes } from '../../../common/runtime_types';
 import { SyntheticsMonitorClient } from '../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
 import { monitorAttributes } from '../../../common/types/saved_objects';

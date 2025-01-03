@@ -13,7 +13,7 @@
         "signature": [
           "({ onDismiss }: { onDismiss: () => void; }) => React.JSX.Element"
         ],
-        "path": "packages/kbn-avc-banner/src/index.tsx",
+        "path": "src/platform/packages/shared/kbn-avc-banner/src/index.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -27,7 +27,7 @@
             "signature": [
               "{ onDismiss: () => void; }"
             ],
-            "path": "packages/kbn-avc-banner/src/index.tsx",
+            "path": "src/platform/packages/shared/kbn-avc-banner/src/index.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -46,7 +46,7 @@
         "signature": [
           "() => boolean"
         ],
-        "path": "packages/kbn-avc-banner/src/index.tsx",
+        "path": "src/platform/packages/shared/kbn-avc-banner/src/index.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [],

@@ -5,23 +5,30 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { useTheme } from '@kbn/observability-shared-plugin/public';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { useSelector } from 'react-redux';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPanel,
+  EuiSpacer,
+  EuiTitle,
+  euiPaletteColorBlindBehindText,
+  useEuiTheme,
+} from '@elastic/eui';
 import { RECORDS_FIELD } from '@kbn/exploratory-view-plugin/public';
-import { useMonitorQueryFilters } from '../../hooks/use_monitor_query_filters';
+import { i18n } from '@kbn/i18n';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import React, { useMemo } from 'react';
+import { useSelector } from 'react-redux';
 import {
   SYNTHETICS_STATUS_RULE,
   SYNTHETICS_TLS_RULE,
 } from '../../../../../../../common/constants/synthetics_alerts';
-import { useMonitorFilters } from '../../hooks/use_monitor_filters';
+import { ClientPluginsStart } from '../../../../../../plugin';
+import { useGetUrlParams, useRefreshedRange } from '../../../../hooks';
 import { selectOverviewStatus } from '../../../../state/overview_status';
 import { AlertsLink } from '../../../common/links/view_alerts';
-import { useRefreshedRange, useGetUrlParams } from '../../../../hooks';
-import { ClientPluginsStart } from '../../../../../../plugin';
+import { useMonitorFilters } from '../../hooks/use_monitor_filters';
+import { useMonitorQueryFilters } from '../../hooks/use_monitor_query_filters';
 
 export const useMonitorQueryIds = () => {
   const { status } = useSelector(selectOverviewStatus);
@@ -62,7 +69,8 @@ export const OverviewAlerts = () => {
     exploratoryView: { ExploratoryViewEmbeddable },
   } = useKibana<ClientPluginsStart>().services;
 
-  const theme = useTheme();
+  const { euiTheme } = useEuiTheme();
+  const isAmsterdam = euiTheme.flags.hasVisColorAdjustment;
   const filters = useMonitorFilters({ forAlerts: true });
 
   const { locations } = useGetUrlParams();
@@ -99,7 +107,9 @@ export const OverviewAlerts = () => {
                   { field: 'kibana.alert.status', values: ['active', 'recovered'] },
                   ...filters,
                 ],
-                color: theme.eui.euiColorVis1,
+                color: isAmsterdam
+                  ? euiTheme.colors.vis.euiColorVis1
+                  : euiTheme.colors.vis.euiColorVis6,
               },
             ]}
           />
@@ -129,7 +139,9 @@ export const OverviewAlerts = () => {
                   { field: 'kibana.alert.status', values: ['active', 'recovered'] },
                   ...filters,
                 ],
-                color: theme.eui.euiColorVis1_behindText,
+                color: isAmsterdam
+                  ? euiPaletteColorBlindBehindText()[1]
+                  : euiTheme.colors.vis.euiColorVis6,
               },
             ]}
           />

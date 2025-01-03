@@ -11,7 +11,7 @@ import type { IncomingHttpHeaders } from 'http';
 import type { IScopedClusterClient, Logger } from '@kbn/core/server';
 import { catchError, tap } from 'rxjs';
 import type { DiagnosticResult } from '@elastic/transport';
-import { SqlQueryResponse } from '@elastic/elasticsearch/lib/api/types';
+import { SqlQueryResponse, type SqlQuerySqlFormat } from '@elastic/elasticsearch/lib/api/types';
 import { getKbnServerError } from '@kbn/kibana-utils-plugin/server';
 import { getKbnSearchError } from '../../report_search_error';
 import type { ISearchStrategy, SearchStrategyDependencies } from '../../types';
@@ -61,9 +61,9 @@ export const sqlSearchStrategyProvider = (
       } else {
         ({ headers, body, meta } = await client.sql.query(
           {
-            format: params.format ?? 'json',
             ...getDefaultAsyncSubmitParams(searchConfig, options),
             ...params,
+            format: (params.format ?? 'json') as SqlQuerySqlFormat,
           },
           { ...options.transport, signal: options.abortSignal, meta: true }
         ));

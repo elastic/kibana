@@ -144,6 +144,10 @@ export class EntityClient {
           errors: results.filter(isRejectedResult).map((result) => result.reason.message as string),
         }));
 
+        if (validSources.length === 0) {
+          return { type, value: 0, errors };
+        }
+
         const { query, filter } = getEntityCountQuery({
           sources: validSources,
           filters,

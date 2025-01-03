@@ -16,6 +16,7 @@ import { createSearchSourceMock } from '@kbn/data-plugin/common/search/search_so
 import { createSearchRequestHandlerContext } from '@kbn/data-plugin/server/search/mocks';
 import type { SearchCursorSettings } from './search_cursor';
 import { SearchCursorScroll } from './search_cursor_scroll';
+import type { OpenPointInTimeResponse } from '@elastic/elasticsearch/lib/api/types';
 
 class TestSearchCursorScroll extends SearchCursorScroll {
   constructor(...args: ConstructorParameters<typeof SearchCursorScroll>) {
@@ -47,7 +48,9 @@ describe('CSV Export Search Cursor', () => {
 
     es = elasticsearchServiceMock.createScopedClusterClient();
     data = createSearchRequestHandlerContext();
-    jest.spyOn(es.asCurrentUser, 'openPointInTime').mockResolvedValue({ id: 'simply-scroll-id' });
+    jest
+      .spyOn(es.asCurrentUser, 'openPointInTime')
+      .mockResolvedValue({ id: 'simply-scroll-id' } as OpenPointInTimeResponse);
 
     logger = loggingSystemMock.createLogger();
   });
