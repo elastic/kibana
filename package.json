@@ -328,7 +328,7 @@
     "@kbn/core-logging-common-internal": "link:src/core/packages/logging/common-internal",
     "@kbn/core-logging-server": "link:src/core/packages/logging/server",
     "@kbn/core-logging-server-internal": "link:src/core/packages/logging/server-internal",
-    "@kbn/core-metrics-collectors-server-internal": "link:packages/core/metrics/core-metrics-collectors-server-internal",
+    "@kbn/core-metrics-collectors-server-internal": "link:src/core/packages/metrics/collectors-server-internal",
     "@kbn/core-metrics-server": "link:packages/core/metrics/core-metrics-server",
     "@kbn/core-metrics-server-internal": "link:packages/core/metrics/core-metrics-server-internal",
     "@kbn/core-mount-utils-browser": "link:packages/core/mount-utils/core-mount-utils-browser",
