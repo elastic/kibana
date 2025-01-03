@@ -4589,7 +4589,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-http-context-server-internal@link:packages/core/http/core-http-context-server-internal":
+"@kbn/core-http-context-server-internal@link:src/core/packages/http/context-server-internal":
   version "0.0.0"
   uid ""
 
