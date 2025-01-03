@@ -86,7 +86,6 @@ packages/core/http/core-http-resources-server-mocks @elastic/kibana-core
 packages/core/http/core-http-router-server-mocks @elastic/kibana-core
 packages/core/http/core-http-server-mocks @elastic/kibana-core
 packages/core/i18n/core-i18n-browser-mocks @elastic/kibana-core
-packages/core/i18n/core-i18n-server-internal @elastic/kibana-core
 packages/core/i18n/core-i18n-server-mocks @elastic/kibana-core
 packages/core/injected-metadata/core-injected-metadata-browser-internal @elastic/kibana-core
 packages/core/injected-metadata/core-injected-metadata-browser-mocks @elastic/kibana-core
@@ -493,6 +492,7 @@ src/core/packages/http/server-utils @elastic/kibana-core
 src/core/packages/i18n/browser @elastic/kibana-core
 src/core/packages/i18n/browser-internal @elastic/kibana-core
 src/core/packages/i18n/server @elastic/kibana-core
+src/core/packages/i18n/server-internal @elastic/kibana-core
 src/platform/packages/private/analytics/utils/analytics_collection_utils @elastic/kibana-core
 src/platform/packages/private/default-nav/analytics @elastic/kibana-data-discovery @elastic/kibana-presentation @elastic/kibana-visualizations
 src/platform/packages/private/default-nav/devtools @elastic/kibana-management
