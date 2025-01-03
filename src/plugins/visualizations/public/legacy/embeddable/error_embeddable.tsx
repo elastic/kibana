@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { ReactNode } from 'react';
+import { ReactNode } from 'react';
 
 import { Embeddable } from './embeddable';
 import { EmbeddableInput, EmbeddableOutput } from './i_embeddable';
