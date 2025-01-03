@@ -17,10 +17,8 @@ import type { InfraConfig } from '../../../../common/plugin_config_types';
 import { O11Y_AAD_FIELDS } from '../../../../common/constants';
 import { createLogThresholdExecutor, FIRED_ACTIONS } from './log_threshold_executor';
 import { extractReferences, injectReferences } from './log_threshold_references_manager';
-import {
-  LOG_DOCUMENT_COUNT_RULE_TYPE_ID,
-  ruleParamsRT,
-} from '../../../../common/alerting/logs/log_threshold';
+import { LOG_DOCUMENT_COUNT_RULE_TYPE_ID } from '../../../../common/alerting/logs/log_threshold';
+import { logThresholdParamsRT } from '@kbn/response-ops-rule-params/log_threshold';
 import { InfraBackendLibs } from '../../infra_types';
 import {
   alertDetailUrlActionVariableDescription,
@@ -127,7 +125,7 @@ export function registerLogThresholdRuleType(
     }),
     validate: {
       params: {
-        validate: (params) => decodeOrThrow(ruleParamsRT)(params),
+        validate: (params) => decodeOrThrow(logThresholdParamsRT)(params),
       },
     },
     defaultActionGroupId: FIRED_ACTIONS.id,

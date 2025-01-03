@@ -7,14 +7,14 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-import { RuleParams, Comparator, CountCriteria, Criterion, ExecutionTimeRange } from '.';
-
+import { Comparator, CountCriteria, Criterion, ExecutionTimeRange } from '.';
+import { LogThresholdParams } from '@kbn/response-ops-rule-params/log_threshold';
 import { getIntervalInSeconds } from '../../../utils/get_interval_in_seconds';
 
-export type LogThresholdRuleTypeParams = RuleParams;
+export type LogThresholdRuleTypeParams = LogThresholdParams;
 
 export const buildFiltersFromCriteria = (
-  params: Pick<RuleParams, 'timeSize' | 'timeUnit'> & { criteria: CountCriteria },
+  params: Pick<LogThresholdParams, 'timeSize' | 'timeUnit'> & { criteria: CountCriteria },
   timestampField: string,
   executionTimeRange?: ExecutionTimeRange
 ) => {

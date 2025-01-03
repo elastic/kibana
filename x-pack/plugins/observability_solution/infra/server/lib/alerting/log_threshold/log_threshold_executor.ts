@@ -37,8 +37,6 @@ import { ecsFieldMap } from '@kbn/rule-registry-plugin/common/assets/field_maps/
 import { decodeOrThrow } from '@kbn/io-ts-utils';
 import { getChartGroupNames } from '../../../../common/utils/get_chart_group_names';
 import {
-  RuleParams,
-  ruleParamsRT,
   AlertStates,
   Comparator,
   CountRuleParams,
@@ -57,6 +55,10 @@ import {
   ExecutionTimeRange,
   Criterion,
 } from '../../../../common/alerting/logs/log_threshold';
+import {
+  logThresholdParamsRT,
+  LogThresholdParams,
+} from '@kbn/response-ops-rule-params/log_threshold';
 import { getLogsAppAlertUrl } from '../../../../common/formatters/alert_link';
 import { InfraBackendLibs } from '../../infra_types';
 import {
@@ -206,7 +208,7 @@ export const createLogThresholdExecutor =
     const [, { logsShared, logsDataAccess }] = await libs.getStartServices();
 
     try {
-      const validatedParams = decodeOrThrow(ruleParamsRT)(params);
+      const validatedParams = decodeOrThrow(logThresholdParamsRT)(params);
 
       const logSourcesService =
         logsDataAccess.services.logSourcesServiceFactory.getLogSourcesService(savedObjectsClient);
@@ -315,12 +317,12 @@ export async function executeRatioAlert(
   executionTimestamp: number
 ) {
   // Ratio alert params are separated out into two standard sets of alert params
-  const numeratorParams: RuleParams = {
+  const numeratorParams: LogThresholdParams = {
     ...ruleParams,
     criteria: getNumerator(ruleParams.criteria),
   };
 
-  const denominatorParams: RuleParams = {
+  const denominatorParams: LogThresholdParams = {
     ...ruleParams,
     criteria: getDenominator(ruleParams.criteria),
   };
@@ -372,7 +374,7 @@ export async function executeRatioAlert(
 }
 
 const getESQuery = (
-  alertParams: Omit<RuleParams, 'criteria'> & { criteria: CountCriteria },
+  alertParams: Omit<LogThresholdParams, 'criteria'> & { criteria: CountCriteria },
   timestampField: string,
   indexPattern: string,
   runtimeMappings: estypes.MappingRuntimeFields,
@@ -694,11 +696,11 @@ export const processGroupByRatioResults = (
 };
 
 export const getGroupedESQuery = (
-  params: Pick<RuleParams, 'timeSize' | 'timeUnit' | 'groupBy'> & {
+  params: Pick<LogThresholdParams, 'timeSize' | 'timeUnit' | 'groupBy'> & {
     criteria: CountCriteria;
     count: {
-      comparator: RuleParams['count']['comparator'];
-      value?: RuleParams['count']['value'];
+      comparator: LogThresholdParams['count']['comparator'];
+      value?: LogThresholdParams['count']['value'];
     };
   },
   timestampField: string,
@@ -813,7 +815,7 @@ export const getGroupedESQuery = (
 };
 
 export const getUngroupedESQuery = (
-  params: Pick<RuleParams, 'timeSize' | 'timeUnit'> & { criteria: CountCriteria },
+  params: Pick<LogThresholdParams, 'timeSize' | 'timeUnit'> & { criteria: CountCriteria },
   timestampField: string,
   index: string,
   runtimeMappings: estypes.MappingRuntimeFields,
@@ -896,7 +898,7 @@ const processRecoveredAlerts = ({
   >;
   spaceId: string;
   startedAt: Date;
-  validatedParams: RuleParams;
+  validatedParams: LogThresholdParams;
 }) => {
   const groupByKeysObjectForRecovered = getGroupByObject(
     validatedParams.groupBy,
@@ -963,7 +965,7 @@ export const FIRED_ACTIONS: ActionGroup<'logs.threshold.fired'> = {
 };
 
 const getContextAggregation = (
-  params: Pick<RuleParams, 'groupBy'> & { criteria: CountCriteria }
+  params: Pick<LogThresholdParams, 'groupBy'> & { criteria: CountCriteria }
 ) => {
   const validPrefixForContext = ['host', 'cloud', 'orchestrator', 'container', 'labels', 'tags'];
   const positiveCriteria = params.criteria.filter((criterion: Criterion) =>

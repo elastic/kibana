@@ -8,10 +8,13 @@
  */
 
 import { TypeOf, schema } from '@kbn/config-schema';
+import { sloBurnRateParamsSchema as sloBurnRateParamsSchemaV1 } from './slo_burn_rate/v1';
 
-export const ruleParamsSchema = schema.recordOf(schema.string(), schema.maybe(schema.any()), {
+const defaultRuleParamsSchema = schema.recordOf(schema.string(), schema.maybe(schema.any()), {
   meta: { description: 'The parameters for the rule.' },
 });
+
+export const ruleParamsSchema = schema.oneOf([sloBurnRateParamsSchemaV1, defaultRuleParamsSchema]);
 
 export const ruleParamsSchemaWithDefaultValue = schema.recordOf(
   schema.string(),
