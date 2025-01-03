@@ -31,7 +31,7 @@ import '@xyflow/react/dist/style.css';
 import { HandleStyleOverride } from '../node/styles';
 
 export default {
-  title: 'Components/Graph Components/Default Edge',
+  title: 'Components/Graph Components',
   description: 'CDR - Graph visualization',
   argTypes: {
     color: {

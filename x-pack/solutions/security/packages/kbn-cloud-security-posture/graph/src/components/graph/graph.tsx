@@ -9,7 +9,7 @@ import React, { useState, useCallback, useEffect, useRef, memo } from 'react';
 import { size, isEmpty, isEqual, xorWith } from 'lodash';
 import {
   Background,
-  Controls,
+  Panel,
   Position,
   ReactFlow,
   useEdgesState,
@@ -34,6 +34,7 @@ import type { EdgeViewModel, NodeViewModel } from '../types';
 import { ONLY_RENDER_VISIBLE_ELEMENTS } from './constants';
 
 import '@xyflow/react/dist/style.css';
+import { Controls } from '../controls/controls';
 
 export interface GraphProps extends CommonProps {
   /**
@@ -53,6 +54,10 @@ export interface GraphProps extends CommonProps {
    * Determines whether the graph is locked. Nodes and edges are still interactive, but the graph itself is not.
    */
   isLocked?: boolean;
+  /**
+   * Additional children to be rendered inside the graph component.
+   */
+  children?: React.ReactNode;
 }
 
 const nodeTypes = {
@@ -84,14 +89,14 @@ const edgeTypes = {
  * @returns {JSX.Element} The rendered Graph component.
  */
 export const Graph = memo<GraphProps>(
-  ({ nodes, edges, interactive, isLocked = false, ...rest }: GraphProps) => {
+  ({ nodes, edges, interactive, isLocked = false, children, ...rest }: GraphProps) => {
     const backgroundId = useGeneratedHtmlId();
     const fitViewRef = useRef<
       ((fitViewOptions?: FitViewOptions<Node> | undefined) => Promise<boolean>) | null
     >(null);
     const currNodesRef = useRef<NodeViewModel[]>([]);
     const currEdgesRef = useRef<EdgeViewModel[]>([]);
-    const [isGraphInteractive, setIsGraphInteractive] = useState(interactive);
+    const [isGraphInteractive, _setIsGraphInteractive] = useState(interactive);
     const [nodesState, setNodes, onNodesChange] = useNodesState<Node<NodeViewModel>>([]);
     const [edgesState, setEdges, onEdgesChange] = useEdgesState<Edge<EdgeViewModel>>([]);
 
@@ -113,22 +118,6 @@ export const Graph = memo<GraphProps>(
         }, 30);
       }
     }, [nodes, edges, setNodes, setEdges, isGraphInteractive]);
-
-    const onInteractiveStateChange = useCallback(
-      (interactiveStatus: boolean): void => {
-        setIsGraphInteractive(interactiveStatus);
-        setNodes((currNodes) =>
-          currNodes.map((node) => ({
-            ...node,
-            data: {
-              ...node.data,
-              interactive: interactiveStatus,
-            },
-          }))
-        );
-      },
-      [setNodes]
-    );
 
     const onInitCallback = useCallback(
       (xyflow: ReactFlowInstance<Node<NodeViewModel>, Edge<EdgeViewModel>>) => {
@@ -174,7 +163,12 @@ export const Graph = memo<GraphProps>(
           maxZoom={1.3}
           minZoom={0.1}
         >
-          {interactive && <Controls onInteractiveChange={onInteractiveStateChange} />}
+          {interactive && (
+            <Panel position="bottom-right">
+              <Controls showCenter={false} />
+            </Panel>
+          )}
+          {children}
           <Background id={backgroundId} />
         </ReactFlow>
       </div>

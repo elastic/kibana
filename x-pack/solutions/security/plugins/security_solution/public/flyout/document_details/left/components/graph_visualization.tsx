@@ -5,14 +5,18 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
+import React, { memo, useCallback } from 'react';
 import { css } from '@emotion/css';
 import { EuiLoadingSpinner } from '@elastic/eui';
+import type { Filter, TimeRange } from '@kbn/es-query';
+import dateMath from '@kbn/datemath';
 import { useGetScopedSourcererDataView } from '../../../../sourcerer/components/use_get_sourcerer_data_view';
 import { SourcererScopeName } from '../../../../sourcerer/store/model';
 import { useDocumentDetailsContext } from '../../shared/context';
 import { GRAPH_VISUALIZATION_TEST_ID } from './test_ids';
 import { useGraphPreview } from '../../shared/hooks/use_graph_preview';
+import { useTimelineApi } from '../../../../common/hooks/timeline/use_timeline_api';
+import { normalizeTimeRange } from '../../../../common/utils/normalize_time_range';
 
 const GraphInvestigationLazy = React.lazy(() =>
   import('@kbn/cloud-security-posture-graph').then((module) => ({
@@ -42,6 +46,35 @@ export const GraphVisualization: React.FC = memo(() => {
   });
 
   const originEventIds = eventIds.map((id) => ({ id, isAlert }));
+  const { openTimeline } = useTimelineApi();
+  const openTimelineCallback = useCallback(
+    (filters: Filter[], timeRange: TimeRange) => {
+      const from = dateMath.parse(timeRange.from);
+      const to = dateMath.parse(timeRange.to);
+
+      if (!from || !to) {
+        // TODO: show error message
+        return;
+      }
+
+      const normalizedTimeRange = normalizeTimeRange({
+        ...timeRange,
+        from: from.toISOString(),
+        to: to.toISOString(),
+      });
+
+      openTimeline({
+        keepDataView: true,
+        filters,
+        timeRange: {
+          from: normalizedTimeRange.from,
+          to: normalizedTimeRange.to,
+          kind: 'absolute',
+        },
+      });
+    },
+    [openTimeline]
+  );
 
   return (
     <div
@@ -63,6 +96,8 @@ export const GraphVisualization: React.FC = memo(() => {
                 to: `${timestamp}||+30m`,
               },
             }}
+            showInvestigateInTimeline={true}
+            onInvestigateInTimeline={openTimelineCallback}
           />
         </React.Suspense>
       )}

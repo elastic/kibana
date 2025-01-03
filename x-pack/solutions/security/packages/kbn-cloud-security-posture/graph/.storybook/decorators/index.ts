@@ -5,12 +5,5 @@
  * 2.0.
  */
 
-import { defaultConfig } from '@kbn/storybook';
-
-module.exports = {
-  ...defaultConfig,
-  stories: ['../**/*.stories.+(tsx|mdx)'],
-  reactOptions: {
-    strictMode: true,
-  },
-};
+export { KibanaReactStorybookDecorator } from './kibana_react_decorator';
+export { ReactQueryStorybookDecorator } from './react_query_decorator';

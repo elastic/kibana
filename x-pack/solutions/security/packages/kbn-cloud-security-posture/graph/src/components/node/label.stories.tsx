@@ -16,7 +16,7 @@ import { HexagonNode, PentagonNode, EllipseNode, RectangleNode, DiamondNode, Lab
 import '@xyflow/react/dist/style.css';
 
 export default {
-  title: 'Components/Graph Components/Labels',
+  title: 'Components/Graph Components/Additional Components/Labels',
   description: 'CDR - Graph visualization',
   argTypes: {
     color: {
