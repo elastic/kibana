@@ -9,13 +9,13 @@ import { DEFAULT_ATTACK_DISCOVERY_MAX_ALERTS } from '@kbn/elastic-assistant';
 import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 
-import { Header } from '.';
 import { useAssistantAvailability } from '../../../assistant/use_assistant_availability';
 import { TestProviders } from '../../../common/mock';
+import { Header } from '.';
 
 jest.mock('../../../assistant/use_assistant_availability');
 
-describe('Header', () => {
+describe('Actions', () => {
   beforeEach(() => {
     (useAssistantAvailability as jest.Mock).mockReturnValue({
       hasAssistantPrivilege: true,
@@ -36,6 +36,7 @@ describe('Header', () => {
           onCancel={jest.fn()}
           onGenerate={jest.fn()}
           onConnectorIdSelected={jest.fn()}
+          openFlyout={jest.fn()}
           setLocalStorageAttackDiscoveryMaxAlerts={jest.fn()}
         />
       </TestProviders>
@@ -61,6 +62,7 @@ describe('Header', () => {
           onCancel={jest.fn()}
           onGenerate={jest.fn()}
           onConnectorIdSelected={jest.fn()}
+          openFlyout={jest.fn()}
           setLocalStorageAttackDiscoveryMaxAlerts={jest.fn()}
         />
       </TestProviders>
@@ -86,6 +88,7 @@ describe('Header', () => {
           onCancel={jest.fn()}
           onConnectorIdSelected={jest.fn()}
           onGenerate={onGenerate}
+          openFlyout={jest.fn()}
           setLocalStorageAttackDiscoveryMaxAlerts={jest.fn()}
         />
       </TestProviders>
@@ -113,6 +116,7 @@ describe('Header', () => {
           onCancel={jest.fn()}
           onConnectorIdSelected={jest.fn()}
           onGenerate={jest.fn()}
+          openFlyout={jest.fn()}
           setLocalStorageAttackDiscoveryMaxAlerts={jest.fn()}
         />
       </TestProviders>
@@ -139,6 +143,7 @@ describe('Header', () => {
           onCancel={onCancel}
           onConnectorIdSelected={jest.fn()}
           onGenerate={jest.fn()}
+          openFlyout={jest.fn()}
           setLocalStorageAttackDiscoveryMaxAlerts={jest.fn()}
         />
       </TestProviders>
@@ -165,6 +170,7 @@ describe('Header', () => {
           onCancel={jest.fn()}
           onConnectorIdSelected={jest.fn()}
           onGenerate={jest.fn()}
+          openFlyout={jest.fn()}
           setLocalStorageAttackDiscoveryMaxAlerts={jest.fn()}
         />
       </TestProviders>
