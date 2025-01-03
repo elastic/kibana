@@ -5857,7 +5857,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/hapi-mocks@link:packages/kbn-hapi-mocks":
+"@kbn/hapi-mocks@link:src/platform/packages/private/kbn-hapi-mocks":
   version "0.0.0"
   uid ""
 
