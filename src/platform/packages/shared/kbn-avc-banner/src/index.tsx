@@ -22,7 +22,7 @@ export const useIsStillYear2025: () => boolean = () => {
   }, []);
 };
 
-export const AVCResultsBanner2024: React.FC<{ onDismiss: () => void }> = ({ onDismiss }) => {
+export const AVCResultsBanner: React.FC<{ onDismiss: () => void }> = ({ onDismiss }) => {
   const { docLinks } = useKibana().services;
   const { euiTheme } = useEuiTheme();
   const bannerTitle = i18n.translate('avcBanner.title', {
