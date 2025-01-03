@@ -14,14 +14,11 @@ import { gridLayoutStateManagerMock, mockRenderPanelContents } from '../test_uti
 import { getSampleLayout } from '../test_utils/sample_layout';
 
 describe('GridRow', () => {
-  const setInteractionEvent = jest.fn();
-
   const renderGridRow = (propsOverrides: Partial<GridRowProps> = {}) => {
     return render(
       <GridRow
         rowIndex={0}
         renderPanelContents={mockRenderPanelContents}
-        setInteractionEvent={setInteractionEvent}
         gridLayoutStateManager={gridLayoutStateManagerMock}
         {...propsOverrides}
       />
