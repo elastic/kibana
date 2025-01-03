@@ -7,13 +7,16 @@
 
 import { ensureDirSync, createSync } from '../util';
 import { createAgentInput } from './agent';
-import { InputType } from '../../common';
+import { CelInput, InputType } from '../../common';
+import { render } from 'nunjucks';
 
 jest.mock('../util', () => ({
   ...jest.requireActual('../util'),
   createSync: jest.fn(),
   ensureDirSync: jest.fn(),
 }));
+
+jest.mock('nunjucks');
 
 describe('createAgentInput', () => {
   const dataStreamPath = 'path';
@@ -23,9 +26,9 @@ describe('createAgentInput', () => {
   });
 
   it('Should create expected files', async () => {
-    const inputTypes: InputType[] = ['aws-s3', 'filestream'];
+    const inputTypes: InputType[] = ['aws-s3', 'filestream', 'cel'];
 
-    createAgentInput(dataStreamPath, inputTypes);
+    createAgentInput(dataStreamPath, inputTypes, undefined);
 
     expect(ensureDirSync).toHaveBeenCalledWith(`${dataStreamPath}/agent/stream`);
 
@@ -39,10 +42,39 @@ describe('createAgentInput', () => {
     );
   });
 
+  it('Should create expected files for cel without generated cel results', async () => {
+    const inputTypes: InputType[] = ['cel'];
+
+    createAgentInput(dataStreamPath, inputTypes, undefined);
+
+    expect(ensureDirSync).toHaveBeenCalledWith(`${dataStreamPath}/agent/stream`);
+
+    expect(createSync).toHaveBeenCalledWith(
+      `${dataStreamPath}/agent/stream/cel.yml.hbs`,
+      expect.any(String)
+    );
+  });
+
   it('Should not create agent files if there are no input types', async () => {
-    createAgentInput(dataStreamPath, []);
+    createAgentInput(dataStreamPath, [], undefined);
 
     expect(ensureDirSync).toHaveBeenCalledWith(`${dataStreamPath}/agent/stream`);
     expect(createSync).not.toHaveBeenCalled();
+  });
+
+  it('Should create generated cel agent file if provided', async () => {
+    const inputTypes: InputType[] = ['cel'];
+    const celInput = {
+      authType: 'basic',
+      configFields: {},
+      needsAuthConfigBlock: false,
+      program: 'program',
+      redactVars: [],
+      stateSettings: {},
+      url: 'url',
+    } as CelInput;
+    createAgentInput(dataStreamPath, inputTypes, celInput);
+
+    expect(render).toHaveBeenCalledWith(`cel_generated.yml.hbs.njk`, expect.anything());
   });
 });

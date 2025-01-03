@@ -7,6 +7,9 @@
 
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
+  EuiBetaBadge,
+  EuiButton,
+  EuiButtonEmpty,
   EuiComboBox,
   EuiFieldText,
   EuiFlexGroup,
@@ -14,6 +17,8 @@ import {
   EuiForm,
   EuiFormRow,
   EuiPanel,
+  EuiSpacer,
+  EuiText,
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { NAME_REGEX_PATTERN } from '../../../../../../common/constants';
@@ -32,7 +37,7 @@ export const InputTypeOptions: Array<EuiComboBoxOptionOption<InputType>> = [
   { value: 'aws-s3', label: 'AWS S3' },
   { value: 'azure-blob-storage', label: 'Azure Blob Storage' },
   { value: 'azure-eventhub', label: 'Azure Event Hub' },
-  { value: 'cel', label: 'Common Expression Language (CEL)' },
+  { value: 'cel', label: 'API (CEL Input)' },
   { value: 'cloudfoundry', label: 'Cloud Foundry' },
   { value: 'filestream', label: 'File Stream' },
   { value: 'gcp-pubsub', label: 'GCP Pub/Sub' },
@@ -49,15 +54,16 @@ const getNameFromTitle = (title: string) => title.toLowerCase().replaceAll(/[^a-
 
 interface DataStreamStepProps {
   integrationSettings: State['integrationSettings'];
+  celInputResult: State['celInputResult'];
   connector: State['connector'];
   isGenerating: State['isGenerating'];
 }
 export const DataStreamStep = React.memo<DataStreamStepProps>(
-  ({ integrationSettings, connector, isGenerating }) => {
+  ({ integrationSettings, celInputResult, connector, isGenerating }) => {
     const {
       setIntegrationSettings,
       setIsGenerating,
-      setHasCelInput,
+      setShowCelCreateFlyout,
       setStep,
       setResult,
       completeStep,
@@ -69,6 +75,7 @@ export const DataStreamStep = React.memo<DataStreamStepProps>(
       integrationSettings?.dataStreamName ?? ''
     );
     const [invalidFields, setInvalidFields] = useState({ name: false, dataStreamName: false });
+    const [showCelOpenApiSpecButton, setShowCelOpenApiSpecButton] = useState<boolean>(false);
 
     const setIntegrationValues = useCallback(
       (settings: Partial<IntegrationSettings>) =>
@@ -107,13 +114,13 @@ export const DataStreamStep = React.memo<DataStreamStepProps>(
           setIntegrationValues({ dataStreamDescription: e.target.value }),
         inputTypes: (options: EuiComboBoxOptionOption[]) => {
           setIntegrationValues({ inputTypes: options.map((option) => option.value as InputType) });
-          setHasCelInput(
+          setShowCelOpenApiSpecButton(
             // the cel value here comes from the input type options defined above
             options.map((option) => option.value as InputType).includes('cel' as InputType)
           );
         },
       };
-    }, [setIntegrationValues, setInvalidFields, setHasCelInput, packageNames]);
+    }, [setIntegrationValues, setInvalidFields, packageNames]);
 
     useEffect(() => {
       // Pre-populates the name from the title set in the previous step.
@@ -239,6 +246,60 @@ export const DataStreamStep = React.memo<DataStreamStepProps>(
                     fullWidth
                   />
                 </EuiFormRow>
+                {showCelOpenApiSpecButton && (
+                  <EuiFormRow
+                    label={
+                      <EuiFlexGroup direction="row" gutterSize="s">
+                        {i18n.ADD_OPEN_API_SPEC_LABEL}
+                        <EuiBetaBadge
+                          iconType="beaker"
+                          label={i18n.TECH_PREVIEW}
+                          tooltipContent={i18n.TECH_PREVIEW_TOOLTIP}
+                          size="s"
+                          color="hollow"
+                          data-test-subj="techPreviewBadge"
+                        />
+                      </EuiFlexGroup>
+                    }
+                    labelAppend={
+                      <EuiText size="xs" color="subdued">
+                        <p>{i18n.ADD_OPEN_API_SPEC_OPTIONAL_LABEL}</p>
+                      </EuiText>
+                    }
+                  >
+                    <EuiFlexGroup direction="column">
+                      <EuiText size="xs">
+                        <p>{i18n.ADD_OPEN_API_SPEC_DESCRIPTION}</p>
+                      </EuiText>
+                      <EuiFlexGroup>
+                        {celInputResult ? (
+                          <EuiFlexGroup>
+                            <EuiButton iconType="check" disabled data-test-subj="openApiConfigured">
+                              <EuiText size="xs">{i18n.OPEN_API_SPEC_BUTTON_CONFIGURED}</EuiText>
+                            </EuiButton>
+                            <EuiButtonEmpty
+                              iconType="pencil"
+                              onClick={() => setShowCelCreateFlyout(true)}
+                            >
+                              <EuiText size="xs">{i18n.EDIT_OPEN_API_SPEC_BUTTON}</EuiText>
+                            </EuiButtonEmpty>
+                          </EuiFlexGroup>
+                        ) : (
+                          <EuiFlexItem grow={false}>
+                            <EuiButton
+                              iconType="plusInCircle"
+                              onClick={() => setShowCelCreateFlyout(true)}
+                              data-test-subj="addOpenApiSpecButton"
+                            >
+                              <EuiText size="xs">{i18n.ADD_OPEN_API_SPEC_BUTTON}</EuiText>
+                            </EuiButton>
+                          </EuiFlexItem>
+                        )}
+                      </EuiFlexGroup>
+                    </EuiFlexGroup>
+                  </EuiFormRow>
+                )}
+                <EuiSpacer size="m" />
                 <SampleLogsInput integrationSettings={integrationSettings} />
               </EuiPanel>
             </StepContentWrapper>

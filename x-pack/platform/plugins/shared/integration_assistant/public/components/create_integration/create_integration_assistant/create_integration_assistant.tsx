@@ -9,48 +9,29 @@ import React, { useReducer, useMemo, useEffect, useCallback } from 'react';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { Header } from './header';
 import { Footer } from './footer';
+import { CreateCelConfigFlyout } from './flyout/cel_configuration';
 import { useNavigate, Page } from '../../../common/hooks/use_navigate';
 import { ConnectorStep, isConnectorStepReadyToComplete } from './steps/connector_step';
 import { IntegrationStep, isIntegrationStepReadyToComplete } from './steps/integration_step';
 import { DataStreamStep, isDataStreamStepReadyToComplete } from './steps/data_stream_step';
 import { ReviewStep, isReviewStepReadyToComplete } from './steps/review_step';
-import { CelInputStep, isCelInputStepReadyToComplete } from './steps/cel_input_step';
-import { ReviewCelStep, isCelReviewStepReadyToComplete } from './steps/review_cel_step';
 import { DeployStep } from './steps/deploy_step';
 import { reducer, initialState, ActionsProvider, type Actions } from './state';
 import { useTelemetry } from '../telemetry';
-import { ExperimentalFeaturesService } from '../../../services';
 
 const stepNames: Record<number | string, string> = {
   1: 'Connector Step',
   2: 'Integration Step',
   3: 'DataStream Step',
   4: 'Review Step',
-  cel_input: 'CEL Input Step',
-  cel_review: 'CEL Review Step',
-  deploy: 'Deploy Step',
+  5: 'Deploy Step',
 };
 
 export const CreateIntegrationAssistant = React.memo(() => {
   const [state, dispatch] = useReducer(reducer, initialState);
   const navigate = useNavigate();
-  const { generateCel: isGenerateCelEnabled } = ExperimentalFeaturesService.get();
 
-  const celInputStepIndex = isGenerateCelEnabled && state.hasCelInput ? 5 : null;
-  const celReviewStepIndex = isGenerateCelEnabled && state.celInputResult ? 6 : null;
-  const deployStepIndex =
-    celInputStepIndex !== null || celReviewStepIndex !== null || state.step === 7 ? 7 : 5;
-
-  const stepName =
-    state.step === deployStepIndex
-      ? stepNames.deploy
-      : state.step === celReviewStepIndex
-      ? stepNames.cel_review
-      : state.step === celInputStepIndex
-      ? stepNames.cel_input
-      : state.step in stepNames
-      ? stepNames[state.step]
-      : 'Unknown Step';
+  const stepName = stepNames[state.step];
 
   const telemetry = useTelemetry();
   useEffect(() => {
@@ -66,13 +47,9 @@ export const CreateIntegrationAssistant = React.memo(() => {
       return isDataStreamStepReadyToComplete(state);
     } else if (state.step === 4) {
       return isReviewStepReadyToComplete(state);
-    } else if (isGenerateCelEnabled && state.step === 5) {
-      return isCelInputStepReadyToComplete(state);
-    } else if (isGenerateCelEnabled && state.step === 6) {
-      return isCelReviewStepReadyToComplete(state);
     }
     return false;
-  }, [state, isGenerateCelEnabled]);
+  }, [state]);
 
   const goBackStep = useCallback(() => {
     if (state.step === 1) {
@@ -88,12 +65,12 @@ export const CreateIntegrationAssistant = React.memo(() => {
       return;
     }
     telemetry.reportAssistantStepComplete({ step: state.step, stepName });
-    if (state.step === 3 || state.step === celInputStepIndex) {
+    if (state.step === 3) {
       dispatch({ type: 'SET_IS_GENERATING', payload: true });
     } else {
       dispatch({ type: 'SET_STEP', payload: state.step + 1 });
     }
-  }, [telemetry, state.step, stepName, celInputStepIndex, isThisStepReadyToComplete]);
+  }, [telemetry, state.step, stepName, isThisStepReadyToComplete]);
 
   const actions = useMemo<Actions>(
     () => ({
@@ -109,8 +86,11 @@ export const CreateIntegrationAssistant = React.memo(() => {
       setIsGenerating: (payload) => {
         dispatch({ type: 'SET_IS_GENERATING', payload });
       },
-      setHasCelInput: (payload) => {
-        dispatch({ type: 'SET_HAS_CEL_INPUT', payload });
+      setShowCelCreateFlyout: (payload) => {
+        dispatch({ type: 'SET_SHOW_CEL_CREATE_FLYOUT', payload });
+      },
+      setIsFlyoutGenerating: (payload) => {
+        dispatch({ type: 'SET_IS_FLYOUT_GENERATING', payload });
       },
       setResult: (payload) => {
         dispatch({ type: 'SET_GENERATED_RESULT', payload });
@@ -133,8 +113,16 @@ export const CreateIntegrationAssistant = React.memo(() => {
           {state.step === 3 && (
             <DataStreamStep
               integrationSettings={state.integrationSettings}
+              celInputResult={state.celInputResult}
               connector={state.connector}
               isGenerating={state.isGenerating}
+            />
+          )}
+          {state.step === 3 && state.showCelCreateFlyout && (
+            <CreateCelConfigFlyout
+              integrationSettings={state.integrationSettings}
+              isFlyoutGenerating={state.isFlyoutGenerating}
+              connector={state.connector}
             />
           )}
           {state.step === 4 && (
@@ -144,21 +132,7 @@ export const CreateIntegrationAssistant = React.memo(() => {
               result={state.result}
             />
           )}
-          {state.step === celInputStepIndex && (
-            <CelInputStep
-              integrationSettings={state.integrationSettings}
-              connector={state.connector}
-              isGenerating={state.isGenerating}
-            />
-          )}
-          {state.step === celReviewStepIndex && (
-            <ReviewCelStep
-              isGenerating={state.isGenerating}
-              celInputResult={state.celInputResult}
-            />
-          )}
-
-          {state.step === deployStepIndex && (
+          {state.step === 5 && (
             <DeployStep
               integrationSettings={state.integrationSettings}
               result={state.result}
@@ -170,10 +144,9 @@ export const CreateIntegrationAssistant = React.memo(() => {
         <Footer
           isGenerating={state.isGenerating}
           isAnalyzeStep={state.step === 3}
-          isAnalyzeCelStep={state.step === celInputStepIndex}
-          isLastStep={state.step === deployStepIndex}
+          isLastStep={state.step === 5}
           isNextStepEnabled={isThisStepReadyToComplete && !state.isGenerating}
-          isNextAddingToElastic={state.step === deployStepIndex - 1}
+          isNextAddingToElastic={state.step === 4}
           onBack={goBackStep}
           onNext={completeStep}
         />
