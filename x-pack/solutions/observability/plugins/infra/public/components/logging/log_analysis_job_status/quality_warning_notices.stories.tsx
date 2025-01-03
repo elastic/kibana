@@ -8,7 +8,7 @@
 import { action } from '@storybook/addon-actions';
 import { storiesOf } from '@storybook/react';
 import React from 'react';
-import { QualityWarning } from '../../../../common/log_analysis';
+import type { QualityWarning } from '../../../../common/log_analysis';
 import { decorateWithGlobalStorybookThemeProviders } from '../../../test_utils/use_global_storybook_theme';
 import { CategoryQualityWarnings } from './quality_warning_notices';
 
