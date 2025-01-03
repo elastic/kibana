@@ -4689,7 +4689,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-lifecycle-browser-internal@link:packages/core/lifecycle/core-lifecycle-browser-internal":
+"@kbn/core-lifecycle-browser-internal@link:src/core/packages/lifecycle/browser-internal":
   version "0.0.0"
   uid ""
 
