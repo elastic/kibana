@@ -15,8 +15,8 @@ import type {
   ESQLSingleAstItem,
   ESQLCommandOption,
 } from '@kbn/esql-ast';
-import { ESQLControlVariable } from '@kbn/esql-validation-autocomplete';
-import { DatatableColumn } from '@kbn/expressions-plugin/common';
+import type { ESQLControlVariable } from '@kbn/esql-validation-autocomplete';
+import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 
 const DEFAULT_ESQL_LIMIT = 1000;
 
