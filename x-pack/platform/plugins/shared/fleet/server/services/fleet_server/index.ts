@@ -41,7 +41,7 @@ export const getFleetServerPolicies = async (
 
   // Retrieve associated agent policies
   const fleetServerAgentPolicies = fleetServerAgentPolicyIds.length
-    ? await agentPolicyService.getByIDs(
+    ? await agentPolicyService.getByIds(
         soClient,
         uniqBy(fleetServerAgentPolicyIds, (p) => p.id)
       )

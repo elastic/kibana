@@ -816,16 +816,7 @@ export class FleetPlugin
         core.elasticsearch.client.asInternalUser,
         internalSoClient
       ),
-      agentPolicyService: {
-        get: agentPolicyService.get,
-        list: agentPolicyService.list,
-        getFullAgentPolicy: agentPolicyService.getFullAgentPolicy,
-        getByIds: agentPolicyService.getByIDs,
-        turnOffAgentTamperProtections:
-          agentPolicyService.turnOffAgentTamperProtections.bind(agentPolicyService),
-        fetchAllAgentPolicies: agentPolicyService.fetchAllAgentPolicies,
-        fetchAllAgentPolicyIds: agentPolicyService.fetchAllAgentPolicyIds,
-      },
+      agentPolicyService,
       packagePolicyService,
       registerExternalCallback: (type: ExternalCallback[0], callback: ExternalCallback[1]) => {
         return appContextService.addExternalCallback(type, callback);
