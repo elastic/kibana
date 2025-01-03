@@ -394,7 +394,7 @@
     "@kbn/core-test-helpers-so-type-serializer": "link:src/core/packages/test-helpers/so-type-serializer",
     "@kbn/core-test-helpers-test-utils": "link:src/core/packages/test-helpers/test-utils",
     "@kbn/core-theme-browser": "link:src/core/packages/theme/browser",
-    "@kbn/core-theme-browser-internal": "link:packages/core/theme/core-theme-browser-internal",
+    "@kbn/core-theme-browser-internal": "link:src/core/packages/theme/browser-internal",
     "@kbn/core-ui-settings-browser": "link:packages/core/ui-settings/core-ui-settings-browser",
     "@kbn/core-ui-settings-browser-internal": "link:packages/core/ui-settings/core-ui-settings-browser-internal",
     "@kbn/core-ui-settings-common": "link:packages/core/ui-settings/core-ui-settings-common",
