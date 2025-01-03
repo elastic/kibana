@@ -336,7 +336,7 @@
     "@kbn/core-node-server": "link:src/core/packages/node/server",
     "@kbn/core-node-server-internal": "link:src/core/packages/node/server-internal",
     "@kbn/core-notifications-browser": "link:src/core/packages/notifications/browser",
-    "@kbn/core-notifications-browser-internal": "link:packages/core/notifications/core-notifications-browser-internal",
+    "@kbn/core-notifications-browser-internal": "link:src/core/packages/notifications/browser-internal",
     "@kbn/core-overlays-browser": "link:packages/core/overlays/core-overlays-browser",
     "@kbn/core-overlays-browser-internal": "link:packages/core/overlays/core-overlays-browser-internal",
     "@kbn/core-plugin-a-plugin": "link:test/plugin_functional/plugins/core_plugin_a",
