@@ -122,6 +122,18 @@ export const VulnerabilitiesPreview = ({
         : undefined,
     [isLinkEnabled, goToEntityInsightTab]
   );
+
+  const vulnerabilityStats = getVulnerabilityStats(
+    {
+      critical: CRITICAL,
+      high: HIGH,
+      medium: MEDIUM,
+      low: LOW,
+      none: NONE,
+    },
+    euiTheme
+  );
+
   return (
     <ExpandablePanel
       header={{
@@ -152,15 +164,7 @@ export const VulnerabilitiesPreview = ({
             <EuiFlexItem />
             <EuiFlexItem>
               <EuiSpacer />
-              <DistributionBar
-                stats={getVulnerabilityStats({
-                  critical: CRITICAL,
-                  high: HIGH,
-                  medium: MEDIUM,
-                  low: LOW,
-                  none: NONE,
-                })}
-              />
+              <DistributionBar stats={vulnerabilityStats} />
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>

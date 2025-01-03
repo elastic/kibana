@@ -9,7 +9,7 @@ import React from 'react';
 import { EuiBadge, type EuiBadgeProps } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
-import { statusColors } from '../constants/component_constants';
+import { MISCONFIGURATION_STATUS } from '@kbn/cloud-security-posture-common';
 
 interface Props {
   type?: 'passed' | 'failed';
@@ -20,8 +20,8 @@ interface Props {
 const BADGE_WIDTH = '46px';
 
 const getColor = (type: Props['type']): EuiBadgeProps['color'] => {
-  if (type === 'passed') return statusColors.passed;
-  if (type === 'failed') return statusColors.failed;
+  if (type === MISCONFIGURATION_STATUS.PASSED) return 'success';
+  if (type === MISCONFIGURATION_STATUS.FAILED) return 'danger';
   return 'default';
 };
 
@@ -35,12 +35,12 @@ export const CspEvaluationBadge = ({ type }: Props) => (
     `}
     data-test-subj={`${type}_finding`}
   >
-    {type === 'failed' ? (
+    {type === MISCONFIGURATION_STATUS.FAILED ? (
       <FormattedMessage
         id="securitySolutionPackages.csp.cspEvaluationBadge.failLabel"
         defaultMessage="Fail"
       />
-    ) : type === 'passed' ? (
+    ) : type === MISCONFIGURATION_STATUS.PASSED ? (
       <FormattedMessage
         id="securitySolutionPackages.csp.cspEvaluationBadge.passLabel"
         defaultMessage="Pass"

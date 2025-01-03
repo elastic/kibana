@@ -7,7 +7,7 @@
 
 import React, { memo, useEffect, useState } from 'react';
 import type { Criteria, EuiBasicTableColumn } from '@elastic/eui';
-import { EuiSpacer, EuiPanel, EuiText, EuiBasicTable, EuiIcon } from '@elastic/eui';
+import { EuiSpacer, EuiPanel, EuiText, EuiBasicTable, EuiIcon, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import {
   buildVulnerabilityEntityFlyoutPreviewQuery,
@@ -48,6 +48,8 @@ interface VulnerabilitiesPackage extends Vulnerability {
 }
 
 export const VulnerabilitiesFindingsDetailsTable = memo(({ value }: { value: string }) => {
+  const { euiTheme } = useEuiTheme();
+
   useEffect(() => {
     uiMetricService.trackUiMetric(
       METRIC_TYPE.COUNT,
@@ -135,6 +137,7 @@ export const VulnerabilitiesFindingsDetailsTable = memo(({ value }: { value: str
       low,
       none,
     },
+    euiTheme,
     setCurrentFilter,
     currentFilter
   );

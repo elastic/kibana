@@ -32,7 +32,8 @@ import { FormattedDate, FormattedTime } from '@kbn/i18n-react';
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
-import { statusColors } from '@kbn/cloud-security-posture';
+import { MISCONFIGURATION_STATUS } from '@kbn/cloud-security-posture-common';
+import { getMisconfigurationStatusColor } from '@kbn/cloud-security-posture';
 import { DASHBOARD_COMPLIANCE_SCORE_CHART } from '../test_subjects';
 import { RULE_FAILED, RULE_PASSED } from '../../../../common/constants';
 import { CompactFormattedNumber } from '../../../components/compact_formatted_number';
@@ -109,31 +110,35 @@ const CompactPercentageLabels = ({
 }: {
   onEvalCounterClick: (evaluation: Evaluation) => void;
   stats: { totalPassed: number; totalFailed: number };
-}) => (
-  <>
-    <CounterLink
-      text="passed"
-      count={stats.totalPassed}
-      color={statusColors.passed}
-      onClick={() => onEvalCounterClick(RULE_PASSED)}
-      tooltipContent={i18n.translate(
-        'xpack.csp.complianceScoreChart.counterLink.passedFindingsTooltip',
-        { defaultMessage: 'Passed findings' }
-      )}
-    />
-    <EuiText size="s">&nbsp;-&nbsp;</EuiText>
-    <CounterLink
-      text="failed"
-      count={stats.totalFailed}
-      color={statusColors.failed}
-      onClick={() => onEvalCounterClick(RULE_FAILED)}
-      tooltipContent={i18n.translate(
-        'xpack.csp.complianceScoreChart.counterButtonLink.failedFindingsTooltip',
-        { defaultMessage: 'Failed findings' }
-      )}
-    />
-  </>
-);
+}) => {
+  const { euiTheme } = useEuiTheme();
+
+  return (
+    <>
+      <CounterLink
+        text="passed"
+        count={stats.totalPassed}
+        color={getMisconfigurationStatusColor(MISCONFIGURATION_STATUS.PASSED, euiTheme)}
+        onClick={() => onEvalCounterClick(RULE_PASSED)}
+        tooltipContent={i18n.translate(
+          'xpack.csp.complianceScoreChart.counterLink.passedFindingsTooltip',
+          { defaultMessage: 'Passed findings' }
+        )}
+      />
+      <EuiText size="s">&nbsp;-&nbsp;</EuiText>
+      <CounterLink
+        text="failed"
+        count={stats.totalFailed}
+        color={getMisconfigurationStatusColor(MISCONFIGURATION_STATUS.FAILED, euiTheme)}
+        onClick={() => onEvalCounterClick(RULE_FAILED)}
+        tooltipContent={i18n.translate(
+          'xpack.csp.complianceScoreChart.counterButtonLink.failedFindingsTooltip',
+          { defaultMessage: 'Failed findings' }
+        )}
+      />
+    </>
+  );
+};
 
 const PercentageLabels = ({
   onEvalCounterClick,
@@ -150,7 +155,7 @@ const PercentageLabels = ({
         <CounterButtonLink
           text="Passed Findings"
           count={stats.totalPassed}
-          color={statusColors.passed}
+          color={getMisconfigurationStatusColor(MISCONFIGURATION_STATUS.PASSED, euiTheme)}
           data-test-subj="dashboard-summary-passed-findings"
           onClick={() => onEvalCounterClick(RULE_PASSED)}
         />
@@ -159,7 +164,7 @@ const PercentageLabels = ({
         <CounterButtonLink
           text="Failed Findings"
           count={stats.totalFailed}
-          color={statusColors.failed}
+          color={getMisconfigurationStatusColor(MISCONFIGURATION_STATUS.FAILED, euiTheme)}
           data-test-subj="dashboard-summary-failed-findings"
           onClick={() => onEvalCounterClick(RULE_FAILED)}
         />
