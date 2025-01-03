@@ -43,7 +43,7 @@ test('can terminate walk early, does not visit all literals', () => {
   `);
   const result = new Visitor()
     .on('visitExpression', (ctx) => {
-      return 0;
+      for (const res of ctx.visitArguments(undefined)) if (res) return res;
     })
     .on('visitLiteralExpression', (ctx) => {
       numbers.push(ctx.node.value as number);
@@ -69,8 +69,9 @@ test('"visitColumnExpression" takes over all column visits', () => {
     .on('visitColumnExpression', (ctx) => {
       return '<COLUMN>';
     })
-    .on('visitExpression', (ctx) => {
-      return 'E';
+    .on('visitExpression', (ctx) => 'E')
+    .on('visitFieldExpression', (ctx) => {
+      return [...ctx.visitArguments()].join(':');
     })
     .on('visitCommand', (ctx) => {
       const args = [...ctx.visitArguments()].join(', ');
@@ -81,7 +82,7 @@ test('"visitColumnExpression" takes over all column visits', () => {
     });
   const text = visitor.visitQuery(ast);
 
-  expect(text).toBe('FROM E | STATS <COLUMN>');
+  expect(text).toBe('FROM E | STATS <COLUMN>:<COLUMN>');
 });
 
 test('"visitSourceExpression" takes over all source visits', () => {
@@ -109,15 +110,15 @@ test('"visitSourceExpression" takes over all source visits', () => {
   expect(text).toBe('FROM <SOURCE> | STATS E, E, E, E | LIMIT E');
 });
 
-test('"visitFunctionCallExpression" takes over all literal visits', () => {
+test('"visitFieldExpression" takes over all "field" visits', () => {
   const { ast } = parse(`
     FROM index
-      | STATS 1, "str", [true], a = b BY field
+      | STATS 1
       | LIMIT 123
   `);
   const visitor = new Visitor()
-    .on('visitFunctionCallExpression', (ctx) => {
-      return '<FUNCTION>';
+    .on('visitFieldExpression', (ctx) => {
+      return '<FIELD>';
     })
     .on('visitExpression', (ctx) => {
       return 'E';
@@ -131,7 +132,35 @@ test('"visitFunctionCallExpression" takes over all literal visits', () => {
     });
   const text = visitor.visitQuery(ast);
 
-  expect(text).toBe('FROM E | STATS E, E, E, <FUNCTION> | LIMIT E');
+  expect(text).toBe('FROM E | STATS <FIELD> | LIMIT E');
+});
+
+test('"visitFunctionCallExpression" takes over all literal visits', () => {
+  const { ast } = parse(`
+    FROM index
+      | STATS 1, "str", [true], a = b(c) BY field
+      | LIMIT 123
+  `);
+  const visitor = new Visitor()
+    .on('visitExpression', (ctx) => {
+      return 'E';
+    })
+    .on('visitFunctionCallExpression', (ctx) => {
+      return '<FUNCTION>';
+    })
+    .on('visitFieldExpression', (ctx) => {
+      return [...ctx.visitArguments()].join(':');
+    })
+    .on('visitCommand', (ctx) => {
+      const args = [...ctx.visitArguments()].join(', ');
+      return `${ctx.name()}${args ? ` ${args}` : ''}`;
+    })
+    .on('visitQuery', (ctx) => {
+      return [...ctx.visitCommands()].join(' | ');
+    });
+  const text = visitor.visitQuery(ast);
+
+  expect(text).toBe('FROM E | STATS E:E, E:E, E:E, E:<FUNCTION> | LIMIT E');
 });
 
 test('"visitLiteral" takes over all literal visits', () => {
@@ -141,11 +170,14 @@ test('"visitLiteral" takes over all literal visits', () => {
       | LIMIT 123
   `);
   const visitor = new Visitor()
+    .on('visitExpression', (ctx) => {
+      return 'E';
+    })
     .on('visitLiteralExpression', (ctx) => {
       return '<LITERAL>';
     })
-    .on('visitExpression', (ctx) => {
-      return 'E';
+    .on('visitFieldExpression', (ctx) => {
+      return [...ctx.visitArguments()].join(':');
     })
     .on('visitCommand', (ctx) => {
       const args = [...ctx.visitArguments()].join(', ');
@@ -156,7 +188,7 @@ test('"visitLiteral" takes over all literal visits', () => {
     });
   const text = visitor.visitQuery(ast);
 
-  expect(text).toBe('FROM E | STATS <LITERAL>, <LITERAL>, E, E | LIMIT <LITERAL>');
+  expect(text).toBe('FROM E | STATS E:<LITERAL>, E:<LITERAL>, E:E, E:E | LIMIT <LITERAL>');
 });
 
 test('"visitExpression" does visit identifier nodes', () => {

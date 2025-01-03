@@ -13,6 +13,7 @@ import type {
   ESQLAstJoinCommand,
   ESQLAstRenameExpression,
   ESQLColumn,
+  ESQLField,
   ESQLFunction,
   ESQLIdentifier,
   ESQLInlineCast,
@@ -424,6 +425,10 @@ export class GlobalVisitorContext<
         if (!this.methods.visitIdentifierExpression) break;
         return this.visitIdentifierExpression(parent, expressionNode, input as any);
       }
+      case 'field': {
+        if (!this.methods.visitFieldExpression) break;
+        return this.visitFieldExpression(parent, expressionNode, input as any);
+      }
       case 'option': {
         switch (expressionNode.name) {
           case 'as': {
@@ -528,5 +533,14 @@ export class GlobalVisitorContext<
   ): types.VisitorOutput<Methods, 'visitIdentifierExpression'> {
     const context = new contexts.IdentifierExpressionVisitorContext(this, node, parent);
     return this.visitWithSpecificContext('visitIdentifierExpression', context, input);
+  }
+
+  public visitFieldExpression(
+    parent: contexts.VisitorContext | null,
+    node: ESQLField,
+    input: types.VisitorInput<Methods, 'visitFieldExpression'>
+  ): types.VisitorOutput<Methods, 'visitFieldExpression'> {
+    const context = new contexts.FieldExpressionVisitorContext(this, node, parent);
+    return this.visitWithSpecificContext('visitFieldExpression', context, input);
   }
 }

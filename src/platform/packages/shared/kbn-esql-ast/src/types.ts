@@ -30,6 +30,7 @@ export type ESQLSingleAstItem =
   | ESQLCommandMode
   | ESQLInlineCast
   | ESQLOrderExpression
+  | ESQLField
   | ESQLUnknownItem;
 
 export type ESQLAstField = ESQLFunction | ESQLColumn;
@@ -315,6 +316,29 @@ export interface ESQLColumn extends ESQLAstBaseItem {
    * property is not enough to represent the identifier. Use `parts` instead.
    */
   quoted: boolean;
+}
+
+/**
+ * An ES|QL field definition.
+ */
+export interface ESQLField extends ESQLAstBaseItem {
+  type: 'field';
+
+  /**
+   * The column name of the field. If not specified, the raw text of the
+   * expression is used. Hence, this property is always present.
+   */
+  column: ESQLColumn;
+
+  /**
+   * The expression which defines the value of the field.
+   */
+  value: ESQLAstExpression;
+
+  /**
+   * The WHERE clause of the field, used in STATS command aggregation fields.
+   */
+  where?: ESQLAstExpression;
 }
 
 export interface ESQLList extends ESQLAstBaseItem {

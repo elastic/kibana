@@ -94,8 +94,10 @@ import {
   ESQLAstField,
   ESQLInlineCast,
   ESQLOrderExpression,
+  ESQLField,
 } from '../types';
 import { firstItem, lastItem } from '../visitor/utils';
+import { Builder } from '../builder';
 
 export function collectAllSourceIdentifiers(ctx: FromCommandContext): ESQLAstItem[] {
   const fromContexts = ctx.getTypedRuleContexts(IndexPatternContext);
@@ -625,3 +627,28 @@ export function visitOrderExpressions(
 
   return ast;
 }
+
+export const createField = (ctx: FieldContext, src: string): ESQLField => {
+  const qualifiedName = ctx.qualifiedName();
+  const hasColumn = !!qualifiedName && !!ctx.ASSIGN();
+  const value = firstItem(collectBooleanExpression(ctx.booleanExpression()))!;
+
+  let column: ESQLColumn | undefined;
+
+  if (hasColumn && qualifiedName) {
+    column = createColumn(qualifiedName);
+  } else {
+    const fieldName = src.slice(value.location.min, value.location.max + 1);
+
+    column = Builder.expression.column({
+      args: [Builder.identifier(fieldName)],
+    });
+  }
+
+  const field = Builder.expression.field({
+    column,
+    value,
+  });
+
+  return field;
+};
