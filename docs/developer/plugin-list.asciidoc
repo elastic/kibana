@@ -949,7 +949,7 @@ in their infrastructure.
 
 |<<translations-plugin>>
 |Contains Elastic-supported translations. Owned by the Localizations team.
-For adding localizations and instrument a ui to support translated content, see https://github.com/elastic/kibana/tree/main/packages/kbn-i18n
+For adding localizations and instrument a ui to support translated content, see https://github.com/elastic/kibana/tree/main/src/platform/packages/shared/kbn-i18n
 
 
 |{kib-repo}blob/{branch}/x-pack/platform/plugins/shared/triggers_actions_ui/README.md[triggersActionsUi]
