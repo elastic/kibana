@@ -102,7 +102,9 @@ export const getSuggestions = async (
       abortController,
       esqlVariables
     );
-    const updatedWithVariablesColumns = mapVariableToColumn(query.esql, esqlVariables, columns);
+    const updatedWithVariablesColumns = esqlVariables.length
+      ? mapVariableToColumn(query.esql, esqlVariables, columns)
+      : columns;
 
     setDataGridAttrs?.({
       rows,

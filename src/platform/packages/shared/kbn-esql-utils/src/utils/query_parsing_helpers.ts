@@ -155,6 +155,9 @@ export const mapVariableToColumn = (
   variables: ESQLControlVariable[],
   columns: DatatableColumn[]
 ) => {
+  if (!variables.length) {
+    return columns;
+  }
   const { root } = parse(esql);
   const usedVariablesInQuery = Walker.params(root).map((param) => param);
 
