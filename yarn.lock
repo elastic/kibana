@@ -4737,7 +4737,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-metrics-collectors-server-internal@link:packages/core/metrics/core-metrics-collectors-server-internal":
+"@kbn/core-metrics-collectors-server-internal@link:src/core/packages/metrics/collectors-server-internal":
   version "0.0.0"
   uid ""
 
