@@ -70,10 +70,10 @@ export class StorybookMock extends AbstractStorybookMock<
     };
   }
 
-  getProps(params: Params) {
+  getProps(params?: Params) {
     return {
       onDataViewCreated: action('onDataViewCreated'),
-      onTryESQL: params.useCustomOnTryESQL ? action('onTryESQL-from-props') : undefined,
+      onTryESQL: params?.useCustomOnTryESQL ? action('onTryESQL-from-props') : undefined,
     };
   }
 }
