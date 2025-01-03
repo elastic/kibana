@@ -35,7 +35,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           `Detected the following unregistered UI Settings in the stack management collector:
           ${JSON.stringify(unreportedUISettings, null)}
           Update the management collector schema and its UsageStats interface.
-          Refer to src/plugins/kibana_usage_collection/server/collectors/management/README.md for additional information.
+          Refer to src/platform/plugins/private/kibana_usage_collection/server/collectors/management/README.md for additional information.
         `
         );
       }
@@ -55,7 +55,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           `Detected the following sensitive UI Settings in the stack management collector not having a 'keyword' type:
           ${JSON.stringify(nonBooleanSensitiveProps, null)}
           Update each setting in the management collector schema with ({ type: 'keyword' }).
-          Refer to src/plugins/kibana_usage_collection/server/collectors/management/README.md for additional information.
+          Refer to src/platform/plugins/private/kibana_usage_collection/server/collectors/management/README.md for additional information.
         `
         );
       }

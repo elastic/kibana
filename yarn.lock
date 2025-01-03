@@ -6073,7 +6073,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/kibana-usage-collection-plugin@link:src/plugins/kibana_usage_collection":
+"@kbn/kibana-usage-collection-plugin@link:src/platform/plugins/private/kibana_usage_collection":
   version "0.0.0"
   uid ""
 

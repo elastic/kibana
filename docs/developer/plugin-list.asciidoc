@@ -242,7 +242,7 @@ in Kibana, e.g. visualizations. It has the form of a flyout panel.
 |Tools for building React applications in Kibana.
 
 
-|{kib-repo}blob/{branch}/src/plugins/kibana_usage_collection/README.md[kibanaUsageCollection]
+|{kib-repo}blob/{branch}/src/platform/plugins/private/kibana_usage_collection/README.md[kibanaUsageCollection]
 |This plugin registers the Platform Usage Collectors in Kibana.
 
 
