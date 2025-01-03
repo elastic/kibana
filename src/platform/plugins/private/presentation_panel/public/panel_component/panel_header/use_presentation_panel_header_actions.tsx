@@ -80,10 +80,11 @@ export const usePresentationPanelHeaderActions = <
       const apiContext = { embeddable: api };
 
       // subscribe to any frequently changing badge actions
-      const frequentlyChangingBadges = uiActions.getFrequentlyChangingActionsForTrigger(
+      const frequentlyChangingBadges = await uiActions.getFrequentlyChangingActionsForTrigger(
         PANEL_BADGE_TRIGGER,
         apiContext
       );
+      if (canceled) return;
       for (const badge of frequentlyChangingBadges) {
         subscriptions.add(
           badge.subscribeToCompatibilityChanges(apiContext, (isCompatible, action) =>
@@ -93,10 +94,12 @@ export const usePresentationPanelHeaderActions = <
       }
 
       // subscribe to any frequently changing notification actions
-      const frequentlyChangingNotifications = uiActions.getFrequentlyChangingActionsForTrigger(
-        PANEL_NOTIFICATION_TRIGGER,
-        apiContext
-      );
+      const frequentlyChangingNotifications =
+        await uiActions.getFrequentlyChangingActionsForTrigger(
+          PANEL_NOTIFICATION_TRIGGER,
+          apiContext
+        );
+      if (canceled) return;
       for (const notification of frequentlyChangingNotifications) {
         if (!disabledNotifications.includes(notification.id))
           subscriptions.add(

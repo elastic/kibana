@@ -16,7 +16,7 @@ export function AddButton({ pageApi, uiActions }: { pageApi: unknown; uiActions:
   const [items, setItems] = useState<ReactElement[]>([]);
 
   useEffect(() => {
-    let cancelled = false;
+    let canceled = false;
 
     const actionContext = {
       embeddable: pageApi,
@@ -24,41 +24,29 @@ export function AddButton({ pageApi, uiActions }: { pageApi: unknown; uiActions:
         id: ADD_PANEL_TRIGGER,
       },
     };
-    const actionsPromises = uiActions.getTriggerActions(ADD_PANEL_TRIGGER).map(async (action) => {
-      return {
-        isCompatible: await action.isCompatible(actionContext),
-        action,
-      };
-    });
 
-    Promise.all(actionsPromises).then((actions) => {
-      if (cancelled) {
-        return;
-      }
+    uiActions.getTriggerCompatibleActions(ADD_PANEL_TRIGGER, actionContext).then((actions) => {
+      if (canceled) return;
 
-      const nextItems = actions
-        .filter(
-          ({ action, isCompatible }) => isCompatible && action.id !== 'ACTION_CREATE_ESQL_CHART'
-        )
-        .map(({ action }) => {
-          return (
-            <EuiContextMenuItem
-              key={action.id}
-              icon="share"
-              onClick={() => {
-                action.execute(actionContext);
-                setIsPopoverOpen(false);
-              }}
-            >
-              {action.getDisplayName(actionContext)}
-            </EuiContextMenuItem>
-          );
-        });
+      const nextItems = actions.map((action) => {
+        return (
+          <EuiContextMenuItem
+            key={action.id}
+            icon="share"
+            onClick={() => {
+              action.execute(actionContext);
+              setIsPopoverOpen(false);
+            }}
+          >
+            {action.getDisplayName(actionContext)}
+          </EuiContextMenuItem>
+        );
+      });
       setItems(nextItems);
     });
 
     return () => {
-      cancelled = true;
+      canceled = true;
     };
   }, [pageApi, uiActions]);
 

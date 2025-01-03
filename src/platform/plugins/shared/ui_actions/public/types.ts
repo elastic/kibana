@@ -14,7 +14,7 @@ import { ActionInternal } from './actions/action_internal';
 import { TriggerInternal } from './triggers/trigger_internal';
 
 export type TriggerRegistry = Map<string, TriggerInternal<object>>;
-export type ActionRegistry = Map<string, ActionInternal>;
+export type ActionRegistry = Map<string, () => Promise<ActionInternal>>;
 export type TriggerToActionsRegistry = Map<string, string[]>;
 
 export interface VisualizeFieldContext {

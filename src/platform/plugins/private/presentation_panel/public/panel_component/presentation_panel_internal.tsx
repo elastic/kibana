@@ -18,7 +18,7 @@ import classNames from 'classnames';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { PresentationPanelHeader } from './panel_header/presentation_panel_header';
 import { PresentationPanelHoverActions } from './panel_header/presentation_panel_hover_actions';
-import { PresentationPanelError } from './presentation_panel_error';
+import { PresentationPanelErrorInternal } from './presentation_panel_error_internal';
 import { DefaultPresentationPanelApi, PresentationPanelInternalProps } from './types';
 
 export const PresentationPanelInternal = <
@@ -147,7 +147,7 @@ export const PresentationPanelInternal = <
             data-test-subj="embeddableError"
             justifyContent="center"
           >
-            <PresentationPanelError api={api} error={blockingError} />
+            <PresentationPanelErrorInternal api={api} error={blockingError} />
           </EuiFlexGroup>
         )}
         {!initialLoadComplete && <PanelLoader />}

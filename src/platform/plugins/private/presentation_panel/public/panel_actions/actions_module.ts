@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
-import { Action } from '@kbn/ui-actions-plugin/public';
-
-export type AnyApiAction = Action<EmbeddableApiContext>;
+export { RemovePanelAction } from './remove_panel_action/remove_panel_action';
+export { CustomTimeRangeBadge } from './customize_panel_action';
+export { CustomizePanelAction } from './customize_panel_action';
+export { EditPanelAction } from './edit_panel_action/edit_panel_action';
+export { InspectPanelAction } from './inspect_panel_action/inspect_panel_action';

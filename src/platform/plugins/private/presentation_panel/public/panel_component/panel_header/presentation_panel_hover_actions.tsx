@@ -243,10 +243,11 @@ export const PresentationPanelHoverActions = ({
 
     (async () => {
       // subscribe to any frequently changing context menu actions
-      const frequentlyChangingActions = uiActions.getFrequentlyChangingActionsForTrigger(
+      const frequentlyChangingActions = await uiActions.getFrequentlyChangingActionsForTrigger(
         CONTEXT_MENU_TRIGGER,
         apiContext
       );
+      if (canceled) return;
 
       for (const frequentlyChangingAction of frequentlyChangingActions) {
         if ((quickActionIds as readonly string[]).includes(frequentlyChangingAction.id)) {
@@ -265,10 +266,12 @@ export const PresentationPanelHoverActions = ({
       }
 
       // subscribe to any frequently changing notification actions
-      const frequentlyChangingNotifications = uiActions.getFrequentlyChangingActionsForTrigger(
-        PANEL_NOTIFICATION_TRIGGER,
-        apiContext
-      );
+      const frequentlyChangingNotifications =
+        await uiActions.getFrequentlyChangingActionsForTrigger(
+          PANEL_NOTIFICATION_TRIGGER,
+          apiContext
+        );
+      if (canceled) return;
 
       for (const frequentlyChangingNotification of frequentlyChangingNotifications) {
         if (
