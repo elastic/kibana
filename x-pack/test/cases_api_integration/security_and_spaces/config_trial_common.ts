@@ -11,6 +11,6 @@ import { createTestConfig } from '../common/config';
 export default createTestConfig('security_and_spaces', {
   license: 'trial',
   ssl: true,
-  testFiles: [require.resolve('./tests/common')],
+  testFiles: [require.resolve('./tests/common/index_common_trial')],
   publicBaseUrl: true,
 });
