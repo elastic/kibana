@@ -8,13 +8,16 @@
 import {GetDeprecationsContext, RegisterDeprecationsConfig} from "@kbn/core-deprecations-server";
 import {DeprecationsDetails} from "@kbn/core-deprecations-common";
 import {ConfigType} from "@kbn/enterprise-search-plugin/server";
+import {Connector, fetchConnectors} from '@kbn/search-connectors';
+
 import {i18n} from "@kbn/i18n";
 
 export const getRegisteredDeprecations = (config: ConfigType, isCloud: boolean): RegisterDeprecationsConfig => {
   return {
-    getDeprecations: (ctx: GetDeprecationsContext) => {
+    getDeprecations: async (ctx: GetDeprecationsContext) => {
       return [
         ...(getEnterpriseSearchNodeDeprecation(config, isCloud)),
+        ...(await getCrawlerDeprecations(ctx)),
       ]
     }
   }
@@ -85,5 +88,55 @@ export function getEnterpriseSearchNodeDeprecation(config: ConfigType, isCloud: 
   } else {
     return []
   }
+}
 
+/**
+ * if the customer was using Elastic Crawler, they must delete the connector records
+ */
+export async function getCrawlerDeprecations(ctx: GetDeprecationsContext): Promise<DeprecationsDetails[]> {
+  let crawlers: Connector[] = await getCrawlerConnectors(ctx)
+  if (crawlers.length == 0){
+    return [] // no deprecations to register if there are no Elastic Crawlers in the connectors index
+  } else {
+    return [{
+      level: 'critical',
+      deprecationType: 'feature',
+      title: i18n.translate('xpack.enterpriseSearch.deprecations.crawler.title', {
+        defaultMessage: 'Elastic Crawler metadata records in the .elastic-connectors index must be removed.',
+      }),
+      message: i18n.translate('xpack.enterpriseSearch.deprecations.crawler.message', {
+        defaultMessage: 'Enterprise Search is not supported in versions >= 9.x. ' +
+          'Therefore, Elastic Crawler is not supported in versions >= 9.x. ' +
+          'In order to upgrade other Native Connectors, metadata records in the `.elastic-connectors` index specific to ' +
+          'Elastic Crawler must be removed. For full details, see the documentation.',
+      }),
+      documentationUrl: 'https://docs.elastic.co', //TODO
+      correctiveActions: {
+        manualSteps: [
+          i18n.translate('xpack.enterpriseSearch.deprecations.crawler.listConnectors', {
+            defaultMessage: 'Enumerate all connector records',
+          }),
+          i18n.translate('xpack.enterpriseSearch.deprecations.crawler.deleteCrawlers', {
+            defaultMessage: 'Delete any that have `service_type: elastic-crawler`',
+          }),
+        ],
+        api: {
+          method: 'POST',
+          path: '/internal/enterprise_search/deprecations/delete_crawler_connectors',
+          body: {
+            ids: crawlers.map((it) => {it.id})
+          },
+        },
+      },
+    }]
+  }
+}
+
+/**
+ * Fetch the connector records for crawlers
+ * @param ctx the deprecations context
+ */
+async function getCrawlerConnectors(ctx: GetDeprecationsContext): Promise<Connector[]>{
+  const client = ctx.esClient.asInternalUser
+  return await fetchConnectors(client, undefined,true, undefined)
 }

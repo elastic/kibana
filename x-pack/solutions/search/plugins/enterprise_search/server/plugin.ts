@@ -105,6 +105,7 @@ import { getSearchResultProvider } from './utils/search_result_provider';
 
 import { ConfigType } from '.';
 import { getRegisteredDeprecations } from './deprecations';
+import {registerDeprecationRoutes} from "@kbn/enterprise-search-plugin/server/deprecations/routes";
 
 interface PluginsSetup {
   cloud: CloudSetup;
@@ -446,6 +447,7 @@ export class EnterpriseSearchPlugin implements Plugin<void, void, PluginsSetup, 
     /**
      * Register deprecations
      */
+    registerDeprecationRoutes(dependencies)
     deprecations.registerDeprecations(getRegisteredDeprecations(config, isCloud));
   }
 
