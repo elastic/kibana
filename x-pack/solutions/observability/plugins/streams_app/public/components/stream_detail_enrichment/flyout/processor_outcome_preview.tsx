@@ -431,15 +431,14 @@ const getDetectedFieldSelectOptions = (
 
 const DetectedFieldSelector = ({ selectorId }: { selectorId: string }) => {
   const { field } = useController({ name: selectorId });
-  const { field: fieldType } = useController({ name: `${selectorId}.type` });
 
-  const options = useMemo(() => getDetectedFieldSelectOptions(field.value), [field.value]);
+  const options = useMemo(() => getDetectedFieldSelectOptions(field.value), [field]);
 
   return (
     <EuiSuperSelect
       options={options}
-      valueOfSelected={fieldType.value}
-      onChange={fieldType.onChange}
+      valueOfSelected={field.value.type}
+      onChange={(type) => field.onChange({ ...field.value, type })}
       css={css`
         min-inline-size: 180px;
       `}
