@@ -116,6 +116,47 @@ Status: `in progress`. The current test plan matches [Rule Immutability/Customiz
 
 - User should be able to install prebuilt rules with and without previewing what exactly they would install (rule properties).
 - User should be able to upgrade prebuilt rules with and without previewing what updates they would apply (rule properties of target rule versions).
+- User should be able to review and perform upgrades for all diffable fields across rule types:
+
+| Field Name             | Rule Type         | Field Type          |
+|------------------------|-------------------|---------------------|
+| name                   | Common            | Single Line String  |
+| severity               | Common            | Single Line String  |
+| description            | Common            | Multi Line String   |
+| note                   | Common            | Multi Line String   |
+| setup                  | Common            | Multi Line String   |
+| risk_score             | Common            | Number              |
+| max_signals            | Common            | Number              |
+| tags                   | Common            | Scalar Array        |
+| references             | Common            | Scalar Array        |
+| severity_mapping       | Common            | Simple              |
+| risk_score_mapping     | Common            | Simple              |
+| false_positives        | Common            | Simple              |
+| threat                 | Common            | Simple              |
+| related_integrations   | Common            | Simple              |
+| required_fields        | Common            | Simple              |
+| rule_schedule          | Common            | Simple              |
+| rule_name_override     | Common            | Simple              |
+| timestamp_override     | Common            | Simple              |
+| timeline_template      | Common            | Simple              |
+| building_block         | Common            | Simple              |
+| investigation_fields   | Common            | Simple              |
+| alert_suppression      | Common            | Simple              |
+| data_source            | Common            | Data Source         |
+| type                   | Common            | Rule Type           |
+| version                | Common            | Force Target Version|
+| kql_query              | query             | KQL Query           |
+| threat_indicator_path  | threat_match      | Single Line String  |
+| threat_query           | threat_match      | KQL Query           |
+| threat_index           | threat_match      | Scalar Array        |
+| threshold              | threshold         | Simple              |
+| anomaly_threshold      | machine_learning  | Number              |
+| machine_learning_job_id| machine_learning  | Simple              |
+| history_window_start   | new_terms         | Single Line String  |
+| new_terms_fields       | new_terms         | Scalar Array        |
+| eql_query              | eql               | EQL Query           |
+| esql_query             | esql              | ESQL Query          |
+
 - If user chooses to preview a prebuilt rule to be installed/upgraded, we currently show this preview in a flyout.
 - In the prebuilt rule preview a tab that doesn't have any sections should not be displayed and a section that doesn't have any properties also should not be displayed.
 
