@@ -217,7 +217,6 @@ export const AlertsDetailsTable = memo(
           const { field: fieldSort, direction } = sort;
           setSortField(fieldSort);
           setSortDirection(direction);
-
           setQuery(
             buildEntityAlertsQuery({
               field,
@@ -225,14 +224,14 @@ export const AlertsDetailsTable = memo(
               from,
               queryValue: value,
               size: 500,
-              severity: '',
+              severity: currentFilter,
               sortField: fieldSort,
               sortDirection: direction,
             })
           );
         }
       },
-      [field, from, setQuery, to, value]
+      [currentFilter, field, from, setQuery, to, value]
     );
 
     const { openPreviewPanel } = useExpandableFlyoutApi();
