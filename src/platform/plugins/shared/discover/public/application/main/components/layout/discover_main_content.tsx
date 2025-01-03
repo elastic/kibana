@@ -106,23 +106,11 @@ export const DiscoverMainContent = ({
           setDiscoverViewMode={setDiscoverViewMode}
           patternCount={patternCount}
           dataView={dataView}
-          prepend={
-            React.isValidElement(panelsToggle)
-              ? React.cloneElement(panelsToggle, { renderedFor: 'tabs', isChartAvailable })
-              : undefined
-          }
+          prepend={panelsToggle}
         />
       );
     },
-    [
-      viewMode,
-      isEsqlMode,
-      stateContainer,
-      setDiscoverViewMode,
-      dataView,
-      panelsToggle,
-      isChartAvailable,
-    ]
+    [viewMode, isEsqlMode, stateContainer, setDiscoverViewMode, dataView, panelsToggle]
   );
 
   const viewModeToggle = useMemo(() => renderViewModeToggle(), [renderViewModeToggle]);
