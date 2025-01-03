@@ -446,7 +446,7 @@ export class EnterpriseSearchPlugin implements Plugin {
     /**
      * Register deprecations
      */
-    deprecations.registerDeprecations(getRegisteredDeprecations());
+    deprecations.registerDeprecations(getRegisteredDeprecations(config, isCloud));
   }
 
   public start() {}
