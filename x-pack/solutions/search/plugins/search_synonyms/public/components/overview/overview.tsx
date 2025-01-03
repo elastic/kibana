@@ -10,6 +10,7 @@ import React, { useMemo } from 'react';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { useKibana } from '../../hooks/use_kibana';
 import { EmptyPrompt } from '../empty_prompt/empty_prompt';
+import { SynonymSets } from '../synonym_sets/synonym_sets';
 
 export const SearchSynonymsOverview = () => {
   const {
@@ -28,7 +29,8 @@ export const SearchSynonymsOverview = () => {
       data-test-subj="searchSynonymsOverviewPage"
       solutionNav={searchNavigation?.useClassicNavigation(history)}
     >
-      <EmptyPrompt />
+      <SynonymSets />
+      {/* <EmptyPrompt /> */}
       {embeddableConsole}
     </KibanaPageTemplate>
   );
