@@ -5889,7 +5889,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/i18n-react@link:packages/kbn-i18n-react":
+"@kbn/i18n-react@link:src/platform/packages/shared/kbn-i18n-react":
   version "0.0.0"
   uid ""
 
