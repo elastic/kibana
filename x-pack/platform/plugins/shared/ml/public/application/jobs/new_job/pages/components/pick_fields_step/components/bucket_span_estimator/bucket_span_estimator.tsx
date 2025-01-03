@@ -9,7 +9,7 @@ import type { FC } from 'react';
 import React, { useState, useEffect, useContext } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButton } from '@elastic/eui';
-import { MLCATEGORY } from '@kbn/ml-anomaly-utils';
+import { MLCATEGORY } from '@kbn/ml-anomaly-utils/field_types';
 import { isAdvancedJobCreator } from '../../../../../common/job_creator';
 import { JobCreatorContext } from '../../../job_creator_context';
 

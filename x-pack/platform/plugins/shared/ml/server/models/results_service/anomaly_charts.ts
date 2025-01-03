@@ -12,19 +12,20 @@ import type { estypes } from '@elastic/elasticsearch';
 import { extent, max, min } from 'd3';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { isDefined } from '@kbn/ml-is-defined';
+import type {
+  InfluencersFilterQuery,
+  MlAnomalyRecordDoc,
+  MlEntityField,
+  MlRecordForInfluencer,
+} from '@kbn/ml-anomaly-utils';
 import {
   aggregationTypeTransform,
   getEntityFieldList,
   isMultiBucketAnomaly,
-  type InfluencersFilterQuery,
-  type MlAnomalyRecordDoc,
-  type MlEntityField,
-  type MlRecordForInfluencer,
-  _DOC_COUNT,
-  DOC_COUNT,
-  ES_AGGREGATION,
-  ML_JOB_AGGREGATION,
-} from '@kbn/ml-anomaly-utils';
+} from '@kbn/ml-anomaly-utils/anomaly_utils';
+import { _DOC_COUNT, DOC_COUNT } from '@kbn/ml-anomaly-utils/field_types';
+import { ES_AGGREGATION } from '@kbn/ml-anomaly-utils/es_aggregation';
+import { ML_JOB_AGGREGATION } from '@kbn/ml-anomaly-utils/aggregation_types';
 import { isRuntimeMappings } from '@kbn/ml-runtime-field-utils';
 import { parseInterval } from '@kbn/ml-parse-interval';
 import type { CriteriaField } from '@kbn/ml-anomaly-utils/types';

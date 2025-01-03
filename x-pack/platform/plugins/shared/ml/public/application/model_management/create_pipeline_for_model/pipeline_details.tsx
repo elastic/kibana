@@ -21,7 +21,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { CodeEditor } from '@kbn/code-editor';
 import type { SupportedPytorchTasksType } from '@kbn/ml-trained-models-utils';
-import { type InferecePipelineCreationState } from './state';
+import { type InferencePipelineCreationState } from './state';
 import { EDIT_MESSAGE, CANCEL_EDIT_MESSAGE } from '../../components/ml_inference/constants';
 import { isValidJson } from '../../../../common/util/validation_utils';
 import { useTestTrainedModelsContext } from '../test_models/test_trained_models_context';
@@ -30,12 +30,12 @@ import { validatePipelineProcessors } from '../../components/ml_inference/valida
 import { PipelineDetailsTitle, PipelineNameAndDescription } from '../../components/shared';
 
 interface Props {
-  handlePipelineConfigUpdate: (configUpdate: Partial<InferecePipelineCreationState>) => void;
+  handlePipelineConfigUpdate: (configUpdate: Partial<InferencePipelineCreationState>) => void;
   modelId: string;
   pipelineNameError: string | undefined;
   pipelineName: string;
   pipelineDescription: string;
-  initialPipelineConfig?: InferecePipelineCreationState['initialPipelineConfig'];
+  initialPipelineConfig?: InferencePipelineCreationState['initialPipelineConfig'];
   setHasUnsavedChanges: React.Dispatch<React.SetStateAction<boolean>>;
   taskType?: SupportedPytorchTasksType;
 }
