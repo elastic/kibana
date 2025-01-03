@@ -11556,7 +11556,7 @@ paths:
       x-beta: true
   /api/fleet/agent_policies:
     get:
-      description: '[Required authorization] Route required privileges: ANY of [fleet-agent-policies-read OR fleet-agents-read].'
+      description: '[Required authorization] Route required privileges: ANY of [fleet-agent-policies-read OR fleet-agents-read OR fleet-setup].'
       operationId: get-fleet-agent-policies
       parameters:
         - in: query
@@ -12830,7 +12830,7 @@ paths:
       x-beta: true
   /api/fleet/agent_policies/_bulk_get:
     post:
-      description: '[Required authorization] Route required privileges: ANY of [fleet-agent-policies-read OR fleet-agents-read].'
+      description: '[Required authorization] Route required privileges: ANY of [fleet-agent-policies-read OR fleet-agents-read OR fleet-setup].'
       operationId: post-fleet-agent-policies-bulk-get
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -13376,7 +13376,7 @@ paths:
       x-beta: true
   /api/fleet/agent_policies/{agentPolicyId}:
     get:
-      description: 'Get an agent policy by ID.<br/><br/>[Required authorization] Route required privileges: ANY of [fleet-agent-policies-read OR fleet-agents-read].'
+      description: 'Get an agent policy by ID.<br/><br/>[Required authorization] Route required privileges: ANY of [fleet-agent-policies-read OR fleet-agents-read OR fleet-setup].'
       operationId: get-fleet-agent-policies-agentpolicyid
       parameters:
         - in: path
@@ -15144,7 +15144,7 @@ paths:
       x-beta: true
   /api/fleet/agent_policies/{agentPolicyId}/download:
     get:
-      description: 'Download an agent policy by ID.<br/><br/>[Required authorization] Route required privileges: ALL of [fleet-agent-policies-read].'
+      description: 'Download an agent policy by ID.<br/><br/>[Required authorization] Route required privileges: ALL of [fleet-agent-policies-read, fleet-setup].'
       operationId: get-fleet-agent-policies-agentpolicyid-download
       parameters:
         - in: path
@@ -22166,7 +22166,7 @@ paths:
       x-beta: true
   /api/fleet/kubernetes:
     get:
-      description: '[Required authorization] Route required privileges: ALL of [fleet-agent-policies-read].'
+      description: '[Required authorization] Route required privileges: ALL of [fleet-agent-policies-read, fleet-setup].'
       operationId: get-fleet-kubernetes
       parameters:
         - in: query
@@ -22218,7 +22218,7 @@ paths:
       x-beta: true
   /api/fleet/kubernetes/download:
     get:
-      description: '[Required authorization] Route required privileges: ALL of [fleet-agent-policies-read].'
+      description: '[Required authorization] Route required privileges: ALL of [fleet-agent-policies-read, fleet-setup].'
       operationId: get-fleet-kubernetes-download
       parameters:
         - in: query
