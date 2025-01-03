@@ -8,6 +8,7 @@
 import React, { useCallback, useEffect } from 'react';
 import { EuiFormRow } from '@elastic/eui';
 import type { DataViewBase } from '@kbn/es-query';
+import usePrevious from 'react-use/lib/usePrevious';
 import { createOrNewEntryItem } from '../../../../common/components/threat_match/helpers';
 import type { ThreatMapEntries } from '../../../../common/components/threat_match/types';
 import { ThreatMatchComponent } from '../../../../common/components/threat_match';
@@ -29,6 +30,8 @@ export function ThreatMatchMappingField({
 }: ThreatMatchMappingFieldProps): JSX.Element {
   const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
   const { setValue, validate } = field;
+  const prevIndexTitle = usePrevious(indexPatterns.title);
+  const prevThreatTitle = usePrevious(threatIndexPatterns.title);
 
   // We have to make sure validation runs against the latest source events index patterns
   // and threat match index patterns.
@@ -38,13 +41,13 @@ export function ThreatMatchMappingField({
   // producing invalid validation results.
   //
   // Validating the field imperatively here fixes this issue.
-  //
-  // Additional pitfall here is `validate` function changing its reference every render. Including it
-  // in useEffect's deps leads to infinite re-render.
   useEffect(() => {
+    if (indexPatterns.title === prevIndexTitle && threatIndexPatterns.title === prevThreatTitle) {
+      return;
+    }
+
     validate();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [indexPatterns, threatIndexPatterns]);
+  }, [indexPatterns.title, threatIndexPatterns.title, prevIndexTitle, prevThreatTitle, validate]);
 
   const handleMappingChange = useCallback(
     (entryItems: ThreatMapEntries[]): void => {
