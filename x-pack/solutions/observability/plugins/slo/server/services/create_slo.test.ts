@@ -51,7 +51,8 @@ describe('CreateSLO', () => {
       mockSummaryTransformManager,
       mockLogger,
       'some-space',
-      httpServiceMock.createStartContract().basePath
+      httpServiceMock.createStartContract().basePath,
+      'some-user-id'
     );
   });
 
