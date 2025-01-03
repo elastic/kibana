@@ -331,7 +331,7 @@
     "@kbn/core-metrics-collectors-server-internal": "link:src/core/packages/metrics/collectors-server-internal",
     "@kbn/core-metrics-server": "link:src/core/packages/metrics/server",
     "@kbn/core-metrics-server-internal": "link:src/core/packages/metrics/server-internal",
-    "@kbn/core-mount-utils-browser": "link:packages/core/mount-utils/core-mount-utils-browser",
+    "@kbn/core-mount-utils-browser": "link:src/core/packages/mount-utils/browser",
     "@kbn/core-mount-utils-browser-internal": "link:packages/core/mount-utils/core-mount-utils-browser-internal",
     "@kbn/core-node-server": "link:packages/core/node/core-node-server",
     "@kbn/core-node-server-internal": "link:packages/core/node/core-node-server-internal",
