@@ -12,8 +12,9 @@ import { EuiButton } from '@elastic/eui';
 import { getRouterLinkProps } from '@kbn/router-utils';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { css } from '@emotion/react';
-import { LocatorPublic } from '@kbn/share-plugin/common';
-import { DISCOVER_APP_LOCATOR, DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
+import type { LocatorPublic } from '@kbn/share-plugin/common';
+import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
+import { DISCOVER_APP_LOCATOR } from '@kbn/discover-plugin/common';
 import { useKibanaContextForPlugin } from '../hooks/use_kibana';
 
 const pageConfigurations = {
