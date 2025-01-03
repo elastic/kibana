@@ -19,7 +19,8 @@ import { fromKueryExpression, luceneStringToDsl, toElasticsearchQuery } from '@k
 import type { ESSearchResponse } from '@kbn/es-types';
 import type { VectorSourceRequestMeta } from '@kbn/maps-plugin/common';
 import { LAYER_TYPE, SOURCE_TYPES, SCALING_TYPES } from '@kbn/maps-plugin/common';
-import { type MLAnomalyDoc, ML_SEVERITY_COLOR_RAMP } from '@kbn/ml-anomaly-utils';
+import type { MLAnomalyDoc } from '@kbn/ml-anomaly-utils';
+import { ML_SEVERITY_COLOR_RAMP } from '@kbn/ml-anomaly-utils/constants';
 import { formatHumanReadableDateTimeSeconds } from '@kbn/ml-date-utils';
 import { SEARCH_QUERY_LANGUAGE } from '@kbn/ml-query-utils';
 import type { MlApi } from '../application/services/ml_api_service';

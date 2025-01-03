@@ -194,6 +194,7 @@
     "@kbn/core-elasticsearch-server",
     "@kbn/streams-schema",
     "@kbn/response-ops-rule-params",
-    "@kbn/ml-common-types"
+    "@kbn/ml-common-types",
+    "@kbn/ml-common-constants"
   ]
 }

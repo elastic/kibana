@@ -20,11 +20,9 @@ import moment from 'moment';
 import { EuiPopover } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import {
-  getFormattedSeverityScore,
-  getSeverityWithLow,
-  ML_SEVERITY_COLORS,
-} from '@kbn/ml-anomaly-utils';
+import { getFormattedSeverityScore } from '@kbn/ml-anomaly-utils/get_formatted_severity_score';
+import { getSeverityWithLow } from '@kbn/ml-anomaly-utils/anomaly_utils';
+import { ML_SEVERITY_COLORS } from '@kbn/ml-anomaly-utils/severity_colors';
 import { formatHumanReadableDateTimeSeconds } from '@kbn/ml-date-utils';
 import { context } from '@kbn/kibana-react-plugin/public';
 
