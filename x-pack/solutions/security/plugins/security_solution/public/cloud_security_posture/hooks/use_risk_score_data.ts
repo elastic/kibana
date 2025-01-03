@@ -7,7 +7,6 @@
 
 import { useMemo } from 'react';
 import {
-  RiskScoreEntity,
   type HostRiskScore,
   type UserRiskScore,
   buildHostNamesFilter,
@@ -15,6 +14,7 @@ import {
 } from '../../../common/search_strategy';
 import { useRiskScore } from '../../entity_analytics/api/hooks/use_risk_score';
 import { FIRST_RECORD_PAGINATION } from '../../entity_analytics/common';
+import { EntityType } from '../../../common/entity_analytics/types';
 
 export const useHasRiskScore = ({
   field,
@@ -29,7 +29,7 @@ export const useHasRiskScore = ({
     [isHostNameField, value]
   );
   const { data } = useRiskScore({
-    riskEntity: isHostNameField ? RiskScoreEntity.host : RiskScoreEntity.user,
+    riskEntity: isHostNameField ? EntityType.host : EntityType.user,
     filterQuery: buildFilterQuery,
     onlyLatest: false,
     pagination: FIRST_RECORD_PAGINATION,

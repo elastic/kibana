@@ -8,6 +8,7 @@
 import React from 'react';
 import type { Story } from '@storybook/react';
 import { TestProvider } from '@kbn/expandable-flyout/src/test/provider';
+import { EntityType } from '../../../../common/search_strategy';
 import { StorybookProviders } from '../../../common/mock/storybook_providers';
 import { mockRiskScoreState } from '../../../flyout/shared/mocks';
 import { FlyoutRiskSummary } from './risk_summary';
@@ -28,6 +29,7 @@ export const Default: Story<void> = () => {
             queryId={'testQuery'}
             recalculatingScore={false}
             isLinkEnabled
+            entityType={EntityType.user}
           />
         </div>
       </TestProvider>
@@ -47,6 +49,7 @@ export const LinkEnabledInPreviewMode: Story<void> = () => {
             openDetailsPanel={() => {}}
             isLinkEnabled
             isPreviewMode
+            entityType={EntityType.user}
           />
         </div>
       </TestProvider>
@@ -65,6 +68,7 @@ export const LinkDisabled: Story<void> = () => {
             recalculatingScore={false}
             openDetailsPanel={() => {}}
             isLinkEnabled={false}
+            entityType={EntityType.user}
           />
         </div>
       </TestProvider>

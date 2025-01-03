@@ -12,7 +12,7 @@ import {
   RISK_SCORE_INDEX_PATTERN,
   type CriticalityLevels,
 } from '../../../../../common/constants';
-import type { RiskSeverity } from '../../../../../common/search_strategy';
+import { EntityTypeToLevelField, type RiskSeverity } from '../../../../../common/search_strategy';
 import { useGlobalFilterQuery } from '../../../../common/hooks/use_global_filter_query';
 import { EntitySourceTag } from '../types';
 
@@ -58,18 +58,11 @@ export const useEntitiesListFilters = ({
       ? [
           {
             bool: {
-              should: selectedSeverities.flatMap((value) => [
-                {
-                  term: {
-                    'host.risk.calculated_level': value,
-                  },
+              should: Object.values(EntityTypeToLevelField).flatMap((levelField) => ({
+                terms: {
+                  [levelField]: selectedSeverities,
                 },
-                {
-                  term: {
-                    'user.risk.calculated_level': value,
-                  },
-                },
-              ]),
+              })),
             },
           },
         ]

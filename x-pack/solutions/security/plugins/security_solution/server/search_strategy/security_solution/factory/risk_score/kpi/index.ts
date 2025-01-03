@@ -8,9 +8,10 @@
 import { getOr } from 'lodash/fp';
 
 import type { IEsSearchResponse } from '@kbn/search-types';
+
+import type { EntityRiskQueries } from '../../../../../../common/api/search_strategy';
 import type {
   KpiRiskScoreStrategyResponse,
-  RiskQueries,
   RiskSeverity,
 } from '../../../../../../common/search_strategy';
 
@@ -23,7 +24,7 @@ interface AggBucket {
   doc_count: number;
 }
 
-export const kpiRiskScore: SecuritySolutionFactory<RiskQueries.kpiRiskScore> = {
+export const kpiRiskScore: SecuritySolutionFactory<EntityRiskQueries.kpi> = {
   buildDsl: (options) => buildKpiRiskScoreQuery(options),
   parse: async (
     options,

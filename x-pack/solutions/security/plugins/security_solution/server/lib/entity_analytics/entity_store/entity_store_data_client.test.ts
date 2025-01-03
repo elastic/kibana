@@ -12,7 +12,6 @@ import {
 } from '@kbn/core/server/mocks';
 import { EntityStoreDataClient } from './entity_store_data_client';
 import type { SortOrder } from '@elastic/elasticsearch/lib/api/types';
-import type { EntityType } from '../../../../common/api/entity_analytics/entity_store/common.gen';
 import type { DataViewsService } from '@kbn/data-views-plugin/common';
 import type { AppClient } from '../../..';
 import type { EntityStoreConfig } from './types';
@@ -29,6 +28,7 @@ const unitedDefinition = getUnitedEntityDefinition({
   frequency: '1m',
 });
 const definition: EntityDefinition = unitedDefinition.entityManagerDefinition;
+import { EntityType } from '../../../../common/search_strategy';
 
 describe('EntityStoreDataClient', () => {
   const mockSavedObjectClient = savedObjectsClientMock.create();
@@ -79,7 +79,7 @@ describe('EntityStoreDataClient', () => {
     it('searches in the entities store indices', async () => {
       await dataClient.searchEntities({
         ...defaultSearchParams,
-        entityTypes: ['host', 'user'],
+        entityTypes: [EntityType.host, EntityType.user],
       });
 
       expect(esClientMock.search).toHaveBeenCalledWith(

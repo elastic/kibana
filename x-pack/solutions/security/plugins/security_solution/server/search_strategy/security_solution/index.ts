@@ -28,10 +28,9 @@ export const securitySolutionSearchStrategyProvider = (
   return {
     search: (request, options, deps) => {
       const parsedRequest = searchStrategyRequestSchema.parse(request);
-
       const queryFactory = securitySolutionFactory[parsedRequest.factoryQueryType];
-
       const dsl = queryFactory.buildDsl(parsedRequest);
+
       return es.search({ ...request, params: dsl }, options, deps).pipe(
         map((response) => {
           return {

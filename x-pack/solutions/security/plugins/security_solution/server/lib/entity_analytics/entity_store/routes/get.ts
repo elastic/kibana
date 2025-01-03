@@ -10,6 +10,7 @@ import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 
+import { EntityType } from '../../../../../common/search_strategy';
 import type { GetEntityEngineResponse } from '../../../../../common/api/entity_analytics/entity_store/engine/get.gen';
 import { GetEntityEngineRequestParams } from '../../../../../common/api/entity_analytics/entity_store/engine/get.gen';
 import { API_VERSIONS, APP_ID } from '../../../../../common/constants';
@@ -44,7 +45,9 @@ export const getEntityEngineRoute = (
 
         try {
           const secSol = await context.securitySolution;
-          const body = await secSol.getEntityStoreDataClient().get(request.params.entityType);
+          const body = await secSol
+            .getEntityStoreDataClient()
+            .get(EntityType[request.params.entityType]);
 
           return response.ok({ body });
         } catch (e) {

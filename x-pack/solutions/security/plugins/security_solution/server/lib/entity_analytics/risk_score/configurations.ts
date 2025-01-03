@@ -6,12 +6,12 @@
  */
 import type { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/types';
 import type { FieldMap } from '@kbn/alerts-as-data-utils';
-import type { IdentifierType } from '../../../../common/entity_analytics/risk_engine';
+import { EntityType } from '../../../../common/entity_analytics/types';
 import {
-  RiskScoreEntity,
-  SERVICE_RISK_SCORE_ENTITY,
   riskScoreBaseIndexName,
+  type IdentifierType,
 } from '../../../../common/entity_analytics/risk_engine';
+
 import type { IIndexPatternString } from '../utils/create_datastream';
 
 const commonRiskFields: FieldMap = {
@@ -115,7 +115,7 @@ export const riskScoreFieldMap: FieldMap = {
     array: false,
     required: false,
   },
-  ...buildIdentityRiskFields(RiskScoreEntity.host),
+  ...buildIdentityRiskFields(EntityType.host),
   'user.name': {
     type: 'keyword',
     array: false,
@@ -126,7 +126,7 @@ export const riskScoreFieldMap: FieldMap = {
     array: false,
     required: false,
   },
-  ...buildIdentityRiskFields(RiskScoreEntity.user),
+  ...buildIdentityRiskFields(EntityType.user),
   'service.name': {
     type: 'keyword',
     array: false,
@@ -137,7 +137,7 @@ export const riskScoreFieldMap: FieldMap = {
     array: false,
     required: false,
   },
-  ...buildIdentityRiskFields(SERVICE_RISK_SCORE_ENTITY),
+  ...buildIdentityRiskFields(EntityType.service),
 } as const;
 
 export const mappingComponentName = '.risk-score-mappings';

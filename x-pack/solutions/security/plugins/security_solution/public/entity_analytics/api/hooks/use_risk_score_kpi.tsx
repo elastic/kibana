@@ -8,24 +8,18 @@
 import { useCallback, useEffect, useMemo } from 'react';
 
 import { i18n } from '@kbn/i18n';
-import {
-  getHostRiskIndex,
-  getUserRiskIndex,
-  RiskQueries,
-  RiskSeverity,
-  RiskScoreEntity,
-  EMPTY_SEVERITY_COUNT,
-} from '../../../../common/search_strategy';
+import { EntityRiskQueries } from '../../../../common/api/search_strategy';
+import type { EntityType } from '../../../../common/entity_analytics/types';
+import { RiskSeverity, EMPTY_SEVERITY_COUNT } from '../../../../common/search_strategy';
 import { isIndexNotFoundError } from '../../../common/utils/exceptions';
 import type { ESQuery } from '../../../../common/typed_json';
 import type { SeverityCount } from '../../components/severity/types';
-import { useSpaceId } from '../../../common/hooks/use_space_id';
 import { useSearchStrategy } from '../../../common/containers/use_search_strategy';
 import type { InspectResponse } from '../../../types';
 import type { inputsModel } from '../../../common/store';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
-import { useIsNewRiskScoreModuleInstalled } from './use_risk_engine_status';
 import { useRiskScoreFeatureStatus } from './use_risk_score_feature_status';
+import { useEntityRiskIndex } from './use_risk_score_index';
 
 interface RiskScoreKpi {
   error: unknown;
@@ -40,7 +34,7 @@ interface RiskScoreKpi {
 interface UseRiskScoreKpiProps {
   filterQuery?: string | ESQuery;
   skip?: boolean;
-  riskEntity: RiskScoreEntity;
+  riskEntity: EntityType;
   timerange?: { to: string; from: string };
 }
 
@@ -51,15 +45,7 @@ export const useRiskScoreKpi = ({
   timerange,
 }: UseRiskScoreKpiProps): RiskScoreKpi => {
   const { addError } = useAppToasts();
-  const spaceId = useSpaceId();
-  const { installed: isNewRiskScoreModuleInstalled, isLoading: riskScoreStatusLoading } =
-    useIsNewRiskScoreModuleInstalled();
-  const defaultIndex =
-    spaceId && !riskScoreStatusLoading && isNewRiskScoreModuleInstalled !== undefined
-      ? riskEntity === RiskScoreEntity.host
-        ? getHostRiskIndex(spaceId, true, isNewRiskScoreModuleInstalled)
-        : getUserRiskIndex(spaceId, true, isNewRiskScoreModuleInstalled)
-      : undefined;
+  const defaultIndex = useEntityRiskIndex(riskEntity);
 
   const {
     isDeprecated,
@@ -70,8 +56,8 @@ export const useRiskScoreKpi = ({
   } = useRiskScoreFeatureStatus(riskEntity, defaultIndex);
 
   const { loading, result, search, refetch, inspect, error } =
-    useSearchStrategy<RiskQueries.kpiRiskScore>({
-      factoryQueryType: RiskQueries.kpiRiskScore,
+    useSearchStrategy<EntityRiskQueries.kpi>({
+      factoryQueryType: EntityRiskQueries.kpi,
       initialResult: {
         kpiRiskScore: EMPTY_SEVERITY_COUNT,
       },

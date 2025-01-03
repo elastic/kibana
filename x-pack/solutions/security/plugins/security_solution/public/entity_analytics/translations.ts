@@ -7,34 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const SHOW_HOSTS_RISK_SCORE = i18n.translate(
-  'xpack.securitySolution.riskScore.riskScorePreview.hosts.show',
-  {
-    defaultMessage: 'Show hosts',
-  }
-);
-
-export const HIDE_HOSTS_RISK_SCORE = i18n.translate(
-  'xpack.securitySolution.riskScore.riskScorePreview.hosts.hide',
-  {
-    defaultMessage: 'Hide hosts',
-  }
-);
-
-export const SHOW_USERS_RISK_SCORE = i18n.translate(
-  'xpack.securitySolution.riskScore.riskScorePreview.users.show',
-  {
-    defaultMessage: 'Show users',
-  }
-);
-
-export const HIDE_USERS_RISK_SCORE = i18n.translate(
-  'xpack.securitySolution.riskScore.riskScorePreview.users.hide',
-  {
-    defaultMessage: 'Hide users',
-  }
-);
-
 export const RISK_SCORE_MODULE_STATUS = i18n.translate(
   'xpack.securitySolution.riskScore.riskScorePreview.status',
   {
