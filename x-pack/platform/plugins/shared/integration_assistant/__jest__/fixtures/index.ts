@@ -61,3 +61,8 @@ export const mockedRequestWithCelDetails = {
   openApiSchema: {},
   openApiAuthSchema: {},
 };
+
+export const mockedApiAnalysisRequest = {
+  dataStreamName: 'audit',
+  pathOptions: { '/path1': 'path1 description' },
+};
