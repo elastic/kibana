@@ -4545,7 +4545,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-feature-flags-browser-internal@link:packages/core/feature-flags/core-feature-flags-browser-internal":
+"@kbn/core-feature-flags-browser-internal@link:src/core/packages/feature-flags/browser-internal":
   version "0.0.0"
   uid ""
 
