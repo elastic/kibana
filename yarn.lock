@@ -7057,7 +7057,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/security-hardening@link:packages/kbn-security-hardening":
+"@kbn/security-hardening@link:src/platform/packages/shared/kbn-security-hardening":
   version "0.0.0"
   uid ""
 
