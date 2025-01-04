@@ -7,6 +7,7 @@
 
 import * as t from 'io-ts';
 import Boom from '@hapi/boom';
+import { z } from '@kbn/zod';
 import { ElasticAgentVersionInfo } from '../../../common/types';
 import { createObservabilityOnboardingServerRoute } from '../create_observability_onboarding_server_route';
 import { getFallbackESUrl } from '../../lib/get_fallback_urls';
@@ -94,6 +95,49 @@ const createAPIKeyRoute = createObservabilityOnboardingServerRoute({
   },
 });
 
+const testOasGeneration = createObservabilityOnboardingServerRoute({
+  endpoint: 'GET /internal/test_os_generation',
+  options: { tags: [] },
+  params: z.object({
+    query: z.object({
+      start: z.string().optional(),
+    }),
+  }),
+  responseValidation: {
+    400: {
+      description: 'Bad Request',
+      body: z.object({
+        success: z.boolean(),
+        data: z.never(),
+        error: z.string(),
+      }),
+      bodyContentType: 'application/json',
+    },
+    200: {
+      description: 'Success response',
+      body: z.object({
+        success: z.boolean(),
+        data: z.array(z.object({ id: z.number() })),
+        error: z.string(),
+      }),
+      bodyContentType: 'application/json',
+    },
+  },
+  async handler(resources) {
+    const start = resources.params.query?.start;
+
+    if (start === 'true') {
+      return {
+        success: true,
+        data: [{ id: 1 }, { id: 2 }],
+        error: '',
+      };
+    } else {
+      return { success: false, data: [], error: '' };
+    }
+  },
+});
+
 const createFlowRoute = createObservabilityOnboardingServerRoute({
   endpoint: 'POST /internal/observability_onboarding/logs/flow',
   options: { tags: [] },
@@ -144,6 +188,7 @@ const createFlowRoute = createObservabilityOnboardingServerRoute({
 });
 
 export const logsOnboardingRouteRepository = {
+  ...testOasGeneration,
   ...logMonitoringPrivilegesRoute,
   ...installShipperSetupRoute,
   ...createFlowRoute,

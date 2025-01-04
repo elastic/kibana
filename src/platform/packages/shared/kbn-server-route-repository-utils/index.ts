@@ -26,4 +26,6 @@ export type {
   DefaultRouteHandlerResources,
   IoTsParamsObject,
   ZodParamsObject,
+  ServerRouteHandlerReturnType,
+  TRouteResponse,
 } from './src/typings';

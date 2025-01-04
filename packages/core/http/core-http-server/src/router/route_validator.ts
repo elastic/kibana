@@ -172,7 +172,7 @@ export type RouteValidatorFullConfigRequest<P, Q, B> = RouteValidatorConfig<P, Q
  *
  * @public
  */
-export interface RouteValidatorFullConfigResponse {
+export interface RouteValidatorFullConfigResponse<B> {
   [statusCode: number]: {
     /**
      * A description of the response. This is required input for complete OAS documentation.
@@ -182,7 +182,7 @@ export interface RouteValidatorFullConfigResponse {
      * A string representing the mime type of the response body.
      */
     bodyContentType?: string;
-    body?: LazyValidator;
+    body?: LazyValidator<B>;
   };
   unsafe?: {
     body?: boolean;
@@ -193,21 +193,21 @@ export interface RouteValidatorFullConfigResponse {
  * An alternative form to register both request schema and all response schemas.
  * @public
  */
-export interface RouteValidatorRequestAndResponses<P, Q, B> {
+export interface RouteValidatorRequestAndResponses<P, Q, B, ResponseBody> {
   request: RouteValidatorFullConfigRequest<P, Q, B>;
   /**
    * Response schemas for your route.
    */
-  response?: RouteValidatorFullConfigResponse;
+  response?: RouteValidatorFullConfigResponse<ResponseBody>;
 }
 
 /**
  * Type container for schemas used in route related validations
  * @public
  */
-export type RouteValidator<P, Q, B> =
+export type RouteValidator<P, Q, B, ResponseBody> =
   | RouteValidatorFullConfigRequest<P, Q, B>
-  | (RouteValidatorRequestAndResponses<P, Q, B> &
+  | (RouteValidatorRequestAndResponses<P, Q, B, ResponseBody> &
       /* Help TS enforce union discrimination */ NotRouteValidatorFullConfigRequest);
 
 interface NotRouteValidatorFullConfigRequest {
@@ -225,4 +225,4 @@ interface NotRouteValidatorFullConfigRequest {
  * @return A @kbn/config-schema schema
  * @public
  */
-export type LazyValidator = () => Type<unknown> | ZodEsque<unknown>;
+export type LazyValidator<B> = () => Type<B> | ZodEsque<B>;

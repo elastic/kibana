@@ -8,7 +8,12 @@
  */
 
 import type { HttpFetchOptions } from '@kbn/core-http-browser';
-import type { IKibanaResponse, RouteAccess, RouteSecurity } from '@kbn/core-http-server';
+import type {
+  IKibanaResponse,
+  RouteAccess,
+  RouteSecurity,
+  VersionedRouteResponseValidation,
+} from '@kbn/core-http-server';
 import type {
   KibanaRequest,
   KibanaResponseFactory,
@@ -123,7 +128,15 @@ type ServerRouteHandlerReturnTypeWithoutRecord =
   | null
   | void;
 
-type ServerRouteHandlerReturnType = ServerRouteHandlerReturnTypeWithoutRecord | Record<string, any>;
+export type ServerRouteHandlerReturnType =
+  | ServerRouteHandlerReturnTypeWithoutRecord
+  | Record<string, any>;
+
+export type TRouteResponse<TReturnType extends ServerRouteHandlerReturnType> = {
+  [statusCode: number]: {
+    body: z.ZodSchema<TReturnType>;
+  } & Omit<VersionedRouteResponseValidation<TReturnType>[number], 'body'>;
+} & Omit<VersionedRouteResponseValidation<TReturnType>, number>;
 
 type ServerRouteHandler<
   TRouteHandlerResources extends ServerRouteHandlerResources,
@@ -151,6 +164,7 @@ export type CreateServerRouteFactory<
     endpoint: ValidateEndpoint<TEndpoint, TRouteAccess> extends true ? TEndpoint : never;
     handler: ServerRouteHandler<TRouteHandlerResources, TRouteParamsRT, TReturnType>;
     params?: TRouteParamsRT;
+    responseValidation?: TRouteResponse<TReturnType>;
     security?: RouteSecurity;
   } & Required<
     {
@@ -167,7 +181,9 @@ export type CreateServerRouteFactory<
     TEndpoint,
     TRouteParamsRT,
     TRouteHandlerResources,
-    Awaited<TReturnType>,
+    'responseValidation' extends keyof typeof options
+      ? VersionedRouteResponseValidation<TReturnType>
+      : TReturnType,
     TRouteCreateOptions
   >
 >;
@@ -183,7 +199,11 @@ export type ServerRoute<
   handler: ServerRouteHandler<TRouteHandlerResources, TRouteParamsRT, TReturnType>;
   security?: RouteSecurity;
 } & (TRouteParamsRT extends RouteParamsRT ? { params: TRouteParamsRT } : {}) &
-  (TRouteCreateOptions extends DefaultRouteCreateOptions ? { options: TRouteCreateOptions } : {});
+  (TRouteCreateOptions extends DefaultRouteCreateOptions
+    ? { options: TRouteCreateOptions }
+    : {}) & {
+    responseValidation?: TRouteResponse<TReturnType>;
+  };
 
 export type ServerRouteRepository = Record<
   string,
