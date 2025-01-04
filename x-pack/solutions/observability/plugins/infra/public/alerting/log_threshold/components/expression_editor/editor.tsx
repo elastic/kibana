@@ -5,19 +5,28 @@
  * 2.0.
  */
 
-import { EuiButton, EuiCallOut, EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiCallOut,
+  EuiEmptyPrompt,
+  EuiFormErrorText,
+  EuiLoadingSpinner,
+  EuiSpacer,
+  EuiTitle,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { FC, PropsWithChildren } from 'react';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState, useEffect } from 'react';
 import useMount from 'react-use/lib/useMount';
 import type { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { ForLastExpression } from '@kbn/triggers-actions-ui-plugin/public';
-import { LogViewProvider, useLogViewContext } from '@kbn/logs-shared-plugin/public';
-import type {
-  PersistedLogViewReference,
-  ResolvedLogViewField,
-} from '@kbn/logs-shared-plugin/common';
+import { useLogViewContext } from '@kbn/logs-shared-plugin/public';
+import type { ResolvedLogViewField } from '@kbn/logs-shared-plugin/common';
 import { decodeOrThrow } from '@kbn/io-ts-utils';
+import type { ISearchSource } from '@kbn/data-plugin/common';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import { DataViewSelectPopover } from '@kbn/stack-alerts-plugin/public';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type {
   PartialCountRuleParams,
   PartialCriteria as PartialCriteriaType,
@@ -38,7 +47,7 @@ import { errorsRT } from '../../validation';
 import { Criteria } from './criteria';
 import { Threshold } from './threshold';
 import { TypeSwitcher } from './type_switcher';
-import { LogViewSwitcher } from './log_view_switcher';
+import { getSearchConfiguration } from '../../../common/helpers/get_search_configuration';
 
 export interface ExpressionCriteria {
   field?: string;
@@ -66,11 +75,9 @@ const createDefaultCriterion = (
     : { field: undefined, comparator: undefined, value: undefined };
 
 const createDefaultCountRuleParams = (
-  availableFields: ResolvedLogViewField[],
-  logView: PersistedLogViewReference
+  availableFields: ResolvedLogViewField[]
 ): PartialCountRuleParams => ({
   ...DEFAULT_BASE_EXPRESSION,
-  logView,
   count: {
     value: 75,
     comparator: Comparator.GT,
@@ -79,11 +86,9 @@ const createDefaultCountRuleParams = (
 });
 
 const createDefaultRatioRuleParams = (
-  availableFields: ResolvedLogViewField[],
-  logView: PersistedLogViewReference
+  availableFields: ResolvedLogViewField[]
 ): PartialRatioRuleParams => ({
   ...DEFAULT_BASE_EXPRESSION,
-  logView,
   count: {
     value: 2,
     comparator: Comparator.GT,
@@ -94,29 +99,164 @@ const createDefaultRatioRuleParams = (
   ],
 });
 
-export const ExpressionEditor: React.FC<
-  RuleTypeParamsExpressionProps<PartialRuleParams, LogsContextMeta>
-> = (props) => {
-  const isInternal = props.metadata?.isInternal ?? false;
+type Props = RuleTypeParamsExpressionProps<PartialRuleParams, LogsContextMeta>;
+
+export const ExpressionEditor: React.FC<Props> = (props) => {
   const {
-    services: { logsShared },
+    services: { data, dataViews, dataViewEditor },
   } = useKibanaContextForPlugin(); // injected during alert registration
+
+  const { setRuleParams, ruleParams, errors, metadata, onChangeMetaData } = props;
+
+  const [dataView, setDataView] = useState<DataView>();
+  const [searchSource, setSearchSource] = useState<ISearchSource>();
+  const [paramsError, setParamsError] = useState<Error>();
+  const [paramsWarning, setParamsWarning] = useState<string>();
+  const [dataViewTimeFieldError, setDataViewTimeFieldError] = useState<string>();
+
+  useEffect(() => {
+    const initSearchSource = async () => {
+      let initialSearchConfiguration = ruleParams.searchConfiguration;
+
+      if (!ruleParams.searchConfiguration || !ruleParams.searchConfiguration.index) {
+        const newSearchSource = data.search.searchSource.createEmpty();
+        newSearchSource.setField('query', data.query.queryString.getDefaultQuery());
+
+        const logsDataView =
+          (await data.dataViews.get('log_rules_data_view')) ??
+          (await data.dataViews.getDefaultDataView());
+
+        if (logsDataView) {
+          newSearchSource.setField('index', logsDataView);
+          setDataView(logsDataView);
+        }
+
+        initialSearchConfiguration = getSearchConfiguration(
+          newSearchSource.getSerializedFields(),
+          setParamsWarning
+        );
+      }
+
+      try {
+        const createdSearchSource = await data.search.searchSource.create(
+          initialSearchConfiguration
+        );
+        setRuleParams(
+          'searchConfiguration',
+          getSearchConfiguration(
+            {
+              ...initialSearchConfiguration,
+              ...(ruleParams.searchConfiguration?.query && {
+                query: ruleParams.searchConfiguration.query,
+              }),
+            },
+            setParamsWarning
+          )
+        );
+        setSearchSource(createdSearchSource);
+        setDataView(createdSearchSource.getField('index'));
+
+        if (createdSearchSource.getField('index')) {
+          const timeFieldName = createdSearchSource.getField('index')?.timeFieldName;
+          if (!timeFieldName) {
+            setDataViewTimeFieldError(
+              i18n.translate(
+                'xpack.infra.logThreshold.rule.alertFlyout.dataViewError.noTimestamp',
+                {
+                  defaultMessage:
+                    'The selected data view does not have a timestamp field, please select another data view.',
+                }
+              )
+            );
+          } else {
+            setDataViewTimeFieldError(undefined);
+          }
+        } else {
+          setDataViewTimeFieldError(undefined);
+        }
+      } catch (error) {
+        setParamsError(error);
+      }
+    };
+
+    initSearchSource();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [data.search.searchSource, data.dataViews]);
+
+  const onSelectDataView = useCallback(
+    (newDataView: DataView) => {
+      searchSource?.setParent(undefined).setField('index', newDataView);
+      setRuleParams(
+        'searchConfiguration',
+        searchSource && getSearchConfiguration(searchSource.getSerializedFields(), setParamsWarning)
+      );
+      setDataView(newDataView);
+    },
+    [searchSource, setRuleParams]
+  );
+
+  if (paramsError) {
+    return (
+      <>
+        <EuiCallOut color="danger" iconType="warning" data-test-subj="metricRuleExpressionError">
+          <p>{paramsError.message}</p>
+        </EuiCallOut>
+        <EuiSpacer size={'m'} />
+      </>
+    );
+  }
+
+  if (!searchSource) {
+    return (
+      <>
+        <EuiEmptyPrompt title={<EuiLoadingSpinner size="xl" />} />
+        <EuiSpacer size="m" />
+      </>
+    );
+  }
 
   return (
     <>
-      {isInternal ? (
+      {!!paramsWarning && (
+        <>
+          <EuiCallOut
+            title={i18n.translate('xpack.infra.logThreshold.rule.alertFlyout.warning.title', {
+              defaultMessage: 'Warning',
+            })}
+            color="warning"
+            iconType="warning"
+            data-test-subj="metricRuleExpressionWarning"
+          >
+            {paramsWarning}
+          </EuiCallOut>
+          <EuiSpacer size="s" />
+        </>
+      )}
+      <EuiTitle size="xs">
+        <h5>
+          <FormattedMessage
+            id="xpack.infra.logThreshold.rule.alertFlyout.selectDataViewPrompt"
+            defaultMessage="Select a data view"
+          />
+        </h5>
+      </EuiTitle>
+      <EuiSpacer size="s" />
+      <DataViewSelectPopover
+        dependencies={{ dataViews, dataViewEditor }}
+        dataView={dataView}
+        onSelectDataView={onSelectDataView}
+        onChangeMetaData={() => {}}
+      />
+      {dataViewTimeFieldError && (
+        <EuiFormErrorText data-test-subj="metricRuleDataViewErrorNoTimestamp">
+          {dataViewTimeFieldError}
+        </EuiFormErrorText>
+      )}
+      <EuiSpacer size="m" />
+      {dataView && dataView.fields && (
         <SourceStatusWrapper {...props}>
-          <Editor {...props} />
+          <Editor {...props} dataView={dataView} />
         </SourceStatusWrapper>
-      ) : (
-        <LogViewProvider
-          logViews={logsShared.logViews.client}
-          initialLogViewReference={props.ruleParams.logView}
-        >
-          <SourceStatusWrapper {...props}>
-            <Editor {...props} />
-          </SourceStatusWrapper>
-        </LogViewProvider>
       )}
     </>
   );
@@ -161,13 +301,8 @@ export const SourceStatusWrapper: FC<PropsWithChildren<unknown>> = ({ children }
 export const Editor: React.FC<RuleTypeParamsExpressionProps<PartialRuleParams, LogsContextMeta>> = (
   props
 ) => {
-  const { setRuleParams, ruleParams, errors } = props;
+  const { setRuleParams, ruleParams, errors, dataView } = props;
   const [hasSetDefaults, setHasSetDefaults] = useState<boolean>(false);
-  const { logViewReference, resolvedLogView } = useLogViewContext();
-
-  if (logViewReference.type !== 'log-view-reference') {
-    throw new Error('The Log Threshold rule type only supports persisted Log Views');
-  }
 
   const {
     criteria: criteriaErrors,
@@ -177,24 +312,24 @@ export const Editor: React.FC<RuleTypeParamsExpressionProps<PartialRuleParams, L
   } = useMemo(() => decodeOrThrow(errorsRT)(errors), [errors]);
 
   const supportedFields = useMemo(() => {
-    if (resolvedLogView?.fields) {
-      return resolvedLogView.fields.filter((field) => {
+    if (dataView?.fields) {
+      return dataView.fields.filter((field) => {
         return (field.type === 'string' || field.type === 'number') && field.searchable;
       });
     } else {
       return [];
     }
-  }, [resolvedLogView]);
+  }, [dataView]);
 
   const groupByFields = useMemo(() => {
-    if (resolvedLogView?.fields) {
-      return resolvedLogView.fields.filter((field) => {
+    if (dataView?.fields) {
+      return dataView.fields.filter((field) => {
         return field.type === 'string' && field.aggregatable;
       });
     } else {
       return [];
     }
-  }, [resolvedLogView]);
+  }, [dataView]);
 
   const updateThreshold = useCallback(
     (thresholdParams: any) => {
@@ -235,21 +370,19 @@ export const Editor: React.FC<RuleTypeParamsExpressionProps<PartialRuleParams, L
   );
 
   const defaultCountAlertParams = useMemo(
-    () => createDefaultCountRuleParams(supportedFields, logViewReference),
-    [supportedFields, logViewReference]
+    () => createDefaultCountRuleParams(supportedFields),
+    [supportedFields]
   );
 
   const updateType = useCallback(
     (type: ThresholdType) => {
       const defaults =
-        type === 'count'
-          ? defaultCountAlertParams
-          : createDefaultRatioRuleParams(supportedFields, logViewReference);
+        type === 'count' ? defaultCountAlertParams : createDefaultRatioRuleParams(supportedFields);
       // Reset properties that don't make sense switching from one context to the other
       setRuleParams('count', defaults.count);
       setRuleParams('criteria', defaults.criteria);
     },
-    [defaultCountAlertParams, setRuleParams, supportedFields, logViewReference]
+    [defaultCountAlertParams, setRuleParams, supportedFields]
   );
 
   useMount(() => {
@@ -281,15 +414,13 @@ export const Editor: React.FC<RuleTypeParamsExpressionProps<PartialRuleParams, L
       defaultCriterion={defaultCountAlertParams.criteria[0]}
       errors={criteriaErrors}
       ruleParams={ruleParams}
-      logViewReference={logViewReference}
+      searchConfiguration={ruleParams.searchConfiguration}
       updateCriteria={updateCriteria}
     />
   ) : null;
 
   return (
     <>
-      {resolvedLogView && <LogViewSwitcher logView={resolvedLogView} />}
-
       <TypeSwitcher criteria={ruleParams.criteria || []} updateType={updateType} />
 
       {ruleParams.criteria && !isRatioRule(ruleParams.criteria) && criteriaComponent}

@@ -6,8 +6,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { ResolvedLogView } from '@kbn/logs-shared-plugin/common';
 import { decodeOrThrow } from '@kbn/io-ts-utils';
+import type { Filter, Query } from '@kbn/es-query';
+import type { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import type {
   ExecutionTimeRange,
   GroupedSearchQueryResponse,
@@ -30,15 +32,29 @@ import { getGroupedESQuery, getUngroupedESQuery } from './log_threshold_executor
 
 const COMPOSITE_GROUP_SIZE = 40;
 
+export interface InfraThresholdSearchSourceFields extends SerializedSearchSourceFields {
+  query?: Query;
+  filter?: Array<Pick<Filter, 'meta' | 'query'>>;
+}
+
 export async function getChartPreviewData(
   requestContext: InfraPluginRequestHandlerContext,
-  resolvedLogView: ResolvedLogView,
+  dataView: DataView,
   callWithRequest: KibanaFramework['callWithRequest'],
   alertParams: GetLogAlertsChartPreviewDataAlertParamsSubset,
   buckets: number,
   executionTimeRange?: ExecutionTimeRange
 ) {
-  const { indices, timestampField, runtimeMappings } = resolvedLogView;
+  const { timeFieldName } = dataView;
+  const indices = dataView.getIndexPattern();
+  const runtimeMappings = dataView.getRuntimeMappings();
+
+  if (!indices) {
+    throw new Error('No matched data view');
+  } else if (!timeFieldName) {
+    throw new Error('The selected data view does not have a timestamp field');
+  }
+
   const { groupBy, timeSize, timeUnit } = alertParams;
   const isGrouped = groupBy && groupBy.length > 0 ? true : false;
 
@@ -50,21 +66,21 @@ export async function getChartPreviewData(
 
   const { rangeFilter } = buildFiltersFromCriteria(
     expandedAlertParams,
-    timestampField,
+    timeFieldName || '@timestamp',
     executionTimeRange
   );
 
   const query = isGrouped
     ? getGroupedESQuery(
         expandedAlertParams,
-        timestampField,
+        timeFieldName || '@timestamp',
         indices,
         runtimeMappings,
         executionTimeRange
       )
     : getUngroupedESQuery(
         expandedAlertParams,
-        timestampField,
+        timeFieldName || '@timestamp',
         indices,
         runtimeMappings,
         executionTimeRange
@@ -78,7 +94,7 @@ export async function getChartPreviewData(
     query,
     rangeFilter,
     `${timeSize}${timeUnit}`,
-    timestampField,
+    timeFieldName || '@timestamp',
     isGrouped
   );
 
@@ -96,19 +112,19 @@ const addHistogramAggregationToQuery = (
   query: any,
   rangeFilter: any,
   interval: string,
-  timestampField: string,
+  timeFieldName: string,
   isGrouped: boolean
 ) => {
   const histogramAggregation = {
     histogramBuckets: {
       date_histogram: {
-        field: timestampField,
+        field: timeFieldName || '@timestamp',
         fixed_interval: interval,
         // Utilise extended bounds to make sure we get a full set of buckets even if there are empty buckets
         // at the start and / or end of the range.
         extended_bounds: {
-          min: rangeFilter.range[timestampField].gte,
-          max: rangeFilter.range[timestampField].lte,
+          min: rangeFilter.range[timeFieldName].gte,
+          max: rangeFilter.range[timeFieldName].lte,
         },
       },
     },

@@ -39,18 +39,24 @@ export const initGetLogAlertsChartPreviewDataRoute = ({
       },
       framework.router.handleLegacyErrors(async (requestContext, request, response) => {
         const {
-          data: { logView, buckets, alertParams, executionTimeRange },
+          data: { buckets, alertParams, executionTimeRange },
         } = request.body;
 
-        const [, { logsShared }] = await getStartServices();
-        const resolvedLogView = await logsShared.logViews
-          .getScopedClient(request)
-          .getResolvedLogView(logView);
+        const { savedObjects, elasticsearch } = await requestContext.core;
+        const soClient = savedObjects.client;
+        const esClient = elasticsearch.client.asCurrentUser;
+
+        const [, { dataViews }] = await getStartServices();
+
+        const dataViewsServiceFactory = await dataViews.dataViewsServiceFactory(soClient, esClient);
+        const dataView =
+          (await dataViewsServiceFactory.get('log_rules_data_view')) ??
+          (await dataViewsServiceFactory.getDefaultDataView());
 
         try {
           const { series } = await getChartPreviewData(
             requestContext,
-            resolvedLogView,
+            dataView,
             framework.callWithRequest,
             alertParams,
             buckets,

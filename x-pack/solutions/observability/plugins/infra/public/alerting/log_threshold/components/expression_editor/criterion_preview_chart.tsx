@@ -23,7 +23,6 @@ import {
 } from '@elastic/charts';
 import { EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { PersistedLogViewReference } from '@kbn/logs-shared-plugin/common';
 import { decodeOrThrow } from '@kbn/io-ts-utils';
 import { useTimelineChartTheme } from '../../../../hooks/use_timeline_chart_theme';
 import type { ExecutionTimeRange } from '../../../../types';
@@ -50,13 +49,14 @@ import type { GetLogAlertsChartPreviewDataAlertParamsSubset } from '../../../../
 import { getLogAlertsChartPreviewDataAlertParamsSubsetRT } from '../../../../../common/http_api';
 import { useChartPreviewData } from './hooks/use_chart_preview_data';
 import { useKibanaTimeZoneSetting } from '../../../../hooks/use_kibana_time_zone_setting';
+import type { InfraThresholdSearchSourceFields } from '../../../common/helpers/get_search_configuration';
 
 const GROUP_LIMIT = 5;
 
 interface Props {
   ruleParams: PartialRuleParams;
   chartCriterion: Partial<Criterion>;
-  logViewReference: PersistedLogViewReference;
+  searchConfiguration: InfraThresholdSearchSourceFields;
   showThreshold: boolean;
   executionTimeRange?: ExecutionTimeRange;
   annotations?: Array<ReactElement<typeof RectAnnotation | typeof LineAnnotation>>;
@@ -66,7 +66,7 @@ interface Props {
 export const CriterionPreview: React.FC<Props> = ({
   ruleParams,
   chartCriterion,
-  logViewReference,
+  searchConfiguration,
   showThreshold,
   executionTimeRange,
   annotations,
@@ -112,7 +112,7 @@ export const CriterionPreview: React.FC<Props> = ({
           ? NUM_BUCKETS
           : NUM_BUCKETS / 4
       } // Display less data for groups due to space limitations
-      logViewReference={logViewReference}
+      searchConfiguration={searchConfiguration}
       threshold={ruleParams.count}
       chartAlertParams={chartAlertParams}
       showThreshold={showThreshold}
@@ -125,7 +125,7 @@ export const CriterionPreview: React.FC<Props> = ({
 
 interface ChartProps {
   buckets: number;
-  logViewReference: PersistedLogViewReference;
+  searchConfiguration: InfraThresholdSearchSourceFields;
   threshold?: Threshold;
   chartAlertParams: GetLogAlertsChartPreviewDataAlertParamsSubset;
   showThreshold: boolean;
@@ -136,7 +136,7 @@ interface ChartProps {
 
 const CriterionPreviewChart: React.FC<ChartProps> = ({
   buckets,
-  logViewReference,
+  searchConfiguration,
   threshold,
   chartAlertParams,
   showThreshold,
@@ -153,7 +153,7 @@ const CriterionPreviewChart: React.FC<ChartProps> = ({
     hasError,
     chartPreviewData: series,
   } = useChartPreviewData({
-    logViewReference,
+    searchConfiguration,
     ruleParams: chartAlertParams,
     buckets,
     executionTimeRange,

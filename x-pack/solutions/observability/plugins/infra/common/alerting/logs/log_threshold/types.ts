@@ -181,7 +181,6 @@ const RequiredRuleParamsRT = rt.type({
   count: ThresholdRT,
   timeUnit: timeUnitRT,
   timeSize: timeSizeRT,
-  logView: persistedLogViewReferenceRT, // Alerts are only compatible with persisted Log Views
 });
 
 const partialRequiredRuleParamsRT = rt.partial(RequiredRuleParamsRT.props);
@@ -189,6 +188,8 @@ export type PartialRequiredRuleParams = rt.TypeOf<typeof partialRequiredRulePara
 
 const OptionalRuleParamsRT = rt.partial({
   groupBy: groupByRT,
+  searchConfiguration: rt.any,
+  logView: persistedLogViewReferenceRT, // Alerts are only compatible with persisted Log Views
 });
 
 export const countRuleParamsRT = rt.intersection([

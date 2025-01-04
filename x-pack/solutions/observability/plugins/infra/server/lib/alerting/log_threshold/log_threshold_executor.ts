@@ -133,7 +133,7 @@ export const createLogThresholdExecutor =
   ) => {
     const { services, params, spaceId, startedAt } = options;
     const { basePath } = libs;
-    const { alertsClient, savedObjectsClient, scopedClusterClient } = services;
+    const { alertsClient, scopedClusterClient, getDataViews } = services;
     if (!alertsClient) {
       throw new AlertsClientError();
     }
@@ -205,17 +205,29 @@ export const createLogThresholdExecutor =
       }
     };
 
-    const [, { logsShared, logsDataAccess }] = await libs.getStartServices();
-
     try {
       const validatedParams = decodeOrThrow(ruleParamsRT)(params);
 
-      const logSourcesService =
-        logsDataAccess.services.logSourcesServiceFactory.getLogSourcesService(savedObjectsClient);
+      const searchSourceClient = await services.getSearchSourceClient();
 
-      const { indices, timestampField, runtimeMappings } = await logsShared.logViews
-        .getClient(savedObjectsClient, scopedClusterClient.asCurrentUser, logSourcesService)
-        .getResolvedLogView(validatedParams.logView);
+      let dataView;
+
+      if (params.searchConfiguration) {
+        const initialSearchSource = await searchSourceClient.create(params.searchConfiguration);
+        dataView = initialSearchSource.getField('index')!;
+      } else {
+        dataView = await (await getDataViews()).get('log_rules_data_view');
+      }
+
+      const { timeFieldName: timestampField } = dataView;
+      const indices = dataView.getIndexPattern();
+      const runtimeMappings = dataView.getRuntimeMappings();
+
+      if (!indices) {
+        throw new Error('No matched data view');
+      } else if (!timestampField) {
+        throw new Error('The selected data view does not have a timestamp field');
+      }
 
       if (!isRatioRuleParams(validatedParams)) {
         await executeAlert(

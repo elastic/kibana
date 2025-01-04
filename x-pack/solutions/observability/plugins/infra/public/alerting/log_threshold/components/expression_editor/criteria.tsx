@@ -9,10 +9,7 @@ import React, { useCallback } from 'react';
 import { EuiFlexItem, EuiFlexGroup, EuiButtonEmpty, EuiAccordion, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import type {
-  PersistedLogViewReference,
-  ResolvedLogViewField,
-} from '@kbn/logs-shared-plugin/common';
+import type { ResolvedLogViewField } from '@kbn/logs-shared-plugin/common';
 import { Criterion } from './criterion';
 import type {
   PartialRuleParams,
@@ -29,6 +26,7 @@ import {
 import type { Errors, CriterionErrors } from '../../validation';
 import { ExpressionLike } from './editor';
 import { CriterionPreview } from './criterion_preview_chart';
+import type { InfraThresholdSearchSourceFields } from '../../../common/helpers/get_search_configuration';
 
 const QueryAText = i18n.translate('xpack.infra.logs.alerting.threshold.ratioCriteriaQueryAText', {
   defaultMessage: 'Query A',
@@ -44,7 +42,7 @@ interface SharedProps {
   defaultCriterion: PartialCriterionType;
   errors: Errors['criteria'];
   ruleParams: PartialRuleParams;
-  logViewReference: PersistedLogViewReference;
+  searchConfiguration: InfraThresholdSearchSourceFields;
   updateCriteria: (criteria: PartialCriteriaType) => void;
 }
 
@@ -69,7 +67,7 @@ interface CriteriaWrapperProps {
   addCriterion: () => void;
   criteria: PartialCountCriteriaType;
   errors: CriterionErrors;
-  logViewReference: SharedProps['logViewReference'];
+  searchConfiguration: InfraThresholdSearchSourceFields;
   isRatio?: boolean;
 }
 
@@ -82,7 +80,7 @@ const CriteriaWrapper: React.FC<CriteriaWrapperProps> = (props) => {
     fields,
     errors,
     ruleParams,
-    logViewReference,
+    searchConfiguration,
     isRatio = false,
   } = props;
 
@@ -110,7 +108,7 @@ const CriteriaWrapper: React.FC<CriteriaWrapperProps> = (props) => {
               <CriterionPreview
                 ruleParams={ruleParams}
                 chartCriterion={criterion}
-                logViewReference={logViewReference}
+                searchConfiguration={searchConfiguration}
                 showThreshold={!isRatio}
               />
             </EuiAccordion>
@@ -170,6 +168,7 @@ const RatioCriteria: React.FC<RatioCriteriaProps> = (props) => {
         addCriterion={addNumeratorCriterion}
         removeCriterion={removeNumeratorCriterion}
         errors={errors[0]}
+        searchConfiguration={props.ruleParams.searchConfiguration}
         isRatio={true}
       />
 
@@ -184,6 +183,7 @@ const RatioCriteria: React.FC<RatioCriteriaProps> = (props) => {
         addCriterion={addDenominatorCriterion}
         removeCriterion={removeDenominatorCriterion}
         errors={errors[1]}
+        searchConfiguration={props.ruleParams.searchConfiguration}
         isRatio={true}
       />
     </>
@@ -210,6 +210,7 @@ const CountCriteria: React.FC<CountCriteriaProps> = (props) => {
       addCriterion={addCriterion}
       removeCriterion={removeCriterion}
       errors={errors[0]}
+      searchConfiguration={props.ruleParams.searchConfiguration}
     />
   );
 };

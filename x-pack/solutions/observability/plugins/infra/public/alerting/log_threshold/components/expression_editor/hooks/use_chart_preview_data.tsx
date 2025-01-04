@@ -8,7 +8,6 @@
 import type { HttpHandler } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useMemo, useState } from 'react';
-import type { PersistedLogViewReference } from '@kbn/logs-shared-plugin/common';
 import { decodeOrThrow } from '@kbn/io-ts-utils';
 import { isRatioRule } from '../../../../../../common/alerting/logs/log_threshold';
 import type {
@@ -22,9 +21,10 @@ import {
 } from '../../../../../../common/http_api';
 import type { ExecutionTimeRange } from '../../../../../types';
 import { useTrackedPromise } from '../../../../../hooks/use_tracked_promise';
+import type { InfraThresholdSearchSourceFields } from '../../../../common/helpers/get_search_configuration';
 
 interface Options {
-  logViewReference: PersistedLogViewReference;
+  searchConfiguration: InfraThresholdSearchSourceFields;
   ruleParams: GetLogAlertsChartPreviewDataAlertParamsSubset;
   buckets: number;
   executionTimeRange?: ExecutionTimeRange;
@@ -32,7 +32,7 @@ interface Options {
 }
 
 export const useChartPreviewData = ({
-  logViewReference,
+  searchConfiguration,
   ruleParams,
   buckets,
   executionTimeRange,
@@ -51,14 +51,14 @@ export const useChartPreviewData = ({
         if (isRatioRule(ruleParams.criteria)) {
           const ratio = await Promise.all([
             callGetChartPreviewDataAPI(
-              logViewReference,
+              searchConfiguration,
               http!.fetch,
               { ...ruleParams, criteria: [...ruleParams.criteria[0]] },
               buckets,
               executionTimeRange
             ),
             callGetChartPreviewDataAPI(
-              logViewReference,
+              searchConfiguration,
               http!.fetch,
               { ...ruleParams, criteria: [...ruleParams.criteria[1]] },
               buckets,
@@ -99,7 +99,7 @@ export const useChartPreviewData = ({
           return { data: { series } };
         }
         return await callGetChartPreviewDataAPI(
-          logViewReference,
+          searchConfiguration,
           http!.fetch,
           ruleParams,
           buckets,
@@ -114,7 +114,7 @@ export const useChartPreviewData = ({
         setHasError(true);
       },
     },
-    [logViewReference, http, ruleParams, buckets]
+    [searchConfiguration, http, ruleParams, buckets]
   );
 
   const isLoading = useMemo(
@@ -131,7 +131,7 @@ export const useChartPreviewData = ({
 };
 
 export const callGetChartPreviewDataAPI = async (
-  logViewReference: PersistedLogViewReference,
+  searchConfiguration: InfraThresholdSearchSourceFields,
   fetch: HttpHandler,
   alertParams: GetLogAlertsChartPreviewDataAlertParamsSubset,
   buckets: number,
@@ -142,7 +142,7 @@ export const callGetChartPreviewDataAPI = async (
     body: JSON.stringify(
       getLogAlertsChartPreviewDataRequestPayloadRT.encode({
         data: {
-          logView: logViewReference,
+          searchConfiguration,
           alertParams,
           buckets,
           executionTimeRange,

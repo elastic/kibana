@@ -6,7 +6,6 @@
  */
 
 import * as rt from 'io-ts';
-import { persistedLogViewReferenceRT } from '@kbn/logs-shared-plugin/common';
 import {
   ThresholdRT,
   countCriteriaRT,
@@ -82,7 +81,7 @@ export type GetLogAlertsChartPreviewDataAlertParamsSubset = rt.TypeOf<
 
 export const getLogAlertsChartPreviewDataRequestPayloadRT = rt.type({
   data: rt.type({
-    logView: persistedLogViewReferenceRT,
+    searchConfiguration: rt.any,
     alertParams: getLogAlertsChartPreviewDataAlertParamsSubsetRT,
     buckets: rt.number,
     executionTimeRange: rt.union([
