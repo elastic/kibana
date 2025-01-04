@@ -1,0 +1,5 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/esql-composer",
+  "owner": "@elastic/obs-ai-assistant"
+}
