@@ -1,0 +1,392 @@
+{
+  "properties": {
+    "security": {
+      "properties": {
+        "auditLoggingEnabled": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Indicates if audit logging is both enabled and supported by the current license."
+          }
+        },
+        "loginSelectorEnabled": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Indicates if the login selector UI is enabled."
+          }
+        },
+        "accessAgreementEnabled": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Indicates if the access agreement UI is both enabled and supported by the current license."
+          }
+        },
+        "authProviderCount": {
+          "type": "long",
+          "_meta": {
+            "description": "The number of configured auth providers (including disabled auth providers)."
+          }
+        },
+        "enabledAuthProviders": {
+          "type": "array",
+          "items": {
+            "type": "keyword",
+            "_meta": {
+              "description": "The types of enabled auth providers (such as `saml`, `basic`, `pki`, etc)."
+            }
+          }
+        },
+        "fipsModeEnabled": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Indicates if Kibana is being run in FIPS mode."
+          }
+        },
+        "httpAuthSchemes": {
+          "type": "array",
+          "items": {
+            "type": "keyword",
+            "_meta": {
+              "description": "The set of enabled http auth schemes. Used for api-based usage, and when credentials are provided via reverse-proxy."
+            }
+          }
+        },
+        "sessionIdleTimeoutInMinutes": {
+          "type": "long",
+          "_meta": {
+            "description": "The global session idle timeout expiration that is configured, in minutes (0 if disabled)."
+          }
+        },
+        "sessionLifespanInMinutes": {
+          "type": "long",
+          "_meta": {
+            "description": "The global session lifespan expiration that is configured, in minutes (0 if disabled)."
+          }
+        },
+        "sessionCleanupInMinutes": {
+          "type": "long",
+          "_meta": {
+            "description": "The session cleanup interval that is configured, in minutes (0 if disabled)."
+          }
+        },
+        "sessionConcurrentSessionsMaxSessions": {
+          "type": "long",
+          "_meta": {
+            "description": "The maximum number of the concurrent user sessions (0 if not configured)."
+          }
+        },
+        "anonymousCredentialType": {
+          "type": "keyword",
+          "_meta": {
+            "description": "The credential type that is configured for the anonymous authentication provider."
+          }
+        }
+      }
+    },
+    "spaces": {
+      "properties": {
+        "usesFeatureControls": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Indicates if at least one feature is disabled in at least one space. This is a signal that space-level feature controls are in use. This does not account for role-based (security) feature controls."
+          }
+        },
+        "solutions": {
+          "properties": {
+            "classic": {
+              "type": "long",
+              "_meta": {
+                "description": "The number of spaces which have solution set to classic."
+              }
+            },
+            "es": {
+              "type": "long",
+              "_meta": {
+                "description": "The number of spaces which have solution set to search."
+              }
+            },
+            "oblt": {
+              "type": "long",
+              "_meta": {
+                "description": "The number of spaces which have solution set to observability."
+              }
+            },
+            "security": {
+              "type": "long",
+              "_meta": {
+                "description": "The number of spaces which have solution set to security."
+              }
+            },
+            "unset": {
+              "type": "long",
+              "_meta": {
+                "description": "The number of spaces without solution set."
+              }
+            }
+          }
+        },
+        "disabledFeatures": {
+          "properties": {
+            "DYNAMIC_KEY": {
+              "type": "long",
+              "_meta": {
+                "description": "The number of spaces which have this feature disabled."
+              }
+            },
+            "stackAlerts": {
+              "type": "long",
+              "_meta": {
+                "description": "The number of spaces which have this feature disabled."
+              }
+            },
+            "actions": {
+              "type": "long",
+              "_meta": {
+                "description": "The number of spaces which have this feature disabled."
+              }
+            },
+            "enterpriseSearch": {
+              "type": "long",
+              "_meta": {
+                "description": "The number of spaces which have this feature disabled."
+              }
+            },
+            "fleet": {
+              "type": "long",
+              "_meta": {
+                "description": "The number of spaces which have this feature disabled."
+              }
+            },
+            "savedObjectsTagging": {
+              "type": "long",
+              "_meta": {
+                "description": "The number of spaces which have this feature disabled."
+              }
+            },
+            "indexPatterns": {
+              "type": "long",
+              "_meta": {
+                "description": "The number of spaces which have this feature disabled."
+              }
+            },
+            "discover": {
+              "type": "long",
+              "_meta": {
+                "description": "The number of spaces which have this feature disabled."
+              }
+            },
+            "canvas": {
+              "type": "long",
+              "_meta": {
+                "description": "The number of spaces which have this feature disabled."
+              }
+            },
+            "maps": {
+              "type": "long",
+              "_meta": {
+                "description": "The number of spaces which have this feature disabled."
+              }
+            },
+            "siem": {
+              "type": "long",
+              "_meta": {
+                "description": "The number of spaces which have this feature disabled."
+              }
+            },
+            "monitoring": {
+              "type": "long",
+              "_meta": {
+                "description": "The number of spaces which have this feature disabled."
+              }
+            },
+            "graph": {
+              "type": "long",
+              "_meta": {
+                "description": "The number of spaces which have this feature disabled."
+              }
+            },
+            "uptime": {
+              "type": "long",
+              "_meta": {
+                "description": "The number of spaces which have this feature disabled."
+              }
+            },
+            "savedObjectsManagement": {
+              "type": "long",
+              "_meta": {
+                "description": "The number of spaces which have this feature disabled."
+              }
+            },
+            "dev_tools": {
+              "type": "long",
+              "_meta": {
+                "description": "The number of spaces which have this feature disabled."
+              }
+            },
+            "advancedSettings": {
+              "type": "long",
+              "_meta": {
+                "description": "The number of spaces which have this feature disabled."
+              }
+            },
+            "infrastructure": {
+              "type": "long",
+              "_meta": {
+                "description": "The number of spaces which have this feature disabled."
+              }
+            },
+            "visualize": {
+              "type": "long",
+              "_meta": {
+                "description": "The number of spaces which have this feature disabled."
+              }
+            },
+            "logs": {
+              "type": "long",
+              "_meta": {
+                "description": "The number of spaces which have this feature disabled."
+              }
+            },
+            "dashboard": {
+              "type": "long",
+              "_meta": {
+                "description": "The number of spaces which have this feature disabled."
+              }
+            },
+            "ml": {
+              "type": "long",
+              "_meta": {
+                "description": "The number of spaces which have this feature disabled."
+              }
+            },
+            "apm": {
+              "type": "long",
+              "_meta": {
+                "description": "The number of spaces which have this feature disabled."
+              }
+            }
+          }
+        },
+        "available": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Indicates if the Spaces feature is available in this installation."
+          }
+        },
+        "enabled": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Indicates if the Spaces feature is enabled in this installation."
+          }
+        },
+        "count": {
+          "type": "long",
+          "_meta": {
+            "description": "The number of spaces in this installation."
+          }
+        },
+        "apiCalls.copySavedObjects.total": {
+          "type": "long",
+          "_meta": {
+            "description": "The number of times the \"Copy Saved Objects\" API has been called."
+          }
+        },
+        "apiCalls.copySavedObjects.kibanaRequest.yes": {
+          "type": "long",
+          "_meta": {
+            "description": "The number of times the \"Copy Saved Objects\" API has been called via the Kibana client."
+          }
+        },
+        "apiCalls.copySavedObjects.kibanaRequest.no": {
+          "type": "long",
+          "_meta": {
+            "description": "The number of times the \"Copy Saved Objects\" API has been called via an API consumer (e.g. curl)."
+          }
+        },
+        "apiCalls.copySavedObjects.createNewCopiesEnabled.yes": {
+          "type": "long",
+          "_meta": {
+            "description": "The number of times the \"Copy Saved Objects\" API has been called with \"createNewCopies\" set to true."
+          }
+        },
+        "apiCalls.copySavedObjects.createNewCopiesEnabled.no": {
+          "type": "long",
+          "_meta": {
+            "description": "The number of times the \"Copy Saved Objects\" API has been called with \"createNewCopies\" set to false."
+          }
+        },
+        "apiCalls.copySavedObjects.overwriteEnabled.yes": {
+          "type": "long",
+          "_meta": {
+            "description": "The number of times the \"Copy Saved Objects\" API has been called with \"overwrite\" set to true."
+          }
+        },
+        "apiCalls.copySavedObjects.overwriteEnabled.no": {
+          "type": "long",
+          "_meta": {
+            "description": "The number of times the \"Copy Saved Objects\" API has been called with \"overwrite\" set to false."
+          }
+        },
+        "apiCalls.copySavedObjects.compatibilityModeEnabled.yes": {
+          "type": "long",
+          "_meta": {
+            "description": "The number of times the \"Copy Saved Objects\" API has been called with \"compatibilityMode\" set to true."
+          }
+        },
+        "apiCalls.copySavedObjects.compatibilityModeEnabled.no": {
+          "type": "long",
+          "_meta": {
+            "description": "The number of times the \"Copy Saved Objects\" API has been called with \"compatibilityMode\" set to false."
+          }
+        },
+        "apiCalls.resolveCopySavedObjectsErrors.total": {
+          "type": "long",
+          "_meta": {
+            "description": "The number of times the \"Resolve Copy Saved Objects Errors\" API has been called."
+          }
+        },
+        "apiCalls.resolveCopySavedObjectsErrors.kibanaRequest.yes": {
+          "type": "long",
+          "_meta": {
+            "description": "The number of times the \"Resolve Copy Saved Objects Errors\" API has been called via the Kibana client."
+          }
+        },
+        "apiCalls.resolveCopySavedObjectsErrors.kibanaRequest.no": {
+          "type": "long",
+          "_meta": {
+            "description": "The number of times the \"Resolve Copy Saved Objects Errors\" API has been called via an API consumer (e.g. curl)."
+          }
+        },
+        "apiCalls.resolveCopySavedObjectsErrors.createNewCopiesEnabled.yes": {
+          "type": "long",
+          "_meta": {
+            "description": "The number of times the \"Resolve Copy Saved Objects Errors\" API has been called with \"createNewCopies\" set to true."
+          }
+        },
+        "apiCalls.resolveCopySavedObjectsErrors.createNewCopiesEnabled.no": {
+          "type": "long",
+          "_meta": {
+            "description": "The number of times the \"Resolve Copy Saved Objects Errors\" API has been called with \"createNewCopies\" set to false."
+          }
+        },
+        "apiCalls.resolveCopySavedObjectsErrors.compatibilityModeEnabled.yes": {
+          "type": "long",
+          "_meta": {
+            "description": "The number of times the \"Resolve Copy Saved Objects Errors\" API has been called with \"compatibilityMode\" set to true."
+          }
+        },
+        "apiCalls.resolveCopySavedObjectsErrors.compatibilityModeEnabled.no": {
+          "type": "long",
+          "_meta": {
+            "description": "The number of times the \"Resolve Copy Saved Objects Errors\" API has been called with \"compatibilityMode\" set to false."
+          }
+        },
+        "apiCalls.disableLegacyUrlAliases.total": {
+          "type": "long",
+          "_meta": {
+            "description": "The number of times the \"Disable Legacy URL Aliases\" API has been called."
+          }
+        }
+      }
+    }
+  }
+}

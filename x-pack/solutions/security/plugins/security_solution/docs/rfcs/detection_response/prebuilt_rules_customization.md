@@ -393,7 +393,7 @@ No changes will be needed either for the `security-rule` [mapping](https://githu
 
 Historically, migrations to Elasticsearch saved objects were carried out by a procedure in which the changes in the SO were described in a migration operation that would be carried out **during an upgrade to a specific Kibana version**. See `x-pack/platform/plugins/shared/alerting/server/saved_objects/migrations/index.ts` for a list of migrations of SO that take place when a user updates Kibana to a specific version.
 
-However, this mechanism is no longer supported by the Alerting Framework team - which maintained it -, and the new migration mechanism introduced to replace that, the [Model Version API](https://github.com/elastic/kibana/blob/main/packages/core/saved-objects/core-saved-objects-server/docs/model_versions.md), which is Serverless-compatible, doesn't support migrating encrypted saved objects.
+However, this mechanism is no longer supported by the Alerting Framework team - which maintained it -, and the new migration mechanism introduced to replace that, the [Model Version API](https://github.com/elastic/kibana/blob/main/src/core/packages/saved-objects/server/docs/model_versions.md), which is Serverless-compatible, doesn't support migrating encrypted saved objects.
 
 Since our alerting rules are encrypted saved objects, we have to find an alternative strategy to migrate them. Therefore, we will perform the migration of the saved objects directly in the Detection API's endpoints that interact with them. This means that, instead of all of a user's saved object being migrated in a single operation during a Kibana update, the SO will be migrated when the pertinent endpoints are called. In the next section, we describe which those endpoints are.
 

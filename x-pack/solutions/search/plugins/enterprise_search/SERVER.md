@@ -36,7 +36,7 @@ Be careful when sharing functions across multiple routes: if you're adding many 
 
 ### Types and validation
 
-Endpoints validate their inputs using [@kbn/config-schema](/packages/kbn-config-schema/), and we share TypeScript types between the frontend and backend in [common/types](common/types) to facilitate consistent API expectation. A few hints:
+Endpoints validate their inputs using [@kbn/config-schema](/src/platform/packages/shared/kbn-config-schema/), and we share TypeScript types between the frontend and backend in [common/types](common/types) to facilitate consistent API expectation. A few hints:
 
 - schema.maybe(...) allows the `...` to be optional/`undefined`.
 - schema.nullable(...) allows the `...` to be `null`, which is distinct from making it optional or allowing `undefined`.

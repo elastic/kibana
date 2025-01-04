@@ -3953,7 +3953,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/analytics-collection-utils@link:packages/analytics/utils/analytics_collection_utils":
+"@kbn/analytics-collection-utils@link:src/platform/packages/private/analytics/utils/analytics_collection_utils":
   version "0.0.0"
   uid ""
 
@@ -3965,11 +3965,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/analytics@link:packages/kbn-analytics":
+"@kbn/analytics@link:src/platform/packages/shared/kbn-analytics":
   version "0.0.0"
   uid ""
 
-"@kbn/apm-config-loader@link:packages/kbn-apm-config-loader":
+"@kbn/apm-config-loader@link:src/platform/packages/private/kbn-apm-config-loader":
   version "0.0.0"
   uid ""
 
@@ -4129,7 +4129,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/cloud-chat-plugin@link:x-pack/plugins/cloud_integrations/cloud_chat":
+"@kbn/cloud-chat-plugin@link:x-pack/platform/plugins/private/cloud_integrations/cloud_chat":
   version "0.0.0"
   uid ""
 
@@ -4141,11 +4141,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/cloud-experiments-plugin@link:x-pack/plugins/cloud_integrations/cloud_experiments":
+"@kbn/cloud-experiments-plugin@link:x-pack/platform/plugins/shared/cloud_integrations/cloud_experiments":
   version "0.0.0"
   uid ""
 
-"@kbn/cloud-full-story-plugin@link:x-pack/plugins/cloud_integrations/cloud_full_story":
+"@kbn/cloud-full-story-plugin@link:x-pack/platform/plugins/private/cloud_integrations/cloud_full_story":
   version "0.0.0"
   uid ""
 
@@ -4153,11 +4153,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/cloud-links-plugin@link:x-pack/plugins/cloud_integrations/cloud_links":
+"@kbn/cloud-links-plugin@link:x-pack/platform/plugins/private/cloud_integrations/cloud_links":
   version "0.0.0"
   uid ""
 
-"@kbn/cloud-plugin@link:x-pack/plugins/cloud":
+"@kbn/cloud-plugin@link:x-pack/platform/plugins/shared/cloud":
   version "0.0.0"
   uid ""
 
@@ -4177,7 +4177,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/cloud@link:packages/cloud":
+"@kbn/cloud@link:src/platform/packages/shared/cloud":
   version "0.0.0"
   uid ""
 
@@ -4197,15 +4197,15 @@
   version "0.0.0"
   uid ""
 
-"@kbn/config-mocks@link:packages/kbn-config-mocks":
+"@kbn/config-mocks@link:src/platform/packages/private/kbn-config-mocks":
   version "0.0.0"
   uid ""
 
-"@kbn/config-schema@link:packages/kbn-config-schema":
+"@kbn/config-schema@link:src/platform/packages/shared/kbn-config-schema":
   version "0.0.0"
   uid ""
 
-"@kbn/config@link:packages/kbn-config":
+"@kbn/config@link:src/platform/packages/shared/kbn-config":
   version "0.0.0"
   uid ""
 
@@ -4341,7 +4341,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-base-common-internal@link:packages/core/base/core-base-common-internal":
+"@kbn/core-base-common-internal@link:src/core/packages/base/common-internal":
   version "0.0.0"
   uid ""
 
@@ -4349,7 +4349,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-base-server-internal@link:packages/core/base/core-base-server-internal":
+"@kbn/core-base-server-internal@link:src/core/packages/base/server-internal":
   version "0.0.0"
   uid ""
 
@@ -4357,7 +4357,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-capabilities-browser-internal@link:packages/core/capabilities/core-capabilities-browser-internal":
+"@kbn/core-capabilities-browser-internal@link:src/core/packages/capabilities/browser-internal":
   version "0.0.0"
   uid ""
 
@@ -4365,11 +4365,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-capabilities-common@link:packages/core/capabilities/core-capabilities-common":
+"@kbn/core-capabilities-common@link:src/core/packages/capabilities/common":
   version "0.0.0"
   uid ""
 
-"@kbn/core-capabilities-server-internal@link:packages/core/capabilities/core-capabilities-server-internal":
+"@kbn/core-capabilities-server-internal@link:src/core/packages/capabilities/server-internal":
   version "0.0.0"
   uid ""
 
@@ -4377,7 +4377,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-capabilities-server@link:packages/core/capabilities/core-capabilities-server":
+"@kbn/core-capabilities-server@link:src/core/packages/capabilities/server":
   version "0.0.0"
   uid ""
 
@@ -4393,7 +4393,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-config-server-internal@link:packages/core/config/core-config-server-internal":
+"@kbn/core-config-server-internal@link:src/core/packages/config/server-internal":
   version "0.0.0"
   uid ""
 
@@ -4425,7 +4425,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-deprecations-browser-internal@link:packages/core/deprecations/core-deprecations-browser-internal":
+"@kbn/core-deprecations-browser-internal@link:src/core/packages/deprecations/browser-internal":
   version "0.0.0"
   uid ""
 
@@ -4433,15 +4433,15 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-deprecations-browser@link:packages/core/deprecations/core-deprecations-browser":
+"@kbn/core-deprecations-browser@link:src/core/packages/deprecations/browser":
   version "0.0.0"
   uid ""
 
-"@kbn/core-deprecations-common@link:packages/core/deprecations/core-deprecations-common":
+"@kbn/core-deprecations-common@link:src/core/packages/deprecations/common":
   version "0.0.0"
   uid ""
 
-"@kbn/core-deprecations-server-internal@link:packages/core/deprecations/core-deprecations-server-internal":
+"@kbn/core-deprecations-server-internal@link:src/core/packages/deprecations/server-internal":
   version "0.0.0"
   uid ""
 
@@ -4449,11 +4449,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-deprecations-server@link:packages/core/deprecations/core-deprecations-server":
+"@kbn/core-deprecations-server@link:src/core/packages/deprecations/server":
   version "0.0.0"
   uid ""
 
-"@kbn/core-doc-links-browser-internal@link:packages/core/doc-links/core-doc-links-browser-internal":
+"@kbn/core-doc-links-browser-internal@link:src/core/packages/doc-links/browser-internal":
   version "0.0.0"
   uid ""
 
@@ -4461,11 +4461,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-doc-links-browser@link:packages/core/doc-links/core-doc-links-browser":
+"@kbn/core-doc-links-browser@link:src/core/packages/doc-links/browser":
   version "0.0.0"
   uid ""
 
-"@kbn/core-doc-links-server-internal@link:packages/core/doc-links/core-doc-links-server-internal":
+"@kbn/core-doc-links-server-internal@link:src/core/packages/doc-links/server-internal":
   version "0.0.0"
   uid ""
 
@@ -4473,11 +4473,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-doc-links-server@link:packages/core/doc-links/core-doc-links-server":
+"@kbn/core-doc-links-server@link:src/core/packages/doc-links/server":
   version "0.0.0"
   uid ""
 
-"@kbn/core-elasticsearch-client-server-internal@link:packages/core/elasticsearch/core-elasticsearch-client-server-internal":
+"@kbn/core-elasticsearch-client-server-internal@link:src/core/packages/elasticsearch/client-server-internal":
   version "0.0.0"
   uid ""
 
@@ -4485,7 +4485,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-elasticsearch-server-internal@link:packages/core/elasticsearch/core-elasticsearch-server-internal":
+"@kbn/core-elasticsearch-server-internal@link:src/core/packages/elasticsearch/server-internal":
   version "0.0.0"
   uid ""
 
@@ -4493,11 +4493,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-elasticsearch-server@link:packages/core/elasticsearch/core-elasticsearch-server":
+"@kbn/core-elasticsearch-server@link:src/core/packages/elasticsearch/server":
   version "0.0.0"
   uid ""
 
-"@kbn/core-environment-server-internal@link:packages/core/environment/core-environment-server-internal":
+"@kbn/core-environment-server-internal@link:src/core/packages/environment/server-internal":
   version "0.0.0"
   uid ""
 
@@ -4505,7 +4505,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-execution-context-browser-internal@link:packages/core/execution-context/core-execution-context-browser-internal":
+"@kbn/core-execution-context-browser-internal@link:src/core/packages/execution-context/browser-internal":
   version "0.0.0"
   uid ""
 
@@ -4513,15 +4513,15 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-execution-context-browser@link:packages/core/execution-context/core-execution-context-browser":
+"@kbn/core-execution-context-browser@link:src/core/packages/execution-context/browser":
   version "0.0.0"
   uid ""
 
-"@kbn/core-execution-context-common@link:packages/core/execution-context/core-execution-context-common":
+"@kbn/core-execution-context-common@link:src/core/packages/execution-context/common":
   version "0.0.0"
   uid ""
 
-"@kbn/core-execution-context-server-internal@link:packages/core/execution-context/core-execution-context-server-internal":
+"@kbn/core-execution-context-server-internal@link:src/core/packages/execution-context/server-internal":
   version "0.0.0"
   uid ""
 
@@ -4529,11 +4529,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-execution-context-server@link:packages/core/execution-context/core-execution-context-server":
+"@kbn/core-execution-context-server@link:src/core/packages/execution-context/server":
   version "0.0.0"
   uid ""
 
-"@kbn/core-fatal-errors-browser-internal@link:packages/core/fatal-errors/core-fatal-errors-browser-internal":
+"@kbn/core-fatal-errors-browser-internal@link:src/core/packages/fatal-errors/browser-internal":
   version "0.0.0"
   uid ""
 
@@ -4541,31 +4541,31 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-fatal-errors-browser@link:packages/core/fatal-errors/core-fatal-errors-browser":
+"@kbn/core-fatal-errors-browser@link:src/core/packages/fatal-errors/browser":
   version "0.0.0"
   uid ""
 
-"@kbn/core-feature-flags-browser-internal@link:packages/core/feature-flags/core-feature-flags-browser-internal":
+"@kbn/core-feature-flags-browser-internal@link:src/core/packages/feature-flags/browser-internal":
   version "0.0.0"
   uid ""
 
-"@kbn/core-feature-flags-browser-mocks@link:packages/core/feature-flags/core-feature-flags-browser-mocks":
+"@kbn/core-feature-flags-browser-mocks@link:src/core/packages/feature-flags/browser-mocks":
   version "0.0.0"
   uid ""
 
-"@kbn/core-feature-flags-browser@link:packages/core/feature-flags/core-feature-flags-browser":
+"@kbn/core-feature-flags-browser@link:src/core/packages/feature-flags/browser":
   version "0.0.0"
   uid ""
 
-"@kbn/core-feature-flags-server-internal@link:packages/core/feature-flags/core-feature-flags-server-internal":
+"@kbn/core-feature-flags-server-internal@link:src/core/packages/feature-flags/server-internal":
   version "0.0.0"
   uid ""
 
-"@kbn/core-feature-flags-server-mocks@link:packages/core/feature-flags/core-feature-flags-server-mocks":
+"@kbn/core-feature-flags-server-mocks@link:src/core/packages/feature-flags/server-mocks":
   version "0.0.0"
   uid ""
 
-"@kbn/core-feature-flags-server@link:packages/core/feature-flags/core-feature-flags-server":
+"@kbn/core-feature-flags-server@link:src/core/packages/feature-flags/server":
   version "0.0.0"
   uid ""
 
@@ -4573,7 +4573,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-http-browser-internal@link:packages/core/http/core-http-browser-internal":
+"@kbn/core-http-browser-internal@link:src/core/packages/http/browser-internal":
   version "0.0.0"
   uid ""
 
@@ -4581,15 +4581,15 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-http-browser@link:packages/core/http/core-http-browser":
+"@kbn/core-http-browser@link:src/core/packages/http/browser":
   version "0.0.0"
   uid ""
 
-"@kbn/core-http-common@link:packages/core/http/core-http-common":
+"@kbn/core-http-common@link:src/core/packages/http/common":
   version "0.0.0"
   uid ""
 
-"@kbn/core-http-context-server-internal@link:packages/core/http/core-http-context-server-internal":
+"@kbn/core-http-context-server-internal@link:src/core/packages/http/context-server-internal":
   version "0.0.0"
   uid ""
 
@@ -4601,15 +4601,15 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-http-request-handler-context-server-internal@link:packages/core/http/core-http-request-handler-context-server-internal":
+"@kbn/core-http-request-handler-context-server-internal@link:src/core/packages/http/request-handler-context-server-internal":
   version "0.0.0"
   uid ""
 
-"@kbn/core-http-request-handler-context-server@link:packages/core/http/core-http-request-handler-context-server":
+"@kbn/core-http-request-handler-context-server@link:src/core/packages/http/request-handler-context-server":
   version "0.0.0"
   uid ""
 
-"@kbn/core-http-resources-server-internal@link:packages/core/http/core-http-resources-server-internal":
+"@kbn/core-http-resources-server-internal@link:src/core/packages/http/resources-server-internal":
   version "0.0.0"
   uid ""
 
@@ -4617,11 +4617,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-http-resources-server@link:packages/core/http/core-http-resources-server":
+"@kbn/core-http-resources-server@link:src/core/packages/http/resources-server":
   version "0.0.0"
   uid ""
 
-"@kbn/core-http-router-server-internal@link:packages/core/http/core-http-router-server-internal":
+"@kbn/core-http-router-server-internal@link:src/core/packages/http/router-server-internal":
   version "0.0.0"
   uid ""
 
@@ -4629,7 +4629,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-http-server-internal@link:packages/core/http/core-http-server-internal":
+"@kbn/core-http-server-internal@link:src/core/packages/http/server-internal":
   version "0.0.0"
   uid ""
 
@@ -4637,15 +4637,15 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-http-server-utils@link:packages/core/http/core-http-server-utils":
+"@kbn/core-http-server-utils@link:src/core/packages/http/server-utils":
   version "0.0.0"
   uid ""
 
-"@kbn/core-http-server@link:packages/core/http/core-http-server":
+"@kbn/core-http-server@link:src/core/packages/http/server":
   version "0.0.0"
   uid ""
 
-"@kbn/core-i18n-browser-internal@link:packages/core/i18n/core-i18n-browser-internal":
+"@kbn/core-i18n-browser-internal@link:src/core/packages/i18n/browser-internal":
   version "0.0.0"
   uid ""
 
@@ -4653,11 +4653,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-i18n-browser@link:packages/core/i18n/core-i18n-browser":
+"@kbn/core-i18n-browser@link:src/core/packages/i18n/browser":
   version "0.0.0"
   uid ""
 
-"@kbn/core-i18n-server-internal@link:packages/core/i18n/core-i18n-server-internal":
+"@kbn/core-i18n-server-internal@link:src/core/packages/i18n/server-internal":
   version "0.0.0"
   uid ""
 
@@ -4665,11 +4665,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-i18n-server@link:packages/core/i18n/core-i18n-server":
+"@kbn/core-i18n-server@link:src/core/packages/i18n/server":
   version "0.0.0"
   uid ""
 
-"@kbn/core-injected-metadata-browser-internal@link:packages/core/injected-metadata/core-injected-metadata-browser-internal":
+"@kbn/core-injected-metadata-browser-internal@link:src/core/packages/injected-metadata/browser-internal":
   version "0.0.0"
   uid ""
 
@@ -4677,11 +4677,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-injected-metadata-common-internal@link:packages/core/injected-metadata/core-injected-metadata-common-internal":
+"@kbn/core-injected-metadata-common-internal@link:src/core/packages/injected-metadata/common-internal":
   version "0.0.0"
   uid ""
 
-"@kbn/core-integrations-browser-internal@link:packages/core/integrations/core-integrations-browser-internal":
+"@kbn/core-integrations-browser-internal@link:src/core/packages/integrations/browser-internal":
   version "0.0.0"
   uid ""
 
@@ -4689,7 +4689,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-lifecycle-browser-internal@link:packages/core/lifecycle/core-lifecycle-browser-internal":
+"@kbn/core-lifecycle-browser-internal@link:src/core/packages/lifecycle/browser-internal":
   version "0.0.0"
   uid ""
 
@@ -4697,11 +4697,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-lifecycle-browser@link:packages/core/lifecycle/core-lifecycle-browser":
+"@kbn/core-lifecycle-browser@link:src/core/packages/lifecycle/browser":
   version "0.0.0"
   uid ""
 
-"@kbn/core-lifecycle-server-internal@link:packages/core/lifecycle/core-lifecycle-server-internal":
+"@kbn/core-lifecycle-server-internal@link:src/core/packages/lifecycle/server-internal":
   version "0.0.0"
   uid ""
 
@@ -4709,11 +4709,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-lifecycle-server@link:packages/core/lifecycle/core-lifecycle-server":
+"@kbn/core-lifecycle-server@link:src/core/packages/lifecycle/server":
   version "0.0.0"
   uid ""
 
-"@kbn/core-logging-browser-internal@link:packages/core/logging/core-logging-browser-internal":
+"@kbn/core-logging-browser-internal@link:src/core/packages/logging/browser-internal":
   version "0.0.0"
   uid ""
 
@@ -4721,11 +4721,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-logging-common-internal@link:packages/core/logging/core-logging-common-internal":
+"@kbn/core-logging-common-internal@link:src/core/packages/logging/common-internal":
   version "0.0.0"
   uid ""
 
-"@kbn/core-logging-server-internal@link:packages/core/logging/core-logging-server-internal":
+"@kbn/core-logging-server-internal@link:src/core/packages/logging/server-internal":
   version "0.0.0"
   uid ""
 
@@ -4733,11 +4733,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-logging-server@link:packages/core/logging/core-logging-server":
+"@kbn/core-logging-server@link:src/core/packages/logging/server":
   version "0.0.0"
   uid ""
 
-"@kbn/core-metrics-collectors-server-internal@link:packages/core/metrics/core-metrics-collectors-server-internal":
+"@kbn/core-metrics-collectors-server-internal@link:src/core/packages/metrics/collectors-server-internal":
   version "0.0.0"
   uid ""
 
@@ -4745,7 +4745,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-metrics-server-internal@link:packages/core/metrics/core-metrics-server-internal":
+"@kbn/core-metrics-server-internal@link:src/core/packages/metrics/server-internal":
   version "0.0.0"
   uid ""
 
@@ -4753,19 +4753,19 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-metrics-server@link:packages/core/metrics/core-metrics-server":
+"@kbn/core-metrics-server@link:src/core/packages/metrics/server":
   version "0.0.0"
   uid ""
 
-"@kbn/core-mount-utils-browser-internal@link:packages/core/mount-utils/core-mount-utils-browser-internal":
+"@kbn/core-mount-utils-browser-internal@link:src/core/packages/mount-utils/browser-internal":
   version "0.0.0"
   uid ""
 
-"@kbn/core-mount-utils-browser@link:packages/core/mount-utils/core-mount-utils-browser":
+"@kbn/core-mount-utils-browser@link:src/core/packages/mount-utils/browser":
   version "0.0.0"
   uid ""
 
-"@kbn/core-node-server-internal@link:packages/core/node/core-node-server-internal":
+"@kbn/core-node-server-internal@link:src/core/packages/node/server-internal":
   version "0.0.0"
   uid ""
 
@@ -4773,11 +4773,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-node-server@link:packages/core/node/core-node-server":
+"@kbn/core-node-server@link:src/core/packages/node/server":
   version "0.0.0"
   uid ""
 
-"@kbn/core-notifications-browser-internal@link:packages/core/notifications/core-notifications-browser-internal":
+"@kbn/core-notifications-browser-internal@link:src/core/packages/notifications/browser-internal":
   version "0.0.0"
   uid ""
 
@@ -4785,11 +4785,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-notifications-browser@link:packages/core/notifications/core-notifications-browser":
+"@kbn/core-notifications-browser@link:src/core/packages/notifications/browser":
   version "0.0.0"
   uid ""
 
-"@kbn/core-overlays-browser-internal@link:packages/core/overlays/core-overlays-browser-internal":
+"@kbn/core-overlays-browser-internal@link:src/core/packages/overlays/browser-internal":
   version "0.0.0"
   uid ""
 
@@ -4797,7 +4797,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-overlays-browser@link:packages/core/overlays/core-overlays-browser":
+"@kbn/core-overlays-browser@link:src/core/packages/overlays/browser":
   version "0.0.0"
   uid ""
 
@@ -4853,11 +4853,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-plugins-base-server-internal@link:packages/core/plugins/core-plugins-base-server-internal":
+"@kbn/core-plugins-base-server-internal@link:src/core/packages/plugins/base-server-internal":
   version "0.0.0"
   uid ""
 
-"@kbn/core-plugins-browser-internal@link:packages/core/plugins/core-plugins-browser-internal":
+"@kbn/core-plugins-browser-internal@link:src/core/packages/plugins/browser-internal":
   version "0.0.0"
   uid ""
 
@@ -4865,19 +4865,19 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-plugins-browser@link:packages/core/plugins/core-plugins-browser":
+"@kbn/core-plugins-browser@link:src/core/packages/plugins/browser":
   version "0.0.0"
   uid ""
 
-"@kbn/core-plugins-contracts-browser@link:packages/core/plugins/core-plugins-contracts-browser":
+"@kbn/core-plugins-contracts-browser@link:src/core/packages/plugins/contracts-browser":
   version "0.0.0"
   uid ""
 
-"@kbn/core-plugins-contracts-server@link:packages/core/plugins/core-plugins-contracts-server":
+"@kbn/core-plugins-contracts-server@link:src/core/packages/plugins/contracts-server":
   version "0.0.0"
   uid ""
 
-"@kbn/core-plugins-server-internal@link:packages/core/plugins/core-plugins-server-internal":
+"@kbn/core-plugins-server-internal@link:src/core/packages/plugins/server-internal":
   version "0.0.0"
   uid ""
 
@@ -4885,11 +4885,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-plugins-server@link:packages/core/plugins/core-plugins-server":
+"@kbn/core-plugins-server@link:src/core/packages/plugins/server":
   version "0.0.0"
   uid ""
 
-"@kbn/core-preboot-server-internal@link:packages/core/preboot/core-preboot-server-internal":
+"@kbn/core-preboot-server-internal@link:src/core/packages/preboot/server-internal":
   version "0.0.0"
   uid ""
 
@@ -4897,7 +4897,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-preboot-server@link:packages/core/preboot/core-preboot-server":
+"@kbn/core-preboot-server@link:src/core/packages/preboot/server":
   version "0.0.0"
   uid ""
 
@@ -4905,7 +4905,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-rendering-browser-internal@link:packages/core/rendering/core-rendering-browser-internal":
+"@kbn/core-rendering-browser-internal@link:src/core/packages/rendering/browser-internal":
   version "0.0.0"
   uid ""
 
@@ -4913,11 +4913,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-rendering-browser@link:packages/core/rendering/core-rendering-browser":
+"@kbn/core-rendering-browser@link:src/core/packages/rendering/browser":
   version "0.0.0"
   uid ""
 
-"@kbn/core-rendering-server-internal@link:packages/core/rendering/core-rendering-server-internal":
+"@kbn/core-rendering-server-internal@link:src/core/packages/rendering/server-internal":
   version "0.0.0"
   uid ""
 
@@ -4925,19 +4925,19 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-root-browser-internal@link:packages/core/root/core-root-browser-internal":
+"@kbn/core-root-browser-internal@link:src/core/packages/root/browser-internal":
   version "0.0.0"
   uid ""
 
-"@kbn/core-root-server-internal@link:packages/core/root/core-root-server-internal":
+"@kbn/core-root-server-internal@link:src/core/packages/root/server-internal":
   version "0.0.0"
   uid ""
 
-"@kbn/core-saved-objects-api-browser@link:packages/core/saved-objects/core-saved-objects-api-browser":
+"@kbn/core-saved-objects-api-browser@link:src/core/packages/saved-objects/api-browser":
   version "0.0.0"
   uid ""
 
-"@kbn/core-saved-objects-api-server-internal@link:packages/core/saved-objects/core-saved-objects-api-server-internal":
+"@kbn/core-saved-objects-api-server-internal@link:src/core/packages/saved-objects/api-server-internal":
   version "0.0.0"
   uid ""
 
@@ -4945,11 +4945,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-saved-objects-api-server@link:packages/core/saved-objects/core-saved-objects-api-server":
+"@kbn/core-saved-objects-api-server@link:src/core/packages/saved-objects/api-server":
   version "0.0.0"
   uid ""
 
-"@kbn/core-saved-objects-base-server-internal@link:packages/core/saved-objects/core-saved-objects-base-server-internal":
+"@kbn/core-saved-objects-base-server-internal@link:src/core/packages/saved-objects/base-server-internal":
   version "0.0.0"
   uid ""
 
@@ -4957,7 +4957,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-saved-objects-browser-internal@link:packages/core/saved-objects/core-saved-objects-browser-internal":
+"@kbn/core-saved-objects-browser-internal@link:src/core/packages/saved-objects/browser-internal":
   version "0.0.0"
   uid ""
 
@@ -4965,15 +4965,15 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-saved-objects-browser@link:packages/core/saved-objects/core-saved-objects-browser":
+"@kbn/core-saved-objects-browser@link:src/core/packages/saved-objects/browser":
   version "0.0.0"
   uid ""
 
-"@kbn/core-saved-objects-common@link:packages/core/saved-objects/core-saved-objects-common":
+"@kbn/core-saved-objects-common@link:src/core/packages/saved-objects/common":
   version "0.0.0"
   uid ""
 
-"@kbn/core-saved-objects-import-export-server-internal@link:packages/core/saved-objects/core-saved-objects-import-export-server-internal":
+"@kbn/core-saved-objects-import-export-server-internal@link:src/core/packages/saved-objects/import-export-server-internal":
   version "0.0.0"
   uid ""
 
@@ -4981,7 +4981,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-saved-objects-migration-server-internal@link:packages/core/saved-objects/core-saved-objects-migration-server-internal":
+"@kbn/core-saved-objects-migration-server-internal@link:src/core/packages/saved-objects/migration-server-internal":
   version "0.0.0"
   uid ""
 
@@ -4989,7 +4989,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-saved-objects-server-internal@link:packages/core/saved-objects/core-saved-objects-server-internal":
+"@kbn/core-saved-objects-server-internal@link:src/core/packages/saved-objects/server-internal":
   version "0.0.0"
   uid ""
 
@@ -4997,47 +4997,47 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-saved-objects-server@link:packages/core/saved-objects/core-saved-objects-server":
+"@kbn/core-saved-objects-server@link:src/core/packages/saved-objects/server":
   version "0.0.0"
   uid ""
 
-"@kbn/core-saved-objects-utils-server@link:packages/core/saved-objects/core-saved-objects-utils-server":
+"@kbn/core-saved-objects-utils-server@link:src/core/packages/saved-objects/utils-server":
   version "0.0.0"
   uid ""
 
-"@kbn/core-security-browser-internal@link:packages/core/security/core-security-browser-internal":
+"@kbn/core-security-browser-internal@link:src/core/packages/security/browser-internal":
   version "0.0.0"
   uid ""
 
-"@kbn/core-security-browser-mocks@link:packages/core/security/core-security-browser-mocks":
+"@kbn/core-security-browser-mocks@link:src/core/packages/security/browser-mocks":
   version "0.0.0"
   uid ""
 
-"@kbn/core-security-browser@link:packages/core/security/core-security-browser":
+"@kbn/core-security-browser@link:src/core/packages/security/browser":
   version "0.0.0"
   uid ""
 
-"@kbn/core-security-common@link:packages/core/security/core-security-common":
+"@kbn/core-security-common@link:src/core/packages/security/common":
   version "0.0.0"
   uid ""
 
-"@kbn/core-security-server-internal@link:packages/core/security/core-security-server-internal":
+"@kbn/core-security-server-internal@link:src/core/packages/security/server-internal":
   version "0.0.0"
   uid ""
 
-"@kbn/core-security-server-mocks@link:packages/core/security/core-security-server-mocks":
+"@kbn/core-security-server-mocks@link:src/core/packages/security/server-mocks":
   version "0.0.0"
   uid ""
 
-"@kbn/core-security-server@link:packages/core/security/core-security-server":
+"@kbn/core-security-server@link:src/core/packages/security/server":
   version "0.0.0"
   uid ""
 
-"@kbn/core-status-common@link:packages/core/status/core-status-common":
+"@kbn/core-status-common@link:src/core/packages/status/common":
   version "0.0.0"
   uid ""
 
-"@kbn/core-status-server-internal@link:packages/core/status/core-status-server-internal":
+"@kbn/core-status-server-internal@link:src/core/packages/status/server-internal":
   version "0.0.0"
   uid ""
 
@@ -5045,15 +5045,15 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-status-server@link:packages/core/status/core-status-server":
+"@kbn/core-status-server@link:src/core/packages/status/server":
   version "0.0.0"
   uid ""
 
-"@kbn/core-test-helpers-deprecations-getters@link:packages/core/test-helpers/core-test-helpers-deprecations-getters":
+"@kbn/core-test-helpers-deprecations-getters@link:src/core/packages/test-helpers/deprecations-getters":
   version "0.0.0"
   uid ""
 
-"@kbn/core-test-helpers-http-setup-browser@link:packages/core/test-helpers/core-test-helpers-http-setup-browser":
+"@kbn/core-test-helpers-http-setup-browser@link:src/core/packages/test-helpers/http-setup-browser":
   version "0.0.0"
   uid ""
 
@@ -5065,15 +5065,15 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-test-helpers-so-type-serializer@link:packages/core/test-helpers/core-test-helpers-so-type-serializer":
+"@kbn/core-test-helpers-so-type-serializer@link:src/core/packages/test-helpers/so-type-serializer":
   version "0.0.0"
   uid ""
 
-"@kbn/core-test-helpers-test-utils@link:packages/core/test-helpers/core-test-helpers-test-utils":
+"@kbn/core-test-helpers-test-utils@link:src/core/packages/test-helpers/test-utils":
   version "0.0.0"
   uid ""
 
-"@kbn/core-theme-browser-internal@link:packages/core/theme/core-theme-browser-internal":
+"@kbn/core-theme-browser-internal@link:src/core/packages/theme/browser-internal":
   version "0.0.0"
   uid ""
 
@@ -5081,7 +5081,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-theme-browser@link:packages/core/theme/core-theme-browser":
+"@kbn/core-theme-browser@link:src/core/packages/theme/browser":
   version "0.0.0"
   uid ""
 
@@ -5113,11 +5113,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-usage-data-base-server-internal@link:packages/core/usage-data/core-usage-data-base-server-internal":
+"@kbn/core-usage-data-base-server-internal@link:src/core/packages/usage-data/base-server-internal":
   version "0.0.0"
   uid ""
 
-"@kbn/core-usage-data-server-internal@link:packages/core/usage-data/core-usage-data-server-internal":
+"@kbn/core-usage-data-server-internal@link:src/core/packages/usage-data/server-internal":
   version "0.0.0"
   uid ""
 
@@ -5125,35 +5125,35 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-usage-data-server@link:packages/core/usage-data/core-usage-data-server":
+"@kbn/core-usage-data-server@link:src/core/packages/usage-data/server":
   version "0.0.0"
   uid ""
 
-"@kbn/core-user-profile-browser-internal@link:packages/core/user-profile/core-user-profile-browser-internal":
+"@kbn/core-user-profile-browser-internal@link:src/core/packages/user-profile/browser-internal":
   version "0.0.0"
   uid ""
 
-"@kbn/core-user-profile-browser-mocks@link:packages/core/user-profile/core-user-profile-browser-mocks":
+"@kbn/core-user-profile-browser-mocks@link:src/core/packages/user-profile/browser-mocks":
   version "0.0.0"
   uid ""
 
-"@kbn/core-user-profile-browser@link:packages/core/user-profile/core-user-profile-browser":
+"@kbn/core-user-profile-browser@link:src/core/packages/user-profile/browser":
   version "0.0.0"
   uid ""
 
-"@kbn/core-user-profile-common@link:packages/core/user-profile/core-user-profile-common":
+"@kbn/core-user-profile-common@link:src/core/packages/user-profile/common":
   version "0.0.0"
   uid ""
 
-"@kbn/core-user-profile-server-internal@link:packages/core/user-profile/core-user-profile-server-internal":
+"@kbn/core-user-profile-server-internal@link:src/core/packages/user-profile/server-internal":
   version "0.0.0"
   uid ""
 
-"@kbn/core-user-profile-server-mocks@link:packages/core/user-profile/core-user-profile-server-mocks":
+"@kbn/core-user-profile-server-mocks@link:src/core/packages/user-profile/server-mocks":
   version "0.0.0"
   uid ""
 
-"@kbn/core-user-profile-server@link:packages/core/user-profile/core-user-profile-server":
+"@kbn/core-user-profile-server@link:src/core/packages/user-profile/server":
   version "0.0.0"
   uid ""
 
@@ -5177,7 +5177,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/crypto-browser@link:packages/kbn-crypto-browser":
+"@kbn/crypto-browser@link:src/platform/packages/shared/kbn-crypto-browser":
   version "0.0.0"
   uid ""
 
@@ -5397,7 +5397,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/ebt-tools@link:packages/kbn-ebt-tools":
+"@kbn/ebt-tools@link:src/platform/packages/shared/kbn-ebt-tools":
   version "0.0.0"
   uid ""
 
@@ -5485,7 +5485,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/es-errors@link:packages/kbn-es-errors":
+"@kbn/es-errors@link:src/platform/packages/shared/kbn-es-errors":
   version "0.0.0"
   uid ""
 
@@ -5493,7 +5493,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/es-types@link:packages/kbn-es-types":
+"@kbn/es-types@link:src/platform/packages/shared/kbn-es-types":
   version "0.0.0"
   uid ""
 
@@ -5693,7 +5693,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/features-plugin@link:x-pack/plugins/features":
+"@kbn/features-plugin@link:x-pack/platform/plugins/shared/features":
   version "0.0.0"
   uid ""
 
@@ -5761,7 +5761,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/ftr-apis-plugin@link:src/plugins/ftr_apis":
+"@kbn/ftr-apis-plugin@link:src/platform/plugins/private/ftr_apis":
   version "0.0.0"
   uid ""
 
@@ -5857,7 +5857,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/hapi-mocks@link:packages/kbn-hapi-mocks":
+"@kbn/hapi-mocks@link:src/platform/packages/private/kbn-hapi-mocks":
   version "0.0.0"
   uid ""
 
@@ -5865,7 +5865,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/health-gateway-server@link:packages/kbn-health-gateway-server":
+"@kbn/health-gateway-server@link:src/platform/packages/private/kbn-health-gateway-server":
   version "0.0.0"
   uid ""
 
@@ -5889,11 +5889,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/i18n-react@link:packages/kbn-i18n-react":
+"@kbn/i18n-react@link:src/platform/packages/shared/kbn-i18n-react":
   version "0.0.0"
   uid ""
 
-"@kbn/i18n@link:packages/kbn-i18n":
+"@kbn/i18n@link:src/platform/packages/shared/kbn-i18n":
   version "0.0.0"
   uid ""
 
@@ -6073,7 +6073,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/kibana-usage-collection-plugin@link:src/plugins/kibana_usage_collection":
+"@kbn/kibana-usage-collection-plugin@link:src/platform/plugins/private/kibana_usage_collection":
   version "0.0.0"
   uid ""
 
@@ -6121,7 +6121,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/licensing-plugin@link:x-pack/plugins/licensing":
+"@kbn/licensing-plugin@link:x-pack/platform/plugins/shared/licensing":
   version "0.0.0"
   uid ""
 
@@ -6153,11 +6153,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/logging-mocks@link:packages/kbn-logging-mocks":
+"@kbn/logging-mocks@link:src/platform/packages/shared/kbn-logging-mocks":
   version "0.0.0"
   uid ""
 
-"@kbn/logging@link:packages/kbn-logging":
+"@kbn/logging@link:src/platform/packages/shared/kbn-logging":
   version "0.0.0"
   uid ""
 
@@ -6429,7 +6429,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/newsfeed-plugin@link:src/plugins/newsfeed":
+"@kbn/newsfeed-plugin@link:src/platform/plugins/shared/newsfeed":
   version "0.0.0"
   uid ""
 
@@ -6833,7 +6833,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/router-to-openapispec@link:packages/kbn-router-to-openapispec":
+"@kbn/router-to-openapispec@link:src/platform/packages/shared/kbn-router-to-openapispec":
   version "0.0.0"
   uid ""
 
@@ -6901,7 +6901,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/saved-objects-management-plugin@link:src/plugins/saved_objects_management":
+"@kbn/saved-objects-management-plugin@link:src/platform/plugins/shared/saved_objects_management":
   version "0.0.0"
   uid ""
 
@@ -7209,7 +7209,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/server-http-tools@link:packages/kbn-server-http-tools":
+"@kbn/server-http-tools@link:src/platform/packages/shared/kbn-server-http-tools":
   version "0.0.0"
   uid ""
 
@@ -7557,7 +7557,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/std@link:packages/kbn-std":
+"@kbn/std@link:src/platform/packages/shared/kbn-std":
   version "0.0.0"
   uid ""
 
@@ -7605,19 +7605,19 @@
   version "0.0.0"
   uid ""
 
-"@kbn/telemetry-collection-manager-plugin@link:src/plugins/telemetry_collection_manager":
+"@kbn/telemetry-collection-manager-plugin@link:src/platform/plugins/shared/telemetry_collection_manager":
   version "0.0.0"
   uid ""
 
-"@kbn/telemetry-collection-xpack-plugin@link:x-pack/plugins/telemetry_collection_xpack":
+"@kbn/telemetry-collection-xpack-plugin@link:x-pack/platform/plugins/private/telemetry_collection_xpack":
   version "0.0.0"
   uid ""
 
-"@kbn/telemetry-management-section-plugin@link:src/plugins/telemetry_management_section":
+"@kbn/telemetry-management-section-plugin@link:src/platform/plugins/shared/telemetry_management_section":
   version "0.0.0"
   uid ""
 
-"@kbn/telemetry-plugin@link:src/plugins/telemetry":
+"@kbn/telemetry-plugin@link:src/platform/plugins/shared/telemetry":
   version "0.0.0"
   uid ""
 
@@ -7821,7 +7821,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/upgrade-assistant-plugin@link:x-pack/plugins/upgrade_assistant":
+"@kbn/upgrade-assistant-plugin@link:x-pack/platform/plugins/private/upgrade_assistant":
   version "0.0.0"
   uid ""
 
@@ -7837,7 +7837,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/usage-collection-plugin@link:src/plugins/usage_collection":
+"@kbn/usage-collection-plugin@link:src/platform/plugins/shared/usage_collection":
   version "0.0.0"
   uid ""
 
@@ -7865,7 +7865,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/utility-types@link:packages/kbn-utility-types":
+"@kbn/utility-types@link:src/platform/packages/shared/kbn-utility-types":
   version "0.0.0"
   uid ""
 
@@ -7973,7 +7973,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/zod@link:packages/kbn-zod":
+"@kbn/zod@link:src/platform/packages/shared/kbn-zod":
   version "0.0.0"
   uid ""
 

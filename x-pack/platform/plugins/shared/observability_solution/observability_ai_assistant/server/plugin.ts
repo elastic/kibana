@@ -73,7 +73,7 @@ export class ObservabilityAIAssistantPlugin
       app: [OBSERVABILITY_AI_ASSISTANT_FEATURE_ID, 'kibana'],
       catalogue: [OBSERVABILITY_AI_ASSISTANT_FEATURE_ID],
       minimumLicense: 'enterprise',
-      // see x-pack/plugins/features/common/feature_kibana_privileges.ts
+      // see x-pack/platform/plugins/shared/features/common/feature_kibana_privileges.ts
       privileges: {
         all: {
           app: [OBSERVABILITY_AI_ASSISTANT_FEATURE_ID, 'kibana'],

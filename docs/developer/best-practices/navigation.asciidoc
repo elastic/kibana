@@ -25,7 +25,7 @@ Assuming you want to link from your app to *Discover*. When building such URL th
 
 ==== Prepending a proper `basePath`
 
-To prepend {kib}'s `basePath` use {kib-repo}tree/{branch}/packages/core/http/core-http-browser-internal/src/base_path.ts[core.http.basePath.prepend] helper: 
+To prepend {kib}'s `basePath` use {kib-repo}tree/{branch}/src/core/packages/http/browser-internal/src/base_path.ts[core.http.basePath.prepend] helper: 
 
 [source,typescript jsx]
 ----
