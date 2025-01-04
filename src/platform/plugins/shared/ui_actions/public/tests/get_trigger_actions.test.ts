@@ -35,7 +35,7 @@ test('returns actions set on trigger', async () => {
   });
 
   const start = doStart();
-  const list0 = start.getTriggerActions('trigger');
+  const list0 = await start.getTriggerActions('trigger');
 
   expect(list0).toHaveLength(0);
 
