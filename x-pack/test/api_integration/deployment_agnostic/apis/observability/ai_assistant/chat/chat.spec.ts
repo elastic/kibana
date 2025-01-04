@@ -59,22 +59,19 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     });
 
     it("returns a 4xx if the connector doesn't exist", async () => {
-      try {
-        await observabilityAIAssistantAPIClient.editor({
-          endpoint: 'POST /internal/observability_ai_assistant/chat',
-          params: {
-            body: {
-              name: 'my_api_call',
-              messages,
-              connectorId: 'does not exist',
-              functions: [],
-              scopes: ['all'],
-            },
+      const { status } = await observabilityAIAssistantAPIClient.editor({
+        endpoint: 'POST /internal/observability_ai_assistant/chat',
+        params: {
+          body: {
+            name: 'my_api_call',
+            messages,
+            connectorId: 'does not exist',
+            functions: [],
+            scopes: ['all'],
           },
-        });
-      } catch (error) {
-        expect(error.status).to.be(404);
-      }
+        },
+      });
+      expect(status).to.be(404);
     });
     it('returns a streaming response from the server', async () => {
       const NUM_RESPONSES = 5;

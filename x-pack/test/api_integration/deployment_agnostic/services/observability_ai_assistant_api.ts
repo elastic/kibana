@@ -77,10 +77,6 @@ function createObservabilityAIAssistantApiClient({
       res = await supertestWithoutAuth[method](url).set(headers);
     }
 
-    if (res?.status !== 200) {
-      throw new ApiError(res, endpoint);
-    }
-
     return res;
   }
 

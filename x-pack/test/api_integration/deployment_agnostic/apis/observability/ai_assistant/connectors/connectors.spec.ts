@@ -10,7 +10,6 @@ import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provi
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
-
   describe('List connectors', () => {
     before(async () => {
       await observabilityAIAssistantAPIClient.deleteAllActionConnectors();
@@ -48,6 +47,15 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       expect(res.body.length).to.be(1);
 
       await observabilityAIAssistantAPIClient.deleteActionConnector({ actionId: connectorId });
+    });
+
+    describe('security roles and access privileges', () => {
+      it('should deny access for users without the ai_assistant privilege', async () => {
+        const { status } = await observabilityAIAssistantAPIClient.unauthorizedUser({
+          endpoint: `GET /internal/observability_ai_assistant/connectors`,
+        });
+        expect(status).to.be(403);
+      });
     });
   });
 }

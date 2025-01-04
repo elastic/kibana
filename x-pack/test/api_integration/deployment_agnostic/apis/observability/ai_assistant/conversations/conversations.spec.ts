@@ -13,7 +13,6 @@ import {
   MessageRole,
 } from '@kbn/observability-ai-assistant-plugin/common/types';
 import type { SupertestReturnType } from '../../../../services/observability_ai_assistant_api';
-import { ForbiddenApiError } from '../../../../../../observability_ai_assistant_api_integration/common/config';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
@@ -58,36 +57,30 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       });
 
       it('returns a 404 for updating conversations', async () => {
-        try {
-          await observabilityAIAssistantAPIClient.editor({
-            endpoint: 'PUT /internal/observability_ai_assistant/conversation/{conversationId}',
-            params: {
-              path: {
-                conversationId: 'non-existing-conversation-id',
-              },
-              body: {
-                conversation: conversationUpdate,
-              },
+        const { status } = await observabilityAIAssistantAPIClient.editor({
+          endpoint: 'PUT /internal/observability_ai_assistant/conversation/{conversationId}',
+          params: {
+            path: {
+              conversationId: 'non-existing-conversation-id',
             },
-          });
-        } catch (error) {
-          expect(error.status).to.be(404);
-        }
+            body: {
+              conversation: conversationUpdate,
+            },
+          },
+        });
+        expect(status).to.be(404);
       });
 
       it('returns a 404 for retrieving a conversation', async () => {
-        try {
-          await observabilityAIAssistantAPIClient.editor({
-            endpoint: 'GET /internal/observability_ai_assistant/conversation/{conversationId}',
-            params: {
-              path: {
-                conversationId: 'my-conversation-id',
-              },
+        const { status } = await observabilityAIAssistantAPIClient.editor({
+          endpoint: 'GET /internal/observability_ai_assistant/conversation/{conversationId}',
+          params: {
+            path: {
+              conversationId: 'my-conversation-id',
             },
-          });
-        } catch (error) {
-          expect(error.status).to.be(404);
-        }
+          },
+        });
+        expect(status).to.be(404);
       });
     });
 
@@ -118,18 +111,15 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         });
         expect(status).to.be(200);
 
-        try {
-          await observabilityAIAssistantAPIClient.editor({
-            endpoint: 'GET /internal/observability_ai_assistant/conversation/{conversationId}',
-            params: {
-              path: {
-                conversationId: createResponse.body.conversation.id,
-              },
+        const res = await observabilityAIAssistantAPIClient.editor({
+          endpoint: 'GET /internal/observability_ai_assistant/conversation/{conversationId}',
+          params: {
+            path: {
+              conversationId: createResponse.body.conversation.id,
             },
-          });
-        } catch (error) {
-          expect(error.status).to.be(404);
-        }
+          },
+        });
+        expect(res.status).to.be(404);
       });
 
       it('returns the conversation', () => {
@@ -155,36 +145,30 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       });
 
       it('returns a 404 for updating a non-existing conversation', async () => {
-        try {
-          await observabilityAIAssistantAPIClient.editor({
-            endpoint: 'PUT /internal/observability_ai_assistant/conversation/{conversationId}',
-            params: {
-              path: {
-                conversationId: 'non-existing-conversation-id',
-              },
-              body: {
-                conversation: conversationUpdate,
-              },
+        const { status } = await observabilityAIAssistantAPIClient.editor({
+          endpoint: 'PUT /internal/observability_ai_assistant/conversation/{conversationId}',
+          params: {
+            path: {
+              conversationId: 'non-existing-conversation-id',
             },
-          });
-        } catch (error) {
-          expect(error.status).to.be(404);
-        }
+            body: {
+              conversation: conversationUpdate,
+            },
+          },
+        });
+        expect(status).to.be(404);
       });
 
       it('returns a 404 for retrieving a non-existing conversation', async () => {
-        try {
-          await observabilityAIAssistantAPIClient.editor({
-            endpoint: 'GET /internal/observability_ai_assistant/conversation/{conversationId}',
-            params: {
-              path: {
-                conversationId: 'non-existing-conversation-id',
-              },
+        const { status } = await observabilityAIAssistantAPIClient.editor({
+          endpoint: 'GET /internal/observability_ai_assistant/conversation/{conversationId}',
+          params: {
+            path: {
+              conversationId: 'non-existing-conversation-id',
             },
-          });
-        } catch (error) {
-          expect(error.status).to.be(404);
-        }
+          },
+        });
+        expect(status).to.be(404);
       });
 
       it('returns the conversation that was created', async () => {
@@ -290,93 +274,64 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         });
 
         it('POST /internal/observability_ai_assistant/conversation', async () => {
-          try {
-            await observabilityAIAssistantAPIClient.unauthorizedUser({
-              endpoint: 'POST /internal/observability_ai_assistant/conversation',
-              params: {
-                body: {
-                  conversation: conversationCreate,
-                },
+          const { status } = await observabilityAIAssistantAPIClient.unauthorizedUser({
+            endpoint: 'POST /internal/observability_ai_assistant/conversation',
+            params: {
+              body: {
+                conversation: conversationCreate,
               },
-            });
-            throw new ForbiddenApiError(
-              'Expected unauthorizedUser() to throw a 403 Forbidden error'
-            );
-          } catch (e) {
-            expect(e.status).to.be(403);
-          }
+            },
+          });
+
+          expect(status).to.be(403);
         });
 
         it('POST /internal/observability_ai_assistant/conversations', async () => {
-          try {
-            await observabilityAIAssistantAPIClient.unauthorizedUser({
-              endpoint: 'POST /internal/observability_ai_assistant/conversations',
-            });
-            throw new ForbiddenApiError(
-              'Expected unauthorizedUser() to throw a 403 Forbidden error'
-            );
-          } catch (e) {
-            expect(e.status).to.be(403);
-          }
+          const { status } = await observabilityAIAssistantAPIClient.unauthorizedUser({
+            endpoint: 'POST /internal/observability_ai_assistant/conversations',
+          });
+          expect(status).to.be(403);
         });
 
         it('PUT /internal/observability_ai_assistant/conversation/{conversationId}', async () => {
-          try {
-            await observabilityAIAssistantAPIClient.unauthorizedUser({
-              endpoint: 'PUT /internal/observability_ai_assistant/conversation/{conversationId}',
-              params: {
-                path: {
-                  conversationId: createResponse.body.conversation.id,
-                },
-                body: {
-                  conversation: merge(omit(conversationUpdate, 'conversation.id'), {
-                    conversation: { id: createResponse.body.conversation.id },
-                  }),
-                },
+          const { status } = await observabilityAIAssistantAPIClient.unauthorizedUser({
+            endpoint: 'PUT /internal/observability_ai_assistant/conversation/{conversationId}',
+            params: {
+              path: {
+                conversationId: createResponse.body.conversation.id,
               },
-            });
-            throw new ForbiddenApiError(
-              'Expected unauthorizedUser() to throw a 403 Forbidden error'
-            );
-          } catch (e) {
-            expect(e.status).to.be(403);
-          }
+              body: {
+                conversation: merge(omit(conversationUpdate, 'conversation.id'), {
+                  conversation: { id: createResponse.body.conversation.id },
+                }),
+              },
+            },
+          });
+          expect(status).to.be(403);
         });
 
         it('GET /internal/observability_ai_assistant/conversation/{conversationId}', async () => {
-          try {
-            await observabilityAIAssistantAPIClient.unauthorizedUser({
-              endpoint: 'GET /internal/observability_ai_assistant/conversation/{conversationId}',
-              params: {
-                path: {
-                  conversationId: createResponse.body.conversation.id,
-                },
+          const { status } = await observabilityAIAssistantAPIClient.unauthorizedUser({
+            endpoint: 'GET /internal/observability_ai_assistant/conversation/{conversationId}',
+            params: {
+              path: {
+                conversationId: createResponse.body.conversation.id,
               },
-            });
-            throw new ForbiddenApiError(
-              'Expected unauthorizedUser() to throw a 403 Forbidden error'
-            );
-          } catch (e) {
-            expect(e.status).to.be(403);
-          }
+            },
+          });
+          expect(status).to.be(403);
         });
 
         it('DELETE /internal/observability_ai_assistant/conversation/{conversationId}', async () => {
-          try {
-            await observabilityAIAssistantAPIClient.unauthorizedUser({
-              endpoint: 'DELETE /internal/observability_ai_assistant/conversation/{conversationId}',
-              params: {
-                path: {
-                  conversationId: createResponse.body.conversation.id,
-                },
+          const { status } = await observabilityAIAssistantAPIClient.unauthorizedUser({
+            endpoint: 'DELETE /internal/observability_ai_assistant/conversation/{conversationId}',
+            params: {
+              path: {
+                conversationId: createResponse.body.conversation.id,
               },
-            });
-            throw new ForbiddenApiError(
-              'Expected unauthorizedUser() to throw a 403 Forbidden error'
-            );
-          } catch (e) {
-            expect(e.status).to.be(403);
-          }
+            },
+          });
+          expect(status).to.be(403);
         });
       });
     });
