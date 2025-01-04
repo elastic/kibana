@@ -6,10 +6,10 @@
  */
 
 module.exports = {
-  coverageDirectory: '<rootDir>/target/kibana-coverage/jest/x-pack/packages/security/ui_components',
+  coverageDirectory: '<rootDir>/target/kibana-coverage/jest/x-pack/platform/packages/private/security/ui_components',
   coverageReporters: ['text', 'html'],
-  collectCoverageFrom: ['<rootDir>/x-pack/packages/security/ui_components/**/*.{ts,tsx}'],
+  collectCoverageFrom: ['<rootDir>/x-pack/platform/packages/private/security/ui_components/**/*.{ts,tsx}'],
   preset: '@kbn/test',
-  rootDir: '../../../..',
-  roots: ['<rootDir>/x-pack/packages/security/ui_components'],
+  rootDir: '../../../../../..',
+  roots: ['<rootDir>/x-pack/platform/packages/private/security/ui_components'],
 };

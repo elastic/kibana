@@ -7125,7 +7125,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/security-ui-components@link:x-pack/packages/security/ui_components":
+"@kbn/security-ui-components@link:x-pack/platform/packages/private/security/ui_components":
   version "0.0.0"
   uid ""
 
