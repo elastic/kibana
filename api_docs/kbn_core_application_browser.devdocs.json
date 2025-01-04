@@ -1055,7 +1055,7 @@
               },
               {
                 "plugin": "kibanaOverview",
-                "path": "src/plugins/kibana_overview/public/application.tsx"
+                "path": "src/platform/plugins/private/kibana_overview/public/application.tsx"
               },
               {
                 "plugin": "@kbn/core",

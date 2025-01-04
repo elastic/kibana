@@ -484,11 +484,11 @@
         "references": [
           {
             "plugin": "reporting",
-            "path": "x-pack/plugins/reporting/server/core.ts"
+            "path": "x-pack/platform/plugins/private/reporting/server/core.ts"
           },
           {
             "plugin": "reporting",
-            "path": "x-pack/plugins/reporting/server/core.ts"
+            "path": "x-pack/platform/plugins/private/reporting/server/core.ts"
           }
         ],
         "children": [

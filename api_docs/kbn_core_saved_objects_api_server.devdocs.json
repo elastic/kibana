@@ -2670,66 +2670,6 @@
             "path": "src/core/server/index.ts"
           },
           {
-            "plugin": "actions",
-            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/create/types/types.ts"
-          },
-          {
-            "plugin": "actions",
-            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/create/types/types.ts"
-          },
-          {
-            "plugin": "actions",
-            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/create/types/types.ts"
-          },
-          {
-            "plugin": "actions",
-            "path": "x-pack/platform/plugins/shared/actions/server/types.ts"
-          },
-          {
-            "plugin": "actions",
-            "path": "x-pack/platform/plugins/shared/actions/server/types.ts"
-          },
-          {
-            "plugin": "actions",
-            "path": "x-pack/platform/plugins/shared/actions/server/types.ts"
-          },
-          {
-            "plugin": "actions",
-            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/update/types/types.ts"
-          },
-          {
-            "plugin": "actions",
-            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/update/types/types.ts"
-          },
-          {
-            "plugin": "actions",
-            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/update/types/types.ts"
-          },
-          {
-            "plugin": "actions",
-            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/update/update.ts"
-          },
-          {
-            "plugin": "actions",
-            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/update/update.ts"
-          },
-          {
-            "plugin": "actions",
-            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/update/update.ts"
-          },
-          {
-            "plugin": "actions",
-            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/create/create.ts"
-          },
-          {
-            "plugin": "actions",
-            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/create/create.ts"
-          },
-          {
-            "plugin": "actions",
-            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/create/create.ts"
-          },
-          {
             "plugin": "@kbn/alerting-types",
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts"
           },
@@ -2788,6 +2728,66 @@
           {
             "plugin": "alerting",
             "path": "x-pack/platform/plugins/shared/alerting/common/rule.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/create/types/types.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/create/types/types.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/create/types/types.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/platform/plugins/shared/actions/server/types.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/platform/plugins/shared/actions/server/types.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/platform/plugins/shared/actions/server/types.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/update/types/types.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/update/types/types.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/update/types/types.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/update/update.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/update/update.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/update/update.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/create/create.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/create/create.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/create/create.ts"
           },
           {
             "plugin": "alerting",
