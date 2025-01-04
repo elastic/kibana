@@ -18,7 +18,7 @@ export const OnboardingBanner = React.memo(() => {
     setIsAVCBannerDismissed(true);
   }, [setIsAVCBannerDismissed]);
 
-  if (isAVCBannerDismissed || !isStillYear2024) {
+  if (isAVCBannerDismissed || !isStillYear2025) {
     return null;
   }
 
