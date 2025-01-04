@@ -9,12 +9,14 @@ import expect from '@kbn/expect';
 import { sortBy } from 'lodash';
 import { Message, MessageRole } from '@kbn/observability-ai-assistant-plugin/common';
 import { CONTEXT_FUNCTION_NAME } from '@kbn/observability-ai-assistant-plugin/server/functions/context';
+import { Instruction } from '@kbn/observability-ai-assistant-plugin/common/types';
 import {
   clearConversations,
   clearKnowledgeBase,
   createKnowledgeBaseModel,
   deleteInferenceEndpoint,
   deleteKnowledgeBaseModel,
+  TINY_ELSER,
 } from '@kbn/test-suites-xpack/observability_ai_assistant_api_integration/tests/knowledge_base/helpers';
 import { getConversationCreatedEvent } from '@kbn/test-suites-xpack/observability_ai_assistant_api_integration/tests/conversations/helpers';
 import {
@@ -33,8 +35,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const log = getService('log');
   const svlUserManager = getService('svlUserManager');
   const svlCommonApi = getService('svlCommonApi');
+  const retry = getService('retry');
 
-  describe.skip('Knowledge base user instructions', function () {
+  describe('Knowledge base user instructions', function () {
+    // TODO: https://github.com/elastic/kibana/issues/192751
     this.tags(['skipMKI']);
     let editorRoleAuthc: RoleCredentials;
     let internalReqHeader: InternalRequestHeader;
@@ -45,8 +49,13 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       await createKnowledgeBaseModel(ml);
 
       await observabilityAIAssistantAPIClient
-        .slsEditor({
+        .slsAdmin({
           endpoint: 'POST /internal/observability_ai_assistant/kb/setup',
+          params: {
+            query: {
+              model_id: TINY_ELSER.id,
+            },
+          },
         })
         .expect(200);
     });
@@ -64,10 +73,22 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         await clearKnowledgeBase(es);
 
         const promises = [
-          { username: 'editor', isPublic: true },
-          { username: 'editor', isPublic: false },
-          { username: 'john', isPublic: true },
-          { username: 'john', isPublic: false },
+          {
+            username: 'editor' as const,
+            isPublic: true,
+          },
+          {
+            username: 'editor' as const,
+            isPublic: false,
+          },
+          {
+            username: 'secondary_editor' as const,
+            isPublic: true,
+          },
+          {
+            username: 'secondary_editor' as const,
+            isPublic: false,
+          },
         ].map(async ({ username, isPublic }) => {
           const visibility = isPublic ? 'Public' : 'Private';
           const user = username === 'editor' ? 'slsEditor' : 'slsAdmin';
@@ -88,61 +109,69 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
 
       it('"editor" can retrieve their own private instructions and the public instruction', async () => {
-        const res = await observabilityAIAssistantAPIClient.slsEditor({
-          endpoint: 'GET /internal/observability_ai_assistant/kb/user_instructions',
+        await retry.try(async () => {
+          const res = await observabilityAIAssistantAPIClient.slsEditor({
+            endpoint: 'GET /internal/observability_ai_assistant/kb/user_instructions',
+          });
+
+          const instructions = res.body.userInstructions;
+          // TODO: gets 4 in serverless, bufferFlush event?
+          expect(instructions).to.have.length(3);
+
+          const sortById = (data: Array<Instruction & { public?: boolean }>) => sortBy(data, 'id');
+          expect(sortById(instructions)).to.eql(
+            sortById([
+              {
+                id: 'private-doc-from-editor',
+                public: false,
+                text: 'Private user instruction from "editor"',
+              },
+              {
+                id: 'public-doc-from-editor',
+                public: true,
+                text: 'Public user instruction from "editor"',
+              },
+              {
+                id: 'public-doc-from-secondary_editor',
+                public: true,
+                text: 'Public user instruction from "secondary_editor"',
+              },
+            ])
+          );
         });
-
-        const instructions = res.body.userInstructions;
-
-        const sortByDocId = (data: any) => sortBy(data, 'doc_id');
-        expect(sortByDocId(instructions)).to.eql(
-          sortByDocId([
-            {
-              doc_id: 'private-doc-from-editor',
-              public: false,
-              text: 'Private user instruction from "editor"',
-            },
-            {
-              doc_id: 'public-doc-from-editor',
-              public: true,
-              text: 'Public user instruction from "editor"',
-            },
-            {
-              doc_id: 'public-doc-from-john',
-              public: true,
-              text: 'Public user instruction from "john"',
-            },
-          ])
-        );
       });
 
-      it('"john" can retrieve their own private instructions and the public instruction', async () => {
-        const res = await observabilityAIAssistantAPIClient.slsAdmin({
-          endpoint: 'GET /internal/observability_ai_assistant/kb/user_instructions',
+      it('"secondaryEditor" can retrieve their own private instructions and the public instruction', async () => {
+        await retry.try(async () => {
+          const res = await observabilityAIAssistantAPIClient.slsAdmin({
+            endpoint: 'GET /internal/observability_ai_assistant/kb/user_instructions',
+          });
+
+          const instructions = res.body.userInstructions;
+          expect(instructions).to.have.length(3);
+
+          const sortById = (data: Array<Instruction & { public?: boolean }>) => sortBy(data, 'id');
+
+          expect(sortById(instructions)).to.eql(
+            sortById([
+              {
+                id: 'public-doc-from-editor',
+                public: true,
+                text: 'Public user instruction from "editor"',
+              },
+              {
+                id: 'public-doc-from-secondary_editor',
+                public: true,
+                text: 'Public user instruction from "secondary_editor"',
+              },
+              {
+                id: 'private-doc-from-secondary_editor',
+                public: false,
+                text: 'Private user instruction from "secondary_editor"',
+              },
+            ])
+          );
         });
-
-        const instructions = res.body.userInstructions;
-
-        const sortByDocId = (data: any) => sortBy(data, 'doc_id');
-        expect(sortByDocId(instructions)).to.eql(
-          sortByDocId([
-            {
-              doc_id: 'public-doc-from-editor',
-              public: true,
-              text: 'Public user instruction from "editor"',
-            },
-            {
-              doc_id: 'public-doc-from-john',
-              public: true,
-              text: 'Public user instruction from "john"',
-            },
-            {
-              doc_id: 'private-doc-from-john',
-              public: false,
-              text: 'Private user instruction from "john"',
-            },
-          ])
-        );
       });
     });
 
@@ -186,7 +215,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         expect(instructions).to.eql([
           {
-            doc_id: 'doc-to-update',
+            id: 'doc-to-update',
             text: 'Updated text',
             public: false,
           },
@@ -327,6 +356,37 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         expect(systemMessage.message.content).to.not.contain(userInstructionText);
         expect(conversation.messages.length).to.be(5);
+      });
+    });
+
+    describe('Instructions can be saved and cleared again', () => {
+      async function updateInstruction(text: string) {
+        await observabilityAIAssistantAPIClient
+          .slsEditor({
+            endpoint: 'PUT /internal/observability_ai_assistant/kb/user_instructions',
+            params: {
+              body: {
+                id: 'my-instruction-that-will-be-cleared',
+                text,
+                public: false,
+              },
+            },
+          })
+          .expect(200);
+
+        const res = await observabilityAIAssistantAPIClient
+          .slsEditor({ endpoint: 'GET /internal/observability_ai_assistant/kb/user_instructions' })
+          .expect(200);
+
+        return res.body.userInstructions[0].text;
+      }
+
+      it('can clear the instruction', async () => {
+        const res1 = await updateInstruction('This is a user instruction that will be cleared');
+        expect(res1).to.be('This is a user instruction that will be cleared');
+
+        const res2 = await updateInstruction('');
+        expect(res2).to.be('');
       });
     });
 

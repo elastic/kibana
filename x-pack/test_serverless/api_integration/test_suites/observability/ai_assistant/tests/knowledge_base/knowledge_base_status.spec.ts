@@ -24,8 +24,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantAPIClient');
 
   describe('/internal/observability_ai_assistant/kb/status', function () {
-    this.tags(['skipMKI']);
-
     before(async () => {
       await createKnowledgeBaseModel(ml);
       await observabilityAIAssistantAPIClient
