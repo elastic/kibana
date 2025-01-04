@@ -557,7 +557,7 @@
     "@kbn/guided-onboarding": "link:packages/kbn-guided-onboarding",
     "@kbn/guided-onboarding-example-plugin": "link:examples/guided_onboarding_example",
     "@kbn/guided-onboarding-plugin": "link:src/platform/plugins/shared/guided_onboarding",
-    "@kbn/handlebars": "link:packages/kbn-handlebars",
+    "@kbn/handlebars": "link:src/platform/packages/private/kbn-handlebars",
     "@kbn/hapi-mocks": "link:src/platform/packages/private/kbn-hapi-mocks",
     "@kbn/hardening-plugin": "link:test/plugin_functional/plugins/hardening",
     "@kbn/health-gateway-server": "link:src/platform/packages/private/kbn-health-gateway-server",

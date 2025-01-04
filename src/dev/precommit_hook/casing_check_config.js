@@ -65,8 +65,8 @@ export const IGNORE_FILE_GLOBS = [
   'packages/kbn-safer-lodash-set/**/*',
 
   // filename must match upstream filenames from handlebars
-  'packages/kbn-handlebars/src/upstream/**/*',
-  'packages/kbn-handlebars/.patches/**/*',
+  'src/platform/packages/private/kbn-handlebars/src/upstream/**/*',
+  'src/platform/packages/private/kbn-handlebars/.patches/**/*',
 
   'x-pack/platform/plugins/shared/maps/server/fonts/**/*',
 

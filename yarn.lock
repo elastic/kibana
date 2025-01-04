@@ -5853,7 +5853,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/handlebars@link:packages/kbn-handlebars":
+"@kbn/handlebars@link:src/platform/packages/private/kbn-handlebars":
   version "0.0.0"
   uid ""
 
