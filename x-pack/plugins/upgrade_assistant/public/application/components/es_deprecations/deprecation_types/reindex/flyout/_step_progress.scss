@@ -11,25 +11,10 @@
   margin-right: $euiSizeM;
 }
 
-$stepStatusToCallOutColor: (
-  failed: $euiColorDanger,
-  complete: $euiColorSuccess,
-  paused: $euiColorWarning,
-  cancelled: $euiColorWarning,
-);
-
 .upgStepProgress__status--circle {
   text-align: center;
   border-radius: $euiSizeM;
   line-height: $euiSize - 2px;
-
-  @each $status, $callOutColor in $stepStatusToCallOutColor {
-    &-#{$status} {
-      $statusBg: tintOrShade($callOutColor, 90%, 70%);
-      color: shadeOrTint(makeHighContrastColor($callOutColor, $statusBg), 0, 20%);
-      background-color: $statusBg;
-    }
-  }
 }
 
 .upgStepProgress__title {
