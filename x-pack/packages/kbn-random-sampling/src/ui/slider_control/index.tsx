@@ -9,6 +9,16 @@ import { EuiFlexGroup, EuiFlexItem, EuiRange, EuiText, useEuiTheme } from '@elas
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { TooltipWrapper } from '@kbn/visualization-utils';
+import { i18n } from '@kbn/i18n';
+
+const tickLabels = {
+  '0.00001': i18n.translate('randomSampling.ui.sliderControl.tickLabels.0.00001', {
+    defaultMessage: 'Point zero zero one percent, most performant',
+  }),
+  '1': i18n.translate('randomSampling.ui.sliderControl.tickLabels.1', {
+    defaultMessage: 'One hundred percent, most accurate',
+  }),
+};
 
 export interface ControlSliderProps {
   /** Allowed values to show on the Control Slider */
@@ -58,6 +68,13 @@ export function ControlSlider({
         <EuiFlexItem>
           <EuiRange
             data-test-subj={dataTestSubj}
+            aria-label={i18n.translate('randomSampling.ui.sliderControl.ariaLabel', {
+              defaultMessage: 'Sampling percentages',
+            })}
+            aria-describedby={i18n.translate('randomSampling.ui.sliderControl.ariaDescribedby', {
+              defaultMessage:
+                'Lower sampling percentages increases the performance, but lowers the accuracy. Lower sampling percentages are best for large datasets.',
+            })}
             value={currentSamplingIndex}
             disabled={disabled}
             fullWidth
@@ -70,11 +87,19 @@ export function ControlSlider({
             step={1}
             min={0}
             max={values.length - 1}
-            ticks={values.map((v, i) => ({
-              // Remove the initial 0 from values with decimal digits: 0.001 => .001
-              label: `${v * 100}%`.slice(Number.isInteger(v * 100) ? 0 : 1),
-              value: i,
-            }))}
+            ticks={values.map((v, i) => {
+              let accessibleLabel: string | undefined;
+              if (v === 0.00001 || v === 1) {
+                accessibleLabel = tickLabels[v];
+              }
+
+              return {
+                // Remove the initial 0 from values with decimal digits: 0.001 => .001
+                label: `${v * 100}%`.slice(Number.isInteger(v * 100) ? 0 : 1),
+                value: i,
+                accessibleLabel,
+              };
+            })}
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
