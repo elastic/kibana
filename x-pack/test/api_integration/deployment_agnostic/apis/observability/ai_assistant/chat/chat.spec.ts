@@ -148,5 +148,22 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         }),
       ]);
     });
+    describe('security roles and access privileges', () => {
+      it('should deny access for users without the ai_assistant privilege', async () => {
+        const { status } = await observabilityAIAssistantAPIClient.unauthorizedUser({
+          endpoint: 'POST /internal/observability_ai_assistant/chat',
+          params: {
+            body: {
+              name: 'my_api_call',
+              messages,
+              connectorId,
+              functions: [],
+              scopes: ['all'],
+            },
+          },
+        });
+        expect(status).to.be(403);
+      });
+    });
   });
 }
