@@ -1,0 +1,101 @@
+{
+  "attributes": {
+    "author": [
+      "Elastic"
+    ],
+    "building_block_type": "default",
+    "description": "Identifies when an AWS IAM login profile is added to a user. Adversaries may add a login profile to an IAM user who typically does not have one and is used only for programmatic access. This can be used to maintain access to the account even if the original access key is rotated or disabled. This is a building block rule and does not generate alerts on its own. It is meant to be used for correlation with other rules to detect suspicious activity.",
+    "from": "now-60m",
+    "index": [
+      "filebeat-*",
+      "logs-aws.cloudtrail-*"
+    ],
+    "interval": "10m",
+    "language": "kuery",
+    "license": "Elastic License v2",
+    "name": "AWS IAM Login Profile Added to User",
+    "query": "event.dataset: aws.cloudtrail and event.provider: \"iam.amazonaws.com\"\n    and event.action: \"CreateLoginProfile\" and event.outcome: success\n",
+    "related_integrations": [
+      {
+        "integration": "cloudtrail",
+        "package": "aws",
+        "version": "^2.0.0"
+      }
+    ],
+    "required_fields": [
+      {
+        "ecs": true,
+        "name": "event.action",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "event.dataset",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "event.outcome",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "event.provider",
+        "type": "keyword"
+      }
+    ],
+    "risk_score": 21,
+    "rule_id": "10445cf0-0748-11ef-ba75-f661ea17fbcc",
+    "severity": "low",
+    "tags": [
+      "Domain: Cloud",
+      "Data Source: AWS",
+      "Data Source: Amazon Web Services",
+      "Data Source: AWS IAM",
+      "Use Case: Identity and Access Audit",
+      "Tactic: Persistence",
+      "Rule Type: BBR"
+    ],
+    "threat": [
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0003",
+          "name": "Persistence",
+          "reference": "https://attack.mitre.org/tactics/TA0003/"
+        },
+        "technique": [
+          {
+            "id": "T1098",
+            "name": "Account Manipulation",
+            "reference": "https://attack.mitre.org/techniques/T1098/",
+            "subtechnique": [
+              {
+                "id": "T1098.003",
+                "name": "Additional Cloud Roles",
+                "reference": "https://attack.mitre.org/techniques/T1098/003/"
+              }
+            ]
+          },
+          {
+            "id": "T1078",
+            "name": "Valid Accounts",
+            "reference": "https://attack.mitre.org/techniques/T1078/",
+            "subtechnique": [
+              {
+                "id": "T1078.004",
+                "name": "Cloud Accounts",
+                "reference": "https://attack.mitre.org/techniques/T1078/004/"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "timestamp_override": "event.ingested",
+    "type": "query",
+    "version": 1
+  },
+  "id": "10445cf0-0748-11ef-ba75-f661ea17fbcc_1",
+  "type": "security-rule"
+}

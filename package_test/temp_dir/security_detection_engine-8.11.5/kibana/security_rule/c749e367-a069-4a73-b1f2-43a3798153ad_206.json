@@ -1,0 +1,83 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "description": "Detects attempts to delete an Okta network zone. Okta network zones can be configured to limit or restrict access to a network based on IP addresses or geolocations. An adversary may attempt to modify, delete, or deactivate an Okta network zone in order to remove or weaken an organization's security controls.",
+        "false_positives": [
+            "Consider adding exceptions to this rule to filter false positives if Oyour organization's Okta network zones are regularly deleted."
+        ],
+        "index": [
+            "filebeat-*",
+            "logs-okta*"
+        ],
+        "language": "kuery",
+        "license": "Elastic License v2",
+        "name": "Attempt to Delete an Okta Network Zone",
+        "note": "## Triage and analysis\n\n### Investigating Attempt to Delete an Okta Network Zone\n\nOkta network zones can be configured to limit or restrict access to a network based on IP addresses or geolocations. Deleting a network zone in Okta might remove or weaken the security controls of an organization, which might be an indicator of an adversary's attempt to evade defenses.\n\n#### Possible investigation steps:\n\n- Identify the actor associated with the alert by examining the `okta.actor.id`, `okta.actor.type`, `okta.actor.alternate_id`, or `okta.actor.display_name` fields.\n- Examine the `event.action` field to confirm the deletion of a network zone.\n- Investigate the `okta.target.id`, `okta.target.type`, `okta.target.alternate_id`, or `okta.target.display_name` fields to identify the network zone that was deleted.\n- Review the `event.time` field to understand when the event happened.\n- Check the actor's activities before and after the event to understand the context of this event.\n\n### False positive analysis:\n\n- Verify the `okta.client.user_agent.raw_user_agent` field to understand the device and software used by the actor. If these match the actor's typical behavior, it might be a false positive.\n- Check if the actor is a known administrator or a member of the IT team who might have a legitimate reason to delete a network zone.\n- Cross-verify the actor's actions with any known planned changes or maintenance activities.\n\n### Response and remediation:\n\n- If unauthorized access or actions are confirmed, immediately lock the affected actor's account and require a password change.\n- If a network zone was deleted without authorization, create a new network zone with similar settings as the deleted one.\n- Review and update the privileges of the actor who initiated the deletion.\n- Identify any gaps in the security policies and procedures and update them as necessary.\n- Implement additional monitoring and logging of Okta events to improve visibility of user actions.\n- Communicate and train the employees about the importance of following proper procedures for modifying network zone settings.",
+        "query": "event.dataset:okta.system and event.action:zone.delete\n",
+        "references": [
+            "https://help.okta.com/en/prod/Content/Topics/Security/network/network-zones.htm",
+            "https://developer.okta.com/docs/reference/api/system-log/",
+            "https://developer.okta.com/docs/reference/api/event-types/",
+            "https://www.elastic.co/security-labs/testing-okta-visibility-and-detection-dorothy"
+        ],
+        "related_integrations": [
+            {
+                "package": "okta",
+                "version": "^2.0.0"
+            }
+        ],
+        "required_fields": [
+            {
+                "ecs": true,
+                "name": "event.action",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "event.dataset",
+                "type": "keyword"
+            }
+        ],
+        "risk_score": 47,
+        "rule_id": "c749e367-a069-4a73-b1f2-43a3798153ad",
+        "setup": "The Okta Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
+        "severity": "medium",
+        "tags": [
+            "Use Case: Identity and Access Audit",
+            "Data Source: Okta",
+            "Use Case: Network Security Monitoring",
+            "Tactic: Defense Evasion"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0005",
+                    "name": "Defense Evasion",
+                    "reference": "https://attack.mitre.org/tactics/TA0005/"
+                },
+                "technique": [
+                    {
+                        "id": "T1562",
+                        "name": "Impair Defenses",
+                        "reference": "https://attack.mitre.org/techniques/T1562/",
+                        "subtechnique": [
+                            {
+                                "id": "T1562.007",
+                                "name": "Disable or Modify Cloud Firewall",
+                                "reference": "https://attack.mitre.org/techniques/T1562/007/"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "timestamp_override": "event.ingested",
+        "type": "query",
+        "version": 206
+    },
+    "id": "c749e367-a069-4a73-b1f2-43a3798153ad_206",
+    "type": "security-rule"
+}

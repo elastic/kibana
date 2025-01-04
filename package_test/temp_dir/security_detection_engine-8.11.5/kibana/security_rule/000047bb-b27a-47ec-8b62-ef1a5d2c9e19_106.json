@@ -1,0 +1,82 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "description": "Detects attempts to modify a rule within an Okta policy. An adversary may attempt to modify an Okta policy rule in order to weaken an organization's security controls.",
+        "false_positives": [
+            "Consider adding exceptions to this rule to filter false positives if Okta MFA rules are regularly modified in your organization."
+        ],
+        "index": [
+            "filebeat-*",
+            "logs-okta*"
+        ],
+        "language": "kuery",
+        "license": "Elastic License v2",
+        "name": "Attempt to Modify an Okta Policy Rule",
+        "note": "## Triage and analysis\n\n### Investigating Attempt to Modify an Okta Policy Rule\n\nThe modification of an Okta policy rule can be an indication of malicious activity as it may aim to weaken an organization's security controls.\n\n#### Possible investigation steps:\n\n- Identify the actor related to the alert by reviewing `okta.actor.id`, `okta.actor.type`, `okta.actor.alternate_id`, or `okta.actor.display_name` fields in the alert.\n- Review the `okta.client.user_agent.raw_user_agent` field to understand the device and software used by the actor.\n- Examine the `okta.outcome.reason` field for additional context around the modification attempt.\n- Check the `okta.outcome.result` field to confirm the rule modification attempt.\n- Check if there are multiple rule modification attempts from the same actor or IP address (`okta.client.ip`).\n- Check for successful logins immediately following the modification attempt.\n- Verify whether the actor's activity aligns with typical behavior or if any unusual activity took place around the time of the modification attempt.\n\n### False positive analysis:\n\n- Check if there were issues with the Okta system at the time of the modification attempt. This could indicate a system error rather than a genuine threat activity.\n- Check the geographical location (`okta.request.ip_chain.geographical_context`) and time of the modification attempt. If these match the actor's normal behavior, it might be a false positive.\n- Verify the actor's administrative rights to ensure they are correctly configured.\n\n### Response and remediation:\n\n- If unauthorized modification is confirmed, initiate the incident response process.\n- Immediately lock the affected actor account and require a password change.\n- Consider resetting MFA tokens for the actor and require re-enrollment.\n- Check if the compromised account was used to access or alter any sensitive data or systems.\n- If a specific modification technique was used, ensure your systems are patched or configured to prevent such techniques.\n- Assess the criticality of affected services and servers.\n- Work with your IT team to minimize the impact on users and maintain business continuity.\n- If multiple accounts are affected, consider a broader reset or audit of MFA tokens.\n- Implement security best practices [outlined](https://www.okta.com/blog/2019/10/9-admin-best-practices-to-keep-your-org-secure/) by Okta.\n- Using the incident response data, update logging and audit policies to improve the mean time to detect (MTTD) and the mean time to respond (MTTR).",
+        "query": "event.dataset:okta.system and event.action:policy.rule.update\n",
+        "references": [
+            "https://help.okta.com/en/prod/Content/Topics/Security/Security_Policies.htm",
+            "https://developer.okta.com/docs/reference/api/system-log/",
+            "https://developer.okta.com/docs/reference/api/event-types/",
+            "https://www.elastic.co/security-labs/testing-okta-visibility-and-detection-dorothy"
+        ],
+        "related_integrations": [
+            {
+                "package": "okta",
+                "version": "^2.0.0"
+            }
+        ],
+        "required_fields": [
+            {
+                "ecs": true,
+                "name": "event.action",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "event.dataset",
+                "type": "keyword"
+            }
+        ],
+        "risk_score": 21,
+        "rule_id": "000047bb-b27a-47ec-8b62-ef1a5d2c9e19",
+        "setup": "The Okta Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
+        "severity": "low",
+        "tags": [
+            "Use Case: Identity and Access Audit",
+            "Tactic: Defense Evasion",
+            "Data Source: Okta"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0005",
+                    "name": "Defense Evasion",
+                    "reference": "https://attack.mitre.org/tactics/TA0005/"
+                },
+                "technique": [
+                    {
+                        "id": "T1562",
+                        "name": "Impair Defenses",
+                        "reference": "https://attack.mitre.org/techniques/T1562/",
+                        "subtechnique": [
+                            {
+                                "id": "T1562.007",
+                                "name": "Disable or Modify Cloud Firewall",
+                                "reference": "https://attack.mitre.org/techniques/T1562/007/"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "timestamp_override": "event.ingested",
+        "type": "query",
+        "version": 106
+    },
+    "id": "000047bb-b27a-47ec-8b62-ef1a5d2c9e19_106",
+    "type": "security-rule"
+}

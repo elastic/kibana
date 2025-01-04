@@ -1,0 +1,88 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "description": "Identifies the first occurrence of an Okta user session started via a proxy.",
+        "history_window_start": "now-7d",
+        "index": [
+            "filebeat-*",
+            "logs-okta*"
+        ],
+        "language": "kuery",
+        "license": "Elastic License v2",
+        "name": "First Occurrence of Okta User Session Started via Proxy",
+        "new_terms_fields": [
+            "okta.actor.id",
+            "cloud.account.id"
+        ],
+        "note": "## Triage and analysis\n\n### Investigating First Occurrence of Okta User Session Started via Proxy\n\nThis rule detects the first occurrence of an Okta user session started via a proxy. This rule is designed to help identify suspicious authentication behavior that may be indicative of an attacker attempting to gain access to an Okta account while remaining anonymous. This rule leverages the New Terms rule type feature where the `okta.actor.id` value is checked against the previous 7 days of data to determine if the value has been seen before for this activity.\n\n#### Possible investigation steps:\n- Identify the user involved in this action by examining the `okta.actor.id`, `okta.actor.type`, `okta.actor.alternate_id`, and `okta.actor.display_name` fields.\n- Determine the client used by the actor. Review the `okta.client.ip`, `okta.client.user_agent.raw_user_agent`, `okta.client.zone`, `okta.client.device`, and `okta.client.id` fields.\n- Examine the `okta.debug_context.debug_data.flattened` field for more information about the proxy used.\n- Review the `okta.request.ip_chain` field for more information about the geographic location of the proxy.\n- Review the past activities of the actor involved in this action by checking their previous actions.\n- Evaluate the actions that happened just before and after this event in the `okta.event_type` field to help understand the full context of the activity.\n\n### False positive analysis:\n- A user may have legitimately started a session via a proxy for security or privacy reasons.\n\n### Response and remediation:\n- Review the profile of the user involved in this action to determine if proxy usage may be expected.\n- If the user is legitimate and the authentication behavior is not suspicious, no action is required.\n- If the user is legitimate but the authentication behavior is suspicious, consider resetting the user's password and enabling multi-factor authentication (MFA).\n    - If MFA is already enabled, consider resetting MFA for the user.\n- If the user is not legitimate, consider deactivating the user's account.\n- Conduct a review of Okta policies and ensure they are in accordance with security best practices.\n\n## Setup",
+        "query": "event.dataset:okta.system and okta.event_type: (user.session.start or user.authentication.verify) and okta.security_context.is_proxy:true and not okta.actor.id: okta*\n",
+        "references": [
+            "https://developer.okta.com/docs/reference/api/system-log/",
+            "https://developer.okta.com/docs/reference/api/event-types/",
+            "https://developer.okta.com/docs/reference/api/system-log/#issuer-object",
+            "https://www.elastic.co/security-labs/testing-okta-visibility-and-detection-dorothy",
+            "https://sec.okta.com/articles/2023/08/cross-tenant-impersonation-prevention-and-detection"
+        ],
+        "related_integrations": [
+            {
+                "package": "okta",
+                "version": "^2.0.0"
+            }
+        ],
+        "required_fields": [
+            {
+                "ecs": true,
+                "name": "event.dataset",
+                "type": "keyword"
+            },
+            {
+                "ecs": false,
+                "name": "okta.actor.id",
+                "type": "keyword"
+            },
+            {
+                "ecs": false,
+                "name": "okta.event_type",
+                "type": "keyword"
+            },
+            {
+                "ecs": false,
+                "name": "okta.security_context.is_proxy",
+                "type": "boolean"
+            }
+        ],
+        "risk_score": 47,
+        "rule_id": "6f1bb4b2-7dc8-11ee-92b2-f661ea17fbcd",
+        "setup": "The Okta Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
+        "severity": "medium",
+        "tags": [
+            "Tactic: Initial Access",
+            "Use Case: Identity and Access Audit",
+            "Data Source: Okta"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0001",
+                    "name": "Initial Access",
+                    "reference": "https://attack.mitre.org/tactics/TA0001/"
+                },
+                "technique": [
+                    {
+                        "id": "T1133",
+                        "name": "External Remote Services",
+                        "reference": "https://attack.mitre.org/techniques/T1133/"
+                    }
+                ]
+            }
+        ],
+        "timestamp_override": "event.ingested",
+        "type": "new_terms",
+        "version": 1
+    },
+    "id": "6f1bb4b2-7dc8-11ee-92b2-f661ea17fbcd_1",
+    "type": "security-rule"
+}

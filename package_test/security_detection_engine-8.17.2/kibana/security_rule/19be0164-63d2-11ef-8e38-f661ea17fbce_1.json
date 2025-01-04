@@ -1,0 +1,49 @@
+{
+  "attributes": {
+    "author": [
+      "Elastic"
+    ],
+    "description": "Identifies when a single AWS resource is making `GetServiceQuota` API calls for the EC2 service quota L-1216C47A in more than 10 regions within a 30-second window. Quota code L-1216C47A represents on-demand instances which are used by adversaries to deploy malware and mine cryptocurrency. This could indicate a potential threat actor attempting to discover the AWS infrastructure across multiple regions using compromised credentials or a compromised instance.",
+    "from": "now-9m",
+    "language": "esql",
+    "license": "Elastic License v2",
+    "name": "AWS Service Quotas Multi-Region `GetServiceQuota` Requests",
+    "query": "from logs-aws.cloudtrail-*\n\n// filter for GetServiceQuota API calls\n| where event.dataset == \"aws.cloudtrail\" and event.provider = \"servicequotas.amazonaws.com\" and event.action == \"GetServiceQuota\"\n\n// truncate the timestamp to a 30-second window\n| eval target_time_window = DATE_TRUNC(30 seconds, @timestamp)\n\n// pre-process the request parameters to extract the service code and quota code\n| dissect aws.cloudtrail.request_parameters \"{%{?service_code_key}=%{service_code}, %{?quota_code_key}=%{quota_code}}\"\n\n// filter for EC2 service quota L-1216C47A (vCPU on-demand instances)\n| where service_code == \"ec2\" and quota_code == \"L-1216C47A\"\n\n// count the number of unique regions and total API calls within the 30-second window\n| stats region_count = count_distinct(cloud.region), window_count = count(*) by target_time_window, aws.cloudtrail.user_identity.arn\n\n// filter for resources making DescribeInstances API calls in more than 10 regions within the 30-second window\n| where region_count >= 10 and window_count >= 10\n\n// sort the results by time windows in descending order\n| sort target_time_window desc\n",
+    "references": [
+      "https://www.sentinelone.com/labs/exploring-fbot-python-based-malware-targeting-cloud-and-payment-services/",
+      "https://docs.aws.amazon.com/servicequotas/2019-06-24/apireference/API_GetServiceQuota.html"
+    ],
+    "risk_score": 21,
+    "rule_id": "19be0164-63d2-11ef-8e38-f661ea17fbce",
+    "severity": "low",
+    "tags": [
+      "Domain: Cloud",
+      "Data Source: AWS",
+      "Data Source: AWS Service Quotas",
+      "Use Case: Threat Detection",
+      "Tactic: Discovery"
+    ],
+    "threat": [
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0007",
+          "name": "Discovery",
+          "reference": "https://attack.mitre.org/tactics/TA0007/"
+        },
+        "technique": [
+          {
+            "id": "T1580",
+            "name": "Cloud Infrastructure Discovery",
+            "reference": "https://attack.mitre.org/techniques/T1580/"
+          }
+        ]
+      }
+    ],
+    "timestamp_override": "event.ingested",
+    "type": "esql",
+    "version": 1
+  },
+  "id": "19be0164-63d2-11ef-8e38-f661ea17fbce_1",
+  "type": "security-rule"
+}

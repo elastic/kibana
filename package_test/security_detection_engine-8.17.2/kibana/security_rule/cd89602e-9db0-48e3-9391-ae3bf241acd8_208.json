@@ -1,0 +1,100 @@
+{
+  "attributes": {
+    "author": [
+      "Elastic"
+    ],
+    "description": "Detects multi-factor authentication (MFA) deactivation with no subsequent re-activation for an Okta user account. An adversary may deactivate MFA for an Okta user account in order to weaken the authentication requirements for the account.",
+    "false_positives": [
+      "If the behavior of deactivating MFA for Okta user accounts is expected, consider adding exceptions to this rule to filter false positives."
+    ],
+    "from": "now-12h",
+    "index": [
+      "filebeat-*",
+      "logs-okta.system*"
+    ],
+    "interval": "6h",
+    "language": "eql",
+    "license": "Elastic License v2",
+    "name": "MFA Deactivation with no Re-Activation for Okta User Account",
+    "note": "## Triage and analysis\n\n### Investigating MFA Deactivation with no Re-Activation for Okta User Account\n\nMFA is used to provide an additional layer of security for user accounts. An adversary may achieve MFA deactivation for an Okta user account to achieve persistence.\n\nThis rule fires when an Okta user account has MFA deactivated and no subsequent MFA reactivation is observed within 12 hours.\n\n#### Possible investigation steps:\n\n- Identify the actor related to the alert by reviewing `okta.actor.alternate_id` field in the alert. This should give the username of the account being targeted.\n- Review `okta.target` or `user.target.full_name` fields to determine if deactivation was performed by a se parate user.\n- Using the `okta.actor.alternate_id` field, search  for MFA re-activation events where `okta.event_type` is `user.mfa.factor.activate`.\n- Review events where `okta.event_type` is `user.authenticate*` to determine if the user account had suspicious login activity.\n    - Geolocation details found in `client.geo*` related fields may be useful in determining if the login activity was suspicious for this user.\n\n#### False positive steps:\n\n- Determine with the target user if MFA deactivation was expected.\n- Determine if MFA is required for the target user account.\n\n#### Response and remediation:\n\n- If the MFA deactivation was not expected, consider deactivating the user\n    - This should be followed by resetting the user's password and re-enabling MFA.\n- If the MFA deactivation was expected, consider adding an exception to this rule to filter false positives.\n- Investigate the source of the attack. If a specific machine or network is compromised, additional steps may need to be taken to address the issue.\n- Encourage users to use complex, unique passwords and consider implementing multi-factor authentication.\n- Check if the compromised account was used to access or alter any sensitive data, applications or systems.\n",
+    "query": "sequence by okta.actor.id with maxspan=12h\n    [any where event.dataset == \"okta.system\" and okta.event_type == \"user.mfa.factor.deactivate\"\n        and okta.outcome.result == \"SUCCESS\" and not okta.client.user_agent.raw_user_agent like \"SFDC-Callout*\"]\n    ![any where event.dataset == \"okta.system\" and okta.event_type == \"user.mfa.factor.activate\"]\n",
+    "references": [
+      "https://developer.okta.com/docs/reference/api/system-log/",
+      "https://developer.okta.com/docs/reference/api/event-types/",
+      "https://www.elastic.co/security-labs/testing-okta-visibility-and-detection-dorothy",
+      "https://www.elastic.co/security-labs/monitoring-okta-threats-with-elastic-security",
+      "https://www.elastic.co/security-labs/starter-guide-to-understanding-okta"
+    ],
+    "related_integrations": [
+      {
+        "package": "okta",
+        "version": "^2.0.0"
+      }
+    ],
+    "required_fields": [
+      {
+        "ecs": true,
+        "name": "event.dataset",
+        "type": "keyword"
+      },
+      {
+        "ecs": false,
+        "name": "okta.actor.id",
+        "type": "keyword"
+      },
+      {
+        "ecs": false,
+        "name": "okta.client.user_agent.raw_user_agent",
+        "type": "keyword"
+      },
+      {
+        "ecs": false,
+        "name": "okta.event_type",
+        "type": "keyword"
+      },
+      {
+        "ecs": false,
+        "name": "okta.outcome.result",
+        "type": "keyword"
+      }
+    ],
+    "risk_score": 21,
+    "rule_id": "cd89602e-9db0-48e3-9391-ae3bf241acd8",
+    "setup": "The Okta Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.\n",
+    "severity": "low",
+    "tags": [
+      "Tactic: Persistence",
+      "Use Case: Identity and Access Audit",
+      "Data Source: Okta",
+      "Domain: Cloud"
+    ],
+    "threat": [
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0003",
+          "name": "Persistence",
+          "reference": "https://attack.mitre.org/tactics/TA0003/"
+        },
+        "technique": [
+          {
+            "id": "T1556",
+            "name": "Modify Authentication Process",
+            "reference": "https://attack.mitre.org/techniques/T1556/",
+            "subtechnique": [
+              {
+                "id": "T1556.006",
+                "name": "Multi-Factor Authentication",
+                "reference": "https://attack.mitre.org/techniques/T1556/006/"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "type": "eql",
+    "version": 208
+  },
+  "id": "cd89602e-9db0-48e3-9391-ae3bf241acd8_208",
+  "type": "security-rule"
+}

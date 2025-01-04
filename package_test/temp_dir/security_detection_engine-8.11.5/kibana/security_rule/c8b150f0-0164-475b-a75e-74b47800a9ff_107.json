@@ -1,0 +1,82 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "description": "Identifies suspicious startup shell folder modifications to change the default Startup directory in order to bypass detections monitoring file creation in the Windows Startup folder.",
+        "from": "now-9m",
+        "index": [
+            "logs-endpoint.events.*",
+            "endgame-*"
+        ],
+        "language": "eql",
+        "license": "Elastic License v2",
+        "name": "Suspicious Startup Shell Folder Modification",
+        "note": "## Triage and analysis\n\n### Investigating Suspicious Startup Shell Folder Modification\n\nTechniques used within malware and by adversaries often leverage the Windows registry to store malicious programs for persistence. Startup shell folders are often targeted as they are not as prevalent as normal Startup folder paths so this behavior may evade existing AV/EDR solutions. These programs may also run with higher privileges which can be ideal for an attacker.\n\n\u003e **Note**:\n\u003e This investigation guide uses the [Osquery Markdown Plugin](https://www.elastic.co/guide/en/security/master/invest-guide-run-osquery.html) introduced in Elastic Stack version 8.5.0. Older Elastic Stack versions will display unrendered Markdown in this guide.\n\n#### Possible investigation steps\n\n- Investigate the process execution chain (parent process tree) for unknown processes. Examine their executable files for prevalence, whether they are located in expected locations, and if they are signed with valid digital signatures.\n- Review the source process and related file tied to the Windows Registry entry.\n- Validate if the activity is not related to planned patches, updates, network administrator activity, or legitimate software installations.\n- Assess whether this behavior is prevalent in the environment by looking for similar occurrences across hosts.\n- Examine the host for derived artifacts that indicate suspicious activities:\n  - Analyze the file using a private sandboxed analysis system.\n  - Observe and collect information about the following activities in both the sandbox and the alert subject host:\n    - Attempts to contact external domains and addresses.\n      - Use the Elastic Defend network events to determine domains and addresses contacted by the subject process by filtering by the process' `process.entity_id`.\n      - Examine the DNS cache for suspicious or anomalous entries.\n        - !{osquery{\"label\":\"Osquery - Retrieve DNS Cache\",\"query\":\"SELECT * FROM dns_cache\"}}\n    - Use the Elastic Defend registry events to examine registry keys accessed, modified, or created by the related processes in the process tree.\n    - Examine the host services for suspicious or anomalous entries.\n      - !{osquery{\"label\":\"Osquery - Retrieve All Services\",\"query\":\"SELECT description, display_name, name, path, pid, service_type, start_type, status, user_account FROM services\"}}\n      - !{osquery{\"label\":\"Osquery - Retrieve Services Running on User Accounts\",\"query\":\"SELECT description, display_name, name, path, pid, service_type, start_type, status, user_account FROM services WHERE\\nNOT (user_account LIKE '%LocalSystem' OR user_account LIKE '%LocalService' OR user_account LIKE '%NetworkService' OR\\nuser_account == null)\\n\"}}\n      - !{osquery{\"label\":\"Osquery - Retrieve Service Unsigned Executables with Virustotal Link\",\"query\":\"SELECT concat('https://www.virustotal.com/gui/file/', sha1) AS VtLink, name, description, start_type, status, pid,\\nservices.path FROM services JOIN authenticode ON services.path = authenticode.path OR services.module_path =\\nauthenticode.path JOIN hash ON services.path = hash.path WHERE authenticode.result != 'trusted'\\n\"}}\n  - Retrieve the files' SHA-256 hash values using the PowerShell `Get-FileHash` cmdlet and search for the existence and reputation of the hashes in resources like VirusTotal, Hybrid-Analysis, CISCO Talos, Any.run, etc.\n- Investigate potentially compromised accounts. Analysts can do this by searching for login events (for example, 4624) to the target host after the registry modification.\n\n### False positive analysis\n\n- There is a high possibility of benign legitimate programs being added to shell folders. This activity could be based on new software installations, patches, or other network administrator activity. Before undertaking further investigation, it should be verified that this activity is not benign.\n\n### Related rules\n\n- Startup or Run Key Registry Modification - 97fc44d3-8dae-4019-ae83-298c3015600f\n- Persistent Scripts in the Startup Directory - f7c4dc5a-a58d-491d-9f14-9b66507121c0\n\n### Response and remediation\n\n- Initiate the incident response process based on the outcome of the triage.\n- Isolate the involved host to prevent further post-compromise behavior.\n- Determine the initial vector abused by the attacker and take action to prevent reinfection through the same vector.\n- If the malicious file was delivered via phishing:\n  - Block the email sender from sending future emails.\n  - Block the malicious web pages.\n  - Remove emails from the sender from mailboxes.\n  - Consider improvements to the security awareness program.\n- Run a full antimalware scan. This may reveal additional artifacts left in the system, persistence mechanisms, and malware components.\n- Using the incident response data, update logging and audit policies to improve the mean time to detect (MTTD) and the mean time to respond (MTTR).\n",
+        "query": "registry where host.os.type == \"windows\" and\n registry.path : (\n     \"HKLM\\\\Software\\\\Microsoft\\\\Windows\\\\CurrentVersion\\\\Explorer\\\\User Shell Folders\\\\Common Startup\",\n     \"HKLM\\\\Software\\\\Microsoft\\\\Windows\\\\CurrentVersion\\\\Explorer\\\\Shell Folders\\\\Common Startup\",\n     \"HKEY_USERS\\\\*\\\\Software\\\\Microsoft\\\\Windows\\\\CurrentVersion\\\\Explorer\\\\User Shell Folders\\\\Startup\",\n     \"HKEY_USERS\\\\*\\\\Software\\\\Microsoft\\\\Windows\\\\CurrentVersion\\\\Explorer\\\\Shell Folders\\\\Startup\",\n     \"\\\\REGISTRY\\\\MACHINE\\\\Software\\\\Microsoft\\\\Windows\\\\CurrentVersion\\\\Explorer\\\\User Shell Folders\\\\Common Startup\",\n     \"\\\\REGISTRY\\\\MACHINE\\\\Software\\\\Microsoft\\\\Windows\\\\CurrentVersion\\\\Explorer\\\\Shell Folders\\\\Common Startup\",\n     \"\\\\REGISTRY\\\\USER\\\\*\\\\Software\\\\Microsoft\\\\Windows\\\\CurrentVersion\\\\Explorer\\\\User Shell Folders\\\\Startup\",\n     \"\\\\REGISTRY\\\\USER\\\\*\\\\Software\\\\Microsoft\\\\Windows\\\\CurrentVersion\\\\Explorer\\\\Shell Folders\\\\Startup\"\n     ) and\n  registry.data.strings != null and\n  /* Normal Startup Folder Paths */\n  not registry.data.strings : (\n           \"C:\\\\ProgramData\\\\Microsoft\\\\Windows\\\\Start Menu\\\\Programs\\\\Startup\",\n           \"%ProgramData%\\\\Microsoft\\\\Windows\\\\Start Menu\\\\Programs\\\\Startup\",\n           \"%USERPROFILE%\\\\AppData\\\\Roaming\\\\Microsoft\\\\Windows\\\\Start Menu\\\\Programs\\\\Startup\",\n           \"C:\\\\Users\\\\*\\\\AppData\\\\Roaming\\\\Microsoft\\\\Windows\\\\Start Menu\\\\Programs\\\\Startup\"\n           )\n",
+        "related_integrations": [
+            {
+                "package": "endpoint",
+                "version": "^8.2.0"
+            }
+        ],
+        "required_fields": [
+            {
+                "ecs": true,
+                "name": "host.os.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "registry.data.strings",
+                "type": "wildcard"
+            },
+            {
+                "ecs": true,
+                "name": "registry.path",
+                "type": "keyword"
+            }
+        ],
+        "risk_score": 73,
+        "rule_id": "c8b150f0-0164-475b-a75e-74b47800a9ff",
+        "severity": "high",
+        "tags": [
+            "Domain: Endpoint",
+            "OS: Windows",
+            "Use Case: Threat Detection",
+            "Tactic: Persistence",
+            "Resources: Investigation Guide",
+            "Data Source: Elastic Endgame",
+            "Data Source: Elastic Defend"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0003",
+                    "name": "Persistence",
+                    "reference": "https://attack.mitre.org/tactics/TA0003/"
+                },
+                "technique": [
+                    {
+                        "id": "T1547",
+                        "name": "Boot or Logon Autostart Execution",
+                        "reference": "https://attack.mitre.org/techniques/T1547/",
+                        "subtechnique": [
+                            {
+                                "id": "T1547.001",
+                                "name": "Registry Run Keys / Startup Folder",
+                                "reference": "https://attack.mitre.org/techniques/T1547/001/"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "timestamp_override": "event.ingested",
+        "type": "eql",
+        "version": 107
+    },
+    "id": "c8b150f0-0164-475b-a75e-74b47800a9ff_107",
+    "type": "security-rule"
+}

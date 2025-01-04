@@ -1,0 +1,89 @@
+{
+  "attributes": {
+    "author": [
+      "Elastic"
+    ],
+    "description": "This rule monitors the syslog log file for error messages related to the rc.local process. The rc.local file is a script that is executed during the boot process on Linux systems. Attackers may attempt to modify the rc.local file to execute malicious commands or scripts during system startup. This rule detects error messages such as \"Connection refused,\" \"No such file or directory,\" or \"command not found\" in the syslog log file, which may indicate that the rc.local file has been tampered with.",
+    "from": "now-9m",
+    "index": [
+      "logs-system.syslog-*"
+    ],
+    "language": "kuery",
+    "license": "Elastic License v2",
+    "name": "Suspicious rc.local Error Message",
+    "query": "host.os.type:linux and event.dataset:system.syslog and process.name:rc.local and\nmessage:(\"Connection refused\" or \"No such file or directory\" or \"command not found\")\n",
+    "references": [
+      "https://www.intezer.com/blog/malware-analysis/hiddenwasp-malware-targeting-linux-systems/",
+      "https://pberba.github.io/security/2022/02/06/linux-threat-hunting-for-persistence-initialization-scripts-and-shell-configuration/#8-boot-or-logon-initialization-scripts-rc-scripts",
+      "https://www.cyberciti.biz/faq/how-to-enable-rc-local-shell-script-on-systemd-while-booting-linux-system/",
+      "https://www.elastic.co/security-labs/sequel-on-persistence-mechanisms"
+    ],
+    "related_integrations": [
+      {
+        "package": "system",
+        "version": "^1.6.4"
+      }
+    ],
+    "required_fields": [
+      {
+        "ecs": true,
+        "name": "event.dataset",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "host.os.type",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "message",
+        "type": "match_only_text"
+      },
+      {
+        "ecs": true,
+        "name": "process.name",
+        "type": "keyword"
+      }
+    ],
+    "risk_score": 21,
+    "rule_id": "69c116bb-d86f-48b0-857d-3648511a6cac",
+    "setup": "## Setup\n\nThis rule requires data coming in from one of the following integrations:\n- Filebeat\n\n### Filebeat Setup\nFilebeat is a lightweight shipper for forwarding and centralizing log data. Installed as an agent on your servers, Filebeat monitors the log files or locations that you specify, collects log events, and forwards them either to Elasticsearch or Logstash for indexing.\n\n#### The following steps should be executed in order to add the Filebeat for the Linux System:\n- Elastic provides repositories available for APT and YUM-based distributions. Note that we provide binary packages, but no source packages.\n- To install the APT and YUM repositories follow the setup instructions in this [helper guide](https://www.elastic.co/guide/en/beats/filebeat/current/setup-repositories.html).\n- To run Filebeat on Docker follow the setup instructions in the [helper guide](https://www.elastic.co/guide/en/beats/filebeat/current/running-on-docker.html).\n- To run Filebeat on Kubernetes follow the setup instructions in the [helper guide](https://www.elastic.co/guide/en/beats/filebeat/current/running-on-kubernetes.html).\n- For quick start information for Filebeat refer to the [helper guide](https://www.elastic.co/guide/en/beats/filebeat/8.11/filebeat-installation-configuration.html).\n- For complete Setup and Run Filebeat information refer to the [helper guide](https://www.elastic.co/guide/en/beats/filebeat/current/setting-up-and-running.html).\n\n#### Rule Specific Setup Note\n- This rule requires the Filebeat System Module to be enabled.\n- The system module collects and parses logs created by the system logging service of common Unix/Linux based distributions.\n- To run the system module of Filebeat on Linux follow the setup instructions in the [helper guide](https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-module-system.html).\n",
+    "severity": "low",
+    "tags": [
+      "Domain: Endpoint",
+      "OS: Linux",
+      "Use Case: Threat Detection",
+      "Tactic: Persistence"
+    ],
+    "threat": [
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0003",
+          "name": "Persistence",
+          "reference": "https://attack.mitre.org/tactics/TA0003/"
+        },
+        "technique": [
+          {
+            "id": "T1037",
+            "name": "Boot or Logon Initialization Scripts",
+            "reference": "https://attack.mitre.org/techniques/T1037/",
+            "subtechnique": [
+              {
+                "id": "T1037.004",
+                "name": "RC Scripts",
+                "reference": "https://attack.mitre.org/techniques/T1037/004/"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "timestamp_override": "event.ingested",
+    "type": "query",
+    "version": 2
+  },
+  "id": "69c116bb-d86f-48b0-857d-3648511a6cac_2",
+  "type": "security-rule"
+}

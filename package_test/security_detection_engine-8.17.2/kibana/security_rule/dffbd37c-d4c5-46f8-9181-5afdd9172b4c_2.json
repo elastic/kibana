@@ -1,0 +1,94 @@
+{
+  "attributes": {
+    "author": [
+      "Elastic"
+    ],
+    "description": "Identifies a privilege escalation attempt via exploiting CVE-2022-38028 to hijack the print spooler service execution.",
+    "from": "now-9m",
+    "index": [
+      "logs-endpoint.events.file-*",
+      "logs-windows.sysmon_operational-*",
+      "endgame-*",
+      "winlogbeat-*"
+    ],
+    "language": "eql",
+    "license": "Elastic License v2",
+    "name": "Potential privilege escalation via CVE-2022-38028",
+    "query": "file where host.os.type == \"windows\" and\n           file.path : (\"?:\\\\*\\\\Windows\\\\system32\\\\DriVerStoRe\\\\FiLeRePoSiToRy\\\\*\\\\MPDW-constraints.js\",\n                        \"?:\\\\*\\\\Windows\\\\WinSxS\\\\amd64_microsoft-windows-printing-printtopdf_*\\\\MPDW-constraints.js\")\n",
+    "references": [
+      "https://www.microsoft.com/en-us/security/blog/2024/04/22/analyzing-forest-blizzards-custom-post-compromise-tool-for-exploiting-cve-2022-38028-to-obtain-credentials/"
+    ],
+    "related_integrations": [
+      {
+        "package": "endpoint",
+        "version": "^8.2.0"
+      },
+      {
+        "package": "windows",
+        "version": "^1.5.0"
+      }
+    ],
+    "required_fields": [
+      {
+        "ecs": true,
+        "name": "file.path",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "host.os.type",
+        "type": "keyword"
+      }
+    ],
+    "risk_score": 73,
+    "rule_id": "dffbd37c-d4c5-46f8-9181-5afdd9172b4c",
+    "severity": "high",
+    "tags": [
+      "Domain: Endpoint",
+      "OS: Windows",
+      "Use Case: Threat Detection",
+      "Tactic: Privilege Escalation",
+      "Tactic: Defense Evasion",
+      "Data Source: Elastic Endgame",
+      "Data Source: Elastic Defend",
+      "Data Source: Sysmon"
+    ],
+    "threat": [
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0004",
+          "name": "Privilege Escalation",
+          "reference": "https://attack.mitre.org/tactics/TA0004/"
+        },
+        "technique": [
+          {
+            "id": "T1068",
+            "name": "Exploitation for Privilege Escalation",
+            "reference": "https://attack.mitre.org/techniques/T1068/"
+          }
+        ]
+      },
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0005",
+          "name": "Defense Evasion",
+          "reference": "https://attack.mitre.org/tactics/TA0005/"
+        },
+        "technique": [
+          {
+            "id": "T1036",
+            "name": "Masquerading",
+            "reference": "https://attack.mitre.org/techniques/T1036/"
+          }
+        ]
+      }
+    ],
+    "timestamp_override": "event.ingested",
+    "type": "eql",
+    "version": 2
+  },
+  "id": "dffbd37c-d4c5-46f8-9181-5afdd9172b4c_2",
+  "type": "security-rule"
+}

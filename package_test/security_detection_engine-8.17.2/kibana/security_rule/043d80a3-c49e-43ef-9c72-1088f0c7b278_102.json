@@ -1,0 +1,128 @@
+{
+  "attributes": {
+    "author": [
+      "Elastic"
+    ],
+    "description": "Identifies when a browser process navigates to the Microsoft Help page followed by spawning an elevated process. This may indicate a successful exploitation for privilege escalation abusing a vulnerable Windows Installer repair setup.",
+    "from": "now-9m",
+    "index": [
+      "winlogbeat-*",
+      "endgame-*",
+      "logs-endpoint.events.process-*",
+      "logs-windows.sysmon_operational-*",
+      "logs-sentinel_one_cloud_funnel.*",
+      "logs-m365_defender.event-*"
+    ],
+    "language": "eql",
+    "license": "Elastic License v2",
+    "name": "Potential Escalation via Vulnerable MSI Repair",
+    "query": "process where event.type == \"start\" and host.os.type == \"windows\" and\n user.domain : (\"NT AUTHORITY\", \"AUTORITE NT\", \"AUTORIDADE NT\") and\n process.parent.name : (\"chrome.exe\", \"msedge.exe\", \"brave.exe\", \"whale.exe\", \"browser.exe\", \"dragon.exe\", \"vivaldi.exe\",\n                        \"opera.exe\", \"iexplore\", \"firefox.exe\", \"waterfox.exe\", \"iexplore.exe\", \"tor.exe\", \"safari.exe\") and\n process.parent.command_line : \"*go.microsoft.com*\"\n",
+    "references": [
+      "https://sec-consult.com/blog/detail/msi-installer-repair-to-system-a-detailed-journey/",
+      "https://msrc.microsoft.com/update-guide/en-US/advisory/CVE-2024-38014"
+    ],
+    "related_integrations": [
+      {
+        "package": "endpoint",
+        "version": "^8.2.0"
+      },
+      {
+        "package": "sentinel_one_cloud_funnel",
+        "version": "^1.0.0"
+      },
+      {
+        "package": "m365_defender",
+        "version": "^2.0.0"
+      },
+      {
+        "package": "windows",
+        "version": "^1.5.0"
+      }
+    ],
+    "required_fields": [
+      {
+        "ecs": true,
+        "name": "event.type",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "host.os.type",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "process.parent.command_line",
+        "type": "wildcard"
+      },
+      {
+        "ecs": true,
+        "name": "process.parent.name",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "user.domain",
+        "type": "keyword"
+      }
+    ],
+    "risk_score": 73,
+    "rule_id": "043d80a3-c49e-43ef-9c72-1088f0c7b278",
+    "severity": "high",
+    "tags": [
+      "Domain: Endpoint",
+      "OS: Windows",
+      "Use Case: Threat Detection",
+      "Tactic: Privilege Escalation",
+      "Data Source: Elastic Endgame",
+      "Data Source: Elastic Defend",
+      "Data Source: Sysmon",
+      "Data Source: SentinelOne",
+      "Data Source: Microsoft Defender for Endpoint"
+    ],
+    "threat": [
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0004",
+          "name": "Privilege Escalation",
+          "reference": "https://attack.mitre.org/tactics/TA0004/"
+        },
+        "technique": [
+          {
+            "id": "T1068",
+            "name": "Exploitation for Privilege Escalation",
+            "reference": "https://attack.mitre.org/techniques/T1068/"
+          }
+        ]
+      },
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0005",
+          "name": "Defense Evasion",
+          "reference": "https://attack.mitre.org/tactics/TA0005/"
+        },
+        "technique": [
+          {
+            "id": "T1218",
+            "name": "System Binary Proxy Execution",
+            "reference": "https://attack.mitre.org/techniques/T1218/",
+            "subtechnique": [
+              {
+                "id": "T1218.007",
+                "name": "Msiexec",
+                "reference": "https://attack.mitre.org/techniques/T1218/007/"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "timestamp_override": "event.ingested",
+    "type": "eql",
+    "version": 102
+  },
+  "id": "043d80a3-c49e-43ef-9c72-1088f0c7b278_102",
+  "type": "security-rule"
+}
