@@ -41,7 +41,7 @@ const getEntityLatest = (
   entityId: generateId(),
   entityDefinitionId: faker.string.uuid(),
   entityDefinitionVersion: '1.0.0',
-  entityIdentityFields: indentityFieldsPerType[entityType],
+  entityIdentityFields: { source1: indentityFieldsPerType[entityType] },
   entitySchemaVersion: '1.0.0',
   ...overrides,
 });
@@ -62,11 +62,11 @@ const alertsMock: InventoryEntity[] = [
 ];
 
 const hostsMock = Array.from({ length: 20 }, () =>
-  getEntityLatest('host', { cloud: { provider: 'gcp' } })
+  getEntityLatest('host', { 'cloud.provider': 'gcp' })
 );
 const containersMock = Array.from({ length: 20 }, () => getEntityLatest('container'));
 const servicesMock = Array.from({ length: 20 }, () =>
-  getEntityLatest('service', { agent: { name: 'java' } })
+  getEntityLatest('service', { 'agent.name': 'java' })
 );
 
 export const entitiesMock = [

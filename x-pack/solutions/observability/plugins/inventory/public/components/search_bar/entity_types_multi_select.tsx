@@ -40,11 +40,12 @@ export function EntityTypesMultiSelect() {
   const items = useMemo(
     () =>
       value?.entityTypes.map((type): EuiSelectableOption => {
-        const checked = selectedEntityTypes?.[type];
+        const checked = selectedEntityTypes?.[type.id];
         return {
-          label: type,
+          label: type.display_name,
+          key: type.id,
           checked,
-          'data-test-subj': `entityTypes_multiSelect_filter_selection_${type}`,
+          'data-test-subj': `entityTypes_multiSelect_filter_selection_${type.id}`,
         };
       }) || [],
     [selectedEntityTypes, value?.entityTypes]
@@ -116,7 +117,10 @@ export function EntityTypesMultiSelect() {
             handleEntityTypeChecked(
               newOptions
                 .filter((item) => item.checked)
-                .reduce<EntityType>((acc, curr) => ({ ...acc, [curr.label]: curr.checked! }), {})
+                .reduce<EntityType>(
+                  (acc, curr) => ({ ...acc, [curr.key as string]: curr.checked! }),
+                  {}
+                )
             );
           }}
           isLoading={loading}
