@@ -17,7 +17,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { hasEditCapabilities } from '@kbn/presentation-publishing';
 import { FilterItems } from '@kbn/unified-search-plugin/public';
 import { CustomizePanelActionApi } from './customize_panel_action';
-import { executeEditPanelAction } from '../../kibana_services';
+import { executeEditPanelAction } from '../edit_panel_action/execute_edit_action';
 
 export const filterDetailsActionStrings = {
   getQueryTitle: () =>

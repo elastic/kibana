@@ -20,7 +20,8 @@ import { useErrorTextStyle } from '@kbn/react-hooks';
 import { ActionExecutionMeta } from '@kbn/ui-actions-plugin/public';
 import { getErrorCallToAction } from './presentation_panel_strings';
 import { DefaultPresentationPanelApi } from './types';
-import { executeEditPanelAction, uiActions } from '../kibana_services';
+import { uiActions } from '../kibana_services';
+import { executeEditPanelAction } from '../panel_actions/edit_panel_action/execute_edit_action';
 import { ACTION_EDIT_PANEL } from '../panel_actions/edit_panel_action/constants';
 import { CONTEXT_MENU_TRIGGER } from '../panel_actions';
 
