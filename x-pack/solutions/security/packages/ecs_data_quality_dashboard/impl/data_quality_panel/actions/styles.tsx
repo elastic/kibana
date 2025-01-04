@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import styled from 'styled-components';
+import { UseEuiTheme } from '@elastic/eui';
+import { SerializedStyles, css } from '@emotion/react';
 
-export const StyledLinkText = styled.span`
-  display: flex;
-  gap: ${({ theme }) => theme.eui.euiSizeS};
-`;
+export const linkTextCss = ({ euiTheme }: UseEuiTheme): SerializedStyles =>
+  css({
+    display: 'flex',
+    gap: euiTheme.size.s,
+  });

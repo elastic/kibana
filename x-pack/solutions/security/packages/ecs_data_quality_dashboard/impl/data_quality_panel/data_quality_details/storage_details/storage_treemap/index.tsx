@@ -18,10 +18,10 @@ import type {
   XYChartElementEvent,
 } from '@elastic/charts';
 import { Chart, Partition, PartitionLayout, Settings } from '@elastic/charts';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import styled from 'styled-components';
+import { css } from '@emotion/react';
 
 import { ChartLegendItem } from './chart_legend_item';
 import { NoData } from './no_data';
@@ -32,24 +32,32 @@ import { getPathToFlattenedBucketMap } from './utils/get_path_to_flattened_bucke
 import { getLayersMultiDimensional } from './utils/get_layers_multi_dimensional';
 import { getLegendItems } from './utils/get_legend_items';
 
-export const ChartFlexItem = styled(EuiFlexItem)<{
-  $maxChartHeight: number | undefined;
-  $minChartHeight: number;
-}>`
-  ${({ $maxChartHeight }) => ($maxChartHeight != null ? `max-height: ${$maxChartHeight}px;` : '')}
-  min-height: ${({ $minChartHeight }) => `${$minChartHeight}px`};
-`;
+interface StyleProps {
+  maxChartHeight?: number;
+  minChartHeight: number;
+  height?: number;
+  width?: number;
+}
 
-export const LegendContainer = styled.div<{
-  $height?: number;
-  $width?: number;
-}>`
-  margin-left: ${({ theme }) => theme.eui.euiSizeM};
-  margin-top: ${({ theme }) => theme.eui.euiSizeM};
-  ${({ $height }) => ($height != null ? `height: ${$height}px;` : '')}
-  scrollbar-width: thin;
-  ${({ $width }) => ($width != null ? `width: ${$width}px;` : '')}
-`;
+const useStyles = ({ maxChartHeight, minChartHeight, height, width }: StyleProps) => {
+  const { euiTheme } = useEuiTheme();
+
+  return {
+    chart: css({
+      ...(maxChartHeight != null && { maxHeight: `${maxChartHeight}px` }),
+      minHeight: `${minChartHeight}px`,
+    }),
+
+    legendContainer: css({
+      marginLeft: euiTheme.size.m,
+      marginTop: euiTheme.size.m,
+      overflowY: 'auto',
+      ...(height != null && { height: `${height}px` }),
+      scrollbarWidth: 'thin',
+      ...(width != null && { width: `${width}px` }),
+    }),
+  };
+};
 
 export const DEFAULT_MIN_CHART_HEIGHT = 240; // px
 export const LEGEND_WIDTH = 220; // px
@@ -107,6 +115,12 @@ const StorageTreemapComponent: React.FC<Props> = ({
   patternRollups,
   valueFormatter,
 }: Props) => {
+  const styles = useStyles({
+    maxChartHeight,
+    minChartHeight,
+    height: maxChartHeight,
+    width: LEGEND_WIDTH,
+  });
   const { theme, baseTheme, patterns } = useDataQualityContext();
   const fillColor = useMemo(
     () => theme?.background?.color ?? baseTheme.background.color,
@@ -163,7 +177,7 @@ const StorageTreemapComponent: React.FC<Props> = ({
 
   return (
     <EuiFlexGroup data-test-subj="storageTreemap" gutterSize="none">
-      <ChartFlexItem grow={true} $maxChartHeight={maxChartHeight} $minChartHeight={minChartHeight}>
+      <EuiFlexItem css={styles.chart} grow={true}>
         {flattenedBuckets.length === 0 ? (
           <NoData />
         ) : (
@@ -185,15 +199,10 @@ const StorageTreemapComponent: React.FC<Props> = ({
             />
           </Chart>
         )}
-      </ChartFlexItem>
+      </EuiFlexItem>
 
       <EuiFlexItem grow={false}>
-        <LegendContainer
-          data-test-subj="legend"
-          $height={maxChartHeight}
-          className="eui-yScroll"
-          $width={LEGEND_WIDTH}
-        >
+        <div css={styles.legendContainer} data-test-subj="legend" className="eui-scrollBar">
           {legendItems.map(({ color, ilmPhase, index, pattern, sizeInBytes, docsCount }) => (
             <ChartLegendItem
               color={color}
@@ -211,7 +220,7 @@ const StorageTreemapComponent: React.FC<Props> = ({
               textWidth={LEGEND_TEXT_WITH}
             />
           ))}
-        </LegendContainer>
+        </div>
       </EuiFlexItem>
     </EuiFlexGroup>
   );

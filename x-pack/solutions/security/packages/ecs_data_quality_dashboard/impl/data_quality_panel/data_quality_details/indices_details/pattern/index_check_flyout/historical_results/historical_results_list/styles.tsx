@@ -5,19 +5,18 @@
  * 2.0.
  */
 
-import { EuiAccordion } from '@elastic/eui';
-import styled from 'styled-components';
+import { UseEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
 
-export const StyledAccordion = styled(EuiAccordion)`
-  padding: 14px ${({ theme }) => theme.eui.euiSize};
-  border: 1px solid ${({ theme }) => theme.eui.euiBorderColor};
-  border-radius: ${({ theme }) => theme.eui.euiBorderRadius};
-
-  .euiAccordion__button:is(:hover, :focus) {
-    text-decoration: none;
-  }
-
-  .euiAccordion__buttonContent {
-    flex-grow: 1;
-  }
-`;
+export const accordionCss = ({ euiTheme }: UseEuiTheme) =>
+  css({
+    padding: `14px ${euiTheme.size.base}`,
+    border: `1px solid ${euiTheme.border.color}`,
+    borderRadius: euiTheme.border.radius.medium,
+    '.euiAccordion__button:is(:hover, :focus)': {
+      textDecoration: 'none',
+    },
+    '.euiAccordion__buttonContent': {
+      flexGrow: 1,
+    },
+  });

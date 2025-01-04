@@ -5,21 +5,29 @@
  * 2.0.
  */
 
-import { EuiBadge } from '@elastic/eui';
+import { EuiBadge, useEuiTheme } from '@elastic/eui';
 import React from 'react';
-import styled from 'styled-components';
+import { css } from '@emotion/react';
 
 import { SAME_FAMILY_BADGE_LABEL } from '../../../../../translations';
 
-const SameFamilyBadge = styled(EuiBadge)`
-  margin: ${({ theme }) => `0 ${theme.eui.euiSizeXS}`};
-`;
+const useStyles = () => {
+  const { euiTheme } = useEuiTheme();
+  return {
+    sameFamilyBadge: css({
+      margin: `0 ${euiTheme.size.xs}`,
+    }),
+  };
+};
 
-const SameFamilyComponent: React.FC = () => (
-  <SameFamilyBadge data-test-subj="sameFamily" color="warning">
-    {SAME_FAMILY_BADGE_LABEL}
-  </SameFamilyBadge>
-);
+const SameFamilyComponent: React.FC = () => {
+  const styles = useStyles();
+  return (
+    <EuiBadge css={styles.sameFamilyBadge} data-test-subj="sameFamily" color="warning">
+      {SAME_FAMILY_BADGE_LABEL}
+    </EuiBadge>
+  );
+};
 
 SameFamilyComponent.displayName = 'SameFamilyComponent';
 

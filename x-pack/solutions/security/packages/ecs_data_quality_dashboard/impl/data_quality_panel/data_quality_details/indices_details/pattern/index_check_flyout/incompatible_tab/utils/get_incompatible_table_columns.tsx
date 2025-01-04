@@ -6,9 +6,9 @@
  */
 
 import React from 'react';
-import { EuiTableFieldDataColumnType } from '@elastic/eui';
+import { EuiCode, EuiTableFieldDataColumnType } from '@elastic/eui';
 
-import { CodeDanger, CodeSuccess } from '../../../../../../styles';
+import { codeDangerCss, codeSuccessCss } from '../../../../../../styles';
 import {
   AllowedValue,
   IncompatibleFieldMetadata,
@@ -77,7 +77,11 @@ export const getIncompatibleMappingsTableColumns = (): Array<
   {
     field: 'type',
     name: ECS_MAPPING_TYPE_EXPECTED,
-    render: (type: string) => <CodeSuccess data-test-subj="codeSuccess">{type}</CodeSuccess>,
+    render: (type: string) => (
+      <EuiCode css={codeSuccessCss} data-test-subj="codeSuccess">
+        {type}
+      </EuiCode>
+    ),
     sortable: true,
     truncateText: false,
     width: '25%',
@@ -86,7 +90,9 @@ export const getIncompatibleMappingsTableColumns = (): Array<
     field: 'indexFieldType',
     name: INDEX_MAPPING_TYPE_ACTUAL,
     render: (indexFieldType: string, x) => (
-      <CodeDanger data-test-subj="codeDanger">{indexFieldType}</CodeDanger>
+      <EuiCode css={codeDangerCss} data-test-subj="codeDanger">
+        {indexFieldType}
+      </EuiCode>
     ),
     sortable: true,
     truncateText: false,
