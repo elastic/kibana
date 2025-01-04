@@ -14,7 +14,7 @@ const SIZE = 200;
 export function getFileEventsQuery({ endpointIds }: { endpointIds: string[] }): SearchRequest {
   return {
     allow_no_indices: true,
-    fields: ['_id', 'agent.id', 'process.executable'],
+    fields: ['_id', 'agent.id', 'process.executable', 'process.code_signature.signing_id'],
     query: {
       bool: {
         must: [

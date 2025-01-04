@@ -31,58 +31,76 @@ export async function buildIncompatibleAntivirusWorkflowInsights(
   const { insightType, endpointIds, apiConfig } = request.body;
 
   const osEndpointIdsMap = await groupEndpointIdsByOS(endpointIds, endpointMetadataService);
+
   return defendInsights.flatMap((defendInsight: DefendInsight) => {
     const filePaths = Array.from(new Set((defendInsight.events ?? []).map((event) => event.value)));
+    const signatures = Array.from(
+      new Set((defendInsight.events ?? []).map((event) => event.signerId))
+    ).filter(Boolean) as string[];
 
-    return Object.keys(osEndpointIdsMap).flatMap((os) =>
-      filePaths.map((filePath) => ({
-        '@timestamp': currentTime,
-        // TODO add i18n support
-        message: 'Incompatible antiviruses detected',
-        category: Category.Endpoint,
-        type: insightType,
-        source: {
-          type: SourceType.LlmConnector,
-          id: apiConfig.connectorId,
-          // TODO use actual time range when we add support
-          data_range_start: currentTime,
-          data_range_end: currentTime.clone().add(24, 'hours'),
+    const createRemediation = (field: string, value: string, os: string) => ({
+      '@timestamp': currentTime,
+      // TODO add i18n support
+      message: 'Incompatible antiviruses detected',
+      category: Category.Endpoint,
+      type: insightType,
+      source: {
+        type: SourceType.LlmConnector,
+        id: apiConfig.connectorId,
+        // TODO use actual time range when we add support
+        data_range_start: currentTime,
+        data_range_end: currentTime.clone().add(24, 'hours'),
+      },
+      target: {
+        type: TargetType.Endpoint,
+        ids: endpointIds,
+      },
+      action: {
+        type: ActionType.Refreshed,
+        timestamp: currentTime,
+      },
+      value: defendInsight.group,
+      metadata: {
+        notes: {
+          llm_model: apiConfig.model ?? '',
         },
-        target: {
-          type: TargetType.Endpoint,
-          ids: endpointIds,
-        },
-        action: {
-          type: ActionType.Refreshed,
-          timestamp: currentTime,
-        },
-        value: defendInsight.group,
-        remediation: {
-          exception_list_items: [
-            {
-              list_id: ENDPOINT_ARTIFACT_LISTS.trustedApps.id,
-              name: defendInsight.group,
-              description: 'Suggested by Security Workflow Insights',
-              entries: [
-                {
-                  field: 'process.executable.caseless',
-                  operator: 'included',
-                  type: 'match',
-                  value: filePath,
-                },
-              ],
-              // TODO add per policy support
-              tags: ['policy:all'],
-              os_types: [os as SupportedHostOsType],
-            },
-          ],
-        },
-        metadata: {
-          notes: {
-            llm_model: apiConfig.model ?? '',
+      },
+      remediation: {
+        exception_list_items: [
+          {
+            list_id: ENDPOINT_ARTIFACT_LISTS.trustedApps.id,
+            name: defendInsight.group,
+            description: 'Suggested by Security Workflow Insights',
+            entries: [
+              {
+                field,
+                operator: 'included' as const,
+                type: 'match' as const,
+                value,
+              },
+            ],
+            // TODO add per policy support
+            tags: ['policy:all'],
+            os_types: [os as SupportedHostOsType],
           },
-        },
-      }))
-    );
+        ],
+      },
+    });
+
+    return Object.keys(osEndpointIdsMap).flatMap((os) => {
+      if (signatures.length) {
+        return signatures.map((signature) =>
+          createRemediation(
+            os === 'macos' ? 'process.code_signature' : 'process.Ext.code_signature',
+            signature,
+            os
+          )
+        );
+      } else {
+        return filePaths.map((filePath) =>
+          createRemediation('process.executable.caseless', filePath, os)
+        );
+      }
+    });
   });
 }
