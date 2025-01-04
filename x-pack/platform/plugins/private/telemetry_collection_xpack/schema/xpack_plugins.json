@@ -1,88 +1,5 @@
 {
   "properties": {
-    "cloud": {
-      "properties": {
-        "isCloudEnabled": {
-          "type": "boolean",
-          "_meta": {
-            "description": "Is the deployment running in Elastic Cloud (ESS or Serverless)?"
-          }
-        },
-        "trialEndDate": {
-          "type": "date",
-          "_meta": {
-            "description": "End of the trial period"
-          }
-        },
-        "inTrial": {
-          "type": "boolean",
-          "_meta": {
-            "description": "Is the organization during the trial period?"
-          }
-        },
-        "isElasticStaffOwned": {
-          "type": "boolean",
-          "_meta": {
-            "description": "Is the deploymend owned by an Elastician"
-          }
-        },
-        "organizationId": {
-          "type": "keyword",
-          "_meta": {
-            "description": "The Elastic Cloud Organization ID that owns the deployment/project"
-          }
-        },
-        "deploymentId": {
-          "type": "keyword",
-          "_meta": {
-            "description": "The ESS Deployment ID"
-          }
-        },
-        "projectId": {
-          "type": "keyword",
-          "_meta": {
-            "description": "The Serverless Project ID"
-          }
-        },
-        "projectType": {
-          "type": "keyword",
-          "_meta": {
-            "description": "The Serverless Project type"
-          }
-        },
-        "orchestratorTarget": {
-          "type": "keyword",
-          "_meta": {
-            "description": "The Orchestrator Target where it is deployed (canary/non-canary)"
-          }
-        }
-      }
-    },
-    "cloudExperiments": {
-      "properties": {
-        "initialized": {
-          "type": "boolean",
-          "_meta": {
-            "description": "Whether the A/B testing client is correctly initialized (identify has been called)"
-          }
-        },
-        "flags": {
-          "type": "pass_through",
-          "_meta": {
-            "description": "Flags received by the client"
-          }
-        },
-        "flagNames": {
-          "type": "array",
-          "items": {
-            "type": "keyword",
-            "_meta": {
-              "description": "Names of the flags received by the client"
-            }
-          }
-        }
-      }
-    },
     "reporting": {
       "properties": {
         "available": {
@@ -571,24 +488,6 @@
           "type": "long",
           "_meta": {
             "description": "The number of times the \"Disable Legacy URL Aliases\" API has been called."
-          }
-        }
-      }
-    },
-    "upgrade-assistant-telemetry": {
-      "properties": {
-        "features": {
-          "properties": {
-            "deprecation_logging": {
-              "properties": {
-                "enabled": {
-                  "type": "boolean",
-                  "_meta": {
-                    "description": "Whether user has enabled Elasticsearch deprecation logging"
-                  }
-                }
-              }
-            }
           }
         }
       }
