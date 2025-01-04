@@ -6,8 +6,17 @@
  */
 
 import { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
+import { KibanaServerError } from '@kbn/kibana-utils-plugin/common';
+import { schema } from '@kbn/config-schema';
+import { InferenceEndpoint } from '../../../../common';
 import { addBasePath } from '..';
 import { RouteDependencies } from '../../../types';
+import { fetchInferenceServices } from '../../../lib/fetch_inference_services';
+import { addInferenceEndpoint } from '../../../lib/add_inference_endpoint';
+
+function isKibanaServerError(error: any): error is KibanaServerError {
+  return error.statusCode && error.message;
+}
 
 export function registerGetAllRoute({ router, lib: { handleEsError } }: RouteDependencies) {
   // Get all inference models
@@ -39,6 +48,71 @@ export function registerGetAllRoute({ router, lib: { handleEsError } }: RouteDep
         });
       } catch (error) {
         return handleEsError({ error, response });
+      }
+    }
+  );
+
+  router.get(
+    {
+      path: addBasePath('/inference/services'),
+      validate: {},
+    },
+    async (context, request, response) => {
+      try {
+        const providers = fetchInferenceServices();
+
+        return response.ok({
+          body: providers,
+          headers: { 'content-type': 'application/json' },
+        });
+      } catch (error) {
+        if (isKibanaServerError(error)) {
+          return response.customError({ statusCode: error.statusCode, body: error.message });
+        }
+        throw error;
+      }
+    }
+  );
+
+  router.put(
+    {
+      path: addBasePath(`/inference/{taskType}/{inferenceId}`),
+      validate: {
+        params: schema.object({
+          taskType: schema.string(),
+          inferenceId: schema.string(),
+        }),
+        body: schema.object({
+          config: schema.object({
+            inferenceId: schema.string(),
+            provider: schema.string(),
+            taskType: schema.string(),
+            providerConfig: schema.any(),
+          }),
+          secrets: schema.object({
+            providerSecrets: schema.any(),
+          }),
+        }),
+      },
+    },
+    async (context, request, response) => {
+      try {
+        const {
+          client: { asCurrentUser },
+        } = (await context.core).elasticsearch;
+
+        const { config, secrets }: InferenceEndpoint = request.body;
+        const result = await addInferenceEndpoint(asCurrentUser, config, secrets);
+
+        return response.ok({
+          body: result,
+          headers: { 'content-type': 'application/json' },
+        });
+      } catch (error) {
+        if (isKibanaServerError(error)) {
+          return response.customError({ statusCode: error.statusCode, body: error.message });
+        }
+        throw error;
       }
     }
   );
