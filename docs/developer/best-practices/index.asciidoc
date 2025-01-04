@@ -38,7 +38,7 @@ ensure your public facing strings will be translated to ensure all
 {kib} apps are localized.
 
 * Read and adhere to our
-{kib-repo}blob/{branch}/packages/kbn-i18n/GUIDELINE.md[i18n
+{kib-repo}blob/{branch}/src/platform/packages/shared/kbn-i18n/GUIDELINE.md[i18n
 guidelines]
 
 [discrete]
