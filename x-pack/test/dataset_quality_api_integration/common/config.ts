@@ -28,7 +28,6 @@ import {
   InheritedFtrProviderContext,
   InheritedServices,
 } from './ftr_provider_context';
-import { PackageService } from './package_service';
 import { RegistryProvider } from './registry';
 
 export interface DatasetQualityFtrConfig {
@@ -81,7 +80,6 @@ export interface CreateTest {
       context: InheritedFtrProviderContext
     ) => SyntheticsSynthtraceEsClient;
     datasetQualityApiClient: (context: InheritedFtrProviderContext) => DatasetQualityApiClient;
-    packageService: ({ getService }: FtrProviderContext) => ReturnType<typeof PackageService>;
   };
   junit: { reportName: string };
   esTestCluster: any;
@@ -132,7 +130,6 @@ export function createTestConfig(
       servicesRequiredForTestAnalysis: ['datasetQualityFtrConfig', 'registry'],
       services: {
         ...services,
-        packageService: PackageService,
         datasetQualityFtrConfig: () => config,
         registry: RegistryProvider,
         logSynthtraceEsClient: (context: InheritedFtrProviderContext) =>
