@@ -50,7 +50,7 @@ export interface FeaturesPluginSetup {
    * @deprecated
    * @removeBy 8.8.0
    */
-  getKibanaFeatures(params?: Pick<GetKibanaFeaturesParams, 'omitDeprecated'>): KibanaFeature[];
+  getKibanaFeatures(): KibanaFeature[];
 
   /**
    * Calling this function during setup will crash Kibana.
@@ -84,7 +84,7 @@ export interface FeaturesPluginSetup {
 export interface FeaturesPluginStart {
   getElasticsearchFeatures(): ElasticsearchFeature[];
 
-  getKibanaFeatures(): KibanaFeature[];
+  getKibanaFeatures(params?: Pick<GetKibanaFeaturesParams, 'omitDeprecated'>): KibanaFeature[];
 }
 
 /**

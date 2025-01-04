@@ -10,7 +10,7 @@ import type { CoreSetup, Logger } from '@kbn/core/server';
 import type { Space } from '../../../common';
 import { addSpaceIdToPath } from '../../../common';
 import { DEFAULT_SPACE_ID, ENTER_SPACE_PATH } from '../../../common/constants';
-import type { PluginsSetup } from '../../plugin';
+import type { PluginsStart } from '../../plugin';
 import type { SpacesServiceStart } from '../../spaces_service/spaces_service';
 import { wrapError } from '../errors';
 import { getSpaceSelectorUrl } from '../get_space_selector_url';
@@ -18,13 +18,13 @@ import { withSpaceSolutionDisabledFeatures } from '../utils/space_solution_disab
 
 export interface OnPostAuthInterceptorDeps {
   http: CoreSetup['http'];
-  features: PluginsSetup['features'];
+  getFeatures: () => Promise<PluginsStart['features']>;
   getSpacesService: () => SpacesServiceStart;
   log: Logger;
 }
 
 export function initSpacesOnPostAuthRequestInterceptor({
-  features,
+  getFeatures,
   getSpacesService,
   log,
   http,
@@ -109,6 +109,7 @@ export function initSpacesOnPostAuthRequestInterceptor({
       // The spaces client returns migrated feature IDs in `disabledFeatures`, so we need to omit deprecated features.
       // Otherwise apps granted by deprecated features will be considered available when they shouldn't be,
       // since their IDs won't be present in `disabledFeatures`.
+      const features = await getFeatures();
       const allFeatures = features.getKibanaFeatures({ omitDeprecated: true });
       const disabledFeatureKeys = withSpaceSolutionDisabledFeatures(
         allFeatures,
