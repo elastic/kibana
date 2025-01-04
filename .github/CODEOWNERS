@@ -268,7 +268,6 @@ packages/kbn-ts-projects @elastic/kibana-operations
 packages/kbn-ts-type-check-cli @elastic/kibana-operations
 packages/kbn-ui-actions-browser @elastic/appex-sharedux
 packages/kbn-use-tracked-promise @elastic/obs-ux-logs-team
-packages/kbn-user-profile-components @elastic/kibana-security
 packages/kbn-validate-next-docs-cli @elastic/kibana-operations
 packages/kbn-visualization-ui-components @elastic/kibana-visualizations
 packages/kbn-visualization-utils @elastic/kibana-visualizations
@@ -592,6 +591,7 @@ src/platform/packages/shared/kbn-unified-data-table @elastic/kibana-data-discove
 src/platform/packages/shared/kbn-unified-doc-viewer @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-unified-field-list @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-unsaved-changes-prompt @elastic/kibana-management
+src/platform/packages/shared/kbn-user-profile-components @elastic/kibana-security
 src/platform/packages/shared/kbn-utility-types @elastic/kibana-core
 src/platform/packages/shared/kbn-utility-types-jest @elastic/kibana-operations
 src/platform/packages/shared/kbn-utils @elastic/kibana-operations

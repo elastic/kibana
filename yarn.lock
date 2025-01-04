@@ -7849,7 +7849,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/user-profile-components@link:packages/kbn-user-profile-components":
+"@kbn/user-profile-components@link:src/platform/packages/shared/kbn-user-profile-components":
   version "0.0.0"
   uid ""
 
