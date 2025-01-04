@@ -116,7 +116,8 @@
     "@kbn/core-plugins-server",
     "@kbn/config",
     "@kbn/observability-utils-common",
-    "@kbn/charts-theme"
+    "@kbn/charts-theme",
+    "@kbn/response-ops-rule-params"
   ],
   "exclude": ["target/**/*"]
 }
