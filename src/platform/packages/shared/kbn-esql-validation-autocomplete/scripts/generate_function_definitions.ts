@@ -448,6 +448,85 @@ const operatorsMeta: Record<
   },
   mod: { name: '%', isMathOperator: true, isComparisonOperator: false },
   mul: { name: '*', isMathOperator: true, isComparisonOperator: false },
+  like: {
+    name: 'like',
+    isMathOperator: false,
+    isComparisonOperator: false,
+    extraSignatures: [
+      {
+        params: [
+          {
+            name: 'str',
+            type: 'text',
+            optional: false,
+          },
+          {
+            name: 'pattern',
+            type: 'keyword',
+            optional: false,
+          },
+        ],
+        returnType: 'boolean',
+        minParams: 2,
+      },
+      {
+        params: [
+          {
+            name: 'str',
+            type: 'keyword',
+            optional: false,
+          },
+          {
+            name: 'pattern',
+            type: 'text',
+            optional: false,
+          },
+        ],
+        returnType: 'boolean',
+        minParams: 2,
+      },
+    ],
+  },
+
+  rlike: {
+    name: 'rlike',
+    isMathOperator: false,
+    isComparisonOperator: false,
+    extraSignatures: [
+      {
+        params: [
+          {
+            name: 'str',
+            type: 'text',
+            optional: false,
+          },
+          {
+            name: 'pattern',
+            type: 'keyword',
+            optional: false,
+          },
+        ],
+        returnType: 'boolean',
+        minParams: 2,
+      },
+      {
+        params: [
+          {
+            name: 'str',
+            type: 'keyword',
+            optional: false,
+          },
+          {
+            name: 'pattern',
+            type: 'text',
+            optional: false,
+          },
+        ],
+        returnType: 'boolean',
+        minParams: 2,
+      },
+    ],
+  },
 };
 
 const operatorNames: Record<string, string> = {

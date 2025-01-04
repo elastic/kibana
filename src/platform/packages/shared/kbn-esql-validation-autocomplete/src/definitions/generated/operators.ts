@@ -76,6 +76,36 @@ const addDefinition: FunctionDefinition = {
       params: [
         {
           name: 'left',
+          type: 'date_nanos',
+          optional: false,
+        },
+        {
+          name: 'right',
+          type: 'date_period',
+          optional: false,
+        },
+      ],
+      returnType: 'date_nanos',
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'date_nanos',
+          optional: false,
+        },
+        {
+          name: 'right',
+          type: 'time_duration',
+          optional: false,
+        },
+      ],
+      returnType: 'date_nanos',
+    },
+    {
+      params: [
+        {
+          name: 'left',
           type: 'date_period',
           optional: false,
         },
@@ -86,6 +116,21 @@ const addDefinition: FunctionDefinition = {
         },
       ],
       returnType: 'date',
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'date_period',
+          optional: false,
+        },
+        {
+          name: 'right',
+          type: 'date_nanos',
+          optional: false,
+        },
+      ],
+      returnType: 'date_nanos',
     },
     {
       params: [
@@ -251,6 +296,21 @@ const addDefinition: FunctionDefinition = {
         },
       ],
       returnType: 'date',
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'time_duration',
+          optional: false,
+        },
+        {
+          name: 'right',
+          type: 'date_nanos',
+          optional: false,
+        },
+      ],
+      returnType: 'date_nanos',
     },
     {
       params: [
@@ -574,6 +634,51 @@ const equalsDefinition: FunctionDefinition = {
         {
           name: 'right',
           type: 'date',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'date',
+          optional: false,
+        },
+        {
+          name: 'right',
+          type: 'date_nanos',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'date_nanos',
+          optional: false,
+        },
+        {
+          name: 'right',
+          type: 'date',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'date_nanos',
+          optional: false,
+        },
+        {
+          name: 'right',
+          type: 'date_nanos',
           optional: false,
         },
       ],
@@ -983,6 +1088,51 @@ const greaterThanDefinition: FunctionDefinition = {
       params: [
         {
           name: 'left',
+          type: 'date',
+          optional: false,
+        },
+        {
+          name: 'right',
+          type: 'date_nanos',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'date_nanos',
+          optional: false,
+        },
+        {
+          name: 'right',
+          type: 'date',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'date_nanos',
+          optional: false,
+        },
+        {
+          name: 'right',
+          type: 'date_nanos',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'left',
           type: 'double',
           optional: false,
         },
@@ -1306,6 +1456,51 @@ const greaterThanOrEqualDefinition: FunctionDefinition = {
         {
           name: 'right',
           type: 'date',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'date',
+          optional: false,
+        },
+        {
+          name: 'right',
+          type: 'date_nanos',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'date_nanos',
+          optional: false,
+        },
+        {
+          name: 'right',
+          type: 'date',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'date_nanos',
+          optional: false,
+        },
+        {
+          name: 'right',
+          type: 'date_nanos',
           optional: false,
         },
       ],
@@ -1886,6 +2081,51 @@ const lessThanDefinition: FunctionDefinition = {
       params: [
         {
           name: 'left',
+          type: 'date',
+          optional: false,
+        },
+        {
+          name: 'right',
+          type: 'date_nanos',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'date_nanos',
+          optional: false,
+        },
+        {
+          name: 'right',
+          type: 'date',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'date_nanos',
+          optional: false,
+        },
+        {
+          name: 'right',
+          type: 'date_nanos',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'left',
           type: 'double',
           optional: false,
         },
@@ -2218,6 +2458,51 @@ const lessThanOrEqualDefinition: FunctionDefinition = {
       params: [
         {
           name: 'left',
+          type: 'date',
+          optional: false,
+        },
+        {
+          name: 'right',
+          type: 'date_nanos',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'date_nanos',
+          optional: false,
+        },
+        {
+          name: 'right',
+          type: 'date',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'date_nanos',
+          optional: false,
+        },
+        {
+          name: 'right',
+          type: 'date_nanos',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'left',
           type: 'double',
           optional: false,
         },
@@ -2492,22 +2777,6 @@ const likeDefinition: FunctionDefinition = {
       params: [
         {
           name: 'str',
-          type: 'keyword',
-          optional: false,
-        },
-        {
-          name: 'pattern',
-          type: 'text',
-          optional: false,
-        },
-      ],
-      returnType: 'boolean',
-      minParams: 2,
-    },
-    {
-      params: [
-        {
-          name: 'str',
           type: 'text',
           optional: false,
         },
@@ -2530,6 +2799,22 @@ const likeDefinition: FunctionDefinition = {
         {
           name: 'pattern',
           type: 'keyword',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
+      minParams: 2,
+    },
+    {
+      params: [
+        {
+          name: 'str',
+          type: 'keyword',
+          optional: false,
+        },
+        {
+          name: 'pattern',
+          type: 'text',
           optional: false,
         },
       ],
@@ -2541,6 +2826,461 @@ const likeDefinition: FunctionDefinition = {
   supportedOptions: undefined,
   validate: undefined,
   examples: ['FROM employees\n| WHERE first_name LIKE """?b*"""\n| KEEP first_name, last_name'],
+};
+
+// Do not edit this manually... generated by scripts/generate_function_definitions.ts
+const matchOperatorDefinition: FunctionDefinition = {
+  type: 'builtin',
+  name: 'match_operator',
+  description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.match_operator', {
+    defaultMessage:
+      'Performs a match query on the specified field. Returns true if the provided query matches the row.',
+  }),
+  preview: true,
+  alias: undefined,
+  signatures: [
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'boolean',
+          optional: false,
+        },
+        {
+          name: 'query',
+          type: 'boolean',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'boolean',
+          optional: false,
+        },
+        {
+          name: 'query',
+          type: 'keyword',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'date',
+          optional: false,
+        },
+        {
+          name: 'query',
+          type: 'date',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'date',
+          optional: false,
+        },
+        {
+          name: 'query',
+          type: 'keyword',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'date_nanos',
+          optional: false,
+        },
+        {
+          name: 'query',
+          type: 'date_nanos',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'date_nanos',
+          optional: false,
+        },
+        {
+          name: 'query',
+          type: 'keyword',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'double',
+          optional: false,
+        },
+        {
+          name: 'query',
+          type: 'double',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'double',
+          optional: false,
+        },
+        {
+          name: 'query',
+          type: 'integer',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'double',
+          optional: false,
+        },
+        {
+          name: 'query',
+          type: 'keyword',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'double',
+          optional: false,
+        },
+        {
+          name: 'query',
+          type: 'long',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'integer',
+          optional: false,
+        },
+        {
+          name: 'query',
+          type: 'double',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'integer',
+          optional: false,
+        },
+        {
+          name: 'query',
+          type: 'integer',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'integer',
+          optional: false,
+        },
+        {
+          name: 'query',
+          type: 'keyword',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'integer',
+          optional: false,
+        },
+        {
+          name: 'query',
+          type: 'long',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'ip',
+          optional: false,
+        },
+        {
+          name: 'query',
+          type: 'ip',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'ip',
+          optional: false,
+        },
+        {
+          name: 'query',
+          type: 'keyword',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'keyword',
+          optional: false,
+        },
+        {
+          name: 'query',
+          type: 'keyword',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'long',
+          optional: false,
+        },
+        {
+          name: 'query',
+          type: 'double',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'long',
+          optional: false,
+        },
+        {
+          name: 'query',
+          type: 'integer',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'long',
+          optional: false,
+        },
+        {
+          name: 'query',
+          type: 'keyword',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'long',
+          optional: false,
+        },
+        {
+          name: 'query',
+          type: 'long',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'text',
+          optional: false,
+        },
+        {
+          name: 'query',
+          type: 'keyword',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'unsigned_long',
+          optional: false,
+        },
+        {
+          name: 'query',
+          type: 'double',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'unsigned_long',
+          optional: false,
+        },
+        {
+          name: 'query',
+          type: 'integer',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'unsigned_long',
+          optional: false,
+        },
+        {
+          name: 'query',
+          type: 'keyword',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'unsigned_long',
+          optional: false,
+        },
+        {
+          name: 'query',
+          type: 'long',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'unsigned_long',
+          optional: false,
+        },
+        {
+          name: 'query',
+          type: 'unsigned_long',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'version',
+          optional: false,
+        },
+        {
+          name: 'query',
+          type: 'keyword',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'version',
+          optional: false,
+        },
+        {
+          name: 'query',
+          type: 'version',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
+    },
+  ],
+  supportedCommands: ['stats', 'inlinestats', 'metrics'],
+  supportedOptions: undefined,
+  validate: undefined,
+  examples: [
+    'FROM books \n| WHERE MATCH(author, "Faulkner")\n| KEEP book_no, author \n| SORT book_no \n| LIMIT 5;',
+  ],
 };
 
 // Do not edit this manually... generated by scripts/generate_function_definitions.ts
@@ -3037,6 +3777,51 @@ const notEqualsDefinition: FunctionDefinition = {
         {
           name: 'right',
           type: 'date',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'date',
+          optional: false,
+        },
+        {
+          name: 'right',
+          type: 'date_nanos',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'date_nanos',
+          optional: false,
+        },
+        {
+          name: 'right',
+          type: 'date',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'date_nanos',
+          optional: false,
+        },
+        {
+          name: 'right',
+          type: 'date_nanos',
           optional: false,
         },
       ],
@@ -3545,6 +4330,51 @@ const subDefinition: FunctionDefinition = {
       params: [
         {
           name: 'left',
+          type: 'date_nanos',
+          optional: false,
+        },
+        {
+          name: 'right',
+          type: 'date_period',
+          optional: false,
+        },
+      ],
+      returnType: 'date_nanos',
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'date_nanos',
+          optional: false,
+        },
+        {
+          name: 'right',
+          type: 'time_duration',
+          optional: false,
+        },
+      ],
+      returnType: 'date_nanos',
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'date_period',
+          optional: false,
+        },
+        {
+          name: 'right',
+          type: 'date_nanos',
+          optional: false,
+        },
+      ],
+      returnType: 'date_nanos',
+    },
+    {
+      params: [
+        {
+          name: 'left',
           type: 'date_period',
           optional: false,
         },
@@ -3700,6 +4530,21 @@ const subDefinition: FunctionDefinition = {
         },
         {
           name: 'right',
+          type: 'date_nanos',
+          optional: false,
+        },
+      ],
+      returnType: 'date_nanos',
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'time_duration',
+          optional: false,
+        },
+        {
+          name: 'right',
           type: 'time_duration',
           optional: false,
         },
@@ -3763,6 +4608,7 @@ export const operatorsFunctionDefinitions = [
   lessThanDefinition,
   lessThanOrEqualDefinition,
   likeDefinition,
+  matchOperatorDefinition,
   modDefinition,
   mulDefinition,
   negDefinition,

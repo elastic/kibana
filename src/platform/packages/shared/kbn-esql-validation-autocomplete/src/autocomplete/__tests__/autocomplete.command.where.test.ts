@@ -73,8 +73,8 @@ describe('WHERE <expression>', () => {
       const expectedComparisonWithDateSuggestions = [
         ...getDateLiterals(),
         ...getFieldNamesByType(['date']),
-        // all functions compatible with a keywordField type
-        ...getFunctionSignaturesByReturnType('where', ['date'], { scalar: true }),
+        ...getFieldNamesByType(['date_nanos']),
+        ...getFunctionSignaturesByReturnType('where', ['date', 'date_nanos'], { scalar: true }),
       ];
       await assertSuggestions(
         'from a | where dateField == /',
