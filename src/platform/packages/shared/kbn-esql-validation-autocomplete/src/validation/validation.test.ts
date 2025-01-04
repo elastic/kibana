@@ -374,28 +374,7 @@ describe('validation logic', () => {
         }
       }
 
-      for (const op of ['>', '>=', '<', '<=']) {
-        testErrorsAndWarnings(`row var = 5 ${op} 0`, []);
-        testErrorsAndWarnings(`row var = NOT 5 ${op} 0`, []);
-        testErrorsAndWarnings(`row var = (doubleField ${op} 0)`, ['Unknown column [doubleField]']);
-        testErrorsAndWarnings(`row var = (NOT (5 ${op} 0))`, []);
-        testErrorsAndWarnings(`row var = to_ip("127.0.0.1") ${op} to_ip("127.0.0.1")`, []);
-        testErrorsAndWarnings(`row var = now() ${op} now()`, []);
-        testErrorsAndWarnings(
-          `row var = false ${op} false`,
-          ['==', '!='].includes(op)
-            ? []
-            : [
-                `Argument of [${op}] must be [date], found value [false] type [boolean]`,
-                `Argument of [${op}] must be [date], found value [false] type [boolean]`,
-              ]
-        );
-        for (const [valueTypeA, valueTypeB] of [['now()', '"2022"']]) {
-          testErrorsAndWarnings(`row var = ${valueTypeA} ${op} ${valueTypeB}`, []);
-          testErrorsAndWarnings(`row var = ${valueTypeB} ${op} ${valueTypeA}`, []);
-        }
-      }
-      for (const op of ['==', '!=']) {
+      for (const op of ['>', '>=', '<', '<=', '==', '!=']) {
         testErrorsAndWarnings(`row var = 5 ${op} 0`, []);
         testErrorsAndWarnings(`row var = NOT 5 ${op} 0`, []);
         testErrorsAndWarnings(`row var = (doubleField ${op} 0)`, ['Unknown column [doubleField]']);

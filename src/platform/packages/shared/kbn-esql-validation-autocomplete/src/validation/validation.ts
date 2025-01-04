@@ -616,9 +616,6 @@ function validateFunction({
   let relevantFuncSignatures = matchingSignatures;
   const enrichedArgs = fn.args;
 
-  // console.log('fn', fn);
-  // // @TODO: remove
-  // console.log(`--@@fn.args`, fn.args);
   if (fn.name === 'in') {
     for (let argIndex = 1; argIndex < fn.args.length; argIndex++) {
       relevantFuncSignatures = fnDefinition.signatures.filter(
@@ -631,16 +628,12 @@ function validateFunction({
             );
           })
       );
-      // @TODO: remove
-      // console.log(`--@@relevantFuncSignatures`, relevantFuncSignatures);
     }
   }
   // Retrieve unique of types that are compatiable for the current arg
   // const typesToSuggestNext = getCompatibleTypesToSuggestNext(fnDefinition, enrichedArgs, argIndex);
 
   for (const signature of relevantFuncSignatures) {
-    // @TODO: remove
-    // console.log(`--@@signature`,signature );
     const failingSignature: ESQLMessage[] = [];
     fn.args.forEach((outerArg, index) => {
       const argDef = getParamAtPosition(signature, index);
@@ -694,8 +687,6 @@ function validateFunction({
       failingSignatures.push(failingSignature);
     }
   }
-  // @TODO: remove
-  // console.log(`--@@failingSignatures`, failingSignatures);
 
   if (failingSignatures.length && failingSignatures.length === relevantFuncSignatures.length) {
     const failingSignatureOrderedByErrorCount = failingSignatures
@@ -704,8 +695,6 @@ function validateFunction({
     const indexForShortestFailingsignature = failingSignatureOrderedByErrorCount[0].index;
     messages.push(...failingSignatures[indexForShortestFailingsignature]);
   }
-  // @TODO: remove
-  // console.log(uniqBy(messages, ({ location }) => `${location.min}-${location.max}`));
   // This is due to a special case in enrich where an implicit assignment is possible
   // so the AST needs to store an explicit "columnX = columnX" which duplicates the message
   return uniqBy(messages, ({ location }) => `${location.min}-${location.max}`);
@@ -1401,9 +1390,6 @@ async function validateAst(
     const commandMessages = validateCommand(command, references, ast, index);
     messages.push(...commandMessages);
   }
-  // @TODO: remove
-  // console.log(`--@@parsingResult.errors`, parsingResult.errors);
-  // console.log(`--@@messages`, messages);
 
   return {
     errors: [...parsingResult.errors, ...messages.filter(({ type }) => type === 'error')],

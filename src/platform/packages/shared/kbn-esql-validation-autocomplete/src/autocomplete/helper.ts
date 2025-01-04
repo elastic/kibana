@@ -120,7 +120,6 @@ export function getSupportedTypesForBinaryOperators(
   // Retrieve list of all 'right' supported types that match the left hand side of the function
   return fnDef && Array.isArray(fnDef?.signatures)
     ? fnDef.signatures
-        // @todo: add 'field'
         .filter(({ params }) =>
           params.find((p) => leftHandSideParamName.has(p.name) && p.type === previousType)
         )
@@ -137,8 +136,6 @@ export function getValidFunctionSignaturesForPreviousArgs(
   >,
   argIndex: number
 ) {
-  // @TODO: remove
-  // console.log(`--@@enrichedArgs`, enrichedArgs, 'argIndex', argIndex);
   // Filter down to signatures that match every params up to the current argIndex
   // e.g. BUCKET(longField, /) => all signatures with first param as long column type
   // or BUCKET(longField, 2, /) => all signatures with (longField, integer, ...)
