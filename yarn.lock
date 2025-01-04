@@ -5181,7 +5181,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/crypto@link:packages/kbn-crypto":
+"@kbn/crypto@link:src/platform/packages/shared/kbn-crypto":
   version "0.0.0"
   uid ""
 
