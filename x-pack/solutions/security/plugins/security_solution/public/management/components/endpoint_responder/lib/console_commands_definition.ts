@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { CustomScriptSelector } from '../../console_argument_selectors/custom_script_selector';
 import { RunScriptActionResult } from '../command_render_components/run_script_action';
 import type { CommandArgDefinition } from '../../console/types';
 import { isAgentTypeAndActionSupported } from '../../../../common/lib/endpoint';
@@ -558,6 +559,7 @@ export const getEndpointConsoleCommands = ({
           about: CROWDSTRIKE_CONSOLE_COMMANDS.runscript.args.cloudFile.about,
           mustHaveValue: 'non-empty-string',
           exclusiveOr: true,
+          SelectorComponent: CustomScriptSelector,
         },
         CommandLine: {
           required: false,
