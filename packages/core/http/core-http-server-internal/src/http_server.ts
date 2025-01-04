@@ -37,6 +37,7 @@ import type {
   IAuthHeadersStorage,
   RouterDeprecatedApiDetails,
   RouteMethod,
+  VersionedRouterRoute,
 } from '@kbn/core-http-server';
 import { performance } from 'perf_hooks';
 import { isBoom } from '@hapi/boom';
@@ -410,10 +411,12 @@ export class HttpServer {
           .map((route) => {
             const access = route.options.access;
             if (route.isVersioned === true) {
-              return [...route.handlers.entries()].map(([_, { options }]) => {
-                const deprecated = options.options?.deprecated;
-                return { route, version: `${options.version}`, deprecated, access };
-              });
+              return [...(route as VersionedRouterRoute).handlers.entries()].map(
+                ([_, { options }]) => {
+                  const deprecated = options.options?.deprecated;
+                  return { route, version: `${options.version}`, deprecated, access };
+                }
+              );
             }
 
             return { route, version: undefined, deprecated: route.options.deprecated, access };

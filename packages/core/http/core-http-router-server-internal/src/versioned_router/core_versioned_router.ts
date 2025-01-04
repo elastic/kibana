@@ -14,13 +14,16 @@ import type {
   VersionedRouterRoute,
 } from '@kbn/core-http-server';
 import { omit } from 'lodash';
+import { Logger } from '@kbn/logging';
 import { CoreVersionedRoute } from './core_versioned_route';
 import type { HandlerResolutionStrategy, Method } from './types';
-import { getRouteFullPath, type Router } from '../router';
+import type { Router } from '../router';
+import { getRouteFullPath } from '../util';
 
 /** @internal */
 export interface VersionedRouterArgs {
   router: Router;
+  log: Logger;
   /**
    * Which route resolution algo to use.
    * @note default to "oldest", but when running in dev default to "none"
@@ -52,12 +55,14 @@ export class CoreVersionedRouter implements VersionedRouter {
   public pluginId?: symbol;
   public static from({
     router,
+    log,
     defaultHandlerResolutionStrategy,
     isDev,
     useVersionResolutionStrategyForInternalPaths,
   }: VersionedRouterArgs) {
     return new CoreVersionedRouter(
       router,
+      log,
       defaultHandlerResolutionStrategy,
       isDev,
       useVersionResolutionStrategyForInternalPaths
@@ -65,6 +70,7 @@ export class CoreVersionedRouter implements VersionedRouter {
   }
   private constructor(
     public readonly router: Router,
+    private readonly log: Logger,
     public readonly defaultHandlerResolutionStrategy: HandlerResolutionStrategy = 'oldest',
     public readonly isDev: boolean = false,
     useVersionResolutionStrategyForInternalPaths: string[] = []
@@ -80,6 +86,7 @@ export class CoreVersionedRouter implements VersionedRouter {
     (options: VersionedRouteConfig<Method>): VersionedRoute<Method, any> => {
       const route = CoreVersionedRoute.from({
         router: this.router,
+        log: this.log,
         method: routeMethod,
         path: options.path,
         options: {
