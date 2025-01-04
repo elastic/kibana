@@ -5,28 +5,13 @@
  * 2.0.
  */
 
-import {
-  isDissectProcessor,
-  isGrokProcessor,
-  ProcessingDefinition,
-  StreamDefinition,
-} from '@kbn/streams-schema';
+import { getProcessorType, StreamDefinition } from '@kbn/streams-schema';
 import { get } from 'lodash';
 import { ASSET_VERSION } from '../../../../common/constants';
 import { conditionToPainless } from '../helpers/condition_to_painless';
 import { logsDefaultPipelineProcessors } from './logs_default_pipeline';
 import { isRoot } from '../helpers/hierarchy';
 import { getProcessingPipelineName } from './name';
-
-function getProcessorType(processor: ProcessingDefinition) {
-  if (isGrokProcessor(processor.config)) {
-    return 'grok';
-  }
-  if (isDissectProcessor(processor.config)) {
-    return 'dissect';
-  }
-  throw new Error('Unknown processor type');
-}
 
 function generateProcessingSteps(definition: StreamDefinition) {
   return definition.stream.ingest.processing.map((processor) => {

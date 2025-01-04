@@ -38,5 +38,6 @@
     "@kbn/navigation-plugin",
     "@kbn/core-notifications-browser",
     "@kbn/streams-schema",
+    "@kbn/react-hooks"
   ]
 }

@@ -9,9 +9,9 @@ import { z } from '@kbn/zod';
 import { wiredStreamDefinitonSchema } from './wired_stream';
 import { ingestStreamDefinitonSchema } from './ingest_stream';
 
-export const streamDefintionSchema = z.union([
+export const streamDefinitionSchema = z.union([
   wiredStreamDefinitonSchema,
   ingestStreamDefinitonSchema,
 ]);
 
-export type StreamDefinition = z.infer<typeof streamDefintionSchema>;
+export type StreamDefinition = z.infer<typeof streamDefinitionSchema>;

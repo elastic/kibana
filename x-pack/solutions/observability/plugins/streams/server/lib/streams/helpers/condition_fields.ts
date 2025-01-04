@@ -13,19 +13,6 @@ import {
   isOrCondition,
 } from '@kbn/streams-schema';
 
-export function isComplete(condition: Condition): boolean {
-  if (isFilterCondition(condition)) {
-    return condition.field !== undefined && condition.field !== '';
-  }
-  if (isAndCondition(condition)) {
-    return condition.and.every(isComplete);
-  }
-  if (isOrCondition(condition)) {
-    return condition.or.every(isComplete);
-  }
-  return false;
-}
-
 export function getFields(
   condition: Condition
 ): Array<{ name: string; type: 'number' | 'string' }> {
