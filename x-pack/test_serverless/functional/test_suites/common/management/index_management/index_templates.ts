@@ -117,10 +117,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         // Click form summary step and then the submit button
         await testSubjects.click('formWizardStep-5');
+        await pageObjects.header.waitUntilLoadingHasFinished();
         expect(await testSubjects.getVisibleText('indexModeValue')).to.be('LogsDB');
 
         // Click update template
         await pageObjects.indexManagement.clickNextButton();
+        await pageObjects.header.waitUntilLoadingHasFinished();
 
         // Close detail tab
         expect(await testSubjects.getVisibleText('indexModeValue')).to.be('LogsDB');
