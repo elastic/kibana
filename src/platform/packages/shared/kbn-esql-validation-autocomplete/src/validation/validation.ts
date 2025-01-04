@@ -616,9 +616,9 @@ function validateFunction({
   let relevantFuncSignatures = matchingSignatures;
   const enrichedArgs = fn.args;
 
-  console.log('fn', fn);
-  // @TODO: remove
-  console.log(`--@@fn.args`, fn.args);
+  // console.log('fn', fn);
+  // // @TODO: remove
+  // console.log(`--@@fn.args`, fn.args);
   if (fn.name === 'in') {
     for (let argIndex = 1; argIndex < fn.args.length; argIndex++) {
       relevantFuncSignatures = fnDefinition.signatures.filter(
@@ -632,7 +632,7 @@ function validateFunction({
           })
       );
       // @TODO: remove
-      console.log(`--@@relevantFuncSignatures`, relevantFuncSignatures);
+      // console.log(`--@@relevantFuncSignatures`, relevantFuncSignatures);
     }
   }
   // Retrieve unique of types that are compatiable for the current arg
@@ -695,7 +695,7 @@ function validateFunction({
     }
   }
   // @TODO: remove
-  console.log(`--@@failingSignatures`, failingSignatures);
+  // console.log(`--@@failingSignatures`, failingSignatures);
 
   if (failingSignatures.length && failingSignatures.length === relevantFuncSignatures.length) {
     const failingSignatureOrderedByErrorCount = failingSignatures
@@ -705,7 +705,7 @@ function validateFunction({
     messages.push(...failingSignatures[indexForShortestFailingsignature]);
   }
   // @TODO: remove
-  console.log(uniqBy(messages, ({ location }) => `${location.min}-${location.max}`));
+  // console.log(uniqBy(messages, ({ location }) => `${location.min}-${location.max}`));
   // This is due to a special case in enrich where an implicit assignment is possible
   // so the AST needs to store an explicit "columnX = columnX" which duplicates the message
   return uniqBy(messages, ({ location }) => `${location.min}-${location.max}`);
@@ -1402,8 +1402,8 @@ async function validateAst(
     messages.push(...commandMessages);
   }
   // @TODO: remove
-  console.log(`--@@parsingResult.errors`, parsingResult.errors);
-  console.log(`--@@messages`, messages);
+  // console.log(`--@@parsingResult.errors`, parsingResult.errors);
+  // console.log(`--@@messages`, messages);
 
   return {
     errors: [...parsingResult.errors, ...messages.filter(({ type }) => type === 'error')],

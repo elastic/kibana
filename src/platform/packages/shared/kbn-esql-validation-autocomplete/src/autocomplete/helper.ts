@@ -138,7 +138,7 @@ export function getValidFunctionSignaturesForPreviousArgs(
   argIndex: number
 ) {
   // @TODO: remove
-  console.log(`--@@enrichedArgs`, enrichedArgs, 'argIndex', argIndex);
+  // console.log(`--@@enrichedArgs`, enrichedArgs, 'argIndex', argIndex);
   // Filter down to signatures that match every params up to the current argIndex
   // e.g. BUCKET(longField, /) => all signatures with first param as long column type
   // or BUCKET(longField, 2, /) => all signatures with (longField, integer, ...)

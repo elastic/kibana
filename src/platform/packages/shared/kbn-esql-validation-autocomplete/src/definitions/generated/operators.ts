@@ -2492,12 +2492,44 @@ const likeDefinition: FunctionDefinition = {
       params: [
         {
           name: 'str',
+          type: 'keyword',
+          optional: false,
+        },
+        {
+          name: 'pattern',
+          type: 'text',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
+      minParams: 2,
+    },
+    {
+      params: [
+        {
+          name: 'str',
           type: 'text',
           optional: false,
         },
         {
           name: 'pattern',
           type: 'text',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
+      minParams: 2,
+    },
+    {
+      params: [
+        {
+          name: 'str',
+          type: 'text',
+          optional: false,
+        },
+        {
+          name: 'pattern',
+          type: 'keyword',
           optional: false,
         },
       ],
@@ -3416,6 +3448,38 @@ const rlikeDefinition: FunctionDefinition = {
         {
           name: 'str',
           type: 'text',
+          optional: false,
+        },
+        {
+          name: 'pattern',
+          type: 'text',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
+      minParams: 2,
+    },
+    {
+      params: [
+        {
+          name: 'str',
+          type: 'text',
+          optional: false,
+        },
+        {
+          name: 'pattern',
+          type: 'keyword',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
+      minParams: 2,
+    },
+    {
+      params: [
+        {
+          name: 'str',
+          type: 'keyword',
           optional: false,
         },
         {

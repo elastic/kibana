@@ -336,7 +336,7 @@ describe('validation logic', () => {
       ]);
       testErrorsAndWarnings('row var = 1 in (', [
         "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', '(', 'null', '?', 'true', '+', '-', NAMED_OR_POSITIONAL_PARAM, OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}",
-        'Error: [in] function expects exactly 2 arguments, got 1.',
+        'Error: [in] function expects at least 2 arguments, got 1.',
       ]);
       testErrorsAndWarnings('row var = 1 not in ', [
         "SyntaxError: mismatched input '<EOF>' expecting '('",
@@ -349,10 +349,14 @@ describe('validation logic', () => {
       testErrorsAndWarnings('row var = "a" in ("a", "b", "c")', []);
       testErrorsAndWarnings('row var = "a" not in ("a", "b", "c")', []);
       testErrorsAndWarnings('row var = 1 in ("a", "b", "c")', [
-        // 'Argument of [in] must be [number[]], found value [("a", "b", "c")] type [(string, string, string)]',
+        'Argument of [in] must be [integer], found value ["a"] type [keyword]',
+        'Argument of [in] must be [integer], found value ["b"] type [keyword]',
+        'Argument of [in] must be [integer], found value ["c"] type [keyword]',
       ]);
       testErrorsAndWarnings('row var = 5 in ("a", "b", "c")', [
-        // 'Argument of [in] must be [number[]], found value [("a", "b", "c")] type [(string, string, string)]',
+        'Argument of [in] must be [integer], found value ["a"] type [keyword]',
+        'Argument of [in] must be [integer], found value ["b"] type [keyword]',
+        'Argument of [in] must be [integer], found value ["c"] type [keyword]',
       ]);
       testErrorsAndWarnings('row var = 5 not in ("a", "b", "c")', [
         // 'Argument of [not_in] must be [number[]], found value [("a", "b", "c")] type [(string, string, string)]',
@@ -370,7 +374,7 @@ describe('validation logic', () => {
         }
       }
 
-      for (const op of ['>', '>=', '<', '<=', '==', '!=']) {
+      for (const op of ['>', '>=', '<', '<=']) {
         testErrorsAndWarnings(`row var = 5 ${op} 0`, []);
         testErrorsAndWarnings(`row var = NOT 5 ${op} 0`, []);
         testErrorsAndWarnings(`row var = (doubleField ${op} 0)`, ['Unknown column [doubleField]']);
@@ -391,6 +395,28 @@ describe('validation logic', () => {
           testErrorsAndWarnings(`row var = ${valueTypeB} ${op} ${valueTypeA}`, []);
         }
       }
+      for (const op of ['==', '!=']) {
+        testErrorsAndWarnings(`row var = 5 ${op} 0`, []);
+        testErrorsAndWarnings(`row var = NOT 5 ${op} 0`, []);
+        testErrorsAndWarnings(`row var = (doubleField ${op} 0)`, ['Unknown column [doubleField]']);
+        testErrorsAndWarnings(`row var = (NOT (5 ${op} 0))`, []);
+        testErrorsAndWarnings(`row var = to_ip("127.0.0.1") ${op} to_ip("127.0.0.1")`, []);
+        testErrorsAndWarnings(`row var = now() ${op} now()`, []);
+        testErrorsAndWarnings(
+          `row var = false ${op} false`,
+          ['==', '!='].includes(op)
+            ? []
+            : [
+                `Argument of [${op}] must be [date], found value [false] type [boolean]`,
+                `Argument of [${op}] must be [date], found value [false] type [boolean]`,
+              ]
+        );
+        for (const [valueTypeA, valueTypeB] of [['now()', '"2022"']]) {
+          testErrorsAndWarnings(`row var = ${valueTypeA} ${op} ${valueTypeB}`, []);
+          testErrorsAndWarnings(`row var = ${valueTypeB} ${op} ${valueTypeA}`, []);
+        }
+      }
+
       for (const op of ['+', '-', '*', '/', '%']) {
         testErrorsAndWarnings(`row var = 1 ${op} 1`, []);
         testErrorsAndWarnings(`row var = (5 ${op} 1)`, []);
@@ -411,13 +437,13 @@ describe('validation logic', () => {
         testErrorsAndWarnings(`row var = NOT "a" ${op} "?a"`, []);
         testErrorsAndWarnings(`row var = NOT "a" NOT ${op} "?a"`, []);
         testErrorsAndWarnings(`row var = 5 ${op} "?a"`, [
-          `Argument of [${op}] must be [text], found value [5] type [integer]`,
+          `Argument of [${op}] must be [keyword], found value [5] type [integer]`,
         ]);
         testErrorsAndWarnings(`row var = 5 NOT ${op} "?a"`, [
           `Argument of [not_${op}] must be [text], found value [5] type [integer]`,
         ]);
         testErrorsAndWarnings(`row var = NOT 5 ${op} "?a"`, [
-          `Argument of [${op}] must be [text], found value [5] type [integer]`,
+          `Argument of [${op}] must be [keyword], found value [5] type [integer]`,
         ]);
         testErrorsAndWarnings(`row var = NOT 5 NOT ${op} "?a"`, [
           `Argument of [not_${op}] must be [text], found value [5] type [integer]`,
@@ -858,13 +884,13 @@ describe('validation logic', () => {
         testErrorsAndWarnings(`from a_index | where NOT textField ${op} "?a"`, []);
         testErrorsAndWarnings(`from a_index | where NOT textField NOT ${op} "?a"`, []);
         testErrorsAndWarnings(`from a_index | where doubleField ${op} "?a"`, [
-          `Argument of [${op}] must be [text], found value [doubleField] type [double]`,
+          `Argument of [${op}] must be [keyword], found value [doubleField] type [double]`,
         ]);
         testErrorsAndWarnings(`from a_index | where doubleField NOT ${op} "?a"`, [
           `Argument of [not_${op}] must be [text], found value [doubleField] type [double]`,
         ]);
         testErrorsAndWarnings(`from a_index | where NOT doubleField ${op} "?a"`, [
-          `Argument of [${op}] must be [text], found value [doubleField] type [double]`,
+          `Argument of [${op}] must be [keyword], found value [doubleField] type [double]`,
         ]);
         testErrorsAndWarnings(`from a_index | where NOT doubleField NOT ${op} "?a"`, [
           `Argument of [not_${op}] must be [text], found value [doubleField] type [double]`,
@@ -1052,7 +1078,9 @@ describe('validation logic', () => {
           `Argument of [${op}] must be [double], found value [keywordField] type [keyword]`,
         ]);
         testErrorsAndWarnings(`from a_index | eval doubleField ${op} "2022"`, [
-          `Argument of [${op}] must be [date], found value [doubleField] type [double]`,
+          op === '==' || op === '!='
+            ? `Argument of [${op}] must be [boolean], found value [doubleField] type [double]`
+            : `Argument of [${op}] must be [date], found value [doubleField] type [double]`,
         ]);
 
         testErrorsAndWarnings(`from a_index | eval dateField ${op} keywordField`, [
@@ -1131,7 +1159,7 @@ describe('validation logic', () => {
         testErrorsAndWarnings(
           `from a_index | eval "1" ${op} 1`,
           ['+', '-'].includes(op)
-            ? [`Argument of [${op}] must be [date], found value [1] type [integer]`]
+            ? [`Argument of [${op}] must be [date_period], found value [1] type [integer]`]
             : [`Argument of [${op}] must be [double], found value [\"1\"] type [keyword]`]
         );
         // TODO: enable when https://github.com/elastic/elasticsearch/issues/108432 is complete
@@ -1157,13 +1185,13 @@ describe('validation logic', () => {
         testErrorsAndWarnings(`from a_index | eval NOT textField ${op} "?a"`, []);
         testErrorsAndWarnings(`from a_index | eval NOT textField NOT ${op} "?a"`, []);
         testErrorsAndWarnings(`from a_index | eval doubleField ${op} "?a"`, [
-          `Argument of [${op}] must be [text], found value [doubleField] type [double]`,
+          `Argument of [${op}] must be [keyword], found value [doubleField] type [double]`,
         ]);
         testErrorsAndWarnings(`from a_index | eval doubleField NOT ${op} "?a"`, [
           `Argument of [not_${op}] must be [text], found value [doubleField] type [double]`,
         ]);
         testErrorsAndWarnings(`from a_index | eval NOT doubleField ${op} "?a"`, [
-          `Argument of [${op}] must be [text], found value [doubleField] type [double]`,
+          `Argument of [${op}] must be [keyword], found value [doubleField] type [double]`,
         ]);
         testErrorsAndWarnings(`from a_index | eval NOT doubleField NOT ${op} "?a"`, [
           `Argument of [not_${op}] must be [text], found value [doubleField] type [double]`,
@@ -1180,7 +1208,9 @@ describe('validation logic', () => {
       testErrorsAndWarnings('from a_index | eval textField not in ("a", "b", "c")', []);
       testErrorsAndWarnings('from a_index | eval textField not in ("a", "b", "c", textField)', []);
       testErrorsAndWarnings('from a_index | eval 1 in ("a", "b", "c")', [
-        // 'Argument of [in] must be [number[]], found value [("a", "b", "c")] type [(string, string, string)]',
+        'Argument of [in] must be [integer], found value ["a"] type [keyword]',
+        'Argument of [in] must be [integer], found value ["b"] type [keyword]',
+        'Argument of [in] must be [integer], found value ["c"] type [keyword]',
       ]);
       testErrorsAndWarnings('from a_index | eval doubleField in ("a", "b", "c")', [
         // 'Argument of [in] must be [number[]], found value [("a", "b", "c")] type [(string, string, string)]',

@@ -336,7 +336,7 @@
       "query": "row var = 1 in (",
       "error": [
         "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', '(', 'null', '?', 'true', '+', '-', NAMED_OR_POSITIONAL_PARAM, OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}",
-        "Error: [in] function expects exactly 2 arguments, got 1."
+        "Error: [in] function expects at least 2 arguments, got 1."
       ],
       "warning": []
     },
@@ -384,12 +384,20 @@
     },
     {
       "query": "row var = 1 in (\"a\", \"b\", \"c\")",
-      "error": [],
+      "error": [
+        "Argument of [in] must be [integer], found value [\"a\"] type [keyword]",
+        "Argument of [in] must be [integer], found value [\"b\"] type [keyword]",
+        "Argument of [in] must be [integer], found value [\"c\"] type [keyword]"
+      ],
       "warning": []
     },
     {
       "query": "row var = 5 in (\"a\", \"b\", \"c\")",
-      "error": [],
+      "error": [
+        "Argument of [in] must be [integer], found value [\"a\"] type [keyword]",
+        "Argument of [in] must be [integer], found value [\"b\"] type [keyword]",
+        "Argument of [in] must be [integer], found value [\"c\"] type [keyword]"
+      ],
       "warning": []
     },
     {
@@ -847,7 +855,7 @@
     {
       "query": "row var = 5 like \"?a\"",
       "error": [
-        "Argument of [like] must be [text], found value [5] type [integer]"
+        "Argument of [like] must be [keyword], found value [5] type [integer]"
       ],
       "warning": []
     },
@@ -861,7 +869,7 @@
     {
       "query": "row var = NOT 5 like \"?a\"",
       "error": [
-        "Argument of [like] must be [text], found value [5] type [integer]"
+        "Argument of [like] must be [keyword], found value [5] type [integer]"
       ],
       "warning": []
     },
@@ -895,7 +903,7 @@
     {
       "query": "row var = 5 rlike \"?a\"",
       "error": [
-        "Argument of [rlike] must be [text], found value [5] type [integer]"
+        "Argument of [rlike] must be [keyword], found value [5] type [integer]"
       ],
       "warning": []
     },
@@ -909,7 +917,7 @@
     {
       "query": "row var = NOT 5 rlike \"?a\"",
       "error": [
-        "Argument of [rlike] must be [text], found value [5] type [integer]"
+        "Argument of [rlike] must be [keyword], found value [5] type [integer]"
       ],
       "warning": []
     },
@@ -3632,7 +3640,7 @@
     {
       "query": "from a_index | where doubleField like \"?a\"",
       "error": [
-        "Argument of [like] must be [text], found value [doubleField] type [double]"
+        "Argument of [like] must be [keyword], found value [doubleField] type [double]"
       ],
       "warning": []
     },
@@ -3646,7 +3654,7 @@
     {
       "query": "from a_index | where NOT doubleField like \"?a\"",
       "error": [
-        "Argument of [like] must be [text], found value [doubleField] type [double]"
+        "Argument of [like] must be [keyword], found value [doubleField] type [double]"
       ],
       "warning": []
     },
@@ -3680,7 +3688,7 @@
     {
       "query": "from a_index | where doubleField rlike \"?a\"",
       "error": [
-        "Argument of [rlike] must be [text], found value [doubleField] type [double]"
+        "Argument of [rlike] must be [keyword], found value [doubleField] type [double]"
       ],
       "warning": []
     },
@@ -3694,7 +3702,7 @@
     {
       "query": "from a_index | where NOT doubleField rlike \"?a\"",
       "error": [
-        "Argument of [rlike] must be [text], found value [doubleField] type [double]"
+        "Argument of [rlike] must be [keyword], found value [doubleField] type [double]"
       ],
       "warning": []
     },
@@ -6327,7 +6335,7 @@
     {
       "query": "from a_index | eval doubleField == \"2022\"",
       "error": [
-        "Argument of [==] must be [date], found value [doubleField] type [double]"
+        "Argument of [==] must be [boolean], found value [doubleField] type [double]"
       ],
       "warning": []
     },
@@ -6466,7 +6474,7 @@
     {
       "query": "from a_index | eval doubleField != \"2022\"",
       "error": [
-        "Argument of [!=] must be [date], found value [doubleField] type [double]"
+        "Argument of [!=] must be [boolean], found value [doubleField] type [double]"
       ],
       "warning": []
     },
@@ -6590,7 +6598,7 @@
     {
       "query": "from a_index | eval \"1\" + 1",
       "error": [
-        "Argument of [+] must be [date], found value [1] type [integer]"
+        "Argument of [+] must be [date_period], found value [1] type [integer]"
       ],
       "warning": []
     },
@@ -6626,7 +6634,7 @@
     {
       "query": "from a_index | eval \"1\" - 1",
       "error": [
-        "Argument of [-] must be [date], found value [1] type [integer]"
+        "Argument of [-] must be [date_period], found value [1] type [integer]"
       ],
       "warning": []
     },
@@ -6806,7 +6814,7 @@
     {
       "query": "from a_index | eval doubleField like \"?a\"",
       "error": [
-        "Argument of [like] must be [text], found value [doubleField] type [double]"
+        "Argument of [like] must be [keyword], found value [doubleField] type [double]"
       ],
       "warning": []
     },
@@ -6820,7 +6828,7 @@
     {
       "query": "from a_index | eval NOT doubleField like \"?a\"",
       "error": [
-        "Argument of [like] must be [text], found value [doubleField] type [double]"
+        "Argument of [like] must be [keyword], found value [doubleField] type [double]"
       ],
       "warning": []
     },
@@ -6854,7 +6862,7 @@
     {
       "query": "from a_index | eval doubleField rlike \"?a\"",
       "error": [
-        "Argument of [rlike] must be [text], found value [doubleField] type [double]"
+        "Argument of [rlike] must be [keyword], found value [doubleField] type [double]"
       ],
       "warning": []
     },
@@ -6868,7 +6876,7 @@
     {
       "query": "from a_index | eval NOT doubleField rlike \"?a\"",
       "error": [
-        "Argument of [rlike] must be [text], found value [doubleField] type [double]"
+        "Argument of [rlike] must be [keyword], found value [doubleField] type [double]"
       ],
       "warning": []
     },
@@ -6926,7 +6934,11 @@
     },
     {
       "query": "from a_index | eval 1 in (\"a\", \"b\", \"c\")",
-      "error": [],
+      "error": [
+        "Argument of [in] must be [integer], found value [\"a\"] type [keyword]",
+        "Argument of [in] must be [integer], found value [\"b\"] type [keyword]",
+        "Argument of [in] must be [integer], found value [\"c\"] type [keyword]"
+      ],
       "warning": []
     },
     {
