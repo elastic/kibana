@@ -7041,7 +7041,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/security-api-key-management@link:x-pack/packages/security/api_key_management":
+"@kbn/security-api-key-management@link:x-pack/platform/packages/shared/security/api_key_management":
   version "0.0.0"
   uid ""
 
