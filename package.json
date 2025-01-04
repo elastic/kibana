@@ -820,7 +820,7 @@
     "@kbn/security-api-key-management": "link:x-pack/platform/packages/shared/security/api_key_management",
     "@kbn/security-authorization-core": "link:x-pack/platform/packages/private/security/authorization_core",
     "@kbn/security-authorization-core-common": "link:x-pack/platform/packages/private/security/authorization_core_common",
-    "@kbn/security-form-components": "link:x-pack/packages/security/form_components",
+    "@kbn/security-form-components": "link:x-pack/platform/packages/shared/security/form_components",
     "@kbn/security-hardening": "link:packages/kbn-security-hardening",
     "@kbn/security-plugin": "link:x-pack/plugins/security",
     "@kbn/security-plugin-types-common": "link:x-pack/packages/security/plugin_types_common",
