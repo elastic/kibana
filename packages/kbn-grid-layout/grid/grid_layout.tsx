@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import classNames from 'classnames';
 import { cloneDeep } from 'lodash';
 import React, { useEffect, useMemo, useState } from 'react';
-import classNames from 'classnames';
 import { combineLatest, distinctUntilChanged, filter, map, pairwise, skip } from 'rxjs';
 
 import { css } from '@emotion/react';
@@ -32,6 +32,45 @@ export interface GridLayoutProps {
   expandedPanelId?: string;
   accessMode?: GridAccessMode;
 }
+
+const EXPANDED_PANEL_STYLES = css`
+  &.kbnGrid--hasExpandedPanel {
+    height: 100%;
+
+    .kbnGridRowContainer {
+      &:not(.kbnGridRowContainer--hasExpandedPanel) {
+        // hide the rows that do not contain the expanded panel
+        position: absolute;
+        top: -9999px;
+        left: -9999px;
+      }
+      &--hasExpandedPanel {
+        .kbnGridRowHeader {
+          height: 0px; // used instead of 'display: none' due to a11y concerns
+        }
+
+        .kbnGridRow {
+          display: block !important; // overwrite grid display
+          height: 100%;
+
+          .kbnGridPanel {
+            &:not(.kbnGridPanel--isExpanded) {
+              // hide the non-expanded panels
+              position: absolute;
+              top: -9999px;
+              left: -9999px;
+              visibility: hidden; // remove hidden panels and their contents from tab order for a11y
+            }
+            &--isExpanded {
+              // show only the expanded panel and make it take up the full height
+              height: 100%;
+            }
+          }
+        }
+      }
+    }
+  }
+`;
 
 export const GridLayout = ({
   layout,
@@ -150,11 +189,7 @@ export const GridLayout = ({
           setDimensionsRef(divElement);
         }}
         className={gridClassNames}
-        css={css`
-          &.kbnGrid--hasExpandedPanel {
-            height: 100%;
-          }
-        `}
+        css={EXPANDED_PANEL_STYLES}
       >
         {children}
       </div>

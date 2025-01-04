@@ -118,11 +118,7 @@ export function DashboardRenderer({
         >
           <DashboardContext.Provider value={dashboardApi}>
             <DashboardInternalContext.Provider value={dashboardInternalApi}>
-              <DashboardViewport
-                dashboardContainer={
-                  dashboardContainer.current ? dashboardContainer.current : undefined
-                }
-              />
+              <DashboardViewport />
             </DashboardInternalContext.Provider>
           </DashboardContext.Provider>
         </ExitFullScreenButtonKibanaProvider>

@@ -23,10 +23,8 @@ export const GridHeightSmoother = ({
       gridLayoutStateManager.gridDimensions$,
       gridLayoutStateManager.interactionEvent$,
     ]).subscribe(([dimensions, interactionEvent]) => {
-      if (!smoothHeightRef.current) return;
-      if (gridLayoutStateManager.expandedPanelId$.getValue()) {
-        return;
-      }
+      if (!smoothHeightRef.current || gridLayoutStateManager.expandedPanelId$.getValue()) return;
+
       if (!interactionEvent) {
         smoothHeightRef.current.style.height = `${dimensions.height}px`;
         smoothHeightRef.current.style.userSelect = 'auto';
@@ -45,22 +43,20 @@ export const GridHeightSmoother = ({
       smoothHeightRef.current.style.userSelect = 'none';
     });
 
-    const expandedPanelSubscription = gridLayoutStateManager.expandedPanelId$.subscribe(
+    const expandedPanelStyleSubscription = gridLayoutStateManager.expandedPanelId$.subscribe(
       (expandedPanelId) => {
         if (!smoothHeightRef.current) return;
-
         if (expandedPanelId) {
-          smoothHeightRef.current.style.height = `100%`;
-          smoothHeightRef.current.style.transition = 'none';
+          smoothHeightRef.current.classList.add('kbnGridWrapper--hasExpandedPanel');
         } else {
-          smoothHeightRef.current.style.height = '';
-          smoothHeightRef.current.style.transition = '';
+          smoothHeightRef.current.classList.remove('kbnGridWrapper--hasExpandedPanel');
         }
       }
     );
+
     return () => {
       interactionStyleSubscription.unsubscribe();
-      expandedPanelSubscription.unsubscribe();
+      expandedPanelStyleSubscription.unsubscribe();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -68,11 +64,21 @@ export const GridHeightSmoother = ({
   return (
     <div
       ref={smoothHeightRef}
+      className={'kbnGridWrapper'}
       css={css`
         // the guttersize cannot currently change, so it's safe to set it just once
-        padding: ${gridLayoutStateManager.runtimeSettings$.getValue().gutterSize};
+        margin: ${gridLayoutStateManager.runtimeSettings$.getValue().gutterSize}px;
         overflow-anchor: none;
         transition: height 500ms linear;
+
+        &.kbnGridWrapper--hasExpandedPanel {
+          height: 100% !important;
+          position: relative;
+          transition: none;
+          // switch to padding so that the panel does not extend the height of the parent
+          margin: 0px;
+          padding: ${gridLayoutStateManager.runtimeSettings$.getValue().gutterSize}px;
+        }
       `}
     >
       {children}
