@@ -21,5 +21,11 @@ module.exports = babelJest.default.createTransformer({
         },
       },
     ],
+    [
+      require.resolve('@emotion/babel-preset-css-prop'),
+      {
+        labelFormat: '[filename]--[local]',
+      },
+    ],
   ],
 });
