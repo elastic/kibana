@@ -145,6 +145,12 @@ export function registerMlSnapshotRoutes({
   router.post(
     {
       path: `${API_BASE_PATH}/ml_snapshots`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Relies on es client for authorization',
+        },
+      },
       validate: {
         body: schema.object({
           snapshotId: schema.string(),
@@ -195,6 +201,12 @@ export function registerMlSnapshotRoutes({
   router.get(
     {
       path: `${API_BASE_PATH}/ml_snapshots/{jobId}/{snapshotId}`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Relies on es and saved object clients for authorization',
+        },
+      },
       validate: {
         params: schema.object({
           snapshotId: schema.string(),

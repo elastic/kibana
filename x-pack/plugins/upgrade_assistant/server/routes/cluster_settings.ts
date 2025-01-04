@@ -17,6 +17,12 @@ export function registerClusterSettingsRoute({
   router.post(
     {
       path: `${API_BASE_PATH}/cluster_settings`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Relies on es client for authorization',
+        },
+      },
       validate: {
         body: schema.object({
           settings: schema.arrayOf(schema.string()),
