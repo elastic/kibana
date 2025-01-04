@@ -60,6 +60,7 @@ enabled:
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/rules_management/rule_read/trial_license_complete_tier/configs/ess.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/rules_management/rule_read/basic_license_essentials_tier/configs/ess.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/telemetry/trial_license_complete_tier/configs/ess.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/telemetry/configs/ess.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/user_roles/trial_license_complete_tier/configs/ess.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/entity_analytics/risk_engine/trial_license_complete_tier/configs/ess.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/entity_analytics/risk_engine/basic_license_essentials_tier/configs/ess.config.ts
