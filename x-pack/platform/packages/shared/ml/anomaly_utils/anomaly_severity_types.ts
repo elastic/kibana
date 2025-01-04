@@ -12,25 +12,25 @@ export const ML_ANOMALY_SEVERITY_TYPES: Record<ML_ANOMALY_SEVERITY, MlSeverityTy
   critical: {
     id: ML_ANOMALY_SEVERITY.CRITICAL,
     label: i18n.translate('xpack.ml.anomalyUtils.severity.criticalLabel', {
-      defaultMessage: 'critical',
+      defaultMessage: '75-100',
     }),
   },
   major: {
     id: ML_ANOMALY_SEVERITY.MAJOR,
     label: i18n.translate('xpack.ml.anomalyUtils.severity.majorLabel', {
-      defaultMessage: 'major',
+      defaultMessage: '50-74',
     }),
   },
   minor: {
     id: ML_ANOMALY_SEVERITY.MINOR,
     label: i18n.translate('xpack.ml.anomalyUtils.severity.minorLabel', {
-      defaultMessage: 'minor',
+      defaultMessage: '25-49',
     }),
   },
   warning: {
     id: ML_ANOMALY_SEVERITY.WARNING,
     label: i18n.translate('xpack.ml.anomalyUtils.severity.warningLabel', {
-      defaultMessage: 'warning',
+      defaultMessage: '3-24',
     }),
   },
   unknown: {
@@ -42,7 +42,7 @@ export const ML_ANOMALY_SEVERITY_TYPES: Record<ML_ANOMALY_SEVERITY, MlSeverityTy
   low: {
     id: ML_ANOMALY_SEVERITY.LOW,
     label: i18n.translate('xpack.ml.anomalyUtils.severityWithLow.lowLabel', {
-      defaultMessage: 'low',
+      defaultMessage: '0-2',
     }),
   },
 };
