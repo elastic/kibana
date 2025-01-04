@@ -23,6 +23,7 @@ import {
   type DataFrameAnalyticsId,
 } from '@kbn/ml-data-frame-analytics-utils';
 import type { ListingPageUrlState } from '@kbn/ml-url-state';
+import { ImportJobsFlyout } from '../../../../../components/import_export_jobs';
 import { useRefreshAnalyticsList } from '../../../../common';
 import { usePermissionCheck } from '../../../../../capabilities/check_capabilities';
 import { useNavigateToPath } from '../../../../../contexts/kibana';
@@ -41,6 +42,7 @@ import { AnalyticsEmptyPrompt } from '../empty_prompt';
 import { useTableSettings } from './use_table_settings';
 import { JobsAwaitingNodeWarning } from '../../../../../components/jobs_awaiting_node_warning';
 import { useRefresh } from '../../../../../routing/use_refresh';
+import { ExportJobsFlyout } from '../../../../../components/import_export_jobs';
 
 const filters: EuiSearchBarProps['filters'] = [
   {
@@ -264,6 +266,15 @@ export const DataFrameAnalyticsList: FC<Props> = ({
       <JobsAwaitingNodeWarning jobCount={jobsAwaitingNodeCount} />
       <EuiFlexGroup justifyContent="spaceBetween">
         {stats}
+        <EuiFlexGroup grow={false} direction="row" gutterSize="none">
+          <EuiFlexItem grow={false}>
+            <ExportJobsFlyout isDisabled={false} currentTab={'data-frame-analytics'} />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <ImportJobsFlyout isDisabled={false} onImportComplete={getAnalyticsCallback} />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+
         <EuiFlexItem grow={false}>
           <EuiFlexGroup alignItems="center" gutterSize="s">
             <EuiFlexItem grow={false}>
