@@ -479,6 +479,14 @@
             "trackAdoption": true,
             "references": [
               {
+                "plugin": "@kbn/core-notifications-browser-internal",
+                "path": "packages/core/notifications/core-notifications-browser-internal/src/toasts/telemetry/event_reporter.ts"
+              },
+              {
+                "plugin": "@kbn/core-notifications-browser-internal",
+                "path": "packages/core/notifications/core-notifications-browser-internal/src/toasts/telemetry/event_reporter.ts"
+              },
+              {
                 "plugin": "@kbn/ebt-tools",
                 "path": "packages/kbn-ebt-tools/src/performance_metric_events/helpers.ts"
               },
@@ -505,14 +513,6 @@
               {
                 "plugin": "@kbn/core",
                 "path": "src/core/packages/analytics/browser-internal/src/analytics_service.ts"
-              },
-              {
-                "plugin": "@kbn/core-notifications-browser-internal",
-                "path": "packages/core/notifications/core-notifications-browser-internal/src/toasts/telemetry/event_reporter.ts"
-              },
-              {
-                "plugin": "@kbn/core-notifications-browser-internal",
-                "path": "packages/core/notifications/core-notifications-browser-internal/src/toasts/telemetry/event_reporter.ts"
               },
               {
                 "plugin": "@kbn/core-root-browser-internal",
@@ -631,14 +631,6 @@
                 "path": "packages/shared-ux/chrome/navigation/src/services.tsx"
               },
               {
-                "plugin": "globalSearchBar",
-                "path": "x-pack/plugins/global_search_bar/public/telemetry/event_reporter.ts"
-              },
-              {
-                "plugin": "globalSearchBar",
-                "path": "x-pack/plugins/global_search_bar/public/telemetry/event_reporter.ts"
-              },
-              {
                 "plugin": "spaces",
                 "path": "x-pack/plugins/spaces/public/analytics/event_tracker.ts"
               },
@@ -667,16 +659,24 @@
                 "path": "src/platform/plugins/shared/discover/public/services/discover_ebt_manager.ts"
               },
               {
-                "plugin": "reporting",
-                "path": "x-pack/plugins/reporting/server/usage/event_tracker.ts"
-              },
-              {
                 "plugin": "spaces",
                 "path": "x-pack/plugins/spaces/public/management/management_service.test.ts"
               },
               {
+                "plugin": "globalSearchBar",
+                "path": "x-pack/platform/plugins/private/global_search_bar/public/telemetry/event_reporter.ts"
+              },
+              {
+                "plugin": "globalSearchBar",
+                "path": "x-pack/platform/plugins/private/global_search_bar/public/telemetry/event_reporter.ts"
+              },
+              {
                 "plugin": "integrationAssistant",
                 "path": "x-pack/platform/plugins/shared/integration_assistant/public/services/telemetry/service.ts"
+              },
+              {
+                "plugin": "reporting",
+                "path": "x-pack/platform/plugins/private/reporting/server/usage/event_tracker.ts"
               },
               {
                 "plugin": "fleet",
@@ -955,10 +955,6 @@
                 "path": "x-pack/solutions/observability/plugins/inventory/public/services/telemetry/telemetry_client.ts"
               },
               {
-                "plugin": "observabilityLogsExplorer",
-                "path": "x-pack/solutions/observability/plugins/observability_logs_explorer/public/state_machines/observability_logs_explorer/src/telemetry_events.ts"
-              },
-              {
                 "plugin": "observabilityOnboarding",
                 "path": "x-pack/solutions/observability/plugins/observability_onboarding/public/application/quickstart_flows/shared/empty_prompt.tsx"
               },
@@ -1009,6 +1005,10 @@
               {
                 "plugin": "securitySolutionServerless",
                 "path": "x-pack/solutions/security/plugins/security_solution_serverless/server/task_manager/nlp_cleanup_task/nlp_cleanup_task.ts"
+              },
+              {
+                "plugin": "observabilityLogsExplorer",
+                "path": "x-pack/solutions/observability/plugins/observability_logs_explorer/public/state_machines/observability_logs_explorer/src/telemetry_events.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -1773,6 +1773,10 @@
             "trackAdoption": true,
             "references": [
               {
+                "plugin": "cloud",
+                "path": "x-pack/plugins/cloud/common/register_cloud_deployment_id_analytics_context.ts"
+              },
+              {
                 "plugin": "@kbn/core-execution-context-browser-internal",
                 "path": "packages/core/execution-context/core-execution-context-browser-internal/src/execution_context_service.ts"
               },
@@ -1865,10 +1869,6 @@
                 "path": "x-pack/plugins/licensing/common/register_analytics_context_provider.ts"
               },
               {
-                "plugin": "cloud",
-                "path": "x-pack/plugins/cloud/common/register_cloud_deployment_id_analytics_context.ts"
-              },
-              {
                 "plugin": "spaces",
                 "path": "x-pack/plugins/spaces/public/analytics/register_analytics_context.ts"
               },
@@ -1877,12 +1877,12 @@
                 "path": "x-pack/plugins/security/public/analytics/register_user_context.ts"
               },
               {
-                "plugin": "discover",
-                "path": "src/platform/plugins/shared/discover/public/services/discover_ebt_manager.ts"
-              },
-              {
                 "plugin": "telemetry",
                 "path": "src/plugins/telemetry/server/plugin.ts"
+              },
+              {
+                "plugin": "discover",
+                "path": "src/platform/plugins/shared/discover/public/services/discover_ebt_manager.ts"
               },
               {
                 "plugin": "telemetry",

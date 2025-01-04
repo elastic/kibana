@@ -1024,7 +1024,7 @@
             "label": "sort",
             "description": [],
             "signature": [
-              "string[][]"
+              "{ [key: string]: string; }[]"
             ],
             "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/types.ts",
             "deprecated": false,

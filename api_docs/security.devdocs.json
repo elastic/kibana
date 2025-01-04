@@ -6435,12 +6435,12 @@
               "path": "x-pack/platform/plugins/shared/actions/server/plugin.ts"
             },
             {
-              "plugin": "savedObjectsTagging",
-              "path": "x-pack/plugins/saved_objects_tagging/server/request_handler_context.ts"
-            },
-            {
               "plugin": "ml",
               "path": "x-pack/platform/plugins/shared/ml/server/saved_objects/initialization/initialization.ts"
+            },
+            {
+              "plugin": "savedObjectsTagging",
+              "path": "x-pack/platform/plugins/private/saved_objects_tagging/server/request_handler_context.ts"
             },
             {
               "plugin": "ml",

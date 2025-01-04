@@ -14051,6 +14051,10 @@
                 "path": "x-pack/plugins/lens/public/app_plugin/lens_top_nav.tsx"
               },
               {
+                "plugin": "upgradeAssistant",
+                "path": "x-pack/plugins/upgrade_assistant/public/application/components/es_deprecation_logs/fix_deprecation_logs/external_links.tsx"
+              },
+              {
                 "plugin": "controls",
                 "path": "src/platform/plugins/shared/controls/public/controls/data_controls/options_list_control/options_list_fetch_cache.ts"
               },
@@ -14065,10 +14069,6 @@
               {
                 "plugin": "dataVisualizer",
                 "path": "x-pack/platform/plugins/private/data_visualizer/public/application/index_data_visualizer/hooks/use_data_visualizer_grid_data.ts"
-              },
-              {
-                "plugin": "upgradeAssistant",
-                "path": "x-pack/plugins/upgrade_assistant/public/application/components/es_deprecation_logs/fix_deprecation_logs/external_links.tsx"
               },
               {
                 "plugin": "graph",

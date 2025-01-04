@@ -8579,10 +8579,10 @@
           },
           {
             "parentPluginId": "observability",
-            "id": "def-server.CustomThresholdLocators.logsExplorerLocator",
+            "id": "def-server.CustomThresholdLocators.logsLocator",
             "type": "Object",
             "tags": [],
-            "label": "logsExplorerLocator",
+            "label": "logsLocator",
             "description": [],
             "signature": [
               {
@@ -8594,11 +8594,11 @@
               },
               "<",
               {
-                "pluginId": "@kbn/deeplinks-observability",
+                "pluginId": "discover",
                 "scope": "common",
-                "docId": "kibKbnDeeplinksObservabilityPluginApi",
-                "section": "def-common.LogsExplorerLocatorParams",
-                "text": "LogsExplorerLocatorParams"
+                "docId": "kibDiscoverPluginApi",
+                "section": "def-common.DiscoverAppLocatorParams",
+                "text": "DiscoverAppLocatorParams"
               },
               "> | undefined"
             ],

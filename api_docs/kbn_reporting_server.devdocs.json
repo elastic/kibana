@@ -1070,7 +1070,7 @@
             "signature": [
               "T"
             ],
-            "path": "src/plugins/kibana_utils/common/create_getter_setter.ts",
+            "path": "src/platform/plugins/shared/kibana_utils/common/create_getter_setter.ts",
             "deprecated": false,
             "trackAdoption": false
           }

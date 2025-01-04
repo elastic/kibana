@@ -4735,11 +4735,11 @@
               },
               {
                 "plugin": "files",
-                "path": "src/plugins/files/server/file_service/file_service_factory.ts"
+                "path": "src/platform/plugins/shared/files/server/file_service/file_service_factory.ts"
               },
               {
                 "plugin": "files",
-                "path": "src/plugins/files/server/file_service/file_service_factory.ts"
+                "path": "src/platform/plugins/shared/files/server/file_service/file_service_factory.ts"
               },
               {
                 "plugin": "cases",
