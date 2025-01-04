@@ -230,7 +230,7 @@ Images can be added either by URL or by uploading the image file via file servic
 in Kibana, e.g. visualizations. It has the form of a flyout panel.
 
 
-|{kib-repo}blob/{branch}/src/plugins/interactive_setup/README.md[interactiveSetup]
+|{kib-repo}blob/{branch}/src/platform/plugins/private/interactive_setup/README.md[interactiveSetup]
 |This plugin provides UI and APIs for interactive setup mode a.k.a "enrollment flow".
 
 

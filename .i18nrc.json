@@ -74,7 +74,7 @@
     "inputControl": "src/platform/plugins/private/input_control_vis",
     "inspector": "src/platform/plugins/shared/inspector",
     "inspectorViews": "src/legacy/core_plugins/inspector_views",
-    "interactiveSetup": "src/plugins/interactive_setup",
+    "interactiveSetup": "src/platform/plugins/private/interactive_setup",
     "interpreter": "src/legacy/core_plugins/interpreter",
     "imageEmbeddable": "src/platform/plugins/private/image_embeddable",
     "kbn": "src/legacy/core_plugins/kibana",
