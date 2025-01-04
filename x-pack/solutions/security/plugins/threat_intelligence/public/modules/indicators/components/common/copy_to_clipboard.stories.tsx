@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { StoryFn } from '@storybook/react';
+import type { StoryFn } from '@storybook/react';
 import { EuiContextMenuPanel } from '@elastic/eui';
 import {
   CopyToClipboardButtonEmpty,

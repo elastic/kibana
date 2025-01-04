@@ -8,7 +8,7 @@
  */
 
 import React, { FC, PropsWithChildren } from 'react';
-import { StoryFn } from '@storybook/react';
+import type { StoryFn } from '@storybook/react';
 import { Render } from '@kbn/presentation-util-plugin/public/__stories__';
 import { getPartitionVisRenderer } from '../expression_renderers';
 import { ChartTypes, PartitionChartProps } from '../../common/types';

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { StoryFn } from '@storybook/react';
+import type { StoryFn } from '@storybook/react';
 
 import { SlosWelcomePage as Component } from './slos_welcome';
 import { KibanaReactStorybookDecorator } from '../../utils/kibana_react.storybook_decorator';

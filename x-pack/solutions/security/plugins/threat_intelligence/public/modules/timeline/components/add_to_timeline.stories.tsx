@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { StoryFn } from '@storybook/react';
+import type { StoryFn } from '@storybook/react';
 import { CoreStart } from '@kbn/core/public';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { EuiContextMenuPanel } from '@elastic/eui';

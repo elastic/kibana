@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { StoryFn } from '@storybook/react';
+import type { StoryFn } from '@storybook/react';
 import { of } from 'rxjs';
 import type { IKibanaSearchResponse } from '@kbn/search-types';
 import { generateMockFileIndicator } from '../../../../common/types/indicator';

@@ -6,7 +6,7 @@
  */
 
 import React, { ComponentProps } from 'react';
-import { StoryFn } from '@storybook/react';
+import type { StoryFn } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import { RuleStatusDropdown } from './rule_status_dropdown';
 import { mockRule } from '../../rule_details/components/test_helpers';

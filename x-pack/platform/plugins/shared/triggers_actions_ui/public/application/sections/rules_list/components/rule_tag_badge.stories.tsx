@@ -6,7 +6,7 @@
  */
 
 import React, { ComponentProps } from 'react';
-import { StoryFn } from '@storybook/react';
+import type { StoryFn } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import { RuleTagBadge } from './rule_tag_badge';
 

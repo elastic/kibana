@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { ThemeProvider } from '@emotion/react';
-import { Story } from '@storybook/react';
+import type { StoryFn } from '@storybook/react';
 import { type NodeButtonProps, NodeShapeContainer } from './styles';
 import { NodeExpandButton } from './node_expand_button';
 
@@ -21,7 +21,7 @@ export default {
   },
 };
 
-const Template: Story<NodeButtonProps> = (args) => (
+const Template: StoryFn<NodeButtonProps> = (args) => (
   <ThemeProvider theme={{ darkMode: false }}>
     <NodeShapeContainer>
       Hover me

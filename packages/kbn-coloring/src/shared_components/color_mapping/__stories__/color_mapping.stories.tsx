@@ -10,7 +10,7 @@
 import React, { FC, useState } from 'react';
 import { getKbnPalettes } from '@kbn/palettes';
 import { EuiFlyout, EuiForm, EuiPage, isColorDark } from '@elastic/eui';
-import { StoryFn } from '@storybook/react';
+import type { StoryFn } from '@storybook/react';
 import { css } from '@emotion/react';
 import { CategoricalColorMapping, ColorMappingProps } from '../categorical_color_mapping';
 import { DEFAULT_COLOR_MAPPING_CONFIG } from '../config/default_color_mapping';

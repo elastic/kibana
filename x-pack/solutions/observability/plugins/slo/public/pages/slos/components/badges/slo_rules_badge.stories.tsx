@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { StoryFn } from '@storybook/react';
+import type { StoryFn } from '@storybook/react';
 
 import { EuiFlexGroup } from '@elastic/eui';
 import { Rule } from '@kbn/triggers-actions-ui-plugin/public';

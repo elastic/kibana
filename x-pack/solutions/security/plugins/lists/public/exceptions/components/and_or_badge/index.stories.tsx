@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { StoryFn } from '@storybook/react';
+import type { StoryFn } from '@storybook/react';
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';

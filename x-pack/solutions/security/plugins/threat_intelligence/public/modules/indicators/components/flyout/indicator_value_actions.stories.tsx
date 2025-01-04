@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { StoryFn } from '@storybook/react';
+import type { StoryFn } from '@storybook/react';
 import { StoryProvidersComponent } from '../../../../mocks/story_providers';
 import { generateMockFileIndicator, Indicator } from '../../../../../common/types/indicator';
 import { IndicatorValueActions } from './indicator_value_actions';

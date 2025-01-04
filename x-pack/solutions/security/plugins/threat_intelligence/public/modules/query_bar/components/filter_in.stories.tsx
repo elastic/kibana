@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { StoryFn } from '@storybook/react';
+import type { StoryFn } from '@storybook/react';
 import { EuiContextMenuPanel, EuiDataGrid, EuiDataGridColumn } from '@elastic/eui';
 import { EuiDataGridColumnVisibility } from '@elastic/eui/src/components/datagrid/data_grid_types';
 import { mockIndicatorsFiltersContext } from '../../../mocks/mock_indicators_filters_context';

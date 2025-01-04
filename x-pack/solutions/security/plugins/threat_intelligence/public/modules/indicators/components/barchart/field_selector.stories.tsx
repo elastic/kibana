@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { StoryFn } from '@storybook/react';
+import type { StoryFn } from '@storybook/react';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { EuiComboBoxOptionOption } from '@elastic/eui';
 import { RawIndicatorFieldId } from '../../../../../common/types/indicator';
