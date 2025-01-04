@@ -13,7 +13,9 @@ import {
   EuiSpacer,
   EuiSuperDatePicker,
   EuiTablePagination,
+  EuiText,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import React, { FC, useMemo, useReducer } from 'react';
 import { useDataQualityContext } from '../../../../../data_quality_context';
 import { useHistoricalResultsContext } from '../../contexts/historical_results_context';
@@ -25,7 +27,6 @@ import { fetchHistoricalResultsQueryReducer } from './reducers/fetch_historical_
 import { FetchHistoricalResultsQueryState } from '../types';
 import { LoadingEmptyPrompt } from '../../loading_empty_prompt';
 import { ErrorEmptyPrompt } from '../../error_empty_prompt';
-import { StyledFilterGroupFlexItem, StyledText } from './styles';
 import {
   ALL,
   ERROR_LOADING_HISTORICAL_RESULTS,
@@ -39,8 +40,15 @@ import { useHistoricalResultsPagination } from './hooks/use_historical_results_p
 import { FAIL, PASS } from '../../translations';
 import { useHistoricalResultsOutcomeFilter } from './hooks/use_historical_results_outcome_filter';
 import { useHistoricalResultsDatePicker } from './hooks/use_historical_results_date_picker';
+import { textCss } from './styles';
 
 const historicalResultsListId = 'historicalResultsList';
+
+const styles = {
+  filterGroupFlexItem: css({
+    flexBasis: '17%',
+  }),
+};
 
 export const initialFetchHistoricalResultsQueryState: FetchHistoricalResultsQueryState = {
   startDate: DEFAULT_HISTORICAL_RESULTS_START_DATE,
@@ -111,7 +119,7 @@ export const HistoricalResultsComponent: FC<Props> = ({ indexName }) => {
   return (
     <div data-test-subj="historicalResults">
       <EuiFlexGroup justifyContent="spaceBetween">
-        <StyledFilterGroupFlexItem grow={false}>
+        <EuiFlexItem css={styles.filterGroupFlexItem} grow={false}>
           <EuiFilterGroup
             data-test-subj="historicalResultsOutcomeFilterGroup"
             role="radiogroup"
@@ -145,7 +153,7 @@ export const HistoricalResultsComponent: FC<Props> = ({ indexName }) => {
               {FAIL}
             </EuiFilterButton>
           </EuiFilterGroup>
-        </StyledFilterGroupFlexItem>
+        </EuiFlexItem>
         <EuiFlexItem>
           <EuiSuperDatePicker
             width="full"
@@ -157,7 +165,8 @@ export const HistoricalResultsComponent: FC<Props> = ({ indexName }) => {
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer />
-      <StyledText
+      <EuiText
+        css={textCss}
         size="s"
         role="status"
         aria-live="polite"
@@ -167,7 +176,7 @@ export const HistoricalResultsComponent: FC<Props> = ({ indexName }) => {
         aria-describedby={historicalResultsListId}
       >
         {totalChecksText}
-      </StyledText>
+      </EuiText>
       <div id={historicalResultsListId}>
         <HistoricalResultsList indexName={indexName} />
       </div>

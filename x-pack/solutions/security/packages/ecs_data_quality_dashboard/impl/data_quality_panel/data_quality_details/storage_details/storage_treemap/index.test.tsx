@@ -85,7 +85,7 @@ describe('StorageTreemap', () => {
     });
 
     test('it renders the legend with the expected overflow-y style', () => {
-      expect(screen.getByTestId('legend')).toHaveClass('eui-yScroll');
+      expect(screen.getByTestId('legend')).toHaveClass('eui-scrollBar');
     });
 
     test('it uses a theme with the expected `minFontSize` to show more labels at various screen resolutions', () => {

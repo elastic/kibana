@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiSpacer, useGeneratedHtmlId } from '@elastic/eui';
+import { EuiAccordion, EuiSpacer, useGeneratedHtmlId } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { ErrorEmptyPrompt } from './error_empty_prompt';
@@ -21,7 +21,7 @@ import type { PatternRollup, SelectedIndex, SortConfig } from '../../../types';
 import { useIlmExplain } from './hooks/use_ilm_explain';
 import { useStats } from './hooks/use_stats';
 import { useDataQualityContext } from '../../../data_quality_context';
-import { PatternAccordion, PatternAccordionChildren } from './styles';
+import { patternAccordionChildrenCss, patternAccordionCss } from './styles';
 import { IndexCheckFlyout } from './index_check_flyout';
 import { useResultsRollupContext } from '../../../contexts/results_rollup_context';
 import { useIndicesCheckContext } from '../../../contexts/indices_check_context';
@@ -318,7 +318,8 @@ const PatternComponent: React.FC<Props> = ({
   return (
     <div data-test-subj={`${pattern}PatternPanel`}>
       <HistoricalResultsContext.Provider value={historicalResultsContextValue}>
-        <PatternAccordion
+        <EuiAccordion
+          css={patternAccordionCss}
           id={patternComponentAccordionId}
           forceState={isAccordionOpen ? 'open' : 'closed'}
           onToggle={handleAccordionToggle}
@@ -337,7 +338,7 @@ const PatternComponent: React.FC<Props> = ({
             />
           }
         >
-          <PatternAccordionChildren>
+          <div css={patternAccordionChildrenCss}>
             {!loading && pattern.includes(':') && (
               <>
                 <RemoteClustersCallout />
@@ -404,8 +405,8 @@ const PatternComponent: React.FC<Props> = ({
                 />
               </div>
             )}
-          </PatternAccordionChildren>
-        </PatternAccordion>
+          </div>
+        </EuiAccordion>
         {isFlyoutVisible ? (
           <IndexCheckFlyout
             pattern={pattern}

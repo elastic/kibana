@@ -5,24 +5,24 @@
  * 2.0.
  */
 
-import { EuiFormControlLayout } from '@elastic/eui';
-import styled from 'styled-components';
+import { UseEuiTheme } from '@elastic/eui';
+import { SerializedStyles, css } from '@emotion/react';
 
-export const StyledOption = styled.div`
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  width: 100%;
-`;
+export const optionCss = css({
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+  whiteSpace: 'nowrap',
+  width: '100%',
+});
 
-export const StyledOptionLabel = styled.span`
-  font-weight: ${({ theme }) => theme.eui.euiFontWeightBold};
-`;
+export const optionLabelCss = ({ euiTheme }: UseEuiTheme): SerializedStyles =>
+  css({
+    fontWeight: euiTheme.font.weight.bold,
+  });
 
-export const StyledFormControlLayout = styled(EuiFormControlLayout)`
-  height: 42px;
-
-  .euiFormControlLayout__childrenWrapper {
-    overflow: visible;
-  }
-`;
+export const formControlLayoutCss = css({
+  height: 42,
+  '.euiFormControlLayout__childrenWrapper': {
+    overflow: 'visible',
+  },
+});

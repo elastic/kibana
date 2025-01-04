@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { EuiFlexItem } from '@elastic/eui';
+import { EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import React, { useState, useCallback, useEffect } from 'react';
-import styled from 'styled-components';
+import { css } from '@emotion/react';
 
 import { useResultsRollupContext } from '../../contexts/results_rollup_context';
 import { Pattern } from './pattern';
@@ -15,13 +15,18 @@ import { SelectedIndex } from '../../types';
 import { useDataQualityContext } from '../../data_quality_context';
 import { useIsHistoricalResultsTourActive } from './hooks/use_is_historical_results_tour_active';
 
-const StyledPatternWrapperFlexItem = styled(EuiFlexItem)`
-  margin-bottom: ${({ theme }) => theme.eui.euiSize};
+const useStyles = () => {
+  const { euiTheme } = useEuiTheme();
 
-  &:last-child {
-    margin-bottom: 0;
-  }
-`;
+  return {
+    patternWrapperFlexItem: css({
+      marginBottom: euiTheme.size.base,
+      ':last-child': {
+        marginBottom: 0,
+      },
+    }),
+  };
+};
 
 export interface Props {
   chartSelectedIndex: SelectedIndex | null;
@@ -32,6 +37,7 @@ const IndicesDetailsComponent: React.FC<Props> = ({
   chartSelectedIndex,
   setChartSelectedIndex,
 }) => {
+  const styles = useStyles();
   const { patternRollups, patternIndexNames } = useResultsRollupContext();
   const { patterns } = useDataQualityContext();
 
@@ -73,7 +79,7 @@ const IndicesDetailsComponent: React.FC<Props> = ({
   return (
     <div data-test-subj="indicesDetails">
       {patterns.map((pattern) => (
-        <StyledPatternWrapperFlexItem grow={false} key={pattern}>
+        <EuiFlexItem css={styles.patternWrapperFlexItem} grow={false} key={pattern}>
           <Pattern
             indexNames={patternIndexNames[pattern]}
             pattern={pattern}
@@ -91,7 +97,7 @@ const IndicesDetailsComponent: React.FC<Props> = ({
             // when surrounding accordions get toggled and affect the layout
             {...(pattern === firstOpenNonEmptyPattern && { openPatternsUpdatedAt })}
           />
-        </StyledPatternWrapperFlexItem>
+        </EuiFlexItem>
       ))}
     </div>
   );

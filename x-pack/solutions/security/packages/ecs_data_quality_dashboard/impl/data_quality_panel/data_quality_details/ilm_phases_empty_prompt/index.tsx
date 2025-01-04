@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { EuiEmptyPrompt, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiSpacer, EuiText, EuiTitle, useEuiTheme } from '@elastic/eui';
 import React, { useMemo } from 'react';
-import styled from 'styled-components';
+import { css } from '@emotion/react';
 
 import {
   COLD_DESCRIPTION,
@@ -23,16 +23,21 @@ import {
 } from '../../translations';
 import * as i18n from './translations';
 
-const Ul = styled.ul`
-  text-align: left;
-`;
-
-const Li = styled.ul`
-  margin-bottom: ${({ theme }) => theme.eui.euiSizeS};
-  text-align: left;
-`;
+const useStyles = () => {
+  const { euiTheme } = useEuiTheme();
+  return {
+    ul: css({
+      textAlign: 'left',
+    }),
+    li: css({
+      marginBottom: euiTheme.size.s,
+      textAlign: 'left',
+    }),
+  };
+};
 
 const IlmPhasesEmptyPromptComponent: React.FC = () => {
+  const styles = useStyles();
   const title = useMemo(() => <h2>{i18n.TITLE}</h2>, []);
   const body = useMemo(() => <p>{i18n.BODY}</p>, []);
   const footer = useMemo(
@@ -44,23 +49,23 @@ const IlmPhasesEmptyPromptComponent: React.FC = () => {
 
         <EuiSpacer size="s" />
 
-        <Ul>
-          <Li>
+        <ul css={styles.ul}>
+          <li css={styles.li}>
             <strong>{HOT}</strong>
             {': '}
             {HOT_DESCRIPTION}
-          </Li>
-          <Li>
+          </li>
+          <li css={styles.li}>
             <strong>{WARM}</strong>
             {': '}
             {WARM_DESCRIPTION}
-          </Li>
-          <Li>
+          </li>
+          <li css={styles.li}>
             <strong>{UNMANAGED}</strong>
             {': '}
             {UNMANAGED_DESCRIPTION}
-          </Li>
-        </Ul>
+          </li>
+        </ul>
 
         <EuiSpacer size="m" />
 
@@ -74,21 +79,21 @@ const IlmPhasesEmptyPromptComponent: React.FC = () => {
 
         <EuiSpacer size="s" />
 
-        <Ul>
-          <Li>
+        <ul css={styles.ul}>
+          <li css={styles.li}>
             <strong>{COLD}</strong>
             {': '}
             {COLD_DESCRIPTION}
-          </Li>
-          <Li>
+          </li>
+          <li css={styles.li}>
             <strong>{FROZEN}</strong>
             {': '}
             {FROZEN_DESCRIPTION}
-          </Li>
-        </Ul>
+          </li>
+        </ul>
       </div>
     ),
-    []
+    [styles.li, styles.ul]
   );
 
   return <EuiEmptyPrompt body={body} footer={footer} title={title} />;
