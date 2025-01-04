@@ -28,6 +28,8 @@ interface Props {
   onChangeSort: (sorting: EuiDataGridSorting['columns'][0]) => void;
   onChangePage: (nextPage: number) => void;
   onFilterByType: (value: string, checked: EntityTypeCheckOptions) => void;
+  definitionIndexPatterns: Record<string, string[]>;
+  isEntityDefinitionIndexPatternsLoading: boolean;
 }
 
 const PAGE_SIZE = 20;
@@ -41,6 +43,8 @@ export function EntitiesGrid({
   onChangePage,
   onChangeSort,
   onFilterByType,
+  definitionIndexPatterns,
+  isEntityDefinitionIndexPatternsLoading,
 }: Props) {
   const [showActions, setShowActions] = useState<boolean>(true);
 
@@ -75,7 +79,7 @@ export function EntitiesGrid({
       }
 
       const columnEntityTableId = columnId as EntityColumnIds;
-      const entityType = entity.entityType;
+      const { entityType } = entity;
 
       switch (columnEntityTableId) {
         case 'alertsCount':
@@ -119,12 +123,21 @@ export function EntitiesGrid({
         case 'entityDisplayName':
           return <EntityName entity={entity} />;
         case 'actions':
-          return <EntityActions entity={entity} setShowActions={setShowActions} />;
+          return isEntityDefinitionIndexPatternsLoading ? (
+            <EuiLoadingSpinner size="s" />
+          ) : (
+            <EntityActions
+              entity={entity}
+              definitionIndexPatterns={definitionIndexPatterns[entity.entityType]}
+              isEntityDefinitionIndexPatternsLoading={isEntityDefinitionIndexPatternsLoading}
+              setShowActions={setShowActions}
+            />
+          );
         default:
           return null;
       }
     },
-    [entities, onFilterByType]
+    [definitionIndexPatterns, entities, isEntityDefinitionIndexPatternsLoading, onFilterByType]
   );
 
   if (loading) {

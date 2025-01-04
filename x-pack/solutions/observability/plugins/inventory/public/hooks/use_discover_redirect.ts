@@ -4,29 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useCallback, useMemo } from 'react';
+import { useCallback } from 'react';
 import type { InventoryEntity } from '../../common/entities';
 import { useAdHocDataView } from './use_adhoc_data_view';
-import { useFetchEntityDefinition } from './use_fetch_entity_definition';
 import { useKibana } from './use_kibana';
 
-export const useDiscoverRedirect = (entity: InventoryEntity) => {
+export const useDiscoverRedirect = (entity: InventoryEntity, definitionIndexPatterns: string) => {
   const {
     services: { share, application, entityManager },
   } = useKibana();
-  const { entityDefinitions, isEntityDefinitionLoading } = useFetchEntityDefinition(
-    entity.entityDefinitionId
-  );
-
-  const title = useMemo(
-    () =>
-      !isEntityDefinitionLoading && entityDefinitions && entityDefinitions?.length > 0
-        ? entityDefinitions[0]?.indexPatterns?.join(',')
-        : '',
-    [entityDefinitions, isEntityDefinitionLoading]
-  );
-
-  const { dataView } = useAdHocDataView(title);
+  const { dataView } = useAdHocDataView(definitionIndexPatterns ?? '');
 
   const discoverLocator = share.url.locators.get('DISCOVER_APP_LOCATOR');
 
@@ -54,5 +41,5 @@ export const useDiscoverRedirect = (entity: InventoryEntity) => {
     entityManager.entityClient,
   ]);
 
-  return { getDiscoverEntitiesRedirectUrl, isEntityDefinitionLoading };
+  return { getDiscoverEntitiesRedirectUrl };
 };
