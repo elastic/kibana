@@ -8,6 +8,7 @@ xpack.fleet.internal.activeAgentsSoftLimit: 25000
 xpack.fleet.internal.onlyAllowAgentUpgradeToKnownVersions: true
 xpack.fleet.internal.retrySetupOnBoot: true
 xpack.fleet.internal.useMeteringApi: true
+xpack.searchSynonyms.enabled: false
 
 ## Fine-tune the feature privileges.
 xpack.features.overrides:
