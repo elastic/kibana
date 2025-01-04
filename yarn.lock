@@ -7073,7 +7073,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/security-plugin@link:x-pack/plugins/security":
+"@kbn/security-plugin@link:x-pack/platform/plugins/shared/security":
   version "0.0.0"
   uid ""
 

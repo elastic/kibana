@@ -7,7 +7,7 @@
 
 import type { KibanaRequest } from '@kbn/core/server';
 
-// Extended version of x-pack/plugins/security/server/authentication/http_authentication/http_authorization_header.ts
+// Extended version of x-pack/platform/plugins/shared/security/server/authentication/http_authentication/http_authorization_header.ts
 // to prevent bundle being required in security_solution
 export class HTTPAuthorizationHeader {
   /**
