@@ -66,7 +66,7 @@ describe('Session index', () => {
         name: indexTemplateName,
       });
       expect(mockElasticsearchClient.indices.exists).toHaveBeenCalledWith({
-        index: getSessionIndexSettings({ indexName, aliasName }).index,
+        index: aliasName,
       });
     }
 
@@ -247,10 +247,10 @@ describe('Session index', () => {
         name: aliasName,
       });
       expect(mockElasticsearchClient.indices.getMapping).toHaveBeenCalledTimes(1);
-      expect(mockElasticsearchClient.indices.getMapping).toHaveBeenCalledWith({ index: indexName });
+      expect(mockElasticsearchClient.indices.getMapping).toHaveBeenCalledWith({ index: aliasName });
       expect(mockElasticsearchClient.indices.putMapping).toHaveBeenCalledTimes(1);
       expect(mockElasticsearchClient.indices.putMapping).toHaveBeenCalledWith({
-        index: indexName,
+        index: aliasName,
         ...getSessionIndexSettings({ indexName, aliasName }).mappings,
       });
     });
@@ -279,10 +279,10 @@ describe('Session index', () => {
         name: aliasName,
       });
       expect(mockElasticsearchClient.indices.getMapping).toHaveBeenCalledTimes(1);
-      expect(mockElasticsearchClient.indices.getMapping).toHaveBeenCalledWith({ index: indexName });
+      expect(mockElasticsearchClient.indices.getMapping).toHaveBeenCalledWith({ index: aliasName });
       expect(mockElasticsearchClient.indices.putMapping).toHaveBeenCalledTimes(1);
       expect(mockElasticsearchClient.indices.putMapping).toHaveBeenCalledWith({
-        index: indexName,
+        index: aliasName,
         ...getSessionIndexSettings({ indexName, aliasName }).mappings,
       });
     });
@@ -311,7 +311,7 @@ describe('Session index', () => {
         name: aliasName,
       });
       expect(mockElasticsearchClient.indices.getMapping).toHaveBeenCalledTimes(1);
-      expect(mockElasticsearchClient.indices.getMapping).toHaveBeenCalledWith({ index: indexName });
+      expect(mockElasticsearchClient.indices.getMapping).toHaveBeenCalledWith({ index: aliasName });
       expect(mockElasticsearchClient.indices.putMapping).not.toHaveBeenCalled();
     });
 
