@@ -11,6 +11,7 @@ import React from 'react';
 import { coreMock } from '@kbn/core/public/mocks';
 import { getElasticOutline, getElasticLogo } from '@kbn/presentation-util-plugin/common';
 import { Render, waitFor } from '@kbn/presentation-util-plugin/public/__stories__';
+import type { Meta } from '@storybook/react';
 import { getRevealImageRenderer } from '..';
 import { Origin } from '../../../common/types/expression_functions';
 
@@ -42,4 +43,4 @@ export const Default = {
 
   name: 'default',
   decorators: [waitFor(getElasticLogo()), waitFor(getElasticOutline())],
-};
+} as Meta;
