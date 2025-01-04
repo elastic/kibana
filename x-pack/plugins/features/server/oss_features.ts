@@ -29,17 +29,11 @@ export const buildOSSFeatures = ({
         }),
       },
       id: 'discover',
-      name: i18n.translate('xpack.features.discoverFeatureName', {
-        defaultMessage: 'Discover (DEPRECATED)',
-      }),
       order: 100,
       ...getBaseDiscoverFeature({ includeReporting, version: 'v1' }),
     },
     {
       id: 'discover_v2',
-      name: i18n.translate('xpack.features.discoverFeatureNameV2', {
-        defaultMessage: 'Discover',
-      }),
       order: 101,
       ...getBaseDiscoverFeature({ includeReporting, version: 'v2' }),
     },
@@ -52,17 +46,11 @@ export const buildOSSFeatures = ({
         }),
       },
       id: 'visualize',
-      name: i18n.translate('xpack.features.visualizeFeatureName', {
-        defaultMessage: 'Visualize Library (DEPRECATED)',
-      }),
       order: 700,
       ...getBaseVisualizeFeature({ includeReporting, version: 'v1' }),
     },
     {
       id: 'visualize_v2',
-      name: i18n.translate('xpack.features.visualizeFeatureNameV2', {
-        defaultMessage: 'Visualize Library',
-      }),
       order: 701,
       ...getBaseVisualizeFeature({ includeReporting, version: 'v2' }),
     },
@@ -75,17 +63,11 @@ export const buildOSSFeatures = ({
         }),
       },
       id: 'dashboard',
-      name: i18n.translate('xpack.features.dashboardFeatureName', {
-        defaultMessage: 'Dashboard (DEPRECATED)',
-      }),
       order: 200,
       ...getBaseDashboardFeature({ includeReporting, version: 'v1' }),
     },
     {
       id: 'dashboard_v2',
-      name: i18n.translate('xpack.features.dashboardFeatureNameV2', {
-        defaultMessage: 'Dashboard',
-      }),
       order: 201,
       ...getBaseDashboardFeature({ includeReporting, version: 'v2' }),
     },
@@ -366,7 +348,7 @@ const getBaseDiscoverFeature = ({
 }: {
   includeReporting: boolean;
   version: 'v1' | 'v2';
-}): Omit<KibanaFeatureConfig, 'id' | 'name' | 'order'> => {
+}): Omit<KibanaFeatureConfig, 'id' | 'order'> => {
   const apiAllPrivileges = ['fileUpload:analyzeFile'];
   const savedObjectAllPrivileges = ['search'];
   const uiAllPrivileges = ['show', 'save'];
@@ -382,6 +364,9 @@ const getBaseDiscoverFeature = ({
   }
 
   return {
+    name: i18n.translate('xpack.features.discoverFeatureName', {
+      defaultMessage: 'Discover',
+    }),
     management: {
       kibana: ['search_sessions'],
       ...(includeReporting ? { insightsAndAlerting: ['reporting'] } : {}),
@@ -512,7 +497,7 @@ const getBaseVisualizeFeature = ({
 }: {
   includeReporting: boolean;
   version: 'v1' | 'v2';
-}): Omit<KibanaFeatureConfig, 'id' | 'name' | 'order'> => {
+}): Omit<KibanaFeatureConfig, 'id' | 'order'> => {
   const apiAllPrivileges = [];
   const savedObjectAllPrivileges = ['visualization', 'lens'];
   const uiAllPrivileges = ['show', 'delete', 'save'];
@@ -528,6 +513,9 @@ const getBaseVisualizeFeature = ({
   }
 
   return {
+    name: i18n.translate('xpack.features.visualizeFeatureName', {
+      defaultMessage: 'Visualize Library',
+    }),
     management: {
       ...(includeReporting ? { insightsAndAlerting: ['reporting'] } : {}),
     },
@@ -623,7 +611,7 @@ const getBaseDashboardFeature = ({
 }: {
   includeReporting: boolean;
   version: 'v1' | 'v2';
-}): Omit<KibanaFeatureConfig, 'id' | 'name' | 'order'> => {
+}): Omit<KibanaFeatureConfig, 'id' | 'order'> => {
   const apiAllPrivileges = ['bulkGetUserProfiles', 'dashboardUsageStats'];
   const savedObjectAllPrivileges = ['dashboard'];
   const uiAllPrivileges = ['createNew', 'show', 'showWriteControls'];
@@ -649,6 +637,9 @@ const getBaseDashboardFeature = ({
   }
 
   return {
+    name: i18n.translate('xpack.features.dashboardFeatureName', {
+      defaultMessage: 'Dashboard',
+    }),
     management: {
       kibana: ['search_sessions'],
       ...(includeReporting ? { insightsAndAlerting: ['reporting'] } : {}),

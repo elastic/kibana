@@ -171,7 +171,7 @@ export class MapsPlugin implements Plugin {
 
     const getBaseMapsFeature = (
       version: 'v1' | 'v2'
-    ): Omit<KibanaFeatureConfig, 'id' | 'name' | 'order'> => {
+    ): Omit<KibanaFeatureConfig, 'id' | 'order'> => {
       const apiAllPrivileges = [];
       const savedObjectAllPrivileges = [MAP_SAVED_OBJECT_TYPE];
       const uiAllPrivileges = ['save', 'show'];
@@ -187,6 +187,9 @@ export class MapsPlugin implements Plugin {
       }
 
       return {
+        name: i18n.translate('xpack.maps.featureRegistry.mapsFeatureName', {
+          defaultMessage: 'Maps',
+        }),
         category: DEFAULT_APP_CATEGORIES.kibana,
         scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
         app: [APP_ID, 'kibana'],
@@ -243,18 +246,12 @@ export class MapsPlugin implements Plugin {
         }),
       },
       id: APP_ID,
-      name: i18n.translate('xpack.maps.featureRegistry.mapsFeatureName', {
-        defaultMessage: 'Maps (DEPRECATED)',
-      }),
       order: 400,
       ...getBaseMapsFeature('v1'),
     });
 
     features.registerKibanaFeature({
       id: 'maps_v2',
-      name: i18n.translate('xpack.maps.featureRegistry.mapsFeatureNameV2', {
-        defaultMessage: 'Maps',
-      }),
       order: 401,
       ...getBaseMapsFeature('v2'),
     });
