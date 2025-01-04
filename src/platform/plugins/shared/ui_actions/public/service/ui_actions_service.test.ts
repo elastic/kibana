@@ -309,7 +309,7 @@ describe('UiActionsService', () => {
       expect(actions2[0].id).toBe(testAction1.id);
     });
 
-    test('new attachments in fork do not appear in original service', () => {
+    test('new attachments in fork do not appear in original service', async () => {
       const service1 = new UiActionsService();
 
       service1.registerTrigger({
@@ -321,16 +321,16 @@ describe('UiActionsService', () => {
 
       const service2 = service1.fork();
 
-      expect(service1.getTriggerActions(FOO_TRIGGER)).toHaveLength(1);
-      expect(service2.getTriggerActions(FOO_TRIGGER)).toHaveLength(1);
+      expect(await service1.getTriggerActions(FOO_TRIGGER)).toHaveLength(1);
+      expect(await service2.getTriggerActions(FOO_TRIGGER)).toHaveLength(1);
 
       service2.addTriggerAction(FOO_TRIGGER, testAction2);
 
-      expect(service1.getTriggerActions(FOO_TRIGGER)).toHaveLength(1);
-      expect(service2.getTriggerActions(FOO_TRIGGER)).toHaveLength(2);
+      expect(await service1.getTriggerActions(FOO_TRIGGER)).toHaveLength(1);
+      expect(await service2.getTriggerActions(FOO_TRIGGER)).toHaveLength(2);
     });
 
-    test('new attachments in original service do not appear in fork', () => {
+    test('new attachments in original service do not appear in fork', async () => {
       const service1 = new UiActionsService();
 
       service1.registerTrigger({
@@ -342,13 +342,13 @@ describe('UiActionsService', () => {
 
       const service2 = service1.fork();
 
-      expect(service1.getTriggerActions(FOO_TRIGGER)).toHaveLength(1);
-      expect(service2.getTriggerActions(FOO_TRIGGER)).toHaveLength(1);
+      expect(await service1.getTriggerActions(FOO_TRIGGER)).toHaveLength(1);
+      expect(await service2.getTriggerActions(FOO_TRIGGER)).toHaveLength(1);
 
       service1.addTriggerAction(FOO_TRIGGER, testAction2);
 
-      expect(service1.getTriggerActions(FOO_TRIGGER)).toHaveLength(2);
-      expect(service2.getTriggerActions(FOO_TRIGGER)).toHaveLength(1);
+      expect(await service1.getTriggerActions(FOO_TRIGGER)).toHaveLength(2);
+      expect(await service2.getTriggerActions(FOO_TRIGGER)).toHaveLength(1);
     });
   });
 
@@ -373,7 +373,7 @@ describe('UiActionsService', () => {
       });
     });
 
-    test('can register action', () => {
+    test('can register action', async () => {
       const actions: ActionRegistry = new Map();
       const service = new UiActionsService({ actions });
 
@@ -382,7 +382,7 @@ describe('UiActionsService', () => {
         order: 13,
       } as unknown as ActionDefinition);
 
-      expect(actions.get(ACTION_HELLO_WORLD)).toMatchObject({
+      expect(await actions.get(ACTION_HELLO_WORLD)?.()).toMatchObject({
         id: ACTION_HELLO_WORLD,
         order: 13,
       });
@@ -408,7 +408,7 @@ describe('UiActionsService', () => {
       expect(actions[0].id).toBe(ACTION_HELLO_WORLD);
     });
 
-    test('can detach an action from a trigger', () => {
+    test('can detach an action from a trigger', async () => {
       const service = new UiActionsService();
 
       const trigger: Trigger = {
@@ -424,7 +424,7 @@ describe('UiActionsService', () => {
       service.addTriggerAction(trigger.id, action);
       service.detachAction(trigger.id, action.id);
 
-      const actions2 = service.getTriggerActions(trigger.id);
+      const actions2 = await service.getTriggerActions(trigger.id);
       expect(actions2).toEqual([]);
     });
 
