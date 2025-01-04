@@ -7513,7 +7513,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/spaces-plugin@link:x-pack/plugins/spaces":
+"@kbn/spaces-plugin@link:x-pack/platform/plugins/shared/spaces":
   version "0.0.0"
   uid ""
 

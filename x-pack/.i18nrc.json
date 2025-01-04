@@ -156,7 +156,7 @@
     ],
     "xpack.slo": "solutions/observability/plugins/slo",
     "xpack.snapshotRestore": "platform/plugins/private/snapshot_restore",
-    "xpack.spaces": "plugins/spaces",
+    "xpack.spaces": "platform/plugins/shared/spaces",
     "xpack.savedObjectsTagging": [
       "platform/plugins/private/saved_objects_tagging"
     ],
