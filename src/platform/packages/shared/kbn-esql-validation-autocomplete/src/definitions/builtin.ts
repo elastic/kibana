@@ -10,7 +10,7 @@
 import { i18n } from '@kbn/i18n';
 import { ESQL_NUMBER_TYPES, isNumericType } from '../shared/esql_types';
 import type { FunctionDefinition, FunctionParameterType, FunctionReturnType } from './types';
-
+import { operatorsFunctionDefinitions } from './generated/operators';
 type MathFunctionSignature = [FunctionParameterType, FunctionParameterType, FunctionReturnType];
 
 function createMathDefinition(
@@ -384,7 +384,7 @@ export const comparisonFunctions: FunctionDefinition[] = [
   },
 ].map((op): FunctionDefinition => createComparisonDefinition(op));
 
-const likeFunctions: FunctionDefinition[] = [
+const notLikeFunctions: FunctionDefinition[] = [
   // Skip the insensitive case equality until it gets restored back
   // new special comparison operator for strings only
   // {
@@ -393,24 +393,12 @@ const likeFunctions: FunctionDefinition[] = [
   //     defaultMessage: 'Case insensitive equality',
   //   }),
   // },
-  {
-    name: 'like',
-    description: i18n.translate('kbn-esql-validation-autocomplete.esql.definition.likeDoc', {
-      defaultMessage: 'Filter data based on string patterns',
-    }),
-  },
   { name: 'not_like', description: '' },
-  {
-    name: 'rlike',
-    description: i18n.translate('kbn-esql-validation-autocomplete.esql.definition.rlikeDoc', {
-      defaultMessage: 'Filter data based on string regular expressions',
-    }),
-  },
   { name: 'not_rlike', description: '' },
 ].map(({ name, description }) => {
   const def: FunctionDefinition = {
     type: 'builtin' as const,
-    ignoreAsSuggestion: /not/.test(name),
+    ignoreAsSuggestion: true,
     name,
     description,
     supportedCommands: ['eval', 'where', 'row', 'sort'],
@@ -450,14 +438,7 @@ const likeFunctions: FunctionDefinition[] = [
   return def;
 });
 
-const inFunctions: FunctionDefinition[] = [
-  {
-    name: 'in',
-    description: i18n.translate('kbn-esql-validation-autocomplete.esql.definition.inDoc', {
-      defaultMessage:
-        'Tests if the value an expression takes is contained in a list of other expressions',
-    }),
-  },
+const notInFunctions: FunctionDefinition[] = [
   { name: 'not_in', description: '' },
 ].map<FunctionDefinition>(({ name, description }) => ({
   // set all arrays to type "any" for now
@@ -470,7 +451,7 @@ const inFunctions: FunctionDefinition[] = [
   //
   // we need to revisit with more robust validation
   type: 'builtin',
-  ignoreAsSuggestion: /not/.test(name),
+  ignoreAsSuggestion: true,
   name,
   description,
   supportedCommands: ['eval', 'where', 'row', 'sort'],
@@ -645,10 +626,9 @@ const otherDefinitions: FunctionDefinition[] = [
 ];
 
 export const builtinFunctions: FunctionDefinition[] = [
-  ...mathFunctions,
-  ...comparisonFunctions,
-  ...likeFunctions,
-  ...inFunctions,
+  ...operatorsFunctionDefinitions,
+  ...notInFunctions,
+  ...notLikeFunctions,
   ...logicalOperators,
   ...nullFunctions,
   ...otherDefinitions,

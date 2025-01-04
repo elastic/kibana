@@ -12,7 +12,7 @@ import { writeFile } from 'fs/promises';
 import { join } from 'path';
 import _ from 'lodash';
 import type { RecursivePartial } from '@kbn/utility-types';
-import { FunctionDefinition } from '../src/definitions/types';
+import { FunctionDefinition, Signature } from '../src/definitions/types';
 import { FULL_TEXT_SEARCH_FUNCTIONS } from '../src/shared/constants';
 const aliasTable: Record<string, string[]> = {
   to_version: ['to_ver'],
@@ -299,9 +299,310 @@ function getFunctionDefinition(ESFunctionDefinition: Record<string, any>): Funct
   return ret as FunctionDefinition;
 }
 
+const comparisonOperatorSignatures = (['ip', 'version'] as const).flatMap((type) => [
+  {
+    params: [
+      { name: 'left', type },
+      { name: 'right', type: 'text' as const, constantOnly: true },
+    ],
+    returnType: 'boolean' as const,
+  },
+  {
+    params: [
+      { name: 'left', type: 'text' as const, constantOnly: true },
+      { name: 'right', type },
+    ],
+    returnType: 'boolean' as const,
+  },
+]);
+const operatorsMeta: Record<
+  string,
+  {
+    name: string;
+    isMathOperator: boolean;
+    isComparisonOperator: boolean;
+    extraSignatures?: Signature[];
+  }
+> = {
+  add: {
+    name: '+',
+    isMathOperator: true,
+    isComparisonOperator: false,
+    extraSignatures: [
+      {
+        params: [
+          { name: 'left', type: 'time_literal' as const },
+          { name: 'right', type: 'date' as const },
+        ],
+        returnType: 'date' as const,
+      },
+      {
+        params: [
+          { name: 'left', type: 'date' as const },
+          { name: 'right', type: 'time_literal' as const },
+        ],
+        returnType: 'date' as const,
+      },
+    ],
+  },
+  sub: {
+    name: '-',
+    isMathOperator: true,
+    isComparisonOperator: false,
+    extraSignatures: [
+      {
+        params: [
+          { name: 'left', type: 'time_literal' as const },
+          { name: 'right', type: 'date' as const },
+        ],
+        returnType: 'date' as const,
+      },
+      {
+        params: [
+          { name: 'left', type: 'date' as const },
+          { name: 'right', type: 'time_literal' as const },
+        ],
+        returnType: 'date' as const,
+      },
+    ],
+  },
+  div: { name: '/', isMathOperator: true, isComparisonOperator: false },
+  equals: {
+    name: '==',
+    isMathOperator: false,
+    isComparisonOperator: true,
+    extraSignatures: [
+      ...comparisonOperatorSignatures,
+      {
+        params: [
+          { name: 'left', type: 'boolean' as const },
+          { name: 'right', type: 'boolean' as const },
+        ],
+        returnType: 'boolean' as const,
+      },
+      // constant strings okay because of implicit casting
+      {
+        params: [
+          { name: 'left', type: 'boolean' as const },
+          { name: 'right', type: 'keyword' as const, constantOnly: true },
+        ],
+        returnType: 'boolean' as const,
+      },
+      {
+        params: [
+          { name: 'left', type: 'keyword' as const, constantOnly: true },
+          { name: 'right', type: 'boolean' as const },
+        ],
+        returnType: 'boolean' as const,
+      },
+    ],
+  },
+  greater_than: {
+    name: '>',
+    isMathOperator: false,
+    isComparisonOperator: true,
+    extraSignatures: comparisonOperatorSignatures,
+  },
+  greater_than_or_equal: {
+    name: '>=',
+    isMathOperator: false,
+    isComparisonOperator: true,
+    extraSignatures: comparisonOperatorSignatures,
+  },
+  less_than: {
+    name: '<',
+    isMathOperator: false,
+    isComparisonOperator: true,
+    extraSignatures: comparisonOperatorSignatures,
+  },
+  less_than_or_equal: { name: '<=', isMathOperator: false, isComparisonOperator: true },
+  not_equals: {
+    name: '!=',
+    isMathOperator: false,
+    isComparisonOperator: true,
+    extraSignatures: [
+      ...comparisonOperatorSignatures,
+      {
+        params: [
+          { name: 'left', type: 'boolean' as const },
+          { name: 'right', type: 'boolean' as const },
+        ],
+        returnType: 'boolean' as const,
+      },
+      // constant strings okay because of implicit casting
+      {
+        params: [
+          { name: 'left', type: 'boolean' as const },
+          { name: 'right', type: 'keyword' as const, constantOnly: true },
+        ],
+        returnType: 'boolean' as const,
+      },
+      {
+        params: [
+          { name: 'left', type: 'keyword' as const, constantOnly: true },
+          { name: 'right', type: 'boolean' as const },
+        ],
+        returnType: 'boolean' as const,
+      },
+    ],
+  },
+  mod: { name: '%', isMathOperator: true, isComparisonOperator: false },
+  mul: { name: '*', isMathOperator: true, isComparisonOperator: false },
+};
+
+const operatorNames: Record<string, string> = {
+  add: '+',
+  sub: '-',
+  div: '/',
+  equals: '==',
+  greater_than: '>',
+  greater_than_or_equal: '>=',
+  less_than: '<',
+  less_than_or_equal: '<=',
+  not_equals: '!=',
+  mod: '%',
+  mul: '*',
+};
+const validators: Record<string, string> = {
+  div: `(fnDef) => {
+    const [left, right] = fnDef.args;
+    const messages = [];
+    if (!Array.isArray(left) && !Array.isArray(right)) {
+      if (right.type === 'literal' && isNumericType(right.literalType)) {
+        if (right.value === 0) {
+          messages.push({
+            type: 'warning' as const,
+            code: 'divideByZero',
+            text: i18n.translate(
+              'kbn-esql-validation-autocomplete.esql.divide.warning.divideByZero',
+              {
+                defaultMessage: 'Cannot divide by zero: {left}/{right}',
+                values: {
+                  left: left.text,
+                  right: right.value,
+                },
+              }
+            ),
+            location: fnDef.location,
+          });
+        }
+      }
+    }
+    return messages;
+  }`,
+  mod: `(fnDef) => {
+    const [left, right] = fnDef.args;
+    const messages = [];
+    if (!Array.isArray(left) && !Array.isArray(right)) {
+      if (right.type === 'literal' && isNumericType(right.literalType)) {
+        if (right.value === 0) {
+          messages.push({
+            type: 'warning' as const,
+            code: 'moduleByZero',
+            text: i18n.translate(
+              'kbn-esql-validation-autocomplete.esql.divide.warning.zeroModule',
+              {
+                defaultMessage: 'Module by zero can return null value: {left}%{right}',
+                values: {
+                  left: left.text,
+                  right: right.value,
+                },
+              }
+            ),
+            location: fnDef.location,
+          });
+        }
+      }
+    }
+    return messages;
+  }`,
+};
+
+/**
+ * Elasticsearch doc exports name as 'lhs' or 'rhs' instead of 'left' or 'right'
+ * @param str
+ * @returns
+ */
+const replaceParamName = (str: string) => {
+  switch (str) {
+    case 'lhs':
+      return 'left';
+    case 'rhs':
+      return 'right';
+
+    // @todo: For in function where Kibana doesn't interpret field and inlist
+    case 'field':
+      return 'left';
+    case 'inlist':
+      return 'right';
+    default:
+      return str;
+  }
+};
+
+const enrichOperators = (
+  operatorsFunctionDefinitions: FunctionDefinition[]
+): FunctionDefinition[] => {
+  // @ts-expect-error Stringified version of the validator function
+  return operatorsFunctionDefinitions.map((op) => {
+    const isMathOperator =
+      Object.hasOwn(operatorsMeta, op.name) && operatorsMeta[op.name]?.isMathOperator;
+    const isComparisonOperator =
+      Object.hasOwn(operatorsMeta, op.name) && operatorsMeta[op.name]?.isComparisonOperator;
+
+    const isInOperator = op.name === 'in';
+    const isLikeOperator = /like/i.test(op.name);
+
+    const signatures = op.signatures.map((s) => ({
+      ...s,
+      // Elasticsearch docs uses lhs and rhs instead of left and right that Kibana code uses
+      params: s.params.map((param) => ({ ...param, name: replaceParamName(param.name) })),
+    }));
+    let supportedCommands = op.supportedCommands;
+    let supportedOptions = op.supportedOptions;
+    if (isComparisonOperator) {
+      supportedCommands = _.uniq([...op.supportedCommands, 'eval', 'where', 'row', 'sort']);
+      supportedOptions = ['by'];
+    }
+    if (isMathOperator) {
+      supportedCommands = _.uniq([
+        ...op.supportedCommands,
+        'eval',
+        'where',
+        'row',
+        'stats',
+        'metrics',
+        'sort',
+      ]);
+      supportedOptions = ['by'];
+    }
+    if (isInOperator || isLikeOperator) {
+      supportedCommands = _.uniq([...op.supportedCommands, 'eval', 'where', 'row', 'sort']);
+    }
+    if (
+      Object.hasOwn(operatorsMeta, op.name) &&
+      Array.isArray(operatorsMeta[op.name]?.extraSignatures)
+    ) {
+      signatures.push(...(operatorsMeta[op.name].extraSignatures ?? []));
+    }
+
+    return {
+      ...op,
+      signatures,
+      // Elasticsearch docs does not include the full supported commands for math operators
+      // so we are overriding to add proper support
+      supportedCommands,
+      supportedOptions,
+      // @TODO: change to operator type
+      type: 'builtin' as const,
+      validate: validators[op.name],
+    };
+  });
+};
+
 function printGeneratedFunctionsFile(
   functionDefinitions: FunctionDefinition[],
-  functionsType: 'aggregation' | 'scalar'
+  functionsType: 'aggregation' | 'scalar' | 'operators'
 ) {
   /**
    * Deals with asciidoc internal cross-references in the function descriptions
@@ -348,7 +649,7 @@ function printGeneratedFunctionsFile(
     return `// Do not edit this manually... generated by scripts/generate_function_definitions.ts
     const ${getDefinitionName(name)}: FunctionDefinition = {
     type: '${type}',
-    name: '${name}',
+    name: '${operatorNames[name] ?? name}',
     description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.${name}', { defaultMessage: ${JSON.stringify(
       removeAsciiDocInternalCrossReferences(removeInlineAsciiDocLinks(description), functionNames)
     )} }),${functionDefinition.ignoreAsSuggestion ? 'ignoreAsSuggestion: true,\n' : ''}
@@ -389,6 +690,8 @@ ${
 import { isLiteralItem } from '../../shared/helpers';`
     : ''
 }
+${functionsType === 'operators' ? `import { isNumericType } from '../../shared/esql_types';` : ''}
+
 
 
 `;
@@ -428,13 +731,17 @@ import { isLiteralItem } from '../../shared/helpers';`
 
   const scalarFunctionDefinitions: FunctionDefinition[] = [];
   const aggFunctionDefinitions: FunctionDefinition[] = [];
+  const operatorDefinitions: FunctionDefinition[] = [];
+
   for (const ESDefinition of ESFunctionDefinitions) {
     if (aliases.has(ESDefinition.name) || excludedFunctions.has(ESDefinition.name)) {
       continue;
     }
 
     const functionDefinition = getFunctionDefinition(ESDefinition);
-
+    if (functionDefinition.type === 'operator') {
+      operatorDefinitions.push(functionDefinition);
+    }
     if (functionDefinition.type === 'eval') {
       scalarFunctionDefinitions.push(functionDefinition);
     } else if (functionDefinition.type === 'agg') {
@@ -451,5 +758,9 @@ import { isLiteralItem } from '../../shared/helpers';`
   await writeFile(
     join(__dirname, '../src/definitions/generated/aggregation_functions.ts'),
     printGeneratedFunctionsFile(aggFunctionDefinitions, 'aggregation')
+  );
+  await writeFile(
+    join(__dirname, '../src/definitions/generated/operators.ts'),
+    printGeneratedFunctionsFile(enrichOperators(operatorDefinitions), 'operators')
   );
 })();

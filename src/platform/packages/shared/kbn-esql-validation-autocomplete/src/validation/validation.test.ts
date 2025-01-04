@@ -455,7 +455,7 @@ describe('validation logic', () => {
           testErrorsAndWarnings(`row var = now() - 1 ${capitalize(timeLiteral.name)}`, []);
           testErrorsAndWarnings(`row var = now() + 1 ${timeLiteral.name}`, []);
           testErrorsAndWarnings(`row 1 ${timeLiteral.name} + 1 year`, [
-            `Argument of [+] must be [date], found value [1 ${timeLiteral.name}] type [duration]`,
+            `Argument of [+] must be [date], found value [1 year] type [duration]`,
           ]);
           for (const op of ['*', '/', '%']) {
             testErrorsAndWarnings(`row var = now() ${op} 1 ${timeLiteral.name}`, [
@@ -1125,13 +1125,13 @@ describe('validation logic', () => {
         testErrorsAndWarnings(
           `from a_index | eval 1 ${op} "1"`,
           ['+', '-'].includes(op)
-            ? [`Argument of [${op}] must be [date_period], found value [1] type [integer]`]
+            ? [`Argument of [${op}] must be [date], found value [1] type [integer]`]
             : [`Argument of [${op}] must be [double], found value [\"1\"] type [keyword]`]
         );
         testErrorsAndWarnings(
           `from a_index | eval "1" ${op} 1`,
           ['+', '-'].includes(op)
-            ? [`Argument of [${op}] must be [date_period], found value [1] type [integer]`]
+            ? [`Argument of [${op}] must be [date], found value [1] type [integer]`]
             : [`Argument of [${op}] must be [double], found value [\"1\"] type [keyword]`]
         );
         // TODO: enable when https://github.com/elastic/elasticsearch/issues/108432 is complete
@@ -1214,7 +1214,7 @@ describe('validation logic', () => {
 
       testErrorsAndWarnings('from a_index | eval textField in textField)', [
         "SyntaxError: missing '(' at 'textField'",
-        'Error: [in] function expects exactly 2 arguments, got 1.',
+        'Error: [in] function expects at least 2 arguments, got 1.',
       ]);
       testErrorsAndWarnings('from a_index | eval textField not in textField', [
         "SyntaxError: missing '(' at 'textField'",
@@ -1272,7 +1272,7 @@ describe('validation logic', () => {
           testErrorsAndWarnings(`from a_index | eval var = dateField - 1 ${capitalize(unit)}`, []);
           testErrorsAndWarnings(`from a_index | eval var = dateField + 1 ${unit}`, []);
           testErrorsAndWarnings(`from a_index | eval 1 ${unit} + 1 year`, [
-            `Argument of [+] must be [date], found value [1 ${unit}] type [duration]`,
+            `Argument of [+] must be [date], found value [1 year] type [duration]`,
           ]);
           for (const op of ['*', '/', '%']) {
             testErrorsAndWarnings(`from a_index | eval var = now() ${op} 1 ${unit}`, [
@@ -1647,7 +1647,7 @@ describe('validation logic', () => {
 
       testErrorsAndWarnings('from a_index | eval 1 + "2"', [
         // just a counter-case to make sure the previous test is meaningful
-        'Argument of [+] must be [date_period], found value [1] type [integer]',
+        'Argument of [+] must be [date], found value [1] type [integer]',
       ]);
       testErrorsAndWarnings(
         'from a_index | eval trim(to_double("23")::keyword::double::long::keyword::double)',
