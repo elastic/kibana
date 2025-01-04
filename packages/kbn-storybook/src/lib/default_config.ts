@@ -231,7 +231,7 @@ export const defaultConfig: StorybookConfig = {
     UiSharedDepsNpm.distDir,
     UiSharedDepsSrc.distDir,
     {
-      from: `${REPO_ROOT}/src/plugins/kibana_react/public/assets`,
+      from: `${REPO_ROOT}/src/platform/plugins/shared/kibana_react/public/assets`,
       to: 'plugins/kibanaReact/assets',
     },
   ],
