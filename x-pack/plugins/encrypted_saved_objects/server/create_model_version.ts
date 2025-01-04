@@ -93,7 +93,7 @@ function createMergedTransformFn(
     const decryptionParams = {
       // Note about isTypeBeingConverted: false
       // "Converting to multi-namespace clashes with the ZDT requirement for serverless"
-      // See deprecation in packages/core/saved-objects/core-saved-objects-server/src/migration.ts SavedObjectMigrationContext
+      // See deprecation in src/core/packages/saved-objects/server/src/migration.ts SavedObjectMigrationContext
       isTypeBeingConverted: false,
       originId,
     };

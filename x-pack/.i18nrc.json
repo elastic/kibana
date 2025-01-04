@@ -19,9 +19,9 @@
     "xpack.banners": "platform/plugins/private/banners",
     "xpack.canvas": "platform/plugins/private/canvas",
     "xpack.cases": "platform/plugins/shared/cases",
-    "xpack.cloud": "plugins/cloud",
+    "xpack.cloud": "platform/plugins/shared/cloud",
     "xpack.cloudDefend": "solutions/security/plugins/cloud_defend",
-    "xpack.cloudLinks": "plugins/cloud_integrations/cloud_links",
+    "xpack.cloudLinks": "platform/plugins/private/cloud_integrations/cloud_links",
     "xpack.cloudDataMigration": "platform/plugins/private/cloud_integrations/cloud_data_migration",
     "xpack.csp": [
       "solutions/security/plugins/cloud_security_posture",
@@ -42,7 +42,7 @@
     "xpack.embeddableEnhanced": "platform/plugins/shared/embeddable_enhanced",
     "xpack.endpoint": "plugins/endpoint",
     "xpack.enterpriseSearch": "solutions/search/plugins/enterprise_search",
-    "xpack.features": "plugins/features",
+    "xpack.features": "platform/plugins/shared/features",
     "xpack.dataVisualizer": "platform/plugins/private/data_visualizer",
     "xpack.exploratoryView": "solutions/observability/plugins/exploratory_view",
     "xpack.fileUpload": "platform/plugins/private/file_upload",
@@ -75,7 +75,7 @@
     "xpack.lens": "plugins/lens",
     "xpack.licenseApiGuard": "platform/plugins/private/license_api_guard",
     "xpack.licenseMgmt": "platform/plugins/shared/license_management",
-    "xpack.licensing": "plugins/licensing",
+    "xpack.licensing": "platform/plugins/shared/licensing",
     "xpack.lists": "solutions/security/plugins/lists",
     "xpack.logstash": [
       "platform/plugins/private/logstash"
@@ -165,7 +165,7 @@
     "xpack.timelines": "solutions/security/plugins/timelines",
     "xpack.transform": "platform/plugins/private/transform",
     "xpack.triggersActionsUI": "platform/plugins/shared/triggers_actions_ui",
-    "xpack.upgradeAssistant": "plugins/upgrade_assistant",
+    "xpack.upgradeAssistant": "platform/plugins/private/upgrade_assistant",
     "xpack.uptime": [
       "solutions/observability/plugins/uptime"
     ],

@@ -204,7 +204,7 @@ for use in their own application.
 |Minimal interface for admins to manage files in Kibana.
 
 
-|{kib-repo}blob/{branch}/src/plugins/ftr_apis/README.md[ftrApis]
+|{kib-repo}blob/{branch}/src/platform/plugins/private/ftr_apis/README.md[ftrApis]
 |This plugin exposes a set of APIs used internally during functional tests by the FTR.
 
 
@@ -242,7 +242,7 @@ in Kibana, e.g. visualizations. It has the form of a flyout panel.
 |Tools for building React applications in Kibana.
 
 
-|{kib-repo}blob/{branch}/src/plugins/kibana_usage_collection/README.md[kibanaUsageCollection]
+|{kib-repo}blob/{branch}/src/platform/plugins/private/kibana_usage_collection/README.md[kibanaUsageCollection]
 |This plugin registers the Platform Usage Collectors in Kibana.
 
 
@@ -269,7 +269,7 @@ management section itself.
 It also provides a stateful version of it on the start contract.
 
 
-|{kib-repo}blob/{branch}/src/plugins/newsfeed/README.md[newsfeed]
+|{kib-repo}blob/{branch}/src/platform/plugins/shared/newsfeed/README.md[newsfeed]
 |The newsfeed plugin adds a NewsfeedNavButton to the top navigation bar and renders the content in the flyout.
 Content is fetched from the remote (https://feeds.elastic.co) once a day, with periodic checks if the content needs to be refreshed. All newsfeed content is hosted remotely.
 
@@ -294,7 +294,7 @@ Content is fetched from the remote (https://feeds.elastic.co) once a day, with p
 |The savedObjectsFinder plugin exposes a UI for finding saved objects on the client side.
 
 
-|{kib-repo}blob/{branch}/src/plugins/saved_objects_management/README.md[savedObjectsManagement]
+|{kib-repo}blob/{branch}/src/platform/plugins/shared/saved_objects_management/README.md[savedObjectsManagement]
 |The savedObjectsManagement plugin manages the Saved Objects management section.
 
 
@@ -317,15 +317,15 @@ This object is created when a user saves their current session in the Discover a
 generating deep links to other apps using locators, and creating short URLs.
 
 
-|{kib-repo}blob/{branch}/src/plugins/telemetry/README.md[telemetry]
+|{kib-repo}blob/{branch}/src/platform/plugins/shared/telemetry/README.md[telemetry]
 |Telemetry allows Kibana features to have usage tracked in the wild. The general term "telemetry" refers to multiple things:
 
 
-|{kib-repo}blob/{branch}/src/plugins/telemetry_collection_manager/README.md[telemetryCollectionManager]
+|{kib-repo}blob/{branch}/src/platform/plugins/shared/telemetry_collection_manager/README.md[telemetryCollectionManager]
 |Telemetry's collection manager to go through all the telemetry sources when fetching it before reporting.
 
 
-|{kib-repo}blob/{branch}/src/plugins/telemetry_management_section/README.md[telemetryManagementSection]
+|{kib-repo}blob/{branch}/src/platform/plugins/shared/telemetry_management_section/README.md[telemetryManagementSection]
 |This plugin adds the Advanced Settings section for the Usage and Security Data collection (aka Telemetry).
 
 
@@ -374,7 +374,7 @@ It manages its own state and data fetching, and can easily be dropped into pages
 |This plugins contains helpers to redirect legacy URLs. It can be used to forward old URLs to their new counterparts.
 
 
-|{kib-repo}blob/{branch}/src/plugins/usage_collection/README.mdx[usageCollection]
+|{kib-repo}blob/{branch}/src/platform/plugins/shared/usage_collection/README.mdx[usageCollection]
 |The Usage Collection Service defines a set of APIs for other plugins to report the usage of their features. At the same time, it provides necessary the APIs for other services (i.e.: telemetry, monitoring, ...) to consume that usage data.
 
 
@@ -483,11 +483,11 @@ The plugin exposes the static DefaultEditorController class to consume.
 |This plugin provides cases management in Kibana
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/cloud/README.md[cloud]
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/shared/cloud/README.md[cloud]
 |The cloud plugin exposes Cloud-specific metadata to Kibana.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/cloud_integrations/cloud_chat/README.md[cloudChat]
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/private/cloud_integrations/cloud_chat/README.md[cloudChat]
 |The plugin was meant to integrate with DriftChat in order to provide live support to our Elastic Cloud users.
 It was removed, but the plugin was left behind to register no longer used config keys.
 
@@ -500,16 +500,16 @@ It was removed, but the plugin was left behind to register no longer used config
 |This plugin currently only exists to provide custom fleet policy UX for a set of new BPF LSM features. The first feature being container "drift prevention".
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/cloud_integrations/cloud_experiments/README.mdx[cloudExperiments]
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/shared/cloud_integrations/cloud_experiments/README.mdx[cloudExperiments]
 |[!NOTE]
 This plugin no-longer exposes any evaluation APIs. Refer to <DocLink id="kibFeatureFlagsService" /> for more information about how to interact with feature flags.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/cloud_integrations/cloud_full_story/README.md[cloudFullStory]
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/private/cloud_integrations/cloud_full_story/README.md[cloudFullStory]
 |Integrates with FullStory in order to provide better product analytics, so we can understand how our users make use of Kibana. This plugin should only run on Elastic Cloud.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/cloud_integrations/cloud_links/README.md[cloudLinks]
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/private/cloud_integrations/cloud_links/README.md[cloudLinks]
 |Adds all the links to the Elastic Cloud console.
 
 
@@ -593,7 +593,7 @@ activities.
 |A shared component for visualizing observability data types via lens embeddable. For further details.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/features/README.md[features]
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/shared/features/README.md[features]
 |The features plugin enhance Kibana with a per-feature privilege system.
 
 
@@ -686,7 +686,7 @@ the infrastructure monitoring use-case within Kibana.
 |This plugin enables users to activate a trial license, downgrade to Basic, and upload a new license.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/licensing/README.md[licensing]
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/shared/licensing/README.md[licensing]
 |The licensing plugin retrieves license data from Elasticsearch at regular configurable intervals.
 
 
@@ -931,7 +931,7 @@ in their infrastructure.
 |The task manager is a generic system for running background tasks.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/telemetry_collection_xpack/README.md[telemetryCollectionXpack]
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/private/telemetry_collection_xpack/README.md[telemetryCollectionXpack]
 |Gathers all usage collection, retrieving them from both: OSS and X-Pack plugins.
 
 
@@ -949,7 +949,7 @@ in their infrastructure.
 
 |<<translations-plugin>>
 |Contains Elastic-supported translations. Owned by the Localizations team.
-For adding localizations and instrument a ui to support translated content, see https://github.com/elastic/kibana/tree/main/packages/kbn-i18n
+For adding localizations and instrument a ui to support translated content, see https://github.com/elastic/kibana/tree/main/src/platform/packages/shared/kbn-i18n
 
 
 |{kib-repo}blob/{branch}/x-pack/platform/plugins/shared/triggers_actions_ui/README.md[triggersActionsUi]
@@ -957,7 +957,7 @@ For adding localizations and instrument a ui to support translated content, see 
 As a developer you can reuse and extend built-in alerts and actions UI functionality:
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/upgrade_assistant/README.md[upgradeAssistant]
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/private/upgrade_assistant/README.md[upgradeAssistant]
 |Upgrade Assistant helps users prepare their Stack for being upgraded to the next version of the Elastic stack.
 
 
