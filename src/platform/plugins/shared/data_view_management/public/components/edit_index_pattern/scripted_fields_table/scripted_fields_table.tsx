@@ -59,7 +59,7 @@ export class ScriptedFieldsTable extends Component<
   }
 
   fetchFields = async () => {
-    const fields = await (this.props.indexPattern.getScriptedFields() as ScriptedFieldItem[]);
+    const fields = this.props.indexPattern.getScriptedFields() as ScriptedFieldItem[];
 
     const deprecatedLangsInUse = [];
     const deprecatedLangs = getDeprecatedScriptingLanguages();
@@ -67,7 +67,7 @@ export class ScriptedFieldsTable extends Component<
 
     for (const field of fields) {
       const lang = field.lang;
-      if (deprecatedLangs.includes(lang) || !supportedLangs.includes(lang)) {
+      if (lang && (deprecatedLangs.includes(lang) || !supportedLangs.includes(lang))) {
         deprecatedLangsInUse.push(lang);
       }
     }
