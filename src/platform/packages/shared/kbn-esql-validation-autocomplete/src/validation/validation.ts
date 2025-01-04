@@ -622,10 +622,14 @@ function validateFunction({
         (s) =>
           s.params?.length >= argIndex &&
           s.params.slice(0, argIndex).every(({ type: dataType }, idx) => {
-            return (
-              dataType === enrichedArgs[idx].literalType ||
-              compareTypesWithLiterals(dataType, enrichedArgs[idx].literalType)
-            );
+            const arg = enrichedArgs[idx];
+
+            if (isLiteralItem(arg)) {
+              return (
+                dataType === arg.literalType || compareTypesWithLiterals(dataType, arg.literalType)
+              );
+            }
+            return false; // Non-literal arguments don't match
           })
       );
     }
