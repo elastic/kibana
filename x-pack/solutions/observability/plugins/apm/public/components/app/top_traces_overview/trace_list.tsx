@@ -7,20 +7,22 @@
 
 import { EuiIcon, EuiToolTip, RIGHT_ALIGNMENT, useEuiFontSize } from '@elastic/eui';
 import { usePerformanceContext } from '@kbn/ebt-tools';
-import { TypeOf } from '@kbn/typed-react-router-config';
+import type { TypeOf } from '@kbn/typed-react-router-config';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useMemo } from 'react';
 import styled from '@emotion/styled';
-import { ApmRoutes } from '../../routing/apm_route_config';
+import type { ApmRoutes } from '../../routing/apm_route_config';
 import { asMillisecondDuration, asTransactionRate } from '../../../../common/utils/formatters';
 import { useApmParams } from '../../../hooks/use_apm_params';
-import { FetcherResult, FETCH_STATUS } from '../../../hooks/use_fetcher';
-import { APIReturnType } from '../../../services/rest/create_call_apm_api';
+import type { FetcherResult } from '../../../hooks/use_fetcher';
+import { FETCH_STATUS } from '../../../hooks/use_fetcher';
+import type { APIReturnType } from '../../../services/rest/create_call_apm_api';
 import { truncate } from '../../../utils/style';
 import { EmptyMessage } from '../../shared/empty_message';
 import { ImpactBar } from '../../shared/impact_bar';
 import { TransactionDetailLink } from '../../shared/links/apm/transaction_detail_link';
-import { ITableColumn, ManagedTable } from '../../shared/managed_table';
+import type { ITableColumn } from '../../shared/managed_table';
+import { ManagedTable } from '../../shared/managed_table';
 import { ServiceLink } from '../../shared/links/apm/service_link';
 import { TruncateWithTooltip } from '../../shared/truncate_with_tooltip';
 import { NOT_AVAILABLE_LABEL } from '../../../../common/i18n';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { APMRouteHandlerResources } from '../../routes/apm_routes/register_apm_server_routes';
+import type { APMRouteHandlerResources } from '../../routes/apm_routes/register_apm_server_routes';
 
 export async function getESCapabilities({ core }: APMRouteHandlerResources) {
   const es = (await core.start()).elasticsearch;

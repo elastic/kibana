@@ -8,21 +8,17 @@
 import React, { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 
-import {
-  EuiButtonEmpty,
-  EuiContextMenu,
-  EuiContextMenuPanelDescriptor,
-  EuiPopover,
-} from '@elastic/eui';
+import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
+import { EuiButtonEmpty, EuiContextMenu, EuiPopover } from '@elastic/eui';
 import DateMath from '@kbn/datemath';
-import { Capabilities } from '@kbn/core/public';
+import type { Capabilities } from '@kbn/core/public';
 import { useLinkProps } from '@kbn/observability-shared-plugin/public';
-import { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
+import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 import { useAssetDetailsRedirect } from '@kbn/metrics-data-access-plugin/public';
 import { useMetricsDataViewContext } from '../../../../containers/metrics_source';
 import { AlertFlyout } from '../../../../alerting/metric_threshold/components/alert_flyout';
-import { MetricsExplorerSeries } from '../../../../../common/http_api/metrics_explorer';
-import {
+import type { MetricsExplorerSeries } from '../../../../../common/http_api/metrics_explorer';
+import type {
   MetricsExplorerOptions,
   MetricsExplorerTimeOptions,
   MetricsExplorerChartOptions,

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { Coordinate } from '../../typings/timeseries';
-import { AnomalyDetectorType } from './apm_ml_detectors';
+import type { Coordinate } from '../../typings/timeseries';
+import type { AnomalyDetectorType } from './apm_ml_detectors';
 
 export interface ServiceAnomalyTimeseries {
   jobId: string;
