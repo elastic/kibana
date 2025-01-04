@@ -26,8 +26,8 @@ SRCS = glob(
 RUNTIME_DEPS = [
   "@npm//babel-loader",
   "@npm//@babel/plugin-proposal-optional-chaining",
-  "@npm//loader-utils",
   "@npm//val-loader",
+  "//packages/kbn-node-libs-browser-webpack-plugin",
   "//src/platform/packages/shared/kbn-repo-info",
   # deps in the dll need to be included in the sandbox for consumers
   # of this DLL (ui-shared-deps-src) because webpack won't actually
@@ -53,6 +53,7 @@ RUNTIME_DEPS = [
   "@npm//jquery",
   "@npm//lodash",
   "@npm//moment-timezone",
+  "@npm//node-libs-browser",
   "@npm//react-dom",
   "@npm//react-dom-18",
   "@npm//react-router-dom",
@@ -96,11 +97,9 @@ webpack_cli(
   env = select({
     "//:dist": {
       "NODE_ENV": "production",
-      "NODE_OPTIONS": "--openssl-legacy-provider",
     },
     "//conditions:default": {
       "NODE_ENV": "development",
-      "NODE_OPTIONS": "--openssl-legacy-provider",
       "REACT_18": "$(REACT_18)",
     },
   })

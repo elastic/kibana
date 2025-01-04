@@ -9,5 +9,9 @@
 
 import { getFieldRowStory, getStory } from './common';
 
-export default getStory('Markdown Row', 'A setting with a Markdown value.');
+const Story = getStory('Markdown Row', 'A setting with a Markdown value.');
 export const MarkdownRow = getFieldRowStory('markdown' as const);
+
+export default {
+  ...Story,
+};

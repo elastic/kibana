@@ -93,12 +93,14 @@ const outputs: Output[] = [
   },
 ];
 
-export const OutputsTable = ({ width }: Args) => {
-  return (
-    <div style={{ width }}>
-      <Component deleteOutput={() => {}} outputs={outputs} />
-    </div>
-  );
-};
+export const OutputsTable = {
+  render: ({ width }: Args) => {
+    return (
+      <div style={{ width }}>
+        <Component deleteOutput={() => {}} outputs={outputs} />
+      </div>
+    );
+  },
 
-OutputsTable.args = args;
+  args,
+};

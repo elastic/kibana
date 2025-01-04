@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { addons, types } from '@storybook/addons';
+import { addons, types } from '@storybook/manager-api';
 import { AddonPanel } from '@storybook/components';
 import { STORY_CHANGED } from '@storybook/core-events';
 import { create } from '@storybook/theming';

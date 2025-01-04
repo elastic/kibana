@@ -351,6 +351,7 @@ packages/kbn-manifest @elastic/kibana-core
 packages/kbn-mock-idp-plugin @elastic/kibana-security
 packages/kbn-mock-idp-utils @elastic/kibana-security
 packages/kbn-monaco @elastic/appex-sharedux
+packages/kbn-node-libs-browser-webpack-plugin @elastic/kibana-operations
 packages/kbn-object-versioning @elastic/appex-sharedux
 packages/kbn-object-versioning-utils @elastic/appex-sharedux
 packages/kbn-openapi-bundler @elastic/security-detection-rule-management
@@ -1578,6 +1579,7 @@ packages/kbn-monaco/src/esql @elastic/kibana-esql
 /.devcontainer/ @elastic/kibana-operations
 /.eslintrc.js @elastic/kibana-operations
 /.eslintignore @elastic/kibana-operations
+/.ci/.storybook @elastic/kibana-operations
 
 # QA - Appex QA
 /x-pack/platform/plugins/private/discover_enhanced/ui_tests/ @elastic/appex-qa # temporarily

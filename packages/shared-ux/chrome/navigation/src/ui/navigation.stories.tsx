@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ComponentMeta } from '@storybook/react';
+import { Meta } from '@storybook/react';
 import React, { EventHandler, FC, MouseEvent, useState, useEffect } from 'react';
 import { of } from 'rxjs';
 
@@ -237,24 +237,26 @@ const groupExamplesNavigationTree: NavigationTreeDefinitionUI = {
   ],
 };
 
-export const GroupsExamples = (args: NavigationServices) => {
-  const services = storybookMock.getServices({
-    ...args,
-    recentlyAccessed$: of([
-      { label: 'This is an example', link: '/app/example/39859', id: '39850' },
-      { label: 'Another example', link: '/app/example/5235', id: '5235' },
-    ]),
-  });
+export const GroupsExamples = {
+  render: (args: NavigationServices) => {
+    const services = storybookMock.getServices({
+      ...args,
+      recentlyAccessed$: of([
+        { label: 'This is an example', link: '/app/example/39859', id: '39850' },
+        { label: 'Another example', link: '/app/example/5235', id: '5235' },
+      ]),
+    });
 
-  return (
-    <NavigationWrapper>
-      {({ isCollapsed }) => (
-        <NavigationProvider {...services} isSideNavCollapsed={isCollapsed}>
-          <Navigation navigationTree$={of(groupExamplesNavigationTree)} />
-        </NavigationProvider>
-      )}
-    </NavigationWrapper>
-  );
+    return (
+      <NavigationWrapper>
+        {({ isCollapsed }) => (
+          <NavigationProvider {...services} isSideNavCollapsed={isCollapsed}>
+            <Navigation navigationTree$={of(groupExamplesNavigationTree)} />
+          </NavigationProvider>
+        )}
+      </NavigationWrapper>
+    );
+  },
 };
 
 const navigationTree: NavigationTreeDefinitionUI = {
@@ -1135,27 +1137,29 @@ const navigationTreeWithPanels: NavigationTreeDefinitionUI = {
   ],
 };
 
-export const ObjectDefinitionWithPanel = (args: NavigationServices) => {
-  const services = storybookMock.getServices({
-    ...args,
-    recentlyAccessed$: of([
-      { label: 'This is an example', link: '/app/example/39859', id: '39850' },
-      { label: 'Another example', link: '/app/example/5235', id: '5235' },
-    ]),
-  });
+export const ObjectDefinitionWithPanel = {
+  render: (args: NavigationServices) => {
+    const services = storybookMock.getServices({
+      ...args,
+      recentlyAccessed$: of([
+        { label: 'This is an example', link: '/app/example/39859', id: '39850' },
+        { label: 'Another example', link: '/app/example/5235', id: '5235' },
+      ]),
+    });
 
-  return (
-    <NavigationWrapper>
-      {({ isCollapsed }) => (
-        <NavigationProvider {...services} isSideNavCollapsed={isCollapsed}>
-          <Navigation
-            navigationTree$={of(navigationTreeWithPanels)}
-            panelContentProvider={panelContentProvider}
-          />
-        </NavigationProvider>
-      )}
-    </NavigationWrapper>
-  );
+    return (
+      <NavigationWrapper>
+        {({ isCollapsed }) => (
+          <NavigationProvider {...services} isSideNavCollapsed={isCollapsed}>
+            <Navigation
+              navigationTree$={of(navigationTreeWithPanels)}
+              panelContentProvider={panelContentProvider}
+            />
+          </NavigationProvider>
+        )}
+      </NavigationWrapper>
+    );
+  },
 };
 
 export default {
@@ -1167,4 +1171,4 @@ export default {
     },
   },
   component: ComplexObjectDefinition,
-} as ComponentMeta<typeof ComplexObjectDefinition>;
+} as Meta<typeof ComplexObjectDefinition>;

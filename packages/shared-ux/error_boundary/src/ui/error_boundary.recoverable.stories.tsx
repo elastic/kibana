@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Meta, Story } from '@storybook/react';
+import { StoryFn, Meta } from '@storybook/react';
 import React from 'react';
 
 import { Template } from '../../mocks/src/storybook_template';
@@ -32,7 +32,7 @@ export default {
   },
 } as Meta;
 
-export const ErrorInCallout: Story = () => {
+export const ErrorInCallout: StoryFn = () => {
   const services = storybookMock.getServices();
 
   return (

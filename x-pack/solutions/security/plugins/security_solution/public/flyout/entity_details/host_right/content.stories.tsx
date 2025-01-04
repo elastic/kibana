@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import { storiesOf } from '@storybook/react';
 import { EuiFlyout } from '@elastic/eui';
 import { TestProvider } from '@kbn/expandable-flyout/src/test/provider';
 import { StorybookProviders } from '../../../common/mock/storybook_providers';
@@ -16,17 +15,24 @@ import { mockObservedHostData } from '../mocks';
 
 const riskScoreData = { ...mockRiskScoreState, data: [] };
 
-storiesOf('Components/HostPanelContent', module)
-  .addDecorator((storyFn) => (
-    <StorybookProviders>
-      <TestProvider>
-        <EuiFlyout size="m" onClose={() => {}}>
-          {storyFn()}
-        </EuiFlyout>
-      </TestProvider>
-    </StorybookProviders>
-  ))
-  .add('default', () => (
+export default {
+  title: 'Components/HostPanelContent',
+
+  decorators: [
+    (storyFn) => (
+      <StorybookProviders>
+        <TestProvider>
+          <EuiFlyout size="m" onClose={() => {}}>
+            {storyFn()}
+          </EuiFlyout>
+        </TestProvider>
+      </StorybookProviders>
+    ),
+  ],
+};
+
+export const Default = {
+  render: () => (
     <HostPanelContent
       observedHost={mockObservedHostData}
       riskScoreState={riskScoreData}
@@ -39,8 +45,13 @@ storiesOf('Components/HostPanelContent', module)
       recalculatingScore={false}
       isLinkEnabled={true}
     />
-  ))
-  .add('no observed data', () => (
+  ),
+
+  name: 'default',
+};
+
+export const NoObservedData = {
+  render: () => (
     <HostPanelContent
       observedHost={{
         details: {},
@@ -65,8 +76,13 @@ storiesOf('Components/HostPanelContent', module)
       recalculatingScore={false}
       isLinkEnabled={true}
     />
-  ))
-  .add('loading', () => (
+  ),
+
+  name: 'no observed data',
+};
+
+export const Loading = {
+  render: () => (
     <HostPanelContent
       observedHost={{
         details: {},
@@ -91,4 +107,7 @@ storiesOf('Components/HostPanelContent', module)
       recalculatingScore={false}
       isLinkEnabled={true}
     />
-  ));
+  ),
+
+  name: 'loading',
+};

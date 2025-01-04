@@ -2061,6 +2061,22 @@ module.exports = {
         'no-console': 'off',
       },
     },
+    {
+      files: [
+        '**/*.stories.tsx',
+        '**/*.stories.ts',
+        '**/.storybook/**/*',
+        '**/storybook/**/*',
+        '**/kbn-storybook/**/*',
+        '**/__stories__/**/*',
+        '**/mocks/**/*',
+        '**/__mocks__/**/*',
+      ],
+      rules: {
+        // @storybook/addon-essentials contains many packages which are not defined in package.json
+        'import/no-extraneous-dependencies': 'off',
+      },
+    },
   ],
 };
 

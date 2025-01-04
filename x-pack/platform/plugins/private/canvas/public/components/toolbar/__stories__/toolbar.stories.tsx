@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { storiesOf } from '@storybook/react';
 import React from 'react';
 
 // @ts-expect-error
@@ -28,7 +27,12 @@ const Pages = ({ story }: { story: Function }) => (
   </div>
 );
 
-storiesOf('components/Toolbar', module)
-  .addDecorator((story) => <Pages story={story} />)
-  .addDecorator(reduxDecorator({ pages }))
-  .add('redux', () => <Toolbar />);
+export default {
+  title: 'components/Toolbar',
+  decorators: [(story) => <Pages story={story} />, reduxDecorator({ pages })],
+};
+
+export const Redux = {
+  render: () => <Toolbar />,
+  name: 'redux',
+};

@@ -39,7 +39,11 @@ const build = () => {
   console.log('--- Building Storybooks');
 
   for (const storybook of Object.keys(storybookAliases)) {
-    exec(`STORYBOOK_BASE_URL=${STORYBOOK_BASE_URL}`, `yarn storybook --site ${storybook}`);
+    exec(
+      `STORYBOOK_BASE_URL=${STORYBOOK_BASE_URL}`,
+      `NODE_OPTIONS=--max-old-space-size=6144`,
+      `yarn storybook --site ${storybook}`
+    );
   }
 };
 
@@ -49,12 +53,14 @@ const upload = () => {
     console.log('--- Generating Storybooks HTML');
 
     process.chdir(path.join('.', 'built_assets', 'storybook'));
+    fs.renameSync('ci_composite', 'composite');
 
     const storybooks = execSync(`ls -1d */`)
       .toString()
       .trim()
       .split('\n')
-      .map((filePath) => filePath.replace('/', ''));
+      .map((filePath) => filePath.replace('/', ''))
+      .filter((filePath) => filePath !== 'composite');
 
     const listHtml = storybooks
       .map((storybook) => `<li><a href="${STORYBOOK_BASE_URL}/${storybook}">${storybook}</a></li>`)
@@ -64,6 +70,8 @@ const upload = () => {
       <html>
         <body>
           <h1>Storybooks</h1>
+          <p><a href="${STORYBOOK_BASE_URL}/composite">Composite Storybook</a></p>
+          <h2>All</h2>
           <ul>
             ${listHtml}
           </ul>

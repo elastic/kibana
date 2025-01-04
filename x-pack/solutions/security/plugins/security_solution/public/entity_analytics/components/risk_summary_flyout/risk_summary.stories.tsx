@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import type { Story } from '@storybook/react';
+import type { StoryFn } from '@storybook/react';
 import { TestProvider } from '@kbn/expandable-flyout/src/test/provider';
 import { StorybookProviders } from '../../../common/mock/storybook_providers';
 import { mockRiskScoreState } from '../../../flyout/shared/mocks';
@@ -17,7 +17,7 @@ export default {
   title: 'Components/FlyoutRiskSummary',
 };
 
-export const Default: Story<void> = () => {
+export const Default: StoryFn = () => {
   return (
     <StorybookProviders>
       <TestProvider>
