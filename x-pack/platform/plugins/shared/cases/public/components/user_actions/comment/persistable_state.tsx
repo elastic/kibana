@@ -18,14 +18,14 @@ type BuilderArgs = Pick<
   | 'handleDeleteComment'
   | 'userProfiles'
 > & {
-  comment: SnakeToCamelCase<PersistableStateAttachment>;
+  attachment: SnakeToCamelCase<PersistableStateAttachment>;
   isLoading: boolean;
 };
 
 export const createPersistableStateAttachmentUserActionBuilder = ({
   userAction,
   userProfiles,
-  comment,
+  attachment,
   persistableStateAttachmentTypeRegistry,
   caseData,
   isLoading,
@@ -34,15 +34,15 @@ export const createPersistableStateAttachmentUserActionBuilder = ({
   return createRegisteredAttachmentUserActionBuilder({
     userAction,
     userProfiles,
-    comment,
+    attachment,
     registry: persistableStateAttachmentTypeRegistry,
     caseData,
     handleDeleteComment,
     isLoading,
-    getId: () => comment.persistableStateAttachmentTypeId,
+    getId: () => attachment.persistableStateAttachmentTypeId,
     getAttachmentViewProps: () => ({
-      persistableStateAttachmentTypeId: comment.persistableStateAttachmentTypeId,
-      persistableStateAttachmentState: comment.persistableStateAttachmentState,
+      persistableStateAttachmentTypeId: attachment.persistableStateAttachmentTypeId,
+      persistableStateAttachmentState: attachment.persistableStateAttachmentState,
     }),
   });
 };
