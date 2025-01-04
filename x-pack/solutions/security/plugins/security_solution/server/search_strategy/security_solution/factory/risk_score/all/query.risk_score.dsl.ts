@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Sort } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { Sort } from '@elastic/elasticsearch/lib/api/types';
 import type { RiskScoreRequestOptions } from '../../../../../../common/api/search_strategy';
 import {
   Direction,
