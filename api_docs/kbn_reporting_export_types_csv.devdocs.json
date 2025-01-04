@@ -643,7 +643,7 @@
               },
               " | undefined; dimensions?: { width: number; height: number; } | undefined; selectors?: Partial<",
               "LayoutSelectorDictionary",
-              "> | undefined; zoom?: number | undefined; } | undefined; locatorParams: ",
+              "> | undefined; zoom?: number | undefined; } | undefined; browserTimezone: string; locatorParams: ",
               "LocatorParams",
               "<",
               {
@@ -653,7 +653,7 @@
                 "section": "def-common.SerializableRecord",
                 "text": "SerializableRecord"
               },
-              ">[]; browserTimezone: string; }>"
+              ">[]; }>"
             ],
             "path": "packages/kbn-reporting/export_types/csv/csv_v2.ts",
             "deprecated": false,
