@@ -13,7 +13,7 @@ it's more efficient to supply the Jest configuration file when running.
 
 ["source","shell"]
 -----------
-yarn jest --config src/plugins/discover/jest.config.js
+yarn jest --config src/platform/plugins/shared/discover/jest.config.js
 -----------
 
 [discrete]

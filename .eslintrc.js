@@ -283,14 +283,14 @@ module.exports = {
      * Temporarily disable some react rules for specific plugins, remove in separate PRs
      */
     {
-      files: ['src/plugins/kibana_react/**/*.{js,mjs,ts,tsx}'],
+      files: ['src/platform/plugins/shared/kibana_react/**/*.{js,mjs,ts,tsx}'],
       rules: {
         'react-hooks/rules-of-hooks': 'off',
         'react-hooks/exhaustive-deps': 'off',
       },
     },
     {
-      files: ['src/plugins/kibana_utils/**/*.{js,mjs,ts,tsx}'],
+      files: ['src/platform/plugins/shared/kibana_utils/**/*.{js,mjs,ts,tsx}'],
       rules: {
         'react-hooks/exhaustive-deps': 'off',
       },
@@ -364,7 +364,7 @@ module.exports = {
     {
       files: [
         'packages/kbn-eslint-config/**/*.{js,mjs,ts,tsx}',
-        'packages/kbn-datemath/**/*.{js,mjs,ts,tsx}',
+        'src/platform/packages/shared/kbn-datemath/**/*.{js,mjs,ts,tsx}',
       ],
       rules: {
         '@kbn/eslint/require-license-header': [
@@ -633,7 +633,7 @@ module.exports = {
         '**/*.test.js',
         'x-pack/test/apm_api_integration/**/*.ts',
         'x-pack/test/functional/apps/**/*.js',
-        'x-pack/plugins/observability_solution/apm/**/*.js',
+        'x-pack/solutions/observability/plugins/apm/**/*.js',
         'test/*/config.ts',
         'test/*/config_open.ts',
         'test/*/*.config.ts',
@@ -913,7 +913,7 @@ module.exports = {
      */
     {
       files: [
-        'x-pack/plugins/observability_solution/apm/**/*.{js,mjs,ts,tsx}',
+        'x-pack/solutions/observability/plugins/apm/**/*.{js,mjs,ts,tsx}',
         'x-pack/solutions/observability/plugins/observability/**/*.{js,mjs,ts,tsx}',
         'x-pack/solutions/observability/plugins/exploratory_view/**/*.{js,mjs,ts,tsx}',
         'x-pack/solutions/observability/plugins/ux/**/*.{js,mjs,ts,tsx}',
@@ -934,7 +934,7 @@ module.exports = {
     },
     {
       files: [
-        'x-pack/plugins/observability_solution/apm/**/*.stories.*',
+        'x-pack/solutions/observability/plugins/apm/**/*.stories.*',
         'x-pack/solutions/observability/plugins/observability/**/*.stories.*',
         'x-pack/solutions/observability/plugins/exploratory_view/**/*.stories.*',
         'x-pack/solutions/observability/plugins/slo/**/*.stories.*',
@@ -999,7 +999,7 @@ module.exports = {
     },
     {
       // require explicit return types in route handlers for performance reasons
-      files: ['x-pack/plugins/observability_solution/apm/server/**/route.ts'],
+      files: ['x-pack/solutions/observability/plugins/apm/server/**/route.ts'],
       rules: {
         '@typescript-eslint/explicit-function-return-type': [
           'error',
@@ -1022,6 +1022,20 @@ module.exports = {
             paths: RESTRICTED_IMPORTS,
           },
         ],
+      },
+    },
+    {
+      files: [
+        'x-pack/solutions/observability/plugins/apm/**/*.{js,mjs,ts,tsx}',
+        'x-pack/solutions/observability/plugins/apm_data_access/**/*.{js,mjs,ts,tsx}',
+        'x-pack/solutions/observability/plugins/infra/**/*.{js,mjs,ts,tsx}',
+        'x-pack/solutions/observability/plugins/inventory/**/*.{js,mjs,ts,tsx}',
+        'x-pack/solutions/observability/plugins/metrics_data_access/**/*.{js,mjs,ts,tsx}',
+        'x-pack/solutions/observability/plugins/profiling/**/*.{js,mjs,ts,tsx}',
+        'x-pack/solutions/observability/plugins/profiling_data_access/**/*.{js,mjs,ts,tsx}',
+      ],
+      rules: {
+        '@typescript-eslint/consistent-type-imports': 'error',
       },
     },
 
@@ -1577,7 +1591,10 @@ module.exports = {
      * Discover overrides
      */
     {
-      files: ['src/plugins/discover/**/*.{ts,tsx}', 'src/plugins/saved_search/**/*.{ts,tsx}'],
+      files: [
+        'src/platform/plugins/shared/discover/**/*.{ts,tsx}',
+        'src/platform/plugins/shared/saved_search/**/*.{ts,tsx}',
+      ],
       rules: {
         '@typescript-eslint/no-explicit-any': 'error',
         '@typescript-eslint/ban-ts-comment': [
@@ -1596,7 +1613,7 @@ module.exports = {
      */
     {
       // All files
-      files: ['x-pack/plugins/enterprise_search/**/*.{ts,tsx}'],
+      files: ['x-pack/solutions/search/plugins/enterprise_search/**/*.{ts,tsx}'],
       rules: {
         'import/order': [
           'error',
@@ -1648,7 +1665,7 @@ module.exports = {
      * Allows snake_case variables in the server, because that's how we return API properties
      */
     {
-      files: ['x-pack/plugins/enterprise_search/server/**/*.{ts,tsx}'],
+      files: ['x-pack/solutions/search/plugins/enterprise_search/server/**/*.{ts,tsx}'],
       rules: {
         '@typescript-eslint/naming-convention': [
           'error',
@@ -1670,8 +1687,10 @@ module.exports = {
     },
     {
       // Source files only - allow `any` in test/mock files
-      files: ['x-pack/plugins/enterprise_search/**/*.{ts,tsx}'],
-      excludedFiles: ['x-pack/plugins/enterprise_search/**/*.{test,mock,test_helper}.{ts,tsx}'],
+      files: ['x-pack/solutions/search/plugins/enterprise_search/**/*.{ts,tsx}'],
+      excludedFiles: [
+        'x-pack/solutions/search/plugins/enterprise_search/**/*.{test,mock,test_helper}.{ts,tsx}',
+      ],
       rules: {
         '@typescript-eslint/no-explicit-any': 'error',
       },
@@ -1682,7 +1701,10 @@ module.exports = {
      */
     {
       // All files
-      files: ['x-pack/plugins/serverless_search/**/*.{ts,tsx}', 'packages/kbn-search-*'],
+      files: [
+        'x-pack/solutions/search/plugins/serverless_search/**/*.{ts,tsx}',
+        'packages/kbn-search-*',
+      ],
       rules: {
         '@kbn/telemetry/event_generating_elements_should_be_instrumented': 'error',
       },
@@ -1918,7 +1940,7 @@ module.exports = {
         'src/core/**',
         'x-pack/plugins/features/**',
         'x-pack/plugins/licensing/**',
-        'x-pack/plugins/global_search/**',
+        'x-pack/platform/plugins/shared/global_search/**',
         'x-pack/plugins/cloud/**',
         'packages/kbn-config-schema',
         'src/plugins/status_page/**',
@@ -1961,7 +1983,7 @@ module.exports = {
      * Lints unnecessary backticks - @see https://github.com/prettier/eslint-config-prettier/blob/main/README.md#forbid-unnecessary-backticks
      */
     {
-      files: ['x-pack/plugins/enterprise_search/**/*.{ts,tsx}'],
+      files: ['x-pack/solutions/search/plugins/enterprise_search/**/*.{ts,tsx}'],
       rules: {
         quotes: ['error', 'single', { avoidEscape: true, allowTemplateLiterals: false }],
       },

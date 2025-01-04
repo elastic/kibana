@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { HttpHandler } from '@kbn/core/public';
-import {
+import type { HttpHandler } from '@kbn/core/public';
+import type {
   ValidateLogEntryDatasetsResponsePayload,
   ValidationIndicesResponsePayload,
 } from '../../../common/http_api';
-import { DeleteJobsResponsePayload } from './api/ml_cleanup';
-import { FetchJobStatusResponsePayload } from './api/ml_get_jobs_summary_api';
-import { GetMlModuleResponsePayload } from './api/ml_get_module';
-import { SetupMlModuleResponsePayload } from './api/ml_setup_module_api';
+import type { DeleteJobsResponsePayload } from './api/ml_cleanup';
+import type { FetchJobStatusResponsePayload } from './api/ml_get_jobs_summary_api';
+import type { GetMlModuleResponsePayload } from './api/ml_get_module';
+import type { SetupMlModuleResponsePayload } from './api/ml_setup_module_api';
 
 export type { JobModelSizeStats, JobSummary } from './api/ml_get_jobs_summary_api';
 

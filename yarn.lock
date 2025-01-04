@@ -3841,7 +3841,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/advanced-settings-plugin@link:src/plugins/advanced_settings":
+"@kbn/advanced-settings-plugin@link:src/platform/plugins/private/advanced_settings":
   version "0.0.0"
   uid ""
 
@@ -3857,7 +3857,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/ai-assistant@link:x-pack/packages/kbn-ai-assistant":
+"@kbn/ai-assistant@link:x-pack/platform/packages/shared/kbn-ai-assistant":
   version "0.0.0"
   uid ""
 
@@ -3973,19 +3973,19 @@
   version "0.0.0"
   uid ""
 
-"@kbn/apm-data-access-plugin@link:x-pack/plugins/observability_solution/apm_data_access":
+"@kbn/apm-data-access-plugin@link:x-pack/solutions/observability/plugins/apm_data_access":
   version "0.0.0"
   uid ""
 
-"@kbn/apm-data-view@link:packages/kbn-apm-data-view":
+"@kbn/apm-data-view@link:src/platform/packages/shared/kbn-apm-data-view":
   version "0.0.0"
   uid ""
 
-"@kbn/apm-ftr-e2e@link:x-pack/plugins/observability_solution/apm/ftr_e2e":
+"@kbn/apm-ftr-e2e@link:x-pack/solutions/observability/plugins/apm/ftr_e2e":
   version "0.0.0"
   uid ""
 
-"@kbn/apm-plugin@link:x-pack/plugins/observability_solution/apm":
+"@kbn/apm-plugin@link:x-pack/solutions/observability/plugins/apm":
   version "0.0.0"
   uid ""
 
@@ -3997,11 +3997,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/apm-types@link:packages/kbn-apm-types":
+"@kbn/apm-types@link:x-pack/solutions/observability/packages/kbn-apm-types":
   version "0.0.0"
   uid ""
 
-"@kbn/apm-utils@link:packages/kbn-apm-utils":
+"@kbn/apm-utils@link:src/platform/packages/shared/kbn-apm-utils":
   version "0.0.0"
   uid ""
 
@@ -4041,7 +4041,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/banners-plugin@link:x-pack/plugins/banners":
+"@kbn/banners-plugin@link:x-pack/platform/plugins/private/banners":
   version "0.0.0"
   uid ""
 
@@ -4077,7 +4077,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/cbor@link:packages/kbn-cbor":
+"@kbn/cbor@link:src/platform/packages/shared/kbn-cbor":
   version "0.0.0"
   uid ""
 
@@ -4241,7 +4241,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/content-management-plugin@link:src/plugins/content_management":
+"@kbn/content-management-plugin@link:src/platform/plugins/shared/content_management":
   version "0.0.0"
   uid ""
 
@@ -4265,7 +4265,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/content-management-utils@link:packages/kbn-content-management-utils":
+"@kbn/content-management-utils@link:src/platform/packages/shared/kbn-content-management-utils":
   version "0.0.0"
   uid ""
 
@@ -5185,7 +5185,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/custom-branding-plugin@link:x-pack/plugins/custom_branding":
+"@kbn/custom-branding-plugin@link:x-pack/platform/plugins/private/custom_branding":
   version "0.0.0"
   uid ""
 
@@ -5241,7 +5241,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/data-view-editor-plugin@link:src/plugins/data_view_editor":
+"@kbn/data-view-editor-plugin@link:src/platform/plugins/shared/data_view_editor":
   version "0.0.0"
   uid ""
 
@@ -5249,19 +5249,19 @@
   version "0.0.0"
   uid ""
 
-"@kbn/data-view-field-editor-plugin@link:src/plugins/data_view_field_editor":
+"@kbn/data-view-field-editor-plugin@link:src/platform/plugins/shared/data_view_field_editor":
   version "0.0.0"
   uid ""
 
-"@kbn/data-view-management-plugin@link:src/plugins/data_view_management":
+"@kbn/data-view-management-plugin@link:src/platform/plugins/shared/data_view_management":
   version "0.0.0"
   uid ""
 
-"@kbn/data-view-utils@link:packages/kbn-data-view-utils":
+"@kbn/data-view-utils@link:src/platform/packages/shared/kbn-data-view-utils":
   version "0.0.0"
   uid ""
 
-"@kbn/data-views-plugin@link:src/plugins/data_views":
+"@kbn/data-views-plugin@link:src/platform/plugins/shared/data_views":
   version "0.0.0"
   uid ""
 
@@ -5273,11 +5273,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/datemath@link:packages/kbn-datemath":
+"@kbn/datemath@link:src/platform/packages/shared/kbn-datemath":
   version "0.0.0"
   uid ""
 
-"@kbn/deeplinks-analytics@link:packages/deeplinks/analytics":
+"@kbn/deeplinks-analytics@link:src/platform/packages/shared/deeplinks/analytics":
   version "0.0.0"
   uid ""
 
@@ -5301,7 +5301,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/deeplinks-search@link:packages/deeplinks/search":
+"@kbn/deeplinks-search@link:src/platform/packages/shared/deeplinks/search":
   version "0.0.0"
   uid ""
 
@@ -5313,7 +5313,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/default-nav-analytics@link:packages/default-nav/analytics":
+"@kbn/default-nav-analytics@link:src/platform/packages/private/default-nav/analytics":
   version "0.0.0"
   uid ""
 
@@ -5369,19 +5369,19 @@
   version "0.0.0"
   uid ""
 
-"@kbn/discover-enhanced-plugin@link:x-pack/plugins/discover_enhanced":
+"@kbn/discover-enhanced-plugin@link:x-pack/platform/plugins/private/discover_enhanced":
   version "0.0.0"
   uid ""
 
-"@kbn/discover-plugin@link:src/plugins/discover":
+"@kbn/discover-plugin@link:src/platform/plugins/shared/discover":
   version "0.0.0"
   uid ""
 
-"@kbn/discover-shared-plugin@link:src/plugins/discover_shared":
+"@kbn/discover-shared-plugin@link:src/platform/plugins/shared/discover_shared":
   version "0.0.0"
   uid ""
 
-"@kbn/discover-utils@link:packages/kbn-discover-utils":
+"@kbn/discover-utils@link:src/platform/packages/shared/kbn-discover-utils":
   version "0.0.0"
   uid ""
 
@@ -5453,7 +5453,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/enterprise-search-plugin@link:x-pack/plugins/enterprise_search":
+"@kbn/enterprise-search-plugin@link:x-pack/solutions/search/plugins/enterprise_search":
   version "0.0.0"
   uid ""
 
@@ -5489,7 +5489,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/es-query@link:packages/kbn-es-query":
+"@kbn/es-query@link:src/platform/packages/shared/kbn-es-query":
   version "0.0.0"
   uid ""
 
@@ -5709,15 +5709,15 @@
   version "0.0.0"
   uid ""
 
-"@kbn/field-formats-plugin@link:src/plugins/field_formats":
+"@kbn/field-formats-plugin@link:src/platform/plugins/shared/field_formats":
   version "0.0.0"
   uid ""
 
-"@kbn/field-types@link:packages/kbn-field-types":
+"@kbn/field-types@link:src/platform/packages/shared/kbn-field-types":
   version "0.0.0"
   uid ""
 
-"@kbn/field-utils@link:packages/kbn-field-utils":
+"@kbn/field-utils@link:src/platform/packages/shared/kbn-field-utils":
   version "0.0.0"
   uid ""
 
@@ -5733,11 +5733,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/files-management-plugin@link:src/plugins/files_management":
+"@kbn/files-management-plugin@link:src/platform/plugins/private/files_management":
   version "0.0.0"
   uid ""
 
-"@kbn/files-plugin@link:src/plugins/files":
+"@kbn/files-plugin@link:src/platform/plugins/shared/files":
   version "0.0.0"
   uid ""
 
@@ -5805,15 +5805,15 @@
   version "0.0.0"
   uid ""
 
-"@kbn/global-search-bar-plugin@link:x-pack/plugins/global_search_bar":
+"@kbn/global-search-bar-plugin@link:x-pack/platform/plugins/private/global_search_bar":
   version "0.0.0"
   uid ""
 
-"@kbn/global-search-plugin@link:x-pack/plugins/global_search":
+"@kbn/global-search-plugin@link:x-pack/platform/plugins/shared/global_search":
   version "0.0.0"
   uid ""
 
-"@kbn/global-search-providers-plugin@link:x-pack/plugins/global_search_providers":
+"@kbn/global-search-providers-plugin@link:x-pack/platform/plugins/private/global_search_providers":
   version "0.0.0"
   uid ""
 
@@ -5845,7 +5845,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/guided-onboarding-plugin@link:src/plugins/guided_onboarding":
+"@kbn/guided-onboarding-plugin@link:src/platform/plugins/shared/guided_onboarding":
   version "0.0.0"
   uid ""
 
@@ -5873,7 +5873,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/home-plugin@link:src/plugins/home":
+"@kbn/home-plugin@link:src/platform/plugins/shared/home":
   version "0.0.0"
   uid ""
 
@@ -5901,7 +5901,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/image-embeddable-plugin@link:src/plugins/image_embeddable":
+"@kbn/image-embeddable-plugin@link:src/platform/plugins/private/image_embeddable":
   version "0.0.0"
   uid ""
 
@@ -5989,11 +5989,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/inventory-e2e@link:x-pack/plugins/observability_solution/inventory/e2e":
+"@kbn/inventory-e2e@link:x-pack/solutions/observability/plugins/inventory/e2e":
   version "0.0.0"
   uid ""
 
-"@kbn/inventory-plugin@link:x-pack/plugins/observability_solution/inventory":
+"@kbn/inventory-plugin@link:x-pack/solutions/observability/plugins/inventory":
   version "0.0.0"
   uid ""
 
@@ -6013,7 +6013,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/ipynb@link:packages/kbn-ipynb":
+"@kbn/ipynb@link:x-pack/solutions/search/packages/kbn-ipynb":
   version "0.0.0"
   uid ""
 
@@ -6065,11 +6065,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/kibana-overview-plugin@link:src/plugins/kibana_overview":
+"@kbn/kibana-overview-plugin@link:src/platform/plugins/private/kibana_overview":
   version "0.0.0"
   uid ""
 
-"@kbn/kibana-react-plugin@link:src/plugins/kibana_react":
+"@kbn/kibana-react-plugin@link:src/platform/plugins/shared/kibana_react":
   version "0.0.0"
   uid ""
 
@@ -6077,7 +6077,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/kibana-utils-plugin@link:src/plugins/kibana_utils":
+"@kbn/kibana-utils-plugin@link:src/platform/plugins/shared/kibana_utils":
   version "0.0.0"
   uid ""
 
@@ -6097,7 +6097,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/lens-embeddable-utils@link:packages/kbn-lens-embeddable-utils":
+"@kbn/lens-embeddable-utils@link:src/platform/packages/shared/kbn-lens-embeddable-utils":
   version "0.0.0"
   uid ""
 
@@ -6269,7 +6269,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/metrics-data-access-plugin@link:x-pack/plugins/observability_solution/metrics_data_access":
+"@kbn/metrics-data-access-plugin@link:x-pack/solutions/observability/plugins/metrics_data_access":
   version "0.0.0"
   uid ""
 
@@ -6425,7 +6425,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/navigation-plugin@link:src/plugins/navigation":
+"@kbn/navigation-plugin@link:src/platform/plugins/shared/navigation":
   version "0.0.0"
   uid ""
 
@@ -6437,11 +6437,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/no-data-page-plugin@link:src/plugins/no_data_page":
+"@kbn/no-data-page-plugin@link:src/platform/plugins/private/no_data_page":
   version "0.0.0"
   uid ""
 
-"@kbn/notifications-plugin@link:x-pack/plugins/notifications":
+"@kbn/notifications-plugin@link:x-pack/platform/plugins/shared/notifications":
   version "0.0.0"
   uid ""
 
@@ -6649,15 +6649,15 @@
   version "0.0.0"
   uid ""
 
-"@kbn/profiling-data-access-plugin@link:x-pack/plugins/observability_solution/profiling_data_access":
+"@kbn/profiling-data-access-plugin@link:x-pack/solutions/observability/plugins/profiling_data_access":
   version "0.0.0"
   uid ""
 
-"@kbn/profiling-plugin@link:x-pack/plugins/observability_solution/profiling":
+"@kbn/profiling-plugin@link:x-pack/solutions/observability/plugins/profiling":
   version "0.0.0"
   uid ""
 
-"@kbn/profiling-utils@link:packages/kbn-profiling-utils":
+"@kbn/profiling-utils@link:src/platform/packages/shared/kbn-profiling-utils":
   version "0.0.0"
   uid ""
 
@@ -6665,7 +6665,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/react-field@link:packages/kbn-react-field":
+"@kbn/react-field@link:src/platform/packages/shared/kbn-react-field":
   version "0.0.0"
   uid ""
 
@@ -6721,7 +6721,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/repo-info@link:packages/kbn-repo-info":
+"@kbn/repo-info@link:src/platform/packages/shared/kbn-repo-info":
   version "0.0.0"
   uid ""
 
@@ -6729,7 +6729,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/repo-packages@link:packages/kbn-repo-packages":
+"@kbn/repo-packages@link:src/platform/packages/private/kbn-repo-packages":
   version "0.0.0"
   uid ""
 
@@ -6781,7 +6781,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/reporting-plugin@link:x-pack/plugins/reporting":
+"@kbn/reporting-plugin@link:x-pack/platform/plugins/private/reporting":
   version "0.0.0"
   uid ""
 
@@ -6797,7 +6797,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/resizable-layout@link:packages/kbn-resizable-layout":
+"@kbn/resizable-layout@link:src/platform/packages/shared/kbn-resizable-layout":
   version "0.0.0"
   uid ""
 
@@ -6813,7 +6813,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/response-ops-rule-params@link:src/platform/packages/private/response-ops/rule_params":
+"@kbn/response-ops-rule-params@link:src/platform/packages/shared/response-ops/rule_params":
   version "0.0.0"
   uid ""
 
@@ -6821,7 +6821,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/rison@link:packages/kbn-rison":
+"@kbn/rison@link:src/platform/packages/shared/kbn-rison":
   version "0.0.0"
   uid ""
 
@@ -6889,7 +6889,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/saved-objects-finder-plugin@link:src/plugins/saved_objects_finder":
+"@kbn/saved-objects-finder-plugin@link:src/platform/plugins/shared/saved_objects_finder":
   version "0.0.0"
   uid ""
 
@@ -6905,7 +6905,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/saved-objects-plugin@link:src/plugins/saved_objects":
+"@kbn/saved-objects-plugin@link:src/platform/plugins/shared/saved_objects":
   version "0.0.0"
   uid ""
 
@@ -6913,11 +6913,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/saved-objects-tagging-oss-plugin@link:src/plugins/saved_objects_tagging_oss":
+"@kbn/saved-objects-tagging-oss-plugin@link:src/platform/plugins/shared/saved_objects_tagging_oss":
   version "0.0.0"
   uid ""
 
-"@kbn/saved-objects-tagging-plugin@link:x-pack/plugins/saved_objects_tagging":
+"@kbn/saved-objects-tagging-plugin@link:x-pack/platform/plugins/private/saved_objects_tagging":
   version "0.0.0"
   uid ""
 
@@ -6925,7 +6925,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/saved-search-plugin@link:src/plugins/saved_search":
+"@kbn/saved-search-plugin@link:src/platform/plugins/shared/saved_search":
   version "0.0.0"
   uid ""
 
@@ -6945,7 +6945,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/screenshot-mode-plugin@link:src/plugins/screenshot_mode":
+"@kbn/screenshot-mode-plugin@link:src/platform/plugins/shared/screenshot_mode":
   version "0.0.0"
   uid ""
 
@@ -6961,31 +6961,31 @@
   version "0.0.0"
   uid ""
 
-"@kbn/search-api-keys-components@link:packages/kbn-search-api-keys-components":
+"@kbn/search-api-keys-components@link:x-pack/solutions/search/packages/kbn-search-api-keys-components":
   version "0.0.0"
   uid ""
 
-"@kbn/search-api-keys-server@link:packages/kbn-search-api-keys-server":
+"@kbn/search-api-keys-server@link:x-pack/solutions/search/packages/kbn-search-api-keys-server":
   version "0.0.0"
   uid ""
 
-"@kbn/search-api-panels@link:packages/kbn-search-api-panels":
+"@kbn/search-api-panels@link:src/platform/packages/shared/kbn-search-api-panels":
   version "0.0.0"
   uid ""
 
-"@kbn/search-assistant@link:x-pack/plugins/search_assistant":
+"@kbn/search-assistant@link:x-pack/solutions/search/plugins/search_assistant":
   version "0.0.0"
   uid ""
 
-"@kbn/search-connectors-plugin@link:x-pack/plugins/search_connectors":
+"@kbn/search-connectors-plugin@link:x-pack/solutions/search/plugins/search_connectors":
   version "0.0.0"
   uid ""
 
-"@kbn/search-connectors@link:packages/kbn-search-connectors":
+"@kbn/search-connectors@link:src/platform/packages/shared/kbn-search-connectors":
   version "0.0.0"
   uid ""
 
-"@kbn/search-errors@link:packages/kbn-search-errors":
+"@kbn/search-errors@link:src/platform/packages/shared/kbn-search-errors":
   version "0.0.0"
   uid ""
 
@@ -6993,43 +6993,43 @@
   version "0.0.0"
   uid ""
 
-"@kbn/search-homepage@link:x-pack/plugins/search_homepage":
+"@kbn/search-homepage@link:x-pack/solutions/search/plugins/search_homepage":
   version "0.0.0"
   uid ""
 
-"@kbn/search-index-documents@link:packages/kbn-search-index-documents":
+"@kbn/search-index-documents@link:x-pack/solutions/search/packages/kbn-search-index-documents":
   version "0.0.0"
   uid ""
 
-"@kbn/search-indices@link:x-pack/plugins/search_indices":
+"@kbn/search-indices@link:x-pack/solutions/search/plugins/search_indices":
   version "0.0.0"
   uid ""
 
-"@kbn/search-inference-endpoints@link:x-pack/plugins/search_inference_endpoints":
+"@kbn/search-inference-endpoints@link:x-pack/solutions/search/plugins/search_inference_endpoints":
   version "0.0.0"
   uid ""
 
-"@kbn/search-navigation@link:x-pack/plugins/search_solution/search_navigation":
+"@kbn/search-navigation@link:x-pack/solutions/search/plugins/search_solution/search_navigation":
   version "0.0.0"
   uid ""
 
-"@kbn/search-notebooks@link:x-pack/plugins/search_notebooks":
+"@kbn/search-notebooks@link:x-pack/solutions/search/plugins/search_notebooks":
   version "0.0.0"
   uid ""
 
-"@kbn/search-playground@link:x-pack/plugins/search_playground":
+"@kbn/search-playground@link:x-pack/solutions/search/plugins/search_playground":
   version "0.0.0"
   uid ""
 
-"@kbn/search-response-warnings@link:packages/kbn-search-response-warnings":
+"@kbn/search-response-warnings@link:src/platform/packages/shared/kbn-search-response-warnings":
   version "0.0.0"
   uid ""
 
-"@kbn/search-shared-ui@link:x-pack/packages/search/shared_ui":
+"@kbn/search-shared-ui@link:x-pack/solutions/search/packages/search/shared_ui":
   version "0.0.0"
   uid ""
 
-"@kbn/search-types@link:packages/kbn-search-types":
+"@kbn/search-types@link:src/platform/packages/shared/kbn-search-types":
   version "0.0.0"
   uid ""
 
@@ -7241,11 +7241,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/serverless-search-settings@link:packages/serverless/settings/search_project":
+"@kbn/serverless-search-settings@link:src/platform/packages/shared/serverless/settings/search_project":
   version "0.0.0"
   uid ""
 
-"@kbn/serverless-search@link:x-pack/plugins/serverless_search":
+"@kbn/serverless-search@link:x-pack/solutions/search/plugins/serverless_search":
   version "0.0.0"
   uid ""
 
@@ -7261,7 +7261,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/serverless@link:x-pack/plugins/serverless":
+"@kbn/serverless@link:x-pack/platform/plugins/shared/serverless":
   version "0.0.0"
   uid ""
 
@@ -7281,11 +7281,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/share-plugin@link:src/plugins/share":
+"@kbn/share-plugin@link:src/platform/plugins/shared/share":
   version "0.0.0"
   uid ""
 
-"@kbn/shared-svg@link:packages/kbn-shared-svg":
+"@kbn/shared-svg@link:src/platform/packages/shared/kbn-shared-svg":
   version "0.0.0"
   uid ""
 
@@ -7725,7 +7725,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/try-in-console@link:packages/kbn-try-in-console":
+"@kbn/try-in-console@link:src/platform/packages/shared/kbn-try-in-console":
   version "0.0.0"
   uid ""
 
@@ -7749,7 +7749,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/ui-actions-enhanced-plugin@link:src/plugins/ui_actions_enhanced":
+"@kbn/ui-actions-enhanced-plugin@link:src/platform/plugins/shared/ui_actions_enhanced":
   version "0.0.0"
   uid ""
 
@@ -7761,7 +7761,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/ui-actions-plugin@link:src/plugins/ui_actions":
+"@kbn/ui-actions-plugin@link:src/platform/plugins/shared/ui_actions":
   version "0.0.0"
   uid ""
 
@@ -7769,19 +7769,19 @@
   version "0.0.0"
   uid ""
 
-"@kbn/ui-shared-deps-npm@link:packages/kbn-ui-shared-deps-npm":
+"@kbn/ui-shared-deps-npm@link:src/platform/packages/private/kbn-ui-shared-deps-npm":
   version "0.0.0"
   uid ""
 
-"@kbn/ui-shared-deps-src@link:packages/kbn-ui-shared-deps-src":
+"@kbn/ui-shared-deps-src@link:src/platform/packages/private/kbn-ui-shared-deps-src":
   version "0.0.0"
   uid ""
 
-"@kbn/ui-theme@link:packages/kbn-ui-theme":
+"@kbn/ui-theme@link:src/platform/packages/shared/kbn-ui-theme":
   version "0.0.0"
   uid ""
 
-"@kbn/unified-data-table@link:packages/kbn-unified-data-table":
+"@kbn/unified-data-table@link:src/platform/packages/shared/kbn-unified-data-table":
   version "0.0.0"
   uid ""
 
@@ -7789,11 +7789,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/unified-doc-viewer-plugin@link:src/plugins/unified_doc_viewer":
+"@kbn/unified-doc-viewer-plugin@link:src/platform/plugins/shared/unified_doc_viewer":
   version "0.0.0"
   uid ""
 
-"@kbn/unified-doc-viewer@link:packages/kbn-unified-doc-viewer":
+"@kbn/unified-doc-viewer@link:src/platform/packages/shared/kbn-unified-doc-viewer":
   version "0.0.0"
   uid ""
 
@@ -7801,11 +7801,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/unified-field-list@link:packages/kbn-unified-field-list":
+"@kbn/unified-field-list@link:src/platform/packages/shared/kbn-unified-field-list":
   version "0.0.0"
   uid ""
 
-"@kbn/unified-histogram-plugin@link:src/plugins/unified_histogram":
+"@kbn/unified-histogram-plugin@link:src/platform/plugins/shared/unified_histogram":
   version "0.0.0"
   uid ""
 
@@ -7813,7 +7813,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/unsaved-changes-badge@link:packages/kbn-unsaved-changes-badge":
+"@kbn/unsaved-changes-badge@link:src/platform/packages/private/kbn-unsaved-changes-badge":
   version "0.0.0"
   uid ""
 
@@ -7861,7 +7861,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/utility-types-jest@link:packages/kbn-utility-types-jest":
+"@kbn/utility-types-jest@link:src/platform/packages/shared/kbn-utility-types-jest":
   version "0.0.0"
   uid ""
 
@@ -7869,7 +7869,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/utils@link:packages/kbn-utils":
+"@kbn/utils@link:src/platform/packages/shared/kbn-utils":
   version "0.0.0"
   uid ""
 
@@ -16430,10 +16430,10 @@ cypress-recurse@^1.35.2:
   dependencies:
     humanize-duration "^3.27.3"
 
-cypress@13.15.2:
-  version "13.15.2"
-  resolved "https://registry.yarnpkg.com/cypress/-/cypress-13.15.2.tgz#ef19554c274bc4ff23802aeb5c52951677fa67f1"
-  integrity sha512-ARbnUorjcCM3XiPwgHKuqsyr5W9Qn+pIIBPaoilnoBkLdSC2oLQjV1BUpnmc7KR+b7Avah3Ly2RMFnfxr96E/A==
+cypress@13.17.0:
+  version "13.17.0"
+  resolved "https://registry.yarnpkg.com/cypress/-/cypress-13.17.0.tgz#34c3d68080c4497eace0f353bd1629587a5f600d"
+  integrity sha512-5xWkaPurwkIljojFidhw8lFScyxhtiFHl/i/3zov+1Z5CmY4t9tjIdvSXfu82Y3w7wt0uR9KkucbhkVvJZLQSA==
   dependencies:
     "@cypress/request" "^3.0.6"
     "@cypress/xvfb" "^1.2.4"
@@ -17732,10 +17732,10 @@ elastic-apm-node@3.46.0:
     traverse "^0.6.6"
     unicode-byte-truncate "^1.0.0"
 
-elastic-apm-node@^4.9.0:
-  version "4.9.0"
-  resolved "https://registry.yarnpkg.com/elastic-apm-node/-/elastic-apm-node-4.9.0.tgz#8ca807fdf64404b615b60c4090bd9c9aad5b78ed"
-  integrity sha512-VUbrahqHmqpfwGHtUysWJ7aeCIUm61hAw8tSu0gE9AYdriVSPod4Ki11X4K8sBri0bIc/FTHxOrg7kudhGoqHQ==
+elastic-apm-node@^4.10.0:
+  version "4.10.0"
+  resolved "https://registry.yarnpkg.com/elastic-apm-node/-/elastic-apm-node-4.10.0.tgz#b0560f1f49ac4f7633a810d4d7f727e45f8ebe20"
+  integrity sha512-QmnKLArA84lJ4mNoUTi9qMUfLE1nUeFLB+VO/7iG6UOTiAdR5Wxk0nu3SpcgFe+tr+4GkyXM2xXdmL2XYfQ1Qg==
   dependencies:
     "@elastic/ecs-pino-format" "^1.5.0"
     "@opentelemetry/api" "^1.4.1"
