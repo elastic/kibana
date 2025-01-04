@@ -118,7 +118,7 @@ const mockedServices = {
   },
   application: {
     capabilities: {
-      discover: { save: true, saveQuery: true, show: true },
+      discover_v2: { save: true, show: true },
     },
   },
   core: corePluginMock,
@@ -388,12 +388,12 @@ describe('Lens Field Item', () => {
     ).not.toBeInTheDocument();
   });
 
-  it('should not display Explore in discover button if discover capabilities show is false', async () => {
+  it('should not display Explore in discover button if discover_v2 capabilities show is false', async () => {
     const services = {
       ...mockedServices,
       application: {
         capabilities: {
-          discover: { save: false, saveQuery: false, show: false },
+          discover_v2: { save: false, show: false },
         },
       },
     };

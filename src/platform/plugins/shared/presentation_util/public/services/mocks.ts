@@ -18,11 +18,11 @@ import { setKibanaServices } from './kibana_services';
 const setDefaultPresentationUtilCapabilities = (core: CoreStart) => {
   core.application.capabilities = {
     ...core.application.capabilities,
-    dashboard: {
+    dashboard_v2: {
       show: true,
       createNew: true,
     },
-    visualize: {
+    visualize_v2: {
       save: true,
     },
     advancedSettings: {

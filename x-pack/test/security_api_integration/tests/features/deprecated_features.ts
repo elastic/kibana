@@ -181,9 +181,13 @@ export default function ({ getService }: FtrProviderContext) {
           "case_3_feature_a",
           "case_4_feature_a",
           "case_4_feature_b",
+          "dashboard",
+          "discover",
           "generalCases",
+          "maps",
           "observabilityCases",
           "securitySolutionCases",
+          "visualize",
         ]
       `);
     });
@@ -204,6 +208,10 @@ export default function ({ getService }: FtrProviderContext) {
         'case_2_feature_a',
         'case_4_feature_a',
         'case_4_feature_b',
+        'discover',
+        'dashboard',
+        'visualize',
+        'maps',
       ]);
       for (const feature of features) {
         if (
