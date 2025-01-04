@@ -7,14 +7,15 @@
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import { calculateAuto } from '@kbn/calculate-auto';
 import { i18n } from '@kbn/i18n';
-import { useDateRange } from '@kbn/observability-utils-browser/hooks/use_date_range';
 import moment from 'moment';
 import React, { useMemo } from 'react';
 import { ReadStreamDefinition } from '@kbn/streams-schema';
+import { useDateRange } from '@kbn/observability-utils-browser/hooks/use_date_range';
 import { useKibana } from '../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
 import { ControlledEsqlChart } from '../esql_chart/controlled_esql_chart';
 import { StreamsAppSearchBar } from '../streams_app_search_bar';
+import { getIndexPatterns } from '../../util/hierarchy_helpers';
 
 export function StreamDetailOverview({ definition }: { definition?: ReadStreamDefinition }) {
   const {
@@ -35,18 +36,8 @@ export function StreamDetailOverview({ definition }: { definition?: ReadStreamDe
   } = useDateRange({ data });
 
   const indexPatterns = useMemo(() => {
-    if (!definition?.name) {
-      return undefined;
-    }
-
-    const isRoot = definition.name.indexOf('.') === -1;
-
-    const dataStreamOfDefinition = definition.name;
-
-    return isRoot
-      ? [dataStreamOfDefinition, `${dataStreamOfDefinition}.*`]
-      : [`${dataStreamOfDefinition}*`];
-  }, [definition?.name]);
+    return getIndexPatterns(definition);
+  }, [definition]);
 
   const discoverLocator = useMemo(
     () => share.url.locators.get('DISCOVER_APP_LOCATOR'),
