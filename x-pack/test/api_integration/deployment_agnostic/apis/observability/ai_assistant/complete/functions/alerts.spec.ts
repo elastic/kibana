@@ -18,7 +18,9 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   const log = getService('log');
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
 
-  describe('when calling the alerts function', () => {
+  describe('when calling the alerts function', function () {
+    // TODO: https://github.com/elastic/kibana/issues/192751
+    this.tags(['skipMKI']);
     let proxy: LlmProxy;
     let connectorId: string;
     let alertsEvents: MessageAddEvent[];
