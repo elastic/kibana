@@ -6,7 +6,7 @@
  */
 
 import React, { memo, useCallback } from 'react';
-import { css } from '@emotion/css';
+import { css } from '@emotion/react';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import type { Filter, TimeRange } from '@kbn/es-query';
 import dateMath from '@kbn/datemath';
