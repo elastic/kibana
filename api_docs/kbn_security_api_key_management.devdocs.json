@@ -35,13 +35,7 @@
                 "label": "http",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-http-browser",
-                    "scope": "public",
-                    "docId": "kibKbnCoreHttpBrowserPluginApi",
-                    "section": "def-public.HttpSetup",
-                    "text": "HttpSetup"
-                  }
+                  "HttpSetup"
                 ],
                 "path": "x-pack/packages/security/api_key_management/src/components/api_keys_api_client.ts",
                 "deprecated": false,
@@ -185,13 +179,7 @@
             "description": [],
             "signature": [
               "(apiKey: ",
-              {
-                "pluginId": "@kbn/core-security-server",
-                "scope": "server",
-                "docId": "kibKbnCoreSecurityServerPluginApi",
-                "section": "def-server.CreateAPIKeyParams",
-                "text": "CreateAPIKeyParams"
-              },
+              "CreateAPIKeyParams",
               ") => Promise<",
               "SecurityCreateApiKeyResponse",
               ">"
@@ -208,13 +196,7 @@
                 "label": "apiKey",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-security-server",
-                    "scope": "server",
-                    "docId": "kibKbnCoreSecurityServerPluginApi",
-                    "section": "def-server.CreateAPIKeyParams",
-                    "text": "CreateAPIKeyParams"
-                  }
+                  "CreateAPIKeyParams"
                 ],
                 "path": "x-pack/packages/security/api_key_management/src/components/api_keys_api_client.ts",
                 "deprecated": false,
@@ -233,13 +215,7 @@
             "description": [],
             "signature": [
               "(apiKey: ",
-              {
-                "pluginId": "@kbn/core-security-server",
-                "scope": "server",
-                "docId": "kibKbnCoreSecurityServerPluginApi",
-                "section": "def-server.UpdateAPIKeyParams",
-                "text": "UpdateAPIKeyParams"
-              },
+              "UpdateAPIKeyParams",
               ") => Promise<",
               "SecurityUpdateApiKeyResponse",
               ">"
@@ -256,13 +232,7 @@
                 "label": "apiKey",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-security-server",
-                    "scope": "server",
-                    "docId": "kibKbnCoreSecurityServerPluginApi",
-                    "section": "def-server.UpdateAPIKeyParams",
-                    "text": "UpdateAPIKeyParams"
-                  }
+                  "UpdateAPIKeyParams"
                 ],
                 "path": "x-pack/packages/security/api_key_management/src/components/api_keys_api_client.ts",
                 "deprecated": false,
@@ -523,13 +493,7 @@
             "text": "ApiKeyFormValues"
           },
           ") => ",
-          {
-            "pluginId": "@kbn/core-security-server",
-            "scope": "server",
-            "docId": "kibKbnCoreSecurityServerPluginApi",
-            "section": "def-server.CreateAPIKeyParams",
-            "text": "CreateAPIKeyParams"
-          }
+          "CreateAPIKeyParams"
         ],
         "path": "x-pack/packages/security/api_key_management/src/components/api_key_flyout.tsx",
         "deprecated": false,
@@ -577,13 +541,7 @@
             "text": "ApiKeyFormValues"
           },
           ") => ",
-          {
-            "pluginId": "@kbn/core-security-server",
-            "scope": "server",
-            "docId": "kibKbnCoreSecurityServerPluginApi",
-            "section": "def-server.UpdateAPIKeyParams",
-            "text": "UpdateAPIKeyParams"
-          }
+          "UpdateAPIKeyParams"
         ],
         "path": "x-pack/packages/security/api_key_management/src/components/api_key_flyout.tsx",
         "deprecated": false,
@@ -1123,31 +1081,13 @@
         "label": "CreateAPIKeyParams",
         "description": [],
         "signature": [
-          {
-            "pluginId": "@kbn/core-security-server",
-            "scope": "server",
-            "docId": "kibKbnCoreSecurityServerPluginApi",
-            "section": "def-server.CreateRestAPIKeyParams",
-            "text": "CreateRestAPIKeyParams"
-          },
+          "CreateRestAPIKeyParams",
           " | ",
-          {
-            "pluginId": "@kbn/core-security-server",
-            "scope": "server",
-            "docId": "kibKbnCoreSecurityServerPluginApi",
-            "section": "def-server.CreateRestAPIKeyWithKibanaPrivilegesParams",
-            "text": "CreateRestAPIKeyWithKibanaPrivilegesParams"
-          },
+          "CreateRestAPIKeyWithKibanaPrivilegesParams",
           " | ",
-          {
-            "pluginId": "@kbn/core-security-server",
-            "scope": "server",
-            "docId": "kibKbnCoreSecurityServerPluginApi",
-            "section": "def-server.CreateCrossClusterAPIKeyParams",
-            "text": "CreateCrossClusterAPIKeyParams"
-          }
+          "CreateCrossClusterAPIKeyParams"
         ],
-        "path": "packages/core/security/core-security-server/src/authentication/api_keys/api_keys.ts",
+        "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1164,7 +1104,7 @@
         "signature": [
           "SecurityCreateApiKeyResponse"
         ],
-        "path": "packages/core/security/core-security-server/src/authentication/api_keys/api_keys.ts",
+        "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1194,31 +1134,13 @@
           "\nRequest body of Kibana Update API key endpoint."
         ],
         "signature": [
-          {
-            "pluginId": "@kbn/core-security-server",
-            "scope": "server",
-            "docId": "kibKbnCoreSecurityServerPluginApi",
-            "section": "def-server.UpdateRestAPIKeyParams",
-            "text": "UpdateRestAPIKeyParams"
-          },
+          "UpdateRestAPIKeyParams",
           " | ",
-          {
-            "pluginId": "@kbn/core-security-server",
-            "scope": "server",
-            "docId": "kibKbnCoreSecurityServerPluginApi",
-            "section": "def-server.UpdateCrossClusterAPIKeyParams",
-            "text": "UpdateCrossClusterAPIKeyParams"
-          },
+          "UpdateCrossClusterAPIKeyParams",
           " | ",
-          {
-            "pluginId": "@kbn/core-security-server",
-            "scope": "server",
-            "docId": "kibKbnCoreSecurityServerPluginApi",
-            "section": "def-server.UpdateRestAPIKeyWithKibanaPrivilegesParams",
-            "text": "UpdateRestAPIKeyWithKibanaPrivilegesParams"
-          }
+          "UpdateRestAPIKeyWithKibanaPrivilegesParams"
         ],
-        "path": "packages/core/security/core-security-server/src/authentication/api_keys/api_keys.ts",
+        "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1235,7 +1157,7 @@
         "signature": [
           "SecurityUpdateApiKeyResponse"
         ],
-        "path": "packages/core/security/core-security-server/src/authentication/api_keys/api_keys.ts",
+        "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
