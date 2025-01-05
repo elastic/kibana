@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-import React, { useContext } from 'react';
+import React from 'react';
 import { Routes, Route } from '@kbn/shared-ux-router';
 
 import {
@@ -30,7 +30,7 @@ import { MetricsAlertDropdown } from '../../alerting/common/components/metrics_a
 import { AlertPrefillProvider } from '../../alerting/use_alert_prefill';
 import { InfraMLCapabilitiesProvider } from '../../containers/ml/infra_ml_capabilities';
 import { AnomalyDetectionFlyout } from '../../components/ml/anomaly_detection/anomaly_detection_flyout';
-import { HeaderActionMenuContext } from '../../containers/header_action_menu_provider';
+import { useHeaderActionMenu } from '../../containers/header_action_menu_provider';
 import { NotFoundPage } from '../404';
 import { ReactQueryProvider } from '../../containers/react_query_provider';
 import { usePluginConfig } from '../../containers/plugin_config_context';
@@ -56,7 +56,7 @@ const HostsPage = dynamic(() => import('./hosts').then((mod) => ({ default: mod.
 export const InfrastructurePage = () => {
   const config = usePluginConfig();
   const { application } = useKibana<{ share: SharePublicStart }>().services;
-  const { setHeaderActionMenu, theme$ } = useContext(HeaderActionMenuContext);
+  const headerActionMenuContext = useHeaderActionMenu();
 
   const uiCapabilities = application?.capabilities;
 
@@ -83,8 +83,8 @@ export const InfrastructurePage = () => {
                   defaultMessage: 'Metrics',
                 })}
               />
-              {setHeaderActionMenu && theme$ && (
-                <HeaderMenuPortal setHeaderActionMenu={setHeaderActionMenu} theme$={theme$}>
+              {headerActionMenuContext && (
+                <HeaderMenuPortal {...headerActionMenuContext}>
                   <EuiFlexGroup responsive={false} gutterSize="s">
                     <EuiFlexItem>
                       <EuiHeaderLinks gutterSize="xs">

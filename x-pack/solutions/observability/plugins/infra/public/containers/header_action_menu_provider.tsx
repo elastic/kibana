@@ -6,24 +6,31 @@
  */
 
 import type { PropsWithChildren } from 'react';
-import React from 'react';
-import type { AppMountParameters } from '@kbn/core/public';
+import React, { useContext } from 'react';
+import type { AppMountParameters, ThemeServiceStart, UserProfileService } from '@kbn/core/public';
 
 interface ContextProps {
-  setHeaderActionMenu?: AppMountParameters['setHeaderActionMenu'];
-  theme$?: AppMountParameters['theme$'];
+  setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
+  userProfile: UserProfileService;
+  theme: ThemeServiceStart;
 }
 
-export const HeaderActionMenuContext = React.createContext<ContextProps>({});
+export const HeaderActionMenuContext = React.createContext<ContextProps | null>(null);
 
 export const HeaderActionMenuProvider: React.FC<PropsWithChildren<Required<ContextProps>>> = ({
   setHeaderActionMenu,
-  theme$,
+  theme,
+  userProfile,
   children,
 }) => {
   return (
-    <HeaderActionMenuContext.Provider value={{ setHeaderActionMenu, theme$ }}>
+    <HeaderActionMenuContext.Provider value={{ setHeaderActionMenu, theme, userProfile }}>
       {children}
     </HeaderActionMenuContext.Provider>
   );
+};
+
+export const useHeaderActionMenu = () => {
+  // TODO: throw error if context is null?
+  return useContext(HeaderActionMenuContext);
 };
