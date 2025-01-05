@@ -82,17 +82,17 @@ right advanced settings like whether to include frozen indices or not.
 ** Rendering maps, visualizations, dashboards in your application
 ** Register new widgets that will can be added to a dashboard or Canvas
 workpad, or rendered in another plugin.
-* {kib-repo}tree/{branch}/src/plugins/ui_actions/README.asciidoc[UiActions]
+* {kib-repo}tree/{branch}/src/platform/plugins/shared/ui_actions/README.asciidoc[UiActions]
 ** Let other plugins inject functionality into your application
 ** Inject custom functionality into other plugins
 * Stateless helper utilities
-* {kib-repo}tree/{branch}/src/plugins/kibana_utils/docs/state_sync/README.md[state
+* {kib-repo}tree/{branch}/src/platform/plugins/shared/kibana_utils/docs/state_sync/README.md[state
 syncing] and
-* {kib-repo}tree/{branch}/src/plugins/kibana_utils/docs/state_containers/README.md[state
+* {kib-repo}tree/{branch}/src/platform/plugins/shared/kibana_utils/docs/state_containers/README.md[state
 container] utilities provided by
-* {kib-repo}tree/{branch}/src/plugins/kibana_utils/README.md[kibana_utils]
+* {kib-repo}tree/{branch}/src/platform/plugins/shared/kibana_utils/README.md[kibana_utils]
 if you want to sync your application state to the URL?
-** {kib-repo}tree/{branch}/src/plugins/kibana_react/README.md[kibana_react]
+** {kib-repo}tree/{branch}/src/platform/plugins/shared/kibana_react/README.md[kibana_react]
 for react specific helpers
 
 Re-using these services will help create a consistent experience across
