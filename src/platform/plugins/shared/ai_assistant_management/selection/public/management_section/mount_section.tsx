@@ -64,7 +64,8 @@ export const mountManagementSection = async ({
           </AppContextProvider>
         </I18nProvider>
       </RedirectToHomeIfUnauthorized>,
-      theme$
+      theme$,
+      coreStart.userProfile
     ),
     element
   );
