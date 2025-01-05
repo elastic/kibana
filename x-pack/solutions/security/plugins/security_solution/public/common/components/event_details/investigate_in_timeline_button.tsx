@@ -13,13 +13,25 @@ import type { Filter } from '@kbn/es-query';
 import type { TimeRange } from '../../store/inputs/model';
 import type { DataProvider } from '../../../../common/types';
 import { ACTION_INVESTIGATE_IN_TIMELINE } from '../../../detections/components/alerts_table/translations';
-import { useTimelineApi } from '../../hooks/timeline/use_timeline_api';
+import { useInvestigateInTimeline } from '../../hooks/timeline/use_investigate_in_timeline';
 
 export interface InvestigateInTimelineButtonProps {
   asEmptyButton: boolean;
+  /**
+   * The data providers to apply to the timeline.
+   */
   dataProviders: DataProvider[] | null;
+  /**
+   * The filters to apply to the timeline.
+   */
   filters?: Filter[] | null;
+  /**
+   * The time range to apply to the timeline, defaults to global time range.
+   */
   timeRange?: TimeRange;
+  /**
+   * Whether to keep the current data view or reset it to the default.
+   */
   keepDataView?: boolean;
   isDisabled?: boolean;
   iconType?: IconType;
@@ -27,6 +39,10 @@ export interface InvestigateInTimelineButtonProps {
   flush?: EuiButtonEmptyProps['flush'];
 }
 
+/**
+ * Component that renders a EuiEmptyButton or a normal EuiButton to wrap some content and attaches a
+ * investigate in timeline callback to the click event.
+ */
 export const InvestigateInTimelineButton: FC<
   PropsWithChildren<InvestigateInTimelineButtonProps>
 > = ({
@@ -40,15 +56,15 @@ export const InvestigateInTimelineButton: FC<
   flush,
   ...rest
 }) => {
-  const { openTimeline } = useTimelineApi();
+  const { investigateInTimeline } = useInvestigateInTimeline();
   const openTimelineCallback = useCallback(() => {
-    openTimeline({
+    investigateInTimeline({
       dataProviders,
       filters,
       timeRange,
       keepDataView,
     });
-  }, [dataProviders, filters, timeRange, keepDataView, openTimeline]);
+  }, [dataProviders, filters, timeRange, keepDataView, investigateInTimeline]);
 
   return asEmptyButton ? (
     <EuiButtonEmpty

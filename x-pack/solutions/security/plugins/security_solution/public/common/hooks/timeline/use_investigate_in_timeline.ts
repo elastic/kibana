@@ -20,7 +20,7 @@ import type { TimeRange } from '../../store/inputs/model';
 import { TimelineId } from '../../../../common/types/timeline';
 import { TimelineTypeEnum } from '../../../../common/api/timeline';
 
-interface OpenTimelineArgs {
+interface InvestigateInTimelineArgs {
   /**
    * The data providers to apply to the timeline.
    */
@@ -42,7 +42,12 @@ interface OpenTimelineArgs {
   keepDataView?: boolean;
 }
 
-export const useTimelineApi = () => {
+/**
+ * This hook returns a callback that, when called, opens the timeline modal.
+ * It clears the current timeline or timeline template.
+ * Parameters can be passed to configure the timeline as it opens
+ */
+export const useInvestigateInTimeline = () => {
   const dispatch = useDispatch();
 
   const signalIndexName = useSelector(sourcererSelectors.signalIndexName);
@@ -58,8 +63,8 @@ export const useTimelineApi = () => {
     timelineType: TimelineTypeEnum.default,
   });
 
-  const openTimeline = useCallback(
-    async ({ dataProviders, filters, timeRange, keepDataView }: OpenTimelineArgs) => {
+  const investigateInTimeline = useCallback(
+    async ({ dataProviders, filters, timeRange, keepDataView }: InvestigateInTimelineArgs) => {
       const hasTemplateProviders =
         dataProviders && dataProviders.find((provider) => provider.type === 'template');
       const clearTimeline = hasTemplateProviders ? clearTimelineTemplate : clearTimelineDefault;
@@ -109,5 +114,5 @@ export const useTimelineApi = () => {
     [clearTimelineTemplate, clearTimelineDefault, dispatch, defaultDataView.id, signalIndexName]
   );
 
-  return { openTimeline };
+  return { investigateInTimeline };
 };

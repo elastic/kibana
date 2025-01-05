@@ -15,7 +15,7 @@ import { SourcererScopeName } from '../../../../sourcerer/store/model';
 import { useDocumentDetailsContext } from '../../shared/context';
 import { GRAPH_VISUALIZATION_TEST_ID } from './test_ids';
 import { useGraphPreview } from '../../shared/hooks/use_graph_preview';
-import { useTimelineApi } from '../../../../common/hooks/timeline/use_timeline_api';
+import { useInvestigateInTimeline } from '../../../../common/hooks/timeline/use_investigate_in_timeline';
 import { normalizeTimeRange } from '../../../../common/utils/normalize_time_range';
 
 const GraphInvestigationLazy = React.lazy(() =>
@@ -46,7 +46,7 @@ export const GraphVisualization: React.FC = memo(() => {
   });
 
   const originEventIds = eventIds.map((id) => ({ id, isAlert }));
-  const { openTimeline } = useTimelineApi();
+  const { investigateInTimeline } = useInvestigateInTimeline();
   const openTimelineCallback = useCallback(
     (filters: Filter[], timeRange: TimeRange) => {
       const from = dateMath.parse(timeRange.from);
@@ -63,7 +63,7 @@ export const GraphVisualization: React.FC = memo(() => {
         to: to.toISOString(),
       });
 
-      openTimeline({
+      investigateInTimeline({
         keepDataView: true,
         filters,
         timeRange: {
@@ -73,7 +73,7 @@ export const GraphVisualization: React.FC = memo(() => {
         },
       });
     },
-    [openTimeline]
+    [investigateInTimeline]
   );
 
   return (

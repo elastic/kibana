@@ -12,13 +12,13 @@ import { FpsTrendline } from './fps_trendline';
 export const GraphPerfMonitor: React.FC = () => {
   const [nodeCount, setNodeCount] = useState(0);
   const [edgeCount, setEdgeCount] = useState(0);
+  const updateCounts = () => {
+    setNodeCount(document.getElementsByClassName('react-flow__node').length);
+    setEdgeCount(document.getElementsByClassName('react-flow__edge').length);
+  };
 
   useEffect(() => {
-    const intervalId = setInterval(() => {
-      setNodeCount(document.getElementsByClassName('react-flow__node').length);
-      setEdgeCount(document.getElementsByClassName('react-flow__edge').length);
-    }, 300);
-
+    const intervalId = setInterval(updateCounts, 300);
     return () => clearInterval(intervalId);
   }, []);
 
