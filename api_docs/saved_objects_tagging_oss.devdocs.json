@@ -210,13 +210,7 @@
             "label": "tagReferences",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "server",
-                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-server.SavedObjectsFindOptionsReference",
-                "text": "SavedObjectsFindOptionsReference"
-              },
+              "SavedObjectsFindOptionsReference",
               "[]"
             ],
             "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
@@ -231,13 +225,7 @@
             "label": "tagReferencesToExclude",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "server",
-                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-server.SavedObjectsFindOptionsReference",
-                "text": "SavedObjectsFindOptionsReference"
-              },
+              "SavedObjectsFindOptionsReference",
               "[]"
             ],
             "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
@@ -538,13 +526,7 @@
               " | undefined) => ",
               "EuiTableFieldDataColumnType",
               "<",
-              {
-                "pluginId": "@kbn/core-saved-objects-common",
-                "scope": "common",
-                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-                "section": "def-common.SavedObject",
-                "text": "SavedObject"
-              },
+              "SavedObject",
               "<unknown>>"
             ],
             "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
@@ -587,13 +569,7 @@
             ],
             "signature": [
               "(tagName: string) => ",
-              {
-                "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "server",
-                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-server.SavedObjectsFindOptionsReference",
-                "text": "SavedObjectsFindOptionsReference"
-              },
+              "SavedObjectsFindOptionsReference",
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
@@ -705,21 +681,9 @@
             ],
             "signature": [
               "(references: (",
-              {
-                "pluginId": "@kbn/core-saved-objects-common",
-                "scope": "common",
-                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-                "section": "def-common.SavedObjectReference",
-                "text": "SavedObjectReference"
-              },
+              "SavedObjectReference",
               " | ",
-              {
-                "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "server",
-                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-server.SavedObjectsFindOptionsReference",
-                "text": "SavedObjectsFindOptionsReference"
-              },
+              "SavedObjectsFindOptionsReference",
               ")[]) => string[]"
             ],
             "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
@@ -735,21 +699,9 @@
                 "description": [],
                 "signature": [
                   "(",
-                  {
-                    "pluginId": "@kbn/core-saved-objects-common",
-                    "scope": "common",
-                    "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-                    "section": "def-common.SavedObjectReference",
-                    "text": "SavedObjectReference"
-                  },
+                  "SavedObjectReference",
                   " | ",
-                  {
-                    "pluginId": "@kbn/core-saved-objects-api-server",
-                    "scope": "server",
-                    "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                    "section": "def-server.SavedObjectsFindOptionsReference",
-                    "text": "SavedObjectsFindOptionsReference"
-                  },
+                  "SavedObjectsFindOptionsReference",
                   ")[]"
                 ],
                 "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
@@ -805,21 +757,9 @@
             ],
             "signature": [
               "(references: ",
-              {
-                "pluginId": "@kbn/core-saved-objects-common",
-                "scope": "common",
-                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-                "section": "def-common.SavedObjectReference",
-                "text": "SavedObjectReference"
-              },
+              "SavedObjectReference",
               "[], newTagIds: string[]) => ",
-              {
-                "pluginId": "@kbn/core-saved-objects-common",
-                "scope": "common",
-                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-                "section": "def-common.SavedObjectReference",
-                "text": "SavedObjectReference"
-              },
+              "SavedObjectReference",
               "[]"
             ],
             "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
@@ -834,13 +774,7 @@
                 "label": "references",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-saved-objects-common",
-                    "scope": "common",
-                    "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-                    "section": "def-common.SavedObjectReference",
-                    "text": "SavedObjectReference"
-                  },
+                  "SavedObjectReference",
                   "[]"
                 ],
                 "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
@@ -1096,13 +1030,7 @@
             ],
             "signature": [
               "{ references: ",
-              {
-                "pluginId": "@kbn/core-saved-objects-common",
-                "scope": "common",
-                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-                "section": "def-common.SavedObjectReference",
-                "text": "SavedObjectReference"
-              },
+              "SavedObjectReference",
               "[]; }"
             ],
             "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",

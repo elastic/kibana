@@ -54,13 +54,7 @@
             "description": [],
             "signature": [
               "({ capabilities }: { capabilities: ",
-              {
-                "pluginId": "@kbn/core-capabilities-common",
-                "scope": "common",
-                "docId": "kibKbnCoreCapabilitiesCommonPluginApi",
-                "section": "def-common.Capabilities",
-                "text": "Capabilities"
-              },
+              "Capabilities",
               "; }) => void"
             ],
             "path": "src/platform/plugins/shared/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
@@ -86,13 +80,7 @@
                     "label": "capabilities",
                     "description": [],
                     "signature": [
-                      {
-                        "pluginId": "@kbn/core-capabilities-common",
-                        "scope": "common",
-                        "docId": "kibKbnCoreCapabilitiesCommonPluginApi",
-                        "section": "def-common.Capabilities",
-                        "text": "Capabilities"
-                      }
+                      "Capabilities"
                     ],
                     "path": "src/platform/plugins/shared/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
                     "deprecated": false,
@@ -676,13 +664,7 @@
             ],
             "signature": [
               "((capabilities: ",
-              {
-                "pluginId": "@kbn/core-capabilities-common",
-                "scope": "common",
-                "docId": "kibKbnCoreCapabilitiesCommonPluginApi",
-                "section": "def-common.Capabilities",
-                "text": "Capabilities"
-              },
+              "Capabilities",
               ") => boolean) | undefined"
             ],
             "path": "src/platform/plugins/shared/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
@@ -697,13 +679,7 @@
                 "label": "capabilities",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-capabilities-common",
-                    "scope": "common",
-                    "docId": "kibKbnCoreCapabilitiesCommonPluginApi",
-                    "section": "def-common.Capabilities",
-                    "text": "Capabilities"
-                  }
+                  "Capabilities"
                 ],
                 "path": "src/platform/plugins/shared/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
                 "deprecated": false,
@@ -1740,13 +1716,7 @@
             "label": "staticAssets",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "server",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-server.IStaticAssets",
-                "text": "IStaticAssets"
-              }
+              "IStaticAssets"
             ],
             "path": "src/platform/plugins/shared/home/server/services/tutorials/lib/tutorials_registry_types.ts",
             "deprecated": false,
@@ -1859,13 +1829,7 @@
             "text": "Writable"
           },
           "<Readonly<{ status?: string | undefined; darkPreviewImagePath?: string | undefined; iconPath?: string | undefined; statusMsg?: string | undefined; } & { id: string; name: string; description: string; savedObjects: Readonly<{ version?: any; attributes?: any; } & { id: string; type: string; references: any[]; }>[]; previewImagePath: string; overviewDashboard: string; defaultIndex: string; dataIndices: Readonly<{ indexSettings?: Record<string, any> | undefined; isDataStream?: boolean | undefined; } & { id: string; fields: Record<string, any>; timeFields: string[]; dataPath: string; currentTimeMarker: string; preserveDayOfWeekTimeOfDay: boolean; }>[]; }>>[]; addSavedObjectsToSampleDataset: (id: string, savedObjects: ",
-          {
-            "pluginId": "@kbn/core-saved-objects-common",
-            "scope": "common",
-            "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-            "section": "def-common.SavedObject",
-            "text": "SavedObject"
-          },
+          "SavedObject",
           "<unknown>[]) => void; addAppLinksToSampleDataset: (id: string, appLinks: ",
           {
             "pluginId": "home",
@@ -2327,13 +2291,7 @@
               "text": "Writable"
             },
             "<Readonly<{ status?: string | undefined; darkPreviewImagePath?: string | undefined; iconPath?: string | undefined; statusMsg?: string | undefined; } & { id: string; name: string; description: string; savedObjects: Readonly<{ version?: any; attributes?: any; } & { id: string; type: string; references: any[]; }>[]; previewImagePath: string; overviewDashboard: string; defaultIndex: string; dataIndices: Readonly<{ indexSettings?: Record<string, any> | undefined; isDataStream?: boolean | undefined; } & { id: string; fields: Record<string, any>; timeFields: string[]; dataPath: string; currentTimeMarker: string; preserveDayOfWeekTimeOfDay: boolean; }>[]; }>>[]; addSavedObjectsToSampleDataset: (id: string, savedObjects: ",
-            {
-              "pluginId": "@kbn/core-saved-objects-common",
-              "scope": "common",
-              "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-              "section": "def-common.SavedObject",
-              "text": "SavedObject"
-            },
+            "SavedObject",
             "<unknown>[]) => void; addAppLinksToSampleDataset: (id: string, appLinks: ",
             {
               "pluginId": "home",
