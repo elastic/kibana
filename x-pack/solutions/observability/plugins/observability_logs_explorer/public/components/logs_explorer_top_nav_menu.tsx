@@ -86,6 +86,7 @@ const ClassicTopNav = () => {
       chrome,
       i18n: i18nStart,
       theme,
+      userProfile,
     },
   } = useKibanaContextForPlugin();
   /**
@@ -112,7 +113,7 @@ const ClassicTopNav = () => {
               <FeedbackLink />
             </EuiHeaderSectionItem>
           </EuiHeaderSection>,
-          { theme, i18n: i18nStart }
+          { theme, i18n: i18nStart, userProfile }
         ),
       });
     }
@@ -122,10 +123,14 @@ const ClassicTopNav = () => {
         chrome.setBreadcrumbsAppendExtension(previousAppendExtension);
       }
     };
-  }, [chrome, i18nStart, previousAppendExtension, theme, euiTheme]);
+  }, [chrome, i18nStart, previousAppendExtension, theme, euiTheme, userProfile]);
 
   return (
-    <HeaderMenuPortal setHeaderActionMenu={setHeaderActionMenu} theme$={theme.theme$}>
+    <HeaderMenuPortal
+      setHeaderActionMenu={setHeaderActionMenu}
+      theme={theme}
+      userProfile={userProfile}
+    >
       <EuiHeaderSection data-test-subj="logsExplorerHeaderMenu">
         <EuiHeaderSectionItem>
           <EuiHeaderLinks gutterSize="xs">

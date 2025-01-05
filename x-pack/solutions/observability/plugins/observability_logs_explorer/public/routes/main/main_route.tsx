@@ -27,8 +27,7 @@ import { useKibanaContextForPlugin } from '../../utils/use_kibana';
 
 export const ObservabilityLogsExplorerMainRoute = () => {
   const { services } = useKibanaContextForPlugin();
-  const { logsExplorer, notifications, appParams, analytics, i18n, theme, logsDataAccess } =
-    services;
+  const { logsExplorer, notifications, appParams, logsDataAccess, ...startServices } = services;
   const { history } = appParams;
 
   useBreadcrumbs();
@@ -54,13 +53,7 @@ export const ObservabilityLogsExplorerMainRoute = () => {
       logSourcesService={logsDataAccess.services.logSourcesService}
     >
       <LogsExplorerTopNavMenu />
-      <LazyOriginInterpreter
-        history={history}
-        toasts={notifications.toasts}
-        analytics={analytics}
-        i18n={i18n}
-        theme={theme}
-      />
+      <LazyOriginInterpreter history={history} toasts={notifications.toasts} {...startServices} />
       <ConnectedContent />
     </ObservabilityLogsExplorerPageStateProvider>
   );

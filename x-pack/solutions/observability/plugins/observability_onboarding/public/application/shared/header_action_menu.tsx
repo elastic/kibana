@@ -13,14 +13,20 @@ import { LOGS_ONBOARDING_FEEDBACK_LINK } from '@kbn/observability-shared-plugin/
 import React from 'react';
 import { useLocation } from 'react-router-dom';
 import { type AppMountParameters } from '@kbn/core-application-browser';
+import { ThemeServiceStart } from '@kbn/core-theme-browser';
+import { UserProfileService } from '@kbn/core-user-profile-browser';
 import { type ObservabilityOnboardingAppServices } from '../..';
 
 interface Props {
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
-  theme$: AppMountParameters['theme$'];
+  theme: ThemeServiceStart;
+  userProfile: UserProfileService;
 }
 
-export function ObservabilityOnboardingHeaderActionMenu({ setHeaderActionMenu, theme$ }: Props) {
+export function ObservabilityOnboardingHeaderActionMenu({
+  setHeaderActionMenu,
+  ...startServices
+}: Props) {
   const {
     services: { context },
   } = useKibana<ObservabilityOnboardingAppServices>();
@@ -31,7 +37,7 @@ export function ObservabilityOnboardingHeaderActionMenu({ setHeaderActionMenu, t
 
   if (!context.isServerless && !isRootPage) {
     return (
-      <HeaderMenuPortal setHeaderActionMenu={setHeaderActionMenu} theme$={theme$}>
+      <HeaderMenuPortal setHeaderActionMenu={setHeaderActionMenu} {...startServices}>
         <EuiButton
           data-test-subj="observabilityOnboardingPageGiveFeedback"
           href={LOGS_ONBOARDING_FEEDBACK_LINK}
