@@ -199,13 +199,7 @@
         "description": [],
         "signature": [
           "<Services extends Partial<",
-          {
-            "pluginId": "@kbn/core-lifecycle-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-            "section": "def-public.CoreStart",
-            "text": "CoreStart"
-          },
+          "CoreStart",
           ">>(services: Services) => ",
           {
             "pluginId": "kibanaReact",
@@ -248,13 +242,7 @@
         "description": [],
         "signature": [
           "(services: Partial<",
-          {
-            "pluginId": "@kbn/core-lifecycle-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-            "section": "def-public.CoreStart",
-            "text": "CoreStart"
-          },
+          "CoreStart",
           ">) => ",
           {
             "pluginId": "kibanaReact",
@@ -277,13 +265,7 @@
             "description": [],
             "signature": [
               "Partial<",
-              {
-                "pluginId": "@kbn/core-lifecycle-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-                "section": "def-public.CoreStart",
-                "text": "CoreStart"
-              },
+              "CoreStart",
               ">"
             ],
             "path": "src/platform/plugins/shared/kibana_react/public/notifications/create_notifications.tsx",
@@ -304,13 +286,7 @@
         "description": [],
         "signature": [
           "(services: Partial<",
-          {
-            "pluginId": "@kbn/core-lifecycle-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-            "section": "def-public.CoreStart",
-            "text": "CoreStart"
-          },
+          "CoreStart",
           ">) => ",
           {
             "pluginId": "kibanaReact",
@@ -333,13 +309,7 @@
             "description": [],
             "signature": [
               "Partial<",
-              {
-                "pluginId": "@kbn/core-lifecycle-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-                "section": "def-public.CoreStart",
-                "text": "CoreStart"
-              },
+              "CoreStart",
               ">"
             ],
             "path": "src/platform/plugins/shared/kibana_react/public/overlays/create_react_overlays.tsx",
@@ -922,13 +892,7 @@
             "text": "ToMountPointOptions"
           },
           ") => ",
-          {
-            "pluginId": "@kbn/core-mount-utils-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreMountUtilsBrowserPluginApi",
-            "section": "def-public.MountPoint",
-            "text": "MountPoint"
-          },
+          "MountPoint",
           "<HTMLElement>"
         ],
         "path": "src/platform/plugins/shared/kibana_react/public/util/index.tsx",
@@ -1084,21 +1048,9 @@
         ],
         "signature": [
           "(executionContext: ",
-          {
-            "pluginId": "@kbn/core-execution-context-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreExecutionContextBrowserPluginApi",
-            "section": "def-public.ExecutionContextSetup",
-            "text": "ExecutionContextSetup"
-          },
+          "ExecutionContextSetup",
           " | undefined, context: ",
-          {
-            "pluginId": "@kbn/core-execution-context-common",
-            "scope": "common",
-            "docId": "kibKbnCoreExecutionContextCommonPluginApi",
-            "section": "def-common.KibanaExecutionContext",
-            "text": "KibanaExecutionContext"
-          },
+          "KibanaExecutionContext",
           ") => void"
         ],
         "path": "src/platform/plugins/shared/kibana_react/public/use_execution_context/use_execution_context.ts",
@@ -1113,13 +1065,7 @@
             "label": "executionContext",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-execution-context-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreExecutionContextBrowserPluginApi",
-                "section": "def-public.ExecutionContextSetup",
-                "text": "ExecutionContextSetup"
-              },
+              "ExecutionContextSetup",
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/kibana_react/public/use_execution_context/use_execution_context.ts",
@@ -1135,13 +1081,7 @@
             "label": "context",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-execution-context-common",
-                "scope": "common",
-                "docId": "kibKbnCoreExecutionContextCommonPluginApi",
-                "section": "def-common.KibanaExecutionContext",
-                "text": "KibanaExecutionContext"
-              }
+              "KibanaExecutionContext"
             ],
             "path": "src/platform/plugins/shared/kibana_react/public/use_execution_context/use_execution_context.ts",
             "deprecated": false,
@@ -1269,13 +1209,7 @@
             "text": "KibanaReactContextValue"
           },
           "<Partial<",
-          {
-            "pluginId": "@kbn/core-lifecycle-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-            "section": "def-public.CoreStart",
-            "text": "CoreStart"
-          },
+          "CoreStart",
           "> & Extra>"
         ],
         "path": "src/platform/plugins/shared/kibana_react/public/context/context.tsx",
@@ -1447,13 +1381,7 @@
             "text": "KibanaTheme"
           },
           ">, userProfile?: ",
-          {
-            "pluginId": "@kbn/core-user-profile-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreUserProfileBrowserPluginApi",
-            "section": "def-public.UserProfileService",
-            "text": "UserProfileService"
-          },
+          "UserProfileService",
           " | undefined) => React.JSX.Element"
         ],
         "path": "src/platform/plugins/shared/kibana_react/public/theme.tsx",
@@ -1525,13 +1453,7 @@
             "label": "userProfile",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-user-profile-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreUserProfileBrowserPluginApi",
-                "section": "def-public.UserProfileService",
-                "text": "UserProfileService"
-              },
+              "UserProfileService",
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/kibana_react/public/theme.tsx",
@@ -1832,21 +1754,9 @@
             "description": [],
             "signature": [
               "(node: React.ReactNode, options?: ",
-              {
-                "pluginId": "@kbn/core-overlays-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreOverlaysBrowserPluginApi",
-                "section": "def-public.OverlayFlyoutOpenOptions",
-                "text": "OverlayFlyoutOpenOptions"
-              },
+              "OverlayFlyoutOpenOptions",
               " | undefined) => ",
-              {
-                "pluginId": "@kbn/core-mount-utils-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreMountUtilsBrowserPluginApi",
-                "section": "def-public.OverlayRef",
-                "text": "OverlayRef"
-              }
+              "OverlayRef"
             ],
             "path": "src/platform/plugins/shared/kibana_react/public/overlays/types.ts",
             "deprecated": false,
@@ -1875,13 +1785,7 @@
                 "label": "options",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-overlays-browser",
-                    "scope": "public",
-                    "docId": "kibKbnCoreOverlaysBrowserPluginApi",
-                    "section": "def-public.OverlayFlyoutOpenOptions",
-                    "text": "OverlayFlyoutOpenOptions"
-                  },
+                  "OverlayFlyoutOpenOptions",
                   " | undefined"
                 ],
                 "path": "src/platform/plugins/shared/kibana_react/public/overlays/types.ts",
@@ -1901,21 +1805,9 @@
             "description": [],
             "signature": [
               "(node: React.ReactNode, options?: ",
-              {
-                "pluginId": "@kbn/core-overlays-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreOverlaysBrowserPluginApi",
-                "section": "def-public.OverlayModalOpenOptions",
-                "text": "OverlayModalOpenOptions"
-              },
+              "OverlayModalOpenOptions",
               " | undefined) => ",
-              {
-                "pluginId": "@kbn/core-mount-utils-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreMountUtilsBrowserPluginApi",
-                "section": "def-public.OverlayRef",
-                "text": "OverlayRef"
-              }
+              "OverlayRef"
             ],
             "path": "src/platform/plugins/shared/kibana_react/public/overlays/types.ts",
             "deprecated": false,
@@ -1944,13 +1836,7 @@
                 "label": "options",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-overlays-browser",
-                    "scope": "public",
-                    "docId": "kibKbnCoreOverlaysBrowserPluginApi",
-                    "section": "def-public.OverlayModalOpenOptions",
-                    "text": "OverlayModalOpenOptions"
-                  },
+                  "OverlayModalOpenOptions",
                   " | undefined"
                 ],
                 "path": "src/platform/plugins/shared/kibana_react/public/overlays/types.ts",
@@ -2209,13 +2095,7 @@
             "signature": [
               "Observable",
               "<",
-              {
-                "pluginId": "@kbn/core-theme-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreThemeBrowserPluginApi",
-                "section": "def-public.CoreTheme",
-                "text": "CoreTheme"
-              },
+              "CoreTheme",
               "> | undefined"
             ],
             "path": "src/platform/plugins/shared/kibana_react/public/util/index.tsx",
@@ -2230,13 +2110,7 @@
             "label": "userProfile",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-user-profile-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreUserProfileBrowserPluginApi",
-                "section": "def-public.UserProfileService",
-                "text": "UserProfileService"
-              },
+              "UserProfileService",
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/kibana_react/public/util/index.tsx",
@@ -2543,69 +2417,21 @@
             "text": "CustomBrandingStart"
           },
           " | undefined; docLinks?: ",
-          {
-            "pluginId": "@kbn/core-doc-links-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreDocLinksBrowserPluginApi",
-            "section": "def-public.DocLinksStart",
-            "text": "DocLinksStart"
-          },
+          "DocLinksStart",
           " | undefined; executionContext?: ",
-          {
-            "pluginId": "@kbn/core-execution-context-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreExecutionContextBrowserPluginApi",
-            "section": "def-public.ExecutionContextSetup",
-            "text": "ExecutionContextSetup"
-          },
+          "ExecutionContextSetup",
           " | undefined; featureFlags?: ",
-          {
-            "pluginId": "@kbn/core-feature-flags-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreFeatureFlagsBrowserPluginApi",
-            "section": "def-public.FeatureFlagsStart",
-            "text": "FeatureFlagsStart"
-          },
+          "FeatureFlagsStart",
           " | undefined; http?: ",
-          {
-            "pluginId": "@kbn/core-http-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreHttpBrowserPluginApi",
-            "section": "def-public.HttpSetup",
-            "text": "HttpSetup"
-          },
+          "HttpSetup",
           " | undefined; savedObjects?: ",
-          {
-            "pluginId": "@kbn/core-saved-objects-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreSavedObjectsBrowserPluginApi",
-            "section": "def-public.SavedObjectsStart",
-            "text": "SavedObjectsStart"
-          },
+          "SavedObjectsStart",
           " | undefined; i18n?: ",
-          {
-            "pluginId": "@kbn/core-i18n-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreI18nBrowserPluginApi",
-            "section": "def-public.I18nStart",
-            "text": "I18nStart"
-          },
+          "I18nStart",
           " | undefined; notifications?: ",
-          {
-            "pluginId": "@kbn/core-notifications-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreNotificationsBrowserPluginApi",
-            "section": "def-public.NotificationsStart",
-            "text": "NotificationsStart"
-          },
+          "NotificationsStart",
           " | undefined; overlays?: ",
-          {
-            "pluginId": "@kbn/core-overlays-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreOverlaysBrowserPluginApi",
-            "section": "def-public.OverlayStart",
-            "text": "OverlayStart"
-          },
+          "OverlayStart",
           " | undefined; uiSettings?: ",
           {
             "pluginId": "@kbn/core-ui-settings-browser",
@@ -2623,53 +2449,17 @@
             "text": "SettingsStart"
           },
           " | undefined; fatalErrors?: ",
-          {
-            "pluginId": "@kbn/core-fatal-errors-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreFatalErrorsBrowserPluginApi",
-            "section": "def-public.FatalErrorsSetup",
-            "text": "FatalErrorsSetup"
-          },
+          "FatalErrorsSetup",
           " | undefined; deprecations?: ",
-          {
-            "pluginId": "@kbn/core-deprecations-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreDeprecationsBrowserPluginApi",
-            "section": "def-public.DeprecationsServiceStart",
-            "text": "DeprecationsServiceStart"
-          },
+          "DeprecationsServiceStart",
           " | undefined; theme?: ",
-          {
-            "pluginId": "@kbn/core-theme-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreThemeBrowserPluginApi",
-            "section": "def-public.ThemeServiceSetup",
-            "text": "ThemeServiceSetup"
-          },
+          "ThemeServiceSetup",
           " | undefined; plugins?: ",
-          {
-            "pluginId": "@kbn/core-plugins-contracts-browser",
-            "scope": "public",
-            "docId": "kibKbnCorePluginsContractsBrowserPluginApi",
-            "section": "def-public.PluginsServiceStart",
-            "text": "PluginsServiceStart"
-          },
+          "PluginsServiceStart",
           " | undefined; security?: ",
-          {
-            "pluginId": "@kbn/core-security-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreSecurityBrowserPluginApi",
-            "section": "def-public.SecurityServiceStart",
-            "text": "SecurityServiceStart"
-          },
+          "SecurityServiceStart",
           " | undefined; userProfile?: ",
-          {
-            "pluginId": "@kbn/core-user-profile-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreUserProfileBrowserPluginApi",
-            "section": "def-public.UserProfileService",
-            "text": "UserProfileService"
-          },
+          "UserProfileService",
           " | undefined; }"
         ],
         "path": "src/platform/plugins/shared/kibana_react/public/context/types.ts",
@@ -2796,13 +2586,7 @@
             "text": "KibanaReactContextValue"
           },
           "<Partial<",
-          {
-            "pluginId": "@kbn/core-lifecycle-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-            "section": "def-public.CoreStart",
-            "text": "CoreStart"
-          },
+          "CoreStart",
           ">>>"
         ],
         "path": "src/platform/plugins/shared/kibana_react/public/context/context.tsx",

@@ -554,6 +554,14 @@
           "trackAdoption": true,
           "references": [
             {
+              "plugin": "imageEmbeddable",
+              "path": "src/platform/plugins/private/image_embeddable/public/components/image_editor/open_image_editor.tsx"
+            },
+            {
+              "plugin": "imageEmbeddable",
+              "path": "src/platform/plugins/private/image_embeddable/public/image_embeddable/get_image_embeddable_factory.tsx"
+            },
+            {
               "plugin": "cases",
               "path": "x-pack/platform/plugins/shared/cases/public/application.tsx"
             },
@@ -576,14 +584,6 @@
             {
               "plugin": "cases",
               "path": "x-pack/platform/plugins/shared/cases/public/plugin.ts"
-            },
-            {
-              "plugin": "imageEmbeddable",
-              "path": "src/platform/plugins/private/image_embeddable/public/components/image_editor/open_image_editor.tsx"
-            },
-            {
-              "plugin": "imageEmbeddable",
-              "path": "src/platform/plugins/private/image_embeddable/public/image_embeddable/get_image_embeddable_factory.tsx"
             },
             {
               "plugin": "cases",
@@ -3474,13 +3474,7 @@
             ],
             "signature": [
               "(req: ",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "server",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-server.KibanaRequest",
-                "text": "KibanaRequest"
-              },
+              "KibanaRequest",
               "<unknown, unknown, unknown, any>) => ",
               {
                 "pluginId": "files",
@@ -3504,13 +3498,7 @@
                   "- the Kibana request to scope the service to"
                 ],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-http-server",
-                    "scope": "server",
-                    "docId": "kibKbnCoreHttpServerPluginApi",
-                    "section": "def-server.KibanaRequest",
-                    "text": "KibanaRequest"
-                  },
+                  "KibanaRequest",
                   "<unknown, unknown, unknown, any>"
                 ],
                 "path": "src/platform/plugins/shared/files/server/file_service/file_service_factory.ts",
@@ -6781,13 +6769,7 @@
           "\nAn {@link SavedObject} containing a file object (i.e., metadata only)."
         ],
         "signature": [
-          {
-            "pluginId": "@kbn/core-saved-objects-common",
-            "scope": "common",
-            "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-            "section": "def-common.SavedObject",
-            "text": "SavedObject"
-          },
+          "SavedObject",
           "<",
           {
             "pluginId": "@kbn/shared-ux-file-types",

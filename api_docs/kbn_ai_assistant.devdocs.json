@@ -14,13 +14,7 @@
           "({\n  connectors,\n  currentUser,\n  flyoutPositionMode,\n  initialConversationId,\n  initialMessages,\n  initialTitle,\n  knowledgeBase,\n  showLinkToConversationsApp,\n  onConversationUpdate,\n  onToggleFlyoutPositionMode,\n  navigateToConversation,\n}: { connectors: ",
           "UseGenAIConnectorsResult",
           "; currentUser?: Pick<",
-          {
-            "pluginId": "@kbn/core-security-common",
-            "scope": "common",
-            "docId": "kibKbnCoreSecurityCommonPluginApi",
-            "section": "def-common.AuthenticatedUser",
-            "text": "AuthenticatedUser"
-          },
+          "AuthenticatedUser",
           ", \"username\" | \"full_name\"> | undefined; flyoutPositionMode?: ",
           {
             "pluginId": "@kbn/ai-assistant",
@@ -95,13 +89,7 @@
                 "description": [],
                 "signature": [
                   "Pick<",
-                  {
-                    "pluginId": "@kbn/core-security-common",
-                    "scope": "common",
-                    "docId": "kibKbnCoreSecurityCommonPluginApi",
-                    "section": "def-common.AuthenticatedUser",
-                    "text": "AuthenticatedUser"
-                  },
+                  "AuthenticatedUser",
                   ", \"username\" | \"full_name\"> | undefined"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/chat_body.tsx",
