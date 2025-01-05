@@ -301,6 +301,7 @@ export function LogRateAnalysisPanel({ slo, alert, rule }: Props) {
                 'storage',
                 'uiSettings',
                 'unifiedSearch',
+                'userProfile',
                 'theme',
                 'lens',
                 'i18n',

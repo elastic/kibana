@@ -17,6 +17,7 @@ import type {
   OverlayStart,
   SavedObjectsStart,
   ThemeServiceStart,
+  UserProfileService,
 } from '@kbn/core/public';
 import { EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
 import { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
@@ -53,6 +54,7 @@ export interface ObservabilityAppServices {
   analytics: AnalyticsServiceStart;
   i18n: I18nStart;
   theme: ThemeServiceStart;
+  userProfile: UserProfileService;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   uiSettings: IUiSettingsClient;
   isDev?: boolean;

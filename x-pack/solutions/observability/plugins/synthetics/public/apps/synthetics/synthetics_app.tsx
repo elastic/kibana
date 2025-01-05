@@ -51,7 +51,7 @@ const Application = (props: SyntheticsAppProps) => {
   return (
     <KibanaRenderContextProvider {...coreStart}>
       <KibanaThemeProvider
-        theme={coreStart.theme}
+        {...coreStart}
         modify={{
           breakpoint: {
             xxl: 1600,
@@ -66,7 +66,10 @@ const Application = (props: SyntheticsAppProps) => {
                 <div className={APP_WRAPPER_CLASS} data-test-subj="syntheticsApp">
                   <InspectorContextProvider>
                     <PageRouter />
-                    <ActionMenu appMountParameters={appMountParameters} />
+                    <ActionMenu
+                      setHeaderActionMenu={appMountParameters.setHeaderActionMenu}
+                      {...coreStart}
+                    />
                     <TestNowModeFlyoutContainer />
                   </InspectorContextProvider>
                 </div>

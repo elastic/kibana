@@ -90,13 +90,13 @@ const Application = (props: UptimeAppProps) => {
   return (
     <KibanaRenderContextProvider {...core}>
       <KibanaThemeProvider
-        theme={core.theme}
         modify={{
           breakpoint: {
             xxl: 1600,
             xxxl: 2000,
           },
         }}
+        {...core}
       >
         <ReduxProvider store={store}>
           <KibanaContextProvider
@@ -131,7 +131,10 @@ const Application = (props: UptimeAppProps) => {
                               <InspectorContextProvider>
                                 <UptimeAlertsFlyoutWrapper />
                                 <PageRouter />
-                                <ActionMenu appMountParameters={appMountParameters} />
+                                <ActionMenu
+                                  setHeaderActionMenu={appMountParameters.setHeaderActionMenu}
+                                  {...core}
+                                />
                               </InspectorContextProvider>
                             </RedirectAppLinks>
                           </div>
