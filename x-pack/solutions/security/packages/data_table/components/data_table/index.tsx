@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable @kbn/eslint/module_migration */
-
 import type {
   EuiDataGridRefProps,
   EuiDataGridColumn,

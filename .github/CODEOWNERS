@@ -255,6 +255,7 @@ packages/kbn-sort-package-json @elastic/kibana-operations
 packages/kbn-sort-predicates @elastic/kibana-visualizations
 packages/kbn-stdio-dev-helpers @elastic/kibana-operations
 packages/kbn-storybook @elastic/kibana-operations
+packages/kbn-styled-components-mapping-cli @elastic/kibana-operations @elastic/eui-team
 packages/kbn-telemetry-tools @elastic/kibana-core
 packages/kbn-test @elastic/kibana-operations @elastic/appex-qa
 packages/kbn-test-eui-helpers @elastic/kibana-visualizations
