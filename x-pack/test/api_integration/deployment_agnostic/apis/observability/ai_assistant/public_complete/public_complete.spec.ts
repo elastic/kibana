@@ -19,14 +19,13 @@ import {
   isFunctionTitleRequest,
   LlmProxy,
   LlmResponseSimulator,
-} from '../../common/create_llm_proxy';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
-import { createProxyActionConnector, deleteActionConnector } from '../../common/action_connectors';
+} from '../../../../../../observability_ai_assistant_api_integration/common/create_llm_proxy';
+import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 
-export default function ApiTest({ getService }: FtrProviderContext) {
-  const supertest = getService('supertest');
+export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
   const log = getService('log');
-  const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantAPIClient');
+  const samlAuth = getService('samlAuth');
+  const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
 
   const messages: Message[] = [
     {
@@ -45,7 +44,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     },
   ];
 
-  describe('/api/observability_ai_assistant/chat/complete', () => {
+  describe('/api/observability_ai_assistant/chat/complete', function () {
+    // TODO: https://github.com/elastic/kibana/issues/192751
+    this.tags(['skipMKI']);
     let proxy: LlmProxy;
     let connectorId: string;
 
@@ -70,7 +71,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         (body) => !isFunctionTitleRequest(body)
       );
 
-      const responsePromise = observabilityAIAssistantAPIClient.admin({
+      const roleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('admin');
+      const responsePromise = observabilityAIAssistantAPIClient.publicApi({
         endpoint: 'POST /api/observability_ai_assistant/chat/complete 2023-10-31',
         params: {
           query: { format },
@@ -82,6 +84,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             instructions,
           },
         },
+        roleAuthc,
       });
 
       const [conversationSimulator, titleSimulator] = await Promise.race([
@@ -134,11 +137,15 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
     before(async () => {
       proxy = await createLlmProxy(log);
-      connectorId = await createProxyActionConnector({ supertest, log, port: proxy.getPort() });
+      connectorId = await observabilityAIAssistantAPIClient.createProxyActionConnector({
+        port: proxy.getPort(),
+      });
     });
 
     after(async () => {
-      await deleteActionConnector({ supertest, connectorId, log });
+      await observabilityAIAssistantAPIClient.deleteActionConnector({
+        actionId: connectorId,
+      });
       proxy.close();
     });
 
