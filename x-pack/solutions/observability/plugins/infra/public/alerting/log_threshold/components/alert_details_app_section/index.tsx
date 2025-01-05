@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { EuiPanel } from '@elastic/eui';
 import {
@@ -20,7 +20,7 @@ import { i18n } from '@kbn/i18n';
 import { getPaddedAlertTimeRange } from '@kbn/observability-get-padded-alert-time-range-util';
 import { get, identity } from 'lodash';
 import { useElasticChartsTheme } from '@kbn/charts-theme';
-import { useLogView } from '@kbn/logs-shared-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import {
   Comparator,
@@ -38,7 +38,9 @@ import { useLicense } from '../../../../hooks/use_license';
 const formatThreshold = (threshold: number) => String(threshold);
 
 const AlertDetailsAppSection = ({ rule, alert }: AlertDetailsAppSectionProps) => {
-  const { logsShared } = useKibanaContextForPlugin().services;
+  const { data } = useKibanaContextForPlugin().services;
+  const [dataView, setDataView] = useState<DataView>();
+  const [, setDataViewError] = useState<Error>();
   const theme = useTheme();
   const baseTheme = useElasticChartsTheme();
   const timeRange = getPaddedAlertTimeRange(alert.fields[ALERT_START]!, alert.fields[ALERT_END]);
@@ -59,10 +61,20 @@ const AlertDetailsAppSection = ({ rule, alert }: AlertDetailsAppSectionProps) =>
         .join(' AND ')
     : '';
 
-  const { derivedDataView } = useLogView({
-    initialLogViewReference: rule.params.logView,
-    logViews: logsShared.logViews.client,
-  });
+  useEffect(() => {
+    const initDataView = async () => {
+      const ruleSearchConfiguration = rule.params.searchConfiguration;
+      try {
+        const createdSearchSource = await data.search.searchSource.create(ruleSearchConfiguration);
+        setDataView(createdSearchSource.getField('index'));
+      } catch (error) {
+        setDataViewError(error);
+      }
+    };
+
+    initDataView();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [data.search.searchSource]);
 
   const { hasAtLeast } = useLicense();
   const hasLicenseForLogRateAnalysis = hasAtLeast('platinum');
@@ -104,7 +116,7 @@ const AlertDetailsAppSection = ({ rule, alert }: AlertDetailsAppSectionProps) =>
             </EuiFlexItem>
             <EuiFlexItem grow={5}>
               <EuiSpacer size="s" />
-              {derivedDataView && (
+              {dataView && (
                 <LogThresholdRatioChart
                   filter={filter}
                   numeratorKql={numeratorKql}
@@ -113,8 +125,8 @@ const AlertDetailsAppSection = ({ rule, alert }: AlertDetailsAppSectionProps) =>
                   timeRange={timeRange}
                   alertRange={{ from: alert.start, to: alertEnd }}
                   index={{
-                    pattern: derivedDataView.getIndexPattern(),
-                    timestampField: derivedDataView.timeFieldName || '@timestamp',
+                    pattern: dataView.getIndexPattern(),
+                    timestampField: dataView.timeFieldName || '@timestamp',
                   }}
                   height={150}
                   interval={interval}
@@ -170,7 +182,7 @@ const AlertDetailsAppSection = ({ rule, alert }: AlertDetailsAppSectionProps) =>
               />
             </EuiFlexItem>
             <EuiFlexItem grow={5}>
-              {derivedDataView && (
+              {dataView && (
                 <LogThresholdCountChart
                   filter={filter}
                   kql={kql}
@@ -178,8 +190,8 @@ const AlertDetailsAppSection = ({ rule, alert }: AlertDetailsAppSectionProps) =>
                   timeRange={timeRange}
                   alertRange={{ from: alert.start, to: alertEnd }}
                   index={{
-                    pattern: derivedDataView.getIndexPattern(),
-                    timestampField: derivedDataView.timeFieldName || '@timestamp',
+                    pattern: dataView.getIndexPattern(),
+                    timestampField: dataView.timeFieldName || '@timestamp',
                   }}
                   height={150}
                   interval={interval}
@@ -193,7 +205,9 @@ const AlertDetailsAppSection = ({ rule, alert }: AlertDetailsAppSectionProps) =>
   };
 
   const getLogRateAnalysisSection = () => {
-    return hasLicenseForLogRateAnalysis ? <LogRateAnalysis rule={rule} alert={alert} /> : null;
+    return dataView && hasLicenseForLogRateAnalysis ? (
+      <LogRateAnalysis rule={rule} alert={alert} dataView={dataView} />
+    ) : null;
   };
 
   return (

@@ -106,7 +106,7 @@ export const ExpressionEditor: React.FC<Props> = (props) => {
     services: { data, dataViews, dataViewEditor },
   } = useKibanaContextForPlugin(); // injected during alert registration
 
-  const { setRuleParams, ruleParams, errors, metadata, onChangeMetaData } = props;
+  const { setRuleParams, ruleParams } = props;
 
   const [dataView, setDataView] = useState<DataView>();
   const [searchSource, setSearchSource] = useState<ISearchSource>();
@@ -298,9 +298,7 @@ export const SourceStatusWrapper: FC<PropsWithChildren<unknown>> = ({ children }
   );
 };
 
-export const Editor: React.FC<RuleTypeParamsExpressionProps<PartialRuleParams, LogsContextMeta>> = (
-  props
-) => {
+export const Editor: React.FC<Props & { dataView: DataView }> = (props) => {
   const { setRuleParams, ruleParams, errors, dataView } = props;
   const [hasSetDefaults, setHasSetDefaults] = useState<boolean>(false);
 

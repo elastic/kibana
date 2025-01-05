@@ -76,7 +76,6 @@ import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { Moment } from 'moment';
 import type { ComponentType, ReactNode, RefObject } from 'react';
 import React from 'react';
-import { DataView } from '@kbn/data-views-plugin/common';
 import { AlertTableConfigRegistry } from './application/alert_table_config_registry';
 import type { CreateConnectorFlyoutProps } from './application/sections/action_connector_form/create_connector_flyout';
 import type { EditConnectorFlyoutProps } from './application/sections/action_connector_form/edit_connector_flyout';
@@ -308,7 +307,6 @@ export interface RuleTypeParamsExpressionProps<
   data: DataPublicPluginStart;
   dataViews: DataViewsPublicPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
-  dataView: DataView;
 }
 
 export type RuleParamsForRules = Record<

@@ -42,6 +42,7 @@ import { getESQueryForLogRateAnalysis } from '../log_rate_analysis_query';
 export interface AlertDetailsLogRateAnalysisSectionProps {
   rule: Rule<PartialRuleParams>;
   alert: TopAlert<Record<string, any>>;
+  dataView: DataView;
 }
 
 interface SignificantFieldValue {
@@ -51,10 +52,13 @@ interface SignificantFieldValue {
   pValue: number | null;
 }
 
-export const LogRateAnalysis: FC<AlertDetailsLogRateAnalysisSectionProps> = ({ rule, alert }) => {
+export const LogRateAnalysis: FC<AlertDetailsLogRateAnalysisSectionProps> = ({
+  rule,
+  alert,
+  dataView,
+}) => {
   const { services } = useKibanaContextForPlugin();
-  const { dataViews, logsShared, observabilityAIAssistant } = services;
-  const [dataView, setDataView] = useState<DataView | undefined>();
+  const { observabilityAIAssistant } = services;
   const [esSearchQuery, setEsSearchQuery] = useState<QueryDslQueryContainer | undefined>();
   const [logRateAnalysisParams, setLogRateAnalysisParams] = useState<
     | { logRateAnalysisType: LogRateAnalysisType; significantFieldValues: SignificantFieldValue[] }
@@ -64,17 +68,6 @@ export const LogRateAnalysis: FC<AlertDetailsLogRateAnalysisSectionProps> = ({ r
   const validatedParams = useMemo(() => decodeOrThrow(ruleParamsRT)(rule.params), [rule]);
 
   useEffect(() => {
-    const getDataView = async () => {
-      const { timestampField, dataViewReference } =
-        await logsShared.logViews.client.getResolvedLogView(validatedParams.logView);
-
-      if (dataViewReference.id) {
-        const logDataView = await dataViews.get(dataViewReference.id);
-        setDataView(logDataView);
-        getQuery(timestampField);
-      }
-    };
-
     const getQuery = (timestampField: string) => {
       const esSearchRequest = getESQueryForLogRateAnalysis(
         validatedParams as CountRuleParams,
@@ -89,9 +82,11 @@ export const LogRateAnalysis: FC<AlertDetailsLogRateAnalysisSectionProps> = ({ r
     };
 
     if (!isRatioRuleParams(validatedParams)) {
-      getDataView();
+      if (dataView.timeFieldName) {
+        getQuery(dataView.timeFieldName);
+      }
     }
-  }, [validatedParams, alert, dataViews, logsShared]);
+  }, [validatedParams, alert, dataView]);
 
   const { timeRange, windowParameters } = useMemo(() => {
     const alertStartedAt = moment(alert.start).toISOString();
