@@ -262,13 +262,7 @@
         "description": [],
         "signature": [
           "({ name, darkMode }: ",
-          {
-            "pluginId": "@kbn/core-theme-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreThemeBrowserPluginApi",
-            "section": "def-public.CoreTheme",
-            "text": "CoreTheme"
-          },
+          "CoreTheme",
           ") => ",
           {
             "pluginId": "@kbn/palettes",
@@ -290,13 +284,7 @@
             "label": "{ name, darkMode }",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-theme-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreThemeBrowserPluginApi",
-                "section": "def-public.CoreTheme",
-                "text": "CoreTheme"
-              }
+              "CoreTheme"
             ],
             "path": "packages/kbn-palettes/palettes/get_kbn_palettes.ts",
             "deprecated": false,

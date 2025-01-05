@@ -855,13 +855,7 @@
             "text": "CanAddNewPanel"
           },
           "; onClose?: (() => void) | undefined; }) => ",
-          {
-            "pluginId": "@kbn/core-mount-utils-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreMountUtilsBrowserPluginApi",
-            "section": "def-public.OverlayRef",
-            "text": "OverlayRef"
-          }
+          "OverlayRef"
         ],
         "path": "src/platform/plugins/shared/embeddable/public/add_from_library/open_add_from_library_flyout.tsx",
         "deprecated": false,
@@ -3597,13 +3591,7 @@
             "text": "SerializableRecord"
           },
           " | undefined; disabledActions?: string[] | undefined; disableTriggers?: boolean | undefined; searchSessionId?: string | undefined; syncColors?: boolean | undefined; syncCursor?: boolean | undefined; syncTooltips?: boolean | undefined; executionContext?: ",
-          {
-            "pluginId": "@kbn/core-execution-context-common",
-            "scope": "common",
-            "docId": "kibKbnCoreExecutionContextCommonPluginApi",
-            "section": "def-common.KibanaExecutionContext",
-            "text": "KibanaExecutionContext"
-          },
+          "KibanaExecutionContext",
           " | undefined; }"
         ],
         "path": "src/platform/plugins/shared/embeddable/common/types.ts",

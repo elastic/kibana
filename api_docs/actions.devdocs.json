@@ -18,13 +18,7 @@
             "text": "Plugin"
           },
           " implements ",
-          {
-            "pluginId": "@kbn/core-plugins-browser",
-            "scope": "public",
-            "docId": "kibKbnCorePluginsBrowserPluginApi",
-            "section": "def-public.Plugin",
-            "text": "Plugin"
-          },
+          "Plugin",
           "<",
           {
             "pluginId": "actions",
@@ -61,13 +55,7 @@
                 "label": "ctx",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-plugins-browser",
-                    "scope": "public",
-                    "docId": "kibKbnCorePluginsBrowserPluginApi",
-                    "section": "def-public.PluginInitializerContext",
-                    "text": "PluginInitializerContext"
-                  },
+                  "PluginInitializerContext",
                   "<",
                   "Config",
                   ">"
@@ -670,13 +658,7 @@
             "label": "kibanaRequest",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "server",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-server.KibanaRequest",
-                "text": "KibanaRequest"
-              },
+              "KibanaRequest",
               "<unknown, unknown, unknown, any> | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/actions/server/sub_action_framework/sub_action_connector.ts",
@@ -1979,13 +1961,7 @@
             "label": "savedObjectsClient",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "server",
-                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-server.SavedObjectsClientContract",
-                "text": "SavedObjectsClientContract"
-              }
+              "SavedObjectsClientContract"
             ],
             "path": "x-pack/platform/plugins/shared/actions/server/sub_action_framework/sub_action_connector.ts",
             "deprecated": false,
@@ -2437,13 +2413,7 @@
         "description": [],
         "signature": [
           "(source: ",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "server",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.KibanaRequest",
-            "text": "KibanaRequest"
-          },
+          "KibanaRequest",
           "<unknown, unknown, unknown, any>) => ",
           "HttpRequestExecutionSource"
         ],
@@ -2459,13 +2429,7 @@
             "label": "source",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "server",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-server.KibanaRequest",
-                "text": "KibanaRequest"
-              },
+              "KibanaRequest",
               "<unknown, unknown, unknown, any>"
             ],
             "path": "x-pack/platform/plugins/shared/actions/server/lib/action_execution_source.ts",
@@ -2522,13 +2486,7 @@
         "description": [],
         "signature": [
           "(source: Omit<",
-          {
-            "pluginId": "@kbn/core-saved-objects-common",
-            "scope": "common",
-            "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-            "section": "def-common.SavedObjectReference",
-            "text": "SavedObjectReference"
-          },
+          "SavedObjectReference",
           ", \"name\">) => ",
           "SavedObjectExecutionSource"
         ],
@@ -2545,13 +2503,7 @@
             "description": [],
             "signature": [
               "Omit<",
-              {
-                "pluginId": "@kbn/core-saved-objects-common",
-                "scope": "common",
-                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-                "section": "def-common.SavedObjectReference",
-                "text": "SavedObjectReference"
-              },
+              "SavedObjectReference",
               ", \"name\">"
             ],
             "path": "x-pack/platform/plugins/shared/actions/server/lib/action_execution_source.ts",
@@ -3322,13 +3274,7 @@
             "label": "request",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "server",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-server.KibanaRequest",
-                "text": "KibanaRequest"
-              },
+              "KibanaRequest",
               "<unknown, unknown, unknown, any> | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/actions/server/types.ts",
@@ -3708,13 +3654,7 @@
             "label": "request",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "server",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-server.KibanaRequest",
-                "text": "KibanaRequest"
-              },
+              "KibanaRequest",
               "<unknown, unknown, unknown, any> | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/actions/server/sub_action_framework/types.ts",
@@ -4330,13 +4270,7 @@
           "description": [],
           "signature": [
             "(request: ",
-            {
-              "pluginId": "@kbn/core-http-server",
-              "scope": "server",
-              "docId": "kibKbnCoreHttpServerPluginApi",
-              "section": "def-server.KibanaRequest",
-              "text": "KibanaRequest"
-            },
+            "KibanaRequest",
             "<unknown, unknown, unknown, any>) => Promise<",
             {
               "pluginId": "@kbn/utility-types",
@@ -4367,13 +4301,7 @@
               "label": "request",
               "description": [],
               "signature": [
-                {
-                  "pluginId": "@kbn/core-http-server",
-                  "scope": "server",
-                  "docId": "kibKbnCoreHttpServerPluginApi",
-                  "section": "def-server.KibanaRequest",
-                  "text": "KibanaRequest"
-                },
+                "KibanaRequest",
                 "<unknown, unknown, unknown, any>"
               ],
               "path": "x-pack/platform/plugins/shared/actions/server/plugin.ts",
@@ -4393,13 +4321,7 @@
           "description": [],
           "signature": [
             "(request: ",
-            {
-              "pluginId": "@kbn/core-http-server",
-              "scope": "server",
-              "docId": "kibKbnCoreHttpServerPluginApi",
-              "section": "def-server.KibanaRequest",
-              "text": "KibanaRequest"
-            },
+            "KibanaRequest",
             "<unknown, unknown, unknown, any>) => ",
             {
               "pluginId": "@kbn/utility-types",
@@ -4430,13 +4352,7 @@
               "label": "request",
               "description": [],
               "signature": [
-                {
-                  "pluginId": "@kbn/core-http-server",
-                  "scope": "server",
-                  "docId": "kibKbnCoreHttpServerPluginApi",
-                  "section": "def-server.KibanaRequest",
-                  "text": "KibanaRequest"
-                },
+                "KibanaRequest",
                 "<unknown, unknown, unknown, any>"
               ],
               "path": "x-pack/platform/plugins/shared/actions/server/plugin.ts",

@@ -1844,13 +1844,7 @@
                 "text": "StorageContext"
               },
               ", savedObject: ",
-              {
-                "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "server",
-                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-server.SavedObjectsFindResult",
-                "text": "SavedObjectsFindResult"
-              },
+              "SavedObjectsFindResult",
               "<TSavedObjectAttributes>) => T"
             ],
             "path": "src/platform/plugins/shared/content_management/server/core/types.ts",
@@ -1886,13 +1880,7 @@
                 "label": "savedObject",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-saved-objects-api-server",
-                    "scope": "server",
-                    "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                    "section": "def-server.SavedObjectsFindResult",
-                    "text": "SavedObjectsFindResult"
-                  },
+                  "SavedObjectsFindResult",
                   "<TSavedObjectAttributes>"
                 ],
                 "path": "src/platform/plugins/shared/content_management/server/core/types.ts",
@@ -1945,13 +1933,7 @@
               "The Core HTTP request handler context"
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/core-http-request-handler-context-server",
-                "scope": "server",
-                "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
-                "section": "def-server.RequestHandlerContext",
-                "text": "RequestHandlerContext"
-              }
+              "RequestHandlerContext"
             ],
             "path": "src/platform/plugins/shared/content_management/server/core/types.ts",
             "deprecated": false,

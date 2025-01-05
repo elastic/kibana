@@ -17,7 +17,7 @@
         "tags": [],
         "label": "ApmConfiguration",
         "description": [],
-        "path": "packages/kbn-apm-config-loader/src/config.ts",
+        "path": "src/platform/packages/private/kbn-apm-config-loader/src/config.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -31,7 +31,7 @@
             "signature": [
               "any"
             ],
-            "path": "packages/kbn-apm-config-loader/src/config.ts",
+            "path": "src/platform/packages/private/kbn-apm-config-loader/src/config.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -45,7 +45,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/kbn-apm-config-loader/src/config.ts",
+                "path": "src/platform/packages/private/kbn-apm-config-loader/src/config.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -60,7 +60,7 @@
                 "signature": [
                   "KibanaRawConfig"
                 ],
-                "path": "packages/kbn-apm-config-loader/src/config.ts",
+                "path": "src/platform/packages/private/kbn-apm-config-loader/src/config.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -75,7 +75,7 @@
                 "signature": [
                   "boolean"
                 ],
-                "path": "packages/kbn-apm-config-loader/src/config.ts",
+                "path": "src/platform/packages/private/kbn-apm-config-loader/src/config.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -94,7 +94,7 @@
               "(serviceName: string) => ",
               "AgentConfigOptions"
             ],
-            "path": "packages/kbn-apm-config-loader/src/config.ts",
+            "path": "src/platform/packages/private/kbn-apm-config-loader/src/config.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -108,7 +108,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/kbn-apm-config-loader/src/config.ts",
+                "path": "src/platform/packages/private/kbn-apm-config-loader/src/config.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -126,7 +126,7 @@
             "signature": [
               "() => boolean"
             ],
-            "path": "packages/kbn-apm-config-loader/src/config.ts",
+            "path": "src/platform/packages/private/kbn-apm-config-loader/src/config.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -149,7 +149,7 @@
           "AgentConfigOptions",
           " | undefined"
         ],
-        "path": "packages/kbn-apm-config-loader/src/config_loader.ts",
+        "path": "src/platform/packages/private/kbn-apm-config-loader/src/config_loader.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -163,7 +163,7 @@
             "signature": [
               "string"
             ],
-            "path": "packages/kbn-apm-config-loader/src/config_loader.ts",
+            "path": "src/platform/packages/private/kbn-apm-config-loader/src/config_loader.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -182,7 +182,7 @@
         "signature": [
           "(argv: string[], rootDir: string, isDistributable: boolean, serviceName: string) => void"
         ],
-        "path": "packages/kbn-apm-config-loader/src/init_apm.ts",
+        "path": "src/platform/packages/private/kbn-apm-config-loader/src/init_apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -196,7 +196,7 @@
             "signature": [
               "string[]"
             ],
-            "path": "packages/kbn-apm-config-loader/src/init_apm.ts",
+            "path": "src/platform/packages/private/kbn-apm-config-loader/src/init_apm.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -211,7 +211,7 @@
             "signature": [
               "string"
             ],
-            "path": "packages/kbn-apm-config-loader/src/init_apm.ts",
+            "path": "src/platform/packages/private/kbn-apm-config-loader/src/init_apm.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -226,7 +226,7 @@
             "signature": [
               "boolean"
             ],
-            "path": "packages/kbn-apm-config-loader/src/init_apm.ts",
+            "path": "src/platform/packages/private/kbn-apm-config-loader/src/init_apm.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -241,7 +241,7 @@
             "signature": [
               "string"
             ],
-            "path": "packages/kbn-apm-config-loader/src/init_apm.ts",
+            "path": "src/platform/packages/private/kbn-apm-config-loader/src/init_apm.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -262,7 +262,7 @@
           "AgentConfigOptions",
           " | undefined) => boolean"
         ],
-        "path": "packages/kbn-apm-config-loader/src/rum_agent_configuration.ts",
+        "path": "src/platform/packages/private/kbn-apm-config-loader/src/rum_agent_configuration.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -277,7 +277,7 @@
               "AgentConfigOptions",
               " | undefined"
             ],
-            "path": "packages/kbn-apm-config-loader/src/rum_agent_configuration.ts",
+            "path": "src/platform/packages/private/kbn-apm-config-loader/src/rum_agent_configuration.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -372,7 +372,7 @@
           },
           "<boolean | undefined>; }>>"
         ],
-        "path": "packages/kbn-apm-config-loader/src/apm_config.ts",
+        "path": "src/platform/packages/private/kbn-apm-config-loader/src/apm_config.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

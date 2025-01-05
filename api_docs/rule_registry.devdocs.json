@@ -1808,13 +1808,7 @@
             "text": "AlertAuditEventParams"
           },
           ") => ",
-          {
-            "pluginId": "@kbn/core-security-server",
-            "scope": "server",
-            "docId": "kibKbnCoreSecurityServerPluginApi",
-            "section": "def-server.AuditEvent",
-            "text": "AuditEvent"
-          }
+          "AuditEvent"
         ],
         "path": "x-pack/platform/plugins/shared/rule_registry/server/alert_data_client/audit_events.ts",
         "deprecated": false,
@@ -1968,13 +1962,7 @@
             "text": "RuleParamsAndRefs"
           },
           "<TParams>; injectReferences: (params: TParams, references: ",
-          {
-            "pluginId": "@kbn/core-saved-objects-common",
-            "scope": "common",
-            "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-            "section": "def-common.SavedObjectReference",
-            "text": "SavedObjectReference"
-          },
+          "SavedObjectReference",
           "[]) => TParams; } | undefined; isExportable: boolean; defaultScheduleInterval?: string | undefined; ruleTaskTimeout?: string | undefined; doesSetRecoveryContext?: boolean | undefined; autoRecoverAlerts?: boolean | undefined; getViewInAppRelativeUrl?: ",
           "GetViewInAppRelativeUrlFn",
           "<TParams> | undefined; fieldsForAAD?: string[] | undefined; }"
@@ -4117,13 +4105,7 @@
           "<Error> | ",
           "Right",
           "<",
-          {
-            "pluginId": "@kbn/core-elasticsearch-server",
-            "scope": "server",
-            "docId": "kibKbnCoreElasticsearchServerPluginApi",
-            "section": "def-server.ElasticsearchClient",
-            "text": "ElasticsearchClient"
-          },
+          "ElasticsearchClient",
           ">"
         ],
         "path": "x-pack/platform/plugins/shared/rule_registry/server/rule_data_client/rule_data_client.ts",
@@ -4284,13 +4266,7 @@
           "description": [],
           "signature": [
             "(req: ",
-            {
-              "pluginId": "@kbn/core-http-server",
-              "scope": "server",
-              "docId": "kibKbnCoreHttpServerPluginApi",
-              "section": "def-server.KibanaRequest",
-              "text": "KibanaRequest"
-            },
+            "KibanaRequest",
             "<unknown, unknown, unknown, any>) => Promise<",
             {
               "pluginId": "ruleRegistry",
@@ -4313,13 +4289,7 @@
               "label": "req",
               "description": [],
               "signature": [
-                {
-                  "pluginId": "@kbn/core-http-server",
-                  "scope": "server",
-                  "docId": "kibKbnCoreHttpServerPluginApi",
-                  "section": "def-server.KibanaRequest",
-                  "text": "KibanaRequest"
-                },
+                "KibanaRequest",
                 "<unknown, unknown, unknown, any>"
               ],
               "path": "x-pack/platform/plugins/shared/rule_registry/server/plugin.ts",

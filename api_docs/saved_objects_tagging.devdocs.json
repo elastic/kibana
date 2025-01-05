@@ -53,13 +53,7 @@
             "label": "client",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "server",
-                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-server.SavedObjectsClientContract",
-                "text": "SavedObjectsClientContract"
-              }
+              "SavedObjectsClientContract"
             ],
             "path": "x-pack/platform/plugins/private/saved_objects_tagging/server/types.ts",
             "deprecated": false,
@@ -87,13 +81,7 @@
             "label": "client",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "server",
-                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-server.SavedObjectsClientContract",
-                "text": "SavedObjectsClientContract"
-              }
+              "SavedObjectsClientContract"
             ],
             "path": "x-pack/platform/plugins/private/saved_objects_tagging/server/types.ts",
             "deprecated": false,
@@ -266,13 +254,7 @@
         "description": [],
         "signature": [
           "(capabilities: ",
-          {
-            "pluginId": "@kbn/core-capabilities-common",
-            "scope": "common",
-            "docId": "kibKbnCoreCapabilitiesCommonPluginApi",
-            "section": "def-common.Capabilities",
-            "text": "Capabilities"
-          },
+          "Capabilities",
           ") => ",
           {
             "pluginId": "savedObjectsTagging",
@@ -294,13 +276,7 @@
             "label": "capabilities",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-capabilities-common",
-                "scope": "common",
-                "docId": "kibKbnCoreCapabilitiesCommonPluginApi",
-                "section": "def-common.Capabilities",
-                "text": "Capabilities"
-              }
+              "Capabilities"
             ],
             "path": "x-pack/platform/plugins/private/saved_objects_tagging/common/capabilities.ts",
             "deprecated": false,

@@ -202,13 +202,7 @@
         "description": [],
         "signature": [
           "(http: ",
-          {
-            "pluginId": "@kbn/core-http-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreHttpBrowserPluginApi",
-            "section": "def-public.HttpSetup",
-            "text": "HttpSetup"
-          },
+          "HttpSetup",
           ", conversationsActions: ",
           {
             "pluginId": "@kbn/elastic-assistant",
@@ -218,13 +212,7 @@
             "text": "ConversationsBulkActions"
           },
           ", toasts?: ",
-          {
-            "pluginId": "@kbn/core-notifications-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreNotificationsBrowserPluginApi",
-            "section": "def-public.IToasts",
-            "text": "IToasts"
-          },
+          "IToasts",
           " | undefined) => Promise<",
           {
             "pluginId": "@kbn/elastic-assistant",
@@ -247,13 +235,7 @@
             "label": "http",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-http-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreHttpBrowserPluginApi",
-                "section": "def-public.HttpSetup",
-                "text": "HttpSetup"
-              }
+              "HttpSetup"
             ],
             "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/assistant/api/conversations/bulk_update_actions_conversations.ts",
             "deprecated": false,
@@ -289,13 +271,7 @@
             "label": "toasts",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-notifications-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreNotificationsBrowserPluginApi",
-                "section": "def-public.IToasts",
-                "text": "IToasts"
-              },
+              "IToasts",
               " | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/assistant/api/conversations/bulk_update_actions_conversations.ts",
@@ -316,21 +292,9 @@
         "description": [],
         "signature": [
           "(http: ",
-          {
-            "pluginId": "@kbn/core-http-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreHttpBrowserPluginApi",
-            "section": "def-public.HttpSetup",
-            "text": "HttpSetup"
-          },
+          "HttpSetup",
           ", prompts: { create?: { name: string; content: string; promptType: \"system\" | \"quick\"; consumer?: string | undefined; color?: string | undefined; categories?: string[] | undefined; isDefault?: boolean | undefined; isNewConversationDefault?: boolean | undefined; }[] | undefined; update?: { id: string; consumer?: string | undefined; content?: string | undefined; color?: string | undefined; categories?: string[] | undefined; isDefault?: boolean | undefined; isNewConversationDefault?: boolean | undefined; }[] | undefined; delete?: { ids?: string[] | undefined; query?: string | undefined; } | undefined; }, toasts?: ",
-          {
-            "pluginId": "@kbn/core-notifications-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreNotificationsBrowserPluginApi",
-            "section": "def-public.IToasts",
-            "text": "IToasts"
-          },
+          "IToasts",
           " | undefined) => Promise<{ attributes: { results: { created: { id: string; name: string; content: string; promptType: \"system\" | \"quick\"; namespace?: string | undefined; consumer?: string | undefined; timestamp?: string | undefined; color?: string | undefined; createdBy?: string | undefined; updatedBy?: string | undefined; createdAt?: string | undefined; updatedAt?: string | undefined; users?: { id?: string | undefined; name?: string | undefined; }[] | undefined; categories?: string[] | undefined; isDefault?: boolean | undefined; isNewConversationDefault?: boolean | undefined; }[]; updated: { id: string; name: string; content: string; promptType: \"system\" | \"quick\"; namespace?: string | undefined; consumer?: string | undefined; timestamp?: string | undefined; color?: string | undefined; createdBy?: string | undefined; updatedBy?: string | undefined; createdAt?: string | undefined; updatedAt?: string | undefined; users?: { id?: string | undefined; name?: string | undefined; }[] | undefined; categories?: string[] | undefined; isDefault?: boolean | undefined; isNewConversationDefault?: boolean | undefined; }[]; skipped: { id: string; skip_reason: \"PROMPT_FIELD_NOT_MODIFIED\"; name?: string | undefined; }[]; deleted: string[]; }; summary: { total: number; succeeded: number; failed: number; skipped: number; }; errors?: { message: string; status_code: number; prompts: { id: string; name?: string | undefined; }[]; err_code?: string | undefined; }[] | undefined; }; message?: string | undefined; success?: boolean | undefined; status_code?: number | undefined; prompts_count?: number | undefined; } | undefined>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/assistant/api/prompts/bulk_update_prompts.ts",
@@ -345,13 +309,7 @@
             "label": "http",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-http-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreHttpBrowserPluginApi",
-                "section": "def-public.HttpSetup",
-                "text": "HttpSetup"
-              }
+              "HttpSetup"
             ],
             "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/assistant/api/prompts/bulk_update_prompts.ts",
             "deprecated": false,
@@ -381,13 +339,7 @@
             "label": "toasts",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-notifications-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreNotificationsBrowserPluginApi",
-                "section": "def-public.IToasts",
-                "text": "IToasts"
-              },
+              "IToasts",
               " | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/assistant/api/prompts/bulk_update_prompts.ts",
@@ -501,21 +453,9 @@
         "description": [],
         "signature": [
           "({ http, signal, toasts, }: { http: ",
-          {
-            "pluginId": "@kbn/core-http-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreHttpBrowserPluginApi",
-            "section": "def-public.HttpSetup",
-            "text": "HttpSetup"
-          },
+          "HttpSetup",
           "; toasts: ",
-          {
-            "pluginId": "@kbn/core-notifications-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreNotificationsBrowserPluginApi",
-            "section": "def-public.IToasts",
-            "text": "IToasts"
-          },
+          "IToasts",
           "; signal?: AbortSignal | undefined; }) => Promise<{ page: number; data: { id: string; name: string; content: string; promptType: \"system\" | \"quick\"; namespace?: string | undefined; consumer?: string | undefined; timestamp?: string | undefined; color?: string | undefined; createdBy?: string | undefined; updatedBy?: string | undefined; createdAt?: string | undefined; updatedAt?: string | undefined; users?: { id?: string | undefined; name?: string | undefined; }[] | undefined; categories?: string[] | undefined; isDefault?: boolean | undefined; isNewConversationDefault?: boolean | undefined; }[]; perPage: number; total: number; }>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/assistant/api/prompts/use_fetch_prompts.ts",
@@ -541,13 +481,7 @@
                 "label": "http",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-http-browser",
-                    "scope": "public",
-                    "docId": "kibKbnCoreHttpBrowserPluginApi",
-                    "section": "def-public.HttpSetup",
-                    "text": "HttpSetup"
-                  }
+                  "HttpSetup"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/assistant/api/prompts/use_fetch_prompts.ts",
                 "deprecated": false,
@@ -561,13 +495,7 @@
                 "label": "toasts",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-notifications-browser",
-                    "scope": "public",
-                    "docId": "kibKbnCoreNotificationsBrowserPluginApi",
-                    "section": "def-public.IToasts",
-                    "text": "IToasts"
-                  }
+                  "IToasts"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/assistant/api/prompts/use_fetch_prompts.ts",
                 "deprecated": false,
@@ -604,21 +532,9 @@
         ],
         "signature": [
           "({ http, signal, toasts, }: { http: ",
-          {
-            "pluginId": "@kbn/core-http-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreHttpBrowserPluginApi",
-            "section": "def-public.HttpSetup",
-            "text": "HttpSetup"
-          },
+          "HttpSetup",
           "; toasts?: ",
-          {
-            "pluginId": "@kbn/core-notifications-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreNotificationsBrowserPluginApi",
-            "section": "def-public.IToasts",
-            "text": "IToasts"
-          },
+          "IToasts",
           " | undefined; signal?: AbortSignal | undefined; }) => Promise<",
           "FetchConversationsResponse",
           ">"
@@ -646,13 +562,7 @@
                 "label": "http",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-http-browser",
-                    "scope": "public",
-                    "docId": "kibKbnCoreHttpBrowserPluginApi",
-                    "section": "def-public.HttpSetup",
-                    "text": "HttpSetup"
-                  }
+                  "HttpSetup"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/assistant/api/conversations/conversations.ts",
                 "deprecated": false,
@@ -666,13 +576,7 @@
                 "label": "toasts",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-notifications-browser",
-                    "scope": "public",
-                    "docId": "kibKbnCoreNotificationsBrowserPluginApi",
-                    "section": "def-public.IToasts",
-                    "text": "IToasts"
-                  },
+                  "IToasts",
                   " | undefined"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/assistant/api/conversations/conversations.ts",
@@ -1110,13 +1014,7 @@
           "<",
           "AIConnector",
           "[], ",
-          {
-            "pluginId": "@kbn/core-http-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreHttpBrowserPluginApi",
-            "section": "def-public.IHttpFetchError",
-            "text": "IHttpFetchError"
-          },
+          "IHttpFetchError",
           "<unknown>>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/connectorland/use_load_connectors/index.tsx",

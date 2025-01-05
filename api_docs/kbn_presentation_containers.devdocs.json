@@ -1899,13 +1899,7 @@
             "description": [],
             "signature": [
               "(ref: ",
-              {
-                "pluginId": "@kbn/core-mount-utils-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreMountUtilsBrowserPluginApi",
-                "section": "def-public.OverlayRef",
-                "text": "OverlayRef"
-              },
+              "OverlayRef",
               ", options?: ",
               "TracksOverlaysOptions",
               " | undefined) => void"
@@ -1922,13 +1916,7 @@
                 "label": "ref",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-mount-utils-browser",
-                    "scope": "public",
-                    "docId": "kibKbnCoreMountUtilsBrowserPluginApi",
-                    "section": "def-public.OverlayRef",
-                    "text": "OverlayRef"
-                  }
+                  "OverlayRef"
                 ],
                 "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/tracks_overlays.ts",
                 "deprecated": false,

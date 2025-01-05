@@ -3230,13 +3230,7 @@
             "description": [],
             "signature": [
               "{ readonly type?: string | undefined; readonly name?: string | undefined; readonly page?: string | undefined; readonly id?: string | undefined; readonly description?: string | undefined; readonly url?: string | undefined; readonly meta?: { [key: string]: string | number | boolean | undefined; } | undefined; child?: ",
-              {
-                "pluginId": "@kbn/core-execution-context-common",
-                "scope": "common",
-                "docId": "kibKbnCoreExecutionContextCommonPluginApi",
-                "section": "def-common.KibanaExecutionContext",
-                "text": "KibanaExecutionContext"
-              },
+              "KibanaExecutionContext",
               " | undefined; }"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_execution_context.ts",
@@ -3550,22 +3544,6 @@
             "path": "x-pack/plugins/lens/public/react_embeddable/initializers/initialize_dashboard_services.ts"
           },
           {
-            "plugin": "dashboard",
-            "path": "src/platform/plugins/shared/dashboard/public/dashboard_actions/add_to_library_action.tsx"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/platform/plugins/shared/dashboard/public/dashboard_actions/add_to_library_action.tsx"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/platform/plugins/shared/dashboard/public/dashboard_actions/unlink_from_library_action.tsx"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/platform/plugins/shared/dashboard/public/dashboard_actions/unlink_from_library_action.tsx"
-          },
-          {
             "plugin": "maps",
             "path": "x-pack/platform/plugins/shared/maps/public/react_embeddable/types.ts"
           },
@@ -3580,6 +3558,22 @@
           {
             "plugin": "maps",
             "path": "x-pack/platform/plugins/shared/maps/public/react_embeddable/library_transforms.ts"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/platform/plugins/shared/dashboard/public/dashboard_actions/add_to_library_action.tsx"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/platform/plugins/shared/dashboard/public/dashboard_actions/add_to_library_action.tsx"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/platform/plugins/shared/dashboard/public/dashboard_actions/unlink_from_library_action.tsx"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/platform/plugins/shared/dashboard/public/dashboard_actions/unlink_from_library_action.tsx"
           }
         ],
         "children": [

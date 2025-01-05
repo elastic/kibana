@@ -512,29 +512,11 @@
             "description": [],
             "signature": [
               "{ userProfile: { bulkGet: <D extends ",
-              {
-                "pluginId": "@kbn/core-user-profile-common",
-                "scope": "common",
-                "docId": "kibKbnCoreUserProfileCommonPluginApi",
-                "section": "def-common.UserProfileData",
-                "text": "UserProfileData"
-              },
+              "UserProfileData",
               ">(params: ",
-              {
-                "pluginId": "@kbn/core-user-profile-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreUserProfileBrowserPluginApi",
-                "section": "def-public.UserProfileBulkGetParams",
-                "text": "UserProfileBulkGetParams"
-              },
+              "UserProfileBulkGetParams",
               ") => Promise<",
-              {
-                "pluginId": "@kbn/core-user-profile-common",
-                "scope": "common",
-                "docId": "kibKbnCoreUserProfileCommonPluginApi",
-                "section": "def-common.UserProfile",
-                "text": "UserProfile"
-              },
+              "UserProfile",
               "<D>[]>; }; }"
             ],
             "path": "packages/content-management/user_profiles/src/services.tsx",

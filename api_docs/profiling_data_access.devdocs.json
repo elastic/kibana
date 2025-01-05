@@ -121,13 +121,7 @@
             "text": "PackagePolicyClient"
           },
           "; soClient: ",
-          {
-            "pluginId": "@kbn/core-saved-objects-api-server",
-            "scope": "server",
-            "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-            "section": "def-server.SavedObjectsClientContract",
-            "text": "SavedObjectsClientContract"
-          },
+          "SavedObjectsClientContract",
           "; }) => Promise<",
           {
             "pluginId": "fleet",
@@ -181,13 +175,7 @@
                 "label": "soClient",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-saved-objects-api-server",
-                    "scope": "server",
-                    "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                    "section": "def-server.SavedObjectsClientContract",
-                    "text": "SavedObjectsClientContract"
-                  }
+                  "SavedObjectsClientContract"
                 ],
                 "path": "x-pack/solutions/observability/plugins/profiling_data_access/common/get_apm_policy.ts",
                 "deprecated": false,
@@ -216,13 +204,7 @@
             "text": "PackagePolicyClient"
           },
           "; soClient: ",
-          {
-            "pluginId": "@kbn/core-saved-objects-api-server",
-            "scope": "server",
-            "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-            "section": "def-server.SavedObjectsClientContract",
-            "text": "SavedObjectsClientContract"
-          },
+          "SavedObjectsClientContract",
           "; }) => Promise<",
           {
             "pluginId": "fleet",
@@ -276,13 +258,7 @@
                 "label": "soClient",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-saved-objects-api-server",
-                    "scope": "server",
-                    "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                    "section": "def-server.SavedObjectsClientContract",
-                    "text": "SavedObjectsClientContract"
-                  }
+                  "SavedObjectsClientContract"
                 ],
                 "path": "x-pack/solutions/observability/plugins/profiling_data_access/common/fleet_policies.ts",
                 "deprecated": false,
@@ -311,13 +287,7 @@
             "text": "PackagePolicyClient"
           },
           "; soClient: ",
-          {
-            "pluginId": "@kbn/core-saved-objects-api-server",
-            "scope": "server",
-            "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-            "section": "def-server.SavedObjectsClientContract",
-            "text": "SavedObjectsClientContract"
-          },
+          "SavedObjectsClientContract",
           "; }) => Promise<",
           {
             "pluginId": "fleet",
@@ -371,13 +341,7 @@
                 "label": "soClient",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-saved-objects-api-server",
-                    "scope": "server",
-                    "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                    "section": "def-server.SavedObjectsClientContract",
-                    "text": "SavedObjectsClientContract"
-                  }
+                  "SavedObjectsClientContract"
                 ],
                 "path": "x-pack/solutions/observability/plugins/profiling_data_access/common/fleet_policies.ts",
                 "deprecated": false,

@@ -86,13 +86,7 @@
             "text": "ThemeServiceStart"
           },
           ", userProfile?: ",
-          {
-            "pluginId": "@kbn/core-user-profile-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreUserProfileBrowserPluginApi",
-            "section": "def-public.UserProfileService",
-            "text": "UserProfileService"
-          },
+          "UserProfileService",
           " | undefined) => React.JSX.Element"
         ],
         "path": "packages/react/kibana_context/theme/with_theme.tsx",
@@ -147,13 +141,7 @@
             "label": "userProfile",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-user-profile-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreUserProfileBrowserPluginApi",
-                "section": "def-public.UserProfileService",
-                "text": "UserProfileService"
-              },
+              "UserProfileService",
               " | undefined"
             ],
             "path": "packages/react/kibana_context/theme/with_theme.tsx",
@@ -265,13 +253,7 @@
             ],
             "signature": [
               "Pick<",
-              {
-                "pluginId": "@kbn/core-user-profile-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreUserProfileBrowserPluginApi",
-                "section": "def-public.UserProfileService",
-                "text": "UserProfileService"
-              },
+              "UserProfileService",
               ", \"getUserProfile$\"> | undefined"
             ],
             "path": "packages/react/kibana_context/theme/theme_provider.tsx",

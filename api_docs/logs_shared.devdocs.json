@@ -3912,13 +3912,7 @@
             "description": [],
             "signature": [
               "(requestContext: ",
-              {
-                "pluginId": "@kbn/core-http-request-handler-context-server",
-                "scope": "server",
-                "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
-                "section": "def-server.RequestHandlerContext",
-                "text": "RequestHandlerContext"
-              },
+              "RequestHandlerContext",
               ", logView: { logViewId: string; type: \"log-view-reference\"; } | { type: \"log-view-inline\"; id: string; attributes: { name: string; description: string; logIndices: { type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; } | { type: \"kibana_advanced_setting\"; }; logColumns: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[]; }; }, params: ",
               "LogEntriesAroundParams",
               ", columnOverrides?: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[] | undefined) => Promise<{ entries: { id: string; index: string; cursor: { time: string; tiebreaker: number; }; columns: ({ columnId: string; time: string; } | { columnId: string; field: string; value: ",
@@ -3951,13 +3945,7 @@
                 "label": "requestContext",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-http-request-handler-context-server",
-                    "scope": "server",
-                    "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
-                    "section": "def-server.RequestHandlerContext",
-                    "text": "RequestHandlerContext"
-                  }
+                  "RequestHandlerContext"
                 ],
                 "path": "x-pack/platform/plugins/shared/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
                 "deprecated": false,
@@ -4021,13 +4009,7 @@
             "description": [],
             "signature": [
               "(requestContext: ",
-              {
-                "pluginId": "@kbn/core-http-request-handler-context-server",
-                "scope": "server",
-                "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
-                "section": "def-server.RequestHandlerContext",
-                "text": "RequestHandlerContext"
-              },
+              "RequestHandlerContext",
               ", logView: { logViewId: string; type: \"log-view-reference\"; } | { type: \"log-view-inline\"; id: string; attributes: { name: string; description: string; logIndices: { type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; } | { type: \"kibana_advanced_setting\"; }; logColumns: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[]; }; }, params: ",
               "LogEntriesParams",
               ", columnOverrides?: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[] | undefined) => Promise<{ entries: { id: string; index: string; cursor: { time: string; tiebreaker: number; }; columns: ({ columnId: string; time: string; } | { columnId: string; field: string; value: ",
@@ -4060,13 +4042,7 @@
                 "label": "requestContext",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-http-request-handler-context-server",
-                    "scope": "server",
-                    "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
-                    "section": "def-server.RequestHandlerContext",
-                    "text": "RequestHandlerContext"
-                  }
+                  "RequestHandlerContext"
                 ],
                 "path": "x-pack/platform/plugins/shared/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
                 "deprecated": false,
@@ -4130,13 +4106,7 @@
             "description": [],
             "signature": [
               "(requestContext: ",
-              {
-                "pluginId": "@kbn/core-http-request-handler-context-server",
-                "scope": "server",
-                "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
-                "section": "def-server.RequestHandlerContext",
-                "text": "RequestHandlerContext"
-              },
+              "RequestHandlerContext",
               ", logView: { logViewId: string; type: \"log-view-reference\"; } | { type: \"log-view-inline\"; id: string; attributes: { name: string; description: string; logIndices: { type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; } | { type: \"kibana_advanced_setting\"; }; logColumns: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[]; }; }, start: number, end: number, bucketSize: number, filterQuery?: ",
               {
                 "pluginId": "@kbn/utility-types",
@@ -4159,13 +4129,7 @@
                 "label": "requestContext",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-http-request-handler-context-server",
-                    "scope": "server",
-                    "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
-                    "section": "def-server.RequestHandlerContext",
-                    "text": "RequestHandlerContext"
-                  }
+                  "RequestHandlerContext"
                 ],
                 "path": "x-pack/platform/plugins/shared/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
                 "deprecated": false,
@@ -4266,13 +4230,7 @@
             "description": [],
             "signature": [
               "(requestContext: ",
-              {
-                "pluginId": "@kbn/core-http-request-handler-context-server",
-                "scope": "server",
-                "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
-                "section": "def-server.RequestHandlerContext",
-                "text": "RequestHandlerContext"
-              },
+              "RequestHandlerContext",
               ", logView: { logViewId: string; type: \"log-view-reference\"; } | { type: \"log-view-inline\"; id: string; attributes: { name: string; description: string; logIndices: { type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; } | { type: \"kibana_advanced_setting\"; }; logColumns: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[]; }; }, startTimestamp: number, endTimestamp: number, bucketSize: number, highlightQueries: string[], filterQuery?: ",
               {
                 "pluginId": "@kbn/utility-types",
@@ -4295,13 +4253,7 @@
                 "label": "requestContext",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-http-request-handler-context-server",
-                    "scope": "server",
-                    "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
-                    "section": "def-server.RequestHandlerContext",
-                    "text": "RequestHandlerContext"
-                  }
+                  "RequestHandlerContext"
                 ],
                 "path": "x-pack/platform/plugins/shared/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
                 "deprecated": false,
@@ -4417,13 +4369,7 @@
             "description": [],
             "signature": [
               "(requestContext: ",
-              {
-                "pluginId": "@kbn/core-http-request-handler-context-server",
-                "scope": "server",
-                "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
-                "section": "def-server.RequestHandlerContext",
-                "text": "RequestHandlerContext"
-              },
+              "RequestHandlerContext",
               ", timestampField: string, indexName: string, startTime: number, endTime: number, runtimeMappings: ",
               "MappingRuntimeFields",
               ") => Promise<string[]>"
@@ -4440,13 +4386,7 @@
                 "label": "requestContext",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-http-request-handler-context-server",
-                    "scope": "server",
-                    "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
-                    "section": "def-server.RequestHandlerContext",
-                    "text": "RequestHandlerContext"
-                  }
+                  "RequestHandlerContext"
                 ],
                 "path": "x-pack/platform/plugins/shared/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
                 "deprecated": false,
@@ -4557,13 +4497,7 @@
             "description": [],
             "signature": [
               "(requestContext: ",
-              {
-                "pluginId": "@kbn/core-http-request-handler-context-server",
-                "scope": "server",
-                "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
-                "section": "def-server.RequestHandlerContext",
-                "text": "RequestHandlerContext"
-              },
+              "RequestHandlerContext",
               ", logView: { logViewId: string; type: \"log-view-reference\"; } | { type: \"log-view-inline\"; id: string; attributes: { name: string; description: string; logIndices: { type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; } | { type: \"kibana_advanced_setting\"; }; logColumns: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[]; }; }, params: ",
               "LogEntriesAroundParams",
               ", columnOverrides?: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[] | undefined) => Promise<{ entries: { id: string; index: string; cursor: { time: string; tiebreaker: number; }; columns: ({ columnId: string; time: string; } | { columnId: string; field: string; value: ",
@@ -4596,13 +4530,7 @@
                 "label": "requestContext",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-http-request-handler-context-server",
-                    "scope": "server",
-                    "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
-                    "section": "def-server.RequestHandlerContext",
-                    "text": "RequestHandlerContext"
-                  }
+                  "RequestHandlerContext"
                 ],
                 "path": "x-pack/platform/plugins/shared/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
                 "deprecated": false,
@@ -4666,13 +4594,7 @@
             "description": [],
             "signature": [
               "(requestContext: ",
-              {
-                "pluginId": "@kbn/core-http-request-handler-context-server",
-                "scope": "server",
-                "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
-                "section": "def-server.RequestHandlerContext",
-                "text": "RequestHandlerContext"
-              },
+              "RequestHandlerContext",
               ", logView: { logViewId: string; type: \"log-view-reference\"; } | { type: \"log-view-inline\"; id: string; attributes: { name: string; description: string; logIndices: { type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; } | { type: \"kibana_advanced_setting\"; }; logColumns: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[]; }; }, params: ",
               "LogEntriesParams",
               ", columnOverrides?: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[] | undefined) => Promise<{ entries: { id: string; index: string; cursor: { time: string; tiebreaker: number; }; columns: ({ columnId: string; time: string; } | { columnId: string; field: string; value: ",
@@ -4705,13 +4627,7 @@
                 "label": "requestContext",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-http-request-handler-context-server",
-                    "scope": "server",
-                    "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
-                    "section": "def-server.RequestHandlerContext",
-                    "text": "RequestHandlerContext"
-                  }
+                  "RequestHandlerContext"
                 ],
                 "path": "x-pack/platform/plugins/shared/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
                 "deprecated": false,
@@ -4775,13 +4691,7 @@
             "description": [],
             "signature": [
               "(requestContext: ",
-              {
-                "pluginId": "@kbn/core-http-request-handler-context-server",
-                "scope": "server",
-                "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
-                "section": "def-server.RequestHandlerContext",
-                "text": "RequestHandlerContext"
-              },
+              "RequestHandlerContext",
               ", logView: { logViewId: string; type: \"log-view-reference\"; } | { type: \"log-view-inline\"; id: string; attributes: { name: string; description: string; logIndices: { type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; } | { type: \"kibana_advanced_setting\"; }; logColumns: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[]; }; }, start: number, end: number, bucketSize: number, filterQuery?: ",
               {
                 "pluginId": "@kbn/utility-types",
@@ -4804,13 +4714,7 @@
                 "label": "requestContext",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-http-request-handler-context-server",
-                    "scope": "server",
-                    "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
-                    "section": "def-server.RequestHandlerContext",
-                    "text": "RequestHandlerContext"
-                  }
+                  "RequestHandlerContext"
                 ],
                 "path": "x-pack/platform/plugins/shared/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
                 "deprecated": false,
@@ -4911,13 +4815,7 @@
             "description": [],
             "signature": [
               "(requestContext: ",
-              {
-                "pluginId": "@kbn/core-http-request-handler-context-server",
-                "scope": "server",
-                "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
-                "section": "def-server.RequestHandlerContext",
-                "text": "RequestHandlerContext"
-              },
+              "RequestHandlerContext",
               ", logView: { logViewId: string; type: \"log-view-reference\"; } | { type: \"log-view-inline\"; id: string; attributes: { name: string; description: string; logIndices: { type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; } | { type: \"kibana_advanced_setting\"; }; logColumns: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[]; }; }, startTimestamp: number, endTimestamp: number, bucketSize: number, highlightQueries: string[], filterQuery?: ",
               {
                 "pluginId": "@kbn/utility-types",
@@ -4940,13 +4838,7 @@
                 "label": "requestContext",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-http-request-handler-context-server",
-                    "scope": "server",
-                    "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
-                    "section": "def-server.RequestHandlerContext",
-                    "text": "RequestHandlerContext"
-                  }
+                  "RequestHandlerContext"
                 ],
                 "path": "x-pack/platform/plugins/shared/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
                 "deprecated": false,
@@ -5062,13 +4954,7 @@
             "description": [],
             "signature": [
               "(requestContext: ",
-              {
-                "pluginId": "@kbn/core-http-request-handler-context-server",
-                "scope": "server",
-                "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
-                "section": "def-server.RequestHandlerContext",
-                "text": "RequestHandlerContext"
-              },
+              "RequestHandlerContext",
               ", timestampField: string, indexName: string, startTime: number, endTime: number, runtimeMappings: ",
               "MappingRuntimeFields",
               ") => Promise<string[]>"
@@ -5085,13 +4971,7 @@
                 "label": "requestContext",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-http-request-handler-context-server",
-                    "scope": "server",
-                    "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
-                    "section": "def-server.RequestHandlerContext",
-                    "text": "RequestHandlerContext"
-                  }
+                  "RequestHandlerContext"
                 ],
                 "path": "x-pack/platform/plugins/shared/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
                 "deprecated": false,

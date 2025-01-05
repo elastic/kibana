@@ -123,13 +123,7 @@
             "description": [],
             "signature": [
               "(element: HTMLDivElement) => ",
-              {
-                "pluginId": "@kbn/core-mount-utils-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreMountUtilsBrowserPluginApi",
-                "section": "def-public.UnmountCallback",
-                "text": "UnmountCallback"
-              }
+              "UnmountCallback"
             ],
             "path": "packages/core/chrome/core-chrome-browser/src/breadcrumb.ts",
             "deprecated": false,
@@ -146,7 +140,7 @@
                 "signature": [
                   "T"
                 ],
-                "path": "packages/core/mount-utils/core-mount-utils-browser/src/mount_point.ts",
+                "path": "src/core/packages/mount-utils/browser/src/mount_point.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -820,13 +814,7 @@
             "description": [],
             "signature": [
               "(element: HTMLElement) => ",
-              {
-                "pluginId": "@kbn/core-mount-utils-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreMountUtilsBrowserPluginApi",
-                "section": "def-public.UnmountCallback",
-                "text": "UnmountCallback"
-              }
+              "UnmountCallback"
             ],
             "path": "packages/core/chrome/core-chrome-browser/src/nav_controls.ts",
             "deprecated": false,
@@ -843,7 +831,7 @@
                 "signature": [
                   "T"
                 ],
-                "path": "packages/core/mount-utils/core-mount-utils-browser/src/mount_point.ts",
+                "path": "src/core/packages/mount-utils/browser/src/mount_point.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -2873,13 +2861,7 @@
             "description": [],
             "signature": [
               "(element: HTMLDivElement) => ",
-              {
-                "pluginId": "@kbn/core-mount-utils-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreMountUtilsBrowserPluginApi",
-                "section": "def-public.UnmountCallback",
-                "text": "UnmountCallback"
-              }
+              "UnmountCallback"
             ],
             "path": "packages/core/chrome/core-chrome-browser/src/types.ts",
             "deprecated": false,
@@ -2896,7 +2878,7 @@
                 "signature": [
                   "T"
                 ],
-                "path": "packages/core/mount-utils/core-mount-utils-browser/src/mount_point.ts",
+                "path": "src/core/packages/mount-utils/browser/src/mount_point.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }

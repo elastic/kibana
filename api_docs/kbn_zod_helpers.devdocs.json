@@ -69,13 +69,7 @@
         ],
         "signature": [
           "(schema: ZodSchema) => ",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "server",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.RouteValidationFunction",
-            "text": "RouteValidationFunction"
-          },
+          "RouteValidationFunction",
           "<Type>"
         ],
         "path": "src/platform/packages/shared/kbn-zod-helpers/src/build_route_validation_with_zod.ts",

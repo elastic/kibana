@@ -674,21 +674,9 @@
             "description": [],
             "signature": [
               "() => { attributes: ",
-              {
-                "pluginId": "@kbn/core-saved-objects-common",
-                "scope": "common",
-                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-                "section": "def-common.SavedObjectAttributes",
-                "text": "SavedObjectAttributes"
-              },
+              "SavedObjectAttributes",
               "; references: ",
-              {
-                "pluginId": "@kbn/core-saved-objects-common",
-                "scope": "common",
-                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-                "section": "def-common.SavedObjectReference",
-                "text": "SavedObjectReference"
-              },
+              "SavedObjectReference",
               "[]; }"
             ],
             "path": "src/platform/plugins/shared/saved_objects/public/types.ts",
@@ -1140,13 +1128,7 @@
             "label": "unresolvedIndexPatternReference",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-saved-objects-common",
-                "scope": "common",
-                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-                "section": "def-common.SavedObjectReference",
-                "text": "SavedObjectReference"
-              },
+              "SavedObjectReference",
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_objects/public/types.ts",
@@ -1184,13 +1166,7 @@
                 "text": "SavedObject"
               },
               "<",
-              {
-                "pluginId": "@kbn/core-saved-objects-common",
-                "scope": "common",
-                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-                "section": "def-common.SavedObjectAttributes",
-                "text": "SavedObjectAttributes"
-              },
+              "SavedObjectAttributes",
               ">) => Promise<",
               {
                 "pluginId": "savedObjects",
@@ -1200,13 +1176,7 @@
                 "text": "SavedObject"
               },
               "<",
-              {
-                "pluginId": "@kbn/core-saved-objects-common",
-                "scope": "common",
-                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-                "section": "def-common.SavedObjectAttributes",
-                "text": "SavedObjectAttributes"
-              },
+              "SavedObjectAttributes",
               ">>) | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_objects/public/types.ts",
@@ -1229,13 +1199,7 @@
                     "text": "SavedObject"
                   },
                   "<",
-                  {
-                    "pluginId": "@kbn/core-saved-objects-common",
-                    "scope": "common",
-                    "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-                    "section": "def-common.SavedObjectAttributes",
-                    "text": "SavedObjectAttributes"
-                  },
+                  "SavedObjectAttributes",
                   ">"
                 ],
                 "path": "src/platform/plugins/shared/saved_objects/public/types.ts",
@@ -1313,21 +1277,9 @@
                 "text": "SavedObject"
               },
               "<",
-              {
-                "pluginId": "@kbn/core-saved-objects-common",
-                "scope": "common",
-                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-                "section": "def-common.SavedObjectAttributes",
-                "text": "SavedObjectAttributes"
-              },
+              "SavedObjectAttributes",
               ">>(object: T, references: ",
-              {
-                "pluginId": "@kbn/core-saved-objects-common",
-                "scope": "common",
-                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-                "section": "def-common.SavedObjectReference",
-                "text": "SavedObjectReference"
-              },
+              "SavedObjectReference",
               "[]) => void) | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_objects/public/types.ts",
@@ -1357,13 +1309,7 @@
                 "label": "references",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-saved-objects-common",
-                    "scope": "common",
-                    "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-                    "section": "def-common.SavedObjectReference",
-                    "text": "SavedObjectReference"
-                  },
+                  "SavedObjectReference",
                   "[]"
                 ],
                 "path": "src/platform/plugins/shared/saved_objects/public/types.ts",

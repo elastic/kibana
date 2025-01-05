@@ -2301,13 +2301,7 @@
             ">; readonly darkModeEnabled$: ",
             "Observable",
             "<",
-            {
-              "pluginId": "@kbn/core-theme-browser",
-              "scope": "public",
-              "docId": "kibKbnCoreThemeBrowserPluginApi",
-              "section": "def-public.CoreTheme",
-              "text": "CoreTheme"
-            },
+            "CoreTheme",
             ">; useDarkMode: () => boolean; useChartsTheme: () => ",
             "RecursivePartial",
             "<",

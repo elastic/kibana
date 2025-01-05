@@ -143,23 +143,11 @@
           "\nRepresents the currently authenticated user."
         ],
         "signature": [
-          {
-            "pluginId": "@kbn/core-security-common",
-            "scope": "common",
-            "docId": "kibKbnCoreSecurityCommonPluginApi",
-            "section": "def-common.AuthenticatedUser",
-            "text": "AuthenticatedUser"
-          },
+          "AuthenticatedUser",
           " extends ",
-          {
-            "pluginId": "@kbn/core-security-common",
-            "scope": "common",
-            "docId": "kibKbnCoreSecurityCommonPluginApi",
-            "section": "def-common.User",
-            "text": "User"
-          }
+          "User"
         ],
-        "path": "packages/core/security/core-security-common/src/authentication/authenticated_user.ts",
+        "path": "src/core/packages/security/common/src/authentication/authenticated_user.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -173,15 +161,9 @@
               "\nThe name and type of the Realm that has authenticated the user."
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/core-security-common",
-                "scope": "common",
-                "docId": "kibKbnCoreSecurityCommonPluginApi",
-                "section": "def-common.UserRealm",
-                "text": "UserRealm"
-              }
+              "UserRealm"
             ],
-            "path": "packages/core/security/core-security-common/src/authentication/authenticated_user.ts",
+            "path": "src/core/packages/security/common/src/authentication/authenticated_user.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -195,15 +177,9 @@
               "\nThe name and type of the Realm where the user information were retrieved from."
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/core-security-common",
-                "scope": "common",
-                "docId": "kibKbnCoreSecurityCommonPluginApi",
-                "section": "def-common.UserRealm",
-                "text": "UserRealm"
-              }
+              "UserRealm"
             ],
-            "path": "packages/core/security/core-security-common/src/authentication/authenticated_user.ts",
+            "path": "src/core/packages/security/common/src/authentication/authenticated_user.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -217,15 +193,9 @@
               "\nThe authentication provider that used to authenticate user."
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/core-security-common",
-                "scope": "common",
-                "docId": "kibKbnCoreSecurityCommonPluginApi",
-                "section": "def-common.AuthenticationProvider",
-                "text": "AuthenticationProvider"
-              }
+              "AuthenticationProvider"
             ],
-            "path": "packages/core/security/core-security-common/src/authentication/authenticated_user.ts",
+            "path": "src/core/packages/security/common/src/authentication/authenticated_user.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -238,7 +208,7 @@
             "description": [
               "\nThe AuthenticationType used by ES to authenticate the user.\n"
             ],
-            "path": "packages/core/security/core-security-common/src/authentication/authenticated_user.ts",
+            "path": "src/core/packages/security/common/src/authentication/authenticated_user.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -251,7 +221,7 @@
             "description": [
               "\nIndicates whether user is authenticated via Elastic Cloud built-in SAML realm."
             ],
-            "path": "packages/core/security/core-security-common/src/authentication/authenticated_user.ts",
+            "path": "src/core/packages/security/common/src/authentication/authenticated_user.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -267,7 +237,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/core/security/core-security-common/src/authentication/authenticated_user.ts",
+            "path": "src/core/packages/security/common/src/authentication/authenticated_user.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -283,7 +253,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "packages/core/security/core-security-common/src/authentication/authenticated_user.ts",
+            "path": "src/core/packages/security/common/src/authentication/authenticated_user.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -300,7 +270,7 @@
               "ApiKeyDescriptor",
               " | undefined"
             ],
-            "path": "packages/core/security/core-security-common/src/authentication/authenticated_user.ts",
+            "path": "src/core/packages/security/common/src/authentication/authenticated_user.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -316,7 +286,7 @@
         "description": [
           "\nType and name tuple to identify provider used to authenticate user."
         ],
-        "path": "packages/core/security/core-security-common/src/authentication/authentication_provider.ts",
+        "path": "src/core/packages/security/common/src/authentication/authentication_provider.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -329,7 +299,7 @@
             "description": [
               "\nType of the Kibana authentication provider."
             ],
-            "path": "packages/core/security/core-security-common/src/authentication/authentication_provider.ts",
+            "path": "src/core/packages/security/common/src/authentication/authentication_provider.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -342,7 +312,7 @@
             "description": [
               "\nName of the Kibana authentication provider (arbitrary string)."
             ],
-            "path": "packages/core/security/core-security-common/src/authentication/authentication_provider.ts",
+            "path": "src/core/packages/security/common/src/authentication/authentication_provider.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1553,7 +1523,7 @@
         "description": [
           "\nA set of fields describing Kibana user."
         ],
-        "path": "packages/core/security/core-security-common/src/authentication/user.ts",
+        "path": "src/core/packages/security/common/src/authentication/user.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1564,7 +1534,7 @@
             "tags": [],
             "label": "username",
             "description": [],
-            "path": "packages/core/security/core-security-common/src/authentication/user.ts",
+            "path": "src/core/packages/security/common/src/authentication/user.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1578,7 +1548,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/core/security/core-security-common/src/authentication/user.ts",
+            "path": "src/core/packages/security/common/src/authentication/user.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1592,7 +1562,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/core/security/core-security-common/src/authentication/user.ts",
+            "path": "src/core/packages/security/common/src/authentication/user.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1606,7 +1576,7 @@
             "signature": [
               "readonly string[]"
             ],
-            "path": "packages/core/security/core-security-common/src/authentication/user.ts",
+            "path": "src/core/packages/security/common/src/authentication/user.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1617,7 +1587,7 @@
             "tags": [],
             "label": "enabled",
             "description": [],
-            "path": "packages/core/security/core-security-common/src/authentication/user.ts",
+            "path": "src/core/packages/security/common/src/authentication/user.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1631,7 +1601,7 @@
             "signature": [
               "{ _reserved: boolean; _deprecated?: boolean | undefined; _deprecated_reason?: string | undefined; } | undefined"
             ],
-            "path": "packages/core/security/core-security-common/src/authentication/user.ts",
+            "path": "src/core/packages/security/common/src/authentication/user.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1648,16 +1618,10 @@
           "\nIMPORTANT:\n\nThe types in this file are duplicated at\n`packages/kbn-user-profile-components/src/user_profile.ts`\n\nWhen making changes please ensure to keep both files in sync.\n\nDescribes basic properties stored in user profile."
         ],
         "signature": [
-          {
-            "pluginId": "@kbn/core-user-profile-common",
-            "scope": "common",
-            "docId": "kibKbnCoreUserProfileCommonPluginApi",
-            "section": "def-common.UserProfile",
-            "text": "UserProfile"
-          },
+          "UserProfile",
           "<D>"
         ],
-        "path": "packages/core/user-profile/core-user-profile-common/src/user_profile.ts",
+        "path": "src/core/packages/user-profile/common/src/user_profile.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1670,7 +1634,7 @@
             "description": [
               "\nUnique ID for of the user profile."
             ],
-            "path": "packages/core/user-profile/core-user-profile-common/src/user_profile.ts",
+            "path": "src/core/packages/user-profile/common/src/user_profile.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1683,7 +1647,7 @@
             "description": [
               "\nIndicates whether user profile is enabled or not."
             ],
-            "path": "packages/core/user-profile/core-user-profile-common/src/user_profile.ts",
+            "path": "src/core/packages/user-profile/common/src/user_profile.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1697,15 +1661,9 @@
               "\nInformation about the user that owns profile."
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/core-user-profile-common",
-                "scope": "common",
-                "docId": "kibKbnCoreUserProfileCommonPluginApi",
-                "section": "def-common.UserProfileUserInfo",
-                "text": "UserProfileUserInfo"
-              }
+              "UserProfileUserInfo"
             ],
-            "path": "packages/core/user-profile/core-user-profile-common/src/user_profile.ts",
+            "path": "src/core/packages/user-profile/common/src/user_profile.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1721,7 +1679,7 @@
             "signature": [
               "{ [P in keyof D]?: D[P] | undefined; }"
             ],
-            "path": "packages/core/user-profile/core-user-profile-common/src/user_profile.ts",
+            "path": "src/core/packages/user-profile/common/src/user_profile.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1737,7 +1695,7 @@
         "description": [
           "\nBasic user information returned in user profile."
         ],
-        "path": "packages/core/user-profile/core-user-profile-common/src/user_profile.ts",
+        "path": "src/core/packages/user-profile/common/src/user_profile.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1750,7 +1708,7 @@
             "description": [
               "\nUsername of the user."
             ],
-            "path": "packages/core/user-profile/core-user-profile-common/src/user_profile.ts",
+            "path": "src/core/packages/user-profile/common/src/user_profile.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1766,7 +1724,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/core/user-profile/core-user-profile-common/src/user_profile.ts",
+            "path": "src/core/packages/user-profile/common/src/user_profile.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1782,7 +1740,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/core/user-profile/core-user-profile-common/src/user_profile.ts",
+            "path": "src/core/packages/user-profile/common/src/user_profile.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1799,23 +1757,11 @@
           "\nExtended user information returned in user profile (both basic and security related properties)."
         ],
         "signature": [
-          {
-            "pluginId": "@kbn/core-user-profile-common",
-            "scope": "common",
-            "docId": "kibKbnCoreUserProfileCommonPluginApi",
-            "section": "def-common.UserProfileUserInfoWithSecurity",
-            "text": "UserProfileUserInfoWithSecurity"
-          },
+          "UserProfileUserInfoWithSecurity",
           " extends ",
-          {
-            "pluginId": "@kbn/core-user-profile-common",
-            "scope": "common",
-            "docId": "kibKbnCoreUserProfileCommonPluginApi",
-            "section": "def-common.UserProfileUserInfo",
-            "text": "UserProfileUserInfo"
-          }
+          "UserProfileUserInfo"
         ],
-        "path": "packages/core/user-profile/core-user-profile-common/src/user_profile.ts",
+        "path": "src/core/packages/user-profile/common/src/user_profile.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1831,7 +1777,7 @@
             "signature": [
               "readonly string[]"
             ],
-            "path": "packages/core/user-profile/core-user-profile-common/src/user_profile.ts",
+            "path": "src/core/packages/user-profile/common/src/user_profile.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1844,7 +1790,7 @@
             "description": [
               "\nName of the Elasticsearch security realm that was used to authenticate user."
             ],
-            "path": "packages/core/user-profile/core-user-profile-common/src/user_profile.ts",
+            "path": "src/core/packages/user-profile/common/src/user_profile.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1860,7 +1806,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/core/user-profile/core-user-profile-common/src/user_profile.ts",
+            "path": "src/core/packages/user-profile/common/src/user_profile.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1877,24 +1823,12 @@
           "\nDescribes all properties stored in user profile (both basic and security related properties)."
         ],
         "signature": [
-          {
-            "pluginId": "@kbn/core-user-profile-common",
-            "scope": "common",
-            "docId": "kibKbnCoreUserProfileCommonPluginApi",
-            "section": "def-common.UserProfileWithSecurity",
-            "text": "UserProfileWithSecurity"
-          },
+          "UserProfileWithSecurity",
           "<D, L> extends ",
-          {
-            "pluginId": "@kbn/core-user-profile-common",
-            "scope": "common",
-            "docId": "kibKbnCoreUserProfileCommonPluginApi",
-            "section": "def-common.UserProfile",
-            "text": "UserProfile"
-          },
+          "UserProfile",
           "<D>"
         ],
-        "path": "packages/core/user-profile/core-user-profile-common/src/user_profile.ts",
+        "path": "src/core/packages/user-profile/common/src/user_profile.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1908,15 +1842,9 @@
               "\nInformation about the user that owns profile."
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/core-user-profile-common",
-                "scope": "common",
-                "docId": "kibKbnCoreUserProfileCommonPluginApi",
-                "section": "def-common.UserProfileUserInfoWithSecurity",
-                "text": "UserProfileUserInfoWithSecurity"
-              }
+              "UserProfileUserInfoWithSecurity"
             ],
-            "path": "packages/core/user-profile/core-user-profile-common/src/user_profile.ts",
+            "path": "src/core/packages/user-profile/common/src/user_profile.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1932,7 +1860,7 @@
             "signature": [
               "L"
             ],
-            "path": "packages/core/user-profile/core-user-profile-common/src/user_profile.ts",
+            "path": "src/core/packages/user-profile/common/src/user_profile.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1948,7 +1876,7 @@
         "description": [
           "\nAn Elasticsearch realm that was used to resolve and authenticate the user."
         ],
-        "path": "packages/core/security/core-security-common/src/authentication/authenticated_user.ts",
+        "path": "src/core/packages/security/common/src/authentication/authenticated_user.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1961,7 +1889,7 @@
             "description": [
               "\nArbitrary name of the security realm."
             ],
-            "path": "packages/core/security/core-security-common/src/authentication/authenticated_user.ts",
+            "path": "src/core/packages/security/common/src/authentication/authenticated_user.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1974,7 +1902,7 @@
             "description": [
               "\nType of the security realm (file, native, saml etc.)."
             ],
-            "path": "packages/core/security/core-security-common/src/authentication/authenticated_user.ts",
+            "path": "src/core/packages/security/common/src/authentication/authenticated_user.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2111,7 +2039,7 @@
         "signature": [
           "{ [x: string]: unknown; }"
         ],
-        "path": "packages/core/user-profile/core-user-profile-common/src/user_profile.ts",
+        "path": "src/core/packages/user-profile/common/src/user_profile.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2128,7 +2056,7 @@
         "signature": [
           "{ [x: string]: string; }"
         ],
-        "path": "packages/core/user-profile/core-user-profile-common/src/user_profile.ts",
+        "path": "src/core/packages/user-profile/common/src/user_profile.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

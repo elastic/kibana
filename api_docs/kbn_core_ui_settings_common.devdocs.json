@@ -242,13 +242,7 @@
             "label": "request",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "server",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-server.KibanaRequest",
-                "text": "KibanaRequest"
-              },
+              "KibanaRequest",
               "<unknown, unknown, unknown, any> | undefined"
             ],
             "path": "packages/core/ui-settings/core-ui-settings-common/src/ui_settings.ts",
@@ -566,7 +560,7 @@
             "tags": [],
             "label": "schema",
             "description": [
-              "\nValue validation schema.\nUsed to validate value on write and read.\n\nThis schema is also used for validating the user input in all settings fields {@link FieldRow} across Kibana UI.\nUse schema options to specify limits on the value. For example:\n`schema.number({ min: 0, max: 100 })`\n\nMore information about schema in https://github.com/elastic/kibana/blob/main/packages/kbn-config-schema/README.md"
+              "\nValue validation schema.\nUsed to validate value on write and read.\n\nThis schema is also used for validating the user input in all settings fields {@link FieldRow} across Kibana UI.\nUse schema options to specify limits on the value. For example:\n`schema.number({ min: 0, max: 100 })`\n\nMore information about schema in https://github.com/elastic/kibana/blob/main/src/platform/packages/shared/kbn-config-schema/README.md"
             ],
             "signature": [
               {

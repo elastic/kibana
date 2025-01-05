@@ -1554,13 +1554,7 @@
             "text": "FieldStatsServices"
           },
           ", \"uiSettings\"> & { core: ",
-          {
-            "pluginId": "@kbn/core-lifecycle-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-            "section": "def-public.CoreStart",
-            "text": "CoreStart"
-          },
+          "CoreStart",
           "; } & { uiActions?: ",
           {
             "pluginId": "uiActions",
@@ -2190,13 +2184,7 @@
             "description": [],
             "signature": [
               "{ core: Pick<",
-              {
-                "pluginId": "@kbn/core-lifecycle-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-                "section": "def-public.CoreStart",
-                "text": "CoreStart"
-              },
+              "CoreStart",
               ", \"analytics\" | \"uiSettings\">; data: ",
               {
                 "pluginId": "data",
@@ -2619,13 +2607,7 @@
             "description": [],
             "signature": [
               "{ core: Pick<",
-              {
-                "pluginId": "@kbn/core-lifecycle-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-                "section": "def-public.CoreStart",
-                "text": "CoreStart"
-              },
+              "CoreStart",
               ", \"docLinks\">; }"
             ],
             "path": "src/platform/packages/shared/kbn-unified-field-list/src/hooks/use_field_filters.ts",
@@ -3089,13 +3071,7 @@
             "label": "docLinks",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-doc-links-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreDocLinksBrowserPluginApi",
-                "section": "def-public.DocLinksStart",
-                "text": "DocLinksStart"
-              }
+              "DocLinksStart"
             ],
             "path": "src/platform/packages/shared/kbn-unified-field-list/src/components/field_list_filters/field_list_filters.tsx",
             "deprecated": false,
@@ -5083,13 +5059,7 @@
                 "text": "DataViewsServicePublic"
               },
               "; core: Pick<",
-              {
-                "pluginId": "@kbn/core-lifecycle-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-                "section": "def-public.CoreStart",
-                "text": "CoreStart"
-              },
+              "CoreStart",
               ", \"docLinks\">; }"
             ],
             "path": "src/platform/packages/shared/kbn-unified-field-list/src/hooks/use_grouped_fields.ts",
@@ -6182,13 +6152,7 @@
             "text": "FieldStatsServices"
           },
           ", \"uiSettings\"> & { core: ",
-          {
-            "pluginId": "@kbn/core-lifecycle-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-            "section": "def-public.CoreStart",
-            "text": "CoreStart"
-          },
+          "CoreStart",
           "; } & { uiActions?: ",
           {
             "pluginId": "uiActions",
