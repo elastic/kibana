@@ -15,7 +15,7 @@ export interface AuditLogger {
    * current user, space and correlation id.
    *
    * Guidelines around what events should be logged and how they should be
-   * structured can be found in: `/x-pack/plugins/security/README.md`
+   * structured can be found in: `/x-pack/platform/plugins/shared/security/README.md`
    *
    * @example
    * ```typescript

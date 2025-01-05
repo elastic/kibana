@@ -51,7 +51,7 @@ const getPipeline = (filename: string, removeSteps = true) => {
 
     pipeline.push(getPipeline('.buildkite/pipelines/pull_request/base.yml', false));
 
-    if (await doAnyChangesMatch([/^packages\/kbn-handlebars/])) {
+    if (await doAnyChangesMatch([/^src\/platform\/packages\/private\/kbn-handlebars/])) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/kbn_handlebars.yml'));
     }
 
@@ -236,7 +236,7 @@ const getPipeline = (filename: string, removeSteps = true) => {
     if (
       (await doAnyChangesMatch([
         /^packages\/kbn-securitysolution-.*/,
-        /^x-pack\/solutions\/security\/plugins\/security_solution/,
+        /^x-pack\/solutions\/security\/platform\/plugins\/shared\/security_solution/,
         /^x-pack\/test\/defend_workflows_cypress/,
         /^x-pack\/test\/security_solution_cypress/,
         /^fleet_packages\.json/,
@@ -256,9 +256,9 @@ const getPipeline = (filename: string, removeSteps = true) => {
         /^x-pack\/platform\/plugins\/shared\/data_views\/common/,
         /^x-pack\/solutions\/security\/plugins\/lists/,
         /^x-pack\/platform\/plugins\/shared\/rule_registry\/common/,
-        /^x-pack\/solutions\/security\/plugins\/security_solution/,
-        /^x-pack\/solutions\/security\/plugins\/security_solution_ess/,
-        /^x-pack\/solutions\/security\/plugins\/security_solution_serverless/,
+        /^x-pack\/solutions\/security\/platform\/plugins\/shared\/security_solution/,
+        /^x-pack\/solutions\/security\/platform\/plugins\/shared\/security_solution_ess/,
+        /^x-pack\/solutions\/security\/platform\/plugins\/shared\/security_solution_serverless/,
         /^x-pack\/platform\/plugins\/shared\/task_manager/,
         /^x-pack\/solutions\/security\/plugins\/timelines/,
         /^x-pack\/platform\/plugins\/shared\/triggers_actions_ui\/public\/application\/sections\/action_connector_form/,
@@ -306,7 +306,7 @@ const getPipeline = (filename: string, removeSteps = true) => {
         /^src\/platform\/packages\/shared\/kbn-resizable-layout/,
         /^src\/platform\/packages\/shared\/kbn-rison/,
         /^src\/platform\/packages\/shared\/kbn-rule-data-utils/,
-        /^packages\/kbn-safer-lodash-set/,
+        /^src\/platform\/packages\/shared\/kbn-safer-lodash-set/,
         /^src\/platform\/packages\/shared\/kbn-search-types/,
         /^packages\/kbn-securitysolution-.*/,
         /^src\/platform\/packages\/shared\/kbn-securitysolution-ecs/,
@@ -341,9 +341,9 @@ const getPipeline = (filename: string, removeSteps = true) => {
         /^x-pack\/solutions\/security\/plugins\/elastic_assistant/,
         /^x-pack\/solutions\/security\/plugins\/lists/,
         /^x-pack\/platform\/plugins\/shared\/rule_registry\/common/,
-        /^x-pack\/solutions\/security\/plugins\/security_solution/,
-        /^x-pack\/solutions\/security\/plugins\/security_solution_ess/,
-        /^x-pack\/solutions\/security\/plugins\/security_solution_serverless/,
+        /^x-pack\/solutions\/security\/platform\/plugins\/shared\/security_solution/,
+        /^x-pack\/solutions\/security\/platform\/plugins\/shared\/security_solution_ess/,
+        /^x-pack\/solutions\/security\/platform\/plugins\/shared\/security_solution_serverless/,
         /^x-pack\/platform\/plugins\/shared\/task_manager/,
         /^x-pack\/solutions\/security\/plugins\/threat_intelligence/,
         /^x-pack\/solutions\/security\/plugins\/timelines/,
@@ -363,7 +363,7 @@ const getPipeline = (filename: string, removeSteps = true) => {
       ((await doAnyChangesMatch([
         /^x-pack\/platform\/plugins\/shared\/osquery/,
         /^x-pack\/test\/osquery_cypress/,
-        /^x-pack\/solutions\/security\/plugins\/security_solution/,
+        /^x-pack\/solutions\/security\/platform\/plugins\/shared\/security_solution/,
       ])) ||
         GITHUB_PR_LABELS.includes('ci:all-cypress-suites')) &&
       !GITHUB_PR_LABELS.includes('ci:skip-cypress-osquery')
@@ -377,7 +377,7 @@ const getPipeline = (filename: string, removeSteps = true) => {
       (await doAnyChangesMatch([
         /^x-pack\/packages\/kbn-cloud-security-posture/,
         /^x-pack\/solutions\/security\/platform\/plugins\/shared\/cloud_security_posture/,
-        /^x-pack\/solutions\/security\/plugins\/security_solution/,
+        /^x-pack\/solutions\/security\/platform\/plugins\/shared\/security_solution/,
         /^x-pack\/test\/security_solution_cypress/,
       ])) ||
       GITHUB_PR_LABELS.includes('ci:all-cypress-suites')

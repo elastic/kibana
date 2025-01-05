@@ -84,7 +84,7 @@ const ELV2_LICENSE_HEADER = `
 const SAFER_LODASH_SET_HEADER = `
 /*
  * Elasticsearch B.V licenses this file to you under the MIT License.
- * See \`packages/kbn-safer-lodash-set/LICENSE\` for more information.
+ * See \`src/platform/packages/shared/kbn-safer-lodash-set/LICENSE\` for more information.
  */
 `;
 
@@ -93,7 +93,7 @@ const SAFER_LODASH_SET_LODASH_HEADER = `
  * This file is forked from the lodash project (https://lodash.com/),
  * and may include modifications made by Elasticsearch B.V.
  * Elasticsearch B.V. licenses this file to you under the MIT License.
- * See \`packages/kbn-safer-lodash-set/LICENSE\` for more information.
+ * See \`src/platform/packages/shared/kbn-safer-lodash-set/LICENSE\` for more information.
  */
 `;
 
@@ -102,14 +102,14 @@ const SAFER_LODASH_SET_DEFINITELYTYPED_HEADER = `
  * This file is forked from the DefinitelyTyped project (https://github.com/DefinitelyTyped/DefinitelyTyped),
  * and may include modifications made by Elasticsearch B.V.
  * Elasticsearch B.V. licenses this file to you under the MIT License.
- * See \`packages/kbn-safer-lodash-set/LICENSE\` for more information.
+ * See \`src/platform/packages/shared/kbn-safer-lodash-set/LICENSE\` for more information.
  */
 `;
 
 const KBN_HANDLEBARS_HEADER = `
 /*
  * Elasticsearch B.V licenses this file to you under the MIT License.
- * See \`packages/kbn-handlebars/LICENSE\` for more information.
+ * See \`src/platform/packages/private/kbn-handlebars/LICENSE\` for more information.
  */
 `;
 
@@ -118,7 +118,7 @@ const KBN_HANDLEBARS_HANDLEBARS_HEADER = `
   * This file is forked from the handlebars project (https://github.com/handlebars-lang/handlebars.js),
   * and may include modifications made by Elasticsearch B.V.
   * Elasticsearch B.V. licenses this file to you under the MIT License.
-  * See \`packages/kbn-handlebars/LICENSE\` for more information.
+  * See \`src/platform/packages/private/kbn-handlebars/LICENSE\` for more information.
   */
 `;
 
@@ -441,7 +441,7 @@ module.exports = {
      * safer-lodash-set package requires special license headers
      */
     {
-      files: ['packages/kbn-safer-lodash-set/**/*.{js,mjs,ts,tsx}'],
+      files: ['src/platform/packages/shared/kbn-safer-lodash-set/**/*.{js,mjs,ts,tsx}'],
       rules: {
         '@kbn/eslint/require-license-header': [
           'error',
@@ -471,7 +471,7 @@ module.exports = {
     },
 
     {
-      files: ['packages/kbn-safer-lodash-set/test/*.{js,mjs,ts,tsx}'],
+      files: ['src/platform/packages/shared/kbn-safer-lodash-set/test/*.{js,mjs,ts,tsx}'],
       rules: {
         '@kbn/eslint/require-license-header': [
           'error',
@@ -500,7 +500,7 @@ module.exports = {
       },
     },
     {
-      files: ['packages/kbn-safer-lodash-set/**/*.d.ts'],
+      files: ['src/platform/packages/shared/kbn-safer-lodash-set/**/*.d.ts'],
       rules: {
         '@kbn/eslint/require-license-header': [
           'error',
@@ -533,7 +533,7 @@ module.exports = {
      * @kbn/handlebars package requires special license headers
      */
     {
-      files: ['packages/kbn-handlebars/**/*.{js,mjs,ts,tsx}'],
+      files: ['src/platform/packages/private/kbn-handlebars/**/*.{js,mjs,ts,tsx}'],
       rules: {
         '@kbn/eslint/require-license-header': [
           'error',
@@ -562,7 +562,7 @@ module.exports = {
       },
     },
     {
-      files: ['packages/kbn-handlebars/src/spec/**/*.{js,mjs,ts,tsx}'],
+      files: ['src/platform/packages/private/kbn-handlebars/src/spec/**/*.{js,mjs,ts,tsx}'],
       rules: {
         '@kbn/eslint/require-license-header': [
           'error',
@@ -778,7 +778,7 @@ module.exports = {
      * Harden specific rules
      */
     {
-      files: ['test/harden/*.js', 'packages/kbn-safer-lodash-set/test/*.js'],
+      files: ['test/harden/*.js', 'src/platform/packages/shared/kbn-safer-lodash-set/test/*.js'],
       rules: {
         'mocha/handle-done-callback': 'off',
       },
@@ -1854,24 +1854,24 @@ module.exports = {
      */
     {
       files: [
-        'src/plugins/interactive_setup/**/*.{js,mjs,ts,tsx}',
+        'src/platform/plugins/private/interactive_setup/**/*.{js,mjs,ts,tsx}',
         'test/interactive_setup_api_integration/**/*.{js,mjs,ts,tsx}',
         'test/interactive_setup_functional/**/*.{js,mjs,ts,tsx}',
 
         'packages/kbn-mock-idp-plugin/**/*.{js,mjs,ts,tsx}',
         'packages/kbn-mock-idp-utils/**/*.{js,mjs,ts,tsx}',
-        'packages/kbn-security-hardening/**/*.{js,mjs,ts,tsx}',
-        'packages/kbn-user-profile-components/**/*.{js,mjs,ts,tsx}',
+        'src/platform/packages/shared/kbn-security-hardening/**/*.{js,mjs,ts,tsx}',
+        'src/platform/packages/shared/kbn-user-profile-components/**/*.{js,mjs,ts,tsx}',
 
-        'x-pack/plugins/encrypted_saved_objects/**/*.{js,mjs,ts,tsx}',
+        'x-pack/platform/plugins/shared/encrypted_saved_objects/**/*.{js,mjs,ts,tsx}',
         'x-pack/test/encrypted_saved_objects_api_integration/**/*.{js,mjs,ts,tsx}',
 
-        'x-pack/plugins/security/**/*.{js,mjs,ts,tsx}',
+        'x-pack/platform/plugins/shared/security/**/*.{js,mjs,ts,tsx}',
         'x-pack/packages/security/**/*.{js,mjs,ts,tsx}',
         'x-pack/test/security_api_integration/**/*.{js,mjs,ts,tsx}',
         'x-pack/test/security_functional/**/*.{js,mjs,ts,tsx}',
 
-        'x-pack/plugins/spaces/**/*.{js,mjs,ts,tsx}',
+        'x-pack/platform/plugins/shared/spaces/**/*.{js,mjs,ts,tsx}',
         'x-pack/test/spaces_api_integration/**/*.{js,mjs,ts,tsx}',
       ],
       rules: {
