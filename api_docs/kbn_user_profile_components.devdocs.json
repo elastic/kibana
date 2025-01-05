@@ -857,37 +857,13 @@
             ],
             "signature": [
               "{ notifications: ",
-              {
-                "pluginId": "@kbn/core-notifications-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreNotificationsBrowserPluginApi",
-                "section": "def-public.NotificationsStart",
-                "text": "NotificationsStart"
-              },
+              "NotificationsStart",
               "; theme: ",
-              {
-                "pluginId": "@kbn/core-theme-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreThemeBrowserPluginApi",
-                "section": "def-public.ThemeServiceSetup",
-                "text": "ThemeServiceSetup"
-              },
+              "ThemeServiceSetup",
               "; userProfile: ",
-              {
-                "pluginId": "@kbn/core-user-profile-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreUserProfileBrowserPluginApi",
-                "section": "def-public.UserProfileService",
-                "text": "UserProfileService"
-              },
+              "UserProfileService",
               "; i18n: ",
-              {
-                "pluginId": "@kbn/core-i18n-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreI18nBrowserPluginApi",
-                "section": "def-public.I18nStart",
-                "text": "I18nStart"
-              },
+              "I18nStart",
               "; }"
             ],
             "path": "packages/kbn-user-profile-components/src/services.tsx",
@@ -929,13 +905,7 @@
                 "text": "ToMountPointParams"
               },
               ") => ",
-              {
-                "pluginId": "@kbn/core-mount-utils-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreMountUtilsBrowserPluginApi",
-                "section": "def-public.MountPoint",
-                "text": "MountPoint"
-              },
+              "MountPoint",
               "<HTMLElement>"
             ],
             "path": "packages/kbn-user-profile-components/src/services.tsx",
@@ -966,13 +936,7 @@
                 "description": [],
                 "signature": [
                   "{ i18n: ",
-                  {
-                    "pluginId": "@kbn/core-i18n-browser",
-                    "scope": "public",
-                    "docId": "kibKbnCoreI18nBrowserPluginApi",
-                    "section": "def-public.I18nStart",
-                    "text": "I18nStart"
-                  },
+                  "I18nStart",
                   "; analytics?: Pick<",
                   "AnalyticsServiceStart",
                   ", \"reportEvent\"> | undefined; theme: ",
@@ -984,13 +948,7 @@
                     "text": "ThemeServiceStart"
                   },
                   "; userProfile?: Pick<",
-                  {
-                    "pluginId": "@kbn/core-user-profile-browser",
-                    "scope": "public",
-                    "docId": "kibKbnCoreUserProfileBrowserPluginApi",
-                    "section": "def-public.UserProfileService",
-                    "text": "UserProfileService"
-                  },
+                  "UserProfileService",
                   ", \"getUserProfile$\"> | undefined; }"
                 ],
                 "path": "packages/react/kibana_mount/to_mount_point.tsx",
