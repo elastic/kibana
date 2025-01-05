@@ -230,7 +230,7 @@ Images can be added either by URL or by uploading the image file via file servic
 in Kibana, e.g. visualizations. It has the form of a flyout panel.
 
 
-|{kib-repo}blob/{branch}/src/plugins/interactive_setup/README.md[interactiveSetup]
+|{kib-repo}blob/{branch}/src/platform/plugins/private/interactive_setup/README.md[interactiveSetup]
 |This plugin provides UI and APIs for interactive setup mode a.k.a "enrollment flow".
 
 
@@ -563,7 +563,7 @@ Plugin server-side only. Plugin has three main functions:
 adds dynamic actions to every embeddables state, in order to support drilldowns.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/encrypted_saved_objects/README.md[encryptedSavedObjects]
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/shared/encrypted_saved_objects/README.md[encryptedSavedObjects]
 |The purpose of this plugin is to provide a way to encrypt/decrypt attributes on the custom Saved Objects that works with
 security and spaces filtering.
 
@@ -856,7 +856,7 @@ detailed information on how Elasticsearch executed the search request. People us
 to understand why a search request might be slow.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/security/README.md[security]
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/shared/security/README.md[security]
 |See Configuring security in
 Kibana.
 
@@ -899,7 +899,7 @@ This plugin is only enabled when the application is built for serverless project
 |or
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/spaces/README.md[spaces]
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/shared/spaces/README.md[spaces]
 |See Configuring Kibana Spaces.
 
 

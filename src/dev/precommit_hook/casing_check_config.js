@@ -62,11 +62,11 @@ export const IGNORE_FILE_GLOBS = [
   '**/preview-head.html',
 
   // filename must match upstream filenames from lodash
-  'packages/kbn-safer-lodash-set/**/*',
+  'src/platform/packages/shared/kbn-safer-lodash-set/**/*',
 
   // filename must match upstream filenames from handlebars
-  'packages/kbn-handlebars/src/upstream/**/*',
-  'packages/kbn-handlebars/.patches/**/*',
+  'src/platform/packages/private/kbn-handlebars/src/upstream/**/*',
+  'src/platform/packages/private/kbn-handlebars/.patches/**/*',
 
   'x-pack/platform/plugins/shared/maps/server/fonts/**/*',
 
