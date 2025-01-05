@@ -16,7 +16,6 @@ import { SupertestWithRoleScope } from '../../../../services/role_scoped_superte
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
-  // const supertest = getService('supertest');
   const log = getService('log');
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
 
