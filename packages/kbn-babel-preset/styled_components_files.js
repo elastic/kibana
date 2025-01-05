@@ -22,6 +22,7 @@ module.exports = {
   USES_STYLED_COMPONENTS: [
     /packages[\/\\]kbn-ui-shared-deps-npm[\/\\]/,
     /packages[\/\\]kbn-ui-shared-deps-src[\/\\]/,
+
     /x-pack[\/\\]platform[\/\\]packages[\/\\]shared[\/\\]kbn-elastic-assistant[\/\\]impl[\/\\]assistant[\/\\]assistant_overlay[\/\\]index.tsx/,
     /x-pack[\/\\]platform[\/\\]packages[\/\\]shared[\/\\]kbn-elastic-assistant[\/\\]impl[\/\\]assistant[\/\\]settings[\/\\]assistant_settings.tsx/,
     /x-pack[\/\\]platform[\/\\]packages[\/\\]shared[\/\\]kbn-elastic-assistant[\/\\]impl[\/\\]data_anonymization_editor[\/\\]context_editor[\/\\]get_columns[\/\\]index.tsx/,
