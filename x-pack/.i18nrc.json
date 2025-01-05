@@ -133,7 +133,11 @@
     "xpack.searchInferenceEndpoints": "solutions/search/plugins/search_inference_endpoints",
     "xpack.searchAssistant": "solutions/search/plugins/search_assistant",
     "xpack.searchProfiler": "platform/plugins/shared/searchprofiler",
-    "xpack.security": ["plugins/security", "packages/security"],
+    "xpack.security": [
+      "platform/plugins/shared/security",
+      "platform/packages/shared/security",
+      "platform/packages/private/security"
+    ],
     "xpack.server": "legacy/server",
     "xpack.serverless": "platform/plugins/shared/serverless",
     "xpack.serverlessSearch": "solutions/search/plugins/serverless_search",
@@ -145,7 +149,7 @@
     "xpack.streams": ["solutions/observability/plugins/streams_app"],
     "xpack.slo": "solutions/observability/plugins/slo",
     "xpack.snapshotRestore": "platform/plugins/private/snapshot_restore",
-    "xpack.spaces": "plugins/spaces",
+    "xpack.spaces": "platform/plugins/shared/spaces",
     "xpack.savedObjectsTagging": [
       "platform/plugins/private/saved_objects_tagging"
     ],

@@ -11,7 +11,7 @@
  * IMPORTANT:
  *
  * The types in this file are duplicated at
- * `packages/kbn-user-profile-components/src/user_profile.ts`
+ * `src/platform/packages/shared/kbn-user-profile-components/src/user_profile.ts`
  *
  * When making changes please ensure to keep both files in sync.
  */
