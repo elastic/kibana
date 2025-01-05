@@ -17,6 +17,8 @@ import { ThemeProvider } from 'styled-components';
 import type { Capabilities } from '@kbn/core/public';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import { coreMock } from '@kbn/core/public/mocks';
 import type { Action } from '@kbn/ui-actions-plugin/public';
 import { CellActionsProvider } from '@kbn/cell-actions';
 import { TestProvider as ExpandableFlyoutTestProvider } from '@kbn/expandable-flyout/src/test/provider';
@@ -74,31 +76,33 @@ export const TestProvidersComponent = ({
   });
 
   return (
-    <I18nProvider>
-      <MockKibanaContextProvider startServices={startServices}>
-        <UpsellingProviderMock>
-          <ReduxStoreProvider store={store}>
-            <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
-              <QueryClientProvider client={queryClient}>
-                <MockDiscoverInTimelineContext>
-                  <MockAssistantProvider>
-                    <ExpandableFlyoutTestProvider>
-                      <ConsoleManager>
-                        <CellActionsProvider
-                          getTriggerCompatibleActions={() => Promise.resolve(cellActions)}
-                        >
-                          <DragDropContext onDragEnd={onDragEnd}>{children}</DragDropContext>
-                        </CellActionsProvider>
-                      </ConsoleManager>
-                    </ExpandableFlyoutTestProvider>
-                  </MockAssistantProvider>
-                </MockDiscoverInTimelineContext>
-              </QueryClientProvider>
-            </ThemeProvider>
-          </ReduxStoreProvider>
-        </UpsellingProviderMock>
-      </MockKibanaContextProvider>
-    </I18nProvider>
+    <MockKibanaContextProvider startServices={startServices}>
+      <KibanaRenderContextProvider {...coreMock.createStart()}>
+        <I18nProvider>
+          <UpsellingProviderMock>
+            <ReduxStoreProvider store={store}>
+              <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
+                <QueryClientProvider client={queryClient}>
+                  <MockDiscoverInTimelineContext>
+                    <MockAssistantProvider>
+                      <ExpandableFlyoutTestProvider>
+                        <ConsoleManager>
+                          <CellActionsProvider
+                            getTriggerCompatibleActions={() => Promise.resolve(cellActions)}
+                          >
+                            <DragDropContext onDragEnd={onDragEnd}>{children}</DragDropContext>
+                          </CellActionsProvider>
+                        </ConsoleManager>
+                      </ExpandableFlyoutTestProvider>
+                    </MockAssistantProvider>
+                  </MockDiscoverInTimelineContext>
+                </QueryClientProvider>
+              </ThemeProvider>
+            </ReduxStoreProvider>
+          </UpsellingProviderMock>
+        </I18nProvider>
+      </KibanaRenderContextProvider>
+    </MockKibanaContextProvider>
   );
 };
 
