@@ -6,7 +6,7 @@
  */
 
 import React, { memo } from 'react';
-import { css } from '@emotion/css';
+import { css } from '@emotion/react';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { useGetScopedSourcererDataView } from '../../../../sourcerer/components/use_get_sourcerer_data_view';
 import { SourcererScopeName } from '../../../../sourcerer/store/model';
