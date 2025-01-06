@@ -48,7 +48,7 @@ const getPipeline = (filename: string, removeSteps = true) => {
     const skippable = await areChangesSkippable(SKIPPABLE_PR_MATCHERS, REQUIRED_PATHS);
 
     if (skippable) {
-      emitPipeline(emptyStep);
+      emitPipeline([emptyStep]);
       return;
     }
 
@@ -58,7 +58,7 @@ const getPipeline = (filename: string, removeSteps = true) => {
     if (onlyRunQuickChecks) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/renovate.yml', false));
       console.warn('Isolated changes to renovate.json. Skipping main PR pipeline.');
-      emitPipeline([...new Set(pipeline)].join('\n'));
+      emitPipeline(pipeline);
       return;
     }
 
@@ -411,8 +411,7 @@ const getPipeline = (filename: string, removeSteps = true) => {
 
     pipeline.push(getPipeline('.buildkite/pipelines/pull_request/post_build.yml'));
 
-    // remove duplicated steps
-    emitPipeline([...new Set(pipeline)].join('\n'));
+    emitPipeline(pipeline);
   } catch (ex) {
     console.error('Error while generating the pipeline steps: ' + ex.message, ex);
     process.exit(1);
