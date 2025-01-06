@@ -16,6 +16,12 @@ export const registerGetRoute = ({
   router.get(
     {
       path: addBasePath('/jobs'),
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Relies on es client for authorization',
+        },
+      },
       validate: false,
     },
     license.guardApiRoute(async (context, request, response) => {
