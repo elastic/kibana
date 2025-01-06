@@ -19,11 +19,11 @@ import {
 import { css } from '@emotion/react';
 import { VALIDATION_WARNING_CODES } from '../../../../../../detection_engine/rule_creation/constants/validation_warning_codes';
 import { useFormWithWarnings } from '../../../../../../common/hooks/use_form_with_warnings';
-import { EsqlQueryEdit } from '../../../../../../detection_engine/rule_creation/components/esql_query_edit';
 import { Field, Form, getUseField } from '../../../../../../shared_imports';
 import type { RuleTranslationSchema } from './types';
 import { schema } from './schema';
 import * as i18n from './translations';
+import { EsqlEditor } from './esql_editor';
 
 const CommonUseField = getUseField({ component: Field });
 
@@ -146,14 +146,7 @@ export const MigrationRuleQuery: React.FC<MigrationRuleQueryProps> = React.memo(
               },
             }}
           />
-          <EuiSpacer size="m" />
-          <EsqlQueryEdit
-            path="queryBar"
-            dataView={{
-              title: '',
-              fields: [],
-            }}
-          />
+          <EsqlEditor path="queryBar" />
         </Form>
       );
     }, [editMode, form, onCancel, onSave]);

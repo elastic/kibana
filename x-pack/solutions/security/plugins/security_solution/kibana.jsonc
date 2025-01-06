@@ -87,7 +87,8 @@
       "usageCollection",
       "lists",
       "ml",
-      "unifiedSearch"
+      "unifiedSearch",
+      "esql"
     ],
     "extraPublicDirs": [
       "common"
