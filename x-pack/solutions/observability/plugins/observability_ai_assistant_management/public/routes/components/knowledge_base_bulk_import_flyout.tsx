@@ -52,8 +52,12 @@ export function KnowledgeBaseBulkImportFlyout({ onClose }: { onClose: () => void
     const elements = text.split('\n').filter(Boolean);
 
     try {
-      const entries: Array<Omit<KnowledgeBaseEntry, '@timestamp' | 'title'> & { title: string }> =
-        elements.map((el) => JSON.parse(el));
+      const entries = elements.map(
+        (el) =>
+          JSON.parse(el) as Omit<KnowledgeBaseEntry, "@timestamp" | "title"> & {
+            title: string;
+          }
+      );
       await mutateAsync({ entries });
     } catch (_) {
       toasts.addError(
