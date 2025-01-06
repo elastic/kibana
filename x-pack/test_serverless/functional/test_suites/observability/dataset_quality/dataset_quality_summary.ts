@@ -48,7 +48,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     ]);
   };
 
-  describe('Dataset quality summary', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/205545
+  describe.skip('Dataset quality summary', () => {
     before(async () => {
       await synthtrace.index(getInitialTestLogs({ to, count: 4 }));
       await PageObjects.svlCommonPage.loginAsViewer();
