@@ -9,17 +9,17 @@ export function registerDeprecationRoutes({ router, log }: RouteDependencies) {
       path: '/internal/enterprise_search/deprecations/delete_crawler_connectors',
       validate: {
         body: schema.object({
-          ids: schema.arrayOf(schema.string())
+          ids: schema.arrayOf(schema.string()),
+          deprecationDetails: schema.object({ domainId: schema.literal('enterpriseSearch')}),
         }),
       },
     },
     elasticsearchErrorHandler(log, async (context, request, response) => {
-      log.info("Made it here, and ids are: "+request.body.ids)
       const {client} = (await context.core).elasticsearch;
       for (const connector_id of request.body.ids) {
-        await deleteConnectorById(client.asInternalUser, connector_id)
+        await deleteConnectorById(client.asCurrentUser, connector_id)
       }
-      return response.ok();
+      return response.ok({ body: { deleted: request.body.ids }});
     })
   );
 }

@@ -124,7 +124,7 @@ export async function getCrawlerDeprecations(ctx: GetDeprecationsContext): Promi
           method: 'POST',
           path: '/internal/enterprise_search/deprecations/delete_crawler_connectors',
           body: {
-            ids: crawlers.map((it) => {it.id})
+            ids: crawlers.map(it=> it.id)
           },
         },
       },
