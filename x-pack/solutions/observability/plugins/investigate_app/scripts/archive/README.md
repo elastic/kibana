@@ -16,7 +16,7 @@ Run the tool using:
 
 This will archive the observability alerts index to use as fixtures within the tests.
 
-Archived data will automatically be saved at the root of the kibana project in the `.rca` folder.
+Archived data will automatically be saved at the root of the kibana project in the `.rca/archives` folder.
 
 ## Creating a test fixture
 
