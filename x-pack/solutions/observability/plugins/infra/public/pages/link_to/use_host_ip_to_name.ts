@@ -7,7 +7,7 @@
 
 import { useState, useEffect } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { IpToHostResponse } from '../../../common/http_api/ip_to_hostname';
+import type { IpToHostResponse } from '../../../common/http_api/ip_to_hostname';
 
 export const useHostIpToName = (ipAddress: string | null, indexPattern: string | null) => {
   const fetch = useKibana().services.http?.fetch;

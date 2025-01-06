@@ -7,7 +7,6 @@
 
 import { createMockStore, mockGlobalState, TestProviders } from '../../../common/mock';
 import { TableId } from '@kbn/securitysolution-data-table';
-import { renderHook } from '@testing-library/react-hooks';
 import { getUseCellActionsHook } from './use_cell_actions';
 import { columns as mockColumns, data as mockData } from './mock/data';
 import type {
@@ -17,7 +16,7 @@ import type {
   EuiDataGridRefProps,
 } from '@elastic/eui';
 import { EuiButtonEmpty } from '@elastic/eui';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor, renderHook } from '@testing-library/react';
 import type { ComponentProps, JSXElementConstructor, PropsWithChildren } from 'react';
 import React from 'react';
 import { makeAction } from '../../../common/components/cell_actions/mocks';
@@ -86,7 +85,7 @@ const TestProviderWithCustomStateAndActions = withCustomPropsAndCellActions({
 
 describe('getUseCellActionsHook', () => {
   it('should render cell actions correctly for gridView view', async () => {
-    const { result, waitForNextUpdate } = renderHook(
+    const { result } = renderHook(
       () =>
         useCellActions({
           columns: mockColumns as unknown as EuiDataGridColumn[],
@@ -101,17 +100,17 @@ describe('getUseCellActionsHook', () => {
       }
     );
 
-    await waitForNextUpdate();
+    await waitFor(() => {
+      const cellAction = result.current.getCellActions('host.name', 0)[0];
 
-    const cellAction = result.current.getCellActions('host.name', 0)[0];
+      renderCellAction(cellAction);
 
-    renderCellAction(cellAction);
-
-    expect(screen.getByTestId('dataGridColumnCellAction-action1')).toBeInTheDocument();
+      expect(screen.getByTestId('dataGridColumnCellAction-action1')).toBeInTheDocument();
+    });
   });
 
   it('should not render cell actions correctly for eventRendered view', async () => {
-    const { result, waitForNextUpdate } = renderHook(
+    const { result } = renderHook(
       () =>
         useCellActions({
           columns: mockColumns as unknown as EuiDataGridColumn[],
@@ -128,8 +127,6 @@ describe('getUseCellActionsHook', () => {
 
     const cellAction = result.current.getCellActions('host.name', 0);
 
-    await waitForNextUpdate();
-
-    expect(cellAction).toHaveLength(0);
+    await waitFor(() => expect(cellAction).toHaveLength(0));
   });
 });
