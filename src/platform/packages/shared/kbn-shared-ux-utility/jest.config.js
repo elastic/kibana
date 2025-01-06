@@ -11,5 +11,7 @@ module.exports = {
   preset: '@kbn/test',
   rootDir: '../../../../..',
   roots: ['<rootDir>/src/platform/packages/shared/kbn-shared-ux-utility'],
-  setupFilesAfterEnv: ['<rootDir>/src/platform/packages/shared/kbn-shared-ux-utility/setup_tests.ts'],
+  setupFilesAfterEnv: [
+    '<rootDir>/src/platform/packages/shared/kbn-shared-ux-utility/setup_tests.ts',
+  ],
 };

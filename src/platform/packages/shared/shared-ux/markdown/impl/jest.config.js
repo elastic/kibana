@@ -11,5 +11,7 @@ module.exports = {
   preset: '@kbn/test',
   rootDir: '../../../../../../..',
   roots: ['<rootDir>/src/platform/packages/shared/shared-ux/markdown/impl'],
-  setupFilesAfterEnv: ['<rootDir>/src/platform/packages/shared/shared-ux/markdown/impl/setup_tests.ts'],
+  setupFilesAfterEnv: [
+    '<rootDir>/src/platform/packages/shared/shared-ux/markdown/impl/setup_tests.ts',
+  ],
 };
