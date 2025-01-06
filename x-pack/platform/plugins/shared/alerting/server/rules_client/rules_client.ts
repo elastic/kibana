@@ -232,5 +232,5 @@ export class RulesClient {
 
   public bulkRemoveTasksWithApiKey = (ids: string[]) => {
     this.context.taskManager.bulkRemove(ids);
-  }
+  };
 }

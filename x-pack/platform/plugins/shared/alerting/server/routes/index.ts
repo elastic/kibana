@@ -10,6 +10,7 @@ import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { ConfigSchema } from '@kbn/unified-search-plugin/server/config';
 import { Observable } from 'rxjs';
+import { schema } from '@kbn/config-schema';
 import { GetAlertIndicesAlias, ILicenseState } from '../lib';
 import { AlertingRequestHandlerContext } from '../types';
 import { createRuleRoute } from './rule/apis/create';
@@ -71,7 +72,6 @@ import { scheduleBackfillRoute } from './backfill/apis/schedule/schedule_backfil
 import { getBackfillRoute } from './backfill/apis/get/get_backfill_route';
 import { findBackfillRoute } from './backfill/apis/find/find_backfill_route';
 import { deleteBackfillRoute } from './backfill/apis/delete/delete_backfill_route';
-import { schema } from '@kbn/config-schema';
 
 export interface RouteOptions {
   router: IRouter<AlertingRequestHandlerContext>;
