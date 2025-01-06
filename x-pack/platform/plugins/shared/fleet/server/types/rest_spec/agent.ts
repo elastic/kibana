@@ -253,7 +253,7 @@ export const PostNewAgentActionResponseSchema = schema.object({
     sent_at: schema.maybe(schema.string()),
     created_at: schema.string(),
     ack_data: schema.maybe(schema.any()),
-    agents: schema.arrayOf(schema.string()),
+    agents: schema.maybe(schema.arrayOf(schema.string())),
     namespaces: schema.maybe(schema.arrayOf(schema.string())),
     expiration: schema.maybe(schema.string()),
     start_time: schema.maybe(schema.string()),
