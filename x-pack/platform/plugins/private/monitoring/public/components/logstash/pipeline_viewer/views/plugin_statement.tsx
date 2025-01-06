@@ -6,31 +6,48 @@
  */
 
 import React from 'react';
-import PropTypes from 'prop-types';
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiBadge } from '@elastic/eui';
+import { css } from '@emotion/react';
+import {
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiBadge,
+  UseEuiTheme,
+  logicalCSS,
+} from '@elastic/eui';
+
+import { i18n } from '@kbn/i18n';
+
 import { formatMetric } from '../../../../lib/format_number';
 import { Metric } from './metric';
-import { i18n } from '@kbn/i18n';
-import './plugin_statement.scss';
+import { Vertex } from './types';
 
-function getInputStatementMetrics({ latestEventsPerSecond }) {
+const pluginStyle = ({ euiTheme }: UseEuiTheme) => css`
+  ${logicalCSS('margin-left', euiTheme.size.xs)}
+`;
+
+const pluginStatementStyle = ({ euiTheme }: UseEuiTheme) => css`
+  ${logicalCSS('padding-left', euiTheme.size.m)}
+`;
+
+function getInputStatementMetrics({ latestEventsPerSecond }: Vertex) {
   return [
     <Metric
       key="eventsEmitted"
-      className="monPipelineViewer__metric--eventsEmitted"
+      type="eventsEmitted"
       value={formatMetric(latestEventsPerSecond, '0.[00]a', 'e/s emitted')}
     />,
   ];
 }
 
-function getProcessorStatementMetrics(processorVertex) {
+function getProcessorStatementMetrics(processorVertex: Vertex) {
   const { latestMillisPerEvent, latestEventsPerSecond, percentOfTotalProcessorTime } =
     processorVertex;
 
   return [
     <Metric
       key="cpuMetric"
-      className="monPipelineViewer__metric--cpuTime"
+      type="cpuTime"
       warning={processorVertex.isTimeConsuming()}
       value={formatMetric(Math.round(percentOfTotalProcessorTime || 0), '0', '%', {
         prependSpace: false,
@@ -38,29 +55,43 @@ function getProcessorStatementMetrics(processorVertex) {
     />,
     <Metric
       key="eventMillis"
-      className="monPipelineViewer__metric--eventMillis"
+      type="eventMillis"
       warning={processorVertex.isSlow()}
       value={formatMetric(latestMillisPerEvent, '0.[00]a', 'ms/e')}
     />,
     <Metric
       key="eventsReceived"
-      className="monPipelineViewer__metric--events"
+      type="events"
       value={formatMetric(latestEventsPerSecond, '0.[00]a', 'e/s received')}
     />,
   ];
 }
 
-function renderPluginStatementMetrics(pluginType, vertex) {
+function renderPluginStatementMetrics(pluginType: string, vertex: Vertex) {
   return pluginType === 'input'
     ? getInputStatementMetrics(vertex)
     : getProcessorStatementMetrics(vertex);
 }
 
+interface Statement {
+  hasExplicitId: boolean;
+  id: string;
+  name: string;
+  pluginType: string;
+  vertex: Vertex;
+}
+
+interface PluginStatementProps {
+  onShowVertexDetails: (vertex: Vertex) => void;
+  statement: Statement;
+}
+
 export function PluginStatement({
   statement: { hasExplicitId, id, name, pluginType, vertex },
   onShowVertexDetails,
-}) {
+}: PluginStatementProps) {
   const statementMetrics = renderPluginStatementMetrics(pluginType, vertex);
+
   const onNameButtonClick = () => {
     onShowVertexDetails(vertex);
   };
@@ -68,7 +99,7 @@ export function PluginStatement({
   return (
     <EuiFlexGroup
       alignItems="center"
-      className="monPipelineViewer__pluginStatement"
+      css={pluginStatementStyle}
       gutterSize="none"
       justifyContent="spaceBetween"
     >
@@ -77,8 +108,8 @@ export function PluginStatement({
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
               aria-label={name}
-              className="monPipelineViewer__plugin"
               color="primary"
+              css={pluginStyle}
               flush="left"
               iconType="dot"
               onClick={onNameButtonClick}
@@ -93,9 +124,7 @@ export function PluginStatement({
                 onClick={onNameButtonClick}
                 onClickAriaLabel={i18n.translate(
                   'xpack.monitoring.logstash.pipelineStatement.viewDetailsAriaLabel',
-                  {
-                    defaultMessage: 'View details',
-                  }
+                  { defaultMessage: 'View details' }
                 )}
               >
                 {id}
@@ -112,18 +141,3 @@ export function PluginStatement({
     </EuiFlexGroup>
   );
 }
-
-PluginStatement.propTypes = {
-  onShowVertexDetails: PropTypes.func.isRequired,
-  statement: PropTypes.shape({
-    hasExplicitId: PropTypes.bool.isRequired,
-    id: PropTypes.string.isRequired,
-    name: PropTypes.string.isRequired,
-    pluginType: PropTypes.string.isRequired,
-    vertex: PropTypes.shape({
-      latestEventsPerSecond: PropTypes.number.isRequired,
-      latestMillisPerEvent: PropTypes.number,
-      percentOfTotalProcessorTime: PropTypes.number,
-    }).isRequired,
-  }).isRequired,
-};
