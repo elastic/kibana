@@ -84,19 +84,24 @@ describe('Root cause analysis', () => {
 
   it('can accurately pinpoint the root cause of cartservice bad entrypoint failure', async () => {
     const rcaChatClient = chatClient as RCAChatClient;
+    const alert = await rcaChatClient.getAlert({ alertId: ALERT_FIXTURE_ID });
     const { from, to } = await rcaChatClient.getTimeRange({
-      alertId: ALERT_FIXTURE_ID,
       fromOffset: 'now-15m',
       toOffset: 'now+15m',
+      alert,
     });
     const investigationId = await rcaChatClient.createInvestigation({
       alertId: ALERT_FIXTURE_ID,
       from,
       to,
     });
-    const response = await rcaChatClient.archiveData();
     investigations.push(investigationId);
-    const events = await rcaChatClient.rootCauseAnalysis({ investigationId });
+    const events = await rcaChatClient.rootCauseAnalysis({
+      investigationId,
+      from: new Date(from).toISOString(),
+      to: new Date(to).toISOString(),
+      alert,
+    });
     const { report, entities, errors } = categorizeEvents(events);
     const prompt = `
     An investigation was performed by the Observability AI Assistant to identify the root cause of an alert for the controller service. Here is the alert:\n\n            {"kibana.alert.reason":"500 Errors is 98.48485, above the threshold of 1. (duration: 1 min, data view: otel_logs_data (Automated by Demo CLI), group: controller,/api/cart)","kibana.alert.evaluation.values":[98.48484848484848],"kibana.alert.evaluation.threshold":[1],"kibana.alert.group":[{"field":"service.name","value":"controller"},{"field":"url.path","value":"/api/cart"}],"tags":["demo","cli-created"],"service.name":"controller","kibana.alert.rule.category":"Custom threshold","kibana.alert.rule.consumer":"logs","kibana.alert.rule.name":"NGINX 500s","kibana.alert.rule.parameters":{"criteria":[{"comparator":">","metrics":[{"name":"A","filter":"http.response.status_code:*","aggType":"count"},{"name":"B","filter":"http.response.status_code>=500","aggType":"count"}],"threshold":[1],"timeSize":1,"timeUnit":"m","equation":"(B/A) * 100","label":"500 Errors"}],"alertOnNoData":false,"alertOnGroupDisappear":false,"searchConfiguration":{"query":{"query":"k8s.namespace.name: \\"ingress-nginx\\" AND url.path: /api/*","language":"kuery"},"index":"otel_logs_data"},"groupBy":["service.name","url.path"]},"kibana.alert.rule.producer":"observability","kibana.alert.rule.revision":0,"kibana.alert.rule.rule_type_id":"observability.rules.custom_threshold","kibana.alert.rule.tags":["demo","cli-created"],"kibana.alert.rule.uuid":"9055220c-8fb1-4f9f-be7c-0a33eb2bafc5","kibana.space_ids":["default"],"kibana.alert.action_group":"recovered","kibana.alert.flapping":false,"kibana.alert.instance.id":"controller,/api/cart","kibana.alert.maintenance_window_ids":[],"kibana.alert.consecutive_matches":0,"kibana.alert.status":"recovered","kibana.alert.uuid":"bac50489-3704-46a6-ba77-bf62bcd975ff","kibana.alert.workflow_status":"open","kibana.alert.duration.us":783515000,"kibana.alert.start":"2024-12-05T03:44:25.019Z","kibana.alert.time_range":{"gte":"2024-12-05T03:44:25.019Z","lte":"2024-12-05T03:57:28.534Z"},"kibana.version":"9.0.0","kibana.alert.previous_action_group":"custom_threshold.fired","kibana.alert.severity_improving":true,"kibana.alert.end":"2024-12-05T03:57:28.534Z"}

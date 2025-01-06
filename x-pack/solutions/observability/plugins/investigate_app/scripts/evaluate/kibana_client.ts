@@ -8,6 +8,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import datemath from '@kbn/datemath';
 import type { AssistantScope } from '@kbn/ai-assistant-common';
+import type { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common';
 import { streamIntoObservable } from '@kbn/observability-ai-assistant-plugin/server';
 import { ToolingLog } from '@kbn/tooling-log';
 import { concatMap, defer, lastValueFrom, switchMap, toArray, tap, OperatorFunction } from 'rxjs';
@@ -16,13 +17,23 @@ import {
   type ChatClient,
 } from '@kbn/observability-ai-assistant-app-plugin/scripts/evaluation/kibana_client';
 import type { RootCauseAnalysisEvent } from '@kbn/observability-ai-server/root_cause_analysis';
+import { getRCAContext } from '../../common/rca/llm_context';
 
 // eslint-disable-next-line spaced-comment
 /// <reference types="@kbn/ambient-ftr-types"/>
 
 export type RCAChatClient = ChatClient & {
-  rootCauseAnalysis: (params: { investigationId: string }) => Promise<RootCauseAnalysisEvent[]>;
-  getTimeRange: (params: { alertId: string }) => Promise<{ from: number; to: number }>;
+  rootCauseAnalysis: (params: {
+    investigationId: string;
+    from: string;
+    to: string;
+    alert: EcsFieldsResponse;
+  }) => Promise<RootCauseAnalysisEvent[]>;
+  getTimeRange: (params: {
+    alert: EcsFieldsResponse;
+    fromOffset: string;
+    toOffset: string;
+  }) => Promise<{ from: number; to: number }>;
   createInvestigation: (params: { alertId: string; from: number; to: number }) => Promise<string>;
   deleteInvestigation: (params: { investigationId: string }) => Promise<void>;
   archiveData: () => Promise<void>;
@@ -70,20 +81,7 @@ export class RCAKibanaClient extends KibanaClient {
       return apmIndexPattern;
     }
 
-    async function archiveData() {
-      const apmIndexPattern = await getAPMIndexPattern();
-      const alertingIndexPattern = '.alerts.internal.alerts-observability.*';
-    }
-
-    async function getTimeRange({
-      alertId,
-      fromOffset,
-      toOffset,
-    }: {
-      alertId: string;
-      fromOffset: string;
-      toOffset: string;
-    }) {
+    async function getAlert(alertId: string) {
       const response = await that.axios.get(
         that.getUrl({
           pathname: `/internal/rac/alerts`,
@@ -94,7 +92,19 @@ export class RCAKibanaClient extends KibanaClient {
           },
         }
       );
-      const alertStart = response.data['kibana.alert.start'];
+      return response.data;
+    }
+
+    async function getTimeRange({
+      fromOffset,
+      toOffset,
+      alert,
+    }: {
+      fromOffset: string;
+      toOffset: string;
+      alert: EcsFieldsResponse;
+    }) {
+      const alertStart = alert['kibana.alert.start'];
       const from = datemath.parse(fromOffset, { forceNow: new Date(alertStart) }).valueOf();
       const to = datemath.parse(toOffset, { forceNow: new Date(alertStart) }).valueOf();
       return {
@@ -151,21 +161,28 @@ export class RCAKibanaClient extends KibanaClient {
     async function rootCauseAnalysis({
       connectorIdOverride,
       investigationId,
+      from,
+      to,
+      alert,
     }: {
       connectorIdOverride?: string;
       investigationId: string;
+      from: string;
+      to: string;
+      alert: EcsFieldsResponse;
     }) {
       const chat$ = defer(() => {
         that.log.debug(`Calling chat API`);
+        const serviceName = alert['service.name'];
+        const context = getRCAContext(alert, serviceName);
         const body = {
           investigationId,
           connectorId: connectorIdOverride || '34002e09-65be-4332-9084-2649c86abacb',
-          context:
-            'The user is investigating an alert for the controller service,\n            and wants to find the root cause. Here is the alert:\n\n            {"kibana.alert.reason":"500 Errors is 98.46154, above the threshold of 1. (duration: 1 min, data view: otel_logs_data (Automated by Demo CLI), group: controller,/api/cart)","kibana.alert.evaluation.values":[98.46153846153847],"kibana.alert.evaluation.threshold":[1],"kibana.alert.group":[{"field":"service.name","value":"controller"},{"field":"url.path","value":"/api/cart"}],"tags":["demo","cli-created"],"service.name":"controller","kibana.alert.rule.category":"Custom threshold","kibana.alert.rule.consumer":"logs","kibana.alert.rule.name":"NGINX 500s","kibana.alert.rule.parameters":{"criteria":[{"comparator":">","metrics":[{"name":"A","filter":"http.response.status_code:*","aggType":"count"},{"name":"B","filter":"http.response.status_code>=500","aggType":"count"}],"threshold":[1],"timeSize":1,"timeUnit":"m","equation":"(B/A) * 100","label":"500 Errors"}],"alertOnNoData":false,"alertOnGroupDisappear":false,"searchConfiguration":{"query":{"query":"k8s.namespace.name: \\"ingress-nginx\\" AND url.path: /api/*","language":"kuery"},"index":"otel_logs_data"},"groupBy":["service.name","url.path"]},"kibana.alert.rule.producer":"observability","kibana.alert.rule.revision":0,"kibana.alert.rule.rule_type_id":"observability.rules.custom_threshold","kibana.alert.rule.tags":["demo","cli-created"],"kibana.alert.rule.uuid":"9055220c-8fb1-4f9f-be7c-0a33eb2bafc5","kibana.space_ids":["default"],"kibana.alert.action_group":"custom_threshold.fired","kibana.alert.flapping":false,"kibana.alert.instance.id":"controller,/api/cart","kibana.alert.maintenance_window_ids":[],"kibana.alert.consecutive_matches":5,"kibana.alert.status":"active","kibana.alert.uuid":"9e2bffb7-b13f-49a8-9f8d-36677f53854e","kibana.alert.workflow_status":"open","kibana.alert.duration.us":240627000,"kibana.alert.start":"2024-12-10T20:40:35.509Z","kibana.alert.time_range":{"gte":"2024-12-10T20:40:35.509Z"},"kibana.version":"9.0.0","kibana.alert.previous_action_group":"custom_threshold.fired"}',
-          rangeFrom: '2024-12-10T20:20:35.509Z',
-          rangeTo: '2024-12-10T20:44:36.465Z',
+          context,
+          rangeFrom: from,
+          rangeTo: to,
           serviceName: 'controller',
-          completeInBackground: true,
+          completeInBackground: false,
         };
 
         return that.axios.post(
@@ -178,8 +195,24 @@ export class RCAKibanaClient extends KibanaClient {
       }).pipe(
         switchMap((response) => streamIntoObservable(response.data)),
         serializeRCAResponse(),
-        tap(() => {
-          that.log.info(`Analyzing root cause...`);
+        tap((event) => {
+          switch (true) {
+            case event.includes('"name":"endProcessAndWriteReport"'):
+              that.log.info(`Root cause analysis completed.`);
+              break;
+            case event.includes('"name":"observe"'):
+              that.log.info(`Observing...`);
+              break;
+            case event.includes('"name":"error"'):
+              that.log.error(`Encountered an error!`);
+              break;
+            case event.includes('"name":"investigateEntity"'):
+              that.log.info(`Investigating entity...`);
+              break;
+            default:
+              that.log.info(`Analyzing root cause...`);
+              break;
+          }
         }),
         toArray()
       );
@@ -237,19 +270,19 @@ export class RCAKibanaClient extends KibanaClient {
 
     return {
       ...baseChatClient,
-      archiveData: async () => {
-        return await archiveData();
+      getAlert: async ({ alertId }: { alertId: string }) => {
+        return await getAlert(alertId);
       },
       getTimeRange: async ({
-        alertId,
         fromOffset,
         toOffset,
+        alert,
       }: {
-        alertId: string;
         fromOffset: string;
         toOffset: string;
+        alert: EcsFieldsResponse;
       }) => {
-        return await getTimeRange({ alertId, fromOffset, toOffset });
+        return await getTimeRange({ alert, fromOffset, toOffset });
       },
       createInvestigation: async ({
         alertId,
@@ -265,8 +298,24 @@ export class RCAKibanaClient extends KibanaClient {
       deleteInvestigation: async ({ investigationId }: { investigationId: string }) => {
         return deleteInvestigation({ investigationId });
       },
-      rootCauseAnalysis: async ({ investigationId }: { investigationId: string }) => {
-        return rootCauseAnalysis({ connectorIdOverride: connectorId, investigationId });
+      rootCauseAnalysis: async ({
+        investigationId,
+        from,
+        to,
+        alert,
+      }: {
+        investigationId: string;
+        from: string;
+        to: string;
+        alert: EcsFieldsResponse;
+      }) => {
+        return rootCauseAnalysis({
+          connectorIdOverride: connectorId,
+          investigationId,
+          from,
+          to,
+          alert,
+        });
       },
     };
   }
