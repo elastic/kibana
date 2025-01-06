@@ -10,6 +10,6 @@
 module.exports = {
   preset: '@kbn/test',
   rootDir: '../../../../../../../..',
-  roots: ['<rootDir>/packages/shared-ux/link/redirect_app'],
+  roots: ['<rootDir>/src/platform/packages/shared/shared-ux/link/redirect_app'],
   verbose: true,
 };
