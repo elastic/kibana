@@ -22,9 +22,11 @@ import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { DragDropIdentifier, ReorderProvider, DropType } from '@kbn/dom-drag-drop';
 import { DimensionButton } from '@kbn/visualization-ui-components';
-import { AggregateQuery, Query } from '@kbn/es-query';
+import { AggregateQuery, isOfAggregateQueryType, Query } from '@kbn/es-query';
 import { ESQLLangEditor } from '@kbn/esql/public';
 import { isEqual } from 'lodash';
+import { Datatable, DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
+import { MAX_NUM_OF_COLUMNS } from '../../../datasources/text_based/utils';
 import { LayerActions } from './layer_actions';
 import { isOperation, LayerAction, VisualizationDimensionGroupConfig } from '../../../types';
 import { LayerHeader } from './layer_header';
@@ -38,13 +40,19 @@ import {
   selectIsFullscreenDatasource,
   selectResolvedDateRange,
   selectDatasourceStates,
+  onActiveDataChange,
+  useLensDispatch,
 } from '../../../state_management';
 import { getSharedActions } from './layer_actions/layer_actions';
 import { FlyoutContainer } from '../../../shared_components/flyout_container';
 import { FakeDimensionButton } from './buttons/fake_dimension_button';
 import { getLongMessage } from '../../../user_messages_utils';
 import { ESQLDataGridAccordion } from '../../../app_plugin/shared/edit_on_the_fly/esql_data_grid_accordion';
-import { ESQLDataGridAttrs } from '../../../app_plugin/shared/edit_on_the_fly/helpers';
+import {
+  ESQLDataGridAttrs,
+  getGridAttrs,
+  getSuggestions,
+} from '../../../app_plugin/shared/edit_on_the_fly/helpers';
 
 export function LayerPanel(props: LayerPanelProps) {
   const [openDimension, setOpenDimension] = useState<{
@@ -78,6 +86,12 @@ export function LayerPanel(props: LayerPanelProps) {
     onDropToDimension,
     setIsInlineFlyoutVisible,
     onlyAllowSwitchToSubtypes,
+    attributes,
+    dataLoading$,
+    lensAdapters,
+    startDependencies,
+    updateSuggestion,
+    setCurrentAttributes,
   } = props;
 
   const isInlineEditing = Boolean(props?.setIsInlineFlyoutVisible);
@@ -130,8 +144,8 @@ export function LayerPanel(props: LayerPanelProps) {
   };
 
   const datasourcePublicAPI = framePublicAPI.datasourceLayers?.[layerId];
-  const datasourceId = datasourcePublicAPI?.datasourceId;
-  let layerDatasourceState = datasourceId ? datasourceStates?.[datasourceId]?.state : undefined;
+  const datasourceId = datasourcePublicAPI?.datasourceId as unknown as 'formBased' | 'textBased';
+  let layerDatasourceState = datasourceStates?.[datasourceId]?.state;
   // try again with aliases
   if (!layerDatasourceState && datasourcePublicAPI?.datasourceAliasIds && datasourceStates) {
     const aliasId = datasourcePublicAPI.datasourceAliasIds.find(
@@ -289,7 +303,7 @@ export function LayerPanel(props: LayerPanelProps) {
 
   const { dataViews } = props.framePublicAPI;
   const [datasource] = Object.values(framePublicAPI.datasourceLayers);
-  const isTextBasedLanguage = layerDatasourceState.layers[layerId].query !== undefined;
+  const isTextBasedLanguage = datasource?.isTextBasedLanguage() || false;
 
   const visualizationLayerSettings = useMemo(
     () =>
@@ -304,44 +318,6 @@ export function LayerPanel(props: LayerPanelProps) {
   const compatibleActions = useMemo<LayerAction[]>(
     () =>
       [
-        ...(activeVisualization.getLayerType(layerId, visualizationState) === 'data'
-          ? [
-              {
-                execute: () => {
-                  updateDataLayerState({
-                    ...layerDatasourceState,
-                    layers: {
-                      ...layerDatasourceState.layers,
-                      [layerId]: {
-                        indexPatternId: layerDatasourceState.layers[layerId].indexPatternId,
-                        linkToLayers: [],
-                        columns: [],
-                        columnOrder: [],
-                        sampling: 1,
-                        ignoreGlobalFilters: false,
-                        query: {
-                          esql: datasourceMap[datasourceId].toExpression(
-                            layerDatasourceState,
-                            layerId,
-                            [],
-                            dateRange,
-                            Date.now()
-                          ),
-                        },
-                      },
-                    },
-                  });
-                },
-                displayName: i18n.translate('xpack.lens.convert', {
-                  defaultMessage: 'Convert to ESQL',
-                }),
-                icon: 'gear',
-                'data-test-subj': 'lnsConvertLayer',
-                order: 0,
-                isCompatible: true,
-              },
-            ]
-          : []),
         ...(activeVisualization
           .getSupportedActionsForLayer?.(
             layerId,
@@ -398,10 +374,8 @@ export function LayerPanel(props: LayerPanelProps) {
   );
   const layerActionsFlyoutRef = useRef<HTMLDivElement | null>(null);
 
-  const prevQuery = useRef<AggregateQuery | Query>(layerDatasourceState.layers[layerId].query);
-  const [query, setQuery] = useState<AggregateQuery | Query>(
-    layerDatasourceState?.layers[layerId]?.query ? layerDatasourceState.layers[layerId].query : ''
-  );
+  const prevQuery = useRef<AggregateQuery | Query>(attributes.state.query);
+  const [query, setQuery] = useState<AggregateQuery | Query>(attributes.state.query);
   const [errors, setErrors] = useState<Error[] | undefined>();
   const [isLayerAccordionOpen, setIsLayerAccordionOpen] = useState(true);
   const [suggestsLimitedColumns, setSuggestsLimitedColumns] = useState(false);
@@ -410,23 +384,110 @@ export function LayerPanel(props: LayerPanelProps) {
   const [isVisualizationLoading, setIsVisualizationLoading] = useState(false);
   const [dataGridAttrs, setDataGridAttrs] = useState<ESQLDataGridAttrs | undefined>(undefined);
 
-  const adHocDataViews = Object.values(framePublicAPI.dataViews.indexPatterns ?? {});
+  const adHocDataViews = Object.values(attributes.state.adHocDataViews!);
   const hideTimeFilterInfo = false;
+
+  const datasourceState = attributes.state.datasourceStates[datasourceId];
+  const activeDatasource = datasourceMap[datasourceId];
+
+  const previousAdapters = useRef<Partial<DefaultInspectorAdapters> | undefined>(lensAdapters);
+
+  const dispatch = useLensDispatch();
+
+  const layers = useMemo(
+    () => activeDatasource.getLayers(datasourceState),
+    [activeDatasource, datasourceState]
+  );
+
+  useEffect(() => {
+    const s = dataLoading$?.subscribe((isDataLoading) => {
+      // go thru only when the loading is complete
+      if (isDataLoading) {
+        return;
+      }
+      const activeData: Record<string, Datatable> = {};
+      const adaptersTables = previousAdapters.current?.tables?.tables;
+      const [table] = Object.values(adaptersTables || {});
+      if (table) {
+        // there are cases where a query can return a big amount of columns
+        // at this case we don't suggest all columns in a table but the first
+        // MAX_NUM_OF_COLUMNS
+        setSuggestsLimitedColumns(table.columns.length >= MAX_NUM_OF_COLUMNS);
+        layers.forEach((layer) => {
+          activeData[layer] = table;
+        });
+
+        dispatch(onActiveDataChange({ activeData }));
+      }
+    });
+    return () => s?.unsubscribe();
+  }, [dispatch, dataLoading$, layers]);
+
+  useEffect(() => {
+    const abortController = new AbortController();
+    const getESQLGridAttrs = async () => {
+      if (!dataGridAttrs && isOfAggregateQueryType(query)) {
+        const { dataView, columns, rows } = await getGridAttrs(
+          query,
+          adHocDataViews,
+          startDependencies,
+          abortController
+        );
+
+        setDataGridAttrs({
+          rows,
+          dataView,
+          columns,
+        });
+      }
+    };
+    getESQLGridAttrs();
+  }, [adHocDataViews, dataGridAttrs, query, startDependencies]);
 
   const runQuery = useCallback(
     async (q: AggregateQuery, abortController?: AbortController) => {
-      updateDatasource(datasourceId, {
-        ...layerDatasourceState,
-        layers: {
-          ...layerDatasourceState.layers,
-          [layerId]: { ...layerDatasourceState.layers[layerId], query: q },
-        },
-      });
+      const attrs = await getSuggestions(
+        q,
+        startDependencies,
+        datasourceMap,
+        visualizationMap,
+        adHocDataViews,
+        setErrors,
+        abortController,
+        setDataGridAttrs
+      );
+      if (attrs) {
+        setCurrentAttributes?.(attrs);
+        setErrors([]);
+        updateSuggestion?.(attrs);
+      }
       prevQuery.current = q;
       setIsVisualizationLoading(false);
     },
-    [datasourceMap, visualizationMap, adHocDataViews]
+    [
+      startDependencies,
+      datasourceMap,
+      visualizationMap,
+      adHocDataViews,
+      setCurrentAttributes,
+      updateSuggestion,
+    ]
   );
+
+  // const runQuery = useCallback(
+  //   async (q: AggregateQuery, abortController?: AbortController) => {
+  //     updateDatasource(datasourceId, {
+  //       ...layerDatasourceState,
+  //       layers: {
+  //         ...layerDatasourceState.layers,
+  //         [layerId]: { ...layerDatasourceState.layers[layerId], query: q },
+  //       },
+  //     });
+  //     prevQuery.current = q;
+  //     setIsVisualizationLoading(false);
+  //   },
+  //   [datasourceMap, visualizationMap, adHocDataViews]
+  // );
 
   return (
     <>
@@ -488,7 +549,7 @@ export function LayerPanel(props: LayerPanelProps) {
             {isTextBasedLanguage && (
               <EuiFlexItem grow={false} data-test-subj="InlineEditingESQLEditor">
                 <ESQLLangEditor
-                  query={query}
+                  query={query as AggregateQuery}
                   onTextLangQueryChange={(q) => {
                     setQuery(q);
                   }}
@@ -522,8 +583,9 @@ export function LayerPanel(props: LayerPanelProps) {
               <ESQLDataGridAccordion
                 dataGridAttrs={dataGridAttrs}
                 isAccordionOpen={isESQLResultsAccordionOpen}
+                isTableView={attributes.visualizationType !== 'lnsDatatable'}
                 setIsAccordionOpen={setIsESQLResultsAccordionOpen}
-                query={query}
+                query={query as AggregateQuery}
                 // isTableView={attributes.visualizationType !== 'lnsDatatable'}
                 onAccordionToggleCb={(status) => {
                   if (status && isSuggestionsAccordionOpen) {

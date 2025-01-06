@@ -28,6 +28,8 @@ export function LayerConfiguration({
   setIsInlineFlyoutVisible,
   getUserMessages,
   onlyAllowSwitchToSubtypes,
+  lensAdapters,
+  dataLoading$,
 }: LayerConfigurationProps) {
   const dispatch = useLensDispatch();
   const { euiTheme } = useEuiTheme();
@@ -51,6 +53,9 @@ export function LayerConfiguration({
   );
 
   const layerPanelsProps = {
+    attributes,
+    lensAdapters,
+    dataLoading$,
     framePublicAPI,
     datasourceMap,
     visualizationMap,
@@ -63,6 +68,7 @@ export function LayerConfiguration({
     indexPatternService,
     setIsInlineFlyoutVisible,
     getUserMessages,
+    startDependencies,
   };
   return (
     <div

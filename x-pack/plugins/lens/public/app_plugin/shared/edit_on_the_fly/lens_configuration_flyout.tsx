@@ -21,7 +21,6 @@ import {
   keys,
 } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
-import { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
 import type { TypedLensSerializedState } from '../../../react_embeddable/types';
 import { buildExpression } from '../../../editor_frame_service/editor_frame/expression_helpers';
 import { useLensSelector, selectFramePublicAPI, useLensDispatch } from '../../../state_management';
@@ -64,13 +63,10 @@ export function LensEditConfigurationFlyout({
 }: EditConfigPanelProps) {
   const euiTheme = useEuiTheme();
   const previousAttributes = useRef<TypedLensSerializedState['attributes']>(attributes);
-  const previousAdapters = useRef<Partial<DefaultInspectorAdapters> | undefined>(lensAdapters);
   const [isInlineFlyoutVisible, setIsInlineFlyoutVisible] = useState(true);
   const [isLayerAccordionOpen, setIsLayerAccordionOpen] = useState(true);
   const [isSuggestionsAccordionOpen, setIsSuggestionsAccordionOpen] = useState(false);
   const [isESQLResultsAccordionOpen, setIsESQLResultsAccordionOpen] = useState(false);
-  const datasourceState = attributes.state.datasourceStates[datasourceId];
-  const activeDatasource = datasourceMap[datasourceId];
 
   const { datasourceStates, visualization, isLoading, annotationGroups, searchSessionId } =
     useLensSelector((state) => state.lens);
@@ -84,12 +80,6 @@ export function LensEditConfigurationFlyout({
     startDependencies.data.query.timefilter.timefilter
   );
 
-  const layers = useMemo(
-    () => activeDatasource.getLayers(datasourceState),
-    [activeDatasource, datasourceState]
-  );
-
-  // needed for text based languages mode which works ONLY with adHoc dataviews
   const dispatch = useLensDispatch();
 
   const attributesChanged: boolean = useMemo(() => {
@@ -324,6 +314,8 @@ export function LensEditConfigurationFlyout({
             hasPadding
             framePublicAPI={framePublicAPI}
             setIsInlineFlyoutVisible={setIsInlineFlyoutVisible}
+            updateSuggestion={updateSuggestion}
+            setCurrentAttributes={setCurrentAttributes}
           />
         </FlyoutWrapper>
       </>
@@ -427,6 +419,8 @@ export function LensEditConfigurationFlyout({
               <>
                 <LayerConfiguration
                   attributes={attributes}
+                  dataLoading$={dataLoading$}
+                  lensAdapters={lensAdapters}
                   getUserMessages={getUserMessages}
                   coreStart={coreStart}
                   startDependencies={startDependencies}

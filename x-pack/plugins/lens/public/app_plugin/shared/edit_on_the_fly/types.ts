@@ -90,6 +90,10 @@ export interface EditConfigPanelProps {
 
 export interface LayerConfigurationProps {
   attributes: TypedLensSerializedState['attributes'];
+  /** Embeddable output observable, useful for dashboard flyout  */
+  dataLoading$?: PublishingSubject<boolean | undefined>;
+  /** Contains the active data, necessary for some panel configuration such as coloring */
+  lensAdapters?: ReturnType<LensInspector['getInspectorAdapters']>;
   coreStart: CoreStart;
   startDependencies: LensPluginStartDependencies;
   visualizationMap: VisualizationMap;
@@ -100,4 +104,7 @@ export interface LayerConfigurationProps {
   setIsInlineFlyoutVisible: (flag: boolean) => void;
   getUserMessages: UserMessagesGetter;
   onlyAllowSwitchToSubtypes?: boolean;
+  updateSuggestion?: (attrs: TypedLensSerializedState['attributes']) => void;
+  /** Set the attributes state */
+  setCurrentAttributes?: (attrs: TypedLensSerializedState['attributes']) => void;
 }

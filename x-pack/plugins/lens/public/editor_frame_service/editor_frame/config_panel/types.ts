@@ -8,6 +8,10 @@
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { DragDropIdentifier, DropType } from '@kbn/dom-drag-drop';
+import { PublishingSubject } from '@kbn/presentation-publishing';
+import type { LensPluginStartDependencies } from '../../../plugin';
+import { LensInspector } from '../../../lens_inspector_service';
+import type { TypedLensSerializedState } from '../../../react_embeddable/types';
 import type { IndexPatternServiceAPI } from '../../../data_views_service/service';
 
 import {
@@ -39,6 +43,15 @@ export interface ConfigPanelWrapperProps {
 }
 
 export interface LayerPanelProps {
+  attributes: TypedLensSerializedState['attributes'];
+  /** Embeddable output observable, useful for dashboard flyout  */
+  dataLoading$?: PublishingSubject<boolean | undefined>;
+  /** Contains the active data, necessary for some panel configuration such as coloring */
+  lensAdapters?: ReturnType<LensInspector['getInspectorAdapters']>;
+  startDependencies: LensPluginStartDependencies;
+  updateSuggestion?: (attrs: TypedLensSerializedState['attributes']) => void;
+  /** Set the attributes state */
+  setCurrentAttributes?: (attrs: TypedLensSerializedState['attributes']) => void;
   visualizationState: unknown;
   datasourceMap: DatasourceMap;
   visualizationMap: VisualizationMap;
