@@ -72,7 +72,7 @@ export const InvokeAIActionParamsSchema = schema.object({
     schema.arrayOf(
       schema.object(
         {
-          type: schema.string(),
+          type: schema.literal('function'),
           function: schema.object(
             {
               description: schema.maybe(schema.string()),
@@ -92,9 +92,10 @@ export const InvokeAIActionParamsSchema = schema.object({
     schema.oneOf([
       schema.literal('none'),
       schema.literal('auto'),
+      schema.literal('required'),
       schema.object(
         {
-          type: schema.string(),
+          type: schema.literal('function'),
           function: schema.object({ name: schema.string() }, { unknowns: 'allow' }),
         },
         { unknowns: 'ignore' }
