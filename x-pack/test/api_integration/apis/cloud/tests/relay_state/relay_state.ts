@@ -8,7 +8,6 @@
 import { readFileSync } from 'fs';
 import type { Cookie } from 'tough-cookie';
 import { parse as parseCookie } from 'tough-cookie';
-import url from 'url';
 
 import { CA_CERT_PATH } from '@kbn/dev-utils';
 import expect from '@kbn/expect';
