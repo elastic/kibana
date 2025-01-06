@@ -746,7 +746,7 @@ export class HttpServer {
     const securityConfig = route?.security;
 
     // for versioned routes, we need to check if the security config is a function
-    return typeof securityConfig === 'function' ? securityConfig({ headers: {} }) : securityConfig;
+    return typeof securityConfig === 'function' ? securityConfig() : securityConfig;
   }
 
   private configureRoute(route: RouterRoute) {

@@ -302,9 +302,12 @@ export class CoreVersionedRoute implements VersionedRoute {
     return [...this.handlers.values()];
   }
 
-  public getSecurity: RouteSecurityGetter = (req: RequestLike) => {
-    const version = this.getVersion(req)!;
+  public getSecurity: RouteSecurityGetter = (req?: RequestLike) => {
+    if (!req) {
+      return this.defaultSecurityConfig;
+    }
 
+    const version = this.getVersion(req)!;
     const security = this.handlers.get(version)?.options.security ?? this.defaultSecurityConfig;
 
     // authc can be defined only on the top route level,
