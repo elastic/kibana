@@ -123,6 +123,7 @@ export const getESQLControlFactory = (): ControlFactory<ESQLControlState, ESQLCo
               <EuiComboBox
                 aria-label="Accessible screen reader label"
                 placeholder="Select a single option"
+                data-test-subj="esqlControlValuesDropdown"
                 singleSelection={{ asPlainText: true }}
                 options={availableOptions.map((option) => ({ label: option }))}
                 selectedOptions={selectedOptions.map((option) => ({ label: option }))}
