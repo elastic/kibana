@@ -37,21 +37,7 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
             title: i18n.translate('xpack.observability.obltNav.discover', {
               defaultMessage: 'Discover',
             }),
-            // 'last-used-logs-viewer' is wrapper app to handle the navigation between observability-log-explorer and discover
-            link: 'last-used-logs-viewer',
-            breadcrumbStatus: 'hidden', // avoid duplicate "Discover" breadcrumbs
-            renderAs: 'item',
-            children: [
-              {
-                link: 'discover',
-                children: [
-                  {
-                    // This is to show "observability-log-explorer" breadcrumbs when navigating from "discover" to "log explorer"
-                    link: 'observability-logs-explorer',
-                  },
-                ],
-              },
-            ],
+            link: 'discover',
           },
           {
             link: 'dashboards',
@@ -398,12 +384,6 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
             renderAs: 'panelOpener',
             children: [
               {
-                link: 'logs:stream',
-                title: i18n.translate('xpack.observability.obltNav.otherTools.logsStream', {
-                  defaultMessage: 'Logs stream',
-                }),
-              },
-              {
                 link: 'logs:anomalies',
                 title: i18n.translate('xpack.observability.obltNav.otherTools.logsAnomalies', {
                   defaultMessage: 'Logs anomalies',
@@ -413,12 +393,6 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
                 link: 'logs:log-categories',
                 title: i18n.translate('xpack.observability.obltNav.otherTools.logsCategories', {
                   defaultMessage: 'Logs categories',
-                }),
-              },
-              {
-                link: 'logs:settings',
-                title: i18n.translate('xpack.observability.obltNav.otherTools.logsSettings', {
-                  defaultMessage: 'Logs settings',
                 }),
               },
               { link: 'maps' },

@@ -33,3 +33,5 @@ exports[`Route renders 1`] = `
   <MatchPropagator />
 </Route>
 `;
+
+exports[`Route renders with enableExecutionContextTracking as false 1`] = `<Route />`;

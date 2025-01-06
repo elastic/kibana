@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import '../_index.scss';
 import { pick } from 'lodash';
 import type { FC } from 'react';
 import React, { useCallback, useEffect, useState, useMemo } from 'react';
