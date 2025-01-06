@@ -7457,7 +7457,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-router-mocks@link:packages/shared-ux/router/mocks":
+"@kbn/shared-ux-router-mocks@link:src/platform/packages/shared/shared-ux/router/mocks":
   version "0.0.0"
   uid ""
 
