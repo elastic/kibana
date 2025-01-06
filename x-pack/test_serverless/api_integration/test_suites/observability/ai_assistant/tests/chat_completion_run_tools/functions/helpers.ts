@@ -42,7 +42,7 @@ export async function invokeChatCompleteWithFunctionRequest({
 }) {
   const { body } = await observabilityAIAssistantAPIClient
     .slsEditor({
-      endpoint: 'POST /internal/observability_ai_assistant/chat/complete',
+      endpoint: 'POST /internal/observability_ai_assistant/chat/run_tools',
       params: {
         body: {
           messages: [

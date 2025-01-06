@@ -18,7 +18,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const log = getService('log');
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantAPIClient');
 
-  const CHAT_API_URL = `/internal/observability_ai_assistant/chat`;
+  const CHAT_API_URL = `/internal/observability_ai_assistant/chat/completion`;
 
   const messages: Message[] = [
     {
@@ -37,7 +37,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     },
   ];
 
-  describe('/internal/observability_ai_assistant/chat', () => {
+  describe('/internal/observability_ai_assistant/chat/completion', () => {
     let proxy: LlmProxy;
 
     let connectorId: string;

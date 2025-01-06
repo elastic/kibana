@@ -27,7 +27,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   let supertestEditorWithCookieCredentials: SupertestWithRoleScope;
 
-  const CHAT_API_URL = `/internal/observability_ai_assistant/chat`;
+  const CHAT_API_URL = `/internal/observability_ai_assistant/chat/completion`;
 
   const messages: Message[] = [
     {
@@ -46,7 +46,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     },
   ];
 
-  describe('/internal/observability_ai_assistant/chat', function () {
+  describe('/internal/observability_ai_assistant/chat/completion', function () {
     // TODO: https://github.com/elastic/kibana/issues/192751
     this.tags(['skipMKI']);
     let proxy: LlmProxy;

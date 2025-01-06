@@ -292,7 +292,7 @@ class ChatService {
     name: string,
     { connectorId, messages, functionCall, functions, signal }
   ) => {
-    return this.callStreamingApi('POST /internal/observability_ai_assistant/chat', {
+    return this.callStreamingApi('POST /internal/observability_ai_assistant/chat/completion', {
       params: {
         body: {
           name,
@@ -336,7 +336,7 @@ class ChatService {
         scopes: this.getScopes(),
       },
       ({ params }) => {
-        return this.callStreamingApi('POST /internal/observability_ai_assistant/chat/complete', {
+        return this.callStreamingApi('POST /internal/observability_ai_assistant/chat/run_tools', {
           params,
           signal,
         });

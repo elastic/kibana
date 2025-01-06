@@ -258,7 +258,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         ];
 
         const createResponse = await apiClient({
-          endpoint: 'POST /internal/observability_ai_assistant/chat/complete',
+          endpoint: 'POST /internal/observability_ai_assistant/chat/run_tools',
           params: {
             body: {
               messages,

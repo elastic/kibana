@@ -59,7 +59,7 @@ export function registerKibanaFunction({
         protocol,
         ...(origin ? pick(parse(origin), 'host', 'protocol') : {}),
         pathname: pathnameFromRequest.replace(
-          '/internal/observability_ai_assistant/chat/complete',
+          '/internal/observability_ai_assistant/chat/run_tools',
           pathname
         ),
         query: query ? (query as Record<string, string>) : undefined,

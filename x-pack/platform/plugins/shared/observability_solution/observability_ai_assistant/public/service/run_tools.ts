@@ -49,7 +49,7 @@ export function runTools(
     getScreenContexts: () => ObservabilityAIAssistantScreenContext[];
   } & Parameters<ObservabilityAIAssistantChatService['runTools']>[0],
   requestCallback: (
-    params: ObservabilityAIAssistantAPIClientRequestParamsOf<'POST /internal/observability_ai_assistant/chat/complete'>
+    params: ObservabilityAIAssistantAPIClientRequestParamsOf<'POST /internal/observability_ai_assistant/chat/run_tools'>
   ) => Observable<StreamingChatResponseEventWithoutError>
 ): Observable<StreamingChatResponseEventWithoutError> {
   return new Observable<StreamingChatResponseEventWithoutError>((subscriber) => {

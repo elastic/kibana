@@ -125,7 +125,7 @@ async function initializeChatRequest({
 }
 
 const chatRoute = createObservabilityAIAssistantServerRoute({
-  endpoint: 'POST /internal/observability_ai_assistant/chat', // TODO: rename to `/chat/completion/single`
+  endpoint: 'POST /internal/observability_ai_assistant/chat/completion',
   security: {
     authz: {
       requiredPrivileges: ['ai_assistant'],
@@ -285,7 +285,7 @@ async function runTools(
 }
 
 const chatCompleteRoute = createObservabilityAIAssistantServerRoute({
-  endpoint: 'POST /internal/observability_ai_assistant/chat/complete', // TODO: rename to `/chat/completion/recursive`
+  endpoint: 'POST /internal/observability_ai_assistant/chat/run_tools',
   security: {
     authz: {
       requiredPrivileges: ['ai_assistant'],
@@ -298,7 +298,7 @@ const chatCompleteRoute = createObservabilityAIAssistantServerRoute({
 });
 
 const publicChatCompleteRoute = createObservabilityAIAssistantServerRoute({
-  endpoint: 'POST /api/observability_ai_assistant/chat/complete 2023-10-31', // TODO: rename to `/chat/completion/recursive`
+  endpoint: 'POST /api/observability_ai_assistant/chat/complete 2023-10-31', // TODO: rename to `/api/observability_ai_assistant/chat/run_tools`
   security: {
     authz: {
       requiredPrivileges: ['ai_assistant'],

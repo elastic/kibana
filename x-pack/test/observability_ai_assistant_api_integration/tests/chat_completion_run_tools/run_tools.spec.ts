@@ -40,7 +40,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantAPIClient');
 
-  const COMPLETE_API_URL = '/internal/observability_ai_assistant/chat/complete';
+  const RUN_TOOLS_API_URL = '/internal/observability_ai_assistant/chat/run_tools';
 
   const messages: Message[] = [
     {
@@ -61,7 +61,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     },
   ];
 
-  describe('/internal/observability_ai_assistant/chat/complete', () => {
+  describe('/internal/observability_ai_assistant/chat/run_tools', () => {
     let proxy: LlmProxy;
     let connectorId: string;
 
@@ -78,7 +78,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       const responsePromise = new Promise<Response>((resolve, reject) => {
         supertest
-          .post(COMPLETE_API_URL)
+          .post(RUN_TOOLS_API_URL)
           .set('kbn-xsrf', 'foo')
           .send({
             messages,
@@ -132,7 +132,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       const passThrough = new PassThrough();
 
       supertest
-        .post(COMPLETE_API_URL)
+        .post(RUN_TOOLS_API_URL)
         .set('kbn-xsrf', 'foo')
         .send({
           messages,
@@ -418,7 +418,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         const createResponse = await observabilityAIAssistantAPIClient
           .editor({
-            endpoint: 'POST /internal/observability_ai_assistant/chat/complete',
+            endpoint: 'POST /internal/observability_ai_assistant/chat/run_tools',
             params: {
               body: {
                 messages,
@@ -451,7 +451,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         const updatedResponse = await observabilityAIAssistantAPIClient
           .editor({
-            endpoint: 'POST /internal/observability_ai_assistant/chat/complete',
+            endpoint: 'POST /internal/observability_ai_assistant/chat/run_tools',
             params: {
               body: {
                 messages: [
@@ -512,7 +512,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       it('should deny access for users without the ai_assistant privilege', async () => {
         try {
           await observabilityAIAssistantAPIClient.unauthorizedUser({
-            endpoint: 'POST /internal/observability_ai_assistant/chat/complete',
+            endpoint: 'POST /internal/observability_ai_assistant/chat/run_tools',
             params: {
               body: {
                 messages,

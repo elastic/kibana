@@ -364,7 +364,7 @@ export class KibanaClient {
 
       const chat$ = defer(() => {
         that.log.info('Calling the /chat API');
-        const params: ObservabilityAIAssistantAPIClientRequestParamsOf<'POST /internal/observability_ai_assistant/chat'>['params']['body'] =
+        const params: ObservabilityAIAssistantAPIClientRequestParamsOf<'POST /internal/observability_ai_assistant/chat/completion'>['params']['body'] =
           {
             name,
             messages,
@@ -376,7 +376,7 @@ export class KibanaClient {
 
         return that.axios.post(
           that.getUrl({
-            pathname: '/internal/observability_ai_assistant/chat',
+            pathname: '/internal/observability_ai_assistant/chat/completion',
           }),
           params,
           {
@@ -431,11 +431,11 @@ export class KibanaClient {
         ];
 
         const stream$ = defer(() => {
-          that.log.info(`Calling /chat/complete API`);
+          that.log.info(`Calling /chat/run_tools API`);
           return from(
             that.axios.post(
               that.getUrl({
-                pathname: '/internal/observability_ai_assistant/chat/complete',
+                pathname: '/internal/observability_ai_assistant/chat/run_tools',
               }),
               {
                 screenContexts: options.screenContexts || [],
