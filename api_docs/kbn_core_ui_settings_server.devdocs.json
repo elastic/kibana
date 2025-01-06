@@ -728,13 +728,7 @@
             ],
             "signature": [
               "(savedObjectsClient: ",
-              {
-                "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "server",
-                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-server.SavedObjectsClientContract",
-                "text": "SavedObjectsClientContract"
-              },
+              "SavedObjectsClientContract",
               ") => ",
               {
                 "pluginId": "@kbn/core-ui-settings-server",
@@ -756,13 +750,7 @@
                 "label": "savedObjectsClient",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-saved-objects-api-server",
-                    "scope": "server",
-                    "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                    "section": "def-server.SavedObjectsClientContract",
-                    "text": "SavedObjectsClientContract"
-                  }
+                  "SavedObjectsClientContract"
                 ],
                 "path": "packages/core/ui-settings/core-ui-settings-server/src/contracts.ts",
                 "deprecated": false,
@@ -783,13 +771,7 @@
             ],
             "signature": [
               "(savedObjectsClient: ",
-              {
-                "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "server",
-                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-server.SavedObjectsClientContract",
-                "text": "SavedObjectsClientContract"
-              },
+              "SavedObjectsClientContract",
               ") => ",
               {
                 "pluginId": "@kbn/core-ui-settings-server",
@@ -811,13 +793,7 @@
                 "label": "savedObjectsClient",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-saved-objects-api-server",
-                    "scope": "server",
-                    "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                    "section": "def-server.SavedObjectsClientContract",
-                    "text": "SavedObjectsClientContract"
-                  }
+                  "SavedObjectsClientContract"
                 ],
                 "path": "packages/core/ui-settings/core-ui-settings-server/src/contracts.ts",
                 "deprecated": false,
