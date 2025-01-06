@@ -121,6 +121,14 @@ export const buildBaseClassicNavItems = (): ClassicNavItem[] => {
         },
         id: 'inference_endpoints',
       },
+      {
+        'data-test-subj': 'searchSideNav-Synonyms',
+        deepLink: {
+          link: 'searchSynonyms:synonyms',
+          shouldShowActiveForSubroutes: true,
+        },
+        id: 'synonyms',
+      },
     ],
     name: i18n.translate('xpack.enterpriseSearch.nav.relevanceTitle', {
       defaultMessage: 'Relevance',

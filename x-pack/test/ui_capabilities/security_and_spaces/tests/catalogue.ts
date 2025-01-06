@@ -91,6 +91,7 @@ export default function catalogueTests({ getService }: FtrProviderContext) {
               'elasticsearchIndices',
               'elasticsearchStart',
               'searchInferenceEndpoints',
+              'searchSynonyms',
               'appSearch',
               'observabilityAIAssistant',
               'workplaceSearch',
