@@ -162,7 +162,7 @@ export class ObservabilityAIAssistantClient {
     });
   };
 
-  complete = ({
+  recursiveChatCompletion = ({
     functionClient,
     connectorId,
     simulateFunctionCalling = false,
@@ -194,7 +194,7 @@ export class ObservabilityAIAssistantClient {
         };
   }): Observable<Exclude<StreamingChatResponseEvent, ChatCompletionErrorEvent>> => {
     return new LangTracer(context.active()).startActiveSpan(
-      'complete',
+      'chatCompletion',
       ({ tracer: completeTracer }) => {
         const isConversationUpdate = persist && !!predefinedConversationId;
 
@@ -250,8 +250,8 @@ export class ObservabilityAIAssistantClient {
                   getGeneratedTitle({
                     messages,
                     logger: this.dependencies.logger,
-                    chat: (name, chatParams) => {
-                      return this.chat(name, {
+                    chatCompletion: (name, chatParams) => {
+                      return this.chatCompletion(name, {
                         ...chatParams,
                         simulateFunctionCalling,
                         connectorId,
@@ -286,9 +286,9 @@ export class ObservabilityAIAssistantClient {
                   ...messagesWithUpdatedSystemMessage,
                   ...(contextRequest ? [contextRequest.message] : []),
                 ],
-                chat: (name, chatParams) => {
+                chatCompletion: (name, chatParams) => {
                   // inject a chat function with predefined parameters
-                  return this.chat(name, {
+                  return this.chatCompletion(name, {
                     ...chatParams,
                     signal,
                     simulateFunctionCalling,
@@ -426,7 +426,7 @@ export class ObservabilityAIAssistantClient {
         );
 
         return output$.pipe(
-          instrumentAndCountTokens('complete'),
+          instrumentAndCountTokens('chatCompletion'),
           withoutTokenCountEvents(),
           catchError((error) => {
             this.dependencies.logger.error(error);
@@ -461,7 +461,7 @@ export class ObservabilityAIAssistantClient {
     );
   };
 
-  chat = (
+  chatCompletion = (
     name: string,
     {
       messages,
@@ -500,7 +500,7 @@ export class ObservabilityAIAssistantClient {
         : ToolChoiceType.auto;
     }
 
-    const chatComplete$ = defer(() =>
+    const chatCompletion$ = defer(() =>
       this.dependencies.inferenceClient.chatComplete({
         connectorId,
         stream: true,
@@ -526,7 +526,7 @@ export class ObservabilityAIAssistantClient {
       shareReplay()
     );
 
-    return chatComplete$;
+    return chatCompletion$;
   };
 
   find = async (options?: { query?: string }): Promise<{ conversations: Conversation[] }> => {

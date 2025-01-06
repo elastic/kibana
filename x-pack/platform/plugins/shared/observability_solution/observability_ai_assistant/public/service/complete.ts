@@ -32,7 +32,7 @@ import type { ObservabilityAIAssistantAPIClientRequestParamsOf } from '../api';
 import type { ObservabilityAIAssistantChatService } from '../types';
 import { createPublicFunctionResponseError } from '../utils/create_function_response_error';
 
-export function complete(
+export function recursiveChatCompletion(
   {
     client,
     getScreenContexts,
@@ -45,9 +45,9 @@ export function complete(
     instructions,
     scopes,
   }: {
-    client: Pick<ObservabilityAIAssistantChatService, 'chat' | 'complete'>;
+    client: Pick<ObservabilityAIAssistantChatService, 'chatCompletion' | 'recursiveChatCompletion'>;
     getScreenContexts: () => ObservabilityAIAssistantScreenContext[];
-  } & Parameters<ObservabilityAIAssistantChatService['complete']>[0],
+  } & Parameters<ObservabilityAIAssistantChatService['recursiveChatCompletion']>[0],
   requestCallback: (
     params: ObservabilityAIAssistantAPIClientRequestParamsOf<'POST /internal/observability_ai_assistant/chat/complete'>
   ) => Observable<StreamingChatResponseEventWithoutError>
@@ -122,7 +122,7 @@ export function complete(
             return;
           }
 
-          complete(
+          recursiveChatCompletion(
             {
               client,
               getScreenContexts,

@@ -34,7 +34,7 @@ export async function scoreSuggestions({
   messages,
   userPrompt,
   context,
-  chat,
+  chatCompletion,
   signal,
   logger,
 }: {
@@ -42,7 +42,7 @@ export async function scoreSuggestions({
   messages: Message[];
   userPrompt: string;
   context: string;
-  chat: FunctionCallChatFunction;
+  chatCompletion: FunctionCallChatFunction;
   signal: AbortSignal;
   logger: Logger;
 }): Promise<{
@@ -107,7 +107,7 @@ export async function scoreSuggestions({
   };
 
   const response = await lastValueFrom(
-    chat('score_suggestions', {
+    chatCompletion('score_suggestions', {
       messages: [...messages.slice(0, -2), newUserMessage],
       functions: [scoreFunction],
       functionCall: 'score',

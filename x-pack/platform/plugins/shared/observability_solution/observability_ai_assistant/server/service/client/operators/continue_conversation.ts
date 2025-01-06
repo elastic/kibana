@@ -49,7 +49,7 @@ function executeFunctionAndCatchError({
   args,
   functionClient,
   messages,
-  chat,
+  chatCompletion,
   signal,
   logger,
   tracer,
@@ -60,7 +60,7 @@ function executeFunctionAndCatchError({
   args: string | undefined;
   functionClient: ChatFunctionClient;
   messages: Message[];
-  chat: AutoAbortedChatFunction;
+  chatCompletion: AutoAbortedChatFunction;
   signal: AbortSignal;
   logger: Logger;
   tracer: LangTracer;
@@ -75,8 +75,8 @@ function executeFunctionAndCatchError({
       const executeFunctionResponse$ = from(
         functionClient.executeFunction({
           name,
-          chat: (operationName, params) => {
-            return chat(operationName, {
+          chatCompletion: (operationName, params) => {
+            return chatCompletion(operationName, {
               ...params,
               tracer: nextTracer,
               connectorId,
@@ -175,7 +175,7 @@ function getFunctionDefinitions({
 export function continueConversation({
   messages: initialMessages,
   functionClient,
-  chat,
+  chatCompletion,
   signal,
   functionCallsLeft,
   adHocInstructions = [],
@@ -188,7 +188,7 @@ export function continueConversation({
 }: {
   messages: Message[];
   functionClient: ChatFunctionClient;
-  chat: AutoAbortedChatFunction;
+  chatCompletion: AutoAbortedChatFunction;
   signal: AbortSignal;
   functionCallsLeft: number;
   adHocInstructions: AdHocInstruction[];
@@ -238,7 +238,7 @@ export function continueConversation({
           ? `function_response ${lastMessage.name}`
           : 'user_message';
 
-      return chat(operationName, {
+      return chatCompletion(operationName, {
         messages: messagesWithUpdatedSystemMessage,
         functions: definitions,
         tracer,
@@ -311,7 +311,7 @@ export function continueConversation({
     return executeFunctionAndCatchError({
       name: functionCallName,
       args: lastMessage.function_call!.arguments,
-      chat,
+      chatCompletion,
       functionClient,
       messages: messagesWithUpdatedSystemMessage,
       signal,
@@ -337,7 +337,7 @@ export function continueConversation({
             }
             return continueConversation({
               messages: messagesWithUpdatedSystemMessage.concat(extractedMessages),
-              chat,
+              chatCompletion,
               functionCallsLeft: nextFunctionCallsLeft,
               functionClient,
               signal,

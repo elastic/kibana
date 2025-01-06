@@ -125,7 +125,7 @@ async function initializeChatRequest({
 }
 
 const chatRoute = createObservabilityAIAssistantServerRoute({
-  endpoint: 'POST /internal/observability_ai_assistant/chat',
+  endpoint: 'POST /internal/observability_ai_assistant/chat', // TODO: rename to `/chat/completion/single`
   security: {
     authz: {
       requiredPrivileges: ['ai_assistant'],
@@ -156,7 +156,7 @@ const chatRoute = createObservabilityAIAssistantServerRoute({
       resources
     );
 
-    const response$ = client.chat(name, {
+    const response$ = client.chatCompletion(name, {
       messages,
       connectorId,
       signal,
@@ -199,9 +199,9 @@ const chatRecallRoute = createObservabilityAIAssistantServerRoute({
     const response$ = from(
       recallAndScore({
         analytics: (await resources.plugins.core.start()).analytics,
-        chat: (name, params) =>
+        chatCompletion: (name, params) =>
           client
-            .chat(name, {
+            .chatCompletion(name, {
               ...params,
               connectorId,
               simulateFunctionCalling,
@@ -235,7 +235,7 @@ const chatRecallRoute = createObservabilityAIAssistantServerRoute({
   },
 });
 
-async function chatComplete(
+async function recursiveChatCompletion(
   resources: ObservabilityAIAssistantRouteHandlerResources & {
     params: t.TypeOf<typeof chatCompleteInternalRt>;
   }
@@ -268,7 +268,7 @@ async function chatComplete(
     scopes,
   });
 
-  const response$ = client.complete({
+  const response$ = client.recursiveChatCompletion({
     messages,
     connectorId,
     conversationId,
@@ -285,7 +285,7 @@ async function chatComplete(
 }
 
 const chatCompleteRoute = createObservabilityAIAssistantServerRoute({
-  endpoint: 'POST /internal/observability_ai_assistant/chat/complete',
+  endpoint: 'POST /internal/observability_ai_assistant/chat/complete', // TODO: rename to `/chat/completion/recursive`
   security: {
     authz: {
       requiredPrivileges: ['ai_assistant'],
@@ -293,12 +293,12 @@ const chatCompleteRoute = createObservabilityAIAssistantServerRoute({
   },
   params: chatCompleteInternalRt,
   handler: async (resources): Promise<Readable> => {
-    return observableIntoStream(await chatComplete(resources));
+    return observableIntoStream(await recursiveChatCompletion(resources));
   },
 });
 
 const publicChatCompleteRoute = createObservabilityAIAssistantServerRoute({
-  endpoint: 'POST /api/observability_ai_assistant/chat/complete 2023-10-31',
+  endpoint: 'POST /api/observability_ai_assistant/chat/complete 2023-10-31', // TODO: rename to `/chat/completion/recursive`
   security: {
     authz: {
       requiredPrivileges: ['ai_assistant'],
@@ -315,7 +315,7 @@ const publicChatCompleteRoute = createObservabilityAIAssistantServerRoute({
 
     const { format = 'default' } = query;
 
-    const response$ = await chatComplete({
+    const response$ = await recursiveChatCompletion({
       ...resources,
       params: {
         body: {

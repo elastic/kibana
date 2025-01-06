@@ -20,7 +20,7 @@ export async function getRelevantFieldNames({
   dataViews,
   esClient,
   savedObjectsClient,
-  chat,
+  chatCompletion,
   messages,
   signal,
 }: {
@@ -31,7 +31,7 @@ export async function getRelevantFieldNames({
   esClient: ElasticsearchClient;
   savedObjectsClient: SavedObjectsClientContract;
   messages: Message[];
-  chat: FunctionCallChatFunction;
+  chatCompletion: FunctionCallChatFunction;
   signal: AbortSignal;
 }): Promise<{ fields: string[]; stats: { analyzed: number; total: number } }> {
   const dataViewsService = await dataViews.dataViewsServiceFactory(savedObjectsClient, esClient);
@@ -97,7 +97,7 @@ export async function getRelevantFieldNames({
   const relevantFields = await Promise.all(
     chunk(fieldNamesToAnalyze, FIELD_NAMES_PER_CHUNK).map(async (fieldsInChunk) => {
       const chunkResponse$ = (
-        await chat('get_relevant_dataset_names', {
+        await chatCompletion('get_relevant_dataset_names', {
           signal,
           messages: [
             {

@@ -26,8 +26,8 @@ import { FunctionDefinition } from '../common';
 
 export const mockChatService: ObservabilityAIAssistantChatService = {
   sendAnalyticsEvent: noop,
-  chat: (options) => new Observable<ChatCompletionChunkEvent>(),
-  complete: (options) => new Observable<StreamingChatResponseEventWithoutError>(),
+  chatCompletion: (options) => new Observable<ChatCompletionChunkEvent>(),
+  recursiveChatCompletion: (options) => new Observable<StreamingChatResponseEventWithoutError>(),
   getFunctions: () => [buildFunctionElasticsearch(), buildFunctionServiceSummary()],
   functions$: new BehaviorSubject<FunctionDefinition[]>([] as FunctionDefinition[]),
   renderFunction: (name) => (

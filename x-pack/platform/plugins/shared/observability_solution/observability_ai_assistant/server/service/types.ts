@@ -30,13 +30,13 @@ export type RespondFunctionResources = Pick<
 
 export type ChatFunction = (
   name: string,
-  params: Parameters<ObservabilityAIAssistantClient['chat']>[1]
+  params: Parameters<ObservabilityAIAssistantClient['chatCompletion']>[1]
 ) => Observable<ChatEvent>;
 
 export type AutoAbortedChatFunction = (
   name: string,
   params: Omit<
-    Parameters<ObservabilityAIAssistantClient['chat']>[1],
+    Parameters<ObservabilityAIAssistantClient['chatCompletion']>[1],
     'simulateFunctionCalling' | 'signal'
   >
 ) => Observable<ChatEvent>;
@@ -44,7 +44,7 @@ export type AutoAbortedChatFunction = (
 export type FunctionCallChatFunction = (
   name: string,
   params: Omit<
-    Parameters<ObservabilityAIAssistantClient['chat']>[1],
+    Parameters<ObservabilityAIAssistantClient['chatCompletion']>[1],
     'connectorId' | 'simulateFunctionCalling' | 'tracer'
   >
 ) => Observable<ChatEvent>;
@@ -54,7 +54,7 @@ type RespondFunction<TArguments, TResponse extends FunctionResponse> = (
     arguments: TArguments;
     messages: Message[];
     screenContexts: ObservabilityAIAssistantScreenContextRequest[];
-    chat: FunctionCallChatFunction;
+    chatCompletion: FunctionCallChatFunction;
     connectorId: string;
     useSimulatedFunctionCalling: boolean;
   },

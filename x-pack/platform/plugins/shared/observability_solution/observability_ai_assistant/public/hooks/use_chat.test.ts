@@ -24,8 +24,8 @@ import * as useKibanaModule from './use_kibana';
 type MockedChatService = DeeplyMockedKeys<ObservabilityAIAssistantChatService>;
 
 const mockChatService: MockedChatService = {
-  chat: jest.fn(),
-  complete: jest.fn(),
+  chatCompletion: jest.fn(),
+  recursiveChatCompletion: jest.fn(),
   sendAnalyticsEvent: jest.fn(),
   functions$: new BehaviorSubject<FunctionDefinition[]>([]) as MockedChatService['functions$'],
   getFunctions: jest.fn().mockReturnValue([]),
@@ -119,7 +119,7 @@ describe('useChat', () => {
 
       subject = new Subject();
 
-      mockChatService.complete.mockReturnValueOnce(subject);
+      mockChatService.recursiveChatCompletion.mockReturnValueOnce(subject);
 
       act(() => {
         hookResult.result.current.next([
@@ -266,7 +266,9 @@ describe('useChat', () => {
       });
 
       it('shows the partial message and sets chatState to aborted', () => {
-        expect(mockChatService.complete.mock.lastCall?.[0].signal.aborted).toBe(true);
+        expect(mockChatService.recursiveChatCompletion.mock.lastCall?.[0].signal.aborted).toBe(
+          true
+        );
       });
     });
 

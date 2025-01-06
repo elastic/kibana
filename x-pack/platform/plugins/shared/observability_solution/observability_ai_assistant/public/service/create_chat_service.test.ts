@@ -79,9 +79,9 @@ describe('createChatService', () => {
     clientSpy.mockReset();
   });
 
-  describe('chat', () => {
+  describe('chatCompletion', () => {
     function chat({ signal }: { signal: AbortSignal } = { signal: new AbortController().signal }) {
-      return service.chat('my_test', {
+      return service.chatCompletion('my_test', {
         signal,
         messages: [],
         connectorId: '',

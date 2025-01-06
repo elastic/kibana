@@ -161,7 +161,7 @@ export class ChatFunctionClient {
   }
 
   async executeFunction({
-    chat,
+    chatCompletion,
     name,
     args,
     messages,
@@ -169,7 +169,7 @@ export class ChatFunctionClient {
     connectorId,
     useSimulatedFunctionCalling,
   }: {
-    chat: FunctionCallChatFunction;
+    chatCompletion: FunctionCallChatFunction;
     name: string;
     args: string | undefined;
     messages: Message[];
@@ -192,7 +192,7 @@ export class ChatFunctionClient {
         arguments: parsedArguments,
         messages,
         screenContexts: this.screenContexts,
-        chat,
+        chatCompletion,
         connectorId,
         useSimulatedFunctionCalling,
       },

@@ -45,7 +45,7 @@ describe('getGeneratedTitle', () => {
     const chatSpy = jest.fn().mockImplementation(() => of(...chunks));
 
     const title$ = getGeneratedTitle({
-      chat: chatSpy,
+      chatCompletion: chatSpy,
       logger: {
         debug: jest.fn(),
         error: jest.fn(),
@@ -182,7 +182,7 @@ describe('getGeneratedTitle', () => {
     };
 
     const title$ = getGeneratedTitle({
-      chat: chatSpy,
+      chatCompletion: chatSpy,
       logger,
       messages,
       tracer: {

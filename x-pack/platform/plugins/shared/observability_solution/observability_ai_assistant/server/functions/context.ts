@@ -33,7 +33,7 @@ export function registerContextFunction({
         'This function provides context as to what the user is looking at on their screen, and recalled documents from the knowledge base that matches their query',
       visibility: FunctionVisibility.Internal,
     },
-    async ({ messages, screenContexts, chat }, signal) => {
+    async ({ messages, screenContexts, chatCompletion: chat }, signal) => {
       const { analytics } = await resources.plugins.core.start();
 
       async function getContext() {
@@ -66,7 +66,7 @@ export function registerContextFunction({
 
         const { scores, relevantDocuments, suggestions } = await recallAndScore({
           recall: client.recall,
-          chat,
+          chatCompletion: chat,
           logger: resources.logger,
           userPrompt,
           context: screenDescription,

@@ -46,7 +46,7 @@ export interface DiscoveredDataset {
 
 export interface ObservabilityAIAssistantChatService {
   sendAnalyticsEvent: (event: TelemetryEventTypeWithPayload) => void;
-  chat: (
+  chatCompletion: (
     name: string,
     options: {
       messages: Message[];
@@ -57,7 +57,7 @@ export interface ObservabilityAIAssistantChatService {
       scopes: AssistantScope[];
     }
   ) => Observable<ChatCompletionChunkEvent>;
-  complete: (options: {
+  recursiveChatCompletion: (options: {
     getScreenContexts: () => ObservabilityAIAssistantScreenContext[];
     conversationId?: string;
     connectorId: string;

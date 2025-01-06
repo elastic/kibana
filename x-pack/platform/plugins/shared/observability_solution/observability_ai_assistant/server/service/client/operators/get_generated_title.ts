@@ -19,24 +19,24 @@ export const TITLE_CONVERSATION_FUNCTION_NAME = 'title_conversation';
 type ChatFunctionWithoutConnectorAndTokenCount = (
   name: string,
   params: Omit<
-    Parameters<ObservabilityAIAssistantClient['chat']>[1],
+    Parameters<ObservabilityAIAssistantClient['chatCompletion']>[1],
     'connectorId' | 'signal' | 'simulateFunctionCalling'
   >
 ) => Observable<ChatEvent>;
 
 export function getGeneratedTitle({
   messages,
-  chat,
+  chatCompletion,
   logger,
   tracer,
 }: {
   messages: Message[];
-  chat: ChatFunctionWithoutConnectorAndTokenCount;
+  chatCompletion: ChatFunctionWithoutConnectorAndTokenCount;
   logger: Pick<Logger, 'debug' | 'error'>;
   tracer: LangTracer;
 }): Observable<string | TokenCountEvent> {
   return hideTokenCountEvents((hide) =>
-    chat('generate_title', {
+    chatCompletion('generate_title', {
       messages: [
         {
           '@timestamp': new Date().toString(),

@@ -131,7 +131,7 @@ export type ScreenContextActionRespondFunction<TArguments> = ({}: {
   args: TArguments;
   signal: AbortSignal;
   connectorId: string;
-  client: Pick<ObservabilityAIAssistantChatService, 'chat' | 'complete'>;
+  client: Pick<ObservabilityAIAssistantChatService, 'chatCompletion' | 'recursiveChatCompletion'>;
   messages: Message[];
 }) => Promise<FunctionResponse>;
 

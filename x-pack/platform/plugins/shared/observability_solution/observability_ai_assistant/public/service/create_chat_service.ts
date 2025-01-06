@@ -52,7 +52,7 @@ import type {
   RenderFunction,
 } from '../types';
 import { readableStreamReaderIntoObservable } from '../utils/readable_stream_reader_into_observable';
-import { complete } from './complete';
+import { recursiveChatCompletion } from './complete';
 import { ChatActionClickHandler } from '../components/chat/types';
 
 const MIN_DELAY = 10;
@@ -179,8 +179,8 @@ class ChatService {
 
   private getClient = () => {
     return {
-      chat: this.chat,
-      complete: this.complete,
+      chatCompletion: this.chatCompletion,
+      recursiveChatCompletion: this.recursiveCompleteCompletion,
     };
   };
 
@@ -288,7 +288,7 @@ class ChatService {
     };
   };
 
-  public chat: ObservabilityAIAssistantChatService['chat'] = (
+  public chatCompletion: ObservabilityAIAssistantChatService['chatCompletion'] = (
     name: string,
     { connectorId, messages, functionCall, functions, signal }
   ) => {
@@ -312,37 +312,38 @@ class ChatService {
     );
   };
 
-  public complete: ObservabilityAIAssistantChatService['complete'] = ({
-    getScreenContexts,
-    connectorId,
-    conversationId,
-    messages,
-    persist,
-    disableFunctions,
-    signal,
-    instructions,
-  }) => {
-    return complete(
-      {
-        getScreenContexts,
-        connectorId,
-        conversationId,
-        messages,
-        persist,
-        disableFunctions,
-        signal,
-        client: this.getClient(),
-        instructions,
-        scopes: this.getScopes(),
-      },
-      ({ params }) => {
-        return this.callStreamingApi('POST /internal/observability_ai_assistant/chat/complete', {
-          params,
+  public recursiveCompleteCompletion: ObservabilityAIAssistantChatService['recursiveChatCompletion'] =
+    ({
+      getScreenContexts,
+      connectorId,
+      conversationId,
+      messages,
+      persist,
+      disableFunctions,
+      signal,
+      instructions,
+    }) => {
+      return recursiveChatCompletion(
+        {
+          getScreenContexts,
+          connectorId,
+          conversationId,
+          messages,
+          persist,
+          disableFunctions,
           signal,
-        });
-      }
-    );
-  };
+          client: this.getClient(),
+          instructions,
+          scopes: this.getScopes(),
+        },
+        ({ params }) => {
+          return this.callStreamingApi('POST /internal/observability_ai_assistant/chat/complete', {
+            params,
+            signal,
+          });
+        }
+      );
+    };
 
   public getScopes() {
     return this.scope$.value;
@@ -362,11 +363,13 @@ export async function createChatService({
   apiClient: ObservabilityAIAssistantAPIClient;
   scope$: BehaviorSubject<AssistantScope[]>;
 }): Promise<ObservabilityAIAssistantChatService> {
-  return new ChatService({
+  const a = new ChatService({
     analytics,
     apiClient,
     scope$,
     registrations,
     abortSignal: setupAbortSignal,
   });
+
+  return a;
 }

@@ -18,7 +18,7 @@ export type RecalledSuggestion = Pick<RecalledEntry, 'id' | 'text' | 'score'>;
 
 export async function recallAndScore({
   recall,
-  chat,
+  chatCompletion: chat,
   analytics,
   userPrompt,
   context,
@@ -27,7 +27,7 @@ export async function recallAndScore({
   signal,
 }: {
   recall: ObservabilityAIAssistantClient['recall'];
-  chat: FunctionCallChatFunction;
+  chatCompletion: FunctionCallChatFunction;
   analytics: AnalyticsServiceStart;
   userPrompt: string;
   context: string;
@@ -64,7 +64,7 @@ export async function recallAndScore({
       userPrompt,
       context,
       signal,
-      chat,
+      chatCompletion: chat,
     });
 
     analytics.reportEvent<RecallRanking>(recallRankingEventType, {

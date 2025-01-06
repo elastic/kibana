@@ -42,7 +42,7 @@ describe('chatFunctionClient', () => {
     it('throws an error', async () => {
       await expect(async () => {
         await client.executeFunction({
-          chat: jest.fn(),
+          chatCompletion: jest.fn(),
           name: 'myFunction',
           args: JSON.stringify({
             foo: 0,
@@ -106,7 +106,7 @@ describe('chatFunctionClient', () => {
       );
 
       const result = await client.executeFunction({
-        chat: jest.fn(),
+        chatCompletion: jest.fn(),
         name: GET_DATA_ON_SCREEN_FUNCTION_NAME,
         args: JSON.stringify({ data: ['my_dummy_data'] }),
         messages: [],

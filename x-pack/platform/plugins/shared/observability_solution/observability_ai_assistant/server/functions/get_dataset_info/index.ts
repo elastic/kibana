@@ -38,7 +38,7 @@ export function registerGetDatasetInfoFunction({
         required: ['index'],
       } as const,
     },
-    async ({ arguments: { index }, messages, chat }, signal) => {
+    async ({ arguments: { index }, messages, chatCompletion: chat }, signal) => {
       const coreContext = await resources.context.core;
 
       const esClient = coreContext.elasticsearch.client;
@@ -85,7 +85,7 @@ export function registerGetDatasetInfoFunction({
         dataViews: await resources.plugins.dataViews.start(),
         savedObjectsClient,
         signal,
-        chat,
+        chatCompletion: chat,
       });
       return {
         content: {
