@@ -29,7 +29,8 @@ const LINK_LABEL = i18n.translate('xpack.elasticAssistant.assistantContext.assis
 });
 
 export const AssistantNavLink: FC = () => {
-  const { chrome, showAssistantOverlay, assistantAvailability, currentAppId } = useAssistantContext();
+  const { chrome, showAssistantOverlay, assistantAvailability, currentAppId } =
+    useAssistantContext();
   const portalNode = React.useMemo(() => createHtmlPortalNode(), []);
   const [chromeStyle, setChromeStyle] = useState<ChromeStyle | undefined>(undefined);
 
@@ -51,7 +52,11 @@ export const AssistantNavLink: FC = () => {
       });
     };
 
-    if (assistantAvailability.hasAssistantPrivilege && chromeStyle && currentAppId !== "management") {
+    if (
+      assistantAvailability.hasAssistantPrivilege &&
+      chromeStyle &&
+      currentAppId !== 'management'
+    ) {
       registerPortalNode();
     }
   }, [chrome, portalNode, assistantAvailability.hasAssistantPrivilege, chromeStyle, currentAppId]);
