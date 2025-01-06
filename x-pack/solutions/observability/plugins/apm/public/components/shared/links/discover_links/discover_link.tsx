@@ -6,8 +6,8 @@
  */
 
 import { EuiLink, EuiLoadingSpinner } from '@elastic/eui';
-import { Location } from 'history';
-import { IBasePath } from '@kbn/core/public';
+import type { Location } from 'history';
+import type { IBasePath } from '@kbn/core/public';
 import React from 'react';
 import { useLocation } from 'react-router-dom';
 import rison from '@kbn/rison';

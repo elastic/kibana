@@ -5,11 +5,8 @@
  * 2.0.
  */
 
-import {
-  areCloudResourcesSetup,
-  createDefaultCloudSetupState,
-  PartialCloudSetupState,
-} from './cloud_setup';
+import type { PartialCloudSetupState } from './cloud_setup';
+import { areCloudResourcesSetup, createDefaultCloudSetupState } from './cloud_setup';
 import { mergePartialSetupStates } from './setup';
 
 const createCloudState = (available: boolean): PartialCloudSetupState => ({ cloud: { available } });
