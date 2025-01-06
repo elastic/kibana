@@ -240,6 +240,7 @@ export function FieldControlForm({
             selectedOptions={selectedFields}
             onChange={onFieldsChange}
             onCreateOption={onCreateOption}
+            data-test-subj="esqlFieldsOptions"
             fullWidth
             compressed
           />

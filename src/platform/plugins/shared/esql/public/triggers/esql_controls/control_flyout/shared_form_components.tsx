@@ -114,6 +114,10 @@ export function ControlType({
         fullWidth
         isDisabled={isDisabled}
         compressed
+        data-test-subj="esqlControlTypeDropdown"
+        inputPopoverProps={{
+          'data-test-subj': 'esqlControlTypeInputPopover',
+        }}
       />
     </EuiFormRow>
   );
@@ -172,6 +176,7 @@ export function VariableName({
           aria-label={i18n.translate('esql.flyout.variableName.placeholder', {
             defaultMessage: 'Set a variable name',
           })}
+          data-test-subj="esqlVariableName"
           fullWidth
           disabled={isControlInEditMode}
           compressed
@@ -207,6 +212,7 @@ export function ControlLabel({
         aria-label={i18n.translate('esql.flyout.label.placeholder', {
           defaultMessage: 'Set a label',
         })}
+        data-test-subj="esqlControlLabel"
         fullWidth
         compressed
       />
@@ -242,6 +248,7 @@ export function ControlWidth({
           onChange={(id) => onMinimumSizeChange(id)}
           type="single"
           isFullWidth
+          data-test-subj="esqlControlMinimumWidth"
         />
       </EuiFormRow>
       <EuiSpacer size="m" />
@@ -253,6 +260,7 @@ export function ControlWidth({
         color="primary"
         checked={grow ?? false}
         onChange={(e) => onGrowChange(e)}
+        data-test-subj="esqlControlGrow"
       />
     </>
   );
