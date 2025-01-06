@@ -22,12 +22,13 @@ import { DatePickerWrapper } from '@kbn/ml-date-picker';
 import * as routes from '../../routing/routes';
 import * as overviewRoutes from '../../routing/routes/overview';
 import * as anomalyDetectionRoutes from '../../routing/routes/anomaly_detection_management';
-import * as dfaRoutes from '../../routing/routes/data_frame_analytics';
+import * as dfaRoutes from '../../routing/routes/data_frame_analytics_management';
 import * as suppliedConfigsRoutes from '../../routing/routes/supplied_configurations';
 import * as settingsRoutes from '../../routing/routes/settings';
 import * as trainedModelsRoutes from '../../routing/routes/trained_models';
 import { MlPageWrapper } from '../../routing/ml_page_wrapper';
 import { useMlKibana, useNavigateToPath } from '../../contexts/kibana';
+import type { NavigateToPath } from '../../contexts/kibana';
 import type { MlRoute, PageDependencies } from '../../routing/router';
 import { useActiveRoute } from '../../routing/use_active_route';
 import { useDocTitle } from '../../routing/use_doc_title';
@@ -36,6 +37,9 @@ import { MlPageHeaderRenderer } from '../page_header/page_header';
 
 import { useSideNavItems } from './side_nav';
 import { useEnabledFeatures } from '../../contexts/ml';
+interface RouteModules {
+  [key: string]: (navigateToPath: NavigateToPath, basePath: string) => MlRoute;
+}
 
 const ML_APP_SELECTOR = '[data-test-subj="mlApp"]';
 
@@ -86,7 +90,7 @@ export const MlPage: FC<{ pageDeps: PageDependencies; entryPoint?: string }> = R
 
     const routeList = useMemo(
       () => {
-        let currentRoutes;
+        let currentRoutes: RouteModules = routes;
 
         switch (entryPoint) {
           case 'overview':
@@ -108,7 +112,7 @@ export const MlPage: FC<{ pageDeps: PageDependencies; entryPoint?: string }> = R
             currentRoutes = settingsRoutes;
             break;
           default:
-            currentRoutes = routes;
+            break;
         }
 
         return Object.values(currentRoutes)

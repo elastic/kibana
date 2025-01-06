@@ -6,12 +6,11 @@
  */
 
 export * from './overview';
-// -- overview section will be replaced
 // export * from './new_job';
-// export * from './datavisualizer';
+export * from './datavisualizer';
 // export * from './jobs_list';
 // export * from './settings';
-// export * from './data_frame_analytics';
+export * from './data_frame_analytics';
 export * from './aiops';
 export { timeSeriesExplorerRouteFactory } from './timeseriesexplorer';
 export * from './explorer';
