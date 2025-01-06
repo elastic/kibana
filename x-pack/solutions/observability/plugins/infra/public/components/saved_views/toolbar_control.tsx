@@ -9,9 +9,9 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButton, EuiPopover, EuiListGroup, EuiListGroupItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { NonEmptyString } from '@kbn/io-ts-utils';
+import type { NonEmptyString } from '@kbn/io-ts-utils';
 import { useBoolean } from '@kbn/react-hooks';
-import {
+import type {
   SavedViewState,
   SavedViewOperations,
   SavedViewItem,

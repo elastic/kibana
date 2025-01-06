@@ -16596,8 +16596,7 @@
                         "type",
                         "data",
                         "created_at",
-                        "ack_data",
-                        "agents"
+                        "ack_data"
                       ],
                       "type": "object"
                     }
@@ -18816,8 +18815,7 @@
                         "type",
                         "data",
                         "created_at",
-                        "ack_data",
-                        "agents"
+                        "ack_data"
                       ],
                       "type": "object"
                     }
