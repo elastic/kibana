@@ -200,6 +200,7 @@ export class CoreVersionedRoute implements VersionedRoute {
       routeInfo: {
         access: this.options.access,
         httpResource: this.options.options?.httpResource,
+        deprecated: handler.options?.options?.deprecated,
       },
       router: this.router,
       log: this.log,

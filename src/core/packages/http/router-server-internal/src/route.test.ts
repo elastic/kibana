@@ -45,7 +45,17 @@ describe('handle', () => {
         handler,
         log,
         method: 'get',
-        route: { path: '/test', validate },
+        route: {
+          path: '/test',
+          validate,
+          options: {
+            deprecated: {
+              severity: 'warning',
+              reason: { type: 'bump', newApiVersion: '123' },
+              documentationUrl: 'http://test.foo',
+            },
+          },
+        },
         routeSchemas: RouteValidator.from(validate),
       });
 
@@ -58,7 +68,11 @@ describe('handle', () => {
         isPublicAccess: false,
       });
       expect(router.emitPostValidate).toHaveBeenNthCalledWith(2, expect.any(Object), {
-        deprecated: undefined,
+        deprecated: {
+          severity: 'warning',
+          reason: { type: 'bump', newApiVersion: '123' },
+          documentationUrl: 'http://test.foo',
+        },
         isInternalApiRequest: false,
         isPublicAccess: false,
       });
@@ -70,7 +84,17 @@ describe('handle', () => {
         handler,
         log,
         method: 'get',
-        route: { path: '/test', validate: false },
+        route: {
+          path: '/test',
+          validate: false,
+          options: {
+            deprecated: {
+              severity: 'warning',
+              reason: { type: 'bump', newApiVersion: '123' },
+              documentationUrl: 'http://test.foo',
+            },
+          },
+        },
         routeSchemas: undefined,
       });
 
@@ -78,7 +102,11 @@ describe('handle', () => {
       expect(router.emitPostValidate).toHaveBeenCalledTimes(1);
 
       expect(router.emitPostValidate).toHaveBeenCalledWith(expect.any(Object), {
-        deprecated: undefined,
+        deprecated: {
+          severity: 'warning',
+          reason: { type: 'bump', newApiVersion: '123' },
+          documentationUrl: 'http://test.foo',
+        },
         isInternalApiRequest: false,
         isPublicAccess: false,
       });

@@ -97,7 +97,7 @@ interface HandlerDependencies extends Dependencies {
   routeSchemas?: RouteValidator<unknown, unknown, unknown>;
 }
 
-type RouteInfo = Pick<RouteConfigOptions<RouteMethod>, 'access' | 'httpResource'>;
+type RouteInfo = Pick<RouteConfigOptions<RouteMethod>, 'access' | 'httpResource' | 'deprecated'>;
 
 interface ValidationContext {
   routeInfo: RouteInfo;
@@ -118,6 +118,8 @@ export function validateHapiRequest(
     kibanaRequest.apiVersion = version;
   } catch (error) {
     kibanaRequest = CoreKibanaRequest.from(request);
+    kibanaRequest.apiVersion = version;
+
     log.error('400 Bad Request', formatErrorMeta(400, { request, error }));
 
     const response = kibanaResponseFactory.badRequest({
@@ -143,7 +145,11 @@ export const handle = async (
   { router, route, handler, routeSchemas, log }: HandlerDependencies
 ) => {
   const { error, ok: kibanaRequest } = validateHapiRequest(request, {
-    routeInfo: { access: route.options?.access, httpResource: route.options?.httpResource },
+    routeInfo: {
+      access: route.options?.access,
+      httpResource: route.options?.httpResource,
+      deprecated: route.options?.deprecated,
+    },
     router,
     log,
     routeSchemas,
@@ -201,7 +207,7 @@ function routeSchemasFromRouteConfig<P, Q, B>(
 
 function getPostValidateEventMetadata(request: AnyKibanaRequest, routeInfo: RouteInfo) {
   return {
-    deprecated: request.route.options.deprecated,
+    deprecated: routeInfo.deprecated,
     isInternalApiRequest: request.isInternalApiRequest,
     isPublicAccess: isPublicAccessApiRoute(routeInfo),
   };

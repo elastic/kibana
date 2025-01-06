@@ -668,13 +668,13 @@ describe('Versioned route', () => {
         {
           version: '1',
           validate: fooValidation,
-        },
-        handlerFn
-      );
-      versionedRouter.post({ path: '/test/{id}', access: 'internal' }).addVersion(
-        {
-          version: '1',
-          validate: false,
+          options: {
+            deprecated: {
+              severity: 'warning',
+              reason: { type: 'bump', newApiVersion: '123' },
+              documentationUrl: 'http://test.foo',
+            },
+          },
         },
         handlerFn
       );
@@ -695,7 +695,11 @@ describe('Versioned route', () => {
         1,
         expect.objectContaining({ apiVersion: '1' }),
         {
-          deprecated: undefined,
+          deprecated: {
+            severity: 'warning',
+            reason: { type: 'bump', newApiVersion: '123' },
+            documentationUrl: 'http://test.foo',
+          },
           isInternalApiRequest: false,
           isPublicAccess: false,
         }
@@ -704,7 +708,11 @@ describe('Versioned route', () => {
         2,
         expect.objectContaining({ apiVersion: '1' }),
         {
-          deprecated: undefined,
+          deprecated: {
+            severity: 'warning',
+            reason: { type: 'bump', newApiVersion: '123' },
+            documentationUrl: 'http://test.foo',
+          },
           isInternalApiRequest: false,
           isPublicAccess: false,
         }
@@ -717,13 +725,13 @@ describe('Versioned route', () => {
         {
           version: '1',
           validate: false,
-        },
-        handlerFn
-      );
-      versionedRouter.post({ path: '/test/{id}', access: 'internal' }).addVersion(
-        {
-          version: '1',
-          validate: false,
+          options: {
+            deprecated: {
+              severity: 'warning',
+              reason: { type: 'bump', newApiVersion: '123' },
+              documentationUrl: 'http://test.foo',
+            },
+          },
         },
         handlerFn
       );
@@ -733,7 +741,11 @@ describe('Versioned route', () => {
       expect(router.emitPostValidate).toHaveBeenCalledWith(
         expect.objectContaining({ apiVersion: '1' }),
         {
-          deprecated: undefined,
+          deprecated: {
+            severity: 'warning',
+            reason: { type: 'bump', newApiVersion: '123' },
+            documentationUrl: 'http://test.foo',
+          },
           isInternalApiRequest: false,
           isPublicAccess: false,
         }
