@@ -17,7 +17,6 @@ export const registerProxyRoute = (deps: RouteDependencies) => {
     {
       path: '/api/console/proxy',
       options: {
-        // tags: ['access:console'],
         body: {
           output: 'stream',
           parse: false,
@@ -25,7 +24,7 @@ export const registerProxyRoute = (deps: RouteDependencies) => {
       },
       security: {
         authz: {
-          requiredPrivileges: ['access:console'],
+          requiredPrivileges: ['console'],
         },
       },
       validate: routeValidationConfig,
