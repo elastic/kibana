@@ -1,0 +1,36 @@
+import {mockDependencies, MockRouter} from "@kbn/enterprise-search-plugin/server/__mocks__";
+import {registerDeprecationRoutes} from "@kbn/enterprise-search-plugin/server/deprecations/routes";
+
+describe('deprecation routes', () => {
+  describe('POST /internal/enterprise_search/deprecations/delete_crawler_connectors', () => {
+    let mockRouter: MockRouter;
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      mockRouter = new MockRouter({
+        method: 'post',
+        path: '/internal/enterprise_search/deprecations/delete_crawler_connectors',
+      });
+
+      registerDeprecationRoutes({
+        ...mockDependencies,
+        router: mockRouter.router,
+      });
+    });
+
+    it('validates correctly with ids and deprecation context', () => {
+      const request = {body: {ids: ["foo"], deprecationDetails: {domainId: 'enterpriseSearch'}}};
+      mockRouter.shouldValidate(request);
+    });
+
+    it('fails validation without ids', () => {
+      const request = {body: {deprecationDetails: {domainId: 'enterpriseSearch'}}};
+      mockRouter.shouldThrow(request);
+    });
+
+    it('fails validation without deprecation context', () => {
+      const request = {body: {ids: ["foo"]}};
+      mockRouter.shouldThrow(request);
+    });
+  });
+});
