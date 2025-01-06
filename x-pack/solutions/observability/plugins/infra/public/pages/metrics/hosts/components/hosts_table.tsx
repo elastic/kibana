@@ -42,7 +42,7 @@ export const HostsTable = () => {
     if (!loading && !hostCountLoading) {
       onPageReady({
         customMetrics: {
-          key1: 'numberOfHosts',
+          key1: 'hostsCount',
           value1: count,
         },
       });

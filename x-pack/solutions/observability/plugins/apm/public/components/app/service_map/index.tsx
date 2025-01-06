@@ -189,7 +189,7 @@ export function ServiceMap({
     onPageReady({
       customMetrics: {
         key1: 'servicesCount',
-        value1: data?.servicesCount,
+        value1: data.servicesCount,
         key2: 'tracesCount',
         value2: data.tracesCount,
       },
