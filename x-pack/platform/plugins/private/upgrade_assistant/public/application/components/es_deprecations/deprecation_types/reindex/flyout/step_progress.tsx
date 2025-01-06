@@ -8,38 +8,64 @@
 import classNames from 'classnames';
 import React, { Fragment, ReactNode } from 'react';
 
-import { EuiIcon, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiIcon, EuiLoadingSpinner, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
 
 import './_step_progress.scss';
 
 type STATUS = 'incomplete' | 'inProgress' | 'complete' | 'failed' | 'paused' | 'cancelled';
 
 const StepStatus: React.FunctionComponent<{ status: STATUS; idx: number }> = ({ status, idx }) => {
+  const { euiTheme } = useEuiTheme();
   if (status === 'incomplete') {
     return <span className="upgStepProgress__status">{idx + 1}.</span>;
   } else if (status === 'inProgress') {
     return <EuiLoadingSpinner size="m" className="upgStepProgress__status" />;
   } else if (status === 'complete') {
     return (
-      <span className="upgStepProgress__status upgStepProgress__status--circle upgStepProgress__status--circle-complete">
+      <span
+        className="upgStepProgress__status upgStepProgress__status--circle"
+        css={css`
+          color: ${euiTheme.colors.textSuccess};
+          background-color: ${euiTheme.colors.backgroundBaseSuccess};
+        `}
+      >
         <EuiIcon type="check" size="s" />
       </span>
     );
   } else if (status === 'paused') {
     return (
-      <span className="upgStepProgress__status upgStepProgress__status--circle upgStepProgress__status--circle-paused">
+      <span
+        className="upgStepProgress__status upgStepProgress__status--circle"
+        css={css`
+          color: ${euiTheme.colors.textWarning};
+          background-color: ${euiTheme.colors.backgroundBaseWarning};
+        `}
+      >
         <EuiIcon type="pause" size="s" />
       </span>
     );
   } else if (status === 'cancelled') {
     return (
-      <span className="upgStepProgress__status upgStepProgress__status--circle upgStepProgress__status--circle-cancelled">
+      <span
+        className="upgStepProgress__status upgStepProgress__status--circle"
+        css={css`
+          color: ${euiTheme.colors.textWarning};
+          background-color: ${euiTheme.colors.backgroundBaseWarning};
+        `}
+      >
         <EuiIcon type="cross" size="s" />
       </span>
     );
   } else if (status === 'failed') {
     return (
-      <span className="upgStepProgress__status upgStepProgress__status--circle upgStepProgress__status--circle-failed">
+      <span
+        className="upgStepProgress__status upgStepProgress__status--circle"
+        css={css`
+          color: ${euiTheme.colors.textDanger};
+          background-color: ${euiTheme.colors.backgroundBaseDanger};
+        `}
+      >
         <EuiIcon type="cross" size="s" />
       </span>
     );
