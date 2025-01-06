@@ -51,13 +51,7 @@
             "description": [],
             "signature": [
               "() => ",
-              {
-                "pluginId": "@kbn/core-doc-links-server",
-                "scope": "server",
-                "docId": "kibKbnCoreDocLinksServerPluginApi",
-                "section": "def-server.DocLinksServiceSetup",
-                "text": "DocLinksServiceSetup"
-              }
+              "DocLinksServiceSetup"
             ],
             "path": "packages/core/doc-links/core-doc-links-server-mocks/src/doc_links_service.mock.ts",
             "deprecated": false,
@@ -74,13 +68,7 @@
             "description": [],
             "signature": [
               "() => ",
-              {
-                "pluginId": "@kbn/core-doc-links-server",
-                "scope": "server",
-                "docId": "kibKbnCoreDocLinksServerPluginApi",
-                "section": "def-server.DocLinksServiceSetup",
-                "text": "DocLinksServiceSetup"
-              }
+              "DocLinksServiceSetup"
             ],
             "path": "packages/core/doc-links/core-doc-links-server-mocks/src/doc_links_service.mock.ts",
             "deprecated": false,
