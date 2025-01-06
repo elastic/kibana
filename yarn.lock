@@ -5101,7 +5101,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-ui-settings-server-internal@link:packages/core/ui-settings/core-ui-settings-server-internal":
+"@kbn/core-ui-settings-server-internal@link:src/core/packages/ui-settings/server-internal":
   version "0.0.0"
   uid ""
 
