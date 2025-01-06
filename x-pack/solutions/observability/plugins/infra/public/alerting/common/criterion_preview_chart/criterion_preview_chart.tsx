@@ -5,15 +5,17 @@
  * 2.0.
  */
 
-import React, { useMemo, FC, PropsWithChildren } from 'react';
-import { niceTimeFormatter, TooltipProps } from '@elastic/charts';
+import type { FC, PropsWithChildren } from 'react';
+import React, { useMemo } from 'react';
+import type { TooltipProps } from '@elastic/charts';
+import { niceTimeFormatter } from '@elastic/charts';
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 import { EuiLoadingChart, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { sum, min as getMin, max as getMax } from 'lodash';
 import { formatNumber } from '../../../../common/formatters/number';
-import { GetLogAlertsChartPreviewDataSuccessResponsePayload } from '../../../../common/http_api';
+import type { GetLogAlertsChartPreviewDataSuccessResponsePayload } from '../../../../common/http_api';
 
 type Series = GetLogAlertsChartPreviewDataSuccessResponsePayload['data']['series'];
 
