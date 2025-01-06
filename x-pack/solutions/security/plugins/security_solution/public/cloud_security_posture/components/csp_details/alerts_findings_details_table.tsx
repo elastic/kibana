@@ -6,6 +6,7 @@
  */
 
 import React, { memo, useCallback, useEffect, useState } from 'react';
+import { encode } from '@kbn/rison';
 import { capitalize } from 'lodash';
 import type { Criteria, EuiBasicTableColumn, EuiTableSortingType } from '@elastic/eui';
 import { EuiSpacer, EuiPanel, EuiText, EuiBasicTable, EuiIcon, EuiLink } from '@elastic/eui';
@@ -26,6 +27,7 @@ import {
   OPEN_IN_ALERTS_TITLE_STATUS,
   OPEN_IN_ALERTS_TITLE_USERNAME,
 } from '../../../overview/components/detection_response/translations';
+import { URL_PARAM_KEY } from '../../../common/hooks/use_url_state';
 import { useNavigateToAlertsPageWithFilters } from '../../../common/hooks/use_navigate_to_alerts_page_with_filters';
 import { DocumentDetailsPreviewPanelKey } from '../../../flyout/document_details/shared/constants/panel_keys';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
@@ -114,6 +116,16 @@ export const AlertsDetailsTable = memo(
     };
 
     const { to, from } = useGlobalTime();
+    const timerange = encode({
+      global: {
+        [URL_PARAM_KEY.timerange]: {
+          kind: 'absolute',
+          from,
+          to,
+        },
+      },
+    });
+
     const { signalIndexName } = useSignalIndex();
     const { data, setQuery } = useQueryAlerts({
       query: buildEntityAlertsQuery({
@@ -327,9 +339,10 @@ export const AlertsDetailsTable = memo(
               fieldName: 'kibana.alert.workflow_status',
             },
           ],
-          true
+          true,
+          timerange
         ),
-      [field, openAlertsPageWithFilters, value]
+      [field, openAlertsPageWithFilters, timerange, value]
     );
 
     return (
