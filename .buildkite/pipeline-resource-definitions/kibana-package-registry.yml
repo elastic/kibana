@@ -21,7 +21,8 @@ spec:
       env:
         SLACK_NOTIFICATIONS_CHANNEL: "#kibana-operations-alerts"
         ELASTIC_SLACK_NOTIFICATIONS_ENABLED: "true"
-        REPORT_FAILED_TESTS_TO_GITHUB: 'true'
+        REPORT_FAILED_TESTS_TO_GITHUB: "true"
+        FLEET_PACKAGE_REGISTRY_DOCKER_IMAGE: "docker.elastic.co/package-registry/distribution:lite"
       repository: elastic/kibana
       branch_configuration: main
       default_branch: main
