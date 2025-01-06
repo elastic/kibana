@@ -429,6 +429,8 @@ export function LensEditConfigurationFlyout({
                   datasourceId={datasourceId}
                   framePublicAPI={framePublicAPI}
                   setIsInlineFlyoutVisible={setIsInlineFlyoutVisible}
+                  updateSuggestion={updateSuggestion}
+                  setCurrentAttributes={setCurrentAttributes}
                 />
                 <EuiSpacer />
               </>

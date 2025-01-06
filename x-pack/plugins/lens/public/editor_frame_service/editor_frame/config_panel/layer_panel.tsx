@@ -89,10 +89,15 @@ export function LayerPanel(props: LayerPanelProps) {
     attributes,
     dataLoading$,
     lensAdapters,
-    startDependencies,
+    data,
     updateSuggestion,
     setCurrentAttributes,
   } = props;
+
+  const startDependencies = useMemo(
+    () => ({ data, dataViews: props.dataViews }),
+    [data, props.dataViews]
+  );
 
   const isInlineEditing = Boolean(props?.setIsInlineFlyoutVisible);
 
@@ -387,7 +392,7 @@ export function LayerPanel(props: LayerPanelProps) {
   const adHocDataViews = Object.values(attributes.state.adHocDataViews!);
   const hideTimeFilterInfo = false;
 
-  const datasourceState = attributes.state.datasourceStates[datasourceId];
+  const datasourceState = layerDatasourceState;
   const activeDatasource = datasourceMap[datasourceId];
 
   const previousAdapters = useRef<Partial<DefaultInspectorAdapters> | undefined>(lensAdapters);
@@ -586,7 +591,6 @@ export function LayerPanel(props: LayerPanelProps) {
                 isTableView={attributes.visualizationType !== 'lnsDatatable'}
                 setIsAccordionOpen={setIsESQLResultsAccordionOpen}
                 query={query as AggregateQuery}
-                // isTableView={attributes.visualizationType !== 'lnsDatatable'}
                 onAccordionToggleCb={(status) => {
                   if (status && isSuggestionsAccordionOpen) {
                     setIsSuggestionsAccordionOpen(!status);

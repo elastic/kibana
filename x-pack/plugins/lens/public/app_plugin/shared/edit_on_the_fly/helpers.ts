@@ -47,7 +47,7 @@ const getDSLFilter = (queryService: DataPublicPluginStart['query'], timeFieldNam
 export const getGridAttrs = async (
   query: AggregateQuery,
   adHocDataViews: DataViewSpec[],
-  deps: LensPluginStartDependencies,
+  deps: Pick<LensPluginStartDependencies, 'dataViews' | 'data'>,
   abortController?: AbortController
 ): Promise<ESQLDataGridAttrs> => {
   const indexPattern = getIndexPatternFromESQLQuery(query.esql);
@@ -81,7 +81,7 @@ export const getGridAttrs = async (
 
 export const getSuggestions = async (
   query: AggregateQuery,
-  deps: LensPluginStartDependencies,
+  deps: Pick<LensPluginStartDependencies, 'dataViews' | 'data'>,
   datasourceMap: DatasourceMap,
   visualizationMap: VisualizationMap,
   adHocDataViews: DataViewSpec[],

@@ -264,6 +264,12 @@ export function LayerPanels(
           !hidden && (
             <LayerPanel
               {...props}
+              attributes={props.attributes}
+              data={props.data}
+              dataViews={props.dataViews}
+              setCurrentAttributes={props.setCurrentAttributes}
+              updateSuggestion={props.updateSuggestion}
+              dataLoading$={props.dataLoading$}
               onDropToDimension={handleDimensionDrop}
               registerLibraryAnnotationGroup={registerLibraryAnnotationGroupFunction}
               dimensionGroups={groups}

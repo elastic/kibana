@@ -30,6 +30,8 @@ export function LayerConfiguration({
   onlyAllowSwitchToSubtypes,
   lensAdapters,
   dataLoading$,
+  setCurrentAttributes,
+  updateSuggestion,
 }: LayerConfigurationProps) {
   const dispatch = useLensDispatch();
   const { euiTheme } = useEuiTheme();
@@ -68,7 +70,9 @@ export function LayerConfiguration({
     indexPatternService,
     setIsInlineFlyoutVisible,
     getUserMessages,
-    startDependencies,
+    data: startDependencies.data,
+    setCurrentAttributes,
+    updateSuggestion,
   };
   return (
     <div
