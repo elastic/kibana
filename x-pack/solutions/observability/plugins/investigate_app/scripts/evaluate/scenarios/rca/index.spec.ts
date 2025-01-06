@@ -25,6 +25,8 @@ type ToolCallMessage =
   | ObservationToolMessage
   | ToolErrorMessage;
 
+const ALERT_FIXTURE_ID = '0265d890-8d8d-4c7e-a5bd-a3951f79574e';
+
 describe('Root cause analysis', () => {
   const investigations: string[] = [];
   function countEntities(entities: InvestigateEntityToolMessage[]) {
@@ -82,7 +84,16 @@ describe('Root cause analysis', () => {
 
   it('can accurately pinpoint the root cause of cartservice bad entrypoint failure', async () => {
     const rcaChatClient = chatClient as RCAChatClient;
-    const investigationId = await rcaChatClient.createInvestigation();
+    const { from, to } = await rcaChatClient.getTimeRange({
+      alertId: ALERT_FIXTURE_ID,
+      fromOffset: 'now-15m',
+      toOffset: 'now+15m',
+    });
+    const investigationId = await rcaChatClient.createInvestigation({
+      alertId: ALERT_FIXTURE_ID,
+      from,
+      to,
+    });
     const response = await rcaChatClient.archiveData();
     investigations.push(investigationId);
     const events = await rcaChatClient.rootCauseAnalysis({ investigationId });
@@ -110,7 +121,7 @@ describe('Root cause analysis', () => {
     ${report.response.report}
     `;
 
-    const conversation = await chatClient.complete(prompt);
+    const conversation = await chatClient.complete({ messages: prompt });
 
     await chatClient.evaluate(conversation, [
       'Effectively reflects the actual root cause in the report. The actual root cause of the system failure was a misconfiguration related to the `cartservice`. A bad container entrypoint was configured for the cart service, causing it to fail to start',
@@ -122,8 +133,8 @@ describe('Root cause analysis', () => {
 
   after(async () => {
     const rcaChatClient = chatClient as RCAChatClient;
-    for (const investigationId of investigations) {
-      await rcaChatClient.deleteInvestigationItem({ investigationId });
-    }
+    // for (const investigationId of investigations) {
+    //   await rcaChatClient.deleteInvestigation({ investigationId });
+    // }
   });
 });
