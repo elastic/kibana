@@ -13,7 +13,7 @@ import { flattenObject } from '@kbn/key-value-metadata-table';
 import type { KeyValuePair } from '@kbn/key-value-metadata-table';
 import { maybe } from '../../../../common/utils/maybe';
 import { asMutableArray } from '../../../../common/utils/as_mutable_array';
-import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
+import type { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 import { PROCESSOR_EVENT, TRACE_ID } from '../../../../common/es_fields/apm';
 import { getTypedSearch } from '../../../utils/create_typed_es_client';
 import { getDownstreamServiceResource } from '../get_observability_alert_details_context/get_downstream_dependency_name';
