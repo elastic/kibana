@@ -3,5 +3,5 @@
   "id": "@kbn/content-management-favorites-common",
   "owner": "@elastic/appex-sharedux",
   "group": "platform",
-  "visibility": "private"
+  "visibility": "shared"
 }
