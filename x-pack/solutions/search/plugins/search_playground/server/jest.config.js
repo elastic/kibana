@@ -15,5 +15,7 @@ module.exports = {
   collectCoverageFrom: [
     '<rootDir>/x-pack/solutions/search/plugins/search_playground/server/**/*.{ts,tsx}',
   ],
-  setupFilesAfterEnv: ['<rootDir>/x-pack/solutions/search/plugins/search_playground/server/setup.ts']
+  setupFilesAfterEnv: [
+    '<rootDir>/x-pack/solutions/search/plugins/search_playground/server/setup.ts',
+  ],
 };

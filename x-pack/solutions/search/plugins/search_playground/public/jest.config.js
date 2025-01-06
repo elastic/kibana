@@ -15,5 +15,4 @@ module.exports = {
   collectCoverageFrom: [
     '<rootDir>/x-pack/solutions/search/plugins/search_playground/{public}/**/*.{ts,tsx}',
   ],
-  
 };
