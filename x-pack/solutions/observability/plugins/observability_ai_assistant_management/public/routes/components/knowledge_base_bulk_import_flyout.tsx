@@ -47,13 +47,13 @@ export function KnowledgeBaseBulkImportFlyout({ onClose }: { onClose: () => void
   };
 
   const handleSubmitNewEntryClick = async () => {
-    let entries: Array<Omit<KnowledgeBaseEntry, '@timestamp' | 'title'> & { title: string }> = [];
     const text = await files[0].text();
 
     const elements = text.split('\n').filter(Boolean);
 
     try {
-      entries = elements.map((el) => JSON.parse(el));
+      const entries: Array<Omit<KnowledgeBaseEntry, '@timestamp' | 'title'> & { title: string }> =
+        elements.map((el) => JSON.parse(el));
       await mutateAsync({ entries });
     } catch (_) {
       toasts.addError(
