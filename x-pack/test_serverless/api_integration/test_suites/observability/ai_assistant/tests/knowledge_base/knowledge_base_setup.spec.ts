@@ -15,15 +15,14 @@ import {
 
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 
+export const KNOWLEDGE_BASE_SETUP_API_URL = '/internal/observability_ai_assistant/kb/setup';
+
 export default function ApiTest({ getService }: FtrProviderContext) {
   const ml = getService('ml');
   const es = getService('es');
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantAPIClient');
 
   describe('/internal/observability_ai_assistant/kb/setup', function () {
-    // TODO: https://github.com/elastic/kibana/issues/192886 kb/setup error
-    this.tags(['skipMKI']);
-
     before(async () => {
       await deleteKnowledgeBaseModel(ml).catch(() => {});
       await deleteInferenceEndpoint({ es }).catch(() => {});
@@ -33,7 +32,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       await createKnowledgeBaseModel(ml);
       const res = await observabilityAIAssistantAPIClient
         .slsAdmin({
-          endpoint: 'POST /internal/observability_ai_assistant/kb/setup',
+          endpoint: `POST ${KNOWLEDGE_BASE_SETUP_API_URL}`,
           params: {
             query: {
               model_id: TINY_ELSER.id,
@@ -52,7 +51,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     it('returns bad request if model cannot be installed', async () => {
       const res = await observabilityAIAssistantAPIClient
         .slsAdmin({
-          endpoint: 'POST /internal/observability_ai_assistant/kb/setup',
+          endpoint: `POST ${KNOWLEDGE_BASE_SETUP_API_URL}`,
           params: {
             query: {
               model_id: TINY_ELSER.id,
@@ -65,6 +64,21 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       expect(res.body.message).to.include.string(
         'No known trained model with model_id [pt_tiny_elser]'
       );
+    });
+
+    describe('security roles and access privileges', () => {
+      it('should deny access for users without the ai_assistant privilege', async () => {
+        await observabilityAIAssistantAPIClient
+          .slsUnauthorized({
+            endpoint: `POST ${KNOWLEDGE_BASE_SETUP_API_URL}`,
+            params: {
+              query: {
+                model_id: TINY_ELSER.id,
+              },
+            },
+          })
+          .expect(403);
+      });
     });
   });
 }

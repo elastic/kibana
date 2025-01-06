@@ -191,7 +191,7 @@ export const PageRouter: FC = () => {
   const isUnprivileged = useSyntheticsPrivileges();
 
   return (
-    <Routes>
+    <Routes enableExecutionContextTracking={true}>
       {routes.map(
         ({
           title,
