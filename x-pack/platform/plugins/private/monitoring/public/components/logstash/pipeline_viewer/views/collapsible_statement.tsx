@@ -6,18 +6,33 @@
  */
 
 import React from 'react';
-import PropTypes from 'prop-types';
+import { css } from '@emotion/react';
 
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import './collapsible_statement.scss';
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, logicalCSS, UseEuiTheme } from '@elastic/eui';
 
-function getToggleIconType(isCollapsed) {
+const collapsibleStatementStyle = ({ euiTheme }: UseEuiTheme) => css`
+  ${logicalCSS('padding-left', euiTheme.size.m)}
+`;
+
+function getToggleIconType(isCollapsed: boolean) {
   return isCollapsed ? 'arrowRight' : 'arrowDown';
 }
 
-export function CollapsibleStatement(props) {
-  const { collapse, expand, id, isCollapsed } = props;
+interface CollapsibleStatementProps {
+  children: React.ReactNode;
+  collapse: (id: string) => void;
+  expand: (id: string) => void;
+  id: string;
+  isCollapsed: boolean;
+}
 
+export function CollapsibleStatement({
+  children,
+  collapse,
+  expand,
+  id,
+  isCollapsed,
+}: CollapsibleStatementProps) {
   const toggleClicked = () => {
     if (isCollapsed) {
       expand(id);
@@ -28,10 +43,10 @@ export function CollapsibleStatement(props) {
 
   return (
     <EuiFlexGroup
-      responsive={false}
-      gutterSize="none"
       alignItems="center"
-      className="monPipelineViewer__collapsibleStatement"
+      css={collapsibleStatementStyle}
+      gutterSize="none"
+      responsive={false}
     >
       <EuiFlexItem key={id} grow={false}>
         <EuiButtonIcon
@@ -42,14 +57,7 @@ export function CollapsibleStatement(props) {
           size="s"
         />
       </EuiFlexItem>
-      {props.children}
+      {children}
     </EuiFlexGroup>
   );
 }
-
-CollapsibleStatement.propTypes = {
-  collapse: PropTypes.func.isRequired,
-  expand: PropTypes.func.isRequired,
-  id: PropTypes.string.isRequired,
-  isCollapsed: PropTypes.bool.isRequired,
-};

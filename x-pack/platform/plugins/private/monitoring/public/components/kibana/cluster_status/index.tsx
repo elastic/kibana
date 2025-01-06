@@ -5,16 +5,25 @@
  * 2.0.
  */
 
-import { EuiBadge, EuiLink, EuiStat, EuiToolTip } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useLocation } from 'react-router-dom';
+import { css } from '@emotion/react';
+import { EuiBadge, EuiLink, EuiStat, euiTextTruncate, EuiToolTip } from '@elastic/eui';
+
+import { i18n } from '@kbn/i18n';
+
 import type { AlertsByName } from '../../../alerts/types';
 import { ExternalConfigContext } from '../../../application/contexts/external_config_context';
 import { formatMetric } from '../../../lib/format_number';
 import { getSafeForExternalLink } from '../../../lib/get_safe_for_external_link';
 import { DefaultStatusIndicator, SummaryStatus } from '../../summary_status';
 import { KibanaStatusIcon } from '../status_icon';
+
+const summaryStatusNoWrapStatStyle = css`
+  p {
+    ${euiTextTruncate()}
+  }
+`;
 
 interface ClusterStatusProps {
   stats: {
@@ -159,7 +168,7 @@ function OverviewPageStatusIndicator({ staleMessage }: IndicatorProps) {
       title={title}
       titleSize="xxxs"
       textAlign="left"
-      className="monSummaryStatusNoWrap__stat"
+      css={summaryStatusNoWrapStatStyle}
     />
   );
 }
@@ -187,7 +196,7 @@ function InstancesPageStatusIndicator({ staleMessage }: IndicatorProps) {
       title={title}
       titleSize="xxxs"
       textAlign="left"
-      className="monSummaryStatusNoWrap__stat"
+      css={summaryStatusNoWrapStatStyle}
     />
   );
 }
