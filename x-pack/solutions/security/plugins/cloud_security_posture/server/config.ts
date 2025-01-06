@@ -40,7 +40,6 @@ export type CloudSecurityPostureConfig = TypeOf<typeof configSchema>;
 export const config: PluginConfigDescriptor<CloudSecurityPostureConfig> = {
   schema: configSchema,
   exposeToBrowser: {
-    serverless: true,
     enableExperimental: true,
   },
 };
