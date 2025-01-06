@@ -1087,7 +1087,7 @@
     "@xstate5/react": "npm:@xstate/react@^4.1.2",
     "@xyflow/react": "^12.3.5",
     "adm-zip": "^0.5.9",
-    "ai": "^2.2.33",
+    "ai": "^4.0.18",
     "ajv": "^8.17.1",
     "ansi-regex": "^6.1.0",
     "antlr4": "^4.13.1-patch-1",
