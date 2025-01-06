@@ -12,8 +12,8 @@ import { createHtmlPortalNode, OutPortal, InPortal } from 'react-reverse-portal'
 import { EuiToolTip, EuiButton, EuiFlexGroup, EuiFlexItem, EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ChromeStyle } from '@kbn/core-chrome-browser';
-import { useAssistantContext } from '.';
 import { AssistantIcon } from '@kbn/ai-assistant-icon';
+import { useAssistantContext } from '.';
 
 const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
 
