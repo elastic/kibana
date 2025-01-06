@@ -24,6 +24,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   describe('List connectors', () => {
     let roleAuthc: RoleCredentials;
     let internalReqHeader: InternalRequestHeader;
+
     before(async () => {
       roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('editor');
       internalReqHeader = svlCommonApi.getInternalRequestHeader();
@@ -45,19 +46,15 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
     it('Returns a 2xx for enterprise license', async () => {
       await observabilityAIAssistantAPIClient
-        .slsUser({
-          endpoint: 'GET /internal/observability_ai_assistant/connectors',
-          roleAuthc,
-          internalReqHeader,
+        .slsEditor({
+          endpoint: `GET /internal/observability_ai_assistant/connectors`,
         })
         .expect(200);
     });
 
     it('returns an empty list of connectors', async () => {
-      const res = await observabilityAIAssistantAPIClient.slsUser({
-        endpoint: 'GET /internal/observability_ai_assistant/connectors',
-        roleAuthc,
-        internalReqHeader,
+      const res = await observabilityAIAssistantAPIClient.slsEditor({
+        endpoint: `GET /internal/observability_ai_assistant/connectors`,
       });
 
       expect(res.body.length).to.be(0);
@@ -72,10 +69,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         roleAuthc,
       });
 
-      const res = await observabilityAIAssistantAPIClient.slsUser({
-        endpoint: 'GET /internal/observability_ai_assistant/connectors',
-        internalReqHeader,
-        roleAuthc,
+      const res = await observabilityAIAssistantAPIClient.slsEditor({
+        endpoint: `GET /internal/observability_ai_assistant/connectors`,
       });
 
       expect(res.body.length).to.be(1);
@@ -86,6 +81,16 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         log,
         internalReqHeader,
         roleAuthc,
+      });
+    });
+
+    describe('security roles and access privileges', () => {
+      it('should deny access for users without the ai_assistant privilege', async () => {
+        await observabilityAIAssistantAPIClient
+          .slsUnauthorized({
+            endpoint: `GET /internal/observability_ai_assistant/connectors`,
+          })
+          .expect(403);
       });
     });
   });

@@ -17,6 +17,7 @@ import type {
   HasEditCapabilities,
   HasInPlaceLibraryTransforms,
   HasLibraryTransforms,
+  HasParentApi,
   HasSupportedTriggers,
   PublishesBlockingError,
   PublishesDataLoading,
@@ -25,6 +26,7 @@ import type {
   PublishesSavedObjectId,
   PublishesUnifiedSearch,
   PublishesViewMode,
+  PublishesRendered,
   PublishesWritablePanelDescription,
   PublishesWritablePanelTitle,
   PublishingSubject,
@@ -62,6 +64,8 @@ import type { AllowedGaugeOverrides } from '@kbn/expression-gauge-plugin/common'
 import type { AllowedPartitionOverrides } from '@kbn/expression-partition-vis-plugin/common';
 import type { AllowedXYOverrides } from '@kbn/expression-xy-plugin/common';
 import type { Action } from '@kbn/ui-actions-plugin/public';
+import { PresentationContainer } from '@kbn/presentation-containers';
+import { PublishesSearchSession } from '@kbn/presentation-publishing/interfaces/fetch/publishes_search_session';
 import type { LegacyMetricState } from '../../common';
 import type { LensDocument } from '../persistence';
 import type { LensInspector } from '../lens_inspector_service';
@@ -80,6 +84,7 @@ import type {
   SharingSavedObjectProps,
   Simplify,
   UserMessage,
+  VisualizationDisplayOptions,
   VisualizationMap,
 } from '../types';
 import type { LensPluginStartDependencies } from '../plugin';
@@ -95,8 +100,12 @@ interface LensApiProps {}
 
 export type LensSavedObjectAttributes = Omit<LensDocument, 'savedObjectId' | 'type'>;
 
+/**
+ * This visualization context can have a different attributes than the
+ * one stored in the Lens API attributes
+ */
 export interface VisualizationContext {
-  doc: LensDocument | undefined;
+  activeAttributes: LensDocument | undefined;
   mergedSearchContext: ExecutionContextSearch;
   indexPatterns: IndexPatternMap;
   indexPatternRefs: IndexPatternRef[];
@@ -106,6 +115,7 @@ export interface VisualizationContext {
 }
 
 export interface VisualizationContextHelper {
+  // the doc prop here is a convenience reference to the internalApi.attributes
   getVisualizationContext: () => VisualizationContext;
   updateVisualizationContext: (newContext: Partial<VisualizationContext>) => void;
 }
@@ -125,7 +135,10 @@ export type LensEmbeddableStartServices = Simplify<
     coreStart: CoreStart;
     capabilities: RecursiveReadonly<Capabilities>;
     expressionRenderer: ReactExpressionRendererType;
-    documentToExpression: (doc: LensDocument) => Promise<DocumentToExpressionReturnType>;
+    documentToExpression: (
+      doc: LensDocument,
+      forceDSL?: boolean
+    ) => Promise<DocumentToExpressionReturnType>;
     injectFilterReferences: FilterManager['inject'];
     visualizationMap: VisualizationMap;
     datasourceMap: DatasourceMap;
@@ -251,6 +264,7 @@ export interface LensSharedProps {
   className?: string;
   noPadding?: boolean;
   viewMode?: ViewMode;
+  forceDSL?: boolean;
 }
 
 interface LensRequestHandlersProps {
@@ -275,7 +289,7 @@ export type LensSerializedState = Simplify<
     LensUnifiedSearchContext &
     LensPanelProps &
     SerializedTitles &
-    LensSharedProps &
+    Omit<LensSharedProps, 'noPadding'> &
     Partial<DynamicActionsSerializedState> & { isNewPanel?: boolean }
 >;
 
@@ -313,7 +327,13 @@ export type LensComponentProps = Simplify<
  */
 export type LensComponentForwardedProps = Pick<
   LensComponentProps,
-  'style' | 'className' | 'noPadding' | 'abortController' | 'executionContext' | 'viewMode'
+  | 'style'
+  | 'className'
+  | 'noPadding'
+  | 'abortController'
+  | 'executionContext'
+  | 'viewMode'
+  | 'forceDSL'
 >;
 
 /**
@@ -337,7 +357,10 @@ export type LensRendererProps = Simplify<LensRendererPrivateProps>;
 export type LensRuntimeState = Simplify<
   Omit<ComponentSerializedProps, 'attributes' | 'references'> & {
     attributes: NonNullable<LensSerializedState['attributes']>;
-  } & Pick<LensComponentForwardedProps, 'viewMode' | 'abortController' | 'executionContext'> &
+  } & Pick<
+      LensComponentForwardedProps,
+      'viewMode' | 'abortController' | 'executionContext' | 'forceDSL'
+    > &
     ContentManagementProps
 >;
 
@@ -360,8 +383,12 @@ export type LensApi = Simplify<
     PublishesBlockingError &
     // This is used by dashboard/container to show filters/queries on the panel
     PublishesUnifiedSearch &
+    // Forward the search session id
+    PublishesSearchSession &
     // Let the container know the loading state
     PublishesDataLoading &
+    // Let the container know when the rendering has completed rendering
+    PublishesRendered &
     // Let the container know the used data views
     PublishesDataViews &
     // Let the container operate on panel title/description
@@ -375,6 +402,8 @@ export type LensApi = Simplify<
     HasLibraryTransforms<LensRuntimeState> &
     // Let the container know the view mode
     PublishesViewMode &
+    // forward the parentApi, note that will be exposed only if it satisfy the PresentationContainer interface
+    Partial<HasParentApi<PresentationContainer>> &
     // Let the container know the saved object id
     PublishesSavedObjectId &
     // Lens specific API methods:
@@ -388,7 +417,8 @@ export type LensApi = Simplify<
 // there's some overlapping between this and the LensApi but they are shared references
 export type LensInternalApi = Simplify<
   Pick<IntegrationCallbacks, 'updateAttributes' | 'updateOverrides'> &
-    PublishesDataViews & {
+    PublishesDataViews &
+    VisualizationContextHelper & {
       attributes$: PublishingSubject<LensRuntimeState['attributes']>;
       overrides$: PublishingSubject<LensOverrides['overrides']>;
       disableTriggers$: PublishingSubject<LensPanelProps['disableTriggers']>;
@@ -411,6 +441,7 @@ export type LensInternalApi = Simplify<
       validationMessages$: PublishingSubject<UserMessage[]>;
       updateValidationMessages: (newMessages: UserMessage[]) => void;
       resetAllMessages: () => void;
+      getDisplayOptions: () => VisualizationDisplayOptions;
     }
 >;
 

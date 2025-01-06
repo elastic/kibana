@@ -24,6 +24,7 @@ import {
   IndexPatternMap,
   IndexPatternRef,
   UserMessage,
+  VisualizationDisplayOptions,
   isLensFilterEvent,
   isLensMultiFilterEvent,
   isLensTableRowContextMenuClickEvent,
@@ -61,15 +62,20 @@ interface GetExpressionRendererPropsParams {
   api: LensApi;
   addUserMessages: (messages: UserMessage[]) => void;
   updateBlockingErrors: (error: Error) => void;
-  renderCount: number;
+  forceDSL?: boolean;
+  getDisplayOptions: () => VisualizationDisplayOptions;
 }
 
 async function getExpressionFromDocument(
   document: LensDocument,
-  documentToExpression: (doc: LensDocument) => Promise<DocumentToExpressionReturnType>
+  documentToExpression: (
+    doc: LensDocument,
+    forceDSL?: boolean
+  ) => Promise<DocumentToExpressionReturnType>,
+  forceDSL?: boolean
 ) {
   const { ast, indexPatterns, indexPatternRefs, activeVisualizationState, activeDatasourceState } =
-    await documentToExpression(document);
+    await documentToExpression(document, forceDSL);
   return {
     expression: ast ? toExpression(ast) : null,
     indexPatterns,
@@ -146,7 +152,8 @@ export async function getExpressionRendererParams(
     addUserMessages,
     updateBlockingErrors,
     searchContext,
-    renderCount,
+    forceDSL,
+    getDisplayOptions,
   }: GetExpressionRendererPropsParams
 ): Promise<{
   params: ExpressionWrapperProps | null;
@@ -164,7 +171,7 @@ export async function getExpressionRendererParams(
     indexPatternRefs,
     activeVisualizationState,
     activeDatasourceState,
-  } = await getExpressionFromDocument(state.attributes, documentToExpression);
+  } = await getExpressionFromDocument(state.attributes, documentToExpression, forceDSL);
 
   // Apparently this change produces had lots of issues with solutions not using
   // the Embeddable incorrectly. Will comment for now and later on will restore it when
@@ -215,7 +222,7 @@ export async function getExpressionRendererParams(
       variables: getVariables(api, state),
       style: state.style,
       className: state.className,
-      noPadding: state.noPadding,
+      noPadding: getDisplayOptions().noPadding,
     };
     return {
       indexPatterns,

@@ -24,10 +24,19 @@ import { customBrandingServiceMock } from '@kbn/core-custom-branding-browser-moc
 import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
 import { i18nServiceMock } from '@kbn/core-i18n-browser-mocks';
 import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
+import { userProfileServiceMock } from '@kbn/core-user-profile-browser-mocks';
 import { getAppInfo } from '@kbn/core-application-browser-internal';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { findTestSubject } from '@kbn/test-jest-helpers';
 import { ChromeService } from './chrome_service';
+
+const mockhandleSystemColorModeChange = jest.fn();
+
+jest.mock('./handle_system_colormode_change', () => {
+  return {
+    handleSystemColorModeChange: (...args: any[]) => mockhandleSystemColorModeChange(...args),
+  };
+});
 
 class FakeApp implements App {
   public title: string;
@@ -55,6 +64,7 @@ function defaultStartDeps(availableApps?: App[], currentAppId?: string) {
     analytics: analyticsServiceMock.createAnalyticsServiceStart(),
     i18n: i18nServiceMock.createStartContract(),
     theme: themeServiceMock.createStartContract(),
+    userProfile: userProfileServiceMock.createStart(),
     application: applicationServiceMock.createInternalStartContract(currentAppId),
     docLinks: docLinksServiceMock.createStartContract(),
     http: httpServiceMock.createStartContract(),
@@ -201,6 +211,29 @@ describe('start', () => {
     });
 
     expect(startDeps.notifications.toasts.addWarning).not.toBeCalled();
+  });
+
+  it('calls handleSystemColorModeChange() with the correct parameters', async () => {
+    mockhandleSystemColorModeChange.mockReset();
+    await start();
+    expect(mockhandleSystemColorModeChange).toHaveBeenCalledTimes(1);
+
+    const [firstCallArg] = mockhandleSystemColorModeChange.mock.calls[0];
+    expect(Object.keys(firstCallArg).sort()).toEqual([
+      'coreStart',
+      'http',
+      'notifications',
+      'stop$',
+      'uiSettings',
+    ]);
+
+    expect(mockhandleSystemColorModeChange).toHaveBeenCalledWith({
+      http: expect.any(Object),
+      coreStart: expect.any(Object),
+      uiSettings: expect.any(Object),
+      notifications: expect.any(Object),
+      stop$: expect.any(Object),
+    });
   });
 
   describe('getHeaderComponent', () => {

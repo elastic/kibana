@@ -75,7 +75,8 @@ export const getStoryServices = (params: Params, action: ActionFn = () => {}) =>
     getTagManagementUrl: () => '',
     getTagIdsFromReferences: () => [],
     isTaggingEnabled: () => true,
-    isFavoritesEnabled: () => false,
+    isFavoritesEnabled: () => Promise.resolve(false),
+    isKibanaVersioningEnabled: false,
     ...params,
   };
 

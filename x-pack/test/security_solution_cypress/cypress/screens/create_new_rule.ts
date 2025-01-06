@@ -268,18 +268,17 @@ export const NEW_TERMS_TYPE = '[data-test-subj="newTermsRuleType"]';
 
 export const ESQL_TYPE = '[data-test-subj="esqlRuleType"]';
 
-export const ESQL_QUERY_BAR_INPUT_AREA =
-  '[data-test-subj="detectionEngineStepDefineRuleEsqlQueryBar"] textarea';
+export const ESQL_QUERY_BAR_INPUT_AREA = '[data-test-subj="ruleEsqlQueryBar"] textarea';
 
-export const ESQL_QUERY_BAR = '[data-test-subj="detectionEngineStepDefineRuleEsqlQueryBar"]';
+export const ESQL_QUERY_BAR = '[data-test-subj="ruleEsqlQueryBar"]';
 
 export const NEW_TERMS_INPUT_AREA = '[data-test-subj="newTermsInput"]';
 
 export const NEW_TERMS_HISTORY_SIZE =
-  '[data-test-subj="detectionEngineStepDefineRuleHistoryWindowSize"] [data-test-subj="interval"]';
+  '[data-test-subj="historyWindowSize"] [data-test-subj="interval"]';
 
 export const NEW_TERMS_HISTORY_TIME_TYPE =
-  '[data-test-subj="detectionEngineStepDefineRuleHistoryWindowSize"] [data-test-subj="timeType"]';
+  '[data-test-subj="historyWindowSize"] [data-test-subj="timeType"]';
 
 export const LOAD_QUERY_DYNAMICALLY_CHECKBOX =
   '[data-test-subj="detectionEngineStepDefineRuleShouldLoadQueryDynamically"] input';

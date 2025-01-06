@@ -17,16 +17,16 @@ export const fontWeightDefinitions = (euiTheme: UseEuiTheme['euiTheme']) => ({
 export const ToolbarButtonStyles = ({ euiTheme }: UseEuiTheme) => {
   return {
     default: {
-      // style declaration carried over from https://github.com/elastic/kibana/blob/v8.10.4/src/plugins/kibana_react/public/toolbar_button/toolbar_button.scss
+      // style declaration carried over from https://github.com/elastic/kibana/blob/v8.10.4/src/platform/plugins/shared/kibana_react/public/toolbar_button/toolbar_button.scss
       // informed by issue https://github.com/elastic/eui/issues/4730
       borderStyle: 'solid',
       border: euiTheme.border.thin,
       borderColor: euiTheme.border.color,
     },
     emptyButton: {
-      backgroundColor: euiTheme.colors.emptyShade,
+      backgroundColor: euiTheme.colors.backgroundBasePlain,
       border: `${euiTheme.border.thin}`,
-      color: `${euiTheme.colors.text}`,
+      color: `${euiTheme.colors.textParagraph}`,
     },
     buttonPositions: {
       left: {

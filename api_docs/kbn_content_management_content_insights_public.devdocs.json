@@ -65,13 +65,7 @@
                     "label": "http",
                     "description": [],
                     "signature": [
-                      {
-                        "pluginId": "@kbn/core-http-browser",
-                        "scope": "public",
-                        "docId": "kibKbnCoreHttpBrowserPluginApi",
-                        "section": "def-public.HttpSetup",
-                        "text": "HttpSetup"
-                      }
+                      "HttpSetup"
                     ],
                     "path": "packages/content-management/content_insights/content_insights_public/src/client.ts",
                     "deprecated": false,
@@ -221,7 +215,7 @@
         "label": "ActivityView",
         "description": [],
         "signature": [
-          "({ item }: ",
+          "({ item, entityNamePlural }: ",
           {
             "pluginId": "@kbn/content-management-content-insights-public",
             "scope": "public",
@@ -240,7 +234,7 @@
             "id": "def-public.ActivityView.$1",
             "type": "Object",
             "tags": [],
-            "label": "{ item }",
+            "label": "{ item, entityNamePlural }",
             "description": [],
             "signature": [
               {
@@ -421,6 +415,20 @@
             "path": "packages/content-management/content_insights/content_insights_public/src/components/activity_view.tsx",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-management-content-insights-public",
+            "id": "def-public.ActivityViewProps.entityNamePlural",
+            "type": "string",
+            "tags": [],
+            "label": "entityNamePlural",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/content-management/content_insights/content_insights_public/src/components/activity_view.tsx",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -571,6 +579,19 @@
                 "section": "def-public.ContentInsightsClientPublic",
                 "text": "ContentInsightsClientPublic"
               }
+            ],
+            "path": "packages/content-management/content_insights/content_insights_public/src/services.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-management-content-insights-public",
+            "id": "def-public.ContentInsightsServices.isKibanaVersioningEnabled",
+            "type": "boolean",
+            "tags": [],
+            "label": "isKibanaVersioningEnabled",
+            "description": [
+              "\nWhether versioning is enabled for the current kibana instance. (aka is Serverless)\nThis is used to determine if we should show the version mentions in the help text."
             ],
             "path": "packages/content-management/content_insights/content_insights_public/src/services.tsx",
             "deprecated": false,
