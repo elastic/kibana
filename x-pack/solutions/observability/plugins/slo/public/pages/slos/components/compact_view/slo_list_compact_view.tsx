@@ -262,9 +262,14 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
                 defaultMessage: 'Enable',
               })
         )(slo),
-      description: i18n.translate('xpack.slo.item.actions.enable', {
-        defaultMessage: 'Enable',
-      }),
+      description: (slo: SLOWithSummaryResponse) =>
+        slo.enabled
+          ? i18n.translate('xpack.slo.item.actions.disable', {
+              defaultMessage: 'Disable',
+            })
+          : i18n.translate('xpack.slo.item.actions.enable', {
+              defaultMessage: 'Enable',
+            }),
       'data-test-subj': 'sloActionsManage',
       enabled: (slo: SLOWithSummaryResponse) =>
         (permissions?.hasAllWriteRequested && !isRemote(slo)) || hasRemoteKibanaUrl(slo),
