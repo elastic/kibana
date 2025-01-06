@@ -39,13 +39,7 @@ import type {
 } from './types';
 import { SOLUTION_NAME, ASSISTANT_MANAGEMENT_TITLE } from './common/translations';
 
-import {
-  APP_ID,
-  APP_UI_ID,
-  APP_PATH,
-  APP_ICON_SOLUTION,
-  SECURITY_FEATURE_ID,
-} from '../common/constants';
+import { APP_ID, APP_UI_ID, APP_PATH, APP_ICON_SOLUTION } from '../common/constants';
 
 import type { AppLinkItems } from './common/links';
 import { updateAppLinks, type LinksPermissions } from './common/links';
