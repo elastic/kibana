@@ -28,6 +28,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const archive =
     'x-pack/test/functional/es_archives/observability/ai_assistant/knowledge_base_8_15';
 
+  // trying flaky test runner
   describe('When there are knowledge base entries (from 8.15 or earlier) that does not contain semantic_text embeddings', () => {
     before(async () => {
       await clearKnowledgeBase(es);
