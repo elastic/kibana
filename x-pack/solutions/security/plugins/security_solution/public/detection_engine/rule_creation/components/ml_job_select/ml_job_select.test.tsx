@@ -21,7 +21,7 @@ describe('MlJobSelect', () => {
 
   it('renders correctly', () => {
     const Component = () => {
-      const field = useFormFieldMock<string[]>();
+      const field = useFormFieldMock<string[]>({ value: [] });
 
       return <MlJobSelect field={field} loading={false} jobs={[]} />;
     };

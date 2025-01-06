@@ -20,6 +20,12 @@ export function registerDeleteRoute({ router, lib: { handleEsError } }: RouteDep
   router.delete(
     {
       path: addInternalBasePath('/enrich_policies/{name}'),
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Relies on es client for authorization',
+        },
+      },
       validate: { params: paramsSchema },
     },
     async (context, request, response) => {
