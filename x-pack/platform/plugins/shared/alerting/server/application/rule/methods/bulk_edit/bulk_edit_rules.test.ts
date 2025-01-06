@@ -207,6 +207,8 @@ describe('bulkEdit()', () => {
         isDeprecated: false,
       },
     ]);
+    actionsClient.listTypes.mockReset();
+    actionsClient.listTypes.mockResolvedValue([]);
     rulesClientParams.getActionsClient.mockResolvedValue(actionsClient);
 
     authorization.getFindAuthorizationFilter.mockResolvedValue({
