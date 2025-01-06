@@ -236,10 +236,10 @@ export const getStructuredToolForIndexEntry = ({
         logger.debug(() => `Similarity Search Results:\n ${JSON.stringify(result)}`);
         logger.debug(() => `Similarity Text Extract Results:\n ${JSON.stringify(kbDocs)}`);
 
-        return `###\nBelow are all relevant documents in JSON format and their citationElement:
-        ${JSON.stringify(kbDocs)}\n###
-        
-        citationElement: \`!{citation[${indexEntry.name}](/app/management/kibana/securityAiAssistantManagement?tab=knowledge_base&entry_search_term=${indexEntry.id}}\` 
+        return `###\n Below are all relevant documents in JSON format:
+${JSON.stringify(kbDocs)}
+citationElement: "!{citation[${indexEntry.name}](/app/management/kibana/securityAiAssistantManagement?tab=knowledge_base&entry_search_term=${indexEntry.id})}"
+###
         `;
       } catch (e) {
         logger.error(`Error performing IndexEntry KB Similarity Search: ${e.message}`);

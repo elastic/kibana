@@ -13,6 +13,7 @@ export const CustomCitation: React.FC<CustomCitationProps> = ({
     citationNumber
 }) => {
     const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+    
     const togglePopover = () =>
         setIsPopoverOpen((isPopoverOpen) => !isPopoverOpen);
     const closePopover = () => setIsPopoverOpen(false);

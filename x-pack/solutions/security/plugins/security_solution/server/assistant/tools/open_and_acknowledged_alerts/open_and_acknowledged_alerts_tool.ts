@@ -18,8 +18,13 @@ import { DynamicStructuredTool } from '@langchain/core/tools';
 import { requestHasRequiredAnonymizationParams } from '@kbn/elastic-assistant-plugin/server/lib/langchain/helpers';
 import { z } from '@kbn/zod';
 import type { AssistantTool, AssistantToolParams } from '@kbn/elastic-assistant-plugin/server';
-import { APP_UI_ID } from '../../../../common';
+import { APP_PATH, APP_UI_ID } from '../../../../common';
+import { ALERT_DETAILS_REDIRECT_PATH } from '@kbn/security-solution-plugin/common/constants';
 
+const relativeAlertPath = (alertId: string | undefined) => {
+  if (!alertId) return ""
+  return `${APP_PATH}${ALERT_DETAILS_REDIRECT_PATH}/${alertId}`
+}
 export interface OpenAndAcknowledgedAlertsToolParams extends AssistantToolParams {
   alertsIndexPattern: string;
   size: number;
@@ -82,16 +87,14 @@ export const OPEN_AND_ACKNOWLEDGED_ALERTS_TOOL: AssistantTool = {
         return JSON.stringify(
           result.hits?.hits?.map((hit) => {
             return {
-              citationElement: `!{citation[Alert](/app/security/alerts/redirect/${hit._id}}`,
-              //citationUrl: `/app/security/alerts/redirect/${hit._id}`,
-              //citationName: 'Alert',
               content: transformRawData({
                 anonymizationFields,
                 currentReplacements: localReplacements, // <-- the latest local replacements
                 getAnonymizedValue,
                 onNewReplacements: localOnNewReplacements, // <-- the local callback
                 rawData: getRawDataOrDefault(hit.fields)
-              })
+              }),
+              citationElement: `!{citation[Alert](${relativeAlertPath(hit._id)})}`,
             }
           }
           )
@@ -101,3 +104,5 @@ export const OPEN_AND_ACKNOWLEDGED_ALERTS_TOOL: AssistantTool = {
     });
   },
 };
+
+
