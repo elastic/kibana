@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common/parse_technical_fields';
+import type { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common/parse_technical_fields';
 import { ALERT_RULE_PARAMETERS, TIMESTAMP } from '@kbn/rule-data-utils';
 import rison from '@kbn/rison';
 import {
@@ -13,7 +13,7 @@ import {
   flatAlertRuleParams,
   getMetricsViewInAppUrl,
 } from './alert_link';
-import {
+import type {
   InventoryLocator,
   AssetDetailsLocator,
   InventoryLocatorParams,
