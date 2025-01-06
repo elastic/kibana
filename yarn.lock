@@ -4381,7 +4381,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-chrome-browser-internal@link:packages/core/chrome/core-chrome-browser-internal":
+"@kbn/core-chrome-browser-internal@link:src/core/packages/chrome/browser-internal":
   version "0.0.0"
   uid ""
 

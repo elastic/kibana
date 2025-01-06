@@ -22,7 +22,7 @@ export interface CustomBranding {
   pageTitle?: string;
   /**
    * Custom replacement for Elastic Mark
-   * @link packages/core/chrome/core-chrome-browser-internal/src/ui/header/elastic_mark.tsx
+   * @link src/core/packages/chrome/browser-internal/src/ui/header/elastic_mark.tsx
    */
   customizedLogo?: string;
   /**
