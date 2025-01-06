@@ -49,7 +49,9 @@ export function SLOCardItemInstanceBadge({ slo }: Props) {
           </EuiBadge>
         }
       >
-        <SLOGroupings slo={slo} direction="column" truncate={false} />
+        <div onMouseDownCapture={(e: MouseEvent<HTMLDivElement>) => e.stopPropagation()}>
+          <SLOGroupings slo={slo} direction="column" truncate={false} />
+        </div>
       </EuiPopover>
     </EuiFlexItem>
   );
