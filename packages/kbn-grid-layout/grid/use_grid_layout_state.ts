@@ -58,7 +58,7 @@ export const useGridLayoutState = ({
   );
 
   useEffect(() => {
-    accessMode$.next(accessMode);
+    if (accessMode !== accessMode$.getValue()) accessMode$.next(accessMode);
   }, [accessMode, accessMode$]);
 
   const gridLayoutStateManager = useMemo(() => {
@@ -110,9 +110,10 @@ export const useGridLayoutState = ({
           gridSettings.columnCount;
 
         gridLayoutStateManager.runtimeSettings$.next({ ...gridSettings, columnPixelWidth });
-        gridLayoutStateManager.isMobileView$.next(
-          shouldShowMobileView(currentAccessMode, euiTheme.breakpoint.m)
-        );
+        const isMobileView = shouldShowMobileView(currentAccessMode, euiTheme.breakpoint.m);
+        if (isMobileView !== gridLayoutStateManager.isMobileView$.getValue()) {
+          gridLayoutStateManager.isMobileView$.next(isMobileView);
+        }
       });
 
     return () => {

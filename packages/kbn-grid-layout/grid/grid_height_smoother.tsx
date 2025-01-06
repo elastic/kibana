@@ -43,7 +43,7 @@ export const GridHeightSmoother = ({
       smoothHeightRef.current.style.userSelect = 'none';
     });
 
-    const expandedPanelStyleSubscription = gridLayoutStateManager.expandedPanelId$.subscribe(
+    const expandedPanelSubscription = gridLayoutStateManager.expandedPanelId$.subscribe(
       (expandedPanelId) => {
         if (!smoothHeightRef.current) return;
         if (expandedPanelId) {
@@ -56,7 +56,7 @@ export const GridHeightSmoother = ({
 
     return () => {
       interactionStyleSubscription.unsubscribe();
-      expandedPanelStyleSubscription.unsubscribe();
+      expandedPanelSubscription.unsubscribe();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
