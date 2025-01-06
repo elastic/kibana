@@ -80,7 +80,7 @@ export function getEnterpriseSearchNodeDeprecation(config: ConfigType, isCloud: 
           'will cease to operate. Native Connectors will also stop running syncs, between when Enterprise Search is stopped ' +
           'and when the 9.x upgrade completes. For full details, see the documentation.',
       }),
-      documentationUrl: 'https://docs.elastic.co', //TODO
+      documentationUrl: 'https://elastic.co/guide/en/enterprise-search/current/upgrading-to-9-x.html',
       correctiveActions: {
         manualSteps: steps,
       },
@@ -110,7 +110,7 @@ export async function getCrawlerDeprecations(ctx: GetDeprecationsContext): Promi
           'In order to upgrade other Native Connectors, metadata records in the `.elastic-connectors` index specific to ' +
           'Elastic Crawler must be removed. For full details, see the documentation.',
       }),
-      documentationUrl: 'https://docs.elastic.co', //TODO
+      documentationUrl: 'https://elastic.co/guide/en/enterprise-search/current/upgrading-to-9-x.html',
       correctiveActions: {
         manualSteps: [
           i18n.translate('xpack.enterpriseSearch.deprecations.crawler.listConnectors', {
