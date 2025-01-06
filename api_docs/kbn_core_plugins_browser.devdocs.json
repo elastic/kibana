@@ -14,16 +14,10 @@
           "\nThe interface that should be returned by a `PluginInitializer`.\n"
         ],
         "signature": [
-          {
-            "pluginId": "@kbn/core-plugins-browser",
-            "scope": "public",
-            "docId": "kibKbnCorePluginsBrowserPluginApi",
-            "section": "def-public.Plugin",
-            "text": "Plugin"
-          },
+          "Plugin",
           "<TSetup, TStart, TPluginsSetup, TPluginsStart>"
         ],
-        "path": "packages/core/plugins/core-plugins-browser/src/plugin.ts",
+        "path": "src/core/packages/plugins/browser/src/plugin.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -36,16 +30,10 @@
             "description": [],
             "signature": [
               "(core: ",
-              {
-                "pluginId": "@kbn/core-lifecycle-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-                "section": "def-public.CoreSetup",
-                "text": "CoreSetup"
-              },
+              "CoreSetup",
               "<TPluginsStart, TStart>, plugins: TPluginsSetup) => TSetup"
             ],
-            "path": "packages/core/plugins/core-plugins-browser/src/plugin.ts",
+            "path": "src/core/packages/plugins/browser/src/plugin.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -57,16 +45,10 @@
                 "label": "core",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-lifecycle-browser",
-                    "scope": "public",
-                    "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-                    "section": "def-public.CoreSetup",
-                    "text": "CoreSetup"
-                  },
+                  "CoreSetup",
                   "<TPluginsStart, TStart>"
                 ],
-                "path": "packages/core/plugins/core-plugins-browser/src/plugin.ts",
+                "path": "src/core/packages/plugins/browser/src/plugin.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -81,7 +63,7 @@
                 "signature": [
                   "TPluginsSetup"
                 ],
-                "path": "packages/core/plugins/core-plugins-browser/src/plugin.ts",
+                "path": "src/core/packages/plugins/browser/src/plugin.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -98,16 +80,10 @@
             "description": [],
             "signature": [
               "(core: ",
-              {
-                "pluginId": "@kbn/core-lifecycle-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-                "section": "def-public.CoreStart",
-                "text": "CoreStart"
-              },
+              "CoreStart",
               ", plugins: TPluginsStart) => TStart"
             ],
-            "path": "packages/core/plugins/core-plugins-browser/src/plugin.ts",
+            "path": "src/core/packages/plugins/browser/src/plugin.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -119,15 +95,9 @@
                 "label": "core",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-lifecycle-browser",
-                    "scope": "public",
-                    "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-                    "section": "def-public.CoreStart",
-                    "text": "CoreStart"
-                  }
+                  "CoreStart"
                 ],
-                "path": "packages/core/plugins/core-plugins-browser/src/plugin.ts",
+                "path": "src/core/packages/plugins/browser/src/plugin.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -142,7 +112,7 @@
                 "signature": [
                   "TPluginsStart"
                 ],
-                "path": "packages/core/plugins/core-plugins-browser/src/plugin.ts",
+                "path": "src/core/packages/plugins/browser/src/plugin.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -168,7 +138,7 @@
               },
               "<void>) | undefined"
             ],
-            "path": "packages/core/plugins/core-plugins-browser/src/plugin.ts",
+            "path": "src/core/packages/plugins/browser/src/plugin.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -187,16 +157,10 @@
           "\nThe available core services passed to a `PluginInitializer`\n"
         ],
         "signature": [
-          {
-            "pluginId": "@kbn/core-plugins-browser",
-            "scope": "public",
-            "docId": "kibKbnCorePluginsBrowserPluginApi",
-            "section": "def-public.PluginInitializerContext",
-            "text": "PluginInitializerContext"
-          },
+          "PluginInitializerContext",
           "<ConfigSchema>"
         ],
-        "path": "packages/core/plugins/core-plugins-browser/src/plugin_initializer.ts",
+        "path": "src/core/packages/plugins/browser/src/plugin_initializer.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -212,7 +176,7 @@
             "signature": [
               "symbol"
             ],
-            "path": "packages/core/plugins/core-plugins-browser/src/plugin_initializer.ts",
+            "path": "src/core/packages/plugins/browser/src/plugin_initializer.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -242,7 +206,7 @@
               },
               ">; }"
             ],
-            "path": "packages/core/plugins/core-plugins-browser/src/plugin_initializer.ts",
+            "path": "src/core/packages/plugins/browser/src/plugin_initializer.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -262,7 +226,7 @@
                 "text": "LoggerFactory"
               }
             ],
-            "path": "packages/core/plugins/core-plugins-browser/src/plugin_initializer.ts",
+            "path": "src/core/packages/plugins/browser/src/plugin_initializer.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -276,7 +240,7 @@
             "signature": [
               "{ get: <T extends object = ConfigSchema>() => T; }"
             ],
-            "path": "packages/core/plugins/core-plugins-browser/src/plugin_initializer.ts",
+            "path": "src/core/packages/plugins/browser/src/plugin_initializer.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -297,24 +261,12 @@
         ],
         "signature": [
           "(core: ",
-          {
-            "pluginId": "@kbn/core-plugins-browser",
-            "scope": "public",
-            "docId": "kibKbnCorePluginsBrowserPluginApi",
-            "section": "def-public.PluginInitializerContext",
-            "text": "PluginInitializerContext"
-          },
+          "PluginInitializerContext",
           "<object>) => ",
-          {
-            "pluginId": "@kbn/core-plugins-browser",
-            "scope": "public",
-            "docId": "kibKbnCorePluginsBrowserPluginApi",
-            "section": "def-public.Plugin",
-            "text": "Plugin"
-          },
+          "Plugin",
           "<TSetup, TStart, TPluginsSetup, TPluginsStart>"
         ],
-        "path": "packages/core/plugins/core-plugins-browser/src/plugin_initializer.ts",
+        "path": "src/core/packages/plugins/browser/src/plugin_initializer.ts",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -327,16 +279,10 @@
             "label": "core",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-plugins-browser",
-                "scope": "public",
-                "docId": "kibKbnCorePluginsBrowserPluginApi",
-                "section": "def-public.PluginInitializerContext",
-                "text": "PluginInitializerContext"
-              },
+              "PluginInitializerContext",
               "<object>"
             ],
-            "path": "packages/core/plugins/core-plugins-browser/src/plugin_initializer.ts",
+            "path": "src/core/packages/plugins/browser/src/plugin_initializer.ts",
             "deprecated": false,
             "trackAdoption": false
           }
