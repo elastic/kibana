@@ -4397,7 +4397,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-custom-branding-browser-internal@link:packages/core/custom-branding/core-custom-branding-browser-internal":
+"@kbn/core-custom-branding-browser-internal@link:src/core/packages/custom-branding/browser-internal":
   version "0.0.0"
   uid ""
 
