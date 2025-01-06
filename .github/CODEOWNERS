@@ -236,7 +236,6 @@ packages/kbn-reporting/export_types/pdf @elastic/appex-sharedux
 packages/kbn-reporting/export_types/pdf_common @elastic/appex-sharedux
 packages/kbn-reporting/export_types/png @elastic/appex-sharedux
 packages/kbn-reporting/export_types/png_common @elastic/appex-sharedux
-packages/kbn-reporting/get_csv_panel_actions @elastic/appex-sharedux
 packages/kbn-reporting/mocks_server @elastic/appex-sharedux
 packages/kbn-reporting/public @elastic/appex-sharedux
 packages/kbn-reporting/server @elastic/appex-sharedux
@@ -492,6 +491,7 @@ src/platform/packages/private/kbn-mapbox-gl @elastic/kibana-presentation
 src/platform/packages/private/kbn-panel-loader @elastic/kibana-presentation
 src/platform/packages/private/kbn-repo-packages @elastic/kibana-operations
 src/platform/packages/private/kbn-reporting/common @elastic/appex-sharedux
+src/platform/packages/private/kbn-reporting/get_csv_panel_actions @elastic/appex-sharedux
 src/platform/packages/private/kbn-ui-shared-deps-npm @elastic/kibana-operations
 src/platform/packages/private/kbn-ui-shared-deps-src @elastic/kibana-operations
 src/platform/packages/private/kbn-unsaved-changes-badge @elastic/kibana-data-discovery
