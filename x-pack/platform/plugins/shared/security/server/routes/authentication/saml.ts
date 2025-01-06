@@ -23,10 +23,10 @@ export function defineSAMLRoutes({ router, getAuthenticationService }: RouteDefi
           enabled: false,
           reason: 'This route must remain accessible to 3rd-party SAML providers',
         },
-        // authc: {
-        //   enabled: false,
-        //   reason: 'This route must remain accessible to 3rd-party SAML providers',
-        // },
+        authc: {
+          enabled: false,
+          reason: 'This route must remain accessible to 3rd-party SAML providers',
+        },
       },
       validate: {
         body: schema.object(
@@ -36,7 +36,6 @@ export function defineSAMLRoutes({ router, getAuthenticationService }: RouteDefi
       },
       options: {
         access: 'public',
-        authRequired: false,
         excludeFromOAS: true,
         xsrfRequired: false,
         tags: [ROUTE_TAG_CAN_REDIRECT, ROUTE_TAG_AUTH_FLOW],

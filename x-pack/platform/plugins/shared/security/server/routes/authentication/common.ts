@@ -53,7 +53,6 @@ export function defineCommonRoutes({
       options: {
         access: 'public',
         excludeFromOAS: true,
-        authRequired: false,
         tags: [ROUTE_TAG_CAN_REDIRECT, ROUTE_TAG_AUTH_FLOW],
       },
     },
@@ -143,11 +142,6 @@ export function defineCommonRoutes({
           reason:
             'This route is used for authentication - it does not require existing authentication',
         },
-        // authc: {
-        //   enabled: false,
-        //   reason:
-        //     'This route is used for authenticaton - it does not require existing authentication',
-        // },
       },
       validate: {
         body: schema.object({
