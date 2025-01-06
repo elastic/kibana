@@ -10,24 +10,29 @@
 import React from 'react';
 import { ThemeProvider } from '@emotion/react';
 import { Story } from '@storybook/react';
-import { type NodeButtonProps, NodeShapeContainer } from './styles';
-import { NodeExpandButton } from './node_expand_button';
+import { NodeShapeContainer } from './styles';
+import { NodeExpandButton, type NodeExpandButtonProps } from './node_expand_button';
 
 export default {
-  title: 'Components/Graph Components',
+  title: 'Components/Graph Components/Additional Components',
   description: 'CDR - Graph visualization',
   argTypes: {
     onClick: { action: 'onClick' },
+    color: {
+      options: ['primary', 'danger', 'warning'],
+      control: { type: 'radio' },
+      defaultValue: 'primary',
+    },
   },
 };
 
-const Template: Story<NodeButtonProps> = (args) => (
+const Template: Story<NodeExpandButtonProps> = (args) => (
   <ThemeProvider theme={{ darkMode: false }}>
     <NodeShapeContainer>
       Hover me
-      <NodeExpandButton onClick={args.onClick} />
+      <NodeExpandButton color={args.color} onClick={args.onClick} />
     </NodeShapeContainer>
   </ThemeProvider>
 );
 
-export const Button = Template.bind({});
+export const ExpandButton = Template.bind({});
