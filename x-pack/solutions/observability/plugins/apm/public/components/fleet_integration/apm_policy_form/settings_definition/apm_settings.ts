@@ -8,7 +8,7 @@ import { i18n } from '@kbn/i18n';
 import { getDurationRt } from '../../../../../common/agent_configuration/runtime_types/duration_rt';
 import { getIntegerRt } from '../../../../../common/agent_configuration/runtime_types/integer_rt';
 import { OPTIONAL_LABEL, REQUIRED_LABEL } from '../settings_form/utils';
-import { SettingsRow } from '../typings';
+import type { SettingsRow } from '../typings';
 
 export function getApmSettings(): SettingsRow[] {
   return [

@@ -7,7 +7,7 @@
 
 import React, { useMemo } from 'react';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
+import type { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
 import { getSectionsFromFields } from '../helper';
 import { MetadataTable } from '..';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';

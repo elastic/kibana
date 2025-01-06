@@ -6,21 +6,21 @@
  */
 
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
-import {
+import type {
   GetViewInAppRelativeUrlFnOpts,
   ActionGroupIdsOf,
   AlertInstanceContext as AlertContext,
   AlertInstanceState as AlertState,
   RuleTypeState,
   RuleExecutorOptions,
-  AlertsClientError,
 } from '@kbn/alerting-plugin/server';
+import { AlertsClientError } from '@kbn/alerting-plugin/server';
+import type { TimeUnitChar } from '@kbn/observability-plugin/common';
 import {
   formatDurationFromTimeUnitChar,
   getAlertDetailsUrl,
   observabilityPaths,
   ProcessorEvent,
-  TimeUnitChar,
 } from '@kbn/observability-plugin/common';
 import { asPercent } from '@kbn/observability-plugin/common/utils/formatters';
 import { getParsedFilterQuery, termQuery } from '@kbn/observability-plugin/server';
@@ -30,9 +30,10 @@ import {
   ALERT_REASON,
   ApmRuleType,
 } from '@kbn/rule-data-utils';
-import { ObservabilityApmAlert } from '@kbn/alerts-as-data-utils';
+import type { ObservabilityApmAlert } from '@kbn/alerts-as-data-utils';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
 import { asyncForEach } from '@kbn/std';
+import { transactionErrorRateParamsSchema } from '@kbn/response-ops-rule-params/transaction_error_rate';
 import { SearchAggregatedTransactionSetting } from '../../../../../common/aggregated_transactions';
 import { getEnvironmentEsField } from '../../../../../common/environment_filter_values';
 import {
@@ -44,25 +45,22 @@ import {
   TRANSACTION_NAME,
 } from '../../../../../common/es_fields/apm';
 import { EventOutcome } from '../../../../../common/event_outcome';
+import type {
+  THRESHOLD_MET_GROUP,
+  ApmRuleParamsType,
+} from '../../../../../common/rules/apm_rule_types';
 import {
   APM_SERVER_FEATURE_ID,
   formatTransactionErrorRateReason,
   RULE_TYPES_CONFIG,
-  THRESHOLD_MET_GROUP,
 } from '../../../../../common/rules/apm_rule_types';
-import {
-  transactionErrorRateParamsSchema,
-  ApmRuleParamsType,
-} from '../../../../../common/rules/schema';
 import { environmentQuery } from '../../../../../common/utils/environment_query';
 import { asDecimalOrInteger, getAlertUrlTransaction } from '../../../../../common/utils/formatters';
 import { getBackwardCompatibleDocumentTypeFilter } from '../../../../lib/helpers/transactions';
 import { apmActionVariables } from '../../action_variables';
 import { alertingEsClient } from '../../alerting_es_client';
-import {
-  ApmRuleTypeAlertDefinition,
-  RegisterRuleDependencies,
-} from '../../register_apm_rule_types';
+import type { RegisterRuleDependencies } from '../../register_apm_rule_types';
+import { ApmRuleTypeAlertDefinition } from '../../register_apm_rule_types';
 import {
   getApmAlertSourceFields,
   getApmAlertSourceFieldsAgg,
