@@ -7,21 +7,22 @@
 
 import { EuiBadge, EuiToolTip } from '@elastic/eui';
 import React from 'react';
-import styled from 'styled-components';
+import { css } from '@emotion/react';
 
 import { getIndexResultToolTip } from '../utils/get_index_result_tooltip';
 import { getCheckTextColor } from '../utils/get_check_text_color';
 import { FAIL, PASS } from '../translations';
 
-const StyledBadge = styled(EuiBadge)`
-  width: 44px;
-  text-align: center;
-  padding-inline: 0;
-
-  .euiBadge__content {
-    justify-content: center;
-  }
-`;
+const styles = {
+  badge: css({
+    width: 44,
+    textAlign: 'center',
+    paddingInline: 0,
+    '.euiBadge__content': {
+      justifyContent: 'center',
+    },
+  }),
+};
 
 export type Props = React.ComponentProps<typeof EuiBadge> & {
   incompatible: number;
@@ -35,13 +36,14 @@ export const IndexResultBadgeComponent: React.FC<Props> = ({
 }) => {
   return (
     <EuiToolTip content={tooltipText ?? getIndexResultToolTip(incompatible)}>
-      <StyledBadge
+      <EuiBadge
+        css={styles.badge}
         data-test-subj="indexResultBadge"
         color={getCheckTextColor(incompatible)}
         {...props}
       >
         {incompatible > 0 ? FAIL : PASS}
-      </StyledBadge>
+      </EuiBadge>
     </EuiToolTip>
   );
 };
