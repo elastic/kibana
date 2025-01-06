@@ -1,0 +1,55 @@
+env:
+  ELASTIC_PR_COMMENTS_ENABLED: 'true'
+  ELASTIC_GITHUB_BUILD_COMMIT_STATUS_ENABLED: 'true'
+  GITHUB_BUILD_COMMIT_STATUS_CONTEXT: kibana-deploy-cloud-from-pr
+
+steps:
+  - group: 'Cloud Deployment'
+    if: "build.env('GITHUB_PR_LABELS') =~ /(ci:cloud-deploy|ci:cloud-redeploy)/"
+
+    steps:
+      - command: .buildkite/scripts/lifecycle/pre_build.sh
+        label: Pre-Build
+        timeout_in_minutes: 10
+        agents:
+          provider: gcp
+          image: family/kibana-ubuntu-2004
+          imageProject: elastic-images-prod
+          machineType: n2-standard-2
+        retry:
+          automatic:
+            - exit_status: '*'
+              limit: 1
+
+      - command: |
+          ts-node .buildkite/scripts/lifecycle/comment_on_pr.ts "PR Cloud deployment started at: $BUILDKITE_BUILD_URL"
+        label: Comment with job URL
+        agents:
+          provider: gcp
+          image: family/kibana-ubuntu-2004
+          imageProject: elastic-images-prod
+          machineType: n2-standard-2
+        timeout_in_minutes: 5
+
+      - command: .buildkite/scripts/steps/cloud/build_and_deploy.sh
+        label: 'Build and Deploy to Cloud'
+        agents:
+          machineType: n2-standard-2
+          preemptible: true
+        timeout_in_minutes: 30
+        retry:
+          automatic:
+            - exit_status: '-1'
+              limit: 3
+
+      - wait: ~
+
+      - command: |
+          ts-node .buildkite/scripts/lifecycle/comment_on_pr.ts "Cloud deployment initiated, see credentials at: $BUILDKITE_BUILD_URL"
+        label: Comment with job URL
+        agents:
+          provider: gcp
+          image: family/kibana-ubuntu-2004
+          imageProject: elastic-images-prod
+          machineType: n2-standard-2
+        timeout_in_minutes: 5
