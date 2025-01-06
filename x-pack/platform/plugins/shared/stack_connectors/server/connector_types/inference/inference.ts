@@ -49,7 +49,7 @@ import { chunksIntoMessage, eventSourceStreamIntoObservable } from './helpers';
 export class InferenceConnector extends SubActionConnector<Config, Secrets> {
   // Not using Axios
   protected getResponseErrorMessage(error: AxiosError): string {
-    throw new Error('Method not implemented.');
+    throw new Error(error.message ?? 'Method not implemented.');
   }
 
   private inferenceId;
