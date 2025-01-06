@@ -132,7 +132,8 @@
     "@kbn/charts-theme",
     "@kbn/response-ops-rule-params",
     "@kbn/entityManager-plugin",
-    "@kbn/core-http-server-utils"
+    "@kbn/core-http-server-utils",
+    "@kbn/observability-utils-server"
   ],
   "exclude": ["target/**/*"]
 }
