@@ -343,7 +343,7 @@ const ActionsConnectorsList = ({
                     actionTypesIndex[item.actionTypeId] &&
                     hasExecuteActionsCapability(
                       capabilities,
-                      actionTypesIndex[item.actionTypeId].subFeatureType
+                      actionTypesIndex[item.actionTypeId].subFeature
                     )
                   )
                 }

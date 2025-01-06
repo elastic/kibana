@@ -14,9 +14,9 @@ import {
   CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
 } from './constants/saved_objects';
 
-const EDR_EXECUTE_PRIVILEGE_API_TAG = 'actions:execute-edr-connectors';
-export const EDR_EXECUTE_PRIVILEGE = `api:${EDR_EXECUTE_PRIVILEGE_API_TAG}`;
-export const EDR_SUB_ACTIONS_EXECUTE_PRIVILEGE = `api:actions:execute-edr-sub-actions`;
+const ENDPOINT_SECURITY_EXECUTE_PRIVILEGE_API_TAG = 'actions:execute-endpoint-security-connectors';
+export const ENDPOINT_SECURITY_EXECUTE_PRIVILEGE = `api:${ENDPOINT_SECURITY_EXECUTE_PRIVILEGE_API_TAG}`;
+export const ENDPOINT_SECURITY_SUB_ACTIONS_EXECUTE_PRIVILEGE = `api:actions:execute-endpoint-security-sub-actions`;
 
 /**
  * The order of appearance in the feature privilege page
@@ -71,25 +71,31 @@ export const ACTIONS_FEATURE: KibanaFeatureConfig = {
   },
   subFeatures: [
     {
-      name: i18n.translate('xpack.actions.featureRegistry.edrSubFeatureName', {
+      name: i18n.translate('xpack.actions.featureRegistry.endpointSecuritySubFeatureName', {
         defaultMessage: 'Endpoint Security',
       }),
-      description: i18n.translate('xpack.actions.featureRegistry.edrSubFeatureDescription', {
-        defaultMessage: 'Includes: Sentinel One, Crowdstrike',
-      }),
+      description: i18n.translate(
+        'xpack.actions.featureRegistry.endpointSecuritySubFeatureDescription',
+        {
+          defaultMessage: 'Includes: Sentinel One, Crowdstrike',
+        }
+      ),
       privilegeGroups: [
         {
           groupType: 'independent',
           privileges: [
             {
-              api: [EDR_EXECUTE_PRIVILEGE_API_TAG],
-              id: 'edr_execute',
-              name: i18n.translate('xpack.actions.featureRegistry.edrSubFeaturePrivilege', {
-                defaultMessage: 'Execute',
-              }),
+              api: [ENDPOINT_SECURITY_EXECUTE_PRIVILEGE_API_TAG],
+              id: 'endpoint_security_execute',
+              name: i18n.translate(
+                'xpack.actions.featureRegistry.endpointSecuritySubFeaturePrivilege',
+                {
+                  defaultMessage: 'Execute',
+                }
+              ),
               includeIn: 'all',
               savedObject: { all: [], read: [] },
-              ui: ['edrExecute'],
+              ui: ['endpointSecurityExecute'],
             },
           ],
         },

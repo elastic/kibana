@@ -18,7 +18,7 @@ export const mockActionTypes = [
     minimumLicenseRequired: 'basic',
     isSystemActionType: true,
     supportedFeatureIds: ['generativeAI'],
-    subFeatureType: undefined,
+    subFeature: undefined,
   } as ActionType,
   {
     id: '.bedrock',
@@ -29,7 +29,7 @@ export const mockActionTypes = [
     minimumLicenseRequired: 'basic',
     isSystemActionType: true,
     supportedFeatureIds: ['generativeAI'],
-    subFeatureType: undefined,
+    subFeature: undefined,
   } as ActionType,
   {
     id: '.gemini',
@@ -40,7 +40,7 @@ export const mockActionTypes = [
     minimumLicenseRequired: 'basic',
     isSystemActionType: true,
     supportedFeatureIds: ['generativeAI'],
-    subFeatureType: undefined,
+    subFeature: undefined,
   } as ActionType,
 ];
 

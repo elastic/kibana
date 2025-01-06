@@ -422,13 +422,13 @@ describe('actionTypeRegistry', () => {
       ]);
     });
 
-    test('sets the subFeatureType correctly for sub-feature type actions', () => {
+    test('sets the subFeature correctly for sub-feature type actions', () => {
       mockedLicenseState.isLicenseValidForActionType.mockReturnValue({ isValid: true });
       const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
 
       actionTypeRegistry.register({
         id: 'test.sub-feature-action',
-        name: 'EDR',
+        name: 'Test',
         minimumLicenseRequired: 'platinum',
         supportedFeatureIds: ['siem'],
         getKibanaPrivileges: () => ['test/create-sub-feature'],
@@ -437,7 +437,7 @@ describe('actionTypeRegistry', () => {
           secrets: { schema: schema.object({}) },
           params: { schema: schema.object({}) },
         },
-        subFeatureType: 'edr',
+        subFeature: 'endpointSecurity',
         executor,
       });
 
@@ -451,8 +451,8 @@ describe('actionTypeRegistry', () => {
           id: 'test.sub-feature-action',
           isSystemActionType: false,
           minimumLicenseRequired: 'platinum',
-          name: 'EDR',
-          subFeatureType: 'edr',
+          name: 'Test',
+          subFeature: 'endpointSecurity',
           supportedFeatureIds: ['siem'],
         },
       ]);
@@ -803,13 +803,13 @@ describe('actionTypeRegistry', () => {
     });
   });
 
-  describe('hasSubFeatureType()', () => {
+  describe('hasSubFeature()', () => {
     it('should return true if the action type has a sub-feature type', () => {
       const registry = new ActionTypeRegistry(actionTypeRegistryParams);
 
       registry.register({
         id: 'test.sub-feature-action',
-        name: 'EDR',
+        name: 'Test',
         minimumLicenseRequired: 'platinum',
         supportedFeatureIds: ['siem'],
         getKibanaPrivileges: () => ['test/create-sub-feature'],
@@ -818,11 +818,11 @@ describe('actionTypeRegistry', () => {
           secrets: { schema: schema.object({}) },
           params: { schema: schema.object({}) },
         },
-        subFeatureType: 'edr',
+        subFeature: 'endpointSecurity',
         executor,
       });
 
-      const result = registry.hasSubFeatureType('test.sub-feature-action');
+      const result = registry.hasSubFeature('test.sub-feature-action');
       expect(result).toBe(true);
     });
 
@@ -847,7 +847,7 @@ describe('actionTypeRegistry', () => {
       const allTypes = registry.getAllTypes();
       expect(allTypes.length).toBe(1);
 
-      const result = registry.hasSubFeatureType('foo');
+      const result = registry.hasSubFeature('foo');
       expect(result).toBe(false);
     });
 
@@ -857,7 +857,7 @@ describe('actionTypeRegistry', () => {
       const allTypes = registry.getAllTypes();
       expect(allTypes.length).toBe(0);
 
-      const result = registry.hasSubFeatureType('not-exist');
+      const result = registry.hasSubFeature('not-exist');
       expect(result).toBe(false);
     });
   });
@@ -882,7 +882,7 @@ describe('actionTypeRegistry', () => {
       });
       registry.register({
         id: 'test.sub-feature-action',
-        name: 'EDR',
+        name: 'Test',
         minimumLicenseRequired: 'platinum',
         supportedFeatureIds: ['siem'],
         getKibanaPrivileges: () => ['test/create-sub-feature'],
@@ -891,7 +891,7 @@ describe('actionTypeRegistry', () => {
           secrets: { schema: schema.object({}) },
           params: { schema: schema.object({}) },
         },
-        subFeatureType: 'edr',
+        subFeature: 'endpointSecurity',
         executor,
       });
 
@@ -919,7 +919,7 @@ describe('actionTypeRegistry', () => {
       });
       registry.register({
         id: 'test.sub-feature-action',
-        name: 'EDR',
+        name: 'Test',
         minimumLicenseRequired: 'platinum',
         supportedFeatureIds: ['siem'],
         validate: {
@@ -927,7 +927,7 @@ describe('actionTypeRegistry', () => {
           secrets: { schema: schema.object({}) },
           params: { schema: schema.object({}) },
         },
-        subFeatureType: 'edr',
+        subFeature: 'endpointSecurity',
         executor,
       });
 

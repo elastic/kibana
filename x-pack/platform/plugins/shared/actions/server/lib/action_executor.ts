@@ -733,7 +733,7 @@ const ensureAuthorizedToExecute = async ({
   try {
     if (
       actionTypeRegistry.isSystemActionType(actionTypeId) ||
-      actionTypeRegistry.hasSubFeatureType(actionTypeId)
+      actionTypeRegistry.hasSubFeature(actionTypeId)
     ) {
       const additionalPrivileges = actionTypeRegistry.getActionKibanaPrivileges(
         actionTypeId,

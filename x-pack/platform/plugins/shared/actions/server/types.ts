@@ -23,7 +23,7 @@ import { ServiceParams } from './sub_action_framework/types';
 import { ActionTypeRegistry } from './action_type_registry';
 import { PluginSetupContract, PluginStartContract } from './plugin';
 import { ActionsClient } from './actions_client';
-import { ActionTypeExecutorResult, SubFeatureType } from '../common';
+import { ActionTypeExecutorResult, SubFeature } from '../common';
 import { TaskInfo } from './lib/action_executor';
 import { ConnectorTokenClient } from './lib/connector_token_client';
 import { ActionsConfigurationUtilities } from './actions_config';
@@ -197,7 +197,7 @@ export interface ActionType<
     connector?: (config: Config, secrets: Secrets) => string | null;
   };
   isSystemActionType?: boolean;
-  subFeatureType?: SubFeatureType;
+  subFeature?: SubFeature;
   /**
    * Additional Kibana privileges to be checked by the actions framework.
    * Use it if you want to perform extra authorization checks based on a Kibana feature.

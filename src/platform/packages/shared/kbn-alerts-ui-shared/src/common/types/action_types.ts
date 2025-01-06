@@ -11,7 +11,7 @@ import type { ComponentType, ReactNode } from 'react';
 import type { RuleActionParam, ActionVariable } from '@kbn/alerting-types';
 import { IconType, RecursivePartial } from '@elastic/eui';
 import { PublicMethodsOf } from '@kbn/utility-types';
-import { SubFeatureType } from '@kbn/actions-types';
+import { SubFeature } from '@kbn/actions-types';
 import { TypeRegistry } from '../type_registry';
 import { RuleFormParamsErrors } from './rule_types';
 
@@ -131,7 +131,7 @@ export interface ActionTypeModel<ActionConfig = any, ActionSecrets = any, Action
   hideInUi?: boolean;
   modalWidth?: number;
   isSystemActionType?: boolean;
-  subFeatureType?: SubFeatureType;
+  subFeature?: SubFeature;
 }
 
 export type ActionTypeRegistryContract<Connector = unknown, Params = unknown> = PublicMethodsOf<

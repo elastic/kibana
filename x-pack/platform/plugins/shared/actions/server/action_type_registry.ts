@@ -119,8 +119,8 @@ export class ActionTypeRegistry {
   /**
    * Returns true if the connector type has a sub-feature type defined
    */
-  public hasSubFeatureType = (actionTypeId: string): boolean =>
-    Boolean(this.actionTypes.get(actionTypeId)?.subFeatureType);
+  public hasSubFeature = (actionTypeId: string): boolean =>
+    Boolean(this.actionTypes.get(actionTypeId)?.subFeature);
 
   /**
    * Returns the kibana privileges
@@ -132,7 +132,7 @@ export class ActionTypeRegistry {
   ): string[] {
     const actionType = this.actionTypes.get(actionTypeId);
 
-    if (!actionType?.isSystemActionType && !actionType?.subFeatureType) {
+    if (!actionType?.isSystemActionType && !actionType?.subFeature) {
       return [];
     }
     return actionType?.getKibanaPrivileges?.({ params, source }) ?? [];
@@ -187,7 +187,7 @@ export class ActionTypeRegistry {
 
     if (
       !actionType.isSystemActionType &&
-      !actionType.subFeatureType &&
+      !actionType.subFeature &&
       actionType.getKibanaPrivileges
     ) {
       throw new Error(
@@ -260,7 +260,7 @@ export class ActionTypeRegistry {
         enabledInLicense: !!this.licenseState.isLicenseValidForActionType(actionType).isValid,
         supportedFeatureIds: actionType.supportedFeatureIds,
         isSystemActionType: !!actionType.isSystemActionType,
-        subFeatureType: actionType.subFeatureType,
+        subFeature: actionType.subFeature,
       }));
   }
 

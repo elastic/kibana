@@ -606,7 +606,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
           }
         });
 
-        it('should handle create alert request appropriately with EDR actions', async () => {
+        it('should handle create alert request appropriately with Endpoint Security actions', async () => {
           let response = await supertest
             .post(`${getUrlPrefix(space.id)}/api/actions/connector`)
             .set('kbn-xsrf', 'foo')
@@ -665,7 +665,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
               expect(response.body).to.eql({
                 error: 'Bad Request',
                 message:
-                  'Failed to validate actions due to the following error: Invalid EDR connectors',
+                  'Failed to validate actions due to the following error: Invalid Endpoint Security connectors',
                 statusCode: 400,
               });
               break;

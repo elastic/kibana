@@ -9,10 +9,10 @@
 
 import type { LicenseType } from '@kbn/licensing-plugin/common/types';
 
-export enum SUB_FEATURE_TYPE {
-  edr,
+export enum SUB_FEATURE {
+  endpointSecurity,
 }
-export type SubFeatureType = keyof typeof SUB_FEATURE_TYPE;
+export type SubFeature = keyof typeof SUB_FEATURE;
 
 export interface ActionType {
   id: string;
@@ -23,5 +23,5 @@ export interface ActionType {
   minimumLicenseRequired: LicenseType;
   supportedFeatureIds: string[];
   isSystemActionType: boolean;
-  subFeatureType?: SubFeatureType;
+  subFeature?: SubFeature;
 }

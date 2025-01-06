@@ -120,7 +120,7 @@ describe('Registration', () => {
   it('registers a sub-feature connector correctly', async () => {
     register<TestConfig, TestSecrets>({
       actionTypeRegistry,
-      connector: { ...connector, subFeatureType: 'edr' },
+      connector: { ...connector, subFeature: 'endpointSecurity' },
       configurationUtilities: mockedActionsConfig,
       logger,
     });
@@ -135,7 +135,7 @@ describe('Registration', () => {
       executor: expect.any(Function),
       getService: expect.any(Function),
       renderParameterTemplates: expect.any(Function),
-      subFeatureType: 'edr',
+      subFeature: 'endpointSecurity',
     });
   });
 

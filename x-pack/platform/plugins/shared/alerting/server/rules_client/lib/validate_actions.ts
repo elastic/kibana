@@ -77,19 +77,21 @@ export async function validateActions(
     }
   }
 
-  // check for invalid EDR connectors
+  // check for invalid Endpoint Security connectors
   const allConnectorTypes = await actionsClient.listTypes({});
-  const edrConnectorTypeIds = new Set(
-    allConnectorTypes.filter((type) => type.subFeatureType === 'edr').map((type) => type.id)
+  const endpointSecurityConnectorTypeIds = new Set(
+    allConnectorTypes
+      .filter((type) => type.subFeature === 'endpointSecurity')
+      .map((type) => type.id)
   );
-  const edrActionTypeIds = actionResults
+  const endpointSecurityActionTypeIds = actionResults
     .map((result) => result.actionTypeId)
-    .filter((id) => edrConnectorTypeIds.has(id));
+    .filter((id) => endpointSecurityConnectorTypeIds.has(id));
 
-  if (edrActionTypeIds.length > 0) {
+  if (endpointSecurityActionTypeIds.length > 0) {
     errors.push(
-      i18n.translate('xpack.alerting.rulesClient.validateActions.edrConnector', {
-        defaultMessage: 'Invalid EDR connectors',
+      i18n.translate('xpack.alerting.rulesClient.validateActions.endpointSecurityConnector', {
+        defaultMessage: 'Endpoint security connectors cannot be used as alerting actions',
       })
     );
   }

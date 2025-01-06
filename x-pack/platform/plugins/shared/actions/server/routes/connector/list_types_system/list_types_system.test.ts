@@ -12,7 +12,7 @@ import { mockHandlerArguments } from '../../_mock_handler_arguments';
 import { listTypesWithSystemRoute } from './list_types_system';
 import { verifyAccessAndContext } from '../../verify_access_and_context';
 import { actionsClientMock } from '../../../mocks';
-import { SubFeatureType } from '../../../../common';
+import { SubFeature } from '../../../../common';
 
 jest.mock('../../verify_access_and_context', () => ({
   verifyAccessAndContext: jest.fn(),
@@ -44,7 +44,7 @@ describe('listTypesWithSystemRoute', () => {
         minimumLicenseRequired: 'gold' as LicenseType,
         supportedFeatureIds: ['alerting'],
         isSystemActionType: true,
-        subFeatureType: 'edr' as SubFeatureType,
+        subFeature: 'endpointSecurity' as SubFeature,
       },
     ];
 
@@ -63,7 +63,7 @@ describe('listTypesWithSystemRoute', () => {
             "is_system_action_type": true,
             "minimum_license_required": "gold",
             "name": "name",
-            "sub_feature_type": "edr",
+            "sub_feature": "endpointSecurity",
             "supported_feature_ids": Array [
               "alerting",
             ],
@@ -83,7 +83,7 @@ describe('listTypesWithSystemRoute', () => {
           supported_feature_ids: ['alerting'],
           minimum_license_required: 'gold',
           is_system_action_type: true,
-          sub_feature_type: 'edr',
+          sub_feature: 'endpointSecurity',
         },
       ],
     });
@@ -135,7 +135,7 @@ describe('listTypesWithSystemRoute', () => {
             "is_system_action_type": false,
             "minimum_license_required": "gold",
             "name": "name",
-            "sub_feature_type": undefined,
+            "sub_feature": undefined,
             "supported_feature_ids": Array [
               "alerting",
             ],

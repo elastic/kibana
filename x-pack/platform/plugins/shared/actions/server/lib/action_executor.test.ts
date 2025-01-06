@@ -136,10 +136,10 @@ const systemConnectorType: jest.Mocked<ConnectorType> = {
 
 const subFeatureConnectorType: jest.Mocked<ConnectorType> = {
   id: 'test.sub-feature-action',
-  name: 'EDR',
+  name: 'Test',
   minimumLicenseRequired: 'platinum',
   supportedFeatureIds: ['siem'],
-  subFeatureType: 'edr',
+  subFeature: 'endpointSecurity',
   validate: {
     config: { schema: schema.any() },
     secrets: { schema: schema.any() },
@@ -654,7 +654,7 @@ describe('Action Executor', () => {
         subFeatureConnectorSavedObject
       );
       connectorTypeRegistry.get.mockReturnValueOnce(subFeatureConnectorType);
-      connectorTypeRegistry.hasSubFeatureType.mockReturnValueOnce(true);
+      connectorTypeRegistry.hasSubFeature.mockReturnValueOnce(true);
 
       if (executeUnsecure) {
         await actionExecutor.executeUnsecured(executeUnsecuredParams);
@@ -663,9 +663,9 @@ describe('Action Executor', () => {
       }
 
       if (executeUnsecure) {
-        expect(connectorTypeRegistry.hasSubFeatureType).not.toHaveBeenCalled();
+        expect(connectorTypeRegistry.hasSubFeature).not.toHaveBeenCalled();
       } else {
-        expect(connectorTypeRegistry.hasSubFeatureType).toHaveBeenCalled();
+        expect(connectorTypeRegistry.hasSubFeature).toHaveBeenCalled();
         expect(authorizationMock.ensureAuthorized).toBeCalled();
       }
 
@@ -1497,7 +1497,7 @@ describe('Sub-feature connectors', () => {
       ...subFeatureConnectorType,
       getKibanaPrivileges: () => ['test/create'],
     });
-    connectorTypeRegistry.hasSubFeatureType.mockReturnValueOnce(true);
+    connectorTypeRegistry.hasSubFeature.mockReturnValueOnce(true);
     connectorTypeRegistry.getActionKibanaPrivileges.mockReturnValueOnce(['test/create']);
 
     await actionExecutor.execute(executeParams);
@@ -1517,7 +1517,7 @@ describe('Sub-feature connectors', () => {
       ...subFeatureConnectorType,
       getKibanaPrivileges: () => ['test/create'],
     });
-    connectorTypeRegistry.hasSubFeatureType.mockReturnValueOnce(true);
+    connectorTypeRegistry.hasSubFeature.mockReturnValueOnce(true);
     connectorTypeRegistry.getActionKibanaPrivileges.mockReturnValueOnce(['test/create']);
 
     await actionExecutor.execute({
@@ -1726,6 +1726,7 @@ describe('Event log', () => {
       kibana: {
         action: {
           execution: {
+            source: 'http_request',
             usage: {
               request_body_bytes: 0,
             },

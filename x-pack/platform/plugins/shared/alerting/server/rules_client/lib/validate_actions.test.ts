@@ -314,19 +314,21 @@ describe('validateActions', () => {
     );
   });
 
-  it('should return error message if the action is an EDR sub-feature connector type', async () => {
-    getBulkMock.mockResolvedValueOnce([{ actionTypeId: 'test.edr', name: 'test name' }]);
+  it('should return error message if the action is an Endpoint Security sub-feature connector type', async () => {
+    getBulkMock.mockResolvedValueOnce([
+      { actionTypeId: 'test.endpointSecurity', name: 'test name' },
+    ]);
     listTypesMock.mockResolvedValueOnce([
       {
-        id: 'test.edr',
-        name: 'EDR connector type',
-        subFeatureType: 'edr',
+        id: 'test.endpointSecurity',
+        name: 'endpoint security connector type',
+        subFeature: 'endpointSecurity',
       },
     ]);
     await expect(
       validateActions(context as unknown as RulesClientContext, ruleType, data, false)
     ).rejects.toThrowErrorMatchingInlineSnapshot(
-      '"Failed to validate actions due to the following error: Invalid EDR connectors"'
+      '"Failed to validate actions due to the following error: IEndpoint security connectors cannot be used as alerting actions"'
     );
   });
 });
