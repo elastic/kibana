@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable @kbn/eslint/module_migration */
-
 import { euiDarkVars } from '@kbn/ui-theme';
 import { I18nProvider } from '@kbn/i18n-react';
 

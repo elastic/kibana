@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import {
+import type {
   CoreSetup,
   PluginInitializerContext,
   Plugin,
   RequestHandlerContext,
 } from '@kbn/core/server';
-import { MetricsDataPluginSetup, MetricsDataPluginStartDeps } from './types';
+import type { MetricsDataPluginSetup, MetricsDataPluginStartDeps } from './types';
 import { MetricsDataClient } from './client';
 import { metricsDataSourceSavedObjectType } from './saved_objects/metrics_data_source';
 import { KibanaFramework } from './lib/adapters/framework/kibana_framework_adapter';

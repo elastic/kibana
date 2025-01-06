@@ -8,11 +8,7 @@
 import { coreMock } from '@kbn/core/public/mocks';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import {
-  LogsLocatorParams,
-  NodeLogsLocatorParams,
-  TraceLogsLocatorParams,
-} from '@kbn/logs-shared-plugin/common';
+import type { LogsLocatorParams } from '@kbn/logs-shared-plugin/common';
 import { MlLocatorDefinition } from '@kbn/ml-plugin/public';
 import { apmEnableProfilingIntegration } from '@kbn/observability-plugin/common';
 import {
@@ -22,15 +18,18 @@ import {
 import { UrlService } from '@kbn/share-plugin/common/url_service';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import { RouterProvider } from '@kbn/typed-react-router-config';
-import { History, createMemoryHistory } from 'history';
+import type { History } from 'history';
+import { createMemoryHistory } from 'history';
 import { merge, noop } from 'lodash';
-import React, { ReactNode, useMemo } from 'react';
+import type { ReactNode } from 'react';
+import React, { useMemo } from 'react';
 import { useHistory } from 'react-router-dom';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { ConfigSchema } from '../..';
+import type { ConfigSchema } from '../..';
 import { apmRouter } from '../../components/routing/apm_route_config';
 import { createCallApmApi } from '../../services/rest/create_call_apm_api';
-import { ApmPluginContext, ApmPluginContextValue } from './apm_plugin_context';
+import type { ApmPluginContextValue } from './apm_plugin_context';
+import { ApmPluginContext } from './apm_plugin_context';
 
 const coreStart = coreMock.createStart({ basePath: '/basepath' });
 
@@ -159,11 +158,7 @@ export const observabilityLogsExplorerLocatorsMock = {
   singleDatasetLocator: sharePluginMock.createLocator(),
 };
 
-export const logsLocatorsMock = {
-  logsLocator: sharePluginMock.createLocator<LogsLocatorParams>(),
-  nodeLogsLocator: sharePluginMock.createLocator<NodeLogsLocatorParams>(),
-  traceLogsLocator: sharePluginMock.createLocator<TraceLogsLocatorParams>(),
-};
+export const logsLocatorMock = sharePluginMock.createLocator<LogsLocatorParams>();
 
 const mockCorePlugins = {
   embeddable: {},

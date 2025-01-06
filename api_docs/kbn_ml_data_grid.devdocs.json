@@ -827,13 +827,7 @@
         ],
         "signature": [
           "(e: unknown, toastNotifications: ",
-          {
-            "pluginId": "@kbn/core-notifications-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreNotificationsBrowserPluginApi",
-            "section": "def-public.IToasts",
-            "text": "IToasts"
-          },
+          "IToasts",
           ") => void"
         ],
         "path": "x-pack/platform/packages/private/ml/data_grid/lib/common.ts",
@@ -867,13 +861,7 @@
               "- The toast notifications service."
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/core-notifications-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreNotificationsBrowserPluginApi",
-                "section": "def-public.IToasts",
-                "text": "IToasts"
-              }
+              "IToasts"
             ],
             "path": "x-pack/platform/packages/private/ml/data_grid/lib/common.ts",
             "deprecated": false,

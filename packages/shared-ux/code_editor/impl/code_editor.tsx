@@ -23,10 +23,8 @@ import {
 } from '@elastic/eui';
 import {
   monaco,
-  CODE_EDITOR_LIGHT_THEME_ID,
-  CODE_EDITOR_DARK_THEME_ID,
-  CODE_EDITOR_LIGHT_THEME_TRANSPARENT_ID,
-  CODE_EDITOR_DARK_THEME_TRANSPARENT_ID,
+  CODE_EDITOR_DEFAULT_THEME_ID,
+  CODE_EDITOR_TRANSPARENT_THEME_ID,
 } from '@kbn/monaco';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -117,11 +115,6 @@ export interface CodeEditorProps {
   editorWillUnmount?: () => void;
 
   /**
-   * Should the editor use the dark theme
-   */
-  useDarkTheme?: boolean;
-
-  /**
    * Should the editor use a transparent background
    */
   transparentBackground?: boolean;
@@ -177,7 +170,6 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
   editorDidMount,
   editorWillMount,
   editorWillUnmount,
-  useDarkTheme: useDarkThemeProp,
   transparentBackground,
   suggestionProvider,
   signatureProvider,
@@ -198,8 +190,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
   enableFindAction,
   dataTestSubj,
 }) => {
-  const { colorMode, euiTheme } = useEuiTheme();
-  const useDarkTheme = useDarkThemeProp ?? colorMode === 'DARK';
+  const { euiTheme } = useEuiTheme();
 
   // We need to be able to mock the MonacoEditor in our test in order to not test implementation
   // detail and not have to call methods on the <CodeEditor /> component instance.
@@ -495,13 +486,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
 
   const theme =
     options?.theme ??
-    (transparentBackground
-      ? useDarkTheme
-        ? CODE_EDITOR_DARK_THEME_TRANSPARENT_ID
-        : CODE_EDITOR_LIGHT_THEME_TRANSPARENT_ID
-      : useDarkTheme
-      ? CODE_EDITOR_DARK_THEME_ID
-      : CODE_EDITOR_LIGHT_THEME_ID);
+    (transparentBackground ? CODE_EDITOR_TRANSPARENT_THEME_ID : CODE_EDITOR_DEFAULT_THEME_ID);
 
   return (
     <div
