@@ -4,9 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import * as t from 'io-ts';
-import { ReactNode } from 'react';
-import { PackagePolicyConfigRecordEntry } from '@kbn/fleet-plugin/common';
+import type * as t from 'io-ts';
+import type { ReactNode } from 'react';
+import type { PackagePolicyConfigRecordEntry } from '@kbn/fleet-plugin/common';
 
 export type {
   PackagePolicyCreateExtensionComponentProps,

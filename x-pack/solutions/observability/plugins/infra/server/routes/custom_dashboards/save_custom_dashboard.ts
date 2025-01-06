@@ -6,13 +6,13 @@
  */
 
 import { createRouteValidationFunction } from '@kbn/io-ts-utils';
-import { InfraCustomDashboard } from '../../../common/custom_dashboards';
+import type { InfraCustomDashboard } from '../../../common/custom_dashboards';
 import {
   InfraSaveCustomDashboardsRequestPayloadRT,
   InfraSaveCustomDashboardsResponseBodyRT,
   InfraGetCustomDashboardsRequestPathParamsRT,
 } from '../../../common/http_api/custom_dashboards_api';
-import { KibanaFramework } from '../../lib/adapters/framework/kibana_framework_adapter';
+import type { KibanaFramework } from '../../lib/adapters/framework/kibana_framework_adapter';
 import { INFRA_CUSTOM_DASHBOARDS_SAVED_OBJECT_TYPE } from '../../saved_objects';
 import { checkCustomDashboardsEnabled } from './lib/check_custom_dashboards_enabled';
 import { handleRouteErrors } from '../../utils/handle_route_errors';
