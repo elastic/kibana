@@ -79,7 +79,7 @@ function createStartContract(): ObservabilityAIAssistantPublicStart {
     ObservabilityAIAssistantContextualInsight: (() => <></>) as any,
     ObservabilityAIAssistantChatServiceContext: React.createContext<any>(undefined),
     ObservabilityAIAssistantMultipaneFlyoutContext: React.createContext<any>(undefined),
-    useChat: () => ({} as any),
+    useChatCompletion: () => ({} as any),
     useObservabilityAIAssistantChatService: () => mockChatService,
     useGenAIConnectors: () => ({
       loading: false,

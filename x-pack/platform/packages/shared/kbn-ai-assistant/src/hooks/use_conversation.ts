@@ -67,7 +67,7 @@ export function useConversation({
   const {
     services: {
       notifications,
-      observabilityAIAssistant: { useChat },
+      observabilityAIAssistant: { useChatCompletion },
     },
   } = useKibana();
 
@@ -110,7 +110,7 @@ export function useConversation({
       });
   };
 
-  const { next, messages, setMessages, state, stop } = useChat({
+  const { next, messages, setMessages, state, stop } = useChatCompletion({
     initialMessages,
     initialConversationId,
     chatService,

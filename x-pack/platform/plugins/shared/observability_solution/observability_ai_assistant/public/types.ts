@@ -28,7 +28,7 @@ import type { ChatActionClickHandler } from './components/chat/types';
 import type { InsightProps } from './components/insight/insight';
 import { ObservabilityAIAssistantChatServiceContext } from './context/observability_ai_assistant_chat_service_context';
 import { ObservabilityAIAssistantMultipaneFlyoutContext } from './context/observability_ai_assistant_multipane_flyout_context';
-import { useChat } from './hooks/use_chat';
+import { useChatCompletion } from './hooks/use_chat_completion';
 import type { UseGenAIConnectorsResult } from './hooks/use_genai_connectors';
 import { useObservabilityAIAssistantChatService } from './hooks/use_observability_ai_assistant_chat_service';
 import { createScreenContextAction } from './utils/create_screen_context_action';
@@ -155,7 +155,7 @@ export interface ObservabilityAIAssistantPublicStart {
   ObservabilityAIAssistantChatServiceContext: typeof ObservabilityAIAssistantChatServiceContext;
   useObservabilityAIAssistantChatService: typeof useObservabilityAIAssistantChatService;
   useGenAIConnectors: () => UseGenAIConnectorsResult;
-  useChat: typeof useChat;
+  useChatCompletion: typeof useChatCompletion;
   getContextualInsightMessages: ({}: { message: string; instructions: string }) => Message[];
   createScreenContextAction: typeof createScreenContextAction;
 }

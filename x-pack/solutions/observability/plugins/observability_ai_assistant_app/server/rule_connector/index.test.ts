@@ -84,10 +84,10 @@ describe('observabilityAIAssistant rule_connector', () => {
     });
 
     it('calls complete api', async () => {
-      const completeMock = jest.fn().mockReturnValue(new Observable());
+      const runToolsMock = jest.fn().mockReturnValue(new Observable());
       const initResources = jest.fn().mockResolvedValue({
         service: {
-          getClient: async () => ({ complete: completeMock }),
+          getClient: async () => ({ runTools: runToolsMock }),
           getFunctionClient: async () => ({
             getFunctions: () => [],
             getInstructions: () => [],
@@ -132,9 +132,9 @@ describe('observabilityAIAssistant rule_connector', () => {
 
       expect(result).toEqual({ actionId: 'observability-ai-assistant', status: 'ok' });
       expect(initResources).toHaveBeenCalledTimes(1);
-      expect(completeMock).toHaveBeenCalledTimes(1);
+      expect(runToolsMock).toHaveBeenCalledTimes(1);
 
-      expect(completeMock).toHaveBeenCalledWith(
+      expect(runToolsMock).toHaveBeenCalledWith(
         expect.objectContaining({
           persist: true,
           isPublic: true,

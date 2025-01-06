@@ -23,7 +23,7 @@ import { ILicense } from '@kbn/licensing-plugin/public';
 import { MessageRole, type Message } from '../../../common/types';
 import { ObservabilityAIAssistantChatServiceContext } from '../../context/observability_ai_assistant_chat_service_context';
 import { useAbortableAsync } from '../../hooks/use_abortable_async';
-import { ChatState, useChat } from '../../hooks/use_chat';
+import { ChatCompletionState, useChatCompletion } from '../../hooks/use_chat_completion';
 import { useGenAIConnectors } from '../../hooks/use_genai_connectors';
 import { useKibana } from '../../hooks/use_kibana';
 import { useObservabilityAIAssistant } from '../../hooks/use_observability_ai_assistant';
@@ -62,7 +62,7 @@ function ChatContent({
 
   const { flyoutState } = useFlyoutState();
 
-  const { messages, next, state, stop } = useChat({
+  const { messages, next, state, stop } = useChatCompletion({
     service,
     chatService,
     connectorId,
@@ -82,7 +82,7 @@ function ChatContent({
   }, [next]);
 
   useEffect(() => {
-    if (state !== ChatState.Loading && lastAssistantResponse) {
+    if (state !== ChatCompletionState.Loading && lastAssistantResponse) {
       chatService.sendAnalyticsEvent({
         type: ObservabilityAIAssistantTelemetryEventType.InsightResponse,
         payload: {
@@ -98,13 +98,13 @@ function ChatContent({
         body={
           <MessageText
             content={lastAssistantResponse?.message.content ?? ''}
-            loading={state === ChatState.Loading}
+            loading={state === ChatCompletionState.Loading}
             onActionClick={async () => {}}
           />
         }
-        error={state === ChatState.Error}
+        error={state === ChatCompletionState.Error}
         controls={
-          state === ChatState.Loading ? (
+          state === ChatCompletionState.Loading ? (
             <StopGeneratingButton
               onClick={() => {
                 stop();

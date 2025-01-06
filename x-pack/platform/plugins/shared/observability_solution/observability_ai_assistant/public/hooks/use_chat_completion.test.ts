@@ -18,7 +18,12 @@ import {
   StreamingChatResponseEventType,
   type StreamingChatResponseEventWithoutError,
 } from '../../common';
-import { ChatState, useChat, type UseChatProps, type UseChatResult } from './use_chat';
+import {
+  ChatCompletionState,
+  useChatCompletion,
+  type UseChatCompletionProps,
+  type UseChatCompletionResult,
+} from './use_chat_completion';
 import * as useKibanaModule from './use_kibana';
 
 type MockedChatService = DeeplyMockedKeys<ObservabilityAIAssistantChatService>;
@@ -57,16 +62,16 @@ jest.spyOn(useKibanaModule, 'useKibana').mockReturnValue({
   },
 } as any);
 
-let hookResult: RenderHookResult<UseChatResult, UseChatProps>;
+let hookResult: RenderHookResult<UseChatCompletionResult, UseChatCompletionProps>;
 
-describe('useChat', () => {
+describe('useChatCompletion', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   describe('initially', () => {
     beforeEach(() => {
-      hookResult = renderHook(useChat, {
+      hookResult = renderHook(useChatCompletion, {
         initialProps: {
           connectorId: 'my-connector',
           chatService: mockChatService,
@@ -84,7 +89,7 @@ describe('useChat', () => {
             getScreenContexts: () => [],
           } as unknown as ObservabilityAIAssistantService,
           scopes: ['observability'],
-        } as UseChatProps,
+        } as UseChatCompletionProps,
       });
     });
 
@@ -96,7 +101,7 @@ describe('useChat', () => {
     });
 
     it('sets chatState to ready', () => {
-      expect(hookResult.result.current.state).toBe(ChatState.Ready);
+      expect(hookResult.result.current.state).toBe(ChatCompletionState.Ready);
     });
   });
 
@@ -104,7 +109,7 @@ describe('useChat', () => {
     let subject: Subject<StreamingChatResponseEventWithoutError>;
 
     beforeEach(() => {
-      hookResult = renderHook(useChat, {
+      hookResult = renderHook(useChatCompletion, {
         initialProps: {
           connectorId: 'my-connector',
           chatService: mockChatService,
@@ -114,7 +119,7 @@ describe('useChat', () => {
             getScreenContexts: () => [],
           } as unknown as ObservabilityAIAssistantService,
           scopes: ['observability'],
-        } as UseChatProps,
+        } as UseChatCompletionProps,
       });
 
       subject = new Subject();
@@ -136,7 +141,7 @@ describe('useChat', () => {
     });
 
     it('sets the chatState to loading', () => {
-      expect(hookResult.result.current.state).toBe(ChatState.Loading);
+      expect(hookResult.result.current.state).toBe(ChatCompletionState.Loading);
     });
 
     describe('after asking for another response', () => {
@@ -223,7 +228,7 @@ describe('useChat', () => {
         });
 
         expect(hookResult.result.current.messages[2].message.content).toBe('goodbye');
-        expect(hookResult.result.current.state).toBe(ChatState.Ready);
+        expect(hookResult.result.current.state).toBe(ChatCompletionState.Ready);
       });
     });
 
@@ -243,7 +248,7 @@ describe('useChat', () => {
 
       it('shows the partial message and sets chatState to aborted', () => {
         expect(hookResult.result.current.messages[2].message.content).toBe('good');
-        expect(hookResult.result.current.state).toBe(ChatState.Aborted);
+        expect(hookResult.result.current.state).toBe(ChatCompletionState.Aborted);
       });
 
       it('does not show an error toast', () => {
@@ -286,7 +291,7 @@ describe('useChat', () => {
 
       it('shows the partial message and sets chatState to error', () => {
         expect(hookResult.result.current.messages[2].message.content).toBe('good');
-        expect(hookResult.result.current.state).toBe(ChatState.Error);
+        expect(hookResult.result.current.state).toBe(ChatCompletionState.Error);
       });
 
       it('shows an error toast', () => {

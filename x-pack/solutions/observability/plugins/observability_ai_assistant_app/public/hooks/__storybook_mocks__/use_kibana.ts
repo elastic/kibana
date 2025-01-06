@@ -10,7 +10,7 @@ import { Subject } from 'rxjs';
 
 const ObservabilityAIAssistantMultipaneFlyoutContext = React.createContext(undefined);
 
-function useChat() {
+function useChatCompletion() {
   return { next: () => {}, messages: [], setMessages: () => {}, state: undefined, stop: () => {} };
 }
 
@@ -35,7 +35,7 @@ export function useKibana() {
             license$: new Subject(),
           },
           observabilityAIAssistant: {
-            useChat,
+            useChatCompletion,
             ObservabilityAIAssistantMultipaneFlyoutContext,
           },
           share: {

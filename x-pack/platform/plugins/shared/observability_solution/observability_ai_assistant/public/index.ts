@@ -41,7 +41,7 @@ export { createStorybookChatService, createStorybookService } from './storybook_
 
 export { createScreenContextAction } from './utils/create_screen_context_action';
 
-export { ChatState } from './hooks/use_chat';
+export { ChatCompletionState as ChatState } from './hooks/use_chat_completion';
 
 export { FeedbackButtons, type Feedback } from './components/buttons/feedback_buttons';
 export { ChatItemControls } from './components/chat/chat_item_controls';
@@ -92,7 +92,7 @@ export type {
   APIReturnType,
 } from './api';
 
-export type { UseChatResult } from './hooks/use_chat';
+export type { UseChatCompletionResult as UseChatResult } from './hooks/use_chat_completion';
 
 export {
   aiAssistantLogsIndexPattern,

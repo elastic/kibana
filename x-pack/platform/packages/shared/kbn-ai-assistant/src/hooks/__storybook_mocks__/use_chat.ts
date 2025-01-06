@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-export function useChat() {
+export function useChatCompletion() {
   return { next: () => {}, messages: [], setMessages: () => {}, state: undefined, stop: () => {} };
 }

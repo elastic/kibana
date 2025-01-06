@@ -17,7 +17,7 @@ import { ObservabilityAIAssistantMultipaneFlyoutContext } from './context/observ
 import { ObservabilityAIAssistantProvider } from './context/observability_ai_assistant_provider';
 import { useGenAIConnectorsWithoutContext } from './hooks/use_genai_connectors';
 import { useObservabilityAIAssistantChatService } from './hooks/use_observability_ai_assistant_chat_service';
-import { createUseChat } from './hooks/use_chat';
+import { createUseChatCompletion } from './hooks/use_chat_completion';
 import { createService } from './service/create_service';
 import { createScreenContextAction } from './utils/create_screen_context_action';
 import { getContextualInsightMessages } from './utils/get_contextual_insight_messages';
@@ -97,7 +97,7 @@ export class ObservabilityAIAssistantPlugin
     return {
       service,
       useGenAIConnectors: () => useGenAIConnectorsWithoutContext(service),
-      useChat: createUseChat({
+      useChatCompletion: createUseChatCompletion({
         notifications: coreStart.notifications,
       }),
       ObservabilityAIAssistantMultipaneFlyoutContext,

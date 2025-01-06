@@ -23,7 +23,7 @@ import {
 } from './use_conversation';
 import { ChatState } from '@kbn/observability-ai-assistant-plugin/public';
 import { createMockChatService } from '../utils/create_mock_chat_service';
-import { createUseChat } from '@kbn/observability-ai-assistant-plugin/public/hooks/use_chat';
+import { createUseChatCompletion } from '@kbn/observability-ai-assistant-plugin/public/hooks/use_chat_completion';
 import type { NotificationsStart } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { AssistantScope } from '@kbn/ai-assistant-common';
@@ -64,7 +64,7 @@ const useKibanaMockServices = {
     get: jest.fn(),
   },
   observabilityAIAssistant: {
-    useChat: createUseChat({
+    useChatCompletion: createUseChatCompletion({
       notifications: {
         toasts: {
           addError: addErrorMock,

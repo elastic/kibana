@@ -23,7 +23,7 @@ import type { ObservabilityAIAssistantChatService, ObservabilityAIAssistantServi
 import { useKibana } from './use_kibana';
 import { useOnce } from './use_once';
 
-export enum ChatState {
+export enum ChatCompletionState {
   Ready = 'ready',
   Loading = 'loading',
   Error = 'error',
@@ -37,15 +37,15 @@ function getWithSystemMessage(messages: Message[], systemMessage: Message) {
   ];
 }
 
-export interface UseChatResult {
+export interface UseChatCompletionResult {
   messages: Message[];
   setMessages: (messages: Message[]) => void;
-  state: ChatState;
+  state: ChatCompletionState;
   next: (messages: Message[]) => void;
   stop: () => void;
 }
 
-interface UseChatPropsWithoutContext {
+interface UseChatCompletionPropsWithoutContext {
   notifications: NotificationsStart;
   initialMessages: Message[];
   initialConversationId?: string;
@@ -59,9 +59,9 @@ interface UseChatPropsWithoutContext {
   scopes: AssistantScope[];
 }
 
-export type UseChatProps = Omit<UseChatPropsWithoutContext, 'notifications'>;
+export type UseChatCompletionProps = Omit<UseChatCompletionPropsWithoutContext, 'notifications'>;
 
-function useChatWithoutContext({
+function useChatCompletionWithoutContext({
   initialMessages,
   initialConversationId,
   notifications,
@@ -73,8 +73,8 @@ function useChatWithoutContext({
   persist,
   disableFunctions,
   scopes,
-}: UseChatPropsWithoutContext): UseChatResult {
-  const [chatState, setChatState] = useState(ChatState.Ready);
+}: UseChatCompletionPropsWithoutContext): UseChatCompletionResult {
+  const [chatState, setChatState] = useState(ChatCompletionState.Ready);
   const systemMessage = useMemo(() => {
     return chatService.getSystemMessage();
   }, [chatService]);
@@ -97,17 +97,17 @@ function useChatWithoutContext({
   onConversationUpdateRef.current = onConversationUpdate;
 
   const handleSignalAbort = useCallback(() => {
-    setChatState(ChatState.Aborted);
+    setChatState(ChatCompletionState.Aborted);
   }, []);
 
   const handleError = useCallback(
     (error: Error) => {
       if (error instanceof AbortError) {
-        setChatState(ChatState.Aborted);
+        setChatState(ChatCompletionState.Aborted);
         return;
       }
 
-      setChatState(ChatState.Error);
+      setChatState(ChatCompletionState.Error);
 
       if (isTokenLimitReachedError(error)) {
         setMessages((msgs) => [
@@ -151,11 +151,11 @@ function useChatWithoutContext({
       setMessages(nextMessages);
 
       if (!connectorId || !nextMessages.length) {
-        setChatState(ChatState.Ready);
+        setChatState(ChatCompletionState.Ready);
         return;
       }
 
-      setChatState(ChatState.Loading);
+      setChatState(ChatCompletionState.Loading);
 
       const next$ = chatService.runTools({
         getScreenContexts: () => service.getScreenContexts(),
@@ -236,7 +236,7 @@ function useChatWithoutContext({
           setPendingMessages(getPendingMessages());
         },
         complete: () => {
-          setChatState(ChatState.Ready);
+          setChatState(ChatCompletionState.Ready);
           const completed = nextMessages.concat(completedMessages);
           setMessages(completed);
           setPendingMessages([]);
@@ -281,7 +281,7 @@ function useChatWithoutContext({
   const setMessagesWithAbort = useCallback((nextMessages: Message[]) => {
     abortControllerRef.current.abort();
     setPendingMessages([]);
-    setChatState(ChatState.Ready);
+    setChatState(ChatCompletionState.Ready);
     setMessages(nextMessages);
   }, []);
 
@@ -296,20 +296,20 @@ function useChatWithoutContext({
   };
 }
 
-export function useChat(props: UseChatProps) {
+export function useChatCompletion(props: UseChatCompletionProps) {
   const {
     services: { notifications },
   } = useKibana();
 
-  return useChatWithoutContext({
+  return useChatCompletionWithoutContext({
     ...props,
     notifications,
   });
 }
 
-export function createUseChat({ notifications }: { notifications: NotificationsStart }) {
-  return (parameters: Omit<UseChatProps, 'notifications'>) => {
-    return useChatWithoutContext({
+export function createUseChatCompletion({ notifications }: { notifications: NotificationsStart }) {
+  return (parameters: Omit<UseChatCompletionProps, 'notifications'>) => {
+    return useChatCompletionWithoutContext({
       ...parameters,
       notifications,
     });
