@@ -239,19 +239,46 @@ const TriggersActionsUiExampleApp = ({
                   <div>
                     <EuiButton
                       onClick={() => {
-                        http.post('/api/alerting/schedule_task_with_api_key');
+                        http.post('/api/alerting/schedule_task_with_api_key/task1');
                       }}
                     >
-                      Schedule
+                      Schedule Task 1
                     </EuiButton>
                   </div>
                   <div>
                     <EuiButton
                       onClick={() => {
-                        http.post('/api/alerting/cancel_task_with_api_key');
+                        http.post('/api/alerting/schedule_task_with_api_key/task2');
                       }}
                     >
-                      Cancel
+                      Schedule Task 2
+                    </EuiButton>
+                  </div>
+                  <div>
+                    <EuiButton
+                      onClick={() => {
+                        http.post('/api/alerting/remove_task_with_api_key/task1');
+                      }}
+                    >
+                      Remove Task 1
+                    </EuiButton>
+                    <EuiButton
+                      onClick={() => {
+                        http.post('/api/alerting/remove_task_with_api_key/task2');
+                      }}
+                    >
+                      Remove Task 2
+                    </EuiButton>
+                  </div>
+                  <div>
+                    <EuiButton
+                      onClick={() => {
+                        http.post('/api/alerting/bulk_remove_task_with_api_key', {
+                          body: JSON.stringify({ ids: ['task1', 'task2'] }),
+                        });
+                      }}
+                    >
+                      Remove All Tasks
                     </EuiButton>
                   </div>
                 </div>

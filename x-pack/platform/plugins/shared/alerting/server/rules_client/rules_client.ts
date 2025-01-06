@@ -226,7 +226,11 @@ export class RulesClient {
     );
   };
 
-  public cancelTaskWithApiKey = (id: string) => {
+  public removeTaskWithApiKey = (id: string) => {
     this.context.taskManager.remove(id);
   };
+
+  public bulkRemoveTasksWithApiKey = (ids: string[]) => {
+    this.context.taskManager.bulkRemove(ids);
+  }
 }

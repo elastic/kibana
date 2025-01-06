@@ -369,11 +369,8 @@ export class AlertingPlugin {
             const scopedClusterClient = services[0].elasticsearch.client.asScoped(fakeRequest);
             const savedObjectsClient = services[0].savedObjects.getScopedClient(fakeRequest);
 
-            console.log('TASK WITH API KEY');
+            console.log(`TASK WITH API KEY - ${taskInstance.id}`);
             console.log(JSON.stringify(taskInstance, null, 2));
-
-            console.log(scopedClusterClient);
-            console.log(savedObjectsClient);
 
             return {
               state: {},

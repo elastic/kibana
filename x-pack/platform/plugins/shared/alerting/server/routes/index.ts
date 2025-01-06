@@ -71,6 +71,7 @@ import { scheduleBackfillRoute } from './backfill/apis/schedule/schedule_backfil
 import { getBackfillRoute } from './backfill/apis/get/get_backfill_route';
 import { findBackfillRoute } from './backfill/apis/find/find_backfill_route';
 import { deleteBackfillRoute } from './backfill/apis/delete/delete_backfill_route';
+import { schema } from '@kbn/config-schema';
 
 export interface RouteOptions {
   router: IRouter<AlertingRequestHandlerContext>;
@@ -161,14 +162,20 @@ export function defineRoutes(opts: RouteOptions) {
 
   router.post(
     {
-      path: '/api/alerting/schedule_task_with_api_key',
-      validate: {},
+      path: '/api/alerting/schedule_task_with_api_key/{id}',
+      validate: {
+        params: schema.object({
+          id: schema.string(),
+        }),
+      },
     },
     async (context, request, res) => {
       const alertingContext = await context.alerting;
       const rulesClient = await alertingContext.getRulesClient();
 
-      rulesClient.scheduleTaskWithApiKey('taskWithApiKeyId', request);
+      const id = request.params.id;
+
+      rulesClient.scheduleTaskWithApiKey(id, request);
 
       return res.ok();
     }
@@ -176,14 +183,41 @@ export function defineRoutes(opts: RouteOptions) {
 
   router.post(
     {
-      path: '/api/alerting/cancel_task_with_api_key',
-      validate: {},
+      path: '/api/alerting/remove_task_with_api_key/{id}',
+      validate: {
+        params: schema.object({
+          id: schema.string(),
+        }),
+      },
     },
     async (context, request, res) => {
       const alertingContext = await context.alerting;
       const rulesClient = await alertingContext.getRulesClient();
 
-      rulesClient.cancelTaskWithApiKey('taskWithApiKeyId');
+      const id = request.params.id;
+
+      rulesClient.removeTaskWithApiKey(id);
+
+      return res.ok();
+    }
+  );
+
+  router.post(
+    {
+      path: '/api/alerting/bulk_remove_task_with_api_key',
+      validate: {
+        body: schema.object({
+          ids: schema.arrayOf(schema.string()),
+        }),
+      },
+    },
+    async (context, request, res) => {
+      const alertingContext = await context.alerting;
+      const rulesClient = await alertingContext.getRulesClient();
+
+      const ids = request.body.ids;
+
+      rulesClient.bulkRemoveTasksWithApiKey(ids);
 
       return res.ok();
     }
