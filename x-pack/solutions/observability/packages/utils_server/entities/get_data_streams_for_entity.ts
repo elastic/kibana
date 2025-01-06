@@ -54,10 +54,26 @@ export async function getDataStreamsForEntity({
   });
 
   const dataStreams = uniq(
-    compact(await resolveIndexResponse.indices.flatMap((idx) => idx.data_stream))
+    compact(
+      await resolveIndexResponse.indices.flatMap((idx) => {
+        const remoteCluster = extractRemoteCluster(idx.name);
+        if (remoteCluster) {
+          return `${remoteCluster}:${idx.data_stream}`;
+        }
+        return idx.data_stream;
+      })
+    )
   );
 
   return {
     dataStreams,
   };
 }
+
+const extractRemoteCluster = (index: string) => {
+  const match = index.match(/^([^:]+):/);
+  if (!match) {
+    return null;
+  }
+  return match[1];
+};
