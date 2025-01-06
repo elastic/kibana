@@ -12,6 +12,7 @@ import { requestHasRequiredAnonymizationParams } from '@kbn/elastic-assistant-pl
 import type { AssistantTool, AssistantToolParams } from '@kbn/elastic-assistant-plugin/server';
 import { getAlertsCountQuery } from './get_alert_counts_query';
 import { APP_UI_ID } from '../../../../common';
+import { getCitationElement } from '@kbn/elastic-assistant-common';
 
 export interface AlertCountsToolParams extends AssistantToolParams {
   alertsIndexPattern: string;
@@ -39,10 +40,15 @@ export const ALERT_COUNTS_TOOL: AssistantTool = {
         const query = getAlertsCountQuery(alertsIndexPattern);
         const result = await esClient.search<SearchResponse>(query);
 
+        const citationElement = getCitationElement({
+          citationLable: "Alerts",
+          citationLink: "/app/security/alerts"
+        })
+
         return ` Below are all relevant results in JSON format and their citationElement:
         ${JSON.stringify(result)}
 
-        citationElement: \`!{citation[Alerts](/app/security/alerts}\`
+        citationElement: "${citationElement}"
         `
       },
       tags: ['alerts', 'alerts-count'],

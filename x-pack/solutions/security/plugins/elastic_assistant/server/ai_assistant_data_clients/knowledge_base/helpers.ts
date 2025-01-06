@@ -11,7 +11,7 @@ import { DynamicStructuredTool } from '@langchain/core/tools';
 import { errors } from '@elastic/elasticsearch';
 import { QueryDslQueryContainer, SearchRequest } from '@elastic/elasticsearch/lib/api/types';
 import { AuthenticatedUser } from '@kbn/core-security-common';
-import { IndexEntry } from '@kbn/elastic-assistant-common';
+import { getCitationElement, IndexEntry } from '@kbn/elastic-assistant-common';
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
 
 export const isModelAlreadyExistsError = (error: Error) => {
@@ -236,9 +236,14 @@ export const getStructuredToolForIndexEntry = ({
         logger.debug(() => `Similarity Search Results:\n ${JSON.stringify(result)}`);
         logger.debug(() => `Similarity Text Extract Results:\n ${JSON.stringify(kbDocs)}`);
 
+        const citationElement = getCitationElement({
+          citationLable: indexEntry.name,
+          citationLink: `/app/management/kibana/securityAiAssistantManagement?tab=knowledge_base&entry_search_term=${indexEntry.id}`
+        })
+        
         return `###\n Below are all relevant documents in JSON format:
 ${JSON.stringify(kbDocs)}
-citationElement: "!{citation[${indexEntry.name}](/app/management/kibana/securityAiAssistantManagement?tab=knowledge_base&entry_search_term=${indexEntry.id})}"
+citationElement: ${citationElement}
 ###
         `;
       } catch (e) {

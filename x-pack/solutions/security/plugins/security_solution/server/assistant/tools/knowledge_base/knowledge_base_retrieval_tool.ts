@@ -10,6 +10,8 @@ import { z } from '@kbn/zod';
 import type { AssistantTool, AssistantToolParams } from '@kbn/elastic-assistant-plugin/server';
 import type { AIAssistantKnowledgeBaseDataClient } from '@kbn/elastic-assistant-plugin/server/ai_assistant_data_clients/knowledge_base';
 import { APP_UI_ID } from '../../../../common';
+import { Document } from 'langchain/document';
+import { getCitationElement } from '@kbn/elastic-assistant-common';
 
 export interface KnowledgeBaseRetrievalToolParams extends AssistantToolParams {
   kbDataClient: AIAssistantKnowledgeBaseDataClient;
@@ -51,20 +53,25 @@ export const KNOWLEDGE_BASE_RETRIEVAL_TOOL: AssistantTool = {
           required: false,
         });
 
-        const citedDocs = docs.map(doc => {
-          return {
-            ...doc,
-            metadata: {
-              ...doc.metadata,
-              citationElement: `!{citation[${doc.metadata.name}](/app/management/kibana/securityAiAssistantManagement?tab=knowledge_base&entry_search_term=${doc.id})}`
-            }
-          }
-        })
+        const enrichedDocuments = docs.map(enrichDocument)
 
-        return JSON.stringify(citedDocs);
+        return JSON.stringify(enrichedDocuments);
       },
       tags: ['knowledge-base'],
       // TODO: Remove after ZodAny is fixed https://github.com/langchain-ai/langchainjs/blob/main/langchain-core/src/tools.ts
     }) as unknown as DynamicStructuredTool;
   },
 };
+
+function enrichDocument(document: Document<Record<string, any>>) {
+  return new Document({
+    ...document,
+    metadata: {
+      ...document.metadata,
+      citationElement: getCitationElement({
+        citationLable: document.metadata.name,
+        citationLink: `/app/management/kibana/securityAiAssistantManagement?tab=knowledge_base&entry_search_term=${document.id}`
+      })
+    }
+  })
+}
