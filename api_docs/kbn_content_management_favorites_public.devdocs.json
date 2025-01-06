@@ -94,13 +94,7 @@
                     "label": "http",
                     "description": [],
                     "signature": [
-                      {
-                        "pluginId": "@kbn/core-http-browser",
-                        "scope": "public",
-                        "docId": "kibKbnCoreHttpBrowserPluginApi",
-                        "section": "def-public.HttpSetup",
-                        "text": "HttpSetup"
-                      }
+                      "HttpSetup"
                     ],
                     "path": "packages/content-management/favorites/favorites_public/src/favorites_client.ts",
                     "deprecated": false,
@@ -114,13 +108,7 @@
                     "label": "userProfile",
                     "description": [],
                     "signature": [
-                      {
-                        "pluginId": "@kbn/core-user-profile-browser",
-                        "scope": "public",
-                        "docId": "kibKbnCoreUserProfileBrowserPluginApi",
-                        "section": "def-public.UserProfileService",
-                        "text": "UserProfileService"
-                      }
+                      "UserProfileService"
                     ],
                     "path": "packages/content-management/favorites/favorites_public/src/favorites_client.ts",
                     "deprecated": false,
