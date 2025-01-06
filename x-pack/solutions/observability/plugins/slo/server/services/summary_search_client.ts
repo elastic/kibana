@@ -6,11 +6,12 @@
  */
 
 import { SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
+import { isCCSRemoteIndexName } from '@kbn/es-query';
 import { ALL_VALUE, Paginated, Pagination } from '@kbn/slo-schema';
 import { assertNever } from '@kbn/std';
 import { partition } from 'lodash';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { SLO_SUMMARY_DESTINATION_INDEX_PATTERN } from '../../common/constants';
 import { Groupings, SLODefinition, SLOId, StoredSLOSettings, Summary } from '../domain/models';
 import { toHighPrecision } from '../utils/number';
@@ -177,7 +178,7 @@ export class DefaultSummarySearchClient implements SummarySearchClient {
         }),
       };
     } catch (err) {
-      this.logger.error(new Error(`Summary search query error, ${err.message}`, { cause: err }));
+      this.logger.error(`Error while searching SLO summary documents. ${err}`);
       return { total: 0, perPage: pagination.perPage, page: pagination.page, results: [] };
     }
   }
@@ -225,8 +226,8 @@ function excludeStaleSummaryFilter(
 }
 
 function getRemoteClusterName(index: string) {
-  if (index.includes(':')) {
-    return index.split(':')[0];
+  if (isCCSRemoteIndexName(index)) {
+    return index.substring(0, index.indexOf(':'));
   }
 }
 
