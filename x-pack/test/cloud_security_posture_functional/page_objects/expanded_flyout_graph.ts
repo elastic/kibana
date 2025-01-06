@@ -19,9 +19,10 @@ const GRAPH_NODE_POPOVER_SHOW_ACTIONS_BY_TEST_ID = `${GRAPH_INVESTIGATION_TEST_I
 const GRAPH_NODE_POPOVER_SHOW_ACTIONS_ON_TEST_ID = `${GRAPH_INVESTIGATION_TEST_ID}ShowActionsOnEntity`;
 const GRAPH_LABEL_EXPAND_POPOVER_TEST_ID = `${GRAPH_INVESTIGATION_TEST_ID}GraphLabelExpandPopover`;
 const GRAPH_LABEL_EXPAND_POPOVER_SHOW_EVENTS_WITH_THIS_ACTION_ITEM_ID = `${GRAPH_INVESTIGATION_TEST_ID}ShowEventsWithThisAction`;
+const GRAPH_ACTIONS_INVESTIGATE_IN_TIMELINE_ID = `${GRAPH_INVESTIGATION_TEST_ID}InvestigateInTimeline`;
 type Filter = Parameters<FilterBarService['addFilter']>[0];
 
-export class ExpandedFlyout extends FtrService {
+export class ExpandedFlyoutGraph extends FtrService {
   private readonly pageObjects = this.ctx.getPageObjects(['common', 'header']);
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly filterBar = this.ctx.getService('filterBar');
@@ -118,6 +119,11 @@ export class ExpandedFlyout extends FtrService {
     await this.filterBar.createFilter(filter);
     await this.testSubjects.scrollIntoView('saveFilter');
     await this.testSubjects.clickWhenNotDisabled('saveFilter');
+    await this.pageObjects.header.waitUntilLoadingHasFinished();
+  }
+
+  async clickOnInvestigateInTimelineButton(): Promise<void> {
+    await this.testSubjects.click(GRAPH_ACTIONS_INVESTIGATE_IN_TIMELINE_ID);
     await this.pageObjects.header.waitUntilLoadingHasFinished();
   }
 }
