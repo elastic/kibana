@@ -20,7 +20,7 @@ import { FilterAction } from './table/filter_action';
 
 export const HostsTable = () => {
   const { loading } = useHostsViewContext();
-  const { loading: hostCountLoading } = useHostCountContext();
+  const { loading: hostCountLoading, count } = useHostCountContext();
   const { onPageReady } = usePerformanceContext();
 
   const {
@@ -40,9 +40,14 @@ export const HostsTable = () => {
 
   useEffect(() => {
     if (!loading && !hostCountLoading) {
-      onPageReady();
+      onPageReady({
+        customMetrics: {
+          key1: 'numberOfHosts',
+          value1: count,
+        },
+      });
     }
-  }, [loading, hostCountLoading, onPageReady]);
+  }, [loading, hostCountLoading, onPageReady, count]);
 
   return (
     <>
