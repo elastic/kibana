@@ -180,7 +180,7 @@ export const useGridLayoutEvents = ({
       const atTheTop = window.scrollY <= 0;
       const atTheBottom = window.innerHeight + window.scrollY >= document.body.scrollHeight;
 
-      const startScrollingUp = !isResize && heightPercentage < 5 && !atTheTop; // don't scroll up when resizing
+      const startScrollingUp = heightPercentage < 5 && !atTheTop;
       const startScrollingDown = heightPercentage > 95 && !atTheBottom;
       if (startScrollingUp || startScrollingDown) {
         if (!scrollInterval.current) {
