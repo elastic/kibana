@@ -5085,7 +5085,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-ui-settings-browser-internal@link:packages/core/ui-settings/core-ui-settings-browser-internal":
+"@kbn/core-ui-settings-browser-internal@link:src/core/packages/ui-settings/browser-internal":
   version "0.0.0"
   uid ""
 
