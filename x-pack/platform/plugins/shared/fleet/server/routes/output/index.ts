@@ -8,7 +8,7 @@
 import type { FleetAuthzRouter } from '../../services/security';
 
 import { API_VERSIONS } from '../../../common/constants';
-
+import { FLEET_API_PRIVILEGES } from '../../constants/api_privileges';
 import { OUTPUT_API_ROUTES } from '../../constants';
 import {
   DeleteOutputRequestSchema,
@@ -40,8 +40,17 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
   router.versioned
     .get({
       path: OUTPUT_API_ROUTES.LIST_PATTERN,
-      fleetAuthz: (authz) => {
-        return authz.fleet.readSettings || authz.fleet.readAgentPolicies;
+      security: {
+        authz: {
+          requiredPrivileges: [
+            {
+              anyRequired: [
+                FLEET_API_PRIVILEGES.SETTINGS.READ,
+                FLEET_API_PRIVILEGES.AGENT_POLICIES.READ,
+              ],
+            },
+          ],
+        },
       },
       summary: 'Get outputs',
       options: {
@@ -68,8 +77,17 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
   router.versioned
     .get({
       path: OUTPUT_API_ROUTES.INFO_PATTERN,
-      fleetAuthz: (authz) => {
-        return authz.fleet.readSettings || authz.fleet.readAgentPolicies;
+      security: {
+        authz: {
+          requiredPrivileges: [
+            {
+              anyRequired: [
+                FLEET_API_PRIVILEGES.SETTINGS.READ,
+                FLEET_API_PRIVILEGES.AGENT_POLICIES.READ,
+              ],
+            },
+          ],
+        },
       },
       summary: 'Get output',
       description: 'Get output by ID.',
@@ -97,8 +115,17 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
   router.versioned
     .put({
       path: OUTPUT_API_ROUTES.UPDATE_PATTERN,
-      fleetAuthz: (authz) => {
-        return authz.fleet.allSettings || authz.fleet.allAgentPolicies;
+      security: {
+        authz: {
+          requiredPrivileges: [
+            {
+              anyRequired: [
+                FLEET_API_PRIVILEGES.SETTINGS.ALL,
+                FLEET_API_PRIVILEGES.AGENT_POLICIES.ALL,
+              ],
+            },
+          ],
+        },
       },
       summary: 'Update output',
       description: 'Update output by ID.',
@@ -127,8 +154,10 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
   router.versioned
     .post({
       path: OUTPUT_API_ROUTES.CREATE_PATTERN,
-      fleetAuthz: {
-        fleet: { allSettings: true },
+      security: {
+        authz: {
+          requiredPrivileges: [FLEET_API_PRIVILEGES.SETTINGS.ALL],
+        },
       },
       summary: 'Create output',
       options: {
@@ -156,8 +185,10 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
   router.versioned
     .delete({
       path: OUTPUT_API_ROUTES.DELETE_PATTERN,
-      fleetAuthz: {
-        fleet: { allSettings: true },
+      security: {
+        authz: {
+          requiredPrivileges: [FLEET_API_PRIVILEGES.SETTINGS.ALL],
+        },
       },
       summary: 'Delete output',
       description: 'Delete output by ID.',
@@ -189,8 +220,10 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
   router.versioned
     .post({
       path: OUTPUT_API_ROUTES.LOGSTASH_API_KEY_PATTERN,
-      fleetAuthz: {
-        fleet: { allSettings: true },
+      security: {
+        authz: {
+          requiredPrivileges: [FLEET_API_PRIVILEGES.SETTINGS.ALL],
+        },
       },
       summary: 'Generate a Logstash API key',
       options: {
@@ -218,8 +251,10 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
   router.versioned
     .get({
       path: OUTPUT_API_ROUTES.GET_OUTPUT_HEALTH_PATTERN,
-      fleetAuthz: {
-        fleet: { readSettings: true },
+      security: {
+        authz: {
+          requiredPrivileges: [FLEET_API_PRIVILEGES.SETTINGS.READ],
+        },
       },
       summary: 'Get the latest output health',
       options: {
