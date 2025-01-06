@@ -140,7 +140,10 @@
     {
       "groupName": "@elastic/appex-qa dependencies",
       "matchDepNames": [
+        "callsites",
+        "chance",
         "cheerio",
+        "@types/chance",
         "@types/pixelmatch",
         "@types/pngjs",
         "@types/supertest",
@@ -152,6 +155,7 @@
         "playwright",
         "playwright-chromium",
         "pngjs",
+        "react-test-renderer",
         "sharp",
         "superagent",
         "supertest",
@@ -265,10 +269,48 @@
       "enabled": true
     },
     {
+      "groupName": "react-markdown",
+      "matchDepNames": [
+        "react-markdown"
+      ],
+      "reviewers": [
+        "team:appex-sharedux"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "Team:SharedUX",
+        "release_note:skip",
+        "backport:all-open"
+      ],
+      "enabled": true
+    },
+    {
+      "groupName": "markdown-it",
+      "matchDepNames": [
+        "markdown-it"
+      ],
+      "reviewers": [
+        "team:appex-sharedux"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "Team:SharedUX",
+        "release_note:skip",
+        "backport:all-open"
+      ],
+      "enabled": true
+    },
+    {
       "groupName": "@elastic/ml-ui dependencies",
       "matchDepNames": [
         "@types/he",
+        "async",
         "he",
+        "icalendar",
         "react-popper-tooltip"
       ],
       "reviewers": [
@@ -363,6 +405,9 @@
         "ansi-regex",
         "axios",
         "cacheable-lookup",
+        "deepmerge",
+        "fetch-mock",
+        "fp-ts",
         "getos",
         "has-ansi",
         "joi-to-json",
@@ -375,11 +420,8 @@
         "reflect-metadata",
         "type-detect",
         "utility-types",
+        "@types/fetch-mock",
         "@types/getos",
-        "@types/hapi__cookie",
-        "@types/hapi__h2o2",
-        "@types/hapi__hapi",
-        "@types/hapi__inert",
         "@types/has-ansi",
         "@types/json5",
         "@types/mime",
@@ -387,6 +429,25 @@
         "@types/mock-fs",
         "@types/node-fetch",
         "@types/type-detect"
+      ],
+      "reviewers": [
+        "team:kibana-core"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "Team:Core",
+        "release_note:skip",
+        "backport:all-open"
+      ],
+      "enabled": true,
+      "minimumReleaseAge": "7 days"
+    },
+    {
+      "groupName": "deepmerge",
+      "matchDepNames": [
+        "deepmerge"
       ],
       "reviewers": [
         "team:kibana-core"
@@ -429,8 +490,10 @@
       "groupName": "@elastic/kibana-management dependencies",
       "matchDepNames": [
         "@mapbox/vector-tile",
+        "csstype",
         "cronstrue",
         "file-saver",
+        "immer",
         "@types/mapbox__vector-tile"
       ],
       "reviewers": [
@@ -619,6 +682,24 @@
       "enabled": true
     },
     {
+      "groupName": "io-ts",
+      "matchDepNames": [
+        "io-ts"
+      ],
+      "reviewers": [
+        "team:kibana-core"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "release_note:skip",
+        "Team:Core",
+        "backport:all-open"
+      ],
+      "enabled": true
+    },
+    {
       "groupName": "RxJS",
       "matchDepNames": [
         "rxjs"
@@ -718,7 +799,11 @@
       "matchDepNames": [
         "@hapi/**",
         "brok",
-        "joi"
+        "joi",
+        "@types/hapi__cookie",
+        "@types/hapi__h2o2",
+        "@types/hapi__hapi",
+        "@types/hapi__inert"
       ],
       "reviewers": [
         "team:kibana-core"
@@ -1272,6 +1357,62 @@
       "enabled": true
     },
     {
+      "groupName": "xml2js",
+      "matchDepNames": [
+        "xml2js",
+        "@types/xml2js"
+      ],
+      "reviewers": [
+        "team:kibana-operations"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "Team:Operations",
+        "backport:all-open",
+        "release_note:skip"
+      ],
+      "minimumReleaseAge": "7 days",
+      "enabled": true
+    },
+    {
+      "groupName": "jquery",
+      "matchDepNames": [
+        "jquery"
+      ],
+      "reviewers": [
+        "team:kibana-visualizations"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "Team:Visualizations",
+        "backport:all-open"
+      ],
+      "minimumReleaseAge": "7 days",
+      "enabled": true
+    },
+    {
+      "groupName": "memoize-one",
+      "matchDepNames": [
+        "memoize-one"
+      ],
+      "reviewers": [
+        "team:kibana-visualizations"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "Team:Visualizations",
+        "backport:all-open"
+      ],
+      "minimumReleaseAge": "7 days",
+      "enabled": true
+    },
+    {
       "groupName": "json-stringify-pretty-compact",
       "matchDepNames": [
         "json-stringify-pretty-compact"
@@ -1317,6 +1458,8 @@
     {
       "groupName": "vega related modules",
       "matchDepNames": [
+        "@types/hjson",
+        "hjson",
         "vega",
         "vega-interpreter",
         "vega-lite",
@@ -2324,9 +2467,10 @@
       "enabled": true
     },
     {
-      "groupName": "buildkite-test-collector",
+      "groupName": "security solution test deps",
       "matchDepNames": [
-        "buildkite-test-collector"
+        "buildkite-test-collector",
+        "marge"
       ],
       "reviewers": [
         "team:security-solution"
@@ -2378,16 +2522,19 @@
       "matchDepNames": [
         "css.escape",
         "dependency-check",
+        "fast-deep-equal",
         "node-forge",
         "formik",
         "handlebars",
         "js-sha256",
+        "js-yaml",
         "require-in-the-middle",
         "tape",
         "tough-cookie",
         "xml-crypto",
         "@elastic/node-crypto",
         "@kayahr/text-encoding",
+        "@types/js-yaml",
         "@types/lodash",
         "@types/minimist",
         "@types/node-forge",
@@ -2666,6 +2813,46 @@
       "enabled": true
     },
     {
+      "groupName": "date-fns",
+      "matchDepNames": [
+        "date-fns"
+      ],
+      "reviewers": [
+        "team:obs-ux-management-team"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "release_note:skip",
+        "backport:all-open",
+        "ci:all-cypress-suites",
+        "Team:obs-ux-management"
+      ],
+      "minimumReleaseAge": "7 days",
+      "enabled": true
+    },
+    {
+      "groupName": "form-data",
+      "matchDepNames": [
+        "form-data"
+      ],
+      "reviewers": [
+        "team:obs-ux-management-team"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "release_note:skip",
+        "backport:all-open",
+        "ci:all-cypress-suites",
+        "Team:obs-ux-management"
+      ],
+      "minimumReleaseAge": "7 days",
+      "enabled": true
+    },
+    {
       "groupName": "@faker-js/faker",
       "matchDepNames": [
         "@faker-js/faker"
@@ -2706,6 +2893,26 @@
       "enabled": true
     },
     {
+      "groupName": "redux-saga",
+      "matchDepNames": [
+        "redux-saga"
+      ],
+      "reviewers": [
+        "team:obs-ux-management-team"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "release_note:skip",
+        "backport:all-open",
+        "ci:all-cypress-suites",
+        "Team:obs-ux-management"
+      ],
+      "minimumReleaseAge": "7 days",
+      "enabled": true
+    },
+    {
       "groupName": "redux",
       "matchDepNames": [
         "redux",
@@ -2723,7 +2930,7 @@
       ],
       "labels": [
         "release_note:skip",
-        "backport:skip",
+        "backport:all-open",
         "ci:all-cypress-suites"
       ],
       "minimumReleaseAge": "7 days",
@@ -2854,13 +3061,13 @@
         "@langchain/openai"
       ],
       "reviewers": [
-        "team:security-defend-workflows"
+        "team:security-generative-ai"
       ],
       "matchBaseBranches": [
         "main"
       ],
       "labels": [
-        "Team:Defend Workflows",
+        "Team:Security Generative AI",
         "release_note:skip",
         "backport:all-open"
       ],
@@ -2873,13 +3080,13 @@
         "@google/generative-ai"
       ],
       "reviewers": [
-        "team:security-defend-workflows"
+        "team:security-generative-ai"
       ],
       "matchBaseBranches": [
         "main"
       ],
       "labels": [
-        "Team:Defend Workflows",
+        "Team:Security Generative AI",
         "release_note:skip",
         "backport:all-open"
       ],
@@ -2893,13 +3100,13 @@
         "@smithy/util-utf8"
       ],
       "reviewers": [
-        "team:security-defend-workflows"
+        "team:security-generative-ai"
       ],
       "matchBaseBranches": [
         "main"
       ],
       "labels": [
-        "Team:Defend Workflows",
+        "Team:Security Generative AI",
         "release_note:skip",
         "backport:all-open"
       ],
@@ -2948,7 +3155,45 @@
     {
       "groupName": "JSON Web Token",
       "matchDepNames": [
-        "jsonwebtoken"
+        "jsonwebtoken",
+        "@types/jsonwebtoken"
+      ],
+      "reviewers": [
+        "team:response-ops"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "release_note:skip",
+        "backport:all-open"
+      ],
+      "minimumReleaseAge": "7 days",
+      "enabled": true
+    },
+    {
+      "groupName": "Mustache",
+      "matchDepNames": [
+        "mustache",
+        "@types/mustache"
+      ],
+      "reviewers": [
+        "team:response-ops"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "release_note:skip",
+        "backport:all-open"
+      ],
+      "minimumReleaseAge": "7 days",
+      "enabled": true
+    },
+    {
+      "groupName": "ipaddr.js",
+      "matchDepNames": [
+        "ipaddr.js"
       ],
       "reviewers": [
         "team:response-ops"
@@ -2970,6 +3215,25 @@
       ],
       "matchDepPrefixes": [
         "@xstate/"
+      ],
+      "reviewers": [
+        "team:obs-ux-logs-team"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "Team:Obs UX Logs",
+        "release_note:skip",
+        "backport:all-open"
+      ],
+      "minimumReleaseAge": "7 days",
+      "enabled": true
+    },
+    {
+      "groupName": "constate",
+      "matchDepNames": [
+        "constate"
       ],
       "reviewers": [
         "team:obs-ux-logs-team"
@@ -3166,7 +3430,8 @@
         "@types/express",
         "express",
         "swagger-jsdoc",
-        "swagger-ui-express"
+        "swagger-ui-express",
+        "zod-to-json-schema"
       ],
       "reviewers": [
         "team:obs-entities"
