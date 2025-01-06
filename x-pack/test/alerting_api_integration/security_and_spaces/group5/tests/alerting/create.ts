@@ -665,7 +665,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
               expect(response.body).to.eql({
                 error: 'Bad Request',
                 message:
-                  'Failed to validate actions due to the following error: Invalid Endpoint Security connectors',
+                  'Failed to validate actions due to the following error: Endpoint security connectors cannot be used as alerting actions',
                 statusCode: 400,
               });
               break;
