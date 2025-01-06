@@ -110,25 +110,19 @@ describe('use show timeline', () => {
       timelinePrivileges: { crud: false, read: false },
     });
 
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook(() => useShowTimeline());
-      await waitForNextUpdate();
-      const showTimeline = result.current;
-      expect(showTimeline).toEqual([false]);
-    });
+    const { result } = renderHook(() => useShowTimeline());
+    const showTimeline = result.current;
+    expect(showTimeline).toEqual([false]);
   });
-  it('shows timeline for users with timeline read access', async () => {
-    (useUserPrivileges as unknown as jest.Mock).mockReturnValue({
-      timelinePrivileges: { crud: false, read: true },
-    });
+});
+it('shows timeline for users with timeline read access', async () => {
+  (useUserPrivileges as unknown as jest.Mock).mockReturnValue({
+    timelinePrivileges: { crud: false, read: true },
+  });
 
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook(() => useShowTimeline());
-      await waitForNextUpdate();
-      const showTimeline = result.current;
-      expect(showTimeline).toEqual([true]);
-    });
-  });
+  const { result } = renderHook(() => useShowTimeline());
+  const showTimeline = result.current;
+  expect(showTimeline).toEqual([true]);
 });
 
 describe('sourcererDataView', () => {
