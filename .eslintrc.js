@@ -283,14 +283,14 @@ module.exports = {
      * Temporarily disable some react rules for specific plugins, remove in separate PRs
      */
     {
-      files: ['src/plugins/kibana_react/**/*.{js,mjs,ts,tsx}'],
+      files: ['src/platform/plugins/shared/kibana_react/**/*.{js,mjs,ts,tsx}'],
       rules: {
         'react-hooks/rules-of-hooks': 'off',
         'react-hooks/exhaustive-deps': 'off',
       },
     },
     {
-      files: ['src/plugins/kibana_utils/**/*.{js,mjs,ts,tsx}'],
+      files: ['src/platform/plugins/shared/kibana_utils/**/*.{js,mjs,ts,tsx}'],
       rules: {
         'react-hooks/exhaustive-deps': 'off',
       },
@@ -1907,14 +1907,14 @@ module.exports = {
      */
     {
       files: [
-        'packages/kbn-analytics/**',
+        'src/platform/packages/shared/kbn-analytics/**',
         // 'packages/kbn-telemetry-tools/**',
-        'src/plugins/kibana_usage_collection/**',
-        'src/plugins/usage_collection/**',
-        'src/plugins/telemetry/**',
-        'src/plugins/telemetry_collection_manager/**',
-        'src/plugins/telemetry_management_section/**',
-        'x-pack/plugins/telemetry_collection_xpack/**',
+        'src/platform/plugins/private/kibana_usage_collection/**',
+        'src/platform/plugins/shared/usage_collection/**',
+        'src/platform/plugins/shared/telemetry/**',
+        'src/platform/plugins/shared/telemetry_collection_manager/**',
+        'src/platform/plugins/shared/telemetry_management_section/**',
+        'x-pack/platform/plugins/private/telemetry_collection_xpack/**',
       ],
       rules: {
         '@typescript-eslint/no-explicit-any': 'error',
@@ -1924,21 +1924,21 @@ module.exports = {
       files: [
         // core-team owned code
         'src/core/**',
-        'x-pack/plugins/features/**',
-        'x-pack/plugins/licensing/**',
-        'x-pack/plugins/global_search/**',
-        'x-pack/plugins/cloud/**',
-        'packages/kbn-config-schema',
+        'x-pack/platform/plugins/shared/features/**',
+        'x-pack/platform/plugins/shared/licensing/**',
+        'x-pack/platform/plugins/shared/global_search/**',
+        'x-pack/platform/plugins/shared/cloud/**',
+        'src/platform/packages/shared/kbn-config-schema',
         'src/plugins/status_page/**',
-        'src/plugins/saved_objects_management/**',
-        'packages/kbn-analytics/**',
+        'src/platform/plugins/shared/saved_objects_management/**',
+        'src/platform/packages/shared/kbn-analytics/**',
         'packages/kbn-telemetry-tools/**',
-        'src/plugins/kibana_usage_collection/**',
-        'src/plugins/usage_collection/**',
-        'src/plugins/telemetry/**',
-        'src/plugins/telemetry_collection_manager/**',
-        'src/plugins/telemetry_management_section/**',
-        'x-pack/plugins/telemetry_collection_xpack/**',
+        'src/platform/plugins/private/kibana_usage_collection/**',
+        'src/platform/plugins/shared/usage_collection/**',
+        'src/platform/plugins/shared/telemetry/**',
+        'src/platform/plugins/shared/telemetry_collection_manager/**',
+        'src/platform/plugins/shared/telemetry_management_section/**',
+        'x-pack/platform/plugins/private/telemetry_collection_xpack/**',
       ],
       rules: {
         '@typescript-eslint/prefer-ts-expect-error': 'error',

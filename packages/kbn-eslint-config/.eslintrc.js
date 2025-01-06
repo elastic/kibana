@@ -114,7 +114,7 @@ module.exports = {
           from: 'react-intl',
           to: '@kbn/i18n-react',
           disallowedMessage: `import from @kbn/i18n-react instead`,
-          exclude: [/packages[\/\\]kbn-i18n-react[\/\\]/],
+          exclude: [/src[\/\\]platform[\/\\]packages[\/\\]shared[\/\\]kbn-i18n-react/],
         },
         {
           from: 'zod',

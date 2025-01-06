@@ -45909,6 +45909,8 @@ components:
       enum:
         - user
         - host
+        - service
+        - universal
       type: string
     Security_Entity_Analytics_API_HostEntity:
       type: object
@@ -45979,6 +45981,7 @@ components:
         - host.name
         - user.name
         - service.name
+        - related.entity
       type: string
     Security_Entity_Analytics_API_IndexPattern:
       type: string
@@ -50085,7 +50088,7 @@ components:
           items:
             type: string
           description: |
-            A list of "carbon copy" email addresses. Addresses can be specified in `user@host-name` format or in name `<user@host-name>` format 
+            A list of "carbon copy" email addresses. Addresses can be specified in `user@host-name` format or in name `<user@host-name>` format
         message:
           type: string
           description: The email message text. Markdown format is supported.
