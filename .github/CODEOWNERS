@@ -292,7 +292,6 @@ packages/shared-ux/code_editor/impl @elastic/appex-sharedux
 packages/shared-ux/code_editor/mocks @elastic/appex-sharedux
 packages/shared-ux/file/file_picker/impl @elastic/appex-sharedux
 packages/shared-ux/file/file_upload/impl @elastic/appex-sharedux
-packages/shared-ux/file/image/mocks @elastic/appex-sharedux
 packages/shared-ux/file/mocks @elastic/appex-sharedux
 packages/shared-ux/file/types @elastic/appex-sharedux
 packages/shared-ux/file/util @elastic/appex-sharedux
@@ -604,6 +603,7 @@ src/platform/packages/shared/shared-ux/chrome/navigation @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/error_boundary @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/file/context @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/file/image/impl @elastic/appex-sharedux
+src/platform/packages/shared/shared-ux/file/image/mocks @elastic/appex-sharedux
 src/platform/plugins/private/advanced_settings @elastic/appex-sharedux @elastic/kibana-management
 src/platform/plugins/private/files_management @elastic/appex-sharedux
 src/platform/plugins/private/ftr_apis @elastic/kibana-core
