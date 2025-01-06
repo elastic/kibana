@@ -9,7 +9,7 @@
         "tags": [],
         "label": "KibanaFeature",
         "description": [],
-        "path": "x-pack/plugins/features/common/kibana_feature.ts",
+        "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -30,7 +30,7 @@
               },
               "[]"
             ],
-            "path": "x-pack/plugins/features/common/kibana_feature.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -44,7 +44,7 @@
             "signature": [
               "any"
             ],
-            "path": "x-pack/plugins/features/common/kibana_feature.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -74,7 +74,7 @@
                   },
                   "[] | undefined; readonly deprecated?: Readonly<{ readonly notice: string; }> | undefined; }>"
                 ],
-                "path": "x-pack/plugins/features/common/kibana_feature.ts",
+                "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -89,7 +89,7 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "path": "x-pack/plugins/features/common/kibana_feature.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -103,7 +103,7 @@
             "signature": [
               "Readonly<{ readonly notice: string; }> | undefined"
             ],
-            "path": "x-pack/plugins/features/common/kibana_feature.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -117,7 +117,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "x-pack/plugins/features/common/kibana_feature.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -128,7 +128,7 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "path": "x-pack/plugins/features/common/kibana_feature.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -142,7 +142,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/features/common/kibana_feature.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -156,7 +156,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "x-pack/plugins/features/common/kibana_feature.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -170,7 +170,7 @@
             "signature": [
               "{ readonly id: string; readonly label: string; readonly ariaLabel?: string | undefined; readonly order?: number | undefined; readonly euiIconType?: string | undefined; }"
             ],
-            "path": "x-pack/plugins/features/common/kibana_feature.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -184,7 +184,7 @@
             "signature": [
               "readonly string[]"
             ],
-            "path": "x-pack/plugins/features/common/kibana_feature.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -198,7 +198,7 @@
             "signature": [
               "readonly string[] | undefined"
             ],
-            "path": "x-pack/plugins/features/common/kibana_feature.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -212,7 +212,7 @@
             "signature": [
               "Readonly<{ [x: string]: readonly string[]; }> | undefined"
             ],
-            "path": "x-pack/plugins/features/common/kibana_feature.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -226,7 +226,7 @@
             "signature": [
               "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined"
             ],
-            "path": "x-pack/plugins/features/common/kibana_feature.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -240,7 +240,7 @@
             "signature": [
               "Readonly<{ all: Readonly<{ excludeFromBasePrivileges?: boolean | undefined; requireAllSpaces?: boolean | undefined; disabled?: boolean | undefined; management?: Readonly<{ [x: string]: readonly string[]; }> | undefined; catalogue?: readonly string[] | undefined; api?: readonly string[] | undefined; app?: readonly string[] | undefined; alerting?: Readonly<{ rule?: Readonly<{ all?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; read?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; }> | undefined; alert?: Readonly<{ all?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; read?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; }> | undefined; }> | undefined; cases?: Readonly<{ all?: readonly string[] | undefined; push?: readonly string[] | undefined; create?: readonly string[] | undefined; read?: readonly string[] | undefined; update?: readonly string[] | undefined; delete?: readonly string[] | undefined; settings?: readonly string[] | undefined; createComment?: readonly string[] | undefined; reopenCase?: readonly string[] | undefined; }> | undefined; savedObject: Readonly<{ all: readonly string[]; read: readonly string[]; }>; ui: readonly string[]; composedOf?: readonly Readonly<{ feature: string; privileges: readonly string[]; }>[] | undefined; replacedBy?: readonly Readonly<{ feature: string; privileges: readonly string[]; }>[] | Readonly<{ default: readonly Readonly<{ feature: string; privileges: readonly string[]; }>[]; minimal: readonly Readonly<{ feature: string; privileges: readonly string[]; }>[]; }> | undefined; }>; read: Readonly<{ excludeFromBasePrivileges?: boolean | undefined; requireAllSpaces?: boolean | undefined; disabled?: boolean | undefined; management?: Readonly<{ [x: string]: readonly string[]; }> | undefined; catalogue?: readonly string[] | undefined; api?: readonly string[] | undefined; app?: readonly string[] | undefined; alerting?: Readonly<{ rule?: Readonly<{ all?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; read?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; }> | undefined; alert?: Readonly<{ all?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; read?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; }> | undefined; }> | undefined; cases?: Readonly<{ all?: readonly string[] | undefined; push?: readonly string[] | undefined; create?: readonly string[] | undefined; read?: readonly string[] | undefined; update?: readonly string[] | undefined; delete?: readonly string[] | undefined; settings?: readonly string[] | undefined; createComment?: readonly string[] | undefined; reopenCase?: readonly string[] | undefined; }> | undefined; savedObject: Readonly<{ all: readonly string[]; read: readonly string[]; }>; ui: readonly string[]; composedOf?: readonly Readonly<{ feature: string; privileges: readonly string[]; }>[] | undefined; replacedBy?: readonly Readonly<{ feature: string; privileges: readonly string[]; }>[] | Readonly<{ default: readonly Readonly<{ feature: string; privileges: readonly string[]; }>[]; minimal: readonly Readonly<{ feature: string; privileges: readonly string[]; }>[]; }> | undefined; }>; }> | null"
             ],
-            "path": "x-pack/plugins/features/common/kibana_feature.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -254,7 +254,7 @@
             "signature": [
               "readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined"
             ],
-            "path": "x-pack/plugins/features/common/kibana_feature.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -268,7 +268,7 @@
             "signature": [
               "readonly string[] | undefined"
             ],
-            "path": "x-pack/plugins/features/common/kibana_feature.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -279,7 +279,7 @@
             "tags": [],
             "label": "excludeFromBasePrivileges",
             "description": [],
-            "path": "x-pack/plugins/features/common/kibana_feature.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -293,7 +293,7 @@
             "signature": [
               "Readonly<{ description: string; privileges: readonly Readonly<{ id: string; privilege: Readonly<{ excludeFromBasePrivileges?: boolean | undefined; requireAllSpaces?: boolean | undefined; disabled?: boolean | undefined; management?: Readonly<{ [x: string]: readonly string[]; }> | undefined; catalogue?: readonly string[] | undefined; api?: readonly string[] | undefined; app?: readonly string[] | undefined; alerting?: Readonly<{ rule?: Readonly<{ all?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; read?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; }> | undefined; alert?: Readonly<{ all?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; read?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; }> | undefined; }> | undefined; cases?: Readonly<{ all?: readonly string[] | undefined; push?: readonly string[] | undefined; create?: readonly string[] | undefined; read?: readonly string[] | undefined; update?: readonly string[] | undefined; delete?: readonly string[] | undefined; settings?: readonly string[] | undefined; createComment?: readonly string[] | undefined; reopenCase?: readonly string[] | undefined; }> | undefined; savedObject: Readonly<{ all: readonly string[]; read: readonly string[]; }>; ui: readonly string[]; composedOf?: readonly Readonly<{ feature: string; privileges: readonly string[]; }>[] | undefined; replacedBy?: readonly Readonly<{ feature: string; privileges: readonly string[]; }>[] | Readonly<{ default: readonly Readonly<{ feature: string; privileges: readonly string[]; }>[]; minimal: readonly Readonly<{ feature: string; privileges: readonly string[]; }>[]; }> | undefined; }>; }>[]; }> | undefined"
             ],
-            "path": "x-pack/plugins/features/common/kibana_feature.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -315,7 +315,7 @@
               },
               "[] | undefined"
             ],
-            "path": "x-pack/plugins/features/common/kibana_feature.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -336,7 +336,7 @@
                 "text": "KibanaFeatureConfig"
               }
             ],
-            "path": "x-pack/plugins/features/common/kibana_feature.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -357,7 +357,7 @@
         "description": [
           "\nFeature privilege definition"
         ],
-        "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
+        "path": "x-pack/platform/plugins/shared/features/common/feature_kibana_privileges.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -373,7 +373,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/feature_kibana_privileges.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -389,7 +389,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/feature_kibana_privileges.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -405,7 +405,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/feature_kibana_privileges.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -421,7 +421,7 @@
             "signature": [
               "{ [sectionId: string]: readonly string[]; } | undefined"
             ],
-            "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/feature_kibana_privileges.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -437,7 +437,7 @@
             "signature": [
               "readonly string[] | undefined"
             ],
-            "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/feature_kibana_privileges.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -453,7 +453,7 @@
             "signature": [
               "readonly string[] | undefined"
             ],
-            "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/feature_kibana_privileges.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -469,7 +469,7 @@
             "signature": [
               "readonly string[] | undefined"
             ],
-            "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/feature_kibana_privileges.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -493,7 +493,7 @@
               "AlertingKibanaPrivilege",
               " | undefined; } | undefined; } | undefined"
             ],
-            "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/feature_kibana_privileges.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -509,7 +509,7 @@
             "signature": [
               "{ all?: readonly string[] | undefined; push?: readonly string[] | undefined; create?: readonly string[] | undefined; read?: readonly string[] | undefined; update?: readonly string[] | undefined; delete?: readonly string[] | undefined; settings?: readonly string[] | undefined; createComment?: readonly string[] | undefined; reopenCase?: readonly string[] | undefined; } | undefined"
             ],
-            "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/feature_kibana_privileges.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -525,7 +525,7 @@
             "signature": [
               "{ all: readonly string[]; read: readonly string[]; }"
             ],
-            "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/feature_kibana_privileges.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -543,7 +543,7 @@
             "signature": [
               "readonly string[]"
             ],
-            "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/feature_kibana_privileges.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -567,7 +567,7 @@
               },
               "[] | undefined"
             ],
-            "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/feature_kibana_privileges.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -607,7 +607,7 @@
               },
               "[]; } | undefined"
             ],
-            "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/feature_kibana_privileges.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -623,7 +623,7 @@
         "description": [
           "\nInterface for registering a feature.\nFeature registration allows plugins to hide their applications with spaces,\nand secure access when configured for security."
         ],
-        "path": "x-pack/plugins/features/common/kibana_feature.ts",
+        "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -638,7 +638,7 @@
             "description": [
               "\nUnique identifier for this feature.\nThis identifier is also used when generating UI Capabilities.\n"
             ],
-            "path": "x-pack/plugins/features/common/kibana_feature.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -651,7 +651,7 @@
             "description": [
               "\nDisplay name for this feature.\nThis will be displayed to end-users, so a translatable string is advised for i18n."
             ],
-            "path": "x-pack/plugins/features/common/kibana_feature.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -667,7 +667,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/features/common/kibana_feature.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -683,7 +683,7 @@
             "signature": [
               "AppCategory"
             ],
-            "path": "x-pack/plugins/features/common/kibana_feature.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -699,7 +699,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "x-pack/plugins/features/common/kibana_feature.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -715,7 +715,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "x-pack/plugins/features/common/kibana_feature.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -731,7 +731,7 @@
             "signature": [
               "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined"
             ],
-            "path": "x-pack/plugins/features/common/kibana_feature.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -747,7 +747,7 @@
             "signature": [
               "readonly string[]"
             ],
-            "path": "x-pack/plugins/features/common/kibana_feature.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -763,7 +763,7 @@
             "signature": [
               "{ [sectionId: string]: readonly string[]; } | undefined"
             ],
-            "path": "x-pack/plugins/features/common/kibana_feature.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -779,7 +779,7 @@
             "signature": [
               "readonly string[] | undefined"
             ],
-            "path": "x-pack/plugins/features/common/kibana_feature.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -796,7 +796,7 @@
               "AlertingKibanaPrivilege",
               " | undefined"
             ],
-            "path": "x-pack/plugins/features/common/kibana_feature.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -812,7 +812,7 @@
             "signature": [
               "readonly string[] | undefined"
             ],
-            "path": "x-pack/plugins/features/common/kibana_feature.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -846,7 +846,7 @@
               },
               "; } | null"
             ],
-            "path": "x-pack/plugins/features/common/kibana_feature.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -870,7 +870,7 @@
               },
               "[] | undefined"
             ],
-            "path": "x-pack/plugins/features/common/kibana_feature.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -886,7 +886,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/features/common/kibana_feature.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -904,7 +904,7 @@
               "ReservedKibanaPrivilege",
               "[]; } | undefined"
             ],
-            "path": "x-pack/plugins/features/common/kibana_feature.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -920,7 +920,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "x-pack/plugins/features/common/kibana_feature.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -944,7 +944,7 @@
               },
               "[] | undefined"
             ],
-            "path": "x-pack/plugins/features/common/kibana_feature.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -960,7 +960,7 @@
             "signature": [
               "Readonly<{ notice: string; }> | undefined"
             ],
-            "path": "x-pack/plugins/features/common/kibana_feature.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -976,7 +976,7 @@
         "description": [
           "\nConfiguration for a sub-feature."
         ],
-        "path": "x-pack/plugins/features/common/sub_feature.ts",
+        "path": "x-pack/platform/plugins/shared/features/common/sub_feature.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -989,7 +989,7 @@
             "description": [
               "Display name for this sub-feature"
             ],
-            "path": "x-pack/plugins/features/common/sub_feature.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/sub_feature.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1005,7 +1005,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "x-pack/plugins/features/common/sub_feature.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/sub_feature.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1021,7 +1021,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/features/common/sub_feature.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/sub_feature.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1045,7 +1045,7 @@
               },
               "[]"
             ],
-            "path": "x-pack/plugins/features/common/sub_feature.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/sub_feature.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1061,7 +1061,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/features/common/sub_feature.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/sub_feature.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1095,7 +1095,7 @@
           },
           ", \"excludeFromBasePrivileges\" | \"composedOf\" | \"replacedBy\">"
         ],
-        "path": "x-pack/plugins/features/common/sub_feature.ts",
+        "path": "x-pack/platform/plugins/shared/features/common/sub_feature.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1108,7 +1108,7 @@
             "description": [
               "\nIdentifier for this privilege. Must be unique across all other privileges within a feature."
             ],
-            "path": "x-pack/plugins/features/common/sub_feature.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/sub_feature.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1121,7 +1121,7 @@
             "description": [
               "\nThe display name for this privilege."
             ],
-            "path": "x-pack/plugins/features/common/sub_feature.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/sub_feature.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1137,7 +1137,7 @@
             "signature": [
               "\"none\" | \"read\" | \"all\""
             ],
-            "path": "x-pack/plugins/features/common/sub_feature.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/sub_feature.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1153,7 +1153,7 @@
             "signature": [
               "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined"
             ],
-            "path": "x-pack/plugins/features/common/sub_feature.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/sub_feature.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1177,7 +1177,7 @@
               },
               "[] | undefined"
             ],
-            "path": "x-pack/plugins/features/common/sub_feature.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/sub_feature.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1195,7 +1195,7 @@
         "description": [
           "\nEnum for allowed feature scope values.\nsecurity - The feature is available in Security Feature Privileges.\nspaces - The feature is available in the Spaces Visibility Toggles."
         ],
-        "path": "x-pack/plugins/features/common/kibana_feature.ts",
+        "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1213,7 +1213,7 @@
       "signature": [
         "void"
       ],
-      "path": "x-pack/plugins/features/public/plugin.ts",
+      "path": "x-pack/platform/plugins/shared/features/public/plugin.ts",
       "deprecated": false,
       "trackAdoption": false,
       "lifecycle": "setup",
@@ -1237,7 +1237,7 @@
         },
         "[]>; }"
       ],
-      "path": "x-pack/plugins/features/public/plugin.ts",
+      "path": "x-pack/platform/plugins/shared/features/public/plugin.ts",
       "deprecated": false,
       "trackAdoption": false,
       "lifecycle": "start",
@@ -1253,7 +1253,7 @@
         "tags": [],
         "label": "ElasticsearchFeature",
         "description": [],
-        "path": "x-pack/plugins/features/common/elasticsearch_feature.ts",
+        "path": "x-pack/platform/plugins/shared/features/common/elasticsearch_feature.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1267,7 +1267,7 @@
             "signature": [
               "any"
             ],
-            "path": "x-pack/plugins/features/common/elasticsearch_feature.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/elasticsearch_feature.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1313,7 +1313,7 @@
                   },
                   ">; }>"
                 ],
-                "path": "x-pack/plugins/features/common/elasticsearch_feature.ts",
+                "path": "x-pack/platform/plugins/shared/features/common/elasticsearch_feature.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1328,7 +1328,7 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "path": "x-pack/plugins/features/common/elasticsearch_feature.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/elasticsearch_feature.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1349,7 +1349,7 @@
               },
               "<string> | undefined"
             ],
-            "path": "x-pack/plugins/features/common/elasticsearch_feature.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/elasticsearch_feature.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1371,7 +1371,7 @@
               },
               "<string>; }> | undefined"
             ],
-            "path": "x-pack/plugins/features/common/elasticsearch_feature.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/elasticsearch_feature.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1400,7 +1400,7 @@
               },
               ">"
             ],
-            "path": "x-pack/plugins/features/common/elasticsearch_feature.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/elasticsearch_feature.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1421,7 +1421,7 @@
                 "text": "ElasticsearchFeatureConfig"
               }
             ],
-            "path": "x-pack/plugins/features/common/elasticsearch_feature.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/elasticsearch_feature.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1437,7 +1437,7 @@
         "tags": [],
         "label": "KibanaFeature",
         "description": [],
-        "path": "x-pack/plugins/features/common/kibana_feature.ts",
+        "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1458,7 +1458,7 @@
               },
               "[]"
             ],
-            "path": "x-pack/plugins/features/common/kibana_feature.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1472,7 +1472,7 @@
             "signature": [
               "any"
             ],
-            "path": "x-pack/plugins/features/common/kibana_feature.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1502,7 +1502,7 @@
                   },
                   "[] | undefined; readonly deprecated?: Readonly<{ readonly notice: string; }> | undefined; }>"
                 ],
-                "path": "x-pack/plugins/features/common/kibana_feature.ts",
+                "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1517,7 +1517,7 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "path": "x-pack/plugins/features/common/kibana_feature.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1531,7 +1531,7 @@
             "signature": [
               "Readonly<{ readonly notice: string; }> | undefined"
             ],
-            "path": "x-pack/plugins/features/common/kibana_feature.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1545,7 +1545,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "x-pack/plugins/features/common/kibana_feature.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1556,7 +1556,7 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "path": "x-pack/plugins/features/common/kibana_feature.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1570,7 +1570,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/features/common/kibana_feature.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1584,7 +1584,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "x-pack/plugins/features/common/kibana_feature.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1598,7 +1598,7 @@
             "signature": [
               "{ readonly id: string; readonly label: string; readonly ariaLabel?: string | undefined; readonly order?: number | undefined; readonly euiIconType?: string | undefined; }"
             ],
-            "path": "x-pack/plugins/features/common/kibana_feature.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1612,7 +1612,7 @@
             "signature": [
               "readonly string[]"
             ],
-            "path": "x-pack/plugins/features/common/kibana_feature.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1626,7 +1626,7 @@
             "signature": [
               "readonly string[] | undefined"
             ],
-            "path": "x-pack/plugins/features/common/kibana_feature.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1640,7 +1640,7 @@
             "signature": [
               "Readonly<{ [x: string]: readonly string[]; }> | undefined"
             ],
-            "path": "x-pack/plugins/features/common/kibana_feature.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1654,7 +1654,7 @@
             "signature": [
               "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined"
             ],
-            "path": "x-pack/plugins/features/common/kibana_feature.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1668,7 +1668,7 @@
             "signature": [
               "Readonly<{ all: Readonly<{ excludeFromBasePrivileges?: boolean | undefined; requireAllSpaces?: boolean | undefined; disabled?: boolean | undefined; management?: Readonly<{ [x: string]: readonly string[]; }> | undefined; catalogue?: readonly string[] | undefined; api?: readonly string[] | undefined; app?: readonly string[] | undefined; alerting?: Readonly<{ rule?: Readonly<{ all?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; read?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; }> | undefined; alert?: Readonly<{ all?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; read?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; }> | undefined; }> | undefined; cases?: Readonly<{ all?: readonly string[] | undefined; push?: readonly string[] | undefined; create?: readonly string[] | undefined; read?: readonly string[] | undefined; update?: readonly string[] | undefined; delete?: readonly string[] | undefined; settings?: readonly string[] | undefined; createComment?: readonly string[] | undefined; reopenCase?: readonly string[] | undefined; }> | undefined; savedObject: Readonly<{ all: readonly string[]; read: readonly string[]; }>; ui: readonly string[]; composedOf?: readonly Readonly<{ feature: string; privileges: readonly string[]; }>[] | undefined; replacedBy?: readonly Readonly<{ feature: string; privileges: readonly string[]; }>[] | Readonly<{ default: readonly Readonly<{ feature: string; privileges: readonly string[]; }>[]; minimal: readonly Readonly<{ feature: string; privileges: readonly string[]; }>[]; }> | undefined; }>; read: Readonly<{ excludeFromBasePrivileges?: boolean | undefined; requireAllSpaces?: boolean | undefined; disabled?: boolean | undefined; management?: Readonly<{ [x: string]: readonly string[]; }> | undefined; catalogue?: readonly string[] | undefined; api?: readonly string[] | undefined; app?: readonly string[] | undefined; alerting?: Readonly<{ rule?: Readonly<{ all?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; read?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; }> | undefined; alert?: Readonly<{ all?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; read?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; }> | undefined; }> | undefined; cases?: Readonly<{ all?: readonly string[] | undefined; push?: readonly string[] | undefined; create?: readonly string[] | undefined; read?: readonly string[] | undefined; update?: readonly string[] | undefined; delete?: readonly string[] | undefined; settings?: readonly string[] | undefined; createComment?: readonly string[] | undefined; reopenCase?: readonly string[] | undefined; }> | undefined; savedObject: Readonly<{ all: readonly string[]; read: readonly string[]; }>; ui: readonly string[]; composedOf?: readonly Readonly<{ feature: string; privileges: readonly string[]; }>[] | undefined; replacedBy?: readonly Readonly<{ feature: string; privileges: readonly string[]; }>[] | Readonly<{ default: readonly Readonly<{ feature: string; privileges: readonly string[]; }>[]; minimal: readonly Readonly<{ feature: string; privileges: readonly string[]; }>[]; }> | undefined; }>; }> | null"
             ],
-            "path": "x-pack/plugins/features/common/kibana_feature.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1682,7 +1682,7 @@
             "signature": [
               "readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined"
             ],
-            "path": "x-pack/plugins/features/common/kibana_feature.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1696,7 +1696,7 @@
             "signature": [
               "readonly string[] | undefined"
             ],
-            "path": "x-pack/plugins/features/common/kibana_feature.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1707,7 +1707,7 @@
             "tags": [],
             "label": "excludeFromBasePrivileges",
             "description": [],
-            "path": "x-pack/plugins/features/common/kibana_feature.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1721,7 +1721,7 @@
             "signature": [
               "Readonly<{ description: string; privileges: readonly Readonly<{ id: string; privilege: Readonly<{ excludeFromBasePrivileges?: boolean | undefined; requireAllSpaces?: boolean | undefined; disabled?: boolean | undefined; management?: Readonly<{ [x: string]: readonly string[]; }> | undefined; catalogue?: readonly string[] | undefined; api?: readonly string[] | undefined; app?: readonly string[] | undefined; alerting?: Readonly<{ rule?: Readonly<{ all?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; read?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; }> | undefined; alert?: Readonly<{ all?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; read?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; }> | undefined; }> | undefined; cases?: Readonly<{ all?: readonly string[] | undefined; push?: readonly string[] | undefined; create?: readonly string[] | undefined; read?: readonly string[] | undefined; update?: readonly string[] | undefined; delete?: readonly string[] | undefined; settings?: readonly string[] | undefined; createComment?: readonly string[] | undefined; reopenCase?: readonly string[] | undefined; }> | undefined; savedObject: Readonly<{ all: readonly string[]; read: readonly string[]; }>; ui: readonly string[]; composedOf?: readonly Readonly<{ feature: string; privileges: readonly string[]; }>[] | undefined; replacedBy?: readonly Readonly<{ feature: string; privileges: readonly string[]; }>[] | Readonly<{ default: readonly Readonly<{ feature: string; privileges: readonly string[]; }>[]; minimal: readonly Readonly<{ feature: string; privileges: readonly string[]; }>[]; }> | undefined; }>; }>[]; }> | undefined"
             ],
-            "path": "x-pack/plugins/features/common/kibana_feature.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1743,7 +1743,7 @@
               },
               "[] | undefined"
             ],
-            "path": "x-pack/plugins/features/common/kibana_feature.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1764,7 +1764,7 @@
                 "text": "KibanaFeatureConfig"
               }
             ],
-            "path": "x-pack/plugins/features/common/kibana_feature.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1785,7 +1785,7 @@
         "description": [
           "\nInterface for registering an Elasticsearch feature.\nFeature registration allows plugins to hide their applications based\non configured cluster or index privileges."
         ],
-        "path": "x-pack/plugins/features/common/elasticsearch_feature.ts",
+        "path": "x-pack/platform/plugins/shared/features/common/elasticsearch_feature.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1800,7 +1800,7 @@
             "description": [
               "\nUnique identifier for this feature.\nThis identifier is also used when generating UI Capabilities.\n"
             ],
-            "path": "x-pack/plugins/features/common/elasticsearch_feature.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/elasticsearch_feature.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1816,7 +1816,7 @@
             "signature": [
               "{ [sectionId: string]: string[]; } | undefined"
             ],
-            "path": "x-pack/plugins/features/common/elasticsearch_feature.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/elasticsearch_feature.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1832,7 +1832,7 @@
             "signature": [
               "string[] | undefined"
             ],
-            "path": "x-pack/plugins/features/common/elasticsearch_feature.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/elasticsearch_feature.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1857,7 +1857,7 @@
               },
               "[]"
             ],
-            "path": "x-pack/plugins/features/common/elasticsearch_feature.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/elasticsearch_feature.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1873,7 +1873,7 @@
         "description": [
           "\nElasticsearch Feature privilege definition"
         ],
-        "path": "x-pack/plugins/features/common/feature_elasticsearch_privileges.ts",
+        "path": "x-pack/platform/plugins/shared/features/common/feature_elasticsearch_privileges.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1889,7 +1889,7 @@
             "signature": [
               "string[]"
             ],
-            "path": "x-pack/plugins/features/common/feature_elasticsearch_privileges.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/feature_elasticsearch_privileges.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1905,7 +1905,7 @@
             "signature": [
               "{ [indexName: string]: string[]; } | undefined"
             ],
-            "path": "x-pack/plugins/features/common/feature_elasticsearch_privileges.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/feature_elasticsearch_privileges.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1923,14 +1923,14 @@
             "signature": [
               "string[] | undefined"
             ],
-            "path": "x-pack/plugins/features/common/feature_elasticsearch_privileges.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/feature_elasticsearch_privileges.ts",
             "deprecated": true,
             "removeBy": "8.8.0\n\nThis is relied on by the reporting feature, and should be removed once reporting\nmigrates to using the Kibana Privilege model: https://github.com/elastic/kibana/issues/19914",
             "trackAdoption": false,
             "references": [
               {
                 "plugin": "security",
-                "path": "x-pack/plugins/security/server/authorization/disable_ui_capabilities.ts"
+                "path": "x-pack/platform/plugins/shared/security/server/authorization/disable_ui_capabilities.ts"
               }
             ]
           },
@@ -1948,7 +1948,7 @@
             "signature": [
               "string[]"
             ],
-            "path": "x-pack/plugins/features/common/feature_elasticsearch_privileges.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/feature_elasticsearch_privileges.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1964,7 +1964,7 @@
         "description": [
           "\nFeature privilege definition"
         ],
-        "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
+        "path": "x-pack/platform/plugins/shared/features/common/feature_kibana_privileges.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1980,7 +1980,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/feature_kibana_privileges.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1996,7 +1996,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/feature_kibana_privileges.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2012,7 +2012,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/feature_kibana_privileges.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2028,7 +2028,7 @@
             "signature": [
               "{ [sectionId: string]: readonly string[]; } | undefined"
             ],
-            "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/feature_kibana_privileges.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2044,7 +2044,7 @@
             "signature": [
               "readonly string[] | undefined"
             ],
-            "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/feature_kibana_privileges.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2060,7 +2060,7 @@
             "signature": [
               "readonly string[] | undefined"
             ],
-            "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/feature_kibana_privileges.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2076,7 +2076,7 @@
             "signature": [
               "readonly string[] | undefined"
             ],
-            "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/feature_kibana_privileges.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2100,7 +2100,7 @@
               "AlertingKibanaPrivilege",
               " | undefined; } | undefined; } | undefined"
             ],
-            "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/feature_kibana_privileges.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2116,7 +2116,7 @@
             "signature": [
               "{ all?: readonly string[] | undefined; push?: readonly string[] | undefined; create?: readonly string[] | undefined; read?: readonly string[] | undefined; update?: readonly string[] | undefined; delete?: readonly string[] | undefined; settings?: readonly string[] | undefined; createComment?: readonly string[] | undefined; reopenCase?: readonly string[] | undefined; } | undefined"
             ],
-            "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/feature_kibana_privileges.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2132,7 +2132,7 @@
             "signature": [
               "{ all: readonly string[]; read: readonly string[]; }"
             ],
-            "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/feature_kibana_privileges.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2150,7 +2150,7 @@
             "signature": [
               "readonly string[]"
             ],
-            "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/feature_kibana_privileges.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2174,7 +2174,7 @@
               },
               "[] | undefined"
             ],
-            "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/feature_kibana_privileges.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2214,7 +2214,7 @@
               },
               "[]; } | undefined"
             ],
-            "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/feature_kibana_privileges.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2230,7 +2230,7 @@
         "description": [
           "\nDescribes public Features plugin contract returned at the `setup` stage."
         ],
-        "path": "x-pack/plugins/features/server/plugin.ts",
+        "path": "x-pack/platform/plugins/shared/features/server/plugin.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2252,7 +2252,7 @@
               },
               ") => void"
             ],
-            "path": "x-pack/plugins/features/server/plugin.ts",
+            "path": "x-pack/platform/plugins/shared/features/server/plugin.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2272,7 +2272,7 @@
                     "text": "KibanaFeatureConfig"
                   }
                 ],
-                "path": "x-pack/plugins/features/server/plugin.ts",
+                "path": "x-pack/platform/plugins/shared/features/server/plugin.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2298,7 +2298,7 @@
               },
               ") => void"
             ],
-            "path": "x-pack/plugins/features/server/plugin.ts",
+            "path": "x-pack/platform/plugins/shared/features/server/plugin.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2318,7 +2318,7 @@
                     "text": "ElasticsearchFeatureConfig"
                   }
                 ],
-                "path": "x-pack/plugins/features/server/plugin.ts",
+                "path": "x-pack/platform/plugins/shared/features/server/plugin.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2348,178 +2348,178 @@
               },
               "[]"
             ],
-            "path": "x-pack/plugins/features/server/plugin.ts",
+            "path": "x-pack/platform/plugins/shared/features/server/plugin.ts",
             "deprecated": true,
             "removeBy": "8.8.0",
             "trackAdoption": false,
             "references": [
               {
                 "plugin": "spaces",
-                "path": "x-pack/plugins/spaces/server/lib/request_interceptors/on_post_auth_interceptor.ts"
+                "path": "x-pack/platform/plugins/shared/spaces/server/lib/request_interceptors/on_post_auth_interceptor.ts"
               },
               {
                 "plugin": "spaces",
-                "path": "x-pack/plugins/spaces/server/usage_collection/spaces_usage_collector.ts"
+                "path": "x-pack/platform/plugins/shared/spaces/server/usage_collection/spaces_usage_collector.ts"
               },
               {
                 "plugin": "@kbn/security-authorization-core",
-                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.ts"
+                "path": "x-pack/platform/packages/private/security/authorization_core/src/privileges/privileges.ts"
               },
               {
                 "plugin": "security",
-                "path": "x-pack/plugins/security/server/authorization/app_authorization.ts"
+                "path": "x-pack/platform/plugins/shared/security/server/authorization/app_authorization.ts"
               },
               {
                 "plugin": "security",
-                "path": "x-pack/plugins/security/server/authorization/authorization_service.tsx"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/server/authorization/app_authorization.test.ts"
-              },
-              {
-                "plugin": "spaces",
-                "path": "x-pack/plugins/spaces/server/lib/request_interceptors/on_post_auth_interceptor.test.ts"
-              },
-              {
-                "plugin": "@kbn/security-role-management-model",
-                "path": "x-pack/packages/security/role_management_model/src/__fixtures__/kibana_privileges.ts"
-              },
-              {
-                "plugin": "@kbn/security-role-management-model",
-                "path": "x-pack/packages/security/role_management_model/src/__fixtures__/kibana_privileges.ts"
-              },
-              {
-                "plugin": "@kbn/security-authorization-core",
-                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
-              },
-              {
-                "plugin": "@kbn/security-authorization-core",
-                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
-              },
-              {
-                "plugin": "@kbn/security-authorization-core",
-                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
-              },
-              {
-                "plugin": "@kbn/security-authorization-core",
-                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
-              },
-              {
-                "plugin": "@kbn/security-authorization-core",
-                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
-              },
-              {
-                "plugin": "@kbn/security-authorization-core",
-                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
-              },
-              {
-                "plugin": "@kbn/security-authorization-core",
-                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
-              },
-              {
-                "plugin": "@kbn/security-authorization-core",
-                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
-              },
-              {
-                "plugin": "@kbn/security-authorization-core",
-                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
-              },
-              {
-                "plugin": "@kbn/security-authorization-core",
-                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
-              },
-              {
-                "plugin": "@kbn/security-authorization-core",
-                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
-              },
-              {
-                "plugin": "@kbn/security-authorization-core",
-                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
-              },
-              {
-                "plugin": "@kbn/security-authorization-core",
-                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
-              },
-              {
-                "plugin": "@kbn/security-authorization-core",
-                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
-              },
-              {
-                "plugin": "@kbn/security-authorization-core",
-                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
-              },
-              {
-                "plugin": "@kbn/security-authorization-core",
-                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
-              },
-              {
-                "plugin": "@kbn/security-authorization-core",
-                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
-              },
-              {
-                "plugin": "@kbn/security-authorization-core",
-                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
-              },
-              {
-                "plugin": "@kbn/security-authorization-core",
-                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
-              },
-              {
-                "plugin": "@kbn/security-authorization-core",
-                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
-              },
-              {
-                "plugin": "@kbn/security-authorization-core",
-                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
-              },
-              {
-                "plugin": "@kbn/security-authorization-core",
-                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
-              },
-              {
-                "plugin": "@kbn/security-authorization-core",
-                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
-              },
-              {
-                "plugin": "@kbn/security-authorization-core",
-                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
-              },
-              {
-                "plugin": "@kbn/security-authorization-core",
-                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
-              },
-              {
-                "plugin": "@kbn/security-authorization-core",
-                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
-              },
-              {
-                "plugin": "@kbn/security-authorization-core",
-                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
-              },
-              {
-                "plugin": "@kbn/security-authorization-core",
-                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
-              },
-              {
-                "plugin": "@kbn/security-authorization-core",
-                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
-              },
-              {
-                "plugin": "@kbn/security-authorization-core",
-                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
-              },
-              {
-                "plugin": "@kbn/security-authorization-core",
-                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+                "path": "x-pack/platform/plugins/shared/security/server/authorization/authorization_service.tsx"
               },
               {
                 "plugin": "alerting",
                 "path": "x-pack/platform/plugins/shared/alerting/server/plugin.test.ts"
               },
               {
+                "plugin": "@kbn/security-role-management-model",
+                "path": "x-pack/platform/packages/private/security/role_management_model/src/__fixtures__/kibana_privileges.ts"
+              },
+              {
+                "plugin": "@kbn/security-role-management-model",
+                "path": "x-pack/platform/packages/private/security/role_management_model/src/__fixtures__/kibana_privileges.ts"
+              },
+              {
                 "plugin": "cases",
                 "path": "x-pack/platform/plugins/shared/cases/server/client/factory.test.ts"
+              },
+              {
+                "plugin": "security",
+                "path": "x-pack/platform/plugins/shared/security/server/authorization/app_authorization.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/platform/packages/private/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/platform/packages/private/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/platform/packages/private/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/platform/packages/private/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/platform/packages/private/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/platform/packages/private/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/platform/packages/private/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/platform/packages/private/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/platform/packages/private/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/platform/packages/private/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/platform/packages/private/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/platform/packages/private/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/platform/packages/private/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/platform/packages/private/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/platform/packages/private/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/platform/packages/private/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/platform/packages/private/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/platform/packages/private/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/platform/packages/private/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/platform/packages/private/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/platform/packages/private/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/platform/packages/private/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/platform/packages/private/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/platform/packages/private/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/platform/packages/private/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/platform/packages/private/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/platform/packages/private/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/platform/packages/private/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/platform/packages/private/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/platform/packages/private/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/platform/packages/private/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "spaces",
+                "path": "x-pack/platform/plugins/shared/spaces/server/lib/request_interceptors/on_post_auth_interceptor.test.ts"
               }
             ],
             "children": [],
@@ -2547,18 +2547,18 @@
               },
               "[]"
             ],
-            "path": "x-pack/plugins/features/server/plugin.ts",
+            "path": "x-pack/platform/plugins/shared/features/server/plugin.ts",
             "deprecated": true,
             "removeBy": "8.8.0",
             "trackAdoption": false,
             "references": [
               {
                 "plugin": "security",
-                "path": "x-pack/plugins/security/server/authorization/authorization_service.tsx"
+                "path": "x-pack/platform/plugins/shared/security/server/authorization/authorization_service.tsx"
               },
               {
                 "plugin": "@kbn/security-role-management-model",
-                "path": "x-pack/packages/security/role_management_model/src/__fixtures__/kibana_privileges.ts"
+                "path": "x-pack/platform/packages/private/security/role_management_model/src/__fixtures__/kibana_privileges.ts"
               }
             ],
             "children": [],
@@ -2576,7 +2576,7 @@
             "signature": [
               "() => void"
             ],
-            "path": "x-pack/plugins/features/server/plugin.ts",
+            "path": "x-pack/platform/plugins/shared/features/server/plugin.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -2612,7 +2612,7 @@
               },
               "; }>"
             ],
-            "path": "x-pack/plugins/features/server/plugin.ts",
+            "path": "x-pack/platform/plugins/shared/features/server/plugin.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -2633,7 +2633,7 @@
                     "text": "KibanaFeature"
                   }
                 ],
-                "path": "x-pack/plugins/features/server/feature_privilege_iterator/feature_privilege_iterator.ts",
+                "path": "x-pack/platform/plugins/shared/features/server/feature_privilege_iterator/feature_privilege_iterator.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -2647,7 +2647,7 @@
                 "signature": [
                   "FeaturePrivilegeIteratorOptions"
                 ],
-                "path": "x-pack/plugins/features/server/feature_privilege_iterator/feature_privilege_iterator.ts",
+                "path": "x-pack/platform/plugins/shared/features/server/feature_privilege_iterator/feature_privilege_iterator.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -2681,7 +2681,7 @@
               },
               ">"
             ],
-            "path": "x-pack/plugins/features/server/plugin.ts",
+            "path": "x-pack/platform/plugins/shared/features/server/plugin.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -2702,7 +2702,7 @@
                     "text": "KibanaFeature"
                   }
                 ],
-                "path": "x-pack/plugins/features/server/feature_privilege_iterator/sub_feature_privilege_iterator.ts",
+                "path": "x-pack/platform/plugins/shared/features/server/feature_privilege_iterator/sub_feature_privilege_iterator.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -2716,7 +2716,7 @@
                 "signature": [
                   "(licenseType: \"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\") => boolean | undefined"
                 ],
-                "path": "x-pack/plugins/features/server/feature_privilege_iterator/sub_feature_privilege_iterator.ts",
+                "path": "x-pack/platform/plugins/shared/features/server/feature_privilege_iterator/sub_feature_privilege_iterator.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "returnComment": [],
@@ -2731,7 +2731,7 @@
                     "signature": [
                       "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\""
                     ],
-                    "path": "x-pack/plugins/features/server/feature_privilege_iterator/sub_feature_privilege_iterator.ts",
+                    "path": "x-pack/platform/plugins/shared/features/server/feature_privilege_iterator/sub_feature_privilege_iterator.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -2749,7 +2749,7 @@
         "tags": [],
         "label": "FeaturesPluginStart",
         "description": [],
-        "path": "x-pack/plugins/features/server/plugin.ts",
+        "path": "x-pack/platform/plugins/shared/features/server/plugin.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2771,7 +2771,7 @@
               },
               "[]"
             ],
-            "path": "x-pack/plugins/features/server/plugin.ts",
+            "path": "x-pack/platform/plugins/shared/features/server/plugin.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -2795,7 +2795,7 @@
               },
               "[]"
             ],
-            "path": "x-pack/plugins/features/server/plugin.ts",
+            "path": "x-pack/platform/plugins/shared/features/server/plugin.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -2813,7 +2813,7 @@
         "description": [
           "\nInterface for registering a feature.\nFeature registration allows plugins to hide their applications with spaces,\nand secure access when configured for security."
         ],
-        "path": "x-pack/plugins/features/common/kibana_feature.ts",
+        "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2828,7 +2828,7 @@
             "description": [
               "\nUnique identifier for this feature.\nThis identifier is also used when generating UI Capabilities.\n"
             ],
-            "path": "x-pack/plugins/features/common/kibana_feature.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2841,7 +2841,7 @@
             "description": [
               "\nDisplay name for this feature.\nThis will be displayed to end-users, so a translatable string is advised for i18n."
             ],
-            "path": "x-pack/plugins/features/common/kibana_feature.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2857,7 +2857,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/features/common/kibana_feature.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2873,7 +2873,7 @@
             "signature": [
               "AppCategory"
             ],
-            "path": "x-pack/plugins/features/common/kibana_feature.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2889,7 +2889,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "x-pack/plugins/features/common/kibana_feature.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2905,7 +2905,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "x-pack/plugins/features/common/kibana_feature.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2921,7 +2921,7 @@
             "signature": [
               "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined"
             ],
-            "path": "x-pack/plugins/features/common/kibana_feature.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2937,7 +2937,7 @@
             "signature": [
               "readonly string[]"
             ],
-            "path": "x-pack/plugins/features/common/kibana_feature.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2953,7 +2953,7 @@
             "signature": [
               "{ [sectionId: string]: readonly string[]; } | undefined"
             ],
-            "path": "x-pack/plugins/features/common/kibana_feature.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2969,7 +2969,7 @@
             "signature": [
               "readonly string[] | undefined"
             ],
-            "path": "x-pack/plugins/features/common/kibana_feature.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2986,7 +2986,7 @@
               "AlertingKibanaPrivilege",
               " | undefined"
             ],
-            "path": "x-pack/plugins/features/common/kibana_feature.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3002,7 +3002,7 @@
             "signature": [
               "readonly string[] | undefined"
             ],
-            "path": "x-pack/plugins/features/common/kibana_feature.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3036,7 +3036,7 @@
               },
               "; } | null"
             ],
-            "path": "x-pack/plugins/features/common/kibana_feature.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3060,7 +3060,7 @@
               },
               "[] | undefined"
             ],
-            "path": "x-pack/plugins/features/common/kibana_feature.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3076,7 +3076,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/features/common/kibana_feature.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3094,7 +3094,7 @@
               "ReservedKibanaPrivilege",
               "[]; } | undefined"
             ],
-            "path": "x-pack/plugins/features/common/kibana_feature.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3110,7 +3110,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "x-pack/plugins/features/common/kibana_feature.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3134,7 +3134,7 @@
               },
               "[] | undefined"
             ],
-            "path": "x-pack/plugins/features/common/kibana_feature.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3150,7 +3150,7 @@
             "signature": [
               "Readonly<{ notice: string; }> | undefined"
             ],
-            "path": "x-pack/plugins/features/common/kibana_feature.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3188,7 +3188,7 @@
           },
           ">"
         ],
-        "path": "x-pack/plugins/features/server/feature_privilege_iterator/sub_feature_privilege_iterator.ts",
+        "path": "x-pack/platform/plugins/shared/features/server/feature_privilege_iterator/sub_feature_privilege_iterator.ts",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -3211,7 +3211,7 @@
                 "text": "KibanaFeature"
               }
             ],
-            "path": "x-pack/plugins/features/server/feature_privilege_iterator/sub_feature_privilege_iterator.ts",
+            "path": "x-pack/platform/plugins/shared/features/server/feature_privilege_iterator/sub_feature_privilege_iterator.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3225,7 +3225,7 @@
             "signature": [
               "(licenseType: \"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\") => boolean | undefined"
             ],
-            "path": "x-pack/plugins/features/server/feature_privilege_iterator/sub_feature_privilege_iterator.ts",
+            "path": "x-pack/platform/plugins/shared/features/server/feature_privilege_iterator/sub_feature_privilege_iterator.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -3240,7 +3240,7 @@
                 "signature": [
                   "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\""
                 ],
-                "path": "x-pack/plugins/features/server/feature_privilege_iterator/sub_feature_privilege_iterator.ts",
+                "path": "x-pack/platform/plugins/shared/features/server/feature_privilege_iterator/sub_feature_privilege_iterator.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -3261,7 +3261,7 @@
         "signature": [
           "RegExp"
         ],
-        "path": "x-pack/plugins/features/server/feature_schema.ts",
+        "path": "x-pack/platform/plugins/shared/features/server/feature_schema.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3277,7 +3277,7 @@
         "tags": [],
         "label": "ElasticsearchFeature",
         "description": [],
-        "path": "x-pack/plugins/features/common/elasticsearch_feature.ts",
+        "path": "x-pack/platform/plugins/shared/features/common/elasticsearch_feature.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3291,7 +3291,7 @@
             "signature": [
               "any"
             ],
-            "path": "x-pack/plugins/features/common/elasticsearch_feature.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/elasticsearch_feature.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -3337,7 +3337,7 @@
                   },
                   ">; }>"
                 ],
-                "path": "x-pack/plugins/features/common/elasticsearch_feature.ts",
+                "path": "x-pack/platform/plugins/shared/features/common/elasticsearch_feature.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -3352,7 +3352,7 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "path": "x-pack/plugins/features/common/elasticsearch_feature.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/elasticsearch_feature.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3373,7 +3373,7 @@
               },
               "<string> | undefined"
             ],
-            "path": "x-pack/plugins/features/common/elasticsearch_feature.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/elasticsearch_feature.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3395,7 +3395,7 @@
               },
               "<string>; }> | undefined"
             ],
-            "path": "x-pack/plugins/features/common/elasticsearch_feature.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/elasticsearch_feature.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3424,7 +3424,7 @@
               },
               ">"
             ],
-            "path": "x-pack/plugins/features/common/elasticsearch_feature.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/elasticsearch_feature.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3445,7 +3445,7 @@
                 "text": "ElasticsearchFeatureConfig"
               }
             ],
-            "path": "x-pack/plugins/features/common/elasticsearch_feature.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/elasticsearch_feature.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -3461,7 +3461,7 @@
         "tags": [],
         "label": "KibanaFeature",
         "description": [],
-        "path": "x-pack/plugins/features/common/kibana_feature.ts",
+        "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3482,7 +3482,7 @@
               },
               "[]"
             ],
-            "path": "x-pack/plugins/features/common/kibana_feature.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3496,7 +3496,7 @@
             "signature": [
               "any"
             ],
-            "path": "x-pack/plugins/features/common/kibana_feature.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -3526,7 +3526,7 @@
                   },
                   "[] | undefined; readonly deprecated?: Readonly<{ readonly notice: string; }> | undefined; }>"
                 ],
-                "path": "x-pack/plugins/features/common/kibana_feature.ts",
+                "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -3541,7 +3541,7 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "path": "x-pack/plugins/features/common/kibana_feature.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3555,7 +3555,7 @@
             "signature": [
               "Readonly<{ readonly notice: string; }> | undefined"
             ],
-            "path": "x-pack/plugins/features/common/kibana_feature.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3569,7 +3569,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "x-pack/plugins/features/common/kibana_feature.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3580,7 +3580,7 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "path": "x-pack/plugins/features/common/kibana_feature.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3594,7 +3594,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/features/common/kibana_feature.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3608,7 +3608,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "x-pack/plugins/features/common/kibana_feature.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3622,7 +3622,7 @@
             "signature": [
               "{ readonly id: string; readonly label: string; readonly ariaLabel?: string | undefined; readonly order?: number | undefined; readonly euiIconType?: string | undefined; }"
             ],
-            "path": "x-pack/plugins/features/common/kibana_feature.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3636,7 +3636,7 @@
             "signature": [
               "readonly string[]"
             ],
-            "path": "x-pack/plugins/features/common/kibana_feature.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3650,7 +3650,7 @@
             "signature": [
               "readonly string[] | undefined"
             ],
-            "path": "x-pack/plugins/features/common/kibana_feature.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3664,7 +3664,7 @@
             "signature": [
               "Readonly<{ [x: string]: readonly string[]; }> | undefined"
             ],
-            "path": "x-pack/plugins/features/common/kibana_feature.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3678,7 +3678,7 @@
             "signature": [
               "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined"
             ],
-            "path": "x-pack/plugins/features/common/kibana_feature.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3692,7 +3692,7 @@
             "signature": [
               "Readonly<{ all: Readonly<{ excludeFromBasePrivileges?: boolean | undefined; requireAllSpaces?: boolean | undefined; disabled?: boolean | undefined; management?: Readonly<{ [x: string]: readonly string[]; }> | undefined; catalogue?: readonly string[] | undefined; api?: readonly string[] | undefined; app?: readonly string[] | undefined; alerting?: Readonly<{ rule?: Readonly<{ all?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; read?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; }> | undefined; alert?: Readonly<{ all?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; read?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; }> | undefined; }> | undefined; cases?: Readonly<{ all?: readonly string[] | undefined; push?: readonly string[] | undefined; create?: readonly string[] | undefined; read?: readonly string[] | undefined; update?: readonly string[] | undefined; delete?: readonly string[] | undefined; settings?: readonly string[] | undefined; createComment?: readonly string[] | undefined; reopenCase?: readonly string[] | undefined; }> | undefined; savedObject: Readonly<{ all: readonly string[]; read: readonly string[]; }>; ui: readonly string[]; composedOf?: readonly Readonly<{ feature: string; privileges: readonly string[]; }>[] | undefined; replacedBy?: readonly Readonly<{ feature: string; privileges: readonly string[]; }>[] | Readonly<{ default: readonly Readonly<{ feature: string; privileges: readonly string[]; }>[]; minimal: readonly Readonly<{ feature: string; privileges: readonly string[]; }>[]; }> | undefined; }>; read: Readonly<{ excludeFromBasePrivileges?: boolean | undefined; requireAllSpaces?: boolean | undefined; disabled?: boolean | undefined; management?: Readonly<{ [x: string]: readonly string[]; }> | undefined; catalogue?: readonly string[] | undefined; api?: readonly string[] | undefined; app?: readonly string[] | undefined; alerting?: Readonly<{ rule?: Readonly<{ all?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; read?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; }> | undefined; alert?: Readonly<{ all?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; read?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; }> | undefined; }> | undefined; cases?: Readonly<{ all?: readonly string[] | undefined; push?: readonly string[] | undefined; create?: readonly string[] | undefined; read?: readonly string[] | undefined; update?: readonly string[] | undefined; delete?: readonly string[] | undefined; settings?: readonly string[] | undefined; createComment?: readonly string[] | undefined; reopenCase?: readonly string[] | undefined; }> | undefined; savedObject: Readonly<{ all: readonly string[]; read: readonly string[]; }>; ui: readonly string[]; composedOf?: readonly Readonly<{ feature: string; privileges: readonly string[]; }>[] | undefined; replacedBy?: readonly Readonly<{ feature: string; privileges: readonly string[]; }>[] | Readonly<{ default: readonly Readonly<{ feature: string; privileges: readonly string[]; }>[]; minimal: readonly Readonly<{ feature: string; privileges: readonly string[]; }>[]; }> | undefined; }>; }> | null"
             ],
-            "path": "x-pack/plugins/features/common/kibana_feature.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3706,7 +3706,7 @@
             "signature": [
               "readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined"
             ],
-            "path": "x-pack/plugins/features/common/kibana_feature.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3720,7 +3720,7 @@
             "signature": [
               "readonly string[] | undefined"
             ],
-            "path": "x-pack/plugins/features/common/kibana_feature.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3731,7 +3731,7 @@
             "tags": [],
             "label": "excludeFromBasePrivileges",
             "description": [],
-            "path": "x-pack/plugins/features/common/kibana_feature.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3745,7 +3745,7 @@
             "signature": [
               "Readonly<{ description: string; privileges: readonly Readonly<{ id: string; privilege: Readonly<{ excludeFromBasePrivileges?: boolean | undefined; requireAllSpaces?: boolean | undefined; disabled?: boolean | undefined; management?: Readonly<{ [x: string]: readonly string[]; }> | undefined; catalogue?: readonly string[] | undefined; api?: readonly string[] | undefined; app?: readonly string[] | undefined; alerting?: Readonly<{ rule?: Readonly<{ all?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; read?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; }> | undefined; alert?: Readonly<{ all?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; read?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; }> | undefined; }> | undefined; cases?: Readonly<{ all?: readonly string[] | undefined; push?: readonly string[] | undefined; create?: readonly string[] | undefined; read?: readonly string[] | undefined; update?: readonly string[] | undefined; delete?: readonly string[] | undefined; settings?: readonly string[] | undefined; createComment?: readonly string[] | undefined; reopenCase?: readonly string[] | undefined; }> | undefined; savedObject: Readonly<{ all: readonly string[]; read: readonly string[]; }>; ui: readonly string[]; composedOf?: readonly Readonly<{ feature: string; privileges: readonly string[]; }>[] | undefined; replacedBy?: readonly Readonly<{ feature: string; privileges: readonly string[]; }>[] | Readonly<{ default: readonly Readonly<{ feature: string; privileges: readonly string[]; }>[]; minimal: readonly Readonly<{ feature: string; privileges: readonly string[]; }>[]; }> | undefined; }>; }>[]; }> | undefined"
             ],
-            "path": "x-pack/plugins/features/common/kibana_feature.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3767,7 +3767,7 @@
               },
               "[] | undefined"
             ],
-            "path": "x-pack/plugins/features/common/kibana_feature.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3788,7 +3788,7 @@
                 "text": "KibanaFeatureConfig"
               }
             ],
-            "path": "x-pack/plugins/features/common/kibana_feature.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -3804,7 +3804,7 @@
         "tags": [],
         "label": "SubFeature",
         "description": [],
-        "path": "x-pack/plugins/features/common/sub_feature.ts",
+        "path": "x-pack/platform/plugins/shared/features/common/sub_feature.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3818,7 +3818,7 @@
             "signature": [
               "any"
             ],
-            "path": "x-pack/plugins/features/common/sub_feature.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/sub_feature.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -3840,7 +3840,7 @@
                   },
                   "; privileges: readonly Readonly<{ id: string; name: string; includeIn: \"none\" | \"read\" | \"all\"; minimumLicense?: \"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined; replacedBy?: readonly Readonly<{ feature: string; privileges: readonly string[]; }>[] | undefined; alerting?: Readonly<{ rule?: Readonly<{ all?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; read?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; }> | undefined; alert?: Readonly<{ all?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; read?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; }> | undefined; }> | undefined; cases?: Readonly<{ all?: readonly string[] | undefined; push?: readonly string[] | undefined; create?: readonly string[] | undefined; read?: readonly string[] | undefined; update?: readonly string[] | undefined; delete?: readonly string[] | undefined; settings?: readonly string[] | undefined; createComment?: readonly string[] | undefined; reopenCase?: readonly string[] | undefined; }> | undefined; disabled?: boolean | undefined; management?: Readonly<{ [x: string]: readonly string[]; }> | undefined; app?: readonly string[] | undefined; ui: readonly string[]; catalogue?: readonly string[] | undefined; requireAllSpaces?: boolean | undefined; api?: readonly string[] | undefined; savedObject: Readonly<{ all: readonly string[]; read: readonly string[]; }>; }>[]; }>[]; description?: string | undefined; }>"
                 ],
-                "path": "x-pack/plugins/features/common/sub_feature.ts",
+                "path": "x-pack/platform/plugins/shared/features/common/sub_feature.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -3855,7 +3855,7 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "path": "x-pack/plugins/features/common/sub_feature.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/sub_feature.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3877,7 +3877,7 @@
               },
               "; privileges: readonly Readonly<{ id: string; name: string; includeIn: \"none\" | \"read\" | \"all\"; minimumLicense?: \"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined; replacedBy?: readonly Readonly<{ feature: string; privileges: readonly string[]; }>[] | undefined; alerting?: Readonly<{ rule?: Readonly<{ all?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; read?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; }> | undefined; alert?: Readonly<{ all?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; read?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; }> | undefined; }> | undefined; cases?: Readonly<{ all?: readonly string[] | undefined; push?: readonly string[] | undefined; create?: readonly string[] | undefined; read?: readonly string[] | undefined; update?: readonly string[] | undefined; delete?: readonly string[] | undefined; settings?: readonly string[] | undefined; createComment?: readonly string[] | undefined; reopenCase?: readonly string[] | undefined; }> | undefined; disabled?: boolean | undefined; management?: Readonly<{ [x: string]: readonly string[]; }> | undefined; app?: readonly string[] | undefined; ui: readonly string[]; catalogue?: readonly string[] | undefined; requireAllSpaces?: boolean | undefined; api?: readonly string[] | undefined; savedObject: Readonly<{ all: readonly string[]; read: readonly string[]; }>; }>[]; }>[]"
             ],
-            "path": "x-pack/plugins/features/common/sub_feature.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/sub_feature.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3888,7 +3888,7 @@
             "tags": [],
             "label": "requireAllSpaces",
             "description": [],
-            "path": "x-pack/plugins/features/common/sub_feature.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/sub_feature.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3899,7 +3899,7 @@
             "tags": [],
             "label": "description",
             "description": [],
-            "path": "x-pack/plugins/features/common/sub_feature.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/sub_feature.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3921,7 +3921,7 @@
               },
               "; privileges: readonly Readonly<{ id: string; name: string; includeIn: \"none\" | \"read\" | \"all\"; minimumLicense?: \"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined; replacedBy?: readonly Readonly<{ feature: string; privileges: readonly string[]; }>[] | undefined; alerting?: Readonly<{ rule?: Readonly<{ all?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; read?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; }> | undefined; alert?: Readonly<{ all?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; read?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; }> | undefined; }> | undefined; cases?: Readonly<{ all?: readonly string[] | undefined; push?: readonly string[] | undefined; create?: readonly string[] | undefined; read?: readonly string[] | undefined; update?: readonly string[] | undefined; delete?: readonly string[] | undefined; settings?: readonly string[] | undefined; createComment?: readonly string[] | undefined; reopenCase?: readonly string[] | undefined; }> | undefined; disabled?: boolean | undefined; management?: Readonly<{ [x: string]: readonly string[]; }> | undefined; app?: readonly string[] | undefined; ui: readonly string[]; catalogue?: readonly string[] | undefined; requireAllSpaces?: boolean | undefined; api?: readonly string[] | undefined; savedObject: Readonly<{ all: readonly string[]; read: readonly string[]; }>; }>[]; }>[]; description?: string | undefined; }"
             ],
-            "path": "x-pack/plugins/features/common/sub_feature.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/sub_feature.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -3942,7 +3942,7 @@
         "description": [
           "\nInterface for registering an Elasticsearch feature.\nFeature registration allows plugins to hide their applications based\non configured cluster or index privileges."
         ],
-        "path": "x-pack/plugins/features/common/elasticsearch_feature.ts",
+        "path": "x-pack/platform/plugins/shared/features/common/elasticsearch_feature.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3957,7 +3957,7 @@
             "description": [
               "\nUnique identifier for this feature.\nThis identifier is also used when generating UI Capabilities.\n"
             ],
-            "path": "x-pack/plugins/features/common/elasticsearch_feature.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/elasticsearch_feature.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3973,7 +3973,7 @@
             "signature": [
               "{ [sectionId: string]: string[]; } | undefined"
             ],
-            "path": "x-pack/plugins/features/common/elasticsearch_feature.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/elasticsearch_feature.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3989,7 +3989,7 @@
             "signature": [
               "string[] | undefined"
             ],
-            "path": "x-pack/plugins/features/common/elasticsearch_feature.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/elasticsearch_feature.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4014,7 +4014,7 @@
               },
               "[]"
             ],
-            "path": "x-pack/plugins/features/common/elasticsearch_feature.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/elasticsearch_feature.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -4030,7 +4030,7 @@
         "description": [
           "\nElasticsearch Feature privilege definition"
         ],
-        "path": "x-pack/plugins/features/common/feature_elasticsearch_privileges.ts",
+        "path": "x-pack/platform/plugins/shared/features/common/feature_elasticsearch_privileges.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -4046,7 +4046,7 @@
             "signature": [
               "string[]"
             ],
-            "path": "x-pack/plugins/features/common/feature_elasticsearch_privileges.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/feature_elasticsearch_privileges.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4062,7 +4062,7 @@
             "signature": [
               "{ [indexName: string]: string[]; } | undefined"
             ],
-            "path": "x-pack/plugins/features/common/feature_elasticsearch_privileges.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/feature_elasticsearch_privileges.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4080,14 +4080,14 @@
             "signature": [
               "string[] | undefined"
             ],
-            "path": "x-pack/plugins/features/common/feature_elasticsearch_privileges.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/feature_elasticsearch_privileges.ts",
             "deprecated": true,
             "removeBy": "8.8.0\n\nThis is relied on by the reporting feature, and should be removed once reporting\nmigrates to using the Kibana Privilege model: https://github.com/elastic/kibana/issues/19914",
             "trackAdoption": false,
             "references": [
               {
                 "plugin": "security",
-                "path": "x-pack/plugins/security/server/authorization/disable_ui_capabilities.ts"
+                "path": "x-pack/platform/plugins/shared/security/server/authorization/disable_ui_capabilities.ts"
               }
             ]
           },
@@ -4105,7 +4105,7 @@
             "signature": [
               "string[]"
             ],
-            "path": "x-pack/plugins/features/common/feature_elasticsearch_privileges.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/feature_elasticsearch_privileges.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -4121,7 +4121,7 @@
         "description": [
           "\nFeature privilege definition"
         ],
-        "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
+        "path": "x-pack/platform/plugins/shared/features/common/feature_kibana_privileges.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -4137,7 +4137,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/feature_kibana_privileges.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4153,7 +4153,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/feature_kibana_privileges.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4169,7 +4169,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/feature_kibana_privileges.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4185,7 +4185,7 @@
             "signature": [
               "{ [sectionId: string]: readonly string[]; } | undefined"
             ],
-            "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/feature_kibana_privileges.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4201,7 +4201,7 @@
             "signature": [
               "readonly string[] | undefined"
             ],
-            "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/feature_kibana_privileges.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4217,7 +4217,7 @@
             "signature": [
               "readonly string[] | undefined"
             ],
-            "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/feature_kibana_privileges.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4233,7 +4233,7 @@
             "signature": [
               "readonly string[] | undefined"
             ],
-            "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/feature_kibana_privileges.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4257,7 +4257,7 @@
               "AlertingKibanaPrivilege",
               " | undefined; } | undefined; } | undefined"
             ],
-            "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/feature_kibana_privileges.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4273,7 +4273,7 @@
             "signature": [
               "{ all?: readonly string[] | undefined; push?: readonly string[] | undefined; create?: readonly string[] | undefined; read?: readonly string[] | undefined; update?: readonly string[] | undefined; delete?: readonly string[] | undefined; settings?: readonly string[] | undefined; createComment?: readonly string[] | undefined; reopenCase?: readonly string[] | undefined; } | undefined"
             ],
-            "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/feature_kibana_privileges.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4289,7 +4289,7 @@
             "signature": [
               "{ all: readonly string[]; read: readonly string[]; }"
             ],
-            "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/feature_kibana_privileges.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4307,7 +4307,7 @@
             "signature": [
               "readonly string[]"
             ],
-            "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/feature_kibana_privileges.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4331,7 +4331,7 @@
               },
               "[] | undefined"
             ],
-            "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/feature_kibana_privileges.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4371,7 +4371,7 @@
               },
               "[]; } | undefined"
             ],
-            "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/feature_kibana_privileges.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -4387,7 +4387,7 @@
         "description": [
           "\nDefines a reference to a set of privileges of a specific feature."
         ],
-        "path": "x-pack/plugins/features/common/feature_kibana_privileges_reference.ts",
+        "path": "x-pack/platform/plugins/shared/features/common/feature_kibana_privileges_reference.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -4400,7 +4400,7 @@
             "description": [
               "\nThe ID of the feature."
             ],
-            "path": "x-pack/plugins/features/common/feature_kibana_privileges_reference.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/feature_kibana_privileges_reference.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4416,7 +4416,7 @@
             "signature": [
               "readonly string[]"
             ],
-            "path": "x-pack/plugins/features/common/feature_kibana_privileges_reference.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/feature_kibana_privileges_reference.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -4432,7 +4432,7 @@
         "description": [
           "\nInterface for registering a feature.\nFeature registration allows plugins to hide their applications with spaces,\nand secure access when configured for security."
         ],
-        "path": "x-pack/plugins/features/common/kibana_feature.ts",
+        "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -4447,7 +4447,7 @@
             "description": [
               "\nUnique identifier for this feature.\nThis identifier is also used when generating UI Capabilities.\n"
             ],
-            "path": "x-pack/plugins/features/common/kibana_feature.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4460,7 +4460,7 @@
             "description": [
               "\nDisplay name for this feature.\nThis will be displayed to end-users, so a translatable string is advised for i18n."
             ],
-            "path": "x-pack/plugins/features/common/kibana_feature.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4476,7 +4476,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/features/common/kibana_feature.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4492,7 +4492,7 @@
             "signature": [
               "AppCategory"
             ],
-            "path": "x-pack/plugins/features/common/kibana_feature.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4508,7 +4508,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "x-pack/plugins/features/common/kibana_feature.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4524,7 +4524,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "x-pack/plugins/features/common/kibana_feature.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4540,7 +4540,7 @@
             "signature": [
               "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined"
             ],
-            "path": "x-pack/plugins/features/common/kibana_feature.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4556,7 +4556,7 @@
             "signature": [
               "readonly string[]"
             ],
-            "path": "x-pack/plugins/features/common/kibana_feature.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4572,7 +4572,7 @@
             "signature": [
               "{ [sectionId: string]: readonly string[]; } | undefined"
             ],
-            "path": "x-pack/plugins/features/common/kibana_feature.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4588,7 +4588,7 @@
             "signature": [
               "readonly string[] | undefined"
             ],
-            "path": "x-pack/plugins/features/common/kibana_feature.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4605,7 +4605,7 @@
               "AlertingKibanaPrivilege",
               " | undefined"
             ],
-            "path": "x-pack/plugins/features/common/kibana_feature.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4621,7 +4621,7 @@
             "signature": [
               "readonly string[] | undefined"
             ],
-            "path": "x-pack/plugins/features/common/kibana_feature.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4655,7 +4655,7 @@
               },
               "; } | null"
             ],
-            "path": "x-pack/plugins/features/common/kibana_feature.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4679,7 +4679,7 @@
               },
               "[] | undefined"
             ],
-            "path": "x-pack/plugins/features/common/kibana_feature.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4695,7 +4695,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/features/common/kibana_feature.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4713,7 +4713,7 @@
               "ReservedKibanaPrivilege",
               "[]; } | undefined"
             ],
-            "path": "x-pack/plugins/features/common/kibana_feature.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4729,7 +4729,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "x-pack/plugins/features/common/kibana_feature.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4753,7 +4753,7 @@
               },
               "[] | undefined"
             ],
-            "path": "x-pack/plugins/features/common/kibana_feature.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4769,7 +4769,7 @@
             "signature": [
               "Readonly<{ notice: string; }> | undefined"
             ],
-            "path": "x-pack/plugins/features/common/kibana_feature.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -4785,7 +4785,7 @@
         "description": [
           "\nConfiguration for a sub-feature."
         ],
-        "path": "x-pack/plugins/features/common/sub_feature.ts",
+        "path": "x-pack/platform/plugins/shared/features/common/sub_feature.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -4798,7 +4798,7 @@
             "description": [
               "Display name for this sub-feature"
             ],
-            "path": "x-pack/plugins/features/common/sub_feature.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/sub_feature.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4814,7 +4814,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "x-pack/plugins/features/common/sub_feature.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/sub_feature.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4830,7 +4830,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/features/common/sub_feature.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/sub_feature.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4854,7 +4854,7 @@
               },
               "[]"
             ],
-            "path": "x-pack/plugins/features/common/sub_feature.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/sub_feature.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4870,7 +4870,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/features/common/sub_feature.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/sub_feature.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -4904,7 +4904,7 @@
           },
           ", \"excludeFromBasePrivileges\" | \"composedOf\" | \"replacedBy\">"
         ],
-        "path": "x-pack/plugins/features/common/sub_feature.ts",
+        "path": "x-pack/platform/plugins/shared/features/common/sub_feature.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -4917,7 +4917,7 @@
             "description": [
               "\nIdentifier for this privilege. Must be unique across all other privileges within a feature."
             ],
-            "path": "x-pack/plugins/features/common/sub_feature.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/sub_feature.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4930,7 +4930,7 @@
             "description": [
               "\nThe display name for this privilege."
             ],
-            "path": "x-pack/plugins/features/common/sub_feature.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/sub_feature.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4946,7 +4946,7 @@
             "signature": [
               "\"none\" | \"read\" | \"all\""
             ],
-            "path": "x-pack/plugins/features/common/sub_feature.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/sub_feature.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4962,7 +4962,7 @@
             "signature": [
               "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined"
             ],
-            "path": "x-pack/plugins/features/common/sub_feature.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/sub_feature.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4986,7 +4986,7 @@
               },
               "[] | undefined"
             ],
-            "path": "x-pack/plugins/features/common/sub_feature.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/sub_feature.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -5002,7 +5002,7 @@
         "description": [
           "\nConfiguration for a sub-feature privilege group."
         ],
-        "path": "x-pack/plugins/features/common/sub_feature.ts",
+        "path": "x-pack/platform/plugins/shared/features/common/sub_feature.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -5018,7 +5018,7 @@
             "signature": [
               "\"mutually_exclusive\" | \"independent\""
             ],
-            "path": "x-pack/plugins/features/common/sub_feature.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/sub_feature.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -5042,7 +5042,7 @@
               },
               "[]"
             ],
-            "path": "x-pack/plugins/features/common/sub_feature.ts",
+            "path": "x-pack/platform/plugins/shared/features/common/sub_feature.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -5060,7 +5060,7 @@
         "description": [
           "\nEnum for allowed feature scope values.\nsecurity - The feature is available in Security Feature Privileges.\nspaces - The feature is available in the Spaces Visibility Toggles."
         ],
-        "path": "x-pack/plugins/features/common/kibana_feature.ts",
+        "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5079,7 +5079,7 @@
         "signature": [
           "\"mutually_exclusive\" | \"independent\""
         ],
-        "path": "x-pack/plugins/features/common/sub_feature.ts",
+        "path": "x-pack/platform/plugins/shared/features/common/sub_feature.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

@@ -28,7 +28,7 @@ import {
 } from '@elastic/eui';
 import { isEmpty } from 'lodash';
 import { callApmApi } from '../../../../services/rest/create_call_apm_api';
-import { CreateApiKeyResponse } from '../../../../../common/agent_key_types';
+import type { CreateApiKeyResponse } from '../../../../../common/agent_key_types';
 import { useCurrentUser } from '../../../../hooks/use_current_user';
 import { PrivilegeType } from '../../../../../common/privilege_type';
 
