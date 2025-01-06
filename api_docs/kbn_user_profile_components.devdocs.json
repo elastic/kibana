@@ -439,7 +439,7 @@
             "section": "def-common.UserProfileData",
             "text": "UserProfileData"
           },
-          ">>(updatedData: D) => Promise<void>; showSuccessNotification: ({ isRefreshRequired }?: { isRefreshRequired?: boolean | undefined; }) => void; userProfileData: ",
+          ">>(updatedData: D) => Promise<D>; showSuccessNotification: ({ isRefreshRequired }?: { isRefreshRequired?: boolean | undefined; }) => void; userProfileData: ",
           {
             "pluginId": "@kbn/user-profile-components",
             "scope": "common",
@@ -447,7 +447,7 @@
             "section": "def-common.UserProfileData",
             "text": "UserProfileData"
           },
-          " | null | undefined; isLoading: boolean; userProfileEnabled: boolean | undefined; }"
+          " | null | undefined; isLoading: boolean; userProfileEnabled: boolean | undefined; userProfileLoaded: boolean; }"
         ],
         "path": "packages/kbn-user-profile-components/src/hooks/use_update_user_profile.tsx",
         "deprecated": false,
@@ -857,37 +857,13 @@
             ],
             "signature": [
               "{ notifications: ",
-              {
-                "pluginId": "@kbn/core-notifications-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreNotificationsBrowserPluginApi",
-                "section": "def-public.NotificationsStart",
-                "text": "NotificationsStart"
-              },
+              "NotificationsStart",
               "; theme: ",
-              {
-                "pluginId": "@kbn/core-theme-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreThemeBrowserPluginApi",
-                "section": "def-public.ThemeServiceSetup",
-                "text": "ThemeServiceSetup"
-              },
+              "ThemeServiceSetup",
               "; userProfile: ",
-              {
-                "pluginId": "@kbn/core-user-profile-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreUserProfileBrowserPluginApi",
-                "section": "def-public.UserProfileService",
-                "text": "UserProfileService"
-              },
+              "UserProfileService",
               "; i18n: ",
-              {
-                "pluginId": "@kbn/core-i18n-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreI18nBrowserPluginApi",
-                "section": "def-public.I18nStart",
-                "text": "I18nStart"
-              },
+              "I18nStart",
               "; }"
             ],
             "path": "packages/kbn-user-profile-components/src/services.tsx",
@@ -929,13 +905,7 @@
                 "text": "ToMountPointParams"
               },
               ") => ",
-              {
-                "pluginId": "@kbn/core-mount-utils-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreMountUtilsBrowserPluginApi",
-                "section": "def-public.MountPoint",
-                "text": "MountPoint"
-              },
+              "MountPoint",
               "<HTMLElement>"
             ],
             "path": "packages/kbn-user-profile-components/src/services.tsx",
@@ -966,13 +936,7 @@
                 "description": [],
                 "signature": [
                   "{ i18n: ",
-                  {
-                    "pluginId": "@kbn/core-i18n-browser",
-                    "scope": "public",
-                    "docId": "kibKbnCoreI18nBrowserPluginApi",
-                    "section": "def-public.I18nStart",
-                    "text": "I18nStart"
-                  },
+                  "I18nStart",
                   "; analytics?: Pick<",
                   "AnalyticsServiceStart",
                   ", \"reportEvent\"> | undefined; theme: ",
@@ -984,13 +948,7 @@
                     "text": "ThemeServiceStart"
                   },
                   "; userProfile?: Pick<",
-                  {
-                    "pluginId": "@kbn/core-user-profile-browser",
-                    "scope": "public",
-                    "docId": "kibKbnCoreUserProfileBrowserPluginApi",
-                    "section": "def-public.UserProfileService",
-                    "text": "UserProfileService"
-                  },
+                  "UserProfileService",
                   ", \"getUserProfile$\"> | undefined; }"
                 ],
                 "path": "packages/react/kibana_mount/to_mount_point.tsx",
@@ -1636,7 +1594,7 @@
         "label": "DarkModeValue",
         "description": [],
         "signature": [
-          "\"\" | \"light\" | \"dark\""
+          "\"light\" | \"dark\" | \"system\" | \"space_default\""
         ],
         "path": "packages/kbn-user-profile-components/src/types.ts",
         "deprecated": false,
@@ -1659,7 +1617,7 @@
             "section": "def-common.UserProfileData",
             "text": "UserProfileData"
           },
-          ">>(updatedData: D) => Promise<void>; showSuccessNotification: ({ isRefreshRequired }?: { isRefreshRequired?: boolean | undefined; }) => void; userProfileData: ",
+          ">>(updatedData: D) => Promise<D>; showSuccessNotification: ({ isRefreshRequired }?: { isRefreshRequired?: boolean | undefined; }) => void; userProfileData: ",
           {
             "pluginId": "@kbn/user-profile-components",
             "scope": "common",
@@ -1667,7 +1625,7 @@
             "section": "def-common.UserProfileData",
             "text": "UserProfileData"
           },
-          " | null | undefined; isLoading: boolean; userProfileEnabled: boolean | undefined; }"
+          " | null | undefined; isLoading: boolean; userProfileEnabled: boolean | undefined; userProfileLoaded: boolean; }"
         ],
         "path": "packages/kbn-user-profile-components/src/hooks/use_update_user_profile.tsx",
         "deprecated": false,

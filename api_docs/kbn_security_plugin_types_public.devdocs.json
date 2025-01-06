@@ -95,13 +95,7 @@
             ],
             "signature": [
               "() => Promise<",
-              {
-                "pluginId": "@kbn/core-security-common",
-                "scope": "common",
-                "docId": "kibKbnCoreSecurityCommonPluginApi",
-                "section": "def-common.AuthenticatedUser",
-                "text": "AuthenticatedUser"
-              },
+              "AuthenticatedUser",
               ">"
             ],
             "path": "x-pack/packages/security/plugin_types_public/src/authentication/authentication_service.ts",
@@ -306,32 +300,14 @@
         "label": "GetUserProfileResponse",
         "description": [],
         "signature": [
-          {
-            "pluginId": "@kbn/core-user-profile-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreUserProfileBrowserPluginApi",
-            "section": "def-public.GetUserProfileResponse",
-            "text": "GetUserProfileResponse"
-          },
+          "GetUserProfileResponse",
           "<D> extends ",
-          {
-            "pluginId": "@kbn/core-user-profile-common",
-            "scope": "common",
-            "docId": "kibKbnCoreUserProfileCommonPluginApi",
-            "section": "def-common.UserProfileWithSecurity",
-            "text": "UserProfileWithSecurity"
-          },
+          "UserProfileWithSecurity",
           "<D, ",
-          {
-            "pluginId": "@kbn/core-user-profile-common",
-            "scope": "common",
-            "docId": "kibKbnCoreUserProfileCommonPluginApi",
-            "section": "def-common.UserProfileLabels",
-            "text": "UserProfileLabels"
-          },
+          "UserProfileLabels",
           ">"
         ],
-        "path": "packages/core/user-profile/core-user-profile-browser/src/service.ts",
+        "path": "src/core/packages/user-profile/browser/src/service.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -345,24 +321,12 @@
               "\nInformation about the currently authenticated user that owns the profile."
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/core-user-profile-common",
-                "scope": "common",
-                "docId": "kibKbnCoreUserProfileCommonPluginApi",
-                "section": "def-common.UserProfileUserInfoWithSecurity",
-                "text": "UserProfileUserInfoWithSecurity"
-              },
+              "UserProfileUserInfoWithSecurity",
               " & Pick<",
-              {
-                "pluginId": "@kbn/core-security-common",
-                "scope": "common",
-                "docId": "kibKbnCoreSecurityCommonPluginApi",
-                "section": "def-common.AuthenticatedUser",
-                "text": "AuthenticatedUser"
-              },
+              "AuthenticatedUser",
               ", \"authentication_provider\">"
             ],
-            "path": "packages/core/user-profile/core-user-profile-browser/src/service.ts",
+            "path": "src/core/packages/user-profile/browser/src/service.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -904,16 +868,16 @@
                 "path": "x-pack/plugins/security/public/plugin.tsx"
               },
               {
-                "plugin": "cloudLinks",
-                "path": "x-pack/plugins/cloud_integrations/cloud_links/public/maybe_add_cloud_links/maybe_add_cloud_links.ts"
-              },
-              {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/public/management/links.ts"
               },
               {
+                "plugin": "cloudLinks",
+                "path": "x-pack/platform/plugins/private/cloud_integrations/cloud_links/public/maybe_add_cloud_links/maybe_add_cloud_links.ts"
+              },
+              {
                 "plugin": "cases",
-                "path": "x-pack/plugins/cases/public/common/lib/kibana/hooks.ts"
+                "path": "x-pack/platform/plugins/shared/cases/public/common/lib/kibana/hooks.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -956,36 +920,14 @@
             ],
             "signature": [
               "Omit<",
-              {
-                "pluginId": "@kbn/core-user-profile-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreUserProfileBrowserPluginApi",
-                "section": "def-public.UserProfileService",
-                "text": "UserProfileService"
-              },
-              ", \"getUserProfile$\"> & { userProfile$: ",
+              "UserProfileService",
+              ", \"getUserProfile$\" | \"getEnabled$\"> & { userProfile$: ",
               "Observable",
               "<",
-              {
-                "pluginId": "@kbn/core-user-profile-common",
-                "scope": "common",
-                "docId": "kibKbnCoreUserProfileCommonPluginApi",
-                "section": "def-common.UserProfileData",
-                "text": "UserProfileData"
-              },
-              " | null>; } & { readonly userProfile$: ",
+              "UserProfileData",
+              " | null>; enabled$: ",
               "Observable",
-              "<",
-              {
-                "pluginId": "@kbn/core-user-profile-common",
-                "scope": "common",
-                "docId": "kibKbnCoreUserProfileCommonPluginApi",
-                "section": "def-common.UserProfileData",
-                "text": "UserProfileData"
-              },
-              " | null>; readonly userProfileLoaded$: ",
-              "Observable",
-              "<boolean>; readonly enabled$: ",
+              "<boolean>; } & { readonly userProfileLoaded$: ",
               "Observable",
               "<boolean>; }"
             ],
@@ -999,31 +941,11 @@
               },
               {
                 "plugin": "cases",
-                "path": "x-pack/plugins/cases/public/containers/user_profiles/api.ts"
+                "path": "x-pack/platform/plugins/shared/cases/public/containers/user_profiles/api.ts"
               },
               {
                 "plugin": "cases",
-                "path": "x-pack/plugins/cases/public/containers/user_profiles/api.ts"
-              },
-              {
-                "plugin": "searchPlayground",
-                "path": "x-pack/plugins/search_playground/public/hooks/use_user_profile.ts"
-              },
-              {
-                "plugin": "cases",
-                "path": "x-pack/plugins/cases/public/containers/user_profiles/api.test.ts"
-              },
-              {
-                "plugin": "cases",
-                "path": "x-pack/plugins/cases/public/containers/user_profiles/api.test.ts"
-              },
-              {
-                "plugin": "cases",
-                "path": "x-pack/plugins/cases/public/containers/user_profiles/api.test.ts"
-              },
-              {
-                "plugin": "cases",
-                "path": "x-pack/plugins/cases/public/containers/user_profiles/api.test.ts"
+                "path": "x-pack/platform/plugins/shared/cases/public/containers/user_profiles/api.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -1032,6 +954,26 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/public/common/components/user_profiles/use_get_current_user_profile.tsx"
+              },
+              {
+                "plugin": "cases",
+                "path": "x-pack/platform/plugins/shared/cases/public/containers/user_profiles/api.test.ts"
+              },
+              {
+                "plugin": "cases",
+                "path": "x-pack/platform/plugins/shared/cases/public/containers/user_profiles/api.test.ts"
+              },
+              {
+                "plugin": "cases",
+                "path": "x-pack/platform/plugins/shared/cases/public/containers/user_profiles/api.test.ts"
+              },
+              {
+                "plugin": "cases",
+                "path": "x-pack/platform/plugins/shared/cases/public/containers/user_profiles/api.test.ts"
+              },
+              {
+                "plugin": "searchPlayground",
+                "path": "x-pack/solutions/search/plugins/search_playground/public/hooks/use_user_profile.ts"
               }
             ]
           }
@@ -1123,7 +1065,7 @@
               "Render a custom ReactNode instead of the default <EuiContextMenuItem />"
             ],
             "signature": [
-              "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
+              "React.ReactNode | ((args: { closePopover: () => void; }) => React.ReactNode)"
             ],
             "path": "x-pack/packages/security/plugin_types_public/src/nav_control/nav_control_service.ts",
             "deprecated": false,
@@ -1141,7 +1083,7 @@
         "description": [
           "\nParameters for the bulk get API."
         ],
-        "path": "packages/core/user-profile/core-user-profile-browser/src/service.ts",
+        "path": "src/core/packages/user-profile/browser/src/service.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1157,7 +1099,7 @@
             "signature": [
               "Set<string>"
             ],
-            "path": "packages/core/user-profile/core-user-profile-browser/src/service.ts",
+            "path": "src/core/packages/user-profile/browser/src/service.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1173,7 +1115,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/core/user-profile/core-user-profile-browser/src/service.ts",
+            "path": "src/core/packages/user-profile/browser/src/service.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1189,7 +1131,7 @@
         "description": [
           "\nParameters for the get user profile for the current user API."
         ],
-        "path": "packages/core/user-profile/core-user-profile-browser/src/service.ts",
+        "path": "src/core/packages/user-profile/browser/src/service.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1202,7 +1144,7 @@
             "description": [
               "\nBy default, get API returns user information, but does not return any user data. The optional \"dataPath\"\nparameter can be used to return personal data for this user (within `kibana` namespace only)."
             ],
-            "path": "packages/core/user-profile/core-user-profile-browser/src/service.ts",
+            "path": "src/core/packages/user-profile/browser/src/service.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1218,7 +1160,7 @@
         "description": [
           "\nParameters for the suggest API."
         ],
-        "path": "packages/core/user-profile/core-user-profile-browser/src/service.ts",
+        "path": "src/core/packages/user-profile/browser/src/service.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1231,7 +1173,7 @@
             "description": [
               "\nQuery string used to match name-related fields in user profiles. The following fields are treated as\nname-related: username, full_name and email."
             ],
-            "path": "packages/core/user-profile/core-user-profile-browser/src/service.ts",
+            "path": "src/core/packages/user-profile/browser/src/service.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1247,7 +1189,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/user-profile/core-user-profile-browser/src/service.ts",
+            "path": "src/core/packages/user-profile/browser/src/service.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1263,7 +1205,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/core/user-profile/core-user-profile-browser/src/service.ts",
+            "path": "src/core/packages/user-profile/browser/src/service.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1340,36 +1282,14 @@
         "description": [],
         "signature": [
           "Omit<",
-          {
-            "pluginId": "@kbn/core-user-profile-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreUserProfileBrowserPluginApi",
-            "section": "def-public.UserProfileService",
-            "text": "UserProfileService"
-          },
-          ", \"getUserProfile$\"> & { userProfile$: ",
+          "UserProfileService",
+          ", \"getUserProfile$\" | \"getEnabled$\"> & { userProfile$: ",
           "Observable",
           "<",
-          {
-            "pluginId": "@kbn/core-user-profile-common",
-            "scope": "common",
-            "docId": "kibKbnCoreUserProfileCommonPluginApi",
-            "section": "def-common.UserProfileData",
-            "text": "UserProfileData"
-          },
-          " | null>; } & { readonly userProfile$: ",
+          "UserProfileData",
+          " | null>; enabled$: ",
           "Observable",
-          "<",
-          {
-            "pluginId": "@kbn/core-user-profile-common",
-            "scope": "common",
-            "docId": "kibKbnCoreUserProfileCommonPluginApi",
-            "section": "def-common.UserProfileData",
-            "text": "UserProfileData"
-          },
-          " | null>; readonly userProfileLoaded$: ",
-          "Observable",
-          "<boolean>; readonly enabled$: ",
+          "<boolean>; } & { readonly userProfileLoaded$: ",
           "Observable",
           "<boolean>; }"
         ],
