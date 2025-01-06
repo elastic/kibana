@@ -136,7 +136,7 @@ const processCustomFieldListValue = (
 export const constructRequiredKibanaPrivileges = (owner: string): string[] => {
   /**
    * Kibana features privileges are defined in
-   * x-pack/packages/security/authorization_core/src/privileges/feature_privilege_builder/cases.ts
+   * x-pack/platform/packages/private/security/authorization_core/src/privileges/feature_privilege_builder/cases.ts
    */
   return [
     `cases:${owner}/createCase`,
