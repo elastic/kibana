@@ -18,6 +18,7 @@ export const getRegisteredDeprecations = (config: ConfigType, isCloud: boolean):
       return [
         ...(getEnterpriseSearchNodeDeprecation(config, isCloud)),
         ...(await getCrawlerDeprecations(ctx)),
+        ...(await getNativeConnectorDeprecations(ctx))
       ]
     }
   }
@@ -131,4 +132,90 @@ export async function getCrawlerDeprecations(ctx: GetDeprecationsContext): Promi
       },
     }]
   }
+}
+
+/**
+ * if the customer is using Native Connectors, agentless is available, but the integration server is missing, they are told that Integrations Server must be added
+ * if the customer is using Native Connectors, and agentless is unavailable, they are told that they must convert their connectors to Connector Clients
+ * if the customer was using "native" connectors that don't match our connector service types, they must delete them or convert them to connector clients.
+ */
+export async function getNativeConnectorDeprecations(ctx: GetDeprecationsContext): Promise<DeprecationsDetails[]> {
+  const client = ctx.esClient.asInternalUser
+  const connectors: Connector[] = await fetchConnectors(client, undefined,false, undefined)
+  const nativeConnectors = connectors.filter(hit => hit.is_native)
+  if (nativeConnectors.length == 0){
+    return [] // no deprecations to register if there are no Native Connectors
+  } else {
+    const nativeServiceTypes = [
+      "azure_blob_storage",
+      "box",
+      "confluence",
+      "dropbox",
+      "github",
+      "gmail",
+      "google_cloud_storage",
+      "google_drive",
+      "jira",
+      "mssql",
+      "mongodb",
+      "mysql",
+      "network_drive",
+      "notion",
+      "onedrive",
+      "oracle",
+      "outlook",
+      "postgresql",
+      "s3",
+      "salesforce",
+      "servicenow",
+      "sharepoint_online",
+      "sharepoint_server",
+      "slack",
+      "microsoft_teams",
+      "zoom"
+    ]
+    const nativeTypesStr = "[" + nativeServiceTypes.join(", ") + "]"
+    const fauxNativeConnectors = nativeConnectors.filter(hit => !nativeServiceTypes.includes(hit.service_type!))
+
+    if (fauxNativeConnectors.length > 0) {
+      return [{
+        level: 'critical',
+        deprecationType: 'feature',
+        title: i18n.translate('xpack.enterpriseSearch.deprecations.fauxNativeConnector.title', {
+          defaultMessage: 'Connectors with `is_native: true` must be of supported service types',
+        }),
+        message: i18n.translate('xpack.enterpriseSearch.deprecations.fauxNativeConnector.message', {
+          values: { serviceTypes: nativeTypesStr},
+          defaultMessage: 'Only specific service types are supported for Elastic-managed connectors. ' +
+            'Eligible service types for Elastic-managed connectors are: {serviceTypes}' +
+            'Connectors of other service types must be converted to Connector Clients before upgrading. ' +
+            'This is a lossless operation, and can be attempted with "quick resolve". ' +
+            'Alternatively, deleting these connectors with mismatched service types will also unblock your upgrade.',
+        }),
+        documentationUrl: 'https://elastic.co/guide/en/enterprise-search/current/upgrading-to-9-x.html',
+        correctiveActions: {
+          manualSteps: [
+            i18n.translate('xpack.enterpriseSearch.deprecations.fauxNativeConnector.listConnectors', {
+              defaultMessage: 'Enumerate all connector records',
+            }),
+            i18n.translate('xpack.enterpriseSearch.deprecations.fauxNativeConnector.convertPretenders', {
+              values: { serviceTypes: nativeTypesStr},
+              defaultMessage: '"Convert to Client" any that have `is_native: true` but have a `service_type` NOT in: {serviceTypes}.',
+            }),
+          ],
+          api: {
+            method: 'POST',
+            path: '/internal/enterprise_search/deprecations/convert_connectors_to_client',
+            body: {
+              ids: fauxNativeConnectors.map(it=> it.id)
+            },
+          },
+        },
+      }]
+    }
+    // const agentlessAvailable: boolean = true //TODO
+    // const integrationServerAvailable: boolean = true //TODO
+
+  }
+  return [] //TODO
 }
