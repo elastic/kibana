@@ -17,7 +17,7 @@ import { ObservedEntity } from '../shared/components/observed_entity';
 import { HOST_PANEL_OBSERVED_HOST_QUERY_ID, HOST_PANEL_RISK_SCORE_QUERY_ID } from '.';
 import type { ObservedEntityData } from '../shared/components/observed_entity/types';
 import { useObservedHostFields } from './hooks/use_observed_host_fields';
-import type { EntityDetailsLeftPanelTab } from '../shared/components/left_panel/left_panel_header';
+import type { EntityDetailsPath } from '../shared/components/left_panel/left_panel_header';
 
 interface HostPanelContentProps {
   observedHost: ObservedEntityData<HostItem>;
@@ -25,11 +25,12 @@ interface HostPanelContentProps {
   contextID: string;
   scopeId: string;
   isDraggable: boolean;
-  openDetailsPanel?: (tab: EntityDetailsLeftPanelTab) => void;
+  openDetailsPanel: (path: EntityDetailsPath) => void;
   hostName: string;
   onAssetCriticalityChange: () => void;
   recalculatingScore: boolean;
   isPreviewMode?: boolean;
+  isLinkEnabled: boolean;
 }
 
 export const HostPanelContent = ({
@@ -43,6 +44,7 @@ export const HostPanelContent = ({
   openDetailsPanel,
   onAssetCriticalityChange,
   isPreviewMode,
+  isLinkEnabled,
 }: HostPanelContentProps) => {
   const observedFields = useObservedHostFields(observedHost);
 
@@ -56,6 +58,7 @@ export const HostPanelContent = ({
             queryId={HOST_PANEL_RISK_SCORE_QUERY_ID}
             openDetailsPanel={openDetailsPanel}
             isPreviewMode={isPreviewMode}
+            isLinkEnabled={isLinkEnabled}
           />
           <EuiHorizontalRule />
         </>
@@ -64,7 +67,13 @@ export const HostPanelContent = ({
         entity={{ name: hostName, type: 'host' }}
         onChange={onAssetCriticalityChange}
       />
-      <EntityInsight value={hostName} field={'host.name'} isPreviewMode={isPreviewMode} />
+      <EntityInsight
+        value={hostName}
+        field={'host.name'}
+        isPreviewMode={isPreviewMode}
+        openDetailsPanel={openDetailsPanel}
+        isLinkEnabled={isLinkEnabled}
+      />
       <ObservedEntity
         observedData={observedHost}
         contextID={contextID}

@@ -22,7 +22,7 @@ import { FlyoutBody } from '../../shared/components/flyout_body';
 import { ObservedEntity } from '../shared/components/observed_entity';
 import type { ObservedEntityData } from '../shared/components/observed_entity/types';
 import { useObservedUserItems } from './hooks/use_observed_user_items';
-import type { EntityDetailsLeftPanelTab } from '../shared/components/left_panel/left_panel_header';
+import type { EntityDetailsPath } from '../shared/components/left_panel/left_panel_header';
 import { EntityInsight } from '../../../cloud_security_posture/components/entity_insight';
 
 interface UserPanelContentProps {
@@ -35,8 +35,9 @@ interface UserPanelContentProps {
   scopeId: string;
   isDraggable: boolean;
   onAssetCriticalityChange: () => void;
-  openDetailsPanel?: (tab: EntityDetailsLeftPanelTab) => void;
+  openDetailsPanel: (path: EntityDetailsPath) => void;
   isPreviewMode?: boolean;
+  isLinkEnabled: boolean;
 }
 
 export const UserPanelContent = ({
@@ -51,6 +52,7 @@ export const UserPanelContent = ({
   openDetailsPanel,
   onAssetCriticalityChange,
   isPreviewMode,
+  isLinkEnabled,
 }: UserPanelContentProps) => {
   const observedFields = useObservedUserItems(observedUser);
   const isManagedUserEnable = useIsExperimentalFeatureEnabled('newUserDetailsFlyoutManagedUser');
@@ -65,6 +67,7 @@ export const UserPanelContent = ({
             queryId={USER_PANEL_RISK_SCORE_QUERY_ID}
             openDetailsPanel={openDetailsPanel}
             isPreviewMode={isPreviewMode}
+            isLinkEnabled={isLinkEnabled}
           />
           <EuiHorizontalRule />
         </>
@@ -73,7 +76,13 @@ export const UserPanelContent = ({
         entity={{ name: userName, type: 'user' }}
         onChange={onAssetCriticalityChange}
       />
-      <EntityInsight value={userName} field={'user.name'} isPreviewMode={isPreviewMode} />
+      <EntityInsight
+        value={userName}
+        field={'user.name'}
+        isPreviewMode={isPreviewMode}
+        isLinkEnabled={isLinkEnabled}
+        openDetailsPanel={openDetailsPanel}
+      />
       <ObservedEntity
         observedData={observedUser}
         contextID={contextID}
@@ -89,6 +98,8 @@ export const UserPanelContent = ({
           contextID={contextID}
           isDraggable={isDraggable}
           openDetailsPanel={openDetailsPanel}
+          isPreviewMode={isPreviewMode}
+          isLinkEnabled={isLinkEnabled}
         />
       )}
     </FlyoutBody>

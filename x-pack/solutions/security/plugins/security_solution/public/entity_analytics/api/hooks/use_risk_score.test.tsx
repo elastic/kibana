@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { renderHook } from '@testing-library/react-hooks';
+
+import { waitFor, renderHook } from '@testing-library/react';
 import { useRiskScore } from './use_risk_score';
 import { TestProviders } from '../../../common/mock';
 import { useSearchStrategy } from '../../../common/containers/use_search_strategy';
@@ -193,7 +194,7 @@ describe.each([RiskScoreEntity.host, RiskScoreEntity.user])(
           totalCount: 0,
         },
       });
-      const { result, waitFor } = renderHook(() => useRiskScore({ riskEntity }), {
+      const { result } = renderHook(() => useRiskScore({ riskEntity }), {
         wrapper: TestProviders,
       });
       await waitFor(() => {
