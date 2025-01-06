@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
-
-const CrowdstrikeParamsFields = () => <></>;
-
-// eslint-disable-next-line import/no-default-export
-export { CrowdstrikeParamsFields as default };
+export interface Vertex {
+  latestEventsPerSecond: number;
+  latestMillisPerEvent?: number;
+  percentOfTotalProcessorTime?: number;
+  isTimeConsuming: () => boolean;
+  isSlow: () => boolean;
+}

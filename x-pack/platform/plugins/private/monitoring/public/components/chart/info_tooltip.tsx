@@ -6,10 +6,36 @@
  */
 
 import React from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
-import './info_tooltip.scss';
+import { css } from '@emotion/react';
+import { euiFontSize, UseEuiTheme } from '@elastic/eui';
 
-export function InfoTooltip({ series, bucketSize }) {
+import { FormattedMessage } from '@kbn/i18n-react';
+
+import { Series } from './types';
+
+const tooltipLabelStyle = (theme: UseEuiTheme) => css`
+  text-align: left;
+  font-size: ${euiFontSize(theme, 'xs').fontSize};
+  padding: ${theme.euiTheme.size.xs};
+  word-wrap: break-word;
+  white-space: normal;
+  font-weight: ${theme.euiTheme.font.weight.bold};
+`;
+
+const tooltipValueStyle = (theme: UseEuiTheme) => css`
+  text-align: left;
+  font-size: ${euiFontSize(theme, 'xs').fontSize};
+  padding: ${theme.euiTheme.size.xs};
+  word-wrap: break-word;
+  white-space: normal;
+`;
+
+interface Props {
+  series: Series[];
+  bucketSize?: string;
+}
+
+export function InfoTooltip({ series, bucketSize }: Props) {
   const tableRows = series.map((item, index) => {
     return (
       <tr
@@ -19,8 +45,8 @@ export function InfoTooltip({ series, bucketSize }) {
         data-debug-metric-is-derivative={item.metric.isDerivative}
         data-debug-metric-has-calculation={item.metric.hasCalculation}
       >
-        <td className="monChart__tooltipLabel">{item.metric.label}</td>
-        <td className="monChart__tooltipValue">{item.metric.description}</td>
+        <td css={tooltipLabelStyle}>{item.metric.label}</td>
+        <td css={tooltipValueStyle}>{item.metric.description}</td>
       </tr>
     );
   });
@@ -29,13 +55,13 @@ export function InfoTooltip({ series, bucketSize }) {
     <table>
       <tbody>
         <tr>
-          <td className="monChart__tooltipLabel">
+          <td css={tooltipLabelStyle}>
             <FormattedMessage
               id="xpack.monitoring.chart.infoTooltip.intervalLabel"
               defaultMessage="Interval"
             />
           </td>
-          <td className="monChart__tooltipValue">{bucketSize}</td>
+          <td css={tooltipValueStyle}>{bucketSize}</td>
         </tr>
         {tableRows}
       </tbody>

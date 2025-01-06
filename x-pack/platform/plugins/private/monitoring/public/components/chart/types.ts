@@ -5,9 +5,14 @@
  * 2.0.
  */
 
-import React from 'react';
-
-const SentinelOneParamsFields = () => <></>;
-
-// eslint-disable-next-line import/no-default-export
-export { SentinelOneParamsFields as default };
+export interface Series {
+  metric: {
+    description: string;
+    field: any;
+    hasCalculation: any;
+    isDerivative: any;
+    label: string;
+    metricAgg: any;
+    title: string;
+  };
+}
