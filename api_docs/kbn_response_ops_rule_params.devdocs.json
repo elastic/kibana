@@ -32,7 +32,7 @@
         "signature": [
           "{ [x: string]: any; }"
         ],
-        "path": "packages/response-ops/rule_params/v1.ts",
+        "path": "src/platform/packages/shared/response-ops/rule_params/v1.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -47,7 +47,7 @@
         "signature": [
           "{ [x: string]: any; }"
         ],
-        "path": "packages/response-ops/rule_params/v1.ts",
+        "path": "src/platform/packages/shared/response-ops/rule_params/v1.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -62,7 +62,7 @@
         "signature": [
           "{ [x: string]: any; }"
         ],
-        "path": "packages/response-ops/rule_params/v1.ts",
+        "path": "src/platform/packages/shared/response-ops/rule_params/v1.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -77,7 +77,7 @@
         "signature": [
           "{ [x: string]: any; }"
         ],
-        "path": "packages/response-ops/rule_params/v1.ts",
+        "path": "src/platform/packages/shared/response-ops/rule_params/v1.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -101,7 +101,7 @@
           },
           "<Record<string, any>>"
         ],
-        "path": "packages/response-ops/rule_params/v1.ts",
+        "path": "src/platform/packages/shared/response-ops/rule_params/v1.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -123,7 +123,7 @@
           },
           "<Record<string, any>>"
         ],
-        "path": "packages/response-ops/rule_params/v1.ts",
+        "path": "src/platform/packages/shared/response-ops/rule_params/v1.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -145,7 +145,7 @@
           },
           "<Record<string, any>>"
         ],
-        "path": "packages/response-ops/rule_params/v1.ts",
+        "path": "src/platform/packages/shared/response-ops/rule_params/v1.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -167,7 +167,7 @@
           },
           "<Record<string, any>>"
         ],
-        "path": "packages/response-ops/rule_params/v1.ts",
+        "path": "src/platform/packages/shared/response-ops/rule_params/v1.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

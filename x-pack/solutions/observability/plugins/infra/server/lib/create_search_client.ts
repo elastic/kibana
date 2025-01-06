@@ -7,8 +7,8 @@
 
 import type { KibanaRequest } from '@kbn/core/server';
 import type { InfraPluginRequestHandlerContext } from '../types';
-import { CallWithRequestParams, InfraDatabaseSearchResponse } from './adapters/framework';
-import { KibanaFramework } from './adapters/framework/kibana_framework_adapter';
+import type { CallWithRequestParams, InfraDatabaseSearchResponse } from './adapters/framework';
+import type { KibanaFramework } from './adapters/framework/kibana_framework_adapter';
 
 export const createSearchClient =
   (

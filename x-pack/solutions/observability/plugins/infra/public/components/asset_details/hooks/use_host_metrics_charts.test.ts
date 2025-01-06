@@ -6,7 +6,7 @@
  */
 
 import { waitFor, renderHook } from '@testing-library/react';
-import { HostMetricTypes } from '../charts/types';
+import type { HostMetricTypes } from '../charts/types';
 import { useHostKpiCharts, useHostCharts, useKubernetesCharts } from './use_host_metrics_charts';
 
 const dataViewId = 'metricsDataViewId';
