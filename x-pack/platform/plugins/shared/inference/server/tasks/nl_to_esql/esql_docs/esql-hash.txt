@@ -1,0 +1,23 @@
+      # HASH
+
+  The HASH function computes the hash of a given input using a specified algorithm.
+
+  ## Syntax
+
+  `HASH(algorithm, input)`
+
+  ### Parameters
+
+  #### algorithm
+
+  The hash algorithm to be used, such as "sha-1" or "md5"
+
+  #### input
+
+  The value to be hashed.
+
+  ## Examples
+
+  Details to be populated by pulling examples from source documentation, if any are available.
+
+  **Note:** Do ensure to adhere to the rules and guidelines around the use of HASH algorithms. Some algorithms may not be suitable for use in all contexts or situations.

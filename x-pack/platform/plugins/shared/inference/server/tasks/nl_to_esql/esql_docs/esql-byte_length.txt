@@ -1,0 +1,26 @@
+# BYTE_LENGTH
+
+This function calculates the byte length of a given string.
+
+## Syntax
+
+`BYTE_LENGTH(string)`
+
+### Parameters
+
+#### string
+
+The text string for which the byte length is to be determined. If `null` is provided, the function will return `null`.
+
+## Examples
+
+Following is an example of how BYTE_LENGTH is implemented in an ES|QL query:
+
+```esql
+FROM airports
+| WHERE country == "India"
+| KEEP city
+| EVAL fn_length = LENGTH(city), fn_byte_length = BYTE_LENGTH(city)
+```
+
+In the above example, BYTE_LENGTH is used to calculate the byte size of the 'city' field. The LENGTH function is used as a comparison to show the different counts between the number of characters and the number of bytes. Here, the function is particularly useful because text strings in UTF-8 can contain characters that use several bytes, so the byte length and character length of a string may differ.

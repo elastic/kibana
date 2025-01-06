@@ -1,0 +1,27 @@
+# BIT_LENGTH
+
+This function calculates the bit length of a given string.
+
+## Syntax
+
+`BIT_LENGTH(string)`
+
+### Parameters
+
+#### string
+
+This is the string whose bit length you want to calculate. If `null` is provided, the function will return `null`.
+
+**Note**: Strings are in UTF-8 format, which means a single character may occupy multiple bytes.
+
+## Examples
+
+In the below example, the `BIT_LENGTH` function is used to calculate the bit length of the 'city' field from the 'airports' index where the 'country' is "India".
+
+```esql
+FROM airports
+| WHERE country == "India"
+| KEEP city
+| EVAL fn_length = LENGTH(city), fn_bit_length = BIT_LENGTH(city)
+```
+This will return two new fields - 'fn_length' representing the length of the city name and 'fn_bit_length' representing the bit length of the city name.
