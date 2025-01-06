@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { rangeQuery } from '@kbn/observability-plugin/server';
+import { rangeQuery, termsQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import { getRequestBase } from '@kbn/apm-data-access-plugin/server/lib/helpers/create_es_client/create_apm_event_client/get_request_base';
 import {
   AGENT_NAME,
   PARENT_ID,
-  PROCESSOR_EVENT,
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
   SPAN_DESTINATION_SERVICE_RESOURCE,
@@ -24,21 +24,17 @@ import type {
   ServiceConnectionNode,
 } from '../../../common/service_map';
 import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
-import { calculateDocsPerShard } from './calculate_docs_per_shard';
+import type { EsClient } from '../../lib/helpers/get_esql_client';
 
-const SCRIPTED_METRICS_FIELDS_TO_COPY = [
-  PARENT_ID,
-  SERVICE_NAME,
-  SERVICE_ENVIRONMENT,
-  SPAN_DESTINATION_SERVICE_RESOURCE,
-  TRACE_ID,
-  PROCESSOR_EVENT,
-  SPAN_TYPE,
-  SPAN_SUBTYPE,
-  AGENT_NAME,
-];
+type QueryReturnType = {
+  'event.id': string;
+  'parent.id'?: string;
+} & ConnectionNode;
 
-const AVG_BYTES_PER_FIELD = 55;
+interface DiscoverService {
+  from: ExternalConnectionNode;
+  to: ServiceConnectionNode;
+}
 
 export async function fetchServicePathsFromTraceIds({
   apmEventClient,
@@ -48,6 +44,7 @@ export async function fetchServicePathsFromTraceIds({
   terminateAfter,
   serviceMapMaxAllowableBytes,
   numOfRequests,
+  esqlClient,
 }: {
   apmEventClient: APMEventClient;
   traceIds: string[];
@@ -56,294 +53,217 @@ export async function fetchServicePathsFromTraceIds({
   terminateAfter: number;
   serviceMapMaxAllowableBytes: number;
   numOfRequests: number;
+  esqlClient: EsClient;
 }) {
-  // make sure there's a range so ES can skip shards
-  const dayInMs = 24 * 60 * 60 * 1000;
-  const startRange = start - dayInMs;
-  const endRange = end + dayInMs;
-
-  const serviceMapParams = {
-    apm: {
-      events: [ProcessorEvent.span, ProcessorEvent.transaction],
-    },
-    body: {
-      terminate_after: terminateAfter,
-      track_total_hits: false,
-      size: 0,
-      query: {
-        bool: {
-          filter: [
-            {
-              terms: {
-                [TRACE_ID]: traceIds,
-              },
-            },
-            ...rangeQuery(startRange, endRange),
-          ],
-        },
-      },
-    },
-  };
-  // fetch without aggs to get shard count, first
-  const serviceMapQueryDataResponse = await apmEventClient.search(
-    'get_trace_ids_shard_data',
-    serviceMapParams
-  );
-  /*
-   * Calculate how many docs we can fetch per shard.
-   * Used in both terminate_after and tracking in the map script of the scripted_metric agg
-   * to ensure we don't fetch more than we can handle.
-   *
-   * 1. Use serviceMapMaxAllowableBytes setting, which represents our baseline request circuit breaker limit.
-   * 2. Divide by numOfRequests we fire off simultaneously to calculate bytesPerRequest.
-   * 3. Divide bytesPerRequest by the average doc size to get totalNumDocsAllowed.
-   * 4. Divide totalNumDocsAllowed by totalShards to get numDocsPerShardAllowed.
-   * 5. Use the lesser of numDocsPerShardAllowed or terminateAfter.
-   */
-
-  const avgDocSizeInBytes = SCRIPTED_METRICS_FIELDS_TO_COPY.length * AVG_BYTES_PER_FIELD; // estimated doc size in bytes
-  const totalShards = serviceMapQueryDataResponse._shards.total;
-
-  const calculatedDocs = calculateDocsPerShard({
-    serviceMapMaxAllowableBytes,
-    avgDocSizeInBytes,
-    totalShards,
-    numOfRequests,
+  const { index, filters } = getRequestBase({
+    apm: { events: [ProcessorEvent.span, ProcessorEvent.transaction] },
+    indices: esqlClient.indices,
   });
 
-  const numDocsPerShardAllowed = calculatedDocs > terminateAfter ? terminateAfter : calculatedDocs;
-
-  /*
-   * Any changes to init_script, map_script, combine_script and reduce_script
-   * must be replicated on https://github.com/elastic/elasticsearch-serverless/blob/main/distribution/archives/src/serverless-default-settings.yml
-   */
-  const serviceMapAggs = {
-    service_map: {
-      scripted_metric: {
-        params: {
-          limit: numDocsPerShardAllowed,
-          fieldsToCopy: SCRIPTED_METRICS_FIELDS_TO_COPY,
-        },
-        init_script: {
-          lang: 'painless',
-          source: `
-            state.docCount = 0;
-            state.limit = params.limit;
-            state.eventsById = new HashMap();
-            state.fieldsToCopy = params.fieldsToCopy;`,
-        },
-        map_script: {
-          lang: 'painless',
-          source: `
-            if (state.docCount >= state.limit) {
-              // Stop processing if the document limit is reached
-              return; 
-            }
-
-            def id = $('span.id', null);
-            if (id == null) {
-              id = $('transaction.id', null);
-            }
-
-            // Ensure same event isn't processed twice
-            if (id != null && !state.eventsById.containsKey(id)) {
-              def copy = new HashMap();
-              copy.id = id;
-
-              for(key in state.fieldsToCopy) {
-                def value = $(key, null);
-                if (value != null) {
-                  copy[key] = value;
-                }
-              }
-
-              state.eventsById[id] = copy;
-              state.docCount++;
-            }
-          `,
-        },
-        combine_script: {
-          lang: 'painless',
-          source: `return state;`,
-        },
-        reduce_script: {
-          lang: 'painless',
-          source: `
-            def getDestination(def event) {
-              def destination = new HashMap();
-              destination['span.destination.service.resource'] = event['span.destination.service.resource'];
-              destination['span.type'] = event['span.type'];
-              destination['span.subtype'] = event['span.subtype'];
-              return destination;
-            }
-      
-            def processAndReturnEvent(def context, def eventId) {
-              def stack = new Stack();
-              def reprocessQueue = new LinkedList();
-
-              // Avoid reprocessing the same event
-              def visited = new HashSet();
-
-              stack.push(eventId);
-
-              while (!stack.isEmpty()) {
-                def currentEventId = stack.pop();
-                def event = context.eventsById.get(currentEventId);
-
-                if (event == null || context.processedEvents.get(currentEventId) != null) {
-                  continue;
-                }
-                visited.add(currentEventId);
-
-                def service = new HashMap();
-                service['service.name'] = event['service.name'];
-                service['service.environment'] = event['service.environment'];
-                service['agent.name'] = event['agent.name'];
-                
-                def basePath = new ArrayList();
-                def parentId = event['parent.id'];
-
-                if (parentId != null && !parentId.equals(currentEventId)) {
-                  def parent = context.processedEvents.get(parentId);
-                  
-                  if (parent == null) {
-                    
-                    // Only adds the parentId to the stack if it hasn't been visited to prevent infinite loop scenarios
-                    // if the parent is null, it means it hasn't been processed yet or it could also mean that the current event
-                    // doesn't have a parent, in which case we should skip it
-                    if (!visited.contains(parentId)) {
-                      stack.push(parentId);
-                      // Add currentEventId to be reprocessed once its parent is processed
-                      reprocessQueue.add(currentEventId); 
-                    }
-
-
-                    continue;
-                  }
-
-                  // copy the path from the parent
-                  basePath.addAll(parent.path);
-                  // flag parent path for removal, as it has children
-                  context.locationsToRemove.add(parent.path);
-      
-                  // if the parent has 'span.destination.service.resource' set, and the service is different, we've discovered a service
-                  if (parent['span.destination.service.resource'] != null
-                    && parent['span.destination.service.resource'] != ""
-                    && (parent['service.name'] != event['service.name']
-                      || parent['service.environment'] != event['service.environment'])
-                  ) {
-                    def parentDestination = getDestination(parent);
-                    context.externalToServiceMap.put(parentDestination, service);
-                  }
-                }
-          
-                def lastLocation = basePath.size() > 0 ? basePath[basePath.size() - 1] : null;
-                def currentLocation = service;
-        
-                // only add the current location to the path if it's different from the last one
-                if (lastLocation == null || !lastLocation.equals(currentLocation)) {
-                  basePath.add(currentLocation);
-                }
-        
-                // if there is an outgoing span, create a new path
-                if (event['span.destination.service.resource'] != null
-                  && !event['span.destination.service.resource'].equals("")) {
-
-                  def outgoingLocation = getDestination(event);
-                  def outgoingPath = new ArrayList(basePath);
-                  outgoingPath.add(outgoingLocation);
-                  context.paths.add(outgoingPath);
-                }
-        
-                event.path = basePath;
-                context.processedEvents[currentEventId] = event;
-
-                // reprocess events which were waiting for their parents to be processed
-                while (!reprocessQueue.isEmpty()) {
-                  stack.push(reprocessQueue.remove());
-                }
-              }
-
-              return null;
-            }
-      
-            def context = new HashMap();
-      
-            context.processedEvents = new HashMap();
-            context.eventsById = new HashMap();
-            context.paths = new HashSet();
-            context.externalToServiceMap = new HashMap();
-            context.locationsToRemove = new HashSet();
-      
-            for (state in states) {
-              context.eventsById.putAll(state.eventsById);
-              state.eventsById.clear();
-            }
-
-            states.clear();
-            
-            for (entry in context.eventsById.entrySet()) {
-              processAndReturnEvent(context, entry.getKey());
-            }
-
-            context.processedEvents.clear();
-            context.eventsById.clear();
-      
-            def response = new HashMap();
-            response.paths = new HashSet();
-            response.discoveredServices = new HashSet();
-      
-            for (foundPath in context.paths) {
-              if (!context.locationsToRemove.contains(foundPath)) {
-                response.paths.add(foundPath);
-              }
-            }
-
-            context.locationsToRemove.clear();
-            context.paths.clear();
-      
-            for (entry in context.externalToServiceMap.entrySet()) {
-              def map = new HashMap();
-              map.from = entry.getKey();
-              map.to = entry.getValue();
-              response.discoveredServices.add(map);
-            }
-
-            context.externalToServiceMap.clear();
-
-            return response;
-          `,
+  const { hits } = await esqlClient.esql<QueryReturnType, { transform: 'plain' }>(
+    'get_service_paths_from_trace_ids',
+    {
+      query: `
+        FROM ${index}
+        | EVAL event.id = COALESCE(span.id, transaction.id)
+        | KEEP event.id, parent.id, agent.name, service.name, service.environment, span.destination.service.resource, span.type, span.subtype
+        | LIMIT 10000
+      `,
+      filter: {
+        bool: {
+          filter: [...rangeQuery(start, end), ...termsQuery(TRACE_ID, ...traceIds), ...filters],
         },
       },
-    } as const,
-  };
-
-  const serviceMapParamsWithAggs = {
-    ...serviceMapParams,
-    body: {
-      ...serviceMapParams.body,
-      size: 1,
-      terminate_after: numDocsPerShardAllowed,
-      aggs: serviceMapAggs,
     },
-  };
-
-  const serviceMapFromTraceIdsScriptResponse = await apmEventClient.search(
-    'get_service_paths_from_trace_ids',
-    serviceMapParamsWithAggs
+    { transform: 'plain' }
   );
 
-  return serviceMapFromTraceIdsScriptResponse as {
+  const eventsById = hits.reduce((acc, hit) => {
+    const eventId = hit['event.id'];
+    if (!acc[eventId]) {
+      acc[eventId] = {
+        'event.id': eventId,
+        'parent.id': hit[PARENT_ID],
+        serviceName: hit[SERVICE_NAME],
+        serviceEnvironment: hit[SERVICE_ENVIRONMENT],
+        agentName: hit[AGENT_NAME],
+        spanDestinationServiceResource: hit[SPAN_DESTINATION_SERVICE_RESOURCE],
+        spanType: hit[SPAN_TYPE],
+        spanSubtype: hit[SPAN_SUBTYPE],
+      };
+    }
+    return acc;
+  }, {} as Record<string, QueryReturnType>);
+
+  const { paths, discoveredServices } = buildAllPaths(eventsById);
+
+  return {
+    aggregations: {
+      service_map: {
+        value: {
+          paths,
+          discoveredServices: Array.from(discoveredServices.values()),
+        },
+      },
+    },
+  } as {
     aggregations?: {
       service_map: {
         value: {
           paths: ConnectionNode[][];
-          discoveredServices: Array<{
-            from: ExternalConnectionNode;
-            to: ServiceConnectionNode;
-          }>;
+          discoveredServices: DiscoverService[];
         };
       };
     };
   };
 }
+
+const getAllEventIds = (eventsById: Record<string, QueryReturnType>) => {
+  return new Set([
+    ...Object.keys(eventsById),
+    ...Object.values(eventsById)
+      .map((event) => event[PARENT_ID])
+      .filter((parentId): parentId is string => !!parentId),
+  ]);
+};
+
+const isSpan = (node: ConnectionNode): node is ExternalConnectionNode => {
+  return !!(node as ExternalConnectionNode).spanDestinationServiceResource;
+};
+
+function getConnectionNodeId(node: ConnectionNode): string {
+  if (isSpan(node)) {
+    return node.spanDestinationServiceResource;
+  }
+  return node.serviceName;
+}
+
+const getServiceConnectionNode = (event: ConnectionNode): ServiceConnectionNode => {
+  const { serviceName, serviceEnvironment, agentName } = event;
+  return {
+    serviceName,
+    serviceEnvironment,
+    agentName,
+  };
+};
+
+const getExternalConnectionNode = (event: ConnectionNode): ExternalConnectionNode => {
+  const {
+    spanDestinationServiceResource: spanDestinationSericeResource,
+    spanType,
+    spanSubtype,
+  } = event;
+  return {
+    spanDestinationServiceResource: spanDestinationSericeResource,
+    spanType,
+    spanSubtype,
+  };
+};
+
+type Node = {
+  edges: ConnectionNode[];
+} & QueryReturnType;
+
+const generatePathKey = (edges: ConnectionNode[]): string => {
+  const res = edges.map((edge) => getConnectionNodeId(edge)).join('|');
+  return res;
+};
+
+const buildEventPath = (
+  startEventId: string,
+  eventsById: Record<string, QueryReturnType>,
+  visitedEvents = new Map<string, Node>()
+) => {
+  const stack: string[] = [startEventId];
+  const reprocessQueue: string[] = [];
+
+  const allPaths = new Map<string, ConnectionNode[]>();
+  const allDiscoveredServices = new Map<string, DiscoverService>();
+
+  while (stack.length > 0) {
+    const eventId = stack.pop()!;
+    const currentEvent = eventsById[eventId];
+
+    if (!currentEvent || visitedEvents.has(eventId)) {
+      continue;
+    }
+
+    const parentId = currentEvent[PARENT_ID];
+    const processedParent = parentId ? visitedEvents.get(parentId) : undefined;
+
+    if (parentId && !processedParent) {
+      stack.push(parentId);
+      reprocessQueue.push(eventId);
+      continue;
+    }
+
+    if (
+      processedParent &&
+      isSpan(processedParent) &&
+      (processedParent.serviceName !== currentEvent.serviceName ||
+        processedParent.serviceEnvironment !== currentEvent.serviceEnvironment)
+    ) {
+      const pathKey = generatePathKey([processedParent, currentEvent]);
+      if (!allDiscoveredServices.has(pathKey)) {
+        allDiscoveredServices.set(pathKey, {
+          from: getExternalConnectionNode(processedParent),
+          to: getServiceConnectionNode(currentEvent),
+        });
+      }
+    }
+
+    const edges = [...(processedParent?.edges || [])];
+    const lastEdge = edges.length > 0 ? edges[edges.length - 1] : undefined;
+
+    if (
+      !lastEdge ||
+      !(
+        lastEdge.serviceName === currentEvent.serviceName &&
+        lastEdge.serviceEnvironment === currentEvent.serviceEnvironment
+      )
+    ) {
+      edges.push(getServiceConnectionNode(currentEvent));
+    }
+
+    if (isSpan(currentEvent)) {
+      const externalNode = getExternalConnectionNode(currentEvent);
+      const newNodes = [...edges, externalNode];
+      const pathKey = generatePathKey(newNodes);
+
+      if (!allPaths.has(pathKey)) {
+        allPaths.set(pathKey, newNodes);
+      }
+    }
+
+    visitedEvents.set(eventId, { edges, ...currentEvent });
+
+    if (reprocessQueue.length > 0) {
+      stack.push(...reprocessQueue);
+      reprocessQueue.length = 0;
+    }
+  }
+
+  return {
+    paths: [...allPaths.values()].filter((path) => path.length > 1),
+    discoveredServices: [...allDiscoveredServices.values()],
+  };
+};
+
+const buildAllPaths = (eventsById: Record<string, QueryReturnType>) => {
+  const allDiscoveredServices: DiscoverService[] = [];
+  const allEventIds = getAllEventIds(eventsById);
+  const allPaths: ConnectionNode[][] = [];
+
+  const visitedEvents = new Map<string, Node>();
+
+  for (const eventId of allEventIds) {
+    const { discoveredServices, paths } = buildEventPath(eventId, eventsById, visitedEvents);
+    allPaths.push(...paths);
+    allDiscoveredServices.push(...discoveredServices);
+  }
+
+  return {
+    paths: allPaths,
+    discoveredServices: allDiscoveredServices,
+  };
+};

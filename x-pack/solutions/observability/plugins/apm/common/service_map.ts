@@ -26,16 +26,16 @@ import type { ServiceAnomalyStats } from './anomaly_detection';
 // } from './es_fields/apm';
 
 export interface ServiceConnectionNode extends cytoscape.NodeDataDefinition {
-  'service.name': string;
-  'service.environment': string | null;
-  'agent.name': string;
+  serviceName: string;
+  serviceEnvironment: string | null;
+  agentName: string;
   serviceAnomalyStats?: ServiceAnomalyStats;
   label?: string;
 }
 export interface ExternalConnectionNode extends cytoscape.NodeDataDefinition {
-  'span.destination.service.resource': string;
-  'span.type': string;
-  'span.subtype': string;
+  spanDestinationServiceResource: string;
+  spanType: string;
+  spanSubtype: string;
   label?: string;
 }
 

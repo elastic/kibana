@@ -7,13 +7,12 @@
 
 import { getAgentIcon } from '@kbn/custom-icons';
 import type cytoscape from 'cytoscape';
-import { AGENT_NAME, SPAN_SUBTYPE, SPAN_TYPE } from '../../../../common/es_fields/apm';
 import { getSpanIcon } from '../../shared/span_icon/get_span_icon';
 
 export function iconForNode(node: cytoscape.NodeSingular) {
-  const agentName = node.data(AGENT_NAME);
-  const subtype = node.data(SPAN_SUBTYPE);
-  const type = node.data(SPAN_TYPE);
+  const agentName = node.data('agentName');
+  const subtype = node.data('spanSubtype');
+  const type = node.data('spanType');
 
   return agentName ? getAgentIcon(agentName, false) : getSpanIcon(type, subtype);
 }

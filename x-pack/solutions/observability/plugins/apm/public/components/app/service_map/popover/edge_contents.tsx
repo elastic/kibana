@@ -16,10 +16,6 @@ import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
 import { useApmRouter } from '../../../../hooks/use_apm_router';
 import { TraceSearchType } from '../../../../../common/trace_explorer';
 import { TransactionTab } from '../../transaction_details/waterfall_with_summary/transaction_tabs';
-import {
-  SERVICE_NAME,
-  SPAN_DESTINATION_SERVICE_RESOURCE,
-} from '../../../../../common/es_fields/apm';
 
 export function EdgeContents({ elementData }: ContentsProps) {
   const edgeData = elementData as EdgeDataDefinition;
@@ -32,22 +28,22 @@ export function EdgeContents({ elementData }: ContentsProps) {
 
   const apmRouter = useApmRouter();
 
-  const sourceService = edgeData.sourceData['service.name'];
+  const sourceService = edgeData.sourceData.serviceName;
 
   const trackEvent = useUiTracker();
 
   let traceQuery: string;
 
-  if (SERVICE_NAME in edgeData.targetData) {
+  if ('serviceName' in edgeData.targetData) {
     traceQuery =
       `sequence by trace.id\n` +
       ` [ span where service.name == "${sourceService}" and span.destination.service.resource != null ] by span.id\n` +
-      ` [ transaction where service.name == "${edgeData.targetData[SERVICE_NAME]}" ] by parent.id`;
+      ` [ transaction where service.name == "${edgeData.targetData.serviceName}" ] by parent.id`;
   } else {
     traceQuery =
       `sequence by trace.id\n` +
       ` [ transaction where service.name == "${sourceService}" ]\n` +
-      ` [ span where service.name == "${sourceService}" and span.destination.service.resource == "${edgeData.targetData[SPAN_DESTINATION_SERVICE_RESOURCE]}" ]`;
+      ` [ span where service.name == "${sourceService}" and span.destination.service.resource == "${edgeData.targetData.spanDestinationServiceResource}" ]`;
   }
 
   const url = apmRouter.link('/traces/explorer/waterfall', {

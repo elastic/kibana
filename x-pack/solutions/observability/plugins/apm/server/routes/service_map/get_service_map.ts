@@ -17,6 +17,7 @@ import { getServiceStats } from './get_service_stats';
 import { getTraceSampleIds } from './get_trace_sample_ids';
 import type { TransformServiceMapResponse } from './transform_service_map_responses';
 import { transformServiceMapResponses } from './transform_service_map_responses';
+import type { EsClient } from '../../lib/helpers/get_esql_client';
 
 export interface IEnvOptions {
   mlClient?: MlClient;
@@ -30,6 +31,7 @@ export interface IEnvOptions {
   end: number;
   serviceGroupKuery?: string;
   kuery?: string;
+  esqlClient: EsClient;
 }
 
 export interface ServiceMapTelemetry {
@@ -47,6 +49,7 @@ async function getConnectionData({
   serviceGroupKuery,
   kuery,
   logger,
+  esqlClient,
 }: IEnvOptions) {
   return withApmSpan('get_service_map_connections', async () => {
     logger.debug('Getting trace sample IDs');
@@ -59,6 +62,7 @@ async function getConnectionData({
       end,
       serviceGroupKuery,
       kuery,
+      // esqlClient,
     });
 
     logger.debug(`Found ${traceIds.length} traces to inspect`);
@@ -90,6 +94,7 @@ async function getConnectionData({
             serviceMapMaxAllowableBytes: config.serviceMapMaxAllowableBytes,
             numOfRequests: chunks.length,
             logger,
+            esqlClient,
           })
         )
       )

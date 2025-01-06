@@ -9,7 +9,6 @@ import type cytoscape from 'cytoscape';
 import type { CSSProperties } from 'react';
 import type { EuiThemeComputed } from '@elastic/eui';
 import type { ServiceAnomalyStats } from '../../../../common/anomaly_detection';
-import { SERVICE_NAME, SPAN_DESTINATION_SERVICE_RESOURCE } from '../../../../common/es_fields/apm';
 import {
   getServiceHealthStatusColor,
   ServiceHealthStatus,
@@ -94,7 +93,7 @@ export const getNodeHeight = (euiTheme: EuiThemeComputed): number =>
   parseInt(euiTheme.size.xxl, 10);
 
 function isService(el: cytoscape.NodeSingular) {
-  return el.data(SERVICE_NAME) !== undefined;
+  return el.data('serviceName') !== undefined;
 }
 
 const getStyle = (
@@ -135,8 +134,8 @@ const getStyle = (
         height: getNodeHeight(euiTheme),
         label: (el: cytoscape.NodeSingular) =>
           isService(el)
-            ? el.data(SERVICE_NAME)
-            : el.data('label') || el.data(SPAN_DESTINATION_SERVICE_RESOURCE),
+            ? el.data('serviceName')
+            : el.data('label') || el.data('spanDestinationServiceResource'),
         'min-zoomed-font-size': parseInt(euiTheme.size.s, 10),
         'overlay-opacity': 0,
         shape: (el: cytoscape.NodeSingular) =>

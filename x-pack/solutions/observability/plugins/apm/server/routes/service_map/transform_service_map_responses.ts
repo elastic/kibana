@@ -7,12 +7,6 @@
 
 import { sortBy, pickBy, identity } from 'lodash';
 import type { ValuesType } from 'utility-types';
-import {
-  SERVICE_NAME,
-  SPAN_DESTINATION_SERVICE_RESOURCE,
-  SPAN_TYPE,
-  SPAN_SUBTYPE,
-} from '../../../common/es_fields/apm';
 import type {
   Connection,
   ConnectionNode,
@@ -26,11 +20,11 @@ import type { GroupResourceNodesResponse } from './group_resource_nodes';
 import { groupResourceNodes } from './group_resource_nodes';
 
 function getConnectionNodeId(node: ConnectionNode): string {
-  if ('span.destination.service.resource' in node) {
+  if ('spanDestinationServiceResource' in node) {
     // use a prefix to distinguish exernal destination ids from services
-    return `>${node[SPAN_DESTINATION_SERVICE_RESOURCE]}`;
+    return `>${node.spanDestinationServiceResource}`;
   }
-  return node[SERVICE_NAME];
+  return node.serviceName;
 }
 
 export function getConnectionId(connection: Connection) {
@@ -46,14 +40,12 @@ function addMessagingConnections(
 ): Connection[] {
   const messagingDestinations = connections
     .map((connection) => connection.destination)
-    .filter(
-      (dest) => dest['span.type'] === 'messaging' && SPAN_DESTINATION_SERVICE_RESOURCE in dest
-    );
+    .filter((dest) => dest.spanType === 'messaging' && 'spanDestinationServiceResource' in dest);
+
   const newConnections = messagingDestinations
     .map((node) => {
       const matchedService = discoveredServices.find(
-        ({ from }) =>
-          node[SPAN_DESTINATION_SERVICE_RESOURCE] === from[SPAN_DESTINATION_SERVICE_RESOURCE]
+        ({ from }) => node.spanDestinationServiceResource === from.spanDestinationServiceResource
       )?.to;
       if (matchedService) {
         return {
@@ -80,7 +72,7 @@ export function getAllNodes(
     .concat(
       services.map((service) => ({
         ...service,
-        id: service[SERVICE_NAME],
+        id: service.serviceName,
       }))
     );
 
@@ -98,13 +90,13 @@ export function getServiceNodes(
     .filter(({ from, to }) => {
       return (
         allNodes.some((node) => node.id === getConnectionNodeId(from)) &&
-        !allNodes.some((node) => node.id === to[SERVICE_NAME])
+        !allNodes.some((node) => node.id === to.serviceName)
       );
     })
     .map(({ to }) => ({ ...to, id: getConnectionNodeId(to) }));
   // List of nodes that are services
   const serviceNodes = [...allNodes, ...connectionFromDiscoveredServices].filter(
-    (node) => SERVICE_NAME in node
+    (node) => 'serviceName' in node
   ) as ServiceConnectionNode[];
 
   return serviceNodes;
@@ -131,7 +123,7 @@ export function transformServiceMapResponses({
   const externalNodes = Array.from(
     new Set(
       allNodes.filter(
-        (node) => SPAN_DESTINATION_SERVICE_RESOURCE in node
+        (node) => 'spanDestinationServiceResource' in node
       ) as ExternalConnectionNode[]
     )
   );
@@ -145,24 +137,24 @@ export function transformServiceMapResponses({
     }
     const outboundConnectionExists = allConnections.some(
       (con) =>
-        SPAN_DESTINATION_SERVICE_RESOURCE in con.source &&
-        con.source[SPAN_DESTINATION_SERVICE_RESOURCE] === node[SPAN_DESTINATION_SERVICE_RESOURCE]
+        'spanDestinationServiceResource' in con.source &&
+        con.source.spanDestinationServiceResource === node.spanDestinationServiceResource
     );
     const matchedService = discoveredServices.find(({ from }) => {
-      if (!outboundConnectionExists && SPAN_DESTINATION_SERVICE_RESOURCE in node) {
-        return node[SPAN_DESTINATION_SERVICE_RESOURCE] === from[SPAN_DESTINATION_SERVICE_RESOURCE];
+      if (!outboundConnectionExists && 'spanDestinationServiceResource' in node) {
+        return node.spanDestinationServiceResource === from.spanDestinationServiceResource;
       }
       return false;
     })?.to;
 
-    let serviceName: string | undefined = matchedService?.[SERVICE_NAME];
+    let serviceName: string | undefined = matchedService?.serviceName;
 
-    if (!serviceName && 'service.name' in node) {
-      serviceName = node[SERVICE_NAME];
+    if (!serviceName && 'serviceName' in node) {
+      serviceName = node.serviceName;
     }
 
     const matchedServiceNodes = serviceNodes
-      .filter((serviceNode) => serviceNode[SERVICE_NAME] === serviceName)
+      .filter((serviceNode) => serviceNode.serviceName === serviceName)
       .map((serviceNode) => pickBy(serviceNode, identity));
     const mergedServiceNode = Object.assign({}, ...matchedServiceNodes);
 
@@ -174,7 +166,7 @@ export function transformServiceMapResponses({
       return {
         ...map,
         [node.id]: {
-          id: matchedServiceNodes[0][SERVICE_NAME],
+          id: matchedServiceNodes[0].serviceName,
           ...mergedServiceNode,
           ...(serviceAnomalyStats ? { serviceAnomalyStats } : null),
         },
@@ -189,9 +181,9 @@ export function transformServiceMapResponses({
       ...map,
       [node.id]: {
         ...firstMatchedNode,
-        label: firstMatchedNode[SPAN_DESTINATION_SERVICE_RESOURCE],
-        [SPAN_TYPE]: allMatchedExternalNodes.map((n) => n[SPAN_TYPE]).sort()[0],
-        [SPAN_SUBTYPE]: allMatchedExternalNodes.map((n) => n[SPAN_SUBTYPE]).sort()[0],
+        label: firstMatchedNode.spanDestinationServiceResource,
+        spanType: allMatchedExternalNodes.map((n) => n.spanType).sort()[0],
+        spanSubtype: allMatchedExternalNodes.map((n) => n.spanSubtype).sort()[0],
       },
     };
   }, {} as Record<string, ConnectionNode>);
@@ -208,9 +200,9 @@ export function transformServiceMapResponses({
       const targetData = getConnectionNode(connection.destination);
 
       const label =
-        sourceData[SERVICE_NAME] +
+        sourceData.serviceName +
         ' to ' +
-        (targetData[SERVICE_NAME] || targetData[SPAN_DESTINATION_SERVICE_RESOURCE]);
+        (targetData.serviceName || targetData.spanDestinationServiceResource);
 
       return {
         source: sourceData.id,
