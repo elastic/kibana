@@ -10,9 +10,9 @@ import { DynamicStructuredTool } from '@langchain/core/tools';
 import { z } from '@kbn/zod';
 import { requestHasRequiredAnonymizationParams } from '@kbn/elastic-assistant-plugin/server/lib/langchain/helpers';
 import type { AssistantTool, AssistantToolParams } from '@kbn/elastic-assistant-plugin/server';
+import { getCitationElement } from '@kbn/elastic-assistant-common';
 import { getAlertsCountQuery } from './get_alert_counts_query';
 import { APP_UI_ID } from '../../../../common';
-import { getCitationElement } from '@kbn/elastic-assistant-common';
 
 export interface AlertCountsToolParams extends AssistantToolParams {
   alertsIndexPattern: string;
@@ -41,15 +41,15 @@ export const ALERT_COUNTS_TOOL: AssistantTool = {
         const result = await esClient.search<SearchResponse>(query);
 
         const citationElement = getCitationElement({
-          citationLable: "Alerts",
-          citationLink: "/app/security/alerts"
-        })
+          citationLable: 'Alerts',
+          citationLink: '/app/security/alerts',
+        });
 
         return ` Below are all relevant results in JSON format and their citationElement:
         ${JSON.stringify(result)}
 
         citationElement: "${citationElement}"
-        `
+        `;
       },
       tags: ['alerts', 'alerts-count'],
     });

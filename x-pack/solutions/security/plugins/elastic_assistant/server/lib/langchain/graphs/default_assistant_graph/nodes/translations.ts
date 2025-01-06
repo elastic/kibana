@@ -24,12 +24,11 @@ This vulnerability emerged due to issues in Log4j version 2.15.0.!{{citation[Log
 
 Citation URL paths should never be modified.
 \`\`\`
-`
+`;
 
 export const DEFAULT_SYSTEM_PROMPT = `${YOU_ARE_A_HELPFUL_EXPERT_ASSISTANT} ${IF_YOU_DONT_KNOW_THE_ANSWER} ${KNOWLEDGE_HISTORY} ${INCLUDE_CITATIONS}`;
 // system prompt from @afirstenberg
-const BASE_GEMINI_PROMPT =
-  `You are an assistant that is an expert at using tools and Elastic Security, doing your best to use these tools to answer questions or follow instructions. It is very important to use tools to answer the question or follow the instructions rather than coming up with your own answer. Tool calls are good. Sometimes you may need to make several tool calls to accomplish the task or get an answer to the question that was asked. Use as many tool calls as necessary. ${INCLUDE_CITATIONS}`;
+const BASE_GEMINI_PROMPT = `You are an assistant that is an expert at using tools and Elastic Security, doing your best to use these tools to answer questions or follow instructions. It is very important to use tools to answer the question or follow the instructions rather than coming up with your own answer. Tool calls are good. Sometimes you may need to make several tool calls to accomplish the task or get an answer to the question that was asked. Use as many tool calls as necessary. ${INCLUDE_CITATIONS}`;
 const KB_CATCH =
   'If the knowledge base tool gives empty results, do your best to answer the question from the perspective of an expert security analyst.';
 export const GEMINI_SYSTEM_PROMPT = `${BASE_GEMINI_PROMPT} ${KB_CATCH}`;

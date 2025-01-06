@@ -9,9 +9,9 @@ import { DynamicStructuredTool } from '@langchain/core/tools';
 import { z } from '@kbn/zod';
 import type { AssistantTool, AssistantToolParams } from '@kbn/elastic-assistant-plugin/server';
 import type { AIAssistantKnowledgeBaseDataClient } from '@kbn/elastic-assistant-plugin/server/ai_assistant_data_clients/knowledge_base';
-import { APP_UI_ID } from '../../../../common';
 import { Document } from 'langchain/document';
 import { getCitationElement } from '@kbn/elastic-assistant-common';
+import { APP_UI_ID } from '../../../../common';
 
 export interface KnowledgeBaseRetrievalToolParams extends AssistantToolParams {
   kbDataClient: AIAssistantKnowledgeBaseDataClient;
@@ -53,7 +53,7 @@ export const KNOWLEDGE_BASE_RETRIEVAL_TOOL: AssistantTool = {
           required: false,
         });
 
-        const enrichedDocuments = docs.map(enrichDocument)
+        const enrichedDocuments = docs.map(enrichDocument);
 
         return JSON.stringify(enrichedDocuments);
       },
@@ -70,8 +70,8 @@ function enrichDocument(document: Document<Record<string, any>>) {
       ...document.metadata,
       citationElement: getCitationElement({
         citationLable: document.metadata.name,
-        citationLink: `/app/management/kibana/securityAiAssistantManagement?tab=knowledge_base&entry_search_term=${document.id}`
-      })
-    }
-  })
+        citationLink: `/app/management/kibana/securityAiAssistantManagement?tab=knowledge_base&entry_search_term=${document.id}`,
+      }),
+    },
+  });
 }
