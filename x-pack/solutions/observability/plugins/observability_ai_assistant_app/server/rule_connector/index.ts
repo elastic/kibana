@@ -242,7 +242,7 @@ If available, include the link of the conversation at the end of your answer.`
   );
 
   client
-    .complete({
+    .runTools({
       functionClient,
       persist: true,
       isPublic: true,

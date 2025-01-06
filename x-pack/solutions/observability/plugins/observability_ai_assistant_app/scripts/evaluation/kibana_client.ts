@@ -73,8 +73,8 @@ type CompleteFunction = (params: CompleteFunctionParams) => Promise<{
 }>;
 
 export interface ChatClient {
-  chat: (message: StringOrMessageList) => Promise<InnerMessage>;
-  complete: CompleteFunction;
+  chatCompletion: (message: StringOrMessageList) => Promise<InnerMessage>;
+  runTools: CompleteFunction;
   evaluate: (
     {}: { conversationId?: string; messages: InnerMessage[]; errors: ChatCompletionErrorEvent[] },
     criteria: string[]
@@ -346,7 +346,7 @@ export class KibanaClient {
       };
     }
 
-    async function chat(
+    async function chatCompletion(
       name: string,
       {
         messages,
@@ -403,22 +403,22 @@ export class KibanaClient {
     const results: EvaluationResult[] = [];
 
     return {
-      chat: async (message) => {
+      chatCompletion: async (message) => {
         const messages = [
           ...this.getMessages(message).map((msg) => ({
             message: msg,
             '@timestamp': new Date().toISOString(),
           })),
         ];
-        return chat('chat', { messages, functions: [] });
+        return chatCompletion('chat', { messages, functions: [] });
       },
-      complete: async ({
+      runTools: async ({
         messages: messagesArg,
         conversationId,
         options = {},
         scope: newScope,
       }: CompleteFunctionParams) => {
-        that.log.info('Calling complete');
+        that.log.info('Calling run tools');
 
         // set scope
         currentScopes = [newScope || 'observability'];
@@ -513,7 +513,7 @@ export class KibanaClient {
         };
       },
       evaluate: async ({ messages, conversationId, errors }, criteria) => {
-        const message = await chat('evaluate', {
+        const message = await chatCompletion('evaluate', {
           connectorIdOverride: evaluationConnectorId,
           messages: [
             {

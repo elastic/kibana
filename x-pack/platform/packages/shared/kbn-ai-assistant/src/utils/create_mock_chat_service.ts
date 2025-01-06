@@ -17,8 +17,8 @@ type MockedChatService = DeeplyMockedKeys<ObservabilityAIAssistantChatService>;
 
 export const createMockChatService = (): MockedChatService => {
   const mockChatService: MockedChatService = {
-    chat: jest.fn(),
-    complete: jest.fn(),
+    chatCompletion: jest.fn(),
+    runTools: jest.fn(),
     sendAnalyticsEvent: jest.fn(),
     functions$: new BehaviorSubject<FunctionDefinition[]>([]) as MockedChatService['functions$'],
     getFunctions: jest.fn().mockReturnValue([]),

@@ -92,7 +92,7 @@ export function registerAlertsFunction({
         } as const,
       },
       async (
-        { arguments: { start, end }, chat, messages },
+        { arguments: { start, end }, chatCompletion, messages },
         signal
       ): Promise<{
         content: {
@@ -108,11 +108,11 @@ export function registerAlertsFunction({
           dataViews: await resources.plugins.dataViews.start(),
           savedObjectsClient: core.savedObjects.client,
           signal,
-          chat: (
+          chatCompletion: (
             operationName,
             { messages: nextMessages, functionCall, functions: nextFunctions }
           ) => {
-            return chat(operationName, {
+            return chatCompletion(operationName, {
               messages: nextMessages,
               functionCall,
               functions: nextFunctions,

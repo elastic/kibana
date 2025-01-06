@@ -80,7 +80,9 @@ describe('createChatService', () => {
   });
 
   describe('chatCompletion', () => {
-    function chat({ signal }: { signal: AbortSignal } = { signal: new AbortController().signal }) {
+    function chatCompletion(
+      { signal }: { signal: AbortSignal } = { signal: new AbortController().signal }
+    ) {
       return service.chatCompletion('my_test', {
         signal,
         messages: [],
@@ -97,7 +99,7 @@ describe('createChatService', () => {
 
       respondWithChunks({ chunks: [chunk1, chunk2] });
 
-      const response$ = chat();
+      const response$ = chatCompletion();
 
       const results: any = [];
 
@@ -133,7 +135,7 @@ describe('createChatService', () => {
 
       respondWithChunks({ chunks: [chunk1, chunk2] });
 
-      const response$ = chat();
+      const response$ = chatCompletion();
 
       const results: any = [];
 
@@ -167,7 +169,7 @@ describe('createChatService', () => {
     it('catches invalid requests and flags it as an error', async () => {
       respondWithChunks({ status: 400, chunks: [] });
 
-      const response$ = chat();
+      const response$ = chatCompletion();
 
       await expect(async () => {
         await getConcatenatedMessage(response$);
@@ -177,7 +179,7 @@ describe('createChatService', () => {
     it('propagates JSON parsing errors', async () => {
       respondWithChunks({ chunks: ['{}', 'invalid json'] });
 
-      const response$ = chat();
+      const response$ = chatCompletion();
 
       await expect(async () => {
         await getConcatenatedMessage(response$);
@@ -191,7 +193,7 @@ describe('createChatService', () => {
         ],
       });
 
-      const response$ = chat();
+      const response$ = chatCompletion();
 
       const matcher = await expect(async () => {
         await getConcatenatedMessage(response$);
@@ -222,7 +224,7 @@ describe('createChatService', () => {
 
             const controller = new AbortController();
 
-            chat({
+            chatCompletion({
               signal: controller.signal,
             }).subscribe({
               complete: resolve,

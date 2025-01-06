@@ -10,8 +10,8 @@ import { Subject } from 'rxjs';
 
 export function useObservabilityAIAssistantChatService() {
   return {
-    chat: () => new Subject(),
-    complete: () => new Subject(),
+    chatCompletion: () => new Subject(),
+    runTools: () => new Subject(),
     getFunctions: () => {
       return [
         {

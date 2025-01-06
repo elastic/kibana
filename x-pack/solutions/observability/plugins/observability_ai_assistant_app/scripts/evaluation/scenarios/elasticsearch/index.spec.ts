@@ -14,7 +14,7 @@ import { chatClient, esClient } from '../../services';
 describe('Elasticsearch functions', () => {
   describe('health', () => {
     it('returns the cluster health state', async () => {
-      const conversation = await chatClient.complete({
+      const conversation = await chatClient.runTools({
         messages: 'Can you tell me what the state of my Elasticsearch cluster is?',
         // using 'all' for elasticsearch scenarios enables the LLM correctly pick
         // elasticsearch functions when querying for data
@@ -61,7 +61,7 @@ describe('Elasticsearch functions', () => {
       });
 
       it('returns the count of docs in the KB', async () => {
-        const conversation = await chatClient.complete({
+        const conversation = await chatClient.runTools({
           messages: 'How many documents are in the index kb?',
           scope: 'all',
         });
@@ -75,12 +75,12 @@ describe('Elasticsearch functions', () => {
       });
 
       it('returns store and refresh stats of an index', async () => {
-        let conversation = await chatClient.complete({
+        let conversation = await chatClient.runTools({
           messages: 'What are the store stats of the index kb?',
           scope: 'all',
         });
 
-        conversation = await chatClient.complete({
+        conversation = await chatClient.runTools({
           conversationId: conversation.conversationId!,
           messages: conversation.messages.concat({
             content: 'What are the the refresh stats of the index?',
@@ -108,13 +108,13 @@ describe('Elasticsearch functions', () => {
 
     describe('assistant created index', () => {
       it('creates index, adds documents and deletes index', async () => {
-        let conversation = await chatClient.complete({
+        let conversation = await chatClient.runTools({
           messages:
             'Create a new index called testing_ai_assistant that will have two documents, one for the test_suite alerts with message "This test is for alerts" and another one for the test_suite esql with the message "This test is for esql"',
           scope: 'all',
         });
 
-        conversation = await chatClient.complete({
+        conversation = await chatClient.runTools({
           conversationId: conversation.conversationId!,
           messages: conversation.messages.concat({
             content: 'What are the fields types for the index testing_ai_assistant?',
@@ -123,7 +123,7 @@ describe('Elasticsearch functions', () => {
           scope: 'all',
         });
 
-        conversation = await chatClient.complete({
+        conversation = await chatClient.runTools({
           conversationId: conversation.conversationId!,
           messages: conversation.messages.concat({
             content: 'Delete the testing_ai_assistant index',
@@ -146,7 +146,7 @@ describe('Elasticsearch functions', () => {
 
   describe('other', () => {
     it('returns clusters license', async () => {
-      const conversation = await chatClient.complete({
+      const conversation = await chatClient.runTools({
         messages: 'What is my clusters license?',
         scope: 'all',
       });

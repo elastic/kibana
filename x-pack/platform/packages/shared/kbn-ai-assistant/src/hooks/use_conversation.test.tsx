@@ -366,7 +366,7 @@ describe('useConversation', () => {
         wrapper,
       });
 
-      mockChatService.complete.mockImplementationOnce(() => {
+      mockChatService.runTools.mockImplementationOnce(() => {
         return subject;
       });
     });

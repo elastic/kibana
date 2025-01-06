@@ -23,7 +23,7 @@ async function evaluateEsqlQuery({
   execute?: boolean;
   criteria?: string[];
 }): Promise<void> {
-  const conversation = await chatClient.complete({ messages: question, scope: 'all' });
+  const conversation = await chatClient.runTools({ messages: question, scope: 'all' });
 
   const evaluation = await chatClient.evaluate(conversation, [
     ...(expected

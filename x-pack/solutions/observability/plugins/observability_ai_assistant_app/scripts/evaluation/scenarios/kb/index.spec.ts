@@ -16,12 +16,12 @@ const KB_INDEX = '.kibana-observability-ai-assistant-kb-*';
 describe('Knowledge base', () => {
   describe('kb functions', () => {
     it('summarizes and recalls information', async () => {
-      let conversation = await chatClient.complete({
+      let conversation = await chatClient.runTools({
         messages:
           'Remember that this cluster is used to test the AI Assistant using the Observability AI Evaluation Framework',
       });
 
-      conversation = await chatClient.complete({
+      conversation = await chatClient.runTools({
         conversationId: conversation.conversationId!,
         messages: conversation.messages.concat({
           content: 'What is this cluster used for?',
@@ -93,7 +93,7 @@ describe('Knowledge base', () => {
 
     it('retrieves inventor and purpose of the QRE', async () => {
       const prompt = 'Who invented the Quantum Revectorization Engine and what does it do?';
-      const conversation = await chatClient.complete({ messages: prompt });
+      const conversation = await chatClient.runTools({ messages: prompt });
 
       const result = await chatClient.evaluate(conversation, [
         'Uses KB retrieval function to find information about the Quantum Revectorization Engine',
@@ -108,7 +108,7 @@ describe('Knowledge base', () => {
     it('retrieves constraints and energy requirements of the QRE', async () => {
       const prompt =
         'What is the approximate revectorization radius of the QRE and what kind of reactor is required to power it?';
-      const conversation = await chatClient.complete({ messages: prompt });
+      const conversation = await chatClient.runTools({ messages: prompt });
 
       const result = await chatClient.evaluate(conversation, [
         'Uses KB retrieval function to find the correct document about QRE constraints',

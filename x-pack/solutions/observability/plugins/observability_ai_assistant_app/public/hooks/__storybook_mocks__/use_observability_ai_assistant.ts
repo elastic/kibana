@@ -10,8 +10,8 @@ import { Subject } from 'rxjs';
 const service = {
   start: async () => {
     return {
-      chat: () => new Subject(),
-      complete: () => new Subject(),
+      chatCompletion: () => new Subject(),
+      runTools: () => new Subject(),
       getFunctions: [],
       getSystemMessage: () => {},
       hasFunction: () => true,

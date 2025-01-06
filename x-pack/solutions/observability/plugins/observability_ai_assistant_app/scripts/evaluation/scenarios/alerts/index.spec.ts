@@ -99,7 +99,7 @@ describe('Alert function', () => {
   });
 
   it('summary of active alerts', async () => {
-    const conversation = await chatClient.complete({
+    const conversation = await chatClient.runTools({
       messages: 'Are there any active alerts over the last 4 hours?',
     });
 
@@ -113,11 +113,11 @@ describe('Alert function', () => {
   });
 
   it('filtered alerts', async () => {
-    let conversation = await chatClient.complete({
+    let conversation = await chatClient.runTools({
       messages: 'Do I have any active threshold alerts related to the AI Assistant?',
     });
 
-    conversation = await chatClient.complete({
+    conversation = await chatClient.runTools({
       conversationId: conversation.conversationId!,
       messages: conversation.messages.concat({
         content: 'Do I have any alerts on the service my-service?',

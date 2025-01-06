@@ -93,7 +93,7 @@ describe('APM', () => {
   });
 
   it('service throughput', async () => {
-    const conversation = await chatClient.complete({
+    const conversation = await chatClient.runTools({
       messages:
         'What is the average throughput per minute for the ai-assistant-service service over the past 4 hours?',
     });
@@ -111,7 +111,7 @@ describe('APM', () => {
   });
 
   it('service dependencies', async () => {
-    const conversation = await chatClient.complete({
+    const conversation = await chatClient.runTools({
       messages: 'What are the downstream dependencies of the ai-assistant-service-front service?',
     });
 
@@ -124,11 +124,11 @@ describe('APM', () => {
   });
 
   it('services in environment', async () => {
-    let conversation = await chatClient.complete({
+    let conversation = await chatClient.runTools({
       messages: 'What are the active services in the environment "test"?',
     });
 
-    conversation = await chatClient.complete({
+    conversation = await chatClient.runTools({
       conversationId: conversation.conversationId!,
       messages: conversation.messages.concat({
         content: 'What is the average error rate per service over the past 4 hours?',
@@ -136,7 +136,7 @@ describe('APM', () => {
       }),
     });
 
-    conversation = await chatClient.complete({
+    conversation = await chatClient.runTools({
       conversationId: conversation.conversationId!,
       messages: conversation.messages.concat({
         content:
@@ -145,7 +145,7 @@ describe('APM', () => {
       }),
     });
 
-    conversation = await chatClient.complete({
+    conversation = await chatClient.runTools({
       conversationId: conversation.conversationId!,
       messages: conversation.messages.concat({
         content: 'Are there any alert for those services?',
