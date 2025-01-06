@@ -6,8 +6,8 @@
  */
 
 import datemath from '@elastic/datemath';
-import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { LogSourcesService } from '@kbn/logs-data-access-plugin/common/types';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { LogSourcesService } from '@kbn/logs-data-access-plugin/common/types';
 import { unflattenKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
 import { flattenObject } from '@kbn/key-value-metadata-table';
 import type { KeyValuePair } from '@kbn/key-value-metadata-table';

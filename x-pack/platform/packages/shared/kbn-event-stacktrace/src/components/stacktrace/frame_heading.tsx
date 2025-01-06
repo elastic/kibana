@@ -5,18 +5,19 @@
  * 2.0.
  */
 
-import React, { ComponentType } from 'react';
+import type { ComponentType } from 'react';
+import React from 'react';
 import styled from '@emotion/styled';
 import { useEuiFontSize } from '@elastic/eui';
 import { Stackframe } from '@kbn/apm-types';
 import {
   CSharpFrameHeadingRenderer,
   DefaultFrameHeadingRenderer,
-  FrameHeadingRendererProps,
   JavaFrameHeadingRenderer,
   JavaScriptFrameHeadingRenderer,
   RubyFrameHeadingRenderer,
   PhpFrameHeadingRenderer,
+  FrameHeadingRendererProps,
 } from './frame_heading_renderers';
 
 const FileDetails = styled.div`
