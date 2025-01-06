@@ -235,7 +235,6 @@ packages/kbn-saved-search-component @elastic/obs-ux-logs-team
 packages/kbn-scout @elastic/appex-qa
 packages/kbn-scout-info @elastic/appex-qa
 packages/kbn-scout-reporting @elastic/appex-qa
-packages/kbn-screenshotting-server @elastic/appex-sharedux
 packages/kbn-set-map @elastic/kibana-operations
 packages/kbn-shared-ux-utility @elastic/appex-sharedux
 packages/kbn-some-dev-log @elastic/kibana-operations
@@ -492,6 +491,7 @@ src/platform/packages/private/kbn-reporting/get_csv_panel_actions @elastic/appex
 src/platform/packages/private/kbn-reporting/mocks_server @elastic/appex-sharedux
 src/platform/packages/private/kbn-reporting/public @elastic/appex-sharedux
 src/platform/packages/private/kbn-reporting/server @elastic/appex-sharedux
+src/platform/packages/private/kbn-screenshotting-server @elastic/appex-sharedux
 src/platform/packages/private/kbn-ui-shared-deps-npm @elastic/kibana-operations
 src/platform/packages/private/kbn-ui-shared-deps-src @elastic/kibana-operations
 src/platform/packages/private/kbn-unsaved-changes-badge @elastic/kibana-data-discovery
