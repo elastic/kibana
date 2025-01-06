@@ -55,7 +55,7 @@ import { sourcererActions } from '../../sourcerer/store';
 import { createMiddlewares } from './middlewares';
 import { addNewTimeline } from '../../timelines/store/helpers';
 import { initialNotesState } from '../../notes/store/notes.slice';
-import { hasAccessToSecuritySolution } from '../../helpers';
+import { hasAccessToSecuritySolution } from '../../helpers_access';
 
 let store: Store<State, Action> | null = null;
 

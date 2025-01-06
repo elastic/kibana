@@ -13,7 +13,7 @@ import type { Capabilities } from '@kbn/core/public';
 import { CASES_FEATURE_ID, CASES_PATH, ONBOARDING_PATH } from '../../common/constants';
 import { NotFoundPage } from './404';
 import type { StartServices } from '../types';
-import { hasAccessToSecuritySolution } from '../helpers';
+import { hasAccessToSecuritySolution } from '../helpers_access';
 
 export interface AppRoutesProps {
   services: StartServices;

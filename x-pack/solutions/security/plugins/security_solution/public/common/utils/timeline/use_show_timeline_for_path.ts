@@ -12,7 +12,7 @@ import { getLinksWithHiddenTimeline } from '../../links';
 import { SourcererScopeName } from '../../../sourcerer/store/model';
 import { useSourcererDataView } from '../../../sourcerer/containers';
 import { useKibana } from '../../lib/kibana';
-import { hasAccessToSecuritySolution } from '../../../helpers';
+import { hasAccessToSecuritySolution } from '../../../helpers_access';
 
 const isTimelinePathVisible = (currentPath: string): boolean => {
   const groupLinksWithHiddenTimelinePaths = getLinksWithHiddenTimeline().map((l) => l.path);

@@ -39,13 +39,7 @@ import type {
 } from './types';
 import { SOLUTION_NAME, ASSISTANT_MANAGEMENT_TITLE } from './common/translations';
 
-import {
-  APP_ID,
-  APP_UI_ID,
-  APP_PATH,
-  APP_ICON_SOLUTION,
-  SECURITY_FEATURE_ID,
-} from '../common/constants';
+import { APP_ID, APP_UI_ID, APP_PATH, APP_ICON_SOLUTION } from '../common/constants';
 
 import type { AppLinkItems } from './common/links';
 import { updateAppLinks, type LinksPermissions } from './common/links';
@@ -67,6 +61,7 @@ import type { SecurityAppStore } from './common/store/types';
 import { PluginContract } from './plugin_contract';
 import { PluginServices } from './plugin_services';
 import { getExternalReferenceAttachmentEndpointRegular } from './cases/attachments/external_reference';
+import { hasAccessToSecuritySolution } from './helpers_access';
 
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
   private config: SecuritySolutionUiConfigType;
@@ -445,7 +440,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
     // When the user does not have access to SIEM (main Security feature) nor Security Cases feature, the plugin must be inaccessible.
     if (
-      !capabilities[SECURITY_FEATURE_ID]?.show &&
+      !hasAccessToSecuritySolution(capabilities) &&
       !capabilities.securitySolutionCasesV2?.read_cases
     ) {
       this.appUpdater$.next(() => ({
