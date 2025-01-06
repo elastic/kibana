@@ -270,7 +270,7 @@
     "@kbn/core-custom-branding-browser-internal": "link:src/core/packages/custom-branding/browser-internal",
     "@kbn/core-custom-branding-browser-mocks": "link:src/core/packages/custom-branding/browser-mocks",
     "@kbn/core-custom-branding-common": "link:src/core/packages/custom-branding/common",
-    "@kbn/core-custom-branding-server": "link:packages/core/custom-branding/core-custom-branding-server",
+    "@kbn/core-custom-branding-server": "link:src/core/packages/custom-branding/server",
     "@kbn/core-custom-branding-server-internal": "link:packages/core/custom-branding/core-custom-branding-server-internal",
     "@kbn/core-custom-branding-server-mocks": "link:packages/core/custom-branding/core-custom-branding-server-mocks",
     "@kbn/core-deprecations-browser": "link:src/core/packages/deprecations/browser",
