@@ -17,7 +17,7 @@ import type { CspClientPluginSetup, CspClientPluginStart, CspClientPluginSetupDe
 import { CLOUD_SECURITY_POSTURE_PACKAGE_NAME } from '../common/constants';
 import { SetupContext } from './application/setup_context';
 import {
-  CSPUIConfigType,
+  type CSPUIConfigType,
   type ExperimentalFeatures,
   parseExperimentalConfigValue,
 } from '../common/experimental_features';

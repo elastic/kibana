@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PluginInitializerContext } from '@kbn/core/public';
+import type { PluginInitializerContext } from '@kbn/core/public';
 import { CspPlugin } from './plugin';
 export type { CspSecuritySolutionContext } from './types';
 export type { CloudSecurityPosturePageId } from './common/navigation/types';
