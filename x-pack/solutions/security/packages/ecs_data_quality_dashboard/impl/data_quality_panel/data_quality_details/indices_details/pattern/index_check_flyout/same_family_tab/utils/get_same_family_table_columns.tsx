@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiTableFieldDataColumnType } from '@elastic/eui';
+import { EuiCode, EuiTableFieldDataColumnType } from '@elastic/eui';
 
 import { SameFamilyFieldMetadata } from '../../../../../../types';
 import {
@@ -14,7 +14,7 @@ import {
   FIELD,
   INDEX_MAPPING_TYPE_ACTUAL,
 } from '../../../../../../translations';
-import { CodeSuccess } from '../../../../../../styles';
+import { codeSuccessCss } from '../../../../../../styles';
 import { SameFamily } from '../../same_family';
 import { ECS_DESCRIPTION } from '../../translations';
 
@@ -31,7 +31,11 @@ export const getSameFamilyTableColumns = (): Array<
   {
     field: 'type',
     name: ECS_MAPPING_TYPE_EXPECTED,
-    render: (type: string) => <CodeSuccess data-test-subj="codeSuccess">{type}</CodeSuccess>,
+    render: (type: string) => (
+      <EuiCode css={codeSuccessCss} data-test-subj="codeSuccess">
+        {type}
+      </EuiCode>
+    ),
     sortable: true,
     truncateText: false,
     width: '25%',
@@ -41,7 +45,9 @@ export const getSameFamilyTableColumns = (): Array<
     name: INDEX_MAPPING_TYPE_ACTUAL,
     render: (indexFieldType: string) => (
       <div>
-        <CodeSuccess data-test-subj="codeSuccess">{indexFieldType}</CodeSuccess>
+        <EuiCode css={codeSuccessCss} data-test-subj="codeSuccess">
+          {indexFieldType}
+        </EuiCode>
         <SameFamily />
       </div>
     ),
