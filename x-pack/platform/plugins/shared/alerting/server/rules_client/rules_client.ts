@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { KibanaRequest } from '@kbn/core-http-server';
 import { UnmuteAlertParams } from '../application/rule/methods/unmute_alert/types';
 import { getRuleTags, RuleTagsParams } from '../application/rule/methods/tags';
 import { MuteAlertParams } from '../application/rule/methods/mute_alert/types';
@@ -207,4 +208,25 @@ export class RulesClient {
   public getTags = (params: RuleTagsParams) => getRuleTags(this.context, params);
 
   public getScheduleFrequency = () => getScheduleFrequency(this.context);
+
+  public scheduleTaskWithApiKey = (id: string, request: KibanaRequest) => {
+    this.context.taskManager.schedule(
+      {
+        id,
+        taskType: 'taskWithApiKey',
+        params: {},
+        state: {},
+        schedule: {
+          interval: '30s',
+        },
+        enabled: true,
+      },
+      undefined,
+      request
+    );
+  };
+
+  public cancelTaskWithApiKey = (id: string) => {
+    this.context.taskManager.remove(id);
+  };
 }

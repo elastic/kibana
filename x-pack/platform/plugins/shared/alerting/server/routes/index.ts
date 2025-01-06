@@ -158,4 +158,34 @@ export function defineRoutes(opts: RouteOptions) {
   runSoonRoute(router, licenseState);
   healthRoute(router, licenseState, encryptedSavedObjects);
   getGlobalExecutionKPIRoute(router, licenseState);
+
+  router.post(
+    {
+      path: '/api/alerting/schedule_task_with_api_key',
+      validate: {},
+    },
+    async (context, request, res) => {
+      const alertingContext = await context.alerting;
+      const rulesClient = await alertingContext.getRulesClient();
+
+      rulesClient.scheduleTaskWithApiKey('taskWithApiKeyId', request);
+
+      return res.ok();
+    }
+  );
+
+  router.post(
+    {
+      path: '/api/alerting/cancel_task_with_api_key',
+      validate: {},
+    },
+    async (context, request, res) => {
+      const alertingContext = await context.alerting;
+      const rulesClient = await alertingContext.getRulesClient();
+
+      rulesClient.cancelTaskWithApiKey('taskWithApiKeyId');
+
+      return res.ok();
+    }
+  );
 }

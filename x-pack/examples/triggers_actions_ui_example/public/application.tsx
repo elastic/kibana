@@ -9,7 +9,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import { QueryClient } from '@tanstack/react-query';
-import { EuiPage, EuiTitle, EuiText, EuiSpacer } from '@elastic/eui';
+import { EuiPage, EuiTitle, EuiText, EuiSpacer, EuiButton } from '@elastic/eui';
 import { AppMountParameters, CoreStart, ScopedHistory } from '@kbn/core/public';
 import { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
@@ -227,6 +227,34 @@ const TriggersActionsUiExampleApp = ({
                     ...startServices,
                   }}
                 />
+              </Page>
+            )}
+          />
+          <Route
+            exact
+            path="/task_manager_with_api_key"
+            render={() => (
+              <Page title="Task Manager with API Key">
+                <div>
+                  <div>
+                    <EuiButton
+                      onClick={() => {
+                        http.post('/api/alerting/schedule_task_with_api_key');
+                      }}
+                    >
+                      Schedule
+                    </EuiButton>
+                  </div>
+                  <div>
+                    <EuiButton
+                      onClick={() => {
+                        http.post('/api/alerting/cancel_task_with_api_key');
+                      }}
+                    >
+                      Cancel
+                    </EuiButton>
+                  </div>
+                </div>
               </Page>
             )}
           />

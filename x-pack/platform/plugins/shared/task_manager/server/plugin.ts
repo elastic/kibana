@@ -252,7 +252,7 @@ export class TaskManagerPlugin
   }
 
   public start(
-    { savedObjects, elasticsearch, executionContext, docLinks }: CoreStart,
+    { savedObjects, elasticsearch, executionContext, docLinks, security }: CoreStart,
     { cloud }: TaskManagerPluginStart
   ): TaskManagerStartContract {
     const savedObjectsRepository = savedObjects.createInternalRepository([
@@ -284,6 +284,7 @@ export class TaskManagerPlugin
       allowReadingInvalidState: this.config.allow_reading_invalid_state,
       logger: this.logger,
       requestTimeouts: this.config.request_timeouts,
+      security,
     });
 
     const isServerless = this.initContext.env.packageInfo.buildFlavor === 'serverless';
@@ -370,6 +371,7 @@ export class TaskManagerPlugin
       taskStore,
       middleware: this.middleware,
       taskManagerId: taskStore.taskManagerId,
+      security,
     });
 
     scheduleDeleteInactiveNodesTaskDefinition(this.logger, taskScheduling).catch(() => {});
