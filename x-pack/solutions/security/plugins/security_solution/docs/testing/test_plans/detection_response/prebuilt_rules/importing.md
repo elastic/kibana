@@ -59,7 +59,6 @@ And the overwrite flag is set to true
 When the user imports the rule
 Then the rule should be created or updated
 And the ruleSource type should be "internal"
-And isCustomized should be false
 ```
 
 #### Scenario: Importing a prebuilt rule with a matching rule_id but no matching version

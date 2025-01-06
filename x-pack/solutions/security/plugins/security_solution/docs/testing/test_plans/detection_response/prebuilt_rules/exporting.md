@@ -114,6 +114,22 @@ And they should include an "immutable" field with a value of false
 And their "ruleSource" "type" should be "internal"
 ```
 
+#### Scenario: Exporting both prebuilt and custom rules in bulk
+
+**Automation**: 1 cypress test.
+
+```Gherkin
+Given a space with customized prebuilt, non-customized prebuilt and custom rules installed
+When the user selects rules from each type in the rules table
+And chooses "Export" from bulk actions
+Then the selected rules should be exported as an NDJSON file
+And the prebuilt rules should include an "immutable" field with a value of true
+And the custom rules should include an "immutable" field with a value of false
+And the prebuilt rules' "ruleSource" "type" should be "external"
+And the custom rules' "ruleSource" "type" should be "internal"
+And the customized prebuilt rules' "isCustomized" value should be true
+```
+
 ### Error Handling
 
 #### Scenario: Exporting beyond the export limit
