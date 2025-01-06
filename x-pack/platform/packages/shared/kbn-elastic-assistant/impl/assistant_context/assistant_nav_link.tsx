@@ -54,7 +54,7 @@ export const AssistantNavLink: FC = () => {
     if (assistantAvailability.hasAssistantPrivilege && chromeStyle && currentAppId !== "management") {
       registerPortalNode();
     }
-  }, [chrome, portalNode, assistantAvailability.hasAssistantPrivilege, chromeStyle]);
+  }, [chrome, portalNode, assistantAvailability.hasAssistantPrivilege, chromeStyle, currentAppId]);
 
   const showOverlay = useCallback(
     () => showAssistantOverlay({ showOverlay: true }),
