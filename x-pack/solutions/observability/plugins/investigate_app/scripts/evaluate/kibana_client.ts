@@ -6,6 +6,7 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
+import datemath from '@kbn/datemath';
 import type { AssistantScope } from '@kbn/ai-assistant-common';
 import { streamIntoObservable } from '@kbn/observability-ai-assistant-plugin/server';
 import { ToolingLog } from '@kbn/tooling-log';
@@ -21,7 +22,8 @@ import type { RootCauseAnalysisEvent } from '@kbn/observability-ai-server/root_c
 
 export type RCAChatClient = ChatClient & {
   rootCauseAnalysis: (params: { investigationId: string }) => Promise<RootCauseAnalysisEvent[]>;
-  createInvestigation: () => Promise<string>;
+  getTimeRange: (params: { alertId: string }) => Promise<{ from: number; to: number }>;
+  createInvestigation: (params: { alertId: string; from: number; to: number }) => Promise<string>;
   deleteInvestigation: (params: { investigationId: string }) => Promise<void>;
   archiveData: () => Promise<void>;
 };
@@ -73,20 +75,56 @@ export class RCAKibanaClient extends KibanaClient {
       const alertingIndexPattern = '.alerts.internal.alerts-observability.*';
     }
 
-    async function createInvestigation(): Promise<string> {
+    async function getTimeRange({
+      alertId,
+      fromOffset,
+      toOffset,
+    }: {
+      alertId: string;
+      fromOffset: string;
+      toOffset: string;
+    }) {
+      const response = await that.axios.get(
+        that.getUrl({
+          pathname: `/internal/rac/alerts`,
+        }),
+        {
+          params: {
+            id: alertId,
+          },
+        }
+      );
+      const alertStart = response.data['kibana.alert.start'];
+      const from = datemath.parse(fromOffset, { forceNow: new Date(alertStart) }).valueOf();
+      const to = datemath.parse(toOffset, { forceNow: new Date(alertStart) }).valueOf();
+      return {
+        from,
+        to,
+      };
+    }
+
+    async function createInvestigation({
+      alertId,
+      from,
+      to,
+    }: {
+      alertId: string;
+      from: number;
+      to: number;
+    }): Promise<string> {
       const body = {
         id: uuidv4(),
         title: 'Investigate Custom threshold breached',
         params: {
           timeRange: {
-            from: 1733862336557,
-            to: 1733866296614,
+            from,
+            to,
           },
         },
         tags: [],
         origin: {
           type: 'alert',
-          id: '689e9712-64d6-49e3-806f-0b74cb156148',
+          id: alertId,
         },
         externalIncidentUrl: null,
       };
@@ -202,8 +240,27 @@ export class RCAKibanaClient extends KibanaClient {
       archiveData: async () => {
         return await archiveData();
       },
-      createInvestigation: async () => {
-        return await createInvestigation();
+      getTimeRange: async ({
+        alertId,
+        fromOffset,
+        toOffset,
+      }: {
+        alertId: string;
+        fromOffset: string;
+        toOffset: string;
+      }) => {
+        return await getTimeRange({ alertId, fromOffset, toOffset });
+      },
+      createInvestigation: async ({
+        alertId,
+        from,
+        to,
+      }: {
+        alertId: string;
+        from: string;
+        to: string;
+      }) => {
+        return await createInvestigation({ alertId, from, to });
       },
       deleteInvestigation: async ({ investigationId }: { investigationId: string }) => {
         return deleteInvestigation({ investigationId });
