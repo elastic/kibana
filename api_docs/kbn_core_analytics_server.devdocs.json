@@ -488,71 +488,15 @@
             "references": [
               {
                 "plugin": "@kbn/core",
-                "path": "src/core/packages/status/server-internal/src/status_service.ts"
+                "path": "src/core/packages/notifications/browser-internal/src/toasts/telemetry/event_reporter.ts"
               },
               {
                 "plugin": "@kbn/core",
-                "path": "src/core/packages/plugins/server-internal/src/plugin_context.ts"
-              },
-              {
-                "plugin": "@kbn/core",
-                "path": "src/core/packages/plugins/server-internal/src/plugin_context.ts"
-              },
-              {
-                "plugin": "@kbn/core",
-                "path": "src/core/packages/plugins/server-internal/src/plugin_context.ts"
-              },
-              {
-                "plugin": "@kbn/core",
-                "path": "src/core/packages/plugins/server-internal/src/plugin_context.ts"
-              },
-              {
-                "plugin": "@kbn/core",
-                "path": "src/core/packages/plugins/server-internal/src/plugin_context.ts"
-              },
-              {
-                "plugin": "@kbn/core",
-                "path": "src/core/packages/plugins/server-internal/src/plugin_context.ts"
+                "path": "src/core/packages/notifications/browser-internal/src/toasts/telemetry/event_reporter.ts"
               },
               {
                 "plugin": "@kbn/ebt-tools",
                 "path": "src/platform/packages/shared/kbn-ebt-tools/src/performance_metric_events/helpers.ts"
-              },
-              {
-                "plugin": "@kbn/core",
-                "path": "src/core/packages/analytics/server-internal/src/analytics_service.ts"
-              },
-              {
-                "plugin": "@kbn/core",
-                "path": "src/core/packages/analytics/server-internal/src/analytics_service.ts"
-              },
-              {
-                "plugin": "@kbn/core",
-                "path": "src/core/packages/analytics/server-internal/src/analytics_service.ts"
-              },
-              {
-                "plugin": "@kbn/core",
-                "path": "src/core/packages/analytics/server-internal/src/analytics_service.ts"
-              },
-              {
-                "plugin": "@kbn/core",
-                "path": "src/core/packages/analytics/server-internal/src/analytics_service.ts"
-              },
-              {
-                "plugin": "@kbn/core",
-                "path": "src/core/packages/analytics/server-internal/src/analytics_service.ts"
-              },
-              {
-                "plugin": "@kbn/core",
-                "path": "src/core/packages/root/server-internal/src/events/kibana_started.ts"
-              },
-              {
-                "plugin": "@kbn/core",
-                "path": "src/core/packages/notifications/browser-internal/src/toasts/telemetry/event_reporter.ts"
-              },
-              {
-                "plugin": "@kbn/core",
-                "path": "src/core/packages/notifications/browser-internal/src/toasts/telemetry/event_reporter.ts"
               },
               {
                 "plugin": "@kbn/core",
@@ -583,16 +527,60 @@
                 "path": "src/core/packages/root/browser-internal/src/core_system.ts"
               },
               {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/server/analytics/analytics_service.ts"
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/status/server-internal/src/status_service.ts"
               },
               {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/server/analytics/analytics_service.ts"
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/plugins/server-internal/src/plugin_context.ts"
               },
               {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/server/analytics/analytics_service.ts"
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/plugins/server-internal/src/plugin_context.ts"
+              },
+              {
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/plugins/server-internal/src/plugin_context.ts"
+              },
+              {
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/plugins/server-internal/src/plugin_context.ts"
+              },
+              {
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/plugins/server-internal/src/plugin_context.ts"
+              },
+              {
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/plugins/server-internal/src/plugin_context.ts"
+              },
+              {
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/analytics/server-internal/src/analytics_service.ts"
+              },
+              {
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/analytics/server-internal/src/analytics_service.ts"
+              },
+              {
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/analytics/server-internal/src/analytics_service.ts"
+              },
+              {
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/analytics/server-internal/src/analytics_service.ts"
+              },
+              {
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/analytics/server-internal/src/analytics_service.ts"
+              },
+              {
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/analytics/server-internal/src/analytics_service.ts"
+              },
+              {
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/root/server-internal/src/events/kibana_started.ts"
               },
               {
                 "plugin": "@kbn/cloud",
@@ -640,11 +628,19 @@
               },
               {
                 "plugin": "spaces",
-                "path": "x-pack/plugins/spaces/public/analytics/event_tracker.ts"
+                "path": "x-pack/platform/plugins/shared/spaces/public/analytics/event_tracker.ts"
               },
               {
-                "plugin": "spaces",
-                "path": "x-pack/plugins/spaces/public/management/management_service.test.ts"
+                "plugin": "security",
+                "path": "x-pack/platform/plugins/shared/security/server/analytics/analytics_service.ts"
+              },
+              {
+                "plugin": "security",
+                "path": "x-pack/platform/plugins/shared/security/server/analytics/analytics_service.ts"
+              },
+              {
+                "plugin": "security",
+                "path": "x-pack/platform/plugins/shared/security/server/analytics/analytics_service.ts"
               },
               {
                 "plugin": "actions",
@@ -849,6 +845,10 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/lib/telemetry/async_sender.ts"
+              },
+              {
+                "plugin": "spaces",
+                "path": "x-pack/platform/plugins/shared/spaces/public/management/management_service.test.ts"
               },
               {
                 "plugin": "@kbn/langchain",
@@ -1071,36 +1071,172 @@
                 "path": "packages/shared-ux/chrome/navigation/mocks/storybook.ts"
               },
               {
-                "plugin": "@kbn/core-analytics-server-mocks",
-                "path": "packages/core/analytics/core-analytics-server-mocks/src/analytics_service.mock.ts"
+                "plugin": "@kbn/core-analytics-browser-mocks",
+                "path": "packages/core/analytics/core-analytics-browser-mocks/src/analytics_service.mock.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/risk_score/tasks/risk_scoring_task.test.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/risk_score/tasks/risk_scoring_task.test.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/risk_score/tasks/risk_scoring_task.test.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/risk_score/tasks/risk_scoring_task.test.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_types/utils/telemetry/send_alert_suppression_telemetry_event.test.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_types/utils/telemetry/send_alert_suppression_telemetry_event.test.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_types/utils/telemetry/send_alert_suppression_telemetry_event.test.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_types/utils/telemetry/send_alert_suppression_telemetry_event.test.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_types/utils/telemetry/send_alert_suppression_telemetry_event.test.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_types/utils/telemetry/send_alert_suppression_telemetry_event.test.ts"
+              },
+              {
+                "plugin": "discover",
+                "path": "src/platform/plugins/shared/discover/public/services/discover_ebt_manager.test.ts"
+              },
+              {
+                "plugin": "discover",
+                "path": "src/platform/plugins/shared/discover/public/services/discover_ebt_manager.test.ts"
+              },
+              {
+                "plugin": "discover",
+                "path": "src/platform/plugins/shared/discover/public/services/discover_ebt_manager.test.ts"
+              },
+              {
+                "plugin": "discover",
+                "path": "src/platform/plugins/shared/discover/public/services/discover_ebt_manager.test.ts"
+              },
+              {
+                "plugin": "discover",
+                "path": "src/platform/plugins/shared/discover/public/services/discover_ebt_manager.test.ts"
+              },
+              {
+                "plugin": "discover",
+                "path": "src/platform/plugins/shared/discover/public/services/discover_ebt_manager.test.ts"
+              },
+              {
+                "plugin": "discover",
+                "path": "src/platform/plugins/shared/discover/public/services/discover_ebt_manager.test.ts"
+              },
+              {
+                "plugin": "discover",
+                "path": "src/platform/plugins/shared/discover/public/services/discover_ebt_manager.test.ts"
+              },
+              {
+                "plugin": "discover",
+                "path": "src/platform/plugins/shared/discover/public/services/discover_ebt_manager.test.ts"
+              },
+              {
+                "plugin": "discover",
+                "path": "src/platform/plugins/shared/discover/public/services/discover_ebt_manager.test.ts"
+              },
+              {
+                "plugin": "discover",
+                "path": "src/platform/plugins/shared/discover/public/services/discover_ebt_manager.test.ts"
+              },
+              {
+                "plugin": "discover",
+                "path": "src/platform/plugins/shared/discover/public/services/discover_ebt_manager.test.ts"
+              },
+              {
+                "plugin": "discover",
+                "path": "src/platform/plugins/shared/discover/public/services/discover_ebt_manager.test.ts"
+              },
+              {
+                "plugin": "discover",
+                "path": "src/platform/plugins/shared/discover/public/services/discover_ebt_manager.test.ts"
+              },
+              {
+                "plugin": "discover",
+                "path": "src/platform/plugins/shared/discover/public/services/discover_ebt_manager.test.ts"
+              },
+              {
+                "plugin": "discover",
+                "path": "src/platform/plugins/shared/discover/public/services/discover_ebt_manager.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-analytics-browser-mocks",
+                "path": "packages/core/analytics/core-analytics-browser-mocks/src/analytics_service.mock.ts"
+              },
+              {
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/root/browser-internal/src/core_system.test.ts"
+              },
+              {
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/root/browser-internal/src/core_system.test.ts"
+              },
+              {
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/root/browser-internal/src/core_system.test.ts"
+              },
+              {
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/root/browser-internal/src/core_system.test.ts"
+              },
+              {
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/root/browser-internal/src/core_system.test.ts"
+              },
+              {
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/root/browser-internal/src/core_system.test.ts"
               },
               {
                 "plugin": "@kbn/core-analytics-server-mocks",
                 "path": "packages/core/analytics/core-analytics-server-mocks/src/analytics_service.mock.ts"
               },
               {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/server/analytics/analytics_service.test.ts"
+                "plugin": "@kbn/core-analytics-server-mocks",
+                "path": "packages/core/analytics/core-analytics-server-mocks/src/analytics_service.mock.ts"
               },
               {
                 "plugin": "security",
-                "path": "x-pack/plugins/security/server/analytics/analytics_service.test.ts"
+                "path": "x-pack/platform/plugins/shared/security/server/analytics/analytics_service.test.ts"
               },
               {
                 "plugin": "security",
-                "path": "x-pack/plugins/security/server/analytics/analytics_service.test.ts"
+                "path": "x-pack/platform/plugins/shared/security/server/analytics/analytics_service.test.ts"
               },
               {
                 "plugin": "security",
-                "path": "x-pack/plugins/security/server/analytics/analytics_service.test.ts"
+                "path": "x-pack/platform/plugins/shared/security/server/analytics/analytics_service.test.ts"
               },
               {
                 "plugin": "security",
-                "path": "x-pack/plugins/security/server/analytics/analytics_service.test.ts"
+                "path": "x-pack/platform/plugins/shared/security/server/analytics/analytics_service.test.ts"
               },
               {
                 "plugin": "security",
-                "path": "x-pack/plugins/security/server/analytics/analytics_service.test.ts"
+                "path": "x-pack/platform/plugins/shared/security/server/analytics/analytics_service.test.ts"
+              },
+              {
+                "plugin": "security",
+                "path": "x-pack/platform/plugins/shared/security/server/analytics/analytics_service.test.ts"
               },
               {
                 "plugin": "datasetQuality",
@@ -1357,142 +1493,6 @@
               {
                 "plugin": "actions",
                 "path": "x-pack/platform/plugins/shared/actions/server/lib/action_executor.test.ts"
-              },
-              {
-                "plugin": "@kbn/core-analytics-browser-mocks",
-                "path": "packages/core/analytics/core-analytics-browser-mocks/src/analytics_service.mock.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/risk_score/tasks/risk_scoring_task.test.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/risk_score/tasks/risk_scoring_task.test.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/risk_score/tasks/risk_scoring_task.test.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/risk_score/tasks/risk_scoring_task.test.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_types/utils/telemetry/send_alert_suppression_telemetry_event.test.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_types/utils/telemetry/send_alert_suppression_telemetry_event.test.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_types/utils/telemetry/send_alert_suppression_telemetry_event.test.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_types/utils/telemetry/send_alert_suppression_telemetry_event.test.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_types/utils/telemetry/send_alert_suppression_telemetry_event.test.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_types/utils/telemetry/send_alert_suppression_telemetry_event.test.ts"
-              },
-              {
-                "plugin": "discover",
-                "path": "src/platform/plugins/shared/discover/public/services/discover_ebt_manager.test.ts"
-              },
-              {
-                "plugin": "discover",
-                "path": "src/platform/plugins/shared/discover/public/services/discover_ebt_manager.test.ts"
-              },
-              {
-                "plugin": "discover",
-                "path": "src/platform/plugins/shared/discover/public/services/discover_ebt_manager.test.ts"
-              },
-              {
-                "plugin": "discover",
-                "path": "src/platform/plugins/shared/discover/public/services/discover_ebt_manager.test.ts"
-              },
-              {
-                "plugin": "discover",
-                "path": "src/platform/plugins/shared/discover/public/services/discover_ebt_manager.test.ts"
-              },
-              {
-                "plugin": "discover",
-                "path": "src/platform/plugins/shared/discover/public/services/discover_ebt_manager.test.ts"
-              },
-              {
-                "plugin": "discover",
-                "path": "src/platform/plugins/shared/discover/public/services/discover_ebt_manager.test.ts"
-              },
-              {
-                "plugin": "discover",
-                "path": "src/platform/plugins/shared/discover/public/services/discover_ebt_manager.test.ts"
-              },
-              {
-                "plugin": "discover",
-                "path": "src/platform/plugins/shared/discover/public/services/discover_ebt_manager.test.ts"
-              },
-              {
-                "plugin": "discover",
-                "path": "src/platform/plugins/shared/discover/public/services/discover_ebt_manager.test.ts"
-              },
-              {
-                "plugin": "discover",
-                "path": "src/platform/plugins/shared/discover/public/services/discover_ebt_manager.test.ts"
-              },
-              {
-                "plugin": "discover",
-                "path": "src/platform/plugins/shared/discover/public/services/discover_ebt_manager.test.ts"
-              },
-              {
-                "plugin": "discover",
-                "path": "src/platform/plugins/shared/discover/public/services/discover_ebt_manager.test.ts"
-              },
-              {
-                "plugin": "discover",
-                "path": "src/platform/plugins/shared/discover/public/services/discover_ebt_manager.test.ts"
-              },
-              {
-                "plugin": "discover",
-                "path": "src/platform/plugins/shared/discover/public/services/discover_ebt_manager.test.ts"
-              },
-              {
-                "plugin": "discover",
-                "path": "src/platform/plugins/shared/discover/public/services/discover_ebt_manager.test.ts"
-              },
-              {
-                "plugin": "@kbn/core-analytics-browser-mocks",
-                "path": "packages/core/analytics/core-analytics-browser-mocks/src/analytics_service.mock.ts"
-              },
-              {
-                "plugin": "@kbn/core",
-                "path": "src/core/packages/root/browser-internal/src/core_system.test.ts"
-              },
-              {
-                "plugin": "@kbn/core",
-                "path": "src/core/packages/root/browser-internal/src/core_system.test.ts"
-              },
-              {
-                "plugin": "@kbn/core",
-                "path": "src/core/packages/root/browser-internal/src/core_system.test.ts"
-              },
-              {
-                "plugin": "@kbn/core",
-                "path": "src/core/packages/root/browser-internal/src/core_system.test.ts"
-              },
-              {
-                "plugin": "@kbn/core",
-                "path": "src/core/packages/root/browser-internal/src/core_system.test.ts"
-              },
-              {
-                "plugin": "@kbn/core",
-                "path": "src/core/packages/root/browser-internal/src/core_system.test.ts"
               },
               {
                 "plugin": "@kbn/core",
@@ -1782,6 +1782,50 @@
             "references": [
               {
                 "plugin": "@kbn/core",
+                "path": "src/core/packages/execution-context/browser-internal/src/execution_context_service.ts"
+              },
+              {
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/application/browser-internal/src/register_analytics_context_provider.ts"
+              },
+              {
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/analytics/browser-internal/src/track_viewport_size.ts"
+              },
+              {
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/analytics/browser-internal/src/analytics_service.ts"
+              },
+              {
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/analytics/browser-internal/src/analytics_service.ts"
+              },
+              {
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/analytics/browser-internal/src/analytics_service.ts"
+              },
+              {
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/analytics/browser-internal/src/analytics_service.ts"
+              },
+              {
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/analytics/browser-internal/src/analytics_service.ts"
+              },
+              {
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/analytics/browser-internal/src/analytics_service.ts"
+              },
+              {
+                "plugin": "@kbn/core-chrome-browser-internal",
+                "path": "packages/core/chrome/core-chrome-browser-internal/src/register_analytics_context_provider.ts"
+              },
+              {
+                "plugin": "cloud",
+                "path": "x-pack/platform/plugins/shared/cloud/common/register_cloud_deployment_id_analytics_context.ts"
+              },
+              {
+                "plugin": "@kbn/core",
                 "path": "src/core/packages/elasticsearch/server-internal/src/register_analytics_context_provider.ts"
               },
               {
@@ -1829,60 +1873,16 @@
                 "path": "src/core/packages/analytics/server-internal/src/analytics_service.ts"
               },
               {
-                "plugin": "cloud",
-                "path": "x-pack/platform/plugins/shared/cloud/common/register_cloud_deployment_id_analytics_context.ts"
+                "plugin": "spaces",
+                "path": "x-pack/platform/plugins/shared/spaces/public/analytics/register_analytics_context.ts"
               },
               {
                 "plugin": "licensing",
                 "path": "x-pack/platform/plugins/shared/licensing/common/register_analytics_context_provider.ts"
               },
               {
-                "plugin": "@kbn/core",
-                "path": "src/core/packages/execution-context/browser-internal/src/execution_context_service.ts"
-              },
-              {
-                "plugin": "@kbn/core",
-                "path": "src/core/packages/application/browser-internal/src/register_analytics_context_provider.ts"
-              },
-              {
-                "plugin": "@kbn/core",
-                "path": "src/core/packages/analytics/browser-internal/src/track_viewport_size.ts"
-              },
-              {
-                "plugin": "@kbn/core",
-                "path": "src/core/packages/analytics/browser-internal/src/analytics_service.ts"
-              },
-              {
-                "plugin": "@kbn/core",
-                "path": "src/core/packages/analytics/browser-internal/src/analytics_service.ts"
-              },
-              {
-                "plugin": "@kbn/core",
-                "path": "src/core/packages/analytics/browser-internal/src/analytics_service.ts"
-              },
-              {
-                "plugin": "@kbn/core",
-                "path": "src/core/packages/analytics/browser-internal/src/analytics_service.ts"
-              },
-              {
-                "plugin": "@kbn/core",
-                "path": "src/core/packages/analytics/browser-internal/src/analytics_service.ts"
-              },
-              {
-                "plugin": "@kbn/core",
-                "path": "src/core/packages/analytics/browser-internal/src/analytics_service.ts"
-              },
-              {
-                "plugin": "@kbn/core-chrome-browser-internal",
-                "path": "packages/core/chrome/core-chrome-browser-internal/src/register_analytics_context_provider.ts"
-              },
-              {
-                "plugin": "spaces",
-                "path": "x-pack/plugins/spaces/public/analytics/register_analytics_context.ts"
-              },
-              {
                 "plugin": "security",
-                "path": "x-pack/plugins/security/public/analytics/register_user_context.ts"
+                "path": "x-pack/platform/plugins/shared/security/public/analytics/register_user_context.ts"
               },
               {
                 "plugin": "telemetry",
@@ -1901,76 +1901,56 @@
                 "path": "x-pack/solutions/security/plugins/security_solution/public/common/lib/telemetry/telemetry_service.ts"
               },
               {
-                "plugin": "@kbn/core-analytics-server-mocks",
-                "path": "packages/core/analytics/core-analytics-server-mocks/src/analytics_service.mock.ts"
-              },
-              {
-                "plugin": "@kbn/core-analytics-server-mocks",
-                "path": "packages/core/analytics/core-analytics-server-mocks/src/analytics_service.mock.ts"
-              },
-              {
-                "plugin": "@kbn/core",
-                "path": "src/core/packages/elasticsearch/server-internal/src/register_analytics_context_provider.test.ts"
-              },
-              {
-                "plugin": "@kbn/core",
-                "path": "src/core/packages/status/server-internal/src/status_service.test.ts"
-              },
-              {
-                "plugin": "@kbn/core",
-                "path": "src/core/packages/status/server-internal/src/status_service.test.ts"
-              },
-              {
                 "plugin": "@kbn/core-analytics-browser-mocks",
                 "path": "packages/core/analytics/core-analytics-browser-mocks/src/analytics_service.mock.ts"
               },
               {
                 "plugin": "security",
-                "path": "x-pack/plugins/security/public/analytics/analytics_service.test.ts"
+                "path": "x-pack/platform/plugins/shared/security/public/analytics/analytics_service.test.ts"
               },
               {
                 "plugin": "security",
-                "path": "x-pack/plugins/security/public/analytics/analytics_service.test.ts"
+                "path": "x-pack/platform/plugins/shared/security/public/analytics/analytics_service.test.ts"
               },
               {
                 "plugin": "security",
-                "path": "x-pack/plugins/security/public/analytics/register_user_context.test.ts"
+                "path": "x-pack/platform/plugins/shared/security/public/analytics/register_user_context.test.ts"
               },
               {
                 "plugin": "security",
-                "path": "x-pack/plugins/security/public/analytics/register_user_context.test.ts"
+                "path": "x-pack/platform/plugins/shared/security/public/analytics/register_user_context.test.ts"
               },
               {
                 "plugin": "security",
-                "path": "x-pack/plugins/security/public/analytics/register_user_context.test.ts"
+                "path": "x-pack/platform/plugins/shared/security/public/analytics/register_user_context.test.ts"
               },
               {
                 "plugin": "security",
-                "path": "x-pack/plugins/security/public/analytics/register_user_context.test.ts"
+                "path": "x-pack/platform/plugins/shared/security/public/analytics/register_user_context.test.ts"
               },
               {
                 "plugin": "security",
-                "path": "x-pack/plugins/security/public/analytics/register_user_context.test.ts"
+                "path": "x-pack/platform/plugins/shared/security/public/analytics/register_user_context.test.ts"
               },
               {
                 "plugin": "security",
-                "path": "x-pack/plugins/security/public/analytics/register_user_context.test.ts"
+                "path": "x-pack/platform/plugins/shared/security/public/analytics/register_user_context.test.ts"
               },
               {
                 "plugin": "security",
-                "path": "x-pack/plugins/security/public/analytics/register_user_context.test.ts"
+                "path": "x-pack/platform/plugins/shared/security/public/analytics/register_user_context.test.ts"
               },
               {
                 "plugin": "security",
-                "path": "x-pack/plugins/security/public/analytics/register_user_context.test.ts"
+                "path": "x-pack/platform/plugins/shared/security/public/analytics/register_user_context.test.ts"
               },
               {
                 "plugin": "security",
-                "path": "x-pack/plugins/security/public/analytics/register_user_context.test.ts"
+                "path": "x-pack/platform/plugins/shared/security/public/analytics/register_user_context.test.ts"
               },
               {
                 "plugin": "security",
-                "path": "x-pack/plugins/security/public/analytics/register_user_context.test.ts"
+                "path": "x-pack/platform/plugins/shared/security/public/analytics/register_user_context.test.ts"
               },
               {
                 "plugin": "discover",
@@ -2007,6 +1987,26 @@
               {
                 "plugin": "@kbn/core-chrome-browser-internal",
                 "path": "packages/core/chrome/core-chrome-browser-internal/src/register_analytics_context_provider.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-analytics-server-mocks",
+                "path": "packages/core/analytics/core-analytics-server-mocks/src/analytics_service.mock.ts"
+              },
+              {
+                "plugin": "@kbn/core-analytics-server-mocks",
+                "path": "packages/core/analytics/core-analytics-server-mocks/src/analytics_service.mock.ts"
+              },
+              {
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/elasticsearch/server-internal/src/register_analytics_context_provider.test.ts"
+              },
+              {
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/status/server-internal/src/status_service.test.ts"
+              },
+              {
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/status/server-internal/src/status_service.test.ts"
               },
               {
                 "plugin": "@kbn/core",

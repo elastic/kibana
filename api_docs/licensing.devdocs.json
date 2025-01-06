@@ -495,18 +495,6 @@
             "trackAdoption": false,
             "references": [
               {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/common/licensing/license_service.test.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/common/licensing/license_service.test.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/common/licensing/license_service.test.ts"
-              },
-              {
                 "plugin": "fleet",
                 "path": "x-pack/platform/plugins/shared/fleet/common/services/agent_policy_config.test.ts"
               },
@@ -521,6 +509,18 @@
               {
                 "plugin": "fleet",
                 "path": "x-pack/platform/plugins/shared/fleet/server/services/agent_policy_watch.test.ts"
+              },
+              {
+                "plugin": "security",
+                "path": "x-pack/platform/plugins/shared/security/common/licensing/license_service.test.ts"
+              },
+              {
+                "plugin": "security",
+                "path": "x-pack/platform/plugins/shared/security/common/licensing/license_service.test.ts"
+              },
+              {
+                "plugin": "security",
+                "path": "x-pack/platform/plugins/shared/security/common/licensing/license_service.test.ts"
               },
               {
                 "plugin": "apm",
@@ -804,7 +804,7 @@
           "references": [
             {
               "plugin": "security",
-              "path": "x-pack/plugins/security/public/plugin.tsx"
+              "path": "x-pack/platform/plugins/shared/security/public/plugin.tsx"
             },
             {
               "plugin": "licenseManagement",
@@ -1798,18 +1798,6 @@
             "trackAdoption": false,
             "references": [
               {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/common/licensing/license_service.test.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/common/licensing/license_service.test.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/common/licensing/license_service.test.ts"
-              },
-              {
                 "plugin": "fleet",
                 "path": "x-pack/platform/plugins/shared/fleet/common/services/agent_policy_config.test.ts"
               },
@@ -1824,6 +1812,18 @@
               {
                 "plugin": "fleet",
                 "path": "x-pack/platform/plugins/shared/fleet/server/services/agent_policy_watch.test.ts"
+              },
+              {
+                "plugin": "security",
+                "path": "x-pack/platform/plugins/shared/security/common/licensing/license_service.test.ts"
+              },
+              {
+                "plugin": "security",
+                "path": "x-pack/platform/plugins/shared/security/common/licensing/license_service.test.ts"
+              },
+              {
+                "plugin": "security",
+                "path": "x-pack/platform/plugins/shared/security/common/licensing/license_service.test.ts"
               },
               {
                 "plugin": "apm",
@@ -2153,28 +2153,24 @@
           "trackAdoption": false,
           "references": [
             {
-              "plugin": "spaces",
-              "path": "x-pack/plugins/spaces/server/usage_collection/spaces_usage_collector.ts"
-            },
-            {
-              "plugin": "spaces",
-              "path": "x-pack/plugins/spaces/server/plugin.ts"
-            },
-            {
-              "plugin": "spaces",
-              "path": "x-pack/plugins/spaces/server/plugin.ts"
-            },
-            {
-              "plugin": "security",
-              "path": "x-pack/plugins/security/server/plugin.ts"
-            },
-            {
               "plugin": "graph",
               "path": "x-pack/plugins/graph/server/plugin.ts"
             },
             {
               "plugin": "spaces",
-              "path": "x-pack/plugins/spaces/server/usage_collection/spaces_usage_collector.test.ts"
+              "path": "x-pack/platform/plugins/shared/spaces/server/usage_collection/spaces_usage_collector.ts"
+            },
+            {
+              "plugin": "spaces",
+              "path": "x-pack/platform/plugins/shared/spaces/server/plugin.ts"
+            },
+            {
+              "plugin": "spaces",
+              "path": "x-pack/platform/plugins/shared/spaces/server/plugin.ts"
+            },
+            {
+              "plugin": "security",
+              "path": "x-pack/platform/plugins/shared/security/server/plugin.ts"
             },
             {
               "plugin": "actions",
@@ -2243,6 +2239,10 @@
             {
               "plugin": "searchprofiler",
               "path": "x-pack/platform/plugins/shared/searchprofiler/server/plugin.ts"
+            },
+            {
+              "plugin": "spaces",
+              "path": "x-pack/platform/plugins/shared/spaces/server/usage_collection/spaces_usage_collector.test.ts"
             },
             {
               "plugin": "upgradeAssistant",

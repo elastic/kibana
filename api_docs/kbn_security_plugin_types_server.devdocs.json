@@ -31,7 +31,7 @@
           },
           "<Readonly<{ base?: string[] | undefined; feature?: Record<string, string[]> | undefined; } & { spaces: string[] | \"*\"[]; }>[]>"
         ],
-        "path": "x-pack/packages/security/plugin_types_server/src/authorization/role_schema.ts",
+        "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authorization/role_schema.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -45,7 +45,7 @@
             "signature": [
               "() => { global: string[]; space: string[]; }"
             ],
-            "path": "x-pack/packages/security/plugin_types_server/src/authorization/role_schema.ts",
+            "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authorization/role_schema.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -112,7 +112,7 @@
           },
           "<Record<string, Readonly<{} & { kibana: Readonly<{ base?: string[] | undefined; feature?: Record<string, string[]> | undefined; } & { spaces: string[] | \"*\"[]; }>[]; elasticsearch: Readonly<{ cluster?: string[] | undefined; indices?: Readonly<{ query?: string | undefined; field_security?: Record<\"except\" | \"grant\", string[]> | undefined; allow_restricted_indices?: boolean | undefined; } & { names: string[]; privileges: string[]; }>[] | undefined; remote_cluster?: Readonly<{} & { privileges: string[]; clusters: string[]; }>[] | undefined; remote_indices?: Readonly<{ query?: string | undefined; field_security?: Record<\"except\" | \"grant\", string[]> | undefined; allow_restricted_indices?: boolean | undefined; } & { names: string[]; privileges: string[]; clusters: string[]; }>[] | undefined; run_as?: string[] | undefined; } & {}>; }>>>; }>"
         ],
-        "path": "x-pack/packages/security/plugin_types_server/src/authentication/api_keys/api_keys.ts",
+        "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authentication/api_keys/api_keys.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -126,7 +126,7 @@
             "signature": [
               "() => { global: string[]; space: string[]; }"
             ],
-            "path": "x-pack/packages/security/plugin_types_server/src/authentication/api_keys/api_keys.ts",
+            "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authentication/api_keys/api_keys.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -193,7 +193,7 @@
           },
           "<Record<string, Readonly<{} & { kibana: Readonly<{ base?: string[] | undefined; feature?: Record<string, string[]> | undefined; } & { spaces: string[] | \"*\"[]; }>[]; elasticsearch: Readonly<{ cluster?: string[] | undefined; indices?: Readonly<{ query?: string | undefined; field_security?: Record<\"except\" | \"grant\", string[]> | undefined; allow_restricted_indices?: boolean | undefined; } & { names: string[]; privileges: string[]; }>[] | undefined; remote_cluster?: Readonly<{} & { privileges: string[]; clusters: string[]; }>[] | undefined; remote_indices?: Readonly<{ query?: string | undefined; field_security?: Record<\"except\" | \"grant\", string[]> | undefined; allow_restricted_indices?: boolean | undefined; } & { names: string[]; privileges: string[]; clusters: string[]; }>[] | undefined; run_as?: string[] | undefined; } & {}>; }>>>; }>"
         ],
-        "path": "x-pack/packages/security/plugin_types_server/src/authentication/api_keys/api_keys.ts",
+        "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authentication/api_keys/api_keys.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -207,7 +207,7 @@
             "signature": [
               "() => { global: string[]; space: string[]; }"
             ],
-            "path": "x-pack/packages/security/plugin_types_server/src/authentication/api_keys/api_keys.ts",
+            "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authentication/api_keys/api_keys.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -260,7 +260,7 @@
         "description": [
           "Actions are used to create the \"actions\" that are associated with Elasticsearch's\napplication privileges, and are used to perform the authorization checks implemented\nby the various `checkPrivilegesWithRequest` derivatives."
         ],
-        "path": "x-pack/packages/security/plugin_types_server/src/authorization/actions/actions.ts",
+        "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authorization/actions/actions.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -280,7 +280,7 @@
                 "text": "ApiActions"
               }
             ],
-            "path": "x-pack/packages/security/plugin_types_server/src/authorization/actions/actions.ts",
+            "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authorization/actions/actions.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -300,7 +300,7 @@
                 "text": "AppActions"
               }
             ],
-            "path": "x-pack/packages/security/plugin_types_server/src/authorization/actions/actions.ts",
+            "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authorization/actions/actions.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -320,7 +320,7 @@
                 "text": "CasesActions"
               }
             ],
-            "path": "x-pack/packages/security/plugin_types_server/src/authorization/actions/actions.ts",
+            "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authorization/actions/actions.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -331,7 +331,7 @@
             "tags": [],
             "label": "login",
             "description": [],
-            "path": "x-pack/packages/security/plugin_types_server/src/authorization/actions/actions.ts",
+            "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authorization/actions/actions.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -351,7 +351,7 @@
                 "text": "SavedObjectActions"
               }
             ],
-            "path": "x-pack/packages/security/plugin_types_server/src/authorization/actions/actions.ts",
+            "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authorization/actions/actions.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -371,7 +371,7 @@
                 "text": "AlertingActions"
               }
             ],
-            "path": "x-pack/packages/security/plugin_types_server/src/authorization/actions/actions.ts",
+            "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authorization/actions/actions.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -391,7 +391,7 @@
                 "text": "SpaceActions"
               }
             ],
-            "path": "x-pack/packages/security/plugin_types_server/src/authorization/actions/actions.ts",
+            "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authorization/actions/actions.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -411,7 +411,7 @@
                 "text": "UIActions"
               }
             ],
-            "path": "x-pack/packages/security/plugin_types_server/src/authorization/actions/actions.ts",
+            "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authorization/actions/actions.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -425,7 +425,7 @@
         "tags": [],
         "label": "AlertingActions",
         "description": [],
-        "path": "x-pack/packages/security/plugin_types_server/src/authorization/actions/alerting.ts",
+        "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authorization/actions/alerting.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -439,7 +439,7 @@
             "signature": [
               "(ruleTypeId: string, consumer: string, alertingEntity: string, operation: string) => string"
             ],
-            "path": "x-pack/packages/security/plugin_types_server/src/authorization/actions/alerting.ts",
+            "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authorization/actions/alerting.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -453,7 +453,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "x-pack/packages/security/plugin_types_server/src/authorization/actions/alerting.ts",
+                "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authorization/actions/alerting.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -468,7 +468,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "x-pack/packages/security/plugin_types_server/src/authorization/actions/alerting.ts",
+                "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authorization/actions/alerting.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -483,7 +483,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "x-pack/packages/security/plugin_types_server/src/authorization/actions/alerting.ts",
+                "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authorization/actions/alerting.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -498,7 +498,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "x-pack/packages/security/plugin_types_server/src/authorization/actions/alerting.ts",
+                "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authorization/actions/alerting.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -516,7 +516,7 @@
         "tags": [],
         "label": "ApiActions",
         "description": [],
-        "path": "x-pack/packages/security/plugin_types_server/src/authorization/actions/api.ts",
+        "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authorization/actions/api.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -538,7 +538,7 @@
               },
               ", subject: string): string; (subject: string): string; }"
             ],
-            "path": "x-pack/packages/security/plugin_types_server/src/authorization/actions/api.ts",
+            "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authorization/actions/api.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -558,7 +558,7 @@
                     "text": "ApiOperation"
                   }
                 ],
-                "path": "x-pack/packages/security/plugin_types_server/src/authorization/actions/api.ts",
+                "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authorization/actions/api.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -573,7 +573,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "x-pack/packages/security/plugin_types_server/src/authorization/actions/api.ts",
+                "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authorization/actions/api.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -601,17 +601,17 @@
               },
               ", subject: string): string; (subject: string): string; }"
             ],
-            "path": "x-pack/packages/security/plugin_types_server/src/authorization/actions/api.ts",
+            "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authorization/actions/api.ts",
             "deprecated": true,
             "trackAdoption": false,
             "references": [
               {
                 "plugin": "security",
-                "path": "x-pack/plugins/security/server/authorization/api_authorization.ts"
+                "path": "x-pack/platform/plugins/shared/security/server/authorization/api_authorization.ts"
               },
               {
                 "plugin": "security",
-                "path": "x-pack/plugins/security/server/authorization/api_authorization.ts"
+                "path": "x-pack/platform/plugins/shared/security/server/authorization/api_authorization.ts"
               },
               {
                 "plugin": "telemetry",
@@ -679,407 +679,407 @@
               },
               {
                 "plugin": "@kbn/security-authorization-core",
-                "path": "x-pack/packages/security/authorization_core/src/actions/api.ts"
+                "path": "x-pack/platform/packages/private/security/authorization_core/src/actions/api.ts"
               },
               {
                 "plugin": "@kbn/security-authorization-core",
-                "path": "x-pack/packages/security/authorization_core/src/actions/api.ts"
+                "path": "x-pack/platform/packages/private/security/authorization_core/src/actions/api.ts"
               },
               {
                 "plugin": "@kbn/security-authorization-core",
-                "path": "x-pack/packages/security/authorization_core/src/privileges/feature_privilege_builder/api.ts"
+                "path": "x-pack/platform/packages/private/security/authorization_core/src/privileges/feature_privilege_builder/api.ts"
               },
               {
                 "plugin": "@kbn/security-authorization-core",
-                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.ts"
+                "path": "x-pack/platform/packages/private/security/authorization_core/src/privileges/privileges.ts"
               },
               {
                 "plugin": "@kbn/security-authorization-core",
-                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.ts"
+                "path": "x-pack/platform/packages/private/security/authorization_core/src/privileges/privileges.ts"
               },
               {
                 "plugin": "@kbn/security-authorization-core",
-                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.ts"
+                "path": "x-pack/platform/packages/private/security/authorization_core/src/privileges/privileges.ts"
               },
               {
                 "plugin": "@kbn/security-authorization-core",
-                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.ts"
+                "path": "x-pack/platform/packages/private/security/authorization_core/src/privileges/privileges.ts"
               },
               {
                 "plugin": "@kbn/security-authorization-core",
-                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/server/authorization/api_authorization.test.ts"
+                "path": "x-pack/platform/packages/private/security/authorization_core/src/privileges/privileges.ts"
               },
               {
                 "plugin": "security",
-                "path": "x-pack/plugins/security/server/authorization/api_authorization.test.ts"
+                "path": "x-pack/platform/plugins/shared/security/server/authorization/api_authorization.test.ts"
               },
               {
                 "plugin": "security",
-                "path": "x-pack/plugins/security/server/authorization/api_authorization.test.ts"
+                "path": "x-pack/platform/plugins/shared/security/server/authorization/api_authorization.test.ts"
               },
               {
+                "plugin": "security",
+                "path": "x-pack/platform/plugins/shared/security/server/authorization/api_authorization.test.ts"
+              },
+              {
                 "plugin": "@kbn/security-authorization-core",
-                "path": "x-pack/packages/security/authorization_core/src/actions/api.test.ts"
+                "path": "x-pack/platform/packages/private/security/authorization_core/src/actions/api.test.ts"
               },
               {
                 "plugin": "@kbn/security-authorization-core",
-                "path": "x-pack/packages/security/authorization_core/src/actions/api.test.ts"
+                "path": "x-pack/platform/packages/private/security/authorization_core/src/actions/api.test.ts"
               },
               {
                 "plugin": "@kbn/security-authorization-core",
-                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+                "path": "x-pack/platform/packages/private/security/authorization_core/src/privileges/privileges.test.ts"
               },
               {
                 "plugin": "@kbn/security-authorization-core",
-                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+                "path": "x-pack/platform/packages/private/security/authorization_core/src/privileges/privileges.test.ts"
               },
               {
                 "plugin": "@kbn/security-authorization-core",
-                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+                "path": "x-pack/platform/packages/private/security/authorization_core/src/privileges/privileges.test.ts"
               },
               {
                 "plugin": "@kbn/security-authorization-core",
-                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+                "path": "x-pack/platform/packages/private/security/authorization_core/src/privileges/privileges.test.ts"
               },
               {
                 "plugin": "@kbn/security-authorization-core",
-                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+                "path": "x-pack/platform/packages/private/security/authorization_core/src/privileges/privileges.test.ts"
               },
               {
                 "plugin": "@kbn/security-authorization-core",
-                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+                "path": "x-pack/platform/packages/private/security/authorization_core/src/privileges/privileges.test.ts"
               },
               {
                 "plugin": "@kbn/security-authorization-core",
-                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+                "path": "x-pack/platform/packages/private/security/authorization_core/src/privileges/privileges.test.ts"
               },
               {
                 "plugin": "@kbn/security-authorization-core",
-                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+                "path": "x-pack/platform/packages/private/security/authorization_core/src/privileges/privileges.test.ts"
               },
               {
                 "plugin": "@kbn/security-authorization-core",
-                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+                "path": "x-pack/platform/packages/private/security/authorization_core/src/privileges/privileges.test.ts"
               },
               {
                 "plugin": "@kbn/security-authorization-core",
-                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+                "path": "x-pack/platform/packages/private/security/authorization_core/src/privileges/privileges.test.ts"
               },
               {
                 "plugin": "@kbn/security-authorization-core",
-                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+                "path": "x-pack/platform/packages/private/security/authorization_core/src/privileges/privileges.test.ts"
               },
               {
                 "plugin": "@kbn/security-authorization-core",
-                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+                "path": "x-pack/platform/packages/private/security/authorization_core/src/privileges/privileges.test.ts"
               },
               {
                 "plugin": "@kbn/security-authorization-core",
-                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+                "path": "x-pack/platform/packages/private/security/authorization_core/src/privileges/privileges.test.ts"
               },
               {
                 "plugin": "@kbn/security-authorization-core",
-                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+                "path": "x-pack/platform/packages/private/security/authorization_core/src/privileges/privileges.test.ts"
               },
               {
                 "plugin": "@kbn/security-authorization-core",
-                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+                "path": "x-pack/platform/packages/private/security/authorization_core/src/privileges/privileges.test.ts"
               },
               {
                 "plugin": "@kbn/security-authorization-core",
-                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+                "path": "x-pack/platform/packages/private/security/authorization_core/src/privileges/privileges.test.ts"
               },
               {
                 "plugin": "@kbn/security-authorization-core",
-                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+                "path": "x-pack/platform/packages/private/security/authorization_core/src/privileges/privileges.test.ts"
               },
               {
                 "plugin": "@kbn/security-authorization-core",
-                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+                "path": "x-pack/platform/packages/private/security/authorization_core/src/privileges/privileges.test.ts"
               },
               {
                 "plugin": "@kbn/security-authorization-core",
-                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+                "path": "x-pack/platform/packages/private/security/authorization_core/src/privileges/privileges.test.ts"
               },
               {
                 "plugin": "@kbn/security-authorization-core",
-                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+                "path": "x-pack/platform/packages/private/security/authorization_core/src/privileges/privileges.test.ts"
               },
               {
                 "plugin": "@kbn/security-authorization-core",
-                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+                "path": "x-pack/platform/packages/private/security/authorization_core/src/privileges/privileges.test.ts"
               },
               {
                 "plugin": "@kbn/security-authorization-core",
-                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+                "path": "x-pack/platform/packages/private/security/authorization_core/src/privileges/privileges.test.ts"
               },
               {
                 "plugin": "@kbn/security-authorization-core",
-                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+                "path": "x-pack/platform/packages/private/security/authorization_core/src/privileges/privileges.test.ts"
               },
               {
                 "plugin": "@kbn/security-authorization-core",
-                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+                "path": "x-pack/platform/packages/private/security/authorization_core/src/privileges/privileges.test.ts"
               },
               {
                 "plugin": "@kbn/security-authorization-core",
-                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+                "path": "x-pack/platform/packages/private/security/authorization_core/src/privileges/privileges.test.ts"
               },
               {
                 "plugin": "@kbn/security-authorization-core",
-                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+                "path": "x-pack/platform/packages/private/security/authorization_core/src/privileges/privileges.test.ts"
               },
               {
                 "plugin": "@kbn/security-authorization-core",
-                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+                "path": "x-pack/platform/packages/private/security/authorization_core/src/privileges/privileges.test.ts"
               },
               {
                 "plugin": "@kbn/security-authorization-core",
-                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+                "path": "x-pack/platform/packages/private/security/authorization_core/src/privileges/privileges.test.ts"
               },
               {
                 "plugin": "@kbn/security-authorization-core",
-                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+                "path": "x-pack/platform/packages/private/security/authorization_core/src/privileges/privileges.test.ts"
               },
               {
                 "plugin": "@kbn/security-authorization-core",
-                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+                "path": "x-pack/platform/packages/private/security/authorization_core/src/privileges/privileges.test.ts"
               },
               {
                 "plugin": "@kbn/security-authorization-core",
-                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+                "path": "x-pack/platform/packages/private/security/authorization_core/src/privileges/privileges.test.ts"
               },
               {
                 "plugin": "@kbn/security-authorization-core",
-                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+                "path": "x-pack/platform/packages/private/security/authorization_core/src/privileges/privileges.test.ts"
               },
               {
                 "plugin": "@kbn/security-authorization-core",
-                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+                "path": "x-pack/platform/packages/private/security/authorization_core/src/privileges/privileges.test.ts"
               },
               {
                 "plugin": "@kbn/security-authorization-core",
-                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+                "path": "x-pack/platform/packages/private/security/authorization_core/src/privileges/privileges.test.ts"
               },
               {
                 "plugin": "@kbn/security-authorization-core",
-                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+                "path": "x-pack/platform/packages/private/security/authorization_core/src/privileges/privileges.test.ts"
               },
               {
                 "plugin": "@kbn/security-authorization-core",
-                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+                "path": "x-pack/platform/packages/private/security/authorization_core/src/privileges/privileges.test.ts"
               },
               {
                 "plugin": "@kbn/security-authorization-core",
-                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+                "path": "x-pack/platform/packages/private/security/authorization_core/src/privileges/privileges.test.ts"
               },
               {
                 "plugin": "@kbn/security-authorization-core",
-                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+                "path": "x-pack/platform/packages/private/security/authorization_core/src/privileges/privileges.test.ts"
               },
               {
                 "plugin": "@kbn/security-authorization-core",
-                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+                "path": "x-pack/platform/packages/private/security/authorization_core/src/privileges/privileges.test.ts"
               },
               {
                 "plugin": "@kbn/security-authorization-core",
-                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+                "path": "x-pack/platform/packages/private/security/authorization_core/src/privileges/privileges.test.ts"
               },
               {
                 "plugin": "@kbn/security-authorization-core",
-                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+                "path": "x-pack/platform/packages/private/security/authorization_core/src/privileges/privileges.test.ts"
               },
               {
                 "plugin": "@kbn/security-authorization-core",
-                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+                "path": "x-pack/platform/packages/private/security/authorization_core/src/privileges/privileges.test.ts"
               },
               {
                 "plugin": "@kbn/security-authorization-core",
-                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+                "path": "x-pack/platform/packages/private/security/authorization_core/src/privileges/privileges.test.ts"
               },
               {
                 "plugin": "@kbn/security-authorization-core",
-                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+                "path": "x-pack/platform/packages/private/security/authorization_core/src/privileges/privileges.test.ts"
               },
               {
                 "plugin": "@kbn/security-authorization-core",
-                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+                "path": "x-pack/platform/packages/private/security/authorization_core/src/privileges/privileges.test.ts"
               },
               {
                 "plugin": "@kbn/security-authorization-core",
-                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+                "path": "x-pack/platform/packages/private/security/authorization_core/src/privileges/privileges.test.ts"
               },
               {
                 "plugin": "@kbn/security-authorization-core",
-                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+                "path": "x-pack/platform/packages/private/security/authorization_core/src/privileges/privileges.test.ts"
               },
               {
                 "plugin": "@kbn/security-authorization-core",
-                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+                "path": "x-pack/platform/packages/private/security/authorization_core/src/privileges/privileges.test.ts"
               },
               {
                 "plugin": "@kbn/security-authorization-core",
-                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+                "path": "x-pack/platform/packages/private/security/authorization_core/src/privileges/privileges.test.ts"
               },
               {
                 "plugin": "@kbn/security-authorization-core",
-                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+                "path": "x-pack/platform/packages/private/security/authorization_core/src/privileges/privileges.test.ts"
               },
               {
                 "plugin": "@kbn/security-authorization-core",
-                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+                "path": "x-pack/platform/packages/private/security/authorization_core/src/privileges/privileges.test.ts"
               },
               {
                 "plugin": "@kbn/security-authorization-core",
-                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+                "path": "x-pack/platform/packages/private/security/authorization_core/src/privileges/privileges.test.ts"
               },
               {
                 "plugin": "@kbn/security-authorization-core",
-                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+                "path": "x-pack/platform/packages/private/security/authorization_core/src/privileges/privileges.test.ts"
               },
               {
                 "plugin": "@kbn/security-authorization-core",
-                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+                "path": "x-pack/platform/packages/private/security/authorization_core/src/privileges/privileges.test.ts"
               },
               {
                 "plugin": "@kbn/security-authorization-core",
-                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+                "path": "x-pack/platform/packages/private/security/authorization_core/src/privileges/privileges.test.ts"
               },
               {
                 "plugin": "@kbn/security-authorization-core",
-                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+                "path": "x-pack/platform/packages/private/security/authorization_core/src/privileges/privileges.test.ts"
               },
               {
                 "plugin": "@kbn/security-authorization-core",
-                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+                "path": "x-pack/platform/packages/private/security/authorization_core/src/privileges/privileges.test.ts"
               },
               {
                 "plugin": "@kbn/security-authorization-core",
-                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+                "path": "x-pack/platform/packages/private/security/authorization_core/src/privileges/privileges.test.ts"
               },
               {
                 "plugin": "@kbn/security-authorization-core",
-                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+                "path": "x-pack/platform/packages/private/security/authorization_core/src/privileges/privileges.test.ts"
               },
               {
                 "plugin": "@kbn/security-authorization-core",
-                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+                "path": "x-pack/platform/packages/private/security/authorization_core/src/privileges/privileges.test.ts"
               },
               {
                 "plugin": "@kbn/security-authorization-core",
-                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+                "path": "x-pack/platform/packages/private/security/authorization_core/src/privileges/privileges.test.ts"
               },
               {
                 "plugin": "@kbn/security-authorization-core",
-                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+                "path": "x-pack/platform/packages/private/security/authorization_core/src/privileges/privileges.test.ts"
               },
               {
                 "plugin": "@kbn/security-authorization-core",
-                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+                "path": "x-pack/platform/packages/private/security/authorization_core/src/privileges/privileges.test.ts"
               },
               {
                 "plugin": "@kbn/security-authorization-core",
-                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+                "path": "x-pack/platform/packages/private/security/authorization_core/src/privileges/privileges.test.ts"
               },
               {
                 "plugin": "@kbn/security-authorization-core",
-                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+                "path": "x-pack/platform/packages/private/security/authorization_core/src/privileges/privileges.test.ts"
               },
               {
                 "plugin": "@kbn/security-authorization-core",
-                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+                "path": "x-pack/platform/packages/private/security/authorization_core/src/privileges/privileges.test.ts"
               },
               {
                 "plugin": "@kbn/security-authorization-core",
-                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+                "path": "x-pack/platform/packages/private/security/authorization_core/src/privileges/privileges.test.ts"
               },
               {
                 "plugin": "@kbn/security-authorization-core",
-                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+                "path": "x-pack/platform/packages/private/security/authorization_core/src/privileges/privileges.test.ts"
               },
               {
                 "plugin": "@kbn/security-authorization-core",
-                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+                "path": "x-pack/platform/packages/private/security/authorization_core/src/privileges/privileges.test.ts"
               },
               {
                 "plugin": "@kbn/security-authorization-core",
-                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+                "path": "x-pack/platform/packages/private/security/authorization_core/src/privileges/privileges.test.ts"
               },
               {
                 "plugin": "@kbn/security-authorization-core",
-                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+                "path": "x-pack/platform/packages/private/security/authorization_core/src/privileges/privileges.test.ts"
               },
               {
                 "plugin": "@kbn/security-authorization-core",
-                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+                "path": "x-pack/platform/packages/private/security/authorization_core/src/privileges/privileges.test.ts"
               },
               {
                 "plugin": "@kbn/security-authorization-core",
-                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+                "path": "x-pack/platform/packages/private/security/authorization_core/src/privileges/privileges.test.ts"
               },
               {
                 "plugin": "@kbn/security-authorization-core",
-                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+                "path": "x-pack/platform/packages/private/security/authorization_core/src/privileges/privileges.test.ts"
               },
               {
                 "plugin": "@kbn/security-authorization-core",
-                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+                "path": "x-pack/platform/packages/private/security/authorization_core/src/privileges/privileges.test.ts"
               },
               {
                 "plugin": "@kbn/security-authorization-core",
-                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+                "path": "x-pack/platform/packages/private/security/authorization_core/src/privileges/privileges.test.ts"
               },
               {
                 "plugin": "@kbn/security-authorization-core",
-                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+                "path": "x-pack/platform/packages/private/security/authorization_core/src/privileges/privileges.test.ts"
               },
               {
                 "plugin": "@kbn/security-authorization-core",
-                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+                "path": "x-pack/platform/packages/private/security/authorization_core/src/privileges/privileges.test.ts"
               },
               {
                 "plugin": "@kbn/security-authorization-core",
-                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+                "path": "x-pack/platform/packages/private/security/authorization_core/src/privileges/privileges.test.ts"
               },
               {
                 "plugin": "@kbn/security-authorization-core",
-                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+                "path": "x-pack/platform/packages/private/security/authorization_core/src/privileges/privileges.test.ts"
               },
               {
                 "plugin": "@kbn/security-authorization-core",
-                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+                "path": "x-pack/platform/packages/private/security/authorization_core/src/privileges/privileges.test.ts"
               },
               {
                 "plugin": "@kbn/security-authorization-core",
-                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+                "path": "x-pack/platform/packages/private/security/authorization_core/src/privileges/privileges.test.ts"
               },
               {
                 "plugin": "@kbn/security-authorization-core",
-                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+                "path": "x-pack/platform/packages/private/security/authorization_core/src/privileges/privileges.test.ts"
               },
               {
                 "plugin": "@kbn/security-authorization-core",
-                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+                "path": "x-pack/platform/packages/private/security/authorization_core/src/privileges/privileges.test.ts"
               },
               {
                 "plugin": "@kbn/security-authorization-core",
-                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+                "path": "x-pack/platform/packages/private/security/authorization_core/src/privileges/privileges.test.ts"
               },
               {
                 "plugin": "@kbn/security-authorization-core",
-                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+                "path": "x-pack/platform/packages/private/security/authorization_core/src/privileges/privileges.test.ts"
               },
               {
                 "plugin": "@kbn/security-authorization-core",
-                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+                "path": "x-pack/platform/packages/private/security/authorization_core/src/privileges/privileges.test.ts"
               },
               {
                 "plugin": "@kbn/security-authorization-core",
-                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+                "path": "x-pack/platform/packages/private/security/authorization_core/src/privileges/privileges.test.ts"
               },
               {
                 "plugin": "fleet",
@@ -1097,7 +1097,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "x-pack/packages/security/plugin_types_server/src/authorization/actions/api.ts",
+                "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authorization/actions/api.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1115,7 +1115,7 @@
             "signature": [
               "(routeTag: string) => string"
             ],
-            "path": "x-pack/packages/security/plugin_types_server/src/authorization/actions/api.ts",
+            "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authorization/actions/api.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1129,7 +1129,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "x-pack/packages/security/plugin_types_server/src/authorization/actions/api.ts",
+                "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authorization/actions/api.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1895,7 +1895,7 @@
         "tags": [],
         "label": "AppActions",
         "description": [],
-        "path": "x-pack/packages/security/plugin_types_server/src/authorization/actions/app.ts",
+        "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authorization/actions/app.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1909,7 +1909,7 @@
             "signature": [
               "(operation: string) => string"
             ],
-            "path": "x-pack/packages/security/plugin_types_server/src/authorization/actions/app.ts",
+            "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authorization/actions/app.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1923,7 +1923,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "x-pack/packages/security/plugin_types_server/src/authorization/actions/app.ts",
+                "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authorization/actions/app.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2256,7 +2256,7 @@
             "tags": [],
             "label": "log",
             "description": [
-              "\nLogs an {@link AuditEvent} and automatically adds meta data about the\ncurrent user, space and correlation id.\n\nGuidelines around what events should be logged and how they should be\nstructured can be found in: `/x-pack/plugins/security/README.md`\n"
+              "\nLogs an {@link AuditEvent} and automatically adds meta data about the\ncurrent user, space and correlation id.\n\nGuidelines around what events should be logged and how they should be\nstructured can be found in: `/x-pack/platform/plugins/shared/security/README.md`\n"
             ],
             "signature": [
               "(event: ",
@@ -2345,7 +2345,7 @@
         "tags": [],
         "label": "AuditServiceSetup",
         "description": [],
-        "path": "x-pack/packages/security/plugin_types_server/src/audit/audit_service.ts",
+        "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/audit/audit_service.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2364,7 +2364,7 @@
               "<unknown, unknown, unknown, any>) => ",
               "AuditLogger"
             ],
-            "path": "x-pack/packages/security/plugin_types_server/src/audit/audit_service.ts",
+            "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/audit/audit_service.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2379,7 +2379,7 @@
                   "KibanaRequest",
                   "<unknown, unknown, unknown, any>"
                 ],
-                "path": "x-pack/packages/security/plugin_types_server/src/audit/audit_service.ts",
+                "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/audit/audit_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2399,7 +2399,7 @@
             "signature": [
               "AuditLogger"
             ],
-            "path": "x-pack/packages/security/plugin_types_server/src/audit/audit_service.ts",
+            "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/audit/audit_service.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2415,7 +2415,7 @@
         "description": [
           "\nAuthentication services available on the security plugin's start contract."
         ],
-        "path": "x-pack/packages/security/plugin_types_server/src/authentication/authentication_service.ts",
+        "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authentication/authentication_service.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2429,7 +2429,7 @@
             "signature": [
               "APIKeys"
             ],
-            "path": "x-pack/packages/security/plugin_types_server/src/authentication/authentication_service.ts",
+            "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authentication/authentication_service.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2447,7 +2447,7 @@
               "AuthenticatedUser",
               " | null"
             ],
-            "path": "x-pack/packages/security/plugin_types_server/src/authentication/authentication_service.ts",
+            "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authentication/authentication_service.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2462,7 +2462,7 @@
                   "KibanaRequest",
                   "<unknown, unknown, unknown, any>"
                 ],
-                "path": "x-pack/packages/security/plugin_types_server/src/authentication/authentication_service.ts",
+                "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authentication/authentication_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2480,7 +2480,7 @@
         "tags": [],
         "label": "AuthorizationMode",
         "description": [],
-        "path": "x-pack/packages/security/plugin_types_server/src/authorization/mode.ts",
+        "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authorization/mode.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2496,7 +2496,7 @@
               "KibanaRequest",
               "<unknown, unknown, unknown, any>) => boolean"
             ],
-            "path": "x-pack/packages/security/plugin_types_server/src/authorization/mode.ts",
+            "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authorization/mode.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2511,7 +2511,7 @@
                   "KibanaRequest",
                   "<unknown, unknown, unknown, any>"
                 ],
-                "path": "x-pack/packages/security/plugin_types_server/src/authorization/mode.ts",
+                "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authorization/mode.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2531,7 +2531,7 @@
         "description": [
           "\nAuthorization services available on the setup contract of the security plugin."
         ],
-        "path": "x-pack/packages/security/plugin_types_server/src/authorization/authorization_service.ts",
+        "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authorization/authorization_service.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2553,7 +2553,7 @@
                 "text": "Actions"
               }
             ],
-            "path": "x-pack/packages/security/plugin_types_server/src/authorization/authorization_service.ts",
+            "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authorization/authorization_service.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2576,7 +2576,7 @@
                 "text": "CheckPrivileges"
               }
             ],
-            "path": "x-pack/packages/security/plugin_types_server/src/authorization/authorization_service.ts",
+            "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authorization/authorization_service.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -2592,7 +2592,7 @@
                   "KibanaRequest",
                   "<unknown, unknown, unknown, any>"
                 ],
-                "path": "x-pack/packages/security/plugin_types_server/src/authorization/check_privileges.ts",
+                "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authorization/check_privileges.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -2617,7 +2617,7 @@
                 "text": "CheckPrivilegesDynamically"
               }
             ],
-            "path": "x-pack/packages/security/plugin_types_server/src/authorization/authorization_service.ts",
+            "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authorization/authorization_service.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -2633,7 +2633,7 @@
                   "KibanaRequest",
                   "<unknown, unknown, unknown, any>"
                 ],
-                "path": "x-pack/packages/security/plugin_types_server/src/authorization/check_privileges_dynamically.ts",
+                "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authorization/check_privileges_dynamically.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -2658,7 +2658,7 @@
                 "text": "CheckSavedObjectsPrivileges"
               }
             ],
-            "path": "x-pack/packages/security/plugin_types_server/src/authorization/authorization_service.ts",
+            "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authorization/authorization_service.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -2674,7 +2674,7 @@
                   "KibanaRequest",
                   "<unknown, unknown, unknown, any>"
                 ],
-                "path": "x-pack/packages/security/plugin_types_server/src/authorization/check_saved_objects_privileges.ts",
+                "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authorization/check_saved_objects_privileges.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -2696,7 +2696,7 @@
                 "text": "AuthorizationMode"
               }
             ],
-            "path": "x-pack/packages/security/plugin_types_server/src/authorization/authorization_service.ts",
+            "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authorization/authorization_service.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2710,7 +2710,7 @@
         "tags": [],
         "label": "CasesActions",
         "description": [],
-        "path": "x-pack/packages/security/plugin_types_server/src/authorization/actions/cases.ts",
+        "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authorization/actions/cases.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2724,7 +2724,7 @@
             "signature": [
               "(owner: string, operation: string) => string"
             ],
-            "path": "x-pack/packages/security/plugin_types_server/src/authorization/actions/cases.ts",
+            "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authorization/actions/cases.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2738,7 +2738,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "x-pack/packages/security/plugin_types_server/src/authorization/actions/cases.ts",
+                "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authorization/actions/cases.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2753,7 +2753,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "x-pack/packages/security/plugin_types_server/src/authorization/actions/cases.ts",
+                "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authorization/actions/cases.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2771,7 +2771,7 @@
         "tags": [],
         "label": "CheckPrivileges",
         "description": [],
-        "path": "x-pack/packages/security/plugin_types_server/src/authorization/check_privileges.ts",
+        "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authorization/check_privileges.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2809,7 +2809,7 @@
               },
               ">"
             ],
-            "path": "x-pack/packages/security/plugin_types_server/src/authorization/check_privileges.ts",
+            "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authorization/check_privileges.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2823,7 +2823,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "x-pack/packages/security/plugin_types_server/src/authorization/check_privileges.ts",
+                "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authorization/check_privileges.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2844,7 +2844,7 @@
                     "text": "CheckPrivilegesPayload"
                   }
                 ],
-                "path": "x-pack/packages/security/plugin_types_server/src/authorization/check_privileges.ts",
+                "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authorization/check_privileges.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2866,7 +2866,7 @@
                   },
                   " | undefined"
                 ],
-                "path": "x-pack/packages/security/plugin_types_server/src/authorization/check_privileges.ts",
+                "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authorization/check_privileges.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -2908,7 +2908,7 @@
               },
               ">"
             ],
-            "path": "x-pack/packages/security/plugin_types_server/src/authorization/check_privileges.ts",
+            "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authorization/check_privileges.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2922,7 +2922,7 @@
                 "signature": [
                   "string[]"
                 ],
-                "path": "x-pack/packages/security/plugin_types_server/src/authorization/check_privileges.ts",
+                "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authorization/check_privileges.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2943,7 +2943,7 @@
                     "text": "CheckPrivilegesPayload"
                   }
                 ],
-                "path": "x-pack/packages/security/plugin_types_server/src/authorization/check_privileges.ts",
+                "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authorization/check_privileges.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2965,7 +2965,7 @@
                   },
                   " | undefined"
                 ],
-                "path": "x-pack/packages/security/plugin_types_server/src/authorization/check_privileges.ts",
+                "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authorization/check_privileges.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -3007,7 +3007,7 @@
               },
               ">"
             ],
-            "path": "x-pack/packages/security/plugin_types_server/src/authorization/check_privileges.ts",
+            "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authorization/check_privileges.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -3027,7 +3027,7 @@
                     "text": "CheckPrivilegesPayload"
                   }
                 ],
-                "path": "x-pack/packages/security/plugin_types_server/src/authorization/check_privileges.ts",
+                "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authorization/check_privileges.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -3049,7 +3049,7 @@
                   },
                   " | undefined"
                 ],
-                "path": "x-pack/packages/security/plugin_types_server/src/authorization/check_privileges.ts",
+                "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authorization/check_privileges.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -3069,7 +3069,7 @@
         "description": [
           "\nOptions to influce the privilege checks."
         ],
-        "path": "x-pack/packages/security/plugin_types_server/src/authorization/check_privileges.ts",
+        "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authorization/check_privileges.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3085,7 +3085,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "x-pack/packages/security/plugin_types_server/src/authorization/check_privileges.ts",
+            "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authorization/check_privileges.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3101,7 +3101,7 @@
         "description": [
           "\nPrivileges that can be checked for the Kibana users."
         ],
-        "path": "x-pack/packages/security/plugin_types_server/src/authorization/check_privileges.ts",
+        "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authorization/check_privileges.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3117,7 +3117,7 @@
             "signature": [
               "string | string[] | undefined"
             ],
-            "path": "x-pack/packages/security/plugin_types_server/src/authorization/check_privileges.ts",
+            "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authorization/check_privileges.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3133,7 +3133,7 @@
             "signature": [
               "{ cluster: string[]; index: Record<string, string[]>; } | undefined"
             ],
-            "path": "x-pack/packages/security/plugin_types_server/src/authorization/check_privileges.ts",
+            "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authorization/check_privileges.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3147,7 +3147,7 @@
         "tags": [],
         "label": "CheckPrivilegesResponse",
         "description": [],
-        "path": "x-pack/packages/security/plugin_types_server/src/authorization/check_privileges.ts",
+        "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authorization/check_privileges.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3158,7 +3158,7 @@
             "tags": [],
             "label": "hasAllRequested",
             "description": [],
-            "path": "x-pack/packages/security/plugin_types_server/src/authorization/check_privileges.ts",
+            "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authorization/check_privileges.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3169,7 +3169,7 @@
             "tags": [],
             "label": "username",
             "description": [],
-            "path": "x-pack/packages/security/plugin_types_server/src/authorization/check_privileges.ts",
+            "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authorization/check_privileges.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3183,7 +3183,7 @@
             "signature": [
               "{ kibana: { resource?: string | undefined; privilege: string; authorized: boolean; }[]; elasticsearch: { cluster: { privilege: string; authorized: boolean; }[]; index: { [indexName: string]: { privilege: string; authorized: boolean; }[]; }; }; }"
             ],
-            "path": "x-pack/packages/security/plugin_types_server/src/authorization/check_privileges.ts",
+            "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authorization/check_privileges.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3199,7 +3199,7 @@
         "description": [
           "\nAn interface to check users profiles privileges in a specific context (only a single-space context is supported at\nthe moment)."
         ],
-        "path": "x-pack/packages/security/plugin_types_server/src/authorization/check_privileges.ts",
+        "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authorization/check_privileges.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3229,7 +3229,7 @@
               },
               ">"
             ],
-            "path": "x-pack/packages/security/plugin_types_server/src/authorization/check_privileges.ts",
+            "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authorization/check_privileges.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -3243,7 +3243,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "x-pack/packages/security/plugin_types_server/src/authorization/check_privileges.ts",
+                "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authorization/check_privileges.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -3264,7 +3264,7 @@
                     "text": "CheckUserProfilesPrivilegesPayload"
                   }
                 ],
-                "path": "x-pack/packages/security/plugin_types_server/src/authorization/check_privileges.ts",
+                "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authorization/check_privileges.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -3284,7 +3284,7 @@
         "description": [
           "\nPrivileges that can be checked for the users profiles (only Kibana specific privileges are supported at the moment)."
         ],
-        "path": "x-pack/packages/security/plugin_types_server/src/authorization/check_privileges.ts",
+        "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authorization/check_privileges.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3300,7 +3300,7 @@
             "signature": [
               "string[]"
             ],
-            "path": "x-pack/packages/security/plugin_types_server/src/authorization/check_privileges.ts",
+            "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authorization/check_privileges.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3316,7 +3316,7 @@
         "description": [
           "\nResponse of the check privileges operation for the users profiles."
         ],
-        "path": "x-pack/packages/security/plugin_types_server/src/authorization/check_privileges.ts",
+        "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authorization/check_privileges.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3332,7 +3332,7 @@
             "signature": [
               "string[]"
             ],
-            "path": "x-pack/packages/security/plugin_types_server/src/authorization/check_privileges.ts",
+            "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authorization/check_privileges.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3348,7 +3348,7 @@
             "signature": [
               "{ count: number; details: Record<string, { type: string; reason: string; }>; } | undefined"
             ],
-            "path": "x-pack/packages/security/plugin_types_server/src/authorization/check_privileges.ts",
+            "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authorization/check_privileges.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3748,7 +3748,7 @@
         "tags": [],
         "label": "HasPrivilegesResponse",
         "description": [],
-        "path": "x-pack/packages/security/plugin_types_server/src/authorization/check_privileges.ts",
+        "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authorization/check_privileges.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3759,7 +3759,7 @@
             "tags": [],
             "label": "has_all_requested",
             "description": [],
-            "path": "x-pack/packages/security/plugin_types_server/src/authorization/check_privileges.ts",
+            "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authorization/check_privileges.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3770,7 +3770,7 @@
             "tags": [],
             "label": "username",
             "description": [],
-            "path": "x-pack/packages/security/plugin_types_server/src/authorization/check_privileges.ts",
+            "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authorization/check_privileges.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3792,7 +3792,7 @@
               },
               "; }"
             ],
-            "path": "x-pack/packages/security/plugin_types_server/src/authorization/check_privileges.ts",
+            "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authorization/check_privileges.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3806,7 +3806,7 @@
             "signature": [
               "{ [privilegeName: string]: boolean; } | undefined"
             ],
-            "path": "x-pack/packages/security/plugin_types_server/src/authorization/check_privileges.ts",
+            "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authorization/check_privileges.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3820,7 +3820,7 @@
             "signature": [
               "{ [indexName: string]: { [privilegeName: string]: boolean; }; } | undefined"
             ],
-            "path": "x-pack/packages/security/plugin_types_server/src/authorization/check_privileges.ts",
+            "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authorization/check_privileges.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3834,7 +3834,7 @@
         "tags": [],
         "label": "HasPrivilegesResponseApplication",
         "description": [],
-        "path": "x-pack/packages/security/plugin_types_server/src/authorization/check_privileges.ts",
+        "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authorization/check_privileges.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3848,7 +3848,7 @@
             "signature": [
               "[resource: string]:  { [privilegeName: string]: boolean; }"
             ],
-            "path": "x-pack/packages/security/plugin_types_server/src/authorization/check_privileges.ts",
+            "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authorization/check_privileges.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3971,7 +3971,7 @@
         "tags": [],
         "label": "PrivilegeDeprecationsRolesByFeatureIdRequest",
         "description": [],
-        "path": "x-pack/packages/security/plugin_types_server/src/authorization/deprecations.ts",
+        "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authorization/deprecations.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3985,7 +3985,7 @@
             "signature": [
               "GetDeprecationsContext"
             ],
-            "path": "x-pack/packages/security/plugin_types_server/src/authorization/deprecations.ts",
+            "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authorization/deprecations.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3996,7 +3996,7 @@
             "tags": [],
             "label": "featureId",
             "description": [],
-            "path": "x-pack/packages/security/plugin_types_server/src/authorization/deprecations.ts",
+            "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authorization/deprecations.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -4010,7 +4010,7 @@
         "tags": [],
         "label": "PrivilegeDeprecationsRolesByFeatureIdResponse",
         "description": [],
-        "path": "x-pack/packages/security/plugin_types_server/src/authorization/deprecations.ts",
+        "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authorization/deprecations.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -4031,7 +4031,7 @@
               },
               "[] | undefined"
             ],
-            "path": "x-pack/packages/security/plugin_types_server/src/authorization/deprecations.ts",
+            "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authorization/deprecations.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4046,7 +4046,7 @@
               "DeprecationsDetails",
               "[] | undefined"
             ],
-            "path": "x-pack/packages/security/plugin_types_server/src/authorization/deprecations.ts",
+            "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authorization/deprecations.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -4060,7 +4060,7 @@
         "tags": [],
         "label": "PrivilegeDeprecationsService",
         "description": [],
-        "path": "x-pack/packages/security/plugin_types_server/src/authorization/deprecations.ts",
+        "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authorization/deprecations.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -4090,7 +4090,7 @@
               },
               ">"
             ],
-            "path": "x-pack/packages/security/plugin_types_server/src/authorization/deprecations.ts",
+            "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authorization/deprecations.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -4110,7 +4110,7 @@
                     "text": "PrivilegeDeprecationsRolesByFeatureIdRequest"
                   }
                 ],
-                "path": "x-pack/packages/security/plugin_types_server/src/authorization/deprecations.ts",
+                "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authorization/deprecations.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -4128,7 +4128,7 @@
         "tags": [],
         "label": "SavedObjectActions",
         "description": [],
-        "path": "x-pack/packages/security/plugin_types_server/src/authorization/actions/saved_object.ts",
+        "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authorization/actions/saved_object.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -4142,7 +4142,7 @@
             "signature": [
               "(type: string, operation: string) => string"
             ],
-            "path": "x-pack/packages/security/plugin_types_server/src/authorization/actions/saved_object.ts",
+            "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authorization/actions/saved_object.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -4156,7 +4156,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "x-pack/packages/security/plugin_types_server/src/authorization/actions/saved_object.ts",
+                "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authorization/actions/saved_object.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -4171,7 +4171,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "x-pack/packages/security/plugin_types_server/src/authorization/actions/saved_object.ts",
+                "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authorization/actions/saved_object.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -4191,7 +4191,7 @@
         "description": [
           "\nDescribes public Security plugin contract returned at the `setup` stage."
         ],
-        "path": "x-pack/packages/security/plugin_types_server/src/plugin.ts",
+        "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/plugin.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -4213,7 +4213,7 @@
                 "text": "SecurityLicense"
               }
             ],
-            "path": "x-pack/packages/security/plugin_types_server/src/plugin.ts",
+            "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/plugin.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4237,13 +4237,13 @@
                 "text": "AuditServiceSetup"
               }
             ],
-            "path": "x-pack/packages/security/plugin_types_server/src/plugin.ts",
+            "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/plugin.ts",
             "deprecated": true,
             "trackAdoption": false,
             "references": [
               {
                 "plugin": "security",
-                "path": "x-pack/plugins/security/server/plugin.ts"
+                "path": "x-pack/platform/plugins/shared/security/server/plugin.ts"
               },
               {
                 "plugin": "files",
@@ -4317,7 +4317,7 @@
                 "text": "PrivilegeDeprecationsService"
               }
             ],
-            "path": "x-pack/packages/security/plugin_types_server/src/plugin.ts",
+            "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/plugin.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -4333,7 +4333,7 @@
         "description": [
           "\nDescribes public Security plugin contract returned at the `start` stage."
         ],
-        "path": "x-pack/packages/security/plugin_types_server/src/plugin.ts",
+        "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/plugin.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -4357,13 +4357,13 @@
                 "text": "AuthenticationServiceStart"
               }
             ],
-            "path": "x-pack/packages/security/plugin_types_server/src/plugin.ts",
+            "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/plugin.ts",
             "deprecated": true,
             "trackAdoption": false,
             "references": [
               {
                 "plugin": "security",
-                "path": "x-pack/plugins/security/server/plugin.ts"
+                "path": "x-pack/platform/plugins/shared/security/server/plugin.ts"
               },
               {
                 "plugin": "alerting",
@@ -4513,7 +4513,7 @@
                 "text": "AuthorizationServiceSetup"
               }
             ],
-            "path": "x-pack/packages/security/plugin_types_server/src/plugin.ts",
+            "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/plugin.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4531,13 +4531,13 @@
             "signature": [
               "UserProfileService"
             ],
-            "path": "x-pack/packages/security/plugin_types_server/src/plugin.ts",
+            "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/plugin.ts",
             "deprecated": true,
             "trackAdoption": false,
             "references": [
               {
                 "plugin": "security",
-                "path": "x-pack/plugins/security/server/plugin.ts"
+                "path": "x-pack/platform/plugins/shared/security/server/plugin.ts"
               },
               {
                 "plugin": "cases",
@@ -4575,7 +4575,7 @@
         "tags": [],
         "label": "SpaceActions",
         "description": [],
-        "path": "x-pack/packages/security/plugin_types_server/src/authorization/actions/space.ts",
+        "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authorization/actions/space.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -4586,7 +4586,7 @@
             "tags": [],
             "label": "manage",
             "description": [],
-            "path": "x-pack/packages/security/plugin_types_server/src/authorization/actions/space.ts",
+            "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authorization/actions/space.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -4600,7 +4600,7 @@
         "tags": [],
         "label": "UIActions",
         "description": [],
-        "path": "x-pack/packages/security/plugin_types_server/src/authorization/actions/ui.ts",
+        "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authorization/actions/ui.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -4616,7 +4616,7 @@
               "Capabilities",
               ", ...uiCapabilityParts: string[]) => string"
             ],
-            "path": "x-pack/packages/security/plugin_types_server/src/authorization/actions/ui.ts",
+            "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authorization/actions/ui.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -4631,7 +4631,7 @@
                   "keyof ",
                   "Capabilities"
                 ],
-                "path": "x-pack/packages/security/plugin_types_server/src/authorization/actions/ui.ts",
+                "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authorization/actions/ui.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -4646,7 +4646,7 @@
                 "signature": [
                   "string[]"
                 ],
-                "path": "x-pack/packages/security/plugin_types_server/src/authorization/actions/ui.ts",
+                "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authorization/actions/ui.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -5194,7 +5194,7 @@
         "tags": [],
         "label": "ApiOperation",
         "description": [],
-        "path": "x-pack/packages/security/plugin_types_server/src/authorization/actions/api.ts",
+        "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authorization/actions/api.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5235,7 +5235,7 @@
           },
           ">"
         ],
-        "path": "x-pack/packages/security/plugin_types_server/src/authorization/check_privileges_dynamically.ts",
+        "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authorization/check_privileges_dynamically.ts",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -5256,7 +5256,7 @@
                 "text": "CheckPrivilegesPayload"
               }
             ],
-            "path": "x-pack/packages/security/plugin_types_server/src/authorization/check_privileges_dynamically.ts",
+            "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authorization/check_privileges_dynamically.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -5277,7 +5277,7 @@
               },
               " | undefined"
             ],
-            "path": "x-pack/packages/security/plugin_types_server/src/authorization/check_privileges_dynamically.ts",
+            "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authorization/check_privileges_dynamically.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -5303,7 +5303,7 @@
             "text": "CheckPrivilegesDynamically"
           }
         ],
-        "path": "x-pack/packages/security/plugin_types_server/src/authorization/check_privileges_dynamically.ts",
+        "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authorization/check_privileges_dynamically.ts",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -5319,7 +5319,7 @@
               "KibanaRequest",
               "<unknown, unknown, unknown, any>"
             ],
-            "path": "x-pack/packages/security/plugin_types_server/src/authorization/check_privileges_dynamically.ts",
+            "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authorization/check_privileges_dynamically.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -5345,7 +5345,7 @@
             "text": "CheckPrivileges"
           }
         ],
-        "path": "x-pack/packages/security/plugin_types_server/src/authorization/check_privileges.ts",
+        "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authorization/check_privileges.ts",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -5361,7 +5361,7 @@
               "KibanaRequest",
               "<unknown, unknown, unknown, any>"
             ],
-            "path": "x-pack/packages/security/plugin_types_server/src/authorization/check_privileges.ts",
+            "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authorization/check_privileges.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -5386,7 +5386,7 @@
           },
           ">"
         ],
-        "path": "x-pack/packages/security/plugin_types_server/src/authorization/check_saved_objects_privileges.ts",
+        "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authorization/check_saved_objects_privileges.ts",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -5401,7 +5401,7 @@
             "signature": [
               "string | string[]"
             ],
-            "path": "x-pack/packages/security/plugin_types_server/src/authorization/check_saved_objects_privileges.ts",
+            "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authorization/check_saved_objects_privileges.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -5415,7 +5415,7 @@
             "signature": [
               "string | (string | undefined)[] | undefined"
             ],
-            "path": "x-pack/packages/security/plugin_types_server/src/authorization/check_saved_objects_privileges.ts",
+            "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authorization/check_saved_objects_privileges.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -5441,7 +5441,7 @@
             "text": "CheckSavedObjectsPrivileges"
           }
         ],
-        "path": "x-pack/packages/security/plugin_types_server/src/authorization/check_saved_objects_privileges.ts",
+        "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authorization/check_saved_objects_privileges.ts",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -5457,7 +5457,7 @@
               "KibanaRequest",
               "<unknown, unknown, unknown, any>"
             ],
-            "path": "x-pack/packages/security/plugin_types_server/src/authorization/check_saved_objects_privileges.ts",
+            "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authorization/check_saved_objects_privileges.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -5512,7 +5512,7 @@
           "XpackUsageBase",
           "; }"
         ],
-        "path": "x-pack/packages/security/plugin_types_server/src/authorization/es_security_config.ts",
+        "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authorization/es_security_config.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5527,7 +5527,7 @@
         "signature": [
           "\"*\""
         ],
-        "path": "x-pack/packages/security/plugin_types_server/src/authorization/constants.ts",
+        "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authorization/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5679,7 +5679,7 @@
           },
           "<Readonly<{} & { names: string[]; }>[] | undefined>; }>; }>"
         ],
-        "path": "x-pack/packages/security/plugin_types_server/src/authentication/api_keys/api_keys.ts",
+        "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authentication/api_keys/api_keys.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5743,7 +5743,7 @@
           },
           "<string[] | undefined>; }>"
         ],
-        "path": "x-pack/packages/security/plugin_types_server/src/authorization/role_schema.ts",
+        "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authorization/role_schema.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5805,7 +5805,7 @@
           },
           "<Readonly<{} & {}> | undefined>; }>"
         ],
-        "path": "x-pack/packages/security/plugin_types_server/src/authentication/api_keys/api_keys.ts",
+        "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authentication/api_keys/api_keys.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5883,7 +5883,7 @@
           },
           "<Readonly<{} & { names: string[]; }>[] | undefined>; }>; }>"
         ],
-        "path": "x-pack/packages/security/plugin_types_server/src/authentication/api_keys/api_keys.ts",
+        "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authentication/api_keys/api_keys.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5945,7 +5945,7 @@
           },
           "<Readonly<{} & {}> | undefined>; }>"
         ],
-        "path": "x-pack/packages/security/plugin_types_server/src/authentication/api_keys/api_keys.ts",
+        "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authentication/api_keys/api_keys.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

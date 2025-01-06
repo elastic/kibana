@@ -4866,18 +4866,6 @@
             "references": [
               {
                 "plugin": "@kbn/core",
-                "path": "src/core/packages/saved-objects/api-server-internal/src/lib/apis/utils/internal_utils.ts"
-              },
-              {
-                "plugin": "@kbn/core",
-                "path": "src/core/packages/saved-objects/import-export-server-internal/src/import/lib/collect_saved_objects.ts"
-              },
-              {
-                "plugin": "@kbn/core",
-                "path": "src/core/packages/saved-objects/server-internal/src/routes/legacy_import_export/lib/import_dashboards.ts"
-              },
-              {
-                "plugin": "@kbn/core",
                 "path": "src/core/packages/saved-objects/api-browser/src/simple_saved_object.ts"
               },
               {
@@ -4887,6 +4875,18 @@
               {
                 "plugin": "@kbn/core",
                 "path": "src/core/packages/saved-objects/browser-internal/src/simple_saved_object.ts"
+              },
+              {
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/saved-objects/api-server-internal/src/lib/apis/utils/internal_utils.ts"
+              },
+              {
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/saved-objects/import-export-server-internal/src/import/lib/collect_saved_objects.ts"
+              },
+              {
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/saved-objects/server-internal/src/routes/legacy_import_export/lib/import_dashboards.ts"
               },
               {
                 "plugin": "graph",
@@ -5818,11 +5818,11 @@
             "references": [
               {
                 "plugin": "encryptedSavedObjects",
-                "path": "x-pack/plugins/encrypted_saved_objects/server/create_migration.ts"
+                "path": "x-pack/platform/plugins/shared/encrypted_saved_objects/server/create_migration.ts"
               },
               {
                 "plugin": "encryptedSavedObjects",
-                "path": "x-pack/plugins/encrypted_saved_objects/server/create_migration.ts"
+                "path": "x-pack/platform/plugins/shared/encrypted_saved_objects/server/create_migration.ts"
               }
             ]
           },
@@ -8983,22 +8983,6 @@
                 "path": "src/core/packages/usage-data/server-internal/src/saved_objects/core_usage_stats.ts"
               },
               {
-                "plugin": "@kbn/core-saved-objects-migration-server-mocks",
-                "path": "packages/core/saved-objects/core-saved-objects-migration-server-mocks/src/kibana_migrator.mock.ts"
-              },
-              {
-                "plugin": "spaces",
-                "path": "x-pack/plugins/spaces/server/saved_objects/saved_objects_service.ts"
-              },
-              {
-                "plugin": "spaces",
-                "path": "x-pack/plugins/spaces/server/saved_objects/saved_objects_service.ts"
-              },
-              {
-                "plugin": "taskManager",
-                "path": "x-pack/platform/plugins/shared/task_manager/server/saved_objects/index.ts"
-              },
-              {
                 "plugin": "dataViews",
                 "path": "src/platform/plugins/shared/data_views/server/saved_objects/data_views.ts"
               },
@@ -9019,12 +9003,24 @@
                 "path": "x-pack/plugins/graph/server/saved_objects/graph_workspace.ts"
               },
               {
+                "plugin": "taskManager",
+                "path": "x-pack/platform/plugins/shared/task_manager/server/saved_objects/index.ts"
+              },
+              {
                 "plugin": "share",
                 "path": "src/platform/plugins/shared/share/server/url_service/saved_objects/register_url_service_saved_object_type.ts"
               },
               {
                 "plugin": "lens",
                 "path": "x-pack/plugins/lens/server/saved_objects.ts"
+              },
+              {
+                "plugin": "spaces",
+                "path": "x-pack/platform/plugins/shared/spaces/server/saved_objects/saved_objects_service.ts"
+              },
+              {
+                "plugin": "spaces",
+                "path": "x-pack/platform/plugins/shared/spaces/server/saved_objects/saved_objects_service.ts"
               },
               {
                 "plugin": "actions",
@@ -9053,6 +9049,10 @@
               {
                 "plugin": "ml",
                 "path": "x-pack/platform/plugins/shared/ml/server/saved_objects/saved_objects.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-migration-server-mocks",
+                "path": "packages/core/saved-objects/core-saved-objects-migration-server-mocks/src/kibana_migrator.mock.ts"
               },
               {
                 "plugin": "savedSearch",
@@ -9662,10 +9662,6 @@
                 "path": "src/core/packages/saved-objects/migration-server-internal/src/document_migrator/validate_migrations.ts"
               },
               {
-                "plugin": "spaces",
-                "path": "x-pack/plugins/spaces/server/saved_objects/saved_objects_service.ts"
-              },
-              {
                 "plugin": "data",
                 "path": "src/plugins/data/server/saved_objects/query.ts"
               },
@@ -9680,6 +9676,10 @@
               {
                 "plugin": "data",
                 "path": "src/plugins/data/server/search/saved_objects/search_session.ts"
+              },
+              {
+                "plugin": "spaces",
+                "path": "x-pack/platform/plugins/shared/spaces/server/saved_objects/saved_objects_service.ts"
               },
               {
                 "plugin": "dashboard",

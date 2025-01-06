@@ -9,7 +9,7 @@
         "tags": [],
         "label": "PrivilegesAPIClientPublicContract",
         "description": [],
-        "path": "x-pack/packages/security/plugin_types_public/src/privileges/privileges_api_client.ts",
+        "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/privileges/privileges_api_client.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -39,7 +39,7 @@
               },
               ">"
             ],
-            "path": "x-pack/packages/security/plugin_types_public/src/privileges/privileges_api_client.ts",
+            "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/privileges/privileges_api_client.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -59,7 +59,7 @@
                     "text": "PrivilegesAPIClientGetAllArgs"
                   }
                 ],
-                "path": "x-pack/packages/security/plugin_types_public/src/privileges/privileges_api_client.ts",
+                "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/privileges/privileges_api_client.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -80,7 +80,7 @@
         "tags": [],
         "label": "AuthenticationServiceSetup",
         "description": [],
-        "path": "x-pack/packages/security/plugin_types_public/src/authentication/authentication_service.ts",
+        "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/authentication/authentication_service.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -98,7 +98,7 @@
               "AuthenticatedUser",
               ">"
             ],
-            "path": "x-pack/packages/security/plugin_types_public/src/authentication/authentication_service.ts",
+            "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/authentication/authentication_service.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -116,7 +116,7 @@
             "signature": [
               "() => Promise<boolean>"
             ],
-            "path": "x-pack/packages/security/plugin_types_public/src/authentication/authentication_service.ts",
+            "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/authentication/authentication_service.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -132,7 +132,7 @@
         "tags": [],
         "label": "AuthorizationServiceSetup",
         "description": [],
-        "path": "x-pack/packages/security/plugin_types_public/src/authorization/authorization_service.ts",
+        "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/authorization/authorization_service.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -148,7 +148,7 @@
             "signature": [
               "() => boolean | undefined"
             ],
-            "path": "x-pack/packages/security/plugin_types_public/src/authorization/authorization_service.ts",
+            "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/authorization/authorization_service.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -172,7 +172,7 @@
                 "text": "RolesAPIClient"
               }
             ],
-            "path": "x-pack/packages/security/plugin_types_public/src/authorization/authorization_service.ts",
+            "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/authorization/authorization_service.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -194,7 +194,7 @@
                 "text": "PrivilegesAPIClientPublicContract"
               }
             ],
-            "path": "x-pack/packages/security/plugin_types_public/src/authorization/authorization_service.ts",
+            "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/authorization/authorization_service.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -208,7 +208,7 @@
         "tags": [],
         "label": "BulkUpdatePayload",
         "description": [],
-        "path": "x-pack/packages/security/plugin_types_public/src/roles/roles_api_client.ts",
+        "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/roles/roles_api_client.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -229,7 +229,7 @@
               },
               "[]"
             ],
-            "path": "x-pack/packages/security/plugin_types_public/src/roles/roles_api_client.ts",
+            "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/roles/roles_api_client.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -243,7 +243,7 @@
         "tags": [],
         "label": "BulkUpdateRoleResponse",
         "description": [],
-        "path": "x-pack/packages/security/plugin_types_public/src/roles/roles_api_client.ts",
+        "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/roles/roles_api_client.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -257,7 +257,7 @@
             "signature": [
               "string[] | undefined"
             ],
-            "path": "x-pack/packages/security/plugin_types_public/src/roles/roles_api_client.ts",
+            "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/roles/roles_api_client.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -271,7 +271,7 @@
             "signature": [
               "string[] | undefined"
             ],
-            "path": "x-pack/packages/security/plugin_types_public/src/roles/roles_api_client.ts",
+            "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/roles/roles_api_client.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -285,7 +285,7 @@
             "signature": [
               "Record<string, { type: string; reason: string; }> | undefined"
             ],
-            "path": "x-pack/packages/security/plugin_types_public/src/roles/roles_api_client.ts",
+            "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/roles/roles_api_client.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -340,7 +340,7 @@
         "tags": [],
         "label": "PrivilegesAPIClientGetAllArgs",
         "description": [],
-        "path": "x-pack/packages/security/plugin_types_public/src/privileges/privileges_api_client.ts",
+        "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/privileges/privileges_api_client.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -351,7 +351,7 @@
             "tags": [],
             "label": "includeActions",
             "description": [],
-            "path": "x-pack/packages/security/plugin_types_public/src/privileges/privileges_api_client.ts",
+            "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/privileges/privileges_api_client.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -362,7 +362,7 @@
             "tags": [],
             "label": "respectLicenseLevel",
             "description": [],
-            "path": "x-pack/packages/security/plugin_types_public/src/privileges/privileges_api_client.ts",
+            "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/privileges/privileges_api_client.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -376,7 +376,7 @@
         "tags": [],
         "label": "RolePutPayload",
         "description": [],
-        "path": "x-pack/packages/security/plugin_types_public/src/roles/roles_api_client.ts",
+        "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/roles/roles_api_client.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -396,7 +396,7 @@
                 "text": "Role"
               }
             ],
-            "path": "x-pack/packages/security/plugin_types_public/src/roles/roles_api_client.ts",
+            "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/roles/roles_api_client.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -410,7 +410,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "x-pack/packages/security/plugin_types_public/src/roles/roles_api_client.ts",
+            "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/roles/roles_api_client.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -424,7 +424,7 @@
         "tags": [],
         "label": "RolesAPIClient",
         "description": [],
-        "path": "x-pack/packages/security/plugin_types_public/src/roles/roles_api_client.ts",
+        "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/roles/roles_api_client.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -446,7 +446,7 @@
               },
               "[]>"
             ],
-            "path": "x-pack/packages/security/plugin_types_public/src/roles/roles_api_client.ts",
+            "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/roles/roles_api_client.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -470,7 +470,7 @@
               },
               ">"
             ],
-            "path": "x-pack/packages/security/plugin_types_public/src/roles/roles_api_client.ts",
+            "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/roles/roles_api_client.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -484,7 +484,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "x-pack/packages/security/plugin_types_public/src/roles/roles_api_client.ts",
+                "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/roles/roles_api_client.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -502,7 +502,7 @@
             "signature": [
               "(roleName: string) => Promise<void>"
             ],
-            "path": "x-pack/packages/security/plugin_types_public/src/roles/roles_api_client.ts",
+            "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/roles/roles_api_client.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -516,7 +516,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "x-pack/packages/security/plugin_types_public/src/roles/roles_api_client.ts",
+                "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/roles/roles_api_client.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -542,7 +542,7 @@
               },
               ") => Promise<void>"
             ],
-            "path": "x-pack/packages/security/plugin_types_public/src/roles/roles_api_client.ts",
+            "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/roles/roles_api_client.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -562,7 +562,7 @@
                     "text": "RolePutPayload"
                   }
                 ],
-                "path": "x-pack/packages/security/plugin_types_public/src/roles/roles_api_client.ts",
+                "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/roles/roles_api_client.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -596,7 +596,7 @@
               },
               ">"
             ],
-            "path": "x-pack/packages/security/plugin_types_public/src/roles/roles_api_client.ts",
+            "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/roles/roles_api_client.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -616,7 +616,7 @@
                     "text": "BulkUpdatePayload"
                   }
                 ],
-                "path": "x-pack/packages/security/plugin_types_public/src/roles/roles_api_client.ts",
+                "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/roles/roles_api_client.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -634,7 +634,7 @@
         "tags": [],
         "label": "SecurityNavControlServiceStart",
         "description": [],
-        "path": "x-pack/packages/security/plugin_types_public/src/nav_control/nav_control_service.ts",
+        "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/nav_control/nav_control_service.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -660,7 +660,7 @@
               },
               "[]>"
             ],
-            "path": "x-pack/packages/security/plugin_types_public/src/nav_control/nav_control_service.ts",
+            "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/nav_control/nav_control_service.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -686,7 +686,7 @@
               },
               "[]) => void"
             ],
-            "path": "x-pack/packages/security/plugin_types_public/src/nav_control/nav_control_service.ts",
+            "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/nav_control/nav_control_service.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -707,7 +707,7 @@
                   },
                   "[]"
                 ],
-                "path": "x-pack/packages/security/plugin_types_public/src/nav_control/nav_control_service.ts",
+                "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/nav_control/nav_control_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -725,7 +725,7 @@
         "tags": [],
         "label": "SecurityPluginSetup",
         "description": [],
-        "path": "x-pack/packages/security/plugin_types_public/src/plugin.ts",
+        "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/plugin.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -749,13 +749,13 @@
                 "text": "AuthenticationServiceSetup"
               }
             ],
-            "path": "x-pack/packages/security/plugin_types_public/src/plugin.ts",
+            "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/plugin.ts",
             "deprecated": true,
             "trackAdoption": false,
             "references": [
               {
                 "plugin": "security",
-                "path": "x-pack/plugins/security/public/plugin.tsx"
+                "path": "x-pack/platform/plugins/shared/security/public/plugin.tsx"
               }
             ]
           },
@@ -777,7 +777,7 @@
                 "text": "AuthorizationServiceSetup"
               }
             ],
-            "path": "x-pack/packages/security/plugin_types_public/src/plugin.ts",
+            "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/plugin.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -799,7 +799,7 @@
                 "text": "SecurityLicense"
               }
             ],
-            "path": "x-pack/packages/security/plugin_types_public/src/plugin.ts",
+            "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/plugin.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -813,7 +813,7 @@
         "tags": [],
         "label": "SecurityPluginStart",
         "description": [],
-        "path": "x-pack/packages/security/plugin_types_public/src/plugin.ts",
+        "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/plugin.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -835,7 +835,7 @@
                 "text": "SecurityNavControlServiceStart"
               }
             ],
-            "path": "x-pack/packages/security/plugin_types_public/src/plugin.ts",
+            "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/plugin.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -859,13 +859,13 @@
                 "text": "AuthenticationServiceSetup"
               }
             ],
-            "path": "x-pack/packages/security/plugin_types_public/src/plugin.ts",
+            "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/plugin.ts",
             "deprecated": true,
             "trackAdoption": false,
             "references": [
               {
                 "plugin": "security",
-                "path": "x-pack/plugins/security/public/plugin.tsx"
+                "path": "x-pack/platform/plugins/shared/security/public/plugin.tsx"
               },
               {
                 "plugin": "securitySolution",
@@ -903,7 +903,7 @@
                 "text": "AuthorizationServiceSetup"
               }
             ],
-            "path": "x-pack/packages/security/plugin_types_public/src/plugin.ts",
+            "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/plugin.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -931,13 +931,13 @@
               "Observable",
               "<boolean>; }"
             ],
-            "path": "x-pack/packages/security/plugin_types_public/src/plugin.ts",
+            "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/plugin.ts",
             "deprecated": true,
             "trackAdoption": false,
             "references": [
               {
                 "plugin": "security",
-                "path": "x-pack/plugins/security/public/plugin.tsx"
+                "path": "x-pack/platform/plugins/shared/security/public/plugin.tsx"
               },
               {
                 "plugin": "cases",
@@ -987,7 +987,7 @@
         "tags": [],
         "label": "UserMenuLink",
         "description": [],
-        "path": "x-pack/packages/security/plugin_types_public/src/nav_control/nav_control_service.ts",
+        "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/nav_control/nav_control_service.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -998,7 +998,7 @@
             "tags": [],
             "label": "label",
             "description": [],
-            "path": "x-pack/packages/security/plugin_types_public/src/nav_control/nav_control_service.ts",
+            "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/nav_control/nav_control_service.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1012,7 +1012,7 @@
             "signature": [
               "string | React.ComponentType<{}>"
             ],
-            "path": "x-pack/packages/security/plugin_types_public/src/nav_control/nav_control_service.ts",
+            "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/nav_control/nav_control_service.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1023,7 +1023,7 @@
             "tags": [],
             "label": "href",
             "description": [],
-            "path": "x-pack/packages/security/plugin_types_public/src/nav_control/nav_control_service.ts",
+            "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/nav_control/nav_control_service.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1037,7 +1037,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "x-pack/packages/security/plugin_types_public/src/nav_control/nav_control_service.ts",
+            "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/nav_control/nav_control_service.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1051,7 +1051,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "x-pack/packages/security/plugin_types_public/src/nav_control/nav_control_service.ts",
+            "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/nav_control/nav_control_service.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1067,7 +1067,7 @@
             "signature": [
               "React.ReactNode | ((args: { closePopover: () => void; }) => React.ReactNode)"
             ],
-            "path": "x-pack/packages/security/plugin_types_public/src/nav_control/nav_control_service.ts",
+            "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/nav_control/nav_control_service.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1233,7 +1233,7 @@
             "text": "AuthenticationServiceSetup"
           }
         ],
-        "path": "x-pack/packages/security/plugin_types_public/src/authentication/authentication_service.ts",
+        "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/authentication/authentication_service.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1256,7 +1256,7 @@
             "text": "AuthorizationServiceSetup"
           }
         ],
-        "path": "x-pack/packages/security/plugin_types_public/src/authorization/authorization_service.ts",
+        "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/authorization/authorization_service.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1268,7 +1268,7 @@
         "tags": [],
         "label": "SecurityLicense",
         "description": [],
-        "path": "x-pack/packages/security/plugin_types_public/src/license/index.ts",
+        "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/license/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1293,7 +1293,7 @@
           "Observable",
           "<boolean>; }"
         ],
-        "path": "x-pack/packages/security/plugin_types_public/src/user_profile/user_profile_api_client.ts",
+        "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/user_profile/user_profile_api_client.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

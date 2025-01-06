@@ -469,7 +469,7 @@
               },
               {
                 "plugin": "security",
-                "path": "x-pack/plugins/security/server/config.ts"
+                "path": "x-pack/platform/plugins/shared/security/server/config.ts"
               },
               {
                 "plugin": "@kbn/core",
