@@ -124,7 +124,7 @@ export default function ({ getService }: FtrProviderContext) {
     it('adds a monitor in private location', async () => {
       const newMonitor = httpMonitorJson;
 
-      newMonitor.locations.push(pvtLoc);
+      newMonitor.locations.push(omit(pvtLoc, ['spaces']));
 
       const { body, rawBody } = await addMonitorAPI(newMonitor);
 
@@ -165,7 +165,7 @@ export default function ({ getService }: FtrProviderContext) {
         label: 'Test private location 1',
       });
 
-      httpMonitorJson.locations.push(pvtLoc2);
+      httpMonitorJson.locations.push(omit(pvtLoc2, ['spaces']));
 
       const apiResponse = await supertestAPI
         .put(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS + '/' + newMonitorId)
@@ -287,7 +287,7 @@ export default function ({ getService }: FtrProviderContext) {
         ...httpMonitorJson,
         name: `Test monitor ${uuidv4()}`,
         [ConfigKey.NAMESPACE]: 'default',
-        locations: [pvtLoc],
+        locations: [omit(pvtLoc, ['spaces'])],
       };
 
       try {
@@ -412,8 +412,9 @@ export default function ({ getService }: FtrProviderContext) {
         const apiResponse = await supertestAPI
           .post(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS)
           .set('kbn-xsrf', 'true')
-          .send(monitor)
-          .expect(200);
+          .send(monitor);
+
+        expect(apiResponse.status).eql(200, JSON.stringify(apiResponse.body));
 
         monitorId = apiResponse.body.id;
 
