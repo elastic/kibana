@@ -7,6 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { getSearchParams, getSearchParamsFromRequest, getPreference } from './get_search_params';
+export { getSearchParamsFromRequest, getEsPreference } from './get_search_params';
 export { RequestFailure } from './request_error';
 export * from './types';
