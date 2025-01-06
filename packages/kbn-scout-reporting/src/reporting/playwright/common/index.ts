@@ -7,6 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { getPluginManifestData } from './get_plugin_matifest_data';
-export { saveTestFailuresReport, saveTestFailureHtml } from './save_test_failures';
-export { stripfilePath, stripRunCommand } from './strip_path';
+export { getPluginManifestData, type PluginManifest } from './get_plugin_manifest_data';
+export { stripRunCommand, stripfilePath } from './strip_path';

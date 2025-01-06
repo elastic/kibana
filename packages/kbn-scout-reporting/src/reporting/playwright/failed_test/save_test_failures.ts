@@ -10,7 +10,7 @@
 import fs from 'fs';
 import path from 'path';
 import { ToolingLog } from '@kbn/tooling-log';
-import { TestFailure } from '../test_failure';
+import { TestFailure } from '../../test_failure';
 
 export const saveTestFailuresReport = (
   testFailures: TestFailure[],

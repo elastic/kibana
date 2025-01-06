@@ -26,17 +26,13 @@ import {
   getCodeOwnersEntries,
   getOwningTeamsForPath,
 } from '@kbn/code-owners';
-import { generateTestRunId, getTestIDForTitle } from '.';
-import {
-  getPluginManifestData,
-  saveTestFailuresReport,
-  saveTestFailureHtml,
-  stripRunCommand,
-  stripfilePath,
-} from './utils';
-import type { TestFailure } from './test_failure';
-import type { ScoutPlaywrightReporterOptions } from './scout_playwright_reporter';
-import { buildFailureHtml } from './utils/build_test_failure_html';
+import { generateTestRunId, getTestIDForTitle } from '../..';
+import type { TestFailure } from '../../test_failure';
+import type { ScoutPlaywrightReporterOptions } from '../../scout_playwright_reporter';
+import { buildFailureHtml } from './build_test_failure_html';
+import { stripRunCommand, stripfilePath } from '../common/strip_path';
+import { getPluginManifestData } from '../common/get_plugin_manifest_data';
+import { saveTestFailureHtml, saveTestFailuresReport } from './save_test_failures';
 
 /**
  * Scout Failed Test reporter

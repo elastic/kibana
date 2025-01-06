@@ -11,7 +11,7 @@ import path from 'path';
 import fs from 'fs';
 import { Jsonc } from '@kbn/repo-packages';
 
-interface PluginManifest {
+export interface PluginManifest {
   id: string;
   group: string;
   owner: string[];

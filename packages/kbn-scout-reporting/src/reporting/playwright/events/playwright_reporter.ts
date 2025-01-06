@@ -28,9 +28,9 @@ import {
   getCodeOwnersEntries,
   getOwningTeamsForPath,
 } from '@kbn/code-owners';
-import { generateTestRunId, getTestIDForTitle, ScoutReport, ScoutReportEventAction } from '.';
-import { environmentMetadata } from '../datasources';
-import type { ScoutPlaywrightReporterOptions } from './scout_playwright_reporter';
+import { generateTestRunId, getTestIDForTitle, ScoutReport, ScoutReportEventAction } from '../..';
+import { environmentMetadata } from '../../../datasources';
+import type { ScoutPlaywrightReporterOptions } from '../../scout_playwright_reporter';
 
 /**
  * Scout Playwright reporter

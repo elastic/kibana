@@ -26,12 +26,15 @@ export function getTestIDForTitle(title: string) {
 export const scoutPlaywrightReporter = (
   options?: ScoutPlaywrightReporterOptions
 ): ReporterDescription => {
-  return ['@kbn/scout-reporting/src/reporting/playwright_reporter.ts', options];
+  return ['@kbn/scout-reporting/src/reporting/playwright/events/playwright_reporter.ts', options];
 };
 
 // Playwright failed test reporting
 export const scoutFailedTestsReporter = (
   options?: ScoutPlaywrightReporterOptions
 ): ReporterDescription => {
-  return ['@kbn/scout-reporting/src/reporting/failed_test_reporter.ts', options];
+  return [
+    '@kbn/scout-reporting/src/reporting/playwright/failed_test/failed_test_reporter.ts',
+    options,
+  ];
 };
