@@ -48,12 +48,11 @@ import {
   ValidatorServices,
 } from '../types';
 import { EVENT_LOG_ACTIONS } from '../constants/event_log';
-import { ActionExecutionSource } from './action_execution_source';
+import { ActionExecutionSource, ActionExecutionSourceType } from './action_execution_source';
 import { RelatedSavedObjects } from './related_saved_objects';
 import { createActionEventLogRecordObject } from './create_action_event_log_record_object';
 import { ActionExecutionError, ActionExecutionErrorReason } from './errors/action_execution_error';
 import type { ActionsAuthorization } from '../authorization/actions_authorization';
-import { isBidirectionalConnectorType } from './bidirectional_connectors';
 
 // 1,000,000 nanoseconds in 1 millisecond
 const Millis2Nanos = 1000 * 1000;
@@ -169,6 +168,7 @@ export class ActionExecutor {
           actionTypeId: connectorTypeId,
           actionTypeRegistry,
           authorization,
+          source: source?.type,
         });
       },
       executeLabel: `execute_action`,
@@ -719,6 +719,7 @@ interface EnsureAuthorizedToExecuteOpts {
   params: Record<string, unknown>;
   actionTypeRegistry: ActionTypeRegistryContract;
   authorization: ActionsAuthorization;
+  source?: ActionExecutionSourceType;
 }
 
 const ensureAuthorizedToExecute = async ({
@@ -727,24 +728,22 @@ const ensureAuthorizedToExecute = async ({
   params,
   actionTypeRegistry,
   authorization,
+  source,
 }: EnsureAuthorizedToExecuteOpts) => {
   try {
-    if (actionTypeRegistry.isSystemActionType(actionTypeId)) {
-      const additionalPrivileges = actionTypeRegistry.getSystemActionKibanaPrivileges(
+    if (
+      actionTypeRegistry.isSystemActionType(actionTypeId) ||
+      actionTypeRegistry.hasSubFeature(actionTypeId)
+    ) {
+      const additionalPrivileges = actionTypeRegistry.getActionKibanaPrivileges(
         actionTypeId,
-        params
+        params,
+        source
       );
 
       await authorization.ensureAuthorized({
         operation: 'execute',
         additionalPrivileges,
-        actionTypeId,
-      });
-    } else if (isBidirectionalConnectorType(actionTypeId)) {
-      // SentinelOne and Crowdstrike sub-actions require that a user have `all` privilege to Actions and Connectors.
-      // This is a temporary solution until a more robust RBAC approach can be implemented for sub-actions
-      await authorization.ensureAuthorized({
-        operation: 'execute',
         actionTypeId,
       });
     }
