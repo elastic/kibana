@@ -155,10 +155,8 @@ export function defineRoutes({
         questionRewritePrompt,
       });
 
-      let stream: ReadableStream<Uint8Array>;
-
       try {
-        stream = await chain.stream(aiClient, messages);
+        const stream = await chain.stream(aiClient, messages);
 
         analytics.reportEvent<SendMessageEventData>(sendMessageEvent.eventType, {
           connectorType:
