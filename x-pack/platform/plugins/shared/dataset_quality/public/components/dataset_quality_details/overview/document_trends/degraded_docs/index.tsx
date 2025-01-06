@@ -27,9 +27,7 @@ import { css } from '@emotion/react';
 import { UnifiedBreakdownFieldSelector } from '@kbn/unified-histogram-plugin/public';
 import {
   discoverAriaText,
-  logsExplorerAriaText,
   openInDiscoverText,
-  openInLogsExplorerText,
   overviewDegradedDocsText,
 } from '../../../../../../common/translations';
 import { DegradedDocsChart } from './degraded_docs_chart';
@@ -133,25 +131,11 @@ export default function DegradedDocs({ lastReloadTime }: { lastReloadTime: numbe
               onBreakdownFieldChange={breakdown.onChange}
             />
           </EuiSkeletonRectangle>
-          <EuiToolTip
-            content={
-              degradedDocLinkLogsExplorer.isLogsExplorerAvailable
-                ? openInLogsExplorerText
-                : openInDiscoverText
-            }
-          >
+          <EuiToolTip content={openInDiscoverText}>
             <EuiButtonIcon
               display="base"
-              iconType={
-                degradedDocLinkLogsExplorer.isLogsExplorerAvailable
-                  ? 'logoObservability'
-                  : 'discoverApp'
-              }
-              aria-label={
-                degradedDocLinkLogsExplorer.isLogsExplorerAvailable
-                  ? logsExplorerAriaText
-                  : discoverAriaText
-              }
+              iconType="discoverApp"
+              aria-label={discoverAriaText}
               size="s"
               data-test-subj="datasetQualityDetailsLinkToDiscover"
               {...degradedDocLinkLogsExplorer.linkProps}

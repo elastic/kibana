@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AggregationsAggregationContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { AggregationsAggregationContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { RuleTypeId } from '@kbn/securitysolution-rules';
 
 /**
