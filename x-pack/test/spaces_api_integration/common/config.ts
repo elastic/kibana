@@ -10,6 +10,8 @@ import path from 'path';
 import { REPO_ROOT } from '@kbn/repo-info';
 import type { FtrConfigProviderContext } from '@kbn/test';
 
+import { services } from './services';
+
 interface CreateTestConfigOptions {
   license: string;
   disabledPlugins?: string[];
@@ -45,7 +47,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
         kibanaServer: config.kibana.functional.get('services.kibanaServer'),
         spaces: config.xpack.api.get('services.spaces'),
         usageAPI: config.xpack.api.get('services.usageAPI'),
-        roleScopedSupertest: config.xpack.api.get('services.roleScopedSupertest'),
+        roleScopedSupertest: services.roleScopedSupertest,
         samlAuth: () => {},
       },
       junit: {
