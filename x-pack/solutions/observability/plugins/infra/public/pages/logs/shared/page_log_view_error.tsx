@@ -7,7 +7,8 @@
 
 import { EuiButton, EuiButtonEmpty, EuiCallOut, EuiEmptyPrompt, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { FC, PropsWithChildren } from 'react';
+import type { FC, PropsWithChildren } from 'react';
+import React from 'react';
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
 import { useLinkProps } from '@kbn/observability-shared-plugin/public';
 import {

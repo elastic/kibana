@@ -8,7 +8,7 @@
 import * as t from 'io-ts';
 import { toNumberRt } from '@kbn/io-ts-utils';
 import { termQuery } from '@kbn/observability-plugin/server';
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { getOverallLatencyDistribution } from './get_overall_latency_distribution';
 import { getSearchTransactionsEvents } from '../../lib/helpers/transactions';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
@@ -19,7 +19,7 @@ import {
   LatencyDistributionChartType,
 } from '../../../common/latency_distribution_chart_types';
 import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
-import { OverallLatencyDistributionResponse } from './types';
+import type { OverallLatencyDistributionResponse } from './types';
 
 const latencyOverallTransactionDistributionRoute = createApmServerRoute({
   endpoint: 'POST /internal/apm/latency/overall_distribution/transactions',

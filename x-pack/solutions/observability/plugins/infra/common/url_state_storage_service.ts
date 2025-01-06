@@ -9,6 +9,8 @@ import { url } from '@kbn/kibana-utils-plugin/common';
 import { encode } from '@kbn/rison';
 import { parse, stringify } from 'query-string';
 
+export const defaultLogViewKey = 'logView';
+
 const encodeRisonUrlState = (state: any) => encode(state);
 
 export const replaceStateKeyInQueryString =

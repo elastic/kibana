@@ -9,12 +9,16 @@ import React from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { AddDataPanel } from '@kbn/observability-shared-plugin/public';
 import { OBSERVABILITY_ONBOARDING_LOCATOR } from '@kbn/deeplinks-observability';
-import { ApmOnboardingLocatorParams } from '../../../locator/onboarding_locator';
+import type { ApmOnboardingLocatorParams } from '../../../locator/onboarding_locator';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
-import { EmptyStateClickParams, EntityInventoryAddDataParams } from '../../../services/telemetry';
-import { ApmPluginStartDeps, ApmServices } from '../../../plugin';
+import type {
+  EmptyStateClickParams,
+  EntityInventoryAddDataParams,
+} from '../../../services/telemetry';
+import type { ApmPluginStartDeps, ApmServices } from '../../../plugin';
 import { useKibanaUrl } from '../../../hooks/use_kibana_url';
-import { addAPMCalloutDefinitions, AddAPMCalloutKeys } from './constants';
+import type { AddAPMCalloutKeys } from './constants';
+import { addAPMCalloutDefinitions } from './constants';
 
 export interface ServiceTabEmptyStateProps {
   id: AddAPMCalloutKeys;
