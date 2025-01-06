@@ -75,7 +75,7 @@ describe('Processor: Append', () => {
     form.setInputValue('fieldNameField.input', 'field_1');
 
     await act(async () => {
-      find('appendValueField.input').simulate('change', [{ label: 'Some_Value' }]);
+      find('comboxValueField.input').simulate('change', [{ label: 'Some_Value' }]);
     });
     component.update();
 
@@ -102,7 +102,7 @@ describe('Processor: Append', () => {
 
     // Set optional parameteres
     await act(async () => {
-      find('appendValueField.input').simulate('change', [{ label: 'Some_Value' }]);
+      find('comboxValueField.input').simulate('change', [{ label: 'Some_Value' }]);
       component.update();
     });
     form.toggleEuiSwitch('allowDuplicatesSwitch.input');
@@ -134,14 +134,14 @@ describe('Processor: Append', () => {
 
     // Shouldn't be able to set media_type if value is not a template string
     await act(async () => {
-      find('appendValueField.input').simulate('change', [{ label: 'value_1' }]);
+      find('comboxValueField.input').simulate('change', [{ label: 'value_1' }]);
     });
     component.update();
     expect(exists('mediaTypeSelectorField')).toBe(false);
 
     // Set value to a template snippet and media_type to a non-default value
     await act(async () => {
-      find('appendValueField.input').simulate('change', [{ label: '{{{value_2}}}' }]);
+      find('comboxValueField.input').simulate('change', [{ label: '{{{value_2}}}' }]);
     });
     component.update();
     form.setSelectValue('mediaTypeSelectorField', 'text/plain');
@@ -154,6 +154,44 @@ describe('Processor: Append', () => {
       field: 'sample_field',
       value: ['{{{value_2}}}'],
       media_type: 'text/plain',
+    });
+  });
+
+  test('saves with json parameter values', async () => {
+    const {
+      actions: { saveNewProcessor },
+      form,
+      find,
+      component,
+    } = testBed;
+
+    // Add "field" value (required)
+    form.setInputValue('fieldNameField.input', 'field_1');
+
+    await act(async () => {
+      find('comboxValueField.input').simulate('change', [{ label: 'Some_Value' }]);
+    });
+    component.update();
+
+    find('toggleTextField').simulate('click');
+
+    await act(async () => {
+      find('jsonValueField').simulate('change', {
+        jsonContent: '{"value_1":"""aaa"bbb""", "value_2":"aaa(bbb"}',
+      });
+
+      // advance timers to allow the form to validate
+      jest.advanceTimersByTime(0);
+    });
+
+    // Save the field
+    await saveNewProcessor();
+
+    const processors = getProcessorValue(onUpdate, APPEND_TYPE);
+    expect(processors[0].append).toEqual({
+      field: 'field_1',
+      // eslint-disable-next-line prettier/prettier
+      value: { value_1: 'aaa\"bbb', value_2: 'aaa(bbb' },
     });
   });
 });
