@@ -35,6 +35,9 @@ interface CreateTestDefinition {
 export function createTestSuiteFactory({ getService }: DeploymentAgnosticFtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const roleScopedSupertest = getService('roleScopedSupertest');
+  const config = getService('config');
+  const isServerless = config.get('serverless');
+  const noop = () => undefined;
 
   const expectConflictResponse = (resp: { [key: string]: any }) => {
     expect(resp.body).to.only.have.keys(['error', 'message', 'statusCode']);
@@ -177,8 +180,10 @@ export function createTestSuiteFactory({ getService }: DeploymentAgnosticFtrProv
             });
           });
 
-          describe('@skipInServerless when solution is specified', () => {
+          describe('when solution is specified', () => {
             it(`should return ${tests.solutionSpecified.statusCode}`, async () => {
+              const statusCode = isServerless ? 400 : tests.solutionSpecified.statusCode;
+
               return supertest
                 .post(`${urlPrefix}/api/spaces/space`)
                 .send({
@@ -189,8 +194,8 @@ export function createTestSuiteFactory({ getService }: DeploymentAgnosticFtrProv
                   solution: 'es',
                   disabledFeatures: [],
                 })
-                .expect(tests.solutionSpecified.statusCode)
-                .then(tests.solutionSpecified.response);
+                .expect(statusCode)
+                .then(isServerless ? noop : tests.solutionSpecified.response);
             });
           });
         });

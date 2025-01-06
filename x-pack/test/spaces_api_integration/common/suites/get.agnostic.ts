@@ -34,6 +34,9 @@ const nonExistantSpaceId = 'not-a-space';
 
 export function getTestSuiteFactory(context: DeploymentAgnosticFtrProviderContext) {
   const esArchiver = context.getService('esArchiver');
+  const config = context.getService('config');
+  const isServerless = config.get('serverless');
+
   const createExpectEmptyResult = () => (resp: { [key: string]: any }) => {
     expect(resp.body).to.eql('');
   };
@@ -80,26 +83,29 @@ export function getTestSuiteFactory(context: DeploymentAgnosticFtrProviderContex
         id: 'space_3',
         name: 'Space 3',
         description: 'This is the third test space',
-        solution: 'es',
-        disabledFeatures: [
-          // Disabled features are automatically added to the space when a solution is set
-          'apm',
-          'infrastructure',
-          'inventory',
-          'logs',
-          'observabilityCases',
-          'observabilityCasesV2',
-          'securitySolutionAssistant',
-          'securitySolutionAttackDiscovery',
-          'securitySolutionCases',
-          'securitySolutionCasesV2',
-          'securitySolutionNotes',
-          'securitySolutionTimeline',
-          'siem',
-          'siemV2',
-          'slo',
-          'uptime',
-        ],
+        disabledFeatures: [],
+        ...(!isServerless && {
+          solution: 'es',
+          disabledFeatures: [
+            // Disabled features are automatically added to the space when a solution is set
+            'apm',
+            'infrastructure',
+            'inventory',
+            'logs',
+            'observabilityCases',
+            'observabilityCasesV2',
+            'securitySolutionAssistant',
+            'securitySolutionAttackDiscovery',
+            'securitySolutionCases',
+            'securitySolutionCasesV2',
+            'securitySolutionNotes',
+            'securitySolutionTimeline',
+            'siem',
+            'siemV2',
+            'slo',
+            'uptime',
+          ],
+        }),
       },
     ];
 
@@ -107,7 +113,7 @@ export function getTestSuiteFactory(context: DeploymentAgnosticFtrProviderContex
 
     const expectedSpace = allSpaces.find((space) => space.id === spaceId);
     if (expectedSpace) {
-      expectedSpace.disabledFeatures.sort();
+      expectedSpace.disabledFeatures?.sort();
     }
 
     expect({ ...resp.body, disabledFeatures }).to.eql(expectedSpace);

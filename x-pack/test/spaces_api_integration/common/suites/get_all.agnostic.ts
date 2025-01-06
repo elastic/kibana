@@ -96,11 +96,25 @@ const ALL_SPACE_RESULTS: Space[] = [
 
 export function getAllTestSuiteFactory(context: DeploymentAgnosticFtrProviderContext) {
   const esArchiver = context.getService('esArchiver');
+  const config = context.getService('config');
+  const isServerless = config.get('serverless');
+
+  const maybeNormalizeSpace = (space: Space) => {
+    if (isServerless && space.solution) {
+      const { id, name, description } = space;
+
+      return { id, name, description, disabledFeatures: [] };
+    }
+    return space;
+  };
 
   const createExpectResults =
     (...spaceIds: string[]) =>
     (resp: { [key: string]: any }) => {
-      const expectedBody = ALL_SPACE_RESULTS.filter((entry) => spaceIds.includes(entry.id));
+      const expectedBody = ALL_SPACE_RESULTS.filter((entry) => spaceIds.includes(entry.id)).map(
+        maybeNormalizeSpace
+      );
+
       for (const space of resp.body) {
         const expectedSpace = expectedBody.find((x) => x.id === space.id);
         expect(space.name).to.eql(expectedSpace?.name);
@@ -115,7 +129,11 @@ export function getAllTestSuiteFactory(context: DeploymentAgnosticFtrProviderCon
     (authorizedPurposes: AuthorizedPurposes, ...spaceIds: string[]) =>
     (resp: { [key: string]: any }) => {
       const expectedBody = ALL_SPACE_RESULTS.filter((entry) => spaceIds.includes(entry.id)).map(
-        (x) => ({ ...x, authorizedPurposes })
+        (entry) => {
+          const space = maybeNormalizeSpace(entry);
+
+          return { ...space, authorizedPurposes };
+        }
       );
 
       for (const space of resp.body) {

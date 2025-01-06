@@ -48,16 +48,6 @@ export function createTestConfig(name: string, testFiles?: string[]) {
       },
     })(context);
 
-    return {
-      ...testConfig,
-      kbnTestServer: {
-        ...testConfig.kbnTestServer,
-        serverArgs: [
-          ...testConfig.kbnTestServer.serverArgs,
-          '--status.allowAnonymous=false',
-          '--server.xsrf.disableProtection=true',
-        ],
-      },
-    };
+    return testConfig;
   };
 }

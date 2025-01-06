@@ -14,6 +14,11 @@ export default function getAllSpacesTestSuite(context: DeploymentAgnosticFtrProv
   const { getAllTest, createExpectResults, createExpectAllPurposesResults, expectRbacForbidden } =
     getAllTestSuiteFactory(context);
 
+  const config = context.getService('config');
+  const isServerless = config.get('serverless');
+
+  const spaces = ['default', 'space_1', 'space_2', 'space_3'];
+
   // these are used to determine expected results for tests where the `include_authorized_purposes` option is enabled
   const authorizedAll = {
     any: true,
@@ -112,25 +117,19 @@ export default function getAllSpacesTestSuite(context: DeploymentAgnosticFtrProv
         tests: {
           exists: {
             statusCode: 200,
-            response: createExpectResults('default', 'space_1', 'space_2', 'space_3'),
+            response: createExpectResults(...spaces),
           },
           copySavedObjectsPurpose: {
             statusCode: 200,
-            response: createExpectResults('default', 'space_1', 'space_2', 'space_3'),
+            response: createExpectResults(...spaces),
           },
           shareSavedObjectsPurpose: {
             statusCode: 200,
-            response: createExpectResults('default', 'space_1', 'space_2', 'space_3'),
+            response: createExpectResults(...spaces),
           },
           includeAuthorizedPurposes: {
             statusCode: 200,
-            response: createExpectAllPurposesResults(
-              authorizedAll,
-              'default',
-              'space_1',
-              'space_2',
-              'space_3'
-            ),
+            response: createExpectAllPurposesResults(authorizedAll, ...spaces),
           },
         },
       });
@@ -141,25 +140,19 @@ export default function getAllSpacesTestSuite(context: DeploymentAgnosticFtrProv
         tests: {
           exists: {
             statusCode: 200,
-            response: createExpectResults('default', 'space_1', 'space_2', 'space_3'),
+            response: createExpectResults(...spaces),
           },
           copySavedObjectsPurpose: {
             statusCode: 200,
-            response: createExpectResults('default', 'space_1', 'space_2', 'space_3'),
+            response: createExpectResults(...spaces),
           },
           shareSavedObjectsPurpose: {
             statusCode: 200,
-            response: createExpectResults('default', 'space_1', 'space_2', 'space_3'),
+            response: createExpectResults(...spaces),
           },
           includeAuthorizedPurposes: {
             statusCode: 200,
-            response: createExpectAllPurposesResults(
-              authorizedAll,
-              'default',
-              'space_1',
-              'space_2',
-              'space_3'
-            ),
+            response: createExpectAllPurposesResults(authorizedAll, ...spaces),
           },
         },
       });
@@ -170,25 +163,19 @@ export default function getAllSpacesTestSuite(context: DeploymentAgnosticFtrProv
         tests: {
           exists: {
             statusCode: 200,
-            response: createExpectResults('default', 'space_1', 'space_2', 'space_3'),
+            response: createExpectResults(...spaces),
           },
           copySavedObjectsPurpose: {
             statusCode: 200,
-            response: createExpectResults('default', 'space_1', 'space_2', 'space_3'),
+            response: createExpectResults(...spaces),
           },
           shareSavedObjectsPurpose: {
             statusCode: 200,
-            response: createExpectResults('default', 'space_1', 'space_2', 'space_3'),
+            response: createExpectResults(...spaces),
           },
           includeAuthorizedPurposes: {
             statusCode: 200,
-            response: createExpectAllPurposesResults(
-              authorizedAll,
-              'default',
-              'space_1',
-              'space_2',
-              'space_3'
-            ),
+            response: createExpectAllPurposesResults(authorizedAll, ...spaces),
           },
         },
       });
@@ -222,7 +209,7 @@ export default function getAllSpacesTestSuite(context: DeploymentAgnosticFtrProv
         tests: {
           exists: {
             statusCode: 200,
-            response: createExpectResults('default', 'space_1', 'space_2', 'space_3'),
+            response: createExpectResults(...spaces),
           },
           copySavedObjectsPurpose: {
             statusCode: 403,
@@ -234,13 +221,7 @@ export default function getAllSpacesTestSuite(context: DeploymentAgnosticFtrProv
           },
           includeAuthorizedPurposes: {
             statusCode: 200,
-            response: createExpectAllPurposesResults(
-              authorizedRead,
-              'default',
-              'space_1',
-              'space_2',
-              'space_3'
-            ),
+            response: createExpectAllPurposesResults(authorizedRead, ...spaces),
           },
         },
       });
@@ -251,7 +232,7 @@ export default function getAllSpacesTestSuite(context: DeploymentAgnosticFtrProv
         tests: {
           exists: {
             statusCode: 200,
-            response: createExpectResults('default', 'space_1', 'space_2', 'space_3'),
+            response: createExpectResults(...spaces),
           },
           copySavedObjectsPurpose: {
             statusCode: 403,
@@ -263,13 +244,7 @@ export default function getAllSpacesTestSuite(context: DeploymentAgnosticFtrProv
           },
           includeAuthorizedPurposes: {
             statusCode: 200,
-            response: createExpectAllPurposesResults(
-              authorizedRead,
-              'default',
-              'space_1',
-              'space_2',
-              'space_3'
-            ),
+            response: createExpectAllPurposesResults(authorizedRead, ...spaces),
           },
         },
       });
@@ -476,74 +451,76 @@ export default function getAllSpacesTestSuite(context: DeploymentAgnosticFtrProv
         }
       );
 
-      getAllTest(`machine_learning_admin can't access any spaces from ${scenario.spaceId}`, {
-        spaceId: scenario.spaceId,
-        user: scenario.users.machineLearningAdmin,
-        tests: {
-          exists: {
-            statusCode: 403,
-            response: expectRbacForbidden,
+      if (!isServerless) {
+        getAllTest(`machine_learning_admin can't access any spaces from ${scenario.spaceId}`, {
+          spaceId: scenario.spaceId,
+          user: scenario.users.machineLearningAdmin,
+          tests: {
+            exists: {
+              statusCode: 403,
+              response: expectRbacForbidden,
+            },
+            copySavedObjectsPurpose: {
+              statusCode: 403,
+              response: expectRbacForbidden,
+            },
+            shareSavedObjectsPurpose: {
+              statusCode: 403,
+              response: expectRbacForbidden,
+            },
+            includeAuthorizedPurposes: {
+              statusCode: 403,
+              response: expectRbacForbidden,
+            },
           },
-          copySavedObjectsPurpose: {
-            statusCode: 403,
-            response: expectRbacForbidden,
-          },
-          shareSavedObjectsPurpose: {
-            statusCode: 403,
-            response: expectRbacForbidden,
-          },
-          includeAuthorizedPurposes: {
-            statusCode: 403,
-            response: expectRbacForbidden,
-          },
-        },
-      });
+        });
 
-      getAllTest(`machine_learning_user can't access any spaces from ${scenario.spaceId}`, {
-        spaceId: scenario.spaceId,
-        user: scenario.users.machineLearningUser,
-        tests: {
-          exists: {
-            statusCode: 403,
-            response: expectRbacForbidden,
+        getAllTest(`machine_learning_user can't access any spaces from ${scenario.spaceId}`, {
+          spaceId: scenario.spaceId,
+          user: scenario.users.machineLearningUser,
+          tests: {
+            exists: {
+              statusCode: 403,
+              response: expectRbacForbidden,
+            },
+            copySavedObjectsPurpose: {
+              statusCode: 403,
+              response: expectRbacForbidden,
+            },
+            shareSavedObjectsPurpose: {
+              statusCode: 403,
+              response: expectRbacForbidden,
+            },
+            includeAuthorizedPurposes: {
+              statusCode: 403,
+              response: expectRbacForbidden,
+            },
           },
-          copySavedObjectsPurpose: {
-            statusCode: 403,
-            response: expectRbacForbidden,
-          },
-          shareSavedObjectsPurpose: {
-            statusCode: 403,
-            response: expectRbacForbidden,
-          },
-          includeAuthorizedPurposes: {
-            statusCode: 403,
-            response: expectRbacForbidden,
-          },
-        },
-      });
+        });
 
-      getAllTest(`monitoring_user can't access any spaces from ${scenario.spaceId}`, {
-        spaceId: scenario.spaceId,
-        user: scenario.users.monitoringUser,
-        tests: {
-          exists: {
-            statusCode: 403,
-            response: expectRbacForbidden,
+        getAllTest(`monitoring_user can't access any spaces from ${scenario.spaceId}`, {
+          spaceId: scenario.spaceId,
+          user: scenario.users.monitoringUser,
+          tests: {
+            exists: {
+              statusCode: 403,
+              response: expectRbacForbidden,
+            },
+            copySavedObjectsPurpose: {
+              statusCode: 403,
+              response: expectRbacForbidden,
+            },
+            shareSavedObjectsPurpose: {
+              statusCode: 403,
+              response: expectRbacForbidden,
+            },
+            includeAuthorizedPurposes: {
+              statusCode: 403,
+              response: expectRbacForbidden,
+            },
           },
-          copySavedObjectsPurpose: {
-            statusCode: 403,
-            response: expectRbacForbidden,
-          },
-          shareSavedObjectsPurpose: {
-            statusCode: 403,
-            response: expectRbacForbidden,
-          },
-          includeAuthorizedPurposes: {
-            statusCode: 403,
-            response: expectRbacForbidden,
-          },
-        },
-      });
+        });
+      }
     });
   });
 }

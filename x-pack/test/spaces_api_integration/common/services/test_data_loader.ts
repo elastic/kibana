@@ -124,6 +124,7 @@ export function getTestDataLoader({ getService }: Pick<FtrProviderContext, 'getS
         );
         await supertest
           .post('/api/spaces/_update_objects_spaces')
+          .set('kbn-xsrf', 'xxx')
           .send({ objects, spacesToAdd, spacesToRemove })
           .expect(200);
       }
