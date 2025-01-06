@@ -7469,7 +7469,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-storybook-config@link:packages/shared-ux/storybook/config":
+"@kbn/shared-ux-storybook-config@link:src/platform/packages/private/shared-ux/storybook/config":
   version "0.0.0"
   uid ""
 

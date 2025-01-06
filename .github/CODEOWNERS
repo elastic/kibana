@@ -291,7 +291,6 @@ packages/serverless/types @elastic/appex-sharedux
 packages/shared-ux/code_editor/impl @elastic/appex-sharedux
 packages/shared-ux/code_editor/mocks @elastic/appex-sharedux
 packages/shared-ux/modal/tabbed @elastic/appex-sharedux
-packages/shared-ux/storybook/config @elastic/appex-sharedux
 packages/shared-ux/storybook/mock @elastic/appex-sharedux
 packages/shared-ux/table_persist @elastic/appex-sharedux
 src/core @elastic/kibana-core
@@ -456,6 +455,7 @@ src/platform/packages/private/shared-ux/page/analytics_no_data/types @elastic/ap
 src/platform/packages/private/shared-ux/page/kibana_no_data/impl @elastic/appex-sharedux
 src/platform/packages/private/shared-ux/page/kibana_no_data/mocks @elastic/appex-sharedux
 src/platform/packages/private/shared-ux/page/kibana_no_data/types @elastic/appex-sharedux
+src/platform/packages/private/shared-ux/storybook/config @elastic/appex-sharedux
 src/platform/packages/shared/cloud @elastic/kibana-core
 src/platform/packages/shared/deeplinks/analytics @elastic/kibana-data-discovery @elastic/kibana-presentation @elastic/kibana-visualizations
 src/platform/packages/shared/deeplinks/devtools @elastic/kibana-management
