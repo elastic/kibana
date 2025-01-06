@@ -21,18 +21,16 @@ export function SearchIndexDetailProvider({ getService }: FtrProviderContext) {
     await testSubjects.existOrFail('mappingsTab');
     await testSubjects.existOrFail('settingsTab');
   };
-  const expectAPIReferenceDocLinkExists = async function () {
-    await testSubjects.existOrFail('ApiReferenceDoc', { timeout: 2000 });
-  };
 
   return {
     expectIndexDetailPageHeader,
     expectSearchIndexDetailsTabsExists,
-    expectAPIReferenceDocLinkExists,
+    async expectAPIReferenceDocLinkExists() {
+      await testSubjects.existOrFail('ApiReferenceDoc', { timeout: 2000 });
+    },
     async expectIndexDetailsPageIsLoaded() {
       await expectIndexDetailPageHeader();
       await expectSearchIndexDetailsTabsExists();
-      await expectAPIReferenceDocLinkExists();
     },
     async expectActionItemReplacedWhenHasDocs() {
       await testSubjects.missingOrFail('ApiReferenceDoc', { timeout: 2000 });

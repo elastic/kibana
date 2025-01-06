@@ -9,13 +9,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
-  const pageObjects = getPageObjects([
-    'svlCommonPage',
-    'common',
-    'indexManagement',
-    'header',
-    'searchIndexDetail',
-  ]);
+  const pageObjects = getPageObjects(['svlCommonPage', 'common', 'indexManagement', 'header']);
   const browser = getService('browser');
   const security = getService('security');
   const testIndexName = `index-ftr-test-${Math.random()}`;
@@ -42,16 +36,17 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
     describe('can view index details', function () {
       it('index with no documents', async () => {
-        await pageObjects.searchIndexDetail.openIndicesDetailFromIndexManagementIndicesListTable(0);
-        await pageObjects.searchIndexDetail.expectIndexDetailsPageIsLoaded();
+        await pageObjects.indexManagement.indexDetailsPage.openIndexDetailsPage(0);
+        await pageObjects.indexManagement.indexDetailsPage.expectIndexDetailsPageIsLoaded();
+        await pageObjects.indexManagement.indexDetailsPage.expectTabsExists();
       });
       it('can add mappings', async () => {
-        await pageObjects.searchIndexDetail.changeTab('mappingsTab');
-        await pageObjects.searchIndexDetail.expectAddFieldToBeEnabled();
+        await pageObjects.indexManagement.indexDetailsPage.changeTab('indexDetailsTab-mappings');
+        await pageObjects.indexManagement.indexDetailsPage.expectIndexDetailsMappingsAddFieldToBeEnabled();
       });
       it('can edit settings', async () => {
-        await pageObjects.searchIndexDetail.changeTab('settingsTab');
-        await pageObjects.searchIndexDetail.expectEditSettingsToBeEnabled();
+        await pageObjects.indexManagement.indexDetailsPage.changeTab('indexDetailsTab-settings');
+        await pageObjects.indexManagement.indexDetailsPage.expectEditSettingsToBeEnabled();
       });
     });
   });

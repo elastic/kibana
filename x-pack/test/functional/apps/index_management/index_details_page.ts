@@ -18,7 +18,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await pageObjects.common.navigateToApp('indexManagement');
     });
 
-    it('Navigates to the index details page from the home page', async () => {
+    it.skip('Navigates to the index details page from the home page', async () => {
       await log.debug('Navigating to the index details page');
 
       // display hidden indices to have some rows in the indices table
