@@ -41,7 +41,7 @@ export const useLoadActionTypes = ({
         featureId: GenerativeAIForSecurityConnectorFeatureId,
       });
 
-      // TODO add .inference once it is available
+      // TODO add .inference once all the providers support unified completion
       const actionTypes = ['.bedrock', '.gen-ai', '.gemini'];
 
       return queryResult

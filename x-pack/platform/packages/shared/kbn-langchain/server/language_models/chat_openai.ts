@@ -206,6 +206,8 @@ export class ActionsClientChatOpenAI extends ChatOpenAI {
       stop: completionRequest.stop,
       tools: completionRequest.tools,
       ...('tool_choice' in completionRequest ? { tool_choice: completionRequest.tool_choice } : {}),
+      // deprecated, use tools
+      functions: completionRequest.functions,
       // ensure we take the messages from the completion request, not the client request
       messages: completionRequest.messages.map((message) => ({
         role: message.role,
@@ -213,6 +215,8 @@ export class ActionsClientChatOpenAI extends ChatOpenAI {
         ...('name' in message ? { name: message?.name } : {}),
         ...('tool_calls' in message ? { tool_calls: message?.tool_calls } : {}),
         ...('tool_call_id' in message ? { tool_call_id: message?.tool_call_id } : {}),
+        // deprecated, use tool_calls
+        ...('function_call' in message ? { function_call: message?.function_call } : {}),
       })),
     };
     const subAction =
