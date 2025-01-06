@@ -5,11 +5,8 @@
  * 2.0.
  */
 
-const BIDIRECTIONAL_CONNECTOR_TYPES = ['.sentinelone', '.crowdstrike'];
-export const isBidirectionalConnectorType = (type: string | undefined) => {
-  if (!type) {
-    return false;
-  }
+import { SearchSynonymsPlugin } from './plugin';
 
-  return BIDIRECTIONAL_CONNECTOR_TYPES.includes(type);
-};
+export function plugin() {
+  return new SearchSynonymsPlugin();
+}

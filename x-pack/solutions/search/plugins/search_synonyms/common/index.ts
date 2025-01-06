@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import React from 'react';
+import { i18n } from '@kbn/i18n';
 
-const CrowdstrikeParamsFields = () => <></>;
+export const PLUGIN_ID = 'searchSynonyms';
+export const PLUGIN_NAME = 'Synonyms';
 
-// eslint-disable-next-line import/no-default-export
-export { CrowdstrikeParamsFields as default };
+export const PLUGIN_TITLE = i18n.translate('xpack.searchSynonyms.pluginTitle', {
+  defaultMessage: 'Synonyms',
+});

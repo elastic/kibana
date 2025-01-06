@@ -5,12 +5,4 @@
  * 2.0.
  */
 
-import { defaultConfig } from '@kbn/storybook';
-
-module.exports = {
-  ...defaultConfig,
-  stories: ['../**/*.stories.+(tsx|mdx)'],
-  reactOptions: {
-    strictMode: true,
-  },
-};
+export const SYNONYMS_UI_FLAG = 'searchSynonyms:synonymsEnabled';

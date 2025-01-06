@@ -5,9 +5,5 @@
  * 2.0.
  */
 
-import React from 'react';
-
-const SentinelOneParamsFields = () => <></>;
-
-// eslint-disable-next-line import/no-default-export
-export { SentinelOneParamsFields as default };
+export { KibanaReactStorybookDecorator } from './kibana_react_decorator';
+export { ReactQueryStorybookDecorator } from './react_query_decorator';
