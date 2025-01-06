@@ -7,6 +7,7 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
+import { isCCSRemoteIndexName } from '@kbn/es-query';
 import { ALL_VALUE } from '@kbn/slo-schema';
 import { assertNever } from '@kbn/std';
 import { partition } from 'lodash';
@@ -159,7 +160,7 @@ export class DefaultSummarySearchClient implements SummarySearchClient {
         }),
       };
     } catch (err) {
-      this.logger.error(new Error(`Summary search query error, ${err.message}`, { cause: err }));
+      this.logger.error(`Error while searching SLO summary documents. ${err}`);
       return { total: 0, ...pagination, results: [] };
     }
   }
@@ -207,8 +208,8 @@ function excludeStaleSummaryFilter(
 }
 
 function getRemoteClusterName(index: string) {
-  if (index.includes(':')) {
-    return index.split(':')[0];
+  if (isCCSRemoteIndexName(index)) {
+    return index.substring(0, index.indexOf(':'));
   }
 }
 
