@@ -115,6 +115,11 @@ export const allowedExperimentalValues = Object.freeze({
   assistantModelEvaluation: false,
 
   /**
+   * Enables filtering of Attack Discovery alerts in a flyout
+   */
+  attackDiscoveryAlertFiltering: false,
+
+  /**
    * Enables the Managed User section inside the new user details flyout.
    */
   newUserDetailsFlyoutManagedUser: false,
@@ -264,9 +269,15 @@ export const allowedExperimentalValues = Object.freeze({
   crowdstrikeRunScriptEnabled: false,
 
   /**
-   * Enables the Asset Inventory feature
+   * Enables the Asset Inventory Entity Store feature.
+   * Allows initializing the Universal Entity Store via the API.
    */
   assetInventoryStoreEnabled: false,
+
+  /**
+   * Enables the Asset Inventory feature
+   */
+  assetInventoryUXEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

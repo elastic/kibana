@@ -28,6 +28,8 @@ components:
       enum:
         - 'host.name'
         - 'user.name'
+        - 'service.name'
+        - 'related.entity'
     AssetCriticalityRecordIdParts:
       type: object
       properties:
@@ -96,6 +98,20 @@ components:
           required:
             - 'name'
         'user':
+          type: object
+          properties:
+            'name':
+              type: string
+            'asset':
+              type: object
+              properties:
+                'criticality':
+                  $ref: '#/components/schemas/AssetCriticalityLevel'
+              required:
+                - 'criticality'
+          required:
+            - 'name'
+        'service':
           type: object
           properties:
             'name':
