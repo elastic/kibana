@@ -44,8 +44,6 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
       type,
       isRenderable = true,
       setDragHandles,
-      // The props below are passed from ReactGridLayoutn and need to be merged with their counterparts.
-      // https://github.com/react-grid-layout/react-grid-layout/issues/1241#issuecomment-658306889
       children,
       className,
       ...rest
@@ -198,8 +196,6 @@ export const ObservedItem = React.forwardRef<HTMLDivElement, Props>((props, pane
   return <Item ref={panelRef} isRenderable={isRenderable} {...props} />;
 });
 
-// ReactGridLayout passes ref to children. Functional component children require forwardRef to avoid react warning
-// https://github.com/react-grid-layout/react-grid-layout#custom-child-components-and-draggable-handles
 export const DashboardGridItem = React.forwardRef<HTMLDivElement, Props>((props, ref) => {
   const dashboardApi = useDashboardApi();
   const [focusedPanelId, viewMode] = useBatchedPublishingSubjects(
