@@ -266,7 +266,7 @@
     "@kbn/core-chrome-browser": "link:packages/core/chrome/core-chrome-browser",
     "@kbn/core-chrome-browser-internal": "link:src/core/packages/chrome/browser-internal",
     "@kbn/core-config-server-internal": "link:src/core/packages/config/server-internal",
-    "@kbn/core-custom-branding-browser": "link:packages/core/custom-branding/core-custom-branding-browser",
+    "@kbn/core-custom-branding-browser": "link:src/core/packages/custom-branding/browser",
     "@kbn/core-custom-branding-browser-internal": "link:packages/core/custom-branding/core-custom-branding-browser-internal",
     "@kbn/core-custom-branding-browser-mocks": "link:packages/core/custom-branding/core-custom-branding-browser-mocks",
     "@kbn/core-custom-branding-common": "link:packages/core/custom-branding/core-custom-branding-common",
