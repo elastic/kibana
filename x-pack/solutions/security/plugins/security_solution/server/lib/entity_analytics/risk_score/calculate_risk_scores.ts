@@ -16,6 +16,7 @@ import {
   ALERT_WORKFLOW_STATUS,
   ALERT_WORKFLOW_TAGS,
 } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
+import { getRiskEngineEntityTypes } from '../../../../common/entity_analytics/risk_engine/utils';
 import type { EntityType } from '../../../../common/search_strategy';
 import type { ExperimentalFeatures } from '../../../../common';
 import type {
@@ -248,9 +249,7 @@ export const calculateRiskScores = async ({
     }
     const identifierTypes: EntityType[] = identifierType
       ? [identifierType]
-      : experimentalFeatures.serviceEntityStoreEnabled
-      ? ['host', 'user', 'service']
-      : ['host', 'user'];
+      : getRiskEngineEntityTypes(experimentalFeatures);
 
     const request = {
       size: 0,

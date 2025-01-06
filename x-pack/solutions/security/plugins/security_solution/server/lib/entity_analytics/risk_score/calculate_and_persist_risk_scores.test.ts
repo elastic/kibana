@@ -15,6 +15,7 @@ import { calculateRiskScoresMock } from './calculate_risk_scores.mock';
 import { riskScoreDataClientMock } from './risk_score_data_client.mock';
 import type { RiskScoreDataClient } from './risk_score_data_client';
 import type { ExperimentalFeatures } from '../../../../common';
+import { EntityType } from '../../../../common/search_strategy';
 
 jest.mock('./calculate_risk_scores');
 const mockExperimentalFeatures = {} as ExperimentalFeatures;
@@ -26,7 +27,7 @@ const calculateAndPersistRecentHostRiskScores = (
 ) => {
   return calculateAndPersistRiskScores({
     afterKeys: {},
-    identifierType: 'host',
+    identifierType: EntityType.host,
     esClient,
     logger,
     index: 'index',
