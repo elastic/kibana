@@ -79,7 +79,7 @@ export class DefaultResourceInstaller implements ResourceInstaller {
       await this.createIndex(SLO_SUMMARY_DESTINATION_INDEX_NAME);
       await this.createIndex(SLO_SUMMARY_TEMP_INDEX_NAME);
     } catch (err) {
-      this.logger.error(`Error installing resources shared for SLO: ${err.message}`);
+      this.logger.error(`Error while installing SLO shared resources: ${err}`);
       throw err;
     }
   }
