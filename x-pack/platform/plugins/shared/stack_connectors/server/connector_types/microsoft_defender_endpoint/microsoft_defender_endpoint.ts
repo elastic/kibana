@@ -100,6 +100,8 @@ export class MicrosoftDefenderEndpointConnector extends SubActionConnector<
     req: Omit<SubActionRequestParams<R>, 'responseSchema'>,
     connectorUsageCollector: ConnectorUsageCollector
   ): Promise<R> {
+    this.logger.debug(() => `Request:\n${JSON.stringify(req, null, 2)}`);
+
     const bearerAccessToken = await this.oAuthToken.get(connectorUsageCollector);
     const response = await this.request<R>(
       {
