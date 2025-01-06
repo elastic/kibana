@@ -397,7 +397,7 @@
     "@kbn/core-theme-browser-internal": "link:src/core/packages/theme/browser-internal",
     "@kbn/core-ui-settings-browser": "link:src/core/packages/ui-settings/browser",
     "@kbn/core-ui-settings-browser-internal": "link:src/core/packages/ui-settings/browser-internal",
-    "@kbn/core-ui-settings-common": "link:packages/core/ui-settings/core-ui-settings-common",
+    "@kbn/core-ui-settings-common": "link:src/core/packages/ui-settings/common",
     "@kbn/core-ui-settings-server": "link:packages/core/ui-settings/core-ui-settings-server",
     "@kbn/core-ui-settings-server-internal": "link:packages/core/ui-settings/core-ui-settings-server-internal",
     "@kbn/core-usage-data-base-server-internal": "link:src/core/packages/usage-data/base-server-internal",
