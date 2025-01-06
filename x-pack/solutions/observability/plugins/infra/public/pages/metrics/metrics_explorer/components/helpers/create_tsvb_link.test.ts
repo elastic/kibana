@@ -11,7 +11,7 @@ import {
   MetricsExplorerYAxisMode,
   MetricsExplorerChartType,
 } from '../../hooks/use_metrics_explorer_options';
-import { MetricsExplorerOptions } from '../../hooks/use_metrics_explorer_options';
+import type { MetricsExplorerOptions } from '../../hooks/use_metrics_explorer_options';
 
 jest.mock('uuid', () => ({
   v4: jest.fn().mockReturnValue('test-id'),
