@@ -62,10 +62,12 @@ export {
 
 // Locators
 export {
+  type LogsLocatorParams,
   LOGS_LOCATOR_ID,
-  TRACE_LOGS_LOCATOR_ID,
-  NODE_LOGS_LOCATOR_ID,
-  getLogsLocatorsFromUrlService,
+  getLogsLocatorFromUrlService,
+  getTimeRange,
+  getTimeRangeEndFromTime,
+  getTimeRangeStartFromTime,
+  getNodeQuery,
+  getTraceQuery,
 } from './locators';
-export type { LogsLocatorParams, NodeLogsLocatorParams, TraceLogsLocatorParams } from './locators';
-export { createNodeLogsQuery } from './locators/helpers';

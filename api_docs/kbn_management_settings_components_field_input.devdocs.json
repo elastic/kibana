@@ -89,13 +89,7 @@
             ],
             "signature": [
               "{ toasts: Pick<",
-              {
-                "pluginId": "@kbn/core-notifications-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreNotificationsBrowserPluginApi",
-                "section": "def-public.IToasts",
-                "text": "IToasts"
-              },
+              "IToasts",
               ", \"addDanger\">; }"
             ],
             "path": "src/platform/packages/shared/kbn-management/settings/components/field_input/types.ts",
