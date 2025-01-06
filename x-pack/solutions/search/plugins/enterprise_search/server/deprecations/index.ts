@@ -94,7 +94,8 @@ export function getEnterpriseSearchNodeDeprecation(config: ConfigType, isCloud: 
  * if the customer was using Elastic Crawler, they must delete the connector records
  */
 export async function getCrawlerDeprecations(ctx: GetDeprecationsContext): Promise<DeprecationsDetails[]> {
-  let crawlers: Connector[] = await getCrawlerConnectors(ctx)
+  const client = ctx.esClient.asInternalUser
+  const crawlers: Connector[] = await fetchConnectors(client, undefined,true, undefined)
   if (crawlers.length == 0){
     return [] // no deprecations to register if there are no Elastic Crawlers in the connectors index
   } else {
@@ -130,13 +131,4 @@ export async function getCrawlerDeprecations(ctx: GetDeprecationsContext): Promi
       },
     }]
   }
-}
-
-/**
- * Fetch the connector records for crawlers
- * @param ctx the deprecations context
- */
-async function getCrawlerConnectors(ctx: GetDeprecationsContext): Promise<Connector[]>{
-  const client = ctx.esClient.asInternalUser
-  return await fetchConnectors(client, undefined,true, undefined)
 }

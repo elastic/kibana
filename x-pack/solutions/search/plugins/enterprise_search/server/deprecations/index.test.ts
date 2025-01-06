@@ -6,8 +6,22 @@
  */
 
 import { expect } from '@jest/globals';
-import { getEnterpriseSearchNodeDeprecation } from './index'
+let mockedFetchConnectors = jest.fn()
+jest.mock("@kbn/search-connectors", () => {
+  return {
+    __esModule: true,
+    ...jest.requireActual('@kbn/search-connectors'),
+    fetchConnectors: () => mockedFetchConnectors(),
+  }
+})
 import {ConfigType} from "@kbn/enterprise-search-plugin/server";
+import {GetDeprecationsContext} from "@kbn/core-deprecations-server";
+import {
+  getCrawlerDeprecations,
+  getEnterpriseSearchNodeDeprecation
+} from "@kbn/enterprise-search-plugin/server/deprecations/index";
+import {Connector} from "@kbn/search-connectors";
+
 
 describe("Enterprise Search node deprecation", () => {
 
@@ -38,4 +52,40 @@ describe("Enterprise Search node deprecation", () => {
     const deprecations = getEnterpriseSearchNodeDeprecation(config, true)
     expect(deprecations).toHaveLength(0)
   })
+})
+
+describe("Crawler connector deprecation", () => {
+
+  it('Has no deprecations if there are no crawler connectors', async () => {
+    const ctx = {
+      esClient: {
+        asInternalUser: {}
+      }
+    } as GetDeprecationsContext
+    mockedFetchConnectors = jest.fn().mockResolvedValue([]);
+    const deprecations = await getCrawlerDeprecations(ctx)
+    expect(deprecations).toHaveLength(0)
+
+    // Restore the original implementation after the test
+    jest.restoreAllMocks();
+  });
+
+  it('Adds a deprecation if there are crawler connectors', async () => {
+    const ctx = {
+      esClient: {
+        asInternalUser: {}
+      }
+    } as GetDeprecationsContext
+    const crawlerConnector = {
+      id: 'foo'
+    } as Connector
+    mockedFetchConnectors = jest.fn().mockResolvedValue([crawlerConnector]);
+    const deprecations = await getCrawlerDeprecations(ctx)
+    expect(deprecations).toHaveLength(1)
+    expect(deprecations[0].correctiveActions.api?.path).toStrictEqual('/internal/enterprise_search/deprecations/delete_crawler_connectors')
+    expect(deprecations[0].correctiveActions.api?.body).toStrictEqual({ids: ['foo']})
+
+    // Restore the original implementation after the test
+    jest.restoreAllMocks();
+  });
 })
