@@ -222,7 +222,8 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
         },
         security: {
           authz: {
-            requiredPrivileges: [],
+            enabled: false,
+            reason: 'any user can open kibana from cloud ui',
           },
         },
       },
