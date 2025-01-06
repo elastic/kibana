@@ -263,7 +263,7 @@ describe('Observability AI Assistant client', () => {
         });
 
       stream = observableIntoStream(
-        client.recursiveChatCompletion({
+        client.runTools({
           connectorId: 'foo',
           messages: [system('This is a system message'), user('How many alerts do I have?')],
           functionClient: functionClientMock,
@@ -562,7 +562,7 @@ describe('Observability AI Assistant client', () => {
       });
 
       stream = observableIntoStream(
-        await client.recursiveChatCompletion({
+        await client.runTools({
           connectorId: 'foo',
           messages: [system('This is a system message'), user('How many alerts do I have?')],
           functionClient: functionClientMock,
@@ -671,7 +671,7 @@ describe('Observability AI Assistant client', () => {
       });
 
       stream = observableIntoStream(
-        await client.recursiveChatCompletion({
+        await client.runTools({
           connectorId: 'foo',
           messages: [system('This is a system message'), user('How many alerts do I have?')],
           functionClient: functionClientMock,
@@ -761,7 +761,7 @@ describe('Observability AI Assistant client', () => {
       });
 
       stream = observableIntoStream(
-        await client.recursiveChatCompletion({
+        await client.runTools({
           connectorId: 'foo',
           messages: [system('This is a system message'), user('How many alerts do I have?')],
           functionClient: functionClientMock,
@@ -1198,7 +1198,7 @@ describe('Observability AI Assistant client', () => {
       });
 
       stream = observableIntoStream(
-        await client.recursiveChatCompletion({
+        await client.runTools({
           connectorId: 'foo',
           messages: [system('This is a system message'), user('How many alerts do I have?')],
           functionClient: functionClientMock,
@@ -1323,7 +1323,7 @@ describe('Observability AI Assistant client', () => {
       }));
 
       stream = observableIntoStream(
-        await client.recursiveChatCompletion({
+        await client.runTools({
           connectorId: 'foo',
           messages: [system('This is a system message'), user('How many alerts do I have?')],
           functionClient: functionClientMock,
@@ -1401,7 +1401,7 @@ describe('Observability AI Assistant client', () => {
       });
 
       const stream = observableIntoStream(
-        await client.recursiveChatCompletion({
+        await client.runTools({
           connectorId: 'foo',
           messages: [system('This is a system message'), user('How many alerts do I have?')],
           functionClient: functionClientMock,
@@ -1489,7 +1489,7 @@ describe('Observability AI Assistant client', () => {
       });
 
       stream = observableIntoStream(
-        await client.recursiveChatCompletion({
+        await client.runTools({
           connectorId: 'foo',
           messages: [system('This is a system message'), user('How many alerts do I have?')],
           functionClient: functionClientMock,
@@ -1554,7 +1554,7 @@ describe('Observability AI Assistant client', () => {
     });
 
     client
-      .recursiveChatCompletion({
+      .runTools({
         connectorId: 'foo',
         messages: [system('This is a system message'), user('A user message to cause completion')],
         functionClient: functionClientMock,
@@ -1582,7 +1582,7 @@ describe('Observability AI Assistant client', () => {
         });
       });
 
-      const complete$ = await client.recursiveChatCompletion({
+      const complete$ = await client.runTools({
         connectorId: 'foo',
         messages: [
           system('This is a system message'),

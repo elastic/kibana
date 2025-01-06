@@ -18,7 +18,7 @@ import { buildFunctionElasticsearch, buildFunctionServiceSummary } from './utils
 export const createStorybookChatService = (): ObservabilityAIAssistantChatService => ({
   sendAnalyticsEvent: () => {},
   chatCompletion: (options) => new Observable<ChatCompletionChunkEvent>(),
-  recursiveChatCompletion: (options) => new Observable<StreamingChatResponseEventWithoutError>(),
+  runTools: (options) => new Observable<StreamingChatResponseEventWithoutError>(),
   getFunctions: () => [buildFunctionElasticsearch(), buildFunctionServiceSummary()],
   renderFunction: (name) => (
     <div>

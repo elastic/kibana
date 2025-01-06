@@ -157,7 +157,7 @@ function useChatWithoutContext({
 
       setChatState(ChatState.Loading);
 
-      const next$ = chatService.recursiveChatCompletion({
+      const next$ = chatService.runTools({
         getScreenContexts: () => service.getScreenContexts(),
         connectorId,
         messages: getWithSystemMessage(nextMessages, systemMessage),

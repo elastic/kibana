@@ -235,7 +235,7 @@ const chatRecallRoute = createObservabilityAIAssistantServerRoute({
   },
 });
 
-async function recursiveChatCompletion(
+async function runTools(
   resources: ObservabilityAIAssistantRouteHandlerResources & {
     params: t.TypeOf<typeof chatCompleteInternalRt>;
   }
@@ -268,7 +268,7 @@ async function recursiveChatCompletion(
     scopes,
   });
 
-  const response$ = client.recursiveChatCompletion({
+  const response$ = client.runTools({
     messages,
     connectorId,
     conversationId,
@@ -293,7 +293,7 @@ const chatCompleteRoute = createObservabilityAIAssistantServerRoute({
   },
   params: chatCompleteInternalRt,
   handler: async (resources): Promise<Readable> => {
-    return observableIntoStream(await recursiveChatCompletion(resources));
+    return observableIntoStream(await runTools(resources));
   },
 });
 
@@ -315,7 +315,7 @@ const publicChatCompleteRoute = createObservabilityAIAssistantServerRoute({
 
     const { format = 'default' } = query;
 
-    const response$ = await recursiveChatCompletion({
+    const response$ = await runTools({
       ...resources,
       params: {
         body: {

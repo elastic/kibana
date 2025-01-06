@@ -162,7 +162,7 @@ export class ObservabilityAIAssistantClient {
     });
   };
 
-  recursiveChatCompletion = ({
+  runTools = ({
     functionClient,
     connectorId,
     simulateFunctionCalling = false,

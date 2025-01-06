@@ -19,11 +19,11 @@ import {
   StreamingChatResponseEventWithoutError,
 } from '../../common';
 import type { ObservabilityAIAssistantChatService } from '../types';
-import { recursiveChatCompletion } from './complete';
+import { runTools } from './complete';
 
 const client = {
   chatCompletion: jest.fn(),
-  recursiveChatCompletion: jest.fn(),
+  runTools: jest.fn(),
 } as unknown as ObservabilityAIAssistantChatService;
 
 const connectorId = 'foo';
@@ -82,18 +82,17 @@ const createLlmResponse = (
   return events;
 };
 
-type CompleteParameters = Parameters<typeof recursiveChatCompletion>[0];
+type CompleteParameters = Parameters<typeof runTools>[0];
 
-describe('recursiveChatCompletion', () => {
-  const requestCallback: jest.MockedFunction<Parameters<typeof recursiveChatCompletion>[1]> =
-    jest.fn();
+describe('runTools', () => {
+  const requestCallback: jest.MockedFunction<Parameters<typeof runTools>[1]> = jest.fn();
 
   beforeEach(() => {
     requestCallback.mockReset();
   });
 
   function callComplete(params?: Partial<CompleteParameters>) {
-    return recursiveChatCompletion(
+    return runTools(
       {
         client,
         connectorId,

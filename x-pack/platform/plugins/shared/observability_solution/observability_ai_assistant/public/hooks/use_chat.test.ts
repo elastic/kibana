@@ -25,7 +25,7 @@ type MockedChatService = DeeplyMockedKeys<ObservabilityAIAssistantChatService>;
 
 const mockChatService: MockedChatService = {
   chatCompletion: jest.fn(),
-  recursiveChatCompletion: jest.fn(),
+  runTools: jest.fn(),
   sendAnalyticsEvent: jest.fn(),
   functions$: new BehaviorSubject<FunctionDefinition[]>([]) as MockedChatService['functions$'],
   getFunctions: jest.fn().mockReturnValue([]),
@@ -119,7 +119,7 @@ describe('useChat', () => {
 
       subject = new Subject();
 
-      mockChatService.recursiveChatCompletion.mockReturnValueOnce(subject);
+      mockChatService.runTools.mockReturnValueOnce(subject);
 
       act(() => {
         hookResult.result.current.next([
@@ -266,9 +266,7 @@ describe('useChat', () => {
       });
 
       it('shows the partial message and sets chatState to aborted', () => {
-        expect(mockChatService.recursiveChatCompletion.mock.lastCall?.[0].signal.aborted).toBe(
-          true
-        );
+        expect(mockChatService.runTools.mock.lastCall?.[0].signal.aborted).toBe(true);
       });
     });
 

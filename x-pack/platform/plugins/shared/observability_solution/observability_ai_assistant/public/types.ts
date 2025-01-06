@@ -57,7 +57,7 @@ export interface ObservabilityAIAssistantChatService {
       scopes: AssistantScope[];
     }
   ) => Observable<ChatCompletionChunkEvent>;
-  recursiveChatCompletion: (options: {
+  runTools: (options: {
     getScreenContexts: () => ObservabilityAIAssistantScreenContext[];
     conversationId?: string;
     connectorId: string;
