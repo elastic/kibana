@@ -1326,6 +1326,360 @@ describe('PrivilegeSummaryTable', () => {
           },
         });
       });
+
+      it('renders effective privileges for requireAllSpaces feature when all spaces is not selected', async () => {
+        const kibanaPrivileges = createKibanaPrivileges(kibanaFeatures, {
+          allowSubFeaturePrivileges,
+        });
+
+        const role = createRole([
+          {
+            base: [],
+            feature: {
+              with_sub_features: ['all'],
+            },
+            spaces: ['default', 'space-1'],
+          },
+        ]);
+
+        const wrapper = await setup({
+          spaces,
+          kibanaPrivileges,
+          role,
+          canCustomizeSubFeaturePrivileges: allowSubFeaturePrivileges,
+          spacesApiUi,
+        });
+
+        const displayedPrivileges = getDisplayedFeaturePrivileges(wrapper, role);
+
+        expect(displayedPrivileges.with_require_all_spaces_sub_features).toEqual({
+          'default, space-1': {
+            hasCustomizedSubFeaturePrivileges: false,
+            primaryFeaturePrivilege: 'None',
+            ...maybeExpectSubFeaturePrivileges(allowSubFeaturePrivileges, {
+              'Require all spaces Sub Feature': [],
+            }),
+          },
+        });
+
+        expect(displayedPrivileges.with_require_all_spaces_for_feature_and_sub_features).toEqual({
+          'default, space-1': {
+            hasCustomizedSubFeaturePrivileges: false,
+            primaryFeaturePrivilege: 'None',
+            ...maybeExpectSubFeaturePrivileges(allowSubFeaturePrivileges, {
+              'Require all spaces Sub Feature': [],
+            }),
+          },
+        });
+      });
+
+      it('renders effective privileges for requireAllSpaces feature when all spaces is selected without granting access', async () => {
+        const kibanaPrivileges = createKibanaPrivileges(kibanaFeatures, {
+          allowSubFeaturePrivileges,
+        });
+
+        const role = createRole([
+          {
+            base: [],
+            feature: {
+              with_sub_features: ['all'],
+            },
+            spaces: ['*'],
+          },
+          {
+            base: [],
+            feature: {
+              with_sub_features: ['all'],
+            },
+            spaces: ['default', 'space-1'],
+          },
+        ]);
+
+        const wrapper = await setup({
+          spaces: [
+            {
+              id: ALL_SPACES_ID,
+              name: '*All Spaces',
+              disabledFeatures: [],
+            },
+            ...spaces,
+          ],
+          kibanaPrivileges,
+          role,
+          canCustomizeSubFeaturePrivileges: allowSubFeaturePrivileges,
+          spacesApiUi,
+        });
+
+        const displayedPrivileges = getDisplayedFeaturePrivileges(wrapper, role);
+
+        expect(displayedPrivileges.with_require_all_spaces_sub_features).toEqual({
+          '*': {
+            hasCustomizedSubFeaturePrivileges: false,
+            primaryFeaturePrivilege: 'None',
+            ...maybeExpectSubFeaturePrivileges(allowSubFeaturePrivileges, {
+              'Require all spaces Sub Feature': [],
+            }),
+          },
+          'default, space-1': {
+            hasCustomizedSubFeaturePrivileges: false,
+            primaryFeaturePrivilege: 'None',
+            ...maybeExpectSubFeaturePrivileges(allowSubFeaturePrivileges, {
+              'Require all spaces Sub Feature': [],
+            }),
+          },
+        });
+
+        expect(displayedPrivileges.with_require_all_spaces_for_feature_and_sub_features).toEqual({
+          '*': {
+            hasCustomizedSubFeaturePrivileges: false,
+            primaryFeaturePrivilege: 'None',
+            ...maybeExpectSubFeaturePrivileges(allowSubFeaturePrivileges, {
+              'Require all spaces Sub Feature': [],
+            }),
+          },
+          'default, space-1': {
+            hasCustomizedSubFeaturePrivileges: false,
+            primaryFeaturePrivilege: 'None',
+            ...maybeExpectSubFeaturePrivileges(allowSubFeaturePrivileges, {
+              'Require all spaces Sub Feature': [],
+            }),
+          },
+        });
+      });
+
+      it('renders effective privileges for requireAllSpaces feature when all spaces grants read access', async () => {
+        const kibanaPrivileges = createKibanaPrivileges(kibanaFeatures, {
+          allowSubFeaturePrivileges,
+        });
+
+        const role = createRole([
+          {
+            base: [],
+            feature: {
+              with_require_all_spaces_for_feature_and_sub_features: ['read'],
+            },
+            spaces: ['*'],
+          },
+          {
+            base: ['all'],
+            feature: {},
+            spaces: ['default'],
+          },
+        ]);
+
+        const wrapper = await setup({
+          spaces: [
+            {
+              id: ALL_SPACES_ID,
+              name: '*All Spaces',
+              disabledFeatures: [],
+            },
+            ...spaces,
+          ],
+          kibanaPrivileges,
+          role,
+          canCustomizeSubFeaturePrivileges: allowSubFeaturePrivileges,
+          spacesApiUi,
+        });
+
+        const displayedPrivileges = getDisplayedFeaturePrivileges(wrapper, role);
+
+        expect(displayedPrivileges.with_require_all_spaces_for_feature_and_sub_features).toEqual({
+          '*': {
+            hasCustomizedSubFeaturePrivileges: false,
+            primaryFeaturePrivilege: 'Read',
+            ...maybeExpectSubFeaturePrivileges(allowSubFeaturePrivileges, {
+              'Require all spaces Sub Feature': [],
+            }),
+          },
+          default: {
+            hasCustomizedSubFeaturePrivileges: false,
+            primaryFeaturePrivilege: 'Read',
+            ...maybeExpectSubFeaturePrivileges(allowSubFeaturePrivileges, {
+              'Require all spaces Sub Feature': [],
+            }),
+          },
+        });
+      });
+
+      it('renders effective privileges for requireAllSpaces feature when all spaces grants all access', async () => {
+        const kibanaPrivileges = createKibanaPrivileges(kibanaFeatures, {
+          allowSubFeaturePrivileges,
+        });
+
+        const role = createRole([
+          {
+            base: [],
+            feature: {
+              with_require_all_spaces_for_feature_and_sub_features: ['all'],
+              with_require_all_spaces_sub_features: ['all'],
+            },
+            spaces: ['*'],
+          },
+          {
+            base: ['read'],
+            feature: {},
+            spaces: ['default'],
+          },
+        ]);
+
+        const wrapper = await setup({
+          spaces: [
+            {
+              id: ALL_SPACES_ID,
+              name: '*All Spaces',
+              disabledFeatures: [],
+            },
+            ...spaces,
+          ],
+          kibanaPrivileges,
+          role,
+          canCustomizeSubFeaturePrivileges: allowSubFeaturePrivileges,
+          spacesApiUi,
+        });
+
+        const displayedPrivileges = getDisplayedFeaturePrivileges(wrapper, role);
+
+        expect(displayedPrivileges.with_require_all_spaces_sub_features).toEqual({
+          '*': {
+            hasCustomizedSubFeaturePrivileges: false,
+            primaryFeaturePrivilege: 'All',
+            ...maybeExpectSubFeaturePrivileges(allowSubFeaturePrivileges, {
+              'Require all spaces Sub Feature': ['Cool toggle 1'],
+            }),
+          },
+          default: {
+            hasCustomizedSubFeaturePrivileges: false,
+            primaryFeaturePrivilege: 'All',
+            ...maybeExpectSubFeaturePrivileges(allowSubFeaturePrivileges, {
+              'Require all spaces Sub Feature': ['Cool toggle 1'],
+            }),
+          },
+        });
+
+        expect(displayedPrivileges.with_require_all_spaces_for_feature_and_sub_features).toEqual({
+          '*': {
+            hasCustomizedSubFeaturePrivileges: false,
+            primaryFeaturePrivilege: 'All',
+            ...maybeExpectSubFeaturePrivileges(allowSubFeaturePrivileges, {
+              'Require all spaces Sub Feature': ['Cool toggle 1'],
+            }),
+          },
+          default: {
+            hasCustomizedSubFeaturePrivileges: false,
+            primaryFeaturePrivilege: 'All',
+            ...maybeExpectSubFeaturePrivileges(allowSubFeaturePrivileges, {
+              'Require all spaces Sub Feature': ['Cool toggle 1'],
+            }),
+          },
+        });
+      });
+
+      it('renders effective privileges for requireAllSpaces feature when all spaces grants base read access', async () => {
+        const kibanaPrivileges = createKibanaPrivileges(kibanaFeatures, {
+          allowSubFeaturePrivileges,
+        });
+
+        const role = createRole([
+          {
+            base: ['read'],
+            feature: {},
+            spaces: ['*'],
+          },
+          {
+            base: ['all'],
+            feature: {},
+            spaces: ['default'],
+          },
+        ]);
+
+        const wrapper = await setup({
+          spaces: [
+            {
+              id: ALL_SPACES_ID,
+              name: '*All Spaces',
+              disabledFeatures: [],
+            },
+            ...spaces,
+          ],
+          kibanaPrivileges,
+          role,
+          canCustomizeSubFeaturePrivileges: allowSubFeaturePrivileges,
+          spacesApiUi,
+        });
+
+        const displayedPrivileges = getDisplayedFeaturePrivileges(wrapper, role);
+
+        expect(displayedPrivileges.with_require_all_spaces_for_feature_and_sub_features).toEqual({
+          '*': {
+            hasCustomizedSubFeaturePrivileges: false,
+            primaryFeaturePrivilege: 'Read',
+            ...maybeExpectSubFeaturePrivileges(allowSubFeaturePrivileges, {
+              'Require all spaces Sub Feature': [],
+            }),
+          },
+          default: {
+            hasCustomizedSubFeaturePrivileges: false,
+            primaryFeaturePrivilege: 'Read',
+            ...maybeExpectSubFeaturePrivileges(allowSubFeaturePrivileges, {
+              'Require all spaces Sub Feature': [],
+            }),
+          },
+        });
+      });
+
+      it('renders effective privileges for requireAllSpaces feature when all spaces grants base all access', async () => {
+        const kibanaPrivileges = createKibanaPrivileges(kibanaFeatures, {
+          allowSubFeaturePrivileges,
+        });
+
+        const role = createRole([
+          {
+            base: ['all'],
+            feature: {},
+            spaces: ['*'],
+          },
+          {
+            base: ['read'],
+            feature: {},
+            spaces: ['default'],
+          },
+        ]);
+
+        const wrapper = await setup({
+          spaces: [
+            {
+              id: ALL_SPACES_ID,
+              name: '*All Spaces',
+              disabledFeatures: [],
+            },
+            ...spaces,
+          ],
+          kibanaPrivileges,
+          role,
+          canCustomizeSubFeaturePrivileges: allowSubFeaturePrivileges,
+          spacesApiUi,
+        });
+
+        const displayedPrivileges = getDisplayedFeaturePrivileges(wrapper, role);
+
+        expect(displayedPrivileges.with_require_all_spaces_for_feature_and_sub_features).toEqual({
+          '*': {
+            hasCustomizedSubFeaturePrivileges: false,
+            primaryFeaturePrivilege: 'All',
+            ...maybeExpectSubFeaturePrivileges(allowSubFeaturePrivileges, {
+              'Require all spaces Sub Feature': ['Cool toggle 1'],
+            }),
+          },
+          default: {
+            hasCustomizedSubFeaturePrivileges: false,
+            primaryFeaturePrivilege: 'All',
+            ...maybeExpectSubFeaturePrivileges(allowSubFeaturePrivileges, {
+              'Require all spaces Sub Feature': ['Cool toggle 1'],
+            }),
+          },
+        });
+      });
     });
   });
 });
