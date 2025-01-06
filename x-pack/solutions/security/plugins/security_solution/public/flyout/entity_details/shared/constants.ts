@@ -32,7 +32,7 @@ export const EntityPanelKeyByType: Record<EntityType, string | undefined> = {
   [EntityType.service]: undefined, // TODO create service flyout
 };
 
-// TODO rename all params to entityName
+// TODO rename all params and merged them as 'entityName'
 export const EntityPanelParamByType: Record<EntityType, string | undefined> = {
   [EntityType.host]: 'hostName',
   [EntityType.user]: 'userName',

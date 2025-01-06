@@ -65,7 +65,7 @@ export const listEntitiesRoute = (router: EntityAnalyticsRoutesDeps['router'], l
           const securitySolution = await context.securitySolution;
           const entityStoreClient = securitySolution.getEntityStoreDataClient();
           const { records, total, inspect } = await entityStoreClient.searchEntities({
-            entityTypes: entityTypes as EntityType[],
+            entityTypes: entityTypes as EntityType[], // convert from OpenApi type to internal type
             filterQuery,
             page,
             perPage,

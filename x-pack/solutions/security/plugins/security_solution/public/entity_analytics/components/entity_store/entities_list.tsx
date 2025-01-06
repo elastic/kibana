@@ -9,9 +9,10 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { EuiFilterGroup, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { noop } from 'lodash/fp';
 import { i18n } from '@kbn/i18n';
+import { getAllEntityTypes } from '../../../../common/entity_analytics/types';
 import { useErrorToast } from '../../../common/hooks/use_error_toast';
 import type { CriticalityLevels } from '../../../../common/constants';
-import { EntityType, type RiskSeverity } from '../../../../common/search_strategy';
+import { type RiskSeverity } from '../../../../common/search_strategy';
 import { useQueryInspector } from '../../../common/components/page/manage_query';
 import { Direction } from '../../../../common/search_strategy/common';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
@@ -68,7 +69,7 @@ export const EntitiesList: React.FC = () => {
 
   const searchParams = useMemo(
     () => ({
-      entitiesTypes: Object.values(EntityType),
+      entitiesTypes: getAllEntityTypes(),
       page: activePage + 1,
       perPage: limit,
       sortField: sorting.field,
