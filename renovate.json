@@ -2854,13 +2854,13 @@
         "@langchain/openai"
       ],
       "reviewers": [
-        "team:security-defend-workflows"
+        "team:security-generative-ai"
       ],
       "matchBaseBranches": [
         "main"
       ],
       "labels": [
-        "Team:Defend Workflows",
+        "Team:Security Generative AI",
         "release_note:skip",
         "backport:all-open"
       ],
@@ -2873,13 +2873,13 @@
         "@google/generative-ai"
       ],
       "reviewers": [
-        "team:security-defend-workflows"
+        "team:security-generative-ai"
       ],
       "matchBaseBranches": [
         "main"
       ],
       "labels": [
-        "Team:Defend Workflows",
+        "Team:Security Generative AI",
         "release_note:skip",
         "backport:all-open"
       ],
@@ -2893,13 +2893,13 @@
         "@smithy/util-utf8"
       ],
       "reviewers": [
-        "team:security-defend-workflows"
+        "team:security-generative-ai"
       ],
       "matchBaseBranches": [
         "main"
       ],
       "labels": [
-        "Team:Defend Workflows",
+        "Team:Security Generative AI",
         "release_note:skip",
         "backport:all-open"
       ],
