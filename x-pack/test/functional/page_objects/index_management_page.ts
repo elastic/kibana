@@ -82,9 +82,6 @@ export function IndexManagementPageProvider({ getService }: FtrProviderContext) 
     async clickIndexAt(indexOfRow: number): Promise<void> {
       const indexList = await testSubjects.findAll('indexTableIndexNameLink');
       await indexList[indexOfRow].click();
-      await retry.waitFor('details page title to show up', async () => {
-        return (await testSubjects.isDisplayed('searchIndexDetailsHeader')) === true;
-      });
     },
 
     async performIndexAction(action: string) {
@@ -162,7 +159,7 @@ export function IndexManagementPageProvider({ getService }: FtrProviderContext) 
         const indexList = await testSubjects.findAll('indexTableIndexNameLink');
         await indexList[indexOfRow].click();
         await retry.waitFor('index details page title to show up', async () => {
-          return (await testSubjects.isDisplayed('searchIndexDetailsHeader')) === true;
+          return (await testSubjects.isDisplayed('indexDetailsHeader')) === true;
         });
       },
       async expectIndexDetailsPageIsLoaded() {

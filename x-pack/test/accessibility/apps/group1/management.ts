@@ -14,6 +14,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'header',
     'indexPatternFieldEditorObjects',
     'indexManagement',
+    'searchIndexDetail',
   ]);
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
@@ -52,6 +53,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             it('index details - overview', async () => {
               await PageObjects.settings.clickIndexManagement();
               await PageObjects.indexManagement.clickIndexAt(0);
+              await PageObjects.searchIndexDetail.expectIndexDetailsPageIsLoaded();
               await a11y.testAppSnapshot();
             });
 
