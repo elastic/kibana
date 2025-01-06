@@ -10,7 +10,7 @@ import Fs from 'fs/promises';
 import type { LegacyUrlAlias } from '@kbn/core-saved-objects-base-server-internal';
 import { ALL_SAVED_OBJECT_INDICES } from '@kbn/core-saved-objects-server';
 
-import type { FtrProviderContext } from '../ftr_provider_context';
+import type { FtrProviderContext } from '../deployment_agnostic/ftr_provider_context';
 
 export const SPACE_1 = {
   id: 'space_1',
@@ -86,6 +86,9 @@ export function getTestDataLoader({ getService }: Pick<FtrProviderContext, 'getS
   const supertest = getService('supertest');
   const log = getService('log');
   const es = getService('es');
+  const roleScopedSupertest = getService('roleScopedSupertest');
+  const config = getService('config');
+  const isServerless = config.get('serverless');
 
   return {
     createFtrSpaces: async () => {
@@ -122,7 +125,19 @@ export function getTestDataLoader({ getService }: Pick<FtrProviderContext, 'getS
             .map(({ type, id }) => `${type}:${id}`)
             .join(', ')}`
         );
-        await supertest
+
+        // _update_objects_spaces route is internal in serverless and public in stateful
+        const supertestWithScope = isServerless
+          ? await roleScopedSupertest.getSupertestWithRoleScope(
+              { role: 'admin' },
+              {
+                withCommonHeaders: true,
+                useCookieHeader: false,
+                withInternalHeaders: true,
+              }
+            )
+          : supertest;
+        await supertestWithScope
           .post('/api/spaces/_update_objects_spaces')
           .set('kbn-xsrf', 'xxx')
           .send({ objects, spacesToAdd, spacesToRemove })

@@ -5,6 +5,15 @@
  * 2.0.
  */
 
-import { createTestConfig } from '../common/config';
+import { createStatefulTestConfig } from '../../../api_integration/deployment_agnostic/default_configs/stateful.config.base';
+import { services } from '../services';
 
-export default createTestConfig('security_and_spaces - trial license');
+export default createStatefulTestConfig({
+  // @ts-expect-error
+  services,
+  testFiles: [require.resolve('./apis')],
+  junit: {
+    reportName:
+      'X-Pack Spaces API Deployment Agnostic Integration Tests -- security_and_spaces - trial license',
+  },
+});

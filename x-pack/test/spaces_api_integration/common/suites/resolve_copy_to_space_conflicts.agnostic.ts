@@ -72,16 +72,29 @@ const getDestinationSpace = (originSpaceId?: string) => {
 
 export function resolveCopyToSpaceConflictsSuite(context: DeploymentAgnosticFtrProviderContext) {
   const testDataLoader = getTestDataLoader(context);
-  const supertestWithAuth = context.getService('supertest');
   const roleScopedSupertest = context.getService('roleScopedSupertest');
 
+  const getSupertestWithAuth = async () =>
+    await roleScopedSupertest.getSupertestWithRoleScope(
+      { role: 'admin' },
+      {
+        withCommonHeaders: true,
+        useCookieHeader: false,
+        withInternalHeaders: true,
+      }
+    );
+
   const getVisualizationAtSpace = async (spaceId: string): Promise<SavedObject<any>> => {
-    return supertestWithAuth
+    const supertest = await getSupertestWithAuth();
+
+    return supertest
       .get(`${getUrlPrefix(spaceId)}/api/saved_objects/visualization/cts_vis_3_${spaceId}`)
       .then((response: any) => response.body);
   };
   const getDashboardAtSpace = async (spaceId: string): Promise<SavedObject<any>> => {
-    return supertestWithAuth
+    const supertest = await getSupertestWithAuth();
+
+    return supertest
       .get(`${getUrlPrefix(spaceId)}/api/saved_objects/dashboard/cts_dashboard_${spaceId}`)
       .then((response: any) => response.body);
   };
@@ -208,6 +221,7 @@ export function resolveCopyToSpaceConflictsSuite(context: DeploymentAgnosticFtrP
       });
 
       const [dashboard, visualization] = await getObjectsAtSpace(destination);
+
       expect(dashboard.attributes.title).to.eql(
         `This is the ${destination} test space CTS dashboard`
       );
