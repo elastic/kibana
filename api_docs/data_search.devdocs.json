@@ -220,13 +220,7 @@
               "{ create: ({ name, appId, locatorId, initialState, restoreState, sessionId, }: { name: string; appId: string; locatorId: string; initialState: Record<string, unknown>; restoreState: Record<string, unknown>; sessionId: string; }) => Promise<",
               "SearchSessionSavedObject",
               ">; update: (sessionId: string, attributes: unknown) => Promise<",
-              {
-                "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "server",
-                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-server.SavedObjectsUpdateResponse",
-                "text": "SavedObjectsUpdateResponse"
-              },
+              "SavedObjectsUpdateResponse",
               "<",
               {
                 "pluginId": "data",
@@ -238,13 +232,7 @@
               ">>; get: (sessionId: string) => Promise<",
               "SearchSessionSavedObject",
               ">; delete: (sessionId: string) => Promise<void>; find: (opts: Omit<",
-              {
-                "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "server",
-                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-server.SavedObjectsFindOptions",
-                "text": "SavedObjectsFindOptions"
-              },
+              "SavedObjectsFindOptions",
               ", \"type\">) => Promise<",
               {
                 "pluginId": "data",
@@ -704,13 +692,7 @@
               "{ create: ({ name, appId, locatorId, initialState, restoreState, sessionId, }: { name: string; appId: string; locatorId: string; initialState: Record<string, unknown>; restoreState: Record<string, unknown>; sessionId: string; }) => Promise<",
               "SearchSessionSavedObject",
               ">; update: (sessionId: string, attributes: unknown) => Promise<",
-              {
-                "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "server",
-                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-server.SavedObjectsUpdateResponse",
-                "text": "SavedObjectsUpdateResponse"
-              },
+              "SavedObjectsUpdateResponse",
               "<",
               {
                 "pluginId": "data",
@@ -722,13 +704,7 @@
               ">>; get: (sessionId: string) => Promise<",
               "SearchSessionSavedObject",
               ">; delete: (sessionId: string) => Promise<void>; find: (opts: Omit<",
-              {
-                "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "server",
-                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-server.SavedObjectsFindOptions",
-                "text": "SavedObjectsFindOptions"
-              },
+              "SavedObjectsFindOptions",
               ", \"type\">) => Promise<",
               {
                 "pluginId": "data",
@@ -1121,13 +1097,7 @@
           "{ create: ({ name, appId, locatorId, initialState, restoreState, sessionId, }: { name: string; appId: string; locatorId: string; initialState: Record<string, unknown>; restoreState: Record<string, unknown>; sessionId: string; }) => Promise<",
           "SearchSessionSavedObject",
           ">; update: (sessionId: string, attributes: unknown) => Promise<",
-          {
-            "pluginId": "@kbn/core-saved-objects-api-server",
-            "scope": "server",
-            "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-            "section": "def-server.SavedObjectsUpdateResponse",
-            "text": "SavedObjectsUpdateResponse"
-          },
+          "SavedObjectsUpdateResponse",
           "<",
           {
             "pluginId": "data",
@@ -1139,13 +1109,7 @@
           ">>; get: (sessionId: string) => Promise<",
           "SearchSessionSavedObject",
           ">; delete: (sessionId: string) => Promise<void>; find: (opts: Omit<",
-          {
-            "pluginId": "@kbn/core-saved-objects-api-server",
-            "scope": "server",
-            "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-            "section": "def-server.SavedObjectsFindOptions",
-            "text": "SavedObjectsFindOptions"
-          },
+          "SavedObjectsFindOptions",
           ", \"type\">) => Promise<",
           {
             "pluginId": "data",
@@ -1404,13 +1368,7 @@
             "description": [],
             "signature": [
               "(core: ",
-              {
-                "pluginId": "@kbn/core-lifecycle-server",
-                "scope": "server",
-                "docId": "kibKbnCoreLifecycleServerPluginApi",
-                "section": "def-server.CoreSetup",
-                "text": "CoreSetup"
-              },
+              "CoreSetup",
               "<object, unknown>, deps: SetupDependencies) => void"
             ],
             "path": "src/plugins/data/server/search/session/session_service.ts",
@@ -1425,13 +1383,7 @@
                 "label": "core",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-lifecycle-server",
-                    "scope": "server",
-                    "docId": "kibKbnCoreLifecycleServerPluginApi",
-                    "section": "def-server.CoreSetup",
-                    "text": "CoreSetup"
-                  },
+                  "CoreSetup",
                   "<object, unknown>"
                 ],
                 "path": "src/plugins/data/server/search/session/session_service.ts",
@@ -1466,13 +1418,7 @@
             "description": [],
             "signature": [
               "(core: ",
-              {
-                "pluginId": "@kbn/core-lifecycle-server",
-                "scope": "server",
-                "docId": "kibKbnCoreLifecycleServerPluginApi",
-                "section": "def-server.CoreStart",
-                "text": "CoreStart"
-              },
+              "CoreStart",
               ", deps: StartDependencies) => void"
             ],
             "path": "src/plugins/data/server/search/session/session_service.ts",
@@ -1487,13 +1433,7 @@
                 "label": "core",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-lifecycle-server",
-                    "scope": "server",
-                    "docId": "kibKbnCoreLifecycleServerPluginApi",
-                    "section": "def-server.CoreStart",
-                    "text": "CoreStart"
-                  }
+                  "CoreStart"
                 ],
                 "path": "src/plugins/data/server/search/session/session_service.ts",
                 "deprecated": false,
@@ -1545,13 +1485,7 @@
               "(deps: ",
               "SearchSessionDependencies",
               ", user: ",
-              {
-                "pluginId": "@kbn/core-security-common",
-                "scope": "common",
-                "docId": "kibKbnCoreSecurityCommonPluginApi",
-                "section": "def-common.AuthenticatedUser",
-                "text": "AuthenticatedUser"
-              },
+              "AuthenticatedUser",
               " | null, sessionId: string, { name, appId, locatorId, initialState, restoreState, }: Partial<",
               {
                 "pluginId": "data",
@@ -1561,13 +1495,7 @@
                 "text": "SearchSessionSavedObjectAttributes"
               },
               ">) => Promise<",
-              {
-                "pluginId": "@kbn/core-saved-objects-common",
-                "scope": "common",
-                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-                "section": "def-common.SavedObject",
-                "text": "SavedObject"
-              },
+              "SavedObject",
               "<",
               {
                 "pluginId": "data",
@@ -1605,13 +1533,7 @@
                 "label": "user",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-security-common",
-                    "scope": "common",
-                    "docId": "kibKbnCoreSecurityCommonPluginApi",
-                    "section": "def-common.AuthenticatedUser",
-                    "text": "AuthenticatedUser"
-                  },
+                  "AuthenticatedUser",
                   " | null"
                 ],
                 "path": "src/plugins/data/server/search/session/session_service.ts",
@@ -1671,21 +1593,9 @@
               "({ savedObjectsClient }: ",
               "SearchSessionDependencies",
               ", user: ",
-              {
-                "pluginId": "@kbn/core-security-common",
-                "scope": "common",
-                "docId": "kibKbnCoreSecurityCommonPluginApi",
-                "section": "def-common.AuthenticatedUser",
-                "text": "AuthenticatedUser"
-              },
+              "AuthenticatedUser",
               " | null, sessionId: string) => Promise<",
-              {
-                "pluginId": "@kbn/core-saved-objects-common",
-                "scope": "common",
-                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-                "section": "def-common.SavedObject",
-                "text": "SavedObject"
-              },
+              "SavedObject",
               "<",
               {
                 "pluginId": "data",
@@ -1723,13 +1633,7 @@
                 "label": "user",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-security-common",
-                    "scope": "common",
-                    "docId": "kibKbnCoreSecurityCommonPluginApi",
-                    "section": "def-common.AuthenticatedUser",
-                    "text": "AuthenticatedUser"
-                  },
+                  "AuthenticatedUser",
                   " | null"
                 ],
                 "path": "src/plugins/data/server/search/session/session_service.ts",
@@ -1766,21 +1670,9 @@
               "({ savedObjectsClient, internalElasticsearchClient }: ",
               "SearchSessionStatusDependencies",
               ", user: ",
-              {
-                "pluginId": "@kbn/core-security-common",
-                "scope": "common",
-                "docId": "kibKbnCoreSecurityCommonPluginApi",
-                "section": "def-common.AuthenticatedUser",
-                "text": "AuthenticatedUser"
-              },
+              "AuthenticatedUser",
               " | null, options: Omit<",
-              {
-                "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "server",
-                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-server.SavedObjectsFindOptions",
-                "text": "SavedObjectsFindOptions"
-              },
+              "SavedObjectsFindOptions",
               ", \"type\">) => Promise<",
               {
                 "pluginId": "data",
@@ -1818,13 +1710,7 @@
                 "label": "user",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-security-common",
-                    "scope": "common",
-                    "docId": "kibKbnCoreSecurityCommonPluginApi",
-                    "section": "def-common.AuthenticatedUser",
-                    "text": "AuthenticatedUser"
-                  },
+                  "AuthenticatedUser",
                   " | null"
                 ],
                 "path": "src/plugins/data/server/search/session/session_service.ts",
@@ -1841,13 +1727,7 @@
                 "description": [],
                 "signature": [
                   "Omit<",
-                  {
-                    "pluginId": "@kbn/core-saved-objects-api-server",
-                    "scope": "server",
-                    "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                    "section": "def-server.SavedObjectsFindOptions",
-                    "text": "SavedObjectsFindOptions"
-                  },
+                  "SavedObjectsFindOptions",
                   ", \"type\">"
                 ],
                 "path": "src/plugins/data/server/search/session/session_service.ts",
@@ -1869,13 +1749,7 @@
               "(deps: ",
               "SearchSessionDependencies",
               ", user: ",
-              {
-                "pluginId": "@kbn/core-security-common",
-                "scope": "common",
-                "docId": "kibKbnCoreSecurityCommonPluginApi",
-                "section": "def-common.AuthenticatedUser",
-                "text": "AuthenticatedUser"
-              },
+              "AuthenticatedUser",
               " | null, sessionId: string, attributes: Partial<",
               {
                 "pluginId": "data",
@@ -1885,13 +1759,7 @@
                 "text": "SearchSessionSavedObjectAttributes"
               },
               ">) => Promise<",
-              {
-                "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "server",
-                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-server.SavedObjectsUpdateResponse",
-                "text": "SavedObjectsUpdateResponse"
-              },
+              "SavedObjectsUpdateResponse",
               "<",
               {
                 "pluginId": "data",
@@ -1929,13 +1797,7 @@
                 "label": "user",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-security-common",
-                    "scope": "common",
-                    "docId": "kibKbnCoreSecurityCommonPluginApi",
-                    "section": "def-common.AuthenticatedUser",
-                    "text": "AuthenticatedUser"
-                  },
+                  "AuthenticatedUser",
                   " | null"
                 ],
                 "path": "src/plugins/data/server/search/session/session_service.ts",
@@ -1995,21 +1857,9 @@
               "(deps: ",
               "SearchSessionDependencies",
               ", user: ",
-              {
-                "pluginId": "@kbn/core-security-common",
-                "scope": "common",
-                "docId": "kibKbnCoreSecurityCommonPluginApi",
-                "section": "def-common.AuthenticatedUser",
-                "text": "AuthenticatedUser"
-              },
+              "AuthenticatedUser",
               " | null, sessionId: string, expires: Date) => Promise<",
-              {
-                "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "server",
-                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-server.SavedObjectsUpdateResponse",
-                "text": "SavedObjectsUpdateResponse"
-              },
+              "SavedObjectsUpdateResponse",
               "<",
               {
                 "pluginId": "data",
@@ -2047,13 +1897,7 @@
                 "label": "user",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-security-common",
-                    "scope": "common",
-                    "docId": "kibKbnCoreSecurityCommonPluginApi",
-                    "section": "def-common.AuthenticatedUser",
-                    "text": "AuthenticatedUser"
-                  },
+                  "AuthenticatedUser",
                   " | null"
                 ],
                 "path": "src/plugins/data/server/search/session/session_service.ts",
@@ -2105,21 +1949,9 @@
               "(deps: ",
               "SearchSessionDependencies",
               ", user: ",
-              {
-                "pluginId": "@kbn/core-security-common",
-                "scope": "common",
-                "docId": "kibKbnCoreSecurityCommonPluginApi",
-                "section": "def-common.AuthenticatedUser",
-                "text": "AuthenticatedUser"
-              },
+              "AuthenticatedUser",
               " | null, sessionId: string) => Promise<",
-              {
-                "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "server",
-                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-server.SavedObjectsUpdateResponse",
-                "text": "SavedObjectsUpdateResponse"
-              },
+              "SavedObjectsUpdateResponse",
               "<",
               {
                 "pluginId": "data",
@@ -2157,13 +1989,7 @@
                 "label": "user",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-security-common",
-                    "scope": "common",
-                    "docId": "kibKbnCoreSecurityCommonPluginApi",
-                    "section": "def-common.AuthenticatedUser",
-                    "text": "AuthenticatedUser"
-                  },
+                  "AuthenticatedUser",
                   " | null"
                 ],
                 "path": "src/plugins/data/server/search/session/session_service.ts",
@@ -2200,13 +2026,7 @@
               "(deps: ",
               "SearchSessionDependencies",
               ", user: ",
-              {
-                "pluginId": "@kbn/core-security-common",
-                "scope": "common",
-                "docId": "kibKbnCoreSecurityCommonPluginApi",
-                "section": "def-common.AuthenticatedUser",
-                "text": "AuthenticatedUser"
-              },
+              "AuthenticatedUser",
               " | null, sessionId: string) => Promise<{}>"
             ],
             "path": "src/plugins/data/server/search/session/session_service.ts",
@@ -2236,13 +2056,7 @@
                 "label": "user",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-security-common",
-                    "scope": "common",
-                    "docId": "kibKbnCoreSecurityCommonPluginApi",
-                    "section": "def-common.AuthenticatedUser",
-                    "text": "AuthenticatedUser"
-                  },
+                  "AuthenticatedUser",
                   " | null"
                 ],
                 "path": "src/plugins/data/server/search/session/session_service.ts",
@@ -2279,13 +2093,7 @@
               "(deps: ",
               "SearchSessionDependencies",
               ", user: ",
-              {
-                "pluginId": "@kbn/core-security-common",
-                "scope": "common",
-                "docId": "kibKbnCoreSecurityCommonPluginApi",
-                "section": "def-common.AuthenticatedUser",
-                "text": "AuthenticatedUser"
-              },
+              "AuthenticatedUser",
               " | null, sessionId: string) => Promise<Map<string, string>>"
             ],
             "path": "src/plugins/data/server/search/session/session_service.ts",
@@ -2315,13 +2123,7 @@
                 "label": "user",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-security-common",
-                    "scope": "common",
-                    "docId": "kibKbnCoreSecurityCommonPluginApi",
-                    "section": "def-common.AuthenticatedUser",
-                    "text": "AuthenticatedUser"
-                  },
+                  "AuthenticatedUser",
                   " | null"
                 ],
                 "path": "src/plugins/data/server/search/session/session_service.ts",
@@ -2358,13 +2160,7 @@
               "(deps: ",
               "SearchSessionStatusDependencies",
               ", user: ",
-              {
-                "pluginId": "@kbn/core-security-common",
-                "scope": "common",
-                "docId": "kibKbnCoreSecurityCommonPluginApi",
-                "section": "def-common.AuthenticatedUser",
-                "text": "AuthenticatedUser"
-              },
+              "AuthenticatedUser",
               " | null, sessionId: string) => Promise<",
               {
                 "pluginId": "data",
@@ -2402,13 +2198,7 @@
                 "label": "user",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-security-common",
-                    "scope": "common",
-                    "docId": "kibKbnCoreSecurityCommonPluginApi",
-                    "section": "def-common.AuthenticatedUser",
-                    "text": "AuthenticatedUser"
-                  },
+                  "AuthenticatedUser",
                   " | null"
                 ],
                 "path": "src/plugins/data/server/search/session/session_service.ts",
@@ -2443,21 +2233,9 @@
             "description": [],
             "signature": [
               "({ security, savedObjects, elasticsearch }: ",
-              {
-                "pluginId": "@kbn/core-lifecycle-server",
-                "scope": "server",
-                "docId": "kibKbnCoreLifecycleServerPluginApi",
-                "section": "def-server.CoreStart",
-                "text": "CoreStart"
-              },
+              "CoreStart",
               ") => (request: ",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "server",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-server.KibanaRequest",
-                "text": "KibanaRequest"
-              },
+              "KibanaRequest",
               "<unknown, unknown, unknown, any>) => { getId: (args_0: ",
               {
                 "pluginId": "@kbn/search-types",
@@ -2499,13 +2277,7 @@
                 "text": "SearchSessionSavedObjectAttributes"
               },
               ">) => Promise<",
-              {
-                "pluginId": "@kbn/core-saved-objects-common",
-                "scope": "common",
-                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-                "section": "def-common.SavedObject",
-                "text": "SavedObject"
-              },
+              "SavedObject",
               "<",
               {
                 "pluginId": "data",
@@ -2515,13 +2287,7 @@
                 "text": "SearchSessionSavedObjectAttributes"
               },
               ">>; get: (sessionId: string) => Promise<",
-              {
-                "pluginId": "@kbn/core-saved-objects-common",
-                "scope": "common",
-                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-                "section": "def-common.SavedObject",
-                "text": "SavedObject"
-              },
+              "SavedObject",
               "<",
               {
                 "pluginId": "data",
@@ -2531,13 +2297,7 @@
                 "text": "SearchSessionSavedObjectAttributes"
               },
               ">>; find: (options: Omit<",
-              {
-                "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "server",
-                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-server.SavedObjectsFindOptions",
-                "text": "SavedObjectsFindOptions"
-              },
+              "SavedObjectsFindOptions",
               ", \"type\">) => Promise<",
               {
                 "pluginId": "data",
@@ -2555,13 +2315,7 @@
                 "text": "SearchSessionSavedObjectAttributes"
               },
               ">) => Promise<",
-              {
-                "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "server",
-                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-server.SavedObjectsUpdateResponse",
-                "text": "SavedObjectsUpdateResponse"
-              },
+              "SavedObjectsUpdateResponse",
               "<",
               {
                 "pluginId": "data",
@@ -2571,13 +2325,7 @@
                 "text": "SearchSessionSavedObjectAttributes"
               },
               ">>; extend: (sessionId: string, expires: Date) => Promise<",
-              {
-                "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "server",
-                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-server.SavedObjectsUpdateResponse",
-                "text": "SavedObjectsUpdateResponse"
-              },
+              "SavedObjectsUpdateResponse",
               "<",
               {
                 "pluginId": "data",
@@ -2587,13 +2335,7 @@
                 "text": "SearchSessionSavedObjectAttributes"
               },
               ">>; cancel: (sessionId: string) => Promise<",
-              {
-                "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "server",
-                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-server.SavedObjectsUpdateResponse",
-                "text": "SavedObjectsUpdateResponse"
-              },
+              "SavedObjectsUpdateResponse",
               "<",
               {
                 "pluginId": "data",
@@ -2624,13 +2366,7 @@
                 "label": "{ security, savedObjects, elasticsearch }",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-lifecycle-server",
-                    "scope": "server",
-                    "docId": "kibKbnCoreLifecycleServerPluginApi",
-                    "section": "def-server.CoreStart",
-                    "text": "CoreStart"
-                  }
+                  "CoreStart"
                 ],
                 "path": "src/plugins/data/server/search/session/session_service.ts",
                 "deprecated": false,
@@ -2745,13 +2481,7 @@
                 "text": "SearchSessionSavedObjectAttributes"
               },
               ">) => Promise<",
-              {
-                "pluginId": "@kbn/core-saved-objects-common",
-                "scope": "common",
-                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-                "section": "def-common.SavedObject",
-                "text": "SavedObject"
-              },
+              "SavedObject",
               "<",
               {
                 "pluginId": "data",
@@ -2827,13 +2557,7 @@
             "description": [],
             "signature": [
               "(sessionId: string) => Promise<",
-              {
-                "pluginId": "@kbn/core-saved-objects-common",
-                "scope": "common",
-                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-                "section": "def-common.SavedObject",
-                "text": "SavedObject"
-              },
+              "SavedObject",
               "<",
               {
                 "pluginId": "data",
@@ -2871,13 +2595,7 @@
             "description": [],
             "signature": [
               "(options: Omit<",
-              {
-                "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "server",
-                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-server.SavedObjectsFindOptions",
-                "text": "SavedObjectsFindOptions"
-              },
+              "SavedObjectsFindOptions",
               ", \"type\">) => Promise<",
               {
                 "pluginId": "data",
@@ -2906,47 +2624,17 @@
                   "> | undefined; search?: string | undefined; namespaces?: string[] | undefined; perPage?: number | undefined; defaultSearchOperator?: \"AND\" | \"OR\" | undefined; searchFields?: string[] | undefined; sortField?: string | undefined; sortOrder?: ",
                   "SortOrder",
                   " | undefined; hasReference?: ",
-                  {
-                    "pluginId": "@kbn/core-saved-objects-api-server",
-                    "scope": "server",
-                    "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                    "section": "def-server.SavedObjectsFindOptionsReference",
-                    "text": "SavedObjectsFindOptionsReference"
-                  },
+                  "SavedObjectsFindOptionsReference",
                   " | ",
-                  {
-                    "pluginId": "@kbn/core-saved-objects-api-server",
-                    "scope": "server",
-                    "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                    "section": "def-server.SavedObjectsFindOptionsReference",
-                    "text": "SavedObjectsFindOptionsReference"
-                  },
+                  "SavedObjectsFindOptionsReference",
                   "[] | undefined; fields?: string[] | undefined; preference?: string | undefined; pit?: ",
-                  {
-                    "pluginId": "@kbn/core-saved-objects-api-server",
-                    "scope": "server",
-                    "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                    "section": "def-server.SavedObjectsPitParams",
-                    "text": "SavedObjectsPitParams"
-                  },
+                  "SavedObjectsPitParams",
                   " | undefined; searchAfter?: ",
                   "SortResults",
                   " | undefined; rootSearchFields?: string[] | undefined; hasReferenceOperator?: \"AND\" | \"OR\" | undefined; hasNoReference?: ",
-                  {
-                    "pluginId": "@kbn/core-saved-objects-api-server",
-                    "scope": "server",
-                    "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                    "section": "def-server.SavedObjectsFindOptionsReference",
-                    "text": "SavedObjectsFindOptionsReference"
-                  },
+                  "SavedObjectsFindOptionsReference",
                   " | ",
-                  {
-                    "pluginId": "@kbn/core-saved-objects-api-server",
-                    "scope": "server",
-                    "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                    "section": "def-server.SavedObjectsFindOptionsReference",
-                    "text": "SavedObjectsFindOptionsReference"
-                  },
+                  "SavedObjectsFindOptionsReference",
                   "[] | undefined; hasNoReferenceOperator?: \"AND\" | \"OR\" | undefined; typeToNamespacesMap?: Map<string, string[] | undefined> | undefined; migrationVersionCompatibility?: \"raw\" | \"compatible\" | undefined; }"
                 ],
                 "path": "src/plugins/data/server/search/session/types.ts",
@@ -2972,13 +2660,7 @@
                 "text": "SearchSessionSavedObjectAttributes"
               },
               ">) => Promise<",
-              {
-                "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "server",
-                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-server.SavedObjectsUpdateResponse",
-                "text": "SavedObjectsUpdateResponse"
-              },
+              "SavedObjectsUpdateResponse",
               "<",
               {
                 "pluginId": "data",
@@ -3110,13 +2792,7 @@
             "description": [],
             "signature": [
               "(sessionId: string, expires: Date) => Promise<",
-              {
-                "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "server",
-                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-server.SavedObjectsUpdateResponse",
-                "text": "SavedObjectsUpdateResponse"
-              },
+              "SavedObjectsUpdateResponse",
               "<",
               {
                 "pluginId": "data",
@@ -3218,21 +2894,9 @@
             "description": [],
             "signature": [
               "(core: ",
-              {
-                "pluginId": "@kbn/core-lifecycle-server",
-                "scope": "server",
-                "docId": "kibKbnCoreLifecycleServerPluginApi",
-                "section": "def-server.CoreStart",
-                "text": "CoreStart"
-              },
+              "CoreStart",
               ") => (request: ",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "server",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-server.KibanaRequest",
-                "text": "KibanaRequest"
-              },
+              "KibanaRequest",
               "<unknown, unknown, unknown, any>) => ",
               "IScopedSearchSessionsClient"
             ],
@@ -3248,13 +2912,7 @@
                 "label": "core",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-lifecycle-server",
-                    "scope": "server",
-                    "docId": "kibKbnCoreLifecycleServerPluginApi",
-                    "section": "def-server.CoreStart",
-                    "text": "CoreStart"
-                  }
+                  "CoreStart"
                 ],
                 "path": "src/plugins/data/server/search/session/types.ts",
                 "deprecated": false,
@@ -3599,13 +3257,7 @@
             "label": "savedObjectsClient",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "server",
-                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-server.SavedObjectsClientContract",
-                "text": "SavedObjectsClientContract"
-              }
+              "SavedObjectsClientContract"
             ],
             "path": "src/plugins/data/server/search/types.ts",
             "deprecated": false,
@@ -3619,13 +3271,7 @@
             "label": "esClient",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-elasticsearch-server",
-                "scope": "server",
-                "docId": "kibKbnCoreElasticsearchServerPluginApi",
-                "section": "def-server.IScopedClusterClient",
-                "text": "IScopedClusterClient"
-              }
+              "IScopedClusterClient"
             ],
             "path": "src/plugins/data/server/search/types.ts",
             "deprecated": false,
@@ -3675,13 +3321,7 @@
             "label": "request",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "server",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-server.KibanaRequest",
-                "text": "KibanaRequest"
-              },
+              "KibanaRequest",
               "<unknown, unknown, unknown, any>"
             ],
             "path": "src/plugins/data/server/search/types.ts",
@@ -3716,13 +3356,7 @@
         "label": "DataRequestHandlerContext",
         "description": [],
         "signature": [
-          {
-            "pluginId": "@kbn/core-http-request-handler-context-server",
-            "scope": "server",
-            "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
-            "section": "def-server.RequestHandlerContext",
-            "text": "RequestHandlerContext"
-          },
+          "RequestHandlerContext",
           " & { search: Promise<",
           {
             "pluginId": "data",
@@ -7235,13 +6869,7 @@
                     "text": "SerializedSearchSourceFields"
                   },
                   "; serialize: () => { searchSourceJSON: string; references: ",
-                  {
-                    "pluginId": "@kbn/core-saved-objects-common",
-                    "scope": "common",
-                    "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-                    "section": "def-common.SavedObjectReference",
-                    "text": "SavedObjectReference"
-                  },
+                  "SavedObjectReference",
                   "[]; }; toExpressionAst: ({ asDatatable }?: ExpressionAstOptions) => ",
                   {
                     "pluginId": "expressions",
@@ -10705,13 +10333,7 @@
             ],
             "signature": [
               "() => { searchSourceJSON: string; references: ",
-              {
-                "pluginId": "@kbn/core-saved-objects-common",
-                "scope": "common",
-                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-                "section": "def-common.SavedObjectReference",
-                "text": "SavedObjectReference"
-              },
+              "SavedObjectReference",
               "[]; }"
             ],
             "path": "src/plugins/data/common/search/search_source/search_source.ts",
@@ -10912,13 +10534,7 @@
                 "text": "SerializedSearchSourceFields"
               },
               "; references: ",
-              {
-                "pluginId": "@kbn/core-saved-objects-common",
-                "scope": "common",
-                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-                "section": "def-common.SavedObjectReference",
-                "text": "SavedObjectReference"
-              },
+              "SavedObjectReference",
               "[]; }; inject: (searchSourceFields: ",
               {
                 "pluginId": "data",
@@ -10928,13 +10544,7 @@
                 "text": "SerializedSearchSourceFields"
               },
               " & { indexRefName: string; }, references: ",
-              {
-                "pluginId": "@kbn/core-saved-objects-common",
-                "scope": "common",
-                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-                "section": "def-common.SavedObjectReference",
-                "text": "SavedObjectReference"
-              },
+              "SavedObjectReference",
               "[]) => ",
               {
                 "pluginId": "data",
@@ -12847,13 +12457,7 @@
             "text": "SerializedSearchSourceFields"
           },
           ", ",
-          {
-            "pluginId": "@kbn/core-saved-objects-common",
-            "scope": "common",
-            "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-            "section": "def-common.SavedObjectReference",
-            "text": "SavedObjectReference"
-          },
+          "SavedObjectReference",
           "[]]"
         ],
         "path": "src/plugins/data/common/search/search_source/extract_references.ts",
@@ -15645,13 +15249,7 @@
             "text": "SerializedSearchSourceFields"
           },
           " & { indexRefName: string; }, references: ",
-          {
-            "pluginId": "@kbn/core-saved-objects-common",
-            "scope": "common",
-            "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-            "section": "def-common.SavedObjectReference",
-            "text": "SavedObjectReference"
-          },
+          "SavedObjectReference",
           "[]) => ",
           {
             "pluginId": "data",
@@ -15695,13 +15293,7 @@
             "label": "references",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-saved-objects-common",
-                "scope": "common",
-                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-                "section": "def-common.SavedObjectReference",
-                "text": "SavedObjectReference"
-              },
+              "SavedObjectReference",
               "[]"
             ],
             "path": "src/plugins/data/common/search/search_source/inject_references.ts",
@@ -28768,13 +28360,7 @@
             "label": "executionContext",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-execution-context-common",
-                "scope": "common",
-                "docId": "kibKbnCoreExecutionContextCommonPluginApi",
-                "section": "def-common.KibanaExecutionContext",
-                "text": "KibanaExecutionContext"
-              },
+              "KibanaExecutionContext",
               " | undefined"
             ],
             "path": "src/plugins/data/common/search/expressions/esaggs/request_handler.ts",
@@ -29242,13 +28828,7 @@
             "text": "SearchSessionsFindResponse"
           },
           " extends ",
-          {
-            "pluginId": "@kbn/core-saved-objects-api-server",
-            "scope": "server",
-            "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-            "section": "def-server.SavedObjectsFindResponse",
-            "text": "SavedObjectsFindResponse"
-          },
+          "SavedObjectsFindResponse",
           "<",
           {
             "pluginId": "data",
@@ -29649,13 +29229,7 @@
                 "text": "DataViewLazy"
               },
               "[]>; clearCache: () => void; clearInstanceCache: (id?: string | undefined) => void; getCache: () => Promise<",
-              {
-                "pluginId": "@kbn/core-saved-objects-common",
-                "scope": "common",
-                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-                "section": "def-common.SavedObject",
-                "text": "SavedObject"
-              },
+              "SavedObject",
               "<",
               {
                 "pluginId": "dataViews",
@@ -29747,13 +29321,7 @@
                 "text": "DataViewFieldMap"
               },
               "; savedObjectToSpec: (savedObject: ",
-              {
-                "pluginId": "@kbn/core-saved-objects-common",
-                "scope": "common",
-                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-                "section": "def-common.SavedObject",
-                "text": "SavedObject"
-              },
+              "SavedObject",
               "<",
               {
                 "pluginId": "dataViews",
@@ -33917,13 +33485,7 @@
             "text": "SerializedSearchSourceFields"
           },
           "; serialize: () => { searchSourceJSON: string; references: ",
-          {
-            "pluginId": "@kbn/core-saved-objects-common",
-            "scope": "common",
-            "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-            "section": "def-common.SavedObjectReference",
-            "text": "SavedObjectReference"
-          },
+          "SavedObjectReference",
           "[]; }; toExpressionAst: ({ asDatatable }?: ExpressionAstOptions) => ",
           {
             "pluginId": "expressions",
