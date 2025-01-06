@@ -5,21 +5,9 @@
  * 2.0.
  */
 
-import { UrlService } from '@kbn/share-plugin/common/url_service';
+import { type UrlService } from '@kbn/share-plugin/common/url_service';
+import { type LogsLocatorParams, LOGS_LOCATOR_ID } from './logs_locator';
 
-import { LogsLocatorParams, NodeLogsLocatorParams, TraceLogsLocatorParams } from './types';
-import { LOGS_LOCATOR_ID } from './logs_locator';
-import { NODE_LOGS_LOCATOR_ID } from './node_logs_locator';
-import { TRACE_LOGS_LOCATOR_ID } from './trace_logs_locator';
-
-export const getLogsLocatorsFromUrlService = (urlService: UrlService) => {
-  const logsLocator = urlService.locators.get<LogsLocatorParams>(LOGS_LOCATOR_ID)!;
-  const nodeLogsLocator = urlService.locators.get<NodeLogsLocatorParams>(NODE_LOGS_LOCATOR_ID)!;
-  const traceLogsLocator = urlService.locators.get<TraceLogsLocatorParams>(TRACE_LOGS_LOCATOR_ID)!;
-
-  return {
-    logsLocator,
-    traceLogsLocator,
-    nodeLogsLocator,
-  };
-};
+export function getLogsLocatorFromUrlService(urlService: UrlService) {
+  return urlService.locators.get<LogsLocatorParams>(LOGS_LOCATOR_ID);
+}
