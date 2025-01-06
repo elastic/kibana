@@ -30,7 +30,7 @@ export const useGetUniqueIpsStatItems: () => Readonly<StatItems[]> = () => {
             key: 'uniqueSourceIps',
             name: i18n.SOURCE_CHART_LABEL,
             description: i18n.SOURCE_UNIT_LABEL,
-            color: euiTheme.colors.vis.euiColorVis2,
+            color: euiTheme.colors.vis.euiColorVis4,
             icon: 'visMapCoordinate',
             lensAttributes: kpiUniqueIpsSourceMetricLensAttributes,
           },
@@ -38,7 +38,7 @@ export const useGetUniqueIpsStatItems: () => Readonly<StatItems[]> = () => {
             key: 'uniqueDestinationIps',
             name: i18n.DESTINATION_CHART_LABEL,
             description: i18n.DESTINATION_UNIT_LABEL,
-            color: euiTheme.colors.vis.euiColorVis3,
+            color: euiTheme.colors.vis.euiColorVis2,
             icon: 'visMapCoordinate',
             lensAttributes: kpiUniqueIpsDestinationMetricLensAttributes,
           },
@@ -50,7 +50,7 @@ export const useGetUniqueIpsStatItems: () => Readonly<StatItems[]> = () => {
         getBarChartLensAttributes: getKpiUniqueIpsBarLensAttributes,
       },
     ],
-    [euiTheme.colors.vis.euiColorVis2, euiTheme.colors.vis.euiColorVis3]
+    [euiTheme.colors.vis.euiColorVis2, euiTheme.colors.vis.euiColorVis4]
   );
 };
 

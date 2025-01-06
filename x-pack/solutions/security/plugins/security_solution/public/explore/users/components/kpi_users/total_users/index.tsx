@@ -23,7 +23,7 @@ export const useGetUsersStatItems: () => Readonly<StatItems[]> = () => {
         fields: [
           {
             key: 'users',
-            color: euiTheme.colors.vis.euiColorVis1,
+            color: euiTheme.colors.vis.euiColorVis0,
             icon: 'storage',
             lensAttributes: kpiTotalUsersMetricLensAttributes,
           },
@@ -33,7 +33,7 @@ export const useGetUsersStatItems: () => Readonly<StatItems[]> = () => {
         getAreaChartLensAttributes: getKpiTotalUsersAreaLensAttributes,
       },
     ],
-    [euiTheme.colors.vis.euiColorVis1]
+    [euiTheme.colors.vis.euiColorVis0]
   );
 };
 

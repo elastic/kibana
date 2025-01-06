@@ -62,7 +62,7 @@ export const getKpiUserAuthenticationsBarLensAttributes: GetLensAttributes = ({ 
             xAccessor: columnEventOutcomeFailureFilter,
             yConfig: [
               {
-                color: euiTheme.colors.vis.euiColorVis9,
+                color: euiTheme.colors.vis.euiColorVis4,
                 forAccessor: columnEventOutcomeFailure,
               },
             ],

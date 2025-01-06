@@ -38,7 +38,7 @@ export const useGetAuthenticationsStatItems: () => Readonly<StatItems[]> = () =>
             key: 'authenticationsFailure',
             name: i18n.FAIL_CHART_LABEL,
             description: i18n.FAIL_UNIT_LABEL,
-            color: euiTheme.colors.vis.euiColorVis9,
+            color: euiTheme.colors.vis.euiColorVis4,
             icon: 'cross',
             lensAttributes: kpiUserAuthenticationsMetricFailureLensAttributes,
           },
@@ -50,7 +50,7 @@ export const useGetAuthenticationsStatItems: () => Readonly<StatItems[]> = () =>
         getBarChartLensAttributes: getKpiUserAuthenticationsBarLensAttributes,
       },
     ],
-    [euiTheme.colors.vis.euiColorVis0, euiTheme.colors.vis.euiColorVis9]
+    [euiTheme.colors.vis.euiColorVis0, euiTheme.colors.vis.euiColorVis4]
   );
 };
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useEuiTheme } from '@elastic/eui';
 
 import type { StatItems } from '../../../../components/stat_items';
@@ -21,34 +21,37 @@ export const ID = 'networkKpiUniquePrivateIpsQuery';
 
 export const useGetUniquePrivateIpsStatItems: () => Readonly<StatItems[]> = () => {
   const { euiTheme } = useEuiTheme();
-  return [
-    {
-      key: 'uniqueIps',
-      fields: [
-        {
-          key: 'uniqueSourcePrivateIps',
-          name: i18n.SOURCE_CHART_LABEL,
-          description: i18n.SOURCE_UNIT_LABEL,
-          color: euiTheme.colors.vis.euiColorVis2,
-          icon: 'visMapCoordinate',
-          lensAttributes: kpiUniquePrivateIpsSourceMetricLensAttributes,
-        },
-        {
-          key: 'uniqueDestinationPrivateIps',
-          name: i18n.DESTINATION_CHART_LABEL,
-          description: i18n.DESTINATION_UNIT_LABEL,
-          color: euiTheme.colors.vis.euiColorVis3,
-          icon: 'visMapCoordinate',
-          lensAttributes: kpiUniquePrivateIpsDestinationMetricLensAttributes,
-        },
-      ],
-      description: i18n.UNIQUE_PRIVATE_IPS,
-      enableAreaChart: true,
-      enableBarChart: true,
-      getAreaChartLensAttributes: getKpiUniquePrivateIpsAreaLensAttributes,
-      getBarChartLensAttributes: getKpiUniquePrivateIpsBarLensAttributes,
-    },
-  ];
+  return useMemo(
+    () => [
+      {
+        key: 'uniqueIps',
+        fields: [
+          {
+            key: 'uniqueSourcePrivateIps',
+            name: i18n.SOURCE_CHART_LABEL,
+            description: i18n.SOURCE_UNIT_LABEL,
+            color: euiTheme.colors.vis.euiColorVis4,
+            icon: 'visMapCoordinate',
+            lensAttributes: kpiUniquePrivateIpsSourceMetricLensAttributes,
+          },
+          {
+            key: 'uniqueDestinationPrivateIps',
+            name: i18n.DESTINATION_CHART_LABEL,
+            description: i18n.DESTINATION_UNIT_LABEL,
+            color: euiTheme.colors.vis.euiColorVis2,
+            icon: 'visMapCoordinate',
+            lensAttributes: kpiUniquePrivateIpsDestinationMetricLensAttributes,
+          },
+        ],
+        description: i18n.UNIQUE_PRIVATE_IPS,
+        enableAreaChart: true,
+        enableBarChart: true,
+        getAreaChartLensAttributes: getKpiUniquePrivateIpsAreaLensAttributes,
+        getBarChartLensAttributes: getKpiUniquePrivateIpsBarLensAttributes,
+      },
+    ],
+    [euiTheme.colors.vis.euiColorVis2, euiTheme.colors.vis.euiColorVis4]
+  );
 };
 
 const NetworkKpiUniquePrivateIpsComponent: React.FC<NetworkKpiProps> = ({ from, to }) => {

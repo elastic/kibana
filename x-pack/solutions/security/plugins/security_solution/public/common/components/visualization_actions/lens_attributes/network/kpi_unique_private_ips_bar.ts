@@ -69,7 +69,7 @@ export const getKpiUniquePrivateIpsBarLensAttributes: GetLensAttributes = ({ eui
             yConfig: [
               {
                 forAccessor: columnSourceIp,
-                color: euiTheme.colors.vis.euiColorVis2,
+                color: euiTheme.colors.vis.euiColorVis4,
               },
             ],
             xAccessor: columnSourceIpFilter,
@@ -82,7 +82,7 @@ export const getKpiUniquePrivateIpsBarLensAttributes: GetLensAttributes = ({ eui
             yConfig: [
               {
                 forAccessor: columnDestinationIp,
-                color: euiTheme.colors.vis.euiColorVis3,
+                color: euiTheme.colors.vis.euiColorVis2,
               },
             ],
             xAccessor: columnDestinationIpFilter,

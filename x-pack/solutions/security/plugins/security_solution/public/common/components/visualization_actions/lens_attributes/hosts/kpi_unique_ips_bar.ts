@@ -96,7 +96,7 @@ export const getKpiUniqueIpsBarLensAttributes: GetLensAttributes = ({ euiTheme }
             layerType: 'data',
             seriesType: 'bar_horizontal_stacked',
             xAccessor: columnSourceFilter,
-            yConfig: [{ color: euiTheme.colors.vis.euiColorVis2, forAccessor: columnSourceIp }],
+            yConfig: [{ color: euiTheme.colors.vis.euiColorVis4, forAccessor: columnSourceIp }],
           },
           {
             accessors: [columnDestinationIp],
@@ -105,7 +105,7 @@ export const getKpiUniqueIpsBarLensAttributes: GetLensAttributes = ({ euiTheme }
             seriesType: 'bar_horizontal_stacked',
             xAccessor: columnDestinationFilter,
             yConfig: [
-              { color: euiTheme.colors.vis.euiColorVis3, forAccessor: columnDestinationIp },
+              { color: euiTheme.colors.vis.euiColorVis2, forAccessor: columnDestinationIp },
             ],
           },
         ],

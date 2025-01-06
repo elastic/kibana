@@ -90,7 +90,7 @@ export const getKpiUniqueIpsAreaLensAttributes: GetLensAttributes = ({ euiTheme 
             seriesType: 'area',
             xAccessor: columnSourceTimestamp,
             yConfig: [
-              { color: euiTheme.colors.vis.euiColorVis2, forAccessor: columnSourceUniqueIp },
+              { color: euiTheme.colors.vis.euiColorVis4, forAccessor: columnSourceUniqueIp },
             ],
           },
           {
@@ -100,7 +100,7 @@ export const getKpiUniqueIpsAreaLensAttributes: GetLensAttributes = ({ euiTheme 
             seriesType: 'area',
             xAccessor: columnDestinationTimestamp,
             yConfig: [
-              { color: euiTheme.colors.vis.euiColorVis3, forAccessor: columnDestinationIp },
+              { color: euiTheme.colors.vis.euiColorVis2, forAccessor: columnDestinationIp },
             ],
           },
         ],
