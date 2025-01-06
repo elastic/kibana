@@ -42,6 +42,10 @@ export const MockAssistantProviderComponent: React.FC<Props> = ({
   const chrome = chromeServiceMock.createStartContract();
   chrome.getChromeStyle$.mockReturnValue(of('classic'));
 
+  const mockUserProfileService = {
+    getCurrent: jest.fn(() => Promise.resolve({ avatar: 'avatar' })),
+  } as unknown as UserProfileService;
+
   return (
     <AssistantProvider
       actionTypeRegistry={actionTypeRegistry}
@@ -57,7 +61,7 @@ export const MockAssistantProviderComponent: React.FC<Props> = ({
       navigateToApp={mockNavigateToApp}
       baseConversations={BASE_SECURITY_CONVERSATIONS}
       currentAppId={'test'}
-      userProfileService={jest.fn() as unknown as UserProfileService}
+      userProfileService={mockUserProfileService}
       chrome={chrome}
     >
       {children}

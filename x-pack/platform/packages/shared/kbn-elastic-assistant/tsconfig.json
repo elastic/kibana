@@ -36,5 +36,6 @@
     "@kbn/user-profile-components",
     "@kbn/core-chrome-browser-mocks",
     "@kbn/core-chrome-browser",
+    "@kbn/ai-assistant-icon",
   ]
 }

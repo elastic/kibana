@@ -9,6 +9,7 @@
 
 import React, { useReducer, useCallback, useEffect, useRef, useMemo } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
+import useAsync from 'react-use/lib/useAsync';
 import {
   EuiBasicTableColumn,
   EuiButton,
@@ -379,6 +380,8 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
     isKibanaVersioningEnabled,
   } = useServices();
 
+  const favoritesEnabled = useAsync(isFavoritesEnabled, [])?.value ?? false;
+
   const openContentEditor = useOpenContentEditor();
   const contentInsightsServices = useContentInsightsServices();
 
@@ -621,7 +624,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
                 }
               }}
               searchTerm={searchQuery.text}
-              isFavoritesEnabled={isFavoritesEnabled()}
+              isFavoritesEnabled={favoritesEnabled}
             />
           );
         },
@@ -754,7 +757,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
     tableItemsRowActions,
     inspectItem,
     entityName,
-    isFavoritesEnabled,
+    favoritesEnabled,
     isKibanaVersioningEnabled,
   ]);
 
@@ -1218,7 +1221,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
           addOrRemoveExcludeTagFilter={addOrRemoveExcludeTagFilter}
           clearTagSelection={clearTagSelection}
           createdByEnabled={createdByEnabled}
-          favoritesEnabled={isFavoritesEnabled()}
+          favoritesEnabled={favoritesEnabled}
         />
 
         {/* Delete modal */}
