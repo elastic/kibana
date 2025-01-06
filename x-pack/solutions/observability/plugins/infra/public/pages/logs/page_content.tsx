@@ -12,16 +12,13 @@ import { Routes, Route } from '@kbn/shared-ux-router';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { HeaderMenuPortal, useLinkProps } from '@kbn/observability-shared-plugin/public';
 import type { SharePublicStart } from '@kbn/share-plugin/public/plugin';
-import type {
-  ObservabilityOnboardingLocatorParams,
-  AllDatasetsLocatorParams,
-} from '@kbn/deeplinks-observability';
 import {
+  type ObservabilityOnboardingLocatorParams,
   OBSERVABILITY_ONBOARDING_LOCATOR,
-  ALL_DATASETS_LOCATOR_ID,
 } from '@kbn/deeplinks-observability';
 import { dynamic } from '@kbn/shared-ux-utility';
 import { isDevMode } from '@kbn/xstate-utils';
+import { type LogsLocatorParams, LOGS_LOCATOR_ID } from '@kbn/logs-shared-plugin/common';
 import { LazyAlertDropdownWrapper } from '../../alerting/log_threshold';
 import { HelpCenterContent } from '../../components/help_center_content';
 import { useReadOnlyBadge } from '../../hooks/use_readonly_badge';
@@ -94,7 +91,7 @@ export const LogsPageContent: React.FunctionComponent = () => {
           path="/stream"
           exact
           render={() => {
-            share.url.locators.get<AllDatasetsLocatorParams>(ALL_DATASETS_LOCATOR_ID)?.navigate({});
+            share.url.locators.get<LogsLocatorParams>(LOGS_LOCATOR_ID)?.navigate({});
 
             return null;
           }}
