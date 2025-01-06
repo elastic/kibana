@@ -96,7 +96,6 @@ const createAndMountDashboardGrid = async (panels: DashboardPanelMap = PANELS) =
     </DashboardContext.Provider>
   );
 
-  // console.log(component.debug());
   // wait for first render
   await waitFor(() => {
     expect(component.queryAllByTestId('dashboardGridItem').length).toBe(Object.keys(panels).length);
