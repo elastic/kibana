@@ -27,8 +27,8 @@ import { SloDeleteModal } from '../../../../components/slo/delete_confirmation_m
 import { SloDisableConfirmationModal } from '../../../../components/slo/disable_confirmation_modal/slo_disable_confirmation_modal';
 import { SloEnableConfirmationModal } from '../../../../components/slo/enable_confirmation_modal/slo_enable_confirmation_modal';
 import { SloResetConfirmationModal } from '../../../../components/slo/reset_confirmation_modal/slo_reset_confirmation_modal';
-import { SloStatusBadge } from '../../../../components/slo/slo_status_badge';
-import { SloActiveAlertsBadge } from '../../../../components/slo/slo_status_badge/slo_active_alerts_badge';
+import { SloStateBadge, SloStatusBadge } from '../../../../components/slo/slo_badges';
+import { SloActiveAlertsBadge } from '../../../../components/slo/slo_badges/slo_active_alerts_badge';
 import { sloKeys } from '../../../../hooks/query_key_factory';
 import { useCloneSlo } from '../../../../hooks/use_clone_slo';
 import { useDisableSlo } from '../../../../hooks/use_disable_slo';
@@ -357,6 +357,7 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
       render: (_, slo: SLOWithSummaryResponse) => (
         <EuiFlexGroup direction="row" gutterSize="s">
           <SloStatusBadge slo={slo} />
+          <SloStateBadge slo={slo} />
           <SloRemoteBadge slo={slo} />
         </EuiFlexGroup>
       ),

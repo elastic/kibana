@@ -168,7 +168,6 @@ export function SloCardItem({ slo, rules, activeAlerts, historicalSummary, refet
               rules={rules}
               activeAlerts={activeAlerts}
               handleCreateRule={handleCreateRule}
-              hasGroupBy={Boolean(slo.groupBy && slo.groupBy !== ALL_VALUE)}
             />
           }
         />
