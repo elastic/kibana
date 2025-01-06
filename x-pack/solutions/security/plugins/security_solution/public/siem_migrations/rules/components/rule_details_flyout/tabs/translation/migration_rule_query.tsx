@@ -10,7 +10,6 @@ import {
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFormRow,
   EuiHorizontalRule,
   EuiMarkdownFormat,
   EuiSpacer,
@@ -18,15 +17,13 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { ESQLLangEditor } from '@kbn/esql/public';
 import { VALIDATION_WARNING_CODES } from '../../../../../../detection_engine/rule_creation/constants/validation_warning_codes';
 import { useFormWithWarnings } from '../../../../../../common/hooks/use_form_with_warnings';
-import { EsqlQueryEdit } from '../../../../../../detection_engine/rule_creation/components/esql_query_edit';
 import { Field, Form, getUseField } from '../../../../../../shared_imports';
 import type { RuleTranslationSchema } from './types';
 import { schema } from './schema';
 import * as i18n from './translations';
+import { EsqlEditor } from './esql_editor';
 
 const CommonUseField = getUseField({ component: Field });
 
@@ -149,85 +146,17 @@ export const MigrationRuleQuery: React.FC<MigrationRuleQueryProps> = React.memo(
               },
             }}
           />
-          <EuiSpacer size="m" />
-          <EsqlQueryEdit
-            path="queryBar"
-            dataView={{
-              title: '',
-              fields: [],
-            }}
-          />
+          <EsqlEditor path="queryBar" />
         </Form>
       );
     }, [editMode, form, onCancel, onSave]);
-
-    const esqlQueryBar = useMemo(() => {
-      if (!editMode) {
-        return null;
-      }
-      return (
-        <Form form={form} data-test-subj="ruleMigrationTranslationTab">
-          <EuiFlexGroup
-            direction="row"
-            gutterSize="none"
-            justifyContent="flexEnd"
-            alignItems="flexStart"
-          >
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty iconType="cross" onClick={onCancel} size="xs">
-                {i18n.CANCEL}
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty iconType="save" onClick={onSave} size="xs">
-                {i18n.SAVE}
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-          <CommonUseField
-            path="ruleName"
-            componentProps={{
-              idAria: 'ruleMigrationTranslationRuleName',
-              'data-test-subj': 'ruleMigrationTranslationRuleName',
-              euiFieldProps: {
-                fullWidth: true,
-              },
-            }}
-          />
-          <EuiFormRow id="queryEditor" data-test-subj="queryEsqlEditor" fullWidth>
-            <ESQLLangEditor
-              query={{ esql: query }}
-              onTextLangQueryChange={
-                (/* q: AggregateQuery */) => {
-                  // setQuery(q);
-                  // setParam('esqlQuery', q);
-                  // refreshTimeFields(q);
-                }
-              }
-              onTextLangQuerySubmit={async () => {}}
-              // detectedTimestamp={detectedTimestamp}
-              hideRunQueryText={true}
-              // isLoading={isLoading}
-              // editorIsInline
-              disableSubmitAction={true}
-              hideTimeFilterInfo={true}
-              hideQueryHistory={true}
-              hasOutline={true}
-              errors={[]}
-              warning={undefined}
-            />
-          </EuiFormRow>
-        </Form>
-      );
-    }, [editMode, form, onCancel, onSave, query]);
 
     return (
       <>
         {headerComponent}
         <EuiHorizontalRule margin="xs" />
         {readQueryComponent}
-        {/* {editQueryComponent} */}
-        {esqlQueryBar}
+        {editQueryComponent}
       </>
     );
   }
