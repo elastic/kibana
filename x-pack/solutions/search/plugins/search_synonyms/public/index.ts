@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import React from 'react';
+import { SearchSynonymsPlugin } from './plugin';
 
-const CrowdstrikeParamsFields = () => <></>;
-
-// eslint-disable-next-line import/no-default-export
-export { CrowdstrikeParamsFields as default };
+export function plugin() {
+  return new SearchSynonymsPlugin();
+}

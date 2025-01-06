@@ -5,9 +5,4 @@
  * 2.0.
  */
 
-import React from 'react';
-
-const SentinelOneParamsFields = () => <></>;
-
-// eslint-disable-next-line import/no-default-export
-export { SentinelOneParamsFields as default };
+export const SYNONYMS_UI_FLAG = 'searchSynonyms:synonymsEnabled';
