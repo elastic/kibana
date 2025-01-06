@@ -43,13 +43,7 @@
             "description": [],
             "signature": [
               "() => jest.Mocked<",
-              {
-                "pluginId": "@kbn/core-i18n-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreI18nBrowserPluginApi",
-                "section": "def-public.I18nStart",
-                "text": "I18nStart"
-              },
+              "I18nStart",
               ">"
             ],
             "path": "packages/core/i18n/core-i18n-browser-mocks/src/i18n_service.mock.ts",
