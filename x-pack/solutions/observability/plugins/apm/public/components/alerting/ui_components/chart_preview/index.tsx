@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { RectAnnotationDatum, TickFormatter } from '@elastic/charts';
 import {
   AnnotationDomainType,
   Axis,
@@ -13,22 +14,20 @@ import {
   LineAnnotation,
   Position,
   RectAnnotation,
-  RectAnnotationDatum,
   ScaleType,
   Settings,
-  TickFormatter,
   Tooltip,
   niceTimeFormatter,
 } from '@elastic/charts';
 import { EuiSpacer, useEuiTheme } from '@elastic/eui';
 import React, { useMemo } from 'react';
-import { IUiSettingsClient } from '@kbn/core/public';
-import { TimeUnitChar } from '@kbn/observability-plugin/common';
+import type { IUiSettingsClient } from '@kbn/core/public';
+import type { TimeUnitChar } from '@kbn/observability-plugin/common';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 import { useElasticChartsTheme } from '@kbn/charts-theme';
-import { Coordinate } from '../../../../../typings/timeseries';
+import type { Coordinate } from '../../../../../typings/timeseries';
 import { getTimeZone } from '../../../shared/charts/helper/timezone';
 import { TimeLabelForData, TIME_LABELS, getDomain } from './chart_preview_helper';
 import { ALERT_PREVIEW_BUCKET_SIZE } from '../../utils/helper';
