@@ -7477,7 +7477,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-tabbed-modal@link:packages/shared-ux/modal/tabbed":
+"@kbn/shared-ux-tabbed-modal@link:src/platform/packages/shared/shared-ux/modal/tabbed":
   version "0.0.0"
   uid ""
 
