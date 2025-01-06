@@ -106,6 +106,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       await titleSimulator.status(200);
       await titleSimulator.next('My generated title');
+      await titleSimulator.tokenCount({ completion: 1, prompt: 1, total: 2 });
       await titleSimulator.complete();
 
       await conversationSimulator.status(200);
@@ -546,5 +547,24 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
     // todo
     it.skip('executes a function', async () => {});
+
+    describe('security roles and access privileges', () => {
+      it('should deny access for users without the ai_assistant privilege', async () => {
+        await observabilityAIAssistantAPIClient
+          .slsUnauthorized({
+            endpoint: 'POST /internal/observability_ai_assistant/chat/complete',
+            params: {
+              body: {
+                messages,
+                connectorId,
+                persist: false,
+                screenContexts: [],
+                scopes: ['all'],
+              },
+            },
+          })
+          .expect(403);
+      });
+    });
   });
 }
