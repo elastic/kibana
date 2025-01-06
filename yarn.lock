@@ -7065,6 +7065,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/search-synonyms@link:x-pack/solutions/search/plugins/search_synonyms":
+  version "0.0.0"
+  uid ""
+
 "@kbn/search-types@link:src/platform/packages/shared/kbn-search-types":
   version "0.0.0"
   uid ""
