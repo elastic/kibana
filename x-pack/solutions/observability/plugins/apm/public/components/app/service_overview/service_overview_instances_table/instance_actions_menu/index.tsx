@@ -15,11 +15,7 @@ import {
   SectionSubtitle,
   SectionTitle,
 } from '@kbn/observability-shared-plugin/public';
-import {
-  AllDatasetsLocatorParams,
-  ALL_DATASETS_LOCATOR_ID,
-} from '@kbn/deeplinks-observability/locators';
-import { getLogsLocatorsFromUrlService } from '@kbn/logs-shared-plugin/common';
+import { getLogsLocatorFromUrlService } from '@kbn/logs-shared-plugin/common';
 import {
   ASSET_DETAILS_LOCATOR_ID,
   type AssetDetailsLocatorParams,
@@ -56,9 +52,7 @@ export function InstanceActionsMenu({ serviceName, serviceNodeName, kuery, onClo
   const metricOverviewHref = useMetricOverviewHref(serviceName);
   const history = useHistory();
 
-  const allDatasetsLocator =
-    share.url.locators.get<AllDatasetsLocatorParams>(ALL_DATASETS_LOCATOR_ID)!;
-  const { nodeLogsLocator } = getLogsLocatorsFromUrlService(share.url);
+  const logsLocator = getLogsLocatorFromUrlService(share.url)!;
   const assetDetailsLocator =
     share.url.locators.get<AssetDetailsLocatorParams>(ASSET_DETAILS_LOCATOR_ID);
 
@@ -99,8 +93,7 @@ export function InstanceActionsMenu({ serviceName, serviceNodeName, kuery, onClo
     basePath: core.http.basePath,
     onFilterByInstanceClick: handleFilterByInstanceClick,
     metricsHref,
-    allDatasetsLocator,
-    nodeLogsLocator,
+    logsLocator,
     assetDetailsLocator,
   });
 

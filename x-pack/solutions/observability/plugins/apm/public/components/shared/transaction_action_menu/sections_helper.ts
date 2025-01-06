@@ -6,7 +6,7 @@
  */
 
 import { isEmpty } from 'lodash';
-import { MouseEvent } from 'react';
+import type { MouseEvent } from 'react';
 
 export interface Action {
   key: string;
