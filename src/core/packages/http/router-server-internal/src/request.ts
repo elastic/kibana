@@ -328,12 +328,6 @@ export class CoreKibanaRequest<
       return true;
     }
 
-    const security = this.getSecurity(request);
-
-    if (security?.authc !== undefined) {
-      return security.authc?.enabled ?? true;
-    }
-
     const authOptions = request.route.settings.auth;
     if (typeof authOptions === 'object') {
       // 'try' is used in the legacy platform
