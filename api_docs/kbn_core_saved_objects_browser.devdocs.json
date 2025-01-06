@@ -23,10 +23,6 @@
           },
           {
             "plugin": "@kbn/core",
-            "path": "src/core/server/index.ts"
-          },
-          {
-            "plugin": "@kbn/core",
             "path": "src/core/packages/lifecycle/browser/src/core_start.ts"
           },
           {
@@ -76,6 +72,10 @@
           {
             "plugin": "exploratoryView",
             "path": "x-pack/solutions/observability/plugins/exploratory_view/public/application/types.ts"
+          },
+          {
+            "plugin": "@kbn/core",
+            "path": "src/core/server/index.ts"
           },
           {
             "plugin": "@kbn/core-saved-objects-browser-mocks",
