@@ -18,7 +18,7 @@ import type { EntityStoreConfig } from './types';
 import { mockGlobalState } from '../../../../public/common/mock';
 import type { EntityDefinition } from '@kbn/entities-schema';
 import { convertToEntityManagerDefinition } from './entity_definitions/entity_manager_conversion';
-import { EntityType } from '@kbn/security-solution-plugin/common/search_strategy';
+import { EntityType } from '../../../../common/search_strategy';
 
 const definition: EntityDefinition = convertToEntityManagerDefinition(
   {
