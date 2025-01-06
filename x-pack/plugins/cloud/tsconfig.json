@@ -19,6 +19,7 @@
     "@kbn/logging",
     "@kbn/core-saved-objects-server",
     "@kbn/core-http-server",
+    "@kbn/std",
   ],
   "exclude": [
     "target/**/*",
