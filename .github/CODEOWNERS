@@ -230,7 +230,6 @@ packages/kbn-repo-linter @elastic/kibana-operations
 packages/kbn-repo-path @elastic/kibana-operations
 packages/kbn-repo-source-classifier @elastic/kibana-operations
 packages/kbn-repo-source-classifier-cli @elastic/kibana-operations
-packages/kbn-reporting/public @elastic/appex-sharedux
 packages/kbn-reporting/server @elastic/appex-sharedux
 packages/kbn-saved-objects-settings @elastic/appex-sharedux
 packages/kbn-saved-search-component @elastic/obs-ux-logs-team
@@ -492,6 +491,7 @@ src/platform/packages/private/kbn-reporting/export_types/png @elastic/appex-shar
 src/platform/packages/private/kbn-reporting/export_types/png_common @elastic/appex-sharedux
 src/platform/packages/private/kbn-reporting/get_csv_panel_actions @elastic/appex-sharedux
 src/platform/packages/private/kbn-reporting/mocks_server @elastic/appex-sharedux
+src/platform/packages/private/kbn-reporting/public @elastic/appex-sharedux
 src/platform/packages/private/kbn-ui-shared-deps-npm @elastic/kibana-operations
 src/platform/packages/private/kbn-ui-shared-deps-src @elastic/kibana-operations
 src/platform/packages/private/kbn-unsaved-changes-badge @elastic/kibana-data-discovery
