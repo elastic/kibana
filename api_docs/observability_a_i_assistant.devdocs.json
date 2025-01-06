@@ -659,39 +659,6 @@
       },
       {
         "parentPluginId": "observabilityAIAssistant",
-        "id": "def-public.isSupportedConnectorType",
-        "type": "Function",
-        "tags": [],
-        "label": "isSupportedConnectorType",
-        "description": [],
-        "signature": [
-          "(type: string) => boolean"
-        ],
-        "path": "x-pack/platform/plugins/shared/observability_solution/observability_ai_assistant/common/connectors.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "observabilityAIAssistant",
-            "id": "def-public.isSupportedConnectorType.$1",
-            "type": "string",
-            "tags": [],
-            "label": "type",
-            "description": [],
-            "signature": [
-              "string"
-            ],
-            "path": "x-pack/platform/plugins/shared/observability_solution/observability_ai_assistant/common/connectors.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "observabilityAIAssistant",
         "id": "def-public.MessageText",
         "type": "Function",
         "tags": [],
@@ -3196,13 +3163,7 @@
               ", ",
               "ObservabilityAIAssistantRouteCreateOptions",
               ">; }, TEndpoint> & Omit<FetchOptions, \"query\" | \"body\" | \"signal\" | \"pathname\"> & { signal: AbortSignal | null; } & ",
-              {
-                "pluginId": "@kbn/core-http-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreHttpBrowserPluginApi",
-                "section": "def-public.HttpFetchOptions",
-                "text": "HttpFetchOptions"
-              },
+              "HttpFetchOptions",
               ">) => Promise<",
               {
                 "pluginId": "@kbn/server-route-repository-utils",
@@ -4212,13 +4173,7 @@
                     "text": "ClientRequestParamsOf"
                   },
                   "<TServerRouteRepository, TEndpoint> & TAdditionalClientOptions & ",
-                  {
-                    "pluginId": "@kbn/core-http-browser",
-                    "scope": "public",
-                    "docId": "kibKbnCoreHttpBrowserPluginApi",
-                    "section": "def-public.HttpFetchOptions",
-                    "text": "HttpFetchOptions"
-                  },
+                  "HttpFetchOptions",
                   "> extends never ? [] | [",
                   {
                     "pluginId": "@kbn/server-route-repository-utils",
@@ -4228,13 +4183,7 @@
                     "text": "ClientRequestParamsOf"
                   },
                   "<TServerRouteRepository, TEndpoint> & TAdditionalClientOptions & ",
-                  {
-                    "pluginId": "@kbn/core-http-browser",
-                    "scope": "public",
-                    "docId": "kibKbnCoreHttpBrowserPluginApi",
-                    "section": "def-public.HttpFetchOptions",
-                    "text": "HttpFetchOptions"
-                  },
+                  "HttpFetchOptions",
                   "] : [",
                   {
                     "pluginId": "@kbn/server-route-repository-utils",
@@ -4244,13 +4193,7 @@
                     "text": "ClientRequestParamsOf"
                   },
                   "<TServerRouteRepository, TEndpoint> & TAdditionalClientOptions & ",
-                  {
-                    "pluginId": "@kbn/core-http-browser",
-                    "scope": "public",
-                    "docId": "kibKbnCoreHttpBrowserPluginApi",
-                    "section": "def-public.HttpFetchOptions",
-                    "text": "HttpFetchOptions"
-                  },
+                  "HttpFetchOptions",
                   "]"
                 ],
                 "path": "src/platform/packages/shared/kbn-server-route-repository-utils/src/typings.ts",
@@ -5897,23 +5840,11 @@
             "text": "ServerRoute"
           },
           "<any, any, any, infer TReturnType extends ServerRouteHandlerReturnType, any> ? TReturnType extends ",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "server",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.IKibanaResponse",
-            "text": "IKibanaResponse"
-          },
+          "IKibanaResponse",
           "<infer TWrappedResponseType extends string | Record<string, any> | Error | Buffer | ",
           "Stream",
           " | { message: string | Error; attributes?: ",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "server",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.ResponseErrorAttributes",
-            "text": "ResponseErrorAttributes"
-          },
+          "ResponseErrorAttributes",
           " | undefined; } | undefined> ? TWrappedResponseType : TReturnType : never"
         ],
         "path": "x-pack/platform/plugins/shared/observability_solution/observability_ai_assistant/public/api/index.ts",
@@ -7842,13 +7773,7 @@
                     "label": "core",
                     "description": [],
                     "signature": [
-                      {
-                        "pluginId": "@kbn/core-lifecycle-server",
-                        "scope": "server",
-                        "docId": "kibKbnCoreLifecycleServerPluginApi",
-                        "section": "def-server.CoreSetup",
-                        "text": "CoreSetup"
-                      },
+                      "CoreSetup",
                       "<",
                       "ObservabilityAIAssistantPluginStartDependencies",
                       ", unknown>"
@@ -7983,21 +7908,9 @@
                     "description": [],
                     "signature": [
                       "{ asInternalUser: ",
-                      {
-                        "pluginId": "@kbn/core-elasticsearch-server",
-                        "scope": "server",
-                        "docId": "kibKbnCoreElasticsearchServerPluginApi",
-                        "section": "def-server.ElasticsearchClient",
-                        "text": "ElasticsearchClient"
-                      },
+                      "ElasticsearchClient",
                       "; asCurrentUser: ",
-                      {
-                        "pluginId": "@kbn/core-elasticsearch-server",
-                        "scope": "server",
-                        "docId": "kibKbnCoreElasticsearchServerPluginApi",
-                        "section": "def-server.ElasticsearchClient",
-                        "text": "ElasticsearchClient"
-                      },
+                      "ElasticsearchClient",
                       "; }"
                     ],
                     "path": "x-pack/platform/plugins/shared/observability_solution/observability_ai_assistant/server/service/client/index.ts",
@@ -11022,39 +10935,6 @@
               "Error"
             ],
             "path": "x-pack/platform/plugins/shared/observability_solution/observability_ai_assistant/common/conversation_complete.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "observabilityAIAssistant",
-        "id": "def-common.isSupportedConnectorType",
-        "type": "Function",
-        "tags": [],
-        "label": "isSupportedConnectorType",
-        "description": [],
-        "signature": [
-          "(type: string) => boolean"
-        ],
-        "path": "x-pack/platform/plugins/shared/observability_solution/observability_ai_assistant/common/connectors.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "observabilityAIAssistant",
-            "id": "def-common.isSupportedConnectorType.$1",
-            "type": "string",
-            "tags": [],
-            "label": "type",
-            "description": [],
-            "signature": [
-              "string"
-            ],
-            "path": "x-pack/platform/plugins/shared/observability_solution/observability_ai_assistant/common/connectors.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true

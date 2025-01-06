@@ -29,7 +29,7 @@ export class DefaultSLOInstaller implements SLOInstaller {
 
       await this.sloResourceInstaller.ensureCommonResourcesInstalled();
     } catch (error) {
-      this.logger.error('Failed to install SLO common resources');
+      this.logger.error(`Failed to install SLO common resources: ${error}`);
     } finally {
       this.isInstalling = false;
       clearTimeout(installTimeout);
