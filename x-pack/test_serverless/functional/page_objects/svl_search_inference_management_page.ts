@@ -18,6 +18,7 @@ export function SvlSearchInferenceManagementPageProvider({ getService }: FtrProv
         await testSubjects.existOrFail('allInferenceEndpointsPage');
         await testSubjects.existOrFail('api-documentation');
         await testSubjects.existOrFail('view-your-models');
+        await testSubjects.existOrFail('add-inference-endpoint-header-button');
       },
 
       async expectTabularViewToBeLoaded() {
@@ -93,6 +94,27 @@ export function SvlSearchInferenceManagementPageProvider({ getService }: FtrProv
 
         await elserCopyEndpointId.click();
         expect((await browser.getClipboardValue()).includes('.elser-2-elasticsearch')).to.be(true);
+      },
+    },
+
+    AddInferenceFlyout: {
+      async expectInferenceEndpointToBeVisible() {
+        await testSubjects.click('add-inference-endpoint-header-button');
+        await testSubjects.existOrFail('create-inference-flyout');
+
+        await testSubjects.click('provider-select');
+        await testSubjects.setValue('provider-super-select-search-box', 'Cohere');
+        await testSubjects.click('provider');
+
+        await testSubjects.existOrFail('api_key-password');
+        await testSubjects.click('completion');
+        await testSubjects.existOrFail('inference-endpoint-input-field');
+        (await testSubjects.getVisibleText('inference-endpoint-input-field')).includes(
+          'cohere-completion'
+        );
+
+        await testSubjects.click('add-inference-endpoint-submit-button');
+        expect(await testSubjects.isEnabled('add-inference-endpoint-submit-button')).to.be(false);
       },
     },
   };
