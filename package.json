@@ -922,7 +922,7 @@
     "@kbn/shared-ux-prompt-not-found": "link:src/platform/packages/shared/shared-ux/prompt/not_found",
     "@kbn/shared-ux-router": "link:src/platform/packages/shared/shared-ux/router/impl",
     "@kbn/shared-ux-router-mocks": "link:src/platform/packages/shared/shared-ux/router/mocks",
-    "@kbn/shared-ux-router-types": "link:packages/shared-ux/router/types",
+    "@kbn/shared-ux-router-types": "link:src/platform/packages/shared/shared-ux/router/types",
     "@kbn/shared-ux-storybook-config": "link:packages/shared-ux/storybook/config",
     "@kbn/shared-ux-storybook-mock": "link:packages/shared-ux/storybook/mock",
     "@kbn/shared-ux-tabbed-modal": "link:packages/shared-ux/modal/tabbed",

@@ -7461,7 +7461,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-router-types@link:packages/shared-ux/router/types":
+"@kbn/shared-ux-router-types@link:src/platform/packages/shared/shared-ux/router/types":
   version "0.0.0"
   uid ""
 
