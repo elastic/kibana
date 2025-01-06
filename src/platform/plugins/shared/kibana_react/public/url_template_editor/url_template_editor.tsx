@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { css } from '@emotion/css';
+import { css } from '@emotion/react';
 import * as React from 'react';
 import { useEuiTheme } from '@elastic/eui';
 import { monaco } from '@kbn/monaco';
@@ -133,11 +133,7 @@ export const UrlTemplateEditor: React.FC<UrlTemplateEditorProps> = ({
   });
 
   return (
-    <div
-      data-test-subj="url-template-editor-container"
-      className={editorStyle}
-      onKeyDown={handleKeyDown}
-    >
+    <div data-test-subj="url-template-editor-container" css={editorStyle} onKeyDown={handleKeyDown}>
       <Editor
         languageId={HandlebarsLang}
         height={height}

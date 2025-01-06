@@ -7,9 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { css } from '@emotion/css';
+import { css } from '@emotion/react';
 import React, { FunctionComponent } from 'react';
-import classNames from 'classnames';
 
 import {
   DistributiveOmit,
@@ -35,9 +34,7 @@ export const KibanaPageTemplateSolutionNavAvatar: FunctionComponent<
   const { euiTheme } = useEuiTheme();
 
   const pageTemplateSolutionNavAvatarStyles = {
-    base: css`
-      ${css(useEuiShadow('s'))};
-    `,
+    base: css(useEuiShadow('s')),
     xxl: css`
       ${useEuiShadow('m')};
       width: 100px;
@@ -54,13 +51,11 @@ export const KibanaPageTemplateSolutionNavAvatar: FunctionComponent<
   return (
     // @ts-expect-error Complains about ExclusiveUnion between `iconSize` and `iconType`, but works fine
     <EuiAvatar
-      className={classNames(
+      className={className}
+      css={[
         pageTemplateSolutionNavAvatarStyles.base,
-        {
-          [pageTemplateSolutionNavAvatarStyles.xxl]: size === 'xxl',
-        },
-        className
-      )}
+        size === 'xxl' ? pageTemplateSolutionNavAvatarStyles.xxl : undefined,
+      ]}
       color="plain"
       size={size === 'xxl' ? 'xl' : size}
       iconSize={size}
