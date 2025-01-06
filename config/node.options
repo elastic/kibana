@@ -12,4 +12,4 @@
 --dns-result-order=ipv4first
 
 ## enable OpenSSL 3 legacy provider
---openssl-legacy-provider
+#--openssl-legacy-provider
