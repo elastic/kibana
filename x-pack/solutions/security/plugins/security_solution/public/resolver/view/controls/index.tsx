@@ -139,20 +139,18 @@ export const GraphControls = React.memo(
             isOpen={activePopover === 'nodeLegend'}
             setActivePopover={setActivePopover}
           />
-          <>
-            <SourcererButton
-              id={id}
-              closePopover={closePopover}
-              isOpen={activePopover === 'sourcererSelection'}
-              setActivePopover={setActivePopover}
-            />
-            <DateSelectionButton
-              id={id}
-              closePopover={closePopover}
-              isOpen={activePopover === 'datePicker'}
-              setActivePopover={setActivePopover}
-            />
-          </>
+          <SourcererButton
+            id={id}
+            closePopover={closePopover}
+            isOpen={activePopover === 'sourcererSelection'}
+            setActivePopover={setActivePopover}
+          />
+          <DateSelectionButton
+            id={id}
+            closePopover={closePopover}
+            isOpen={activePopover === 'datePicker'}
+            setActivePopover={setActivePopover}
+          />
           {isSplitPanel && showPanelOnClick && (
             <ShowPanelButton showPanelOnClick={showPanelOnClick} />
           )}
