@@ -81,5 +81,8 @@
     "@kbn/utility-types-jest",
     "@kbn/visualization-utils",
     "@kbn/zod",
+    "@kbn/babel-register",
+    "@kbn/ai-assistant-common",
+    "@kbn/tooling-log",
   ],
 }
