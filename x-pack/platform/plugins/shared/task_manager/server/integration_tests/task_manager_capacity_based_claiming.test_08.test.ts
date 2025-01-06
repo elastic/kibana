@@ -172,7 +172,7 @@ describe('capacity based claiming', () => {
     times(10, () => ids.push(uuidV4()));
 
     const now = new Date();
-    const runAt = new Date(now.valueOf() + 5000);
+    const runAt = new Date(now.valueOf() + 6000);
     for (const id of ids) {
       await injectTask(kibanaServer.coreStart.elasticsearch.client.asInternalUser, {
         id,
