@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { KibanaRequest } from '@kbn/core/server';
-import { InventoryMetric } from '@kbn/metrics-data-access-plugin/common';
+import type { KibanaRequest } from '@kbn/core/server';
+import type { InventoryMetric } from '@kbn/metrics-data-access-plugin/common';
 import type { InfraPluginRequestHandlerContext } from '../../../types';
-import {
+import type {
   NodeDetailsRequest,
   NodeDetailsMetricData,
 } from '../../../../common/http_api/node_details_api';
-import { InfraSourceConfiguration } from '../../sources';
+import type { InfraSourceConfiguration } from '../../sources';
 
 export interface InfraMetricsRequestOptions
   extends Omit<NodeDetailsRequest, 'sourceId' | 'nodeId' | 'cloudId'> {

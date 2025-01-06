@@ -1278,13 +1278,7 @@
           "description": [],
           "signature": [
             "(request: ",
-            {
-              "pluginId": "@kbn/core-http-server",
-              "scope": "server",
-              "docId": "kibKbnCoreHttpServerPluginApi",
-              "section": "def-server.KibanaRequest",
-              "text": "KibanaRequest"
-            },
+            "KibanaRequest",
             "<unknown, unknown, unknown, any>) => ",
             {
               "pluginId": "slo",
@@ -1306,13 +1300,7 @@
               "label": "request",
               "description": [],
               "signature": [
-                {
-                  "pluginId": "@kbn/core-http-server",
-                  "scope": "server",
-                  "docId": "kibKbnCoreHttpServerPluginApi",
-                  "section": "def-server.KibanaRequest",
-                  "text": "KibanaRequest"
-                },
+                "KibanaRequest",
                 "<unknown, unknown, unknown, any>"
               ],
               "path": "x-pack/solutions/observability/plugins/slo/server/types.ts",

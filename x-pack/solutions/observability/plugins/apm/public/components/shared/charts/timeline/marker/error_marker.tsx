@@ -11,7 +11,7 @@ import styled from '@emotion/styled';
 import { TRACE_ID, TRANSACTION_ID } from '../../../../../../common/es_fields/apm';
 import { asDuration } from '../../../../../../common/utils/formatters';
 import { useLegacyUrlParams } from '../../../../../context/url_params_context/use_url_params';
-import { ErrorMark } from '../../../../app/transaction_details/waterfall_with_summary/waterfall_container/marks/get_error_marks';
+import type { ErrorMark } from '../../../../app/transaction_details/waterfall_with_summary/waterfall_container/marks/get_error_marks';
 import { ErrorDetailLink } from '../../../links/apm/error_detail_link';
 import { Legend, Shape } from '../legend';
 
