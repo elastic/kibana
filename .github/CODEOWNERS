@@ -2543,7 +2543,6 @@ x-pack/solutions/security/plugins/security_solution/server/lib/security_integrat
 
 # Observability design
 /x-pack/platform/plugins/shared/fleet/**/*.scss @elastic/observability-design
-/x-pack/platform/plugins/private/monitoring/**/*.scss @elastic/observability-design
 
 # Ent. Search design
 /x-pack/solutions/search/plugins/enterprise_search/**/*.scss @elastic/search-design
