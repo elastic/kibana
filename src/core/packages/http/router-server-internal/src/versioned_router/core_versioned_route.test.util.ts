@@ -17,7 +17,7 @@ export function createRequest(
     body,
     params,
     query,
-  }: { version: undefined | ApiVersion; body?: object; params?: object; query?: object } = {
+  }: { version?: undefined | ApiVersion; body?: object; params?: object; query?: object } = {
     version: '1',
   }
 ) {

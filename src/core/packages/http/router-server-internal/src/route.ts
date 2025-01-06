@@ -97,8 +97,10 @@ interface HandlerDependencies extends Dependencies {
   routeSchemas?: RouteValidator<unknown, unknown, unknown>;
 }
 
+type RouteInfo = Pick<RouteConfigOptions<RouteMethod>, 'access' | 'httpResource'>;
+
 interface ValidationContext {
-  routeInfo: Pick<RouteConfigOptions<RouteMethod>, 'access' | 'httpResource'>;
+  routeInfo: RouteInfo;
   router: Router;
   log: Logger;
   routeSchemas?: RouteValidator<unknown, unknown, unknown>;
@@ -115,28 +117,23 @@ export function validateHapiRequest(
     kibanaRequest = CoreKibanaRequest.from(request, routeSchemas);
     kibanaRequest.apiVersion = version;
   } catch (error) {
+    kibanaRequest = CoreKibanaRequest.from(request);
     log.error('400 Bad Request', formatErrorMeta(400, { request, error }));
-    const isPublicApi = isPublicAccessApiRoute(routeInfo);
-    // Emit onPostValidation even if validation fails.
-    const failedRequest: Mutable<AnyKibanaRequest> = CoreKibanaRequest.from(request);
-    router.emitPostValidate(failedRequest, {
-      deprecated: failedRequest.route.options.deprecated,
-      isInternalApiRequest: failedRequest.isInternalApiRequest,
-      isPublicAccess: isPublicApi,
-    });
 
     const response = kibanaResponseFactory.badRequest({
       body: error.message,
-      headers: isPublicApi ? getVersionHeader(BASE_PUBLIC_VERSION) : undefined,
+      headers: isPublicAccessApiRoute(routeInfo)
+        ? getVersionHeader(BASE_PUBLIC_VERSION)
+        : undefined,
     });
     return { error: response };
+  } finally {
+    router.emitPostValidate(
+      kibanaRequest!,
+      getPostValidateEventMetadata(kibanaRequest!, routeInfo)
+    );
   }
 
-  router.emitPostValidate(kibanaRequest, {
-    deprecated: kibanaRequest.route.options.deprecated,
-    isInternalApiRequest: kibanaRequest.isInternalApiRequest,
-    isPublicAccess: isPublicAccessApiRoute(routeInfo),
-  });
   return { ok: kibanaRequest };
 }
 
@@ -200,4 +197,12 @@ function routeSchemasFromRouteConfig<P, Q, B>(
     });
     return RouteValidator.from(validation);
   }
+}
+
+function getPostValidateEventMetadata(request: AnyKibanaRequest, routeInfo: RouteInfo) {
+  return {
+    deprecated: request.route.options.deprecated,
+    isInternalApiRequest: request.isInternalApiRequest,
+    isPublicAccess: isPublicAccessApiRoute(routeInfo),
+  };
 }

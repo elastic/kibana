@@ -657,4 +657,87 @@ describe('Versioned route', () => {
       - [authz.requiredPrivileges.0.1]: expected value of type [string] but got [Object]"
     `);
   });
+
+  describe('emits post validation events on the router', () => {
+    let handler: InternalRouteHandler;
+
+    it('for routes with validation', async () => {
+      const { fooValidation } = testValidation;
+      (router.registerRoute as jest.Mock).mockImplementation((opts) => (handler = opts.handler));
+      versionedRouter.post({ path: '/test/{id}', access: 'internal' }).addVersion(
+        {
+          version: '1',
+          validate: fooValidation,
+        },
+        handlerFn
+      );
+      versionedRouter.post({ path: '/test/{id}', access: 'internal' }).addVersion(
+        {
+          version: '1',
+          validate: false,
+        },
+        handlerFn
+      );
+
+      await handler!(
+        createRequest({
+          version: '1',
+          body: { foo: 1 },
+          params: { foo: 1 },
+          query: { foo: 1 },
+        })
+      );
+      // Failed validation
+      await handler!(createRequest({ version: '1' }));
+
+      expect(router.emitPostValidate).toHaveBeenCalledTimes(2);
+      expect(router.emitPostValidate).toHaveBeenNthCalledWith(
+        1,
+        expect.objectContaining({ apiVersion: '1' }),
+        {
+          deprecated: undefined,
+          isInternalApiRequest: false,
+          isPublicAccess: false,
+        }
+      );
+      expect(router.emitPostValidate).toHaveBeenNthCalledWith(
+        2,
+        expect.objectContaining({ apiVersion: '1' }),
+        {
+          deprecated: undefined,
+          isInternalApiRequest: false,
+          isPublicAccess: false,
+        }
+      );
+    });
+
+    it('for routes without validation', async () => {
+      (router.registerRoute as jest.Mock).mockImplementation((opts) => (handler = opts.handler));
+      versionedRouter.post({ path: '/test/{id}', access: 'internal' }).addVersion(
+        {
+          version: '1',
+          validate: false,
+        },
+        handlerFn
+      );
+      versionedRouter.post({ path: '/test/{id}', access: 'internal' }).addVersion(
+        {
+          version: '1',
+          validate: false,
+        },
+        handlerFn
+      );
+
+      await handler!(createRequest({ version: '1' }));
+      expect(router.emitPostValidate).toHaveBeenCalledTimes(1);
+      expect(router.emitPostValidate).toHaveBeenCalledWith(
+        expect.objectContaining({ apiVersion: '1' }),
+        {
+          deprecated: undefined,
+          isInternalApiRequest: false,
+          isPublicAccess: false,
+        }
+      );
+    });
+  });
 });

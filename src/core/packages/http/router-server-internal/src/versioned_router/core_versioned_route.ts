@@ -22,11 +22,9 @@ import type {
   RouteSecurity,
   RouteMethod,
   VersionedRouterRoute,
-  AnyKibanaRequest,
 } from '@kbn/core-http-server';
 import { Request } from '@hapi/hapi';
 import { Logger } from '@kbn/logging';
-import { Mutable } from 'utility-types';
 import type { HandlerResolutionStrategy, Method, Options } from './types';
 
 import {
@@ -46,7 +44,6 @@ import { RequestHandlerEnhanced, Router } from '../router';
 import { kibanaResponseFactory as responseFactory } from '../response';
 import { validateHapiRequest } from '../route';
 import { RouteValidator } from '../validator';
-import { CoreKibanaRequest } from '../request';
 
 interface InternalVersionedRouteConfig<M extends RouteMethod> extends VersionedRouteConfig<M> {
   isDev: boolean;
@@ -199,26 +196,18 @@ export class CoreVersionedRoute implements VersionedRoute {
     }
     const validation = extractValidationSchemaFromHandler(handler);
 
-    let kibanaRequest: Mutable<AnyKibanaRequest> = CoreKibanaRequest.from(hapiRequest);
-    kibanaRequest.apiVersion = version;
-    if (
-      validation?.request &&
-      Boolean(validation.request.body || validation.request.params || validation.request.query)
-    ) {
-      const { error, ok: validatedRequest } = validateHapiRequest(hapiRequest, {
-        routeInfo: {
-          access: this.options.access,
-          httpResource: this.options.options?.httpResource,
-        },
-        router: this.router,
-        log: this.log,
-        routeSchemas: RouteValidator.from(validation.request),
-        version,
-      });
-      if (error) {
-        return injectVersionHeader(version, error);
-      }
-      kibanaRequest = validatedRequest;
+    const { error, ok: kibanaRequest } = validateHapiRequest(hapiRequest, {
+      routeInfo: {
+        access: this.options.access,
+        httpResource: this.options.options?.httpResource,
+      },
+      router: this.router,
+      log: this.log,
+      routeSchemas: validation?.request ? RouteValidator.from(validation.request) : undefined,
+      version,
+    });
+    if (error) {
+      return injectVersionHeader(version, error);
     }
 
     const response = await handler.fn(kibanaRequest, responseFactory);

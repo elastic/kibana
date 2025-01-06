@@ -8,7 +8,7 @@
  */
 
 import { hapiMocks } from '@kbn/hapi-mocks';
-import { validateHapiRequest } from './route';
+import { validateHapiRequest, handle } from './route';
 import { createRouter } from './versioned_router/mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { Logger } from '@kbn/logging';
@@ -16,6 +16,75 @@ import { RouteValidator } from './validator';
 import { schema } from '@kbn/config-schema';
 import { Router } from './router';
 import { RouteAccess } from '@kbn/core-http-server';
+import { createRequest } from './versioned_router/core_versioned_route.test.util';
+import { kibanaResponseFactory } from './response';
+
+describe('handle', () => {
+  let handler: jest.Func;
+  let log: Logger;
+  let router: Router;
+  beforeEach(() => {
+    router = createRouter();
+    handler = jest.fn(async () => kibanaResponseFactory.ok());
+    log = loggingSystemMock.createLogger();
+  });
+  describe('post validation events', () => {
+    it('emits with validation schemas provided', async () => {
+      const validate = { body: schema.object({ foo: schema.number() }) };
+      await handle(createRequest({ body: { foo: 1 } }), {
+        router,
+        handler,
+        log,
+        method: 'get',
+        route: { path: '/test', validate },
+        routeSchemas: RouteValidator.from(validate),
+      });
+      // Failure
+      await handle(createRequest({ body: { foo: 'bar' } }), {
+        router,
+        handler,
+        log,
+        method: 'get',
+        route: { path: '/test', validate },
+        routeSchemas: RouteValidator.from(validate),
+      });
+
+      expect(handler).toHaveBeenCalledTimes(1);
+      expect(router.emitPostValidate).toHaveBeenCalledTimes(2);
+
+      expect(router.emitPostValidate).toHaveBeenNthCalledWith(1, expect.any(Object), {
+        deprecated: undefined,
+        isInternalApiRequest: false,
+        isPublicAccess: false,
+      });
+      expect(router.emitPostValidate).toHaveBeenNthCalledWith(2, expect.any(Object), {
+        deprecated: undefined,
+        isInternalApiRequest: false,
+        isPublicAccess: false,
+      });
+    });
+
+    it('emits with no validation schemas provided', async () => {
+      await handle(createRequest({ body: { foo: 1 } }), {
+        router,
+        handler,
+        log,
+        method: 'get',
+        route: { path: '/test', validate: false },
+        routeSchemas: undefined,
+      });
+
+      expect(handler).toHaveBeenCalledTimes(1);
+      expect(router.emitPostValidate).toHaveBeenCalledTimes(1);
+
+      expect(router.emitPostValidate).toHaveBeenCalledWith(expect.any(Object), {
+        deprecated: undefined,
+        isInternalApiRequest: false,
+        isPublicAccess: false,
+      });
+    });
+  });
+});
 
 describe('validateHapiRequest', () => {
   let router: Router;
