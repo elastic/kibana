@@ -51,13 +51,7 @@
             "description": [],
             "signature": [
               "() => jest.Mocked<",
-              {
-                "pluginId": "@kbn/core-plugins-contracts-server",
-                "scope": "server",
-                "docId": "kibKbnCorePluginsContractsServerPluginApi",
-                "section": "def-server.PluginsServiceSetup",
-                "text": "PluginsServiceSetup"
-              },
+              "PluginsServiceSetup",
               ">"
             ],
             "path": "packages/core/plugins/core-plugins-server-mocks/src/plugins_service.mock.ts",
@@ -75,13 +69,7 @@
             "description": [],
             "signature": [
               "() => jest.Mocked<",
-              {
-                "pluginId": "@kbn/core-plugins-contracts-server",
-                "scope": "server",
-                "docId": "kibKbnCorePluginsContractsServerPluginApi",
-                "section": "def-server.PluginsServiceStart",
-                "text": "PluginsServiceStart"
-              },
+              "PluginsServiceStart",
               ">"
             ],
             "path": "packages/core/plugins/core-plugins-server-mocks/src/plugins_service.mock.ts",
