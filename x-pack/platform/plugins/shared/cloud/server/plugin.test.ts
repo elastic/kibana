@@ -6,13 +6,10 @@
  */
 
 import { decodeCloudIdMock, parseDeploymentIdFromDeploymentUrlMock } from './plugin.test.mocks';
-import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
+import { coreMock } from '@kbn/core/server/mocks';
 import type { CloudConfigType } from './config';
 import { CloudPlugin } from './plugin';
 import type { DecodedCloudId } from '../common/decode_cloud_id';
-import { persistTokenCloudData } from './cloud_data';
-import type { KibanaRequestRouteOptions } from '@kbn/core/server';
-import type { LifecycleResponseFactory, OnPostAuthToolkit } from '@kbn/core-http-server';
 
 const baseConfig = {
   base_url: 'https://cloud.elastic.co',
