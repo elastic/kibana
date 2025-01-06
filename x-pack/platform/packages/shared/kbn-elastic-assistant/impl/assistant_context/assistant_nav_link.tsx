@@ -13,7 +13,7 @@ import { EuiToolTip, EuiButton, EuiFlexGroup, EuiFlexItem, EuiButtonEmpty } from
 import { i18n } from '@kbn/i18n';
 import { ChromeStyle } from '@kbn/core-chrome-browser';
 import { useAssistantContext } from '.';
-import { AssistantAvatar } from '../..';
+import { AssistantIcon } from '@kbn/ai-assistant-icon';
 
 const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
 
@@ -78,7 +78,7 @@ export const AssistantNavLink: FC = () => {
         >
           <EuiFlexGroup gutterSize="s" alignItems="center">
             <EuiFlexItem grow={false}>
-              <AssistantAvatar size="xs" />
+              <AssistantIcon size="m" />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>{LINK_LABEL}</EuiFlexItem>
           </EuiFlexGroup>
