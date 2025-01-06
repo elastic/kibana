@@ -8,6 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { compact, groupBy } from 'lodash';
 import type { ValuesType } from 'utility-types';
+import { SPAN_TYPE, SPAN_SUBTYPE } from '../../../common/es_fields/apm';
 import type {
   ConnectionEdge,
   ConnectionElement,
@@ -22,7 +23,7 @@ type GroupedConnection = ConnectionNode | ConnectionEdge;
 interface GroupedNode {
   data: {
     id: string;
-    spanType: string;
+    'span.type': string;
     label: string;
     groupedConnections: GroupedConnection[];
   };
@@ -48,8 +49,8 @@ export function groupResourceNodes(responseData: {
   const isEdge = (el: ElementDefinition) => Boolean(el.data.source && el.data.target);
   const isNode = (el: ElementDefinition) => !isEdge(el);
   const isElligibleGroupNode = (el: ElementDefinition) => {
-    if (isNode(el) && 'spanType' in el.data) {
-      return isSpanGroupingSupported(el.data.spanType, el.data.spanSubtype);
+    if (isNode(el) && 'span.type' in el.data) {
+      return isSpanGroupingSupported(el.data[SPAN_TYPE], el.data[SPAN_SUBTYPE]);
     }
     return false;
   };
@@ -110,7 +111,7 @@ export function groupResourceNodes(responseData: {
     ({ id, targets }): GroupedNode => ({
       data: {
         id,
-        spanType: 'external',
+        'span.type': 'external',
         label: i18n.translate('xpack.apm.serviceMap.resourceCountLabel', {
           defaultMessage: '{count} resources',
           values: { count: targets.length },

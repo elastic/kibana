@@ -19,6 +19,7 @@ import type cytoscape from 'cytoscape';
 import type { CSSProperties, MouseEvent } from 'react';
 import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
+import { SERVICE_NAME, SPAN_TYPE } from '../../../../../common/es_fields/apm';
 import type { Environment } from '../../../../../common/environment_rt';
 import { useTraceExplorerEnabledSetting } from '../../../../hooks/use_trace_explorer_enabled_setting';
 import { CytoscapeContext } from '../cytoscape';
@@ -39,10 +40,10 @@ function getContentsComponent(
   ) {
     return ExternalsListContents;
   }
-  if (selectedElementData.serviceName) {
+  if (selectedElementData[SERVICE_NAME]) {
     return ServiceContents;
   }
-  if (selectedElementData.spanType === 'resource') {
+  if (selectedElementData[SPAN_TYPE] === 'resource') {
     return ResourceContents;
   }
 

@@ -20,6 +20,7 @@ import {
 } from '../../../common/es_fields/apm';
 import type {
   ConnectionNode,
+  DiscoveredService,
   ExternalConnectionNode,
   ServiceConnectionNode,
 } from '../../../common/service_map';
@@ -28,13 +29,8 @@ import type { EsClient } from '../../lib/helpers/get_esql_client';
 
 type QueryReturnType = {
   'event.id': string;
-  'parent.id'?: string;
+  [PARENT_ID]?: string;
 } & ConnectionNode;
-
-interface DiscoverService {
-  from: ExternalConnectionNode;
-  to: ServiceConnectionNode;
-}
 
 export async function fetchServicePathsFromTraceIds({
   apmEventClient,
@@ -66,7 +62,7 @@ export async function fetchServicePathsFromTraceIds({
       query: `
         FROM ${index}
         | EVAL event.id = COALESCE(span.id, transaction.id)
-        | KEEP event.id, parent.id, agent.name, service.name, service.environment, span.destination.service.resource, span.type, span.subtype
+        | KEEP event.id, ${PARENT_ID}, ${AGENT_NAME}, ${SERVICE_NAME}, ${SERVICE_ENVIRONMENT}, ${SPAN_DESTINATION_SERVICE_RESOURCE}, ${SPAN_TYPE}, ${SPAN_SUBTYPE}
         | LIMIT 10000
       `,
       filter: {
@@ -81,16 +77,7 @@ export async function fetchServicePathsFromTraceIds({
   const eventsById = hits.reduce((acc, hit) => {
     const eventId = hit['event.id'];
     if (!acc[eventId]) {
-      acc[eventId] = {
-        'event.id': eventId,
-        'parent.id': hit[PARENT_ID],
-        serviceName: hit[SERVICE_NAME],
-        serviceEnvironment: hit[SERVICE_ENVIRONMENT],
-        agentName: hit[AGENT_NAME],
-        spanDestinationServiceResource: hit[SPAN_DESTINATION_SERVICE_RESOURCE],
-        spanType: hit[SPAN_TYPE],
-        spanSubtype: hit[SPAN_SUBTYPE],
-      };
+      acc[eventId] = hit;
     }
     return acc;
   }, {} as Record<string, QueryReturnType>);
@@ -111,7 +98,7 @@ export async function fetchServicePathsFromTraceIds({
       service_map: {
         value: {
           paths: ConnectionNode[][];
-          discoveredServices: DiscoverService[];
+          discoveredServices: DiscoveredService[];
         };
       };
     };
@@ -128,35 +115,29 @@ const getAllEventIds = (eventsById: Record<string, QueryReturnType>) => {
 };
 
 const isSpan = (node: ConnectionNode): node is ExternalConnectionNode => {
-  return !!(node as ExternalConnectionNode).spanDestinationServiceResource;
+  return !!(node as ExternalConnectionNode)[SPAN_DESTINATION_SERVICE_RESOURCE];
 };
 
 function getConnectionNodeId(node: ConnectionNode): string {
   if (isSpan(node)) {
-    return node.spanDestinationServiceResource;
+    return node[SPAN_DESTINATION_SERVICE_RESOURCE];
   }
-  return node.serviceName;
+  return node[SERVICE_NAME];
 }
 
 const getServiceConnectionNode = (event: ConnectionNode): ServiceConnectionNode => {
-  const { serviceName, serviceEnvironment, agentName } = event;
   return {
-    serviceName,
-    serviceEnvironment,
-    agentName,
+    [SERVICE_NAME]: event[SERVICE_NAME],
+    [SERVICE_ENVIRONMENT]: event[SERVICE_ENVIRONMENT],
+    [AGENT_NAME]: event[AGENT_NAME],
   };
 };
 
 const getExternalConnectionNode = (event: ConnectionNode): ExternalConnectionNode => {
-  const {
-    spanDestinationServiceResource: spanDestinationSericeResource,
-    spanType,
-    spanSubtype,
-  } = event;
   return {
-    spanDestinationServiceResource: spanDestinationSericeResource,
-    spanType,
-    spanSubtype,
+    [SPAN_DESTINATION_SERVICE_RESOURCE]: event[SPAN_DESTINATION_SERVICE_RESOURCE],
+    [SPAN_TYPE]: event[SPAN_TYPE],
+    [SPAN_SUBTYPE]: event[SPAN_SUBTYPE],
   };
 };
 
@@ -178,7 +159,7 @@ const buildEventPath = (
   const reprocessQueue: string[] = [];
 
   const allPaths = new Map<string, ConnectionNode[]>();
-  const allDiscoveredServices = new Map<string, DiscoverService>();
+  const allDiscoveredServices = new Map<string, DiscoveredService>();
 
   while (stack.length > 0) {
     const eventId = stack.pop()!;
@@ -200,8 +181,8 @@ const buildEventPath = (
     if (
       processedParent &&
       isSpan(processedParent) &&
-      (processedParent.serviceName !== currentEvent.serviceName ||
-        processedParent.serviceEnvironment !== currentEvent.serviceEnvironment)
+      (processedParent[SERVICE_NAME] !== currentEvent[SERVICE_NAME] ||
+        processedParent[SERVICE_ENVIRONMENT] !== currentEvent[SERVICE_ENVIRONMENT])
     ) {
       const pathKey = generatePathKey([processedParent, currentEvent]);
       if (!allDiscoveredServices.has(pathKey)) {
@@ -218,8 +199,8 @@ const buildEventPath = (
     if (
       !lastEdge ||
       !(
-        lastEdge.serviceName === currentEvent.serviceName &&
-        lastEdge.serviceEnvironment === currentEvent.serviceEnvironment
+        lastEdge[SERVICE_NAME] === currentEvent[SERVICE_NAME] &&
+        lastEdge[SERVICE_ENVIRONMENT] === currentEvent[SERVICE_ENVIRONMENT]
       )
     ) {
       edges.push(getServiceConnectionNode(currentEvent));
@@ -250,7 +231,7 @@ const buildEventPath = (
 };
 
 const buildAllPaths = (eventsById: Record<string, QueryReturnType>) => {
-  const allDiscoveredServices: DiscoverService[] = [];
+  const allDiscoveredServices: DiscoveredService[] = [];
   const allEventIds = getAllEventIds(eventsById);
   const allPaths: ConnectionNode[][] = [];
 

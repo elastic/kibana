@@ -9,33 +9,26 @@ import { i18n } from '@kbn/i18n';
 import type cytoscape from 'cytoscape';
 import type { Coordinate } from '../typings/timeseries';
 import type { ServiceAnomalyStats } from './anomaly_detection';
-
-// These should be imported, but until TypeScript 4.2 we're inlining them here.
-// All instances of "agent.name", "service.name", "service.environment", "span.type",
-// "span.subtype", and "span.destination.service.resource" need to be changed
-// back to using the constants.
-// See https://github.com/microsoft/TypeScript/issues/37888
-//
-// import {
-//   AGENT_NAME,
-//   SERVICE_ENVIRONMENT,
-//   SERVICE_NAME,
-//   SPAN_DESTINATION_SERVICE_RESOURCE,
-//   SPAN_SUBTYPE,
-//   SPAN_TYPE,
-// } from './es_fields/apm';
+import type {
+  AGENT_NAME,
+  SERVICE_ENVIRONMENT,
+  SERVICE_NAME,
+  SPAN_DESTINATION_SERVICE_RESOURCE,
+  SPAN_SUBTYPE,
+} from './es_fields/apm';
+import type { SPAN_TYPE } from './es_fields/apm';
 
 export interface ServiceConnectionNode extends cytoscape.NodeDataDefinition {
-  serviceName: string;
-  serviceEnvironment: string | null;
-  agentName: string;
+  [SERVICE_NAME]: string;
+  [SERVICE_ENVIRONMENT]: string | null;
+  [AGENT_NAME]: string;
   serviceAnomalyStats?: ServiceAnomalyStats;
   label?: string;
 }
 export interface ExternalConnectionNode extends cytoscape.NodeDataDefinition {
-  spanDestinationServiceResource: string;
-  spanType: string;
-  spanSubtype: string;
+  [SPAN_DESTINATION_SERVICE_RESOURCE]: string;
+  [SPAN_SUBTYPE]: string;
+  [SPAN_TYPE]: string;
   label?: string;
 }
 
@@ -108,3 +101,8 @@ export function isSpanGroupingSupported(type?: string, subtype?: string) {
 }
 
 export const SERVICE_MAP_TIMEOUT_ERROR = 'ServiceMapTimeoutError';
+
+export interface DiscoveredService {
+  from: ExternalConnectionNode;
+  to: ServiceConnectionNode;
+}
