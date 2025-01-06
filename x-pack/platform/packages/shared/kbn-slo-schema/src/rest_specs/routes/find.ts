@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { toBooleanRt } from '@kbn/io-ts-utils';
-import { either } from 'fp-ts/lib/Either';
+import { either, isRight } from 'fp-ts/lib/Either';
 import * as t from 'io-ts';
 import { sloWithDataResponseSchema } from '../slo';
 
@@ -33,9 +33,9 @@ const searchAfterSchema = new t.Type<SearchAfterArray, string, unknown>(
     either.chain(t.string.validate(input, context), (value: string) => {
       try {
         const parsedValue = JSON.parse(value);
-        const validation = searchAfterArraySchema.decode(parsedValue);
-        if (validation._tag === 'Right' && validation.right.length > 0) {
-          return t.success(validation.right);
+        const decoded = searchAfterArraySchema.decode(parsedValue);
+        if (isRight(decoded)) {
+          return t.success(decoded.right);
         }
         return t.failure(input, context);
       } catch (err) {
