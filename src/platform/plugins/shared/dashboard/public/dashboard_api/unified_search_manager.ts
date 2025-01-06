@@ -121,9 +121,6 @@ export function initializeUnifiedSearchManager(
     switchMap((controlGroupApi) => (controlGroupApi ? controlGroupApi.timeslice$ : of(undefined)))
   );
   controlGroupSubscriptions.add(
-    esqlVariablesService.esqlVariables$.subscribe(() => panelsReload$.next())
-  );
-  controlGroupSubscriptions.add(
     combineLatest([unifiedSearchFilters$, controlGroupFilters$]).subscribe(
       ([unifiedSearchFilters, controlGroupFilters]) => {
         filters$.next([...(unifiedSearchFilters ?? []), ...(controlGroupFilters ?? [])]);
@@ -136,7 +133,13 @@ export function initializeUnifiedSearchManager(
       if (timeslice !== timeslice$.value) timeslice$.next(timeslice);
     })
   );
-
+  controlGroupSubscriptions.add(
+    esqlVariablesService.esqlVariables$.subscribe((variables) => {
+      if (variables.length) {
+        return panelsReload$.next();
+      }
+    })
+  );
   // --------------------------------------------------------------------------------------
   // Set up unified search integration.
   // --------------------------------------------------------------------------------------
