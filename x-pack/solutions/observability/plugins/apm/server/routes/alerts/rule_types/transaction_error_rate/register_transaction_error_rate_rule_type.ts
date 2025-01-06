@@ -33,6 +33,7 @@ import {
 import type { ObservabilityApmAlert } from '@kbn/alerts-as-data-utils';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
 import { asyncForEach } from '@kbn/std';
+import { transactionErrorRateParamsSchema } from '@kbn/response-ops-rule-params/transaction_error_rate';
 import { SearchAggregatedTransactionSetting } from '../../../../../common/aggregated_transactions';
 import { getEnvironmentEsField } from '../../../../../common/environment_filter_values';
 import {
@@ -44,14 +45,15 @@ import {
   TRANSACTION_NAME,
 } from '../../../../../common/es_fields/apm';
 import { EventOutcome } from '../../../../../common/event_outcome';
-import type { THRESHOLD_MET_GROUP } from '../../../../../common/rules/apm_rule_types';
+import type {
+  THRESHOLD_MET_GROUP,
+  ApmRuleParamsType,
+} from '../../../../../common/rules/apm_rule_types';
 import {
   APM_SERVER_FEATURE_ID,
   formatTransactionErrorRateReason,
   RULE_TYPES_CONFIG,
 } from '../../../../../common/rules/apm_rule_types';
-import type { ApmRuleParamsType } from '../../../../../common/rules/schema';
-import { transactionErrorRateParamsSchema } from '../../../../../common/rules/schema';
 import { environmentQuery } from '../../../../../common/utils/environment_query';
 import { asDecimalOrInteger, getAlertUrlTransaction } from '../../../../../common/utils/formatters';
 import { getBackwardCompatibleDocumentTypeFilter } from '../../../../lib/helpers/transactions';
