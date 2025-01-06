@@ -30,6 +30,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import React, { FunctionComponent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ILicense } from '@kbn/licensing-plugin/public';
 import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
+import { isEmpty } from 'lodash';
 import {
   getStateWithCopyToFields,
   isSemanticTextField,
@@ -237,6 +238,7 @@ export const DetailsPageMappingsContent: FunctionComponent<{
               .map((field) => field.inference_id)
               .filter(
                 (inferenceId: string) =>
+                  !isEmpty(inferenceId) &&
                   inferenceToModelIdMap?.[inferenceId].trainedModelId && // third-party inference models don't have trainedModelId
                   !inferenceToModelIdMap?.[inferenceId].isDeployed &&
                   !isInferencePreconfigured(inferenceId)

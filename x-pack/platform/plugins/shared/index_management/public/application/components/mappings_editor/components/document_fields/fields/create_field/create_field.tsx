@@ -18,6 +18,7 @@ import { TrainedModelStat } from '@kbn/ml-plugin/common/types/trained_models';
 import { MlPluginStart } from '@kbn/ml-plugin/public';
 import classNames from 'classnames';
 import React, { useEffect, useRef } from 'react';
+import { isEmpty } from 'lodash';
 import { EUI_SIZE, TYPE_DEFINITION } from '../../../../constants';
 import { fieldSerializer } from '../../../../lib';
 import { isSemanticTextField } from '../../../../lib/utils';
@@ -106,7 +107,7 @@ export const CreateField = React.memo(function CreateFieldComponent({
     }
   };
 
-  const { createInferenceEndpoint, handleSemanticText } = useSemanticText({
+  const { createInferenceEndpoint } = useSemanticText({
     form,
     setErrorsInTrainedModelDeployment,
     ml,
@@ -130,8 +131,9 @@ export const CreateField = React.memo(function CreateFieldComponent({
     const { isValid, data } = await form.submit();
 
     if (isValid && !clickOutside) {
-      if (isSemanticTextField(data)) {
-        handleSemanticText(data);
+      if (isSemanticTextField(data) && isEmpty(data.inference_id)) {
+        const { inference_id: inferenceId, ...rest } = data;
+        dispatch({ type: 'field.add', value: rest });
       } else {
         dispatch({ type: 'field.add', value: data });
       }
