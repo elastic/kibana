@@ -8,7 +8,8 @@ import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { IconType } from '@elastic/eui';
 import { get } from 'lodash/fp';
-import { EntityType, getAllEntityTypes } from '../../../../common/entity_analytics/types';
+import { getAllEntityTypes } from '../../../../common/entity_analytics/utils';
+import { EntityType } from '../../../../common/entity_analytics/types';
 
 import {
   ASSET_CRITICALITY_INDEX_PATTERN,
@@ -34,6 +35,7 @@ export const EntityIconByType: Record<EntityType, IconType> = {
   [EntityType.user]: 'user',
   [EntityType.host]: 'storage',
   [EntityType.service]: 'console',
+  [EntityType.universal]: 'globe',
 };
 
 export const sourceFieldToText = (source: string) => {

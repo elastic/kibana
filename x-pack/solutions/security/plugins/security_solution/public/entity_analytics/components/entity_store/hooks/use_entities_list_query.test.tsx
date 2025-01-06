@@ -27,7 +27,7 @@ describe('useEntitiesListQuery', () => {
   });
 
   it('should call fetchEntitiesList with correct parameters', async () => {
-    const searchParams = { entitiesTypes: [], page: 7 };
+    const searchParams = { entityTypes: [], page: 7 };
 
     fetchEntitiesListMock.mockResolvedValueOnce({ data: 'test data' });
 
@@ -42,7 +42,7 @@ describe('useEntitiesListQuery', () => {
   });
 
   it('should not call fetchEntitiesList if skip is true', async () => {
-    const searchParams = { entitiesTypes: [], page: 7 };
+    const searchParams = { entityTypes: [], page: 7 };
 
     const { result } = renderHook(() => useEntitiesListQuery({ ...searchParams, skip: true }), {
       wrapper: TestWrapper,

@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import type { EntityType } from '../../../../common/entity_analytics/types';
 import { EntityTypeToIdentifierField } from '../../../../common/entity_analytics/types';
 import type { RiskScoresCalculationResponse } from '../../../../common/api/entity_analytics';
 import type { AfterKeys, EntityAfterKey } from '../../../../common/api/entity_analytics/common';
-import type { IdentifierType } from '../../../../common/entity_analytics/risk_engine';
 
-export const getFieldForIdentifier = (identifierType: IdentifierType): string =>
+export const getFieldForIdentifier = (identifierType: EntityType): string =>
   EntityTypeToIdentifierField[identifierType];
 
 export const getAfterKeyForIdentifierType = ({
@@ -18,7 +18,7 @@ export const getAfterKeyForIdentifierType = ({
   identifierType,
 }: {
   afterKeys: AfterKeys;
-  identifierType: IdentifierType;
+  identifierType: EntityType;
 }): EntityAfterKey | undefined => afterKeys[identifierType];
 
 export const isRiskScoreCalculationComplete = (result: RiskScoresCalculationResponse): boolean =>

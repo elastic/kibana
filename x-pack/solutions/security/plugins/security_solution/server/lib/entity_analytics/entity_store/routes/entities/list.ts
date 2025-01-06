@@ -58,7 +58,7 @@ export const listEntitiesRoute = (router: EntityAnalyticsRoutesDeps['router'], l
             per_page: perPage = 10,
             sort_field: sortField = '@timestamp',
             sort_order: sortOrder = 'desc',
-            entities_types: entityTypes,
+            entity_types: entityTypes,
             filterQuery,
           } = request.query;
 

@@ -7,10 +7,7 @@
 import type { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/types';
 import type { FieldMap } from '@kbn/alerts-as-data-utils';
 import { EntityType } from '../../../../common/entity_analytics/types';
-import {
-  riskScoreBaseIndexName,
-  type IdentifierType,
-} from '../../../../common/entity_analytics/risk_engine';
+import { riskScoreBaseIndexName } from '../../../../common/entity_analytics/risk_engine';
 
 import type { IIndexPatternString } from '../utils/create_datastream';
 
@@ -92,7 +89,7 @@ const commonRiskFields: FieldMap = {
   },
 };
 
-const buildIdentityRiskFields = (identifierType: IdentifierType): FieldMap =>
+const buildIdentityRiskFields = (identifierType: EntityType): FieldMap =>
   Object.keys(commonRiskFields).reduce((fieldMap, key) => {
     const identifierKey = `${identifierType}.risk.${key}`;
     fieldMap[identifierKey] = commonRiskFields[key];

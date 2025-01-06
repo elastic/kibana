@@ -9,7 +9,6 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { EuiFilterGroup, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { noop } from 'lodash/fp';
 import { i18n } from '@kbn/i18n';
-import { getAllEntityTypes } from '../../../../common/entity_analytics/types';
 import { useErrorToast } from '../../../common/hooks/use_error_toast';
 import type { CriticalityLevels } from '../../../../common/constants';
 import { type RiskSeverity } from '../../../../common/search_strategy';
@@ -27,6 +26,7 @@ import { useEntitiesListQuery } from './hooks/use_entities_list_query';
 import { ENTITIES_LIST_TABLE_ID, rowItems } from './constants';
 import { useEntitiesListColumns } from './hooks/use_entities_list_columns';
 import type { EntitySourceTag } from './types';
+import { useStoreEntityTypes } from '../../hooks/use_enabled_entity_types';
 
 export const EntitiesList: React.FC = () => {
   const { deleteQuery, setQuery, isInitializing, from, to } = useGlobalTime();
@@ -37,7 +37,7 @@ export const EntitiesList: React.FC = () => {
     field: '@timestamp',
     direction: Direction.desc,
   });
-
+  const entityTypes = useStoreEntityTypes();
   const [selectedSeverities, setSelectedSeverities] = useState<RiskSeverity[]>([]);
   const [selectedCriticalities, setSelectedCriticalities] = useState<CriticalityLevels[]>([]);
   const [selectedSources, setSelectedSources] = useState<EntitySourceTag[]>([]);
@@ -69,7 +69,7 @@ export const EntitiesList: React.FC = () => {
 
   const searchParams = useMemo(
     () => ({
-      entitiesTypes: getAllEntityTypes(),
+      entityTypes,
       page: activePage + 1,
       perPage: limit,
       sortField: sorting.field,
@@ -81,7 +81,7 @@ export const EntitiesList: React.FC = () => {
         },
       }),
     }),
-    [activePage, limit, querySkip, sorting, filter]
+    [entityTypes, activePage, limit, sorting.field, sorting.direction, querySkip, filter]
   );
   const { data, isLoading, isRefetching, refetch, error } = useEntitiesListQuery(searchParams);
 

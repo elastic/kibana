@@ -16,11 +16,10 @@ import type {
 } from '@kbn/task-manager-plugin/server';
 import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
 import type { AuditLogger } from '@kbn/security-plugin-types-server';
-import { getAllEntityTypes } from '../../../../../common/entity_analytics/types';
-import { EntityType } from '../../../../../common/search_strategy';
+import { getRiskEngineEntityTypes } from '../../../../../common/entity_analytics/risk_engine/utils';
+import type { EntityType } from '../../../../../common/search_strategy';
 import type { ExperimentalFeatures } from '../../../../../common';
 import type { AfterKeys } from '../../../../../common/api/entity_analytics/common';
-import { type IdentifierType } from '../../../../../common/entity_analytics/risk_engine';
 import { type RiskScoreService, riskScoreServiceFactory } from '../risk_score_service';
 import { RiskEngineDataClient } from '../../risk_engine/risk_engine_data_client';
 import { RiskScoreDataClient } from '../risk_score_data_client';
@@ -290,14 +289,12 @@ export const runTask = async ({
       dataViewId,
     });
 
-    const identifierTypes: IdentifierType[] = configuredIdentifierType
+    const identifierTypes: EntityType[] = configuredIdentifierType
       ? [configuredIdentifierType]
-      : experimentalFeatures.serviceEntityStoreEnabled
-      ? getAllEntityTypes()
-      : [EntityType.host, EntityType.user];
+      : getRiskEngineEntityTypes(experimentalFeatures);
 
     const runs: Array<{
-      identifierType: IdentifierType;
+      identifierType: EntityType;
       scoresWritten: number;
       tookMs: number;
     }> = [];

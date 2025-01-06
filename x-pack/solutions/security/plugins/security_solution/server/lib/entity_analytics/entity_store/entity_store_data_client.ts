@@ -23,7 +23,8 @@ import moment from 'moment';
 import type { EntityDefinitionWithState } from '@kbn/entityManager-plugin/server/lib/entities/types';
 import type { EntityDefinition } from '@kbn/entities-schema';
 import type { estypes } from '@elastic/elasticsearch';
-import { EntityType, getAllEntityTypes } from '../../../../common/entity_analytics/types';
+import { getEnabledStoreEntityTypes } from '../../../../common/entity_analytics/entity_store/utils';
+import { EntityType } from '../../../../common/entity_analytics/types';
 import type { ExperimentalFeatures } from '../../../../common';
 import type {
   GetEntityStoreStatusRequestQuery,
@@ -210,9 +211,7 @@ export class EntityStoreDataClient {
       new Promise<T>((resolve) => setTimeout(() => fn().then(resolve), 0));
 
     const { experimentalFeatures } = this.options;
-    const enginesTypes = experimentalFeatures.serviceEntityStoreEnabled
-      ? getAllEntityTypes()
-      : [EntityType.host, EntityType.user];
+    const enginesTypes = getEnabledStoreEntityTypes(experimentalFeatures);
 
     const promises = enginesTypes.map((entity) =>
       run(() =>
@@ -279,14 +278,11 @@ export class EntityStoreDataClient {
   ): Promise<InitEntityEngineResponse> {
     const { experimentalFeatures } = this.options;
 
-    if (
-      entityType === EntityTypeEnum.universal &&
-      !experimentalFeatures.assetInventoryStoreEnabled
-    ) {
+    if (entityType === EntityType.universal && !experimentalFeatures.assetInventoryStoreEnabled) {
       throw new Error('Universal entity store is not enabled');
     }
 
-    if (entityType === EntityTypeEnum.service && !experimentalFeatures.serviceEntityStoreEnabled) {
+    if (entityType === EntityType.service && !experimentalFeatures.serviceEntityStoreEnabled) {
       throw new Error('Service entity store is not enabled');
     }
 

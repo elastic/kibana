@@ -20,7 +20,7 @@ import React from 'react';
 import { FormattedMessage, useI18n } from '@kbn/i18n-react';
 
 import { euiThemeVars } from '@kbn/ui-theme';
-import { useEnabledEntityTypes } from '../../../../common/hooks/use_enabled_entity_types';
+import { useAssetCriticalityEntityTypes } from '../../../hooks/use_enabled_entity_types';
 import { EntityTypeToIdentifierField } from '../../../../../common/entity_analytics/types';
 import {
   CRITICALITY_CSV_MAX_SIZE_BYTES,
@@ -50,7 +50,7 @@ export const AssetCriticalityFilePickerStep: React.FC<AssetCriticalityFilePicker
 
     const formatBytes = useFormatBytes();
     const { euiTheme } = useEuiTheme();
-    const entityTypes = useEnabledEntityTypes();
+    const entityTypes = useAssetCriticalityEntityTypes();
     const i18nOrList = (items: string[]) =>
       i18n
         .formatListToParts(items, {

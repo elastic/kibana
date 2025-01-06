@@ -50,7 +50,7 @@ import { TECHNICAL_PREVIEW, TECHNICAL_PREVIEW_TOOLTIP } from '../../common/trans
 import { useEntityEnginePrivileges } from '../components/entity_store/hooks/use_entity_engine_privileges';
 import { MissingPrivilegesCallout } from '../components/entity_store/components/missing_privileges_callout';
 import { EngineStatus } from '../components/entity_store/components/engines_status';
-import { useEnabledEntityTypes } from '../../common/hooks/use_enabled_entity_types';
+import { useStoreEntityTypes } from '../hooks/use_enabled_entity_types';
 
 enum TabId {
   Import = 'import',
@@ -74,7 +74,7 @@ export const EntityStoreManagementPage = () => {
   const hasAssetCriticalityWritePermissions = assetCriticalityPrivileges?.has_write_permissions;
   const [selectedTabId, setSelectedTabId] = useState(TabId.Import);
   const entityStoreStatus = useEntityStoreStatus({});
-  const entityTypes = useEnabledEntityTypes();
+  const entityTypes = useStoreEntityTypes();
   const enableStoreMutation = useEnableEntityStoreMutation();
   const stopEntityEngineMutation = useStopEntityEngineMutation(entityTypes);
   const deleteEntityEngineMutation = useDeleteEntityEngineMutation({
