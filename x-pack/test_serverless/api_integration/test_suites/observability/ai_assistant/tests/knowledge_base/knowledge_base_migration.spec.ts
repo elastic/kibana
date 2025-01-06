@@ -49,6 +49,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   }
 
   describe('When there are knowledge base entries (from 8.15 or earlier) that does not contain semantic_text embeddings', function () {
+    this.tags(['skipMKI']);
+
     before(async () => {
       await clearKnowledgeBase(es);
       await esArchiver.load(archive);
