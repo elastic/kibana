@@ -18,7 +18,8 @@ export function RoleScopedSupertestProvider({ getService }: DeploymentAgnosticFt
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const samlAuth = getService('samlAuth');
   const config = getService('config');
-  const supertestWithAuth = getService('supertest');
+  const license = config.get('esTestCluster.license');
+  const isServerless = config.get('serverless');
 
   return {
     async getSupertestWithRoleScope(
@@ -29,13 +30,8 @@ export function RoleScopedSupertestProvider({ getService }: DeploymentAgnosticFt
         withInternalHeaders: true,
       }
     ) {
-      const license = config.get('esTestCluster.license');
-      const isServerless = config.get('serverless');
-
       if (!user || (license === 'basic' && !isServerless)) {
-        return user?.role === 'admin'
-          ? supertestWithAuth
-          : new SupertestWithBasicAuth(supertestWithoutAuth, user);
+        return new SupertestWithBasicAuth(supertestWithoutAuth, user);
       }
 
       const isBuiltIn = isBuiltInRole(user.role);

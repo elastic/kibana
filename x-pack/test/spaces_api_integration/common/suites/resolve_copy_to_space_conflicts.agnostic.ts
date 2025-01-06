@@ -73,16 +73,22 @@ const getDestinationSpace = (originSpaceId?: string) => {
 export function resolveCopyToSpaceConflictsSuite(context: DeploymentAgnosticFtrProviderContext) {
   const testDataLoader = getTestDataLoader(context);
   const roleScopedSupertest = context.getService('roleScopedSupertest');
+  const supertestWithAuth = context.getService('supertest');
+  const config = context.getService('config');
+  const license = config.get('esTestCluster.license');
+  const isServerless = config.get('serverless');
 
   const getSupertestWithAuth = async () =>
-    await roleScopedSupertest.getSupertestWithRoleScope(
-      { role: 'admin' },
-      {
-        withCommonHeaders: true,
-        useCookieHeader: false,
-        withInternalHeaders: true,
-      }
-    );
+    license === 'basic' && !isServerless
+      ? supertestWithAuth
+      : await roleScopedSupertest.getSupertestWithRoleScope(
+          { role: 'admin' },
+          {
+            withCommonHeaders: true,
+            useCookieHeader: false,
+            withInternalHeaders: true,
+          }
+        );
 
   const getVisualizationAtSpace = async (spaceId: string): Promise<SavedObject<any>> => {
     const supertest = await getSupertestWithAuth();
