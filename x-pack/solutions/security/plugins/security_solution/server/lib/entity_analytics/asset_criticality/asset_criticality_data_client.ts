@@ -94,14 +94,14 @@ export class AssetCriticalityDataClient {
           _meta: {
             version: ASSET_CRITICALITY_MAPPINGS_VERSIONS,
           },
-          settings: {
-            default_pipeline: getIngestPipelineName(this.options.namespace),
-          },
+        },
+        settings: {
+          default_pipeline: getIngestPipelineName(this.options.namespace),
         },
       },
     });
   }
-  
+
   /**
    *
    * A general method for searching asset criticality records.
