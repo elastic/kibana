@@ -17250,7 +17250,6 @@ paths:
                       - data
                       - created_at
                       - ack_data
-                      - agents
                 required:
                   - item
         '400':
@@ -17779,7 +17778,6 @@ paths:
                       - data
                       - created_at
                       - ack_data
-                      - agents
                 required:
                   - item
         '400':
@@ -46989,6 +46987,20 @@ components:
               type: string
           required:
             - name
+        service:
+          type: object
+          properties:
+            asset:
+              type: object
+              properties:
+                criticality:
+                  $ref: '#/components/schemas/Security_Entity_Analytics_API_AssetCriticalityLevel'
+              required:
+                - criticality
+            name:
+              type: string
+          required:
+            - name
         user:
           type: object
           properties:
@@ -47238,6 +47250,7 @@ components:
         - user
         - host
         - service
+        - universal
       type: string
     Security_Entity_Analytics_API_HostEntity:
       type: object
@@ -47307,6 +47320,8 @@ components:
       enum:
         - host.name
         - user.name
+        - service.name
+        - related.entity
       type: string
     Security_Entity_Analytics_API_IndexPattern:
       type: string

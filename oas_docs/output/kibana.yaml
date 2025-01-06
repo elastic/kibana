@@ -19374,7 +19374,6 @@ paths:
                       - data
                       - created_at
                       - ack_data
-                      - agents
                 required:
                   - item
         '400':
@@ -19896,7 +19895,6 @@ paths:
                       - data
                       - created_at
                       - ack_data
-                      - agents
                 required:
                   - item
         '400':
@@ -37372,7 +37370,7 @@ paths:
         - roles
   /api/spaces/_copy_saved_objects:
     post:
-      description: 'It also allows you to automatically copy related objects, so when you copy a dashboard, this can automatically copy over the associated visualizations, data views, and saved searches, as required. You can request to overwrite any objects that already exist in the target space if they share an identifier or you can use the resolve copy saved objects conflicts API to do this on a per-object basis.<br/><br/>[Required authorization] Route required privileges: ALL of [copySavedObjectsToSpaces].'
+      description: 'It also allows you to automatically copy related objects, so when you copy a dashboard, this can automatically copy over the associated visualizations, data views, and saved Discover sessions, as required. You can request to overwrite any objects that already exist in the target space if they share an identifier or you can use the resolve copy saved objects conflicts API to do this on a per-object basis.<br/><br/>[Required authorization] Route required privileges: ALL of [copySavedObjectsToSpaces].'
       operationId: post-spaces-copy-saved-objects
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -53865,6 +53863,20 @@ components:
               type: string
           required:
             - name
+        service:
+          type: object
+          properties:
+            asset:
+              type: object
+              properties:
+                criticality:
+                  $ref: '#/components/schemas/Security_Entity_Analytics_API_AssetCriticalityLevel'
+              required:
+                - criticality
+            name:
+              type: string
+          required:
+            - name
         user:
           type: object
           properties:
@@ -54114,6 +54126,7 @@ components:
         - user
         - host
         - service
+        - universal
       type: string
     Security_Entity_Analytics_API_HostEntity:
       type: object
@@ -54183,6 +54196,8 @@ components:
       enum:
         - host.name
         - user.name
+        - service.name
+        - related.entity
       type: string
     Security_Entity_Analytics_API_IndexPattern:
       type: string
