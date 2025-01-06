@@ -66,7 +66,7 @@ function showPrivilege({
   }
 
   if (primaryFeature?.requireAllSpaces && allSpacesSelected) {
-    return globalPrimaryFeature?.name ?? primaryFeature?.name;
+    return globalPrimaryFeature?.name ?? 'None';
   }
 
   return primaryFeature?.name;
