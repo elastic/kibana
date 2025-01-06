@@ -21,7 +21,7 @@ const RiskBadge = styled.div<{
 }>`
   ${({ theme, $severity, $hideBackgroundColor }) => css`
     width: fit-content;
-    padding-right: ${theme.eui.euiSizeXS};
+    padding-right: ${theme.eui.euiSizeS};
     padding-left: ${theme.eui.euiSizeXS};
 
     ${($severity === 'Critical' || $severity === 'High') &&
