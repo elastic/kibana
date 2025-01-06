@@ -52,7 +52,7 @@ import type {
   RenderFunction,
 } from '../types';
 import { readableStreamReaderIntoObservable } from '../utils/readable_stream_reader_into_observable';
-import { runTools } from './complete';
+import { runTools } from './run_tools';
 import { ChatActionClickHandler } from '../components/chat/types';
 
 const MIN_DELAY = 10;
@@ -180,7 +180,7 @@ class ChatService {
   private getClient = () => {
     return {
       chatCompletion: this.chatCompletion,
-      runTools: this.recursiveCompleteCompletion,
+      runTools: this.runTools,
     };
   };
 
@@ -312,7 +312,7 @@ class ChatService {
     );
   };
 
-  public recursiveCompleteCompletion: ObservabilityAIAssistantChatService['runTools'] = ({
+  public runTools: ObservabilityAIAssistantChatService['runTools'] = ({
     getScreenContexts,
     connectorId,
     conversationId,
@@ -362,13 +362,11 @@ export async function createChatService({
   apiClient: ObservabilityAIAssistantAPIClient;
   scope$: BehaviorSubject<AssistantScope[]>;
 }): Promise<ObservabilityAIAssistantChatService> {
-  const a = new ChatService({
+  return new ChatService({
     analytics,
     apiClient,
     scope$,
     registrations,
     abortSignal: setupAbortSignal,
   });
-
-  return a;
 }

@@ -19,7 +19,7 @@ import {
   StreamingChatResponseEventWithoutError,
 } from '../../common';
 import type { ObservabilityAIAssistantChatService } from '../types';
-import { runTools } from './complete';
+import { runTools } from './run_tools';
 
 const client = {
   chatCompletion: jest.fn(),
