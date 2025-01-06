@@ -328,7 +328,7 @@ describe('validateActions', () => {
     await expect(
       validateActions(context as unknown as RulesClientContext, ruleType, data, false)
     ).rejects.toThrowErrorMatchingInlineSnapshot(
-      '"Failed to validate actions due to the following error: IEndpoint security connectors cannot be used as alerting actions"'
+      '"Failed to validate actions due to the following error: Endpoint security connectors cannot be used as alerting actions"'
     );
   });
 });
