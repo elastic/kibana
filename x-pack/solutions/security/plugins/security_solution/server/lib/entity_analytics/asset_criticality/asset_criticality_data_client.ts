@@ -101,7 +101,7 @@ export class AssetCriticalityDataClient {
       },
     });
   }
-  
+
   /**
    *
    * A general method for searching asset criticality records.
