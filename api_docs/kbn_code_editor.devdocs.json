@@ -435,22 +435,6 @@
           },
           {
             "parentPluginId": "@kbn/code-editor",
-            "id": "def-common.CodeEditorProps.useDarkTheme",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "useDarkTheme",
-            "description": [
-              "\nShould the editor use the dark theme"
-            ],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "packages/shared-ux/code_editor/impl/code_editor.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/code-editor",
             "id": "def-common.CodeEditorProps.transparentBackground",
             "type": "CompoundType",
             "tags": [],

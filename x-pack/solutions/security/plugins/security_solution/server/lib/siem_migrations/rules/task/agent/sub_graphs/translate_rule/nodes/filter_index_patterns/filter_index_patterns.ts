@@ -6,7 +6,7 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import { SiemMigrationRuleTranslationResult } from '../../../../../../../../../../common/siem_migrations/constants';
+import { RuleTranslationResult } from '../../../../../../../../../../common/siem_migrations/constants';
 import type { GraphNode } from '../../types';
 
 interface GetFilterIndexPatternsNodeParams {
@@ -30,7 +30,7 @@ export const getFilterIndexPatternsNode = ({
         elastic_rule: {
           ...state.elastic_rule,
           query: newQuery,
-          translation_result: SiemMigrationRuleTranslationResult.PARTIAL,
+          translation_result: RuleTranslationResult.PARTIAL,
         },
       };
     }

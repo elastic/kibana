@@ -43,6 +43,7 @@
     "@kbn/kibana-utils-plugin",
     "@kbn/utils",
     "@kbn/zod",
-    "@kbn/tooling-log"
+    "@kbn/tooling-log",
+    "@kbn/ai-assistant-icon"
   ]
 }
