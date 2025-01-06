@@ -1131,5 +1131,19 @@ describe('RRule', () => {
         `"Cannot create RRule: interval must be greater than 0"`
       );
     });
+    it('throws an error when exceeding the iteration limit', () => {
+      const testFn = () => {
+        const rule = new RRule({
+          dtstart: new Date(DATE_2020),
+          freq: Frequency.YEARLY,
+          byyearday: [1],
+          interval: 1,
+          tzid: 'UTC',
+        });
+        rule.all(100001);
+      };
+
+      expect(testFn).toThrowErrorMatchingInlineSnapshot(`"RRule iteration limit exceeded"`);
+    });
   });
 });

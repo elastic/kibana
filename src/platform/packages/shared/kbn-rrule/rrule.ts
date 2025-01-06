@@ -32,6 +32,7 @@ type AllResult = Date[] & {
 };
 
 const ALL_LIMIT = 10000;
+const TIMEOUT_LIMIT = 100000;
 
 export class RRule {
   private options: Options;
@@ -65,12 +66,17 @@ export class RRule {
       .toDate();
 
     const nextRecurrences: Moment[] = [];
+    let iters = 0;
 
     while (
       (!count && !until) ||
       (count && yieldedRecurrenceCount < count) ||
       (until && current.getTime() < new Date(until).getTime())
     ) {
+      iters++;
+      if (iters > TIMEOUT_LIMIT) {
+        throw new Error('RRule iteration limit exceeded');
+      }
       const next = nextRecurrences.shift()?.toDate();
       if (next) {
         current = next;
@@ -281,6 +287,7 @@ const getYearOfRecurrences = function ({
 
   return derivedByyearday.flatMap((dayOfYear) => {
     const currentDate = moment(refDT).dayOfYear(dayOfYear);
+    if (currentDate.year() !== refDT.year()) return [];
     if (!derivedByweekday.includes(currentDate.isoWeekday())) return [];
     return getDayOfRecurrences({ refDT: currentDate, byhour, byminute, bysecond });
   });
