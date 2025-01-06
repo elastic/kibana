@@ -57,6 +57,21 @@ export const MlJobSelect: React.FC<MlJobSelectProps> = ({
     label: `${job.customSettings?.security_app_display_name} ${job.id}`,
   }));
 
+  // If rule's ML job is no longer available or has not yet become available, we still want it to appear in the dropdown.
+  selectedJobIds.forEach((selectedJobId) => {
+    const isSelectedJobAvailable = jobOptions.some((job) => job.value.id === selectedJobId);
+    if (!isSelectedJobAvailable) {
+      jobOptions.push({
+        value: {
+          id: selectedJobId,
+          description: '',
+          name: selectedJobId,
+        },
+        label: selectedJobId,
+      });
+    }
+  });
+
   const selectedJobOptions = jobOptions
     .filter((option) => selectedJobIds.includes(option.value.id))
     // 'label' defines what is rendered inside the selected ComboBoxPill
