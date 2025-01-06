@@ -411,6 +411,7 @@ export function ValueControlForm({
               placeholder={i18n.translate('esql.flyout.values.placeholder', {
                 defaultMessage: 'Select the options or add a new one',
               })}
+              data-test-subj="esqlValuesOptions"
               options={availableValuesOptions}
               selectedOptions={selectedValues}
               onChange={onValuesChange}
