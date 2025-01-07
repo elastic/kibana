@@ -6949,7 +6949,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/saved-objects-tagging-plugin@link:x-pack/platform/plugins/private/saved_objects_tagging":
+"@kbn/saved-objects-tagging-plugin@link:x-pack/platform/plugins/shared/saved_objects_tagging":
   version "0.0.0"
   uid ""
 

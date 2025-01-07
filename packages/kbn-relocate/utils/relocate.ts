@@ -92,12 +92,14 @@ export const calculateModuleTargetFolder = (module: Package): string => {
 };
 
 export const isInTargetFolder = (module: Package, log: ToolingLog): boolean => {
-  if (!module.group || module.group === 'common' || !module.visibility) {
+  const { group, visibility } = module.manifest;
+
+  if (!group || group === 'common' || !visibility) {
     log.warning(`The module '${module.id}' is missing the group/visibility information`);
     return false;
   }
 
-  const baseTargetFolders = TARGET_FOLDERS[`${module.group}:${module.visibility}`];
+  const baseTargetFolders = TARGET_FOLDERS[`${group}:${visibility}`];
   const baseTargetFolder = baseTargetFolders.find((candidate) => {
     return module.directory.includes(candidate);
   });
