@@ -6,6 +6,7 @@
  */
 
 import type { RemarkTokenizer } from '@elastic/eui';
+import { CitationElement } from '@kbn/elastic-assistant-common/impl/citations';
 import type { Plugin } from 'unified';
 import type { Node } from 'unist';
 
@@ -92,7 +93,9 @@ export const CustomCitationParser: Plugin = function CustomCitationParser() {
     now.column += START_SIGNAL.length + 1;
     now.offset += START_SIGNAL.length + 1;
 
-    return eat(`!{citation[${citationLabel}](${citationLink})}`)({
+    const citationElement: CitationElement = `!{citation[${citationLabel}](${citationLink})}`
+
+    return eat(citationElement)({
       type: 'customCitation',
       citationLink,
       citationLable: citationLabel,

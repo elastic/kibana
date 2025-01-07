@@ -45,7 +45,7 @@ export const ALERT_COUNTS_TOOL: AssistantTool = {
           citationLink: '/app/security/alerts',
         });
 
-        return ` Below are all relevant results in JSON format and their citationElement:
+        return `Below are all relevant results in JSON format and their citationElement:
         ${JSON.stringify(result)}
 
         citationElement: "${citationElement}"

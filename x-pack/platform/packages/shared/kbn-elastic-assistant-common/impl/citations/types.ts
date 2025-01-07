@@ -5,10 +5,12 @@
  * 2.0.
  */
 
+export type CitationElement = `!{citation[${string}](${string})}`
+
 export type GetCitationElement = ({
   citationLable,
   citationLink,
 }: {
   citationLable: string;
   citationLink: string;
-}) => string;
+}) => CitationElement;
