@@ -65,12 +65,7 @@ export class ScoutFailedTestReporter implements Reporter {
 
   public get reportRootPath(): string {
     const outputPath = this.reporterOptions.outputPath || SCOUT_REPORT_OUTPUT_ROOT;
-    return path.join(
-      outputPath,
-      `scout-playwright-test-failures-${this.runId}`,
-      'target',
-      'test-failures'
-    );
+    return path.join(outputPath, `scout-playwright-test-failures-${this.runId}`);
   }
 
   printsToStdio(): boolean {
