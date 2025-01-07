@@ -36,6 +36,7 @@ export const packagePolicyV17AdvancedFieldsForEndpointV818: SavedObjectModelData
 
         events: {
           aggregate_process: false,
+          aggregate_network: false,
           ...policyPerOs.advanced?.events,
 
           hash: {

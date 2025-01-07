@@ -82,6 +82,7 @@ describe('Defend integration advanced policy fields v8.18.0', () => {
     describe.each`
       name                               | path                                        | backfill
       ${'aggregate_process'}             | ${'advanced.events.aggregate_process'}      | ${false}
+      ${'aggregate_network'}             | ${'advanced.events.aggregate_network'}      | ${false}
       ${'set_extended_host_information'} | ${'advanced.set_extended_host_information'} | ${true}
       ${'alerts.hash.md5'}               | ${'advanced.alerts.hash.md5'}               | ${true}
       ${'alerts.hash.sha1'}              | ${'advanced.alerts.hash.sha1'}              | ${true}
