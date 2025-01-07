@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { COMMON_EMBEDDABLE_GROUPING } from '@kbn/embeddable-plugin/public';
+import { ADD_PANEL_ANNOTATION_GROUP, ADD_PANEL_LEGACY_GROUP } from '@kbn/embeddable-plugin/public';
 import type { PresentationContainer } from '@kbn/presentation-containers';
 import type { Action, UiActionsService } from '@kbn/ui-actions-plugin/public';
 import { ADD_PANEL_TRIGGER } from '@kbn/ui-actions-plugin/public';
@@ -92,8 +92,8 @@ describe('Get dashboard panels hook', () => {
   describe('augmenting ui action group items with dashboard visualization types', () => {
     it.each([
       ['visualizations', VisGroups.PROMOTED],
-      [COMMON_EMBEDDABLE_GROUPING.legacy.id, VisGroups.LEGACY],
-      [COMMON_EMBEDDABLE_GROUPING.annotation.id, VisGroups.TOOLS],
+      [ADD_PANEL_LEGACY_GROUP.id, VisGroups.LEGACY],
+      [ADD_PANEL_ANNOTATION_GROUP.id, VisGroups.TOOLS],
     ])(
       'includes in the ui action %s group, %s dashboard visualization group types',
       async (uiActionGroupId, dashboardVisualizationGroupId) => {

@@ -17,13 +17,9 @@ import {
   valueClickTrigger,
   cellValueTrigger,
   panelHoverTrigger,
-} from './lib';
+} from './triggers';
 
-/**
- * This method initializes Embeddable plugin with initial set of
- * triggers and actions.
- */
-export const bootstrap = (uiActions: UiActionsSetup) => {
+export const registerTriggers = (uiActions: UiActionsSetup) => {
   uiActions.registerTrigger(contextMenuTrigger);
   uiActions.registerTrigger(panelHoverTrigger);
   uiActions.registerTrigger(panelBadgeTrigger);

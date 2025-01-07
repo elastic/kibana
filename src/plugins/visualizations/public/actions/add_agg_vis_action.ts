@@ -14,7 +14,7 @@ import {
   HasType,
   HasAppContext,
 } from '@kbn/presentation-publishing';
-import { COMMON_EMBEDDABLE_GROUPING } from '@kbn/embeddable-plugin/public';
+import { ADD_PANEL_LEGACY_GROUP } from '@kbn/embeddable-plugin/public';
 import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { apiHasType } from '@kbn/presentation-publishing';
 import { apiCanAddNewPanel, CanAddNewPanel } from '@kbn/presentation-containers';
@@ -33,7 +33,7 @@ const isApiCompatible = (api: unknown | null): api is AddAggVisualizationPanelAc
 export class AddAggVisualizationPanelAction implements Action<EmbeddableApiContext> {
   public readonly type = ADD_AGG_VIS_ACTION_ID;
   public readonly id = ADD_AGG_VIS_ACTION_ID;
-  public readonly grouping = [COMMON_EMBEDDABLE_GROUPING.legacy];
+  public readonly grouping = [ADD_PANEL_LEGACY_GROUP];
   private readonly aggVisualizationCreationEnabled: boolean;
 
   public readonly order = 20;
