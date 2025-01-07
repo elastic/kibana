@@ -135,16 +135,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it(`should send no more than ${expectedRequests} requests (documents + chart) when changing the time range`, async () => {
-        await expectSearches(
-          type,
-          type === 'esql' ? expectedRequests + 1 : expectedRequests,
-          async () => {
-            await timePicker.setAbsoluteRange(
-              'Sep 21, 2015 @ 06:31:44.000',
-              'Sep 23, 2015 @ 00:00:00.000'
-            );
-          }
-        );
+        await expectSearches(type, expectedRequests, async () => {
+          await timePicker.setAbsoluteRange(
+            'Sep 21, 2015 @ 06:31:44.000',
+            'Sep 23, 2015 @ 00:00:00.000'
+          );
+        });
       });
 
       it(`should send ${savedSearchesRequests} requests for saved search changes`, async () => {
@@ -159,7 +155,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         log.debug('Creating saved search');
         await expectSearches(
           type,
-          type === 'esql' ? actualExpectedRequests + 2 : actualExpectedRequests,
+          type === 'esql' ? actualExpectedRequests + 1 : actualExpectedRequests,
           async () => {
             await discover.saveSearch(savedSearch);
           }
@@ -174,7 +170,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         log.debug('Clearing saved search');
         await expectSearches(
           type,
-          type === 'esql' ? actualExpectedRequests + 2 : actualExpectedRequests,
+          type === 'esql' ? actualExpectedRequests + 1 : actualExpectedRequests,
           async () => {
             await testSubjects.click('discoverNewButton');
             await waitForLoadingToFinish();
@@ -183,7 +179,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         log.debug('Loading saved search');
         await expectSearches(
           type,
-          type === 'esql' ? actualExpectedRequests + 2 : actualExpectedRequests,
+          type === 'esql' ? actualExpectedRequests + 1 : actualExpectedRequests,
           async () => {
             await discover.loadSavedSearch(savedSearch);
           }
@@ -286,7 +282,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await expectSearches(type, 1, async () => {
           await discover.toggleChartVisibility();
         });
-        await expectSearches(type, 3, async () => {
+        await expectSearches(type, 2, async () => {
           await discover.toggleChartVisibility();
         });
       });

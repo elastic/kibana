@@ -9,10 +9,8 @@
 
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { BehaviorSubject } from 'rxjs';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { DataDocuments$ } from '../../state_management/discover_data_state_container';
 import { discoverServiceMock } from '../../../../__mocks__/services';
 import { FetchStatus } from '../../../types';
 import { DiscoverDocuments, onResize } from './discover_documents';
@@ -37,15 +35,24 @@ async function mountComponent(fetchStatus: FetchStatus, hits: EsHitRecord[]) {
     return { from: '2020-05-14T11:05:13.590', to: '2020-05-14T11:20:13.590' };
   };
 
-  const documents$ = new BehaviorSubject({
+  const stateContainer = getDiscoverStateMock({});
+  stateContainer.internalState.transitions.setDataResults({
     fetchStatus,
     result: hits.map((hit) => buildDataTableRecord(hit, dataViewMock)),
-  }) as DataDocuments$;
-  const stateContainer = getDiscoverStateMock({});
+  });
   stateContainer.appState.update({
     dataSource: createDataViewDataSource({ dataViewId: dataViewMock.id! }),
   });
-  stateContainer.dataState.data$.documents$ = documents$;
+  stateContainer.internalState.transitions.setDataRequestParams({
+    timeRangeRelative: {
+      from: '2020-05-14T11:05:13.590',
+      to: '2020-05-14T11:20:13.590',
+    },
+    timeRangeAbsolute: {
+      from: '2020-05-14T11:05:13.590',
+      to: '2020-05-14T11:20:13.590',
+    },
+  });
 
   const props = {
     viewModeToggle: <div data-test-subj="viewModeToggle">test</div>,

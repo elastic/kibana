@@ -8,12 +8,12 @@
  */
 
 import React, { memo, type FC } from 'react';
-import { useSavedSearch } from '../../state_management/discover_state_provider';
+import { useInternalStateSelector } from '../../state_management/discover_internal_state_container';
 import { PatternAnalysisTable, type PatternAnalysisTableProps } from './pattern_analysis_table';
 
 export const PatternAnalysisTab: FC<Omit<PatternAnalysisTableProps, 'query' | 'filters'>> = memo(
   (props) => {
-    const savedSearch = useSavedSearch();
+    const savedSearch = useInternalStateSelector((state) => state.discoverSessionEdited!);
 
     return (
       <PatternAnalysisTable

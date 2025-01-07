@@ -14,8 +14,8 @@ import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
 import { SearchResponseWarningsEmptyPrompt } from '@kbn/search-response-warnings';
 import { NoResultsSuggestions } from './no_results_suggestions';
 import type { DiscoverStateContainer } from '../../state_management/discover_state';
-import { useDataState } from '../../hooks/use_data_state';
 import './_no_results.scss';
+import { useInternalStateSelector } from '../../state_management/discover_internal_state_container';
 
 export interface DiscoverNoResultsProps {
   stateContainer: DiscoverStateContainer;
@@ -27,15 +27,15 @@ export interface DiscoverNoResultsProps {
 }
 
 export function DiscoverNoResults({
-  stateContainer,
   isTimeBased,
   query,
   filters,
   dataView,
   onDisableFilters,
 }: DiscoverNoResultsProps) {
-  const { documents$ } = stateContainer.dataState.data$;
-  const interceptedWarnings = useDataState(documents$).interceptedWarnings;
+  const interceptedWarnings = useInternalStateSelector(
+    (state) => state.dataResults?.interceptedWarnings
+  );
 
   if (interceptedWarnings?.length) {
     return <SearchResponseWarningsEmptyPrompt warnings={interceptedWarnings} />;

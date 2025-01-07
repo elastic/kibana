@@ -120,6 +120,7 @@ const mountComponent = async ({
         }
         isChartAvailable={undefined}
         renderedFor="root"
+        services={services}
       />
     ),
   };
@@ -160,22 +161,19 @@ describe('Discover main content component', () => {
 
     it('should include PanelsToggle when chart is available', async () => {
       const component = await mountComponent({ isChartAvailable: true });
-      expect(component.find(PanelsToggle).prop('isChartAvailable')).toBe(true);
-      expect(component.find(PanelsToggle).prop('renderedFor')).toBe('tabs');
+      expect(component.find(PanelsToggle).prop('renderedFor')).toBe('root');
       expect(component.find(EuiHorizontalRule).exists()).toBe(true);
     });
 
     it('should include PanelsToggle when chart is available and hidden', async () => {
       const component = await mountComponent({ isChartAvailable: true, hideChart: true });
-      expect(component.find(PanelsToggle).prop('isChartAvailable')).toBe(true);
-      expect(component.find(PanelsToggle).prop('renderedFor')).toBe('tabs');
+      expect(component.find(PanelsToggle).prop('renderedFor')).toBe('root');
       expect(component.find(EuiHorizontalRule).exists()).toBe(false);
     });
 
     it('should include PanelsToggle when chart is not available', async () => {
       const component = await mountComponent({ isChartAvailable: false });
-      expect(component.find(PanelsToggle).prop('isChartAvailable')).toBe(false);
-      expect(component.find(PanelsToggle).prop('renderedFor')).toBe('tabs');
+      expect(component.find(PanelsToggle).prop('renderedFor')).toBe('root');
       expect(component.find(EuiHorizontalRule).exists()).toBe(false);
     });
   });

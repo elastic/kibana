@@ -13,8 +13,9 @@ import { findTestSubject } from '@elastic/eui/lib/test';
 import { BehaviorSubject } from 'rxjs';
 import { getDiscoverStateMock } from '../../__mocks__/discover_state.mock';
 import { PanelsToggle, type PanelsToggleProps } from './panels_toggle';
-import { DiscoverAppStateProvider } from '../../application/main/state_management/discover_app_state_container';
 import { SidebarToggleState } from '../../application/types';
+import { discoverServiceMock } from '../../__mocks__/services';
+import { DiscoverMainProvider } from '../../application/main/state_management/discover_state_provider';
 
 describe('Panels toggle component', () => {
   const mountComponent = ({
@@ -24,20 +25,18 @@ describe('Panels toggle component', () => {
     hideChart,
   }: Omit<PanelsToggleProps, 'stateContainer'> & { hideChart: boolean }) => {
     const stateContainer = getDiscoverStateMock({ isTimeBased: true });
-    const appStateContainer = stateContainer.appState;
-    appStateContainer.set({
-      hideChart,
-    });
+    stateContainer.appState.set({ hideChart });
 
     return mountWithIntl(
-      <DiscoverAppStateProvider value={appStateContainer}>
+      <DiscoverMainProvider value={stateContainer}>
         <PanelsToggle
           stateContainer={stateContainer}
           sidebarToggleState$={sidebarToggleState$}
           isChartAvailable={isChartAvailable}
           renderedFor={renderedFor}
+          services={discoverServiceMock}
         />
-      </DiscoverAppStateProvider>
+      </DiscoverMainProvider>
     );
   };
 
@@ -52,6 +51,7 @@ describe('Panels toggle component', () => {
         isChartAvailable: undefined,
         renderedFor: 'histogram',
         sidebarToggleState$,
+        services: discoverServiceMock,
       });
       expect(findTestSubject(component, 'dscShowSidebarButton').exists()).toBe(false);
       expect(findTestSubject(component, 'dscHideHistogramButton').exists()).toBe(true);
@@ -67,6 +67,7 @@ describe('Panels toggle component', () => {
         isChartAvailable: undefined,
         renderedFor: 'histogram',
         sidebarToggleState$,
+        services: discoverServiceMock,
       });
       expect(findTestSubject(component, 'dscShowSidebarButton').exists()).toBe(true);
       expect(findTestSubject(component, 'dscHideHistogramButton').exists()).toBe(true);
@@ -88,6 +89,7 @@ describe('Panels toggle component', () => {
         isChartAvailable: true,
         renderedFor: 'tabs',
         sidebarToggleState$,
+        services: discoverServiceMock,
       });
       expect(findTestSubject(component, 'dscShowSidebarButton').exists()).toBe(false);
       expect(findTestSubject(component, 'dscHideHistogramButton').exists()).toBe(false);
@@ -104,6 +106,7 @@ describe('Panels toggle component', () => {
         isChartAvailable: false,
         renderedFor: 'tabs',
         sidebarToggleState$,
+        services: discoverServiceMock,
       });
       expect(findTestSubject(component, 'dscShowSidebarButton').exists()).toBe(false);
       expect(findTestSubject(component, 'dscHideHistogramButton').exists()).toBe(false);
@@ -120,6 +123,7 @@ describe('Panels toggle component', () => {
         isChartAvailable: true,
         renderedFor: 'tabs',
         sidebarToggleState$,
+        services: discoverServiceMock,
       });
       expect(findTestSubject(component, 'dscShowSidebarButton').exists()).toBe(false);
       expect(findTestSubject(component, 'dscHideHistogramButton').exists()).toBe(false);
@@ -136,6 +140,7 @@ describe('Panels toggle component', () => {
         isChartAvailable: false,
         renderedFor: 'tabs',
         sidebarToggleState$,
+        services: discoverServiceMock,
       });
       expect(findTestSubject(component, 'dscShowSidebarButton').exists()).toBe(true);
       expect(findTestSubject(component, 'dscHideHistogramButton').exists()).toBe(false);
@@ -152,6 +157,7 @@ describe('Panels toggle component', () => {
         isChartAvailable: true,
         renderedFor: 'tabs',
         sidebarToggleState$,
+        services: discoverServiceMock,
       });
       expect(findTestSubject(component, 'dscShowSidebarButton').exists()).toBe(false);
       expect(findTestSubject(component, 'dscShowHistogramButton').exists()).toBe(true);
@@ -167,6 +173,7 @@ describe('Panels toggle component', () => {
         isChartAvailable: false,
         renderedFor: 'tabs',
         sidebarToggleState$,
+        services: discoverServiceMock,
       });
       expect(findTestSubject(component, 'dscShowSidebarButton').exists()).toBe(false);
       expect(findTestSubject(component, 'dscShowHistogramButton').exists()).toBe(false);
@@ -183,6 +190,7 @@ describe('Panels toggle component', () => {
         isChartAvailable: true,
         renderedFor: 'tabs',
         sidebarToggleState$,
+        services: discoverServiceMock,
       });
       expect(findTestSubject(component, 'dscShowSidebarButton').exists()).toBe(true);
       expect(findTestSubject(component, 'dscShowHistogramButton').exists()).toBe(true);
@@ -198,6 +206,7 @@ describe('Panels toggle component', () => {
         isChartAvailable: false,
         renderedFor: 'tabs',
         sidebarToggleState$,
+        services: discoverServiceMock,
       });
       expect(findTestSubject(component, 'dscShowSidebarButton').exists()).toBe(true);
       expect(findTestSubject(component, 'dscShowHistogramButton').exists()).toBe(false);
