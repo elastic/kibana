@@ -17,6 +17,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { css } from '@emotion/react';
 
 import {
   FLEET_CLOUD_SECURITY_POSTURE_KSPM_POLICY_TEMPLATE,
@@ -224,7 +225,7 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
               fontSize="m"
               isCopyable={!fullCopyButton}
               paddingSize="m"
-              css={`
+              css={css`
                 max-width: 1100px;
               `}
               whiteSpace="pre"

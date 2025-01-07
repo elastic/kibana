@@ -59,7 +59,6 @@ const getStreamedResponse = async (
         role: MessageRole.system,
         createdAt: new Date(),
       };
-      // concating the last question and error message with existing chat history
       mutate([...previousMessages, chatRequest.messages.slice(-1)[0], systemErrorMessage], false);
     },
     onUpdate(merged) {
