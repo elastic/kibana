@@ -73,6 +73,7 @@ export const GridPanel = forwardRef<HTMLDivElement, GridPanelProps>(
     const initialStyles = useMemo(() => {
       const initialPanel = gridLayoutStateManager.gridLayout$.getValue()[rowIndex].panels[panelId];
       return css`
+        position: relative;
         grid-column-start: ${initialPanel.column + 1};
         grid-column-end: ${initialPanel.column + 1 + initialPanel.width};
         grid-row-start: ${initialPanel.row + 1};
@@ -206,21 +207,13 @@ export const GridPanel = forwardRef<HTMLDivElement, GridPanelProps>(
 
     return (
       <div ref={panelRef} css={initialStyles} className="kbnGridPanel">
-        <div
-          css={css`
-            padding: 0;
-            height: 100%;
-            position: relative;
-          `}
-        >
-          <DragHandle
-            ref={setDragHandleApi}
-            gridLayoutStateManager={gridLayoutStateManager}
-            interactionStart={interactionStart}
-          />
-          {panelContents}
-          <ResizeHandle interactionStart={interactionStart} />
-        </div>
+        <DragHandle
+          ref={setDragHandleApi}
+          gridLayoutStateManager={gridLayoutStateManager}
+          interactionStart={interactionStart}
+        />
+        {panelContents}
+        <ResizeHandle interactionStart={interactionStart} />
       </div>
     );
   }
