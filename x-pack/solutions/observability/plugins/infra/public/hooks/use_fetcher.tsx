@@ -12,7 +12,7 @@ import type { HttpFetchOptions, HttpSetup } from '@kbn/core-http-browser';
 import type { BehaviorSubject } from 'rxjs';
 import type { InfraHttpError } from '../types';
 import { useKibanaContextForPlugin } from './use_kibana';
-import { useSearchSessionContext } from './use_search_session';
+import { useReloadRequestTimeContext } from './use_reload_request_time';
 
 export enum FETCH_STATUS {
   LOADING = 'loading',
@@ -109,8 +109,8 @@ export function useFetcher<TReturn, Fn extends (apiClient: ApiCallClient) => Pro
     data: undefined,
     status: FETCH_STATUS.NOT_INITIATED,
   });
-  const { searchSessionId } = useSearchSessionContext();
-  const [cachedSearchSessionId, setCachedSearchSessionId] = useState('');
+  const { reloadRequestTime } = useReloadRequestTimeContext();
+  const [cachedReloadRequestTime, setCachedReloadRequestTime] = useState(reloadRequestTime);
   const autoFetchRef = useRef(autoFetch);
 
   const controller = useRef(new AbortController());
@@ -198,10 +198,10 @@ export function useFetcher<TReturn, Fn extends (apiClient: ApiCallClient) => Pro
   useEffect(() => {
     // Allows the caller of useFetcher to control when the fetch can be triggered
     if (autoFetch) {
-      setCachedSearchSessionId(searchSessionId);
+      setCachedReloadRequestTime(reloadRequestTime);
     }
     autoFetchRef.current = autoFetch;
-  }, [autoFetch, searchSessionId]);
+  }, [autoFetch, reloadRequestTime]);
 
   useEffect(() => {
     return () => {
@@ -213,7 +213,7 @@ export function useFetcher<TReturn, Fn extends (apiClient: ApiCallClient) => Pro
     if (autoFetchRef.current) {
       triggerFetch();
     }
-  }, [autoFetchRef, fetchWithAbort, cachedSearchSessionId, triggerFetch]);
+  }, [autoFetchRef, fetchWithAbort, cachedReloadRequestTime, triggerFetch]);
 
   return useMemo(
     () => ({
