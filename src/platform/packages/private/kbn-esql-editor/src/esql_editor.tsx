@@ -704,10 +704,18 @@ export const ESQLEditor = memo(function ESQLEditor({
                     });
 
                     // on CMD/CTRL + Enter submit the query
-                    editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter, onQuerySubmit);
+                    editor.addCommand(
+                      // eslint-disable-next-line no-bitwise
+                      monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter,
+                      onQuerySubmit
+                    );
 
                     // on CMD/CTRL + / comment out the entire line
-                    editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Slash, onCommentLine);
+                    editor.addCommand(
+                      // eslint-disable-next-line no-bitwise
+                      monaco.KeyMod.CtrlCmd | monaco.KeyCode.Slash,
+                      onCommentLine
+                    );
 
                     setMeasuredEditorWidth(editor.getLayoutInfo().width);
                     editor.onDidLayoutChange((layoutInfoEvent) => {
