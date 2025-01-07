@@ -9,6 +9,3 @@
 
 export { mlAnomalyDetectionAlertParamsSchema } from './latest';
 export { mlAnomalyDetectionAlertParamsSchema as mlAnomalyDetectionAlertParamsSchemaV1 } from './v1';
-
-export { jobsSelectionSchema } from './latest';
-export { jobsSelectionSchema as jobsSelectionSchemaV1 } from './v1';
