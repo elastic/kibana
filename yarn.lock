@@ -7925,7 +7925,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/vis-default-editor-plugin@link:src/plugins/vis_default_editor":
+"@kbn/vis-default-editor-plugin@link:src/platform/plugins/private/vis_default_editor":
   version "0.0.0"
   uid ""
 

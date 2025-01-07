@@ -143,7 +143,7 @@
     "usageCollection": "src/platform/plugins/shared/usage_collection",
     "userProfileComponents": "src/platform/packages/shared/kbn-user-profile-components",
     "utils": "x-pack/solutions/security/packages/kbn-securitysolution-utils/src",
-    "visDefaultEditor": "src/plugins/vis_default_editor",
+    "visDefaultEditor": "src/platform/plugins/private/vis_default_editor",
     "visTypeGauge": "src/plugins/vis_types/gauge",
     "visTypeHeatmap": "src/plugins/vis_types/heatmap",
     "visTypeMarkdown": "src/platform/plugins/private/vis_type_markdown",
