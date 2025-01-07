@@ -84,7 +84,6 @@ export const metricInventoryThresholdRuleParamsSchema = schema.object(
     ),
     nodeType: schema.string(),
     filterQuery: schema.maybe(schema.string({ validate: validateIsStringElasticsearchJSONFilter })),
-    filterQueryText: schema.maybe(schema.string()),
     sourceId: schema.string(),
     alertOnNoData: schema.maybe(schema.boolean()),
   },
