@@ -6,7 +6,7 @@
  */
 
 import React, { ComponentProps } from 'react';
-import { Meta, StoryFn } from '@storybook/react';
+import { Meta, StoryFn, StoryObj } from '@storybook/react';
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { RulesSettingsLink } from './rules_settings_link';
 import { StorybookContextDecorator } from '../../../../.storybook/decorator';
@@ -23,7 +23,7 @@ const Template: StoryFn<Args> = () => {
   return <RulesSettingsLink />;
 };
 
-export const withAllPermission = {
+export const withAllPermission: StoryObj = {
   render: Template,
 
   decorators: [
@@ -49,7 +49,7 @@ export const withAllPermission = {
   ],
 };
 
-export const withReadPermission = {
+export const withReadPermission: StoryObj = {
   render: Template,
 
   decorators: [
@@ -75,7 +75,7 @@ export const withReadPermission = {
   ],
 };
 
-export const withNoPermission = {
+export const withNoPermission: StoryObj = {
   render: Template,
 
   decorators: [
