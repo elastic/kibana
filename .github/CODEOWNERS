@@ -169,7 +169,6 @@ packages/kbn-grid-layout @elastic/kibana-presentation
 packages/kbn-guided-onboarding @elastic/appex-sharedux
 packages/kbn-import-locator @elastic/kibana-operations
 packages/kbn-import-resolver @elastic/kibana-operations
-packages/kbn-interpreter @elastic/kibana-visualizations
 packages/kbn-item-buffer @elastic/appex-sharedux
 packages/kbn-jest-serializers @elastic/kibana-operations
 packages/kbn-journeys @elastic/kibana-operations @elastic/appex-qa
@@ -498,6 +497,7 @@ src/platform/packages/shared/kbn-flot-charts @elastic/kibana-presentation @elast
 src/platform/packages/shared/kbn-grouping @elastic/response-ops
 src/platform/packages/shared/kbn-i18n @elastic/kibana-core
 src/platform/packages/shared/kbn-i18n-react @elastic/kibana-core
+src/platform/packages/shared/kbn-interpreter @elastic/kibana-visualizations
 src/platform/packages/shared/kbn-io-ts-utils @elastic/obs-knowledge-team
 src/platform/packages/shared/kbn-lens-embeddable-utils @elastic/obs-ux-infra_services-team @elastic/kibana-visualizations
 src/platform/packages/shared/kbn-logging @elastic/kibana-core
