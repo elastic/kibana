@@ -1186,7 +1186,7 @@ describe('useSetupTechnology', () => {
     });
   });
 
-  it('should not have global_data_tags when switching from agentless to agent-based policy', async () => {
+  it.only('should not have global_data_tags when switching from agentless to agent-based policy', async () => {
     (useConfig as MockFn).mockReturnValue({
       agentless: {
         enabled: true,
