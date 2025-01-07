@@ -36,6 +36,9 @@ import { useFieldTypes } from '../../../../hooks/use_field_types';
 import { getFieldSchema } from '../../utils/get_field_schema';
 import { Pagination } from '../../services/fetch_indicators';
 import { TABLE_TEST_ID, TABLE_UPDATE_PROGRESS_TEST_ID } from './test_ids';
+import { useSecurityContext } from '../../../../hooks/use_security_context';
+
+const actionsColumnIconWidth = 28;
 
 export interface IndicatorsTableProps {
   indicators: Indicator[];
@@ -71,6 +74,8 @@ export const IndicatorsTable: VFC<IndicatorsTableProps> = ({
   browserFields,
   columnSettings: { columns, columnVisibility, handleResetColumns, handleToggleColumn, sorting },
 }) => {
+  const securitySolutionContext = useSecurityContext();
+
   const [expanded, setExpanded] = useState<Indicator>();
 
   const fieldTypes = useFieldTypes();
@@ -97,7 +102,9 @@ export const IndicatorsTable: VFC<IndicatorsTableProps> = ({
     () => [
       {
         id: 'Actions',
-        width: 84,
+        width: securitySolutionContext?.hasAccessToTimeline
+          ? 3 * actionsColumnIconWidth
+          : 2 * actionsColumnIconWidth,
         headerCellRender: () => (
           <FormattedMessage
             id="xpack.threatIntelligence.indicator.table.actionColumnLabel"
@@ -107,7 +114,7 @@ export const IndicatorsTable: VFC<IndicatorsTableProps> = ({
         rowCellRender: renderCellValue,
       },
     ],
-    [renderCellValue]
+    [renderCellValue, securitySolutionContext?.hasAccessToTimeline]
   );
 
   const mappedColumns = useMemo(
