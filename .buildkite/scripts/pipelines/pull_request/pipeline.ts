@@ -7,9 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/* eslint "no-restricted-syntax": [
+            "error",
+            {
+                "selector": "CallExpression[callee.object.name='console'][callee.property.name!=/^(warn|error)$/]",
+                "message": "Debug logging to stdout in this file will attempt to upload the log message as yaml to buildkite, which might result in pipeline syntax error. Use emitPipeline() to upload steps, or log to stderr."
+            }
+        ] */
+
 import fs from 'fs';
 import prConfigs from '../../../pull_requests.json';
-import { areChangesSkippable, doAnyChangesMatch, getAgentImageConfig } from '#pipeline-utils';
+import {
+  areChangesSkippable,
+  doAnyChangesMatch,
+  getAgentImageConfig,
+  emitPipeline,
+} from '#pipeline-utils';
 
 const prConfig = prConfigs.jobs.find((job) => job.pipelineSlug === 'kibana-pull-request');
 const emptyStep = `steps: []`;
@@ -35,7 +48,7 @@ const getPipeline = (filename: string, removeSteps = true) => {
     const skippable = await areChangesSkippable(SKIPPABLE_PR_MATCHERS, REQUIRED_PATHS);
 
     if (skippable) {
-      console.log(emptyStep);
+      emitPipeline([emptyStep]);
       return;
     }
 
@@ -44,8 +57,8 @@ const getPipeline = (filename: string, removeSteps = true) => {
     const onlyRunQuickChecks = await areChangesSkippable([/^renovate\.json$/], REQUIRED_PATHS);
     if (onlyRunQuickChecks) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/renovate.yml', false));
-
-      console.log([...new Set(pipeline)].join('\n'));
+      console.warn('Isolated changes to renovate.json. Skipping main PR pipeline.');
+      emitPipeline(pipeline);
       return;
     }
 
@@ -236,7 +249,7 @@ const getPipeline = (filename: string, removeSteps = true) => {
     if (
       (await doAnyChangesMatch([
         /^packages\/kbn-securitysolution-.*/,
-        /^x-pack\/solutions\/security\/platform\/plugins\/shared\/security_solution/,
+        /^x-pack\/solutions\/security\/plugins\/security_solution/,
         /^x-pack\/test\/defend_workflows_cypress/,
         /^x-pack\/test\/security_solution_cypress/,
         /^fleet_packages\.json/,
@@ -256,9 +269,9 @@ const getPipeline = (filename: string, removeSteps = true) => {
         /^x-pack\/platform\/plugins\/shared\/data_views\/common/,
         /^x-pack\/solutions\/security\/plugins\/lists/,
         /^x-pack\/platform\/plugins\/shared\/rule_registry\/common/,
-        /^x-pack\/solutions\/security\/platform\/plugins\/shared\/security_solution/,
-        /^x-pack\/solutions\/security\/platform\/plugins\/shared\/security_solution_ess/,
-        /^x-pack\/solutions\/security\/platform\/plugins\/shared\/security_solution_serverless/,
+        /^x-pack\/solutions\/security\/plugins\/security_solution/,
+        /^x-pack\/solutions\/security\/plugins\/security_solution_ess/,
+        /^x-pack\/solutions\/security\/plugins\/security_solution_serverless/,
         /^x-pack\/platform\/plugins\/shared\/task_manager/,
         /^x-pack\/solutions\/security\/plugins\/timelines/,
         /^x-pack\/platform\/plugins\/shared\/triggers_actions_ui\/public\/application\/sections\/action_connector_form/,
@@ -341,9 +354,9 @@ const getPipeline = (filename: string, removeSteps = true) => {
         /^x-pack\/solutions\/security\/plugins\/elastic_assistant/,
         /^x-pack\/solutions\/security\/plugins\/lists/,
         /^x-pack\/platform\/plugins\/shared\/rule_registry\/common/,
-        /^x-pack\/solutions\/security\/platform\/plugins\/shared\/security_solution/,
-        /^x-pack\/solutions\/security\/platform\/plugins\/shared\/security_solution_ess/,
-        /^x-pack\/solutions\/security\/platform\/plugins\/shared\/security_solution_serverless/,
+        /^x-pack\/solutions\/security\/plugins\/security_solution/,
+        /^x-pack\/solutions\/security\/plugins\/security_solution_ess/,
+        /^x-pack\/solutions\/security\/plugins\/security_solution_serverless/,
         /^x-pack\/platform\/plugins\/shared\/task_manager/,
         /^x-pack\/solutions\/security\/plugins\/threat_intelligence/,
         /^x-pack\/solutions\/security\/plugins\/timelines/,
@@ -363,7 +376,7 @@ const getPipeline = (filename: string, removeSteps = true) => {
       ((await doAnyChangesMatch([
         /^x-pack\/platform\/plugins\/shared\/osquery/,
         /^x-pack\/test\/osquery_cypress/,
-        /^x-pack\/solutions\/security\/platform\/plugins\/shared\/security_solution/,
+        /^x-pack\/solutions\/security\/plugins\/security_solution/,
       ])) ||
         GITHUB_PR_LABELS.includes('ci:all-cypress-suites')) &&
       !GITHUB_PR_LABELS.includes('ci:skip-cypress-osquery')
@@ -376,8 +389,8 @@ const getPipeline = (filename: string, removeSteps = true) => {
     if (
       (await doAnyChangesMatch([
         /^x-pack\/packages\/kbn-cloud-security-posture/,
-        /^x-pack\/solutions\/security\/platform\/plugins\/shared\/cloud_security_posture/,
-        /^x-pack\/solutions\/security\/platform\/plugins\/shared\/security_solution/,
+        /^x-pack\/solutions\/security\/plugins\/cloud_security_posture/,
+        /^x-pack\/solutions\/security\/plugins\/security_solution/,
         /^x-pack\/test\/security_solution_cypress/,
       ])) ||
       GITHUB_PR_LABELS.includes('ci:all-cypress-suites')
@@ -401,8 +414,7 @@ const getPipeline = (filename: string, removeSteps = true) => {
 
     pipeline.push(getPipeline('.buildkite/pipelines/pull_request/post_build.yml'));
 
-    // remove duplicated steps
-    console.log([...new Set(pipeline)].join('\n'));
+    emitPipeline(pipeline);
   } catch (ex) {
     console.error('Error while generating the pipeline steps: ' + ex.message, ex);
     process.exit(1);
