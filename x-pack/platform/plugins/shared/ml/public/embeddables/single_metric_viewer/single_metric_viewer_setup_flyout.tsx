@@ -10,12 +10,12 @@ import type { CoreStart } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
+import type { MlApi } from '@kbn/ml-services/ml_api_service';
 import type {
   SingleMetricViewerEmbeddableUserInput,
   SingleMetricViewerEmbeddableInput,
 } from '../types';
 import { SingleMetricViewerInitializer } from './single_metric_viewer_initializer';
-import type { MlApi } from '../../application/services/ml_api_service';
 
 export function EmbeddableSingleMetricViewerUserInput({
   coreStart,

@@ -33,7 +33,7 @@ import { useElasticChartsTheme } from '@kbn/charts-theme';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { MlTooltipComponent } from '../../components/chart_tooltip';
 import { withKibana } from '@kbn/kibana-react-plugin/public';
-import { useMlKibana } from '../../contexts/kibana';
+import { useMlKibana } from '@kbn/ml-kibana-context';
 import { ML_JOB_AGGREGATION } from '@kbn/ml-anomaly-utils/aggregation_types';
 import { getInitialAnomaliesLayers } from '../../../maps/util';
 import { APP_ID as MAPS_APP_ID } from '@kbn/maps-plugin/common';

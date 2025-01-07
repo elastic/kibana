@@ -41,8 +41,9 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { context } from '@kbn/kibana-react-plugin/public';
 import { getBoundsRoundedToInterval } from '@kbn/ml-time-buckets';
 import { ResizeChecker } from '@kbn/kibana-utils-plugin/public';
-
+import { mlJobServiceFactory } from '@kbn/ml-services/job_service';
 import { ANOMALIES_TABLE_DEFAULT_QUERY_SIZE } from '@kbn/ml-common-constants/search';
+
 import {
   isModelPlotEnabled,
   isModelPlotChartableForDetector,
@@ -59,7 +60,6 @@ import { SelectInterval } from '../components/controls/select_interval/select_in
 import { SelectSeverity } from '../components/controls/select_severity';
 import { forecastServiceFactory } from '../services/forecast_service';
 import { timeSeriesExplorerServiceFactory } from '../util/time_series_explorer_service';
-import { mlJobServiceFactory } from '../services/job_service';
 import { mlResultsServiceProvider } from '../services/results_service';
 import { toastNotificationServiceProvider } from '../services/toast_notification_service';
 
