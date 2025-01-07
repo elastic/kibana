@@ -11,6 +11,7 @@ import { useStreamsAppParams } from '../../hooks/use_streams_app_params';
 import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
 import { useKibana } from '../../hooks/use_kibana';
 import { StreamDetailOverview } from '../stream_detail_overview';
+import { StreamDetailDashboardsView } from '../stream_detail_dashboards_view';
 import { StreamDetailManagement } from '../stream_detail_management';
 
 export function StreamDetailView() {
@@ -29,7 +30,11 @@ export function StreamDetailView() {
     },
   } = useKibana();
 
-  const { value: streamEntity, refresh } = useStreamsAppFetch(
+  const {
+    value: streamEntity,
+    refresh,
+    loading,
+  } = useStreamsAppFetch(
     ({ signal }) => {
       return streamsRepositoryClient.fetch('GET /api/streams/{id}', {
         signal,
@@ -57,8 +62,21 @@ export function StreamDetailView() {
       }),
     },
     {
+      name: 'dashboards',
+      content: <StreamDetailDashboardsView definition={streamEntity} />,
+      label: i18n.translate('xpack.streams.streamDetailView.dashboardsTab', {
+        defaultMessage: 'Dashboards',
+      }),
+    },
+    {
       name: 'management',
-      content: <StreamDetailManagement definition={streamEntity} refreshDefinition={refresh} />,
+      content: (
+        <StreamDetailManagement
+          definition={streamEntity}
+          refreshDefinition={refresh}
+          isLoadingDefinition={loading}
+        />
+      ),
       label: i18n.translate('xpack.streams.streamDetailView.managementTab', {
         defaultMessage: 'Management',
       }),

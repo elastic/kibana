@@ -11,7 +11,7 @@ import React from 'react';
 import ReactDOM from 'react-dom/server';
 import { EuiIcon } from '@elastic/eui';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import { getAnalytics, getI18n, getTheme } from '../../services';
+import { getCoreStart } from '../../services';
 
 interface Props {
   wholeBucket: boolean;
@@ -19,7 +19,7 @@ interface Props {
 
 export const touchdownTemplate = ({ wholeBucket }: Props) => {
   return ReactDOM.renderToStaticMarkup(
-    <KibanaRenderContextProvider analytics={getAnalytics()} i18n={getI18n()} theme={getTheme()}>
+    <KibanaRenderContextProvider {...getCoreStart()}>
       <p className="visTooltip__header">
         <EuiIcon type="iInCircle" className="visTooltip__headerIcon" />
         <span className="visTooltip__headerText">

@@ -56,7 +56,7 @@ import { SuggestionsComponent } from '../typeahead';
 import { onRaf } from '../utils';
 import { FilterButtonGroup } from '../filter_bar/filter_button_group/filter_button_group';
 import { AutocompleteService, QuerySuggestion, QuerySuggestionTypes } from '../autocomplete';
-import { getAnalytics, getI18n, getTheme } from '../services';
+import { getCoreStart } from '../services';
 import './query_string_input.scss';
 
 export const strings = {
@@ -568,7 +568,7 @@ export default class QueryStringInputUI extends PureComponent<QueryStringInputPr
                 </EuiFlexItem>
               </EuiFlexGroup>
             </div>,
-            { analytics: getAnalytics(), i18n: getI18n(), theme: getTheme() }
+            getCoreStart()
           ),
         });
       }
