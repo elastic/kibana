@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { EuiFlexItemProps } from '@elastic/eui';
 import {
   EuiBadge,
   EuiBadgeGroup,
@@ -15,21 +14,17 @@ import {
   EuiCallOut,
   EuiColorPicker,
   EuiDescribedFormGroup,
-  EuiDescriptionList,
   EuiFilePicker,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
   EuiIcon,
-  EuiIconTip,
   EuiKeyPadMenu,
   EuiKeyPadMenuItem,
   EuiPageHeaderSection,
   EuiPopover,
   EuiSpacer,
-  EuiText,
   EuiTextTruncate,
-  EuiTitle,
   EuiToolTip,
   useEuiTheme,
   useGeneratedHtmlId,
@@ -81,34 +76,6 @@ const pageHeaderCSS = css`
   max-width: 1248px;
   margin: auto;
   border-bottom: none;
-`;
-
-const pageTitleCSS = css`
-  min-width: 120px;
-`;
-
-const rightSideItemsCSS = css`
-  justify-content: flex-start;
-
-  @include euiBreakpoint('m') {
-    justify-content: flex-end;
-  }
-`;
-
-const rightSideItemCSS = css`
-  min-width: 160px;
-`;
-
-const usernameTextCSS = css`
-  max-width: 160px;
-`;
-
-const fullnameTextCSS = css`
-  max-width: 300px;
-`;
-
-const emailTextCSS = css`
-  max-width: 420px;
 `;
 
 export interface UserProfileProps {
@@ -696,11 +663,13 @@ const UserRoles: FunctionComponent<UserRoleProps> = ({ user }) => {
   const renderMoreRoles = () => {
     const button = (
       <EuiButtonEmpty size="xs" onClick={onButtonClick} data-test-subj="userRolesExpand">
-        <FormattedMessage
-          id="xpack.security.accountManagement.userProfile.rolesCountLabel"
-          defaultMessage="+{count} more"
-          values={{ count: remainingRoles.length }}
-        />
+        <EuiBadge>
+          <FormattedMessage
+            id="xpack.security.accountManagement.userProfile.rolesCountLabel"
+            defaultMessage="+{count}"
+            values={{ count: remainingRoles.length }}
+          />
+        </EuiBadge>
       </EuiButtonEmpty>
     );
     return (
@@ -736,21 +705,18 @@ const UserRoles: FunctionComponent<UserRoleProps> = ({ user }) => {
             {role}
           </EuiBadge>
         ))}
+        {remainingRoles.length ? renderMoreRoles() : null}
       </EuiBadgeGroup>
-      {remainingRoles.length ? renderMoreRoles() : null}
     </>
   );
 };
 
 export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data }) => {
-  const { euiTheme } = useEuiTheme();
   const { services } = useKibana<CoreStart>();
   const formik = useUserProfileForm({ user, data });
   const formChanges = useFormChanges();
   const titleId = useGeneratedHtmlId();
   const [showChangePasswordForm, setShowChangePasswordForm] = useState(false);
-
-  const canChangeDetails = canUserChangeDetails(user, services.application.capabilities);
 
   const isCloudUser = user.elastic_cloud_user;
 
@@ -759,102 +725,11 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
     services.theme
   );
 
-  const rightSideItems = [
-    {
-      title: (
-        <FormattedMessage
-          id="xpack.security.accountManagement.userProfile.usernameLabel"
-          defaultMessage="Username"
-        />
-      ),
-      description:
-        user.username &&
-        ((<EuiTextTruncate text={user.username} css={usernameTextCSS} />) as
-          | string
-          | undefined
-          | JSX.Element),
-      helpText: (
-        <FormattedMessage
-          id="xpack.security.accountManagement.userProfile.usernameHelpText"
-          defaultMessage="User name cannot be changed after account creation."
-        />
-      ),
-      testSubj: 'username',
-      grow: 0 as EuiFlexItemProps['grow'],
-    },
-  ];
-
-  if (!canChangeDetails) {
-    rightSideItems.push({
-      title: (
-        <FormattedMessage
-          id="xpack.security.accountManagement.userProfile.fullNameLabel"
-          defaultMessage="Full name"
-        />
-      ),
-      description: user.full_name && (
-        <EuiTextTruncate text={user.full_name} css={fullnameTextCSS} />
-      ),
-      helpText: (
-        <FormattedMessage
-          id="xpack.security.accountManagement.userProfile.fullNameHelpText"
-          defaultMessage="Please contact an administrator to change your full name."
-        />
-      ),
-      testSubj: 'full_name',
-      grow: 1,
-    });
-
-    rightSideItems.push({
-      title: (
-        <FormattedMessage
-          id="xpack.security.accountManagement.userProfile.emailLabel"
-          defaultMessage="Email address"
-        />
-      ),
-      description: user.email && <EuiTextTruncate text={user.email} css={emailTextCSS} />,
-      helpText: (
-        <FormattedMessage
-          id="xpack.security.accountManagement.userProfile.emailHelpText"
-          defaultMessage="Please contact an administrator to change your email address."
-        />
-      ),
-      testSubj: 'email',
-      grow: 2,
-    });
-  }
-
-  rightSideItems.push({
-    title: (
-      <FormattedMessage
-        id="xpack.security.accountManagement.userProfile.rolesLabel"
-        defaultMessage="{roles, plural,
-            one {Role}
-            other {Roles}
-          }"
-        values={{ roles: user.roles.length }}
-      />
-    ),
-    description: <UserRoles user={user} />,
-    helpText: (
-      <FormattedMessage
-        id="xpack.security.accountManagement.userProfile.rolesHelpText"
-        defaultMessage="Roles control access and permissions across the Elastic Stack."
-      />
-    ),
-    testSubj: 'userRoles',
-    grow: 1,
-  });
-
   return (
     <>
       <FormikProvider value={formik}>
         <FormChangesProvider value={formChanges}>
-          <Breadcrumb
-            text={i18n.translate('xpack.security.accountManagement.userProfile.title', {
-              defaultMessage: 'Profile',
-            })}
-          >
+          <Breadcrumb text={user.username}>
             {showChangePasswordForm ? (
               <ChangePasswordModal
                 username={user.username}
@@ -864,58 +739,66 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
             ) : null}
 
             <KibanaPageTemplate className="eui-fullHeight" restrictWidth={true}>
-              <KibanaPageTemplate.Header id={titleId} css={pageHeaderCSS}>
-                <EuiPageHeaderSection>
-                  <EuiTitle size="l" css={pageTitleCSS}>
-                    <h1>
+              <KibanaPageTemplate.Header
+                id={titleId}
+                css={pageHeaderCSS}
+                pageTitle={user.username}
+                pageTitleProps={{
+                  'data-test-subj': 'username',
+                  'aria-label': i18n.translate(
+                    'xpack.security.accountManagement.userProfile.usernameHelpText',
+                    {
+                      defaultMessage: 'User name cannot be changed after account creation.',
+                    }
+                  ),
+                }}
+                rightSideItems={[
+                  <EuiFlexGroup direction="column" data-test-subj="userRoles" gutterSize="s">
+                    <EuiFlexItem>
                       <FormattedMessage
-                        id="xpack.security.accountManagement.userProfile.title"
-                        defaultMessage="Profile"
+                        id="xpack.security.accountManagement.userProfile.rolesLabel"
+                        defaultMessage="{roles, plural,
+                        one {Role}
+                        other {Roles}
+                        }"
+                        values={{ roles: user.roles.length }}
                       />
-                    </h1>
-                  </EuiTitle>
-                </EuiPageHeaderSection>
+                    </EuiFlexItem>
+                    <EuiFlexItem>
+                      <UserRoles user={user} />
+                    </EuiFlexItem>
+                  </EuiFlexGroup>,
+                  ,
+                ]}
+              >
                 <EuiPageHeaderSection>
-                  <EuiFlexGroup alignItems="center" css={rightSideItemsCSS}>
-                    {rightSideItems.map((item) => (
-                      <EuiFlexItem key={item.testSubj} grow={item.grow}>
-                        <EuiDescriptionList
-                          textStyle="reverse"
-                          css={rightSideItemCSS}
-                          listItems={[
-                            {
-                              title: (
-                                <EuiText color={euiTheme.colors.darkestShade} size="s">
-                                  <EuiFlexGroup
-                                    responsive={false}
-                                    alignItems="center"
-                                    gutterSize="none"
-                                  >
-                                    <EuiFlexItem grow={false}>{item.title}</EuiFlexItem>
-                                    <EuiFlexItem grow={false}>
-                                      <EuiIconTip type="questionInCircle" content={item.helpText} />
-                                    </EuiFlexItem>
-                                  </EuiFlexGroup>
-                                </EuiText>
-                              ),
-                              description: (
-                                <span data-test-subj={item.testSubj}>
-                                  {item.description || (
-                                    <EuiText color={euiTheme.colors.textDisabled} size="s">
-                                      <FormattedMessage
-                                        id="xpack.security.accountManagement.userProfile.noneProvided"
-                                        defaultMessage="None provided"
-                                      />
-                                    </EuiText>
-                                  )}
-                                </span>
-                              ),
-                            },
-                          ]}
-                          compressed
-                        />
-                      </EuiFlexItem>
-                    ))}
+                  <EuiFlexGroup direction="column" gutterSize="s">
+                    {user.full_name && (
+                      <EuiTextTruncate
+                        text={user.full_name}
+                        data-test-subj="full_name"
+                        aria-label={i18n.translate(
+                          'xpack.security.accountManagement.userProfile.fullNameHelpText',
+                          {
+                            defaultMessage:
+                              'Please contact an administrator to change your full name.',
+                          }
+                        )}
+                      />
+                    )}
+                    {user.email && (
+                      <EuiTextTruncate
+                        text={user.email}
+                        data-test-subj="email"
+                        aria-label={i18n.translate(
+                          'xpack.security.accountManagement.userProfile.emailHelpText',
+                          {
+                            defaultMessage:
+                              'Please contact an administrator to change your email address.',
+                          }
+                        )}
+                      />
+                    )}
                   </EuiFlexGroup>
                 </EuiPageHeaderSection>
               </KibanaPageTemplate.Header>
