@@ -38,6 +38,10 @@ export interface InvestigateInTimelineButtonProps {
   iconType?: IconType;
   children?: React.ReactNode;
   flush?: EuiButtonEmptyProps['flush'];
+  /**
+   * Data test subject string for testing
+   */
+  ['data-test-subj']?: string;
 }
 
 /**
@@ -56,6 +60,7 @@ export const InvestigateInTimelineButton: FC<
   iconType,
   flush,
   isDisabled,
+  'data-test-subj': dataTestSubj,
   ...rest
 }) => {
   const { investigateInTimeline } = useInvestigateInTimeline();
@@ -81,6 +86,7 @@ export const InvestigateInTimelineButton: FC<
       size="xs"
       iconType={iconType}
       disabled={disabled}
+      data-test-subj={dataTestSubj}
     >
       {children}
     </EuiButtonEmpty>
@@ -89,6 +95,7 @@ export const InvestigateInTimelineButton: FC<
       aria-label={ACTION_INVESTIGATE_IN_TIMELINE}
       disabled={disabled}
       onClick={openTimelineCallback}
+      data-test-subj={dataTestSubj}
       {...rest}
     >
       {children}
