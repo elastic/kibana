@@ -83,7 +83,7 @@ export function useSetupTechnology({
   // this is a placeholder for the new agent-BASED policy that will be used when the user switches from agentless to agent-based and back
   const newAgentBasedPolicy = useRef<NewAgentPolicy>(newAgentPolicy);
   const defaultSetupTechnology = useMemo(() => {
-    return isOnlyAgentlessIntegration(packageInfo)
+    return isOnlyAgentlessIntegration(packageInfo) || isAgentlessSetupDefault(packageInfo)
       ? SetupTechnology.AGENTLESS
       : SetupTechnology.AGENT_BASED;
   }, [packageInfo]);
@@ -107,6 +107,7 @@ export function useSetupTechnology({
       const nextNewAgentlessPolicy = {
         ...newAgentlessPolicy,
         name: getAgentlessAgentPolicyNameFromPackagePolicyName(packagePolicy.name),
+        ...getAdditionalAgentlessPolicyInfo(packageInfo),
       };
       if (!newAgentlessPolicy.name || nextNewAgentlessPolicy.name !== newAgentlessPolicy.name) {
         setNewAgentlessPolicy(nextNewAgentlessPolicy);
@@ -141,10 +142,11 @@ export function useSetupTechnology({
     agentPolicies,
     setSelectedSetupTechnology,
     updatePackagePolicy,
+    packageInfo,
   ]);
 
   const handleSetupTechnologyChange = useCallback(
-    (setupTechnology: SetupTechnology, policyTemplateName?: string) => {
+    (setupTechnology: SetupTechnology) => {
       if (!isAgentlessEnabled || setupTechnology === selectedSetupTechnology) {
         return;
       }
@@ -153,7 +155,6 @@ export function useSetupTechnology({
         if (isAgentlessEnabled) {
           const agentlessPolicy = {
             ...newAgentlessPolicy,
-            ...getAdditionalAgentlessPolicyInfo(policyTemplateName, packageInfo),
           } as NewAgentPolicy;
 
           setNewAgentPolicy(agentlessPolicy);
@@ -183,7 +184,6 @@ export function useSetupTechnology({
       updatePackagePolicy,
       setNewAgentPolicy,
       newAgentlessPolicy,
-      packageInfo,
       setSelectedPolicyTab,
       updateAgentPolicies,
     ]
@@ -195,36 +195,42 @@ export function useSetupTechnology({
   };
 }
 
-const getAdditionalAgentlessPolicyInfo = (
-  policyTemplateName?: string,
-  packageInfo?: PackageInfo
-) => {
-  if (!policyTemplateName || !packageInfo) {
-    return {};
-  }
-  const agentlessPolicyTemplate = policyTemplateName
-    ? packageInfo?.policy_templates?.find((policy) => policy.name === policyTemplateName)
-    : undefined;
+const isAgentlessSetupDefault = (packageInfo?: PackageInfo) => {
+  // placegolder for the logic to determine if the agentless setup is the default
+  return true;
+};
+
+const getAdditionalAgentlessPolicyInfo = (packageInfo?: PackageInfo) => {
+  // this assumes that there is all the deployments modes are the same for all the policy templates
+  const agentlessPolicyTemplate = packageInfo?.policy_templates?.find(
+    (policy) => policy.deployment_modes
+  );
 
   const agentlessInfo = agentlessPolicyTemplate?.deployment_modes?.agentless;
-  return !agentlessInfo
-    ? {}
-    : {
-        global_data_tags: agentlessInfo
-          ? [
-              {
-                name: AGENTLESS_GLOBAL_TAG_NAME_ORGANIZATION,
-                value: agentlessInfo.organization,
-              },
-              {
-                name: AGENTLESS_GLOBAL_TAG_NAME_DIVISION,
-                value: agentlessInfo.division,
-              },
-              {
-                name: AGENTLESS_GLOBAL_TAG_NAME_TEAM,
-                value: agentlessInfo.team,
-              },
-            ]
-          : [],
-      };
+  if (
+    agentlessInfo === undefined ||
+    !agentlessInfo.organization ||
+    !agentlessInfo.division ||
+    !agentlessInfo.team
+  ) {
+    return undefined;
+  }
+  return {
+    global_data_tags: agentlessInfo
+      ? [
+          {
+            name: AGENTLESS_GLOBAL_TAG_NAME_ORGANIZATION,
+            value: agentlessInfo.organization,
+          },
+          {
+            name: AGENTLESS_GLOBAL_TAG_NAME_DIVISION,
+            value: agentlessInfo.division,
+          },
+          {
+            name: AGENTLESS_GLOBAL_TAG_NAME_TEAM,
+            value: agentlessInfo.team,
+          },
+        ]
+      : [],
+  };
 };
