@@ -18,13 +18,7 @@
             "text": "InspectorPublicPlugin"
           },
           " implements ",
-          {
-            "pluginId": "@kbn/core-plugins-browser",
-            "scope": "public",
-            "docId": "kibKbnCorePluginsBrowserPluginApi",
-            "section": "def-public.Plugin",
-            "text": "Plugin"
-          },
+          "Plugin",
           "<",
           {
             "pluginId": "inspector",
@@ -84,13 +78,7 @@
                 "label": "_initializerContext",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-plugins-browser",
-                    "scope": "public",
-                    "docId": "kibKbnCorePluginsBrowserPluginApi",
-                    "section": "def-public.PluginInitializerContext",
-                    "text": "PluginInitializerContext"
-                  },
+                  "PluginInitializerContext",
                   "<object>"
                 ],
                 "path": "src/platform/plugins/shared/inspector/public/plugin.tsx",
@@ -110,13 +98,7 @@
             "description": [],
             "signature": [
               "(_core: ",
-              {
-                "pluginId": "@kbn/core-lifecycle-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-                "section": "def-public.CoreSetup",
-                "text": "CoreSetup"
-              },
+              "CoreSetup",
               "<object, unknown>) => { registerView: (view: ",
               {
                 "pluginId": "inspector",
@@ -141,13 +123,7 @@
                 "label": "_core",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-lifecycle-browser",
-                    "scope": "public",
-                    "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-                    "section": "def-public.CoreSetup",
-                    "text": "CoreSetup"
-                  },
+                  "CoreSetup",
                   "<object, unknown>"
                 ],
                 "path": "src/platform/plugins/shared/inspector/public/plugin.tsx",
@@ -167,13 +143,7 @@
             "description": [],
             "signature": [
               "(core: ",
-              {
-                "pluginId": "@kbn/core-lifecycle-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-                "section": "def-public.CoreStart",
-                "text": "CoreStart"
-              },
+              "CoreStart",
               ", startDeps: ",
               "InspectorPluginStartDeps",
               ") => { isAvailable: (adapters?: ",
@@ -201,13 +171,7 @@
                 "text": "InspectorOptions"
               },
               " | undefined) => ",
-              {
-                "pluginId": "@kbn/core-mount-utils-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreMountUtilsBrowserPluginApi",
-                "section": "def-public.OverlayRef",
-                "text": "OverlayRef"
-              },
+              "OverlayRef",
               "; }"
             ],
             "path": "src/platform/plugins/shared/inspector/public/plugin.tsx",
@@ -222,13 +186,7 @@
                 "label": "core",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-lifecycle-browser",
-                    "scope": "public",
-                    "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-                    "section": "def-public.CoreStart",
-                    "text": "CoreStart"
-                  }
+                  "CoreStart"
                 ],
                 "path": "src/platform/plugins/shared/inspector/public/plugin.tsx",
                 "deprecated": false,
@@ -1420,13 +1378,7 @@
         "label": "InspectorSession",
         "description": [],
         "signature": [
-          {
-            "pluginId": "@kbn/core-mount-utils-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreMountUtilsBrowserPluginApi",
-            "section": "def-public.OverlayRef",
-            "text": "OverlayRef"
-          }
+          "OverlayRef"
         ],
         "path": "src/platform/plugins/shared/inspector/public/types.ts",
         "deprecated": false,
@@ -1605,13 +1557,7 @@
               "text": "InspectorOptions"
             },
             " | undefined) => ",
-            {
-              "pluginId": "@kbn/core-mount-utils-browser",
-              "scope": "public",
-              "docId": "kibKbnCoreMountUtilsBrowserPluginApi",
-              "section": "def-public.OverlayRef",
-              "text": "OverlayRef"
-            }
+            "OverlayRef"
           ],
           "path": "src/platform/plugins/shared/inspector/public/plugin.tsx",
           "deprecated": false,
