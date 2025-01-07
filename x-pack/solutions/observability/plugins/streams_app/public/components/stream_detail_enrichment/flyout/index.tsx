@@ -7,10 +7,10 @@
 
 import React, { useMemo } from 'react';
 import { FormProvider, SubmitHandler, useForm } from 'react-hook-form';
-import deepEqual from 'fast-deep-equal';
 import { EuiCallOut, EuiForm, EuiButton, EuiSpacer, EuiHorizontalRule } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ProcessingDefinition, ReadStreamDefinition } from '@kbn/streams-schema';
+import { isEqual } from 'lodash';
 import { ProcessorTypeSelector } from './processor_type_selector';
 import { ProcessorFlyoutTemplate } from './processor_flyout_template';
 import { DetectedField, ProcessorDefinition, ProcessorFormState } from '../types';
@@ -46,7 +46,7 @@ export function AddProcessorFlyout({
   const formFields = methods.watch();
 
   const hasChanges = useMemo(
-    () => !deepEqual(defaultValues, formFields),
+    () => !isEqual(defaultValues, formFields),
     [defaultValues, formFields]
   );
 
@@ -102,7 +102,7 @@ export function EditProcessorFlyout({
   const formFields = methods.watch();
 
   const hasChanges = useMemo(
-    () => !deepEqual(defaultValues, formFields),
+    () => !isEqual(defaultValues, formFields),
     [defaultValues, formFields]
   );
 

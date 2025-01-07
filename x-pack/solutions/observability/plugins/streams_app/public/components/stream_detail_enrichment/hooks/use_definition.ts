@@ -6,7 +6,6 @@
  */
 
 import { useState, useMemo, useEffect } from 'react';
-import deepEqual from 'fast-deep-equal';
 import { i18n } from '@kbn/i18n';
 import { useAbortController } from '@kbn/observability-utils-browser/hooks/use_abort_controller';
 import { useBoolean } from '@kbn/react-hooks';
@@ -17,6 +16,7 @@ import {
   FieldDefinition,
 } from '@kbn/streams-schema';
 import { htmlIdGenerator } from '@elastic/eui';
+import { isEqual } from 'lodash';
 import { DetectedField, ProcessorDefinition } from '../types';
 import { useKibana } from '../../../hooks/use_kibana';
 
@@ -42,7 +42,7 @@ export const useDefinition = (definition: ReadStreamDefinition, refreshDefinitio
   }, [definition]);
 
   const hasChanges = useMemo(
-    () => !deepEqual(processing, httpProcessing),
+    () => !isEqual(processing, httpProcessing),
     [processing, httpProcessing]
   );
 
