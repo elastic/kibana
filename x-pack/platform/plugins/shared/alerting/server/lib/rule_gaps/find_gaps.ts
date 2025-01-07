@@ -10,7 +10,7 @@ import { Logger } from '@kbn/core/server';
 import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 import { FindGapsParams } from './types';
 import { Gap } from './gap';
-import { transformToGap } from './transforms/transformToGap';
+import { transformToGap } from './transforms/transform_to_gap';
 import { GapStatus } from '../../../common/constants/gap_status';
 
 export const findGaps = async ({
@@ -28,7 +28,7 @@ export const findGaps = async ({
   perPage: number;
 }> => {
   const { ruleId, start, end, page, perPage, statuses, sortField, sortOrder } = params;
-  console.log('-----------------statuses', statuses);
+
   try {
     const statusesFilter = statuses
       ?.map((status) => `kibana.alert.rule.gap.status : ${status}`)

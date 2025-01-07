@@ -13,7 +13,6 @@ const createEventLoggerMock = () => {
     updateEvent: jest.fn(),
     startTiming: jest.fn(),
     stopTiming: jest.fn(),
-    deleteEventsDocsByQuery: jest.fn(),
   };
   return mock;
 };

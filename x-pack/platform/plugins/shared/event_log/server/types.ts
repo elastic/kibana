@@ -8,7 +8,6 @@
 import { schema, TypeOf } from '@kbn/config-schema';
 import type { KibanaRequest } from '@kbn/core/server';
 import { KueryNode } from '@kbn/es-query';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 export type { IEvent, IValidatedEvent } from '../generated/schemas';
 export { EventSchema, ECS_VERSION } from '../generated/schemas';
@@ -16,14 +15,14 @@ import { IEvent } from '../generated/schemas';
 import { AggregateOptionsType, FindOptionsType } from './event_log_client';
 import {
   AggregateEventsBySavedObjectResult,
-  DocMeta,
   QueryEventsBySavedObjectResult,
+  InternalFields,
 } from './es/cluster_client_adapter';
 
 export type {
   QueryEventsBySavedObjectResult,
   AggregateEventsBySavedObjectResult,
-  DocMeta,
+  InternalFields,
 } from './es/cluster_client_adapter';
 import { SavedObjectProvider } from './saved_object_provider_registry';
 
@@ -86,6 +85,5 @@ export interface IEventLogger {
   logEvent(properties: IEvent): void;
   startTiming(event: IEvent, startTime?: Date): void;
   stopTiming(event: IEvent): void;
-  updateEvent(meta: DocMeta, event: IEvent): Promise<void>;
-  deleteEventsDocsByQuery(query: estypes.QueryDslQueryContainer): Promise<void>;
+  updateEvent(internalFields: InternalFields, event: IEvent): Promise<void>;
 }

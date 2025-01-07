@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { DocMeta } from '@kbn/event-log-plugin/server/es/cluster_client_adapter';
+import { InternalFields } from '@kbn/event-log-plugin/server/es/cluster_client_adapter';
 import { GapStatus, gapStatus } from '../../../../common/constants';
 
 import { Interval, StringInterval, GapBase } from '../types';
@@ -21,34 +21,36 @@ import {
 } from './interval_utils';
 
 interface GapConstructorParams {
-  timestamp: string;
+  timestamp?: string;
   range: StringInterval;
   filledIntervals?: StringInterval[];
   inProgressIntervals?: StringInterval[];
-  meta?: DocMeta;
+  internalFields?: InternalFields;
 }
 
 export class Gap {
   private _range: Interval;
   private _filledIntervals: Interval[];
   private _inProgressIntervals: Interval[];
-  private _meta?: DocMeta;
-  private _timestamp: string;
+  private _internalFields?: InternalFields;
+  private _timestamp?: string;
 
   constructor({
     timestamp,
     range,
     filledIntervals = [],
     inProgressIntervals = [],
-    meta,
+    internalFields,
   }: GapConstructorParams) {
     this._range = normalizeInterval(range);
     this._filledIntervals = mergeIntervals(filledIntervals.map(normalizeInterval));
     this._inProgressIntervals = mergeIntervals(inProgressIntervals.map(normalizeInterval));
-    if (meta) {
-      this._meta = meta;
+    if (internalFields) {
+      this._internalFields = internalFields;
     }
-    this._timestamp = timestamp;
+    if (timestamp) {
+      this._timestamp = timestamp;
+    }
   }
 
   public fillGap(interval: Interval): void {
@@ -129,8 +131,8 @@ export class Gap {
     this._inProgressIntervals = [];
   }
 
-  public get meta() {
-    return this._meta;
+  public get internalFields() {
+    return this._internalFields;
   }
 
   public getState() {

@@ -10,7 +10,7 @@ import { Logger } from '@kbn/core/server';
 import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 import { FindGapByIdParams } from './types';
 import { Gap } from './gap';
-import { transformToGap } from './transforms/transformToGap';
+import { transformToGap } from './transforms/transform_to_gap';
 
 export const findGapById = async ({
   eventLogClient,

@@ -37,7 +37,6 @@ import { ruleDomainSchema } from '../../schemas';
 import type { RuleParams, RuleDomain } from '../../types';
 import type { RawRule, SanitizedRule } from '../../../../types';
 import { untrackRuleAlerts } from '../../../../rules_client/lib';
-import { deleteGaps } from '../../../../lib/rule_gaps/delete_gaps';
 
 export const bulkDeleteRules = async <Params extends RuleParams>(
   context: RulesClientContext,
@@ -89,11 +88,6 @@ export const bulkDeleteRules = async <Params extends RuleParams>(
       ruleIds: rules.map(({ id }) => id),
       namespace: context.namespace,
       unsecuredSavedObjectsClient: context.unsecuredSavedObjectsClient,
-    }),
-    deleteGaps({
-      ruleIds: rules.map(({ id }) => id),
-      eventLogger: context.eventLogger,
-      logger: context.logger,
     }),
     bulkMarkApiKeysForInvalidation(
       { apiKeys: apiKeysToInvalidate },

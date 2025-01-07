@@ -47,12 +47,12 @@ export const addFilledIntervalToGaps = async (params: {
       });
 
       const esGap = gap.getEsObject();
-      const meta = gap.meta;
+      const internalFields = gap.internalFields;
 
-      if (meta) {
+      if (internalFields) {
         try {
           await alertingEventLogger.updateGap({
-            meta,
+            internalFields,
             gap: esGap,
           });
         } catch (e) {

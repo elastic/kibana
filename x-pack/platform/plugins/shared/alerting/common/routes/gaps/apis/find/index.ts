@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-export { findQuerySchema, findResponseSchema } from './schemas/latest';
+export { findGapsBodySchema, findGapsResponseSchema } from './schemas/latest';
 export type { FindGapsRequestQuery, FindGapsResponseBody, FindGapsResponse } from './types/latest';
 
 export {
-  findQuerySchema as findQuerySchemaV1,
-  findResponseSchema as findResponseSchemaV1,
+  findGapsBodySchema as findGapsBodySchemaV1,
+  findGapsResponseSchema as findGapsResponseSchemaV1,
 } from './schemas/v1';
 export type {
   FindGapsRequestQuery as FindGapsRequestQueryV1,

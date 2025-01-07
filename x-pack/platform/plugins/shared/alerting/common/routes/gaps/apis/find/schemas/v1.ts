@@ -7,7 +7,7 @@
 import { schema } from '@kbn/config-schema';
 import { gapsResponseSchemaV1 } from '../../../response';
 
-export const findQuerySchema = schema.object(
+export const findGapsBodySchema = schema.object(
   {
     end: schema.maybe(schema.string()),
     page: schema.number({ defaultValue: 1, min: 1 }),
@@ -50,7 +50,7 @@ export const findQuerySchema = schema.object(
   }
 );
 
-export const findResponseSchema = schema.object({
+export const findGapsResponseSchema = schema.object({
   page: schema.number(),
   per_page: schema.number(),
   total: schema.number(),

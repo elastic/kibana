@@ -9,6 +9,7 @@ import { Gap } from '../gap';
 import { StringInterval } from '../types';
 
 type PotenialInterval = { lte?: string; gte?: string } | undefined;
+
 const validateInterval = (interval: PotenialInterval): StringInterval | null => {
   if (!interval?.gte || !interval?.lte) return null;
 
@@ -22,6 +23,10 @@ const validateIntervals = (intervals: PotenialInterval[] | undefined): StringInt
   (intervals?.map(validateInterval)?.filter((interval) => interval !== null) as StringInterval[]) ??
   [];
 
+/**
+ * Transforms event log results into Gap objects
+ * Filters out invalid gaps/gaps intervals
+ */
 export const transformToGap = (events: QueryEventsBySavedObjectResult): Gap[] => {
   return events?.data
     ?.map((doc) => {
@@ -30,7 +35,7 @@ export const transformToGap = (events: QueryEventsBySavedObjectResult): Gap[] =>
 
       const range = validateInterval(gap.range);
 
-      if (!range) return null;
+      if (!range || !doc['@timestamp']) return null;
 
       const filledIntervals = validateIntervals(gap?.filled_intervals);
       const inProgressIntervals = validateIntervals(gap?.in_progress_intervals);
@@ -40,7 +45,7 @@ export const transformToGap = (events: QueryEventsBySavedObjectResult): Gap[] =>
         range,
         filledIntervals,
         inProgressIntervals,
-        meta: {
+        internalFields: {
           _id: doc._id,
           _index: doc._index,
           _seq_no: doc._seq_no,

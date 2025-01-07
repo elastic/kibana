@@ -6,7 +6,7 @@
  */
 import { IRouter } from '@kbn/core/server';
 import {
-  findQuerySchemaV1,
+  findGapsBodySchemaV1,
   FindGapsRequestQueryV1,
   FindGapsResponseV1,
 } from '../../../../../common/routes/gaps/apis/find';
@@ -24,9 +24,9 @@ export const findGapsRoute = (
 ) => {
   router.post(
     {
-      path: `${INTERNAL_ALERTING_GAPS_FIND_API_PATH}`,
+      path: INTERNAL_ALERTING_GAPS_FIND_API_PATH,
       validate: {
-        body: findQuerySchemaV1,
+        body: findGapsBodySchemaV1,
       },
       options: {
         access: 'internal',
@@ -37,7 +37,6 @@ export const findGapsRoute = (
         const alertingContext = await context.alerting;
         const rulesClient = await alertingContext.getRulesClient();
         const query: FindGapsRequestQueryV1 = req.body;
-        console.log('-----------------query', query);
         const result = await rulesClient.findGaps(transformRequestV1(query));
         const response: FindGapsResponseV1 = {
           body: transformResponseV1(result),

@@ -10,7 +10,7 @@ import {
   IEventLogger,
   millisToNanos,
   SAVED_OBJECT_REL_PRIMARY,
-  DocMeta,
+  InternalFields,
 } from '@kbn/event-log-plugin/server';
 import { EVENT_LOG_ACTIONS } from '../../plugin';
 import { UntypedNormalizedRuleType } from '../../rule_type_registry';
@@ -425,33 +425,20 @@ export class AlertingEventLogger {
     );
   }
 
-  public async updateGap({ meta, gap }: { meta: DocMeta; gap: GapBase }): Promise<void> {
-    return this.eventLogger.updateEvent(meta, {
+  public async updateGap({
+    internalFields,
+    gap,
+  }: {
+    internalFields: InternalFields;
+    gap: GapBase;
+  }): Promise<void> {
+    return this.eventLogger.updateEvent(internalFields, {
       kibana: {
         alert: {
           rule: {
             gap,
           },
         },
-      },
-    });
-  }
-
-  public async deleteGaps(ruleIds: string[]) {
-    return this.eventLogger.deleteEventsDocsByQuery({
-      bool: {
-        must: [
-          {
-            term: {
-              'event.action': EVENT_LOG_ACTIONS.gap,
-            },
-          },
-          {
-            terms: {
-              'rule.id': ruleIds,
-            },
-          },
-        ],
       },
     });
   }

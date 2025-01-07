@@ -7,7 +7,6 @@
 
 import { schema } from '@kbn/config-schema';
 import { Logger } from '@kbn/core/server';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { merge } from 'lodash';
 
 import { coerce } from 'semver';
@@ -24,7 +23,7 @@ import {
   EventSchema,
 } from './types';
 import { SAVED_OBJECT_REL_PRIMARY } from './types';
-import { Doc, DocMeta } from './es/cluster_client_adapter';
+import { Doc, InternalFields } from './es/cluster_client_adapter';
 
 type SystemLogger = Plugin['systemLogger'];
 
@@ -109,11 +108,11 @@ export class EventLogger implements IEventLogger {
     }
   }
 
-  async updateEvent(meta: DocMeta, event: IEvent): Promise<void> {
+  async updateEvent(internalFields: InternalFields, event: IEvent): Promise<void> {
     const doc: Required<Doc> = {
       index: this.esContext.esNames.dataStream,
       body: event,
-      meta,
+      internalFields,
     };
 
     if (this.eventLogService.isIndexingEntries()) {
@@ -125,10 +124,6 @@ export class EventLogger implements IEventLogger {
 
       return result;
     }
-  }
-
-  async deleteEventsDocsByQuery(query: estypes.QueryDslQueryContainer): Promise<void> {
-    return deleteByQuery(this.esContext, query);
   }
 }
 
@@ -194,11 +189,4 @@ function indexEventDoc(esContext: EsContext, doc: Doc): void {
 
 async function updateEventDoc(esContext: EsContext, doc: Required<Doc>): Promise<void> {
   return esContext.esAdapter.updateDocument(doc);
-}
-
-async function deleteByQuery(
-  esContext: EsContext,
-  query: estypes.QueryDslQueryContainer
-): Promise<void> {
-  return esContext.esAdapter.deleteByQueryDocs(query);
 }
