@@ -6,7 +6,7 @@
  */
 
 import type { CriteriaWithPagination, EuiBasicTableColumn, Pagination } from '@elastic/eui';
-import { EuiInMemoryTable } from '@elastic/eui';
+import { EuiInMemoryTable, useEuiTheme } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 
 import { defaultSort } from '../../../../constants';
@@ -23,6 +23,7 @@ export interface Props {
     pattern,
     onCheckNowAction,
     onViewHistoryAction,
+    dangerColor,
   }: {
     formatBytes: (value: number | undefined) => string;
     formatNumber: (value: number | undefined) => string;
@@ -31,6 +32,7 @@ export interface Props {
     onCheckNowAction: (indexName: string) => void;
     onViewHistoryAction: (indexName: string) => void;
     firstIndexName?: string;
+    dangerColor: string;
   }) => Array<EuiBasicTableColumn<IndexSummaryTableItem>>;
   items: IndexSummaryTableItem[];
   pageIndex: number;
@@ -58,6 +60,9 @@ const SummaryTableComponent: React.FC<Props> = ({
   onViewHistoryAction,
 }) => {
   const { isILMAvailable, formatBytes, formatNumber } = useDataQualityContext();
+  const { euiTheme } = useEuiTheme();
+  const dangerColor = euiTheme.colors.danger;
+
   const columns = useMemo(
     () =>
       getTableColumns({
@@ -68,6 +73,7 @@ const SummaryTableComponent: React.FC<Props> = ({
         onCheckNowAction,
         onViewHistoryAction,
         firstIndexName: items[0]?.indexName,
+        dangerColor,
       }),
     [
       getTableColumns,
@@ -78,6 +84,7 @@ const SummaryTableComponent: React.FC<Props> = ({
       onCheckNowAction,
       onViewHistoryAction,
       items,
+      dangerColor,
     ]
   );
   const getItemId = useCallback((item: IndexSummaryTableItem) => item.indexName, []);
