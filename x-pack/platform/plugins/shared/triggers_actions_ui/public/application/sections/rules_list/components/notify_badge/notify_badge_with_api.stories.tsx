@@ -83,6 +83,9 @@ export const IndefinitelyRuleNotifyBadgeWithApi = {
   },
 };
 
+const ActiveSnoozeDate = new Date();
+ActiveSnoozeDate.setDate(ActiveSnoozeDate.getDate() + 2);
+
 export const ActiveSnoozesRuleNotifyBadgeWithApi = {
   render: Template,
 
@@ -105,9 +108,6 @@ export const ActiveSnoozesRuleNotifyBadgeWithApi = {
     },
   },
 };
-
-const ActiveSnoozeDate = new Date();
-ActiveSnoozeDate.setDate(ActiveSnoozeDate.getDate() + 2);
 
 const SnoozeDate = new Date();
 
