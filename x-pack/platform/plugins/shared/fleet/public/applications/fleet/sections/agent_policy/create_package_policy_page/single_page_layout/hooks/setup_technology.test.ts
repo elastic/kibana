@@ -672,7 +672,7 @@ describe('useSetupTechnology', () => {
     });
   });
 
-  it.only('should not have global_data_tags when switching from agentless to agent-based policy', async () => {
+  it('should not have global_data_tags when switching from agentless to agent-based policy', async () => {
     (useConfig as MockFn).mockReturnValue({
       agentless: {
         enabled: true,
@@ -699,20 +699,6 @@ describe('useSetupTechnology', () => {
       })
     );
 
-    await waitFor(() => {
-      expect(result.current.selectedSetupTechnology).toBe(SetupTechnology.AGENTLESS);
-      expect(setNewAgentPolicy).toHaveBeenCalledWith(
-        expect.objectContaining({
-          supports_agentless: true,
-          global_data_tags: [
-            { name: 'organization', value: 'org' },
-            { name: 'division', value: 'div' },
-            { name: 'team', value: 'team' },
-          ],
-        })
-      );
-    });
-
     act(() => {
       result.current.handleSetupTechnologyChange(SetupTechnology.AGENT_BASED);
     });
@@ -726,6 +712,24 @@ describe('useSetupTechnology', () => {
           { name: 'team', value: 'team' },
         ],
       });
+    });
+
+    act(() => {
+      result.current.handleSetupTechnologyChange(SetupTechnology.AGENTLESS);
+    });
+
+    await waitFor(() => {
+      expect(result.current.selectedSetupTechnology).toBe(SetupTechnology.AGENTLESS);
+      expect(setNewAgentPolicy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          supports_agentless: true,
+          global_data_tags: [
+            { name: 'organization', value: 'org' },
+            { name: 'division', value: 'div' },
+            { name: 'team', value: 'team' },
+          ],
+        })
+      );
     });
   });
 });
