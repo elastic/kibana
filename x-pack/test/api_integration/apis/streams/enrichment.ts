@@ -20,12 +20,15 @@ export default function ({ getService }: FtrProviderContext) {
   const logger = getService('log');
 
   describe('Enrichment', () => {
-    after(async () => {
-      await cleanUpRootStream(esClient);
-    });
-
     before(async () => {
       await enableStreams(supertest);
+    });
+
+    after(async () => {
+      await cleanUpRootStream(esClient);
+      await esClient.indices.deleteDataStream({
+        name: ['logs*'],
+      });
     });
 
     it('Place processing steps', async () => {

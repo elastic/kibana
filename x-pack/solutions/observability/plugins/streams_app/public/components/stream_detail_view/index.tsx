@@ -11,6 +11,7 @@ import { useStreamsAppParams } from '../../hooks/use_streams_app_params';
 import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
 import { useKibana } from '../../hooks/use_kibana';
 import { StreamDetailOverview } from '../stream_detail_overview';
+import { StreamDetailDashboardsView } from '../stream_detail_dashboards_view';
 import { StreamDetailManagement } from '../stream_detail_management';
 
 export function StreamDetailView() {
@@ -58,6 +59,13 @@ export function StreamDetailView() {
       content: <StreamDetailOverview definition={streamEntity} />,
       label: i18n.translate('xpack.streams.streamDetailView.overviewTab', {
         defaultMessage: 'Overview',
+      }),
+    },
+    {
+      name: 'dashboards',
+      content: <StreamDetailDashboardsView definition={streamEntity} />,
+      label: i18n.translate('xpack.streams.streamDetailView.dashboardsTab', {
+        defaultMessage: 'Dashboards',
       }),
     },
     {

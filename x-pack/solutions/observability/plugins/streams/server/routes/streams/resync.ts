@@ -23,7 +23,7 @@ export const resyncStreamsRoute = createServerRoute({
   },
   params: z.object({}),
   handler: async ({ logger, request, getScopedClients }): Promise<{ acknowledged: true }> => {
-    const { scopedClusterClient } = await getScopedClients({ request });
+    const { scopedClusterClient, assetClient } = await getScopedClients({ request });
 
     const { streams } = await listStreams({ scopedClusterClient });
 
@@ -35,6 +35,7 @@ export const resyncStreamsRoute = createServerRoute({
 
       await syncStream({
         scopedClusterClient,
+        assetClient,
         definition,
         logger,
       });
