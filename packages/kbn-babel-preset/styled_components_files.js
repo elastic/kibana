@@ -556,7 +556,6 @@ module.exports = {
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]timelines[\/\\]components[\/\\]timeline[\/\\]data_providers[\/\\]provider_badge.tsx/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]timelines[\/\\]components[\/\\]timeline[\/\\]data_providers[\/\\]provider_item_actions.tsx/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]timelines[\/\\]components[\/\\]timeline[\/\\]data_providers[\/\\]providers.tsx/,
-    /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]timelines[\/\\]components[\/\\]timeline[\/\\]footer[\/\\]index.tsx/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]timelines[\/\\]components[\/\\]timeline[\/\\]index.tsx/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]timelines[\/\\]components[\/\\]timeline[\/\\]kpi[\/\\]kpis.tsx/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]timelines[\/\\]components[\/\\]timeline[\/\\]properties[\/\\]helpers.test.tsx/,
