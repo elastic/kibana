@@ -14,6 +14,7 @@ export const SESSION_VIEW_NO_DATA_TEST_ID = `${PREFIX}SessionViewNoData` as cons
 
 const INSIGHTS_TEST_ID = `${PREFIX}Insights` as const;
 export const INSIGHTS_ALERTS_COUNT_TEXT_TEST_ID = `${INSIGHTS_TEST_ID}AlertsCount` as const;
-export const INSIGHTS_ALERTS_COUNT_INVESTIGATE_IN_TIMELINE_BUTTON_TEST_ID = `${INSIGHTS_TEST_ID}AlertsCountInvestigateInTimelineButton` as const;
+export const INSIGHTS_ALERTS_COUNT_INVESTIGATE_IN_TIMELINE_BUTTON_TEST_ID =
+  `${INSIGHTS_TEST_ID}AlertsCountInvestigateInTimelineButton` as const;
 
 export const FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID = `${PREFIX}FooterDropdownButton` as const;
