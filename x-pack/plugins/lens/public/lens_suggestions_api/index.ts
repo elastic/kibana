@@ -39,12 +39,6 @@ export const suggestionsApi = ({
       isLoading: false,
       state: {
         layers: {},
-      },
-    },
-    textBased: {
-      isLoading: false,
-      state: {
-        layers: {},
         indexPatternRefs: [],
         initialContext,
       },

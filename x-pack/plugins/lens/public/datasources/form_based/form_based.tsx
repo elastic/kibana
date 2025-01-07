@@ -338,6 +338,7 @@ export function getFormBasedDatasource({
         layers: {
           ...state.layers,
           [newLayerId]: {
+            type: 'esql',
             index,
             query,
             columns: newColumns ?? [],
@@ -1002,7 +1003,7 @@ export function getFormBasedDatasource({
     },
     getDatasourceSuggestionsForField(state, draggedField, filterLayers, indexPatterns) {
       const layers = Object.values(state.layers);
-      if (true || layers?.[0]?.type === 'esql') {
+      if (layers?.[0]?.type === 'esql') {
         const query = layers?.[0]?.query;
         const fieldList = query ? getColumnsFromCache(query) : [];
         const field = fieldList?.find((f) => f.id === (draggedField as TextBasedField).id);
@@ -1068,7 +1069,7 @@ export function getFormBasedDatasource({
         : [];
     },
     getDatasourceSuggestionsFromCurrentState: (state, indexPatterns, filterFn, activeData) => {
-      if (true || Object.values(state.layers).some((layer) => layer.type === 'esql')) {
+      if (Object.values(state.layers).some((layer) => layer.type === 'esql')) {
         return getSuggestionsForState(state);
       }
       return getDatasourceSuggestionsFromCurrentState(state, indexPatterns, filterFn);
@@ -1079,8 +1080,11 @@ export function getFormBasedDatasource({
       fieldName,
       indexPatterns
     ) => {
-      if (true || Object.values(state.layers).some((layer) => layer.type === 'esql'))
-        getSuggestionsForVisualizeField(state, indexPatternId, fieldName);
+      if (
+        state.initialContext ||
+        Object.values(state.layers).some((layer) => layer.type === 'esql')
+      )
+        return getSuggestionsForVisualizeField(state, indexPatternId, fieldName);
       return getDatasourceSuggestionsForVisualizeField(
         state,
         indexPatternId,
@@ -1089,7 +1093,7 @@ export function getFormBasedDatasource({
       );
     },
     getDatasourceSuggestionsForVisualizeCharts: (state, context, indexPatterns) => {
-      if (true || Object.values(state.layers).some((layer) => layer.type === 'esql'))
+      if (Object.values(state.layers).some((layer) => layer.type === 'esql'))
         return getSuggestionsForState(state);
       return getDatasourceSuggestionsForVisualizeCharts(state, context, indexPatterns);
     },
