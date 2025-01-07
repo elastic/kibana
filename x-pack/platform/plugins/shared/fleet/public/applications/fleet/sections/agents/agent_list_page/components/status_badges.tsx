@@ -26,11 +26,14 @@ export const AgentStatusBadges: React.FC<{
 }> = memo(({ agentStatus }) => {
   return (
     <EuiFlexGroup gutterSize="m">
-      {AGENT_STATUSES.map((status) => (
-        <EuiFlexItem key={status} grow={false}>
-          <AgentStatusBadge status={status} count={agentStatus[status] || 0} />
-        </EuiFlexItem>
-      ))}
+      {AGENT_STATUSES.map(
+        (status) =>
+          agentStatus[status] > 0 && (
+            <EuiFlexItem key={status} grow={false}>
+              <AgentStatusBadge status={status} count={agentStatus[status] || 0} />
+            </EuiFlexItem>
+          )
+      )}
     </EuiFlexGroup>
   );
 });

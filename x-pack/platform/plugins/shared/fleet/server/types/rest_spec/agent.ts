@@ -519,6 +519,8 @@ export const GetAgentStatusResponseSchema = schema.object({
     online: schema.number(),
     error: schema.number(),
     offline: schema.number(),
+    uninstalled: schema.number(),
+    orphaned: schema.number(),
     other: schema.number(),
     updating: schema.number(),
     inactive: schema.number(),

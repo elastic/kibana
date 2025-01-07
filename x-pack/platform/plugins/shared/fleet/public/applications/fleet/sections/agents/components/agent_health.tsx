@@ -89,7 +89,7 @@ function getStatusComponent({
         uninstallReason = convertAuditUnenrolledReason(uninstallReason);
         return (
           <EuiBadge
-            color={uninstallReason === 'Uninstalled' ? 'warning' : 'danger'}
+            color={uninstallReason === 'Uninstalled' ? 'default' : 'warning'}
             {...restOfProps}
           >
             <FormattedMessage

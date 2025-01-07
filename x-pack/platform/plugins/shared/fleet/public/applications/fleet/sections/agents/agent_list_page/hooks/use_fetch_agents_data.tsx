@@ -123,6 +123,7 @@ export function useFetchAgentsData() {
   const [selectedStatus, setSelectedStatus] = useState<string[]>([
     'healthy',
     'unhealthy',
+    'orphaned',
     'updating',
     'offline',
     ...(urlHasInactive ? ['inactive'] : []),
@@ -236,7 +237,6 @@ export function useFetchAgentsData() {
               perPage: MAX_AGENT_ACTIONS,
             }),
           ]);
-
           // Return if a newer request has been triggered
           if (currentRequestRef.current !== currentRequest) {
             return;
@@ -264,6 +264,7 @@ export function useFetchAgentsData() {
           }
 
           const statusSummary = agentsResponse.data.statusSummary;
+
           if (!statusSummary) {
             throw new Error('Invalid GET /agents response - no status summary');
           }
@@ -286,7 +287,7 @@ export function useFetchAgentsData() {
             }, {} as { [k: string]: AgentPolicy })
           );
 
-          setAgentsStatus(agentStatusesToSummary(statusSummary));
+          setAgentsStatus(agentStatusesToSummary(statusSummary, agentsResponse.data.items));
 
           const newAllTags = agentTagsResponse.data.items;
           // We only want to update the list of available tags if
@@ -297,7 +298,7 @@ export function useFetchAgentsData() {
             setAllTags(newAllTags);
           }
 
-          setAgentsOnCurrentPage(agentsResponse.data.items);
+          setAgentsOnCurrentPage(filterAgentsBySelectedStatus(agentsResponse.data.items));
           setNAgentsInTable(agentsResponse.data.total);
           setTotalInactiveAgents(totalInactiveAgentsResponse.data.results.inactive || 0);
 
@@ -351,6 +352,27 @@ export function useFetchAgentsData() {
           });
         }
         setIsLoading(false);
+      }
+      // Handles the logic of filtering to show uninstalled and orphaned agents. Since theyre not based on status like all the others, but audit_unenrolled_reason, if we get them using 'offline' status, we will get the wrong count and show all offline on the page.
+      function filterAgentsBySelectedStatus(items: Agent[]) {
+        // if offline is not selected, but uninstalled or orphaned is, we need to filter out the items that are 'normal' offline agents
+        if (
+          !selectedStatus.includes('offline') &&
+          (selectedStatus.includes('uninstalled') || selectedStatus.includes('orphaned'))
+        ) {
+          // this will filter keep non-offline agents as theyre not to be worried with, and then filter out the offline agents that are not uninstalled or orphaned (depending which one is selected)
+          return items.filter(
+            (agent) =>
+              agent.status !== 'offline' ||
+              (agent.status === 'offline' &&
+                selectedStatus.some((status: string) =>
+                  agent.audit_unenrolled_reason
+                    ? status.indexOf(agent.audit_unenrolled_reason) > -1
+                    : false
+                ))
+          );
+        }
+        return items;
       }
       fetchDataAsync();
     },
