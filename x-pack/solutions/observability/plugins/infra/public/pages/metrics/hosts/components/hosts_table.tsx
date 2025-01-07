@@ -17,10 +17,13 @@ import { useHostCountContext } from '../hooks/use_host_count';
 import { FlyoutWrapper } from './host_details_flyout/flyout_wrapper';
 import { DEFAULT_PAGE_SIZE, PAGE_SIZE_OPTIONS } from '../constants';
 import { FilterAction } from './table/filter_action';
+import { useUnifiedSearchContext } from '../hooks/use_unified_search';
 
 export const HostsTable = () => {
   const { loading } = useHostsViewContext();
   const { loading: hostCountLoading, count } = useHostCountContext();
+  const { searchCriteria } = useUnifiedSearchContext();
+
   const { onPageReady } = usePerformanceContext();
 
   const {
@@ -44,10 +47,12 @@ export const HostsTable = () => {
         customMetrics: {
           key1: 'hostsCount',
           value1: count,
+          key2: `hostsLimit`,
+          value2: searchCriteria.limit,
         },
       });
     }
-  }, [loading, hostCountLoading, onPageReady, count]);
+  }, [loading, hostCountLoading, onPageReady, count, searchCriteria]);
 
   return (
     <>
