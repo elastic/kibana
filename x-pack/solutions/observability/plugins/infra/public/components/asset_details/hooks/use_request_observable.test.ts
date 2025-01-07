@@ -9,12 +9,12 @@ import { act, waitFor, renderHook } from '@testing-library/react';
 import { useRequestObservable } from './use_request_observable';
 import { type RequestState, useLoadingStateContext } from './use_loading_state';
 import { useDatePickerContext, type UseDateRangeProviderProps } from './use_date_picker';
-import { useSearchSessionContext } from '../../../hooks/use_search_session';
+import { useReloadRequestTimeContext } from '../../../hooks/use_reload_request_time';
 import { BehaviorSubject } from 'rxjs';
 
 jest.mock('./use_loading_state');
 jest.mock('./use_date_picker');
-jest.mock('../../../hooks/use_search_session');
+jest.mock('../../../hooks/use_reload_request_time');
 
 const useLoadingStateContextMock = useLoadingStateContext as jest.MockedFunction<
   typeof useLoadingStateContext
@@ -23,8 +23,8 @@ const useDatePickerContextMock = useDatePickerContext as jest.MockedFunction<
   typeof useDatePickerContext
 >;
 
-const useSearchSessionMock = useSearchSessionContext as jest.MockedFunction<
-  typeof useSearchSessionContext
+const useReloadRequestTimeMock = useReloadRequestTimeContext as jest.MockedFunction<
+  typeof useReloadRequestTimeContext
 >;
 
 describe('useRequestObservable', () => {
@@ -38,10 +38,10 @@ describe('useRequestObservable', () => {
   // needed to spy on `next` function
   requestStateMock$.next = jest.fn();
 
-  const mockUseSearchSessionMock = () => {
-    useSearchSessionMock.mockReturnValue({
-      updateSearchSessionId: jest.fn(() => {}),
-      searchSessionId: '',
+  const mockUseRequestTimeMock = () => {
+    useReloadRequestTimeMock.mockReturnValue({
+      updateReloadRequestTime: jest.fn(() => {}),
+      reloadRequestTime: 0,
     });
   };
 
@@ -59,12 +59,14 @@ describe('useRequestObservable', () => {
   };
 
   beforeEach(() => {
+    jest.useFakeTimers();
     mockDatePickerContext();
-    mockUseSearchSessionMock();
+    mockUseRequestTimeMock();
     mockUseLoadingStateContextMock();
   });
 
   afterEach(() => {
+    jest.useRealTimers();
     jest.clearAllMocks();
   });
 
