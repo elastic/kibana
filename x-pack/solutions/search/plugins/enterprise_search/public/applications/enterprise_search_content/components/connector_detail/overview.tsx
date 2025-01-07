@@ -108,8 +108,7 @@ export const ConnectorDetailOverview: React.FC = () => {
               {i18n.translate(
                 'xpack.enterpriseSearch.content.connectors.overview.agentlessDeploymentNotReadyCallOut.description',
                 {
-                  defaultMessage:
-                    "We're setting up the agentless infrastructure to run the connector.",
+                  defaultMessage: 'Setting up the agentless infrastructure to run the connector.',
                 }
               )}
             </EuiText>

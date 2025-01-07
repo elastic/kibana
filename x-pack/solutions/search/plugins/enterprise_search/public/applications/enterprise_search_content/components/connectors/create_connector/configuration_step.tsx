@@ -93,7 +93,7 @@ export const ConfigurationStep: React.FC<ConfigurationStepProps> = ({ title, set
                 'xpack.enterpriseSearch.createConnector.configurationStep.agentlessDeploymentNotReadyCallOut.description',
                 {
                   defaultMessage:
-                    "We're setting up the agentless infrastructure to run the connector. This process may take up to one minute.",
+                    'Setting up the agentless infrastructure to run the connector. This process may take up to one minute.',
                 }
               )}
             </EuiText>
