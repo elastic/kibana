@@ -15,8 +15,8 @@ import {
   indexLifeCyclePhaseToDataTier,
 } from '../../../common/storage_explorer_types';
 import { environmentQuery } from '../../../common/utils/environment_query';
-import { RandomSampler } from '../../lib/helpers/get_random_sampler';
-import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
+import type { RandomSampler } from '../../lib/helpers/get_random_sampler';
+import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 
 export async function getTotalTransactionsPerService({
   apmEventClient,

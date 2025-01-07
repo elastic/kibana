@@ -7,7 +7,7 @@
 import React, { useMemo } from 'react';
 import type { TimeRange } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
+import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 import { HostMetrics } from './host_metrics';
 import { ContainerMetrics } from './container_metrics';
 import { Section } from '../../../components/section';

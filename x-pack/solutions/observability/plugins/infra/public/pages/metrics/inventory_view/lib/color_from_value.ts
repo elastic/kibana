@@ -7,15 +7,17 @@
 
 import { isEqual, first, gt, gte, last, lt, lte, sortBy } from 'lodash';
 import { mix, parseToRgb, toColorString } from 'polished';
-import {
+import type {
   InfraWaffleMapBounds,
   InfraWaffleMapLegend,
+  InfraWaffleMapStepRule,
+  InfraWaffleMapGradientRule,
+} from '../../../../common/inventory/types';
+import {
   InfraWaffleMapRuleOperator,
   GradientLegendRT,
   SteppedGradientLegendRT,
   StepLegendRT,
-  InfraWaffleMapStepRule,
-  InfraWaffleMapGradientRule,
 } from '../../../../common/inventory/types';
 
 const OPERATOR_TO_FN = {
