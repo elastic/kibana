@@ -39,7 +39,7 @@ export const APM_FEATURE: KibanaFeatureConfig = {
     insightsAndAlerting: ['triggersActions'],
   },
   alerting: alertingFeatures,
-  // see x-pack/plugins/features/common/feature_kibana_privileges.ts
+  // see x-pack/platform/plugins/shared/features/common/feature_kibana_privileges.ts
   privileges: {
     all: {
       app: [APM_SERVER_FEATURE_ID, 'ux', 'kibana'],

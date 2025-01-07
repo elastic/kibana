@@ -166,13 +166,7 @@
             ", undefined>; \"GET /api/streams/_status\": { endpoint: \"GET /api/streams/_status\"; handler: ServerRouteHandler<",
             "StreamsRouteHandlerResources",
             ", undefined, { enabled: boolean; }>; security?: ",
-            {
-              "pluginId": "@kbn/core-http-server",
-              "scope": "server",
-              "docId": "kibKbnCoreHttpServerPluginApi",
-              "section": "def-server.RouteSecurity",
-              "text": "RouteSecurity"
-            },
+            "RouteSecurity",
             " | undefined; }; \"GET /api/streams\": ",
             {
               "pluginId": "@kbn/server-route-repository-utils",
@@ -835,13 +829,7 @@
           ", undefined>; \"GET /api/streams/_status\": { endpoint: \"GET /api/streams/_status\"; handler: ServerRouteHandler<",
           "StreamsRouteHandlerResources",
           ", undefined, { enabled: boolean; }>; security?: ",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "server",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.RouteSecurity",
-            "text": "RouteSecurity"
-          },
+          "RouteSecurity",
           " | undefined; }; \"GET /api/streams\": ",
           {
             "pluginId": "@kbn/server-route-repository-utils",
