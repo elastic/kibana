@@ -61,7 +61,7 @@ export const crawlersBreadcrumbs = [
 
 export interface ConnectorsProps {
   isCrawler: boolean;
-  isCrawlerSelfManaged: boolean;
+  isCrawlerSelfManaged?: boolean;
 }
 export const Connectors: React.FC<ConnectorsProps> = ({ isCrawler, isCrawlerSelfManaged }) => {
   const { fetchConnectors, onPaginate, setIsFirstRequest, openDeleteModal } =
