@@ -37,7 +37,7 @@ import { ConfigurationFormItems } from './configuration/configuration_form_items
 import { AdditionalOptionsFields } from './additional_options_fields';
 import { ProviderSecretHiddenField } from './hidden_fields/provider_secret_hidden_field';
 import { ProviderConfigHiddenField } from './hidden_fields/provider_config_hidden_field';
-import { useProviders } from './hooks/use_providers';
+import { useProviders } from '../hooks/use_providers';
 
 interface InferenceServicesProps {
   http: HttpSetup;
@@ -317,7 +317,7 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
     setRequiredProviderFormFields(existingConfiguration.filter((p) => p.required || p.sensitive));
   }, [config?.providerConfig, providerSchema, secrets]);
 
-  return (
+  return !isLoading ? (
     <>
       <UseField
         path="config.provider"
@@ -398,5 +398,5 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
         </>
       ) : null}
     </>
-  );
+  ) : null;
 };

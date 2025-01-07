@@ -9,8 +9,8 @@ import type { HttpSetup } from '@kbn/core-http-browser';
 import { useQuery } from '@tanstack/react-query';
 import { KibanaServerError } from '@kbn/kibana-utils-plugin/common';
 import { IToasts } from '@kbn/core/public';
-import { FieldType, InferenceProvider } from '../../..';
-import * as i18n from '../../translations';
+import { FieldType, InferenceProvider } from '../..';
+import * as i18n from '../translations';
 
 const getProviders = (http: HttpSetup): InferenceProvider[] => {
   return [

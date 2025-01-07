@@ -129,7 +129,7 @@ export const RE_ENTER_SECRETS = (label: string) => {
 };
 
 export const GET_PROVIDERS_FAILED = i18n.translate(
-  'xpack.searchInferenceEndpoints.addEndpoint.unableToFindProvidersQueryMessage',
+  'xpack.inferenceEndpointUICommon.hooks.unableToFindProvidersQueryMessage',
   {
     defaultMessage: 'Unable to find providers',
   }
