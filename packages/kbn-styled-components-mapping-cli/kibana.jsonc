@@ -1,0 +1,6 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/styled-components-mapping-cli",
+  "owner": ["@elastic/kibana-operations", "@elastic/eui-team"],
+  "devOnly": true
+}

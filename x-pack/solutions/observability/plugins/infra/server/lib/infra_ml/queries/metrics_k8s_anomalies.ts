@@ -6,7 +6,7 @@
  */
 
 import * as rt from 'io-ts';
-import { ML_ANOMALY_THRESHOLD } from '@kbn/ml-anomaly-utils/anomaly_threshold';
+import type { ML_ANOMALY_THRESHOLD } from '@kbn/ml-anomaly-utils/anomaly_threshold';
 import { TIEBREAKER_FIELD } from '../../../../common/constants';
 import { commonSearchSuccessResponseFieldsRT } from '../../../utils/elasticsearch_runtime_types';
 import {
@@ -18,8 +18,8 @@ import {
   createInfluencerFilter,
   createJobIdsQuery,
 } from './common';
-import { InfluencerFilter } from '../common';
-import { Sort, Pagination } from '../../../../common/http_api/infra_ml';
+import type { InfluencerFilter } from '../common';
+import type { Sort, Pagination } from '../../../../common/http_api/infra_ml';
 
 const sortToMlFieldMap = {
   dataset: 'partition_field_value',

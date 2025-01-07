@@ -5,15 +5,18 @@
  * 2.0.
  */
 
-import React, { memo, useEffect, useState } from 'react';
-import type { Criteria, EuiBasicTableColumn, EuiThemeComputed } from '@elastic/eui';
+import React, { memo, useCallback, useEffect, useState } from 'react';
+import type { Criteria, EuiBasicTableColumn, EuiTableSortingType, EuiThemeComputed } from '@elastic/eui';
 import { EuiSpacer, EuiPanel, EuiText, EuiBasicTable, EuiIcon, useEuiTheme } from '@elastic/eui';
-import { useMisconfigurationFindings } from '@kbn/cloud-security-posture/src/hooks/use_misconfiguration_findings';
+import type { MisconfigurationFindingDetailFields } from '@kbn/cloud-security-posture/src/hooks/use_misconfiguration_findings';
+import {
+  useMisconfigurationFindings,
+  MISCONFIGURATION,
+} from '@kbn/cloud-security-posture/src/hooks/use_misconfiguration_findings';
 import { i18n } from '@kbn/i18n';
+import type { CspFindingResult } from '@kbn/cloud-security-posture-common';
 import {
   MISCONFIGURATION_STATUS,
-  type CspFinding,
-  type CspFindingResult,
   buildMisconfigurationEntityFlyoutPreviewQuery,
 } from '@kbn/cloud-security-posture-common';
 import { DistributionBar } from '@kbn/security-solution-distribution-bar';
@@ -31,7 +34,11 @@ import { SecurityPageName } from '@kbn/deeplinks-security';
 import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/use_has_misconfigurations';
 import { SecuritySolutionLinkAnchor } from '../../../common/components/links';
 
-type MisconfigurationFindingDetailFields = Pick<CspFinding, 'result' | 'rule' | 'resource'>;
+type MisconfigurationSortFieldType =
+  | MISCONFIGURATION.RESULT_EVALUATION
+  | MISCONFIGURATION.RULE_NAME
+  | 'resource'
+  | 'rule';
 
 const getFindingsStats = (
   passedFindingsStats: number,
@@ -97,9 +104,17 @@ export const MisconfigurationFindingsDetailsTable = memo(
 
     const [currentFilter, setCurrentFilter] = useState<string>('');
 
+    const [sortField, setSortField] = useState<MisconfigurationSortFieldType>(
+      MISCONFIGURATION.RESULT_EVALUATION
+    );
+    const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
+
+    const sortFieldDirection: { [key: string]: string } = {};
+    sortFieldDirection[sortField] = sortDirection;
+
     const { data } = useMisconfigurationFindings({
       query: buildMisconfigurationEntityFlyoutPreviewQuery(field, value, currentFilter),
-      sort: [],
+      sort: [sortFieldDirection],
       enabled: true,
       pageSize: 1,
     });
@@ -108,6 +123,13 @@ export const MisconfigurationFindingsDetailsTable = memo(
 
     const [pageIndex, setPageIndex] = useState(0);
     const [pageSize, setPageSize] = useState(10);
+
+    const sorting: EuiTableSortingType<MisconfigurationFindingDetailFields> = {
+      sort: {
+        field: sortField,
+        direction: sortDirection,
+      },
+    };
 
     const findingsPagination = (findings: MisconfigurationFindingDetailFields[]) => {
       let pageOfItems;
@@ -136,14 +158,21 @@ export const MisconfigurationFindingsDetailsTable = memo(
       totalItemCount,
       pageSizeOptions: [10, 25, 100],
     };
-
-    const onTableChange = ({ page }: Criteria<MisconfigurationFindingDetailFields>) => {
-      if (page) {
-        const { index, size } = page;
-        setPageIndex(index);
-        setPageSize(size);
-      }
-    };
+    const onTableChange = useCallback(
+      ({ page, sort }: Criteria<MisconfigurationFindingDetailFields>) => {
+        if (page) {
+          const { index, size } = page;
+          setPageIndex(index);
+          setPageSize(size);
+        }
+        if (sort) {
+          const { field: fieldSort, direction } = sort;
+          setSortField(fieldSort);
+          setSortDirection(direction);
+        }
+      },
+      []
+    );
 
     const getNavUrlParams = useGetNavigationUrlParams();
 
@@ -192,8 +221,10 @@ export const MisconfigurationFindingsDetailsTable = memo(
         ),
       },
       {
-        field: 'result',
-        render: (result: CspFindingResult) => <CspEvaluationBadge type={result?.evaluation} />,
+        field: MISCONFIGURATION.RESULT_EVALUATION,
+        render: (result: CspFindingResult['evaluation'] | undefined) => (
+          <CspEvaluationBadge type={result} />
+        ),
         name: i18n.translate(
           'xpack.securitySolution.flyout.left.insights.misconfigurations.table.resultColumnName',
           {
@@ -201,10 +232,13 @@ export const MisconfigurationFindingsDetailsTable = memo(
           }
         ),
         width: `${resultWidth}px`,
+        sortable: true,
       },
       {
-        field: 'rule',
-        render: (rule: CspBenchmarkRuleMetadata) => <EuiText size="s">{rule?.name}</EuiText>,
+        field: MISCONFIGURATION.RULE_NAME,
+        render: (ruleName: CspBenchmarkRuleMetadata['name']) => (
+          <EuiText size="s">{ruleName}</EuiText>
+        ),
         name: i18n.translate(
           'xpack.securitySolution.flyout.left.insights.misconfigurations.table.ruleColumnName',
           {
@@ -212,6 +246,7 @@ export const MisconfigurationFindingsDetailsTable = memo(
           }
         ),
         width: `calc(100% - ${linkWidth + resultWidth}px)`,
+        sortable: true,
       },
     ];
 
@@ -248,6 +283,7 @@ export const MisconfigurationFindingsDetailsTable = memo(
             pagination={pagination}
             onChange={onTableChange}
             data-test-subj={'securitySolutionFlyoutMisconfigurationFindingsTable'}
+            sorting={sorting}
           />
         </EuiPanel>
       </>
