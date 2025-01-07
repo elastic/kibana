@@ -73,24 +73,24 @@ const minimumWidthButtonGroup = [
 export function ControlType({
   isDisabled,
   initialControlFlyoutType,
-  setControlFlyoutType,
+  onFlyoutTypeChange,
 }: {
   isDisabled: boolean;
   initialControlFlyoutType: EsqlControlType;
-  setControlFlyoutType?: (flyoutType: EsqlControlType) => void;
+  onFlyoutTypeChange?: (flyoutType: EsqlControlType) => void;
 }) {
   const controlFlyoutType = controlTypeOptions.find(
     (option) => option.key === initialControlFlyoutType
   )!;
 
-  const onFlyoutTypeChange = useCallback(
+  const onTypeChange = useCallback(
     (selectedOptions: EuiComboBoxOptionOption[]) => {
       const flyoutType = controlTypeOptions.find(
         (option) => option.key === selectedOptions[0].key
       )!;
-      setControlFlyoutType?.(flyoutType.key);
+      onFlyoutTypeChange?.(flyoutType.key);
     },
-    [setControlFlyoutType]
+    [onFlyoutTypeChange]
   );
 
   return (
@@ -110,7 +110,7 @@ export function ControlType({
         singleSelection={{ asPlainText: true }}
         options={controlTypeOptions}
         selectedOptions={[controlFlyoutType]}
-        onChange={onFlyoutTypeChange}
+        onChange={onTypeChange}
         fullWidth
         isDisabled={isDisabled}
         compressed

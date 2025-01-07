@@ -78,7 +78,6 @@ describe('ValueControlForm', () => {
         />
       );
       // control type dropdown should be rendered and default to 'STATIC_VALUES'
-      // no need to test further as the control type is disabled
       expect(await findByTestId('esqlControlTypeDropdown')).toBeInTheDocument();
       const controlTypeInputPopover = await findByTestId('esqlControlTypeInputPopover');
       expect(within(controlTypeInputPopover).getByRole('combobox')).toHaveValue(`Static Values`);
