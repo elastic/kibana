@@ -18,7 +18,7 @@ export default function subFeatureDescriptionsTest({ getService }: FtrProviderCo
     it('should have each connector in a sub feature description', async () => {
       const { body: features } = await supertest.get('/api/features').expect(200);
       expect(Array.isArray(features)).to.be(true);
-      const actionsFeature = features.find((o) => o.id === 'actions');
+      const actionsFeature = features.find((o: any) => o.id === 'actions');
       expect(!!actionsFeature).to.be(true);
 
       const connectorTitles = [];
@@ -40,7 +40,7 @@ export default function subFeatureDescriptionsTest({ getService }: FtrProviderCo
         }
       }
       for (const connectorTitle of connectorTitles) {
-        if (!connectorTypes.find((o) => o.name === connectorTitle)) {
+        if (!connectorTypes.find((o: any) => o.name === connectorTitle)) {
           throw new Error(
             `Connector type "${connectorTitle}" is included in the "Actions & Connectors" sub-feature descriptions but not registered as a connector type. Please update the sub-feature descriptions in "x-pack/plugins/actions/server/feature.ts" to remove "${connectorTitle}" to make this test pass.`
           );
