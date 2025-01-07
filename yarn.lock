@@ -7953,7 +7953,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/vis-type-tagcloud-plugin@link:src/plugins/vis_types/tagcloud":
+"@kbn/vis-type-tagcloud-plugin@link:src/platform/plugins/private/vis_types/tagcloud":
   version "0.0.0"
   uid ""
 

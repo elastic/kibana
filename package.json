@@ -1016,7 +1016,7 @@
     "@kbn/vis-type-metric-plugin": "link:src/platform/plugins/private/vis_types/metric",
     "@kbn/vis-type-pie-plugin": "link:src/platform/plugins/private/vis_types/pie",
     "@kbn/vis-type-table-plugin": "link:src/platform/plugins/private/vis_types/table",
-    "@kbn/vis-type-tagcloud-plugin": "link:src/plugins/vis_types/tagcloud",
+    "@kbn/vis-type-tagcloud-plugin": "link:src/platform/plugins/private/vis_types/tagcloud",
     "@kbn/vis-type-timelion-plugin": "link:src/plugins/vis_types/timelion",
     "@kbn/vis-type-timeseries-plugin": "link:src/plugins/vis_types/timeseries",
     "@kbn/vis-type-vega-plugin": "link:src/plugins/vis_types/vega",
