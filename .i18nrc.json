@@ -43,7 +43,7 @@
     "expressionHeatmap": "src/platform/plugins/shared/chart_expressions/expression_heatmap",
     "expressionImage": "src/platform/plugins/shared/expression_image",
     "expressionMetric": "src/platform/plugins/shared/expression_metric",
-    "expressionMetricVis": "src/plugins/chart_expressions/expression_metric",
+    "expressionMetricVis": "src/platform/plugins/shared/chart_expressions/expression_metric",
     "expressionLegacyMetricVis": "src/platform/plugins/shared/chart_expressions/expression_legacy_metric",
     "expressionPartitionVis": "src/plugins/chart_expressions/expression_partition_vis",
     "expressionXY": "src/plugins/chart_expressions/expression_xy",
