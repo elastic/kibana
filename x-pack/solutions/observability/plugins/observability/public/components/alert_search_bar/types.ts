@@ -6,7 +6,7 @@
  */
 
 import { ReactElement } from 'react';
-import { FilterControlConfig as ControlConfig } from '@kbn/alerts-ui-shared';
+import { type FilterControlConfig } from '@kbn/alerts-ui-shared';
 import type { HttpStart } from '@kbn/core-http-browser';
 import { type NotificationsStart, ToastsStart } from '@kbn/core-notifications-browser';
 import {
@@ -58,20 +58,21 @@ export interface ObservabilityAlertSearchBarProps
   extends AlertSearchBarContainerState,
     AlertSearchBarStateTransitions,
     CommonAlertSearchBarProps {
-  showFilterBar?: boolean;
-  savedQuery?: SavedQuery;
   services: Services;
+  filterControls: Filter[];
+  onFilterControlsChange: (controlConfigs: Filter[]) => void;
+  savedQuery?: SavedQuery;
+  showFilterBar?: boolean;
 }
 
 export interface AlertSearchBarContainerState {
   rangeFrom: string;
   rangeTo: string;
   kuery: string;
-  status: AlertStatus;
+  status?: AlertStatus;
   filters?: Filter[];
   savedQueryId?: string;
-  controlFilters?: Filter[];
-  controlConfigs?: ControlConfig[];
+  controlConfigs?: FilterControlConfig[];
 }
 
 interface AlertSearchBarStateTransitions {
@@ -81,8 +82,7 @@ interface AlertSearchBarStateTransitions {
   onStatusChange: (status: AlertStatus) => void;
   onFiltersChange?: (filters: Filter[]) => void;
   setSavedQuery?: (savedQueryId?: SavedQuery) => void;
-  onControlFiltersChange: (controlFilters: Filter[]) => void;
-  onControlConfigsChange: (controlConfigs: ControlConfig[]) => void;
+  onControlConfigsChange?: (controlConfigs: FilterControlConfig[]) => void;
 }
 
 interface CommonAlertSearchBarProps {

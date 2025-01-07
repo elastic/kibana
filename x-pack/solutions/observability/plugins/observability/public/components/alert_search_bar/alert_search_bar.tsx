@@ -36,13 +36,13 @@ export function ObservabilityAlertSearchBar({
   onKueryChange,
   onRangeFromChange,
   onRangeToChange,
-  onControlFiltersChange,
-  // onStatusChange,
+  onControlConfigsChange,
   onFiltersChange,
+  onFilterControlsChange,
   showFilterBar = false,
-  controlFilters = [],
   controlConfigs,
   filters = defaultFilters,
+  filterControls = defaultFilters,
   savedQuery,
   setSavedQuery,
   kuery,
@@ -58,8 +58,7 @@ export function ObservabilityAlertSearchBar({
     useToasts,
     uiSettings,
   },
-}: // status,
-ObservabilityAlertSearchBarProps) {
+}: ObservabilityAlertSearchBarProps) {
   const toasts = useToasts();
   const [spaceId, setSpaceId] = useState<string>();
 
@@ -67,42 +66,6 @@ ObservabilityAlertSearchBarProps) {
     () => (setSavedQuery ? setSavedQuery(undefined) : null),
     [setSavedQuery]
   );
-  // const onAlertStatusChange = useCallback(
-  //   (alertStatus: AlertStatus) => {
-  //     try {
-  //       onEsQueryChange(
-  //         buildEsQuery({
-  //           timeRange: {
-  //             to: rangeTo,
-  //             from: rangeFrom,
-  //           },
-  //           kuery,
-  //           queries: [...getAlertStatusQuery(alertStatus), ...defaultSearchQueries],
-  //           config: getEsQueryConfig(uiSettings),
-  //         })
-  //       );
-  //     } catch (error) {
-  //       toasts.addError(error, {
-  //         title: toastTitle,
-  //       });
-  //       onKueryChange(DEFAULT_QUERY_STRING);
-  //     }
-  //   },
-  //   [
-  //     onEsQueryChange,
-  //     rangeTo,
-  //     rangeFrom,
-  //     kuery,
-  //     defaultSearchQueries,
-  //     uiSettings,
-  //     toasts,
-  //     onKueryChange,
-  //   ]
-  // );
-
-  // useEffect(() => {
-  //   onAlertStatusChange(status);
-  // }, [onAlertStatusChange, status]);
 
   const filterControlsStorageKey = useMemo(
     () => ['observabilitySearchBar', spaceId, appName, 'filterControls'].filter(Boolean).join('.'),
@@ -119,7 +82,7 @@ ObservabilityAlertSearchBarProps) {
           },
           kuery,
           queries: defaultSearchQueries,
-          filters: [...filters, ...controlFilters],
+          filters: [...filters, ...filterControls],
           config: getEsQueryConfig(uiSettings),
         })
       );
@@ -136,7 +99,7 @@ ObservabilityAlertSearchBarProps) {
     kuery,
     defaultSearchQueries,
     filters,
-    controlFilters,
+    filterControls,
     uiSettings,
     toasts,
     onKueryChange,
@@ -209,8 +172,9 @@ ObservabilityAlertSearchBarProps) {
           spaceId={spaceId}
           chainingSystem="HIERARCHICAL"
           controlsUrlState={controlConfigs}
-          filters={controlFilters}
-          onFiltersChange={onControlFiltersChange}
+          setControlsUrlState={onControlConfigsChange}
+          filters={filters}
+          onFiltersChange={onFilterControlsChange}
           storageKey={filterControlsStorageKey}
           services={{
             http,
