@@ -686,7 +686,7 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
       input,
       isAgentlessEnabled,
       handleSetupTechnologyChange,
-      isEditPage,
+      // isEditPage,
     });
 
     const shouldRenderAgentlessSelector =

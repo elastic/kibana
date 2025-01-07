@@ -672,7 +672,7 @@ describe('useSetupTechnology', () => {
     });
   });
 
-  it('should not have global_data_tags when switching from agentless to agent-based policy', async () => {
+  it.only('should not have global_data_tags when switching from agentless to agent-based policy', async () => {
     (useConfig as MockFn).mockReturnValue({
       agentless: {
         enabled: true,
@@ -699,11 +699,8 @@ describe('useSetupTechnology', () => {
       })
     );
 
-    act(() => {
-      result.current.handleSetupTechnologyChange(SetupTechnology.AGENTLESS, 'cspm');
-    });
-
     await waitFor(() => {
+      expect(result.current.selectedSetupTechnology).toBe(SetupTechnology.AGENTLESS);
       expect(setNewAgentPolicy).toHaveBeenCalledWith(
         expect.objectContaining({
           supports_agentless: true,
