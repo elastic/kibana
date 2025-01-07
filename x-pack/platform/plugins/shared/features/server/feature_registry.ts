@@ -341,6 +341,7 @@ function applyAutomaticAllPrivilegeGrants(
         'config-global',
         'url',
         'tag',
+        'cloud',
       ]);
     }
   });

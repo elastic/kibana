@@ -64,7 +64,8 @@ export const persistTokenCloudData = async (
         CLOUD_DATA_SAVED_OBJECT_ID,
         {
           onboardingData: {
-            ...cloudDataSo?.attributes.onboardingData,
+            solutionType:
+              (solutionType as SolutionType) ?? cloudDataSo?.attributes.onboardingData.solutionType,
             token: onboardingToken,
           },
         }

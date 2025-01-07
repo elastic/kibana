@@ -242,9 +242,9 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
           core
             .getStartServices()
             .then(async ([coreStart]) => {
-              const soClient = coreStart.savedObjects.createInternalRepository([
-                CLOUD_DATA_SAVED_OBJECT_TYPE,
-              ]);
+              const soClient = coreStart.savedObjects.getScopedClient(request, {
+                includedHiddenTypes: [CLOUD_DATA_SAVED_OBJECT_TYPE],
+              });
 
               await persistTokenCloudData(soClient, {
                 logger: this.logger,
