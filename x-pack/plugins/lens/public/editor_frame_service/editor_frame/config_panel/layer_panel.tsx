@@ -94,8 +94,6 @@ export function LayerPanel(props: LayerPanelProps) {
     setCurrentAttributes,
   } = props;
 
-  const startDependencies = useMemo(() => ({ data, dataViews: data.dataViews }), [data]);
-
   const isInlineEditing = Boolean(props?.setIsInlineFlyoutVisible);
 
   const isSaveable = useLensSelector((state) => state.lens.isSaveable);
@@ -388,9 +386,10 @@ export function LayerPanel(props: LayerPanelProps) {
   const [isVisualizationLoading, setIsVisualizationLoading] = useState(false);
   const [dataGridAttrs, setDataGridAttrs] = useState<ESQLDataGridAttrs | undefined>(undefined);
 
-  const adHocDataViews = attributes
-    ? Object.values(attributes.state.adHocDataViews!)
-    : Object.values(framePublicAPI.dataViews.indexPatterns).map((index) => index.spec);
+  const adHocDataViews =
+    attributes && attributes.state.adHocDataViews
+      ? Object.values(attributes.state.adHocDataViews)
+      : Object.values(framePublicAPI.dataViews.indexPatterns).map((index) => index.spec);
   const hideTimeFilterInfo = false;
 
   const datasourceState = layerDatasourceState;
@@ -436,7 +435,7 @@ export function LayerPanel(props: LayerPanelProps) {
         const { dataView, columns, rows } = await getGridAttrs(
           query,
           adHocDataViews,
-          startDependencies,
+          data,
           abortController
         );
 
@@ -448,13 +447,13 @@ export function LayerPanel(props: LayerPanelProps) {
       }
     };
     getESQLGridAttrs();
-  }, [adHocDataViews, dataGridAttrs, query, startDependencies]);
+  }, [adHocDataViews, dataGridAttrs, query, data]);
 
   const runQuery = useCallback(
     async (q: AggregateQuery, abortController?: AbortController) => {
       const attrs = await getSuggestions(
         q,
-        startDependencies,
+        data,
         datasourceMap,
         visualizationMap,
         adHocDataViews,
@@ -470,30 +469,8 @@ export function LayerPanel(props: LayerPanelProps) {
       prevQuery.current = q;
       setIsVisualizationLoading(false);
     },
-    [
-      startDependencies,
-      datasourceMap,
-      visualizationMap,
-      adHocDataViews,
-      setCurrentAttributes,
-      updateSuggestion,
-    ]
+    [data, datasourceMap, visualizationMap, adHocDataViews, setCurrentAttributes, updateSuggestion]
   );
-
-  // const runQuery = useCallback(
-  //   async (q: AggregateQuery, abortController?: AbortController) => {
-  //     updateDatasource(datasourceId, {
-  //       ...layerDatasourceState,
-  //       layers: {
-  //         ...layerDatasourceState.layers,
-  //         [layerId]: { ...layerDatasourceState.layers[layerId], query: q },
-  //       },
-  //     });
-  //     prevQuery.current = q;
-  //     setIsVisualizationLoading(false);
-  //   },
-  //   [datasourceMap, visualizationMap, adHocDataViews]
-  // );
 
   return (
     <>

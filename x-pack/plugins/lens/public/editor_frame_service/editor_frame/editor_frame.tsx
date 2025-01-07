@@ -35,7 +35,6 @@ import {
   selectActiveDatasourceId,
   selectDatasourceStates,
   selectVisualization,
-  selectAdHocDataViews,
 } from '../../state_management';
 import type { LensInspector } from '../../lens_inspector_service';
 import { ErrorBoundary, showMemoizedErrorNotification } from '../../lens_ui_errors';
@@ -61,7 +60,6 @@ export function EditorFrame(props: EditorFrameProps) {
   const activeDatasourceId = useLensSelector(selectActiveDatasourceId);
   const datasourceStates = useLensSelector(selectDatasourceStates);
   const visualization = useLensSelector(selectVisualization);
-  const adHocDataViews = useLensSelector(selectAdHocDataViews);
   const areDatasourcesLoaded = useLensSelector(selectAreDatasourcesLoaded);
   const isVisualizationLoaded = !!visualization.state;
   const visualizationTypeIsKnown = Boolean(
@@ -161,18 +159,6 @@ export function EditorFrame(props: EditorFrameProps) {
                 uiActions={props.plugins.uiActions}
                 dataViews={props.plugins.dataViews}
                 data={props.plugins.data}
-                attributes={{
-                  title: 'Untitled',
-                  references: [],
-                  visualizationType: 'lnsXY',
-                  state: {
-                    query: framePublicAPI.query,
-                    filters: framePublicAPI.filters,
-                    adHocDataViews,
-                    datasourceStates,
-                    visualization,
-                  },
-                }}
                 indexPatternService={props.indexPatternService}
                 getUserMessages={props.getUserMessages}
               />
