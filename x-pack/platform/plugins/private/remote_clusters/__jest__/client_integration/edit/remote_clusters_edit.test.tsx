@@ -8,7 +8,7 @@
 import { act } from 'react-dom/test-utils';
 import { TestBed } from '@kbn/test-jest-helpers';
 
-import { RemoteClusterForm } from '../../../public/application/sections/components/remote_cluster_form';
+import { RemoteClusterForm } from '../../../public/application/sections/components/remote_cluster_config_steps/remote_cluster_form';
 import { RemoteClustersActions, setupEnvironment } from '../helpers';
 import { setup as setupRemoteClustersAdd } from '../add/remote_clusters_add.helpers';
 import {

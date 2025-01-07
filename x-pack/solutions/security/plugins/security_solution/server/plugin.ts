@@ -224,6 +224,7 @@ export class Plugin implements ISecuritySolutionPlugin {
         taskManager: plugins.taskManager,
         telemetry: core.analytics,
         entityAnalyticsConfig: config.entityAnalytics,
+        experimentalFeatures,
       });
     }
 
@@ -232,6 +233,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       taskManager: plugins.taskManager,
       logger: this.logger,
       auditLogger: plugins.security?.audit.withoutRequest,
+      kibanaVersion: pluginContext.env.packageInfo.version,
     }).catch((err) => {
       logger.error(`Error scheduling entity analytics migration: ${err}`);
     });

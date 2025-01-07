@@ -7,8 +7,8 @@
 
 import { omit } from 'lodash';
 import { filterByAgent, settingDefinitions } from '.';
-import { AgentName } from '../../../typings/es_schemas/ui/fields/agent';
-import { SettingDefinition } from './types';
+import type { AgentName } from '../../../typings/es_schemas/ui/fields/agent';
+import type { SettingDefinition } from './types';
 
 describe('filterByAgent', () => {
   describe('when `excludeAgents` is dotnet and nodejs', () => {

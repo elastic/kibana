@@ -5,7 +5,7 @@
  * 2.0.
  */
 import 'cypress-real-events/support';
-import { Interception } from 'cypress/types/net-stubbing';
+import type { Interception } from 'cypress/types/net-stubbing';
 import 'cypress-axe';
 import moment from 'moment';
 import '@frsource/cypress-plugin-visual-regression-diff';
