@@ -115,7 +115,7 @@ const getPluginDependencies = () => {
       return (
         <CustomCitation
           citationLable={props.citationLable}
-          citationNumber={props.citationIndex}
+          citationNumber={props.citationNumber}
           citationUrl={props.citationLink}
         />
       );

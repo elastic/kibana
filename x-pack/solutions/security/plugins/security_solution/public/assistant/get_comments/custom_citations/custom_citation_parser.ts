@@ -9,23 +9,23 @@ import type { RemarkTokenizer } from '@elastic/eui';
 import type { Plugin } from 'unified';
 import type { Node } from 'unist';
 
-export interface CustomCitationNodeDetails extends Node {
+export interface CustomCitationNode extends Node {
   type: 'customCitation';
   citationLink: string;
   citationLable: string;
-  citationIndex?: number;
+  citationNumber?: number;
 }
 
 const START_SIGNAL = '!{citation';
 
 /**
- * Parses `!{citation[citationLabel](citationLink)` into customCitation node
+ * Parses `!{citation[citationLabel](citationLink)` into CustomCitationNode
  */
 export const CustomCitationParser: Plugin = function CustomCitationParser() {
   const Parser = this.Parser;
   const tokenizers = Parser.prototype.inlineTokenizers;
   const methods = Parser.prototype.inlineMethods;
-  let citationIndex = 1;
+  let citationNumber = 1;
   const tokenizeCustomCitation: RemarkTokenizer = function tokenizeCustomCitation(
     eat,
     value,
@@ -96,8 +96,8 @@ export const CustomCitationParser: Plugin = function CustomCitationParser() {
       type: 'customCitation',
       citationLink,
       citationLable: citationLabel,
-      citationIndex: citationIndex++,
-    } as CustomCitationNodeDetails);
+      citationNumber: citationNumber++,
+    } as CustomCitationNode);
   };
 
   tokenizeCustomCitation.notInLink = true;

@@ -35,7 +35,7 @@ describe('CustomCitationParser', () => {
         value: 'Hello world ',
       },
       {
-        citationIndex: 1,
+        citationNumber: 1,
         citationLable: 'foo',
         citationLink: 'bar',
         position: {
@@ -99,7 +99,7 @@ describe('CustomCitationParser', () => {
         value: 'Hello world ',
       },
       {
-        citationIndex: 1,
+        citationNumber: 1,
         citationLable: 'foo',
         citationLink: 'bar',
         position: {
@@ -135,7 +135,7 @@ describe('CustomCitationParser', () => {
         value: ' hello world ',
       },
       {
-        citationIndex: 2,
+        citationNumber: 2,
         citationLable: 'secondFoo',
         citationLink: 'secondBar',
         position: {
@@ -180,7 +180,7 @@ describe('CustomCitationParser', () => {
         value: 'Hello world ',
       },
       {
-        citationIndex: 1,
+        citationNumber: 1,
         citationLable: 'foo',
         citationLink: 'bar',
         position: {
