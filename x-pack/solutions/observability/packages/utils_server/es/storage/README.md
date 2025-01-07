@@ -41,3 +41,36 @@ Currently, we only have the StorageIndexAdapter which writes to plain indices. I
 - Data/Index Lifecycle Management
 - Migration scripts
 - Runtime mappings for older versions
+
+## Usage
+
+### Storage index adapter
+
+To use the storage index adapter, instantiate it with an authenticated Elasticsearch client:
+
+```ts
+  const storageSettings = {
+    name: '.kibana_streams_assets',
+    schema: {
+      properties: {
+        [ASSET_ASSET_ID]: types.keyword({ required: true }),
+        [ASSET_TYPE]: types.enum(Object.values(ASSET_TYPES), { required: true }),
+      },
+    },
+  } satisfies IndexStorageSettings;
+
+  // create and configure the adapter
+  const adapter = new StorageIndexAdapter(
+    esClient: coreStart.elasticsearch.client.asInternalUser,
+    this.logger.get('assets'),
+    storageSettings
+  );
+
+  // get the client (which is shared across all adapters)
+  const client = adapter.getClient();
+
+  const response = await client.search('operation_name', {
+    track_total_hits: true
+  });
+
+```

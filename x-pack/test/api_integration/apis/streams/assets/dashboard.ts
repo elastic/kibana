@@ -241,6 +241,22 @@ export default function ({ getService }: FtrProviderContext) {
           expect(response.body.dashboards.length).to.eql(1);
         });
       });
+
+      describe('after deleting the dashboards', () => {
+        before(async () => {
+          await unloadDashboards();
+        });
+
+        it('no longer lists the dashboard as a linked asset', async () => {
+          const response = await apiClient.fetch('GET /api/streams/{id}/dashboards', {
+            params: { path: { id: 'logs' } },
+          });
+
+          expect(response.status).to.eql(200);
+
+          expect(response.body.dashboards.length).to.eql(0);
+        });
+      });
     });
 
     describe('after using the bulk API', () => {

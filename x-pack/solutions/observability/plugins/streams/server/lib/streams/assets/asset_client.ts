@@ -282,7 +282,7 @@ export class AssetClient {
 
               return idsByType.dashboard.flatMap((dashboardId): Asset[] => {
                 const dashboard = dashboardsById[dashboardId];
-                if (dashboard) {
+                if (dashboard && !dashboard.error) {
                   return [dashboardSavedObjectToAsset(dashboardId, dashboard)];
                 }
                 return [];
@@ -312,7 +312,7 @@ export class AssetClient {
 
               return idsByType.slo.flatMap((sloId): Asset[] => {
                 const sloDefinition = sloDefinitionsById[sloId];
-                if (sloDefinition) {
+                if (sloDefinition && !sloDefinition.error) {
                   return [sloSavedObjectToAsset(sloId, sloDefinition)];
                 }
                 return [];
