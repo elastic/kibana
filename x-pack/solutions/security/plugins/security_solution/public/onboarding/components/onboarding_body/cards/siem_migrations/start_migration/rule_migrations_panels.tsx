@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React from 'react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { SiemMigrationTaskStatus } from '../../../../../../../common/siem_migrations/constants';
 import type { RuleMigrationStats } from '../../../../../../siem_migrations/rules/types';
 import { UploadRulesPanel } from './upload_rules_panel';
@@ -22,24 +22,39 @@ export interface RuleMigrationsPanelsProps {
 }
 export const RuleMigrationsPanels = React.memo<RuleMigrationsPanelsProps>(
   ({ migrationsStats, isConnectorsCardComplete, expandConnectorsCard }) => {
-    if (migrationsStats.length === 0) {
-      return isConnectorsCardComplete ? (
-        <UploadRulesPanel />
-      ) : (
-        <MissingAIConnectorCallout onExpandAiConnectorsCard={expandConnectorsCard} />
-      );
-    }
+    const latestMigrationsStats = useMemo(() => migrationsStats.reverse(), [migrationsStats]);
+    const [expandedCardId, setExpandedCardId] = useState<string | undefined>();
+
+    useEffect(() => {
+      const [lastMigrationStats] = latestMigrationsStats;
+      if (lastMigrationStats && lastMigrationStats.status === SiemMigrationTaskStatus.FINISHED) {
+        setExpandedCardId(lastMigrationStats.id);
+      }
+    }, [latestMigrationsStats]);
+
+    const getOnToggleCollapsed = useCallback(
+      (id: string) => (isCollapsed: boolean) => {
+        setExpandedCardId(isCollapsed ? undefined : id);
+      },
+      []
+    );
 
     return (
       <EuiFlexGroup direction="column" gutterSize="m">
         <EuiFlexItem grow={false}>
-          {isConnectorsCardComplete ? (
-            <UploadRulesPanel isUploadMore />
-          ) : (
-            <MissingAIConnectorCallout onExpandAiConnectorsCard={expandConnectorsCard} />
+          {!isConnectorsCardComplete && (
+            <>
+              <MissingAIConnectorCallout onExpandAiConnectorsCard={expandConnectorsCard} />
+              <EuiSpacer size="s" />
+            </>
           )}
+          <UploadRulesPanel
+            isUploadMore={latestMigrationsStats.length > 0}
+            isDisabled={!isConnectorsCardComplete}
+          />
         </EuiFlexItem>
-        {migrationsStats.map((migrationStats) => (
+
+        {latestMigrationsStats.map((migrationStats) => (
           <EuiFlexItem grow={false} key={migrationStats.id}>
             {migrationStats.status === SiemMigrationTaskStatus.READY && (
               <MigrationReadyPanel migrationStats={migrationStats} />
@@ -48,7 +63,11 @@ export const RuleMigrationsPanels = React.memo<RuleMigrationsPanelsProps>(
               <MigrationProgressPanel migrationStats={migrationStats} />
             )}
             {migrationStats.status === SiemMigrationTaskStatus.FINISHED && (
-              <MigrationResultPanel migrationStats={migrationStats} />
+              <MigrationResultPanel
+                migrationStats={migrationStats}
+                isCollapsed={migrationStats.id !== expandedCardId}
+                onToggleCollapsed={getOnToggleCollapsed(migrationStats.id)}
+              />
             )}
           </EuiFlexItem>
         ))}
