@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EmbeddableInput } from '@kbn/embeddable-plugin/public';
 import { MaybePromise } from '@kbn/utility-types';
 import { DashboardPanelState } from '../../../common';
 import type { GridData } from '../../../server/content_management';
@@ -28,16 +27,6 @@ export interface PanelPlacementProps {
   width: number;
   height: number;
   currentPanels: { [key: string]: DashboardPanelState };
-}
-
-export interface IProvidesLegacyPanelPlacementSettings<
-  InputType extends EmbeddableInput = EmbeddableInput,
-  AttributesType = unknown
-> {
-  getLegacyPanelPlacementSettings: (
-    input: InputType,
-    attributes?: AttributesType
-  ) => Partial<PanelPlacementSettings>;
 }
 
 export type GetPanelPlacementSettings<SerializedState extends object = object> = (

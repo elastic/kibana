@@ -6,9 +6,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { LicenseType } from '@kbn/licensing-plugin/common/types';
+import type { LicenseType } from '@kbn/licensing-plugin/common/types';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
-import {
+import type {
   LicensingPluginSetup,
   LicensingApiRequestHandlerContext,
 } from '@kbn/licensing-plugin/server';
@@ -16,7 +16,8 @@ import {
 import { APM_INDEX_SETTINGS_SAVED_OBJECT_TYPE } from '@kbn/apm-data-access-plugin/server/saved_objects/apm_indices';
 import { ApmRuleType } from '@kbn/rule-data-utils';
 import { ALERTING_FEATURE_ID } from '@kbn/alerting-plugin/common';
-import { KibanaFeatureConfig, KibanaFeatureScope } from '@kbn/features-plugin/common';
+import type { KibanaFeatureConfig } from '@kbn/features-plugin/common';
+import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 import { APM_SERVER_FEATURE_ID } from '../common/rules/apm_rule_types';
 
 const alertingFeatures = Object.values(ApmRuleType).map((ruleTypeId) => ({
@@ -38,7 +39,7 @@ export const APM_FEATURE: KibanaFeatureConfig = {
     insightsAndAlerting: ['triggersActions'],
   },
   alerting: alertingFeatures,
-  // see x-pack/plugins/features/common/feature_kibana_privileges.ts
+  // see x-pack/platform/plugins/shared/features/common/feature_kibana_privileges.ts
   privileges: {
     all: {
       app: [APM_SERVER_FEATURE_ID, 'ux', 'kibana'],

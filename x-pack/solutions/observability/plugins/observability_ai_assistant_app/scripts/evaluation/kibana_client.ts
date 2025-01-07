@@ -26,7 +26,7 @@ import { Message, MessageRole } from '@kbn/observability-ai-assistant-plugin/com
 import { streamIntoObservable } from '@kbn/observability-ai-assistant-plugin/server';
 import { ToolingLog } from '@kbn/tooling-log';
 import axios, { AxiosInstance, AxiosResponse, isAxiosError } from 'axios';
-import { isArray, omit, pick, remove } from 'lodash';
+import { omit, pick, remove } from 'lodash';
 import pRetry from 'p-retry';
 import {
   concatMap,
@@ -59,13 +59,14 @@ interface Options {
   screenContexts?: ObservabilityAIAssistantScreenContext[];
 }
 
-type CompleteFunction = (
-  ...args:
-    | [StringOrMessageList]
-    | [StringOrMessageList, Options]
-    | [string | undefined, StringOrMessageList]
-    | [string | undefined, StringOrMessageList, Options]
-) => Promise<{
+interface CompleteFunctionParams {
+  messages: StringOrMessageList;
+  conversationId?: string;
+  options?: Options;
+  scope?: AssistantScope;
+}
+
+type CompleteFunction = (params: CompleteFunctionParams) => Promise<{
   conversationId?: string;
   messages: InnerMessage[];
   errors: ChatCompletionErrorEvent[];
@@ -74,7 +75,6 @@ type CompleteFunction = (
 export interface ChatClient {
   chat: (message: StringOrMessageList) => Promise<InnerMessage>;
   complete: CompleteFunction;
-
   evaluate: (
     {}: { conversationId?: string; messages: InnerMessage[]; errors: ChatCompletionErrorEvent[] },
     criteria: string[]
@@ -124,10 +124,10 @@ export class KibanaClient {
     return this.axios<T>({
       method,
       url,
-      data: data || {},
+      ...(method.toLowerCase() === 'delete' && !data ? {} : { data: data || {} }),
       headers: {
         'kbn-xsrf': 'true',
-        'x-elastic-internal-origin': 'foo',
+        'x-elastic-internal-origin': 'Kibana',
       },
     }).catch((error) => {
       if (isAxiosError(error)) {
@@ -148,7 +148,7 @@ export class KibanaClient {
   }
 
   async installKnowledgeBase() {
-    this.log.debug('Checking to see whether knowledge base is installed');
+    this.log.info('Checking whether the knowledge base is installed');
 
     const {
       data: { ready },
@@ -157,7 +157,7 @@ export class KibanaClient {
     });
 
     if (ready) {
-      this.log.info('Knowledge base is installed');
+      this.log.success('Knowledge base is already installed');
       return;
     }
 
@@ -176,7 +176,7 @@ export class KibanaClient {
       { retries: 10 }
     );
 
-    this.log.info('Knowledge base installed');
+    this.log.success('Knowledge base installed');
   }
 
   async createSpaceIfNeeded() {
@@ -184,7 +184,7 @@ export class KibanaClient {
       return;
     }
 
-    this.log.debug(`Checking if space ${this.spaceId} exists`);
+    this.log.info(`Checking if space ${this.spaceId} exists`);
 
     const spaceExistsResponse = await this.callKibana<{
       id?: string;
@@ -204,7 +204,7 @@ export class KibanaClient {
     });
 
     if (spaceExistsResponse.data.id) {
-      this.log.debug(`Space id ${this.spaceId} found`);
+      this.log.success(`Space id ${this.spaceId} found`);
       return;
     }
 
@@ -223,12 +223,24 @@ export class KibanaClient {
     );
 
     if (spaceCreatedResponse.status === 200) {
-      this.log.info(`Created space ${this.spaceId}`);
+      this.log.success(`Created space ${this.spaceId}`);
     } else {
       throw new Error(
         `Error creating space: ${spaceCreatedResponse.status} - ${spaceCreatedResponse.data}`
       );
     }
+  }
+
+  getMessages(message: string | Array<Message['message']>): Array<Message['message']> {
+    if (typeof message === 'string') {
+      return [
+        {
+          content: message,
+          role: MessageRole.User,
+        },
+      ];
+    }
+    return message;
   }
 
   createChatClient({
@@ -244,22 +256,11 @@ export class KibanaClient {
     suite?: Mocha.Suite;
     scopes: AssistantScope[];
   }): ChatClient {
-    function getMessages(message: string | Array<Message['message']>): Array<Message['message']> {
-      if (typeof message === 'string') {
-        return [
-          {
-            content: message,
-            role: MessageRole.User,
-          },
-        ];
-      }
-      return message;
-    }
-
     const that = this;
 
     let currentTitle: string = '';
     let firstSuiteName: string = '';
+    let currentScopes = scopes;
 
     if (suite) {
       suite.beforeEach(function () {
@@ -362,7 +363,7 @@ export class KibanaClient {
       that.log.info('Chat', name);
 
       const chat$ = defer(() => {
-        that.log.debug(`Calling chat API`);
+        that.log.info('Calling the /chat API');
         const params: ObservabilityAIAssistantAPIClientRequestParamsOf<'POST /internal/observability_ai_assistant/chat'>['params']['body'] =
           {
             name,
@@ -370,7 +371,7 @@ export class KibanaClient {
             connectorId: connectorIdOverride || connectorId,
             functions: functions.map((fn) => pick(fn, 'name', 'description', 'parameters')),
             functionCall,
-            scopes,
+            scopes: currentScopes,
           };
 
         return that.axios.post(
@@ -378,7 +379,11 @@ export class KibanaClient {
             pathname: '/internal/observability_ai_assistant/chat',
           }),
           params,
-          { responseType: 'stream', timeout: NaN }
+          {
+            responseType: 'stream',
+            timeout: NaN,
+            headers: { 'x-elastic-internal-origin': 'Kibana' },
+          }
         );
       }).pipe(
         switchMap((response) => streamIntoObservable(response.data)),
@@ -400,54 +405,33 @@ export class KibanaClient {
     return {
       chat: async (message) => {
         const messages = [
-          ...getMessages(message).map((msg) => ({
+          ...this.getMessages(message).map((msg) => ({
             message: msg,
             '@timestamp': new Date().toISOString(),
           })),
         ];
         return chat('chat', { messages, functions: [] });
       },
-      complete: async (...args) => {
-        that.log.info(`Complete`);
-        let messagesArg: StringOrMessageList | undefined;
-        let conversationId: string | undefined;
-        let options: Options = {};
+      complete: async ({
+        messages: messagesArg,
+        conversationId,
+        options = {},
+        scope: newScope,
+      }: CompleteFunctionParams) => {
+        that.log.info('Calling complete');
 
-        function isMessageList(arg: any): arg is StringOrMessageList {
-          return isArray(arg) || typeof arg === 'string';
-        }
-
-        // | [StringOrMessageList]
-        // | [StringOrMessageList, Options]
-        // | [string, StringOrMessageList]
-        // | [string, StringOrMessageList, Options]
-        if (args.length === 1) {
-          messagesArg = args[0];
-        } else if (args.length === 2 && !isMessageList(args[1])) {
-          messagesArg = args[0];
-          options = args[1];
-        } else if (
-          args.length === 2 &&
-          (typeof args[0] === 'string' || typeof args[0] === 'undefined') &&
-          isMessageList(args[1])
-        ) {
-          conversationId = args[0];
-          messagesArg = args[1];
-        } else if (args.length === 3) {
-          conversationId = args[0];
-          messagesArg = args[1];
-          options = args[2];
-        }
+        // set scope
+        currentScopes = [newScope || 'observability'];
 
         const messages = [
-          ...getMessages(messagesArg!).map((msg) => ({
+          ...this.getMessages(messagesArg!).map((msg) => ({
             message: msg,
             '@timestamp': new Date().toISOString(),
           })),
         ];
 
         const stream$ = defer(() => {
-          that.log.debug(`Calling /chat/complete API`);
+          that.log.info(`Calling /chat/complete API`);
           return from(
             that.axios.post(
               that.getUrl({
@@ -460,9 +444,13 @@ export class KibanaClient {
                 connectorId,
                 persist,
                 title: currentTitle,
-                scopes,
+                scopes: currentScopes,
               },
-              { responseType: 'stream', timeout: NaN }
+              {
+                responseType: 'stream',
+                timeout: NaN,
+                headers: { 'x-elastic-internal-origin': 'Kibana' },
+              }
             )
           );
         }).pipe(
@@ -615,7 +603,7 @@ export class KibanaClient {
           })
           .concat({
             score: errors.length === 0 ? 1 : 0,
-            criterion: 'The conversation encountered errors',
+            criterion: 'The conversation did not encounter any errors',
             reasoning: errors.length
               ? `The following errors occurred: ${errors.map((error) => error.error.message)}`
               : 'No errors occurred',
