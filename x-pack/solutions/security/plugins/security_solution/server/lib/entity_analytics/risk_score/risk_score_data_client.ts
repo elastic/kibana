@@ -381,7 +381,7 @@ export class RiskScoreDataClient {
       }
     );
   };
-  
+
   public async reinstallTransform() {
     const esClient = this.options.esClient;
     const namespace = this.options.namespace;
