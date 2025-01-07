@@ -8,8 +8,9 @@
 import type { ES_FIELD_TYPES } from '@kbn/field-types';
 
 import type { DataFrameAnalyticsConfig } from '@kbn/ml-data-frame-analytics-utils';
+import type { MlApi } from '@kbn/ml-services/ml_api_service';
+
 import { mlJobCapsServiceAnalyticsFactory } from '../../services/new_job_capabilities/new_job_capabilities_service_analytics';
-import type { MlApi } from '../../services/ml_api_service';
 
 export interface FieldTypes {
   [key: string]: ES_FIELD_TYPES;

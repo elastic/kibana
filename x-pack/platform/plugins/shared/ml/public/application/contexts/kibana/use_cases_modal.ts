@@ -10,7 +10,7 @@ import { stringHash } from '@kbn/ml-string-hash';
 import { AttachmentType } from '@kbn/cases-plugin/common';
 import { i18n } from '@kbn/i18n';
 import type { MlEmbeddableTypes } from '@kbn/ml-embeddables/constants';
-import { useMlKibana } from './kibana_context';
+import { useMlKibana } from '@kbn/ml-kibana-context';
 import type { MappedEmbeddableTypeOf } from '../../../embeddables/types';
 
 /**

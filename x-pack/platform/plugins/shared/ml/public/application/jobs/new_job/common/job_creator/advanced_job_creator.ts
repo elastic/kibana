@@ -13,7 +13,7 @@ import type { Job, Detector, CustomRule } from '@kbn/ml-common-types/anomaly_det
 import type { Datafeed } from '@kbn/ml-common-types/anomaly_detection_jobs/datafeed';
 import { CREATED_BY_LABEL, JOB_TYPE } from '@kbn/ml-common-constants/new_job';
 
-import type { MlApi } from '../../../../services/ml_api_service';
+import type { MlApi } from '@kbn/ml-services/ml_api_service';
 import { JobCreator } from './job_creator';
 import { createBasicDetector } from './util/default_configs';
 import { getRichDetectors } from './util/general';

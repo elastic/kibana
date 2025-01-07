@@ -10,7 +10,7 @@ import { useFakeTimers } from 'sinon';
 import type { CalculatePayload } from './model_memory_estimator';
 import { modelMemoryEstimatorProvider } from './model_memory_estimator';
 import type { JobValidator } from '../../job_validator';
-import type { MlApi } from '../../../../../services/ml_api_service';
+import type { MlApi } from '@kbn/ml-services/ml_api_service';
 import type { JobCreator } from '../job_creator';
 import { BehaviorSubject } from 'rxjs';
 

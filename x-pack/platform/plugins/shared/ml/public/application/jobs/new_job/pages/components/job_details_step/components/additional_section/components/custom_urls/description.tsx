@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiDescribedFormGroup, EuiFormRow, EuiLink } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { useMlKibana } from '../../../../../../../../../contexts/kibana';
+import { useMlKibana } from '@kbn/ml-kibana-context';
 
 export const Description: FC<PropsWithChildren<unknown>> = memo(({ children }) => {
   const {

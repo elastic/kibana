@@ -29,7 +29,7 @@ import {
 import type { EMSTermJoinConfig } from '@kbn/maps-plugin/public';
 import { isDefined } from '@kbn/ml-is-defined';
 import type { MlAnomaliesTableRecord } from '@kbn/ml-anomaly-utils';
-import { useMlKibana } from '../contexts/kibana';
+import { useMlKibana } from '@kbn/ml-kibana-context';
 
 const MAX_ENTITY_VALUES = 3;
 

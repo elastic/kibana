@@ -18,7 +18,7 @@ import {
   type TMlStorageMapped,
 } from '@kbn/ml-common-types/storage';
 import type { NotificationsCountResponse } from '@kbn/ml-common-types/notifications';
-import { useMlKibana } from '../kibana';
+import { useMlKibana } from '@kbn/ml-kibana-context';
 import { useAsObservable } from '../../hooks';
 
 const NOTIFICATIONS_CHECK_INTERVAL = 60000;

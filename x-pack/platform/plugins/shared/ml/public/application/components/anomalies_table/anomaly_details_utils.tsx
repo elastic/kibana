@@ -27,10 +27,10 @@ import {
 import { useSeverityColor } from '@kbn/ml-anomaly-utils/use_severity_color';
 import { ML_JOB_AGGREGATION } from '@kbn/ml-anomaly-utils/aggregation_types';
 import { formatHumanReadableDateTimeSeconds } from '@kbn/ml-date-utils';
+import { useMlKibana } from '@kbn/ml-kibana-context';
 import type { EntityCellFilter } from '../entity_cell';
 import { EntityCell } from '../entity_cell';
 import { formatValue } from '../../formatters/format_value';
-import { useMlKibana } from '../../contexts/kibana';
 import { AnomalyValueDisplay } from './anomaly_value_display';
 
 const TIME_FIELD_NAME = 'timestamp';
@@ -600,7 +600,7 @@ export const AnomalyExplanationDetails: FC<{ anomaly: MlAnomaliesTableRecord }> 
       {explanationDetails.map(({ title, description }) => (
         <>
           <EuiFlexGroup gutterSize="none">
-            <EuiFlexItem style={{ width: '220px' }} grow={false}>
+            <EuiFlexItem css={{ width: '220px' }} grow={false}>
               {title}
             </EuiFlexItem>
             <EuiFlexItem>{description}</EuiFlexItem>

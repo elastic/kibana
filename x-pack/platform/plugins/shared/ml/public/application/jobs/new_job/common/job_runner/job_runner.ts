@@ -9,7 +9,7 @@ import { BehaviorSubject } from 'rxjs';
 import type { JobId } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
 import type { DatafeedId } from '@kbn/ml-common-types/anomaly_detection_jobs/datafeed';
 import { DATAFEED_STATE } from '@kbn/ml-common-constants/states';
-import type { MlApi } from '../../../../services/ml_api_service';
+import type { MlApi } from '@kbn/ml-services/ml_api_service';
 import type { JobCreator } from '../job_creator';
 
 const REFRESH_INTERVAL_MS = 250;

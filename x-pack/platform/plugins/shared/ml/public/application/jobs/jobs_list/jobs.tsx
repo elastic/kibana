@@ -15,7 +15,7 @@ import { css } from '@emotion/react';
 import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 import { JobsListView } from './components/jobs_list_view';
 import { HelpMenu } from '../../components/help_menu';
-import { useMlKibana } from '../../contexts/kibana';
+import { useMlKibana } from '@kbn/ml-kibana-context';
 import { MlPageHeader } from '../../components/page_header';
 import { HeaderMenuPortal } from '../../components/header_menu_portal';
 import { JobsActionMenu } from '../components/jobs_action_menu';

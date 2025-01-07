@@ -24,9 +24,9 @@ import {
   type MlStorageKey,
   type TMlStorageMapped,
 } from '@kbn/ml-common-types/storage';
+import { useMlJobService } from '@kbn/ml-services/job_service';
+import { useMlKibana } from '@kbn/ml-kibana-context';
 import { EntityControl } from '../entity_control';
-import { useMlJobService } from '../../../services/job_service';
-import { useMlKibana } from '../../../contexts/kibana';
 import { APP_STATE_ACTION } from '../../timeseriesexplorer_constants';
 import type { ComboBoxOption, Entity, EntityControlProps } from '../entity_control/entity_control';
 import { EMPTY_FIELD_VALUE_LABEL } from '../entity_control/entity_control';

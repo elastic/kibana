@@ -15,7 +15,7 @@ import {
   toElasticsearchQuery,
 } from '@kbn/es-query';
 import { SEARCH_QUERY_LANGUAGE } from '@kbn/ml-query-utils';
-import { useMlKibana } from '../../../../../contexts/kibana';
+import { useMlKibana } from '@kbn/ml-kibana-context';
 import { useDataSource } from '../../../../../contexts/ml';
 
 // `undefined` is used for a non-initialized state
