@@ -8,7 +8,11 @@
 import { combineLatest, Observable, Subject, BehaviorSubject } from 'rxjs';
 import { map, distinctUntilChanged } from 'rxjs';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { UsageCollectionSetup, UsageCounter } from '@kbn/usage-collection-plugin/server';
+import type {
+  UsageCollectionSetup,
+  UsageCollectionStart,
+  UsageCounter,
+} from '@kbn/usage-collection-plugin/server';
 import {
   PluginInitializerContext,
   Plugin,
@@ -18,7 +22,7 @@ import {
   ServiceStatusLevels,
   CoreStatus,
 } from '@kbn/core/server';
-import type { CloudStart } from '@kbn/cloud-plugin/server';
+import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/server';
 import {
   registerDeleteInactiveNodesTaskDefinition,
   scheduleDeleteInactiveNodesTaskDefinition,
@@ -79,14 +83,26 @@ export type TaskManagerStartContract = Pick<
     getRegisteredTypes: () => string[];
   };
 
-export interface TaskManagerPluginStart {
+export interface TaskManagerPluginsStart {
   cloud?: CloudStart;
+  usageCollection?: UsageCollectionStart;
+}
+
+export interface TaskManagerPluginsSetup {
+  cloud?: CloudSetup;
+  usageCollection?: UsageCollectionSetup;
 }
 
 const LogHealthForBackgroundTasksOnlyMinutes = 60;
 
 export class TaskManagerPlugin
-  implements Plugin<TaskManagerSetupContract, TaskManagerStartContract>
+  implements
+    Plugin<
+      TaskManagerSetupContract,
+      TaskManagerStartContract,
+      TaskManagerPluginsSetup,
+      TaskManagerPluginsStart
+    >
 {
   private taskPollingLifecycle?: TaskPollingLifecycle;
   private taskManagerId?: string;
@@ -125,8 +141,8 @@ export class TaskManagerPlugin
   }
 
   public setup(
-    core: CoreSetup<TaskManagerStartContract, unknown>,
-    plugins: { usageCollection?: UsageCollectionSetup }
+    core: CoreSetup<TaskManagerPluginsStart, TaskManagerStartContract>,
+    plugins: TaskManagerPluginsSetup
   ): TaskManagerSetupContract {
     this.elasticsearchAndSOAvailability$ = getElasticsearchAndSOAvailability(core.status.core$);
 
@@ -253,7 +269,7 @@ export class TaskManagerPlugin
 
   public start(
     { savedObjects, elasticsearch, executionContext, docLinks }: CoreStart,
-    { cloud }: TaskManagerPluginStart
+    { cloud }: TaskManagerPluginsStart
   ): TaskManagerStartContract {
     const savedObjectsRepository = savedObjects.createInternalRepository([
       TASK_SO_NAME,
