@@ -61,6 +61,23 @@ export const useGridLayoutState = ({
     if (accessMode !== accessMode$.getValue()) accessMode$.next(accessMode);
   }, [accessMode, accessMode$]);
 
+  const runtimeSettings$ = useMemo(
+    () =>
+      new BehaviorSubject<RuntimeGridSettings>({
+        ...gridSettings,
+        columnPixelWidth: 0,
+      }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
+  );
+
+  useEffect(() => {
+    runtimeSettings$.next({
+      ...gridSettings,
+      columnPixelWidth: 0,
+    });
+  }, [gridSettings, runtimeSettings$]);
+
   const gridLayoutStateManager = useMemo(() => {
     const resolvedLayout = cloneDeep(layout);
     resolvedLayout.forEach((row, rowIndex) => {
@@ -71,10 +88,6 @@ export const useGridLayoutState = ({
     const gridDimensions$ = new BehaviorSubject<ObservedSize>({ width: 0, height: 0 });
     const interactionEvent$ = new BehaviorSubject<PanelInteractionEvent | undefined>(undefined);
     const activePanel$ = new BehaviorSubject<ActivePanel | undefined>(undefined);
-    const runtimeSettings$ = new BehaviorSubject<RuntimeGridSettings>({
-      ...gridSettings,
-      columnPixelWidth: 0,
-    });
     const panelIds$ = new BehaviorSubject<string[][]>(
       layout.map(({ panels }) => Object.keys(panels))
     );
@@ -104,12 +117,18 @@ export const useGridLayoutState = ({
     const resizeSubscription = combineLatest([gridLayoutStateManager.gridDimensions$, accessMode$])
       .pipe(debounceTime(250))
       .subscribe(([dimensions, currentAccessMode]) => {
+        const currentRuntimeSettings = gridLayoutStateManager.runtimeSettings$.getValue();
         const elementWidth = dimensions.width ?? 0;
         const columnPixelWidth =
-          (elementWidth - gridSettings.gutterSize * (gridSettings.columnCount - 1)) /
-          gridSettings.columnCount;
+          (elementWidth -
+            currentRuntimeSettings.gutterSize * (currentRuntimeSettings.columnCount - 1)) /
+          currentRuntimeSettings.columnCount;
 
-        gridLayoutStateManager.runtimeSettings$.next({ ...gridSettings, columnPixelWidth });
+        if (columnPixelWidth !== currentRuntimeSettings.columnPixelWidth)
+          gridLayoutStateManager.runtimeSettings$.next({
+            ...currentRuntimeSettings,
+            columnPixelWidth,
+          });
         const isMobileView = shouldShowMobileView(currentAccessMode, euiTheme.breakpoint.m);
         if (isMobileView !== gridLayoutStateManager.isMobileView$.getValue()) {
           gridLayoutStateManager.isMobileView$.next(isMobileView);

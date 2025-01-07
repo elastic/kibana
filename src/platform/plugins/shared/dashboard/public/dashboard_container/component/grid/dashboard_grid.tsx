@@ -131,11 +131,11 @@ export const DashboardGrid = () => {
 
   const gridSettings = useMemo(() => {
     return {
-      gutterSize: DASHBOARD_MARGIN_SIZE,
+      gutterSize: useMargins ? DASHBOARD_MARGIN_SIZE : 0,
       rowHeight: DASHBOARD_GRID_HEIGHT,
       columnCount: DASHBOARD_GRID_COLUMN_COUNT,
     };
-  }, []);
+  }, [useMargins]);
 
   const [controlGroupReady, setControlGroupReady] = useState<boolean>(false);
   useEffect(() => {
