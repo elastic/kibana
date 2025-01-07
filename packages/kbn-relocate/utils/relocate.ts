@@ -19,7 +19,6 @@ import {
   KIBANA_FOLDER,
   NO_GREP,
   SCRIPT_ERRORS,
-  TARGET_FOLDERS,
   UPDATED_REFERENCES,
   UPDATED_RELATIVE_PATHS,
 } from '../constants';
@@ -38,13 +37,20 @@ export const stripFirstChunk = (path: string): string => {
 export const calculateModuleTargetFolder = (module: Package): string => {
   const group = module.manifest.group!;
   const isPlugin = module.manifest.type === 'plugin';
-  const fullPath = join(BASE_FOLDER, module.directory);
+  const fullPath = module.directory.startsWith(BASE_FOLDER)
+    ? module.directory
+    : join(BASE_FOLDER, module.directory);
+
+  let moduleDelimiter: string;
   if (!fullPath.includes('/plugins/') && !fullPath.includes('/packages/')) {
     throw new Error(
       `The module ${module.id} is not located under a '*/plugins/*' or '*/packages/*' folder`
     );
+  } else if (fullPath.includes('/plugins/') && fullPath.includes('/packages/')) {
+    moduleDelimiter = isPlugin ? '/plugins/' : '/packages/';
+  } else {
+    moduleDelimiter = fullPath.includes('/plugins/') ? '/plugins/' : '/packages/';
   }
-  let moduleDelimiter = fullPath.includes('/plugins/') ? '/plugins/' : '/packages/';
 
   // for platform modules that are in a sustainable folder, strip the /private/ or /shared/ part too
   if (module.directory.includes(`${moduleDelimiter}private/`)) {
@@ -60,7 +66,10 @@ export const calculateModuleTargetFolder = (module: Package): string => {
   let path: string;
 
   if (group === 'platform') {
-    if (fullPath.includes(`/${KIBANA_FOLDER}/packages/core/`)) {
+    if (
+      fullPath.includes(`/${KIBANA_FOLDER}/packages/core/`) ||
+      fullPath.includes(`/${KIBANA_FOLDER}/src/core/packages`)
+    ) {
       // packages/core/* => src/core/packages/*
       path = join(BASE_FOLDER, 'src', 'core', 'packages', moduleFolder);
     } else {
@@ -91,26 +100,8 @@ export const calculateModuleTargetFolder = (module: Package): string => {
   return applyTransforms(module, path);
 };
 
-export const isInTargetFolder = (module: Package, log: ToolingLog): boolean => {
-  const { group, visibility } = module.manifest;
-
-  if (!group || group === 'common' || !visibility) {
-    log.warning(`The module '${module.id}' is missing the group/visibility information`);
-    return false;
-  }
-
-  const baseTargetFolders = TARGET_FOLDERS[`${group}:${visibility}`];
-  const baseTargetFolder = baseTargetFolders.find((candidate) => {
-    return module.directory.includes(candidate);
-  });
-  if (baseTargetFolder) {
-    log.info(
-      `The module ${module.id} is already in the correct folder: '${baseTargetFolder}'. Skipping`
-    );
-    return true;
-  }
-
-  return false;
+export const isInTargetFolder = (module: Package): boolean => {
+  return module.directory.startsWith(calculateModuleTargetFolder(module));
 };
 
 export const replaceReferences = async (module: Package, destination: string, log: ToolingLog) => {
@@ -186,7 +177,7 @@ const replaceReferencesInternal = async (
   const backFwdSrc = relativeSource.replaceAll('/', `\\\\\\/`);
   const backFwdDst = relativeDestination.replaceAll('/', `\\\\\\/`);
   await safeExec(
-    `sed -i '' -E '/${src}[\-_a-zA-Z0-9]/! s/${backFwdSrc}/${backFwdDst}/g' .buildkite/scripts/pipelines/pull_request/pipeline.ts`,
+    `sed -i '' -E '/${backFwdSrc}[\-_a-zA-Z0-9]/! s/${backFwdSrc}/${backFwdDst}/g' .buildkite/scripts/pipelines/pull_request/pipeline.ts`,
     false
   );
 };

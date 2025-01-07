@@ -9,6 +9,7 @@
 
 import { run } from '@kbn/dev-cli-runner';
 import { findAndRelocateModules, findAndMoveModule } from './relocate';
+import { listModules } from './list';
 
 const toStringArray = (flag: string | boolean | string[] | undefined): string[] => {
   if (typeof flag === 'string') {
@@ -44,6 +45,8 @@ export const runKbnRelocateCli = () => {
       if (typeof flags.moveOnly === 'string' && flags.moveOnly.length > 0) {
         log.info('When using --moveOnly flag, the rest of flags are ignored.');
         await findAndMoveModule(flags.moveOnly, log);
+      } else if (typeof flags.list === 'string' && flags.list.length > 0) {
+        await listModules(flags.list, log);
       } else {
         const { pr, team, path, include, exclude, baseBranch } = flags;
         await findAndRelocateModules(
@@ -64,7 +67,7 @@ export const runKbnRelocateCli = () => {
         defaultLevel: 'info',
       },
       flags: {
-        string: ['pr', 'team', 'path', 'include', 'exclude', 'baseBranch', 'moveOnly'],
+        string: ['pr', 'team', 'path', 'include', 'exclude', 'baseBranch', 'moveOnly', 'list'],
         help: `
           Usage: node scripts/relocate [options]
 
@@ -75,6 +78,9 @@ export const runKbnRelocateCli = () => {
           --include <id> Include the specified module in the relocation (can specify multiple modules)
           --exclude <id> Exclude the specified module from the relocation (can use multiple times)
           --baseBranch <name> Use a branch different than 'main' (e.g. "8.x")
+          --list "all" List all Kibana modules
+          --list "uncategorised" List Kibana modules that are lacking 'group' or 'visibility' information
+          --list "incorrect" List Kibana modules that are not in the correct folder (aka folder does not match group/visibility in the manifest)
 
           E.g. relocate all modules owned by Core team and also modules owned by Operations team, excluding 'foo-module-id'. Force push into PR 239847:
           node scripts/relocate --pr 239847 --team @elastic/kibana-core --team @elastic/kibana-operations --exclude @kbn/foo-module-id
