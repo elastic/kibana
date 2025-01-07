@@ -5691,6 +5691,11 @@
   dependencies:
     "@types/jquery" "*"
 
+"@types/fnv-plus@^1.3.2":
+  version "1.3.2"
+  resolved "https://registry.yarnpkg.com/@types/fnv-plus/-/fnv-plus-1.3.2.tgz#bd591c1031ae48a18c99eaa60f659288aea545c0"
+  integrity sha512-Bgr5yn2dph2q8HZKDS002Pob6vaRTRfhqN9E+TOhjKsJvnfZXULPR3ihH8dL5ZjgxbNhqhTn9hijpbAMPtKZzw==
+
 "@types/fs-extra@^8.0.0":
   version "8.1.1"
   resolved "https://registry.yarnpkg.com/@types/fs-extra/-/fs-extra-8.1.1.tgz#1e49f22d09aa46e19b51c0b013cb63d0d923a068"
