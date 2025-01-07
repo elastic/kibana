@@ -488,16 +488,20 @@ export class SessionIndex {
     let indexNeedsRefresh = false;
 
     if (!securityIndexShardsExist) {
-      const shardMissingCounter = taskInstance.state?.shardMissingCounter ?? 0;
+      const shardMissingCounter = taskInstance.state?.shardMissingCounter
+        ? taskInstance.state?.shardMissingCounter + 1
+        : 0;
       if (shardMissingCounter > 10) {
-        logger.error('Session index shards are still missing, skipping session cleanup.');
+        logger.error('Failed to clean sessions due to missing shards. ');
         return;
       }
 
-      logger.debug('No shards found for session index, skipping session cleanup.');
+      logger.debug(
+        `No shards found for session index, skipping session cleanup. This operation has failed ${shardMissingCounter} time(s)`
+      );
       return {
         state: {
-          shardMissingCounter: +1,
+          shardMissingCounter,
         },
       };
     }
