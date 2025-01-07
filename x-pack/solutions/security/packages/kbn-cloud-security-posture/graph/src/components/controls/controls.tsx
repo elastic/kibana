@@ -90,7 +90,7 @@ export const Controls = ({
   const btnCss = css`
     border: ${euiTheme.border.thin};
     border-radius: ${euiTheme.border.radius.medium};
-    background-color: ${euiTheme.colors.backgroundBasePlain};
+    background-color: ${euiTheme.colors.emptyShade};
     box-sizing: content-box;
   `;
 

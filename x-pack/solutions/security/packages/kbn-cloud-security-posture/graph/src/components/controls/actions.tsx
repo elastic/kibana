@@ -93,7 +93,7 @@ export const Actions = ({
                 !searchToggled
                   ? css`
                       border: ${euiTheme.border.thin};
-                      background-color: ${euiTheme.colors.backgroundBasePlain};
+                      background-color: ${euiTheme.colors.emptyShade};
                     `
                   : undefined,
               ]}
