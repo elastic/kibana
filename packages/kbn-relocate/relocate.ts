@@ -127,6 +127,15 @@ const findModules = ({ teams, paths, included, excluded }: FindModulesParams, lo
       )
       // the module is not explicitly excluded
       .filter(({ id }) => !excluded.includes(id))
+      // exclude modules that don't define a group/visibility
+      .filter((module) => {
+        if (!module.group || module.group === 'common' || !module.visibility) {
+          log.info(`The module ${module.id} does not specify 'group' or 'visibility'. Skipping`);
+          return false;
+        } else {
+          return true;
+        }
+      })
       // exclude modules that are in the correct folder
       .filter((module) => {
         if (isInTargetFolder(module)) {
