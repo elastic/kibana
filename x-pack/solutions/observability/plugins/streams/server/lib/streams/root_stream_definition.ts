@@ -21,6 +21,9 @@ export const rootStreamDefinition: WiredStreamDefinition = {
           message: {
             type: 'match_only_text',
           },
+          'body.text': {
+            type: 'match_only_text',
+          },
           'host.name': {
             type: 'keyword',
           },

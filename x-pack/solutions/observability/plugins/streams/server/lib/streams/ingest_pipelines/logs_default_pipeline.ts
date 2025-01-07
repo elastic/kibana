@@ -7,6 +7,12 @@
 
 export const logsDefaultPipelineProcessors = [
   {
+    pipeline: {
+      name: 'otel-rerouter@streams',
+      ignore_missing_pipeline: true,
+    },
+  },
+  {
     set: {
       description: "If '@timestamp' is missing, set it with the ingest timestamp",
       field: '@timestamp',
@@ -23,6 +29,25 @@ export const logsDefaultPipelineProcessors = [
   {
     dot_expander: {
       field: '*',
+      ignore_failure: true,
+    },
+  },
+  {
+    dot_expander: {
+      field: 'body.structured',
+      ignore_failure: true,
+    },
+  },
+  {
+    dot_expander: {
+      field: 'resource.attributes',
+      ignore_failure: true,
+    },
+  },
+  {
+    dot_expander: {
+      field: 'scope.attributes',
+      ignore_failure: true,
     },
   },
 ];
