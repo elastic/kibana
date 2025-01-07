@@ -5,28 +5,20 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ReadStreamDefinition } from '@kbn/streams-schema';
 import { DissectAppendSeparator } from './dissect_append_separator';
 import { DissectPatternDefinition } from './dissect_pattern_definition';
 import { ProcessorFieldSelector } from '../processor_field_selector';
 import { ToggleField } from '../toggle_field';
 import { OptionalFieldsAccordion } from '../optional_fields_accordion';
-import { getFieldsMapFromDefinition } from '../../utils';
 import { ProcessorConditionEditor } from '../processor_condition_editor';
 
-interface DissectProcessorFormProps {
-  definition: ReadStreamDefinition;
-}
-
-export const DissectProcessorForm = ({ definition }: DissectProcessorFormProps) => {
-  const mappedFields = useMemo(() => getFieldsMapFromDefinition(definition), [definition]);
-
+export const DissectProcessorForm = () => {
   return (
     <>
-      <ProcessorFieldSelector fields={mappedFields} />
+      <ProcessorFieldSelector />
       <DissectPatternDefinition />
       <EuiSpacer size="m" />
       <OptionalFieldsAccordion>

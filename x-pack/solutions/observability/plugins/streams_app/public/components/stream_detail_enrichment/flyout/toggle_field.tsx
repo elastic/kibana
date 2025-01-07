@@ -9,14 +9,20 @@ import React from 'react';
 import { useController } from 'react-hook-form';
 import { EuiFormRow, EuiSwitch, htmlIdGenerator } from '@elastic/eui';
 
-interface Props {
-  name: string;
-  label: string;
+interface ToggleFieldProps {
   helpText?: string;
   id?: string;
+  label: string;
+  name: string;
 }
 
-export const ToggleField = ({ name, label, helpText, id = createId(), ...rest }: Props) => {
+export const ToggleField = ({
+  helpText,
+  id = createId(),
+  label,
+  name,
+  ...rest
+}: ToggleFieldProps) => {
   const { field } = useController({ name });
 
   return (

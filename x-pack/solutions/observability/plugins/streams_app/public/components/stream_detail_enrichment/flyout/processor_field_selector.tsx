@@ -7,15 +7,10 @@
 
 import { EuiFormRow, EuiFieldText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FieldDefinitionConfig } from '@kbn/streams-schema';
 import React from 'react';
 import { useFormContext } from 'react-hook-form';
 
-interface ProcessorFieldSelectorProps {
-  fields: Array<{ name: string; type: FieldDefinitionConfig['type'] }>;
-}
-
-export const ProcessorFieldSelector = ({ fields }: ProcessorFieldSelectorProps) => {
+export const ProcessorFieldSelector = () => {
   const { register } = useFormContext();
   const { ref, ...inputProps } = register(`field`);
 

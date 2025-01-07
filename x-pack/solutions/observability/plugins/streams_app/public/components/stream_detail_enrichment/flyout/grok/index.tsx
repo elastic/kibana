@@ -5,28 +5,20 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ReadStreamDefinition } from '@kbn/streams-schema';
 import { GrokPatternDefinition } from './grok_pattern_definition';
 import { GrokPatternsEditor } from './grok_patterns_editor';
 import { ProcessorFieldSelector } from '../processor_field_selector';
 import { ToggleField } from '../toggle_field';
 import { OptionalFieldsAccordion } from '../optional_fields_accordion';
-import { getFieldsMapFromDefinition } from '../../utils';
 import { ProcessorConditionEditor } from '../processor_condition_editor';
 
-interface GrokProcessorFormProps {
-  definition: ReadStreamDefinition;
-}
-
-export const GrokProcessorForm = ({ definition }: GrokProcessorFormProps) => {
-  const mappedFields = useMemo(() => getFieldsMapFromDefinition(definition), [definition]);
-
+export const GrokProcessorForm = () => {
   return (
     <>
-      <ProcessorFieldSelector fields={mappedFields} />
+      <ProcessorFieldSelector />
       <GrokPatternsEditor />
       <EuiSpacer size="m" />
       <OptionalFieldsAccordion>

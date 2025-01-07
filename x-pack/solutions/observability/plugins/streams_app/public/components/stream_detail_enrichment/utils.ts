@@ -11,11 +11,9 @@ import {
   DissectProcessingDefinition,
   GrokProcessingDefinition,
   ProcessingDefinition,
-  ReadStreamDefinition,
   isCompleteCondition,
   isDissectProcessor,
   isGrokProcessor,
-  isWiredReadStream,
 } from '@kbn/streams-schema';
 import { isEmpty } from 'lodash';
 import { GrokFormState, ProcessorDefinition, ProcessorFormState } from './types';
@@ -33,17 +31,6 @@ const defaultProcessorConfig: GrokFormState = {
   pattern_definitions: {},
   ignore_failure: false,
   condition: defaultCondition,
-};
-
-export const getFieldsMapFromDefinition = (definition: ReadStreamDefinition) => {
-  if (isWiredReadStream(definition)) {
-    return Object.entries({
-      ...definition.stream.ingest.wired.fields,
-      ...definition.inherited_fields,
-    }).map(([name, { type }]) => ({ name, type }));
-  }
-
-  return [];
 };
 
 export const getDefaultFormState = (processor?: ProcessorDefinition): ProcessorFormState => {

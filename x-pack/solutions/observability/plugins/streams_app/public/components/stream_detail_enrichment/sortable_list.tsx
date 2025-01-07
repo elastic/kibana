@@ -11,8 +11,9 @@ import {
   EuiDroppableProps,
   EuiDragDropContext,
   EuiDroppable,
+  useEuiTheme,
 } from '@elastic/eui';
-import { ClassNames } from '@emotion/react';
+import { css } from '@emotion/react';
 
 interface SortableListProps {
   onDragItem: DragDropContextProps['onDragEnd'];
@@ -20,20 +21,18 @@ interface SortableListProps {
 }
 
 export const SortableList = ({ onDragItem, children }: SortableListProps) => {
+  const { euiTheme } = useEuiTheme();
+
   return (
     <EuiDragDropContext onDragEnd={onDragItem}>
-      <ClassNames>
-        {({ css, theme, cx }) => (
-          <EuiDroppable
-            droppableId="droppable-area"
-            className={cx(css`
-              background-color: ${theme.euiTheme.colors.backgroundTransparent};
-            `)}
-          >
-            {children}
-          </EuiDroppable>
-        )}
-      </ClassNames>
+      <EuiDroppable
+        droppableId="droppable-area"
+        css={css`
+          background-color: ${euiTheme.colors.backgroundTransparent};
+        `}
+      >
+        {children}
+      </EuiDroppable>
     </EuiDragDropContext>
   );
 };

@@ -14,6 +14,7 @@ import {
   ProcessingDefinition,
   isWiredReadStream,
   FieldDefinition,
+  WiredReadStreamDefinition,
 } from '@kbn/streams-schema';
 import { htmlIdGenerator } from '@elastic/eui';
 import { isEqual } from 'lodash';
@@ -24,8 +25,8 @@ export const useDefinition = (definition: ReadStreamDefinition, refreshDefinitio
   const { core, dependencies } = useKibana();
 
   const { toasts } = core.notifications;
-  const { streamsRepositoryClient } = dependencies.start.streams;
   const { processing } = definition.stream.ingest;
+  const { streamsRepositoryClient } = dependencies.start.streams;
 
   const abortController = useAbortController();
   const [isSavingChanges, { on: startsSaving, off: endsSaving }] = useBoolean();
@@ -38,6 +39,7 @@ export const useDefinition = (definition: ReadStreamDefinition, refreshDefinitio
   const httpProcessing = useMemo(() => processors.map(removeIdFromProcessor), [processors]);
 
   useEffect(() => {
+    // Reset processors when definition refreshes
     setProcessors(createProcessorsList(definition.stream.ingest.processing));
   }, [definition]);
 
@@ -47,41 +49,26 @@ export const useDefinition = (definition: ReadStreamDefinition, refreshDefinitio
   );
 
   const addProcessor = (newProcessing: ProcessingDefinition, newFields?: DetectedField[]) => {
-    setProcessors(processors.concat(createProcessorWithId(newProcessing)));
+    setProcessors((prevProcs) => prevProcs.concat(createProcessorWithId(newProcessing)));
 
     if (isWiredReadStream(definition) && newFields) {
-      setFields({
-        ...definition.stream.ingest.wired.fields,
-        ...newFields.reduce((acc, field) => {
-          if (!(field.name in fields) && field.type !== 'unmapped') {
-            acc[field.name] = { type: field.type };
-          }
-          return acc;
-        }, {} as FieldDefinition),
-      });
+      setFields((currentFields) => mergeFields(definition, currentFields, newFields));
     }
   };
 
   const updateProcessor = (id: string, processorUpdate: ProcessorDefinition) => {
-    const updatedProcessors = processors.map((processor) => {
-      if (processor.id === id) {
-        return processorUpdate;
-      }
-
-      return processor;
-    });
-
-    setProcessors(updatedProcessors);
+    setProcessors((prevProcs) =>
+      prevProcs.map((proc) => (proc.id === id ? processorUpdate : proc))
+    );
   };
 
   const deleteProcessor = (id: string) => {
-    const updatedProcessors = processors.filter((processor) => processor.id !== id);
-
-    setProcessors(updatedProcessors);
+    setProcessors((prevProcs) => prevProcs.filter((proc) => proc.id !== id));
   };
 
   const resetChanges = () => {
     setProcessors(createProcessorsList(processing));
+    setFields(isWiredReadStream(definition) ? definition.stream.ingest.wired.fields : {});
   };
 
   const saveChanges = async () => {
@@ -103,8 +90,6 @@ export const useDefinition = (definition: ReadStreamDefinition, refreshDefinitio
         },
       });
 
-      await refreshDefinition();
-
       toasts.addSuccess(
         i18n.translate(
           'xpack.streams.streamDetailView.managementTab.enrichment.saveChangesSuccess',
@@ -120,6 +105,7 @@ export const useDefinition = (definition: ReadStreamDefinition, refreshDefinitio
         toastMessage: error.body.message,
       });
     } finally {
+      await refreshDefinition();
       endsSaving();
     }
   };
@@ -152,4 +138,21 @@ const createProcessorWithId = (processor: ProcessingDefinition): ProcessorDefini
 const removeIdFromProcessor = (processor: ProcessorDefinition): ProcessingDefinition => {
   const { id, ...rest } = processor;
   return rest;
+};
+
+const mergeFields = (
+  definition: WiredReadStreamDefinition,
+  currentFields: FieldDefinition,
+  newFields: DetectedField[]
+) => {
+  return {
+    ...definition.stream.ingest.wired.fields,
+    ...newFields.reduce((acc, field) => {
+      // Add only new fields and ignore unmapped ones
+      if (!(field.name in currentFields) && field.type !== 'unmapped') {
+        acc[field.name] = { type: field.type };
+      }
+      return acc;
+    }, {} as FieldDefinition),
+  };
 };

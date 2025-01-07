@@ -34,20 +34,19 @@ export function StreamDetailEnrichmentContent({
   definition,
   refreshDefinition,
 }: StreamDetailEnrichmentContentProps) {
+  const [isBottomBarOpen, { on: openBottomBar, off: closeBottomBar }] = useBoolean();
+  const [isAddProcessorOpen, { on: openAddProcessor, off: closeAddProcessor }] = useBoolean();
   const {
     processors,
     addProcessor,
     updateProcessor,
     deleteProcessor,
+    resetChanges,
+    saveChanges,
     setProcessors,
     hasChanges,
     isSavingChanges,
-    resetChanges,
-    saveChanges,
   } = useDefinition(definition, refreshDefinition);
-
-  const [isAddProcessorOpen, { on: openAddProcessor, off: closeAddProcessor }] = useBoolean();
-  const [isBottomBarOpen, { on: openBottomBar, off: closeBottomBar }] = useBoolean();
 
   const handlerItemDrag: DragDropContextProps['onDragEnd'] = ({ source, destination }) => {
     if (source && destination) {
@@ -71,7 +70,13 @@ export function StreamDetailEnrichmentContent({
     closeBottomBar();
   };
 
-  const hasProcessors = processors.length > 0;
+  const bottomBar = isBottomBarOpen && (
+    <ManagementBottomBar
+      onCancel={handleDiscardChanges}
+      onConfirm={handleSaveChanges}
+      isLoading={isSavingChanges}
+    />
+  );
 
   const addProcessorFlyout = isAddProcessorOpen && (
     <AddProcessorFlyout
@@ -82,28 +87,12 @@ export function StreamDetailEnrichmentContent({
     />
   );
 
-  const bottomBar = isBottomBarOpen && (
-    <ManagementBottomBar
-      onCancel={handleDiscardChanges}
-      onConfirm={handleSaveChanges}
-      isLoading={isSavingChanges}
-    />
-  );
-
-  if (!hasProcessors) {
-    return (
-      <>
-        <EnrichmentEmptyPrompt onAddProcessor={openAddProcessor} />
-        {addProcessorFlyout}
-        {bottomBar}
-      </>
-    );
-  }
+  const hasProcessors = processors.length > 0;
 
   return (
-    <EuiPanel paddingSize="none">
+    <>
       {hasProcessors ? (
-        <>
+        <EuiPanel paddingSize="none">
           <ProcessorsHeader />
           <EuiSpacer size="l" />
           <SortableList onDragItem={handlerItemDrag}>
@@ -120,13 +109,13 @@ export function StreamDetailEnrichmentContent({
           </SortableList>
           <EuiSpacer size="m" />
           <AddProcessorButton onClick={openAddProcessor} />
-        </>
+        </EuiPanel>
       ) : (
         <EnrichmentEmptyPrompt onAddProcessor={openAddProcessor} />
       )}
       {addProcessorFlyout}
       {bottomBar}
-    </EuiPanel>
+    </>
   );
 }
 
