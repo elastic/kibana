@@ -149,7 +149,11 @@ const mergeFields = (
     ...definition.stream.ingest.wired.fields,
     ...newFields.reduce((acc, field) => {
       // Add only new fields and ignore unmapped ones
-      if (!(field.name in currentFields) && field.type !== 'unmapped') {
+      if (
+        !(field.name in currentFields) &&
+        !(field.name in definition.inherited_fields) &&
+        field.type !== 'unmapped'
+      ) {
         acc[field.name] = { type: field.type };
       }
       return acc;
