@@ -72,6 +72,7 @@ Array [
     "type": "field_value_selection",
   },
   Object {
+    "autoSortOptions": false,
     "field": "ilm.phase",
     "multiSelect": "or",
     "name": "Lifecycle phase",
