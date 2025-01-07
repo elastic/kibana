@@ -9,7 +9,7 @@
 
 import { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { ADD_PANEL_TRIGGER, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
-import { COMMON_EMBEDDABLE_GROUPING } from '@kbn/embeddable-plugin/public';
+import { ADD_PANEL_ANNOTATION_GROUP } from '@kbn/embeddable-plugin/public';
 import { APP_ICON, APP_NAME, CONTENT_ID } from '../../common';
 import { uiActions } from '../services/kibana_services';
 
@@ -38,7 +38,7 @@ export const registerCreateLinksPanelAction = () => {
         initialState: runtimeState,
       });
     },
-    grouping: [COMMON_EMBEDDABLE_GROUPING.annotation],
+    grouping: [ADD_PANEL_ANNOTATION_GROUP],
     getDisplayName: () => APP_NAME,
   });
   uiActions.attachAction(ADD_PANEL_TRIGGER, ADD_LINKS_PANEL_ACTION_ID);

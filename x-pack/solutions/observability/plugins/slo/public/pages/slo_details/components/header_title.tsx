@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import moment from 'moment';
 import React from 'react';
-import { SloStatusBadge } from '../../../components/slo/slo_status_badge';
+import { SloStateBadge, SloStatusBadge } from '../../../components/slo/slo_badges';
 import { SloRemoteBadge } from '../../slos/components/badges/slo_remote_badge';
 import { SLOGroupings } from './groupings/slo_groupings';
 
@@ -35,6 +35,7 @@ export function HeaderTitle({ isLoading, slo }: Props) {
         wrap={true}
       >
         <SloStatusBadge slo={slo} />
+        <SloStateBadge slo={slo} />
         <SloRemoteBadge slo={slo} />
         <EuiFlexItem grow={false}>
           <EuiText color="subdued" size="xs">
