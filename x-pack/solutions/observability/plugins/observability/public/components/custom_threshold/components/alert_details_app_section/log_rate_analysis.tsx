@@ -201,6 +201,7 @@ export function LogRateAnalysis({ alert, dataView, services }: AlertDetailsLogRa
                 'uiSettings',
                 'unifiedSearch',
                 'theme',
+                'userProfile',
                 'lens',
                 'i18n',
               ]),
