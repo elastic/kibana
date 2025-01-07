@@ -69,6 +69,9 @@ export interface ESQLEditorProps {
 
   /** The component by default focuses on the editor when it is mounted, this flag disables it**/
   disableAutoFocus?: boolean;
+
+  /** It validates only the ES|QL query syntax, ignoring source, columns, policies and preferences validations **/
+  syntaxValidationOnly?: boolean;
 }
 
 export interface ESQLEditorDeps {

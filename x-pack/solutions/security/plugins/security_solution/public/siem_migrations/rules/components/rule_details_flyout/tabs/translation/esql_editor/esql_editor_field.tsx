@@ -59,6 +59,7 @@ export const EsqlEditorField: React.FC<EsqlEditorFieldProps> = React.memo(
           hideTimeFilterInfo={true}
           hideQueryHistory={true}
           hasOutline={true}
+          syntaxValidationOnly
         />
       </EuiFormRow>
     );

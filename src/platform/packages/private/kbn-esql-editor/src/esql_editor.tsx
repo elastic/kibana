@@ -78,6 +78,7 @@ export const ESQLEditor = memo(function ESQLEditor({
   hasOutline,
   displayDocumentationAsFlyout,
   disableAutoFocus,
+  syntaxValidationOnly,
 }: ESQLEditorProps) {
   const popoverRef = useRef<HTMLDivElement>(null);
   const datePickerOpenStatusRef = useRef<boolean>(false);
@@ -331,6 +332,9 @@ export const ESQLEditor = memo(function ESQLEditor({
   }, []);
 
   const esqlCallbacks: ESQLCallbacks = useMemo(() => {
+    if (syntaxValidationOnly) {
+      return {};
+    }
     const callbacks: ESQLCallbacks = {
       getSources: async () => {
         clearCacheWhenOld(dataSourcesCache, query.esql);
@@ -386,6 +390,7 @@ export const ESQLEditor = memo(function ESQLEditor({
     return callbacks;
   }, [
     query.esql,
+    syntaxValidationOnly,
     memoizedSources,
     dataSourcesCache,
     dataViews,
@@ -699,18 +704,10 @@ export const ESQLEditor = memo(function ESQLEditor({
                     });
 
                     // on CMD/CTRL + Enter submit the query
-                    editor.addCommand(
-                      // eslint-disable-next-line no-bitwise
-                      monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter,
-                      onQuerySubmit
-                    );
+                    editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter, onQuerySubmit);
 
                     // on CMD/CTRL + / comment out the entire line
-                    editor.addCommand(
-                      // eslint-disable-next-line no-bitwise
-                      monaco.KeyMod.CtrlCmd | monaco.KeyCode.Slash,
-                      onCommentLine
-                    );
+                    editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Slash, onCommentLine);
 
                     setMeasuredEditorWidth(editor.getLayoutInfo().width);
                     editor.onDidLayoutChange((layoutInfoEvent) => {
