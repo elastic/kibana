@@ -208,7 +208,6 @@ packages/kbn-management/storybook/config @elastic/kibana-management
 packages/kbn-manifest @elastic/kibana-core
 packages/kbn-mock-idp-plugin @elastic/kibana-security
 packages/kbn-mock-idp-utils @elastic/kibana-security
-packages/kbn-monaco @elastic/appex-sharedux
 packages/kbn-object-versioning @elastic/appex-sharedux
 packages/kbn-object-versioning-utils @elastic/appex-sharedux
 packages/kbn-openapi-bundler @elastic/security-detection-rule-management
@@ -505,6 +504,7 @@ src/platform/packages/shared/kbn-management/settings/components/field_row @elast
 src/platform/packages/shared/kbn-management/settings/field_definition @elastic/kibana-management
 src/platform/packages/shared/kbn-management/settings/types @elastic/kibana-management
 src/platform/packages/shared/kbn-management/settings/utilities @elastic/kibana-management
+src/platform/packages/shared/kbn-monaco @elastic/appex-sharedux
 src/platform/packages/shared/kbn-openapi-common @elastic/security-detection-rule-management
 src/platform/packages/shared/kbn-osquery-io-ts-types @elastic/security-asset-management
 src/platform/packages/shared/kbn-profiling-utils @elastic/obs-ux-infra_services-team
@@ -1206,7 +1206,7 @@ src/platform/plugins/shared/discover/public/context_awareness/profile_providers/
 /test/api_integration/apis/event_annotations @elastic/kibana-visualizations
 /x-pack/test_serverless/functional/test_suites/common/visualizations/ @elastic/kibana-visualizations
 /x-pack/test_serverless/functional/fixtures/kbn_archiver/lens/ @elastic/kibana-visualizations
-packages/kbn-monaco/src/esql @elastic/kibana-esql
+src/platform/packages/shared/kbn-monaco/src/esql @elastic/kibana-esql
 
 # ESQL
 /test/api_integration/apis/esql/*.ts @elastic/kibana-esql
