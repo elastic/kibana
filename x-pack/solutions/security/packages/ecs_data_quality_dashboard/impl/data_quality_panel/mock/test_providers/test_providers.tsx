@@ -9,14 +9,15 @@ import { actionTypeRegistryMock } from '@kbn/triggers-actions-ui-plugin/public/a
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import { AssistantAvailability, AssistantProvider } from '@kbn/elastic-assistant';
-import { I18nProvider } from '@kbn/i18n-react';
-import { euiDarkVars } from '@kbn/ui-theme';
 import React from 'react';
-import { ThemeProvider } from 'styled-components';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Theme } from '@elastic/charts';
-
+import { coreMock } from '@kbn/core/public/mocks';
 import { UserProfileService } from '@kbn/core/public';
+import { I18nProvider } from '@kbn/i18n-react';
+import { EuiThemeProvider } from '@elastic/eui';
+
 import { DataQualityProvider, DataQualityProviderProps } from '../../data_quality_context';
 import { ResultsRollupContext } from '../../contexts/results_rollup_context';
 import { IndicesCheckContext } from '../../contexts/indices_check_context';
@@ -66,30 +67,32 @@ const TestExternalProvidersComponent: React.FC<TestExternalProvidersProps> = ({ 
   });
 
   return (
-    <I18nProvider>
-      <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
-        <QueryClientProvider client={queryClient}>
-          <AssistantProvider
-            actionTypeRegistry={actionTypeRegistry}
-            assistantAvailability={mockAssistantAvailability}
-            augmentMessageCodeBlocks={jest.fn()}
-            basePath={'https://localhost:5601/kbn'}
-            docLinks={{
-              ELASTIC_WEBSITE_URL: 'https://www.elastic.co/',
-              DOC_LINK_VERSION: 'current',
-            }}
-            getComments={mockGetComments}
-            http={mockHttp}
-            baseConversations={{}}
-            navigateToApp={mockNavigateToApp}
-            currentAppId={'securitySolutionUI'}
-            userProfileService={jest.fn() as unknown as UserProfileService}
-          >
-            {children}
-          </AssistantProvider>
-        </QueryClientProvider>
-      </ThemeProvider>
-    </I18nProvider>
+    <KibanaRenderContextProvider {...coreMock.createStart()}>
+      <I18nProvider>
+        <EuiThemeProvider>
+          <QueryClientProvider client={queryClient}>
+            <AssistantProvider
+              actionTypeRegistry={actionTypeRegistry}
+              assistantAvailability={mockAssistantAvailability}
+              augmentMessageCodeBlocks={jest.fn()}
+              basePath={'https://localhost:5601/kbn'}
+              docLinks={{
+                ELASTIC_WEBSITE_URL: 'https://www.elastic.co/',
+                DOC_LINK_VERSION: 'current',
+              }}
+              getComments={mockGetComments}
+              http={mockHttp}
+              baseConversations={{}}
+              navigateToApp={mockNavigateToApp}
+              currentAppId={'securitySolutionUI'}
+              userProfileService={jest.fn() as unknown as UserProfileService}
+            >
+              {children}
+            </AssistantProvider>
+          </QueryClientProvider>
+        </EuiThemeProvider>
+      </I18nProvider>
+    </KibanaRenderContextProvider>
   );
 };
 
