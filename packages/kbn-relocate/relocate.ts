@@ -178,7 +178,7 @@ export const findAndRelocateModules = async (params: RelocateModulesParams, log:
         type: 'confirm',
         name: 'overrideManualCommits',
         message:
-          'Manual commits detected in the PR, the script will try to cherry-pick them, but it might require manual intervention to resolve conflicts. Continue?',
+          'Manual commits detected in the PR. The script will try to cherry-pick them, but it might require manual intervention to resolve conflicts. Continue?',
       });
       if (!resOverride.overrideManualCommits) {
         log.info('Aborting');
@@ -218,7 +218,7 @@ export const findAndRelocateModules = async (params: RelocateModulesParams, log:
     await checkoutBranch(NEW_BRANCH);
   }
 
-  // push changes in the branch
+  await safeExec(`yarn kbn bootstrap`);
   await inquirer.prompt({
     type: 'confirm',
     name: 'readyRelocate',
@@ -247,7 +247,6 @@ export const findAndRelocateModules = async (params: RelocateModulesParams, log:
   }
 
   // relocate modules
-  await safeExec(`yarn kbn bootstrap`);
   const movedCount = await relocateModules(toMove, log);
 
   if (movedCount === 0) {
