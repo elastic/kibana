@@ -7965,7 +7965,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/vis-type-vega-plugin@link:src/plugins/vis_types/vega":
+"@kbn/vis-type-vega-plugin@link:src/platform/plugins/private/vis_types/vega":
   version "0.0.0"
   uid ""
 

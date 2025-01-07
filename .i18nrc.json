@@ -152,7 +152,7 @@
     "visTypeTable": "src/platform/plugins/private/vis_types/table",
     "visTypeTagCloud": "src/platform/plugins/private/vis_types/tagcloud",
     "visTypeTimeseries": "src/platform/plugins/shared/vis_types/timeseries",
-    "visTypeVega": "src/plugins/vis_types/vega",
+    "visTypeVega": "src/platform/plugins/private/vis_types/vega",
     "visTypeVislib": "src/plugins/vis_types/vislib",
     "visTypeXy": "src/plugins/vis_types/xy",
     "visualizations": "src/plugins/visualizations",

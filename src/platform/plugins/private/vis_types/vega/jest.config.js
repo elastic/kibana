@@ -9,9 +9,9 @@
 
 module.exports = {
   preset: '@kbn/test',
-  rootDir: '../../../..',
-  roots: ['<rootDir>/src/plugins/vis_types/vega'],
-  coverageDirectory: '<rootDir>/target/kibana-coverage/jest/src/plugins/vis_types/vega',
+  rootDir: '../../../../../..',
+  roots: ['<rootDir>/src/platform/plugins/private/vis_types/vega'],
+  coverageDirectory: '<rootDir>/target/kibana-coverage/jest/src/platform/plugins/private/vis_types/vega',
   coverageReporters: ['text', 'html'],
-  collectCoverageFrom: ['<rootDir>/src/plugins/vis_types/vega/{public,server}/**/*.{js,ts,tsx}'],
+  collectCoverageFrom: ['<rootDir>/src/platform/plugins/private/vis_types/vega/{public,server}/**/*.{js,ts,tsx}'],
 };
