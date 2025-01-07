@@ -162,6 +162,7 @@ export const ExpandedRow: FC<Props> = ({ item }) => {
             defaultMessage: 'Status',
           }
         ),
+        type: 'badge',
         description: stateValues.state,
       },
       {

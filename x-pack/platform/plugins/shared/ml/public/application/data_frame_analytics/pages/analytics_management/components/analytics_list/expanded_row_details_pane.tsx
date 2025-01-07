@@ -10,6 +10,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 
 import {
+  EuiBadge,
   EuiBasicTable,
   EuiDescriptionListDescription,
   EuiDescriptionListTitle,
@@ -24,6 +25,7 @@ import {
 
 export interface SectionItem {
   title: string;
+  type?: 'plain' | 'badge';
   description: string | ReactElement;
 }
 export interface SectionConfig {
@@ -42,7 +44,7 @@ export const OverallDetails: FC<{
   <EuiFlexGroup alignItems="center" wrap data-test-subj={overallDetails.dataTestSubj}>
     {overallDetails.items.map((item) => (
       <EuiFlexItem grow={false} key={item.title}>
-        <EuiFlexGroup gutterSize="xs">
+        <EuiFlexGroup gutterSize="xs" alignItems="center">
           <EuiFlexItem grow={false}>
             <EuiDescriptionListDescription className="descriptionListTitle">
               <EuiText size="xs">{item.title}</EuiText>
@@ -50,9 +52,13 @@ export const OverallDetails: FC<{
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiDescriptionListTitle className="descriptionListDescription">
-              <EuiText size="s">
-                <h5>{item.description}</h5>
-              </EuiText>
+              {item.type === 'badge' ? (
+                <EuiBadge color="hollow">{item.description}</EuiBadge>
+              ) : (
+                <EuiText size="s">
+                  <h5>{item.description}</h5>
+                </EuiText>
+              )}
             </EuiDescriptionListTitle>
           </EuiFlexItem>
         </EuiFlexGroup>
