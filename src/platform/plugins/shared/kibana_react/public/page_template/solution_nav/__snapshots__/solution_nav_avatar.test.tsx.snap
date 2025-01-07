@@ -17,7 +17,7 @@ box-shadow:
 ",
         "toString": [Function],
       },
-      undefined,
+      false,
     ]
   }
   iconType="logoElastic"
