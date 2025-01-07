@@ -14013,6 +14013,10 @@
                 "path": "x-pack/solutions/search/plugins/enterprise_search/public/applications/analytics/utils/find_or_create_data_view.test.ts"
               },
               {
+                "plugin": "@kbn/cloud-security-posture-graph",
+                "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/graph/src/components/mock/data_view.mock.ts"
+              },
+              {
                 "plugin": "exploratoryView",
                 "path": "x-pack/solutions/observability/plugins/exploratory_view/public/components/shared/exploratory_view/configurations/test_data/sample_attribute.ts"
               },
