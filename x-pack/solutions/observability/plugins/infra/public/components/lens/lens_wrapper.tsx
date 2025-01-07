@@ -6,10 +6,10 @@
  */
 import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
-import { TypedLensByValueInput } from '@kbn/lens-plugin/public';
+import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import { css } from '@emotion/react';
 import { useEuiTheme } from '@elastic/eui';
-import { LensAttributes } from '@kbn/lens-embeddable-utils';
+import type { LensAttributes } from '@kbn/lens-embeddable-utils';
 import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
 import { ChartLoadingProgress, ChartPlaceholder } from './chart_placeholder';
 import type { LensWrapperProps } from './types';
@@ -18,10 +18,10 @@ export const LensWrapper = ({
   attributes,
   dateRange,
   filters,
-  searchSessionId,
   loading = false,
   onLoad,
   query,
+  lastReloadRequestTime,
   ...props
 }: LensWrapperProps) => {
   const { euiTheme } = useEuiTheme();
@@ -33,7 +33,7 @@ export const LensWrapper = ({
     dateRange,
     filters,
     query,
-    searchSessionId,
+    lastReloadRequestTime,
   });
 
   const ref = useRef<HTMLDivElement>(null);
@@ -62,7 +62,7 @@ export const LensWrapper = ({
         dateRange,
         filters,
         query,
-        searchSessionId,
+        lastReloadRequestTime,
       });
     }
   }, [
@@ -71,7 +71,7 @@ export const LensWrapper = ({
     filters,
     intersectionObserverEntry?.isIntersecting,
     query,
-    searchSessionId,
+    lastReloadRequestTime,
   ]);
 
   const handleOnLoad = useCallback(
@@ -109,7 +109,7 @@ export const LensWrapper = ({
             {isLoading && <ChartLoadingProgress hasTopMargin={!props.hidePanelTitles} />}
             <EmbeddableComponentMemo
               {...props}
-              searchSessionId={state.searchSessionId}
+              lastReloadRequestTime={state.lastReloadRequestTime}
               attributes={state.attributes}
               filters={state.filters}
               onLoad={handleOnLoad}

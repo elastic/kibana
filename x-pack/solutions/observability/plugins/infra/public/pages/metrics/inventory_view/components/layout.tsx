@@ -10,20 +10,18 @@ import useInterval from 'react-use/lib/useInterval';
 import { css } from '@emotion/react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import styled from '@emotion/styled';
-import { InventoryView } from '../../../../../common/inventory_views';
-import { SnapshotNode } from '../../../../../common/http_api';
+import type { InventoryView } from '../../../../../common/inventory_views';
+import type { SnapshotNode } from '../../../../../common/http_api';
 import { AutoSizer } from '../../../../components/auto_sizer';
 import { NodesOverview } from './nodes_overview';
 import { calculateBoundsFromNodes } from '../lib/calculate_bounds_from_nodes';
 import { PageContent } from '../../../../components/page';
 import { useWaffleTimeContext } from '../hooks/use_waffle_time';
 import { useWaffleFiltersContext } from '../hooks/use_waffle_filters';
-import {
-  DEFAULT_LEGEND,
-  useWaffleOptionsContext,
-  WaffleLegendOptions,
-} from '../hooks/use_waffle_options';
-import { InfraFormatterType, InfraWaffleMapBounds } from '../../../../common/inventory/types';
+import type { WaffleLegendOptions } from '../hooks/use_waffle_options';
+import { DEFAULT_LEGEND, useWaffleOptionsContext } from '../hooks/use_waffle_options';
+import type { InfraWaffleMapBounds } from '../../../../common/inventory/types';
+import { InfraFormatterType } from '../../../../common/inventory/types';
 import { Toolbar } from './toolbars/toolbar';
 import { ViewSwitcher } from './waffle/view_switcher';
 import { createInventoryMetricFormatter } from '../lib/create_inventory_metric_formatter';
