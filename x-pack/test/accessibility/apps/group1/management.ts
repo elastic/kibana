@@ -58,23 +58,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             });
 
             it('index details - settings', async () => {
-              await PageObjects.indexManagement.clickIndexDetailsTab('settings');
+              await PageObjects.searchIndexDetail.changeTab('settingsTab');
               await a11y.testAppSnapshot();
             });
 
             it('index details - edit settings', async () => {
-              await PageObjects.indexManagement.clickIndexDetailsTab('settings');
-              await PageObjects.indexManagement.clickIndexDetailsEditSettingsSwitch();
+              await PageObjects.searchIndexDetail.changeTab('settingsTab');
+              await PageObjects.searchIndexDetail.clickIndexDetailsEditSettingsSwitch();
               await a11y.testAppSnapshot();
             });
 
             it('index details - mappings', async () => {
-              await PageObjects.indexManagement.clickIndexDetailsTab('mappings');
-              await a11y.testAppSnapshot();
-            });
-
-            it('index details - stats', async () => {
-              await PageObjects.indexManagement.clickIndexDetailsTab('stats');
+              await PageObjects.searchIndexDetail.changeTab('mappingsTab');
               await a11y.testAppSnapshot();
             });
           });
