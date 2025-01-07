@@ -13,10 +13,9 @@
  */
 
 import React from 'react';
-import type { AllDatasetsLocatorParams } from '@kbn/deeplinks-observability';
-import { ALL_DATASETS_LOCATOR_ID } from '@kbn/deeplinks-observability';
 import { EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { type LogsLocatorParams, LOGS_LOCATOR_ID } from '@kbn/logs-shared-plugin/common';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { buildLogsExplorerLocatorConfig } from './logs_explorer_locator_config';
 
@@ -31,15 +30,14 @@ export function ExploreLogsButton({
 }) {
   const { share } = useApmPluginContext();
 
-  const logsExplorerLocator =
-    share.url.locators.get<AllDatasetsLocatorParams>(ALL_DATASETS_LOCATOR_ID)!;
+  const logsLocator = share.url.locators.get<LogsLocatorParams>(LOGS_LOCATOR_ID);
 
-  if (!logsExplorerLocator) {
+  if (!logsLocator) {
     return null;
   }
 
   const { logsExplorerLinkProps } = buildLogsExplorerLocatorConfig({
-    locator: logsExplorerLocator,
+    locator: logsLocator,
     from: start,
     to: end,
     kuery,
