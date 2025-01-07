@@ -36,7 +36,7 @@ const InferenceServiceParamsFields: React.FunctionComponent<
     if (!subAction) {
       editAction(
         'subAction',
-        provider === 'openai' && taskType === 'completion'
+        (provider === 'openai' || provider === 'elastic') && taskType === 'completion'
           ? SUB_ACTION.UNIFIED_COMPLETION
           : taskType,
         index
@@ -50,7 +50,7 @@ const InferenceServiceParamsFields: React.FunctionComponent<
         'subActionParams',
         {
           ...(DEFAULTS_BY_TASK_TYPE[
-            provider === 'openai' && taskType === 'completion'
+            (provider === 'openai' || provider === 'elastic') && taskType === 'completion'
               ? SUB_ACTION.UNIFIED_COMPLETION
               : taskType
           ] ?? {}),

@@ -15,6 +15,40 @@ import * as i18n from '../translations';
 const getProviders = (http: HttpSetup): InferenceProvider[] => {
   return [
     {
+      service: 'elastic',
+      name: 'Elastic',
+      task_types: ['sparse_embedding', 'completion'],
+      configurations: {
+        'rate_limit.requests_per_minute': {
+          default_value: null,
+          description: 'Minimize the number of rate limit errors.',
+          label: 'Rate Limit',
+          required: false,
+          sensitive: false,
+          updatable: true,
+          type: FieldType.INTEGER,
+        },
+        model_id: {
+          default_value: null,
+          description: 'The name of the model to use for the inference task.',
+          label: 'Model ID',
+          required: true,
+          sensitive: false,
+          updatable: true,
+          type: FieldType.STRING,
+        },
+        max_input_tokens: {
+          default_value: null,
+          description: 'Allows you to specify the maximum number of tokens per input.',
+          label: 'Maximum Input Tokens',
+          required: false,
+          sensitive: false,
+          updatable: true,
+          type: FieldType.INTEGER,
+        },
+      },
+    },
+    {
       service: 'alibabacloud-ai-search',
       name: 'AlibabaCloud AI Search',
       task_types: ['text_embedding', 'sparse_embedding', 'rerank', 'completion'],
