@@ -13,7 +13,7 @@ import { castArray } from 'lodash';
 import { BUILT_IN_ENTITY_TYPES } from '@kbn/observability-shared-plugin/common';
 import type { AgentName } from '@kbn/elastic-agent-utils';
 import type { InventoryEntity } from '../../../common/entities';
-import { isBuiltinEntityOfType } from '../../../common/utils/entity_type_guards';
+import { isBuiltinEntityOfType } from '../../../common/utils/check_entity_type';
 
 interface EntityIconProps {
   entity: InventoryEntity;

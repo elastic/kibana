@@ -36,7 +36,7 @@ describe('identityFieldsBySource', () => {
     ).rejects.toThrowError(UnknownEntityType);
   });
 
-  it('returns the correct identity fields for a single identity field with a single source', async () => {
+  it('returns the correct identity fields with a single source', async () => {
     const instance: EntityV2 = {
       'entity.type': 'my_type',
       'entity.id': 'whatever',
@@ -63,35 +63,7 @@ describe('identityFieldsBySource', () => {
     });
   });
 
-  it('returns the correct identity fields for multiple identity field with a single source', async () => {
-    const instance: EntityV2 = {
-      'entity.type': 'my_type',
-      'entity.id': 'whatever',
-      'entity.display_name': 'Whatever',
-      'host.name': 'my_host',
-      'host.os': 'my_os',
-    };
-
-    const sources: EntitySourceDefinition[] = [
-      {
-        id: 'my_source',
-        type_id: 'my_type',
-        identity_fields: ['host.name', 'host.os'],
-        index_patterns: [],
-        metadata_fields: [],
-        filters: [],
-      },
-    ];
-    readSourceDefinitionsMock.mockResolvedValue(sources);
-
-    await expect(
-      identityFieldsBySource(instance['entity.type'], esClientMock, logger)
-    ).resolves.toEqual({
-      my_source: ['host.name', 'host.os'],
-    });
-  });
-
-  it('returns the correct identity fields for a single identity field with multiple sources', async () => {
+  it('returns the correct identity fields with multiple sources', async () => {
     const instance: EntityV2 = {
       'entity.type': 'my_type',
       'entity.id': 'whatever',
@@ -125,44 +97,6 @@ describe('identityFieldsBySource', () => {
     ).resolves.toEqual({
       my_source_host: ['host.name'],
       my_source_os: ['host.os'],
-    });
-  });
-
-  it('returns the correct identity fields for multiple identity field with multiple sources', async () => {
-    const instance: EntityV2 = {
-      'entity.type': 'my_type',
-      'entity.id': 'whatever',
-      'entity.display_name': 'Whatever',
-      'host.name': 'my_host',
-      'host.os': 'my_os',
-      'host.arch': 'my_arch',
-    };
-
-    const sources: EntitySourceDefinition[] = [
-      {
-        id: 'my_source_host',
-        type_id: 'my_type',
-        identity_fields: ['host.name', 'host.arch'],
-        index_patterns: [],
-        metadata_fields: [],
-        filters: [],
-      },
-      {
-        id: 'my_source_os',
-        type_id: 'my_type',
-        identity_fields: ['host.os', 'host.arch'],
-        index_patterns: [],
-        metadata_fields: [],
-        filters: [],
-      },
-    ];
-    readSourceDefinitionsMock.mockResolvedValue(sources);
-
-    await expect(
-      identityFieldsBySource(instance['entity.type'], esClientMock, logger)
-    ).resolves.toEqual({
-      my_source_host: ['host.name', 'host.arch'],
-      my_source_os: ['host.os', 'host.arch'],
     });
   });
 });

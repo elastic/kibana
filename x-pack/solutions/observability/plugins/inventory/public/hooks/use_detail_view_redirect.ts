@@ -14,7 +14,7 @@ import {
 import { useCallback } from 'react';
 import type { DashboardLocatorParams } from '@kbn/dashboard-plugin/public';
 import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
-import { isBuiltinEntityOfType } from '../../common/utils/entity_type_guards';
+import { isBuiltinEntityOfType } from '../../common/utils/check_entity_type';
 import type { InventoryEntity } from '../../common/entities';
 import { useKibana } from './use_kibana';
 

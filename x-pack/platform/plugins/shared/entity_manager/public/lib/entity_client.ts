@@ -140,6 +140,6 @@ export class EntityClient {
         }
       });
       return acc;
-    }, {} as Record<string, any>);
+    }, {} as Record<string, string>);
   }
 }
