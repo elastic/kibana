@@ -29,6 +29,8 @@ export const DEFAULT_METRICS_RESET_INTERVAL = 30 * 1000; // 30 seconds
 // At the default poll interval of 3sec, this averages over the last 15sec.
 export const DEFAULT_WORKER_UTILIZATION_RUNNING_AVERAGE_WINDOW = 5;
 
+export const WORKER_UTILIZATION_RUNNING_AVERAGE_WINDOW_SIZE_MS = 15 * 1000; // 15 seconds
+
 export const CLAIM_STRATEGY_UPDATE_BY_QUERY = 'update_by_query';
 export const CLAIM_STRATEGY_MGET = 'mget';
 
@@ -189,11 +191,12 @@ export const configSchema = schema.object(
       min: 50,
       max: 100,
     }),
-    worker_utilization_running_average_window: schema.number({
-      defaultValue: DEFAULT_WORKER_UTILIZATION_RUNNING_AVERAGE_WINDOW,
-      max: 100,
-      min: 1,
-    }),
+    worker_utilization_running_average_window: schema.maybe(
+      schema.number({
+        max: 100,
+        min: 1,
+      })
+    ),
     claim_strategy: schema.string({ defaultValue: CLAIM_STRATEGY_MGET }),
     request_timeouts: requestTimeoutsConfig,
     auto_calculate_default_ech_capacity: schema.boolean({ defaultValue: false }),
