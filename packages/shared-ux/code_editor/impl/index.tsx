@@ -8,7 +8,6 @@
  */
 
 import React from 'react';
-import { euiLightVars as lightTheme, euiDarkVars as darkTheme } from '@kbn/ui-theme';
 import {
   EuiDelayRender,
   EuiSkeletonText,
@@ -58,17 +57,15 @@ export const CodeEditor: React.FunctionComponent<CodeEditorProps> = (props) => {
  * Renders a Monaco code editor in the same style as other EUI form fields.
  */
 export const CodeEditorField: React.FunctionComponent<CodeEditorProps> = (props) => {
-  const { width, height, options, fullWidth, useDarkTheme: useDarkThemeProp } = props;
-  const { colorMode } = useEuiTheme();
-  const useDarkTheme = useDarkThemeProp ?? colorMode === 'DARK';
-  const theme = useDarkTheme ? darkTheme : lightTheme;
+  const { width, height, options, fullWidth } = props;
+  const { euiTheme } = useEuiTheme();
 
   const style = {
     width,
     height,
     backgroundColor: options?.readOnly
-      ? theme.euiFormBackgroundReadOnlyColor
-      : theme.euiFormBackgroundColor,
+      ? euiTheme.colors.backgroundBaseDisabled
+      : euiTheme.colors.backgroundBaseSubdued,
   };
 
   return (
