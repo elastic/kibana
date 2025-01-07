@@ -5,44 +5,57 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, useEuiTheme } from '@elastic/eui';
 import React from 'react';
-import styled from 'styled-components';
+import { css } from '@emotion/react';
 
 import * as i18n from '../translations';
 
-const NoDataLabel = styled(EuiText)`
-  text-align: center;
-`;
+const useStyles = () => {
+  const { euiTheme } = useEuiTheme();
+
+  return {
+    noDataLabel: css({
+      textAlign: 'center',
+    }),
+    container: css({
+      padding: `${euiTheme.size.m} 0`,
+    }),
+  };
+};
 
 interface Props {
   reason?: string;
 }
 
-const StyledContainer = styled.div`
-  padding: ${({ theme }) => theme.eui.euiSizeM} 0;
-`;
+const NoDataComponent: React.FC<Props> = ({ reason }) => {
+  const styles = useStyles();
+  return (
+    <EuiFlexGroup alignItems="center" gutterSize="none">
+      <EuiFlexItem grow>
+        <div css={styles.container}>
+          <EuiText css={styles.noDataLabel} color="subdued" data-test-subj="noDataLabel" size="xs">
+            {i18n.NO_DATA_LABEL}
+          </EuiText>
 
-const NoDataComponent: React.FC<Props> = ({ reason }) => (
-  <EuiFlexGroup alignItems="center" gutterSize="none">
-    <EuiFlexItem grow>
-      <StyledContainer>
-        <NoDataLabel color="subdued" data-test-subj="noDataLabel" size="xs">
-          {i18n.NO_DATA_LABEL}
-        </NoDataLabel>
-
-        {reason != null && (
-          <>
-            <EuiSpacer size="s" />
-            <NoDataLabel color="subdued" data-test-subj="reasonLabel" size="xs">
-              {reason}
-            </NoDataLabel>
-          </>
-        )}
-      </StyledContainer>
-    </EuiFlexItem>
-  </EuiFlexGroup>
-);
+          {reason != null && (
+            <>
+              <EuiSpacer size="s" />
+              <EuiText
+                css={styles.noDataLabel}
+                color="subdued"
+                data-test-subj="reasonLabel"
+                size="xs"
+              >
+                {reason}
+              </EuiText>
+            </>
+          )}
+        </div>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+};
 
 NoDataComponent.displayName = 'NoDataComponent';
 
