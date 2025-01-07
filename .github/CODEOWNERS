@@ -127,7 +127,6 @@ packages/kbn-babel-register @elastic/kibana-operations
 packages/kbn-babel-transform @elastic/kibana-operations
 packages/kbn-bazel-runner @elastic/kibana-operations
 packages/kbn-calculate-auto @elastic/obs-ux-management-team
-packages/kbn-calculate-width-from-char-count @elastic/kibana-visualizations
 packages/kbn-capture-oas-snapshot-cli @elastic/kibana-core
 packages/kbn-chart-icons @elastic/kibana-visualizations
 packages/kbn-charts-theme @elastic/kibana-visualizations
@@ -469,6 +468,7 @@ src/platform/packages/shared/kbn-analytics @elastic/kibana-core
 src/platform/packages/shared/kbn-apm-data-view @elastic/obs-ux-infra_services-team
 src/platform/packages/shared/kbn-apm-utils @elastic/obs-ux-infra_services-team
 src/platform/packages/shared/kbn-avc-banner @elastic/security-defend-workflows
+src/platform/packages/shared/kbn-calculate-width-from-char-count @elastic/kibana-visualizations
 src/platform/packages/shared/kbn-cases-components @elastic/response-ops
 src/platform/packages/shared/kbn-cbor @elastic/kibana-operations
 src/platform/packages/shared/kbn-cell-actions @elastic/security-threat-hunting-explore
