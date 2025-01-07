@@ -85,7 +85,8 @@ export abstract class ActionRunner {
     // create task to check result with some delay, this runs in case of kibana crash too
     this.checkTaskId = await this.createCheckResultTask();
 
-    await withSpan({ name: this.getActionType(), type: 'action' }, () =>
+    // intentionally skipping await, we want the API to return quickly with taskId, and let the scheduled task run async
+    withSpan({ name: this.getActionType(), type: 'action' }, () =>
       this.processAgentsInBatches()
         .then(async () => {
           if (this.checkTaskId) {
