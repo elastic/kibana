@@ -140,7 +140,7 @@ export abstract class ActionRunner {
 
           appContextService.getLogger().info(`Retrying in task: ${taskId}`);
         })
-    );
+    ).catch(() => {});
 
     return { actionId: this.actionParams.actionId! };
   }
