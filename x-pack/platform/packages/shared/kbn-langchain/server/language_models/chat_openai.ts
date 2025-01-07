@@ -207,7 +207,7 @@ export class ActionsClientChatOpenAI extends ChatOpenAI {
       tools: completionRequest.tools,
       ...('tool_choice' in completionRequest ? { tool_choice: completionRequest.tool_choice } : {}),
       // deprecated, use tools
-      functions: completionRequest.functions,
+      ...('functions' in completionRequest ? { functions: completionRequest?.functions } : {}),
       // ensure we take the messages from the completion request, not the client request
       messages: completionRequest.messages.map((message) => ({
         role: message.role,
