@@ -4121,7 +4121,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/chart-expressions-common@link:src/plugins/chart_expressions/common":
+"@kbn/chart-expressions-common@link:src/platform/packages/shared/chart-expressions-common":
   version "0.0.0"
   uid ""
 

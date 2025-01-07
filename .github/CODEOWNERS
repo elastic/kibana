@@ -451,6 +451,7 @@ src/platform/packages/private/shared-ux/page/kibana_no_data/impl @elastic/appex-
 src/platform/packages/private/shared-ux/page/kibana_no_data/mocks @elastic/appex-sharedux
 src/platform/packages/private/shared-ux/page/kibana_no_data/types @elastic/appex-sharedux
 src/platform/packages/private/shared-ux/storybook/config @elastic/appex-sharedux
+src/platform/packages/shared/chart-expressions-common @elastic/kibana-visualizations
 src/platform/packages/shared/cloud @elastic/kibana-core
 src/platform/packages/shared/deeplinks/analytics @elastic/kibana-data-discovery @elastic/kibana-presentation @elastic/kibana-visualizations
 src/platform/packages/shared/deeplinks/devtools @elastic/kibana-management
@@ -666,7 +667,6 @@ src/platform/plugins/shared/ui_actions_enhanced @elastic/appex-sharedux
 src/platform/plugins/shared/unified_doc_viewer @elastic/kibana-data-discovery
 src/platform/plugins/shared/unified_histogram @elastic/kibana-data-discovery
 src/platform/plugins/shared/usage_collection @elastic/kibana-core
-src/plugins/chart_expressions/common @elastic/kibana-visualizations
 src/plugins/chart_expressions/expression_gauge @elastic/kibana-visualizations
 src/plugins/chart_expressions/expression_heatmap @elastic/kibana-visualizations
 src/plugins/chart_expressions/expression_legacy_metric @elastic/kibana-visualizations

@@ -204,7 +204,7 @@
     "@kbn/cases-plugin": "link:x-pack/platform/plugins/shared/cases",
     "@kbn/cbor": "link:src/platform/packages/shared/kbn-cbor",
     "@kbn/cell-actions": "link:src/platform/packages/shared/kbn-cell-actions",
-    "@kbn/chart-expressions-common": "link:src/plugins/chart_expressions/common",
+    "@kbn/chart-expressions-common": "link:src/platform/packages/shared/chart-expressions-common",
     "@kbn/chart-icons": "link:packages/kbn-chart-icons",
     "@kbn/charts-plugin": "link:src/plugins/charts",
     "@kbn/charts-theme": "link:packages/kbn-charts-theme",
