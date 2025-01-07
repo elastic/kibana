@@ -22,7 +22,16 @@ export function registerRestoreRoutes({
 }: RouteDependencies) {
   // GET all snapshot restores
   router.get(
-    { path: addBasePath('restores'), validate: false },
+    {
+      path: addBasePath('restores'),
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Relies on es client for authorization',
+        },
+      },
+      validate: false,
+    },
     license.guardApiRoute(async (ctx, req, res) => {
       const { client: clusterClient } = (await ctx.core).elasticsearch;
 
