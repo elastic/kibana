@@ -13,9 +13,9 @@ export const CustomCitation: React.FC<CustomCitationProps> = ({
     citationNumber
 }) => {
     const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-    
+
     const togglePopover = () =>
-        setIsPopoverOpen((isPopoverOpen) => !isPopoverOpen);
+        setIsPopoverOpen((prev) => !prev);
     const closePopover = () => setIsPopoverOpen(false);
     const openPopover = () => setIsPopoverOpen(true);
 
@@ -33,7 +33,7 @@ export const CustomCitation: React.FC<CustomCitationProps> = ({
                 }
             }}
         >
-            <sup>[{citationNumber}]</sup>
+            <sup>{`[${citationNumber}]`}</sup>
 
         </EuiButtonEmpty>
     );

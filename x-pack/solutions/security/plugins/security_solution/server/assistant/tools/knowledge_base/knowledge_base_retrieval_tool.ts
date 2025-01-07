@@ -63,7 +63,7 @@ export const KNOWLEDGE_BASE_RETRIEVAL_TOOL: AssistantTool = {
   },
 };
 
-function enrichDocument(document: Document<Record<string, any>>) {
+function enrichDocument(document: Document<Record<string, string>>) {
   return new Document({
     ...document,
     metadata: {

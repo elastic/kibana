@@ -86,7 +86,7 @@ export const KnowledgeBaseSettingsManagement: React.FC<Params> = React.memo(({ d
   const [searchParams] = useSearchParams()
   const initialSearchTerm = useMemo(
     () => (searchParams.get('entry_search_term') as string) ?? undefined,
-    []
+    [searchParams]
   );
 
   const [deleteKBItem, setDeleteKBItem] = useState<DocumentEntry | IndexEntry | null>(null);
@@ -293,7 +293,7 @@ export const KnowledgeBaseSettingsManagement: React.FC<Params> = React.memo(({ d
       filters: [],
       defaultQuery: initialSearchTerm
     }),
-    [isFetchingEntries, handleRefreshTable, onDocumentClicked, onIndexClicked]
+    [isFetchingEntries, handleRefreshTable, onDocumentClicked, onIndexClicked, initialSearchTerm]
   );
 
   const flyoutTitle = useMemo(() => {
