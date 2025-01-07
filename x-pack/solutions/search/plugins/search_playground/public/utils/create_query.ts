@@ -248,7 +248,9 @@ export function createQuery(
       };
     });
 
-    const semanticField = matches.find((match) => match.semantic)?.semantic.field ?? null;
+    const semanticFields = matches
+      .filter((match) => match.semantic)
+      .map((match) => match.semantic.field);
 
     return {
       retriever: {
@@ -256,15 +258,16 @@ export function createQuery(
           retrievers,
         },
       },
-      ...(semanticField
+      ...(semanticFields.length > 0
         ? {
             highlight: {
-              fields: {
-                [semanticField]: {
+              fields: semanticFields.reduce((acc, field) => {
+                acc[field] = {
                   type: SEMANTIC_FIELD_TYPE,
                   number_of_fragments: 2,
-                },
-              },
+                };
+                return acc;
+              }, {}),
             },
           }
         : {}),
