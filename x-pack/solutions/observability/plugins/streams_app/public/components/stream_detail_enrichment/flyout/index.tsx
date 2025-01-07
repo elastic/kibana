@@ -21,17 +21,17 @@ import { ProcessorOutcomePreview } from './processor_outcome_preview';
 import { convertFormStateToProcessing, getDefaultFormState } from '../utils';
 
 export interface ProcessorFlyoutProps {
-  definition: ReadStreamDefinition;
   onClose: () => void;
 }
 
 export interface AddProcessorFlyoutProps extends ProcessorFlyoutProps {
+  definition: ReadStreamDefinition;
   onAddProcessor: (newProcessing: ProcessingDefinition, newFields?: DetectedField[]) => void;
 }
 export interface EditProcessorFlyoutProps extends ProcessorFlyoutProps {
+  processor: ProcessorDefinition;
   onDeleteProcessor: (id: string) => void;
   onUpdateProcessor: (id: string, processor: ProcessorDefinition) => void;
-  processor: ProcessorDefinition;
 }
 
 export function AddProcessorFlyout({
@@ -78,8 +78,8 @@ export function AddProcessorFlyout({
         <EuiForm component="form" fullWidth onSubmit={methods.handleSubmit(handleSubmit)}>
           <ProcessorTypeSelector />
           <EuiSpacer size="m" />
-          {formFields.type === 'grok' && <GrokProcessorForm definition={definition} />}
-          {formFields.type === 'dissect' && <DissectProcessorForm definition={definition} />}
+          {formFields.type === 'grok' && <GrokProcessorForm />}
+          {formFields.type === 'dissect' && <DissectProcessorForm />}
         </EuiForm>
         <EuiHorizontalRule />
         <ProcessorOutcomePreview definition={definition} formFields={formFields} />
@@ -89,7 +89,6 @@ export function AddProcessorFlyout({
 }
 
 export function EditProcessorFlyout({
-  definition,
   onClose,
   onDeleteProcessor,
   onUpdateProcessor,
@@ -148,8 +147,8 @@ export function EditProcessorFlyout({
         <EuiForm component="form" fullWidth onSubmit={methods.handleSubmit(handleSubmit)}>
           <ProcessorTypeSelector disabled />
           <EuiSpacer size="m" />
-          {formFields.type === 'grok' && <GrokProcessorForm definition={definition} />}
-          {formFields.type === 'dissect' && <DissectProcessorForm definition={definition} />}
+          {formFields.type === 'grok' && <GrokProcessorForm />}
+          {formFields.type === 'dissect' && <DissectProcessorForm />}
           <EuiHorizontalRule />
           <DangerZone onDeleteProcessor={handleProcessorDelete} />
         </EuiForm>
