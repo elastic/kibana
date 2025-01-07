@@ -4417,7 +4417,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-chrome-browser-internal@link:packages/core/chrome/core-chrome-browser-internal":
+"@kbn/core-chrome-browser-internal@link:src/core/packages/chrome/browser-internal":
   version "0.0.0"
   uid ""
 
@@ -4433,31 +4433,31 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-custom-branding-browser-internal@link:packages/core/custom-branding/core-custom-branding-browser-internal":
+"@kbn/core-custom-branding-browser-internal@link:src/core/packages/custom-branding/browser-internal":
   version "0.0.0"
   uid ""
 
-"@kbn/core-custom-branding-browser-mocks@link:packages/core/custom-branding/core-custom-branding-browser-mocks":
+"@kbn/core-custom-branding-browser-mocks@link:src/core/packages/custom-branding/browser-mocks":
   version "0.0.0"
   uid ""
 
-"@kbn/core-custom-branding-browser@link:packages/core/custom-branding/core-custom-branding-browser":
+"@kbn/core-custom-branding-browser@link:src/core/packages/custom-branding/browser":
   version "0.0.0"
   uid ""
 
-"@kbn/core-custom-branding-common@link:packages/core/custom-branding/core-custom-branding-common":
+"@kbn/core-custom-branding-common@link:src/core/packages/custom-branding/common":
   version "0.0.0"
   uid ""
 
-"@kbn/core-custom-branding-server-internal@link:packages/core/custom-branding/core-custom-branding-server-internal":
+"@kbn/core-custom-branding-server-internal@link:src/core/packages/custom-branding/server-internal":
   version "0.0.0"
   uid ""
 
-"@kbn/core-custom-branding-server-mocks@link:packages/core/custom-branding/core-custom-branding-server-mocks":
+"@kbn/core-custom-branding-server-mocks@link:src/core/packages/custom-branding/server-mocks":
   version "0.0.0"
   uid ""
 
-"@kbn/core-custom-branding-server@link:packages/core/custom-branding/core-custom-branding-server":
+"@kbn/core-custom-branding-server@link:src/core/packages/custom-branding/server":
   version "0.0.0"
   uid ""
 
@@ -5121,7 +5121,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-ui-settings-browser-internal@link:packages/core/ui-settings/core-ui-settings-browser-internal":
+"@kbn/core-ui-settings-browser-internal@link:src/core/packages/ui-settings/browser-internal":
   version "0.0.0"
   uid ""
 
@@ -5129,15 +5129,15 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-ui-settings-browser@link:packages/core/ui-settings/core-ui-settings-browser":
+"@kbn/core-ui-settings-browser@link:src/core/packages/ui-settings/browser":
   version "0.0.0"
   uid ""
 
-"@kbn/core-ui-settings-common@link:packages/core/ui-settings/core-ui-settings-common":
+"@kbn/core-ui-settings-common@link:src/core/packages/ui-settings/common":
   version "0.0.0"
   uid ""
 
-"@kbn/core-ui-settings-server-internal@link:packages/core/ui-settings/core-ui-settings-server-internal":
+"@kbn/core-ui-settings-server-internal@link:src/core/packages/ui-settings/server-internal":
   version "0.0.0"
   uid ""
 
@@ -5145,7 +5145,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-ui-settings-server@link:packages/core/ui-settings/core-ui-settings-server":
+"@kbn/core-ui-settings-server@link:src/core/packages/ui-settings/server":
   version "0.0.0"
   uid ""
 
