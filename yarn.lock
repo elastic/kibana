@@ -6145,7 +6145,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/lens-plugin@link:x-pack/plugins/lens":
+"@kbn/lens-plugin@link:x-pack/platform/plugins/shared/lens":
   version "0.0.0"
   uid ""
 

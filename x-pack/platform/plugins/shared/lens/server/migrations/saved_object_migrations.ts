@@ -592,7 +592,7 @@ const lensMigrations: SavedObjectMigrationMap = {
   '8.6.0': flow(migrateIndexPatternDatasource, migratePartitionMetrics),
   '8.9.0': migrateMetricFormatter,
   // FOLLOW THESE GUIDELINES IF YOU ARE ADDING A NEW MIGRATION!
-  // 1. Make sure you are applying migrations for a given version in the same order here as they are applied in x-pack/plugins/lens/server/embeddable/make_lens_embeddable_factory.ts
+  // 1. Make sure you are applying migrations for a given version in the same order here as they are applied in x-pack/platform/plugins/shared/lens/server/embeddable/make_lens_embeddable_factory.ts
 };
 
 export const getAllMigrations = (

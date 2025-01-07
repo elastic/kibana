@@ -883,6 +883,7 @@ x-pack/platform/plugins/shared/index_management @elastic/kibana-management
 x-pack/platform/plugins/shared/inference @elastic/appex-ai-infra
 x-pack/platform/plugins/shared/ingest_pipelines @elastic/kibana-management
 x-pack/platform/plugins/shared/integration_assistant @elastic/security-scalability
+x-pack/platform/plugins/shared/lens @elastic/kibana-visualizations
 x-pack/platform/plugins/shared/license_management @elastic/kibana-management
 x-pack/platform/plugins/shared/licensing @elastic/kibana-core
 x-pack/platform/plugins/shared/logs_data_access @elastic/obs-ux-logs-team
@@ -904,7 +905,6 @@ x-pack/platform/plugins/shared/stack_connectors @elastic/response-ops
 x-pack/platform/plugins/shared/task_manager @elastic/response-ops
 x-pack/platform/plugins/shared/triggers_actions_ui @elastic/response-ops
 x-pack/plugins/drilldowns/url_drilldown @elastic/appex-sharedux
-x-pack/plugins/lens @elastic/kibana-visualizations
 x-pack/solutions/observability/packages/alert_details @elastic/obs-ux-management-team
 x-pack/solutions/observability/packages/alerting_test_data @elastic/obs-ux-management-team
 x-pack/solutions/observability/packages/get_padded_alert_time_range_util @elastic/obs-ux-management-team
