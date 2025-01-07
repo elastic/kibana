@@ -9,6 +9,6 @@
 
 module.exports = {
   preset: '@kbn/test',
-  rootDir: '../..',
-  roots: ['<rootDir>/packages/kbn-lens-formula-docs'],
+  rootDir: '../../../../..',
+  roots: ['<rootDir>/src/platform/packages/private/kbn-lens-formula-docs'],
 };

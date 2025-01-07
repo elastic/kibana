@@ -174,7 +174,6 @@ packages/kbn-jest-serializers @elastic/kibana-operations
 packages/kbn-journeys @elastic/kibana-operations @elastic/appex-qa
 packages/kbn-json-ast @elastic/kibana-operations
 packages/kbn-kibana-manifest-schema @elastic/kibana-operations
-packages/kbn-lens-formula-docs @elastic/kibana-visualizations
 packages/kbn-lint-packages-cli @elastic/kibana-operations
 packages/kbn-lint-ts-projects-cli @elastic/kibana-operations
 packages/kbn-managed-content-badge @elastic/kibana-visualizations
@@ -416,6 +415,7 @@ src/platform/packages/private/kbn-handlebars @elastic/kibana-security
 src/platform/packages/private/kbn-hapi-mocks @elastic/kibana-core
 src/platform/packages/private/kbn-health-gateway-server @elastic/kibana-core
 src/platform/packages/private/kbn-language-documentation @elastic/kibana-esql
+src/platform/packages/private/kbn-lens-formula-docs @elastic/kibana-visualizations
 src/platform/packages/private/kbn-management/settings/application @elastic/kibana-management
 src/platform/packages/private/kbn-management/settings/components/field_category @elastic/kibana-management
 src/platform/packages/private/kbn-management/settings/components/form @elastic/kibana-management

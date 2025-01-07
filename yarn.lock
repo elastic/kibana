@@ -6137,7 +6137,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/lens-formula-docs@link:packages/kbn-lens-formula-docs":
+"@kbn/lens-formula-docs@link:src/platform/packages/private/kbn-lens-formula-docs":
   version "0.0.0"
   uid ""
 

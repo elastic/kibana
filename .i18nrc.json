@@ -84,7 +84,7 @@
     "kibana_utils": "src/platform/plugins/shared/kibana_utils",
     "kibana-react": "src/platform/plugins/shared/kibana_react",
     "kibanaOverview": "src/platform/plugins/private/kibana_overview",
-    "lensFormulaDocs": "packages/kbn-lens-formula-docs",
+    "lensFormulaDocs": "src/platform/packages/private/kbn-lens-formula-docs",
     "lists": "x-pack/solutions/security/packages/kbn-securitysolution-list-utils/src",
     "exceptionList-components": "x-pack/solutions/security/packages/kbn-securitysolution-exception-list-components/src",
     "management": [
