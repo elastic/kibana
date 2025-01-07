@@ -111,7 +111,7 @@ describe('getSuggestions', () => {
   it('returns the suggestions attributes correctly', async () => {
     const suggestionsAttributes = await getSuggestions(
       query,
-      startDependencies,
+      startDependencies.data,
       mockDatasourceMap(),
       mockVisualizationMap(),
       dataviewSpecArr,
@@ -127,7 +127,7 @@ describe('getSuggestions', () => {
     mockSuggestionApi.mockResolvedValueOnce([]);
     const suggestionsAttributes = await getSuggestions(
       query,
-      startDependencies,
+      startDependencies.data,
       mockDatasourceMap(),
       mockVisualizationMap(),
       dataviewSpecArr,
@@ -143,7 +143,7 @@ describe('getSuggestions', () => {
     const setErrorsSpy = jest.fn();
     const suggestionsAttributes = await getSuggestions(
       query,
-      startDependencies,
+      startDependencies.data,
       mockDatasourceMap(),
       mockVisualizationMap(),
       dataviewSpecArr,
