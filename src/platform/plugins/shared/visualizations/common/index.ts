@@ -8,7 +8,6 @@
  */
 
 // TODO: https://github.com/elastic/kibana/issues/110891
-/* eslint-disable @kbn/eslint/no_export_all */
 
 /** @public types */
 export * from './types';

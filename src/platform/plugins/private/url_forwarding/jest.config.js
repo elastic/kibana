@@ -11,7 +11,10 @@ module.exports = {
   preset: '@kbn/test',
   rootDir: '../../../../..',
   roots: ['<rootDir>/src/platform/plugins/private/url_forwarding'],
-  coverageDirectory: '<rootDir>/target/kibana-coverage/jest/src/platform/plugins/private/url_forwarding',
+  coverageDirectory:
+    '<rootDir>/target/kibana-coverage/jest/src/platform/plugins/private/url_forwarding',
   coverageReporters: ['text', 'html'],
-  collectCoverageFrom: ['<rootDir>/src/platform/plugins/private/url_forwarding/public/**/*.{ts,tsx}'],
+  collectCoverageFrom: [
+    '<rootDir>/src/platform/plugins/private/url_forwarding/public/**/*.{ts,tsx}',
+  ],
 };

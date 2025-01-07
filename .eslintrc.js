@@ -599,7 +599,9 @@ module.exports = {
      * venn.js fork requires special license headers
      */
     {
-      files: ['x-pack/platform/plugins/private/graph/public/components/venn_diagram/vennjs/**/*.{js,mjs,ts,tsx}'],
+      files: [
+        'x-pack/platform/plugins/private/graph/public/components/venn_diagram/vennjs/**/*.{js,mjs,ts,tsx}',
+      ],
       rules: {
         '@kbn/eslint/require-license-header': [
           'error',

@@ -8,7 +8,6 @@
  */
 
 // TODO: https://github.com/elastic/kibana/issues/109904
-/* eslint-disable @kbn/eslint/no_export_all */
 
 export {
   DEFAULT_QUERY_LANGUAGE,

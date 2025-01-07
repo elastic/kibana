@@ -11,7 +11,10 @@ module.exports = {
   preset: '@kbn/test',
   rootDir: '../../../../../..',
   roots: ['<rootDir>/src/platform/plugins/private/vis_types/metric'],
-  coverageDirectory: '<rootDir>/target/kibana-coverage/jest/src/platform/plugins/private/vis_types/metric',
+  coverageDirectory:
+    '<rootDir>/target/kibana-coverage/jest/src/platform/plugins/private/vis_types/metric',
   coverageReporters: ['text', 'html'],
-  collectCoverageFrom: ['<rootDir>/src/platform/plugins/private/vis_types/metric/{public,server}/**/*.{ts,tsx}'],
+  collectCoverageFrom: [
+    '<rootDir>/src/platform/plugins/private/vis_types/metric/{public,server}/**/*.{ts,tsx}',
+  ],
 };
