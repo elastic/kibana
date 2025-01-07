@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook, waitFor } from '@testing-library/react';
 import * as api from './api';
 import type { AppMockRenderer } from '../common/mock';
 import { createAppMockRenderer } from '../common/mock';
@@ -30,12 +30,9 @@ describe('useGetSimilarCases', () => {
 
   it('calls getSimilarCases with correct arguments', async () => {
     const spyOnGetCases = jest.spyOn(api, 'getSimilarCases');
-    const { waitFor } = renderHook(
-      () => useGetSimilarCases({ caseId: mockCase.id, perPage: 10, page: 0 }),
-      {
-        wrapper: appMockRender.AppWrapper,
-      }
-    );
+    renderHook(() => useGetSimilarCases({ caseId: mockCase.id, perPage: 10, page: 0 }), {
+      wrapper: appMockRender.AppWrapper,
+    });
 
     await waitFor(() => {
       expect(spyOnGetCases).toBeCalled();
@@ -58,12 +55,9 @@ describe('useGetSimilarCases', () => {
     const addError = jest.fn();
     (useToasts as jest.Mock).mockReturnValue({ addSuccess, addError });
 
-    const { waitFor } = renderHook(
-      () => useGetSimilarCases({ caseId: mockCase.id, perPage: 10, page: 0 }),
-      {
-        wrapper: appMockRender.AppWrapper,
-      }
-    );
+    renderHook(() => useGetSimilarCases({ caseId: mockCase.id, perPage: 10, page: 0 }), {
+      wrapper: appMockRender.AppWrapper,
+    });
 
     await waitFor(() => {
       expect(addError).toHaveBeenCalled();
