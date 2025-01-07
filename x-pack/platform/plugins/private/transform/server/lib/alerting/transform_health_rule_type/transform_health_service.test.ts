@@ -190,6 +190,45 @@ describe('transformHealthServiceProvider', () => {
     expect(result[0].context.message).toEqual('2 transforms are started: transform1, transform2.');
   });
 
+  it('should work without previous execution state', async () => {
+    const service = transformHealthServiceProvider({ esClient, rulesClient, fieldFormatsRegistry });
+
+    (esClient.transform.getTransformStats as jest.Mock).mockResolvedValue({
+      count: 2,
+      transforms: [
+        {
+          id: 'transform1',
+          state: 'started',
+        },
+        {
+          id: 'transform2',
+          state: 'started',
+        },
+      ],
+    } as unknown as TransformGetTransformStatsResponse);
+
+    const result = await service.getHealthChecksResults(
+      {
+        includeTransforms: ['*'],
+        excludeTransforms: ['transform4', 'transform6', 'transform6*'],
+        testsConfig: {
+          notStarted: {
+            enabled: true,
+          },
+          healthCheck: {
+            enabled: false,
+          },
+          errorMessages: {
+            enabled: false,
+          },
+        },
+      },
+      {}
+    );
+
+    expect(result[0].context.message).toEqual('All transforms are started.');
+  });
+
   describe('populateTransformsWithAssignedRules', () => {
     it('should throw an error if rulesClient is missing', async () => {
       const service = transformHealthServiceProvider({ esClient, fieldFormatsRegistry });
