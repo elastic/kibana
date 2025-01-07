@@ -26,7 +26,11 @@ import { i18n } from '@kbn/i18n';
 import { TimeRange } from '@kbn/es-query';
 import { isEmpty } from 'lodash';
 import { FieldIcon } from '@kbn/react-field';
-import { FIELD_DEFINITION_TYPES, isWiredReadStream } from '@kbn/streams-schema';
+import {
+  FIELD_DEFINITION_TYPES,
+  ReadStreamDefinition,
+  isWiredReadStream,
+} from '@kbn/streams-schema';
 import { useController, useFieldArray, useFormContext } from 'react-hook-form';
 import { css } from '@emotion/react';
 import { useStreamsAppFetch } from '../../../hooks/use_streams_app_fetch';
@@ -34,9 +38,17 @@ import { useKibana } from '../../../hooks/use_kibana';
 import { StreamsAppSearchBar, StreamsAppSearchBarProps } from '../../streams_app_search_bar';
 import { PreviewTable } from '../../preview_table';
 import { convertFormStateToProcessing, isCompleteProcessingDefinition } from '../utils';
-import { DetectedField } from '../types';
+import { DetectedField, ProcessorFormState } from '../types';
 
-export const ProcessorOutcomePreview = ({ definition, formFields }) => {
+interface ProcessorOutcomePreviewProps {
+  definition: ReadStreamDefinition;
+  formFields: ProcessorFormState;
+}
+
+export const ProcessorOutcomePreview = ({
+  definition,
+  formFields,
+}: ProcessorOutcomePreviewProps) => {
   const { dependencies } = useKibana();
   const {
     data,

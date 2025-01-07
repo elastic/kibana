@@ -20,19 +20,19 @@ import { useBoolean } from '@kbn/react-hooks';
 import { DiscardChangesModal } from '../discard_changes_modal';
 
 interface ProcessorFlyoutTemplateProps {
+  banner?: React.ReactNode;
   confirmButton?: React.ReactNode;
   onClose: () => void;
   shouldConfirm?: boolean;
-  subHeader?: React.ReactNode;
   title: string;
 }
 
 export function ProcessorFlyoutTemplate({
+  banner,
   children,
   confirmButton,
   onClose,
   shouldConfirm = false,
-  subHeader,
   title,
 }: PropsWithChildren<ProcessorFlyoutTemplateProps>) {
   const [isDiscardModalOpen, { on: openDiscardModal, off: closeDiscardModal }] = useBoolean();
@@ -51,8 +51,7 @@ export function ProcessorFlyoutTemplate({
           <h2>{title}</h2>
         </EuiTitle>
       </EuiFlyoutHeader>
-      {subHeader}
-      <EuiFlyoutBody>{children}</EuiFlyoutBody>
+      <EuiFlyoutBody banner={banner}>{children}</EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiButtonEmpty iconType="cross" onClick={closeHandler}>

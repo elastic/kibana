@@ -7,7 +7,6 @@
 
 import {
   DissectProcessingDefinition,
-  FieldDefinition,
   FieldDefinitionConfig,
   GrokProcessingDefinition,
   ProcessingDefinition,
@@ -17,26 +16,15 @@ export interface ProcessorDefinition extends ProcessingDefinition {
   id: string;
 }
 
-export type ProcessorType = ProcessingDefinition['config'] extends infer U
-  ? U extends { [key: string]: any }
-    ? keyof U
-    : never
-  : never;
-
-interface BaseProcessingDefinition {
-  condition?: ProcessingDefinition['condition'];
-}
-
-export interface ProcessingDefinitionGrok extends BaseProcessingDefinition {
+export interface ProcessingDefinitionGrok extends Pick<ProcessingDefinition, 'condition'> {
   config: GrokProcessingDefinition;
 }
 
-export interface ProcessingDefinitionDissect extends BaseProcessingDefinition {
+export interface ProcessingDefinitionDissect extends Pick<ProcessingDefinition, 'condition'> {
   config: DissectProcessingDefinition;
 }
 
-interface BaseFormState {
-  condition?: ProcessingDefinition['condition'];
+interface BaseFormState extends Pick<ProcessingDefinition, 'condition'> {
   detected_fields?: DetectedField[];
 }
 

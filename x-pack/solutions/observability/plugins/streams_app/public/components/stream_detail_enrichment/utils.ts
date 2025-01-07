@@ -18,7 +18,22 @@ import {
   isWiredReadStream,
 } from '@kbn/streams-schema';
 import { isEmpty } from 'lodash';
-import { ProcessorFormState } from './types';
+import { GrokFormState, ProcessorDefinition, ProcessorFormState } from './types';
+
+const defaultCondition: ProcessingDefinition['condition'] = {
+  field: '',
+  operator: 'eq',
+  value: '',
+};
+
+const defaultProcessorConfig: GrokFormState = {
+  type: 'grok',
+  field: 'message',
+  patterns: [{ value: '' }],
+  pattern_definitions: {},
+  ignore_failure: false,
+  condition: defaultCondition,
+};
 
 export const getFieldsMapFromDefinition = (definition: ReadStreamDefinition) => {
   if (isWiredReadStream(definition)) {
@@ -29,6 +44,36 @@ export const getFieldsMapFromDefinition = (definition: ReadStreamDefinition) => 
   }
 
   return [];
+};
+
+export const getDefaultFormState = (processor?: ProcessorDefinition): ProcessorFormState => {
+  if (!processor) return defaultProcessorConfig;
+
+  let configValues: ProcessorFormState = defaultProcessorConfig;
+
+  if (isGrokProcessor(processor.config)) {
+    const { grok } = processor.config;
+
+    configValues = structuredClone({
+      ...grok,
+      type: 'grok',
+      patterns: grok.patterns.map((pattern) => ({ value: pattern })),
+    });
+  }
+
+  if (isDissectProcessor(processor.config)) {
+    const { dissect } = processor.config;
+
+    configValues = structuredClone({
+      ...dissect,
+      type: 'dissect',
+    });
+  }
+
+  return {
+    condition: processor.condition || defaultCondition,
+    ...configValues,
+  };
 };
 
 export const convertFormStateToProcessing = (

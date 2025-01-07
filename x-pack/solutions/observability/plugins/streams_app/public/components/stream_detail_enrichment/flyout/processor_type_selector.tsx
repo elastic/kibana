@@ -10,7 +10,7 @@ import { EuiLink, EuiFormRow, EuiSuperSelect, EuiSuperSelectProps } from '@elast
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useController, useFormContext, useWatch } from 'react-hook-form';
-import { ProcessorType } from '../types';
+import { ProcessorType } from '@kbn/streams-schema';
 import { useKibana } from '../../../hooks/use_kibana';
 
 interface TAvailableProcessor {

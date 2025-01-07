@@ -81,6 +81,12 @@ export const processingDefinitionSchema = z.object({
 
 export type ProcessingDefinition = z.infer<typeof processingDefinitionSchema>;
 
+export type ProcessorType = ProcessingDefinition['config'] extends infer U
+  ? U extends { [key: string]: any }
+    ? keyof U
+    : never
+  : never;
+
 export const FIELD_DEFINITION_TYPES = [
   'keyword',
   'match_only_text',

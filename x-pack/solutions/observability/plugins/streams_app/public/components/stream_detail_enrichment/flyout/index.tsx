@@ -5,45 +5,20 @@
  * 2.0.
  */
 
-/* eslint-disable @typescript-eslint/naming-convention */
-
 import React, { useMemo } from 'react';
-import { FormProvider, SubmitHandler, useForm, useWatch } from 'react-hook-form';
+import { FormProvider, SubmitHandler, useForm } from 'react-hook-form';
 import deepEqual from 'fast-deep-equal';
 import { EuiCallOut, EuiForm, EuiButton, EuiSpacer, EuiHorizontalRule } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import {
-  DissectProcessingDefinition,
-  GrokProcessingDefinition,
-  ProcessingDefinition,
-  ReadStreamDefinition,
-  conditionSchema,
-  getProcessorType,
-  isCompleteCondition,
-} from '@kbn/streams-schema';
+import { ProcessingDefinition, ReadStreamDefinition } from '@kbn/streams-schema';
 import { ProcessorTypeSelector } from './processor_type_selector';
 import { ProcessorFlyoutTemplate } from './processor_flyout_template';
-import { DetectedField, GrokFormState, ProcessorDefinition, ProcessorFormState } from '../types';
+import { DetectedField, ProcessorDefinition, ProcessorFormState } from '../types';
 import { DangerZone } from './danger_zone';
 import { DissectProcessorForm } from './dissect';
 import { GrokProcessorForm } from './grok';
 import { ProcessorOutcomePreview } from './processor_outcome_preview';
-import { convertFormStateToProcessing } from '../utils';
-
-const defaultCondition: ProcessingDefinition['condition'] = {
-  field: '',
-  operator: 'eq',
-  value: '',
-};
-
-const defaultProcessorConfig: GrokFormState = {
-  type: 'grok',
-  field: 'message',
-  patterns: [{ value: '' }],
-  pattern_definitions: {},
-  ignore_failure: false,
-  condition: defaultCondition,
-};
+import { convertFormStateToProcessing, getDefaultFormState } from '../utils';
 
 export interface ProcessorFlyoutProps {
   definition: ReadStreamDefinition;
@@ -51,11 +26,11 @@ export interface ProcessorFlyoutProps {
 }
 
 export interface AddProcessorFlyoutProps extends ProcessorFlyoutProps {
-  onAddProcessor: (_newProcessing: ProcessingDefinition, newFields?: DetectedField[]) => void;
+  onAddProcessor: (newProcessing: ProcessingDefinition, newFields?: DetectedField[]) => void;
 }
 export interface EditProcessorFlyoutProps extends ProcessorFlyoutProps {
   onDeleteProcessor: (id: string) => void;
-  onUpdateProcessor: (id: string, _processor: ProcessorDefinition) => void;
+  onUpdateProcessor: (id: string, processor: ProcessorDefinition) => void;
   processor: ProcessorDefinition;
 }
 
@@ -64,19 +39,21 @@ export function AddProcessorFlyout({
   onAddProcessor,
   onClose,
 }: AddProcessorFlyoutProps) {
-  const methods = useForm<ProcessorFormState>({
-    defaultValues: defaultProcessorConfig,
-  });
+  const defaultValues = useMemo(() => getDefaultFormState(), []);
 
-  const formFields = useWatch({ control: methods.control });
+  const methods = useForm<ProcessorFormState>({ defaultValues });
 
-  const hasChanges = useMemo(() => !deepEqual(defaultProcessorConfig, formFields), [formFields]);
+  const formFields = methods.watch();
+
+  const hasChanges = useMemo(
+    () => !deepEqual(defaultValues, formFields),
+    [defaultValues, formFields]
+  );
 
   const handleSubmit: SubmitHandler<ProcessorFormState> = (data) => {
     const processingDefinition = convertFormStateToProcessing(data);
 
     onAddProcessor(processingDefinition, data.detected_fields);
-
     onClose();
   };
 
@@ -118,83 +95,21 @@ export function EditProcessorFlyout({
   onUpdateProcessor,
   processor,
 }: EditProcessorFlyoutProps) {
-  const initialProcessorConfig = useMemo(() => {
-    const type = getProcessorType(processor);
-    let configValues: ProcessorFormState = defaultProcessorConfig;
+  const defaultValues = useMemo(() => getDefaultFormState(processor), [processor]);
 
-    if (type === 'grok') {
-      const { grok } = processor.config as GrokProcessingDefinition;
+  const methods = useForm<ProcessorFormState>({ defaultValues });
 
-      configValues = structuredClone({
-        ...grok,
-        type,
-        patterns: grok.patterns.map((pattern) => ({ value: pattern })),
-      });
-    }
-
-    if (type === 'dissect') {
-      const { dissect } = processor.config as DissectProcessingDefinition;
-
-      configValues = structuredClone({
-        ...dissect,
-        type,
-      });
-    }
-
-    return {
-      condition: processor.condition || defaultCondition,
-      ...configValues,
-    };
-  }, [processor]);
-
-  const methods = useForm<ProcessorFormState>({
-    defaultValues: initialProcessorConfig,
-  });
-
-  const formFields = useWatch({ control: methods.control });
+  const formFields = methods.watch();
 
   const hasChanges = useMemo(
-    () => !deepEqual(initialProcessorConfig, formFields),
-    [initialProcessorConfig, formFields]
+    () => !deepEqual(defaultValues, formFields),
+    [defaultValues, formFields]
   );
 
   const handleSubmit: SubmitHandler<ProcessorFormState> = (data) => {
-    if (data.type === 'grok') {
-      const { condition, field, patterns, pattern_definitions, ignore_failure } = data;
+    const processingDefinition = convertFormStateToProcessing(data);
 
-      onUpdateProcessor(processor.id, {
-        id: processor.id,
-        condition: isCompleteCondition(condition) ? condition : undefined,
-        config: {
-          grok: {
-            patterns: patterns
-              .filter(({ value }) => value.trim().length > 0)
-              .map(({ value }) => value),
-            field,
-            pattern_definitions,
-            ignore_failure,
-          },
-        },
-      });
-    }
-
-    if (data.type === 'dissect') {
-      const { condition, field, pattern, append_separator, ignore_failure } = data;
-
-      onUpdateProcessor(processor.id, {
-        id: processor.id,
-        condition: isCompleteCondition(condition) ? condition : undefined,
-        config: {
-          dissect: {
-            field,
-            pattern,
-            append_separator,
-            ignore_failure,
-          },
-        },
-      });
-    }
-
+    onUpdateProcessor(processor.id, { id: processor.id, ...processingDefinition });
     onClose();
   };
 
@@ -211,7 +126,7 @@ export function EditProcessorFlyout({
         'xpack.streams.streamDetailView.managementTab.enrichment.processorFlyout.titleEdit',
         { defaultMessage: 'Edit processor' }
       )}
-      subHeader={
+      banner={
         <EuiCallOut
           title={i18n.translate(
             'xpack.streams.streamDetailView.managementTab.enrichment.processorFlyout.calloutEdit',

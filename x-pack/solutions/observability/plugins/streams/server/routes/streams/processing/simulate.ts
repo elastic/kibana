@@ -8,13 +8,13 @@
 import { z } from '@kbn/zod';
 import { notFound, internal } from '@hapi/boom';
 import {
+  FieldDefinitionConfig,
   ProcessingDefinition,
   getProcessorType,
   processingDefinitionSchema,
 } from '@kbn/streams-schema';
 import { get } from 'lodash';
 import {
-  IngestSimulatePipelineSimulation,
   IngestSimulateResponse,
   IngestSimulateSimulateDocumentResult,
 } from '@elastic/elasticsearch/lib/api/types';
@@ -120,7 +120,10 @@ const computeSimulationDocuments = (
 const computeDetectedFields = (
   simulation: IngestSimulateResponse,
   sampleDocs: Array<{ _source: Record<string, unknown> }>
-) => {
+): Array<{
+  name: string;
+  type: FieldDefinitionConfig['type'] | 'unmapped';
+}> => {
   // Since we filter out failed documents, we need to map the simulation docs to the sample docs for later retrieval
   const samplesToSimulationMap = new Map(simulation.docs.map((doc, id) => [doc, sampleDocs[id]]));
 
