@@ -135,13 +135,13 @@ describe('AddEventNoteAction', () => {
   });
 
   describe('button state', () => {
-    test('should disable the add note button when the user does NOT have crud privileges', () => {
+    test('should disable the add note button when the user does NOT have crud privileges and no notes have been created', () => {
       useUserPrivilegesMock.mockReturnValue({
         notesPrivileges: { crud: false, read: true },
         endpointPrivileges: getEndpointPrivilegesInitialStateMock(),
       });
 
-      renderTestComponent();
+      renderTestComponent({ notesCount: 0 });
 
       expect(screen.getByTestId('timeline-notes-button-small-mock')).toHaveProperty(
         'disabled',
