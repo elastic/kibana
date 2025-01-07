@@ -1801,7 +1801,7 @@ module.exports = {
      * TSVB overrides
      */
     {
-      files: ['src/plugins/vis_types/timeseries/**/*.{js,mjs,ts,tsx}'],
+      files: ['src/platform/plugins/shared/vis_types/timeseries/**/*.{js,mjs,ts,tsx}'],
       rules: {
         'import/no-default-export': 'error',
       },
