@@ -22,6 +22,27 @@ import { aggregationType } from '../expression_row';
 import { MetricExpression } from '../../types';
 import { validateCustomThreshold } from '../validation';
 
+const BASE_ARGS: Partial<CustomEquationEditorProps> = {
+  expression: {
+    metrics: [
+      {
+        name: 'A',
+        aggType: Aggregators.COUNT,
+      },
+    ],
+    timeSize: 1,
+    timeUnit: 'm' as TimeUnitChar,
+    threshold: [1],
+    comparator: COMPARATORS.GREATER_THAN,
+  },
+  fields: [
+    { name: 'system.cpu.user.pct', normalizedType: 'number' },
+    { name: 'system.cpu.system.pct', normalizedType: 'number' },
+    { name: 'system.cpu.cores', normalizedType: 'number' },
+  ],
+  aggregationTypes: aggregationType,
+};
+
 export default {
   title: 'app/Alerts/CustomEquationEditor',
   decorators: [
@@ -121,25 +142,4 @@ export const CustomEquationEditorWithEquationErrors = {
 
 export const CustomEquationEditorWithFieldError = {
   render: CustomEquationEditorTemplate,
-};
-
-const BASE_ARGS: Partial<CustomEquationEditorProps> = {
-  expression: {
-    metrics: [
-      {
-        name: 'A',
-        aggType: Aggregators.COUNT,
-      },
-    ],
-    timeSize: 1,
-    timeUnit: 'm' as TimeUnitChar,
-    threshold: [1],
-    comparator: COMPARATORS.GREATER_THAN,
-  },
-  fields: [
-    { name: 'system.cpu.user.pct', normalizedType: 'number' },
-    { name: 'system.cpu.system.pct', normalizedType: 'number' },
-    { name: 'system.cpu.cores', normalizedType: 'number' },
-  ],
-  aggregationTypes: aggregationType,
 };
