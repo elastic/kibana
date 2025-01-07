@@ -24,6 +24,12 @@ export function registerUpgradeStatusRoute({
   router.get(
     {
       path: `${API_BASE_PATH}/status`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Relies on es client for authorization',
+        },
+      },
       options: {
         access: 'public',
         summary: `Get upgrade readiness status`,

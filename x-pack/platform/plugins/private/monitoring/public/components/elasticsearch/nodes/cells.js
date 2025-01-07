@@ -7,7 +7,7 @@
 
 import React, { useState } from 'react';
 import { get } from 'lodash';
-import { formatMetric } from '../../../lib/format_number';
+import { css } from '@emotion/react';
 import {
   EuiText,
   EuiPopover,
@@ -17,7 +17,14 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
+
 import { i18n } from '@kbn/i18n';
+
+import { formatMetric } from '../../../lib/format_number';
+
+const offlineStyle = ({ euiTheme }) => css`
+  color: ${euiTheme.colors.textParagraph};
+`;
 
 const TRENDING_DOWN = i18n.translate('xpack.monitoring.elasticsearch.node.cells.trendingDownText', {
   defaultMessage: 'down',
@@ -27,7 +34,7 @@ const TRENDING_UP = i18n.translate('xpack.monitoring.elasticsearch.node.cells.tr
 });
 
 function OfflineCell() {
-  return <div className="monTableCell__offline">N/A</div>;
+  return <div css={offlineStyle}>N/A</div>;
 }
 
 const getDirection = (slope) => {
