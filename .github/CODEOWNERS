@@ -41,17 +41,6 @@ examples/unified_doc_viewer @elastic/kibana-core
 examples/unified_field_list_examples @elastic/kibana-data-discovery
 examples/user_profile_examples @elastic/kibana-security
 examples/v8_profiler_examples @elastic/response-ops
-packages/content-management/content_editor @elastic/appex-sharedux
-packages/content-management/content_insights/content_insights_public @elastic/appex-sharedux
-packages/content-management/content_insights/content_insights_server @elastic/appex-sharedux
-packages/content-management/favorites/favorites_common @elastic/appex-sharedux
-packages/content-management/favorites/favorites_public @elastic/appex-sharedux
-packages/content-management/favorites/favorites_server @elastic/appex-sharedux
-packages/content-management/tabbed_table_list_view @elastic/appex-sharedux
-packages/content-management/table_list_view @elastic/appex-sharedux
-packages/content-management/table_list_view_common @elastic/appex-sharedux
-packages/content-management/table_list_view_table @elastic/appex-sharedux
-packages/content-management/user_profiles @elastic/appex-sharedux
 packages/core/analytics/core-analytics-browser-mocks @elastic/kibana-core
 packages/core/analytics/core-analytics-server-mocks @elastic/kibana-core
 packages/core/application/core-application-browser-mocks @elastic/kibana-core
@@ -195,8 +184,6 @@ packages/kbn-manifest @elastic/kibana-core
 packages/kbn-mock-idp-plugin @elastic/kibana-security
 packages/kbn-mock-idp-utils @elastic/kibana-security
 packages/kbn-monaco @elastic/appex-sharedux
-packages/kbn-object-versioning @elastic/appex-sharedux
-packages/kbn-object-versioning-utils @elastic/appex-sharedux
 packages/kbn-openapi-bundler @elastic/security-detection-rule-management
 packages/kbn-openapi-generator @elastic/security-detection-rule-management
 packages/kbn-optimizer @elastic/kibana-operations
@@ -210,7 +197,6 @@ packages/kbn-plugin-check @elastic/appex-sharedux
 packages/kbn-plugin-generator @elastic/kibana-operations
 packages/kbn-plugin-helpers @elastic/kibana-operations
 packages/kbn-react-mute-legacy-root-warning @elastic/appex-sharedux
-packages/kbn-recently-accessed @elastic/appex-sharedux
 packages/kbn-relocate @elastic/kibana-core
 packages/kbn-repo-file-maps @elastic/kibana-operations
 packages/kbn-repo-linter @elastic/kibana-operations
@@ -240,7 +226,6 @@ packages/kbn-tooling-log @elastic/kibana-operations
 packages/kbn-transpose-utils @elastic/kibana-visualizations
 packages/kbn-ts-projects @elastic/kibana-operations
 packages/kbn-ts-type-check-cli @elastic/kibana-operations
-packages/kbn-ui-actions-browser @elastic/appex-sharedux
 packages/kbn-use-tracked-promise @elastic/obs-ux-logs-team
 packages/kbn-validate-next-docs-cli @elastic/kibana-operations
 packages/kbn-visualization-ui-components @elastic/kibana-visualizations
@@ -453,6 +438,17 @@ src/platform/packages/private/shared-ux/page/kibana_no_data/mocks @elastic/appex
 src/platform/packages/private/shared-ux/page/kibana_no_data/types @elastic/appex-sharedux
 src/platform/packages/private/shared-ux/storybook/config @elastic/appex-sharedux
 src/platform/packages/shared/cloud @elastic/kibana-core
+src/platform/packages/shared/content-management/content_editor @elastic/appex-sharedux
+src/platform/packages/shared/content-management/content_insights/content_insights_public @elastic/appex-sharedux
+src/platform/packages/shared/content-management/content_insights/content_insights_server @elastic/appex-sharedux
+src/platform/packages/shared/content-management/favorites/favorites_common @elastic/appex-sharedux
+src/platform/packages/shared/content-management/favorites/favorites_public @elastic/appex-sharedux
+src/platform/packages/shared/content-management/favorites/favorites_server @elastic/appex-sharedux
+src/platform/packages/shared/content-management/tabbed_table_list_view @elastic/appex-sharedux
+src/platform/packages/shared/content-management/table_list_view @elastic/appex-sharedux
+src/platform/packages/shared/content-management/table_list_view_common @elastic/appex-sharedux
+src/platform/packages/shared/content-management/table_list_view_table @elastic/appex-sharedux
+src/platform/packages/shared/content-management/user_profiles @elastic/appex-sharedux
 src/platform/packages/shared/deeplinks/analytics @elastic/kibana-data-discovery @elastic/kibana-presentation @elastic/kibana-visualizations
 src/platform/packages/shared/deeplinks/devtools @elastic/kibana-management
 src/platform/packages/shared/deeplinks/fleet @elastic/fleet
@@ -507,11 +503,14 @@ src/platform/packages/shared/kbn-management/settings/components/field_row @elast
 src/platform/packages/shared/kbn-management/settings/field_definition @elastic/kibana-management
 src/platform/packages/shared/kbn-management/settings/types @elastic/kibana-management
 src/platform/packages/shared/kbn-management/settings/utilities @elastic/kibana-management
+src/platform/packages/shared/kbn-object-versioning @elastic/appex-sharedux
+src/platform/packages/shared/kbn-object-versioning-utils @elastic/appex-sharedux
 src/platform/packages/shared/kbn-openapi-common @elastic/security-detection-rule-management
 src/platform/packages/shared/kbn-osquery-io-ts-types @elastic/security-asset-management
 src/platform/packages/shared/kbn-profiling-utils @elastic/obs-ux-infra_services-team
 src/platform/packages/shared/kbn-react-field @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-react-hooks @elastic/obs-ux-logs-team
+src/platform/packages/shared/kbn-recently-accessed @elastic/appex-sharedux
 src/platform/packages/shared/kbn-repo-info @elastic/kibana-operations
 src/platform/packages/shared/kbn-resizable-layout @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-rison @elastic/kibana-operations
@@ -545,6 +544,7 @@ src/platform/packages/shared/kbn-timerange @elastic/obs-ux-logs-team
 src/platform/packages/shared/kbn-triggers-actions-ui-types @elastic/response-ops
 src/platform/packages/shared/kbn-try-in-console @elastic/search-kibana
 src/platform/packages/shared/kbn-typed-react-router-config @elastic/obs-knowledge-team @elastic/obs-ux-infra_services-team
+src/platform/packages/shared/kbn-ui-actions-browser @elastic/appex-sharedux
 src/platform/packages/shared/kbn-ui-theme @elastic/kibana-operations
 src/platform/packages/shared/kbn-unified-data-table @elastic/kibana-data-discovery @elastic/security-threat-hunting-investigations
 src/platform/packages/shared/kbn-unified-doc-viewer @elastic/kibana-data-discovery
