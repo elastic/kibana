@@ -34,6 +34,9 @@ steps:
       - command: .buildkite/scripts/steps/cloud/build_and_deploy.sh
         label: 'Build and Deploy to Cloud'
         agents:
+          provider: gcp
+          image: family/kibana-ubuntu-2004
+          imageProject: elastic-images-prod
           machineType: n2-standard-2
           preemptible: true
         timeout_in_minutes: 30
