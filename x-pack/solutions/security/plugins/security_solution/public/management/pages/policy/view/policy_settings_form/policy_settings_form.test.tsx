@@ -74,13 +74,13 @@ describe('Endpoint Policy Settings Form', () => {
 
       expect(renderResult.queryByTestId('eventMergingCallout')).not.toBeInTheDocument();
     });
-    it('should show the event merging banner for 8.16 if it has never been dismissed', () => {
+    it('should show the event merging banner if it has never been dismissed', () => {
       render();
 
       expect(renderResult.getByTestId('eventMergingCallout')).toBeInTheDocument();
     });
 
-    it('should show the event merging banner for 8.16 if `securitySolution.showEventMergingBanner` is `true`', () => {
+    it('should show the event merging banner if `securitySolution.showEventMergingBanner` is `true`', () => {
       storageMock.set('securitySolution.showEventMergingBanner', true);
       render();
 

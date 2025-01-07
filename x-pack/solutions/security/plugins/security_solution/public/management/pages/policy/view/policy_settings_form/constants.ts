@@ -6,13 +6,11 @@
  */
 
 /**
- * Event merging banner is hidden temporarily for 8.16 (and serverless).
- * Probably will be enabled for 8.17 or 8.18, when we can change the defaults and trigger policy deploy by migration.
- * Blocker issue: https://github.com/elastic/kibana/issues/193352
+ * Enables displaying event merging banner.
  */
-export const ALLOW_SHOWING_EVENT_MERGING_BANNER = false;
+export const ALLOW_SHOWING_EVENT_MERGING_BANNER = true;
 
 /**
  * The version from which we decrease event volume by default.
  */
-export const ENDPOINT_VERSION_SUPPORTING_EVENT_MERGING_BY_DEFAULT = '8.17';
+export const ENDPOINT_VERSION_SUPPORTING_EVENT_MERGING_BY_DEFAULT = '8.18';
