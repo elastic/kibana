@@ -8,11 +8,7 @@
 import { coreMock } from '@kbn/core/public/mocks';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import type {
-  LogsLocatorParams,
-  NodeLogsLocatorParams,
-  TraceLogsLocatorParams,
-} from '@kbn/logs-shared-plugin/common';
+import type { LogsLocatorParams } from '@kbn/logs-shared-plugin/common';
 import { MlLocatorDefinition } from '@kbn/ml-plugin/public';
 import { apmEnableProfilingIntegration } from '@kbn/observability-plugin/common';
 import {
@@ -162,11 +158,7 @@ export const observabilityLogsExplorerLocatorsMock = {
   singleDatasetLocator: sharePluginMock.createLocator(),
 };
 
-export const logsLocatorsMock = {
-  logsLocator: sharePluginMock.createLocator<LogsLocatorParams>(),
-  nodeLogsLocator: sharePluginMock.createLocator<NodeLogsLocatorParams>(),
-  traceLogsLocator: sharePluginMock.createLocator<TraceLogsLocatorParams>(),
-};
+export const logsLocatorMock = sharePluginMock.createLocator<LogsLocatorParams>();
 
 const mockCorePlugins = {
   embeddable: {},
