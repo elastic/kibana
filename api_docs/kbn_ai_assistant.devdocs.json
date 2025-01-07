@@ -349,7 +349,7 @@
         "label": "ChatFlyout",
         "description": [],
         "signature": [
-          "({\n  initialTitle,\n  initialMessages,\n  initialFlyoutPositionMode,\n  isOpen,\n  onClose,\n  navigateToConversation,\n  hideConversationList,\n}: { initialTitle: string; initialMessages: ",
+          "({\n  initialTitle,\n  initialMessages,\n  initialFlyoutPositionMode,\n  onFlyoutPositionModeChange,\n  isOpen,\n  onClose,\n  navigateToConversation,\n  hideConversationList,\n}: { initialTitle: string; initialMessages: ",
           {
             "pluginId": "observabilityAIAssistant",
             "scope": "common",
@@ -365,7 +365,15 @@
             "section": "def-public.FlyoutPositionMode",
             "text": "FlyoutPositionMode"
           },
-          " | undefined; isOpen: boolean; onClose: () => void; navigateToConversation?: ((conversationId?: string | undefined) => void) | undefined; hideConversationList?: boolean | undefined; }) => React.JSX.Element | null"
+          " | undefined; onFlyoutPositionModeChange?: ((next: ",
+          {
+            "pluginId": "@kbn/ai-assistant",
+            "scope": "public",
+            "docId": "kibKbnAiAssistantPluginApi",
+            "section": "def-public.FlyoutPositionMode",
+            "text": "FlyoutPositionMode"
+          },
+          ") => void) | undefined; isOpen: boolean; onClose: () => void; navigateToConversation?: ((conversationId?: string | undefined) => void) | undefined; hideConversationList?: boolean | undefined; }) => React.JSX.Element | null"
         ],
         "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/chat_flyout.tsx",
         "deprecated": false,
@@ -376,7 +384,7 @@
             "id": "def-public.ChatFlyout.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  initialTitle,\n  initialMessages,\n  initialFlyoutPositionMode,\n  isOpen,\n  onClose,\n  navigateToConversation,\n  hideConversationList,\n}",
+            "label": "{\n  initialTitle,\n  initialMessages,\n  initialFlyoutPositionMode,\n  onFlyoutPositionModeChange,\n  isOpen,\n  onClose,\n  navigateToConversation,\n  hideConversationList,\n}",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/chat_flyout.tsx",
             "deprecated": false,
@@ -434,6 +442,52 @@
                 "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/chat_flyout.tsx",
                 "deprecated": false,
                 "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/ai-assistant",
+                "id": "def-public.ChatFlyout.$1.onFlyoutPositionModeChange",
+                "type": "Function",
+                "tags": [],
+                "label": "onFlyoutPositionModeChange",
+                "description": [],
+                "signature": [
+                  "((next: ",
+                  {
+                    "pluginId": "@kbn/ai-assistant",
+                    "scope": "public",
+                    "docId": "kibKbnAiAssistantPluginApi",
+                    "section": "def-public.FlyoutPositionMode",
+                    "text": "FlyoutPositionMode"
+                  },
+                  ") => void) | undefined"
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/chat_flyout.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/ai-assistant",
+                    "id": "def-public.ChatFlyout.$1.onFlyoutPositionModeChange.$1",
+                    "type": "Enum",
+                    "tags": [],
+                    "label": "next",
+                    "description": [],
+                    "signature": [
+                      {
+                        "pluginId": "@kbn/ai-assistant",
+                        "scope": "public",
+                        "docId": "kibKbnAiAssistantPluginApi",
+                        "section": "def-public.FlyoutPositionMode",
+                        "text": "FlyoutPositionMode"
+                      }
+                    ],
+                    "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/chat_flyout.tsx",
+                    "deprecated": false,
+                    "trackAdoption": false,
+                    "isRequired": true
+                  }
+                ],
+                "returnComment": []
               },
               {
                 "parentPluginId": "@kbn/ai-assistant",
