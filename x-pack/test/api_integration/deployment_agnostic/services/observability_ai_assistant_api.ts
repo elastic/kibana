@@ -197,7 +197,6 @@ export function ObservabilityAIAssistantApiProvider(context: DeploymentAgnosticF
     admin: observabilityAIAssistantApiClient.makeInternalApiRequest('admin'),
     viewer: observabilityAIAssistantApiClient.makeInternalApiRequest('viewer'),
     editor: observabilityAIAssistantApiClient.makeInternalApiRequest('editor'),
-    unauthorizedUser: observabilityAIAssistantApiClient.makeInternalApiRequest('viewer'),
     publicApi: observabilityAIAssistantApiClient.makePublicApiRequest(),
     deleteAllActionConnectors: observabilityAIAssistantApiClient.deleteAllActionConnectors,
     createProxyActionConnector: observabilityAIAssistantApiClient.createProxyActionConnector,

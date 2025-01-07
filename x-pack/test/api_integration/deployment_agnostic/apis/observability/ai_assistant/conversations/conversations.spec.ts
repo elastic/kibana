@@ -274,7 +274,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         });
 
         it('POST /internal/observability_ai_assistant/conversation', async () => {
-          const { status } = await observabilityAIAssistantAPIClient.unauthorizedUser({
+          const { status } = await observabilityAIAssistantAPIClient.viewer({
             endpoint: 'POST /internal/observability_ai_assistant/conversation',
             params: {
               body: {
@@ -287,14 +287,14 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         });
 
         it('POST /internal/observability_ai_assistant/conversations', async () => {
-          const { status } = await observabilityAIAssistantAPIClient.unauthorizedUser({
+          const { status } = await observabilityAIAssistantAPIClient.viewer({
             endpoint: 'POST /internal/observability_ai_assistant/conversations',
           });
           expect(status).to.be(403);
         });
 
         it('PUT /internal/observability_ai_assistant/conversation/{conversationId}', async () => {
-          const { status } = await observabilityAIAssistantAPIClient.unauthorizedUser({
+          const { status } = await observabilityAIAssistantAPIClient.viewer({
             endpoint: 'PUT /internal/observability_ai_assistant/conversation/{conversationId}',
             params: {
               path: {
@@ -311,7 +311,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         });
 
         it('GET /internal/observability_ai_assistant/conversation/{conversationId}', async () => {
-          const { status } = await observabilityAIAssistantAPIClient.unauthorizedUser({
+          const { status } = await observabilityAIAssistantAPIClient.viewer({
             endpoint: 'GET /internal/observability_ai_assistant/conversation/{conversationId}',
             params: {
               path: {
@@ -323,7 +323,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         });
 
         it('DELETE /internal/observability_ai_assistant/conversation/{conversationId}', async () => {
-          const { status } = await observabilityAIAssistantAPIClient.unauthorizedUser({
+          const { status } = await observabilityAIAssistantAPIClient.viewer({
             endpoint: 'DELETE /internal/observability_ai_assistant/conversation/{conversationId}',
             params: {
               path: {

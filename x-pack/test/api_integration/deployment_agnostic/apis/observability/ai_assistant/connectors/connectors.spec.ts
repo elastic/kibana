@@ -51,7 +51,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
     describe('security roles and access privileges', () => {
       it('should deny access for users without the ai_assistant privilege', async () => {
-        const { status } = await observabilityAIAssistantAPIClient.unauthorizedUser({
+        const { status } = await observabilityAIAssistantAPIClient.viewer({
           endpoint: `GET /internal/observability_ai_assistant/connectors`,
         });
         expect(status).to.be(403);
