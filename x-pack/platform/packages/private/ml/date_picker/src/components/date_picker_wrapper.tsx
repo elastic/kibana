@@ -88,10 +88,6 @@ interface DatePickerWrapperProps {
    */
   width?: EuiSuperDatePickerProps['width'];
   /**
-   * Boolean flag to set use of flex group wrapper
-   */
-  flexGroup?: boolean;
-  /**
    * Boolean flag to disable the date picker
    */
   isDisabled?: boolean;
@@ -123,7 +119,6 @@ export const DatePickerWrapper: FC<DatePickerWrapperProps> = (props) => {
     isLoading = false,
     showRefresh,
     width,
-    flexGroup = true,
     isDisabled = false,
     needsUpdate,
     onRefresh,
@@ -362,6 +357,8 @@ export const DatePickerWrapper: FC<DatePickerWrapperProps> = (props) => {
       ) : null}
     </>
   );
+
+  const flexGroup = !isTimeRangeSelectorEnabled || isAutoRefreshOnly === true;
 
   const wrapped = flexGroup ? (
     <EuiFlexGroup gutterSize="s" alignItems="center">
