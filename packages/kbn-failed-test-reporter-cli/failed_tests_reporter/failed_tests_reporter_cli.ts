@@ -15,6 +15,8 @@ import { createFailError, createFlagError } from '@kbn/dev-cli-errors';
 import { CiStatsReporter } from '@kbn/ci-stats-reporter';
 import globby from 'globby';
 import normalize from 'normalize-path';
+import fs from 'fs';
+import { createHash } from 'crypto';
 
 import { getFailures } from './get_failures';
 import { GithubApi } from './github_api';
@@ -183,6 +185,58 @@ run(
         });
 
         await reportFailuresToFile(log, failures, bkMeta, getRootMetadata(report));
+      }
+
+      // Scout test failures reporting
+      log.info('Searching for Scout test failure reports');
+      const scoutTestFailuresDirPattern = '.scout/reports/scout-playwright-test-failures-*';
+
+      const dirs = await globby(scoutTestFailuresDirPattern, {
+        onlyDirectories: true,
+      });
+
+      if (dirs.length === 0) {
+        throw new Error(`No directories found matching pattern: ${scoutTestFailuresDirPattern}`);
+      }
+
+      const dirPath = dirs[0]; // temp take the last one
+      const summaryFilePath = Path.join(dirPath, 'test-failures-summary.json');
+
+      // Check if summary JSON exists
+      if (!fs.existsSync(summaryFilePath)) {
+        throw new Error(`Summary file not found in: ${dirPath}`);
+      }
+
+      const summaryData: Array<{ name: string; htmlReportFilename: string }> = JSON.parse(
+        fs.readFileSync(summaryFilePath, 'utf-8')
+      );
+
+      log.info('Creating failure artifacts for', summaryData.length, 'test failures');
+      for (const { name, htmlReportFilename } of summaryData) {
+        const htmlFilePath = Path.join(dirPath, htmlReportFilename);
+        const failureHTML = fs.readFileSync(htmlFilePath, 'utf-8');
+
+        const hash = createHash('md5').update(name).digest('hex'); // eslint-disable-line @kbn/eslint/no_unsafe_hash
+        const filenameBase = `${
+          process.env.BUILDKITE_JOB_ID ? process.env.BUILDKITE_JOB_ID + '_' : ''
+        }${hash}`;
+        const dir = Path.join('target', 'test_failures');
+        const failureJSON = JSON.stringify(
+          {
+            name,
+            hash,
+            buildId: bkMeta.buildId,
+            jobId: bkMeta.jobId,
+            url: bkMeta.url,
+            jobUrl: bkMeta.jobUrl,
+            jobName: bkMeta.jobName,
+          },
+          null,
+          2
+        );
+        fs.mkdirSync(dir, { recursive: true });
+        fs.writeFileSync(Path.join(dir, `${filenameBase}.html`), failureHTML, 'utf8');
+        fs.writeFileSync(Path.join(dir, `${filenameBase}.json`), failureJSON, 'utf8');
       }
     } finally {
       await CiStatsReporter.fromEnv(log).metrics([

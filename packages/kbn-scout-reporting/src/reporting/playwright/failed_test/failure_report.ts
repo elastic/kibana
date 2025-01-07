@@ -73,17 +73,29 @@ export class ScoutFailureReport {
       throw new ScoutReportError(`Save destination path '${destination}' already exists`);
     }
 
-    // Create the destination directory
-    this.log.info(`Saving Scout failures report to ${destination}`);
-    fs.mkdirSync(destination, { recursive: true });
-
     const testFailures: TestFailure[] = this.readFailuresFromNDJSON();
+
+    if (testFailures.length === 0) {
+      this.log.info('No test failures to report');
+      return;
+    }
+
+    // Create the destination directory
+    this.log.info(
+      `Saving Scout failures report to ${destination}: ${testFailures.length} failures reported`
+    );
+    fs.mkdirSync(destination, { recursive: true });
 
     // Generate HTML report for each failed test with embedded screenshots
     for (const failure of testFailures) {
       const htmlContent = buildFailureHtml(failure);
       const htmlReportPath = path.join(destination, `${failure.id}.html`);
-      saveTestFailuresReport(htmlReportPath, htmlContent, this.log);
+      saveTestFailuresReport(
+        htmlReportPath,
+        htmlContent,
+        this.log,
+        `html report for ${failure.id} is saved at ${htmlReportPath}`
+      );
     }
 
     const summaryContent = testFailures.map((failure) => {
@@ -98,7 +110,8 @@ export class ScoutFailureReport {
     saveTestFailuresReport(
       testFailuresSummaryReportPath,
       JSON.stringify(summaryContent, null, 2),
-      this.log
+      this.log,
+      `Summary report is saved at ${testFailuresSummaryReportPath}`
     );
   }
 

@@ -13,11 +13,12 @@ import { ToolingLog } from '@kbn/tooling-log';
 export const saveTestFailuresReport = (
   reportPath: string,
   testFailureHtml: string,
-  log: ToolingLog
+  log: ToolingLog,
+  message: string
 ): void => {
   try {
     fs.writeFileSync(reportPath, testFailureHtml, 'utf-8');
-    log.info(`Saving Scout test failure html to ${reportPath}`);
+    log.info(message);
   } catch (error) {
     log.error(`Failed to save report at ${reportPath}: ${error.message}`);
   }
