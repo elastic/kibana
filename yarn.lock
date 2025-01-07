@@ -6373,10 +6373,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/ml-kibana-theme@link:x-pack/platform/packages/private/ml/kibana_theme":
-  version "0.0.0"
-  uid ""
-
 "@kbn/ml-local-storage@link:x-pack/platform/packages/private/ml/local_storage":
   version "0.0.0"
   uid ""

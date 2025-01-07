@@ -779,7 +779,6 @@ x-pack/platform/packages/private/ml/inference_integration_flyout @elastic/ml-ui
 x-pack/platform/packages/private/ml/is_defined @elastic/ml-ui
 x-pack/platform/packages/private/ml/is_populated_object @elastic/ml-ui
 x-pack/platform/packages/private/ml/json_schemas @elastic/ml-ui
-x-pack/platform/packages/private/ml/kibana_theme @elastic/ml-ui
 x-pack/platform/packages/private/ml/local_storage @elastic/ml-ui
 x-pack/platform/packages/private/ml/nested_property @elastic/ml-ui
 x-pack/platform/packages/private/ml/number_utils @elastic/ml-ui
@@ -3171,7 +3170,6 @@ x-pack/platform/packages/private/ml/inference_integration_flyout @elastic/ml-ui
 x-pack/platform/packages/private/ml/is_defined @elastic/ml-ui
 x-pack/platform/packages/private/ml/is_populated_object @elastic/ml-ui
 x-pack/platform/packages/private/ml/json_schemas @elastic/ml-ui
-x-pack/platform/packages/private/ml/kibana_theme @elastic/ml-ui
 x-pack/platform/packages/private/ml/local_storage @elastic/ml-ui
 x-pack/platform/packages/private/ml/nested_property @elastic/ml-ui
 x-pack/platform/packages/private/ml/number_utils @elastic/ml-ui

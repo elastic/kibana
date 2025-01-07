@@ -665,7 +665,6 @@
     "@kbn/ml-in-memory-table": "link:x-pack/platform/packages/private/ml/in_memory_table",
     "@kbn/ml-is-defined": "link:x-pack/platform/packages/private/ml/is_defined",
     "@kbn/ml-is-populated-object": "link:x-pack/platform/packages/private/ml/is_populated_object",
-    "@kbn/ml-kibana-theme": "link:x-pack/platform/packages/private/ml/kibana_theme",
     "@kbn/ml-local-storage": "link:x-pack/platform/packages/private/ml/local_storage",
     "@kbn/ml-nested-property": "link:x-pack/platform/packages/private/ml/nested_property",
     "@kbn/ml-number-utils": "link:x-pack/platform/packages/private/ml/number_utils",
