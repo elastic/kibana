@@ -7873,7 +7873,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/url-forwarding-plugin@link:src/plugins/url_forwarding":
+"@kbn/url-forwarding-plugin@link:src/platform/plugins/private/url_forwarding":
   version "0.0.0"
   uid ""
 

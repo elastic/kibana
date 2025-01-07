@@ -370,7 +370,7 @@ It manages its own state and data fetching, and can easily be dropped into pages
 |Contains all the components of Kibana's unified search experience. Specifically:
 
 
-|{kib-repo}blob/{branch}/src/plugins/url_forwarding/README.md[urlForwarding]
+|{kib-repo}blob/{branch}/src/platform/plugins/private/url_forwarding/README.md[urlForwarding]
 |This plugins contains helpers to redirect legacy URLs. It can be used to forward old URLs to their new counterparts.
 
 
