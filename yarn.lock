@@ -7949,7 +7949,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/vis-type-table-plugin@link:src/plugins/vis_types/table":
+"@kbn/vis-type-table-plugin@link:src/platform/plugins/private/vis_types/table":
   version "0.0.0"
   uid ""
 

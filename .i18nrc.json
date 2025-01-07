@@ -149,7 +149,7 @@
     "visTypeMarkdown": "src/platform/plugins/private/vis_type_markdown",
     "visTypeMetric": "src/platform/plugins/private/vis_types/metric",
     "visTypePie": "src/platform/plugins/private/vis_types/pie",
-    "visTypeTable": "src/plugins/vis_types/table",
+    "visTypeTable": "src/platform/plugins/private/vis_types/table",
     "visTypeTagCloud": "src/plugins/vis_types/tagcloud",
     "visTypeTimeseries": "src/plugins/vis_types/timeseries",
     "visTypeVega": "src/plugins/vis_types/vega",
