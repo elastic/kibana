@@ -34,7 +34,9 @@ export const contentLabel = i18n.translate('unifiedDocViewer.docView.logsOvervie
 export function LogsOverviewHeader({ doc }: { doc: LogDocumentOverview }) {
   const hasLogLevel = Boolean(doc[fieldConstants.LOG_LEVEL_FIELD]);
   const hasTimestamp = Boolean(doc[fieldConstants.TIMESTAMP_FIELD]);
-  const { field, value } = getMessageFieldWithFallbacks(doc);
+  const { field, value, formattedValue } = getMessageFieldWithFallbacks(doc, {
+    includeFormattedValue: true,
+  });
   const hasBadges = hasTimestamp || hasLogLevel;
   const hasMessageField = field && value;
   const hasFlyoutHeader = hasMessageField || hasBadges;
@@ -80,14 +82,21 @@ export function LogsOverviewHeader({ doc }: { doc: LogDocumentOverview }) {
         </EuiText>
         <EuiFlexItem grow={false}>{logLevelAndTimestamp}</EuiFlexItem>
       </EuiFlexGroup>
-      <HoverActionPopover value={value} field={field} anchorPosition="downCenter" display="block">
+      <HoverActionPopover
+        value={value}
+        formattedValue={formattedValue}
+        field={field}
+        anchorPosition="downCenter"
+        display="block"
+      >
         <EuiCodeBlock
           overflowHeight={100}
           paddingSize="s"
           isCopyable
-          language="txt"
+          language={formattedValue ? 'json' : 'txt'}
           fontSize="s"
-          dangerouslySetInnerHTML={{ __html: value }}
+          children={formattedValue}
+          dangerouslySetInnerHTML={formattedValue ? undefined : { __html: value }}
         />
       </HoverActionPopover>
     </EuiFlexGroup>
