@@ -500,7 +500,7 @@
     "@kbn/event-annotation-common": "link:src/platform/packages/shared/kbn-event-annotation-common",
     "@kbn/event-annotation-components": "link:src/platform/packages/shared/kbn-event-annotation-components",
     "@kbn/event-annotation-listing-plugin": "link:src/platform/plugins/private/event_annotation_listing",
-    "@kbn/event-annotation-plugin": "link:src/plugins/event_annotation",
+    "@kbn/event-annotation-plugin": "link:src/platform/plugins/private/event_annotation",
     "@kbn/event-log-fixture-plugin": "link:x-pack/test/plugin_api_integration/plugins/event_log",
     "@kbn/event-log-plugin": "link:x-pack/platform/plugins/shared/event_log",
     "@kbn/expandable-flyout": "link:x-pack/solutions/security/packages/expandable-flyout",
