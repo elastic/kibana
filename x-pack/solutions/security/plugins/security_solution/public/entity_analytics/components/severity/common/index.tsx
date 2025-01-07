@@ -19,7 +19,7 @@ const RiskBadge = styled.div<{
   $severity: RiskSeverity;
   $hideBackgroundColor: boolean;
 }>`
-  ${({ theme, $severity, $hideBackgroundColor }) => css`
+  ${({ theme, color, $severity, $hideBackgroundColor }) => css`
     width: fit-content;
     padding-right: ${theme.eui.euiSizeS};
     padding-left: ${theme.eui.euiSizeXS};
@@ -27,7 +27,7 @@ const RiskBadge = styled.div<{
     ${($severity === 'Critical' || $severity === 'High') &&
     !$hideBackgroundColor &&
     css`
-      background-color: ${euiTheme.colors.backgroundLightDanger};
+      background-color: ${color};
       border-radius: 999px; // pill shaped
     `};
   `}
@@ -75,7 +75,7 @@ const RiskScoreBadge: React.FC<{
   const riskColors = useRiskSeverityColors();
   return (
     <RiskBadge
-      color={euiTheme.colors.danger}
+      color={euiTheme.colors.backgroundLightDanger}
       $severity={severity}
       $hideBackgroundColor={hideBackgroundColor}
       data-test-subj={dataTestSubj ?? 'risk-score'}
