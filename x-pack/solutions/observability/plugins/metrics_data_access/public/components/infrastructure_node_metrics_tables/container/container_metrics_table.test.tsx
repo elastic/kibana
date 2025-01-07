@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MetricsExplorerSeries } from '../../../../common/http_api';
+import type { MetricsExplorerSeries } from '../../../../common/http_api';
 import { CoreProviders } from '../../../apps/common_providers';
 import { render, screen, waitFor } from '@testing-library/react';
 import React from 'react';

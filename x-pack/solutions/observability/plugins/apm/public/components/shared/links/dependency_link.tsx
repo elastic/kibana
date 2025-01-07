@@ -6,12 +6,12 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
-import { TypeOf } from '@kbn/typed-react-router-config';
+import type { TypeOf } from '@kbn/typed-react-router-config';
 import React from 'react';
 import styled from '@emotion/styled';
 import { useApmRouter } from '../../../hooks/use_apm_router';
 import { truncate } from '../../../utils/style';
-import { ApmRoutes } from '../../routing/apm_route_config';
+import type { ApmRoutes } from '../../routing/apm_route_config';
 import { SpanIcon } from '../span_icon';
 
 const StyledLink = styled(EuiLink)`
