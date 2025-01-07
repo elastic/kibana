@@ -10,7 +10,7 @@ import { useHistory } from 'react-router-dom';
 import { ObservabilityAlertSearchBar } from '@kbn/observability-plugin/public';
 import { AlertStatus } from '@kbn/observability-plugin/common/typings';
 import { EuiPanel, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
-import { BoolQuery } from '@kbn/es-query';
+import { BoolQuery, Filter } from '@kbn/es-query';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
@@ -19,7 +19,7 @@ import {
 } from '../../../../common/alerting/config/apm_alerting_feature_ids';
 import { ApmPluginStartDeps } from '../../../plugin';
 import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
-import { SERVICE_NAME } from '../../../../common/es_fields/apm';
+import { SERVICE_ENVIRONMENT, SERVICE_NAME } from '../../../../common/es_fields/apm';
 import { getEnvironmentKuery } from '../../../../common/environment_filter_values';
 import { push } from '../../shared/links/url_helpers';
 
@@ -48,30 +48,45 @@ export function AlertsOverview() {
       alertsTableConfigurationRegistry,
     },
     notifications,
-    data: {
-      query: {
-        timefilter: { timefilter: timeFilterService },
-      },
-    },
+    data,
+    dataViews,
+    http,
+    spaces,
     uiSettings,
     observability: { observabilityRuleTypeRegistry },
   } = services;
+  const {
+    query: {
+      timefilter: { timefilter: timeFilterService },
+    },
+  } = data;
 
   const useToasts = () => notifications!.toasts;
 
-  const apmQueries = useMemo(() => {
+  const apmFilters: Filter[] = useMemo(() => {
     const environmentKuery = getEnvironmentKuery(environment);
-    let query = `${SERVICE_NAME}:${serviceName}`;
-
-    if (environmentKuery) {
-      query += ` AND ${environmentKuery}`;
-    }
-    return [
+    const filters: Filter[] = [
       {
-        query,
-        language: 'kuery',
+        query: {
+          match_phrase: {
+            [SERVICE_NAME]: serviceName,
+          },
+        },
+        meta: {},
       },
     ];
+
+    if (environmentKuery) {
+      filters.push({
+        query: {
+          match_phrase: {
+            [SERVICE_ENVIRONMENT]: environmentKuery,
+          },
+        },
+        meta: {},
+      });
+    }
+    return filters;
   }, [serviceName, environment]);
 
   const onKueryChange = useCallback(
@@ -90,7 +105,7 @@ export function AlertsOverview() {
               onRangeFromChange={(value) => push(history, { query: { rangeFrom: value } })}
               onRangeToChange={(value) => push(history, { query: { rangeTo: value } })}
               onKueryChange={onKueryChange}
-              defaultSearchQueries={apmQueries}
+              defaultFilters={apmFilters}
               onStatusChange={setAlertStatusFilter}
               onEsQueryChange={setEsQuery}
               rangeTo={rangeTo}
@@ -99,6 +114,11 @@ export function AlertsOverview() {
               services={{
                 timeFilterService,
                 AlertsSearchBar,
+                http,
+                data,
+                dataViews,
+                notifications,
+                spaces,
                 useToasts,
                 uiSettings,
               }}

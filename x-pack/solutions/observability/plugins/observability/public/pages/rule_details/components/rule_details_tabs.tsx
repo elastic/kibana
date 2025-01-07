@@ -16,7 +16,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import type { RuleTypeParams } from '@kbn/alerting-plugin/common';
 import type { Rule } from '@kbn/triggers-actions-ui-plugin/public';
-import type { Query, BoolQuery } from '@kbn/es-query';
+import type { BoolQuery } from '@kbn/es-query';
 import { observabilityAlertFeatureIds } from '../../../../common';
 import { useKibana } from '../../../utils/kibana_react';
 import { usePluginContext } from '../../../hooks/use_plugin_context';
@@ -65,8 +65,15 @@ export function RuleDetailsTabs({
   } = useKibana().services;
   const { observabilityRuleTypeRegistry } = usePluginContext();
 
-  const ruleQuery = useRef<Query[]>([
-    { query: `kibana.alert.rule.uuid: ${ruleId}`, language: 'kuery' },
+  const ruleFilters = useRef<Filter[]>([
+    {
+      query: {
+        match_phrase: {
+          'kibana.alert.rule.uuid': ruleId,
+        },
+      },
+      meta: {},
+    },
   ]);
 
   const tabs: EuiTabbedContentTab[] = [
@@ -84,7 +91,7 @@ export function RuleDetailsTabs({
             appName={RULE_DETAILS_ALERTS_SEARCH_BAR_ID}
             onEsQueryChange={onEsQueryChange}
             urlStorageKey={RULE_DETAILS_SEARCH_BAR_URL_STORAGE_KEY}
-            defaultSearchQueries={ruleQuery.current}
+            defaultFilters={ruleFilters.current}
           />
           <EuiSpacer size="s" />
 

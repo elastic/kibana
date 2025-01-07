@@ -14,24 +14,17 @@ import { i18n } from '@kbn/i18n';
 import { Filter } from '@kbn/es-query';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import { OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES } from '../../../common/constants';
-import { DEFAULT_QUERIES, DEFAULT_QUERY_STRING } from './constants';
+import { DEFAULT_QUERY_STRING, EMPTY_FILTERS } from './constants';
 import { ObservabilityAlertSearchBarProps } from './types';
 import { buildEsQuery } from '../../utils/build_es_query';
-// import { AlertStatus } from '../../../common/typings';
 
-// const getAlertStatusQuery = (status: string): Query[] => {
-//   return ALERT_STATUS_QUERY[status]
-//     ? [{ query: ALERT_STATUS_QUERY[status], language: 'kuery' }]
-//     : [];
-// };
 const toastTitle = i18n.translate('xpack.observability.alerts.searchBar.invalidQueryTitle', {
   defaultMessage: 'Invalid query string',
 });
-const defaultFilters: Filter[] = [];
 
 export function ObservabilityAlertSearchBar({
   appName,
-  defaultSearchQueries = DEFAULT_QUERIES,
+  defaultFilters = EMPTY_FILTERS,
   onEsQueryChange,
   onKueryChange,
   onRangeFromChange,
@@ -41,8 +34,8 @@ export function ObservabilityAlertSearchBar({
   onFilterControlsChange,
   showFilterBar = false,
   controlConfigs,
-  filters = defaultFilters,
-  filterControls = defaultFilters,
+  filters = EMPTY_FILTERS,
+  filterControls = EMPTY_FILTERS,
   savedQuery,
   setSavedQuery,
   kuery,
@@ -81,8 +74,7 @@ export function ObservabilityAlertSearchBar({
             from: rangeFrom,
           },
           kuery,
-          queries: defaultSearchQueries,
-          filters: [...filters, ...filterControls],
+          filters: [...filters, ...filterControls, ...defaultFilters],
           config: getEsQueryConfig(uiSettings),
         })
       );
@@ -97,7 +89,7 @@ export function ObservabilityAlertSearchBar({
     rangeTo,
     rangeFrom,
     kuery,
-    defaultSearchQueries,
+    defaultFilters,
     filters,
     filterControls,
     uiSettings,
@@ -173,7 +165,7 @@ export function ObservabilityAlertSearchBar({
           chainingSystem="HIERARCHICAL"
           controlsUrlState={controlConfigs}
           setControlsUrlState={onControlConfigsChange}
-          filters={filters}
+          filters={[...filters, ...defaultFilters]}
           onFiltersChange={onFilterControlsChange}
           storageKey={filterControlsStorageKey}
           services={{
@@ -184,11 +176,6 @@ export function ObservabilityAlertSearchBar({
           }}
           ControlGroupRenderer={ControlGroupRenderer}
         />
-        {/* <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">*/}
-        {/*  <EuiFlexItem grow={false}>*/}
-        {/*    <AlertsStatusFilter status={status} onChange={onStatusChange} />*/}
-        {/*  </EuiFlexItem>*/}
-        {/* </EuiFlexGroup>*/}
       </EuiFlexItem>
     </EuiFlexGroup>
   );

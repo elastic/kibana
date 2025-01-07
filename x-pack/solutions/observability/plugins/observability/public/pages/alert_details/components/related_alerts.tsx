@@ -25,7 +25,7 @@ import {
   ALERT_UUID,
   TAGS,
 } from '@kbn/rule-data-utils';
-import { BoolQuery, Filter, type Query } from '@kbn/es-query';
+import { BoolQuery, Filter } from '@kbn/es-query';
 import { AlertsGrouping } from '@kbn/alerts-grouping';
 import { ObservabilityFields } from '../../../../common/utils/alerting/types';
 
@@ -69,7 +69,8 @@ interface Props {
   alert?: TopAlert<ObservabilityFields>;
 }
 
-const defaultState: AlertSearchBarContainerState = { ...DEFAULT_STATE, status: 'active' };
+// TODO: Bring back setting default status filter as active
+const defaultState: AlertSearchBarContainerState = { ...DEFAULT_STATE };
 const DEFAULT_FILTERS: Filter[] = [];
 
 export function InternalRelatedAlerts({ alert }: Props) {
@@ -95,8 +96,17 @@ export function InternalRelatedAlerts({ alert }: Props) {
   const sharedFields = getSharedFields(alert?.fields);
   const kuery = getRelatedAlertKuery({ tags, groups, ruleId, sharedFields });
 
-  const defaultQuery = useRef<Query[]>([
-    { query: `not kibana.alert.uuid: ${alertId}`, language: 'kuery' },
+  const defaultFilters = useRef<Filter[]>([
+    {
+      query: {
+        match_phrase: {
+          'kibana.alert.uuid': alertId,
+        },
+      },
+      meta: {
+        negate: true,
+      },
+    },
   ]);
 
   useEffect(() => {
@@ -118,7 +128,7 @@ export function InternalRelatedAlerts({ alert }: Props) {
           appName={RELATED_ALERTS_SEARCH_BAR_ID}
           onEsQueryChange={setEsQuery}
           urlStorageKey={SEARCH_BAR_URL_STORAGE_KEY}
-          defaultSearchQueries={defaultQuery.current}
+          defaultFilters={defaultFilters.current}
           defaultState={{
             ...defaultState,
             kuery,
