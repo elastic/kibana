@@ -21,7 +21,7 @@ import {
 } from '../../types';
 
 import { genericErrorResponse } from '../schema/errors';
-
+import { FLEET_API_PRIVILEGES } from '../../constants/api_privileges';
 import { ListResponseSchema } from '../schema/utils';
 
 import {
@@ -36,8 +36,14 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
   router.versioned
     .get({
       path: FLEET_SERVER_HOST_API_ROUTES.LIST_PATTERN,
-      fleetAuthz: (authz) => {
-        return authz.fleet.addAgents || authz.fleet.addFleetServers || authz.fleet.readSettings;
+      security: {
+        authz: {
+          requiredPrivileges: [
+            {
+              anyRequired: [FLEET_API_PRIVILEGES.AGENTS.ALL, FLEET_API_PRIVILEGES.SETTINGS.READ],
+            },
+          ],
+        },
       },
       summary: `Get Fleet Server hosts`,
       options: {
@@ -64,8 +70,10 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
   router.versioned
     .post({
       path: FLEET_SERVER_HOST_API_ROUTES.CREATE_PATTERN,
-      fleetAuthz: {
-        fleet: { allSettings: true },
+      security: {
+        authz: {
+          requiredPrivileges: [FLEET_API_PRIVILEGES.SETTINGS.ALL],
+        },
       },
       summary: `Create a Fleet Server host`,
       options: {
@@ -92,8 +100,10 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
   router.versioned
     .get({
       path: FLEET_SERVER_HOST_API_ROUTES.INFO_PATTERN,
-      fleetAuthz: {
-        fleet: { readSettings: true },
+      security: {
+        authz: {
+          requiredPrivileges: [FLEET_API_PRIVILEGES.SETTINGS.READ],
+        },
       },
       summary: `Get a Fleet Server host`,
       description: `Get a Fleet Server host by ID.`,
@@ -121,8 +131,10 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
   router.versioned
     .delete({
       path: FLEET_SERVER_HOST_API_ROUTES.DELETE_PATTERN,
-      fleetAuthz: {
-        fleet: { allSettings: true },
+      security: {
+        authz: {
+          requiredPrivileges: [FLEET_API_PRIVILEGES.SETTINGS.ALL],
+        },
       },
       summary: `Delete a Fleet Server host`,
       description: `Delete a Fleet Server host by ID.`,
@@ -153,8 +165,10 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
   router.versioned
     .put({
       path: FLEET_SERVER_HOST_API_ROUTES.UPDATE_PATTERN,
-      fleetAuthz: {
-        fleet: { allSettings: true },
+      security: {
+        authz: {
+          requiredPrivileges: [FLEET_API_PRIVILEGES.SETTINGS.ALL],
+        },
       },
       summary: `Update a Fleet Server host`,
       description: `Update a Fleet Server host by ID.`,
