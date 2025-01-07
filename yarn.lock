@@ -5681,7 +5681,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/expression-partition-vis-plugin@link:src/plugins/chart_expressions/expression_partition_vis":
+"@kbn/expression-partition-vis-plugin@link:src/platform/plugins/shared/chart_expressions/expression_partition_vis":
   version "0.0.0"
   uid ""
 

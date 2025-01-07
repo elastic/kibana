@@ -9,12 +9,12 @@
 
 module.exports = {
   preset: '@kbn/test',
-  rootDir: '../../../../',
-  roots: ['<rootDir>/src/plugins/chart_expressions/expression_partition_vis'],
+  rootDir: '../../../../../../',
+  roots: ['<rootDir>/src/platform/plugins/shared/chart_expressions/expression_partition_vis'],
   coverageDirectory:
-    '<rootDir>/target/kibana-coverage/jest/src/plugins/chart_expressions/expression_partition_vis',
+    '<rootDir>/target/kibana-coverage/jest/src/platform/plugins/shared/chart_expressions/expression_partition_vis',
   coverageReporters: ['text', 'html'],
   collectCoverageFrom: [
-    '<rootDir>/src/plugins/chart_expressions/expression_partition_vis/{common,public,server}/**/*.{ts,tsx}',
+    '<rootDir>/src/platform/plugins/shared/chart_expressions/expression_partition_vis/{common,public,server}/**/*.{ts,tsx}',
   ],
 };
