@@ -63,6 +63,12 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.stackManagementJobs.assertSyncFlyoutSyncButtonEnabled(false);
     });
 
+    it('should not have objects to sync', async () => {
+      await ml.navigation.navigateToMl();
+      await ml.navigation.navigateToAnomalyDetection();
+      await ml.overviewPage.assertJobSyncRequiredWarningNotExists();
+    });
+
     it('should prepare test data', async () => {
       // create jobs
 
@@ -102,8 +108,8 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('should have objects to sync', async () => {
-      // sync required warning is displayed
-      await ml.navigation.navigateToMl();
+      await ml.jobTable.refreshJobList();
+
       await ml.overviewPage.assertJobSyncRequiredWarningExists();
 
       // object counts in sync flyout are all 1, sync button is enabled
