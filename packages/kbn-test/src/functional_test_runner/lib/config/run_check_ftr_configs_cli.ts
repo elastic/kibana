@@ -27,7 +27,7 @@ const IGNORED_PATHS = [
   Path.resolve(REPO_ROOT, 'packages/kbn-test/src/jest/run_check_jest_configs_cli.ts'),
   Path.resolve(
     REPO_ROOT,
-    'x-pack/plugins/observability_solution/observability_onboarding/e2e/playwright/playwright.config.ts'
+    'x-pack/solutions/observability/plugins/observability_onboarding/e2e/playwright/playwright.config.ts'
   ),
 ];
 
