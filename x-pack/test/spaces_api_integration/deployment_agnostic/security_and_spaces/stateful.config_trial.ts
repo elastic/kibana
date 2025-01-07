@@ -9,7 +9,7 @@ import { createStatefulTestConfig } from '../../../api_integration/deployment_ag
 import { services } from '../services';
 
 export default createStatefulTestConfig({
-  // @ts-expect-error
+  // @ts-expect-error roleScopedSupertest service accepts a user not just a user role and is different from the one in the common services
   services,
   testFiles: [require.resolve('./apis')],
   junit: {

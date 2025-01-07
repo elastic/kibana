@@ -5,8 +5,15 @@
  * 2.0.
  */
 
-import { createTestConfig } from '../common/config';
+import { createStatefulTestConfig } from '../../../api_integration/deployment_agnostic/default_configs/stateful.config.base';
+import { services } from '../services';
 
-export default createTestConfig('copy_to_space - trial license', [
-  require.resolve('./apis/copy_to_space'),
-]);
+export default createStatefulTestConfig({
+  // @ts-expect-error roleScopedSupertest service accepts a user not just a user role and is different from the one in the common services
+  services,
+  testFiles: [require.resolve('./apis/copy_to_space')],
+  junit: {
+    reportName:
+      'X-Pack Spaces API Deployment Agnostic Integration Tests -- copy_to_space - trial license',
+  },
+});

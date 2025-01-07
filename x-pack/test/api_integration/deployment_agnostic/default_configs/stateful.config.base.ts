@@ -41,7 +41,7 @@ export function createStatefulTestConfig<T extends DeploymentAgnosticCommonServi
     if (options.esServerArgs || options.kbnServerArgs) {
       throw new Error(
         `FTR doesn't provision custom ES/Kibana server arguments into the ESS deployment.
-      It may lead to unexpected test failures on Cloud. Please contact #appex-qa.`
+  It may lead to unexpected test failures on Cloud. Please contact #appex-qa.`
       );
     }
 
