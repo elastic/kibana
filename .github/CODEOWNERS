@@ -621,6 +621,7 @@ src/platform/plugins/private/no_data_page @elastic/appex-sharedux
 src/platform/plugins/private/presentation_panel @elastic/kibana-presentation
 src/platform/plugins/private/vis_type_markdown @elastic/kibana-presentation
 src/platform/plugins/shared/ai_assistant_management/selection @elastic/obs-ai-assistant
+src/platform/plugins/shared/chart_expressions/expression_gauge @elastic/kibana-visualizations
 src/platform/plugins/shared/charts @elastic/kibana-visualizations
 src/platform/plugins/shared/console @elastic/kibana-management
 src/platform/plugins/shared/content_management @elastic/appex-sharedux
@@ -671,7 +672,6 @@ src/platform/plugins/shared/ui_actions_enhanced @elastic/appex-sharedux
 src/platform/plugins/shared/unified_doc_viewer @elastic/kibana-data-discovery
 src/platform/plugins/shared/unified_histogram @elastic/kibana-data-discovery
 src/platform/plugins/shared/usage_collection @elastic/kibana-core
-src/plugins/chart_expressions/expression_gauge @elastic/kibana-visualizations
 src/plugins/chart_expressions/expression_heatmap @elastic/kibana-visualizations
 src/plugins/chart_expressions/expression_legacy_metric @elastic/kibana-visualizations
 src/plugins/chart_expressions/expression_metric @elastic/kibana-visualizations

@@ -5657,7 +5657,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/expression-gauge-plugin@link:src/plugins/chart_expressions/expression_gauge":
+"@kbn/expression-gauge-plugin@link:src/platform/plugins/shared/chart_expressions/expression_gauge":
   version "0.0.0"
   uid ""
 
