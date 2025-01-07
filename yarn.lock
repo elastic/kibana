@@ -4125,7 +4125,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/chart-icons@link:packages/kbn-chart-icons":
+"@kbn/chart-icons@link:src/platform/packages/shared/kbn-chart-icons":
   version "0.0.0"
   uid ""
 
