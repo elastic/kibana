@@ -7,6 +7,7 @@
 
 import React, { FC, useState } from 'react';
 import { action } from '@storybook/addon-actions';
+import type { Meta } from '@storybook/react';
 import { PalettePicker } from '..';
 
 import { paulTor14, ColorPalette } from '../../../../../common/lib/palettes';
@@ -20,7 +21,7 @@ const Interactive: FC = () => {
 export default {
   title: 'components/Color/PalettePicker',
   decorators: [(fn) => <div style={{ width: '350px' }}>{fn()}</div>],
-};
+} as Meta;
 
 export const Default = {
   render: () => <PalettePicker palette={paulTor14} onChange={action('onChange')} />,

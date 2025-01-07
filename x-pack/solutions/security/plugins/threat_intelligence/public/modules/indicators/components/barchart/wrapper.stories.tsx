@@ -122,7 +122,7 @@ const mockOnFieldChange = function (value: EuiComboBoxOptionOption<string>): voi
   window.alert(value.label);
 };
 
-export const Default: StoryObj<void> = {
+export const Default: StoryObj = {
   render: () => {
     return (
       <StoryProvidersComponent
@@ -148,7 +148,7 @@ export const Default: StoryObj<void> = {
   decorators: [(story) => <MemoryRouter>{story()}</MemoryRouter>],
 };
 
-export const InitialLoad: StoryObj<void> = {
+export const InitialLoad: StoryObj = {
   render: () => {
     return (
       <StoryProvidersComponent
@@ -176,7 +176,7 @@ export const InitialLoad: StoryObj<void> = {
   decorators: [(story) => <MemoryRouter>{story()}</MemoryRouter>],
 };
 
-export const UpdatingData: StoryObj<void> = {
+export const UpdatingData: StoryObj = {
   render: () => {
     const mockIndicators: ChartSeries[] = [
       {

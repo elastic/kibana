@@ -7,6 +7,7 @@
 
 import { action } from '@storybook/addon-actions';
 import React from 'react';
+import type { Meta } from '@storybook/react';
 import { ExpressionAstExpression } from '../../../../../types';
 
 import { ExtendedTemplate } from '../extended_template';
@@ -51,7 +52,7 @@ export default {
   decorators: [
     (story) => <div style={{ width: '323px', padding: '16px', background: '#fff' }}>{story()}</div>,
   ],
-};
+} as Meta;
 
 export const Extended = {
   render: () => <Interactive />,

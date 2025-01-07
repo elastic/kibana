@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { action } from '@storybook/addon-actions';
+import type { Meta, StoryObj } from '@storybook/react';
 import { waitFor } from '@kbn/presentation-util-plugin/public/__stories__';
 import { getElasticLogo } from '@kbn/presentation-util-plugin/common';
 import { ElementCard } from '../element_card';
@@ -25,9 +26,9 @@ export default {
       </div>
     ),
   ],
-};
+} as Meta;
 
-export const WithTitleAndDescription = {
+export const WithTitleAndDescription: StoryObj = {
   render: () => (
     <ElementCard
       title="Element 1"
@@ -38,7 +39,7 @@ export const WithTitleAndDescription = {
   name: 'with title and description',
 };
 
-export const WithImage = {
+export const WithImage: StoryObj = {
   render: (_, props) => (
     <ElementCard
       title="Element 1"
@@ -51,7 +52,7 @@ export const WithImage = {
   decorators: [waitFor(getElasticLogo())],
 };
 
-export const WithTags = {
+export const WithTags: StoryObj = {
   render: () => (
     <ElementCard
       title="Element 1"
@@ -64,7 +65,7 @@ export const WithTags = {
   name: 'with tags',
 };
 
-export const WithClickHandler = {
+export const WithClickHandler: StoryObj = {
   render: () => (
     <ElementCard
       title="Element 1"

@@ -7,6 +7,7 @@
 
 import { action } from '@storybook/addon-actions';
 import React from 'react';
+import type { Meta } from '@storybook/react';
 import { reduxDecorator, getAddonPanelParameters } from '../../../../storybook';
 import { Asset, AssetComponent } from '..';
 import { AIRPLANE, MARKER, assets } from './assets';
@@ -18,7 +19,7 @@ export default {
     reduxDecorator({ assets }),
   ],
   parameters: getAddonPanelParameters(),
-};
+} as Meta;
 
 export const ReduxAsset = {
   render: () => <Asset asset={AIRPLANE} />,

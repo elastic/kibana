@@ -25,9 +25,9 @@ addons.register(ADDON_ID, (api) => {
   addons.add(ACTIONS_PANEL_ID, {
     title: 'Redux Actions',
     type: types.PANEL,
-    render: ({ active, key }) => {
+    render: ({ active }) => {
       return (
-        <AddonPanel active={!!active} key={key}>
+        <AddonPanel active={!!active} key={ACTIONS_PANEL_ID}>
           <Panel />
         </AddonPanel>
       );

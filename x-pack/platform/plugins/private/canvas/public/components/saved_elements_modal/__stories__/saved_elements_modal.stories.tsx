@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { action } from '@storybook/addon-actions';
+import type { StoryObj } from '@storybook/react';
 import { waitFor } from '@kbn/presentation-util-plugin/public/__stories__';
 import { SavedElementsModal } from '../saved_elements_modal.component';
 import { getTestCustomElements } from './fixtures/test_elements';
@@ -16,7 +17,7 @@ export default {
   title: 'components/SavedElementsModal',
 };
 
-export const NoCustomElements = {
+export const NoCustomElements: StoryObj = {
   render: () => (
     <SavedElementsModal
       customElements={[] as CustomElement[]}
@@ -31,7 +32,7 @@ export const NoCustomElements = {
   name: 'no custom elements',
 };
 
-export const WithCustomElements = {
+export const WithCustomElements: StoryObj = {
   render: (_, props) => (
     <SavedElementsModal
       customElements={props?.testCustomElements}
@@ -47,7 +48,7 @@ export const WithCustomElements = {
   decorators: [waitFor(getTestCustomElements())],
 };
 
-export const WithTextFilter = {
+export const WithTextFilter: StoryObj = {
   render: (_, props) => (
     <SavedElementsModal
       customElements={props?.testCustomElements}

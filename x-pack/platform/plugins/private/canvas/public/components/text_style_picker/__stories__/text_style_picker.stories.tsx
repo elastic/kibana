@@ -7,6 +7,7 @@
 
 import React, { useState } from 'react';
 import { action } from '@storybook/addon-actions';
+import type { Meta } from '@storybook/react';
 
 import { TextStylePicker, StyleProps } from '../text_style_picker';
 
@@ -22,7 +23,7 @@ const Interactive = () => {
 export default {
   title: 'components/TextStylePicker',
   decorators: [(fn) => <div style={{ width: 264 }}>{fn()}</div>],
-};
+} as Meta;
 
 export const Default = {
   render: () => <TextStylePicker onChange={action('onChange')} />,

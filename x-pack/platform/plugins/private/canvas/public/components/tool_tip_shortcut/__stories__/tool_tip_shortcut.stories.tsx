@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import type { Meta } from '@storybook/react';
 import { ToolTipShortcut } from '../tool_tip_shortcut';
 
 export default {
@@ -16,7 +17,7 @@ export default {
       <div style={{ width: '100px', backgroundColor: '#343741', padding: '5px' }}>{story()}</div>
     ),
   ],
-};
+} as Meta;
 
 export const WithShortcut = {
   render: () => <ToolTipShortcut shortcut="G" />,

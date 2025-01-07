@@ -7,6 +7,7 @@
 
 import { action } from '@storybook/addon-actions';
 import React from 'react';
+import type { Meta } from '@storybook/react';
 
 import { SimpleTemplate } from '../simple_template';
 
@@ -36,7 +37,7 @@ export default {
   decorators: [
     (story) => <div style={{ width: '323px', padding: '16px', background: '#fff' }}>{story()}</div>,
   ],
-};
+} as Meta;
 
 export const Simple = {
   render: () => <Interactive />,

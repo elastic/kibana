@@ -6,8 +6,8 @@
  */
 
 import { action } from '@storybook/addon-actions';
-import { boolean } from '@storybook/addon-controls';
 import React from 'react';
+import type { StoryObj } from '@storybook/react';
 import { ColorPicker } from '../color_picker';
 
 const THREE_COLORS = ['#fff', '#666', '#000'];
@@ -72,7 +72,7 @@ export default {
   },
 };
 
-export const ThreeColors = {
+export const ThreeColors: StoryObj = {
   render: () => (
     <ColorPicker
       value="#fff"
@@ -80,14 +80,15 @@ export const ThreeColors = {
       onRemoveColor={action('onRemoveColor')}
       onChange={action('onChange')}
       colors={THREE_COLORS}
-      hasButtons={boolean('Has Buttons', true)}
     />
   ),
-
+  args: {
+    hasButtons: true,
+  },
   name: 'three colors',
 };
 
-export const SixColors = {
+export const SixColors: StoryObj = {
   render: () => (
     <ColorPicker
       value="#fff"
@@ -95,14 +96,15 @@ export const SixColors = {
       onRemoveColor={action('onRemoveColor')}
       onChange={action('onChange')}
       colors={SIX_COLORS}
-      hasButtons={boolean('Has Buttons', true)}
     />
   ),
-
+  args: {
+    hasButtons: true,
+  },
   name: 'six colors',
 };
 
-export const SixColorsValueMissing = {
+export const SixColorsValueMissing: StoryObj = {
   render: () => (
     <ColorPicker
       value="#a1b2c3"
@@ -110,10 +112,11 @@ export const SixColorsValueMissing = {
       onRemoveColor={action('onRemoveColor')}
       onChange={action('onChange')}
       colors={SIX_COLORS}
-      hasButtons={boolean('Has Buttons', true)}
     />
   ),
-
+  args: {
+    hasButtons: true,
+  },
   name: 'six colors, value missing',
 };
 

@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import type { Meta } from '@storybook/react';
 import { reduxDecorator } from '../../../../storybook';
 import { WorkpadFilters } from '../workpad_filters';
 import { elementWithGroup, elements } from './elements';
@@ -23,7 +24,7 @@ export default {
     ),
     reduxDecorator({ elements }),
   ],
-};
+} as Meta;
 
 export const ReduxDefault = {
   render: () => <WorkpadFilters />,

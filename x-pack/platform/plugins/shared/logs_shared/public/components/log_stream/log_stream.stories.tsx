@@ -6,7 +6,7 @@
  */
 
 import { I18nProvider } from '@kbn/i18n-react';
-import type { Meta } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/react';
 import React from 'react';
 import { decorateWithGlobalStorybookThemeProviders } from '../../test_utils/use_global_storybook_theme';
 import { LogStream } from './log_stream';
@@ -57,7 +57,7 @@ export const CustomColumns = {
   },
 };
 
-export const CustomColumnRendering = {
+export const CustomColumnRendering: StoryObj<typeof LogStream> = {
   args: {
     columns: [
       { type: 'timestamp', header: 'When?' },

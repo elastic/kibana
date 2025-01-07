@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import type { Meta } from '@storybook/react';
 import moment from 'moment';
 import { FiltersGroup } from '../filters_group.component';
 import { FiltersGroup as FiltersGroupType } from '../types';
@@ -41,7 +42,7 @@ const filtersGroup: FiltersGroupType = {
 export default {
   title: 'components/WorkpadFilters/FiltersGroupComponent',
   decorators: [(story) => <div className="canvasLayout__sidebar">{story()}</div>],
-};
+} as Meta;
 
 export const Default = {
   render: () => <FiltersGroup filtersGroup={filtersGroup} id="0" />,

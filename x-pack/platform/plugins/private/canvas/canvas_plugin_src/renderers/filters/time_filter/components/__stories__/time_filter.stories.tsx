@@ -7,6 +7,7 @@
 
 import { action } from '@storybook/addon-actions';
 import React from 'react';
+import type { Meta } from '@storybook/react';
 import { TimeFilter } from '../time_filter';
 
 const timeRanges = [
@@ -36,7 +37,7 @@ export default {
       </div>
     ),
   ],
-};
+} as Meta;
 
 export const Default = {
   render: () => (

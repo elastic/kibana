@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import type { Meta } from '@storybook/react';
 
 // @ts-expect-error
 import { getDefaultPage } from '../../../state/defaults';
@@ -30,7 +31,7 @@ const Pages = ({ story }: { story: Function }) => (
 export default {
   title: 'components/Toolbar',
   decorators: [(story) => <Pages story={story} />, reduxDecorator({ pages })],
-};
+} as Meta;
 
 export const Redux = {
   render: () => <Toolbar />,

@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { action } from '@storybook/addon-actions';
+import type { Meta, StoryObj } from '@storybook/react';
 import { waitFor } from '@kbn/presentation-util-plugin/public/__stories__';
 import { ElementGrid } from '../element_grid';
 import { getTestCustomElements } from './fixtures/test_elements';
@@ -25,9 +26,9 @@ export default {
       </div>
     ),
   ],
-};
+} as Meta;
 
-export const Default = {
+export const Default: StoryObj = {
   render: (_, props) => (
     <ElementGrid
       elements={props?.testCustomElements}
@@ -41,7 +42,7 @@ export const Default = {
   decorators: [waitFor(getTestCustomElements())],
 };
 
-export const WithTextFilter = {
+export const WithTextFilter: StoryObj = {
   render: (_, props) => (
     <ElementGrid
       elements={props?.testCustomElements}

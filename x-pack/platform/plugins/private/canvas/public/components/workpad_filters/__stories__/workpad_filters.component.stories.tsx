@@ -6,6 +6,7 @@
  */
 
 import { action } from '@storybook/addon-actions';
+import type { Meta } from '@storybook/react';
 import React from 'react';
 import moment from 'moment';
 import { WorkpadFilters } from '../workpad_filters.component';
@@ -60,7 +61,7 @@ export default {
       </div>
     ),
   ],
-};
+} as Meta;
 
 export const Default = {
   render: () => (

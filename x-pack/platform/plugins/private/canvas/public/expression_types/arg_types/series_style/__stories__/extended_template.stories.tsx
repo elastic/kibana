@@ -6,6 +6,7 @@
  */
 
 import { action } from '@storybook/addon-actions';
+import type { Meta } from '@storybook/react';
 import React, { useState } from 'react';
 
 import { ExtendedTemplate } from '../extended_template';
@@ -60,30 +61,29 @@ const Interactive = ({
   );
 };
 
-Interactive.args = {
-  lines: true,
-  bars: true,
-  points: true,
-  seriesLabels: ['label1', 'label2'],
-  typeInstance: 'custom',
-};
-
 export default {
   title: 'arguments/SeriesStyle',
   component: Interactive,
   decorators: [
     (story) => <div style={{ width: '323px', padding: '16px', background: '#fff' }}>{story()}</div>,
   ],
+  args: {
+    lines: true,
+    bars: true,
+    points: true,
+    seriesLabels: ['label1', 'label2'],
+    typeInstance: 'custom',
+  },
   argTypes: {
     typeInstance: {
       control: 'radio',
       options: ['defaultStyle', 'custom'],
     },
     seriesLabels: {
-      control: 'array',
+      control: 'object',
     },
   },
-};
+} as Meta<InteractiveProps>;
 
 export const ExtendedDefaults = {
   render: () => (

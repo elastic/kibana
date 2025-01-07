@@ -7,15 +7,16 @@
 
 import React from 'react';
 import { action } from '@storybook/addon-actions';
+import type { Meta, StoryObj } from '@storybook/react';
 import { waitFor } from '@kbn/presentation-util-plugin/public/__stories__';
 import { getElasticLogo } from '@kbn/presentation-util-plugin/common';
 import { CustomElementModal } from '../custom_element_modal';
 
 export default {
   title: 'components/Elements/CustomElementModal',
-};
+} as Meta;
 
-export const WithTitle = {
+export const WithTitle: StoryObj = {
   render: () => (
     <CustomElementModal
       title="Create new element"
@@ -27,7 +28,7 @@ export const WithTitle = {
   name: 'with title',
 };
 
-export const WithName = {
+export const WithName: StoryObj = {
   render: () => (
     <CustomElementModal
       title="Edit custom element"
@@ -41,7 +42,7 @@ export const WithName = {
   name: 'with name',
 };
 
-export const WithDescription = {
+export const WithDescription: StoryObj = {
   render: () => (
     <CustomElementModal
       title="Edit custom element"
@@ -54,7 +55,7 @@ export const WithDescription = {
   name: 'with description',
 };
 
-export const WithImage = {
+export const WithImage: StoryObj = {
   render: (_, props) => (
     <CustomElementModal
       title="Edit custom element"

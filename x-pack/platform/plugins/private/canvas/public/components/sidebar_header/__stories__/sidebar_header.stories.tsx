@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { action } from '@storybook/addon-actions';
+import type { Meta } from '@storybook/react';
 import { SidebarHeader } from '../sidebar_header.component';
 
 const handlers = {
@@ -19,7 +20,7 @@ const handlers = {
 export default {
   title: 'components/Sidebar/SidebarHeader',
   decorators: [(story) => <div style={{ width: '300px' }}>{story()}</div>],
-};
+} as Meta;
 
 export const Default = {
   render: () => <SidebarHeader title="Selected layer" {...handlers} />,

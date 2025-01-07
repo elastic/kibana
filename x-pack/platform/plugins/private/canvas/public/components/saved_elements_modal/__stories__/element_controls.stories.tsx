@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { action } from '@storybook/addon-actions';
+import type { Meta } from '@storybook/react';
 import { ElementControls } from '../element_controls';
 
 export default {
@@ -23,7 +24,7 @@ export default {
       </div>
     ),
   ],
-};
+} as Meta;
 
 export const HasTwoButtons = {
   render: () => <ElementControls onDelete={action('onDelete')} onEdit={action('onEdit')} />,

@@ -18,6 +18,7 @@ import ReactDOM from 'react-dom';
 
 // @ts-expect-error untyped library
 import styleSheetSerializer from 'jest-styled-components/src/styleSheetSerializer';
+// @ts-expect-error untyped library
 import { addSerializer } from 'jest-specific-snapshot';
 import { createSerializer } from '@emotion/jest';
 import { replaceEmotionPrefix } from '@elastic/eui/lib/test';

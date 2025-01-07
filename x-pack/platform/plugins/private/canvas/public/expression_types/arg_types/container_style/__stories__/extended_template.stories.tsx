@@ -6,6 +6,7 @@
  */
 
 import { action } from '@storybook/addon-actions';
+import type { Meta } from '@storybook/react';
 import React from 'react';
 // @ts-expect-error untyped local
 import { getDefaultWorkpad } from '../../../../state/defaults';
@@ -60,7 +61,7 @@ export default {
   decorators: [
     (story) => <div style={{ width: '323px', padding: '16px', background: '#fff' }}>{story()}</div>,
   ],
-};
+} as Meta;
 
 export const Extended = {
   render: () => <Interactive />,
