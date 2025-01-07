@@ -5621,7 +5621,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/event-annotation-listing-plugin@link:src/plugins/event_annotation_listing":
+"@kbn/event-annotation-listing-plugin@link:src/platform/plugins/private/event_annotation_listing":
   version "0.0.0"
   uid ""
 

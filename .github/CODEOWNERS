@@ -606,6 +606,7 @@ src/platform/packages/shared/shared-ux/router/types @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/storybook/mock @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/table_persist @elastic/appex-sharedux
 src/platform/plugins/private/advanced_settings @elastic/appex-sharedux @elastic/kibana-management
+src/platform/plugins/private/event_annotation_listing @elastic/kibana-visualizations
 src/platform/plugins/private/files_management @elastic/appex-sharedux
 src/platform/plugins/private/ftr_apis @elastic/kibana-core
 src/platform/plugins/private/image_embeddable @elastic/appex-sharedux
@@ -677,7 +678,6 @@ src/plugins/chart_expressions/expression_partition_vis @elastic/kibana-visualiza
 src/plugins/chart_expressions/expression_tagcloud @elastic/kibana-visualizations
 src/plugins/chart_expressions/expression_xy @elastic/kibana-visualizations
 src/plugins/event_annotation @elastic/kibana-visualizations
-src/plugins/event_annotation_listing @elastic/kibana-visualizations
 src/plugins/expressions @elastic/kibana-visualizations
 src/plugins/unified_search @elastic/kibana-visualizations
 src/plugins/url_forwarding @elastic/kibana-visualizations
