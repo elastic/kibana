@@ -157,28 +157,18 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
   protected async writeActionRequestToEndpointIndex<
     TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes,
     TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
-    TMeta extends {} = {}
+    TMeta extends {} = MicrosoftDefenderEndpointActionRequestCommonMeta
   >(
     actionRequest: ResponseActionsClientWriteActionRequestToEndpointIndexOptions<
       TParameters,
       TOutputContent,
       TMeta
     >
-  ): Promise<
-    LogsEndpointAction<
-      TParameters,
-      TOutputContent,
-      TMeta & MicrosoftDefenderEndpointActionRequestCommonMeta
-    >
-  > {
+  ): Promise<LogsEndpointAction<TParameters, TOutputContent, TMeta>> {
     const agentId = actionRequest.endpoint_ids[0];
     const agentDetails = await this.getAgentDetails(agentId);
 
-    const doc = await super.writeActionRequestToEndpointIndex<
-      TParameters,
-      TOutputContent,
-      TMeta & MicrosoftDefenderEndpointActionRequestCommonMeta
-    >({
+    const doc = await super.writeActionRequestToEndpointIndex<TParameters, TOutputContent, TMeta>({
       ...actionRequest,
       hosts: {
         [agentId]: { name: agentDetails.computerDnsName },

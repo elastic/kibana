@@ -827,7 +827,13 @@ class MockClassWithExposedProtectedMembers extends ResponseActionsClientImpl {
     return super.writeActionResponseToEndpointIndex<TOutputContent>(options);
   }
 
-  public fetchAllPendingActions(): AsyncIterable<ResponseActionsClientPendingAction[]> {
-    return super.fetchAllPendingActions();
+  public fetchAllPendingActions<
+    TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes,
+    TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
+    TMeta extends {} = {}
+  >(): AsyncIterable<
+    Array<ResponseActionsClientPendingAction<TParameters, TOutputContent, TMeta>>
+  > {
+    return super.fetchAllPendingActions<TParameters, TOutputContent, TMeta>();
   }
 }
