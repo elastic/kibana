@@ -1,7 +1,17 @@
-import {RouteDependencies} from "@kbn/enterprise-search-plugin/server/plugin";
-import {schema} from "@kbn/config-schema";
-import {elasticsearchErrorHandler} from "@kbn/enterprise-search-plugin/server/utils/elasticsearch_error_handler";
-import {deleteConnectorById, putUpdateNative} from "@kbn/search-connectors";
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { schema } from '@kbn/config-schema';
+
+import { deleteConnectorById, putUpdateNative } from '@kbn/search-connectors';
+
+import { RouteDependencies } from '../plugin';
+
+import { elasticsearchErrorHandler } from '../utils/elasticsearch_error_handler';
 
 export function registerDeprecationRoutes({ router, log }: RouteDependencies) {
   router.post(
@@ -10,16 +20,16 @@ export function registerDeprecationRoutes({ router, log }: RouteDependencies) {
       validate: {
         body: schema.object({
           ids: schema.arrayOf(schema.string()),
-          deprecationDetails: schema.object({ domainId: schema.literal('enterpriseSearch')}),
+          deprecationDetails: schema.object({ domainId: schema.literal('enterpriseSearch') }),
         }),
       },
     },
     elasticsearchErrorHandler(log, async (context, request, response) => {
-      const {client} = (await context.core).elasticsearch;
+      const { client } = (await context.core).elasticsearch;
       for (const connectorId of request.body.ids) {
-        await deleteConnectorById(client.asCurrentUser, connectorId)
+        await deleteConnectorById(client.asCurrentUser, connectorId);
       }
-      return response.ok({ body: { deleted: request.body.ids }});
+      return response.ok({ body: { deleted: request.body.ids } });
     })
   );
 
@@ -29,16 +39,16 @@ export function registerDeprecationRoutes({ router, log }: RouteDependencies) {
       validate: {
         body: schema.object({
           ids: schema.arrayOf(schema.string()),
-          deprecationDetails: schema.object({ domainId: schema.literal('enterpriseSearch')}),
+          deprecationDetails: schema.object({ domainId: schema.literal('enterpriseSearch') }),
         }),
       },
     },
     elasticsearchErrorHandler(log, async (context, request, response) => {
-      const {client} = (await context.core).elasticsearch;
+      const { client } = (await context.core).elasticsearch;
       for (const connectorId of request.body.ids) {
-        await putUpdateNative(client.asCurrentUser, connectorId, false)
+        await putUpdateNative(client.asCurrentUser, connectorId, false);
       }
-      return response.ok({ body: { converted_to_client: request.body.ids }});
+      return response.ok({ body: { converted_to_client: request.body.ids } });
     })
   );
 }

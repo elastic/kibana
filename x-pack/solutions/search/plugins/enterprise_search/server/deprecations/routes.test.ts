@@ -1,5 +1,13 @@
-import {mockDependencies, MockRouter} from "@kbn/enterprise-search-plugin/server/__mocks__";
-import {registerDeprecationRoutes} from "@kbn/enterprise-search-plugin/server/deprecations/routes";
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { mockDependencies, MockRouter } from '../__mocks__';
+
+import { registerDeprecationRoutes } from './routes';
 
 describe('deprecation routes', () => {
   describe('POST /internal/enterprise_search/deprecations/delete_crawler_connectors', () => {
@@ -19,17 +27,19 @@ describe('deprecation routes', () => {
     });
 
     it('validates correctly with ids and deprecation context', () => {
-      const request = {body: {ids: ["foo"], deprecationDetails: {domainId: 'enterpriseSearch'}}};
+      const request = {
+        body: { ids: ['foo'], deprecationDetails: { domainId: 'enterpriseSearch' } },
+      };
       mockRouter.shouldValidate(request);
     });
 
     it('fails validation without ids', () => {
-      const request = {body: {deprecationDetails: {domainId: 'enterpriseSearch'}}};
+      const request = { body: { deprecationDetails: { domainId: 'enterpriseSearch' } } };
       mockRouter.shouldThrow(request);
     });
 
     it('fails validation without deprecation context', () => {
-      const request = {body: {ids: ["foo"]}};
+      const request = { body: { ids: ['foo'] } };
       mockRouter.shouldThrow(request);
     });
   });
@@ -51,17 +61,19 @@ describe('deprecation routes', () => {
     });
 
     it('validates correctly with ids and deprecation context', () => {
-      const request = {body: {ids: ["foo"], deprecationDetails: {domainId: 'enterpriseSearch'}}};
+      const request = {
+        body: { ids: ['foo'], deprecationDetails: { domainId: 'enterpriseSearch' } },
+      };
       mockRouter.shouldValidate(request);
     });
 
     it('fails validation without ids', () => {
-      const request = {body: {deprecationDetails: {domainId: 'enterpriseSearch'}}};
+      const request = { body: { deprecationDetails: { domainId: 'enterpriseSearch' } } };
       mockRouter.shouldThrow(request);
     });
 
     it('fails validation without deprecation context', () => {
-      const request = {body: {ids: ["foo"]}};
+      const request = { body: { ids: ['foo'] } };
       mockRouter.shouldThrow(request);
     });
   });

@@ -19,6 +19,7 @@ import {
 import { CustomIntegrationsPluginSetup } from '@kbn/custom-integrations-plugin/server';
 import { DataPluginStart } from '@kbn/data-plugin/server/plugin';
 import { ENTERPRISE_SEARCH_APP_ID } from '@kbn/deeplinks-search';
+
 import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 import { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import { GlobalSearchPluginSetup } from '@kbn/global-search-plugin/server';
@@ -72,6 +73,8 @@ import {
   WS_TELEMETRY_NAME,
   registerTelemetryUsageCollector as registerWSTelemetryUsageCollector,
 } from './collectors/workplace_search/telemetry';
+import { getRegisteredDeprecations } from './deprecations';
+import { registerDeprecationRoutes } from './deprecations/routes';
 import { registerEnterpriseSearchIntegrations } from './integrations';
 
 import { checkAccess } from './lib/check_access';
@@ -104,8 +107,6 @@ import { getIndicesSearchResultProvider } from './utils/indices_search_result_pr
 import { getSearchResultProvider } from './utils/search_result_provider';
 
 import { ConfigType } from '.';
-import { getRegisteredDeprecations } from './deprecations';
-import {registerDeprecationRoutes} from "@kbn/enterprise-search-plugin/server/deprecations/routes";
 
 interface PluginsSetup {
   cloud: CloudSetup;
@@ -447,7 +448,7 @@ export class EnterpriseSearchPlugin implements Plugin<void, void, PluginsSetup, 
     /**
      * Register deprecations
      */
-    registerDeprecationRoutes(dependencies)
+    registerDeprecationRoutes(dependencies);
     deprecations.registerDeprecations(getRegisteredDeprecations(config, isCloud));
   }
 
