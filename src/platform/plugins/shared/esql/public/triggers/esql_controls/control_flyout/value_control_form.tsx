@@ -368,6 +368,7 @@ export function ValueControlForm({
                   overflow-y: auto;
                   max-height: 200px;
                 `}
+                data-test-subj="esqlValuesPreview"
               >
                 {queryColumns.length === 1 ? (
                   selectedValues.map((value) => value.label).join(', ')

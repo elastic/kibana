@@ -10,7 +10,11 @@
 import React from 'react';
 import { render, within, fireEvent } from '@testing-library/react';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { IUiSettingsClient } from '@kbn/core/public';
+import { coreMock } from '@kbn/core/server/mocks';
 import { ESQLVariableType } from '@kbn/esql-validation-autocomplete';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { ValueControlForm } from './value_control_form';
 import { EsqlControlType } from '../types';
 
@@ -20,24 +24,10 @@ jest.mock('@kbn/esql-utils', () => {
       response: {
         columns: [
           {
-            name: '@timestamp',
-            id: '@timestamp',
+            name: 'field',
+            id: 'field',
             meta: {
-              type: 'date',
-            },
-          },
-          {
-            name: 'bytes',
-            id: 'bytes',
-            meta: {
-              type: 'number',
-            },
-          },
-          {
-            name: 'memory',
-            id: 'memory',
-            meta: {
-              type: 'number',
+              type: 'keyword',
             },
           },
         ],
@@ -45,12 +35,35 @@ jest.mock('@kbn/esql-utils', () => {
       },
     }),
     getIndexPatternFromESQLQuery: jest.fn().mockReturnValue('index1'),
+    getLimitFromESQLQuery: jest.fn().mockReturnValue(1000),
+    isQueryWrappedByPipes: jest.fn().mockReturnValue(false),
   };
 });
 
 describe('ValueControlForm', () => {
   const dataMock = dataPluginMock.createStartContract();
   const searchMock = dataMock.search.search;
+
+  const uiConfig: Record<string, any> = {};
+  const uiSettings = {
+    get: (key: string) => uiConfig[key],
+  } as IUiSettingsClient;
+
+  const esqlVariablesService = {
+    enableSuggestions: jest.fn(),
+    disableSuggestions: jest.fn(),
+    getVariablesByType: jest.fn(),
+    areSuggestionsEnabled: false,
+  };
+
+  const services = {
+    uiSettings,
+    settings: {
+      client: uiSettings,
+    },
+    core: coreMock.createStart(),
+    esqlService: esqlVariablesService,
+  };
 
   describe('Interval type', () => {
     it('should default correctly if no initial state is given for an interval variable type', async () => {
@@ -73,7 +86,7 @@ describe('ValueControlForm', () => {
       // variable name input should be rendered and with the default value
       expect(await findByTestId('esqlVariableName')).toHaveValue('interval');
 
-      // fields dropdown should be rendered with available fields column1 and column2
+      // values dropdown should be rendered
       const valuesOptionsDropdown = await findByTestId('esqlValuesOptions');
       expect(valuesOptionsDropdown).toBeInTheDocument();
       const valuesOptionsDropdownSearchInput = within(valuesOptionsDropdown).getByRole('combobox');
@@ -166,7 +179,7 @@ describe('ValueControlForm', () => {
       // variable name input should be rendered and with the default value
       expect(await findByTestId('esqlVariableName')).toHaveValue('myInterval');
 
-      // fields dropdown should be rendered with column2 selected
+      // values dropdown should be rendered with column2 selected
       const valuesOptionsDropdown = await findByTestId('esqlValuesOptions');
       const valuesOptionsDropdownBadge = within(valuesOptionsDropdown).getByTestId('5 minutes');
       expect(valuesOptionsDropdownBadge).toBeInTheDocument();
@@ -214,6 +227,37 @@ describe('ValueControlForm', () => {
       // click on the create button
       fireEvent.click(await findByTestId('saveEsqlControlsFlyoutButton'));
       expect(onEditControlSpy).toHaveBeenCalled();
+    });
+
+    describe('Values type', () => {
+      it('should default correctly if no initial state is given for a values variable type', async () => {
+        const { findByTestId } = render(
+          <KibanaContextProvider services={services}>
+            <IntlProvider locale="en">
+              <ValueControlForm
+                variableType={ESQLVariableType.VALUES}
+                queryString="FROM foo | WHERE field =="
+                onCreateControl={jest.fn()}
+                closeFlyout={jest.fn()}
+                onEditControl={jest.fn()}
+                search={searchMock}
+              />
+            </IntlProvider>
+          </KibanaContextProvider>
+        );
+        // control type dropdown should be rendered and default to 'Values from a query'
+        expect(await findByTestId('esqlControlTypeDropdown')).toBeInTheDocument();
+        const controlTypeInputPopover = await findByTestId('esqlControlTypeInputPopover');
+        expect(within(controlTypeInputPopover).getByRole('combobox')).toHaveValue(
+          `Values from a query`
+        );
+
+        // code editor should be rendered
+        expect(await findByTestId('ESQLEditor')).toBeInTheDocument();
+
+        // values preview panel should be rendered
+        expect(await findByTestId('esqlValuesPreview')).toBeInTheDocument();
+      });
     });
   });
 });
