@@ -28,6 +28,10 @@ const patternRollups: Record<string, PatternRollup> = {
   'packetbeat-*': packetbeatNoResults,
 };
 
+const successColor = 'test-success-color';
+const dangerColor = 'test-danger-color';
+const primaryColor = 'test-primary-color';
+
 describe('getGroupFromPath', () => {
   it('returns the expected group from the path', () => {
     expect(
@@ -76,6 +80,9 @@ describe('getLayersMultiDimensional', () => {
         valueFormatter: formatBytes,
         layer0FillColor,
         pathToFlattenedBucketMap,
+        successColor,
+        dangerColor,
+        primaryColor,
       }).length
     ).toEqual(2);
   });
@@ -85,6 +92,9 @@ describe('getLayersMultiDimensional', () => {
       valueFormatter: formatBytes,
       layer0FillColor,
       pathToFlattenedBucketMap,
+      successColor,
+      dangerColor,
+      primaryColor,
     }).forEach((x) => expect(x.fillLabel.valueFormatter(123)).toEqual('123B'));
   });
 });
