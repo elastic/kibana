@@ -26,6 +26,8 @@ export const getEndpointSecurityPolicyManager: () => Omit<Role, 'name'> = () => 
             'event_filters_all',
             'host_isolation_exceptions_all',
             'blocklist_all',
+
+            'workflow_insights_all',
           ],
         },
       },

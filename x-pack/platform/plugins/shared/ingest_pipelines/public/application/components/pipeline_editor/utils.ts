@@ -154,6 +154,7 @@ const fieldToConvertToJson = [
   'params',
   'pattern_definitions',
   'processor',
+  'value',
 ];
 
 export const convertProccesorsToJson = (obj: { [key: string]: any }): { [key: string]: any } => {

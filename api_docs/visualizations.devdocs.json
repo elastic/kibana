@@ -1314,13 +1314,7 @@
             "text": "VisualizeEmbeddable"
           },
           " extends ",
-          {
-            "pluginId": "embeddable",
-            "scope": "public",
-            "docId": "kibEmbeddablePluginApi",
-            "section": "def-public.Embeddable",
-            "text": "Embeddable"
-          },
+          "Embeddable",
           "<",
           {
             "pluginId": "visualizations",
@@ -1331,44 +1325,12 @@
           },
           ", ",
           "VisualizeOutput",
-          ", any> implements ",
-          {
-            "pluginId": "embeddable",
-            "scope": "public",
-            "docId": "kibEmbeddablePluginApi",
-            "section": "def-public.ReferenceOrValueEmbeddable",
-            "text": "ReferenceOrValueEmbeddable"
-          },
-          "<",
-          "VisualizeByValueInput",
-          ", ",
-          "VisualizeByReferenceInput",
-          ">,",
-          {
-            "pluginId": "embeddable",
-            "scope": "public",
-            "docId": "kibEmbeddablePluginApi",
-            "section": "def-public.FilterableEmbeddable",
-            "text": "FilterableEmbeddable"
-          }
+          ", any>"
         ],
         "path": "src/plugins/visualizations/public/legacy/embeddable/visualize_embeddable.tsx",
         "deprecated": true,
         "trackAdoption": false,
-        "references": [
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/legacy_visualizations/is_legacy_map.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/legacy_visualizations/is_legacy_map.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/legacy_visualizations/is_legacy_map.ts"
-          }
-        ],
+        "references": [],
         "children": [
           {
             "parentPluginId": "visualizations",
@@ -1625,13 +1587,7 @@
             "description": [],
             "signature": [
               "() => ",
-              {
-                "pluginId": "@kbn/core-mount-utils-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreMountUtilsBrowserPluginApi",
-                "section": "def-public.OverlayRef",
-                "text": "OverlayRef"
-              },
+              "OverlayRef",
               " | undefined"
             ],
             "path": "src/plugins/visualizations/public/legacy/embeddable/visualize_embeddable.tsx",
@@ -2556,13 +2512,7 @@
             "label": "core",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-lifecycle-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-                "section": "def-public.CoreStart",
-                "text": "CoreStart"
-              }
+              "CoreStart"
             ],
             "path": "src/plugins/visualizations/public/visualize_app/types.ts",
             "deprecated": false,
@@ -2793,13 +2743,7 @@
             "label": "migrationVersion",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-saved-objects-common",
-                "scope": "common",
-                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-                "section": "def-common.SavedObjectsMigrationVersion",
-                "text": "SavedObjectsMigrationVersion"
-              },
+              "SavedObjectsMigrationVersion",
               " | undefined"
             ],
             "path": "src/plugins/visualizations/public/types.ts",
@@ -4084,13 +4028,7 @@
             "label": "migrationVersion",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-saved-objects-common",
-                "scope": "common",
-                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-                "section": "def-common.SavedObjectsMigrationVersion",
-                "text": "SavedObjectsMigrationVersion"
-              },
+              "SavedObjectsMigrationVersion",
               " | undefined"
             ],
             "path": "src/plugins/visualizations/public/types.ts",
@@ -6798,15 +6736,7 @@
             "section": "def-common.Filter",
             "text": "Filter"
           },
-          "[]; getExplicitInput: () => Readonly<",
-          {
-            "pluginId": "visualizations",
-            "scope": "public",
-            "docId": "kibVisualizationsPluginApi",
-            "section": "def-public.VisualizeInput",
-            "text": "VisualizeInput"
-          },
-          ">; getDescription: () => string; render: (domNode: HTMLElement) => Promise<void>; supportedTriggers: () => string[]; getInspectorAdapters: () => ",
+          "[]; render: (domNode: HTMLElement) => Promise<void>; supportedTriggers: () => string[]; getInspectorAdapters: () => ",
           {
             "pluginId": "inspector",
             "scope": "common",
@@ -6849,13 +6779,7 @@
             "text": "VisParams"
           },
           ">; openInspector: () => ",
-          {
-            "pluginId": "@kbn/core-mount-utils-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreMountUtilsBrowserPluginApi",
-            "section": "def-public.OverlayRef",
-            "text": "OverlayRef"
-          },
+          "OverlayRef",
           " | undefined; transferCustomizationsToUiState: () => void; hasInspector: () => boolean; onContainerLoading: () => void; onContainerData: () => void; onContainerRender: () => void; onContainerError: (error: ",
           {
             "pluginId": "expressions",
@@ -6914,7 +6838,15 @@
             "section": "def-public.VisualizeInput",
             "text": "VisualizeInput"
           },
-          ">) => Promise<boolean>; getPersistableInput: () => Readonly<",
+          ">) => Promise<boolean>; getExplicitInput: () => Readonly<",
+          {
+            "pluginId": "visualizations",
+            "scope": "public",
+            "docId": "kibVisualizationsPluginApi",
+            "section": "def-public.VisualizeInput",
+            "text": "VisualizeInput"
+          },
+          ">; getPersistableInput: () => Readonly<",
           {
             "pluginId": "visualizations",
             "scope": "public",
@@ -6930,7 +6862,7 @@
             "section": "def-public.VisualizeInput",
             "text": "VisualizeInput"
           },
-          ">; getTitle: () => string; untilInitializationFinished: () => Promise<void>; updateOutput: (outputChanges: Partial<",
+          ">; getTitle: () => string; getDescription: () => string; untilInitializationFinished: () => Promise<void>; updateOutput: (outputChanges: Partial<",
           "VisualizeOutput",
           ">) => void; }"
         ],
