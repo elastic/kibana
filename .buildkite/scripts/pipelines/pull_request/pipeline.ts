@@ -51,7 +51,7 @@ const getPipeline = (filename: string, removeSteps = true) => {
 
     pipeline.push(getPipeline('.buildkite/pipelines/pull_request/base.yml', false));
 
-    if (await doAnyChangesMatch([/^packages\/kbn-handlebars/])) {
+    if (await doAnyChangesMatch([/^src\/platform\/packages\/private\/kbn-handlebars/])) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/kbn_handlebars.yml'));
     }
 
@@ -265,7 +265,7 @@ const getPipeline = (filename: string, removeSteps = true) => {
         /^x-pack\/platform\/plugins\/shared\/triggers_actions_ui\/public\/application\/context\/actions_connectors_context\.tsx/,
         /^x-pack\/platform\/plugins\/shared\/triggers_actions_ui\/server\/connector_types\/openai/,
         /^x-pack\/platform\/plugins\/shared\/triggers_actions_ui\/server\/connector_types\/bedrock/,
-        /^x-pack\/plugins\/usage_collection\/public/,
+        /^x-pack\/platform\/plugins\/shared\/usage_collection\/public/,
         /^x-pack\/solutions\/security\/plugins\/elastic_assistant/,
         /^x-pack\/solutions\/security\/packages/,
         /^x-pack\/platform\/packages\/shared\/kbn-elastic-assistant/,
@@ -300,13 +300,13 @@ const getPipeline = (filename: string, removeSteps = true) => {
         /^packages\/kbn-doc-links/,
         /^packages\/kbn-dom-drag-drop/,
         /^src\/platform\/packages\/shared\/kbn-es-query/,
-        /^packages\/kbn-i18n/,
-        /^packages\/kbn-i18n-react/,
+        /^src\/platform\/packages\/shared\/kbn-i18n/,
+        /^src\/platform\/packages\/shared\/kbn-i18n-react/,
         /^src\/platform\/packages\/shared\/kbn-grouping/,
         /^src\/platform\/packages\/shared\/kbn-resizable-layout/,
         /^src\/platform\/packages\/shared\/kbn-rison/,
         /^src\/platform\/packages\/shared\/kbn-rule-data-utils/,
-        /^packages\/kbn-safer-lodash-set/,
+        /^src\/platform\/packages\/shared\/kbn-safer-lodash-set/,
         /^src\/platform\/packages\/shared\/kbn-search-types/,
         /^packages\/kbn-securitysolution-.*/,
         /^src\/platform\/packages\/shared\/kbn-securitysolution-ecs/,
@@ -315,7 +315,7 @@ const getPipeline = (filename: string, removeSteps = true) => {
         /^x-pack\/solutions\/security\/packages\/kbn-securitysolution-list-hooks/,
         /^x-pack\/solutions\/security\/packages\/kbn-securitysolution-t-grid/,
         /^src\/platform\/packages\/shared\/kbn-ui-theme/,
-        /^packages\/kbn-utility-types/,
+        /^src\/platform\/packages\/shared\/kbn-utility-types/,
         /^packages\/react/,
         /^packages\/shared-ux/,
         /^src\/core/,
@@ -326,10 +326,10 @@ const getPipeline = (filename: string, removeSteps = true) => {
         /^src\/platform\/plugins\/shared\/discover/,
         /^src\/platform\/plugins\/shared\/field_formats/,
         /^src\/platform\/plugins\/shared\/inspector/,
-        /^src\/plugins\/kibana_react/,
-        /^src\/plugins\/kibana_utils/,
+        /^src\/platform\/plugins\/shared\/kibana_react/,
+        /^src\/platform\/plugins\/shared\/kibana_utils/,
         /^src\/platform\/plugins\/shared\/saved_search/,
-        /^src\/plugins\/ui_actions/,
+        /^src\/platform\/plugins\/shared\/ui_actions/,
         /^src\/platform\/plugins\/shared\/unified_histogram/,
         /^src\/plugins\/unified_search/,
         /^x-pack\/platform\/packages\/shared\/kbn-elastic-assistant/,
@@ -348,7 +348,7 @@ const getPipeline = (filename: string, removeSteps = true) => {
         /^x-pack\/solutions\/security\/plugins\/threat_intelligence/,
         /^x-pack\/solutions\/security\/plugins\/timelines/,
         /^x-pack\/platform\/plugins\/shared\/triggers_actions_ui/,
-        /^x-pack\/plugins\/usage_collection\/public/,
+        /^x-pack\/platform\/plugins\/shared\/usage_collection\/public/,
         /^x-pack\/test\/functional\/es_archives\/security_solution/,
         /^x-pack\/test\/security_solution_cypress/,
       ])) ||
