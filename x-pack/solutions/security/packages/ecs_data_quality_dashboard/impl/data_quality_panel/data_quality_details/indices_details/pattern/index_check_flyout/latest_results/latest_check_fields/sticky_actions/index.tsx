@@ -6,14 +6,10 @@
  */
 
 import React, { FC } from 'react';
-import { EuiButtonEmpty } from '@elastic/eui';
-import styled from 'styled-components';
+import { useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
 
 import { Actions } from '../../../../../../../actions';
-
-export const CopyToClipboardButton = styled(EuiButtonEmpty)`
-  margin-left: ${({ theme }) => theme.eui.euiSizeXS};
-`;
 
 interface Props {
   markdownComment: string;
@@ -23,15 +19,21 @@ interface Props {
   indexName?: string;
 }
 
-const StyledStickyContainer = styled.div`
-  padding: ${({ theme }) => theme.eui.euiSizeL} 0;
-  background: ${({ theme }) => theme.eui.euiColorEmptyShade};
-  position: sticky;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  border-top: 1px solid ${({ theme }) => theme.eui.euiBorderColor};
-`;
+const useStyles = () => {
+  const { euiTheme } = useEuiTheme();
+
+  return {
+    stickyContainer: css({
+      padding: `${euiTheme.size.l} 0`,
+      background: euiTheme.colors.emptyShade,
+      position: 'sticky',
+      bottom: 0,
+      left: 0,
+      right: 0,
+      borderTop: `1px solid ${euiTheme.border.color}`,
+    }),
+  };
+};
 
 const StickyActionsComponent: FC<Props> = ({
   indexName,
@@ -40,8 +42,10 @@ const StickyActionsComponent: FC<Props> = ({
   showAddToNewCaseAction,
   showChatAction,
 }) => {
+  const styles = useStyles();
+
   return (
-    <StyledStickyContainer>
+    <div css={styles.stickyContainer}>
       <Actions
         indexName={indexName}
         markdownComment={markdownComment}
@@ -49,7 +53,7 @@ const StickyActionsComponent: FC<Props> = ({
         showCopyToClipboardAction={showCopyToClipboardAction}
         showAddToNewCaseAction={showAddToNewCaseAction}
       />
-    </StyledStickyContainer>
+    </div>
   );
 };
 
