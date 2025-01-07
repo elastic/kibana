@@ -31,7 +31,7 @@ export const useCardPanelStyles = () => {
     }
     .onboardingCardHeaderCompleteBadge {
       background-color: ${successBackgroundColor};
-      color: ${euiTheme.colors.successText};
+      color: ${euiTheme.colors.textSuccess};
     }
     .onboardingCardContentWrapper {
       display: grid;
