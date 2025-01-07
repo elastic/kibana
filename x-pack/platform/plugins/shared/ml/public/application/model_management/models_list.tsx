@@ -114,7 +114,6 @@ export const ModelsList: FC<Props> = ({
   const isInitialized = trainedModelsService.isInitialized();
   const items = useObservable(trainedModelsService.models$, trainedModelsService.models);
   const isLoading = useObservable(trainedModelsService.isLoading$, trainedModelsService.isLoading);
-  const error = useObservable(trainedModelsService.error$, trainedModelsService.error);
 
   const nlpElserDocUrl = docLinks.links.ml.nlpElser;
 
@@ -162,17 +161,6 @@ export const ModelsList: FC<Props> = ({
   }, [items]);
 
   useEffect(() => {
-    if (error) {
-      displayErrorToast(
-        error,
-        i18n.translate('xpack.ml.trainedModels.modelsList.fetchFailedErrorMessage', {
-          defaultMessage: 'Error loading trained models',
-        })
-      );
-    }
-  }, [displayErrorToast, error]);
-
-  useEffect(() => {
     return () => {
       if (trainedModelsService) {
         trainedModelsService.destroy();
@@ -198,13 +186,26 @@ export const ModelsList: FC<Props> = ({
         });
       });
 
-      trainedModelsService.fetchModels();
+      const fetchData = async () => {
+        try {
+          await trainedModelsService.fetchModels();
+        } catch (error) {
+          displayErrorToast(
+            error,
+            i18n.translate('xpack.ml.trainedModels.modelsList.fetchFailedErrorMessage', {
+              defaultMessage: 'Error loading trained models',
+            })
+          );
+        }
+      };
+
+      fetchData();
 
       return () => {
         removeCallback();
       };
     },
-    [refresh, trainedModelsService]
+    [displayErrorToast, refresh, trainedModelsService]
   );
 
   const modelsStats: ModelsBarStats = useMemo(() => {

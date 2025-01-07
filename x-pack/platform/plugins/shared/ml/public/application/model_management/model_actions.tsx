@@ -46,6 +46,7 @@ export function useModelActions({
   onTestAction,
   onModelsDeleteRequest,
   onModelDeployRequest,
+  onModelDownloadRequest,
   isLoading,
   modelAndDeploymentIds,
 }: {
@@ -229,7 +230,7 @@ export function useModelActions({
         },
         onClick: async (item) => {
           if (isModelDownloadItem(item) && item.state === MODEL_STATE.NOT_DOWNLOADED) {
-            trainedModelsService.downloadModel(item.model_id);
+            onModelDownloadRequest(item.model_id);
           }
 
           const modelDeploymentParams = await getUserInputModelDeploymentParams(
@@ -569,20 +570,21 @@ export function useModelActions({
       navigateToPath,
       canStartStopTrainedModels,
       isLoading,
+      canCreateTrainedModels,
       getUserInputModelDeploymentParams,
       modelAndDeploymentIds,
+      onModelDownloadRequest,
       trainedModelsService,
       displayErrorToast,
       displaySuccessToast,
       getUserConfirmation,
-      canCreateTrainedModels,
       onModelDeployRequest,
       canManageIngestPipelines,
-      onModelsDeleteRequest,
-      canDeleteTrainedModels,
       onDfaTestAction,
       onTestAction,
       canTestTrainedModels,
+      onModelsDeleteRequest,
+      canDeleteTrainedModels,
     ]
   );
 }

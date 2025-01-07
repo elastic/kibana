@@ -17,7 +17,6 @@ import {
 } from 'rxjs';
 import { MODEL_STATE } from '@kbn/ml-trained-models-utils';
 import { isEqual } from 'lodash';
-import type { ErrorType } from '@kbn/ml-error-utils';
 import {
   isBaseNLPModelItem,
   type ModelDownloadState,
@@ -39,7 +38,6 @@ interface ModelDownloadStatus {
 interface ModelState {
   items: TrainedModelUIItem[];
   isLoading: boolean;
-  error?: ErrorType;
 }
 
 const DOWNLOAD_POLL_INTERVAL = 3000;
@@ -67,21 +65,12 @@ export class TrainedModelsService {
     distinctUntilChanged()
   );
 
-  public readonly error$ = this.modelState$.pipe(
-    map((state) => state.error),
-    distinctUntilChanged()
-  );
-
   public get models(): TrainedModelUIItem[] {
     return this.modelState$.getValue().items;
   }
 
   public get isLoading(): boolean {
     return this.modelState$.getValue().isLoading;
-  }
-
-  public get error() {
-    return this.modelState$.getValue().error;
   }
 
   public isInitialized() {
@@ -114,11 +103,10 @@ export class TrainedModelsService {
 
       this.startDownloadStatusPolling();
     } catch (error) {
-      this.modelState$.next({
-        ...this.modelState$.getValue(),
-        isLoading: false,
-        error,
-      });
+      // Rethrow to be handled by the caller
+      throw error;
+    } finally {
+      this.setLoading(false);
     }
   }
 
@@ -126,25 +114,21 @@ export class TrainedModelsService {
     this.setLoading(true);
 
     const downloadPromise = async () => {
-      try {
-        await this.trainedModelsApiService.installElasticTrainedModelConfig(modelId);
-        await this.fetchModels();
-      } catch (error) {
-        this.modelState$.next({
-          ...this.modelState$.getValue(),
-          error,
-        });
-        throw error;
-      }
+      await this.trainedModelsApiService.installElasticTrainedModelConfig(modelId);
+      await this.fetchModels();
     };
 
-    const queuedDownload = downloadPromise().finally(() => {
+    try {
+      const queuedDownload = downloadPromise();
+      this.downloadQueue.set(modelId, queuedDownload);
+      await queuedDownload;
+    } catch (error) {
+      // Rethrow to be handled by the caller
+      throw error;
+    } finally {
       this.setLoading(false);
       this.downloadQueue.delete(modelId);
-    });
-
-    this.downloadQueue.set(modelId, queuedDownload);
-    return queuedDownload;
+    }
   }
 
   public async startModelDeployment(
@@ -167,10 +151,7 @@ export class TrainedModelsService {
       );
       await this.fetchModels();
     } catch (error) {
-      this.modelState$.next({
-        ...this.modelState$.getValue(),
-        error,
-      });
+      // Rethrow to be handled by the caller
       throw error;
     } finally {
       this.setLoading(false);
@@ -187,10 +168,7 @@ export class TrainedModelsService {
       await this.trainedModelsApiService.updateModelDeployment(modelId, deploymentId, config);
       await this.fetchModels();
     } catch (error) {
-      this.modelState$.next({
-        ...this.modelState$.getValue(),
-        error,
-      });
+      // Rethrow to be handled by the caller
       throw error;
     } finally {
       this.setLoading(false);
@@ -212,10 +190,7 @@ export class TrainedModelsService {
       await this.fetchModels();
       return results;
     } catch (error) {
-      this.modelState$.next({
-        ...this.modelState$.getValue(),
-        error,
-      });
+      // Rethrow to be handled by the caller
       throw error;
     } finally {
       this.setLoading(false);
