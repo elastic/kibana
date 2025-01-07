@@ -35,7 +35,7 @@ import { registerIntegrations } from './register_integrations';
 import { StartDeps, SetupDeps } from './types';
 import { MapsStorage } from './content_management';
 
-export class MapsPlugin implements Plugin {
+export class MapsPlugin implements Plugin<void, void, SetupDeps, StartDeps> {
   readonly _initializerContext: PluginInitializerContext<MapsXPackConfig>;
   private readonly _logger: Logger;
 

@@ -132,7 +132,7 @@ export interface RouteDependencies {
   router: IRouter;
 }
 
-export class EnterpriseSearchPlugin implements Plugin {
+export class EnterpriseSearchPlugin implements Plugin<void, void, PluginsSetup, PluginsStart> {
   private readonly config: ConfigType;
   private readonly logger: Logger;
   private readonly globalConfigService: GlobalConfigService;

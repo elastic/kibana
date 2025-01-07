@@ -82,7 +82,15 @@ export interface Framework {
   getEsShardTimeout: () => Promise<number>;
 }
 
-export class VisTypeTimeseriesPlugin implements Plugin<VisTypeTimeseriesSetup> {
+export class VisTypeTimeseriesPlugin
+  implements
+    Plugin<
+      VisTypeTimeseriesSetup,
+      void,
+      VisTypeTimeseriesPluginSetupDependencies,
+      VisTypeTimeseriesPluginStartDependencies
+    >
+{
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.initializerContext = initializerContext;
   }
