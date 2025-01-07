@@ -54,7 +54,7 @@ export function KnowledgeBaseBulkImportFlyout({ onClose }: { onClose: () => void
     try {
       const entries = elements.map(
         (el) =>
-          JSON.parse(el) as Omit<KnowledgeBaseEntry, "@timestamp" | "title"> & {
+          JSON.parse(el) as Omit<KnowledgeBaseEntry, '@timestamp' | 'title'> & {
             title: string;
           }
       );
