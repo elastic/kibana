@@ -186,7 +186,7 @@ export const ModelsList: FC<Props> = ({
       if (!refresh) return;
 
       // Register callback for expanded rows updates
-      const unsubscribe = trainedModelsService.onFetch((modelItems) => {
+      const removeCallback = trainedModelsService.onFetch((modelItems) => {
         // Refresh expanded rows
         setItemIdToExpandedRowMap((prevMap) => {
           return Object.fromEntries(
@@ -201,7 +201,7 @@ export const ModelsList: FC<Props> = ({
       trainedModelsService.fetchModels();
 
       return () => {
-        unsubscribe();
+        removeCallback();
       };
     },
     [refresh, trainedModelsService]

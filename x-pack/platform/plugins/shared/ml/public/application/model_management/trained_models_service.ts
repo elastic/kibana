@@ -53,10 +53,36 @@ export class TrainedModelsService {
   private initialized = false;
   private onFetchCallbacks: Array<(items: TrainedModelUIItem[]) => void> = [];
   private downloadStatusFetchInProgress = false;
-
   private downloadQueue = new Map<string, Promise<void>>();
 
   constructor(private readonly trainedModelsApiService: TrainedModelsApiService) {}
+
+  public readonly models$ = this.modelState$.pipe(
+    map((state) => state.items),
+    distinctUntilChanged()
+  );
+
+  public readonly isLoading$ = this.modelState$.pipe(
+    map((state) => state.isLoading),
+    distinctUntilChanged()
+  );
+
+  public readonly error$ = this.modelState$.pipe(
+    map((state) => state.error),
+    distinctUntilChanged()
+  );
+
+  public get models(): TrainedModelUIItem[] {
+    return this.modelState$.getValue().items;
+  }
+
+  public get isLoading(): boolean {
+    return this.modelState$.getValue().isLoading;
+  }
+
+  public get error() {
+    return this.modelState$.getValue().error;
+  }
 
   public isInitialized() {
     return this.initialized;
@@ -78,20 +104,9 @@ export class TrainedModelsService {
 
     try {
       const resultItems = await this.trainedModelsApiService.getTrainedModelsList();
-
       // Merge extisting items with new items
       // to preserve state and download status
-      const updatedItems = resultItems.map((item) => {
-        const prevItem = this.modelState$
-          .getValue()
-          .items.find((i) => i.model_id === item.model_id);
-        return {
-          ...item,
-          ...(isBaseNLPModelItem(prevItem) && prevItem?.state === MODEL_STATE.DOWNLOADING
-            ? { state: prevItem.state, downloadState: prevItem.downloadState }
-            : {}),
-        };
-      });
+      const updatedItems = this.mergeModelItems(resultItems);
 
       this.modelState$.next({ items: updatedItems, isLoading: false });
 
@@ -105,78 +120,6 @@ export class TrainedModelsService {
         error,
       });
     }
-  }
-
-  private startDownloadStatusPolling() {
-    if (this.downloadStatusFetchInProgress) return;
-    this.stopPolling();
-
-    const downloadInProgress = new Set<string>();
-    this.downloadStatusFetchInProgress = true;
-
-    this.pollingSubscription = timer(0, DOWNLOAD_POLL_INTERVAL)
-      .pipe(
-        takeUntil(this.stopPolling$),
-        switchMap(() => this.trainedModelsApiService.getModelsDownloadStatus()),
-        distinctUntilChanged((prev, curr) => isEqual(prev, curr))
-      )
-      .subscribe({
-        next: (downloadStatus) => {
-          const currentItems = this.modelState$.getValue().items;
-          const updatedItems = currentItems.map((item) => {
-            if (!isBaseNLPModelItem(item)) return item;
-
-            if (downloadStatus[item.model_id]) {
-              downloadInProgress.add(item.model_id);
-              return {
-                ...item,
-                state: MODEL_STATE.DOWNLOADING,
-                downloadState: downloadStatus[item.model_id],
-              };
-            } else {
-              /* Unfortunately, model download status does not report 100% download state, only from 1 to 99. Hence, there might be 3 cases
-               * 1. Model is not downloaded at all
-               * 2. Model download was in progress and finished
-               * 3. Model download was in progress and aborted
-               */
-              const newItem = { ...item };
-              delete newItem.downloadState;
-
-              if (this.abortedDownloads.has(item.model_id)) {
-                // Change downloading state to not downloaded
-                this.abortedDownloads.delete(item.model_id);
-                newItem.state = MODEL_STATE.NOT_DOWNLOADED;
-              } else if (downloadInProgress.has(item.model_id) || !item.state) {
-                newItem.state = MODEL_STATE.DOWNLOADED;
-              }
-              downloadInProgress.delete(item.model_id);
-              return newItem;
-            }
-          });
-
-          this.modelState$.next({
-            ...this.modelState$.getValue(),
-            items: updatedItems,
-          });
-
-          this.downloadStatus$.next(downloadStatus);
-
-          Object.keys(downloadStatus).forEach((modelId) => {
-            if (downloadStatus[modelId]) {
-              downloadInProgress.add(modelId);
-            }
-          });
-
-          if (Object.keys(downloadStatus).length === 0 && downloadInProgress.size === 0) {
-            this.stopPolling();
-            this.downloadStatusFetchInProgress = false;
-          }
-        },
-        error: (error) => {
-          this.stopPolling();
-          this.downloadStatusFetchInProgress = false;
-        },
-      });
   }
 
   public async downloadModel(modelId: string) {
@@ -279,6 +222,110 @@ export class TrainedModelsService {
     }
   }
 
+  public getModel(modelId: string): TrainedModelUIItem | undefined {
+    return this.modelState$.getValue().items.find((item) => item.model_id === modelId);
+  }
+
+  public markDownloadAborted(modelId: string) {
+    this.abortedDownloads.add(modelId);
+  }
+
+  public getModelDownloadState$(modelId: string): Observable<ModelDownloadState | undefined> {
+    return this.downloadStatus$.pipe(
+      map((status) => status[modelId]),
+      distinctUntilChanged()
+    );
+  }
+
+  public getModelDownloadState(modelId: string): ModelDownloadState | undefined {
+    return this.downloadStatus$.getValue()[modelId];
+  }
+
+  private mergeModelItems(newItems: TrainedModelUIItem[]) {
+    return newItems.map((item) => {
+      const prevItem = this.modelState$.getValue().items.find((i) => i.model_id === item.model_id);
+
+      return {
+        ...item,
+        ...(isBaseNLPModelItem(prevItem) && prevItem?.state === MODEL_STATE.DOWNLOADING
+          ? { state: prevItem.state, downloadState: prevItem.downloadState }
+          : {}),
+      };
+    });
+  }
+
+  private startDownloadStatusPolling() {
+    if (this.downloadStatusFetchInProgress) return;
+    this.stopPolling();
+
+    const downloadInProgress = new Set<string>();
+    this.downloadStatusFetchInProgress = true;
+
+    this.pollingSubscription = timer(0, DOWNLOAD_POLL_INTERVAL)
+      .pipe(
+        takeUntil(this.stopPolling$),
+        switchMap(() => this.trainedModelsApiService.getModelsDownloadStatus()),
+        distinctUntilChanged((prev, curr) => isEqual(prev, curr))
+      )
+      .subscribe({
+        next: (downloadStatus) => {
+          const currentItems = this.modelState$.getValue().items;
+          const updatedItems = currentItems.map((item) => {
+            if (!isBaseNLPModelItem(item)) return item;
+
+            if (downloadStatus[item.model_id]) {
+              downloadInProgress.add(item.model_id);
+              return {
+                ...item,
+                state: MODEL_STATE.DOWNLOADING,
+                downloadState: downloadStatus[item.model_id],
+              };
+            } else {
+              /* Unfortunately, model download status does not report 100% download state, only from 1 to 99. Hence, there might be 3 cases
+               * 1. Model is not downloaded at all
+               * 2. Model download was in progress and finished
+               * 3. Model download was in progress and aborted
+               */
+              const newItem = { ...item };
+              delete newItem.downloadState;
+
+              if (this.abortedDownloads.has(item.model_id)) {
+                // Change downloading state to not downloaded
+                this.abortedDownloads.delete(item.model_id);
+                newItem.state = MODEL_STATE.NOT_DOWNLOADED;
+              } else if (downloadInProgress.has(item.model_id) || !item.state) {
+                newItem.state = MODEL_STATE.DOWNLOADED;
+              }
+              downloadInProgress.delete(item.model_id);
+              return newItem;
+            }
+          });
+
+          this.modelState$.next({
+            ...this.modelState$.getValue(),
+            items: updatedItems,
+          });
+
+          this.downloadStatus$.next(downloadStatus);
+
+          Object.keys(downloadStatus).forEach((modelId) => {
+            if (downloadStatus[modelId]) {
+              downloadInProgress.add(modelId);
+            }
+          });
+
+          if (Object.keys(downloadStatus).length === 0 && downloadInProgress.size === 0) {
+            this.stopPolling();
+            this.downloadStatusFetchInProgress = false;
+          }
+        },
+        error: (error) => {
+          this.stopPolling();
+          this.downloadStatusFetchInProgress = false;
+        },
+      });
+  }
+
   private stopPolling() {
     this.stopPolling$.next();
     if (this.pollingSubscription) {
@@ -294,54 +341,8 @@ export class TrainedModelsService {
     );
   }
 
-  public getModel(modelId: string): TrainedModelUIItem | undefined {
-    return this.modelState$.getValue().items.find((item) => item.model_id === modelId);
-  }
-
-  public markDownloadAborted(modelId: string) {
-    this.abortedDownloads.add(modelId);
-  }
-
   private setLoading(isLoading: boolean): void {
     this.modelState$.next({ ...this.modelState$.getValue(), isLoading });
-  }
-
-  public readonly models$ = this.modelState$.pipe(
-    map((state) => state.items),
-    distinctUntilChanged()
-  );
-
-  public get models(): TrainedModelUIItem[] {
-    return this.modelState$.getValue().items;
-  }
-
-  public readonly isLoading$ = this.modelState$.pipe(
-    map((state) => state.isLoading),
-    distinctUntilChanged()
-  );
-
-  public get isLoading(): boolean {
-    return this.modelState$.getValue().isLoading;
-  }
-
-  public readonly error$ = this.modelState$.pipe(
-    map((state) => state.error),
-    distinctUntilChanged()
-  );
-
-  public get error() {
-    return this.modelState$.getValue().error;
-  }
-
-  public getModelDownloadState$(modelId: string): Observable<ModelDownloadState | undefined> {
-    return this.downloadStatus$.pipe(
-      map((status) => status[modelId]),
-      distinctUntilChanged()
-    );
-  }
-
-  public getModelDownloadState(modelId: string): ModelDownloadState | undefined {
-    return this.downloadStatus$.getValue()[modelId];
   }
 
   public destroy() {
@@ -353,6 +354,7 @@ export class TrainedModelsService {
   }
 }
 
+// Retain singleton instance of TrainedModelsService
 let trainedModelsService: TrainedModelsService | null = null;
 export const TrainedModelsServiceFactory = (trainedModelsApiService: TrainedModelsApiService) => {
   if (!trainedModelsService) {
