@@ -19,6 +19,7 @@ interface WriterBulkResponse {
 interface BulkParams {
   host?: EntityRiskScoreRecord[];
   user?: EntityRiskScoreRecord[];
+  service?: EntityRiskScoreRecord[];
   refresh?: 'wait_for';
 }
 
@@ -38,7 +39,7 @@ export class RiskEngineDataWriter implements RiskEngineDataWriter {
 
   public bulk = async (params: BulkParams) => {
     try {
-      if (!params.host?.length && !params.user?.length) {
+      if (!params.host?.length && !params.user?.length && !params.service?.length) {
         return { errors: [], docs_written: 0, took: 0 };
       }
 
@@ -81,7 +82,13 @@ export class RiskEngineDataWriter implements RiskEngineDataWriter {
         this.scoreToEcs(score, 'user'),
       ]) ?? [];
 
-    return hostBody.concat(userBody) as BulkOperationContainer[];
+    const serviceBody =
+      params.service?.flatMap((score) => [
+        { create: { _index: this.options.index } },
+        this.scoreToEcs(score, 'service'),
+      ]) ?? [];
+
+    return [...hostBody, ...userBody, ...serviceBody] as BulkOperationContainer[];
   };
 
   private scoreToEcs = (score: EntityRiskScoreRecord, identifierType: IdentifierType): unknown => {

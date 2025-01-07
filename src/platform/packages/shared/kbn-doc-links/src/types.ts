@@ -307,6 +307,7 @@ export interface DocLinks {
     readonly fieldFormattersNumber: string;
     readonly fieldFormattersString: string;
     readonly runtimeFields: string;
+    readonly migrateOffScriptedFields: string;
   };
   readonly addData: string;
   readonly kibana: {
