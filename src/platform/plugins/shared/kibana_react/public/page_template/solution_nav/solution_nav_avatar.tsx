@@ -54,7 +54,7 @@ export const KibanaPageTemplateSolutionNavAvatar: FunctionComponent<
       className={className}
       css={[
         pageTemplateSolutionNavAvatarStyles.base,
-        size === 'xxl' ? pageTemplateSolutionNavAvatarStyles.xxl : undefined,
+        size === 'xxl' && pageTemplateSolutionNavAvatarStyles.xxl,
       ]}
       color="plain"
       size={size === 'xxl' ? 'xl' : size}
