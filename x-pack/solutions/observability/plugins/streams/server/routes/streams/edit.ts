@@ -18,7 +18,7 @@ import {
   WiredStreamConfigDefinition,
   WiredStreamDefinition,
 } from '@kbn/streams-schema';
-import fastDeepEqual from 'fast-deep-equal';
+import { isEqual } from 'lodash';
 import {
   DefinitionNotFound,
   ForkConditionMissing,
@@ -72,11 +72,25 @@ export const editStreamRoute = createServerRoute({
         return { acknowledged: true };
       }
 
+      const currentStreamDefinition = (await readStream({
+        scopedClusterClient,
+        id: params.path.id,
+      })) as WiredStreamDefinition;
+
       if (isRootStream(streamDefinition)) {
-        await validateRootStreamChanges(scopedClusterClient, streamDefinition);
+        await validateRootStreamChanges(
+          scopedClusterClient,
+          currentStreamDefinition,
+          streamDefinition
+        );
       }
 
-      await validateStreamChildren(scopedClusterClient, params.path.id, params.body.ingest.routing);
+      await validateStreamChildren(
+        scopedClusterClient,
+        currentStreamDefinition,
+        params.body.ingest.routing
+      );
+
       if (isWiredStreamConfig(params.body)) {
         await validateAncestorFields(
           scopedClusterClient,
@@ -190,15 +204,11 @@ async function updateParentStream(
 
 async function validateStreamChildren(
   scopedClusterClient: IScopedClusterClient,
-  id: string,
+  currentStreamDefinition: WiredStreamDefinition,
   children: WiredStreamConfigDefinition['ingest']['routing']
 ) {
   try {
-    const oldDefinition = await readStream({
-      scopedClusterClient,
-      id,
-    });
-    const oldChildren = oldDefinition.stream.ingest.routing.map((child) => child.name);
+    const oldChildren = currentStreamDefinition.stream.ingest.routing.map((child) => child.name);
     const newChildren = new Set(children.map((child) => child.name));
     children.forEach((child) => {
       validateCondition(child.condition);
@@ -222,15 +232,11 @@ async function validateStreamChildren(
  */
 async function validateRootStreamChanges(
   scopedClusterClient: IScopedClusterClient,
+  currentStreamDefinition: WiredStreamDefinition,
   nextStreamDefinition: WiredStreamDefinition
 ) {
-  const oldDefinition = (await readStream({
-    scopedClusterClient,
-    id: nextStreamDefinition.name,
-  })) as WiredStreamDefinition;
-
-  const hasFieldChanges = !fastDeepEqual(
-    oldDefinition.stream.ingest.wired.fields,
+  const hasFieldChanges = !isEqual(
+    currentStreamDefinition.stream.ingest.wired.fields,
     nextStreamDefinition.stream.ingest.wired.fields
   );
 
@@ -238,8 +244,8 @@ async function validateRootStreamChanges(
     throw new RootStreamImmutabilityException('Root stream fields cannot be changed');
   }
 
-  const hasProcessingChanges = !fastDeepEqual(
-    oldDefinition.stream.ingest.processing,
+  const hasProcessingChanges = !isEqual(
+    currentStreamDefinition.stream.ingest.processing,
     nextStreamDefinition.stream.ingest.processing
   );
 
