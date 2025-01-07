@@ -424,7 +424,7 @@ The plugin exposes the static DefaultEditorController class to consume.
 |WARNING: Missing README.
 
 
-|{kib-repo}blob/{branch}/src/plugins/vis_types/vislib[visTypeVislib]
+|{kib-repo}blob/{branch}/src/platform/plugins/private/vis_types/vislib[visTypeVislib]
 |WARNING: Missing README.
 
 
