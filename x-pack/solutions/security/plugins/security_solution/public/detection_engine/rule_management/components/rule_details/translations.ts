@@ -273,6 +273,21 @@ export const MACHINE_LEARNING_JOB_ID_FIELD_LABEL = i18n.translate(
   }
 );
 
+export const MACHINE_LEARNING_JOB_NOT_AVAILABLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.machineLearning.mlJobNotAvailable',
+  {
+    defaultMessage:
+      'This job is currently unavailable. Please ensure that all related ML integrations are installed and configured.',
+  }
+);
+
+export const OPEN_HELP_POPOVER_ARIA_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.machineLearning.mlJobNotAvailable.openHelpPopoverAriaLabel',
+  {
+    defaultMessage: 'Open help popover',
+  }
+);
+
 export const ANOMALY_THRESHOLD_FIELD_LABEL = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetails.anomalyThresholdFieldLabel',
   {
