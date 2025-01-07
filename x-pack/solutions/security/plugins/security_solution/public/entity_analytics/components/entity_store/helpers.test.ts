@@ -5,43 +5,76 @@
  * 2.0.
  */
 
-import { sourceFieldToText } from './helpers';
+import { getEntityType, sourceFieldToText } from './helpers';
 import { render } from '@testing-library/react';
 import { TestProviders } from '@kbn/timelines-plugin/public/mock';
+import type {
+  Entity,
+  HostEntity,
+  ServiceEntity,
+  UserEntity,
+} from '../../../../common/api/entity_analytics';
 
 describe('helpers', () => {
-  // TODO write tests for getEntityType
-  // describe('getEntityType', () => {
-  //   it('should return true if the record is a UserEntity', () => {
-  //     const userEntity: UserEntity = {
-  //       '@timestamp': '2021-08-02T14:00:00.000Z',
-  //       user: {
-  //         name: 'test_user',
-  //       },
-  //       entity: {
-  //         name: 'test_user',
-  //         source: 'logs-test',
-  //       },
-  //     };
+  describe('getEntityType', () => {
+    it('should return "user" if the record is a UserEntity', () => {
+      const userEntity: UserEntity = {
+        '@timestamp': '2021-08-02T14:00:00.000Z',
+        user: {
+          name: 'test_user',
+        },
+        entity: {
+          name: 'test_user',
+          source: 'logs-test',
+        },
+      };
 
-  //     expect(getEntityType(userEntity)).toBe(true);
-  //   });
+      expect(getEntityType(userEntity)).toBe('user');
+    });
 
-  //   it('should return false if the record is not a UserEntity', () => {
-  //     const nonUserEntity: Entity = {
-  //       '@timestamp': '2021-08-02T14:00:00.000Z',
-  //       host: {
-  //         name: 'test_host',
-  //       },
-  //       entity: {
-  //         name: 'test_host',
-  //         source: 'logs-test',
-  //       },
-  //     };
+    it('should return "host" if the record is a HostEntity', () => {
+      const hostEntity: HostEntity = {
+        '@timestamp': '2021-08-02T14:00:00.000Z',
+        host: {
+          name: 'test_host',
+        },
+        entity: {
+          name: 'test_host',
+          source: 'logs-test',
+        },
+      };
 
-  //     expect(getEntityType(nonUserEntity)).toBe(false);
-  //   });
-  // });
+      expect(getEntityType(hostEntity)).toBe('host');
+    });
+    it('should return "service" if the record is a ServiceEntity', () => {
+      const serviceEntity: ServiceEntity = {
+        '@timestamp': '2021-08-02T14:00:00.000Z',
+        service: {
+          name: 'test_service',
+        },
+        entity: {
+          name: 'test_service',
+          source: 'logs-test',
+        },
+      };
+
+      expect(getEntityType(serviceEntity)).toBe('service');
+    });
+
+    it('should throw an error if the record does not match any entity type', () => {
+      const unknownEntity = {
+        '@timestamp': '2021-08-02T14:00:00.000Z',
+        entity: {
+          name: 'unknown_entity',
+          source: 'logs-test',
+        },
+      } as unknown as Entity;
+
+      expect(() => getEntityType(unknownEntity)).toThrow(
+        'Unexpected entity: {"@timestamp":"2021-08-02T14:00:00.000Z","entity":{"name":"unknown_entity","source":"logs-test"}}'
+      );
+    });
+  });
 
   describe('sourceFieldToText', () => {
     it("should return 'Events' if the value isn't risk or asset", () => {

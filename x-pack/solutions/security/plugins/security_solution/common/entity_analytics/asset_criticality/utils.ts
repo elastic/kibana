@@ -11,7 +11,7 @@ import { EntityType } from '../types';
 
 const ASSET_CRITICALITY_UNAVAILABLE_TYPES = [EntityType.universal];
 
-// TODO can we merge all getEntityTypes into a single function? For now all pf them exclude EntityType.universal
+// TODO delete this function when the universal entity support is added
 export const getAssetCriticalityEntityTypes = (experimentalFeatures: ExperimentalFeatures) => {
   const allEntityTypes = getAllEntityTypes();
   const disabledEntityTypes = getDisabledEntityTypes(experimentalFeatures);

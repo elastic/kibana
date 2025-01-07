@@ -34,8 +34,8 @@ export const getEntityType = (record: Entity): EntityType => {
 export const EntityIconByType: Record<EntityType, IconType> = {
   [EntityType.user]: 'user',
   [EntityType.host]: 'storage',
-  [EntityType.service]: 'console',
-  [EntityType.universal]: 'globe',
+  [EntityType.service]: 'gear',
+  [EntityType.universal]: 'globe', // random value since we don't support universal entity type
 };
 
 export const sourceFieldToText = (source: string) => {
