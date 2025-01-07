@@ -120,6 +120,7 @@ exports[`ResetSLO happy path resets all associated resources 6`] = `
   "calls": Array [
     Array [
       Object {
+        "addedBy": "irrelevant",
         "budgetingMethod": "occurrences",
         "createdAt": 2023-01-01T00:00:00.000Z,
         "description": "irrelevant",
@@ -165,6 +166,7 @@ exports[`ResetSLO happy path resets all associated resources 6`] = `
           "type": "rolling",
         },
         "updatedAt": 2023-01-01T00:00:00.000Z,
+        "updatedBy": "irrelevant",
         "version": 1,
       },
     ],
@@ -203,7 +205,7 @@ exports[`ResetSLO happy path resets all associated resources 8`] = `
           "description": "Ingest pipeline for SLO rollup data",
           "managed": true,
           "managed_by": "observability",
-          "version": 3.3,
+          "version": 3.4,
         },
         "description": "Ingest pipeline for SLO rollup data [id: irrelevant, revision: 1]",
         "id": ".slo-observability.sli.pipeline-irrelevant-1",
@@ -241,7 +243,7 @@ exports[`ResetSLO happy path resets all associated resources 8`] = `
               ],
               "date_rounding": "M",
               "field": "@timestamp",
-              "index_name_prefix": ".slo-observability.sli-v3.3.",
+              "index_name_prefix": ".slo-observability.sli-v3.4.",
             },
           },
           Object {
@@ -275,7 +277,7 @@ exports[`ResetSLO happy path resets all associated resources 8`] = `
           "description": "Ingest pipeline for SLO summary data [id: irrelevant, revision: 1]",
           "managed": true,
           "managed_by": "observability",
-          "version": 3.3,
+          "version": 3.4,
         },
         "description": "Ingest pipeline for SLO summary data [id: irrelevant, revision: 1]",
         "id": ".slo-observability.summary.pipeline-irrelevant-1",
@@ -525,6 +527,18 @@ exports[`ResetSLO happy path resets all associated resources 8`] = `
   }",
             },
           },
+          Object {
+            "set": Object {
+              "field": "updatedBy",
+              "value": "irrelevant",
+            },
+          },
+          Object {
+            "set": Object {
+              "field": "addedBy",
+              "value": "irrelevant",
+            },
+          },
         ],
       },
     ],
@@ -547,6 +561,7 @@ exports[`ResetSLO happy path resets all associated resources 9`] = `
   "calls": Array [
     Array [
       Object {
+        "addedBy": "irrelevant",
         "budgetingMethod": "occurrences",
         "createdAt": 2023-01-01T00:00:00.000Z,
         "description": "irrelevant",
@@ -592,6 +607,7 @@ exports[`ResetSLO happy path resets all associated resources 9`] = `
           "type": "rolling",
         },
         "updatedAt": 2023-01-01T00:00:00.000Z,
+        "updatedBy": "irrelevant",
         "version": 1,
       },
     ],
@@ -666,6 +682,7 @@ exports[`ResetSLO happy path resets all associated resources 11`] = `
           },
           "sliValue": -1,
           "slo": Object {
+            "addedBy": "irrelevant",
             "budgetingMethod": "occurrences",
             "createdAt": "2023-01-01T00:00:00.000Z",
             "description": "irrelevant",
@@ -700,6 +717,7 @@ exports[`ResetSLO happy path resets all associated resources 11`] = `
               "type": "rolling",
             },
             "updatedAt": "2023-01-01T00:00:00.000Z",
+            "updatedBy": "irrelevant",
           },
           "spaceId": "some-space",
           "status": "NO_DATA",
@@ -712,7 +730,7 @@ exports[`ResetSLO happy path resets all associated resources 11`] = `
           },
         },
         "id": "slo-irrelevant",
-        "index": ".slo-observability.summary-v3.3.temp",
+        "index": ".slo-observability.summary-v3.4.temp",
         "refresh": true,
       },
     ],

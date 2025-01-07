@@ -217,6 +217,20 @@ export const getSLOSummaryMappingsTemplate = (
             },
           },
         },
+        addedBy: {
+          type: 'keyword',
+        },
+        updatedBy: {
+          type: 'keyword',
+        },
+        createdAt: {
+          type: 'date',
+          format: 'date_optional_time||epoch_millis',
+        },
+        updatedAt: {
+          type: 'date',
+          format: 'date_optional_time||epoch_millis',
+        },
       },
     },
   },

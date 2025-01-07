@@ -206,6 +206,8 @@ export const createSLO = (params: Partial<SLODefinition> = {}): SLODefinition =>
     revision: 1,
     createdAt: now,
     updatedAt: now,
+    createdBy: 'irrelevant',
+    updatedBy: 'irrelevant',
     version: SLO_MODEL_VERSION,
     ...params,
   });
