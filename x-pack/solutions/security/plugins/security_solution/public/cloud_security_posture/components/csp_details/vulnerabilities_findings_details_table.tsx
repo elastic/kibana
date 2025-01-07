@@ -6,7 +6,7 @@
  */
 
 import React, { memo, useEffect, useState } from 'react';
-import type { Criteria, EuiBasicTableColumn } from '@elastic/eui';
+import type { Criteria, EuiBasicTableColumn, EuiTableSortingType } from '@elastic/eui';
 import { EuiSpacer, EuiPanel, EuiText, EuiBasicTable, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import {
@@ -14,11 +14,14 @@ import {
   type VulnSeverity,
 } from '@kbn/cloud-security-posture-common';
 import { DistributionBar } from '@kbn/security-solution-distribution-bar';
-import { useVulnerabilitiesFindings } from '@kbn/cloud-security-posture/src/hooks/use_vulnerabilities_findings';
 import type {
-  CspVulnerabilityFinding,
-  Vulnerability,
-} from '@kbn/cloud-security-posture-common/schema/vulnerabilities/csp_vulnerability_finding';
+  VulnerabilitiesFindingDetailFields,
+  VulnerabilitiesPackage,
+} from '@kbn/cloud-security-posture/src/hooks/use_vulnerabilities_findings';
+import {
+  useVulnerabilitiesFindings,
+  VULNERABILITY,
+} from '@kbn/cloud-security-posture/src/hooks/use_vulnerabilities_findings';
 import {
   getVulnerabilityStats,
   CVSScoreBadge,
@@ -35,17 +38,13 @@ import { useGetNavigationUrlParams } from '@kbn/cloud-security-posture/src/hooks
 import { useHasVulnerabilities } from '@kbn/cloud-security-posture/src/hooks/use_has_vulnerabilities';
 import { SecuritySolutionLinkAnchor } from '../../../common/components/links';
 
-type VulnerabilitiesFindingDetailFields = Pick<
-  CspVulnerabilityFinding,
-  'vulnerability' | 'resource'
->;
-
-interface VulnerabilitiesPackage extends Vulnerability {
-  package: {
-    name: string;
-    version: string;
-  };
-}
+type VulnerabilitySortFieldType =
+  | 'score'
+  | 'vulnerability'
+  | 'resource'
+  | VULNERABILITY.SEVERITY
+  | VULNERABILITY.ID
+  | VULNERABILITY.PACKAGE_NAME;
 
 export const VulnerabilitiesFindingsDetailsTable = memo(({ value }: { value: string }) => {
   useEffect(() => {
@@ -56,10 +55,23 @@ export const VulnerabilitiesFindingsDetailsTable = memo(({ value }: { value: str
   }, []);
 
   const [currentFilter, setCurrentFilter] = useState<string>('');
+  const [sortField, setSortField] = useState<VulnerabilitySortFieldType>(VULNERABILITY.SEVERITY);
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
+
+  const sortFieldDirection: { [key: string]: string } = {};
+  sortFieldDirection[sortField === 'score' ? 'vulnerability.score.base' : sortField] =
+    sortDirection;
+
+  const sorting: EuiTableSortingType<VulnerabilitiesFindingDetailFields> = {
+    sort: {
+      field: sortField,
+      direction: sortDirection,
+    },
+  };
 
   const { data } = useVulnerabilitiesFindings({
     query: buildVulnerabilityEntityFlyoutPreviewQuery('host.name', value, currentFilter),
-    sort: [],
+    sort: [sortFieldDirection],
     enabled: true,
     pageSize: 1,
   });
@@ -96,11 +108,16 @@ export const VulnerabilitiesFindingsDetailsTable = memo(({ value }: { value: str
     pageSizeOptions: [10, 25, 100],
   };
 
-  const onTableChange = ({ page }: Criteria<VulnerabilitiesFindingDetailFields>) => {
+  const onTableChange = ({ page, sort }: Criteria<VulnerabilitiesFindingDetailFields>) => {
     if (page) {
       const { index, size } = page;
       setPageIndex(index);
       setPageSize(size);
+    }
+    if (sort) {
+      const { field: fieldSort, direction } = sort;
+      setSortField(fieldSort);
+      setSortDirection(direction);
     }
   };
 
@@ -164,22 +181,20 @@ export const VulnerabilitiesFindingsDetailsTable = memo(({ value }: { value: str
       ),
     },
     {
-      field: 'vulnerability',
-      render: (vulnerability: Vulnerability) => <EuiText size="s">{vulnerability?.id}</EuiText>,
+      field: VULNERABILITY.ID,
+      render: (id: string) => <EuiText size="s">{id}</EuiText>,
       name: i18n.translate(
         'xpack.securitySolution.flyout.left.insights.vulnerability.table.resultColumnName',
         { defaultMessage: 'Vulnerability' }
       ),
       width: '20%',
+      sortable: true,
     },
     {
-      field: 'vulnerability',
-      render: (vulnerability: Vulnerability) => (
+      field: 'score',
+      render: (score: { version?: string; base?: number }) => (
         <EuiText size="s">
-          <CVSScoreBadge
-            version={vulnerability?.score?.version}
-            score={vulnerability?.score?.base}
-          />
+          <CVSScoreBadge version={score?.version} score={score?.base} />
         </EuiText>
       ),
       name: i18n.translate(
@@ -187,15 +202,14 @@ export const VulnerabilitiesFindingsDetailsTable = memo(({ value }: { value: str
         { defaultMessage: 'CVSS' }
       ),
       width: '15%',
+      sortable: true,
     },
     {
-      field: 'vulnerability',
-      render: (vulnerability: Vulnerability) => (
+      field: VULNERABILITY.SEVERITY,
+      render: (severity: string) => (
         <>
           <EuiText size="s">
-            <SeverityStatusBadge
-              severity={vulnerability?.severity?.toUpperCase() as VulnSeverity}
-            />
+            <SeverityStatusBadge severity={severity?.toUpperCase() as VulnSeverity} />
           </EuiText>
         </>
       ),
@@ -204,17 +218,17 @@ export const VulnerabilitiesFindingsDetailsTable = memo(({ value }: { value: str
         { defaultMessage: 'Severity' }
       ),
       width: '20%',
+      sortable: true,
     },
     {
-      field: 'vulnerability',
-      render: (vulnerability: VulnerabilitiesPackage) => (
-        <EuiText size="s">{vulnerability?.package?.name}</EuiText>
-      ),
+      field: VULNERABILITY.PACKAGE_NAME,
+      render: (packageName: string) => <EuiText size="s">{packageName}</EuiText>,
       name: i18n.translate(
         'xpack.securitySolution.flyout.left.insights.vulnerability.table.ruleColumnName',
         { defaultMessage: 'Package' }
       ),
       width: '40%',
+      sortable: true,
     },
   ];
 
@@ -248,6 +262,7 @@ export const VulnerabilitiesFindingsDetailsTable = memo(({ value }: { value: str
           pagination={pagination}
           onChange={onTableChange}
           data-test-subj={'securitySolutionFlyoutVulnerabilitiesFindingsTable'}
+          sorting={sorting}
         />
       </EuiPanel>
     </>
