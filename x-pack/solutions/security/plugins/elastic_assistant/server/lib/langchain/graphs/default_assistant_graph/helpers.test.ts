@@ -74,35 +74,24 @@ describe('streamGraph', () => {
   describe('OpenAI Function Agent streaming', () => {
     it('should execute the graph in streaming mode - OpenAI + isOssModel = false', async () => {
       mockStreamEvents.mockReturnValue({
-        next: jest
-          .fn()
-          .mockResolvedValueOnce({
-            value: {
-              name: 'ActionsClientChatOpenAI',
-              event: 'on_llm_stream',
-              data: { chunk: { message: { content: 'content' } } },
-              tags: [AGENT_NODE_TAG],
-            },
-            done: false,
-          })
-          .mockResolvedValueOnce({
-            value: {
-              name: 'ActionsClientChatOpenAI',
-              event: 'on_llm_end',
-              data: {
-                output: {
-                  generations: [
-                    [{ generationInfo: { finish_reason: 'stop' }, text: 'final message' }],
-                  ],
-                },
+        async *[Symbol.asyncIterator]() {
+          yield {
+            event: 'on_llm_stream',
+            data: { chunk: { message: { content: 'content' } } },
+            tags: [AGENT_NODE_TAG],
+          };
+          yield {
+            event: 'on_llm_end',
+            data: {
+              output: {
+                generations: [
+                  [{ generationInfo: { finish_reason: 'stop' }, text: 'final message' }],
+                ],
               },
-              tags: [AGENT_NODE_TAG],
             },
-          })
-          .mockResolvedValue({
-            done: true,
-          }),
-        return: jest.fn(),
+            tags: [AGENT_NODE_TAG],
+          };
+        },
       });
 
       const response = await streamGraph(requestArgs);
@@ -119,33 +108,22 @@ describe('streamGraph', () => {
     });
     it('on_llm_end events with finish_reason != stop should not end the stream', async () => {
       mockStreamEvents.mockReturnValue({
-        next: jest
-          .fn()
-          .mockResolvedValueOnce({
-            value: {
-              name: 'ActionsClientChatOpenAI',
-              event: 'on_llm_stream',
-              data: { chunk: { message: { content: 'content' } } },
-              tags: [AGENT_NODE_TAG],
-            },
-            done: false,
-          })
-          .mockResolvedValueOnce({
-            value: {
-              name: 'ActionsClientChatOpenAI',
-              event: 'on_llm_end',
-              data: {
-                output: {
-                  generations: [[{ generationInfo: { finish_reason: 'function_call' }, text: '' }]],
-                },
+        async *[Symbol.asyncIterator]() {
+          yield {
+            event: 'on_llm_stream',
+            data: { chunk: { message: { content: 'content' } } },
+            tags: [AGENT_NODE_TAG],
+          };
+          yield {
+            event: 'on_llm_end',
+            data: {
+              output: {
+                generations: [[{ generationInfo: { finish_reason: 'function_call' }, text: '' }]],
               },
-              tags: [AGENT_NODE_TAG],
             },
-          })
-          .mockResolvedValue({
-            done: true,
-          }),
-        return: jest.fn(),
+            tags: [AGENT_NODE_TAG],
+          };
+        },
       });
 
       const response = await streamGraph(requestArgs);
@@ -158,33 +136,22 @@ describe('streamGraph', () => {
     });
     it('on_llm_end events without a finish_reason should end the stream', async () => {
       mockStreamEvents.mockReturnValue({
-        next: jest
-          .fn()
-          .mockResolvedValueOnce({
-            value: {
-              name: 'ActionsClientChatOpenAI',
-              event: 'on_llm_stream',
-              data: { chunk: { message: { content: 'content' } } },
-              tags: [AGENT_NODE_TAG],
-            },
-            done: false,
-          })
-          .mockResolvedValueOnce({
-            value: {
-              name: 'ActionsClientChatOpenAI',
-              event: 'on_llm_end',
-              data: {
-                output: {
-                  generations: [[{ generationInfo: {}, text: 'final message' }]],
-                },
+        async *[Symbol.asyncIterator]() {
+          yield {
+            event: 'on_llm_stream',
+            data: { chunk: { message: { content: 'content' } } },
+            tags: [AGENT_NODE_TAG],
+          };
+          yield {
+            event: 'on_llm_end',
+            data: {
+              output: {
+                generations: [[{ generationInfo: {}, text: 'final message' }]],
               },
-              tags: [AGENT_NODE_TAG],
             },
-          })
-          .mockResolvedValue({
-            done: true,
-          }),
-        return: jest.fn(),
+            tags: [AGENT_NODE_TAG],
+          };
+        },
       });
 
       const response = await streamGraph(requestArgs);
@@ -201,33 +168,22 @@ describe('streamGraph', () => {
     });
     it('on_llm_end events is called with chunks if there is no final text value', async () => {
       mockStreamEvents.mockReturnValue({
-        next: jest
-          .fn()
-          .mockResolvedValueOnce({
-            value: {
-              name: 'ActionsClientChatOpenAI',
-              event: 'on_llm_stream',
-              data: { chunk: { message: { content: 'content' } } },
-              tags: [AGENT_NODE_TAG],
-            },
-            done: false,
-          })
-          .mockResolvedValueOnce({
-            value: {
-              name: 'ActionsClientChatOpenAI',
-              event: 'on_llm_end',
-              data: {
-                output: {
-                  generations: [[{ generationInfo: {}, text: '' }]],
-                },
+        async *[Symbol.asyncIterator]() {
+          yield {
+            event: 'on_llm_stream',
+            data: { chunk: { message: { content: 'content' } } },
+            tags: [AGENT_NODE_TAG],
+          };
+          yield {
+            event: 'on_llm_end',
+            data: {
+              output: {
+                generations: [[{ generationInfo: {}, text: '' }]],
               },
-              tags: [AGENT_NODE_TAG],
             },
-          })
-          .mockResolvedValue({
-            done: true,
-          }),
-        return: jest.fn(),
+            tags: [AGENT_NODE_TAG],
+          };
+        },
       });
 
       const response = await streamGraph(requestArgs);
@@ -241,6 +197,28 @@ describe('streamGraph', () => {
           false
         );
       });
+    });
+    it('on_llm_end does not call handleStreamEnd if generations is undefined', async () => {
+      mockStreamEvents.mockReturnValue({
+        async *[Symbol.asyncIterator]() {
+          yield {
+            event: 'on_llm_stream',
+            data: { chunk: { message: { content: 'content' } } },
+            tags: [AGENT_NODE_TAG],
+          };
+          yield {
+            event: 'on_llm_end',
+            data: {},
+            tags: [AGENT_NODE_TAG],
+          };
+        },
+      });
+
+      const response = await streamGraph(requestArgs);
+
+      expect(response).toBe(mockResponseWithHeaders);
+      expect(mockPush).toHaveBeenCalledWith({ payload: 'content', type: 'content' });
+      expect(mockOnLlmResponse).not.toHaveBeenCalled();
     });
   });
 
@@ -330,7 +308,7 @@ describe('streamGraph', () => {
 
       await expectConditions(response);
     });
-    it('should execute the graph in streaming mode - OpenAI + isOssModel = false', async () => {
+    it('should execute the graph in streaming mode - OpenAI + isOssModel = true', async () => {
       const mockAssistantGraphAsyncIterator = {
         streamEvents: () => mockAsyncIterator,
       } as unknown as DefaultAssistantGraph;
