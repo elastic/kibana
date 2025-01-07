@@ -314,13 +314,13 @@ export function transformHealthServiceProvider({
                   'xpack.transform.alertTypes.transformHealth.notStartedRecoveryMessage',
                   {
                     defaultMessage:
-                      '{count, plural, =0 {All transforms are started} one {{transformsString} is started} other {# transforms are started: {transformsString}}}.',
+                      '{count, plural, =0 {All transforms are started} one {Transform {transformsString} is started} other {# transforms are started: {transformsString}}}.',
                     values: { count, transformsString },
                   }
                 )
               : i18n.translate('xpack.transform.alertTypes.transformHealth.notStartedMessage', {
                   defaultMessage:
-                    '{count, plural, one {{transformsString} is not started} other {# transforms are not started: {transformsString}}}.',
+                    '{count, plural, one {Transform {transformsString} is not started} other {# transforms are not started: {transformsString}}}.',
                   values: { count, transformsString },
                 }),
           },
@@ -374,13 +374,13 @@ export function transformHealthServiceProvider({
                   'xpack.transform.alertTypes.transformHealth.healthCheckRecoveryMessage',
                   {
                     defaultMessage:
-                      '{count, plural, =0 {All transforms are healthy} one {{transformsString} is healthy} other {# transforms are healthy: {transformsString}}}.',
+                      '{count, plural, =0 {All transforms are healthy} one {Transform {transformsString} is healthy} other {# transforms are healthy: {transformsString}}}.',
                     values: { count, transformsString },
                   }
                 )
               : i18n.translate('xpack.transform.alertTypes.transformHealth.healthCheckMessage', {
                   defaultMessage:
-                    '{count, plural, one {{transformsString} is unhealthy} other {# transforms are unhealthy: {transformsString}}}.',
+                    '{count, plural, one {Transform {transformsString} is unhealthy} other {# transforms are unhealthy: {transformsString}}}.',
                   values: { count, transformsString },
                 }),
           },
