@@ -21,7 +21,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { TrainedModelItem } from '@kbn/ml-common-types/trained_models';
 
-import { useMlKibana } from '../../contexts/kibana';
+import { useMlKibana } from '@kbn/ml-kibana-context';
 import { ProcessorsStats } from './expanded_row';
 
 export type IngestStatsResponse = Exclude<TrainedModelItem['stats'], undefined>['ingest'];

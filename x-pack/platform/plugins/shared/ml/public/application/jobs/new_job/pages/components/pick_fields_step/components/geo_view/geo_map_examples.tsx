@@ -12,8 +12,8 @@ import type { LayerDescriptor } from '@kbn/maps-plugin/common';
 import { INITIAL_LOCATION } from '@kbn/maps-plugin/common';
 import type { Aggregation, Field, SplitField } from '@kbn/ml-anomaly-utils';
 import { JOB_TYPE } from '@kbn/ml-common-constants/new_job';
+import { useMlKibana } from '@kbn/ml-kibana-context';
 import { SplitCards, useAnimateSplit } from '../split_cards';
-import { useMlKibana } from '../../../../../../../contexts/kibana';
 import { DetectorTitle } from '../detector_title';
 
 interface Props {

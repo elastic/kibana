@@ -14,7 +14,7 @@ import {
   DEFAULT_REFRESH_INTERVAL_MS,
   MINIMUM_REFRESH_INTERVAL_MS,
 } from '@kbn/ml-common-constants/jobs_list';
-import { useMlKibana } from '../../../../../contexts/kibana';
+import { useMlKibana } from '@kbn/ml-kibana-context';
 
 import { useRefreshAnalyticsList } from '../../../../common';
 

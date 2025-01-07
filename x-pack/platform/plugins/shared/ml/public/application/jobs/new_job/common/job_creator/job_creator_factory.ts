@@ -8,7 +8,7 @@
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { JOB_TYPE } from '@kbn/ml-common-constants/new_job';
-import type { MlApi } from '../../../../services/ml_api_service';
+import type { MlApi } from '@kbn/ml-services/ml_api_service';
 import type { NewJobCapsService } from '../../../../services/new_job_capabilities/new_job_capabilities_service';
 import { SingleMetricJobCreator } from './single_metric_job_creator';
 import { MultiMetricJobCreator } from './multi_metric_job_creator';

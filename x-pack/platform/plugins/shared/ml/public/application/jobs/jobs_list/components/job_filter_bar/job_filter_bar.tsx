@@ -13,7 +13,7 @@ import { EuiSearchBar, EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eu
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { JobGroup } from '../job_group';
-import { useMlKibana } from '../../../../contexts/kibana';
+import { useMlKibana } from '@kbn/ml-kibana-context';
 
 interface JobFilterBarProps {
   setFilters: (query: Query | null) => void;
