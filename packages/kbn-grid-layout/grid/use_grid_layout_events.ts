@@ -74,7 +74,6 @@ export const useGridLayoutEvents = ({
         scrollInterval.current = null;
       }
     };
-
     const calculateUserEvent = (e: Event, shouldAutoScroll = true) => {
       const interactionEvent = interactionEvent$.value;
       if (!interactionEvent) {
@@ -82,8 +81,11 @@ export const useGridLayoutEvents = ({
         stopAutoScrollIfNecessary();
         return;
       }
-      e.stopPropagation();
-      e.preventDefault();
+      // make sure when the user is dragging through touchmove, the page doesn't scroll
+      if (isTouchEvent(e)) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
 
       const gridRowElements = gridLayoutStateManager.rowRefs.current;
 

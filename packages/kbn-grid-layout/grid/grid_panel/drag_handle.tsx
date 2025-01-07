@@ -19,6 +19,7 @@ import {
   UserMouseEvent,
   UserTouchEvent,
 } from '../types';
+import { isMouseEvent, isTouchEvent } from '../utils/sensors';
 
 export interface DragHandleApi {
   setDragHandles: (refs: Array<HTMLElement | null>) => void;
@@ -41,13 +42,20 @@ export const DragHandle = React.forwardRef<
   const dragHandleRefs = useRef<Array<HTMLElement | null>>([]);
 
   /**
-   * We need to memoize the `onMouseDown`, `onTouchStart` and `onTouchEnd` callbacks so that we don't assign a new event handler
+   * We need to memoize the `onDragStart`, `onTouchStart` and `onTouchEnd` callbacks so that we don't assign a new event handler
    * every time `setDragHandles` is called
    */
-  const onMouseDown = useCallback(
-    (e: UserMouseEvent) => {
-      if (gridLayoutStateManager.accessMode$.getValue() !== 'EDIT' || e.button !== 0) {
-        // ignore anything but left clicks, and ignore clicks when not in edit mode
+  const onDragStart = useCallback(
+    (e: UserMouseEvent | UserTouchEvent) => {
+      // ignore when not in edit mode
+      if (gridLayoutStateManager.accessMode$.getValue() !== 'EDIT') return;
+
+      // ignore anything but left clicks for mouse events
+      if (isMouseEvent(e) && e.button !== 0) {
+        return;
+      }
+      // ignore multi-touch events for touch events
+      if (isTouchEvent(e) && e.touches.length > 1) {
         return;
       }
       e.stopPropagation();
@@ -55,15 +63,9 @@ export const DragHandle = React.forwardRef<
     },
     [interactionStart, gridLayoutStateManager.accessMode$]
   );
-  const onTouchStart = useCallback(
-    (e: UserTouchEvent) => {
-      e.stopPropagation();
-      interactionStart('drag', e);
-    },
-    [interactionStart]
-  );
-  const onTouchEnd = useCallback(
-    (e: UserTouchEvent) => {
+
+  const onDragEnd = useCallback(
+    (e: UserTouchEvent | UserMouseEvent) => {
       e.stopPropagation();
       interactionStart('drop', e);
     },
@@ -80,21 +82,21 @@ export const DragHandle = React.forwardRef<
 
       for (const handle of dragHandles) {
         if (handle === null) return;
-        handle.addEventListener('mousedown', onMouseDown, { passive: true });
-        handle.addEventListener('touchstart', onTouchStart, { passive: false });
-        handle.addEventListener('touchend', onTouchEnd, { passive: true });
+        handle.addEventListener('mousedown', onDragStart, { passive: true });
+        handle.addEventListener('touchstart', onDragStart, { passive: false });
+        handle.addEventListener('touchend', onDragEnd, { passive: true });
       }
 
       removeEventListenersRef.current = () => {
         for (const handle of dragHandles) {
           if (handle === null) return;
-          handle.removeEventListener('mousedown', onMouseDown);
-          handle.removeEventListener('touchstart', onTouchStart);
-          handle.removeEventListener('touchend', onTouchEnd);
+          handle.removeEventListener('mousedown', onDragStart);
+          handle.removeEventListener('touchstart', onDragStart);
+          handle.removeEventListener('touchend', onDragEnd);
         }
       };
     },
-    [onMouseDown, onTouchStart, onTouchEnd, gridLayoutStateManager.accessMode$]
+    [onDragStart, onDragEnd, gridLayoutStateManager.accessMode$]
   );
 
   useEffect(() => {
@@ -151,12 +153,10 @@ export const DragHandle = React.forwardRef<
           display: none;
         }
       `}
-      onMouseDown={onMouseDown}
-      onMouseUp={(e) => {
-        interactionStart('drop', e);
-      }}
-      onTouchStart={onTouchStart}
-      onTouchEnd={onTouchEnd}
+      onMouseDown={onDragStart}
+      onMouseUp={onDragEnd}
+      onTouchStart={onDragStart}
+      onTouchEnd={onDragEnd}
     >
       <EuiIcon type="grabOmnidirectional" />
     </button>
