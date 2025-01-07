@@ -73,11 +73,11 @@
           },
           {
             "plugin": "spaces",
-            "path": "x-pack/plugins/spaces/public/legacy_urls/types.ts"
+            "path": "x-pack/platform/plugins/shared/spaces/public/legacy_urls/types.ts"
           },
           {
             "plugin": "spaces",
-            "path": "x-pack/plugins/spaces/public/legacy_urls/types.ts"
+            "path": "x-pack/platform/plugins/shared/spaces/public/legacy_urls/types.ts"
           },
           {
             "plugin": "graph",
