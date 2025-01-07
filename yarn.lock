@@ -5265,7 +5265,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/data-service@link:packages/kbn-data-service":
+"@kbn/data-service@link:src/platform/packages/shared/kbn-data-service":
   version "0.0.0"
   uid ""
 
