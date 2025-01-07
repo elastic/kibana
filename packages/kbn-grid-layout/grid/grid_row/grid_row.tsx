@@ -150,7 +150,7 @@ export const GridRow = forwardRef<HTMLDivElement, GridRowProps>(
             }
           });
 
-        const expandedPanelStyleSubscription = gridLayoutStateManager.expandedPanelId$
+        const expandedPanelSubscription = gridLayoutStateManager.expandedPanelId$
           .pipe(skip(1)) // skip the first emit because the `initialStyles` will take care of it
           .subscribe((expandedPanelId) => {
             const rowContainerRef = rowContainer.current;
@@ -174,7 +174,7 @@ export const GridRow = forwardRef<HTMLDivElement, GridRowProps>(
         return () => {
           interactionStyleSubscription.unsubscribe();
           rowStateSubscription.unsubscribe();
-          expandedPanelStyleSubscription.unsubscribe();
+          expandedPanelSubscription.unsubscribe();
         };
       },
       // eslint-disable-next-line react-hooks/exhaustive-deps

@@ -7,9 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import classNames from 'classnames';
 import { cloneDeep } from 'lodash';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { combineLatest, distinctUntilChanged, filter, map, pairwise, skip } from 'rxjs';
 
 import { css } from '@emotion/react';
@@ -33,38 +32,50 @@ export interface GridLayoutProps {
   accessMode?: GridAccessMode;
 }
 
-const EXPANDED_PANEL_STYLES = css`
-  &.kbnGrid--hasExpandedPanel {
-    height: 100%;
+const singleColumnStyles = css`
+  .kbnGridRow {
+    grid-template-columns: 100% !important;
+    grid-template-rows: auto !important;
+  }
 
-    .kbnGridRowContainer {
-      &:not(.kbnGridRowContainer--hasExpandedPanel) {
-        // hide the rows that do not contain the expanded panel
-        position: absolute;
-        top: -9999px;
-        left: -9999px;
+  .kbnGridPanel {
+    grid-column-start: 1 !important;
+    grid-column-end: 1 !important;
+    grid-row-end: auto !important;
+    grid-row-start: auto !important;
+  }
+`;
+
+const expandedPanelStyles = css`
+  height: 100%;
+
+  .kbnGridRowContainer {
+    &:not(.kbnGridRowContainer--hasExpandedPanel) {
+      // hide the rows that do not contain the expanded panel
+      position: absolute;
+      top: -9999px;
+      left: -9999px;
+    }
+    &--hasExpandedPanel {
+      .kbnGridRowHeader {
+        height: 0px; // used instead of 'display: none' due to a11y concerns
       }
-      &--hasExpandedPanel {
-        .kbnGridRowHeader {
-          height: 0px; // used instead of 'display: none' due to a11y concerns
-        }
 
-        .kbnGridRow {
-          display: block !important; // overwrite grid display
-          height: 100%;
+      .kbnGridRow {
+        display: block !important; // overwrite grid display
+        height: 100%;
 
-          .kbnGridPanel {
-            &:not(.kbnGridPanel--isExpanded) {
-              // hide the non-expanded panels
-              position: absolute;
-              top: -9999px;
-              left: -9999px;
-              visibility: hidden; // remove hidden panels and their contents from tab order for a11y
-            }
-            &--isExpanded {
-              // show only the expanded panel and make it take up the full height
-              height: 100%;
-            }
+        .kbnGridPanel {
+          &:not(.kbnGridPanel--isExpanded) {
+            // hide the non-expanded panels
+            position: absolute;
+            top: -9999px;
+            left: -9999px;
+            visibility: hidden; // remove hidden panels and their contents from tab order for a11y
+          }
+          &--isExpanded {
+            // show only the expanded panel and make it take up the full height
+            height: 100% !important;
           }
         }
       }
@@ -87,6 +98,7 @@ export const GridLayout = ({
     accessMode,
   });
   useGridLayoutEvents({ gridLayoutStateManager });
+  const layoutRef = useRef<HTMLDivElement | null>(null);
 
   const [rowCount, setRowCount] = useState<number>(
     gridLayoutStateManager.gridLayout$.getValue().length
@@ -145,9 +157,35 @@ export const GridLayout = ({
         }
       });
 
+    const gridLayoutClassSubscription = combineLatest([
+      gridLayoutStateManager.expandedPanelId$,
+      gridLayoutStateManager.accessMode$,
+      gridLayoutStateManager.isMobileView$,
+    ]).subscribe(([currentExpandedPanelId, currentAccessMode, isMobileView]) => {
+      if (!layoutRef) return;
+
+      if (isMobileView) {
+        layoutRef.current?.classList.add('kbnGrid--mobileView');
+      } else {
+        layoutRef.current?.classList.remove('kbnGrid--mobileView');
+      }
+
+      if (currentExpandedPanelId) {
+        layoutRef.current?.classList.add('kbnGrid--static');
+        layoutRef.current?.classList.add('kbnGrid--hasExpandedPanel');
+      } else if (currentAccessMode === 'VIEW') {
+        layoutRef.current?.classList.add('kbnGrid--static');
+        layoutRef.current?.classList.remove('kbnGrid--hasExpandedPanel');
+      } else {
+        layoutRef.current?.classList.remove('kbnGrid--static');
+        layoutRef.current?.classList.remove('kbnGrid--hasExpandedPanel');
+      }
+    });
+
     return () => {
       rowCountSubscription.unsubscribe();
       onLayoutChangeSubscription.unsubscribe();
+      gridLayoutClassSubscription.unsubscribe();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -177,19 +215,22 @@ export const GridLayout = ({
     });
   }, [rowCount, gridLayoutStateManager, renderPanelContents]);
 
-  const gridClassNames = classNames('kbnGrid', {
-    'kbnGrid--static': expandedPanelId || accessMode === 'VIEW',
-    'kbnGrid--hasExpandedPanel': Boolean(expandedPanelId),
-  });
-
   return (
     <GridHeightSmoother gridLayoutStateManager={gridLayoutStateManager}>
       <div
         ref={(divElement) => {
+          layoutRef.current = divElement;
           setDimensionsRef(divElement);
         }}
-        className={gridClassNames}
-        css={EXPANDED_PANEL_STYLES}
+        className="kbnGrid"
+        css={css`
+          &.kbnGrid--hasExpandedPanel {
+            ${expandedPanelStyles}
+          }
+          &.kbnGrid--mobileView {
+            ${singleColumnStyles}
+          }
+        `}
       >
         {children}
       </div>

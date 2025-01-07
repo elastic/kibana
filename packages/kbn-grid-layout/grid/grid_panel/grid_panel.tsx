@@ -14,7 +14,6 @@ import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 
 import { GridLayoutStateManager, PanelInteractionEvent } from '../types';
-import { getKeysInOrder } from '../utils/resolve_grid_row';
 import { DragHandle, DragHandleApi } from './drag_handle';
 import { ResizeHandle } from './resize_handle';
 
@@ -72,8 +71,11 @@ export const GridPanel = forwardRef<HTMLDivElement, GridPanelProps>(
     /** Set initial styles based on state at mount to prevent styles from "blipping" */
     const initialStyles = useMemo(() => {
       const initialPanel = gridLayoutStateManager.gridLayout$.getValue()[rowIndex].panels[panelId];
+      const { gutterSize, rowHeight } = gridLayoutStateManager.runtimeSettings$.getValue();
       return css`
         position: relative;
+        height: ${initialPanel.height * (rowHeight + gutterSize) - gutterSize}px;
+
         grid-column-start: ${initialPanel.column + 1};
         grid-column-end: ${initialPanel.column + 1 + initialPanel.width};
         grid-row-start: ${initialPanel.row + 1};
@@ -131,6 +133,8 @@ export const GridPanel = forwardRef<HTMLDivElement, GridPanelProps>(
                 ref.style.gridArea = `auto`; // shortcut to set all grid styles to `auto`
               }
             } else {
+              const { gutterSize, rowHeight } = gridLayoutStateManager.runtimeSettings$.getValue();
+
               ref.style.zIndex = `auto`;
 
               // if the panel is not being dragged and/or resized, undo any fixed position styles
@@ -138,7 +142,7 @@ export const GridPanel = forwardRef<HTMLDivElement, GridPanelProps>(
               ref.style.left = ``;
               ref.style.top = ``;
               ref.style.width = ``;
-              ref.style.height = ``;
+              ref.style.height = `${panel.height * (rowHeight + gutterSize) - gutterSize}px`;
 
               // and render the panel locked to the grid
               ref.style.gridColumnStart = `${panel.column + 1}`;
@@ -148,7 +152,7 @@ export const GridPanel = forwardRef<HTMLDivElement, GridPanelProps>(
             }
           });
 
-        const expandedPanelStyleSubscription = gridLayoutStateManager.expandedPanelId$
+        const expandedPanelSubscription = gridLayoutStateManager.expandedPanelId$
           .pipe(skip(1)) // skip the first emit because the `initialStyles` will take care of it
           .subscribe((expandedPanelId) => {
             const ref = gridLayoutStateManager.panelRefs.current[rowIndex][panelId];
@@ -163,34 +167,8 @@ export const GridPanel = forwardRef<HTMLDivElement, GridPanelProps>(
             }
           });
 
-        const mobileViewStyleSubscription = gridLayoutStateManager.isMobileView$
-          .pipe(skip(1))
-          .subscribe((isMobileView) => {
-            if (!isMobileView) {
-              return;
-            }
-            const ref = gridLayoutStateManager.panelRefs.current[rowIndex][panelId];
-            const gridLayout = gridLayoutStateManager.gridLayout$.getValue();
-            const allPanels = gridLayout[rowIndex].panels;
-            const panel = allPanels[panelId];
-            if (!ref || !panel) return;
-
-            const sortedKeys = getKeysInOrder(gridLayout[rowIndex].panels);
-            const currentPanelPosition = sortedKeys.indexOf(panelId);
-            const sortedKeysBefore = sortedKeys.slice(0, currentPanelPosition);
-            const responsiveGridRowStart = sortedKeysBefore.reduce(
-              (acc, key) => acc + allPanels[key].height,
-              1
-            );
-            ref.style.gridColumnStart = `1`;
-            ref.style.gridColumnEnd = `-1`;
-            ref.style.gridRowStart = `${responsiveGridRowStart}`;
-            ref.style.gridRowEnd = `${responsiveGridRowStart + panel.height}`;
-          });
-
         return () => {
-          expandedPanelStyleSubscription.unsubscribe();
-          mobileViewStyleSubscription.unsubscribe();
+          expandedPanelSubscription.unsubscribe();
           activePanelStyleSubscription.unsubscribe();
         };
       },

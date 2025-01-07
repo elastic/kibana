@@ -48,7 +48,7 @@ export const useGridLayoutState = ({
     []
   );
   useEffect(() => {
-    expandedPanelId$.next(expandedPanelId);
+    if (expandedPanelId !== expandedPanelId$.getValue()) expandedPanelId$.next(expandedPanelId);
   }, [expandedPanelId, expandedPanelId$]);
 
   const accessMode$ = useMemo(
