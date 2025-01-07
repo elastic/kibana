@@ -652,6 +652,7 @@ src/platform/plugins/shared/expression_metric @elastic/kibana-presentation
 src/platform/plugins/shared/expression_repeat_image @elastic/kibana-presentation
 src/platform/plugins/shared/expression_reveal_image @elastic/kibana-presentation
 src/platform/plugins/shared/expression_shape @elastic/kibana-presentation
+src/platform/plugins/shared/expressions @elastic/kibana-visualizations
 src/platform/plugins/shared/field_formats @elastic/kibana-data-discovery
 src/platform/plugins/shared/files @elastic/appex-sharedux
 src/platform/plugins/shared/guided_onboarding @elastic/appex-sharedux
@@ -678,7 +679,6 @@ src/platform/plugins/shared/ui_actions_enhanced @elastic/appex-sharedux
 src/platform/plugins/shared/unified_doc_viewer @elastic/kibana-data-discovery
 src/platform/plugins/shared/unified_histogram @elastic/kibana-data-discovery
 src/platform/plugins/shared/usage_collection @elastic/kibana-core
-src/plugins/expressions @elastic/kibana-visualizations
 src/plugins/unified_search @elastic/kibana-visualizations
 src/plugins/url_forwarding @elastic/kibana-visualizations
 src/plugins/vis_default_editor @elastic/kibana-visualizations

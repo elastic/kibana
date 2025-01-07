@@ -5709,7 +5709,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/expressions-plugin@link:src/plugins/expressions":
+"@kbn/expressions-plugin@link:src/platform/plugins/shared/expressions":
   version "0.0.0"
   uid ""
 
