@@ -5857,7 +5857,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/graph-plugin@link:x-pack/plugins/graph":
+"@kbn/graph-plugin@link:x-pack/platform/plugins/private/graph":
   version "0.0.0"
   uid ""
 

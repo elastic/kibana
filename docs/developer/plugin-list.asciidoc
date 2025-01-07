@@ -622,7 +622,7 @@ or dashboards from the Kibana instance, from both server and client-side plugins
 |The globalSearchProviders plugin provides Kibana default search providers for the GlobalSearch plugin.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/graph/README.md[graph]
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/private/graph/README.md[graph]
 |This is the main source folder of the Graph plugin. It contains all of the Kibana server and client source code. x-pack/test/functional/apps/graph contains additional functional tests.
 
 
