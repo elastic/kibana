@@ -29,10 +29,9 @@ import {
 import { generateTestRunId, getTestIDForTitle } from '../..';
 import type { TestFailure } from '../../test_failure';
 import type { ScoutPlaywrightReporterOptions } from '../../scout_playwright_reporter';
-import { buildFailureHtml } from './build_test_failure_html';
 import { stripRunCommand, stripfilePath } from '../common/strip_path';
 import { getPluginManifestData } from '../common/get_plugin_manifest_data';
-import { saveTestFailureHtml, saveTestFailuresReport } from './save_test_failures';
+import { ScoutFailureReport } from './failure_report';
 
 /**
  * Scout Failed Test reporter
@@ -41,8 +40,8 @@ export class ScoutFailedTestReporter implements Reporter {
   private readonly log: ToolingLog;
   private readonly runId: string;
   private readonly codeOwnersEntries: CodeOwnersEntry[];
+  private readonly report: ScoutFailureReport;
   private target: string;
-  private testFailures: TestFailure[];
   private plugin: TestFailure['plugin'];
   private command: string;
 
@@ -52,9 +51,10 @@ export class ScoutFailedTestReporter implements Reporter {
       writeTo: process.stdout,
     });
 
-    this.runId = this.reporterOptions.runId || generateTestRunId();
+    this.report = new ScoutFailureReport(this.log);
     this.codeOwnersEntries = getCodeOwnersEntries();
-    this.testFailures = [];
+
+    this.runId = this.reporterOptions.runId || generateTestRunId();
     this.target = 'undefined'; // when '--grep' is not provided in the command line
     this.command = stripRunCommand(process.argv);
   }
@@ -65,7 +65,12 @@ export class ScoutFailedTestReporter implements Reporter {
 
   public get reportRootPath(): string {
     const outputPath = this.reporterOptions.outputPath || SCOUT_REPORT_OUTPUT_ROOT;
-    return path.join(outputPath, `scout-playwright-failed-test-${this.runId}`);
+    return path.join(
+      outputPath,
+      `scout-playwright-test-failures-${this.runId}`,
+      'target',
+      'test-failures'
+    );
   }
 
   printsToStdio(): boolean {
@@ -90,43 +95,40 @@ export class ScoutFailedTestReporter implements Reporter {
   }
 
   onTestEnd(test: TestCase, result: TestResult) {
-    if (result.status === 'passed') return;
-
-    const testFailure: TestFailure = {
-      id: getTestIDForTitle(test.titlePath().join(' ')),
-      suite: test.parent.title,
-      title: test.title,
-      target: this.target,
-      command: this.command,
-      location: test.location.file.replace(`${REPO_ROOT}/`, ''),
-      owner: this.getFileOwners(path.relative(REPO_ROOT, test.location.file)),
-      plugin: this.plugin,
-      duration: result.duration,
-      error: {
-        message: result.error?.message ? stripfilePath(stripANSI(result.error.message)) : undefined,
-        stack_trace: result.error?.stack ? stripfilePath(stripANSI(result.error.stack)) : undefined,
-      },
-      attachments: result.attachments.map((attachment) => ({
-        name: attachment.name,
-        path: attachment.path,
-        contentType: attachment.contentType,
-      })),
-    };
-
-    this.testFailures.push(testFailure);
+    if (result.status === 'failed') {
+      this.report.logFailure({
+        id: getTestIDForTitle(test.titlePath().join(' ')),
+        suite: test.parent.title,
+        title: test.title,
+        target: this.target,
+        command: this.command,
+        location: test.location.file.replace(`${REPO_ROOT}/`, ''),
+        owner: this.getFileOwners(path.relative(REPO_ROOT, test.location.file)),
+        plugin: this.plugin,
+        duration: result.duration,
+        error: {
+          message: result.error?.message
+            ? stripfilePath(stripANSI(result.error.message))
+            : undefined,
+          stack_trace: result.error?.stack
+            ? stripfilePath(stripANSI(result.error.stack))
+            : undefined,
+        },
+        attachments: result.attachments.map((attachment) => ({
+          name: attachment.name,
+          path: attachment.path,
+          contentType: attachment.contentType,
+        })),
+      });
+    }
   }
 
   onEnd(result: FullResult) {
-    if (this.testFailures.length === 0) return;
-
-    const filename = `failed-tests-${this.plugin?.id}.json`;
-    saveTestFailuresReport(this.testFailures, this.reportRootPath, filename, this.log);
-
-    // Generate HTML report for each failed test with embedded screenshots
-    for (const testFailure of this.testFailures) {
-      const failureHtml = buildFailureHtml(testFailure);
-      const htmlFilename = `${testFailure.id}.html`;
-      saveTestFailureHtml(this.reportRootPath, htmlFilename, failureHtml, this.log);
+    // Save & conclude the report
+    try {
+      this.report.save(this.reportRootPath);
+    } finally {
+      this.report.conclude();
     }
   }
 }

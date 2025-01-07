@@ -8,38 +8,17 @@
  */
 
 import fs from 'fs';
-import path from 'path';
 import { ToolingLog } from '@kbn/tooling-log';
-import { TestFailure } from '../../test_failure';
 
 export const saveTestFailuresReport = (
-  testFailures: TestFailure[],
-  reportRootPath: string,
-  filename: string,
-  log: ToolingLog
-): void => {
-  try {
-    const reportPath = path.join(reportRootPath, filename);
-    fs.mkdirSync(reportRootPath, { recursive: true });
-    fs.writeFileSync(reportPath, JSON.stringify({ failures: testFailures }, null, 2), 'utf-8');
-    log.info(`Saving Scout failed test report to ${reportPath}`);
-  } catch (error) {
-    log.error(`Failed to save report at ${reportRootPath}: ${error.message}`);
-  }
-};
-
-export const saveTestFailureHtml = (
-  reportRootPath: string,
-  filename: string,
+  reportPath: string,
   testFailureHtml: string,
   log: ToolingLog
 ): void => {
   try {
-    const reportPath = path.join(reportRootPath, filename);
-    fs.mkdirSync(reportRootPath, { recursive: true });
     fs.writeFileSync(reportPath, testFailureHtml, 'utf-8');
     log.info(`Saving Scout test failure html to ${reportPath}`);
   } catch (error) {
-    log.error(`Failed to save report at ${reportRootPath}: ${error.message}`);
+    log.error(`Failed to save report at ${reportPath}: ${error.message}`);
   }
 };
