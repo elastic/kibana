@@ -1021,7 +1021,7 @@
     "@kbn/vis-type-timeseries-plugin": "link:src/platform/plugins/shared/vis_types/timeseries",
     "@kbn/vis-type-vega-plugin": "link:src/platform/plugins/private/vis_types/vega",
     "@kbn/vis-type-vislib-plugin": "link:src/platform/plugins/private/vis_types/vislib",
-    "@kbn/vis-type-xy-plugin": "link:src/plugins/vis_types/xy",
+    "@kbn/vis-type-xy-plugin": "link:src/platform/plugins/private/vis_types/xy",
     "@kbn/visualization-ui-components": "link:packages/kbn-visualization-ui-components",
     "@kbn/visualization-utils": "link:packages/kbn-visualization-utils",
     "@kbn/visualizations-plugin": "link:src/plugins/visualizations",

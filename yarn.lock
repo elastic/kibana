@@ -7973,7 +7973,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/vis-type-xy-plugin@link:src/plugins/vis_types/xy":
+"@kbn/vis-type-xy-plugin@link:src/platform/plugins/private/vis_types/xy":
   version "0.0.0"
   uid ""
 

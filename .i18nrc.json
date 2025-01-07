@@ -154,7 +154,7 @@
     "visTypeTimeseries": "src/platform/plugins/shared/vis_types/timeseries",
     "visTypeVega": "src/platform/plugins/private/vis_types/vega",
     "visTypeVislib": "src/platform/plugins/private/vis_types/vislib",
-    "visTypeXy": "src/plugins/vis_types/xy",
+    "visTypeXy": "src/platform/plugins/private/vis_types/xy",
     "visualizations": "src/plugins/visualizations",
     "visualizationUiComponents": "packages/kbn-visualization-ui-components",
     "visualizationUtils": "packages/kbn-visualization-utils",
