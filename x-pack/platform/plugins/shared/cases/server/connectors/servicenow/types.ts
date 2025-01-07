@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { ServiceNowITSMFieldsType } from '../../../common/types/domain';
 import type { ICasesConnector } from '../types';
 
 interface CorrelationValues {
@@ -13,6 +12,7 @@ interface CorrelationValues {
   correlation_display: string | null;
 }
 
+// ServiceNow SIR
 export interface ServiceNowSIRFieldsType extends CorrelationValues {
   dest_ip: string[] | null;
   source_ip: string[] | null;
@@ -21,6 +21,7 @@ export interface ServiceNowSIRFieldsType extends CorrelationValues {
   malware_hash: string[] | null;
   malware_url: string[] | null;
   priority: string | null;
+  additional_fields: string | null;
 }
 
 export type SirFieldKey = 'dest_ip' | 'source_ip' | 'malware_hash' | 'malware_url';
@@ -30,11 +31,19 @@ export type AlertFieldMappingAndValues = Record<
 >;
 
 // ServiceNow ITSM
-export type ServiceNowITSMCasesConnector = ICasesConnector<ServiceNowITSMFieldsType>;
-export type ServiceNowITSMFormat = ICasesConnector<
-  ServiceNowITSMFieldsType & CorrelationValues
->['format'];
-export type ServiceNowITSMGetMapping = ICasesConnector<ServiceNowITSMFieldsType>['getMapping'];
+export interface ServiceNowITSMFieldsTypeConnector extends CorrelationValues {
+  impact: string | null;
+  severity: string | null;
+  urgency: string | null;
+  category: string | null;
+  subcategory: string | null;
+  additional_fields: string | null;
+}
+
+export type ServiceNowITSMCasesConnector = ICasesConnector<ServiceNowITSMFieldsTypeConnector>;
+export type ServiceNowITSMFormat = ICasesConnector<ServiceNowITSMFieldsTypeConnector>['format'];
+export type ServiceNowITSMGetMapping =
+  ICasesConnector<ServiceNowITSMFieldsTypeConnector>['getMapping'];
 
 // ServiceNow SIR
 export type ServiceNowSIRCasesConnector = ICasesConnector<ServiceNowSIRFieldsType>;

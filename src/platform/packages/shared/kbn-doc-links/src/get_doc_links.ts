@@ -349,6 +349,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       fieldFormattersNumber: `${KIBANA_DOCS}numeral.html`,
       fieldFormattersString: `${KIBANA_DOCS}managing-data-views.html#string-field-formatters`,
       runtimeFields: `${KIBANA_DOCS}managing-data-views.html#runtime-fields`,
+      migrateOffScriptedFields: `${KIBANA_DOCS}managing-data-views.html#migrate-off-scripted-fields`,
     },
     addData: `${KIBANA_DOCS}connect-to-elasticsearch.html`,
     kibana: {
@@ -448,6 +449,11 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       remoteClustersOnPremSetupTrustWithCert: `${ELASTICSEARCH_DOCS}remote-clusters-cert.html`,
       remoteClustersOnPremSetupTrustWithApiKey: `${ELASTICSEARCH_DOCS}remote-clusters-api-key.html`,
       remoteClustersCloudSetupTrust: `${ELASTIC_WEBSITE_URL}guide/en/cloud/current/ec-enable-ccs.html`,
+      remoteClustersCreateCloudClusterApiKey: `${ELASTICSEARCH_DOCS}security-api-create-cross-cluster-api-key.html`,
+      remoteClustersOnPremPrerequisitesApiKey: `${ELASTICSEARCH_DOCS}remote-clusters-api-key.html#remote-clusters-prerequisites-api-key`,
+      remoteClustersOnPremSecurityApiKey: `${ELASTICSEARCH_DOCS}remote-clusters-api-key.html#remote-clusters-security-api-key`,
+      remoteClustersOnPremPrerequisitesCert: `${ELASTICSEARCH_DOCS}remote-clusters-cert.html#remote-clusters-prerequisites-cert`,
+      remoteClustersOnPremSecurityCert: `${ELASTICSEARCH_DOCS}remote-clusters-cert.html#remote-clusters-security-cert`,
       rollupMigratingToDownsampling: `${ELASTICSEARCH_DOCS}rollup-migrating-to-downsampling.html`,
       rrf: `${ELASTICSEARCH_DOCS}rrf.html`,
       scriptParameters: `${ELASTICSEARCH_DOCS}modules-scripting-using.html#prefer-params`,
@@ -540,6 +546,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       timelionSettings: `${KIBANA_DOCS}advanced-options.html#kibana-timelion-settings`,
       generalSettings: `${KIBANA_DOCS}advanced-options.html#kibana-general-settings`,
       savedObjectsApiList: `${KIBANA_DOCS}saved-objects-api.html#saved-objects-api`,
+      apiKeys: `${KIBANA_DOCS}api-keys.html`,
     },
     ml: {
       guide: `${MACHINE_LEARNING_DOCS}index.html`,
