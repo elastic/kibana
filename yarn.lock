@@ -7945,7 +7945,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/vis-type-pie-plugin@link:src/plugins/vis_types/pie":
+"@kbn/vis-type-pie-plugin@link:src/platform/plugins/private/vis_types/pie":
   version "0.0.0"
   uid ""
 

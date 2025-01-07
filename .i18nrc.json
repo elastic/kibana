@@ -148,7 +148,7 @@
     "visTypeHeatmap": "src/platform/plugins/private/vis_types/heatmap",
     "visTypeMarkdown": "src/platform/plugins/private/vis_type_markdown",
     "visTypeMetric": "src/platform/plugins/private/vis_types/metric",
-    "visTypePie": "src/plugins/vis_types/pie",
+    "visTypePie": "src/platform/plugins/private/vis_types/pie",
     "visTypeTable": "src/plugins/vis_types/table",
     "visTypeTagCloud": "src/plugins/vis_types/tagcloud",
     "visTypeTimeseries": "src/plugins/vis_types/timeseries",
