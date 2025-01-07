@@ -16,4 +16,3 @@ export const LATEST_DASHBOARD_CONTAINER_VERSION = convertNumberToDashboardVersio
 
 export { LazyDashboardRenderer } from './external_api/lazy_dashboard_renderer';
 export type { DashboardLocatorParams } from './types';
-export type { IProvidesLegacyPanelPlacementSettings } from './panel_placement';
