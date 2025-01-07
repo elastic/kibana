@@ -35,6 +35,7 @@ function createEditApi(servicesOverrides: Partial<LensEmbeddableStartServices> =
     internalApi,
     api,
     api,
+    api,
     () => false, // DSL based
     services,
     { getAppContext: () => ({ currentAppId: 'lens' }), viewMode: new BehaviorSubject('edit') }
