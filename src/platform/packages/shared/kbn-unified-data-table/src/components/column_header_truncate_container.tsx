@@ -8,19 +8,8 @@
  */
 
 import React from 'react';
-import { EuiTextBlockTruncate, UseEuiTheme } from '@elastic/eui';
+import { EuiTextBlockTruncate, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-
-const headerCss = ({ euiTheme }: UseEuiTheme) => css`
-  overflow-wrap: anywhere;
-  white-space: normal;
-  word-break: break-all;
-  line-height: ${euiTheme.size.base};
-  text-align: left;
-  .euiDataGridHeaderCell--numeric & {
-    float: right;
-  }
-`;
 
 const ColumnHeaderTruncateContainer = ({
   headerRowHeight,
@@ -29,6 +18,19 @@ const ColumnHeaderTruncateContainer = ({
   headerRowHeight?: number;
   children: React.ReactNode;
 }) => {
+  const { euiTheme } = useEuiTheme();
+
+  const headerCss = css`
+    overflow-wrap: anywhere;
+    white-space: normal;
+    word-break: break-all;
+    line-height: ${euiTheme.size.base};
+    text-align: left;
+    .euiDataGridHeaderCell--numeric & {
+      float: right;
+    }
+  `;
+
   return headerRowHeight ? (
     <EuiTextBlockTruncate lines={headerRowHeight} css={headerCss}>
       {children}
