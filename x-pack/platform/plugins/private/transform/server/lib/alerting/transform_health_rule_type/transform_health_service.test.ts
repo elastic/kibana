@@ -65,11 +65,14 @@ describe('transformHealthServiceProvider', () => {
 
   it('should fetch transform stats by transform IDs if the length does not exceed the URL limit', async () => {
     const service = transformHealthServiceProvider({ esClient, rulesClient, fieldFormatsRegistry });
-    const result = await service.getHealthChecksResults({
-      includeTransforms: ['*'],
-      excludeTransforms: ['transform4', 'transform6', 'transform6*'],
-      testsConfig: null,
-    });
+    const result = await service.getHealthChecksResults(
+      {
+        includeTransforms: ['*'],
+        excludeTransforms: ['transform4', 'transform6', 'transform6*'],
+        testsConfig: null,
+      },
+      {}
+    );
 
     expect(esClient.transform.getTransform).toHaveBeenCalledTimes(1);
 
@@ -118,11 +121,14 @@ describe('transformHealthServiceProvider', () => {
     } as unknown as TransformGetTransformStatsResponse);
 
     const service = transformHealthServiceProvider({ esClient, rulesClient, fieldFormatsRegistry });
-    const result = await service.getHealthChecksResults({
-      includeTransforms: ['*'],
-      excludeTransforms: new Array(50).fill(null).map((_, i) => `${transformIdPrefix}${i + 60}`),
-      testsConfig: null,
-    });
+    const result = await service.getHealthChecksResults(
+      {
+        includeTransforms: ['*'],
+        excludeTransforms: new Array(50).fill(null).map((_, i) => `${transformIdPrefix}${i + 60}`),
+        testsConfig: null,
+      },
+      {}
+    );
 
     expect(esClient.transform.getTransform).toHaveBeenCalledWith({
       allow_no_match: true,
@@ -140,6 +146,48 @@ describe('transformHealthServiceProvider', () => {
     expect(notStarted.context.message).toEqual(
       '60 transforms are not started: transform_with_a_very_long_id_that_result_in_long_url_for_sure_0, transform_with_a_very_long_id_that_result_in_long_url_for_sure_1, transform_with_a_very_long_id_that_result_in_long_url_for_sure_2, transform_with_a_very_long_id_that_result_in_long_url_for_sure_3, transform_with_a_very_long_id_that_result_in_long_url_for_sure_4, transform_with_a_very_long_id_that_result_in_long_url_for_sure_5, transform_with_a_very_long_id_that_result_in_long_url_for_sure_6, transform_with_a_very_long_id_that_result_in_long_url_for_sure_7, transform_with_a_very_long_id_that_result_in_long_url_for_sure_8, transform_with_a_very_long_id_that_result_in_long_url_for_sure_9, transform_with_a_very_long_id_that_result_in_long_url_for_sure_10, transform_with_a_very_long_id_that_result_in_long_url_for_sure_11, transform_with_a_very_long_id_that_result_in_long_url_for_sure_12, transform_with_a_very_long_id_that_result_in_long_url_for_sure_13, transform_with_a_very_long_id_that_result_in_long_url_for_sure_14, transform_with_a_very_long_id_that_result_in_long_url_for_sure_15, transform_with_a_very_long_id_that_result_in_long_url_for_sure_16, transform_with_a_very_long_id_that_result_in_long_url_for_sure_17, transform_with_a_very_long_id_that_result_in_long_url_for_sure_18, transform_with_a_very_long_id_that_result_in_long_url_for_sure_19, transform_with_a_very_long_id_that_result_in_long_url_for_sure_20, transform_with_a_very_long_id_that_result_in_long_url_for_sure_21, transform_with_a_very_long_id_that_result_in_long_url_for_sure_22, transform_with_a_very_long_id_that_result_in_long_url_for_sure_23, transform_with_a_very_long_id_that_result_in_long_url_for_sure_24, transform_with_a_very_long_id_that_result_in_long_url_for_sure_25, transform_with_a_very_long_id_that_result_in_long_url_for_sure_26, transform_with_a_very_long_id_that_result_in_long_url_for_sure_27, transform_with_a_very_long_id_that_result_in_long_url_for_sure_28, transform_with_a_very_long_id_that_result_in_long_url_for_sure_29, transform_with_a_very_long_id_that_result_in_long_url_for_sure_30, transform_with_a_very_long_id_that_result_in_long_url_for_sure_31, transform_with_a_very_long_id_that_result_in_long_url_for_sure_32, transform_with_a_very_long_id_that_result_in_long_url_for_sure_33, transform_with_a_very_long_id_that_result_in_long_url_for_sure_34, transform_with_a_very_long_id_that_result_in_long_url_for_sure_35, transform_with_a_very_long_id_that_result_in_long_url_for_sure_36, transform_with_a_very_long_id_that_result_in_long_url_for_sure_37, transform_with_a_very_long_id_that_result_in_long_url_for_sure_38, transform_with_a_very_long_id_that_result_in_long_url_for_sure_39, transform_with_a_very_long_id_that_result_in_long_url_for_sure_40, transform_with_a_very_long_id_that_result_in_long_url_for_sure_41, transform_with_a_very_long_id_that_result_in_long_url_for_sure_42, transform_with_a_very_long_id_that_result_in_long_url_for_sure_43, transform_with_a_very_long_id_that_result_in_long_url_for_sure_44, transform_with_a_very_long_id_that_result_in_long_url_for_sure_45, transform_with_a_very_long_id_that_result_in_long_url_for_sure_46, transform_with_a_very_long_id_that_result_in_long_url_for_sure_47, transform_with_a_very_long_id_that_result_in_long_url_for_sure_48, transform_with_a_very_long_id_that_result_in_long_url_for_sure_49, transform_with_a_very_long_id_that_result_in_long_url_for_sure_50, transform_with_a_very_long_id_that_result_in_long_url_for_sure_51, transform_with_a_very_long_id_that_result_in_long_url_for_sure_52, transform_with_a_very_long_id_that_result_in_long_url_for_sure_53, transform_with_a_very_long_id_that_result_in_long_url_for_sure_54, transform_with_a_very_long_id_that_result_in_long_url_for_sure_55, transform_with_a_very_long_id_that_result_in_long_url_for_sure_56, transform_with_a_very_long_id_that_result_in_long_url_for_sure_57, transform_with_a_very_long_id_that_result_in_long_url_for_sure_58, transform_with_a_very_long_id_that_result_in_long_url_for_sure_59.'
     );
+  });
+
+  it('should mention recovered transforms based on the previous state', async () => {
+    const service = transformHealthServiceProvider({ esClient, rulesClient, fieldFormatsRegistry });
+
+    (esClient.transform.getTransformStats as jest.Mock).mockResolvedValue({
+      count: 2,
+      transforms: [
+        {
+          id: 'transform1',
+          state: 'started',
+        },
+        {
+          id: 'transform2',
+          state: 'started',
+        },
+      ],
+    } as unknown as TransformGetTransformStatsResponse);
+
+    const result = await service.getHealthChecksResults(
+      {
+        includeTransforms: ['*'],
+        excludeTransforms: ['transform4', 'transform6', 'transform6*'],
+        testsConfig: {
+          notStarted: {
+            enabled: true,
+          },
+          healthCheck: {
+            enabled: false,
+          },
+          errorMessages: {
+            enabled: false,
+          },
+        },
+      },
+      {
+        notStarted: ['transform1', 'transform2'],
+        unhealthy: ['transform3'],
+      }
+    );
+
+    expect(result[0].context.message).toEqual('2 transforms are started: transform1, transform2.');
   });
 
   describe('populateTransformsWithAssignedRules', () => {
