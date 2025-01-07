@@ -110,7 +110,7 @@
     "searchConnectorsPlugin": "x-pack/solutions/search/plugins/search_connectors",
     "server": "src/legacy/server",
     "share": ["src/platform/plugins/shared/share", "packages/kbn-reporting-share"],
-    "sharedUXPackages": "packages/shared-ux",
+    "sharedUXPackages": ["packages/shared-ux", "src/platform/packages/shared/shared-ux", "src/platform/packages/private/shared-ux/"],
     "searchApiKeysComponents": "x-pack/solutions/search/packages/kbn-search-api-keys-components",
     "searchApiPanels": "src/platform/packages/shared/kbn-search-api-panels/",
     "searchErrors": "src/platform/packages/shared/kbn-search-errors",
