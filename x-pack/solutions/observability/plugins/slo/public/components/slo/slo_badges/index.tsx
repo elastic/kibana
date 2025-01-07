@@ -5,10 +5,6 @@
  * 2.0.
  */
 
-import { useIsDarkTheme as useIsDarkThemeMl } from '@kbn/ml-kibana-theme';
-import { useAiopsAppContext } from './use_aiops_app_context';
-
-export function useIsDarkTheme() {
-  const { theme } = useAiopsAppContext();
-  return useIsDarkThemeMl(theme);
-}
+export { SloStatusBadge } from './slo_status_badge';
+export { SloActiveAlertsBadge } from './slo_active_alerts_badge';
+export { SloStateBadge } from './slo_state_badge';

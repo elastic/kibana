@@ -7,4 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './triggers';
+import { i18n } from '@kbn/i18n';
+
+export class PanelNotFoundError extends Error {
+  code = 'PANEL_NOT_FOUND';
+
+  constructor() {
+    super(
+      i18n.translate('embeddableApi.errors.paneldoesNotExist', {
+        defaultMessage: 'Panel not found',
+      })
+    );
+  }
+}
