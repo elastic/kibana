@@ -7545,7 +7545,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/sort-predicates@link:packages/kbn-sort-predicates":
+"@kbn/sort-predicates@link:src/platform/packages/shared/kbn-sort-predicates":
   version "0.0.0"
   uid ""
 
