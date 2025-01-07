@@ -229,9 +229,7 @@ export class LoginForm extends Component<LoginFormProps, State> {
               name="username"
               data-test-subj="loginUsername"
               value={this.state.username}
-              onChange={
-                !this.isLoadingState(LoadingStateType.None) ? undefined : this.onUsernameChange
-              }
+              onChange={this.onUsernameChange}
               disabled={!this.isLoadingState(LoadingStateType.None)}
               isInvalid={false}
               aria-required={true}
