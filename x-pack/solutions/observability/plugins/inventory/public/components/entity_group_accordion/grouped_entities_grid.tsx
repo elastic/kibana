@@ -7,7 +7,6 @@
 import type { EuiDataGridSorting } from '@elastic/eui';
 import React from 'react';
 import useEffectOnce from 'react-use/lib/useEffectOnce';
-import type { InventoryEntity } from '../../../common/entities';
 import { type EntityColumnIds } from '../../../common/entities';
 import {
   type EntityTypeCheckOptions,
@@ -101,7 +100,7 @@ export function GroupedEntitiesGrid({ groupValue }: Props) {
 
   return (
     <EntitiesGrid
-      entities={value.entities as InventoryEntity[]}
+      entities={value.entities}
       loading={loading}
       sortDirection={sortDirection}
       sortField={sortField}
