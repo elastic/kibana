@@ -7941,7 +7941,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/vis-type-metric-plugin@link:src/plugins/vis_types/metric":
+"@kbn/vis-type-metric-plugin@link:src/platform/plugins/private/vis_types/metric":
   version "0.0.0"
   uid ""
 

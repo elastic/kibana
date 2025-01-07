@@ -396,7 +396,7 @@ The plugin exposes the static DefaultEditorController class to consume.
 |The markdown visualization that can be used to place text panels on dashboards.
 
 
-|{kib-repo}blob/{branch}/src/plugins/vis_types/metric[visTypeMetric]
+|{kib-repo}blob/{branch}/src/platform/plugins/private/vis_types/metric[visTypeMetric]
 |WARNING: Missing README.
 
 

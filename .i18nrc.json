@@ -147,7 +147,7 @@
     "visTypeGauge": "src/platform/plugins/private/vis_types/gauge",
     "visTypeHeatmap": "src/platform/plugins/private/vis_types/heatmap",
     "visTypeMarkdown": "src/platform/plugins/private/vis_type_markdown",
-    "visTypeMetric": "src/plugins/vis_types/metric",
+    "visTypeMetric": "src/platform/plugins/private/vis_types/metric",
     "visTypePie": "src/plugins/vis_types/pie",
     "visTypeTable": "src/plugins/vis_types/table",
     "visTypeTagCloud": "src/plugins/vis_types/tagcloud",
