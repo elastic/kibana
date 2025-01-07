@@ -25,6 +25,7 @@ import { sessionCleanupConcurrentLimitEvent, sessionCleanupEvent } from '../audi
 import { AnonymousAuthenticationProvider } from '../authentication';
 import type { ConfigType } from '../config';
 import { getDetailedErrorMessage, getErrorStatusCode } from '../errors';
+import { RunContext } from '@kbn/task-manager-plugin/server';
 
 export interface SessionIndexOptions {
   readonly elasticsearchClient: ElasticsearchClient;
@@ -475,9 +476,26 @@ export class SessionIndex {
   /**
    * Trigger a removal of any outdated session values.
    */
-  async cleanUp() {
+  async cleanUp(taskManagerRunContext: RunContext) {
+    const { taskInstance } = taskManagerRunContext;
     const { auditLogger, logger } = this.options;
     logger.debug('Running cleanup routine.');
+
+    const securityIndexShardResponse = await this.options.elasticsearchClient.cat.shards({
+      index: this.aliasName,
+    });
+
+    const hasShards = securityIndexShardResponse.length > 0;
+
+    if (!hasShards) {
+      logger.debug('No shards found for session index, skipping cleanup.');
+      return {
+        state: {
+          missingShardError: true,
+        },
+        runAt: new Date(Date.now() + 60_000),
+      };
+    }
 
     let error: Error | undefined;
     let indexNeedsRefresh = false;
