@@ -38,7 +38,7 @@ for SUITE_NAME in "${!TEST_CONFIGS[@]}"; do
     esac
 
     echo "--- $SUITE_NAME ($RUN_MODE_NAME) UI Tests"
-    if ! node scripts/scout run-tests "$RUN_MODE" --config "$TEST_CONFIG" --kibana-install-dir "$KIBANA_DIR"; then
+    if ! node scripts/scout run-tests "$RUN_MODE" --config "$CONFIG_PATH" --kibana-install-dir "$KIBANA_DIR"; then
       echo "$SUITE_NAME: failed"
       EXIT_CODE=1
     else
