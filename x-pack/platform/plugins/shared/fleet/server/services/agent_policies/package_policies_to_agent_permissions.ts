@@ -41,16 +41,6 @@ export const UNIVERSAL_PROFILING_PERMISSIONS = [
   'view_index_metadata',
 ];
 
-export const ELASTIC_CONNECTORS_INDEX_PERMISSIONS = [
-  'read',
-  'write',
-  'monitor',
-  'create_index',
-  'auto_configure',
-  'maintenance',
-  'view_index_metadata',
-];
-
 export const AGENTLESS_INDEX_PERMISSIONS = [
   'read',
   'write',
