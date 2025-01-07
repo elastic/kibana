@@ -40,11 +40,28 @@ type Props = EuiBadgeProps & {
   fromDetails?: boolean;
 };
 
+function convertAuditUnenrolledReason(reason: string | undefined) {
+  if (!reason) {
+    return undefined;
+  }
+
+  switch (reason) {
+    case 'uninstall':
+      return 'Uninstalled';
+    case 'orphaned':
+      return 'Orphaned';
+    default:
+      return reason;
+  }
+}
+
 function getStatusComponent({
   status,
+  uninstallReason,
   ...restOfProps
 }: {
   status: Agent['status'];
+  uninstallReason: string | undefined;
 } & EuiBadgeProps): React.ReactElement {
   switch (status) {
     case 'error':
@@ -67,14 +84,31 @@ function getStatusComponent({
         </EuiBadge>
       );
     case 'offline':
-      return (
-        <EuiBadge color="default" {...restOfProps}>
-          <FormattedMessage
-            id="xpack.fleet.agentHealth.offlineStatusText"
-            defaultMessage="Offline"
-          />
-        </EuiBadge>
-      );
+      // if theres an uninstall reason, and its offline, then need to show the status based on that reason
+      if (uninstallReason) {
+        uninstallReason = convertAuditUnenrolledReason(uninstallReason);
+        return (
+          <EuiBadge
+            color={uninstallReason === 'Uninstalled' ? 'warning' : 'danger'}
+            {...restOfProps}
+          >
+            <FormattedMessage
+              id="xpack.fleet.agentHealth.orphanedOrUninstalledStatusText"
+              defaultMessage={uninstallReason}
+            />
+          </EuiBadge>
+        );
+      } else {
+        return (
+          <EuiBadge color="default" {...restOfProps}>
+            <FormattedMessage
+              id="xpack.fleet.agentHealth.offlineStatusText"
+              defaultMessage="Offline"
+            />
+          </EuiBadge>
+        );
+      }
+
     case 'unenrolling':
     case 'enrolling':
     case 'updating':
@@ -185,15 +219,27 @@ export const AgentHealth: React.FunctionComponent<Props> = ({
       >
         {isStuckInUpdating(agent) && !fromDetails ? (
           <div className="eui-textNoWrap">
-            {getStatusComponent({ status: agent.status, ...restOfProps })}
+            {getStatusComponent({
+              status: agent.status,
+              uninstallReason: agent.audit_unenrolled_reason,
+              ...restOfProps,
+            })}
             &nbsp;
             <EuiIcon type="warning" color="warning" />
           </div>
         ) : (
           <>
-            {getStatusComponent({ status: agent.status, ...restOfProps })}
+            {getStatusComponent({
+              status: agent.status,
+              uninstallReason: agent.audit_unenrolled_reason,
+              ...restOfProps,
+            })}
             {previousToOfflineStatus
-              ? getStatusComponent({ status: previousToOfflineStatus, ...restOfProps })
+              ? getStatusComponent({
+                  status: previousToOfflineStatus,
+                  uninstallReason: agent.audit_unenrolled_reason,
+                  ...restOfProps,
+                })
               : null}
           </>
         )}
