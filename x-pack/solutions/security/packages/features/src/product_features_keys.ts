@@ -88,6 +88,9 @@ export enum ProductFeatureSecurityKey {
    * enables the integration assistant
    */
   integrationAssistant = 'integration_assistant',
+
+  /** Enables Endpoint Workflow Insights */
+  securityWorkflowInsights = 'security_workflow_insights',
 }
 
 export enum ProductFeatureCasesKey {
@@ -155,6 +158,7 @@ export enum SecuritySubFeatureId {
   eventFilters = 'eventFiltersSubFeature',
   policyManagement = 'policyManagementSubFeature',
   responseActionsHistory = 'responseActionsHistorySubFeature',
+  workflowInsights = 'workflowInsightsSubFeature',
   hostIsolation = 'hostIsolationSubFeature',
   processOperations = 'processOperationsSubFeature',
   fileOperations = 'fileOperationsSubFeature',

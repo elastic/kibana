@@ -311,6 +311,7 @@ t3_analyst:
         - feature_siemV2.actions_log_management_all # Response actions history
         - feature_siemV2.file_operations_all
         - feature_siemV2.scan_operations_all
+        - feature_siemV2.workflow_insights_all
         - feature_securitySolutionCasesV2.all
         - feature_securitySolutionAssistant.all
         - feature_securitySolutionAttackDiscovery.all
@@ -445,6 +446,7 @@ rule_author:
         - feature_siemV2.host_isolation_exceptions_read
         - feature_siemV2.blocklist_all # Elastic Defend Policy Management
         - feature_siemV2.actions_log_management_read
+        - feature_siemV2.workflow_insights_all
         - feature_securitySolutionCasesV2.all
         - feature_securitySolutionAssistant.all
         - feature_securitySolutionAttackDiscovery.all
@@ -520,6 +522,7 @@ soc_manager:
         - feature_siemV2.file_operations_all
         - feature_siemV2.execute_operations_all
         - feature_siemV2.scan_operations_all
+        - feature_siemV2.workflow_insights_all
         - feature_securitySolutionCasesV2.all
         - feature_securitySolutionAssistant.all
         - feature_securitySolutionAttackDiscovery.all
@@ -643,6 +646,7 @@ platform_engineer:
         - feature_siemV2.host_isolation_exceptions_all
         - feature_siemV2.blocklist_all # Elastic Defend Policy Management
         - feature_siemV2.actions_log_management_read
+        - feature_siemV2.workflow_insights_all
         - feature_securitySolutionCasesV2.all
         - feature_securitySolutionAssistant.all
         - feature_securitySolutionAttackDiscovery.all
@@ -718,6 +722,7 @@ endpoint_operations_analyst:
         - feature_siemV2.file_operations_all
         - feature_siemV2.execute_operations_all
         - feature_siemV2.scan_operations_all
+        - feature_siemV2.workflow_insights_all
         - feature_securitySolutionCasesV2.all
         - feature_securitySolutionAssistant.all
         - feature_securitySolutionAttackDiscovery.all
@@ -795,6 +800,7 @@ endpoint_policy_manager:
         - feature_siemV2.event_filters_all
         - feature_siemV2.host_isolation_exceptions_all
         - feature_siemV2.blocklist_all # Elastic Defend Policy Management
+        - feature_siemV2.workflow_insights_all
         - feature_securitySolutionCasesV2.all
         - feature_securitySolutionAssistant.all
         - feature_securitySolutionAttackDiscovery.all
