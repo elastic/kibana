@@ -269,12 +269,11 @@ exports[`PartitionVisComponent should render correct structure for donut 1`] = `
                 },
                 "isolatedPoint": Object {
                   "enabled": true,
-                  "fill": "white",
+                  "fill": "__use__series__color__",
                   "opacity": 1,
-                  "radius": 2,
                   "stroke": "__use__series__color__",
-                  "strokeWidth": 1,
-                  "visible": true,
+                  "strokeWidth": 0,
+                  "visible": "auto",
                 },
                 "line": Object {
                   "opacity": 1,
@@ -282,13 +281,14 @@ exports[`PartitionVisComponent should render correct structure for donut 1`] = `
                   "visible": true,
                 },
                 "point": Object {
-                  "fill": "#FFF",
+                  "fill": "__use__series__color__",
                   "opacity": 1,
                   "radius": 3,
-                  "stroke": "__use__series__color__",
-                  "strokeWidth": 2,
-                  "visible": false,
+                  "stroke": "__use__empty__color__",
+                  "strokeWidth": 0,
+                  "visible": "never",
                 },
+                "pointVisibilityMinDistance": 20,
               },
               "axes": Object {
                 "axisLine": Object {
@@ -415,11 +415,11 @@ exports[`PartitionVisComponent should render correct structure for donut 1`] = `
               },
               "bubbleSeriesStyle": Object {
                 "point": Object {
-                  "fill": "white",
+                  "fill": "__use__series__color__",
                   "opacity": 1,
                   "radius": 2,
-                  "strokeWidth": 1,
-                  "visible": true,
+                  "strokeWidth": 0,
+                  "visible": "always",
                 },
               },
               "bulletGraph": Object {
@@ -622,11 +622,11 @@ exports[`PartitionVisComponent should render correct structure for donut 1`] = `
               },
               "highlighter": Object {
                 "point": Object {
-                  "fill": "__use__empty__color__",
-                  "opacity": 1,
-                  "radius": 10,
-                  "stroke": "__use__series__color__",
-                  "strokeWidth": 4,
+                  "fill": "__use__series__color__",
+                  "opacity": 0.5,
+                  "radius": 5,
+                  "stroke": "__use__empty__color__",
+                  "strokeWidth": 0,
                 },
               },
               "legend": Object {
@@ -659,12 +659,11 @@ exports[`PartitionVisComponent should render correct structure for donut 1`] = `
                 },
                 "isolatedPoint": Object {
                   "enabled": true,
-                  "fill": "white",
+                  "fill": "__use__series__color__",
                   "opacity": 1,
-                  "radius": 2,
                   "stroke": "__use__series__color__",
                   "strokeWidth": 1,
-                  "visible": true,
+                  "visible": "auto",
                 },
                 "line": Object {
                   "opacity": 1,
@@ -672,13 +671,14 @@ exports[`PartitionVisComponent should render correct structure for donut 1`] = `
                   "visible": true,
                 },
                 "point": Object {
-                  "fill": "#FFF",
+                  "fill": "__use__series__color__",
                   "opacity": 1,
                   "radius": 3,
-                  "stroke": "__use__series__color__",
-                  "strokeWidth": 2,
-                  "visible": true,
+                  "stroke": "__use__empty__color__",
+                  "strokeWidth": 0,
+                  "visible": "auto",
                 },
+                "pointVisibilityMinDistance": 40,
               },
               "metric": Object {
                 "barBackground": "#EDF0F5",
@@ -810,17 +810,13 @@ exports[`PartitionVisComponent should render correct structure for donut 1`] = `
                 "partition": Object {
                   "circlePadding": 4,
                   "emptySizeRatio": 0.3,
-                  "fontFamily": "Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif",
                   "linkLabel": Object {
-                    "fontSize": 11,
                     "maxCount": 5,
                     "maxTextLength": 100,
-                    "textColor": "#343741",
                   },
                   "maxFontSize": 16,
                   "minFontSize": 10,
                   "outerSizeRatio": undefined,
-                  "sectorLineStroke": "#FFF",
                   "sectorLineWidth": 1.5,
                 },
               },
@@ -1203,12 +1199,11 @@ exports[`PartitionVisComponent should render correct structure for mosaic 1`] = 
                 },
                 "isolatedPoint": Object {
                   "enabled": true,
-                  "fill": "white",
+                  "fill": "__use__series__color__",
                   "opacity": 1,
-                  "radius": 2,
                   "stroke": "__use__series__color__",
-                  "strokeWidth": 1,
-                  "visible": true,
+                  "strokeWidth": 0,
+                  "visible": "auto",
                 },
                 "line": Object {
                   "opacity": 1,
@@ -1216,13 +1211,14 @@ exports[`PartitionVisComponent should render correct structure for mosaic 1`] = 
                   "visible": true,
                 },
                 "point": Object {
-                  "fill": "#FFF",
+                  "fill": "__use__series__color__",
                   "opacity": 1,
                   "radius": 3,
-                  "stroke": "__use__series__color__",
-                  "strokeWidth": 2,
-                  "visible": false,
+                  "stroke": "__use__empty__color__",
+                  "strokeWidth": 0,
+                  "visible": "never",
                 },
+                "pointVisibilityMinDistance": 20,
               },
               "axes": Object {
                 "axisLine": Object {
@@ -1349,11 +1345,11 @@ exports[`PartitionVisComponent should render correct structure for mosaic 1`] = 
               },
               "bubbleSeriesStyle": Object {
                 "point": Object {
-                  "fill": "white",
+                  "fill": "__use__series__color__",
                   "opacity": 1,
                   "radius": 2,
-                  "strokeWidth": 1,
-                  "visible": true,
+                  "strokeWidth": 0,
+                  "visible": "always",
                 },
               },
               "bulletGraph": Object {
@@ -1556,11 +1552,11 @@ exports[`PartitionVisComponent should render correct structure for mosaic 1`] = 
               },
               "highlighter": Object {
                 "point": Object {
-                  "fill": "__use__empty__color__",
-                  "opacity": 1,
-                  "radius": 10,
-                  "stroke": "__use__series__color__",
-                  "strokeWidth": 4,
+                  "fill": "__use__series__color__",
+                  "opacity": 0.5,
+                  "radius": 5,
+                  "stroke": "__use__empty__color__",
+                  "strokeWidth": 0,
                 },
               },
               "legend": Object {
@@ -1593,12 +1589,11 @@ exports[`PartitionVisComponent should render correct structure for mosaic 1`] = 
                 },
                 "isolatedPoint": Object {
                   "enabled": true,
-                  "fill": "white",
+                  "fill": "__use__series__color__",
                   "opacity": 1,
-                  "radius": 2,
                   "stroke": "__use__series__color__",
                   "strokeWidth": 1,
-                  "visible": true,
+                  "visible": "auto",
                 },
                 "line": Object {
                   "opacity": 1,
@@ -1606,13 +1601,14 @@ exports[`PartitionVisComponent should render correct structure for mosaic 1`] = 
                   "visible": true,
                 },
                 "point": Object {
-                  "fill": "#FFF",
+                  "fill": "__use__series__color__",
                   "opacity": 1,
                   "radius": 3,
-                  "stroke": "__use__series__color__",
-                  "strokeWidth": 2,
-                  "visible": true,
+                  "stroke": "__use__empty__color__",
+                  "strokeWidth": 0,
+                  "visible": "auto",
                 },
+                "pointVisibilityMinDistance": 40,
               },
               "metric": Object {
                 "barBackground": "#EDF0F5",
@@ -1742,17 +1738,13 @@ exports[`PartitionVisComponent should render correct structure for mosaic 1`] = 
                 "partition": Object {
                   "circlePadding": 4,
                   "emptySizeRatio": 0,
-                  "fontFamily": "Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif",
                   "linkLabel": Object {
-                    "fontSize": 11,
                     "maxCount": 5,
                     "maxTextLength": undefined,
-                    "textColor": "#343741",
                   },
                   "maxFontSize": 16,
                   "minFontSize": 10,
                   "outerSizeRatio": 1,
-                  "sectorLineStroke": "#FFF",
                   "sectorLineWidth": 1.5,
                 },
               },
@@ -2197,12 +2189,11 @@ exports[`PartitionVisComponent should render correct structure for multi-metric 
                 },
                 "isolatedPoint": Object {
                   "enabled": true,
-                  "fill": "white",
+                  "fill": "__use__series__color__",
                   "opacity": 1,
-                  "radius": 2,
                   "stroke": "__use__series__color__",
-                  "strokeWidth": 1,
-                  "visible": true,
+                  "strokeWidth": 0,
+                  "visible": "auto",
                 },
                 "line": Object {
                   "opacity": 1,
@@ -2210,13 +2201,14 @@ exports[`PartitionVisComponent should render correct structure for multi-metric 
                   "visible": true,
                 },
                 "point": Object {
-                  "fill": "#FFF",
+                  "fill": "__use__series__color__",
                   "opacity": 1,
                   "radius": 3,
-                  "stroke": "__use__series__color__",
-                  "strokeWidth": 2,
-                  "visible": false,
+                  "stroke": "__use__empty__color__",
+                  "strokeWidth": 0,
+                  "visible": "never",
                 },
+                "pointVisibilityMinDistance": 20,
               },
               "axes": Object {
                 "axisLine": Object {
@@ -2343,11 +2335,11 @@ exports[`PartitionVisComponent should render correct structure for multi-metric 
               },
               "bubbleSeriesStyle": Object {
                 "point": Object {
-                  "fill": "white",
+                  "fill": "__use__series__color__",
                   "opacity": 1,
                   "radius": 2,
-                  "strokeWidth": 1,
-                  "visible": true,
+                  "strokeWidth": 0,
+                  "visible": "always",
                 },
               },
               "bulletGraph": Object {
@@ -2550,11 +2542,11 @@ exports[`PartitionVisComponent should render correct structure for multi-metric 
               },
               "highlighter": Object {
                 "point": Object {
-                  "fill": "__use__empty__color__",
-                  "opacity": 1,
-                  "radius": 10,
-                  "stroke": "__use__series__color__",
-                  "strokeWidth": 4,
+                  "fill": "__use__series__color__",
+                  "opacity": 0.5,
+                  "radius": 5,
+                  "stroke": "__use__empty__color__",
+                  "strokeWidth": 0,
                 },
               },
               "legend": Object {
@@ -2587,12 +2579,11 @@ exports[`PartitionVisComponent should render correct structure for multi-metric 
                 },
                 "isolatedPoint": Object {
                   "enabled": true,
-                  "fill": "white",
+                  "fill": "__use__series__color__",
                   "opacity": 1,
-                  "radius": 2,
                   "stroke": "__use__series__color__",
                   "strokeWidth": 1,
-                  "visible": true,
+                  "visible": "auto",
                 },
                 "line": Object {
                   "opacity": 1,
@@ -2600,13 +2591,14 @@ exports[`PartitionVisComponent should render correct structure for multi-metric 
                   "visible": true,
                 },
                 "point": Object {
-                  "fill": "#FFF",
+                  "fill": "__use__series__color__",
                   "opacity": 1,
                   "radius": 3,
-                  "stroke": "__use__series__color__",
-                  "strokeWidth": 2,
-                  "visible": true,
+                  "stroke": "__use__empty__color__",
+                  "strokeWidth": 0,
+                  "visible": "auto",
                 },
+                "pointVisibilityMinDistance": 40,
               },
               "metric": Object {
                 "barBackground": "#EDF0F5",
@@ -2738,17 +2730,13 @@ exports[`PartitionVisComponent should render correct structure for multi-metric 
                 "partition": Object {
                   "circlePadding": 4,
                   "emptySizeRatio": 0,
-                  "fontFamily": "Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif",
                   "linkLabel": Object {
-                    "fontSize": 11,
                     "maxCount": 5,
                     "maxTextLength": 100,
-                    "textColor": "#343741",
                   },
                   "maxFontSize": 16,
                   "minFontSize": 10,
                   "outerSizeRatio": undefined,
-                  "sectorLineStroke": "#FFF",
                   "sectorLineWidth": 1.5,
                 },
               },
@@ -3193,12 +3181,11 @@ exports[`PartitionVisComponent should render correct structure for pie 1`] = `
                 },
                 "isolatedPoint": Object {
                   "enabled": true,
-                  "fill": "white",
+                  "fill": "__use__series__color__",
                   "opacity": 1,
-                  "radius": 2,
                   "stroke": "__use__series__color__",
-                  "strokeWidth": 1,
-                  "visible": true,
+                  "strokeWidth": 0,
+                  "visible": "auto",
                 },
                 "line": Object {
                   "opacity": 1,
@@ -3206,13 +3193,14 @@ exports[`PartitionVisComponent should render correct structure for pie 1`] = `
                   "visible": true,
                 },
                 "point": Object {
-                  "fill": "#FFF",
+                  "fill": "__use__series__color__",
                   "opacity": 1,
                   "radius": 3,
-                  "stroke": "__use__series__color__",
-                  "strokeWidth": 2,
-                  "visible": false,
+                  "stroke": "__use__empty__color__",
+                  "strokeWidth": 0,
+                  "visible": "never",
                 },
+                "pointVisibilityMinDistance": 20,
               },
               "axes": Object {
                 "axisLine": Object {
@@ -3339,11 +3327,11 @@ exports[`PartitionVisComponent should render correct structure for pie 1`] = `
               },
               "bubbleSeriesStyle": Object {
                 "point": Object {
-                  "fill": "white",
+                  "fill": "__use__series__color__",
                   "opacity": 1,
                   "radius": 2,
-                  "strokeWidth": 1,
-                  "visible": true,
+                  "strokeWidth": 0,
+                  "visible": "always",
                 },
               },
               "bulletGraph": Object {
@@ -3546,11 +3534,11 @@ exports[`PartitionVisComponent should render correct structure for pie 1`] = `
               },
               "highlighter": Object {
                 "point": Object {
-                  "fill": "__use__empty__color__",
-                  "opacity": 1,
-                  "radius": 10,
-                  "stroke": "__use__series__color__",
-                  "strokeWidth": 4,
+                  "fill": "__use__series__color__",
+                  "opacity": 0.5,
+                  "radius": 5,
+                  "stroke": "__use__empty__color__",
+                  "strokeWidth": 0,
                 },
               },
               "legend": Object {
@@ -3583,12 +3571,11 @@ exports[`PartitionVisComponent should render correct structure for pie 1`] = `
                 },
                 "isolatedPoint": Object {
                   "enabled": true,
-                  "fill": "white",
+                  "fill": "__use__series__color__",
                   "opacity": 1,
-                  "radius": 2,
                   "stroke": "__use__series__color__",
                   "strokeWidth": 1,
-                  "visible": true,
+                  "visible": "auto",
                 },
                 "line": Object {
                   "opacity": 1,
@@ -3596,13 +3583,14 @@ exports[`PartitionVisComponent should render correct structure for pie 1`] = `
                   "visible": true,
                 },
                 "point": Object {
-                  "fill": "#FFF",
+                  "fill": "__use__series__color__",
                   "opacity": 1,
                   "radius": 3,
-                  "stroke": "__use__series__color__",
-                  "strokeWidth": 2,
-                  "visible": true,
+                  "stroke": "__use__empty__color__",
+                  "strokeWidth": 0,
+                  "visible": "auto",
                 },
+                "pointVisibilityMinDistance": 40,
               },
               "metric": Object {
                 "barBackground": "#EDF0F5",
@@ -3734,17 +3722,13 @@ exports[`PartitionVisComponent should render correct structure for pie 1`] = `
                 "partition": Object {
                   "circlePadding": 4,
                   "emptySizeRatio": 0,
-                  "fontFamily": "Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif",
                   "linkLabel": Object {
-                    "fontSize": 11,
                     "maxCount": 5,
                     "maxTextLength": 100,
-                    "textColor": "#343741",
                   },
                   "maxFontSize": 16,
                   "minFontSize": 10,
                   "outerSizeRatio": undefined,
-                  "sectorLineStroke": "#FFF",
                   "sectorLineWidth": 1.5,
                 },
               },
@@ -4127,12 +4111,11 @@ exports[`PartitionVisComponent should render correct structure for treemap 1`] =
                 },
                 "isolatedPoint": Object {
                   "enabled": true,
-                  "fill": "white",
+                  "fill": "__use__series__color__",
                   "opacity": 1,
-                  "radius": 2,
                   "stroke": "__use__series__color__",
-                  "strokeWidth": 1,
-                  "visible": true,
+                  "strokeWidth": 0,
+                  "visible": "auto",
                 },
                 "line": Object {
                   "opacity": 1,
@@ -4140,13 +4123,14 @@ exports[`PartitionVisComponent should render correct structure for treemap 1`] =
                   "visible": true,
                 },
                 "point": Object {
-                  "fill": "#FFF",
+                  "fill": "__use__series__color__",
                   "opacity": 1,
                   "radius": 3,
-                  "stroke": "__use__series__color__",
-                  "strokeWidth": 2,
-                  "visible": false,
+                  "stroke": "__use__empty__color__",
+                  "strokeWidth": 0,
+                  "visible": "never",
                 },
+                "pointVisibilityMinDistance": 20,
               },
               "axes": Object {
                 "axisLine": Object {
@@ -4273,11 +4257,11 @@ exports[`PartitionVisComponent should render correct structure for treemap 1`] =
               },
               "bubbleSeriesStyle": Object {
                 "point": Object {
-                  "fill": "white",
+                  "fill": "__use__series__color__",
                   "opacity": 1,
                   "radius": 2,
-                  "strokeWidth": 1,
-                  "visible": true,
+                  "strokeWidth": 0,
+                  "visible": "always",
                 },
               },
               "bulletGraph": Object {
@@ -4480,11 +4464,11 @@ exports[`PartitionVisComponent should render correct structure for treemap 1`] =
               },
               "highlighter": Object {
                 "point": Object {
-                  "fill": "__use__empty__color__",
-                  "opacity": 1,
-                  "radius": 10,
-                  "stroke": "__use__series__color__",
-                  "strokeWidth": 4,
+                  "fill": "__use__series__color__",
+                  "opacity": 0.5,
+                  "radius": 5,
+                  "stroke": "__use__empty__color__",
+                  "strokeWidth": 0,
                 },
               },
               "legend": Object {
@@ -4517,12 +4501,11 @@ exports[`PartitionVisComponent should render correct structure for treemap 1`] =
                 },
                 "isolatedPoint": Object {
                   "enabled": true,
-                  "fill": "white",
+                  "fill": "__use__series__color__",
                   "opacity": 1,
-                  "radius": 2,
                   "stroke": "__use__series__color__",
                   "strokeWidth": 1,
-                  "visible": true,
+                  "visible": "auto",
                 },
                 "line": Object {
                   "opacity": 1,
@@ -4530,13 +4513,14 @@ exports[`PartitionVisComponent should render correct structure for treemap 1`] =
                   "visible": true,
                 },
                 "point": Object {
-                  "fill": "#FFF",
+                  "fill": "__use__series__color__",
                   "opacity": 1,
                   "radius": 3,
-                  "stroke": "__use__series__color__",
-                  "strokeWidth": 2,
-                  "visible": true,
+                  "stroke": "__use__empty__color__",
+                  "strokeWidth": 0,
+                  "visible": "auto",
                 },
+                "pointVisibilityMinDistance": 40,
               },
               "metric": Object {
                 "barBackground": "#EDF0F5",
@@ -4666,17 +4650,13 @@ exports[`PartitionVisComponent should render correct structure for treemap 1`] =
                 "partition": Object {
                   "circlePadding": 4,
                   "emptySizeRatio": 0,
-                  "fontFamily": "Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif",
                   "linkLabel": Object {
-                    "fontSize": 11,
                     "maxCount": 5,
                     "maxTextLength": undefined,
-                    "textColor": "#343741",
                   },
                   "maxFontSize": 16,
                   "minFontSize": 10,
                   "outerSizeRatio": 1,
-                  "sectorLineStroke": "#FFF",
                   "sectorLineWidth": 1.5,
                 },
               },
@@ -5016,12 +4996,11 @@ exports[`PartitionVisComponent should render correct structure for waffle 1`] = 
                 },
                 "isolatedPoint": Object {
                   "enabled": true,
-                  "fill": "white",
+                  "fill": "__use__series__color__",
                   "opacity": 1,
-                  "radius": 2,
                   "stroke": "__use__series__color__",
-                  "strokeWidth": 1,
-                  "visible": true,
+                  "strokeWidth": 0,
+                  "visible": "auto",
                 },
                 "line": Object {
                   "opacity": 1,
@@ -5029,13 +5008,14 @@ exports[`PartitionVisComponent should render correct structure for waffle 1`] = 
                   "visible": true,
                 },
                 "point": Object {
-                  "fill": "#FFF",
+                  "fill": "__use__series__color__",
                   "opacity": 1,
                   "radius": 3,
-                  "stroke": "__use__series__color__",
-                  "strokeWidth": 2,
-                  "visible": false,
+                  "stroke": "__use__empty__color__",
+                  "strokeWidth": 0,
+                  "visible": "never",
                 },
+                "pointVisibilityMinDistance": 20,
               },
               "axes": Object {
                 "axisLine": Object {
@@ -5162,11 +5142,11 @@ exports[`PartitionVisComponent should render correct structure for waffle 1`] = 
               },
               "bubbleSeriesStyle": Object {
                 "point": Object {
-                  "fill": "white",
+                  "fill": "__use__series__color__",
                   "opacity": 1,
                   "radius": 2,
-                  "strokeWidth": 1,
-                  "visible": true,
+                  "strokeWidth": 0,
+                  "visible": "always",
                 },
               },
               "bulletGraph": Object {
@@ -5369,11 +5349,11 @@ exports[`PartitionVisComponent should render correct structure for waffle 1`] = 
               },
               "highlighter": Object {
                 "point": Object {
-                  "fill": "__use__empty__color__",
-                  "opacity": 1,
-                  "radius": 10,
-                  "stroke": "__use__series__color__",
-                  "strokeWidth": 4,
+                  "fill": "__use__series__color__",
+                  "opacity": 0.5,
+                  "radius": 5,
+                  "stroke": "__use__empty__color__",
+                  "strokeWidth": 0,
                 },
               },
               "legend": Object {
@@ -5406,12 +5386,11 @@ exports[`PartitionVisComponent should render correct structure for waffle 1`] = 
                 },
                 "isolatedPoint": Object {
                   "enabled": true,
-                  "fill": "white",
+                  "fill": "__use__series__color__",
                   "opacity": 1,
-                  "radius": 2,
                   "stroke": "__use__series__color__",
                   "strokeWidth": 1,
-                  "visible": true,
+                  "visible": "auto",
                 },
                 "line": Object {
                   "opacity": 1,
@@ -5419,13 +5398,14 @@ exports[`PartitionVisComponent should render correct structure for waffle 1`] = 
                   "visible": true,
                 },
                 "point": Object {
-                  "fill": "#FFF",
+                  "fill": "__use__series__color__",
                   "opacity": 1,
                   "radius": 3,
-                  "stroke": "__use__series__color__",
-                  "strokeWidth": 2,
-                  "visible": true,
+                  "stroke": "__use__empty__color__",
+                  "strokeWidth": 0,
+                  "visible": "auto",
                 },
+                "pointVisibilityMinDistance": 40,
               },
               "metric": Object {
                 "barBackground": "#EDF0F5",
@@ -5562,17 +5542,13 @@ exports[`PartitionVisComponent should render correct structure for waffle 1`] = 
                 "partition": Object {
                   "circlePadding": 4,
                   "emptySizeRatio": 0,
-                  "fontFamily": "Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif",
                   "linkLabel": Object {
-                    "fontSize": 11,
                     "maxCount": 5,
                     "maxTextLength": undefined,
-                    "textColor": "#343741",
                   },
                   "maxFontSize": 16,
                   "minFontSize": 10,
                   "outerSizeRatio": undefined,
-                  "sectorLineStroke": "#FFF",
                   "sectorLineWidth": 1.5,
                 },
               },

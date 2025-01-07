@@ -7,18 +7,49 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import deepEqual from 'fast-deep-equal';
 import { useEffect, useRef } from 'react';
-import { resolveGridRow } from './resolve_grid_row';
+import { resolveGridRow } from './utils/resolve_grid_row';
 import { GridPanelData, GridLayoutStateManager } from './types';
+import { isGridDataEqual } from './utils/equality_checks';
 
-export const isGridDataEqual = (a?: GridPanelData, b?: GridPanelData) => {
-  return (
-    a?.id === b?.id &&
-    a?.column === b?.column &&
-    a?.row === b?.row &&
-    a?.width === b?.width &&
-    a?.height === b?.height
-  );
+const MIN_SPEED = 50;
+const MAX_SPEED = 150;
+
+const scrollOnInterval = (direction: 'up' | 'down') => {
+  let count = 0;
+  let currentSpeed = MIN_SPEED;
+  let maxSpeed = MIN_SPEED;
+  let turnAroundPoint: number | undefined;
+
+  const interval = setInterval(() => {
+    /**
+     * Since "smooth" scrolling on an interval is jittery on Chrome, we are manually creating
+     * an "ease" effect via the parabola formula `y = a(x - h)^2 + k`
+     *
+     * Scrolling slowly speeds up as the user drags, and it slows down again as they approach the
+     * top and/or bottom of the screen.
+     */
+    const nearTop = direction === 'up' && scrollY < window.innerHeight;
+    const nearBottom =
+      direction === 'down' &&
+      window.innerHeight + window.scrollY > document.body.scrollHeight - window.innerHeight;
+    if (!turnAroundPoint && (nearTop || nearBottom)) {
+      // reverse the direction of the parabola
+      maxSpeed = currentSpeed;
+      turnAroundPoint = count;
+    }
+
+    currentSpeed = turnAroundPoint
+      ? Math.max(-3 * (count - turnAroundPoint) ** 2 + maxSpeed, MIN_SPEED) // slow down fast
+      : Math.min(0.1 * count ** 2 + MIN_SPEED, MAX_SPEED); // speed up slowly
+    window.scrollBy({
+      top: direction === 'down' ? currentSpeed : -currentSpeed,
+    });
+
+    count++; // increase the counter to increase the time interval used in the parabola formula
+  }, 60);
+  return interval;
 };
 
 export const useGridLayoutEvents = ({
@@ -28,19 +59,30 @@ export const useGridLayoutEvents = ({
 }) => {
   const mouseClientPosition = useRef({ x: 0, y: 0 });
   const lastRequestedPanelPosition = useRef<GridPanelData | undefined>(undefined);
+  const scrollInterval = useRef<NodeJS.Timeout | null>(null);
 
   // -----------------------------------------------------------------------------------------
   // Set up drag events
   // -----------------------------------------------------------------------------------------
   useEffect(() => {
     const { runtimeSettings$, interactionEvent$, gridLayout$ } = gridLayoutStateManager;
+
+    const stopAutoScrollIfNecessary = () => {
+      if (scrollInterval.current) {
+        clearInterval(scrollInterval.current);
+        scrollInterval.current = null;
+      }
+    };
+
     const calculateUserEvent = (e: Event) => {
-      if (!interactionEvent$.value) return;
-      e.preventDefault();
+      if (!interactionEvent$.value) {
+        // if no interaction event, stop auto scroll (if necessary) and return early
+        stopAutoScrollIfNecessary();
+        return;
+      }
       e.stopPropagation();
 
       const gridRowElements = gridLayoutStateManager.rowRefs.current;
-      const previewElement = gridLayoutStateManager.dragPreviewRef.current;
 
       const interactionEvent = interactionEvent$.value;
       const isResize = interactionEvent?.type === 'resize';
@@ -53,7 +95,7 @@ export const useGridLayoutEvents = ({
         }
       })();
 
-      if (!runtimeSettings$.value || !previewElement || !gridRowElements || !currentGridData) {
+      if (!runtimeSettings$.value || !gridRowElements || !currentGridData) {
         return;
       }
 
@@ -68,7 +110,8 @@ export const useGridLayoutEvents = ({
         bottom: mouseTargetPixel.y - interactionEvent.mouseOffsets.bottom,
         right: mouseTargetPixel.x - interactionEvent.mouseOffsets.right,
       };
-      gridLayoutStateManager.updatePreviewElement(previewRect);
+
+      gridLayoutStateManager.activePanel$.next({ id: interactionEvent.id, position: previewRect });
 
       // find the grid that the preview rect is over
       const previewBottom =
@@ -121,6 +164,7 @@ export const useGridLayoutEvents = ({
         maxColumn
       );
       const targetRow = Math.max(Math.round(localYCoordinate / (rowHeight + gutterSize)), 0);
+
       const requestedGridData = { ...currentGridData };
       if (isResize) {
         requestedGridData.width = Math.max(targetColumn - requestedGridData.column, 1);
@@ -128,6 +172,23 @@ export const useGridLayoutEvents = ({
       } else {
         requestedGridData.column = targetColumn;
         requestedGridData.row = targetRow;
+      }
+
+      // auto scroll when an event is happening close to the top or bottom of the screen
+      const heightPercentage =
+        100 - ((window.innerHeight - mouseTargetPixel.y) / window.innerHeight) * 100;
+      const atTheTop = window.scrollY <= 0;
+      const atTheBottom = window.innerHeight + window.scrollY >= document.body.scrollHeight;
+
+      const startScrollingUp = !isResize && heightPercentage < 5 && !atTheTop; // don't scroll up when resizing
+      const startScrollingDown = heightPercentage > 95 && !atTheBottom;
+      if (startScrollingUp || startScrollingDown) {
+        if (!scrollInterval.current) {
+          // only start scrolling if it's not already happening
+          scrollInterval.current = scrollOnInterval(startScrollingUp ? 'up' : 'down');
+        }
+      } else {
+        stopAutoScrollIfNecessary();
       }
 
       // resolve the new grid layout
@@ -154,29 +215,23 @@ export const useGridLayoutEvents = ({
           const resolvedOriginGrid = resolveGridRow(originGrid);
           nextLayout[lastRowIndex] = resolvedOriginGrid;
         }
-        gridLayout$.next(nextLayout);
+        if (!deepEqual(currentLayout, nextLayout)) {
+          gridLayout$.next(nextLayout);
+        }
       }
     };
 
-    const onMouseUp = (e: MouseEvent) => {
-      if (!interactionEvent$.value) return;
-      e.preventDefault();
-      e.stopPropagation();
-
-      interactionEvent$.next(undefined);
-      gridLayoutStateManager.hideDragPreview();
-    };
-
     const onMouseMove = (e: MouseEvent) => {
+      // Note: When an item is being interacted with, `mousemove` events continue to be fired, even when the
+      // mouse moves out of the window (i.e. when a panel is being dragged around outside the window).
       mouseClientPosition.current = { x: e.clientX, y: e.clientY };
       calculateUserEvent(e);
     };
 
-    document.addEventListener('mouseup', onMouseUp);
-    document.addEventListener('mousemove', onMouseMove);
-    document.addEventListener('scroll', calculateUserEvent);
+    document.addEventListener('mousemove', onMouseMove, { passive: true });
+    document.addEventListener('scroll', calculateUserEvent, { passive: true });
+
     return () => {
-      document.removeEventListener('mouseup', onMouseUp);
       document.removeEventListener('mousemove', onMouseMove);
       document.removeEventListener('scroll', calculateUserEvent);
     };

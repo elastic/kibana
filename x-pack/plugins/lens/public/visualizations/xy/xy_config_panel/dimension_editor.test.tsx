@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { mountWithIntl as mount } from '@kbn/test-jest-helpers';
+import { render, screen } from '@testing-library/react';
 import { EuiButtonGroupProps, EuiButtonGroup } from '@elastic/eui';
 import { DataDimensionEditor } from './dimension_editor';
 import { FramePublicAPI, DatasourcePublicAPI } from '../../../types';
@@ -17,6 +18,7 @@ import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { EuiColorPicker } from '@elastic/eui';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { act } from 'react-dom/test-utils';
+import { getKbnPalettes } from '@kbn/palettes';
 
 describe('XY Config panels', () => {
   let frame: FramePublicAPI;
@@ -62,6 +64,7 @@ describe('XY Config panels', () => {
           }}
           formatFactory={jest.fn()}
           paletteService={chartPluginMock.createPaletteRegistry()}
+          palettes={getKbnPalettes({ name: 'amsterdam', darkMode: false })}
           panelRef={React.createRef()}
           addLayer={jest.fn()}
           removeLayer={jest.fn()}
@@ -90,6 +93,7 @@ describe('XY Config panels', () => {
           state={state}
           formatFactory={jest.fn()}
           paletteService={chartPluginMock.createPaletteRegistry()}
+          palettes={getKbnPalettes({ name: 'amsterdam', darkMode: false })}
           panelRef={React.createRef()}
           addLayer={jest.fn()}
           removeLayer={jest.fn()}
@@ -139,6 +143,7 @@ describe('XY Config panels', () => {
           state={state}
           formatFactory={jest.fn()}
           paletteService={chartPluginMock.createPaletteRegistry()}
+          palettes={getKbnPalettes({ name: 'amsterdam', darkMode: false })}
           panelRef={React.createRef()}
           addLayer={jest.fn()}
           removeLayer={jest.fn()}
@@ -185,6 +190,7 @@ describe('XY Config panels', () => {
           state={state}
           formatFactory={jest.fn()}
           paletteService={chartPluginMock.createPaletteRegistry()}
+          palettes={getKbnPalettes({ name: 'amsterdam', darkMode: false })}
           panelRef={React.createRef()}
           addLayer={jest.fn()}
           removeLayer={jest.fn()}
@@ -195,6 +201,66 @@ describe('XY Config panels', () => {
 
       expect(component.find(EuiColorPicker).prop('color')).toEqual('red');
     });
+    test.each<{ collapseFn?: string; shouldDisplay?: boolean }>([
+      // should display color picker
+      { shouldDisplay: true },
+      // should not display color picker
+      { collapseFn: 'sum', shouldDisplay: false },
+    ])(
+      'should only show color picker when collapseFn is defined for breakdown group',
+      ({ collapseFn = undefined, shouldDisplay = true }) => {
+        const state = {
+          ...testState(),
+          layers: [
+            {
+              collapseFn,
+              seriesType: 'bar',
+              layerType: LayerTypes.DATA,
+              layerId: 'first',
+              splitAccessor: 'breakdownAccessor',
+              xAccessor: 'foo',
+              accessors: ['bar'],
+              yConfig: [{ forAccessor: 'bar', color: 'red' }],
+            },
+          ],
+        } as XYState;
+
+        render(
+          <DataDimensionEditor
+            layerId={state.layers[0].layerId}
+            frame={{
+              ...frame,
+              activeData: {
+                first: {
+                  type: 'datatable',
+                  columns: [],
+                  rows: [{ bar: 123 }],
+                },
+              },
+            }}
+            setState={jest.fn()}
+            accessor="breakdownAccessor"
+            groupId={'breakdown'}
+            state={state}
+            formatFactory={jest.fn()}
+            paletteService={chartPluginMock.createPaletteRegistry()}
+            palettes={getKbnPalettes({ name: 'amsterdam', darkMode: false })}
+            panelRef={React.createRef()}
+            addLayer={jest.fn()}
+            removeLayer={jest.fn()}
+            datasource={{} as DatasourcePublicAPI}
+            isDarkMode={false}
+          />
+        );
+        const colorPickerUi = screen.queryByLabelText('Edit colors');
+
+        if (shouldDisplay) {
+          expect(colorPickerUi).toBeInTheDocument();
+        } else {
+          expect(colorPickerUi).not.toBeInTheDocument();
+        }
+      }
+    );
     test('does not apply incorrect color', () => {
       jest.useFakeTimers();
       const setState = jest.fn();
@@ -232,6 +298,7 @@ describe('XY Config panels', () => {
           state={state}
           formatFactory={jest.fn()}
           paletteService={chartPluginMock.createPaletteRegistry()}
+          palettes={getKbnPalettes({ name: 'amsterdam', darkMode: false })}
           panelRef={React.createRef()}
           addLayer={jest.fn()}
           removeLayer={jest.fn()}

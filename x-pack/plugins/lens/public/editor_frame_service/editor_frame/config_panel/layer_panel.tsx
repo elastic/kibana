@@ -39,6 +39,7 @@ import {
 import { getSharedActions } from './layer_actions/layer_actions';
 import { FlyoutContainer } from '../../../shared_components/flyout_container';
 import { FakeDimensionButton } from './buttons/fake_dimension_button';
+import { getLongMessage } from '../../../user_messages_utils';
 
 export function LayerPanel(props: LayerPanelProps) {
   const [openDimension, setOpenDimension] = useState<{
@@ -518,6 +519,7 @@ export function LayerPanel(props: LayerPanelProps) {
                             props?.getUserMessages?.('dimensionButton', {
                               dimensionId: columnId,
                             }) ?? [];
+                          const firstMessage = messages.at(0);
 
                           return (
                             <DraggableDimensionButton
@@ -567,11 +569,15 @@ export function LayerPanel(props: LayerPanelProps) {
                                   props.onRemoveDimension({ columnId: id, layerId });
                                   removeButtonRef(id);
                                 }}
-                                message={{
-                                  severity: messages[0]?.severity,
-                                  content: (messages[0]?.shortMessage ||
-                                    messages[0]?.longMessage) as React.ReactNode,
-                                }}
+                                message={
+                                  firstMessage
+                                    ? {
+                                        severity: firstMessage.severity,
+                                        content:
+                                          firstMessage.shortMessage || getLongMessage(firstMessage),
+                                      }
+                                    : undefined
+                                }
                               >
                                 {layerDatasource ? (
                                   <>
@@ -678,9 +684,6 @@ export function LayerPanel(props: LayerPanelProps) {
               {layerDatasource?.LayerSettingsComponent && (
                 <layerDatasource.LayerSettingsComponent {...layerDatasourceConfigProps} />
               )}
-              {layerDatasource?.LayerSettingsComponent && visualizationLayerSettings.data ? (
-                <EuiSpacer size="m" />
-              ) : null}
               {activeVisualization?.LayerSettingsComponent && visualizationLayerSettings.data ? (
                 <activeVisualization.LayerSettingsComponent
                   {...{

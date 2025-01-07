@@ -5,23 +5,26 @@
  * 2.0.
  */
 
-import { parse as parseCookie, Cookie } from 'tough-cookie';
-import { setTimeout as setTimeoutAsync } from 'timers/promises';
-import expect from '@kbn/expect';
-import { adminTestUser } from '@kbn/test';
-import type { AuthenticationProvider } from '@kbn/security-plugin/common';
-import {
+import type {
   AggregateName,
   AggregationsMultiTermsAggregate,
   AggregationsMultiTermsBucket,
   AggregationsTopHitsAggregate,
   SearchTotalHits,
 } from '@elastic/elasticsearch/lib/api/types';
+import { setTimeout as setTimeoutAsync } from 'timers/promises';
+import type { Cookie } from 'tough-cookie';
+import { parse as parseCookie } from 'tough-cookie';
+
+import expect from '@kbn/expect';
 import {
   getSAMLRequestId,
   getSAMLResponse,
 } from '@kbn/security-api-integration-helpers/saml/saml_tools';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { AuthenticationProvider } from '@kbn/security-plugin/common';
+import { adminTestUser } from '@kbn/test';
+
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertestWithoutAuth');

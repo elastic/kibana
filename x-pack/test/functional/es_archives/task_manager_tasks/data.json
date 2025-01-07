@@ -2,11 +2,9 @@
   "type": "doc",
   "value": {
     "id": "task:be7e1250-3322-11eb-94c1-db6995e84f6a",
-    "index": ".kibana_task_manager_1",
+    "index": ".kibana_task_manager",
     "source": {
-      "migrationVersion": {
-        "task": "7.16.0"
-      },
+      "typeMigrationVersion": "7.16.0",
       "references": [
       ],
       "task": {
@@ -33,11 +31,9 @@
   "type": "doc",
   "value": {
     "id": "task:be7e1250-3322-11eb-94c1-db6995e8389f",
-    "index": ".kibana_task_manager_1",
+    "index": ".kibana_task_manager",
     "source": {
-      "migrationVersion": {
-        "task": "7.16.0"
-      },
+      "typeMigrationVersion": "7.16.0",
       "references": [
       ],
       "task": {
@@ -64,11 +60,9 @@
   "type": "doc",
   "value": {
     "id": "task:d33d7590-8377-11ec-8c11-2dfe94229b95",
-    "index": ".kibana_task_manager_1",
+    "index": ".kibana_task_manager",
     "source": {
-      "migrationVersion": {
-        "task": "7.6.0"
-      },
+      "typeMigrationVersion": "7.6.0",
       "task": {
         "taskType": "alerting:xpack.uptime.alerts.monitorStatus",
         "retryAt": null,
@@ -95,11 +89,9 @@
   "type": "doc",
   "value": {
     "id": "task:ce7e1250-3322-11eb-94c1-db6995e84f6d",
-    "index": ".kibana_task_manager_1",
+    "index": ".kibana_task_manager",
     "source": {
-      "migrationVersion": {
-        "task": "7.16.0"
-      },
+      "typeMigrationVersion": "7.16.0",
       "references": [
       ],
       "task": {
@@ -126,11 +118,9 @@
   "type": "doc",
   "value": {
     "id": "task:fe7e1250-3322-11eb-94c1-db6395e84f6e",
-    "index": ".kibana_task_manager_1",
+    "index": ".kibana_task_manager",
     "source": {
-      "migrationVersion": {
-        "task": "7.16.0"
-      },
+      "typeMigrationVersion": "7.16.0",
       "references": [
       ],
       "task": {
@@ -157,11 +147,9 @@
   "type": "doc",
   "value": {
     "id": "task:ge7e1250-3322-11eb-94c1-db6395e84f6g",
-    "index": ".kibana_task_manager_1",
+    "index": ".kibana_task_manager",
     "source": {
-      "migrationVersion": {
-        "task": "7.16.0"
-      },
+      "typeMigrationVersion": "7.16.0",
       "references": [
       ],
       "task": {
@@ -188,11 +176,9 @@
   "type": "doc",
   "value": {
     "id": "task:ie7e1250-3322-11eb-94c1-db6395e84f6i",
-    "index": ".kibana_task_manager_1",
+    "index": ".kibana_task_manager",
     "source": {
-      "migrationVersion": {
-        "task": "7.16.0"
-      },
+      "typeMigrationVersion": "7.16.0",
       "references": [
       ],
       "task": {
@@ -219,11 +205,9 @@
   "type": "doc",
   "value": {
     "id": "task:d0487a50-c7f1-11ed-aefe-691acd8d4e25",
-    "index": ".kibana_task_manager_1",
+    "index": ".kibana_task_manager",
     "source": {
-      "migrationVersion": {
-        "task": "8.5.0"
-      },
+      "typeMigrationVersion": "8.5.0",
       "task": {
           "retryAt": null,
           "runAt": "2023-03-21T14:08:29.777Z",
@@ -255,11 +239,9 @@
   "type": "doc",
   "value": {
     "id": "task:cf0ced10-c7f1-11ed-aefe-691acd8d4e25",
-    "index": ".kibana_task_manager_1",
+    "index": ".kibana_task_manager",
     "source": {
-      "migrationVersion": {
-        "task": "8.5.0"
-      },
+      "typeMigrationVersion": "8.5.0",
       "task": {
           "retryAt": null,
           "runAt": "2023-03-21T14:08:29.777Z",

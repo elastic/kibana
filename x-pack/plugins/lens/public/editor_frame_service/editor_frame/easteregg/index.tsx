@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import type { Query } from '@kbn/es-query';
+import { AggregateQuery, isOfAggregateQueryType, Query } from '@kbn/es-query';
 import { EuiErrorBoundary } from '@elastic/eui';
 
 const Bee = React.lazy(() => import('./bee'));
@@ -34,11 +34,14 @@ function Bees({ query }: { query?: Query }) {
   );
 }
 
-export function Easteregg(props: { query?: Query }) {
+export function Easteregg(props: { query?: Query | AggregateQuery }) {
+  if (isOfAggregateQueryType(props.query)) {
+    return null;
+  }
   return (
     // Do not break Lens for an easteregg
     <EuiErrorBoundary style={{ display: 'none' }}>
-      <Bees {...props} />
+      <Bees query={props.query} />
     </EuiErrorBoundary>
   );
 }

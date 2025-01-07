@@ -172,5 +172,23 @@ describe('createFiltersFromClickEvent', () => {
       expect(queryString).toEqual(`from meow
 | WHERE \`columnA\`=="2048"`);
     });
+
+    test('should return the update query string for negated action', async () => {
+      dataPoints[0].table.columns[0] = {
+        name: 'columnA',
+        id: 'columnA',
+        meta: {
+          type: 'string',
+        },
+      };
+      const queryString = await appendFilterToESQLQueryFromValueClickAction({
+        data: dataPoints,
+        query: { esql: 'from meow' },
+        negate: true,
+      });
+
+      expect(queryString).toEqual(`from meow
+| WHERE \`columnA\`!="2048"`);
+    });
   });
 });

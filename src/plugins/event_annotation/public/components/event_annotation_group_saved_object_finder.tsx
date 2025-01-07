@@ -99,6 +99,7 @@ export const EventAnnotationGroupSavedObjectFinder = ({
     </EuiFlexGroup>
   ) : (
     <SavedObjectFinder
+      id="eventAnnotationGroup"
       key="searchSavedObjectFinder"
       fixedPageSize={fixedPageSize}
       onChoose={(id, type, fullName, savedObject) => {

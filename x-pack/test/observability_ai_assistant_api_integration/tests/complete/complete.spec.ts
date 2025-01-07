@@ -32,6 +32,7 @@ import {
   getConversationUpdatedEvent,
 } from '../conversations/helpers';
 import { createProxyActionConnector, deleteActionConnector } from '../../common/action_connectors';
+import { ForbiddenApiError } from '../../common/config';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -39,7 +40,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantAPIClient');
 
-  const COMPLETE_API_URL = `/internal/observability_ai_assistant/chat/complete`;
+  const COMPLETE_API_URL = '/internal/observability_ai_assistant/chat/complete';
 
   const messages: Message[] = [
     {
@@ -84,7 +85,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             connectorId,
             persist: true,
             screenContexts: params.screenContexts || [],
-            scope: 'all',
+            scopes: ['all'],
           })
           .then((response) => resolve(response))
           .catch((err) => reject(err));
@@ -97,6 +98,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       await titleSimulator.status(200);
       await titleSimulator.next('My generated title');
+      await titleSimulator.tokenCount({ completion: 5, prompt: 10, total: 15 });
       await titleSimulator.complete();
 
       await conversationSimulator.status(200);
@@ -137,7 +139,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           connectorId,
           persist: false,
           screenContexts: [],
-          scope: 'all',
+          scopes: ['all'],
         })
         .pipe(passThrough);
 
@@ -152,6 +154,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       await simulator.rawWrite(`data: ${chunk.substring(0, 10)}`);
       await simulator.rawWrite(`${chunk.substring(10)}\n\n`);
+      await simulator.tokenCount({ completion: 20, prompt: 33, total: 53 });
       await simulator.complete();
 
       await new Promise<void>((resolve) => passThrough.on('end', () => resolve()));
@@ -162,6 +165,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         StreamingChatResponseEventType.MessageAdd,
         StreamingChatResponseEventType.MessageAdd,
         StreamingChatResponseEventType.ChatCompletionChunk,
+        StreamingChatResponseEventType.ChatCompletionMessage,
         StreamingChatResponseEventType.MessageAdd,
       ]);
 
@@ -229,6 +233,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         events = await getEvents({}, async (conversationSimulator) => {
           await conversationSimulator.next('Hello');
           await conversationSimulator.next(' again');
+          await conversationSimulator.tokenCount({ completion: 0, prompt: 0, total: 0 });
           await conversationSimulator.complete();
         });
       });
@@ -247,6 +252,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           },
         });
         expect(omit(events[2], 'id', 'message.@timestamp')).to.eql({
+          type: StreamingChatResponseEventType.ChatCompletionMessage,
+          message: {
+            content: 'Hello again',
+          },
+        });
+        expect(omit(events[3], 'id', 'message.@timestamp')).to.eql({
           type: StreamingChatResponseEventType.MessageAdd,
           message: {
             message: {
@@ -263,7 +274,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         expect(
           omit(
-            events[3],
+            events[4],
             'conversation.id',
             'conversation.last_updated',
             'conversation.token_count'
@@ -275,7 +286,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           },
         });
 
-        const tokenCount = (events[3] as ConversationCreateEvent).conversation.token_count!;
+        const tokenCount = (events[4] as ConversationCreateEvent).conversation.token_count!;
 
         expect(tokenCount.completion).to.be.greaterThan(0);
         expect(tokenCount.prompt).to.be.greaterThan(0);
@@ -290,7 +301,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         )[0]?.conversation.id;
 
         await observabilityAIAssistantAPIClient
-          .adminUser({
+          .admin({
             endpoint: 'DELETE /internal/observability_ai_assistant/conversation/{conversationId}',
             params: {
               path: {
@@ -329,8 +340,18 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           },
           async (conversationSimulator) => {
             await conversationSimulator.next({
-              function_call: { name: 'my_action', arguments: JSON.stringify({ foo: 'bar' }) },
+              tool_calls: [
+                {
+                  id: 'fake-id',
+                  index: 'fake-index',
+                  function: {
+                    name: 'my_action',
+                    arguments: JSON.stringify({ foo: 'bar' }),
+                  },
+                },
+              ],
             });
+            await conversationSimulator.tokenCount({ completion: 0, prompt: 0, total: 0 });
             await conversationSimulator.complete();
           }
         );
@@ -366,7 +387,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         ).to.eql(0);
 
         const conversations = await observabilityAIAssistantAPIClient
-          .editorUser({
+          .editor({
             endpoint: 'POST /internal/observability_ai_assistant/conversations',
           })
           .expect(200);
@@ -396,7 +417,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           .completeAfterIntercept();
 
         const createResponse = await observabilityAIAssistantAPIClient
-          .editorUser({
+          .editor({
             endpoint: 'POST /internal/observability_ai_assistant/chat/complete',
             params: {
               body: {
@@ -404,7 +425,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 connectorId,
                 persist: true,
                 screenContexts: [],
-                scope: 'observability',
+                scopes: ['observability'],
               },
             },
           })
@@ -415,7 +436,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         conversationCreatedEvent = getConversationCreatedEvent(createResponse.body);
 
         const conversationId = conversationCreatedEvent.conversation.id;
-        const fullConversation = await observabilityAIAssistantAPIClient.editorUser({
+        const fullConversation = await observabilityAIAssistantAPIClient.editor({
           endpoint: 'GET /internal/observability_ai_assistant/conversation/{conversationId}',
           params: {
             path: {
@@ -429,7 +450,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           .completeAfterIntercept();
 
         const updatedResponse = await observabilityAIAssistantAPIClient
-          .editorUser({
+          .editor({
             endpoint: 'POST /internal/observability_ai_assistant/chat/complete',
             params: {
               body: {
@@ -447,7 +468,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 persist: true,
                 screenContexts: [],
                 conversationId,
-                scope: 'observability',
+                scopes: ['observability'],
               },
             },
           })
@@ -460,7 +481,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       after(async () => {
         await observabilityAIAssistantAPIClient
-          .editorUser({
+          .editor({
             endpoint: 'DELETE /internal/observability_ai_assistant/conversation/{conversationId}',
             params: {
               path: {
@@ -486,5 +507,27 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
     // todo
     it.skip('executes a function', async () => {});
+
+    describe('security roles and access privileges', () => {
+      it('should deny access for users without the ai_assistant privilege', async () => {
+        try {
+          await observabilityAIAssistantAPIClient.unauthorizedUser({
+            endpoint: 'POST /internal/observability_ai_assistant/chat/complete',
+            params: {
+              body: {
+                messages,
+                connectorId,
+                persist: false,
+                screenContexts: [],
+                scopes: ['all'],
+              },
+            },
+          });
+          throw new ForbiddenApiError('Expected unauthorizedUser() to throw a 403 Forbidden error');
+        } catch (e) {
+          expect(e.status).to.be(403);
+        }
+      });
+    });
   });
 }

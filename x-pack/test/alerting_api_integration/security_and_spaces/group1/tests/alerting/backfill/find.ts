@@ -135,8 +135,7 @@ export default function findBackfillTests({ getService }: FtrProviderContext) {
 
     for (const scenario of UserAtSpaceScenarios) {
       const { user, space } = scenario;
-      // FLAKY: https://github.com/elastic/kibana/issues/181862
-      describe.skip(scenario.id, () => {
+      describe(scenario.id, () => {
         const apiOptions = {
           spaceId: space.id,
           username: user.username,
@@ -279,15 +278,12 @@ export default function findBackfillTests({ getService }: FtrProviderContext) {
             .auth(apiOptions.username, apiOptions.password);
 
           // find backfill with end time that is after one backfill ends
+          const findEnd = moment(end2).utc().add(1, 'hour').toISOString();
           const findWithEndOneRuleResponse = await supertestWithoutAuth
             .post(
               `${getUrlPrefix(
                 apiOptions.spaceId
-              )}/internal/alerting/rules/backfill/_find?end=${moment()
-                .utc()
-                .startOf('day')
-                .subtract(9, 'days')
-                .toISOString()}`
+              )}/internal/alerting/rules/backfill/_find?end=${findEnd}`
             )
             .set('kbn-xsrf', 'foo')
             .auth(apiOptions.username, apiOptions.password);

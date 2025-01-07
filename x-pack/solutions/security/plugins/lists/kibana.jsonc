@@ -1,0 +1,25 @@
+{
+  "type": "plugin",
+  "id": "@kbn/lists-plugin",
+  "owner": [
+    "@elastic/security-detection-engine"
+  ],
+  "group": "security",
+  "visibility": "private",
+  "plugin": {
+    "id": "lists",
+    "browser": true,
+    "server": true,
+    "configPath": [
+      "xpack",
+      "lists"
+    ],
+    "optionalPlugins": [
+      "spaces",
+      "security"
+    ],
+    "extraPublicDirs": [
+      "common"
+    ]
+  }
+}

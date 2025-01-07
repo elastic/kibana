@@ -11,8 +11,12 @@ import { xyVisFunction } from '.';
 import { createMockExecutionContext } from '@kbn/expressions-plugin/common/mocks';
 import { sampleArgs, sampleLayer } from '../__mocks__';
 import { XY_VIS } from '../constants';
+import { createDefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
 
 describe('xyVis', () => {
+  const getExecutionContext = () =>
+    createMockExecutionContext({}, createDefaultInspectorAdapters());
+
   test('it renders with the specified data and args', async () => {
     const { data, args } = sampleArgs();
     const { layers, ...rest } = args;
@@ -20,7 +24,7 @@ describe('xyVis', () => {
     const result = await xyVisFunction.fn(
       data,
       { ...rest, ...restLayerArgs, referenceLines: [] },
-      createMockExecutionContext()
+      getExecutionContext()
     );
 
     expect(result).toEqual({
@@ -59,7 +63,7 @@ describe('xyVis', () => {
           markSizeRatio: 0,
           referenceLines: [],
         },
-        createMockExecutionContext()
+        getExecutionContext()
       )
     ).rejects.toThrowErrorMatchingSnapshot();
 
@@ -72,7 +76,7 @@ describe('xyVis', () => {
           markSizeRatio: 101,
           referenceLines: [],
         },
-        createMockExecutionContext()
+        getExecutionContext()
       )
     ).rejects.toThrowErrorMatchingSnapshot();
   });
@@ -90,7 +94,7 @@ describe('xyVis', () => {
           minTimeBarInterval: '1q',
           referenceLines: [],
         },
-        createMockExecutionContext()
+        getExecutionContext()
       )
     ).rejects.toThrowErrorMatchingSnapshot();
   });
@@ -108,7 +112,7 @@ describe('xyVis', () => {
           minTimeBarInterval: '1h',
           referenceLines: [],
         },
-        createMockExecutionContext()
+        getExecutionContext()
       )
     ).rejects.toThrowErrorMatchingSnapshot();
   });
@@ -126,7 +130,7 @@ describe('xyVis', () => {
           addTimeMarker: true,
           referenceLines: [],
         },
-        createMockExecutionContext()
+        getExecutionContext()
       )
     ).rejects.toThrowErrorMatchingSnapshot();
   });
@@ -147,7 +151,7 @@ describe('xyVis', () => {
 
           splitRowAccessor,
         },
-        createMockExecutionContext()
+        getExecutionContext()
       )
     ).rejects.toThrowErrorMatchingSnapshot();
   });
@@ -168,7 +172,7 @@ describe('xyVis', () => {
 
           splitColumnAccessor,
         },
-        createMockExecutionContext()
+        getExecutionContext()
       )
     ).rejects.toThrowErrorMatchingSnapshot();
   });
@@ -188,7 +192,7 @@ describe('xyVis', () => {
 
           markSizeRatio: 5,
         },
-        createMockExecutionContext()
+        getExecutionContext()
       )
     ).rejects.toThrowErrorMatchingSnapshot();
   });
@@ -211,7 +215,7 @@ describe('xyVis', () => {
           seriesType: 'bar',
           showLines: true,
         },
-        createMockExecutionContext()
+        getExecutionContext()
       )
     ).rejects.toThrowErrorMatchingSnapshot();
   });
@@ -238,7 +242,7 @@ describe('xyVis', () => {
             extent: { type: 'axisExtentConfig', mode: 'dataBounds' },
           },
         },
-        createMockExecutionContext()
+        getExecutionContext()
       )
     ).rejects.toThrowErrorMatchingSnapshot();
   });
@@ -268,7 +272,7 @@ describe('xyVis', () => {
             },
           },
         },
-        createMockExecutionContext()
+        getExecutionContext()
       )
     ).rejects.toThrowErrorMatchingSnapshot();
   });
@@ -293,7 +297,7 @@ describe('xyVis', () => {
             extent: { type: 'axisExtentConfig', mode: 'dataBounds' },
           },
         },
-        createMockExecutionContext()
+        getExecutionContext()
       )
     ).rejects.toThrowErrorMatchingSnapshot();
   });
@@ -320,7 +324,7 @@ describe('xyVis', () => {
           },
         },
       },
-      createMockExecutionContext()
+      getExecutionContext()
     );
 
     expect(result).toEqual({
@@ -370,7 +374,7 @@ describe('xyVis', () => {
       },
     };
     const context = {
-      ...createMockExecutionContext(),
+      ...getExecutionContext(),
       variables: {
         overrides,
       },

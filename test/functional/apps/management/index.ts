@@ -31,13 +31,13 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./_mgmt_import_saved_objects'));
     loadTestFile(require.resolve('./data_views/_index_patterns_empty'));
     loadTestFile(require.resolve('./data_views/_scripted_fields'));
-    loadTestFile(require.resolve('./data_views/_scripted_fields_classic_table'));
     loadTestFile(require.resolve('./data_views/_runtime_fields'));
     loadTestFile(require.resolve('./data_views/_runtime_fields_composite'));
     loadTestFile(require.resolve('./data_views/_field_formatter'));
     loadTestFile(require.resolve('./data_views/_legacy_url_redirect'));
     loadTestFile(require.resolve('./data_views/_exclude_index_pattern'));
     loadTestFile(require.resolve('./data_views/_index_pattern_filter'));
+    loadTestFile(require.resolve('./data_views/_try_esql'));
     loadTestFile(require.resolve('./data_views/_scripted_fields_filter'));
     loadTestFile(require.resolve('./_import_objects'));
     loadTestFile(require.resolve('./data_views/_test_huge_fields'));

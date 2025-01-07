@@ -1,14 +1,34 @@
 [
   {
-    "output": "plugins/telemetry_collection_xpack/schema/xpack_plugins.json",
+    "output": "platform/plugins/private/telemetry_collection_xpack/schema/xpack_plugins.json",
     "root": "plugins/",
+    "exclude": []
+  },
+  {
+    "output": "platform/plugins/private/telemetry_collection_xpack/schema/xpack_monitoring.json",
+    "root": "platform/plugins/private/monitoring/server/telemetry_collection/",
+    "exclude": []
+  },
+  {
+    "output": "platform/plugins/private/telemetry_collection_xpack/schema/xpack_platform.json",
+    "root": "platform/",
     "exclude": [
-      "plugins/monitoring/server/telemetry_collection/"
+      "platform/plugins/private/monitoring/server/telemetry_collection/"
     ]
   },
   {
-    "output": "plugins/telemetry_collection_xpack/schema/xpack_monitoring.json",
-    "root": "plugins/monitoring/server/telemetry_collection/",
+    "output": "platform/plugins/private/telemetry_collection_xpack/schema/xpack_observability.json",
+    "root": "solutions/observability",
+    "exclude": []
+  },
+  {
+    "output": "platform/plugins/private/telemetry_collection_xpack/schema/xpack_search.json",
+    "root": "solutions/search",
+    "exclude": []
+  },
+  {
+    "output": "platform/plugins/private/telemetry_collection_xpack/schema/xpack_security.json",
+    "root": "solutions/security",
     "exclude": []
   }
 ]

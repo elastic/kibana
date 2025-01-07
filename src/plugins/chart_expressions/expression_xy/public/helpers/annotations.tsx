@@ -112,7 +112,7 @@ export function MarkerBody({
     return (
       <div
         className="eui-textTruncate"
-        style={{ maxWidth: LINES_MARKER_SIZE * 3 }}
+        css={{ maxWidth: LINES_MARKER_SIZE * 3 }}
         data-test-subj="xyVisAnnotationText"
       >
         {label}
@@ -123,13 +123,13 @@ export function MarkerBody({
     <div
       className="xyDecorationRotatedWrapper"
       data-test-subj="xyVisAnnotationText"
-      style={{
+      css={{
         width: LINES_MARKER_SIZE,
       }}
     >
       <div
         className="eui-textTruncate xyDecorationRotatedWrapper__label"
-        style={{
+        css={{
           maxWidth: LINES_MARKER_SIZE * 3,
         }}
       >

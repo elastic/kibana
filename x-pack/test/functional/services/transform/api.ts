@@ -285,6 +285,15 @@ export function TransformAPIProvider({ getService }: FtrProviderContext) {
       }
     },
 
+    async scheduleTransform(transformId: string, assertSuccess = true) {
+      log.debug(`Scheduling now transform '${transformId}' ...`);
+      const { body, status } = await esSupertest.post(`/_transform/${transformId}/_schedule_now`);
+
+      if (assertSuccess) {
+        this.assertResponseStatusCode(200, status, body);
+      }
+    },
+
     async stopTransform(transformId: string) {
       log.debug(`Stopping transform '${transformId}' ...`);
       const { body, status } = await esSupertest.post(`/_transform/${transformId}/_stop`);

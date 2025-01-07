@@ -34,10 +34,11 @@ import {
   getReindexingMigratorTestKit,
   getUpToDateMigratorTestKit,
 } from '../kibana_migrator_test_kit.fixtures';
-import { delay } from '../test_utils';
+import { delay, getDocVersion } from '../test_utils';
 import { expectDocumentsMigratedToHighestVersion } from '../kibana_migrator_test_kit.expect';
 
 const logFilePath = join(__dirname, 'v2_migration.log');
+const docVersion = getDocVersion();
 
 describe('v2 migration', () => {
   let esServer: TestElasticsearchUtils;
@@ -66,34 +67,48 @@ describe('v2 migration', () => {
       migrationResults = await upToDateKit.runMigrations();
     });
 
+    it('updates the index mappings to account for new SO types', async () => {
+      const res = await upToDateKit.client.indices.getMapping({ index: defaultKibanaIndex });
+      const mappings = res[`${defaultKibanaIndex}_${currentVersion}_001`].mappings;
+
+      expect(mappings._meta?.indexTypesMap[defaultKibanaIndex]).toContain('recent');
+      expect(mappings.properties?.recent).toEqual({
+        properties: {
+          name: {
+            type: 'keyword',
+          },
+        },
+      });
+    });
+
     it('skips UPDATE_TARGET_MAPPINGS_PROPERTIES if there are no changes in the mappings', async () => {
       const logs = await readLog(logFilePath);
       expect(logs).not.toMatch('CREATE_NEW_TARGET');
+
+      // defaultKibana index has a new SO type ('recent'), thus we must update the _meta properties
       expect(logs).toMatch(
-        `[${defaultKibanaIndex}] CHECK_TARGET_MAPPINGS -> CHECK_VERSION_INDEX_READY_ACTIONS`
+        `[${defaultKibanaIndex}] CHECK_TARGET_MAPPINGS -> UPDATE_TARGET_MAPPINGS_META.`
       );
       expect(logs).toMatch(
         `[${defaultKibanaTaskIndex}] CHECK_TARGET_MAPPINGS -> CHECK_VERSION_INDEX_READY_ACTIONS`
       );
+
+      // no updated types, so no pickup
       expect(logs).not.toMatch('UPDATE_TARGET_MAPPINGS_PROPERTIES');
-      expect(logs).not.toMatch('UPDATE_TARGET_MAPPINGS_PROPERTIES_WAIT_FOR_TASK');
-      expect(logs).not.toMatch('UPDATE_TARGET_MAPPINGS_META');
     });
 
     it(`returns a 'patched' status for each SO index`, () => {
       // omit elapsedMs as it varies in each execution
-      expect(migrationResults.map((result) => omit(result, 'elapsedMs'))).toMatchInlineSnapshot(`
-        Array [
-          Object {
-            "destIndex": ".kibana_migrator_${currentVersion}_001",
-            "status": "patched",
-          },
-          Object {
-            "destIndex": ".kibana_migrator_tasks_${currentVersion}_001",
-            "status": "patched",
-          },
-        ]
-      `);
+      expect(migrationResults.map((result) => omit(result, 'elapsedMs'))).toEqual([
+        {
+          destIndex: `${defaultKibanaIndex}_${currentVersion}_001`,
+          status: 'patched',
+        },
+        {
+          destIndex: `${defaultKibanaTaskIndex}_${currentVersion}_001`,
+          status: 'patched',
+        },
+      ]);
     });
 
     it('each migrator takes less than 10 seconds', () => {
@@ -127,7 +142,7 @@ describe('v2 migration', () => {
         await expect(unknownTypesKit.runMigrations()).rejects.toThrowErrorMatchingInlineSnapshot(`
           "Unable to complete saved object migrations for the [.kibana_migrator] index: Migration failed because some documents were found which use unknown saved object types: deprecated
           To proceed with the migration you can configure Kibana to discard unknown saved objects for this migration.
-          Please refer to https://www.elastic.co/guide/en/kibana/master/resolve-migrations-failures.html for more information."
+          Please refer to https://www.elastic.co/guide/en/kibana/${docVersion}/resolve-migrations-failures.html for more information."
         `);
         logs = await readLog(logFilePath);
         expect(logs).toMatch(
@@ -317,21 +332,18 @@ describe('v2 migration', () => {
 
         it('returns a migrated status for each SO index', () => {
           // omit elapsedMs as it varies in each execution
-          expect(migrationResults.map((result) => omit(result, 'elapsedMs')))
-            .toMatchInlineSnapshot(`
-                      Array [
-                        Object {
-                          "destIndex": ".kibana_migrator_${nextMinor}_001",
-                          "sourceIndex": ".kibana_migrator_${currentVersion}_001",
-                          "status": "migrated",
-                        },
-                        Object {
-                          "destIndex": ".kibana_migrator_tasks_${currentVersion}_001",
-                          "sourceIndex": ".kibana_migrator_tasks_${currentVersion}_001",
-                          "status": "migrated",
-                        },
-                      ]
-                  `);
+          expect(migrationResults.map((result) => omit(result, 'elapsedMs'))).toEqual([
+            {
+              destIndex: `${defaultKibanaIndex}_${nextMinor}_001`,
+              sourceIndex: `${defaultKibanaIndex}_${currentVersion}_001`,
+              status: 'migrated',
+            },
+            {
+              destIndex: `${defaultKibanaTaskIndex}_${currentVersion}_001`,
+              sourceIndex: `${defaultKibanaTaskIndex}_${currentVersion}_001`,
+              status: 'migrated',
+            },
+          ]);
         });
 
         it('each migrator takes less than 60 seconds', () => {

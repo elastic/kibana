@@ -50,11 +50,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('action exists in panel context menu', async () => {
       await dashboard.loadSavedDashboard(drilldowns.DASHBOARD_WITH_PIE_CHART_NAME);
-      await panelActions.openContextMenu();
-      await testSubjects.existOrFail(ACTION_TEST_SUBJ);
+      await panelActions.expectExistsPanelAction(ACTION_TEST_SUBJ);
     });
 
     it('is a link <a> element', async () => {
+      await panelActions.openContextMenuByTitle('Visualization PieChart');
       const actionElement = await testSubjects.find(ACTION_TEST_SUBJ);
       const tag = await actionElement.getTagName();
 
@@ -87,8 +87,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         exitFromEditMode: true,
       });
 
-      await panelActions.openContextMenu();
-      await testSubjects.clickWhenNotDisabledWithoutRetry(ACTION_TEST_SUBJ);
+      await panelActions.clickPanelAction(ACTION_TEST_SUBJ);
       await discover.waitForDiscoverAppOnScreen();
 
       const text = await timePicker.getShowDatesButtonText();

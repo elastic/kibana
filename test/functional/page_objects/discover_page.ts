@@ -22,27 +22,22 @@ export class DiscoverPageObject extends FtrService {
   private readonly browser = this.ctx.getService('browser');
   private readonly globalNav = this.ctx.getService('globalNav');
   private readonly elasticChart = this.ctx.getService('elasticChart');
-  private readonly docTable = this.ctx.getService('docTable');
   private readonly config = this.ctx.getService('config');
   private readonly dataGrid = this.ctx.getService('dataGrid');
-  private readonly kibanaServer = this.ctx.getService('kibanaServer');
   private readonly fieldEditor = this.ctx.getService('fieldEditor');
   private readonly queryBar = this.ctx.getService('queryBar');
   private readonly savedObjectsFinder = this.ctx.getService('savedObjectsFinder');
 
   private readonly defaultFindTimeout = this.config.get('timeouts.find');
 
-  public async getChartTimespan() {
-    return await this.testSubjects.getAttribute('unifiedHistogramChart', 'data-time-range');
+  /** Ensures that navigation to discover has completed */
+  public async expectOnDiscover() {
+    await this.testSubjects.existOrFail('discoverNewButton');
+    await this.testSubjects.existOrFail('discoverOpenButton');
   }
 
-  public async getDocTable() {
-    const isLegacyDefault = await this.useLegacyTable();
-    if (isLegacyDefault) {
-      return this.docTable;
-    } else {
-      return this.dataGrid;
-    }
+  public async getChartTimespan() {
+    return await this.testSubjects.getAttribute('unifiedHistogramChart', 'data-time-range');
   }
 
   public async saveSearch(
@@ -111,12 +106,7 @@ export class DiscoverPageObject extends FtrService {
   }
 
   public async getColumnHeaders() {
-    const isLegacy = await this.useLegacyTable();
-    if (isLegacy) {
-      return await this.docTable.getHeaderFields('embeddedSavedSearchDocTable');
-    }
-    const table = await this.getDocTable();
-    return await table.getHeaderFields();
+    return await this.dataGrid.getHeaderFields();
   }
 
   public async openLoadSavedSearchPanel() {
@@ -158,6 +148,7 @@ export class DiscoverPageObject extends FtrService {
 
   public async clickNewSearchButton() {
     await this.testSubjects.click('discoverNewButton');
+    await this.testSubjects.moveMouseTo('unifiedFieldListSidebar__toggle-collapse'); // cancel tooltips
     await this.header.waitUntilLoadingHasFinished();
   }
 
@@ -215,6 +206,12 @@ export class DiscoverPageObject extends FtrService {
       { location: el, offset: { x: -300, y: 20 } },
       { location: el, offset: { x: -100, y: 30 } }
     );
+  }
+
+  public async getBreakdownFieldValue() {
+    const breakdownButton = await this.testSubjects.find('unifiedHistogramBreakdownSelectorButton');
+
+    return breakdownButton.getVisibleText();
   }
 
   public async chooseBreakdownField(field: string, value?: string) {
@@ -332,9 +329,11 @@ export class DiscoverPageObject extends FtrService {
     return await this.header.waitUntilLoadingHasFinished();
   }
 
-  public async getHitCount() {
+  public async getHitCount({ isPartial }: { isPartial?: boolean } = {}) {
     await this.header.waitUntilLoadingHasFinished();
-    return await this.testSubjects.getVisibleText('discoverQueryHits');
+    return await this.testSubjects.getVisibleText(
+      isPartial ? 'discoverQueryHitsPartial' : 'discoverQueryHits'
+    );
   }
 
   public async getHitCountInt() {
@@ -346,28 +345,16 @@ export class DiscoverPageObject extends FtrService {
   }
 
   public async getDocHeader() {
-    const table = await this.getDocTable();
-    const docHeader = await table.getHeaders();
+    const docHeader = await this.dataGrid.getHeaders();
     return docHeader.join();
   }
 
   public async getDocTableRows() {
     await this.header.waitUntilLoadingHasFinished();
-    const table = await this.getDocTable();
-    return await table.getBodyRows();
-  }
-
-  public async useLegacyTable() {
-    return (await this.kibanaServer.uiSettings.get('doc_table:legacy')) === true;
+    return await this.dataGrid.getBodyRows();
   }
 
   public async getDocTableIndex(index: number, visibleText = false) {
-    const isLegacyDefault = await this.useLegacyTable();
-    if (isLegacyDefault) {
-      const row = await this.find.byCssSelector(`tr.kbnDocTable__row:nth-child(${index})`);
-      return await row.getVisibleText();
-    }
-
     const row = await this.dataGrid.getRow({ rowIndex: index - 1 });
     const result = await Promise.all(
       row.map(async (cell) => {
@@ -383,53 +370,15 @@ export class DiscoverPageObject extends FtrService {
     return result.slice(await this.dataGrid.getControlColumnsCount()).join(' ');
   }
 
-  public async getDocTableIndexLegacy(index: number) {
-    const row = await this.find.byCssSelector(`tr.kbnDocTable__row:nth-child(${index})`);
-    return await row.getVisibleText();
-  }
-
   public async getDocTableField(index: number, cellIdx: number = -1) {
-    const isLegacyDefault = await this.useLegacyTable();
-    const usedDefaultCellIdx = isLegacyDefault ? 0 : await this.dataGrid.getControlColumnsCount();
+    const usedDefaultCellIdx = await this.dataGrid.getControlColumnsCount();
     const usedCellIdx = cellIdx === -1 ? usedDefaultCellIdx : cellIdx;
-    if (isLegacyDefault) {
-      const fields = await this.find.allByCssSelector(
-        `tr.kbnDocTable__row:nth-child(${index}) [data-test-subj='docTableField']`
-      );
-      return await fields[usedCellIdx].getVisibleText();
-    }
+
     await this.testSubjects.click('dataGridFullScreenButton');
     const row = await this.dataGrid.getRow({ rowIndex: index - 1 });
     const result = await Promise.all(row.map(async (cell) => (await cell.getVisibleText()).trim()));
     await this.testSubjects.click('dataGridFullScreenButton');
     return result[usedCellIdx];
-  }
-
-  public async clickDocTableRowToggle(rowIndex: number = 0) {
-    const docTable = await this.getDocTable();
-    await docTable.clickRowToggle({ rowIndex });
-  }
-
-  public async skipToEndOfDocTable() {
-    // add the focus to the button to make it appear
-    const skipButton = await this.testSubjects.find('discoverSkipTableButton');
-    // force focus on it, to make it interactable
-    await skipButton.focus();
-    // now click it!
-    return skipButton.click();
-  }
-
-  /**
-   * When scrolling down the legacy table there's a link to scroll up
-   * So this is done by this function
-   */
-  public async backToTop() {
-    const skipButton = await this.testSubjects.find('discoverBackToTop');
-    return skipButton.click();
-  }
-
-  public async getDocTableFooter() {
-    return await this.testSubjects.find('discoverDocTableFooter');
   }
 
   public isShowingDocViewer() {
@@ -463,7 +412,7 @@ export class DiscoverPageObject extends FtrService {
   }
 
   public async getMarks() {
-    const table = await this.docTable.getTable();
+    const table = await this.dataGrid.getTable();
     const marks = await table.findAllByTagName('mark');
     return await Promise.all(marks.map((mark) => mark.getVisibleText()));
   }
@@ -558,10 +507,6 @@ export class DiscoverPageObject extends FtrService {
   }
 
   public async clickFieldSort(field: string, text = 'Sort New-Old') {
-    const isLegacyDefault = await this.useLegacyTable();
-    if (isLegacyDefault) {
-      return await this.testSubjects.click(`docTableHeaderFieldSort_${field}`);
-    }
     return await this.dataGrid.clickDocSortAsc(field, text);
   }
 
@@ -588,17 +533,12 @@ export class DiscoverPageObject extends FtrService {
     if (await this.testSubjects.exists('select-text-based-language-btn')) {
       await this.testSubjects.click('select-text-based-language-btn');
       await this.header.waitUntilLoadingHasFinished();
+      await this.waitUntilSearchingHasFinished();
     }
   }
 
   public async removeHeaderColumn(name: string) {
-    const isLegacyDefault = await this.useLegacyTable();
-    if (isLegacyDefault) {
-      await this.testSubjects.moveMouseTo(`docTableHeader-${name}`);
-      await this.testSubjects.click(`docTableRemoveHeader-${name}`);
-    } else {
-      await this.dataGrid.clickRemoveColumn(name);
-    }
+    await this.dataGrid.clickRemoveColumn(name);
   }
 
   public async waitForChartLoadingComplete(renderCount: number) {

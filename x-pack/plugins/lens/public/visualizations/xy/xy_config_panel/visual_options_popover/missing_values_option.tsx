@@ -9,6 +9,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiIconTip, EuiSuperSelect, EuiSwitch, EuiText } from '@elastic/eui';
 import type { FittingFunction, EndValue } from '@kbn/expression-xy-plugin/common';
+import { FittingFunctions } from '@kbn/expression-xy-plugin/public';
 import { fittingFunctionDefinitions } from './fitting_function_definitions';
 import { endValueDefinitions } from './end_value_definitions';
 
@@ -25,7 +26,7 @@ export interface MissingValuesOptionProps {
 export const MissingValuesOptions: React.FC<MissingValuesOptionProps> = ({
   onFittingFnChange,
   fittingFunction,
-  emphasizeFitting,
+  emphasizeFitting = true,
   onEmphasizeFittingChange,
   onEndValueChange,
   endValue,
@@ -78,15 +79,16 @@ export const MissingValuesOptions: React.FC<MissingValuesOptionProps> = ({
                   inputDisplay: title,
                 };
               })}
-              valueOfSelected={fittingFunction || 'None'}
+              valueOfSelected={fittingFunction || FittingFunctions.LINEAR}
               onChange={(value) => onFittingFnChange(value)}
               itemLayoutAlign="top"
               hasDividers
             />
           </EuiFormRow>
-          {fittingFunction && fittingFunction !== 'None' && (
+          {fittingFunction && fittingFunction !== FittingFunctions.NONE && (
             <>
               <EuiFormRow
+                fullWidth
                 display="columnCompressed"
                 label={i18n.translate('xpack.lens.xyChart.endValuesLabel', {
                   defaultMessage: 'End values',
@@ -109,17 +111,18 @@ export const MissingValuesOptions: React.FC<MissingValuesOptionProps> = ({
                       inputDisplay: title,
                     };
                   })}
-                  valueOfSelected={endValue || 'None'}
+                  valueOfSelected={endValue || FittingFunctions.NONE}
                   onChange={(value) => onEndValueChange(value)}
                   itemLayoutAlign="top"
                   hasDividers
                 />
               </EuiFormRow>
               <EuiFormRow
+                fullWidth
                 label={i18n.translate('xpack.lens.xyChart.missingValuesStyle', {
                   defaultMessage: 'Show as dotted line',
                 })}
-                display="columnCompressedSwitch"
+                display="columnCompressed"
               >
                 <EuiSwitch
                   showLabel={false}

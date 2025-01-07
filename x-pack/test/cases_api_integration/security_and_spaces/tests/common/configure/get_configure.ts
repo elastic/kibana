@@ -70,6 +70,13 @@ export default ({ getService }: FtrProviderContext): void => {
             required: true,
             defaultValue: false,
           },
+          {
+            key: 'num',
+            label: 'number',
+            type: CustomFieldTypes.NUMBER,
+            required: true,
+            defaultValue: 1,
+          },
         ],
       };
       await createConfiguration(

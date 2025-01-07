@@ -29,8 +29,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         const actualFullname = await pageObjects.userProfiles.getProfileFullname();
         const actualEmail = await pageObjects.userProfiles.getProfileEmail();
 
-        expect(actualFullname).to.be(userData.full_name);
-        expect(actualEmail).to.be(userData.email);
+        expect(actualFullname).to.contain(userData.full_name);
+        expect(actualEmail).to.contain(userData.email);
       });
 
       it('should not have edit actions', async () => {

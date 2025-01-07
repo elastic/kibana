@@ -12,6 +12,9 @@ export const SPACES = {
   SPACE_2: {
     spaceId: 'space_2',
   },
+  SPACE_3: {
+    spaceId: 'space_3',
+  },
   DEFAULT: {
     spaceId: 'default',
   },

@@ -1,4 +1,6 @@
-summary: Create an index threshold rule.
+summary: Index threshold rule
+description: >
+  Create an index threshold rule that uses a server log connector to send notifications when the threshold is met.
 value:
   actions:
     - id: 48de3460-f401-11ed-9f8e-399c75a2deeb

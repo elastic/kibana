@@ -11,7 +11,7 @@ import { FtrProviderContext } from '../../../../ftr_provider_context';
 export function datastreamsHelpers(getService: FtrProviderContext['getService']) {
   const es = getService('es');
 
-  const createDataStream = async (name: string) => {
+  const createDataStream = async (name: string, indexMode?: string) => {
     // A data stream requires an index template before it can be created.
     await es.indices.putIndexTemplate({
       name,
@@ -24,6 +24,11 @@ export function datastreamsHelpers(getService: FtrProviderContext['getService'])
               '@timestamp': {
                 type: 'date',
               },
+            },
+          },
+          settings: {
+            index: {
+              mode: indexMode,
             },
           },
           lifecycle: {

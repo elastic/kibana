@@ -11,7 +11,7 @@
         "tags": [],
         "label": "CloudDataMigrationPluginSetup",
         "description": [],
-        "path": "x-pack/plugins/cloud_integrations/cloud_data_migration/public/types.ts",
+        "path": "x-pack/platform/plugins/private/cloud_integrations/cloud_data_migration/public/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -31,7 +31,7 @@
                 "text": "CloudSetup"
               }
             ],
-            "path": "x-pack/plugins/cloud_integrations/cloud_data_migration/public/types.ts",
+            "path": "x-pack/platform/plugins/private/cloud_integrations/cloud_data_migration/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -51,7 +51,7 @@
                 "text": "ManagementSetup"
               }
             ],
-            "path": "x-pack/plugins/cloud_integrations/cloud_data_migration/public/types.ts",
+            "path": "x-pack/platform/plugins/private/cloud_integrations/cloud_data_migration/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -65,7 +65,7 @@
             "signature": [
               "BreadcrumbService"
             ],
-            "path": "x-pack/plugins/cloud_integrations/cloud_data_migration/public/types.ts",
+            "path": "x-pack/platform/plugins/private/cloud_integrations/cloud_data_migration/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -79,7 +79,7 @@
         "tags": [],
         "label": "CloudDataMigrationPluginStart",
         "description": [],
-        "path": "x-pack/plugins/cloud_integrations/cloud_data_migration/public/types.ts",
+        "path": "x-pack/platform/plugins/private/cloud_integrations/cloud_data_migration/public/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -100,7 +100,7 @@
               },
               " | undefined"
             ],
-            "path": "x-pack/plugins/cloud_integrations/cloud_data_migration/public/types.ts",
+            "path": "x-pack/platform/plugins/private/cloud_integrations/cloud_data_migration/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -136,7 +136,7 @@
         "signature": [
           "\"migrate_data\""
         ],
-        "path": "x-pack/plugins/cloud_integrations/cloud_data_migration/common/index.ts",
+        "path": "x-pack/platform/plugins/private/cloud_integrations/cloud_data_migration/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -148,7 +148,7 @@
         "tags": [],
         "label": "PLUGIN_NAME",
         "description": [],
-        "path": "x-pack/plugins/cloud_integrations/cloud_data_migration/common/index.ts",
+        "path": "x-pack/platform/plugins/private/cloud_integrations/cloud_data_migration/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

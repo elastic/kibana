@@ -109,8 +109,8 @@ function MetricsAxisOptions(props: ValidationVisOptionsProps<VisParams>) {
         }
 
         if (lastCustomLabels[axis.id] !== newCustomLabel && newCustomLabel !== '') {
-          const lastSeriesAggType = get(lastSeriesAgg, `${matchingSeries[0].id}.type`);
-          const lastSeriesAggField = get(lastSeriesAgg, `${matchingSeries[0].id}.field`);
+          const lastSeriesAggType = get(lastSeriesAgg, [matchingSeries[0].id, `type`]); // using array path vs. string because type inference was broken
+          const lastSeriesAggField = get(lastSeriesAgg, [matchingSeries[0].id, `field`]);
           const matchingSeriesAggType = get(matchingSeries, '[0]type.name', '');
           const matchingSeriesAggField = get(matchingSeries, '[0]params.field.name', '');
 

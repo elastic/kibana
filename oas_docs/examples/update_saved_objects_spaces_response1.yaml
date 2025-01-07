@@ -1,0 +1,10 @@
+summary: Update saved object spaces
+description: >
+  The response from updating the spaces of saved objects.
+value:
+  objects:
+    - type: index-pattern
+      id: 90943e30-9a47-11e8-b64d-95841ca0b247
+      spaces:
+        - default
+        - test

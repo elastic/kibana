@@ -43,9 +43,12 @@ describe('elasticsearch clients errors', () => {
       });
       expect('should have thrown').toEqual('but it did not');
     } catch (e) {
-      expect(JSON.stringify(e)).toMatchInlineSnapshot(
-        `"{\\"name\\":\\"ResponseError\\",\\"message\\":\\"parsing_exception\\\\n\\\\tCaused by:\\\\n\\\\t\\\\tnamed_object_not_found_exception: [1:30] unknown field [someInvalidQuery]\\\\n\\\\tRoot causes:\\\\n\\\\t\\\\tparsing_exception: unknown query [someInvalidQuery]\\"}"`
+      const str = JSON.stringify(e);
+      expect(str).toContain(
+        `{"name":"ResponseError","message":"parsing_exception\\n\\tCaused by:\\n\\t\\tnamed_object_not_found_exception: [1:30] unknown field [someInvalidQuery]\\n\\tRoot causes:\\n\\t\\tparsing_exception: unknown query [someInvalidQuery]","stack":"ResponseError: parsing_exception`
       );
+      // it contains the offending line for troubleshooting.
+      expect(str).toContain('src/core/server/integration_tests/elasticsearch/errors.test.ts:39:7');
     }
   });
 
@@ -81,16 +84,22 @@ describe('elasticsearch clients errors', () => {
       });
       expect('should have thrown').toEqual('but it did not');
     } catch (e) {
-      expect(inspect(e)).toMatchInlineSnapshot(`
-        "{
-          name: 'ResponseError',
-          message: 'parsing_exception\\\\n' +
-            '\\\\tCaused by:\\\\n' +
-            '\\\\t\\\\tnamed_object_not_found_exception: [1:30] unknown field [someInvalidQuery]\\\\n' +
-            '\\\\tRoot causes:\\\\n' +
-            '\\\\t\\\\tparsing_exception: unknown query [someInvalidQuery]'
-        }"
-      `);
+      const str = inspect(e);
+      expect(str).toContain(`{
+  name: 'ResponseError',
+  message: 'parsing_exception\\n' +
+    '\\tCaused by:\\n' +
+    '\\t\\tnamed_object_not_found_exception: [1:30] unknown field [someInvalidQuery]\\n' +
+    '\\tRoot causes:\\n' +
+    '\\t\\tparsing_exception: unknown query [someInvalidQuery]',
+  stack: 'ResponseError: parsing_exception\\n' +
+    '\\tCaused by:\\n' +
+    '\\t\\tnamed_object_not_found_exception: [1:30] unknown field [someInvalidQuery]\\n' +
+    '\\tRoot causes:\\n' +
+    '\\t\\tparsing_exception: unknown query [someInvalidQuery]\\n' +
+    '    at KibanaTransport._request (`);
+      // it contains the offending line for troubleshooting.
+      expect(str).toContain('src/core/server/integration_tests/elasticsearch/errors.test.ts:80:7');
     }
   });
 });

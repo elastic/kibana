@@ -18,7 +18,7 @@ import type { LocationDescriptor, History } from 'history';
 import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
 
 import { WithServices } from './__jest__';
-import { getTagList } from './mocks';
+import { getTagList, localStorageMock } from './mocks';
 import { TableListViewTable, type TableListViewTableProps } from './table_list_view_table';
 import { getActions } from './table_list_view.test.helpers';
 import type { Services } from './services';
@@ -242,8 +242,8 @@ describe('TableListView', () => {
       const updatedAtValues: Moment[] = [];
 
       const updatedHits = hits.map(({ id, attributes, references }, i) => {
-        const updatedAt = new Date(new Date().setDate(new Date().getDate() - (7 + i)));
-        updatedAtValues.push(moment(updatedAt));
+        const updatedAt = moment().subtract(7 + i, 'days');
+        updatedAtValues.push(updatedAt);
 
         return {
           id,
@@ -334,6 +334,12 @@ describe('TableListView', () => {
     const initialPageSize = 20;
     const totalItems = 30;
     const updatedAt = new Date().toISOString();
+
+    beforeEach(() => {
+      Object.defineProperty(window, 'localStorage', {
+        value: localStorageMock(),
+      });
+    });
 
     const hits: UserContentCommonSchema[] = [...Array(totalItems)].map((_, i) => ({
       id: `item${i}`,
@@ -428,6 +434,54 @@ describe('TableListView', () => {
 
       expect(firstRowTitle).toBe('Item 20');
       expect(lastRowTitle).toBe('Item 29');
+    });
+
+    test('should persist the number of rows in the table', async () => {
+      let testBed: TestBed;
+
+      const tableId = 'myTable';
+
+      await act(async () => {
+        testBed = await setup({
+          initialPageSize,
+          findItems: jest.fn().mockResolvedValue({ total: hits.length, hits: [...hits] }),
+          id: tableId,
+        });
+      });
+
+      {
+        const { component, table, find } = testBed!;
+        component.update();
+
+        const { tableCellsValues } = table.getMetaData('itemsInMemTable');
+        expect(tableCellsValues.length).toBe(20); // 20 by default
+
+        let storageValue = localStorage.getItem(`tablePersist:${tableId}`);
+        expect(storageValue).toBe(null);
+
+        find('tablePaginationPopoverButton').simulate('click');
+        find('tablePagination-10-rows').simulate('click');
+
+        storageValue = localStorage.getItem(`tablePersist:${tableId}`);
+        expect(storageValue).not.toBe(null);
+        expect(JSON.parse(storageValue!).pageSize).toBe(10);
+      }
+
+      // Mount a second table and verify that is shows only 10 rows
+      {
+        await act(async () => {
+          testBed = await setup({
+            initialPageSize,
+            findItems: jest.fn().mockResolvedValue({ total: hits.length, hits: [...hits] }),
+            id: tableId,
+          });
+        });
+
+        const { component, table } = testBed!;
+        component.update();
+        const { tableCellsValues } = table.getMetaData('itemsInMemTable');
+        expect(tableCellsValues.length).toBe(10); // 10 items this time
+      }
     });
   });
 
@@ -1078,25 +1132,29 @@ describe('TableListView', () => {
 
     const findItems = jest.fn();
 
-    const setupSearch = (...args: Parameters<ReturnType<typeof registerTestBed>>) => {
-      const testBed = registerTestBed<string, TableListViewTableProps>(
-        WithServices<TableListViewTableProps>(TableListViewTable),
-        {
-          defaultProps: {
-            ...requiredProps,
-            findItems,
-            urlStateEnabled: false,
-            entityName: 'Foo',
-            entityNamePlural: 'Foos',
-          },
-          memoryRouter: { wrapComponent: true },
-        }
-      )(...args);
+    const setupSearch = async (...args: Parameters<ReturnType<typeof registerTestBed>>) => {
+      let testBed: TestBed;
 
-      const { updateSearchText, getSearchBoxValue } = getActions(testBed);
+      await act(async () => {
+        testBed = registerTestBed<string, TableListViewTableProps>(
+          WithServices<TableListViewTableProps>(TableListViewTable),
+          {
+            defaultProps: {
+              ...requiredProps,
+              findItems,
+              urlStateEnabled: false,
+              entityName: 'Foo',
+              entityNamePlural: 'Foos',
+            },
+            memoryRouter: { wrapComponent: true },
+          }
+        )(...args);
+      });
+
+      const { updateSearchText, getSearchBoxValue } = getActions(testBed!);
 
       return {
-        testBed,
+        testBed: testBed!,
         updateSearchText,
         getSearchBoxValue,
         getLastCallArgsFromFindItems: () => findItems.mock.calls[findItems.mock.calls.length - 1],
@@ -1108,15 +1166,8 @@ describe('TableListView', () => {
     });
 
     test('should search the table items', async () => {
-      let testBed: TestBed;
-      let updateSearchText: (value: string) => Promise<void>;
-      let getLastCallArgsFromFindItems: () => Parameters<typeof findItems>;
-      let getSearchBoxValue: () => string;
-
-      await act(async () => {
-        ({ testBed, getLastCallArgsFromFindItems, getSearchBoxValue, updateSearchText } =
-          await setupSearch());
-      });
+      const { testBed, getLastCallArgsFromFindItems, getSearchBoxValue, updateSearchText } =
+        await setupSearch();
 
       const { component, table } = testBed!;
       component.update();
@@ -1173,12 +1224,7 @@ describe('TableListView', () => {
     });
 
     test('should search and render empty list if no result', async () => {
-      let testBed: TestBed;
-      let updateSearchText: (value: string) => Promise<void>;
-
-      await act(async () => {
-        ({ testBed, updateSearchText } = await setupSearch());
-      });
+      const { testBed, updateSearchText } = await setupSearch();
 
       const { component, table, find } = testBed!;
       component.update();
@@ -1217,42 +1263,65 @@ describe('TableListView', () => {
         ]
       `);
     });
+
+    test('should show error hint when inserting invalid chars', async () => {
+      const { testBed, getLastCallArgsFromFindItems, getSearchBoxValue, updateSearchText } =
+        await setupSearch();
+
+      const { component, exists } = testBed;
+      component.update();
+
+      expect(exists('forbiddenCharErrorMessage')).toBe(false);
+
+      const expected = '[foo';
+      await updateSearchText!(expected);
+      expect(getSearchBoxValue!()).toBe(expected);
+
+      expect(exists('forbiddenCharErrorMessage')).toBe(true); // hint is shown
+
+      const [searchTerm] = getLastCallArgsFromFindItems!();
+      expect(searchTerm).toBe(''); // no search has been made
+    });
   });
 
   describe('url state', () => {
     let router: Router | undefined;
 
-    const setupTagFiltering = registerTestBed<string, TableListViewTableProps>(
-      WithServices<TableListViewTableProps>(TableListViewTable, {
-        getTagList: () => [
-          {
-            id: 'id-tag-1',
-            name: 'tag-1',
-            type: 'tag',
-            description: '',
-            color: '',
-            managed: false,
+    const setupInitialUrl = (initialSearchQuery: string = '') =>
+      registerTestBed<string, TableListViewTableProps>(
+        WithServices<TableListViewTableProps>(TableListViewTable, {
+          getTagList: () => [
+            {
+              id: 'id-tag-1',
+              name: 'tag-1',
+              type: 'tag',
+              description: '',
+              color: '',
+              managed: false,
+            },
+            {
+              id: 'id-tag-2',
+              name: 'tag-2',
+              type: 'tag',
+              description: '',
+              color: '',
+              managed: false,
+            },
+          ],
+        }),
+        {
+          defaultProps: { ...requiredProps, urlStateEnabled: true },
+          memoryRouter: {
+            wrapComponent: true,
+            initialEntries: [{ search: initialSearchQuery }],
+            onRouter: (_router: Router) => {
+              router = _router;
+            },
           },
-          {
-            id: 'id-tag-2',
-            name: 'tag-2',
-            type: 'tag',
-            description: '',
-            color: '',
-            managed: false,
-          },
-        ],
-      }),
-      {
-        defaultProps: { ...requiredProps, urlStateEnabled: true },
-        memoryRouter: {
-          wrapComponent: true,
-          onRouter: (_router: Router) => {
-            router = _router;
-          },
-        },
-      }
-    );
+        }
+      );
+
+    const setupTagFiltering = setupInitialUrl();
 
     const hits: UserContentCommonSchema[] = [
       {
@@ -1277,13 +1346,13 @@ describe('TableListView', () => {
       },
     ];
 
-    test('should read search term from URL', async () => {
+    test('should read the initial search term from URL', async () => {
       let testBed: TestBed;
 
       const findItems = jest.fn().mockResolvedValue({ total: hits.length, hits: [...hits] });
 
       await act(async () => {
-        testBed = await setupTagFiltering({
+        testBed = await setupInitialUrl('?s=hello')({
           findItems,
         });
       });
@@ -1294,22 +1363,23 @@ describe('TableListView', () => {
       const getSearchBoxValue = () => find('tableListSearchBox').props().defaultValue;
 
       // Start with empty search box
-      expect(getSearchBoxValue()).toBe('');
-      expect(router?.history.location?.search).toBe('');
+      expect(getSearchBoxValue()).toBe('hello');
+      expect(router?.history.location?.search).toBe('?s=hello');
 
       // Change the URL
       await act(async () => {
         if (router?.history.push) {
           router.history.push({
-            search: `?${queryString.stringify({ s: 'hello' }, { encode: false })}`,
+            search: `?${queryString.stringify({ s: '' }, { encode: false })}`,
           });
         }
       });
+
       component.update();
 
-      // Search box is updated
+      // Search box is not updated
       expect(getSearchBoxValue()).toBe('hello');
-      expect(router?.history.location?.search).toBe('?s=hello');
+      expect(router?.history.location?.search).toBe('?s=');
     });
 
     test('should update the URL when changing the search term', async () => {
@@ -1338,13 +1408,15 @@ describe('TableListView', () => {
       expect(router?.history.location?.search).toBe('?s=search-changed');
     });
 
-    test('should filter by tag from the URL', async () => {
+    test('should filter by initial tag from the URL', async () => {
       let testBed: TestBed;
 
       const findItems = jest.fn().mockResolvedValue({ total: hits.length, hits: [...hits] });
 
       await act(async () => {
-        testBed = await setupTagFiltering({
+        testBed = await setupInitialUrl(
+          `?${queryString.stringify({ s: 'tag:(tag-2)' }, { encode: false })}`
+        )({
           findItems,
         });
       });
@@ -1357,7 +1429,7 @@ describe('TableListView', () => {
 
       const getSearchBoxValue = () => find('tableListSearchBox').props().defaultValue;
 
-      let expected = '';
+      let expected = 'tag:(tag-2)';
       let [searchTerm] = getLastCallArgsFromFindItems();
       expect(getSearchBoxValue()).toBe(expected);
       expect(searchTerm).toBe(expected);
@@ -1366,13 +1438,13 @@ describe('TableListView', () => {
       await act(async () => {
         if (router?.history.push) {
           router.history.push({
-            search: `?${queryString.stringify({ s: 'tag:(tag-2)' }, { encode: false })}`,
+            search: `?${queryString.stringify({ s: '' }, { encode: false })}`,
           });
         }
       });
       component.update();
 
-      // The search bar should be updated
+      // The search bar shouldn't be updated
       expected = 'tag:(tag-2)';
       [searchTerm] = getLastCallArgsFromFindItems();
       expect(getSearchBoxValue()).toBe(expected);
@@ -1413,13 +1485,15 @@ describe('TableListView', () => {
       expect(router?.history.location?.search).toBe('?s=tag:(tag-2)');
     });
 
-    test('should set sort column and direction from URL', async () => {
+    test('should set initial sort column and direction from URL', async () => {
       let testBed: TestBed;
 
       const findItems = jest.fn().mockResolvedValue({ total: hits.length, hits: [...hits] });
 
       await act(async () => {
-        testBed = await setupTagFiltering({
+        testBed = await setupInitialUrl(
+          `?${queryString.stringify({ sort: 'updatedAt', sortdir: 'asc' })}`
+        )({
           findItems,
         });
       });
@@ -1427,21 +1501,18 @@ describe('TableListView', () => {
       const { component, table } = testBed!;
       component.update();
 
-      // Start with empty search box
-      expect(router?.history.location?.search).toBe('');
-
       let { tableCellsValues } = table.getMetaData('itemsInMemTable');
 
       expect(tableCellsValues).toEqual([
-        ['Item 1tag-1', yesterdayToString],
         ['Item 2tag-2', twoDaysAgoToString],
+        ['Item 1tag-1', yesterdayToString],
       ]);
 
       // Change the URL
       await act(async () => {
         if (router?.history.push) {
           router.history.push({
-            search: `?${queryString.stringify({ sort: 'updatedAt', sortdir: 'asc' })}`,
+            search: `?${queryString.stringify({ sort: 'updatedAt', sortdir: 'desc' })}`,
           });
         }
       });
@@ -1450,24 +1521,8 @@ describe('TableListView', () => {
       ({ tableCellsValues } = table.getMetaData('itemsInMemTable'));
 
       expect(tableCellsValues).toEqual([
-        ['Item 2tag-2', twoDaysAgoToString], // Sort got inverted
-        ['Item 1tag-1', yesterdayToString],
-      ]);
-
-      await act(async () => {
-        if (router?.history.push) {
-          router.history.push({
-            search: `?${queryString.stringify({ sort: 'title' })}`, // if dir not specified, asc by default
-          });
-        }
-      });
-      component.update();
-
-      ({ tableCellsValues } = table.getMetaData('itemsInMemTable'));
-
-      expect(tableCellsValues).toEqual([
-        ['Item 1tag-1', yesterdayToString],
         ['Item 2tag-2', twoDaysAgoToString],
+        ['Item 1tag-1', yesterdayToString], // Sort stayed the same
       ]);
     });
 

@@ -150,6 +150,7 @@ const expectedIndexPatterns = {
     hasRestrictions: false,
     fields,
     getFieldByName: getFieldByNameFactory(fields),
+    getFormatterForField: () => ({ convert: (v: unknown) => v }),
     isPersisted: true,
     spec: {},
   },
@@ -373,7 +374,7 @@ describe('FormBasedDimensionEditor', () => {
     // // press arrow up to go back to the beginning
     await userEvent.type(comboBoxInput, '{ArrowUp}{ArrowUp}');
     expect(getVisibleFieldSelectOptions()).toEqual(allOptions.slice(8));
-  });
+  }, 10000); // this test can be long running due to a big tree we're rendering and userEvent.type function that is slow
 
   it('should hide fields that have no data', () => {
     (useExistingFieldsReader as jest.Mock).mockImplementationOnce(() => {
@@ -2377,6 +2378,7 @@ describe('FormBasedDimensionEditor', () => {
                 searchable: true,
               },
             ]),
+            getFormatterForField: () => ({ convert: (v: unknown) => v }),
             isPersisted: true,
             spec: {},
           },

@@ -8,24 +8,37 @@
 import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiSwitch, EuiButtonGroup, htmlIdGenerator } from '@elastic/eui';
-import { PaletteRegistry } from '@kbn/coloring';
+import {
+  CUSTOM_PALETTE,
+  CustomPaletteParams,
+  PaletteOutput,
+  PaletteRegistry,
+  applyPaletteParams,
+  getFallbackDataBounds,
+} from '@kbn/coloring';
 import { getColorCategories } from '@kbn/chart-expressions-common';
 import { useDebouncedValue } from '@kbn/visualization-utils';
+import { getOriginalId } from '@kbn/transpose-utils';
+import { KbnPalettes } from '@kbn/palettes';
 import type { VisualizationDimensionEditorProps } from '../../../types';
 import type { DatatableVisualizationState } from '../visualization';
 
 import {
-  applyPaletteParams,
   defaultPaletteParams,
   findMinMaxByColumnId,
   shouldColorByTerms,
 } from '../../../shared_components';
-import { getOriginalId } from '../../../../common/expressions/datatable/transpose_helpers';
 
 import './dimension_editor.scss';
 import { CollapseSetting } from '../../../shared_components/collapse_setting';
 import { ColorMappingByValues } from '../../../shared_components/coloring/color_mapping_by_values';
 import { ColorMappingByTerms } from '../../../shared_components/coloring/color_mapping_by_terms';
+import { getColumnAlignment } from '../utils';
+import {
+  getFieldMetaFromDatatable,
+  isNumericField,
+} from '../../../../common/expressions/datatable/utils';
+import { DatatableInspectorTables } from '../../../../common/expressions/datatable/datatable_fn';
 
 const idPrefix = htmlIdGenerator()();
 
@@ -45,12 +58,14 @@ function updateColumn(
   });
 }
 
-export function TableDimensionEditor(
-  props: VisualizationDimensionEditorProps<DatatableVisualizationState> & {
+export type TableDimensionEditorProps =
+  VisualizationDimensionEditorProps<DatatableVisualizationState> & {
     paletteService: PaletteRegistry;
+    palettes: KbnPalettes;
     isDarkMode: boolean;
-  }
-) {
+  };
+
+export function TableDimensionEditor(props: TableDimensionEditorProps) {
   const { frame, accessor, isInlineEditing, isDarkMode } = props;
   const column = props.state.columns.find(({ columnId }) => accessor === columnId);
   const { inputValue: localState, handleInputChange: setLocalState } =
@@ -72,14 +87,16 @@ export function TableDimensionEditor(
   if (!column) return null;
   if (column.isTransposed) return null;
 
-  const currentData = frame.activeData?.[localState.layerId];
+  const currentData =
+    frame.activeData?.[localState.layerId] ?? frame.activeData?.[DatatableInspectorTables.Default];
   const datasource = frame.datasourceLayers?.[localState.layerId];
-  const { dataType, isBucketed } = datasource?.getOperationForColumnId(accessor) ?? {};
-  const showColorByTerms = shouldColorByTerms(dataType, isBucketed);
-  const currentAlignment = column?.alignment || (dataType === 'number' ? 'right' : 'left');
+  const { isBucketed } = datasource?.getOperationForColumnId(accessor) ?? {};
+  const meta = getFieldMetaFromDatatable(currentData, accessor);
+  const showColorByTerms = shouldColorByTerms(meta?.type, isBucketed);
+  const currentAlignment = getColumnAlignment(column, isNumericField(meta));
   const currentColorMode = column?.colorMode || 'none';
   const hasDynamicColoring = currentColorMode !== 'none';
-  const showDynamicColoringFeature = dataType !== 'date';
+  const showDynamicColoringFeature = meta?.type !== 'date';
   const visibleColumnsCount = localState.columns.filter((c) => !c.hidden).length;
 
   const hasTransposedColumn = localState.columns.some(({ isTransposed }) => isTransposed);
@@ -87,16 +104,26 @@ export function TableDimensionEditor(
     ? currentData?.columns.filter(({ id }) => getOriginalId(id) === accessor).map(({ id }) => id) ||
       []
     : [accessor];
-  const minMaxByColumnId = findMinMaxByColumnId(columnsToCheck, currentData, getOriginalId);
-  const currentMinMax = minMaxByColumnId[accessor];
+  const minMaxByColumnId = findMinMaxByColumnId(columnsToCheck, currentData);
+  const currentMinMax = minMaxByColumnId.get(accessor) ?? getFallbackDataBounds();
 
-  const activePalette = column?.palette ?? {
+  const activePalette: PaletteOutput<CustomPaletteParams> = {
     type: 'palette',
     name: showColorByTerms ? 'default' : defaultPaletteParams.name,
+    ...column?.palette,
+    params: { ...column?.palette?.params },
   };
   // need to tell the helper that the colorStops are required to display
   const displayStops = applyPaletteParams(props.paletteService, activePalette, currentMinMax);
   const categories = getColorCategories(currentData?.rows ?? [], accessor, false, [null]);
+
+  if (activePalette.name !== CUSTOM_PALETTE && activePalette.params?.stops) {
+    activePalette.params.stops = applyPaletteParams(
+      props.paletteService,
+      activePalette,
+      currentMinMax
+    );
+  }
 
   return (
     <>
@@ -216,6 +243,7 @@ export function TableDimensionEditor(
                 isDarkMode={isDarkMode}
                 colorMapping={column.colorMapping}
                 palette={activePalette}
+                palettes={props.palettes}
                 isInlineEditing={isInlineEditing}
                 setPalette={(palette) => {
                   updateColumnState(accessor, { palette });
@@ -247,7 +275,7 @@ export function TableDimensionEditor(
           label={i18n.translate('xpack.lens.table.columnVisibilityLabel', {
             defaultMessage: 'Hide column',
           })}
-          display="columnCompressedSwitch"
+          display="columnCompressed"
         >
           <EuiSwitch
             compressed
@@ -283,7 +311,7 @@ export function TableDimensionEditor(
           label={i18n.translate('xpack.lens.table.columnFilterClickLabel', {
             defaultMessage: 'Directly filter on click',
           })}
-          display="columnCompressedSwitch"
+          display="columnCompressed"
         >
           <EuiSwitch
             compressed

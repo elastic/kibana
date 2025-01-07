@@ -5,10 +5,12 @@
  * 2.0.
  */
 
+import type { SuperAgent } from 'superagent';
+
 import expect from '@kbn/expect';
-import { SuperAgent } from 'superagent';
+
 import { getTestScenariosForSpace } from '../lib/space_test_utils';
-import { DescribeFn, TestDefinitionAuthentication } from '../lib/types';
+import type { DescribeFn, TestDefinitionAuthentication } from '../lib/types';
 
 interface GetTest {
   statusCode: number;
@@ -71,8 +73,38 @@ export function getTestSuiteFactory(esArchiver: any, supertest: SuperAgent<any>)
         description: 'This is the second test space',
         disabledFeatures: [],
       },
+      {
+        id: 'space_3',
+        name: 'Space 3',
+        description: 'This is the third test space',
+        solution: 'es',
+        disabledFeatures: [
+          // Disabled features are automatically added to the space when a solution is set
+          'apm',
+          'infrastructure',
+          'inventory',
+          'logs',
+          'observabilityCases',
+          'observabilityCasesV2',
+          'securitySolutionAssistant',
+          'securitySolutionAttackDiscovery',
+          'securitySolutionCases',
+          'securitySolutionCasesV2',
+          'siem',
+          'slo',
+          'uptime',
+        ],
+      },
     ];
-    expect(resp.body).to.eql(allSpaces.find((space) => space.id === spaceId));
+
+    const disabledFeatures = (resp.body.disabledFeatures ?? []).sort();
+
+    const expectedSpace = allSpaces.find((space) => space.id === spaceId);
+    if (expectedSpace) {
+      expectedSpace.disabledFeatures.sort();
+    }
+
+    expect({ ...resp.body, disabledFeatures }).to.eql(expectedSpace);
   };
 
   const makeGetTest =

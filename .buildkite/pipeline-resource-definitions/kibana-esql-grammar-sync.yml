@@ -26,7 +26,6 @@ spec:
       default_branch: main
       repository: elastic/kibana
       pipeline_file: .buildkite/pipelines/esql_grammar_sync.yml
-      skip_intermediate_builds: false
       provider_settings:
         build_branches: false
         build_pull_requests: false
@@ -51,3 +50,5 @@ spec:
           cronline: 0 0 * * 1 America/New_York
           message: Weekly build
           branch: main
+      tags:
+        - kibana

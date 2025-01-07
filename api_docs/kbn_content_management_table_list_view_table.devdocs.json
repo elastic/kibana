@@ -13,7 +13,7 @@
           "\nKibana-specific Provider that maps to known dependency types."
         ],
         "signature": [
-          "({ children, ...services }: React.PropsWithChildren<React.PropsWithChildren<",
+          "({ children, ...services }: React.PropsWithChildren<",
           {
             "pluginId": "@kbn/content-management-table-list-view-table",
             "scope": "public",
@@ -21,7 +21,7 @@
             "section": "def-public.TableListViewKibanaDependencies",
             "text": "TableListViewKibanaDependencies"
           },
-          ">>) => JSX.Element"
+          ">) => React.JSX.Element"
         ],
         "path": "packages/content-management/table_list_view_table/src/services.tsx",
         "deprecated": false,
@@ -35,7 +35,7 @@
             "label": "{ children, ...services }",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<React.PropsWithChildren<",
+              "React.PropsWithChildren<",
               {
                 "pluginId": "@kbn/content-management-table-list-view-table",
                 "scope": "public",
@@ -43,7 +43,7 @@
                 "section": "def-public.TableListViewKibanaDependencies",
                 "text": "TableListViewKibanaDependencies"
               },
-              ">>"
+              ">"
             ],
             "path": "packages/content-management/table_list_view_table/src/services.tsx",
             "deprecated": false,
@@ -64,9 +64,9 @@
           "\nAbstract external service Provider."
         ],
         "signature": [
-          "({ children, ...services }: React.PropsWithChildren<React.PropsWithChildren<",
+          "({ children, ...services }: React.PropsWithChildren<",
           "Services",
-          ">>) => JSX.Element"
+          ">) => React.JSX.Element"
         ],
         "path": "packages/content-management/table_list_view_table/src/services.tsx",
         "deprecated": false,
@@ -80,9 +80,9 @@
             "label": "{\n  children,\n  ...services\n}",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<React.PropsWithChildren<",
+              "React.PropsWithChildren<",
               "Services",
-              ">>"
+              ">"
             ],
             "path": "packages/content-management/table_list_view_table/src/services.tsx",
             "deprecated": false,
@@ -117,7 +117,7 @@
             "section": "def-public.TableListViewTableProps",
             "text": "TableListViewTableProps"
           },
-          "<T>) => JSX.Element | null"
+          "<T>) => React.JSX.Element | null"
         ],
         "path": "packages/content-management/table_list_view_table/src/table_list_view_table.tsx",
         "deprecated": false,
@@ -176,61 +176,19 @@
               "TableListViewStartServices & { application: { capabilities: { [key: string]: Readonly<Record<string, boolean | Record<string, boolean>>>; }; getUrlForApp: (app: string, options: { path: string; }) => string; currentAppId$: ",
               "Observable",
               "<string | undefined>; navigateToUrl: (url: string) => void | Promise<void>; }; notifications: { toasts: { addDanger: (notifyArgs: { title: ",
-              {
-                "pluginId": "@kbn/core-mount-utils-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreMountUtilsBrowserPluginApi",
-                "section": "def-public.MountPoint",
-                "text": "MountPoint"
-              },
+              "MountPoint",
               "<HTMLElement>; text?: string | undefined; }) => void; }; }; http: { basePath: { prepend: (path: string) => string; }; }; overlays: { openFlyout(mount: ",
-              {
-                "pluginId": "@kbn/core-mount-utils-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreMountUtilsBrowserPluginApi",
-                "section": "def-public.MountPoint",
-                "text": "MountPoint"
-              },
+              "MountPoint",
               "<HTMLElement>, options?: ",
-              {
-                "pluginId": "@kbn/core-overlays-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreOverlaysBrowserPluginApi",
-                "section": "def-public.OverlayFlyoutOpenOptions",
-                "text": "OverlayFlyoutOpenOptions"
-              },
+              "OverlayFlyoutOpenOptions",
               " | undefined): ",
-              {
-                "pluginId": "@kbn/core-mount-utils-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreMountUtilsBrowserPluginApi",
-                "section": "def-public.OverlayRef",
-                "text": "OverlayRef"
-              },
+              "OverlayRef",
               "; }; userProfile: { bulkGet: <D extends ",
-              {
-                "pluginId": "@kbn/core-user-profile-common",
-                "scope": "common",
-                "docId": "kibKbnCoreUserProfileCommonPluginApi",
-                "section": "def-common.UserProfileData",
-                "text": "UserProfileData"
-              },
+              "UserProfileData",
               ">(params: ",
-              {
-                "pluginId": "@kbn/core-user-profile-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreUserProfileBrowserPluginApi",
-                "section": "def-public.UserProfileBulkGetParams",
-                "text": "UserProfileBulkGetParams"
-              },
+              "UserProfileBulkGetParams",
               ") => Promise<",
-              {
-                "pluginId": "@kbn/core-user-profile-common",
-                "scope": "common",
-                "docId": "kibKbnCoreUserProfileCommonPluginApi",
-                "section": "def-common.UserProfile",
-                "text": "UserProfile"
-              },
+              "UserProfile",
               "<D>[]>; }; }"
             ],
             "path": "packages/content-management/table_list_view_table/src/services.tsx",
@@ -297,7 +255,7 @@
                 "section": "def-common.FormattedRelativeProps",
                 "text": "FormattedRelativeProps"
               },
-              ") => JSX.Element"
+              ") => React.JSX.Element"
             ],
             "path": "packages/content-management/table_list_view_table/src/services.tsx",
             "deprecated": false,
@@ -320,7 +278,7 @@
                     "text": "FormattedRelativeProps"
                   }
                 ],
-                "path": "packages/kbn-i18n-react/src/compatiblity_layer.tsx",
+                "path": "src/platform/packages/shared/kbn-i18n-react/src/compatiblity_layer.tsx",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -343,7 +301,7 @@
                 "section": "def-public.FavoritesClientPublic",
                 "text": "FavoritesClientPublic"
               },
-              " | undefined"
+              "<void> | undefined"
             ],
             "path": "packages/content-management/table_list_view_table/src/services.tsx",
             "deprecated": false,
@@ -367,6 +325,22 @@
                 "text": "ContentInsightsClientPublic"
               },
               " | undefined"
+            ],
+            "path": "packages/content-management/table_list_view_table/src/services.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-management-table-list-view-table",
+            "id": "def-public.TableListViewKibanaDependencies.isKibanaVersioningEnabled",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isKibanaVersioningEnabled",
+            "description": [
+              "\nFlag to indicate if Kibana versioning is enabled. (aka not Serverless)\nUsed to determine if we should show the version mentions in the help text."
+            ],
+            "signature": [
+              "boolean | undefined"
             ],
             "path": "packages/content-management/table_list_view_table/src/services.tsx",
             "deprecated": false,
@@ -861,7 +835,7 @@
               },
               {
                 "plugin": "filesManagement",
-                "path": "src/plugins/files_management/public/app.tsx"
+                "path": "src/platform/plugins/private/files_management/public/app.tsx"
               }
             ]
           },

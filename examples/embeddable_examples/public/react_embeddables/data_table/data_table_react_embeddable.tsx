@@ -99,7 +99,7 @@ export const getDataTableFactory = (
                 width: 100%;
               `}
             >
-              <KibanaRenderContextProvider theme={core.theme} i18n={core.i18n}>
+              <KibanaRenderContextProvider {...core}>
                 <KibanaContextProvider services={allServices}>
                   <CellActionsProvider
                     getTriggerCompatibleActions={services.uiActions.getTriggerCompatibleActions}
@@ -112,7 +112,6 @@ export const getDataTableFactory = (
                       dataView={dataView}
                       sampleSizeState={100}
                       columns={fields ?? []}
-                      useNewFieldsApi={true}
                       services={allServices}
                       onSetColumns={() => {}}
                       ariaLabelledBy="dataTableReactEmbeddableAria"

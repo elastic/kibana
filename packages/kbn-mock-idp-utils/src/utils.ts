@@ -7,23 +7,23 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Client } from '@elastic/elasticsearch';
-
-import { SignedXml } from 'xml-crypto';
-import { KBN_KEY_PATH, KBN_CERT_PATH } from '@kbn/dev-utils';
-import { readFile } from 'fs/promises';
+import type { Client } from '@elastic/elasticsearch';
 import { X509Certificate } from 'crypto';
+import { readFile } from 'fs/promises';
+import { SignedXml } from 'xml-crypto';
+
+import { KBN_CERT_PATH, KBN_KEY_PATH } from '@kbn/dev-utils';
 
 import {
-  MOCK_IDP_REALM_NAME,
-  MOCK_IDP_ENTITY_ID,
-  MOCK_IDP_ROLE_MAPPING_NAME,
-  MOCK_IDP_ATTRIBUTE_PRINCIPAL,
-  MOCK_IDP_ATTRIBUTE_ROLES,
   MOCK_IDP_ATTRIBUTE_EMAIL,
   MOCK_IDP_ATTRIBUTE_NAME,
+  MOCK_IDP_ATTRIBUTE_PRINCIPAL,
+  MOCK_IDP_ATTRIBUTE_ROLES,
+  MOCK_IDP_ENTITY_ID,
   MOCK_IDP_LOGIN_PATH,
   MOCK_IDP_LOGOUT_PATH,
+  MOCK_IDP_REALM_NAME,
+  MOCK_IDP_ROLE_MAPPING_NAME,
 } from './constants';
 
 /**

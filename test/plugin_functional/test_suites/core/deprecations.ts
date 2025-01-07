@@ -151,7 +151,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
           });
 
           expect(resolveResult).to.eql({
-            reason: 'This deprecation cannot be resolved automatically.',
+            reason: 'This deprecation cannot be resolved automatically or marked as resolved.',
             status: 'fail',
           });
         });

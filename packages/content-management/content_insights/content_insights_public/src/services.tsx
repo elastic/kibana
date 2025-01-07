@@ -17,6 +17,11 @@ import { ContentInsightsClientPublic } from './client';
  */
 export interface ContentInsightsServices {
   contentInsightsClient: ContentInsightsClientPublic;
+  /**
+   * Whether versioning is enabled for the current kibana instance. (aka is Serverless)
+   * This is used to determine if we should show the version mentions in the help text.
+   */
+  isKibanaVersioningEnabled: boolean;
 }
 
 const ContentInsightsContext = React.createContext<ContentInsightsServices | null>(null);
@@ -34,7 +39,10 @@ export const ContentInsightsProvider: FC<PropsWithChildren<Partial<ContentInsigh
 
   return (
     <ContentInsightsContext.Provider
-      value={{ contentInsightsClient: services.contentInsightsClient }}
+      value={{
+        contentInsightsClient: services.contentInsightsClient,
+        isKibanaVersioningEnabled: services.isKibanaVersioningEnabled ?? false,
+      }}
     >
       {children}
     </ContentInsightsContext.Provider>

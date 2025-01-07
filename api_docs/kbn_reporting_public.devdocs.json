@@ -532,7 +532,7 @@
             "label": "getStatusMessage",
             "description": [],
             "signature": [
-              "() => JSX.Element | null"
+              "() => React.JSX.Element | null"
             ],
             "path": "packages/kbn-reporting/public/job.tsx",
             "deprecated": false,
@@ -642,7 +642,7 @@
             "label": "getCreatedAtLabel",
             "description": [],
             "signature": [
-              "() => string | JSX.Element"
+              "() => string | React.JSX.Element"
             ],
             "path": "packages/kbn-reporting/public/job.tsx",
             "deprecated": false,
@@ -690,7 +690,7 @@
             "label": "getWarnings",
             "description": [],
             "signature": [
-              "() => JSX.Element | undefined"
+              "() => React.JSX.Element | undefined"
             ],
             "path": "packages/kbn-reporting/public/job.tsx",
             "deprecated": false,
@@ -764,13 +764,7 @@
                 "label": "http",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-http-browser",
-                    "scope": "public",
-                    "docId": "kibKbnCoreHttpBrowserPluginApi",
-                    "section": "def-public.HttpSetup",
-                    "text": "HttpSetup"
-                  }
+                  "HttpSetup"
                 ],
                 "path": "packages/kbn-reporting/public/reporting_api_client.ts",
                 "deprecated": false,
@@ -1312,65 +1306,13 @@
           },
           {
             "parentPluginId": "@kbn/reporting-public",
-            "id": "def-public.ReportingAPIClient.createImmediateReport",
-            "type": "Function",
-            "tags": [
-              "deprecated"
-            ],
-            "label": "createImmediateReport",
-            "description": [],
-            "signature": [
-              "(baseParams: ",
-              "BaseParams",
-              ") => Promise<",
-              {
-                "pluginId": "@kbn/core-http-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreHttpBrowserPluginApi",
-                "section": "def-public.HttpResponse",
-                "text": "HttpResponse"
-              },
-              "<unknown>>"
-            ],
-            "path": "packages/kbn-reporting/public/reporting_api_client.ts",
-            "deprecated": true,
-            "trackAdoption": false,
-            "references": [
-              {
-                "plugin": "@kbn/reporting-csv-share-panel",
-                "path": "packages/kbn-reporting/get_csv_panel_actions/panel_actions/get_csv_panel_action.tsx"
-              },
-              {
-                "plugin": "@kbn/reporting-csv-share-panel",
-                "path": "packages/kbn-reporting/get_csv_panel_actions/panel_actions/get_csv_panel_action.test.ts"
-              }
-            ],
-            "children": [
-              {
-                "parentPluginId": "@kbn/reporting-public",
-                "id": "def-public.ReportingAPIClient.createImmediateReport.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "baseParams",
-                "description": [],
-                "signature": [
-                  "BaseParams"
-                ],
-                "path": "packages/kbn-reporting/public/reporting_api_client.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "@kbn/reporting-public",
             "id": "def-public.ReportingAPIClient.getDecoratedJobParams",
             "type": "Function",
             "tags": [],
             "label": "getDecoratedJobParams",
-            "description": [],
+            "description": [
+              "\nAdds the browserTimezone and kibana version to report job params"
+            ],
             "signature": [
               "<T extends AppParams>(baseParams: T) => ",
               "BaseParams"
@@ -1562,7 +1504,7 @@
         "label": "InternalApiClientProvider",
         "description": [],
         "signature": [
-          "({ apiClient, http, children }: React.PropsWithChildren<React.PropsWithChildren<{ apiClient: ",
+          "({ apiClient, http, children }: React.PropsWithChildren<{ apiClient: ",
           {
             "pluginId": "@kbn/reporting-public",
             "scope": "public",
@@ -1571,14 +1513,8 @@
             "text": "ReportingAPIClient"
           },
           "; http: ",
-          {
-            "pluginId": "@kbn/core-http-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreHttpBrowserPluginApi",
-            "section": "def-public.HttpSetup",
-            "text": "HttpSetup"
-          },
-          "; }>>) => JSX.Element"
+          "HttpSetup",
+          "; }>) => React.JSX.Element"
         ],
         "path": "packages/kbn-reporting/public/context.tsx",
         "deprecated": false,
@@ -1592,7 +1528,7 @@
             "label": "{ apiClient, http, children }",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<React.PropsWithChildren<{ apiClient: ",
+              "React.PropsWithChildren<{ apiClient: ",
               {
                 "pluginId": "@kbn/reporting-public",
                 "scope": "public",
@@ -1601,14 +1537,8 @@
                 "text": "ReportingAPIClient"
               },
               "; http: ",
-              {
-                "pluginId": "@kbn/core-http-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreHttpBrowserPluginApi",
-                "section": "def-public.HttpSetup",
-                "text": "HttpSetup"
-              },
-              "; }>>"
+              "HttpSetup",
+              "; }>"
             ],
             "path": "packages/kbn-reporting/public/context.tsx",
             "deprecated": false,
@@ -1697,13 +1627,7 @@
             "text": "KibanaReactContextValue"
           },
           "<Partial<",
-          {
-            "pluginId": "@kbn/core-lifecycle-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-            "section": "def-public.CoreStart",
-            "text": "CoreStart"
-          },
+          "CoreStart",
           "> & ",
           {
             "pluginId": "@kbn/reporting-public",
@@ -1742,7 +1666,7 @@
             "label": "csv",
             "description": [],
             "signature": [
-              "{ enablePanelActionDownload: boolean; scroll: { duration: string; size: number; }; }"
+              "{ scroll: { duration: string; size: number; }; }"
             ],
             "path": "packages/kbn-reporting/public/types.ts",
             "deprecated": false,
@@ -1757,20 +1681,6 @@
             "description": [],
             "signature": [
               "{ jobsRefresh: { interval: number; intervalErrorMultiplier: number; }; }"
-            ],
-            "path": "packages/kbn-reporting/public/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/reporting-public",
-            "id": "def-public.ClientConfigType.roles",
-            "type": "Object",
-            "tags": [],
-            "label": "roles",
-            "description": [],
-            "signature": [
-              "{ enabled: boolean; }"
             ],
             "path": "packages/kbn-reporting/public/types.ts",
             "deprecated": false,
@@ -1826,13 +1736,7 @@
             "label": "http",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-http-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreHttpBrowserPluginApi",
-                "section": "def-public.HttpSetup",
-                "text": "HttpSetup"
-              }
+              "HttpSetup"
             ],
             "path": "packages/kbn-reporting/public/index.ts",
             "deprecated": false,
@@ -1846,13 +1750,7 @@
             "label": "application",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-application-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreApplicationBrowserPluginApi",
-                "section": "def-public.ApplicationStart",
-                "text": "ApplicationStart"
-              }
+              "ApplicationStart"
             ],
             "path": "packages/kbn-reporting/public/index.ts",
             "deprecated": false,
@@ -1886,13 +1784,7 @@
             "label": "docLinks",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-doc-links-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreDocLinksBrowserPluginApi",
-                "section": "def-public.DocLinksStart",
-                "text": "DocLinksStart"
-              }
+              "DocLinksStart"
             ],
             "path": "packages/kbn-reporting/public/index.ts",
             "deprecated": false,

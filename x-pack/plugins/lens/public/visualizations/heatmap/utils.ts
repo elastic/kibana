@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { PaletteRegistry } from '@kbn/coloring';
+import { applyPaletteParams, type PaletteRegistry } from '@kbn/coloring';
 import type { Datatable } from '@kbn/expressions-plugin/common';
-import { applyPaletteParams, findMinMaxByColumnId } from '../../shared_components';
+import { findMinMaxByColumnId } from '../../shared_components';
 import { DEFAULT_PALETTE_NAME } from './constants';
 import type { HeatmapVisualizationState, Palette } from './types';
 
@@ -26,7 +26,10 @@ export function getSafePaletteParams(
     accessor,
   };
   const minMaxByColumnId = findMinMaxByColumnId([accessor], currentData);
-  const currentMinMax = minMaxByColumnId[accessor];
+  const currentMinMax = minMaxByColumnId.get(accessor) ?? {
+    max: Number.NEGATIVE_INFINITY,
+    min: Number.POSITIVE_INFINITY,
+  };
 
   // need to tell the helper that the colorStops are required to display
   return {

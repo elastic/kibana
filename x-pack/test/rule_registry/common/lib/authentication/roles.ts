@@ -265,6 +265,40 @@ export const logsOnlyAllSpacesAll: Role = {
   },
 };
 
+export const stackAlertsOnlyReadSpacesAll: Role = {
+  name: 'stack_alerts_only_read_spaces_all',
+  privileges: {
+    elasticsearch: {
+      indices: [],
+    },
+    kibana: [
+      {
+        feature: {
+          stackAlerts: ['read'],
+        },
+        spaces: ['*'],
+      },
+    ],
+  },
+};
+
+export const stackAlertsOnlyAllSpacesAll: Role = {
+  name: 'stack_alerts_only_all_spaces_all',
+  privileges: {
+    elasticsearch: {
+      indices: [],
+    },
+    kibana: [
+      {
+        feature: {
+          stackAlerts: ['all'],
+        },
+        spaces: ['*'],
+      },
+    ],
+  },
+};
+
 /**
  * This role exists to test that the alert search strategy allows
  * users who do not have access to security solutions the ability
@@ -494,6 +528,8 @@ export const allRoles = [
   securitySolutionOnlyReadSpacesAll,
   observabilityOnlyAllSpacesAll,
   logsOnlyAllSpacesAll,
+  stackAlertsOnlyReadSpacesAll,
+  stackAlertsOnlyAllSpacesAll,
   observabilityOnlyReadSpacesAll,
   observabilityOnlyAllSpacesAllWithReadESIndices,
   observabilityMinReadAlertsRead,

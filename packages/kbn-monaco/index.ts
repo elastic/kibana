@@ -20,7 +20,7 @@ export {
 } from './src/monaco_imports';
 export { XJsonLang } from './src/xjson';
 export { SQLLang } from './src/sql';
-export { ESQL_LANG_ID, ESQL_THEME_ID, ESQLLang } from './src/esql';
+export { ESQL_LANG_ID, ESQL_DARK_THEME_ID, ESQL_LIGHT_THEME_ID, ESQLLang } from './src/esql';
 export type { ESQLCallbacks } from '@kbn/esql-validation-autocomplete';
 
 export * from './src/painless';
@@ -45,8 +45,7 @@ export {
 export type { ParsedRequest } from './src/console';
 
 export {
-  CODE_EDITOR_LIGHT_THEME_ID,
-  CODE_EDITOR_DARK_THEME_ID,
-  CODE_EDITOR_LIGHT_THEME_TRANSPARENT_ID,
-  CODE_EDITOR_DARK_THEME_TRANSPARENT_ID,
+  defaultThemesResolvers,
+  CODE_EDITOR_DEFAULT_THEME_ID,
+  CODE_EDITOR_TRANSPARENT_THEME_ID,
 } from './src/code_editor';

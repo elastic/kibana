@@ -105,7 +105,7 @@ export const FilterEditorWrapper = React.memo(function FilterEditorWrapper({
   }
 
   return (
-    <div style={{ width: FILTER_EDITOR_WIDTH, maxWidth: '100%' }}>
+    <div css={{ width: FILTER_EDITOR_WIDTH, maxWidth: '100%' }}>
       {newFilter && (
         <FilterEditor
           mode="add"

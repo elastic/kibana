@@ -53,6 +53,7 @@ import {
 export default function createBackfillTaskRunnerTests({ getService }: FtrProviderContext) {
   const es = getService('es');
   const retry = getService('retry');
+  const log = getService('log');
   const esTestIndexTool = new ESTestIndexTool(es, retry);
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const supertest = getService('supertest');
@@ -65,25 +66,25 @@ export default function createBackfillTaskRunnerTests({ getService }: FtrProvide
     moment().utc().subtract(14, 'days').toISOString(),
 
     // backfill execution set 1
-    moment().utc().startOf('day').subtract(13, 'days').add(64, 'seconds').toISOString(),
-    moment().utc().startOf('day').subtract(13, 'days').add(65, 'seconds').toISOString(),
-    moment().utc().startOf('day').subtract(13, 'days').add(66, 'seconds').toISOString(),
+    moment().utc().startOf('day').subtract(13, 'days').add(10, 'minutes').toISOString(),
+    moment().utc().startOf('day').subtract(13, 'days').add(11, 'minutes').toISOString(),
+    moment().utc().startOf('day').subtract(13, 'days').add(12, 'minutes').toISOString(),
 
     // backfill execution set 2
-    moment().utc().startOf('day').subtract(12, 'days').add(89, 'seconds').toISOString(),
+    moment().utc().startOf('day').subtract(12, 'days').add(20, 'minutes').toISOString(),
 
     // backfill execution set 3
-    moment().utc().startOf('day').subtract(11, 'days').add(785, 'seconds').toISOString(),
-    moment().utc().startOf('day').subtract(11, 'days').add(888, 'seconds').toISOString(),
-    moment().utc().startOf('day').subtract(11, 'days').add(954, 'seconds').toISOString(),
-    moment().utc().startOf('day').subtract(11, 'days').add(1045, 'seconds').toISOString(),
-    moment().utc().startOf('day').subtract(11, 'days').add(1145, 'seconds').toISOString(),
+    moment().utc().startOf('day').subtract(11, 'days').add(30, 'minutes').toISOString(),
+    moment().utc().startOf('day').subtract(11, 'days').add(31, 'minutes').toISOString(),
+    moment().utc().startOf('day').subtract(11, 'days').add(32, 'minutes').toISOString(),
+    moment().utc().startOf('day').subtract(11, 'days').add(33, 'minutes').toISOString(),
+    moment().utc().startOf('day').subtract(11, 'days').add(34, 'minutes').toISOString(),
 
     // backfill execution set 4 purposely left empty
 
     // after last backfill
-    moment().utc().startOf('day').subtract(9, 'days').add(666, 'seconds').toISOString(),
-    moment().utc().startOf('day').subtract(9, 'days').add(667, 'seconds').toISOString(),
+    moment().utc().startOf('day').subtract(9, 'days').add(40, 'minutes').toISOString(),
+    moment().utc().startOf('day').subtract(9, 'days').add(41, 'minutes').toISOString(),
   ];
 
   describe('ad hoc backfill task', () => {
@@ -164,8 +165,8 @@ export default function createBackfillTaskRunnerTests({ getService }: FtrProvide
       const ruleId = response1.body.id;
       objectRemover.add(spaceId, ruleId, 'rule', 'alerting');
 
-      const start = moment().utc().startOf('day').subtract(13, 'days').toISOString();
-      const end = moment().utc().startOf('day').subtract(9, 'days').toISOString();
+      const start = moment(originalDocTimestamps[1]).utc().startOf('day').toISOString();
+      const end = moment(originalDocTimestamps[11]).utc().startOf('day').toISOString();
 
       // Schedule backfill for this rule
       const response2 = await supertestWithoutAuth
@@ -174,6 +175,9 @@ export default function createBackfillTaskRunnerTests({ getService }: FtrProvide
         .auth(SuperuserAtSpace1.user.username, SuperuserAtSpace1.user.password)
         .send([{ rule_id: ruleId, start, end }])
         .expect(200);
+
+      log.info(`originalDocTimestamps ${JSON.stringify(originalDocTimestamps)}`);
+      log.info(`scheduledBackfill ${JSON.stringify(response2.body)}`);
 
       const scheduleResult = response2.body;
 
@@ -668,7 +672,10 @@ export default function createBackfillTaskRunnerTests({ getService }: FtrProvide
   async function queryForAlertDocs<T>(): Promise<Array<SearchHit<T>>> {
     const searchResult = await es.search({
       index: alertsAsDataIndex,
-      body: { query: { match_all: {} } },
+      body: {
+        sort: [{ [ALERT_ORIGINAL_TIME]: { order: 'asc' } }],
+        query: { match_all: {} },
+      },
     });
     return searchResult.hits.hits as Array<SearchHit<T>>;
   }

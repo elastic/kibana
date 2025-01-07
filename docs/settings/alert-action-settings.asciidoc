@@ -112,11 +112,6 @@ A boolean value indicating that TLS must be used for this connection.
 The options `smtp.ignoreTLS` and `smtp.requireTLS` can not both be set to true.
 Default: `false`.
 
-`xpack.actions.customHostSettings[n].ssl.rejectUnauthorized`::
-deprecated:[8.0.0] Use <<action-config-custom-host-verification-mode,`xpack.actions.customHostSettings.ssl.verificationMode`>> instead. A boolean value indicating whether to bypass server certificate validation.
-Overrides the general `xpack.actions.rejectUnauthorized` configuration
-for requests made for this hostname/port.
-
 [[action-config-custom-host-verification-mode]] `xpack.actions.customHostSettings[n].ssl.verificationMode` {ess-icon}::
 Controls the verification of the server certificate that {kib} receives when making an outbound SSL/TLS connection to the host server. Valid values are `full`, `certificate`, and `none`.
 Use `full` to perform hostname verification, `certificate` to skip hostname verification, and `none` to skip verification. Default: `full`. <<elasticsearch-ssl-verificationMode,Equivalent {kib} setting>>. Overrides the general `xpack.actions.ssl.verificationMode` configuration
@@ -198,18 +193,9 @@ By default, no hosts will use the proxy, but if an action's hostname is in this 
 `xpack.actions.proxyHeaders` {ess-icon}::
 Specifies HTTP headers for the proxy, if using a proxy for actions. Default: {}.
 
-`xpack.actions.proxyRejectUnauthorizedCertificates` {ess-icon}::
-deprecated:[8.0.0] Use <<action-config-proxy-verification-mode,`xpack.actions.ssl.proxyVerificationMode`>> instead. Set to `false` to bypass certificate validation for the proxy, if using a proxy for actions. Default: `true`.
-
 [[action-config-proxy-verification-mode]]`xpack.actions.ssl.proxyVerificationMode` {ess-icon}::
 Controls the verification for the proxy server certificate that Kibana receives when making an outbound SSL/TLS connection to the proxy server. Valid values are `full`, `certificate`, and `none`.
 Use `full` to perform hostname verification, `certificate` to skip hostname verification, and `none` to skip verification. Default: `full`. <<elasticsearch-ssl-verificationMode,Equivalent {kib} setting>>.
-
-`xpack.actions.rejectUnauthorized` {ess-icon}::
-deprecated:[8.0.0] Use <<action-config-verification-mode,`xpack.actions.ssl.verificationMode`>> instead. Set to `false` to bypass certificate validation for actions. Default: `true`.
-+
-As an alternative to setting `xpack.actions.rejectUnauthorized`, you can use the setting
-`xpack.actions.customHostSettings` to set SSL options for specific servers.
 
 [[action-config-verification-mode]] `xpack.actions.ssl.verificationMode` {ess-icon}::
 Controls the verification for the server certificate that {hosted-ems} receives when making an outbound SSL/TLS connection for actions. Valid values are `full`, `certificate`, and `none`.
@@ -290,7 +276,9 @@ A configuration URL that varies by connector:
 * For a <<pagerduty-action-type,PagerDuty connector>>, specifies the PagerDuty event URL. Defaults to `https://events.pagerduty.com/v2/enqueue`.
 * For a <<servicenow-action-type,{sn-itsm}>>, <<servicenow-sir-action-type,{sn-sir}>>, or <<servicenow-itom-action-type,{sn-itom} connector>> specifies the ServiceNow instance URL.
 * For a <<swimlane-action-type,{swimlane} connector>>, specifies the {swimlane} instance URL.
-
+// ifeval::["featureAIConnector"=="true"]
+// * For an <<inference-action-type,AI connector>>, specifies the Elastic {inference} request.
+// endif::[]
 NOTE: If you are using the `xpack.actions.allowedHosts` setting, make sure the hostname in the URL is added to the allowed hosts.
 --
 
@@ -347,7 +335,7 @@ The default model to use for requests, which varies by connector:
 +
 --
 * For an <<bedrock-action-type,{bedrock} connector>>, current support is for the Anthropic Claude models. Defaults to `anthropic.claude-3-5-sonnet-20240620-v1:0`.
-* For a <<gemini-action-type,{gemini} connector>>, current support is for the Gemini models. Defaults to `gemini-1.5-pro-001`.
+* For a <<gemini-action-type,{gemini} connector>>, current support is for the Gemini models. Defaults to `gemini-1.5-pro-002`.
 * For a <<openai-action-type,OpenAI connector>>, it is optional and applicable only when `xpack.actions.preconfigured.<connector-id>.config.apiProvider` is `OpenAI`.
 --
 
@@ -491,7 +479,7 @@ For an <<bedrock-action-type,{bedrock} connector>>, specifies the AWS access key
 `xpack.actions.preconfigured.<connector-id>.secrets.apikey`::
 An API key secret that varies by connector:
 
-`xpack.actions.preconfigured.<connector-id>.secrets.credentialsJSON`::
+`xpack.actions.preconfigured.<connector-id>.secrets.credentialsJson`::
 For an <<gemini-action-type,{gemini} connector>>, specifies the GCP service account credentials JSON file for authentication.
 +
 --
@@ -588,12 +576,6 @@ For a <<servicenow-action-type,{sn-itsm}>>, <<servicenow-sir-action-type,{sn-sir
 [float]
 [[alert-settings]]
 === Alerting settings
-
-`xpack.alerting.maxEphemeralActionsPerAlert` {ess-icon}::
-deprecated:[8.8.0]
-Sets the number of actions that will run ephemerally. To use this, enable
-ephemeral tasks in task manager first with
-<<task-manager-settings,`xpack.task_manager.ephemeral_tasks.enabled`>>
 
 `xpack.alerting.cancelAlertsOnRuleTimeout` {ess-icon}::
 Specifies whether to skip writing alerts and scheduling actions if rule

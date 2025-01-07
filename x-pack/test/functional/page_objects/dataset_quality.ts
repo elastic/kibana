@@ -9,6 +9,7 @@ import expect from '@kbn/expect';
 import querystring from 'querystring';
 import rison from '@kbn/rison';
 import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
+import { IndicesIndexSettings } from '@elastic/elasticsearch/lib/api/types';
 import {
   DATA_QUALITY_URL_STATE_KEY,
   datasetQualityUrlSchemaV1,
@@ -77,6 +78,7 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
   const euiSelectable = getService('selectable');
   const find = getService('find');
   const retry = getService('retry');
+  const es = getService('es');
 
   const selectors = {
     datasetQualityTable: '[data-test-subj="datasetQualityTable"]',
@@ -132,6 +134,10 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
     unifiedHistogramBreakdownSelectorSelectable: 'unifiedHistogramBreakdownSelectorSelectable',
     managementHome: 'managementHome',
     euiFlyoutCloseButton: 'euiFlyoutCloseButton',
+    datasetQualityDetailsDegradedFieldFlyoutIssueDoesNotExist:
+      'datasetQualityDetailsDegradedFieldFlyoutIssueDoesNotExist',
+    datasetQualityDetailsOverviewDegradedFieldToggleSwitch:
+      'datasetQualityDetailsOverviewDegradedFieldToggleSwitch',
   };
 
   return {
@@ -198,6 +204,13 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
       }
     },
 
+    async waitUntilPossibleMitigationsLoaded() {
+      await find.waitForDeletedByCssSelector(
+        '.euiFlyoutBody .datasetQualityDetailsFlyoutManualMitigationsLoading',
+        20 * 1000
+      );
+    },
+
     async waitUntilDegradedFieldFlyoutLoaded() {
       await testSubjects.existOrFail(testSubjectSelectors.datasetQualityDetailsDegradedFieldFlyout);
     },
@@ -231,6 +244,18 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
         }),
         {} as SummaryPanelKpi
       );
+    },
+
+    generateBackingIndexNameWithoutVersion({
+      type = 'logs',
+      dataset,
+      namespace = 'default',
+    }: {
+      type?: string;
+      dataset: string;
+      namespace?: string;
+    }) {
+      return `.ds-${type}-${dataset}-${namespace}-${getCurrentDateFormatted()}`;
     },
 
     getDatasetsTable(): Promise<WebElementWrapper> {
@@ -440,6 +465,27 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
       return testSubjects.click(testSubjectSelectors.euiFlyoutCloseButton);
     },
 
+    async setDataStreamSettings(name: string, settings: IndicesIndexSettings) {
+      return es.indices.putSettings({
+        index: name,
+        settings,
+      });
+    },
+
+    async rolloverDataStream(name: string) {
+      return es.indices.rollover({
+        alias: name,
+      });
+    },
+
+    async getQualityIssueSwitchState() {
+      const isSelected = await testSubjects.getAttribute(
+        testSubjectSelectors.datasetQualityDetailsOverviewDegradedFieldToggleSwitch,
+        'aria-checked'
+      );
+      return isSelected === 'true';
+    },
+
     async parseTable(tableWrapper: WebElementWrapper, columnNamesOrIndexes: string[]) {
       const headerElementWrappers = await tableWrapper.findAllByCssSelector('thead th, thead td');
 
@@ -526,4 +572,13 @@ async function getDatasetTableHeaderTexts(tableWrapper: WebElementWrapper) {
   return Promise.all(
     headerElementWrappers.map((headerElementWrapper) => headerElementWrapper.getVisibleText())
   );
+}
+
+function getCurrentDateFormatted() {
+  const date = new Date();
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+
+  return `${year}.${month}.${day}`;
 }

@@ -1,0 +1,24 @@
+summary: Get all spaces
+description: Get all spaces without specifying any options.
+value:
+  - id: default
+    name: Default
+    description: This is the Default Space
+    disabledFeatures: []
+    imageUrl: ""
+    _reserved: true
+  - id: marketing
+    name: Marketing
+    description: This is the Marketing Space
+    color: #aabbcc
+    disabledFeatures:
+      - apm
+    initials: MK
+    imageUrl: "data:image/png;base64,iVBORw0KGgoAAAANSU"
+  - id: sales
+    name: Sales
+    initials: MK
+    disabledFeatures:
+      - discover
+    imageUr": ""
+    solution: oblt

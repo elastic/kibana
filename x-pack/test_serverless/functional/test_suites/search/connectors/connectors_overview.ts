@@ -18,25 +18,34 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   ]);
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
-  describe('connectors', function () {
+
+  // Failing: See https://github.com/elastic/kibana/issues/203477
+  describe.skip('connectors', function () {
     before(async () => {
+      await pageObjects.svlSearchConnectorsPage.helpers.deleteAllConnectors();
       await pageObjects.svlCommonPage.loginWithRole('developer');
-      await pageObjects.svlCommonNavigation.sidenav.clickLink({
-        deepLinkId: 'serverlessConnectors',
-      });
     });
 
-    it('Connector app is loaded and  has no connectors', async () => {
-      await pageObjects.svlSearchConnectorsPage.connectorOverviewPage.expectConnectorOverviewPageComponentsToExist();
-    });
-    it('has embedded dev console', async () => {
+    it('has embedded console', async () => {
+      await pageObjects.common.navigateToApp('serverlessConnectors');
       await testHasEmbeddedConsole(pageObjects);
     });
-    describe('create and configure connector', () => {
+
+    it('Connector app is loaded and has no connectors', async () => {
+      await pageObjects.common.navigateToApp('serverlessConnectors');
+      await pageObjects.svlSearchConnectorsPage.connectorOverviewPage.expectConnectorOverviewPageComponentsToExist();
+    });
+
+    // FLAKY: https://github.com/elastic/kibana/issues/203462
+    describe.skip('create and configure connector', () => {
       it('create connector and confirm connector configuration page is loaded', async () => {
         await pageObjects.svlSearchConnectorsPage.connectorConfigurationPage.createConnector();
+        await pageObjects.svlSearchConnectorsPage.connectorConfigurationPage.editType('zoom');
+        const connectorDetails =
+          await pageObjects.svlSearchConnectorsPage.connectorConfigurationPage.getConnectorDetails();
+        const connectorId = connectorDetails.match(/connector_id: (.*)/)?.[1];
         await pageObjects.svlSearchConnectorsPage.connectorConfigurationPage.expectConnectorIdToMatchUrl(
-          await pageObjects.svlSearchConnectorsPage.connectorConfigurationPage.getConnectorId()
+          connectorId!
         );
       });
       it('edit description', async () => {

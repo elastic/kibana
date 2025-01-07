@@ -8,7 +8,6 @@
  */
 
 import expect from '@kbn/expect';
-
 import { VisualizeConstants } from '@kbn/visualizations-plugin/common/constants';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
@@ -30,17 +29,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
+    after(async () => {
+      await kibanaServer.savedObjects.cleanStandardList();
+    });
+
     it('ensure toolbar popover closes on add', async () => {
       await dashboard.navigateToApp();
       await dashboard.clickNewDashboard();
       await dashboard.switchToEditMode();
       await dashboardAddPanel.clickEditorMenuButton();
-      await dashboardAddPanel.clickAddNewPanelFromUIActionLink('Log stream (deprecated)');
+      await dashboardAddPanel.clickAddNewPanelFromUIActionLink('Monitors stats');
       await dashboardAddPanel.expectEditorMenuClosed();
-    });
-
-    after(async () => {
-      await kibanaServer.savedObjects.cleanStandardList();
     });
 
     describe('add new visualization link', () => {

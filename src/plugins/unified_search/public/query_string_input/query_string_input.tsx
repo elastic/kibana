@@ -56,7 +56,7 @@ import { SuggestionsComponent } from '../typeahead';
 import { onRaf } from '../utils';
 import { FilterButtonGroup } from '../filter_bar/filter_button_group/filter_button_group';
 import { AutocompleteService, QuerySuggestion, QuerySuggestionTypes } from '../autocomplete';
-import { getAnalytics, getI18n, getTheme } from '../services';
+import { getCoreStart } from '../services';
 import './query_string_input.scss';
 
 export const strings = {
@@ -568,7 +568,7 @@ export default class QueryStringInputUI extends PureComponent<QueryStringInputPr
                 </EuiFlexItem>
               </EuiFlexGroup>
             </div>,
-            { analytics: getAnalytics(), i18n: getI18n(), theme: getTheme() }
+            getCoreStart()
           ),
         });
       }
@@ -792,14 +792,15 @@ export default class QueryStringInputUI extends PureComponent<QueryStringInputPr
       ) : undefined;
 
     const containerClassName = classNames('kbnQueryBar__wrap', this.props.className);
-    const inputClassName = classNames('kbnQueryBar__textarea', {
+    const inputClassName = classNames('kbnQueryBar__textarea', 'eui-scrollBar', {
       'kbnQueryBar__textarea--withIcon': this.props.iconType,
       'kbnQueryBar__textarea--isClearable': this.props.isClearable,
       'kbnQueryBar__textarea--withPrepend': prependElement,
-      'kbnQueryBar__textarea--isSuggestionsVisible':
+    });
+    const inputWrapClassName = classNames('kbnQueryBar__textareaWrap', {
+      'kbnQueryBar__textareaWrap--withSuggestionVisible':
         isSuggestionsVisible && !isEmpty(this.state.suggestions),
     });
-    const inputWrapClassName = classNames('kbnQueryBar__textareaWrap');
     return (
       <div className={containerClassName} onFocus={this.onFocusWithin} onBlur={this.onBlurWithin}>
         {prependElement}
@@ -807,7 +808,7 @@ export default class QueryStringInputUI extends PureComponent<QueryStringInputPr
         <EuiOutsideClickDetector onOutsideClick={this.onOutsideClick}>
           <div
             {...ariaCombobox}
-            style={{
+            css={{
               position: 'relative',
               width: '100%',
               zIndex: euiThemeVars.euiZLevel1,

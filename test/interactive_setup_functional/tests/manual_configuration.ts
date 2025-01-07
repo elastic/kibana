@@ -8,6 +8,7 @@
  */
 
 import { getUrl, kibanaServerTestUser } from '@kbn/test';
+
 import type { FtrProviderContext } from '../../functional/ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {

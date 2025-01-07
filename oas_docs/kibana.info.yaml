@@ -31,6 +31,8 @@ info:
 
     This documentation is derived from the `main` branch of the [kibana](https://github.com/elastic/kibana) repository.
     It is provided under license [Attribution-NonCommercial-NoDerivatives 4.0 International](https://creativecommons.org/licenses/by-nc-nd/4.0/).
+
+    This documentation contains work-in-progress information for future Elastic Stack releases.
   version: '1.0.2'
   x-doc-license:
     name: Attribution-NonCommercial-NoDerivatives 4.0 International
@@ -40,11 +42,6 @@ info:
   x-feedbackLink:
     label: Feedback
     url: https://github.com/elastic/docs-content/issues/new?assignees=&labels=feedback%2Ccommunity&projects=&template=api-feedback.yaml&title=%5BFeedback%5D%3A+
-servers:
-  - url: https://{kibana_url}
-    variables:
-      kibana_url:
-        default: localhost:5601
 security:
   - apiKeyAuth: []
   - basicAuth: []

@@ -318,3 +318,6 @@ The features in this section are experimental and may be changed or removed comp
 Elastic will make a best effort to fix any issues, but experimental features are not supported to the same level as generally available (GA) features.
 ====
 
+`xpack.fleet.enableManagedLogsAndMetricsDataviews`::
+Set to `true` (default), to enable the automatic creation of global `logs-*` and `metrics-*` data views.
+

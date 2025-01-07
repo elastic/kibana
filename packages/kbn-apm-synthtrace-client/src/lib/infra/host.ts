@@ -27,7 +27,7 @@ interface HostDocument extends Fields {
   'cloud.provider'?: string;
 }
 
-class Host extends Entity<HostDocument> {
+export class Host extends Entity<HostDocument> {
   cpu({ cpuTotalValue }: { cpuTotalValue?: number } = {}) {
     return new HostMetrics({
       ...this.fields,
@@ -173,5 +173,13 @@ export function host(name: string): Host {
     'host.os.platform': 'ubuntu',
     'host.os.version': '4.19.76-linuxkit',
     'cloud.provider': 'gcp',
+  });
+}
+
+export function minimalHost(name: string): Host {
+  return new Host({
+    'agent.id': 'synthtrace',
+    'host.hostname': name,
+    'host.name': name,
   });
 }

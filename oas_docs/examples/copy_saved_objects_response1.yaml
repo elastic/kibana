@@ -1,0 +1,28 @@
+summary: Copy with createNewCopies
+description: >
+  The response for successfully copying a dashboard with the my-dashboard ID, including all references from the default space to the marketing space.
+  The result indicates a successful copy and all three objects are created.
+  Since these objects were created as new copies, each entry in the successResults array includes a destinationId attribute.
+value:
+  marketing:
+    success: true
+    successCount: 3
+    successResults:
+      - id: my-dashboard
+        type: dashboard
+        destinationId: "1e127098-5b80-417f-b0f1-c60c8395358f"
+        meta:
+          icon: dashboardApp
+          title: Look at my dashboard
+      - id: my-vis
+        type: visualization
+        destinationId: "a610ed80-1c73-4507-9e13-d3af736c8e04"
+        meta:
+          icon: visualizeApp
+          title: Look at my visualization
+      - id: my-index-pattern
+        type: index-pattern
+        destinationId: "bc3c9c70-bf6f-4bec-b4ce-f4189aa9e26b"
+        meta:
+          icon: indexPatternApp
+          title: my-pattern-*

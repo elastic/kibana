@@ -1,0 +1,9 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/deeplinks-fleet",
+  "owner": [
+    "@elastic/fleet"
+  ],
+  "group": "platform",
+  "visibility": "shared"
+}

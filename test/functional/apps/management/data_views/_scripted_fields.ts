@@ -19,10 +19,6 @@
 // 3. Filter in Discover by the scripted field
 // 4. Visualize with aggregation on the scripted field by clicking unifiedFieldList.clickFieldListItemVisualize
 
-// NOTE: Scripted field input is managed by Ace editor, which automatically
-//   appends closing braces, for exmaple, if you type opening square brace [
-//   it will automatically insert a a closing square brace ], etc.
-
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
@@ -63,8 +59,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.settings.navigateTo();
       await PageObjects.settings.clickKibanaIndexPatterns();
       await PageObjects.settings.clickIndexPatternLogstash();
-      await PageObjects.settings.clickScriptedFieldsTab();
-      await PageObjects.settings.clickAddScriptedField();
+      await PageObjects.settings.goToAddScriptedField();
       await PageObjects.settings.setScriptedFieldName('doomedScriptedField');
       await PageObjects.settings.setScriptedFieldScript(`i n v a l i d  s c r i p t`);
       await PageObjects.settings.clickSaveScriptedField();
@@ -82,7 +77,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.settings.clickKibanaIndexPatterns();
         await PageObjects.settings.clickIndexPatternLogstash();
         const startingCount = parseInt(await PageObjects.settings.getScriptedFieldsTabCount(), 10);
-        await PageObjects.settings.clickScriptedFieldsTab();
         await log.debug('add scripted field');
         const script = `1`;
         await PageObjects.settings.addScriptedField(
@@ -116,7 +110,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.settings.clickKibanaIndexPatterns();
         await PageObjects.settings.clickIndexPatternLogstash();
         const startingCount = parseInt(await PageObjects.settings.getScriptedFieldsTabCount(), 10);
-        await PageObjects.settings.clickScriptedFieldsTab();
         await log.debug('add scripted field');
         const script = `if (doc['machine.ram'].size() == 0) return -1;
           else return doc['machine.ram'].value / (1024 * 1024 * 1024);
@@ -231,7 +224,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.settings.clickKibanaIndexPatterns();
         await PageObjects.settings.clickIndexPatternLogstash();
         const startingCount = parseInt(await PageObjects.settings.getScriptedFieldsTabCount(), 10);
-        await PageObjects.settings.clickScriptedFieldsTab();
         await log.debug('add scripted field');
         await PageObjects.settings.addScriptedField(
           scriptedPainlessFieldName2,
@@ -335,7 +327,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.settings.clickKibanaIndexPatterns();
         await PageObjects.settings.clickIndexPatternLogstash();
         const startingCount = parseInt(await PageObjects.settings.getScriptedFieldsTabCount(), 10);
-        await PageObjects.settings.clickScriptedFieldsTab();
         await log.debug('add scripted field');
         await PageObjects.settings.addScriptedField(
           scriptedPainlessFieldName2,
@@ -391,14 +382,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await testSubjects.click('docTableHeaderFieldSort_@timestamp');
         await PageObjects.header.waitUntilLoadingHasFinished();
         await retry.try(async function () {
-          const rowData = await PageObjects.discover.getDocTableIndexLegacy(1);
+          const rowData = await PageObjects.discover.getDocTableIndex(1);
           expect(rowData).to.be('updateExpectedResultHere\ntrue');
         });
 
         await testSubjects.click(`docTableHeaderFieldSort_${scriptedPainlessFieldName2}`);
         await PageObjects.header.waitUntilLoadingHasFinished();
         await retry.try(async function () {
-          const rowData = await PageObjects.discover.getDocTableIndexLegacy(1);
+          const rowData = await PageObjects.discover.getDocTableIndex(1);
           expect(rowData).to.be('updateExpectedResultHere\nfalse');
         });
       });
@@ -432,7 +423,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.settings.clickKibanaIndexPatterns();
         await PageObjects.settings.clickIndexPatternLogstash();
         const startingCount = parseInt(await PageObjects.settings.getScriptedFieldsTabCount(), 10);
-        await PageObjects.settings.clickScriptedFieldsTab();
         await log.debug('add scripted field');
         await PageObjects.settings.addScriptedField(
           scriptedPainlessFieldName2,
@@ -473,14 +463,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await testSubjects.click('docTableHeaderFieldSort_@timestamp');
         await PageObjects.header.waitUntilLoadingHasFinished();
         await retry.try(async function () {
-          const rowData = await PageObjects.discover.getDocTableIndexLegacy(1);
+          const rowData = await PageObjects.discover.getDocTableIndex(1);
           expect(rowData).to.be('updateExpectedResultHere\n2015-09-18 07:00');
         });
 
         await testSubjects.click(`docTableHeaderFieldSort_${scriptedPainlessFieldName2}`);
         await PageObjects.header.waitUntilLoadingHasFinished();
         await retry.try(async function () {
-          const rowData = await PageObjects.discover.getDocTableIndexLegacy(1);
+          const rowData = await PageObjects.discover.getDocTableIndex(1);
           expect(rowData).to.be('updateExpectedResultHere\n2015-09-18 07:00');
         });
       });

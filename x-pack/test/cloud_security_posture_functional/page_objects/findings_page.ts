@@ -366,8 +366,7 @@ export function FindingsPageProvider({ getService, getPageObjects }: FtrProvider
   });
   const isLatestFindingsTableThere = async () => {
     const table = await testSubjects.findAll('docTable');
-    const trueOrFalse = table.length > 0 ? true : false;
-    return trueOrFalse;
+    return table.length > 0;
   };
 
   const getUnprivilegedPrompt = async () => {

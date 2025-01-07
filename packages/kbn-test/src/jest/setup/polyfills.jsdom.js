@@ -25,7 +25,7 @@ if (!Object.hasOwn(global, 'TextEncoder')) {
 
 // NOTE: We should evaluate removing this once we upgrade to Node 18 and find out if loaders.gl already fixed this usage
 // or instead check if we can use the official Blob implementation.
-// This is needed for x-pack/plugins/file_upload/public/importer/geo/geojson_importer/geojson_importer.test.js
+// This is needed for x-pack/platform/plugins/private/file_upload/public/importer/geo/geojson_importer/geojson_importer.test.js
 //
 // https://github.com/jsdom/jsdom/issues/2555
 global.Blob = require('blob-polyfill').Blob;
@@ -53,22 +53,16 @@ if (!Object.hasOwn(global, 'Worker')) {
   if (!Object.hasOwn(global, 'matchMedia')) {
     Object.defineProperty(global, 'matchMedia', {
       writable: true,
-      // eslint-disable-next-line no-undef
-      value: jest.fn().mockImplementation((query) => ({
+      value: (query) => ({
         matches: false,
         media: query,
         onchange: null,
-        // eslint-disable-next-line no-undef
-        addListener: jest.fn(), // deprecated
-        // eslint-disable-next-line no-undef
-        removeListener: jest.fn(), // deprecated
-        // eslint-disable-next-line no-undef
-        addEventListener: jest.fn(),
-        // eslint-disable-next-line no-undef
-        removeEventListener: jest.fn(),
-        // eslint-disable-next-line no-undef
-        dispatchEvent: jest.fn(),
-      })),
+        addListener: () => {},
+        removeListener: () => {},
+        addEventListener: () => {},
+        removeEventListener: () => {},
+        dispatchEvent: () => {},
+      }),
     });
   }
 }
