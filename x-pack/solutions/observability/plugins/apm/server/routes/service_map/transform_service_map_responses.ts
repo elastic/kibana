@@ -6,23 +6,24 @@
  */
 
 import { sortBy, pickBy, identity } from 'lodash';
-import { ValuesType } from 'utility-types';
+import type { ValuesType } from 'utility-types';
 import {
   SERVICE_NAME,
   SPAN_DESTINATION_SERVICE_RESOURCE,
   SPAN_TYPE,
   SPAN_SUBTYPE,
 } from '../../../common/es_fields/apm';
-import {
+import type {
   Connection,
   ConnectionNode,
   ServiceConnectionNode,
   ExternalConnectionNode,
   ConnectionElement,
 } from '../../../common/service_map';
-import { ConnectionsResponse, ServicesResponse } from './get_service_map';
-import { ServiceAnomaliesResponse } from './get_service_anomalies';
-import { groupResourceNodes, GroupResourceNodesResponse } from './group_resource_nodes';
+import type { ConnectionsResponse, ServicesResponse } from './get_service_map';
+import type { ServiceAnomaliesResponse } from './get_service_anomalies';
+import type { GroupResourceNodesResponse } from './group_resource_nodes';
+import { groupResourceNodes } from './group_resource_nodes';
 
 function getConnectionNodeId(node: ConnectionNode): string {
   if ('span.destination.service.resource' in node) {

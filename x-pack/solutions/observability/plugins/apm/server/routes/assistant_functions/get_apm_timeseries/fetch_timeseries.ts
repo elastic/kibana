@@ -9,11 +9,11 @@ import type {
   AggregationsAggregationContainer,
   QueryDslQueryContainer,
 } from '@elastic/elasticsearch/lib/api/types';
-import { AggregationResultOf, AggregationResultOfMap } from '@kbn/es-types';
-import { Unionize } from 'utility-types';
-import { ApmDocumentType } from '../../../../common/document_type';
-import { RollupInterval } from '../../../../common/rollup';
-import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
+import type { AggregationResultOf, AggregationResultOfMap } from '@kbn/es-types';
+import type { Unionize } from 'utility-types';
+import type { ApmDocumentType } from '../../../../common/document_type';
+import type { RollupInterval } from '../../../../common/rollup';
+import type { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 
 type ChangePointResult = AggregationResultOf<{ change_point: any }, unknown>;
 

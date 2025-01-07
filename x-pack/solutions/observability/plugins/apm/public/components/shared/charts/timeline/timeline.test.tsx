@@ -12,8 +12,9 @@ import {
   mockMoment,
   toJson,
 } from '../../../../utils/test_helpers';
-import { TimelineAxisContainer, TimelineProps, VerticalLinesContainer } from '.';
-import { AgentMark } from '../../../app/transaction_details/waterfall_with_summary/waterfall_container/marks/get_agent_marks';
+import type { TimelineProps } from '.';
+import { TimelineAxisContainer, VerticalLinesContainer } from '.';
+import type { AgentMark } from '../../../app/transaction_details/waterfall_with_summary/waterfall_container/marks/get_agent_marks';
 
 describe.each([[TimelineAxisContainer], [VerticalLinesContainer]])(`Timeline`, (Component) => {
   let consoleMock: jest.SpyInstance;

@@ -15,7 +15,6 @@ import { Subscription } from 'rxjs';
 import {
   PANEL_HOVER_TRIGGER,
   panelHoverTrigger,
-  type EmbeddableInput,
   type ViewMode,
 } from '@kbn/embeddable-plugin/public';
 import { apiHasUniqueId } from '@kbn/presentation-publishing';
@@ -31,7 +30,7 @@ export interface FloatingActionsProps {
   isEnabled?: boolean;
   api?: unknown;
   viewMode?: ViewMode;
-  disabledActions?: EmbeddableInput['disabledActions'];
+  disabledActions?: string[];
 }
 
 export type FloatingActionItem = AnyApiAction & {

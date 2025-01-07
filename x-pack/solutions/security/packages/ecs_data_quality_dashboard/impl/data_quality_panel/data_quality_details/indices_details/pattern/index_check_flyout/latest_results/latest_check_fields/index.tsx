@@ -7,7 +7,6 @@
 
 import React, { useMemo } from 'react';
 import { EuiButtonGroup } from '@elastic/eui';
-import styled from 'styled-components';
 
 import {
   ALL_FIELDS,
@@ -37,14 +36,16 @@ import { AllTab } from './all_tab';
 import { getEcsCompliantBadgeColor } from './utils/get_ecs_compliant_badge_color';
 import { CheckFieldsTabs } from '../../check_fields_tabs';
 
-const StyledButtonGroup = styled(EuiButtonGroup)`
-  button[data-test-subj='${INCOMPATIBLE_TAB_ID}'] {
-    flex-grow: 1.2;
-  }
-  button[data-test-subj='${ECS_COMPLIANT_TAB_ID}'] {
-    flex-grow: 1.4;
-  }
-`;
+const styles = {
+  buttonGroup: {
+    [`button[data-test-subj='${INCOMPATIBLE_TAB_ID}']`]: {
+      flexGrow: 1.2,
+    },
+    [`button[data-test-subj='${ECS_COMPLIANT_TAB_ID}']`]: {
+      flexGrow: 1.4,
+    },
+  },
+};
 
 export interface Props {
   indexName: string;
@@ -185,7 +186,9 @@ const LatestCheckFieldsComponent: React.FC<Props> = ({
     <div data-test-subj="latestCheckFields">
       <CheckFieldsTabs
         tabs={tabs}
-        renderButtonGroup={(props) => <StyledButtonGroup {...props} isFullWidth />}
+        renderButtonGroup={(props) => (
+          <EuiButtonGroup css={styles.buttonGroup} {...props} isFullWidth />
+        )}
       />
     </div>
   );
