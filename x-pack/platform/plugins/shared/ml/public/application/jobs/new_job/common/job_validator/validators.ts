@@ -13,7 +13,7 @@ import type { CombinedJob } from '@kbn/ml-common-types/anomaly_detection_jobs/co
 import type {
   CardinalityModelPlotHigh,
   CardinalityValidationResult,
-} from '../../../../services/ml_api_service';
+} from '@kbn/ml-services/ml_api_service';
 import type { JobCreator } from '../job_creator';
 import type { BasicValidations } from './job_validator';
 

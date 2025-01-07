@@ -21,7 +21,7 @@ import { SEARCH_QUERY_LANGUAGE } from '@kbn/ml-query-utils';
 import { PLUGIN_ID } from '@kbn/ml-common-constants/app';
 import type { Dictionary } from '@kbn/ml-common-types/common';
 import { removeFilterFromQueryString } from '../../../../../explorer/explorer_utils';
-import { useMlKibana } from '../../../../../contexts/kibana';
+import { useMlKibana } from '@kbn/ml-kibana-context';
 
 export interface ExplorationQueryBarProps {
   dataView: DataView;

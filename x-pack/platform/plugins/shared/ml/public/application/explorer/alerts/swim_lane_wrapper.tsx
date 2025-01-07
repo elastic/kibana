@@ -42,7 +42,7 @@ import {
   getAlertEntryFormatter,
   getAlertFormatters,
 } from '../../../alerting/anomaly_detection_alerts_table/render_cell_value';
-import { useMlKibana } from '../../contexts/kibana';
+import { useMlKibana } from '@kbn/ml-kibana-context';
 import { useAnomalyExplorerContext } from '../anomaly_explorer_context';
 import type { AppStateSelectedCells, SwimlaneData } from '../explorer_utils';
 import { CELL_HEIGHT } from '../swimlane_container';
