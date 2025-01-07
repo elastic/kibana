@@ -56,13 +56,7 @@
         ],
         "signature": [
           "({ type, }: { type: ",
-          {
-            "pluginId": "@kbn/core-saved-objects-server",
-            "scope": "server",
-            "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-            "section": "def-server.SavedObjectsType",
-            "text": "SavedObjectsType"
-          },
+          "SavedObjectsType",
           "<any>; }) => ",
           {
             "pluginId": "@kbn/core-test-helpers-model-versions",
@@ -95,13 +89,7 @@
                 "label": "type",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-saved-objects-server",
-                    "scope": "server",
-                    "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-                    "section": "def-server.SavedObjectsType",
-                    "text": "SavedObjectsType"
-                  },
+                  "SavedObjectsType",
                   "<any>"
                 ],
                 "path": "packages/core/test-helpers/core-test-helpers-model-versions/src/model_version_tester.ts",
@@ -266,13 +254,7 @@
               "\nThe SO repository using the SO type definitions at the `before` versions."
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "server",
-                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-server.ISavedObjectsRepository",
-                "text": "ISavedObjectsRepository"
-              }
+              "ISavedObjectsRepository"
             ],
             "path": "packages/core/test-helpers/core-test-helpers-model-versions/src/test_bed/types.ts",
             "deprecated": false,
@@ -288,13 +270,7 @@
               "\nThe SO repository using the SO type definitions at the `after` versions."
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "server",
-                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-server.ISavedObjectsRepository",
-                "text": "ISavedObjectsRepository"
-              }
+              "ISavedObjectsRepository"
             ],
             "path": "packages/core/test-helpers/core-test-helpers-model-versions/src/test_bed/types.ts",
             "deprecated": false,
@@ -380,13 +356,7 @@
               "\n(optional) if specified, the provided list of objects will be created (using `SOR.bulkCreate`)\nbetween the first (before) the second (after) migrator runs. Objects are therefor expected to be of\nthe `versionBefore` version."
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "server",
-                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-server.SavedObjectsBulkCreateObject",
-                "text": "SavedObjectsBulkCreateObject"
-              },
+              "SavedObjectsBulkCreateObject",
               "<unknown>[] | undefined"
             ],
             "path": "packages/core/test-helpers/core-test-helpers-model-versions/src/test_bed/types.ts",
@@ -486,13 +456,7 @@
             ],
             "signature": [
               "<In = unknown, Out = unknown>(options: ModelVersionTestMigrateOptions<In>) => ",
-              {
-                "pluginId": "@kbn/core-saved-objects-common",
-                "scope": "common",
-                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-                "section": "def-common.SavedObject",
-                "text": "SavedObject"
-              },
+              "SavedObject",
               "<Out>"
             ],
             "path": "packages/core/test-helpers/core-test-helpers-model-versions/src/model_version_tester.ts",
@@ -543,13 +507,7 @@
               "\nThe SO type definition"
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/core-saved-objects-server",
-                "scope": "server",
-                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-                "section": "def-server.SavedObjectsType",
-                "text": "SavedObjectsType"
-              },
+              "SavedObjectsType",
               "<any>"
             ],
             "path": "packages/core/test-helpers/core-test-helpers-model-versions/src/test_bed/types.ts",
