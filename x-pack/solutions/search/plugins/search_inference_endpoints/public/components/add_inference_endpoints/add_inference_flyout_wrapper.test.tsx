@@ -22,7 +22,7 @@ jest.mock('../../hooks/use_add_endpoint', () => ({
   }),
 }));
 
-jest.mock('../../hooks/use_providers', () => ({
+jest.mock('@kbn/inference-endpoint-ui-common/src/hooks/use_providers', () => ({
   useProviders: jest.fn(() => ({
     data: mockProviders,
   })),
