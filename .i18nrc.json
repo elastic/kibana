@@ -129,7 +129,7 @@
     "sharedPlatformPackages": ["x-pack/platform/packages/shared/kbn-cloud-security-posture"],
     "serverlessPackages": "packages/serverless",
     "sse": ["src/platform/packages/shared/kbn-sse-utils"],
-    "coloring": "packages/kbn-coloring/src",
+    "coloring": "src/platform/packages/shared/kbn-coloring/src",
     "languageDocumentation": "src/platform/packages/private/kbn-language-documentation/src",
     "esql": "src/platform/plugins/shared/esql",
     "esqlDataGrid": "src/platform/plugins/shared/esql_datagrid",

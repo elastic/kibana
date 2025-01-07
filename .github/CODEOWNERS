@@ -137,7 +137,6 @@ packages/kbn-ci-stats-reporter @elastic/kibana-operations
 packages/kbn-ci-stats-shipper-cli @elastic/kibana-operations
 packages/kbn-cli-dev-mode @elastic/kibana-operations
 packages/kbn-code-owners @elastic/appex-qa
-packages/kbn-coloring @elastic/kibana-visualizations
 packages/kbn-cypress-config @elastic/kibana-operations
 packages/kbn-data-service @elastic/kibana-visualizations @elastic/kibana-data-discovery
 packages/kbn-dependency-ownership @elastic/kibana-security
@@ -473,6 +472,7 @@ src/platform/packages/shared/kbn-cases-components @elastic/response-ops
 src/platform/packages/shared/kbn-cbor @elastic/kibana-operations
 src/platform/packages/shared/kbn-cell-actions @elastic/security-threat-hunting-explore
 src/platform/packages/shared/kbn-chart-icons @elastic/kibana-visualizations
+src/platform/packages/shared/kbn-coloring @elastic/kibana-visualizations
 src/platform/packages/shared/kbn-config @elastic/kibana-core
 src/platform/packages/shared/kbn-config-schema @elastic/kibana-core
 src/platform/packages/shared/kbn-content-management-utils @elastic/kibana-data-discovery

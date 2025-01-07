@@ -223,7 +223,7 @@
     "@kbn/cloud-security-posture-plugin": "link:x-pack/solutions/security/plugins/cloud_security_posture",
     "@kbn/code-editor": "link:packages/shared-ux/code_editor/impl",
     "@kbn/code-editor-mock": "link:packages/shared-ux/code_editor/mocks",
-    "@kbn/coloring": "link:packages/kbn-coloring",
+    "@kbn/coloring": "link:src/platform/packages/shared/kbn-coloring",
     "@kbn/config": "link:src/platform/packages/shared/kbn-config",
     "@kbn/config-mocks": "link:src/platform/packages/private/kbn-config-mocks",
     "@kbn/config-schema": "link:src/platform/packages/shared/kbn-config-schema",
