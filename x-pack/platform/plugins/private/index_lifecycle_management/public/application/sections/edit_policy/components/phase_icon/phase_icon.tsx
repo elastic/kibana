@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import { FunctionComponent } from 'react';
+import { css } from '@emotion/react';
+import { euiThemeVars } from '@kbn/ui-theme';
 import { EuiIcon, useEuiTheme } from '@elastic/eui';
 import { Phases } from '../../../../../../common/types';
 import './phase_icon.scss';
@@ -16,7 +18,15 @@ interface Props {
 export const PhaseIcon: FunctionComponent<Props> = ({ enabled, phase }) => {
   const { euiTheme } = useEuiTheme();
 
-  const themeName = euiTheme.themeName === 'EUI_THEME_BOREALIS' ? 'borealis' : 'amsterdam';
+  const isBorealis = euiTheme.themeName === 'EUI_THEME_BOREALIS';
+
+  const phaseIconColors = {
+    hot: isBorealis ? euiTheme.colors.vis.euiColorVis6 : euiThemeVars.euiColorVis9_behindText,
+    warm: isBorealis ? euiTheme.colors.vis.euiColorVis9 : euiThemeVars.euiColorVis5_behindText,
+    cold: isBorealis ? euiTheme.colors.vis.euiColorVis2 : euiThemeVars.euiColorVis1_behindText,
+    frozen: euiTheme.colors.vis.euiColorVis4,
+    delete: euiTheme.colors.darkShade,
+  };
 
   return (
     <div
@@ -24,7 +34,9 @@ export const PhaseIcon: FunctionComponent<Props> = ({ enabled, phase }) => {
     >
       {enabled ? (
         <EuiIcon
-          className={`ilmPhaseIcon__inner--${phase}--${themeName}`}
+          css={css`
+            fill: ${phaseIconColors[phase]};
+          `}
           type={phase === 'delete' ? 'trash' : 'checkInCircleFilled'}
           size={phase === 'delete' ? 'm' : 'l'}
         />

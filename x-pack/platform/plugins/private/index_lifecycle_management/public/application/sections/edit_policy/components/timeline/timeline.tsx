@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+/** @jsx jsx */
+// Needed for for testing out the css prop feature. See: https://emotion.sh/docs/css-prop#jsx-pragma
+import { css, jsx } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -144,7 +147,14 @@ export const Timeline: FunctionComponent<Props> = memo(
 
     const { euiTheme } = useEuiTheme();
 
-    const themeName = euiTheme.themeName === 'EUI_THEME_BOREALIS' ? 'borealis' : 'amsterdam';
+    const isBorealis = euiTheme.themeName === 'EUI_THEME_BOREALIS';
+
+    const timelineIconColors = {
+      hot: isBorealis ? euiTheme.colors.vis.euiColorVis6 : euiTheme.colors.vis.euiColorVis9,
+      warm: isBorealis ? euiTheme.colors.vis.euiColorVis9 : euiTheme.colors.vis.euiColorVis5,
+      cold: isBorealis ? euiTheme.colors.vis.euiColorVis2 : euiTheme.colors.vis.euiColorVis1,
+      frozen: euiTheme.colors.vis.euiColorVis4,
+    };
 
     const phaseAgeInMilliseconds = calculateRelativeFromAbsoluteMilliseconds(absoluteTimings);
 
@@ -200,7 +210,10 @@ export const Timeline: FunctionComponent<Props> = memo(
                     className="ilmTimeline__phasesContainer__phase ilmTimeline__hotPhase"
                   >
                     <div
-                      className={`ilmTimeline__colorBar ilmTimeline__hotPhase__colorBar__${themeName}`}
+                      className={`ilmTimeline__colorBar `}
+                      css={css`
+                        background-color: ${timelineIconColors.hot};
+                      `}
                     />
                     <TimelinePhaseText
                       phaseName={i18nTexts.hotPhase}
@@ -213,7 +226,10 @@ export const Timeline: FunctionComponent<Props> = memo(
                       className="ilmTimeline__phasesContainer__phase ilmTimeline__warmPhase"
                     >
                       <div
-                        className={`ilmTimeline__colorBar ilmTimeline__warmPhase__colorBar__${themeName}`}
+                        className={`ilmTimeline__colorBar`}
+                        css={css`
+                          background-color: ${timelineIconColors.warm};
+                        `}
                       />
                       <TimelinePhaseText
                         phaseName={i18nTexts.warmPhase}
@@ -227,7 +243,10 @@ export const Timeline: FunctionComponent<Props> = memo(
                       className="ilmTimeline__phasesContainer__phase ilmTimeline__coldPhase"
                     >
                       <div
-                        className={`ilmTimeline__colorBar ilmTimeline__coldPhase__colorBar__${themeName}`}
+                        className={`ilmTimeline__colorBar`}
+                        css={css`
+                          background-color: ${timelineIconColors.cold};
+                        `}
                       />
                       <TimelinePhaseText
                         phaseName={i18nTexts.coldPhase}
@@ -240,7 +259,12 @@ export const Timeline: FunctionComponent<Props> = memo(
                       data-test-subj="ilmTimelinePhase-frozen"
                       className="ilmTimeline__phasesContainer__phase ilmTimeline__frozenPhase"
                     >
-                      <div className="ilmTimeline__colorBar ilmTimeline__frozenPhase__colorBar" />
+                      <div
+                        className="ilmTimeline__colorBar"
+                        css={css`
+                          background-color: ${timelineIconColors.frozen};
+                        `}
+                      />
                       <TimelinePhaseText
                         phaseName={i18nTexts.frozenPhase}
                         durationInPhase={getDurationInPhaseContent('frozen')}
