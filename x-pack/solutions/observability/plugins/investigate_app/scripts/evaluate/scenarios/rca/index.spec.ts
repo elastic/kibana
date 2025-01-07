@@ -130,7 +130,7 @@ describe('Root cause analysis', () => {
 
     await chatClient.evaluate(conversation, [
       'Effectively reflects the actual root cause in the report. The actual root cause of the system failure was a misconfiguration related to the `cartservice`. A bad container entrypoint was configured for the cart service, causing it to fail to start',
-      'Analyzes the cart service during the course of the investigation.',
+      'Analyzes the cartservice during the course of the investigation.',
       'Analyzes each entity only once.',
       'The Observability AI Assistant encountered 0 errors when attempting to analyze the system failure.',
     ]);
@@ -138,8 +138,8 @@ describe('Root cause analysis', () => {
 
   after(async () => {
     const rcaChatClient = chatClient as RCAChatClient;
-    // for (const investigationId of investigations) {
-    //   await rcaChatClient.deleteInvestigation({ investigationId });
-    // }
+    for (const investigationId of investigations) {
+      await rcaChatClient.deleteInvestigation({ investigationId });
+    }
   });
 });
