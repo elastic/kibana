@@ -93,9 +93,9 @@ export const TRANSFORM_HEALTH_AAD_CONFIG: IRuleTypeAlerts<TransformHealthAlert> 
         dynamic: false,
         properties: {
           transform_id: { type: ES_FIELD_TYPES.KEYWORD },
-          // description: { type: ES_FIELD_TYPES.TEXT },
+          description: { type: ES_FIELD_TYPES.TEXT },
           health_status: { type: ES_FIELD_TYPES.KEYWORD },
-          // issues: { type: ES_FIELD_TYPES.OBJECT },
+          issues: { type: ES_FIELD_TYPES.OBJECT },
           transform_state: { type: ES_FIELD_TYPES.KEYWORD },
           node_name: { type: ES_FIELD_TYPES.KEYWORD },
         },
