@@ -236,7 +236,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         {
           feature: {
             infrastructure: ['read'],
+            apm: ['read'],
             advancedSettings: ['read'],
+            streams: ['read'],
           },
           spaces: ['*'],
         },
