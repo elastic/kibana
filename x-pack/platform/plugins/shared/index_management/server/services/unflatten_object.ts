@@ -7,11 +7,7 @@
 
 import { set } from '@kbn/safer-lodash-set';
 
-interface GenericObject {
-  [key: string]: any;
-}
-
-export const unflattenObject = <T extends object = GenericObject>(object: object): T =>
+export const unflattenObject = <T extends object = Record<string, any>>(object: object): T =>
   Object.entries(object).reduce((acc, [key, value]) => {
     set(acc, key, value);
     return acc;
