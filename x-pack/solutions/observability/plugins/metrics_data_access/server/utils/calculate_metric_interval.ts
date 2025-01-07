@@ -7,8 +7,8 @@
 
 const TIMESTAMP_FIELD = '@timestamp';
 import { findInventoryModel } from '../../common/inventory_models';
-import { InventoryItemType } from '../../common/inventory_models/types';
-import { ESSearchClient } from '../lib/metrics/types';
+import type { InventoryItemType } from '../../common/inventory_models/types';
+import type { ESSearchClient } from '../lib/metrics/types';
 
 interface Options {
   indexPattern: string;

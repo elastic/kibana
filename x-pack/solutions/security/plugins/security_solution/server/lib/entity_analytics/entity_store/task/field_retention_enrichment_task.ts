@@ -13,7 +13,6 @@ import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import { getAvailableEntityTypes } from '../../../../../common/entity_analytics/entity_store/constants';
 import {
   EngineComponentResourceEnum,
   type EntityType,
@@ -25,7 +24,7 @@ import {
 } from './state';
 import { INTERVAL, SCOPE, TIMEOUT, TYPE, VERSION } from './constants';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
-import { getUnitedEntityDefinitionVersion } from '../united_entity_definitions';
+
 import { executeFieldRetentionEnrichPolicy } from '../elasticsearch_assets';
 
 import { getEntitiesIndexName } from '../utils';
@@ -33,6 +32,8 @@ import {
   FIELD_RETENTION_ENRICH_POLICY_EXECUTION_EVENT,
   ENTITY_STORE_USAGE_EVENT,
 } from '../../../telemetry/event_based/events';
+import { VERSIONS_BY_ENTITY_TYPE } from '../entity_definitions/constants';
+import { getAvailableEntityDescriptions } from '../installation/engine_description';
 
 const logFactory =
   (logger: Logger, taskId: string) =>
@@ -79,10 +80,10 @@ export const registerEntityStoreFieldRetentionEnrichTask = ({
     const [coreStart, _] = await getStartServices();
     const esClient = coreStart.elasticsearch.client.asInternalUser;
 
-    const unitedDefinitionVersion = getUnitedEntityDefinitionVersion(entityType);
-
     return executeFieldRetentionEnrichPolicy({
-      unitedDefinition: { namespace, entityType, version: unitedDefinitionVersion },
+      entityType,
+      version: VERSIONS_BY_ENTITY_TYPE[entityType],
+      options: { namespace },
       esClient,
       logger,
     });
@@ -202,7 +203,7 @@ export const runTask = async ({
       return { state: updatedState };
     }
 
-    const entityTypes = getAvailableEntityTypes();
+    const entityTypes = getAvailableEntityDescriptions();
 
     for (const entityType of entityTypes) {
       const start = Date.now();
