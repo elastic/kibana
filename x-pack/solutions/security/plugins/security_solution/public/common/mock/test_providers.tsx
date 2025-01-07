@@ -74,8 +74,8 @@ export const TestProvidersComponent = ({
   });
 
   return (
-    <I18nProvider>
-      <MockKibanaContextProvider startServices={startServices}>
+    <MockKibanaContextProvider startServices={startServices}>
+      <I18nProvider>
         <UpsellingProviderMock>
           <ReduxStoreProvider store={store}>
             <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
@@ -97,8 +97,8 @@ export const TestProvidersComponent = ({
             </ThemeProvider>
           </ReduxStoreProvider>
         </UpsellingProviderMock>
-      </MockKibanaContextProvider>
-    </I18nProvider>
+      </I18nProvider>
+    </MockKibanaContextProvider>
   );
 };
 
