@@ -10,13 +10,14 @@
 import { SeriesColorAccessorFn } from '@elastic/charts';
 import { getColorFactory, type ColorMapping, type ColorMappingInputData } from '@kbn/coloring';
 import { MULTI_FIELD_KEY_SEPARATOR } from '@kbn/data-plugin/common';
+import { KbnPalettes } from '@kbn/palettes';
 
 /**
  * Return a color accessor function for XY charts depending on the split accessors received.
  */
 export function getColorSeriesAccessorFn(
   config: ColorMapping.Config,
-  getPaletteFn: (paletteId: string) => ColorMapping.CategoricalPalette,
+  palettes: KbnPalettes,
   isDarkMode: boolean,
   mappingData: ColorMappingInputData,
   fieldId: string,
@@ -28,7 +29,7 @@ export function getColorSeriesAccessorFn(
     [...specialTokens.entries()].map((d) => [d[1], d[0]])
   );
 
-  const getColor = getColorFactory(config, getPaletteFn, isDarkMode, mappingData);
+  const getColor = getColorFactory(config, palettes, isDarkMode, mappingData);
 
   return ({ splitAccessors }) => {
     const splitValue = splitAccessors.get(fieldId);

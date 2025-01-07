@@ -21,6 +21,7 @@ export function naturalLanguageToEsql<TToolOptions extends ToolOptions>({
   toolChoice,
   logger,
   functionCalling,
+  system,
   ...rest
 }: NlToEsqlTaskParams<TToolOptions>): Observable<NlToEsqlTaskEvent<TToolOptions>> {
   return from(loadDocBase()).pipe(
@@ -41,6 +42,7 @@ export function naturalLanguageToEsql<TToolOptions extends ToolOptions>({
           tools,
           toolChoice,
         },
+        system,
       });
 
       return requestDocumentation({

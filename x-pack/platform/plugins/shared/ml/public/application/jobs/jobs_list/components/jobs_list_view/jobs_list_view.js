@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 
@@ -505,6 +506,7 @@ export class JobsListViewUI extends Component {
           ) : null}
 
           <EditJobFlyout
+            euiTheme={this.props.euiTheme}
             setShowFunction={this.setShowEditJobFlyoutFunction}
             unsetShowFunction={this.unsetShowEditJobFlyoutFunction}
             refreshJobs={() => this.refreshJobSummaryList()}
@@ -556,5 +558,9 @@ export class JobsListViewUI extends Component {
     return <div>{this.renderJobsListComponents()}</div>;
   }
 }
+
+JobsListViewUI.propTypes = {
+  euiTheme: PropTypes.object.isRequired,
+};
 
 export const JobsListView = withKibana(JobsListViewUI);

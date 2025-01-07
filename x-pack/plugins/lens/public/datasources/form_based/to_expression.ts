@@ -71,7 +71,8 @@ function getExpressionForLayer(
   uiSettings: IUiSettingsClient,
   dateRange: DateRange,
   nowInstant: Date,
-  searchSessionId?: string
+  searchSessionId?: string,
+  forceDSL?: boolean
 ): ExpressionAstExpression | null {
   const { columnOrder } = layer;
   if (columnOrder.length === 0 || !indexPattern) {
@@ -523,7 +524,8 @@ export function toExpression(
   uiSettings: IUiSettingsClient,
   dateRange: DateRange,
   nowInstant: Date,
-  searchSessionId?: string
+  searchSessionId?: string,
+  forceDSL?: boolean
 ) {
   const layer = state.layers[layerId] as FormBasedLayer;
   if (layer) {
@@ -533,7 +535,8 @@ export function toExpression(
       uiSettings,
       dateRange,
       nowInstant,
-      searchSessionId
+      searchSessionId,
+      forceDSL
     );
   }
 

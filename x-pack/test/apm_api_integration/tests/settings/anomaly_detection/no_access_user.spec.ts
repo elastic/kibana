@@ -38,7 +38,9 @@ export default function apiTest({ getService }: FtrProviderContext) {
           const err = await expectToReject<ApmApiError>(() => getJobs());
 
           expect(err.res.status).to.be(403);
-          expect(err.res.body.message).eql('Forbidden');
+          expect(err.res.body.message).eql(
+            'API [GET /internal/apm/settings/anomaly-detection/jobs] is unauthorized for user, this action is granted by the Kibana privileges [apm,ml:canGetJobs]'
+          );
         });
       });
 
@@ -49,7 +51,9 @@ export default function apiTest({ getService }: FtrProviderContext) {
           );
 
           expect(err.res.status).to.be(403);
-          expect(err.res.body.message).eql('Forbidden');
+          expect(err.res.body.message).eql(
+            'API [POST /internal/apm/settings/anomaly-detection/jobs] is unauthorized for user, this action is granted by the Kibana privileges [apm,apm_settings_write,ml:canCreateJob]'
+          );
         });
       });
     });

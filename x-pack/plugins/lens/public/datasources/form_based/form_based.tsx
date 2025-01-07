@@ -638,7 +638,15 @@ export function getFormBasedDatasource({
       );
     },
 
-    toExpression: (state, layerId, indexPatterns, dateRange, nowInstant, searchSessionId) => {
+    toExpression: (
+      state,
+      layerId,
+      indexPatterns,
+      dateRange,
+      nowInstant,
+      searchSessionId,
+      forceDSL
+    ) => {
       if (state.layers[layerId].type === 'esql') {
         return toExpressionESQL(state, layerId);
       }
@@ -649,7 +657,8 @@ export function getFormBasedDatasource({
         uiSettings,
         dateRange,
         nowInstant,
-        searchSessionId
+        searchSessionId,
+        forceDSL
       );
     },
 

@@ -79,7 +79,7 @@ export function wrapWithSimulatedFunctionCalling({
   };
 }
 
-const convertToolResponseMessage = (message: ToolMessage<unknown>): UserMessage => {
+const convertToolResponseMessage = (message: ToolMessage): UserMessage => {
   return {
     role: MessageRole.User,
     content: JSON.stringify({
