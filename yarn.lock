@@ -7725,7 +7725,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/timelion-grammar@link:packages/kbn-timelion-grammar":
+"@kbn/timelion-grammar@link:src/platform/packages/private/kbn-timelion-grammar":
   version "0.0.0"
   uid ""
 
