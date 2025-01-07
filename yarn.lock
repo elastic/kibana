@@ -7307,203 +7307,203 @@
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-avatar-solution@link:packages/shared-ux/avatar/solution":
+"@kbn/shared-ux-avatar-solution@link:src/platform/packages/shared/shared-ux/avatar/solution":
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-button-exit-full-screen@link:packages/shared-ux/button/exit_full_screen":
+"@kbn/shared-ux-button-exit-full-screen@link:src/platform/packages/shared/shared-ux/button/exit_full_screen":
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-button-toolbar@link:packages/shared-ux/button_toolbar":
+"@kbn/shared-ux-button-toolbar@link:src/platform/packages/shared/shared-ux/button_toolbar":
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-card-no-data-mocks@link:packages/shared-ux/card/no_data/mocks":
+"@kbn/shared-ux-card-no-data-mocks@link:src/platform/packages/shared/shared-ux/card/no_data/mocks":
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-card-no-data-types@link:packages/shared-ux/card/no_data/types":
+"@kbn/shared-ux-card-no-data-types@link:src/platform/packages/shared/shared-ux/card/no_data/types":
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-card-no-data@link:packages/shared-ux/card/no_data/impl":
+"@kbn/shared-ux-card-no-data@link:src/platform/packages/shared/shared-ux/card/no_data/impl":
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-chrome-navigation@link:packages/shared-ux/chrome/navigation":
+"@kbn/shared-ux-chrome-navigation@link:src/platform/packages/shared/shared-ux/chrome/navigation":
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-error-boundary@link:packages/shared-ux/error_boundary":
+"@kbn/shared-ux-error-boundary@link:src/platform/packages/shared/shared-ux/error_boundary":
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-file-context@link:packages/shared-ux/file/context":
+"@kbn/shared-ux-file-context@link:src/platform/packages/shared/shared-ux/file/context":
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-file-image-mocks@link:packages/shared-ux/file/image/mocks":
+"@kbn/shared-ux-file-image-mocks@link:src/platform/packages/shared/shared-ux/file/image/mocks":
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-file-image@link:packages/shared-ux/file/image/impl":
+"@kbn/shared-ux-file-image@link:src/platform/packages/shared/shared-ux/file/image/impl":
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-file-mocks@link:packages/shared-ux/file/mocks":
+"@kbn/shared-ux-file-mocks@link:src/platform/packages/shared/shared-ux/file/mocks":
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-file-picker@link:packages/shared-ux/file/file_picker/impl":
+"@kbn/shared-ux-file-picker@link:src/platform/packages/shared/shared-ux/file/file_picker/impl":
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-file-types@link:packages/shared-ux/file/types":
+"@kbn/shared-ux-file-types@link:src/platform/packages/shared/shared-ux/file/types":
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-file-upload@link:packages/shared-ux/file/file_upload/impl":
+"@kbn/shared-ux-file-upload@link:src/platform/packages/shared/shared-ux/file/file_upload/impl":
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-file-util@link:packages/shared-ux/file/util":
+"@kbn/shared-ux-file-util@link:src/platform/packages/shared/shared-ux/file/util":
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-link-redirect-app-mocks@link:packages/shared-ux/link/redirect_app/mocks":
+"@kbn/shared-ux-link-redirect-app-mocks@link:src/platform/packages/shared/shared-ux/link/redirect_app/mocks":
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-link-redirect-app-types@link:packages/shared-ux/link/redirect_app/types":
+"@kbn/shared-ux-link-redirect-app-types@link:src/platform/packages/shared/shared-ux/link/redirect_app/types":
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-link-redirect-app@link:packages/shared-ux/link/redirect_app/impl":
+"@kbn/shared-ux-link-redirect-app@link:src/platform/packages/shared/shared-ux/link/redirect_app/impl":
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-markdown-mocks@link:packages/shared-ux/markdown/mocks":
+"@kbn/shared-ux-markdown-mocks@link:src/platform/packages/shared/shared-ux/markdown/mocks":
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-markdown-types@link:packages/shared-ux/markdown/types":
+"@kbn/shared-ux-markdown-types@link:src/platform/packages/shared/shared-ux/markdown/types":
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-markdown@link:packages/shared-ux/markdown/impl":
+"@kbn/shared-ux-markdown@link:src/platform/packages/shared/shared-ux/markdown/impl":
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-page-analytics-no-data-mocks@link:packages/shared-ux/page/analytics_no_data/mocks":
+"@kbn/shared-ux-page-analytics-no-data-mocks@link:src/platform/packages/private/shared-ux/page/analytics_no_data/mocks":
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-page-analytics-no-data-types@link:packages/shared-ux/page/analytics_no_data/types":
+"@kbn/shared-ux-page-analytics-no-data-types@link:src/platform/packages/private/shared-ux/page/analytics_no_data/types":
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-page-analytics-no-data@link:packages/shared-ux/page/analytics_no_data/impl":
+"@kbn/shared-ux-page-analytics-no-data@link:src/platform/packages/private/shared-ux/page/analytics_no_data/impl":
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-page-kibana-no-data-mocks@link:packages/shared-ux/page/kibana_no_data/mocks":
+"@kbn/shared-ux-page-kibana-no-data-mocks@link:src/platform/packages/private/shared-ux/page/kibana_no_data/mocks":
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-page-kibana-no-data-types@link:packages/shared-ux/page/kibana_no_data/types":
+"@kbn/shared-ux-page-kibana-no-data-types@link:src/platform/packages/private/shared-ux/page/kibana_no_data/types":
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-page-kibana-no-data@link:packages/shared-ux/page/kibana_no_data/impl":
+"@kbn/shared-ux-page-kibana-no-data@link:src/platform/packages/private/shared-ux/page/kibana_no_data/impl":
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-page-kibana-template-mocks@link:packages/shared-ux/page/kibana_template/mocks":
+"@kbn/shared-ux-page-kibana-template-mocks@link:src/platform/packages/shared/shared-ux/page/kibana_template/mocks":
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-page-kibana-template-types@link:packages/shared-ux/page/kibana_template/types":
+"@kbn/shared-ux-page-kibana-template-types@link:src/platform/packages/shared/shared-ux/page/kibana_template/types":
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-page-kibana-template@link:packages/shared-ux/page/kibana_template/impl":
+"@kbn/shared-ux-page-kibana-template@link:src/platform/packages/shared/shared-ux/page/kibana_template/impl":
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-page-no-data-config-mocks@link:packages/shared-ux/page/no_data_config/mocks":
+"@kbn/shared-ux-page-no-data-config-mocks@link:src/platform/packages/shared/shared-ux/page/no_data_config/mocks":
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-page-no-data-config-types@link:packages/shared-ux/page/no_data_config/types":
+"@kbn/shared-ux-page-no-data-config-types@link:src/platform/packages/shared/shared-ux/page/no_data_config/types":
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-page-no-data-config@link:packages/shared-ux/page/no_data_config/impl":
+"@kbn/shared-ux-page-no-data-config@link:src/platform/packages/shared/shared-ux/page/no_data_config/impl":
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-page-no-data-mocks@link:packages/shared-ux/page/no_data/mocks":
+"@kbn/shared-ux-page-no-data-mocks@link:src/platform/packages/shared/shared-ux/page/no_data/mocks":
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-page-no-data-types@link:packages/shared-ux/page/no_data/types":
+"@kbn/shared-ux-page-no-data-types@link:src/platform/packages/shared/shared-ux/page/no_data/types":
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-page-no-data@link:packages/shared-ux/page/no_data/impl":
+"@kbn/shared-ux-page-no-data@link:src/platform/packages/shared/shared-ux/page/no_data/impl":
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-page-solution-nav@link:packages/shared-ux/page/solution_nav":
+"@kbn/shared-ux-page-solution-nav@link:src/platform/packages/shared/shared-ux/page/solution_nav":
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-prompt-no-data-views-mocks@link:packages/shared-ux/prompt/no_data_views/mocks":
+"@kbn/shared-ux-prompt-no-data-views-mocks@link:src/platform/packages/shared/shared-ux/prompt/no_data_views/mocks":
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-prompt-no-data-views-types@link:packages/shared-ux/prompt/no_data_views/types":
+"@kbn/shared-ux-prompt-no-data-views-types@link:src/platform/packages/shared/shared-ux/prompt/no_data_views/types":
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-prompt-no-data-views@link:packages/shared-ux/prompt/no_data_views/impl":
+"@kbn/shared-ux-prompt-no-data-views@link:src/platform/packages/shared/shared-ux/prompt/no_data_views/impl":
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-prompt-not-found@link:packages/shared-ux/prompt/not_found":
+"@kbn/shared-ux-prompt-not-found@link:src/platform/packages/shared/shared-ux/prompt/not_found":
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-router-mocks@link:packages/shared-ux/router/mocks":
+"@kbn/shared-ux-router-mocks@link:src/platform/packages/shared/shared-ux/router/mocks":
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-router-types@link:packages/shared-ux/router/types":
+"@kbn/shared-ux-router-types@link:src/platform/packages/shared/shared-ux/router/types":
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-router@link:packages/shared-ux/router/impl":
+"@kbn/shared-ux-router@link:src/platform/packages/shared/shared-ux/router/impl":
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-storybook-config@link:packages/shared-ux/storybook/config":
+"@kbn/shared-ux-storybook-config@link:src/platform/packages/private/shared-ux/storybook/config":
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-storybook-mock@link:packages/shared-ux/storybook/mock":
+"@kbn/shared-ux-storybook-mock@link:src/platform/packages/shared/shared-ux/storybook/mock":
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-tabbed-modal@link:packages/shared-ux/modal/tabbed":
+"@kbn/shared-ux-tabbed-modal@link:src/platform/packages/shared/shared-ux/modal/tabbed":
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-table-persist@link:packages/shared-ux/table_persist":
+"@kbn/shared-ux-table-persist@link:src/platform/packages/shared/shared-ux/table_persist":
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-utility@link:packages/kbn-shared-ux-utility":
+"@kbn/shared-ux-utility@link:src/platform/packages/shared/kbn-shared-ux-utility":
   version "0.0.0"
   uid ""
 
@@ -11500,10 +11500,10 @@
   resolved "https://registry.yarnpkg.com/@types/diff-match-patch/-/diff-match-patch-1.0.36.tgz#dcef10a69d357fe9d43ac4ff2eca6b85dbf466af"
   integrity sha512-xFdR6tkm0MWvBfO8xXCSsinYxHcqkQUlcHeSpMC2ukzOb6lwQAfDmW+Qt0AvlGd8HpsS28qKsB+oPeJn9I39jg==
 
-"@types/diff@^5.0.8":
-  version "5.0.8"
-  resolved "https://registry.yarnpkg.com/@types/diff/-/diff-5.0.8.tgz#28dc501cc3e7c62d4c5d096afe20755170acf276"
-  integrity sha512-kR0gRf0wMwpxQq6ME5s+tWk9zVCfJUl98eRkD05HWWRbhPB/eu4V1IbyZAsvzC1Gn4znBJ0HN01M4DGXdBEV8Q==
+"@types/diff@^6.0.0":
+  version "6.0.0"
+  resolved "https://registry.yarnpkg.com/@types/diff/-/diff-6.0.0.tgz#031f27cf57564f3cce825f38fb19fdd4349ad07a"
+  integrity sha512-dhVCYGv3ZSbzmQaBSagrv1WJ6rXCdkyTcDyoNu1MD8JohI7pR7k8wdZEm+mvdxRKXyHVwckFzWU1vJc+Z29MlA==
 
 "@types/ejs@^3.0.6":
   version "3.0.6"
@@ -17447,6 +17447,11 @@ diff@^5.0.0, diff@^5.1.0, diff@^5.2.0:
   resolved "https://registry.yarnpkg.com/diff/-/diff-5.2.0.tgz#26ded047cd1179b78b9537d5ef725503ce1ae531"
   integrity sha512-uIFDxqpRZGZ6ThOk84hEfqWoHx2devRFvpTZcTHur85vImfaxUbTW9Ryh4CpCuDnToOP1CEtXKIgytHBPVff5A==
 
+diff@^7.0.0:
+  version "7.0.0"
+  resolved "https://registry.yarnpkg.com/diff/-/diff-7.0.0.tgz#3fb34d387cd76d803f6eebea67b921dab0182a9a"
+  integrity sha512-PJWHUb1RFevKCwaFA9RlG5tCd+FO5iRh9A8HEtkmBH2Li03iJriB6m6JIN4rGz3K3JLawI7/veA1xzRKP6ISBw==
+
 diffie-hellman@^5.0.0:
   version "5.0.2"
   resolved "https://registry.yarnpkg.com/diffie-hellman/-/diffie-hellman-5.0.2.tgz#b5835739270cfe26acf632099fded2a07f209e5e"
@@ -19102,10 +19107,10 @@ fast-xml-parser@4.4.1:
   dependencies:
     strnum "^1.0.5"
 
-fastest-levenshtein@^1.0.12:
-  version "1.0.12"
-  resolved "https://registry.yarnpkg.com/fastest-levenshtein/-/fastest-levenshtein-1.0.12.tgz#9990f7d3a88cc5a9ffd1f1745745251700d497e2"
-  integrity sha512-On2N+BpYJ15xIC974QNVuYGMOlEVt4s0EOI3wwMqOmK1fdDY+FN/zltPV8vosq4ad4c/gJ1KHScUn/6AWIgiow==
+fastest-levenshtein@^1.0.12, fastest-levenshtein@^1.0.16:
+  version "1.0.16"
+  resolved "https://registry.yarnpkg.com/fastest-levenshtein/-/fastest-levenshtein-1.0.16.tgz#210e61b6ff181de91ea9b3d1b84fdedd47e034e5"
+  integrity sha512-eRnCtTTtGZFpQCwhJiUOuxPQWRXVKYDn0b2PeHfXL6/Zi53SLAzAHfVhVWK2AryC/WH05kGfxhFIPvTF0SXQzg==
 
 fastest-stable-stringify@^1.0.1:
   version "1.0.1"
