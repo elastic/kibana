@@ -9,7 +9,7 @@ import { EuiButton } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useEffect, useRef } from 'react';
 import { type DataView } from '@kbn/data-plugin/common';
-import { useMlKibana } from '../../contexts/kibana';
+import { useMlKibana } from '@kbn/ml-kibana-context';
 
 export const CreateDataViewButton = ({
   onDataViewCreated,

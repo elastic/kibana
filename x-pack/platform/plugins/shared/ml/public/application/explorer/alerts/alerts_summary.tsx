@@ -20,7 +20,7 @@ import React, { useMemo, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { statusNameMap } from './const';
 import { getAlertFormatters } from '../../../alerting/anomaly_detection_alerts_table/render_cell_value';
-import { useMlKibana } from '../../contexts/kibana';
+import { useMlKibana } from '@kbn/ml-kibana-context';
 import { useAnomalyExplorerContext } from '../anomaly_explorer_context';
 import { getAlertsSummary } from './get_alerts_summary';
 

@@ -30,7 +30,7 @@ import { SaveChangesButton } from '../ml_inference/components/save_changes_butto
 import type { MlInferenceState } from '../ml_inference/types';
 import { getDefaultOnFailureConfiguration } from '../ml_inference/state';
 import { CANCEL_EDIT_MESSAGE, EDIT_MESSAGE } from '../ml_inference/constants';
-import { useMlKibana } from '../../contexts/kibana';
+import { useMlKibana } from '@kbn/ml-kibana-context';
 import { isValidJson } from '../../../../common/util/validation_utils';
 
 interface Props {

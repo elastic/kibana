@@ -12,14 +12,14 @@ import { i18n } from '@kbn/i18n';
 
 import { dynamic } from '@kbn/shared-ux-utility';
 import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
+import { useMlKibana } from '@kbn/ml-kibana-context';
+import { useMlJobService } from '@kbn/ml-services/job_service';
 import { basicResolvers } from '../../resolvers';
 import type { NavigateToPath } from '../../../contexts/kibana';
-import { useMlKibana } from '../../../contexts/kibana';
 
 import type { MlRoute, PageProps } from '../../router';
 import { createPath, PageLoader } from '../../router';
 import { useRouteResolver } from '../../use_resolver';
-import { useMlJobService } from '../../../services/job_service';
 import { getDateFormatTz } from '../../../explorer/explorer_utils';
 import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
 import { MlAnnotationUpdatesContext } from '../../../contexts/ml/ml_annotation_updates_context';
