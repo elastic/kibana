@@ -101,7 +101,7 @@ export function getEnterpriseSearchNodeDeprecation(config: ConfigType, isCloud: 
 export async function getCrawlerDeprecations(ctx: GetDeprecationsContext): Promise<DeprecationsDetails[]> {
   const client = ctx.esClient.asInternalUser
   const crawlers: Connector[] = await fetchConnectors(client, undefined,true, undefined)
-  if (crawlers.length == 0){
+  if (crawlers.length === 0){
     return [] // no deprecations to register if there are no Elastic Crawlers in the connectors index
   } else {
     return [{
@@ -147,7 +147,7 @@ export async function getNativeConnectorDeprecations(ctx: GetDeprecationsContext
   const client = ctx.esClient.asInternalUser
   const connectors: Connector[] = await fetchConnectors(client, undefined,false, undefined)
   const nativeConnectors = connectors.filter(hit => hit.is_native)
-  if (nativeConnectors.length == 0){
+  if (nativeConnectors.length === 0){
     return [] // no deprecations to register if there are no Native Connectors
   } else {
     const deprecations: DeprecationsDetails[] = []

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { expect } from '@jest/globals';
 let mockedFetchConnectors = jest.fn()
 jest.mock("@kbn/search-connectors", () => {
   return {
