@@ -42,7 +42,7 @@ export const storybookAliases = {
   expression_repeat_image: 'src/platform/plugins/shared/expression_repeat_image/.storybook',
   expression_reveal_image: 'src/platform/plugins/shared/expression_reveal_image/.storybook',
   expression_shape: 'src/platform/plugins/shared/expression_shape/.storybook',
-  expression_tagcloud: 'src/plugins/chart_expressions/expression_tagcloud/.storybook',
+  expression_tagcloud: 'src/platform/plugins/shared/chart_expressions/expression_tagcloud/.storybook',
   fleet: 'x-pack/platform/plugins/shared/fleet/.storybook',
   grouping: 'src/platform/packages/shared/kbn-grouping/.storybook',
   home: 'src/platform/plugins/shared/home/.storybook',
