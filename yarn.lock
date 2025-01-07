@@ -5617,7 +5617,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/event-annotation-components@link:packages/kbn-event-annotation-components":
+"@kbn/event-annotation-components@link:src/platform/packages/shared/kbn-event-annotation-components":
   version "0.0.0"
   uid ""
 
