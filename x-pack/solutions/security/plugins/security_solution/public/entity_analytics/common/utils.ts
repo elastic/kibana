@@ -35,16 +35,16 @@ export const useRiskSeverityColors = (): { [k in RiskSeverity]: string } => {
     // TODO: update these with V9.0.0 severity palette colors when available / keep if the below are  updated with the palette
     [RiskSeverity.Low]: euiTheme.flags.hasVisColorAdjustment
       ? '#54B399'
-      : euiTheme.colors.vis.euiColorVisSuccess0,
+      : euiTheme.colors.vis.euiColorVis0,
     [RiskSeverity.Moderate]: euiTheme.flags.hasVisColorAdjustment
       ? '#D6BF57'
-      : euiTheme.colors.vis.euiColorVis9,
+      : euiTheme.colors.vis.euiColorVis5,
     [RiskSeverity.High]: euiTheme.flags.hasVisColorAdjustment
       ? '#DA8B45'
-      : euiTheme.colors.vis.euiColorVisWarm1,
+      : euiTheme.colors.vis.euiColorVis7,
     [RiskSeverity.Critical]: euiTheme.flags.hasVisColorAdjustment
       ? '#E7664C'
-      : euiTheme.colors.vis.euiColorVis6,
+      : euiTheme.colors.vis.euiColorVis9,
   };
 };
 
