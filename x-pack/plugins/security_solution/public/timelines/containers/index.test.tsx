@@ -6,7 +6,7 @@
  */
 
 import { DataLoadingState } from '@kbn/unified-data-table';
-import { act, waitFor, renderHook } from '@testing-library/react';
+import { act, renderHook } from '@testing-library/react-hooks';
 import type { TimelineArgs, UseTimelineEventsProps } from '.';
 import * as useTimelineEventsModule from '.';
 import { SecurityPageName } from '../../../common/constants';
@@ -16,6 +16,7 @@ import { useRouteSpy } from '../../common/utils/route/use_route_spy';
 import { useFetchNotes } from '../../notes/hooks/use_fetch_notes';
 import { useKibana } from '../../common/lib/kibana';
 import { getMockTimelineSearchSubscription } from '../../common/mock/mock_timeline_search_service';
+import { waitFor } from '@testing-library/dom';
 
 const { initSortDefault, useTimelineEvents } = useTimelineEventsModule;
 
@@ -154,7 +155,7 @@ describe('useTimelineEventsHandler', () => {
   });
 
   test('should make events search request correctly', async () => {
-    const { result } = renderHook<[DataLoadingState, TimelineArgs], UseTimelineEventsProps>(
+    const { result } = renderHook<UseTimelineEventsProps, [DataLoadingState, TimelineArgs]>(
       (args) => useTimelineEvents(args),
       {
         initialProps: props,
@@ -188,8 +189,8 @@ describe('useTimelineEventsHandler', () => {
 
   test('should mock cache for active timeline when switching page', async () => {
     const { result, rerender } = renderHook<
-      [DataLoadingState, TimelineArgs],
-      UseTimelineEventsProps
+      UseTimelineEventsProps,
+      [DataLoadingState, TimelineArgs]
     >((args) => useTimelineEvents(args), {
       initialProps: props,
     });
@@ -231,8 +232,8 @@ describe('useTimelineEventsHandler', () => {
 
   test('Correlation pagination is calling search strategy when switching page', async () => {
     const { result, rerender } = renderHook<
-      [DataLoadingState, TimelineArgs],
-      UseTimelineEventsProps
+      UseTimelineEventsProps,
+      [DataLoadingState, TimelineArgs]
     >((args) => useTimelineEvents(args), {
       initialProps: {
         ...props,
