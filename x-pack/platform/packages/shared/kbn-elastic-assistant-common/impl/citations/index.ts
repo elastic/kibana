@@ -6,4 +6,4 @@
  */
 
 export { getCitationElement } from './citationElement';
-export type { CitationElement } from './types'
+export type { CitationElement } from './types';

@@ -61,7 +61,13 @@ const mockDataViews = {
   getExistingIndices: jest.fn().mockResolvedValue(['index-2']),
 } as unknown as DataViewsContract;
 const queryClient = new QueryClient();
-const Wrapper = ({ children, history = createMemoryHistory() }: { children: React.ReactNode, history?: History }) => (
+const Wrapper = ({
+  children,
+  history = createMemoryHistory(),
+}: {
+  children: React.ReactNode;
+  history?: History;
+}) => (
   <I18nProvider>
     <Router history={history}>
       <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
@@ -218,14 +224,18 @@ describe('KnowledgeBaseSettingsManagement', () => {
 
   it('uses entry_search_term as default query', async () => {
     const rawHistory = createMemoryHistory({
-      initialEntries: ['/example?entry_search_term=testQuery']
+      initialEntries: ['/example?entry_search_term=testQuery'],
     });
     const { container } = render(<KnowledgeBaseSettingsManagement dataViews={mockDataViews} />, {
-      wrapper: props => <Wrapper history={rawHistory}>{props.children}</Wrapper>,
+      wrapper: (props) => <Wrapper history={rawHistory}>{props.children}</Wrapper>,
     });
     waitFor(() => {
       expect(screen.getByTestId('knowledge-base-entries-table')).toBeInTheDocument();
-      expect(container.querySelector('input[type=search][placeholder="Search for an entry"]')?.getAttribute('value')).toEqual('testQuery')
+      expect(
+        container
+          .querySelector('input[type=search][placeholder="Search for an entry"]')
+          ?.getAttribute('value')
+      ).toEqual('testQuery');
     });
   });
 
