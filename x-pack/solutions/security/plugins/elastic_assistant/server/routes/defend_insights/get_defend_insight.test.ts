@@ -23,6 +23,7 @@ import {
 import { serverMock } from '../../__mocks__/server';
 import { isDefendInsightsEnabled, updateDefendInsightLastViewedAt } from './helpers';
 import { getDefendInsightRoute } from './get_defend_insight';
+import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 
 jest.mock('./helpers');
 
@@ -71,6 +72,20 @@ describe('getDefendInsightRoute', () => {
 
   afterEach(() => {
     jest.clearAllMocks();
+  });
+
+  it('Insufficient license', async () => {
+    const insufficientLicense = licensingMock.createLicense({ license: { type: 'basic' } });
+    const tools = requestContextMock.createTools();
+    tools.context.licensing.license = insufficientLicense;
+    jest.spyOn(insufficientLicense, 'hasAtLeast').mockReturnValue(false);
+
+    await expect(
+      server.inject(
+        getDefendInsightRequest('insight-id1'),
+        requestContextMock.convertContext(tools.context)
+      )
+    ).rejects.toThrowError('Encountered unexpected call to response.forbidden');
   });
 
   it('should handle successful request', async () => {
