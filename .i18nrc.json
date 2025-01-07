@@ -20,7 +20,7 @@
     "cloud": "src/platform/packages/shared/cloud",
     "domDragDrop": "packages/kbn-dom-drag-drop",
     "controls": "src/platform/plugins/shared/controls",
-    "data": "src/plugins/data",
+    "data": "src/platform/plugins/shared/data",
     "observabilityAlertDetails": "x-pack/solutions/observability/packages/alert_details",
     "dataViews": "src/platform/plugins/shared/data_views",
     "defaultNavigation": ["packages/default-nav", "src/platform/packages/private/default-nav"],

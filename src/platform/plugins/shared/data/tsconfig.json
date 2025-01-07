@@ -1,5 +1,5 @@
 {
-  "extends": "../../../tsconfig.base.json",
+  "extends": "../../../../../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "target/types",
   },
@@ -10,7 +10,7 @@
     "config.mock.ts",
     "common/**/*.json",
     "public/**/*.json",
-    "../../../typings/index.d.ts"
+    "../../../../../typings/index.d.ts"
   ],
   "kbn_references": [
     "@kbn/core",

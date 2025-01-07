@@ -29,7 +29,7 @@ export const storybookAliases = {
   custom_integrations: 'src/platform/plugins/shared/custom_integrations/storybook',
   dashboard_enhanced: 'x-pack/platform/plugins/shared/dashboard_enhanced/.storybook',
   dashboard: 'src/platform/plugins/shared/dashboard/.storybook',
-  data: 'src/plugins/data/.storybook',
+  data: 'src/platform/plugins/shared/data/.storybook',
   discover: 'src/platform/plugins/shared/discover/.storybook',
   esql_ast_inspector: 'examples/esql_ast_inspector/.storybook',
   es_ui_shared: 'src/platform/plugins/shared/es_ui_shared/.storybook',

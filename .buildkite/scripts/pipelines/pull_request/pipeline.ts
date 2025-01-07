@@ -70,7 +70,7 @@ const getPipeline = (filename: string, removeSteps = true) => {
 
     if (
       (await doAnyChangesMatch([
-        /^src\/plugins\/data/,
+        /^src\/platform\/plugins\/shared\/data/,
         /^x-pack\/platform\/plugins\/shared\/actions/,
         /^x-pack\/platform\/plugins\/shared\/alerting/,
         /^x-pack\/platform\/plugins\/shared\/event_log/,
@@ -334,7 +334,7 @@ const getPipeline = (filename: string, removeSteps = true) => {
         /^src\/core/,
         /^src\/platform\/plugins\/shared\/charts/,
         /^src\/platform\/plugins\/shared\/controls/,
-        /^src\/plugins\/data/,
+        /^src\/platform\/plugins\/shared\/data/,
         /^src\/platform\/plugins\/shared\/data_views/,
         /^src\/platform\/plugins\/shared\/discover/,
         /^src\/platform\/plugins\/shared\/field_formats/,
