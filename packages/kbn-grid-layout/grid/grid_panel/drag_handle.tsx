@@ -14,12 +14,14 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import {
   GridLayoutStateManager,
+  GridPanelData,
   PanelInteractionEvent,
   UserInteractionEvent,
   UserMouseEvent,
   UserTouchEvent,
 } from '../types';
 import { isMouseEvent, isTouchEvent } from '../utils/sensors';
+import { calculateUserEvent, getPointerClientPosition } from '../use_grid_layout_events';
 
 export interface DragHandleApi {
   setDragHandles: (refs: Array<HTMLElement | null>) => void;
@@ -37,9 +39,37 @@ export const DragHandle = React.forwardRef<
 >(({ gridLayoutStateManager, interactionStart }, ref) => {
   const { euiTheme } = useEuiTheme();
 
+  const pointerClientPosition = useRef({ x: 0, y: 0 });
+  const lastRequestedPanelPosition = useRef<GridPanelData | undefined>(undefined);
+
   const removeEventListenersRef = useRef<(() => void) | null>(null);
   const [dragHandleCount, setDragHandleCount] = useState<number>(0);
   const dragHandleRefs = useRef<Array<HTMLElement | null>>([]);
+
+  const onPointerMove = useCallback(
+    (e: UserTouchEvent) => {
+      // Note: When an item is being interacted with, `mousemove` events continue to be fired, even when the
+      // mouse moves out of the window (i.e. when a panel is being dragged around outside the window).
+      if (!isTouchEvent(e)) {
+        return;
+      }
+      pointerClientPosition.current = getPointerClientPosition(e);
+      e.preventDefault();
+      e.stopPropagation();
+      calculateUserEvent(e, gridLayoutStateManager, {
+        pointerClientPosition,
+        lastRequestedPanelPosition,
+      });
+    },
+    [gridLayoutStateManager]
+  );
+
+  const onDragEnd = useCallback(
+    (e: UserTouchEvent | UserMouseEvent) => {
+      interactionStart('drop', e);
+    },
+    [interactionStart]
+  );
 
   /**
    * We need to memoize the `onDragStart`, `onTouchStart` and `onTouchEnd` callbacks so that we don't assign a new event handler
@@ -49,6 +79,17 @@ export const DragHandle = React.forwardRef<
     (e: UserMouseEvent | UserTouchEvent) => {
       // ignore when not in edit mode
       if (gridLayoutStateManager.accessMode$.getValue() !== 'EDIT') return;
+
+      if (isTouchEvent(e) && e.target) {
+        const onTouchEnd = () => {
+          onDragEnd(e);
+          if (!e.target) return;
+          e.target.removeEventListener('touchmove', onPointerMove);
+          e.target.removeEventListener('touchend', onTouchEnd);
+        };
+        e.target.addEventListener('touchmove', onPointerMove);
+        e.target.addEventListener('touchend', onTouchEnd);
+      }
 
       // ignore anything but left clicks for mouse events
       if (isMouseEvent(e) && e.button !== 0) {
@@ -61,15 +102,7 @@ export const DragHandle = React.forwardRef<
       e.stopPropagation();
       interactionStart('drag', e);
     },
-    [interactionStart, gridLayoutStateManager.accessMode$]
-  );
-
-  const onDragEnd = useCallback(
-    (e: UserTouchEvent | UserMouseEvent) => {
-      e.stopPropagation();
-      interactionStart('drop', e);
-    },
-    [interactionStart]
+    [interactionStart, onDragEnd, gridLayoutStateManager.accessMode$, onPointerMove]
   );
 
   const setDragHandles = useCallback(
@@ -84,7 +117,6 @@ export const DragHandle = React.forwardRef<
         if (handle === null) return;
         handle.addEventListener('mousedown', onDragStart, { passive: true });
         handle.addEventListener('touchstart', onDragStart, { passive: false });
-        handle.addEventListener('touchend', onDragEnd, { passive: true });
       }
 
       removeEventListenersRef.current = () => {
@@ -92,11 +124,10 @@ export const DragHandle = React.forwardRef<
           if (handle === null) return;
           handle.removeEventListener('mousedown', onDragStart);
           handle.removeEventListener('touchstart', onDragStart);
-          handle.removeEventListener('touchend', onDragEnd);
         }
       };
     },
-    [onDragStart, onDragEnd, gridLayoutStateManager.accessMode$]
+    [onDragStart, gridLayoutStateManager.accessMode$]
   );
 
   useEffect(() => {
@@ -156,7 +187,6 @@ export const DragHandle = React.forwardRef<
       onMouseDown={onDragStart}
       onMouseUp={onDragEnd}
       onTouchStart={onDragStart}
-      onTouchEnd={onDragEnd}
     >
       <EuiIcon type="grabOmnidirectional" />
     </button>
