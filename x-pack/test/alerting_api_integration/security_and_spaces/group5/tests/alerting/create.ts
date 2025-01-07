@@ -8,6 +8,10 @@
 import expect from '@kbn/expect';
 import { RULE_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server';
 import { ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
+import {
+  SENTINELONE_CONNECTOR_ID,
+  SUB_ACTION,
+} from '@kbn/stack-connectors-plugin/common/sentinelone/constants';
 import { systemActionScenario, UserAtSpaceScenarios } from '../../../scenarios';
 import {
   checkAAD,
@@ -596,6 +600,74 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
             case 'system_actions at space1':
               expect(response.statusCode).to.eql(200);
               objectRemover.add(space.id, response.body.id, 'rule', 'alerting');
+              break;
+            default:
+              throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
+          }
+        });
+
+        it('should handle create alert request appropriately with Endpoint Security actions', async () => {
+          let response = await supertest
+            .post(`${getUrlPrefix(space.id)}/api/actions/connector`)
+            .set('kbn-xsrf', 'foo')
+            .send({
+              name: 'My sub connector',
+              connector_type_id: SENTINELONE_CONNECTOR_ID,
+              config: { url: 'https://some.non.existent.com' },
+              secrets: { token: 'abc-123' },
+            })
+            .expect(200);
+          const connectorId = response.body.id;
+
+          response = await supertestWithoutAuth
+            .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
+            .set('kbn-xsrf', 'foo')
+            .auth(user.username, user.password)
+            .send(
+              getTestRuleData({
+                actions: [
+                  {
+                    id: connectorId,
+                    group: 'default',
+                    params: {
+                      subAction: SUB_ACTION.GET_AGENTS,
+                      subActionParams: {},
+                    },
+                  },
+                ],
+              })
+            );
+
+          switch (scenario.id) {
+            case 'no_kibana_privileges at space1':
+            case 'global_read at space1':
+            case 'space_1_all at space2':
+              expect(response.statusCode).to.eql(403);
+              expect(response.body).to.eql({
+                error: 'Forbidden',
+                message: getUnauthorizedErrorMessage('create', 'test.noop', 'alertsFixture'),
+                statusCode: 403,
+              });
+              break;
+            case 'space_1_all_alerts_none_actions at space1':
+              expect(response.statusCode).to.eql(403);
+              expect(response.body).to.eql({
+                error: 'Forbidden',
+                message: 'Unauthorized to get actions',
+                statusCode: 403,
+              });
+              break;
+            case 'space_1_all at space1':
+            case 'space_1_all_with_restricted_fixture at space1':
+            case 'superuser at space1':
+            case 'system_actions at space1':
+              expect(response.statusCode).to.eql(400);
+              expect(response.body).to.eql({
+                error: 'Bad Request',
+                message:
+                  'Failed to validate actions due to the following error: Endpoint security connectors cannot be used as alerting actions',
+                statusCode: 400,
+              });
               break;
             default:
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
