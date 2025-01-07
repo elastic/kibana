@@ -965,7 +965,7 @@
     "@kbn/timelines-plugin": "link:x-pack/solutions/security/plugins/timelines",
     "@kbn/timelion-grammar": "link:src/platform/packages/private/kbn-timelion-grammar",
     "@kbn/timerange": "link:src/platform/packages/shared/kbn-timerange",
-    "@kbn/tinymath": "link:packages/kbn-tinymath",
+    "@kbn/tinymath": "link:src/platform/packages/private/kbn-tinymath",
     "@kbn/transform-plugin": "link:x-pack/platform/plugins/private/transform",
     "@kbn/translations-plugin": "link:x-pack/platform/plugins/private/translations",
     "@kbn/transpose-utils": "link:packages/kbn-transpose-utils",
