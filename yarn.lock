@@ -4129,7 +4129,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/charts-plugin@link:src/plugins/charts":
+"@kbn/charts-plugin@link:src/platform/plugins/shared/charts":
   version "0.0.0"
   uid ""
 

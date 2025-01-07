@@ -206,7 +206,7 @@
     "@kbn/cell-actions": "link:src/platform/packages/shared/kbn-cell-actions",
     "@kbn/chart-expressions-common": "link:src/platform/packages/shared/chart-expressions-common",
     "@kbn/chart-icons": "link:src/platform/packages/shared/kbn-chart-icons",
-    "@kbn/charts-plugin": "link:src/plugins/charts",
+    "@kbn/charts-plugin": "link:src/platform/plugins/shared/charts",
     "@kbn/charts-theme": "link:packages/kbn-charts-theme",
     "@kbn/cloud": "link:src/platform/packages/shared/cloud",
     "@kbn/cloud-chat-plugin": "link:x-pack/platform/plugins/private/cloud_integrations/cloud_chat",
