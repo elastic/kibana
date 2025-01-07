@@ -11,7 +11,7 @@ import { join } from 'path';
 import { existsSync } from 'fs';
 import { rename, mkdir, rm } from 'fs/promises';
 import inquirer from 'inquirer';
-import { orderBy } from 'lodash';
+import { sortBy } from 'lodash';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { getPackages } from '@kbn/repo-packages';
 import { REPO_ROOT } from '@kbn/repo-info';
@@ -104,8 +104,8 @@ const findModules = ({ teams, paths, included, excluded }: FindModulesParams, lo
   const modules = getPackages(REPO_ROOT);
 
   // find modules selected by user filters
-  return orderBy(
-    modules
+  return (
+    sortBy(modules, ['directory'])
       // exclude devOnly modules (they will remain in /packages)
       .filter(({ manifest }) => !manifest.devOnly)
       // explicit exclusions
