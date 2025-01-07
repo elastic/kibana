@@ -208,7 +208,10 @@ const includedHiddenTypes = [
   CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
 ];
 
-export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartContract> {
+export class ActionsPlugin
+  implements
+    Plugin<PluginSetupContract, PluginStartContract, ActionsPluginsSetup, ActionsPluginsStart>
+{
   private readonly logger: Logger;
   private readonly actionsConfig: ActionsConfig;
   private taskRunnerFactory?: TaskRunnerFactory;
@@ -237,7 +240,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
   }
 
   public setup(
-    core: CoreSetup<ActionsPluginsStart>,
+    core: CoreSetup<ActionsPluginsStart, PluginStartContract>,
     plugins: ActionsPluginsSetup
   ): PluginSetupContract {
     this.licenseState = new LicenseState(plugins.licensing.license$);
