@@ -64,7 +64,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
             it('index details - edit settings', async () => {
               await PageObjects.searchIndexDetail.changeTab('settingsTab');
-              await PageObjects.searchIndexDetail.clickIndexDetailsEditSettingsSwitch();
+              await PageObjects.indexManagement.clickIndexDetailsEditSettingsSwitch();
               await a11y.testAppSnapshot();
             });
 
