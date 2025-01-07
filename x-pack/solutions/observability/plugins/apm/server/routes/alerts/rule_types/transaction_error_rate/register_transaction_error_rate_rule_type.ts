@@ -33,6 +33,7 @@ import {
 import { ObservabilityApmAlert } from '@kbn/alerts-as-data-utils';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
 import { asyncForEach } from '@kbn/std';
+import { transactionErrorRateParamsSchema } from '@kbn/response-ops-rule-params/transaction_error_rate';
 import { SearchAggregatedTransactionSetting } from '../../../../../common/aggregated_transactions';
 import { getEnvironmentEsField } from '../../../../../common/environment_filter_values';
 import {
@@ -49,11 +50,8 @@ import {
   formatTransactionErrorRateReason,
   RULE_TYPES_CONFIG,
   THRESHOLD_MET_GROUP,
-} from '../../../../../common/rules/apm_rule_types';
-import {
-  transactionErrorRateParamsSchema,
   ApmRuleParamsType,
-} from '../../../../../common/rules/schema';
+} from '../../../../../common/rules/apm_rule_types';
 import { environmentQuery } from '../../../../../common/utils/environment_query';
 import { asDecimalOrInteger, getAlertUrlTransaction } from '../../../../../common/utils/formatters';
 import { getBackwardCompatibleDocumentTypeFilter } from '../../../../lib/helpers/transactions';
