@@ -188,7 +188,7 @@ for use in their own application.
 |Expression Tagcloud plugin adds a tagcloud renderer and function to the expression plugin. The renderer will display the Wordcloud chart.
 
 
-|{kib-repo}blob/{branch}/src/plugins/chart_expressions/expression_xy/README.md[expressionXY]
+|{kib-repo}blob/{branch}/src/platform/plugins/shared/chart_expressions/expression_xy/README.md[expressionXY]
 |Expression XY plugin adds a xy renderer and function to the expression plugin. The renderer will display the xy chart.
 
 

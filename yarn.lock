@@ -5701,7 +5701,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/expression-xy-plugin@link:src/plugins/chart_expressions/expression_xy":
+"@kbn/expression-xy-plugin@link:src/platform/plugins/shared/chart_expressions/expression_xy":
   version "0.0.0"
   uid ""
 
