@@ -6,7 +6,7 @@
  */
 
 import type { EntityAnalyticsMigrationsParams } from '.';
-import { AssetCriticalityEcsMigrationClient } from '../asset_criticality/asset_criticality_migration_client';
+import { AssetCriticalityMigrationClient } from '../asset_criticality/asset_criticality_migration_client';
 
 const TASK_TYPE = 'security-solution-ea-asset-criticality-copy-timestamp-to-event-ingested';
 const TASK_ID = `${TASK_TYPE}-task-id`;
@@ -69,7 +69,7 @@ export const createMigrationTask =
         abortController = new AbortController();
         const [coreStart] = await getStartServices();
         const esClient = coreStart.elasticsearch.client.asInternalUser;
-        const assetCrticalityClient = new AssetCriticalityEcsMigrationClient({
+        const assetCrticalityClient = new AssetCriticalityMigrationClient({
           esClient,
           logger,
           auditLogger,
