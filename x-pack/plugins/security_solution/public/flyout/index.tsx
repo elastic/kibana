@@ -39,7 +39,7 @@ import type { HostPanelExpandableFlyoutProps } from './entity_details/host_right
 import { HostPanel, HostPanelKey, HostPreviewPanelKey } from './entity_details/host_right';
 import type { HostDetailsExpandableFlyoutProps } from './entity_details/host_details_left';
 import { HostDetailsPanel, HostDetailsPanelKey } from './entity_details/host_details_left';
-import { NetworkPanel, NetworkPanelKey } from './network_details';
+import { NetworkPanel, NetworkPanelKey, NetworkPreviewPanelKey } from './network_details';
 import type { AnalyzerPanelExpandableFlyoutProps } from './document_details/analyzer_panels';
 import { AnalyzerPanel } from './document_details/analyzer_panels';
 
@@ -139,6 +139,12 @@ const expandableFlyoutDocumentsPanels: ExpandableFlyoutProps['registeredPanels']
   {
     key: NetworkPanelKey,
     component: (props) => <NetworkPanel {...(props as NetworkExpandableFlyoutProps).params} />,
+  },
+  {
+    key: NetworkPreviewPanelKey,
+    component: (props) => (
+      <NetworkPanel {...(props as NetworkExpandableFlyoutProps).params} isPreviewMode />
+    ),
   },
 ];
 

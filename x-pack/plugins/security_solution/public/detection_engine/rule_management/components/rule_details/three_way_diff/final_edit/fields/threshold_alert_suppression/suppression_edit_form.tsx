@@ -13,12 +13,12 @@ import {
 import { ALERT_SUPPRESSION_DURATION_FIELD_NAME } from '../../../../../../../rule_creation/components/alert_suppression_edit';
 import { type FormData } from '../../../../../../../../shared_imports';
 import type { ThresholdAlertSuppression } from '../../../../../../../../../common/api/detection_engine';
-import { RuleFieldEditFormWrapper } from '../rule_field_edit_form_wrapper';
+import { RuleFieldEditFormWrapper } from '../../../field_final_side';
 import {
   thresholdAlertSuppressionFormSchema,
   type ThresholdAlertSuppressionFormData,
 } from './form_schema';
-import type { RuleFieldEditComponentProps } from '../rule_field_edit_component_props';
+import type { RuleFieldEditComponentProps } from '../../../field_final_side';
 
 export function ThresholdAlertSuppressionEditForm(): JSX.Element {
   return (

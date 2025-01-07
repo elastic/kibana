@@ -29,7 +29,6 @@
     "@kbn/actions-plugin",
     "@kbn/core-notifications-browser",
     "@kbn/i18n-react",
-    "@kbn/ui-theme",
     "@kbn/core-doc-links-browser",
     "@kbn/core",
     "@kbn/zod",

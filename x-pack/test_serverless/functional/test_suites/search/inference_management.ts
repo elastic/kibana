@@ -37,10 +37,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await pageObjects.svlCommonPage.loginWithRole('developer');
     });
 
-    after(async () => {
-      await ml.api.cleanMlIndices();
-    });
-
     beforeEach(async () => {
       await svlSearchNavigation.navigateToInferenceManagementPage();
     });

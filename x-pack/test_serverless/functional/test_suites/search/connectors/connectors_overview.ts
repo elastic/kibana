@@ -19,7 +19,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
 
-  describe('connectors', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/203477
+  describe.skip('connectors', function () {
     before(async () => {
       await pageObjects.svlSearchConnectorsPage.helpers.deleteAllConnectors();
       await pageObjects.svlCommonPage.loginWithRole('developer');

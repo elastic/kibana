@@ -18,8 +18,8 @@ export const createStatusColumn = (): TableColumn => {
     render: (value: RuleMigration['translation_result'], rule: RuleMigration) => (
       <StatusBadge value={value} installedRuleId={rule.elastic_rule?.id} />
     ),
-    sortable: false,
+    sortable: true,
     truncateText: true,
-    width: '12%',
+    width: '15%',
   };
 };

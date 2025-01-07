@@ -141,6 +141,35 @@ describe('commands', () => {
       ]);
     });
 
+    it('KEEP (with param)', () => {
+      const query = 'FROM index | KEEP abc, ?param';
+      const { ast } = parse(query);
+
+      expect(ast).toMatchObject([
+        {},
+        {
+          type: 'command',
+          name: 'keep',
+          args: [
+            {
+              type: 'column',
+              name: 'abc',
+            },
+            {
+              type: 'column',
+              args: [
+                {
+                  type: 'literal',
+                  literalType: 'param',
+                  value: 'param',
+                },
+              ],
+            },
+          ],
+        },
+      ]);
+    });
+
     it('SORT', () => {
       const query = 'FROM index | SORT 1';
       const { ast } = parse(query);

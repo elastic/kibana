@@ -83,9 +83,4 @@ describe('<AlertHeaderTitle />', () => {
     const { getByTestId } = renderHeader(mockContextValue);
     expect(getByTestId(NOTES_TITLE_TEST_ID)).toBeInTheDocument();
   });
-
-  it('should render fall back values if document is not alert', () => {
-    const { getByTestId } = renderHeader({ ...mockContextValue, dataFormattedForFieldBrowser: [] });
-    expect(getByTestId(HEADER_TEXT_TEST_ID)).toHaveTextContent('Document details');
-  });
 });

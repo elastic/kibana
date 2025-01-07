@@ -11,6 +11,7 @@ components:
       enum:
         - user
         - host
+        - service
 
     EngineDescriptor:
       type: object

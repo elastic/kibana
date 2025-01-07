@@ -22,10 +22,20 @@ export class LogEntriesService {
     setupDeps: LogEntriesServiceSetupDeps
   ) {
     void core.getStartServices().then(([, startDeps, selfStartDeps]) => {
+      /**
+       * @deprecated
+       *
+       * Given the deprecation of the LogStream feature, this API will not return reliable data in upcoming versions of Kibana.
+       */
       setupDeps.data.search.registerSearchStrategy(
         LOG_ENTRIES_SEARCH_STRATEGY,
         logEntriesSearchStrategyProvider({ ...setupDeps, ...startDeps, ...selfStartDeps })
       );
+      /**
+       * @deprecated
+       *
+       * Given the deprecation of the LogStream feature, this API will not return reliable data in upcoming versions of Kibana.
+       */
       setupDeps.data.search.registerSearchStrategy(
         LOG_ENTRY_SEARCH_STRATEGY,
         logEntrySearchStrategyProvider({ ...setupDeps, ...startDeps, ...selfStartDeps })

@@ -14,7 +14,7 @@ import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import type { EventFieldsData } from '../../../../common/components/event_details/types';
 import { TableFieldValueCell } from './table_field_value_cell';
 import { TestProviders } from '../../../../common/mock';
-import { NetworkPanelKey, NETWORK_PREVIEW_BANNER } from '../../../network_details';
+import { NetworkPreviewPanelKey, NETWORK_PREVIEW_BANNER } from '../../../network_details';
 import { mockFlyoutApi } from '../../shared/mocks/mock_flyout_context';
 import { FLYOUT_TABLE_PREVIEW_LINK_FIELD_TEST_ID } from './test_ids';
 import { createTelemetryServiceMock } from '../../../../common/lib/telemetry/telemetry_service.mock';
@@ -217,10 +217,11 @@ describe('TableFieldValueCell', () => {
       screen.getByTestId(`${FLYOUT_TABLE_PREVIEW_LINK_FIELD_TEST_ID}-0`).click();
 
       expect(mockFlyoutApi.openPreviewPanel).toHaveBeenCalledWith({
-        id: NetworkPanelKey,
+        id: NetworkPreviewPanelKey,
         params: {
           ip: '127.0.0.1',
           flowTarget: 'source',
+          scopeId: 'scopeId',
           banner: NETWORK_PREVIEW_BANNER,
         },
       });

@@ -36,7 +36,7 @@ export const AIOPS_EMBEDDABLE_GROUPING = [
     id: 'logs-aiops',
     getDisplayName: () =>
       i18n.translate('xpack.aiops.embedabble.groupingDisplayName', {
-        defaultMessage: 'Logs AIOps',
+        defaultMessage: 'Log analysis',
       }),
     getIconType: () => 'machineLearningApp',
   },

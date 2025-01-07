@@ -26,8 +26,10 @@ export const getEvaluateRoute = (router: IRouter<ElasticAssistantRequestHandlerC
     .get({
       access: INTERNAL_API_ACCESS,
       path: ELASTIC_AI_ASSISTANT_EVALUATE_URL,
-      options: {
-        tags: ['access:elasticAssistant'],
+      security: {
+        authz: {
+          requiredPrivileges: ['elasticAssistant'],
+        },
       },
     })
     .addVersion(

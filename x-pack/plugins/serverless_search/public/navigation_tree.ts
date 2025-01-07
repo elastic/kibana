@@ -72,7 +72,7 @@ export const navigationTree = ({ isAppRegistered }: ApplicationStart): Navigatio
                 title: i18n.translate('xpack.serverlessSearch.nav.devTools', {
                   defaultMessage: 'Dev Tools',
                 }),
-                link: 'dev_tools',
+                link: 'dev_tools:console',
                 getIsActive: ({ pathNameSerialized, prepend }) => {
                   return pathNameSerialized.startsWith(prepend('/app/dev_tools'));
                 },

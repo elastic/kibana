@@ -228,7 +228,7 @@ const getDegradedFieldsColumns = (): Array<EuiBasicTableColumn<DegradedField>> =
     sortable: true,
     field: 'values',
     render: (values: string[]) => {
-      return values.map((value, idx) => <EuiBadge key={idx}>{value}</EuiBadge>);
+      return values.map((value, idx) => <EuiBadge key={idx}>{JSON.stringify(value)}</EuiBadge>);
     },
   },
 ];

@@ -9,6 +9,7 @@ paths:
       operationId: ReadAlertsMigrationStatus
       x-codegen-enabled: true
       summary: Retrieve the status of detection alert migrations
+      deprecated: true
       description: Retrieve indices that contain detection alerts of a particular age, along with migration information for each of those indices.
       tags:
         - Alerts migration API

@@ -42,9 +42,13 @@ export const postDefendInsightsRoute = (router: IRouter<ElasticAssistantRequestH
       access: 'internal',
       path: DEFEND_INSIGHTS,
       options: {
-        tags: ['access:elasticAssistant'],
         timeout: {
           idleSocket: ROUTE_HANDLER_TIMEOUT,
+        },
+      },
+      security: {
+        authz: {
+          requiredPrivileges: ['elasticAssistant'],
         },
       },
     })

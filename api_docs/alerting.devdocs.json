@@ -110,7 +110,7 @@
           "references": [
             {
               "plugin": "ml",
-              "path": "x-pack/plugins/ml/public/alerting/register_ml_alerts.ts"
+              "path": "x-pack/platform/plugins/shared/ml/public/alerting/register_ml_alerts.ts"
             },
             {
               "plugin": "stackAlerts",

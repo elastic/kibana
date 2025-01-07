@@ -128,28 +128,26 @@ export function syntheticsAppPageProvider({
     },
 
     async deleteMonitors() {
-      let isSuccessful: boolean = false;
-      while (true) {
-        if (
-          !(await page.isVisible(this.byTestId('euiCollapsedItemActionsButton'), { timeout: 0 }))
-        ) {
-          isSuccessful = true;
-          break;
-        }
-        await page.click(this.byTestId('euiCollapsedItemActionsButton'), {
-          delay: 800,
-          force: true,
-        });
-        await page.click(`.euiContextMenuPanel ${this.byTestId('syntheticsMonitorDeleteAction')}`, {
-          delay: 800,
-        });
-        await page.waitForSelector('[data-test-subj="confirmModalTitleText"]');
-        await this.clickByTestSubj('confirmModalConfirmButton');
-        isSuccessful = Boolean(await this.findByTestSubj('uptimeDeleteMonitorSuccess'));
-        await this.navigateToMonitorManagement();
-        await page.waitForTimeout(5 * 1000);
+      if (!page.url().includes('monitors/management')) {
+        return true;
       }
-      return isSuccessful;
+      await page.getByTestId('euiCollapsedItemActionsButton').first().click();
+      await page.click(`.euiContextMenuPanel ${this.byTestId('syntheticsMonitorDeleteAction')}`, {
+        delay: 800,
+      });
+      await page.waitForSelector('[data-test-subj="confirmModalTitleText"]');
+      await page.getByTestId('confirmModalConfirmButton').click();
+      await page.getByTestId('uptimeDeleteMonitorSuccess').click();
+      await page.getByTestId('syntheticsRefreshButtonButton').click();
+
+      await page.getByTestId('checkboxSelectAll').click();
+      await page
+        .getByTestId('syntheticsBulkOperationPopoverClickMeToLoadAContextMenuButton')
+        .click();
+
+      await page.getByTestId('confirmModalConfirmButton').click();
+
+      return true;
     },
 
     async navigateToEditMonitor(monitorName: string) {
@@ -387,6 +385,7 @@ export function syntheticsAppPageProvider({
         await button?.click();
       }
     },
+
     async checkIsEnabled() {
       await page.waitForTimeout(5 * 1000);
       const addMonitorBtn = await this.getAddMonitorButton();

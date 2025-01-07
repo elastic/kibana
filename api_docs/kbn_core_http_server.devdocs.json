@@ -4026,6 +4026,10 @@
                 "path": "x-pack/plugins/rule_registry/server/routes/get_aad_fields_by_rule_type.ts"
               },
               {
+                "plugin": "inference",
+                "path": "x-pack/plugins/inference/server/routes/connectors.ts"
+              },
+              {
                 "plugin": "assetInventory",
                 "path": "x-pack/plugins/asset_inventory/server/routes/index.ts"
               },
@@ -4188,10 +4192,6 @@
               {
                 "plugin": "triggersActionsUi",
                 "path": "x-pack/plugins/triggers_actions_ui/server/routes/config.ts"
-              },
-              {
-                "plugin": "inference",
-                "path": "x-pack/plugins/inference/server/routes/connectors.ts"
               },
               {
                 "plugin": "productDocBase",
@@ -4864,6 +4864,10 @@
               {
                 "plugin": "snapshotRestore",
                 "path": "x-pack/plugins/snapshot_restore/server/routes/api/restore.ts"
+              },
+              {
+                "plugin": "snapshotRestore",
+                "path": "x-pack/plugins/snapshot_restore/server/routes/api/policy.ts"
               },
               {
                 "plugin": "snapshotRestore",
@@ -6748,6 +6752,14 @@
                 "path": "x-pack/plugins/rule_registry/server/routes/get_alert_summary.ts"
               },
               {
+                "plugin": "inference",
+                "path": "x-pack/plugins/inference/server/routes/chat_complete.ts"
+              },
+              {
+                "plugin": "inference",
+                "path": "x-pack/plugins/inference/server/routes/chat_complete.ts"
+              },
+              {
                 "plugin": "savedObjectsTagging",
                 "path": "x-pack/plugins/saved_objects_tagging/server/routes/tags/create_tag.ts"
               },
@@ -6878,14 +6890,6 @@
               {
                 "plugin": "triggersActionsUi",
                 "path": "x-pack/plugins/triggers_actions_ui/server/data/routes/indices.ts"
-              },
-              {
-                "plugin": "inference",
-                "path": "x-pack/plugins/inference/server/routes/chat_complete.ts"
-              },
-              {
-                "plugin": "inference",
-                "path": "x-pack/plugins/inference/server/routes/chat_complete.ts"
               },
               {
                 "plugin": "productDocBase",
@@ -15458,10 +15462,6 @@
                 "path": "x-pack/plugins/data_usage/server/routes/internal/data_streams.ts"
               },
               {
-                "plugin": "dataVisualizer",
-                "path": "x-pack/plugins/data_visualizer/server/routes.ts"
-              },
-              {
                 "plugin": "ecsDataQualityDashboard",
                 "path": "x-pack/plugins/ecs_data_quality_dashboard/server/routes/get_index_mappings.ts"
               },
@@ -15483,243 +15483,243 @@
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/notifications.ts"
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/notifications.ts"
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/notifications.ts"
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/notifications.ts"
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/trained_models.ts"
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/trained_models.ts"
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/trained_models.ts"
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/trained_models.ts"
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/trained_models.ts"
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/trained_models.ts"
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/trained_models.ts"
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/trained_models.ts"
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/trained_models.ts"
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/trained_models.ts"
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/trained_models.ts"
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/trained_models.ts"
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/trained_models.ts"
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/trained_models.ts"
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/trained_models.ts"
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/trained_models.ts"
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/trained_models.ts"
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/trained_models.ts"
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/trained_models.ts"
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/trained_models.ts"
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/calendars.ts"
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/calendars.ts"
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/calendars.ts"
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/calendars.ts"
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/datafeeds.ts"
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/datafeeds.ts"
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/datafeeds.ts"
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/datafeeds.ts"
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/datafeeds.ts"
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/datafeeds.ts"
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/datafeeds.ts"
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/datafeeds.ts"
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/datafeeds.ts"
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/datafeeds.ts"
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/data_frame_analytics.ts"
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/data_frame_analytics.ts"
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/data_frame_analytics.ts"
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/data_frame_analytics.ts"
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/data_frame_analytics.ts"
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/data_frame_analytics.ts"
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/data_frame_analytics.ts"
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/data_frame_analytics.ts"
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/data_frame_analytics.ts"
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/data_frame_analytics.ts"
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/data_frame_analytics.ts"
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/data_frame_analytics.ts"
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/data_frame_analytics.ts"
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/data_frame_analytics.ts"
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/modules.ts"
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/modules.ts"
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/modules.ts"
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/modules.ts"
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/modules.ts"
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/modules.ts"
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/modules.ts"
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/modules.ts"
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/filters.ts"
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/filters.ts"
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/filters.ts"
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/filters.ts"
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/filters.ts"
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/filters.ts"
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/job_audit_messages.ts"
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/job_audit_messages.ts"
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/job_audit_messages.ts"
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/job_audit_messages.ts"
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/anomaly_detectors.ts"
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/anomaly_detectors.ts"
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/anomaly_detectors.ts"
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/anomaly_detectors.ts"
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/anomaly_detectors.ts"
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/anomaly_detectors.ts"
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/anomaly_detectors.ts"
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/anomaly_detectors.ts"
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/anomaly_detectors.ts"
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/anomaly_detectors.ts"
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/anomaly_detectors.ts"
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/anomaly_detectors.ts"
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/anomaly_detectors.ts"
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/anomaly_detectors.ts"
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/job_service.ts"
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/job_service.ts"
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/job_service.ts"
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/job_service.ts"
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/job_service.ts"
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/job_service.ts"
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/job_service.ts"
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/job_service.ts"
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/job_service.ts"
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/job_service.ts"
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/saved_objects.ts"
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/saved_objects.ts"
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/saved_objects.ts"
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/saved_objects.ts"
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/saved_objects.ts"
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/saved_objects.ts"
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/saved_objects.ts"
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/saved_objects.ts"
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/saved_objects.ts"
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/saved_objects.ts"
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/results_service.ts"
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/results_service.ts"
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/model_management.ts"
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/model_management.ts"
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/model_management.ts"
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/model_management.ts"
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/system.ts"
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/system.ts"
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/system.ts"
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/system.ts"
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/system.ts"
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/system.ts"
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/management.ts"
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/management.ts"
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/inference_models.ts"
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/inference_models.ts"
               },
               {
                 "plugin": "elasticAssistant",
@@ -16139,6 +16139,10 @@
               },
               {
                 "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/siem_migrations/rules/api/get_prebuilt_rules.ts"
+              },
+              {
+                "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/endpoint/routes/metadata/index.ts"
               },
               {
@@ -16202,30 +16206,6 @@
                 "path": "x-pack/plugins/session_view/server/routes/get_total_io_bytes_route.ts"
               },
               {
-                "plugin": "transform",
-                "path": "x-pack/plugins/transform/server/routes/api/audit_messages/register_route.ts"
-              },
-              {
-                "plugin": "transform",
-                "path": "x-pack/plugins/transform/server/routes/api/transforms_nodes/register_route.ts"
-              },
-              {
-                "plugin": "transform",
-                "path": "x-pack/plugins/transform/server/routes/api/transforms_all/register_route.ts"
-              },
-              {
-                "plugin": "transform",
-                "path": "x-pack/plugins/transform/server/routes/api/transforms_single/register_route.ts"
-              },
-              {
-                "plugin": "transform",
-                "path": "x-pack/plugins/transform/server/routes/api/transforms_stats_all/register_route.ts"
-              },
-              {
-                "plugin": "transform",
-                "path": "x-pack/plugins/transform/server/routes/api/transforms_stats_single/register_route.ts"
-              },
-              {
                 "plugin": "synthetics",
                 "path": "x-pack/plugins/observability_solution/synthetics/server/server.ts"
               },
@@ -16240,6 +16220,34 @@
               {
                 "plugin": "dataUsage",
                 "path": "x-pack/plugins/data_usage/server/routes/internal/data_streams.test.ts"
+              },
+              {
+                "plugin": "dataVisualizer",
+                "path": "x-pack/platform/plugins/private/data_visualizer/server/routes.ts"
+              },
+              {
+                "plugin": "transform",
+                "path": "x-pack/platform/plugins/private/transform/server/routes/api/audit_messages/register_route.ts"
+              },
+              {
+                "plugin": "transform",
+                "path": "x-pack/platform/plugins/private/transform/server/routes/api/transforms_nodes/register_route.ts"
+              },
+              {
+                "plugin": "transform",
+                "path": "x-pack/platform/plugins/private/transform/server/routes/api/transforms_all/register_route.ts"
+              },
+              {
+                "plugin": "transform",
+                "path": "x-pack/platform/plugins/private/transform/server/routes/api/transforms_single/register_route.ts"
+              },
+              {
+                "plugin": "transform",
+                "path": "x-pack/platform/plugins/private/transform/server/routes/api/transforms_stats_all/register_route.ts"
+              },
+              {
+                "plugin": "transform",
+                "path": "x-pack/platform/plugins/private/transform/server/routes/api/transforms_stats_single/register_route.ts"
               },
               {
                 "plugin": "@kbn/core-http-router-server-internal",
@@ -16538,47 +16546,47 @@
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/trained_models.ts"
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/trained_models.ts"
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/annotations.ts"
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/annotations.ts"
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/calendars.ts"
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/calendars.ts"
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/calendars.ts"
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/calendars.ts"
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/datafeeds.ts"
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/datafeeds.ts"
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/data_frame_analytics.ts"
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/data_frame_analytics.ts"
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/filters.ts"
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/filters.ts"
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/filters.ts"
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/filters.ts"
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/job_audit_messages.ts"
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/job_audit_messages.ts"
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/anomaly_detectors.ts"
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/anomaly_detectors.ts"
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/inference_models.ts"
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/inference_models.ts"
               },
               {
                 "plugin": "elasticAssistant",
@@ -16669,10 +16677,6 @@
                 "path": "x-pack/plugins/security_solution/server/lib/siem_migrations/rules/api/retry.ts"
               },
               {
-                "plugin": "transform",
-                "path": "x-pack/plugins/transform/server/routes/api/transforms_create/register_route.ts"
-              },
-              {
                 "plugin": "synthetics",
                 "path": "x-pack/plugins/observability_solution/synthetics/server/server.ts"
               },
@@ -16683,6 +16687,10 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_management/api/rules/bulk_update_rules/route.ts"
+              },
+              {
+                "plugin": "transform",
+                "path": "x-pack/platform/plugins/private/transform/server/routes/api/transforms_create/register_route.ts"
               },
               {
                 "plugin": "@kbn/core-http-router-server-internal",
@@ -16908,18 +16916,6 @@
                 "path": "packages/core/http/core-http-router-server-mocks/src/versioned_router.mock.ts"
               },
               {
-                "plugin": "aiops",
-                "path": "x-pack/plugins/aiops/server/routes/log_rate_analysis_field_candidates/define_route.ts"
-              },
-              {
-                "plugin": "aiops",
-                "path": "x-pack/plugins/aiops/server/routes/log_rate_analysis/define_route.ts"
-              },
-              {
-                "plugin": "aiops",
-                "path": "x-pack/plugins/aiops/server/routes/categorization_field_validation/define_route.ts"
-              },
-              {
                 "plugin": "canvas",
                 "path": "x-pack/plugins/canvas/server/routes/custom_elements/create.ts"
               },
@@ -16968,14 +16964,6 @@
                 "path": "x-pack/plugins/data_usage/server/routes/internal/usage_metrics.ts"
               },
               {
-                "plugin": "dataVisualizer",
-                "path": "x-pack/plugins/data_visualizer/server/routes.ts"
-              },
-              {
-                "plugin": "dataVisualizer",
-                "path": "x-pack/plugins/data_visualizer/server/routes.ts"
-              },
-              {
                 "plugin": "ecsDataQualityDashboard",
                 "path": "x-pack/plugins/ecs_data_quality_dashboard/server/routes/get_unallowed_field_values.ts"
               },
@@ -16985,299 +16973,299 @@
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/trained_models.ts"
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/trained_models.ts"
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/trained_models.ts"
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/trained_models.ts"
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/trained_models.ts"
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/trained_models.ts"
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/trained_models.ts"
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/trained_models.ts"
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/trained_models.ts"
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/trained_models.ts"
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/trained_models.ts"
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/trained_models.ts"
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/trained_models.ts"
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/trained_models.ts"
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/annotations.ts"
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/annotations.ts"
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/datafeeds.ts"
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/datafeeds.ts"
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/datafeeds.ts"
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/datafeeds.ts"
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/datafeeds.ts"
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/datafeeds.ts"
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/data_frame_analytics.ts"
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/data_frame_analytics.ts"
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/data_frame_analytics.ts"
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/data_frame_analytics.ts"
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/data_frame_analytics.ts"
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/data_frame_analytics.ts"
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/data_frame_analytics.ts"
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/data_frame_analytics.ts"
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/data_frame_analytics.ts"
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/data_frame_analytics.ts"
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/data_frame_analytics.ts"
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/data_frame_analytics.ts"
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/data_frame_analytics.ts"
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/data_frame_analytics.ts"
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/modules.ts"
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/modules.ts"
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/data_visualizer.ts"
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/data_visualizer.ts"
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/fields_service.ts"
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/fields_service.ts"
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/fields_service.ts"
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/fields_service.ts"
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/anomaly_detectors.ts"
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/anomaly_detectors.ts"
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/anomaly_detectors.ts"
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/anomaly_detectors.ts"
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/anomaly_detectors.ts"
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/anomaly_detectors.ts"
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/anomaly_detectors.ts"
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/anomaly_detectors.ts"
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/anomaly_detectors.ts"
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/anomaly_detectors.ts"
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/anomaly_detectors.ts"
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/anomaly_detectors.ts"
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/anomaly_detectors.ts"
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/anomaly_detectors.ts"
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/job_service.ts"
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/job_service.ts"
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/job_service.ts"
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/job_service.ts"
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/job_service.ts"
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/job_service.ts"
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/job_service.ts"
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/job_service.ts"
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/job_service.ts"
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/job_service.ts"
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/job_service.ts"
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/job_service.ts"
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/job_service.ts"
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/job_service.ts"
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/job_service.ts"
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/job_service.ts"
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/job_service.ts"
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/job_service.ts"
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/job_service.ts"
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/job_service.ts"
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/job_service.ts"
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/job_service.ts"
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/job_service.ts"
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/job_service.ts"
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/job_service.ts"
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/job_service.ts"
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/job_service.ts"
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/job_service.ts"
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/job_service.ts"
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/job_service.ts"
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/job_service.ts"
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/job_service.ts"
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/job_service.ts"
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/job_service.ts"
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/job_service.ts"
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/job_service.ts"
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/job_service.ts"
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/job_service.ts"
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/job_service.ts"
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/job_service.ts"
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/saved_objects.ts"
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/saved_objects.ts"
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/saved_objects.ts"
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/saved_objects.ts"
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/saved_objects.ts"
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/saved_objects.ts"
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/saved_objects.ts"
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/saved_objects.ts"
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/saved_objects.ts"
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/saved_objects.ts"
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/job_validation.ts"
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/job_validation.ts"
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/job_validation.ts"
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/job_validation.ts"
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/job_validation.ts"
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/job_validation.ts"
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/job_validation.ts"
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/job_validation.ts"
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/job_validation.ts"
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/job_validation.ts"
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/results_service.ts"
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/results_service.ts"
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/results_service.ts"
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/results_service.ts"
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/results_service.ts"
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/results_service.ts"
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/results_service.ts"
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/results_service.ts"
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/results_service.ts"
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/results_service.ts"
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/results_service.ts"
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/results_service.ts"
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/results_service.ts"
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/results_service.ts"
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/results_service.ts"
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/results_service.ts"
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/results_service.ts"
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/results_service.ts"
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/results_service.ts"
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/results_service.ts"
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/system.ts"
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/system.ts"
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/system.ts"
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/system.ts"
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/system.ts"
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/system.ts"
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/system.ts"
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/system.ts"
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/alerting.ts"
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/alerting.ts"
               },
               {
                 "plugin": "elasticAssistant",
@@ -17521,18 +17509,6 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/prebuilt_rules/api/perform_rule_upgrade/perform_rule_upgrade_route.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/prebuilt_rules/api/bootstrap_prebuilt_rules/bootstrap_prebuilt_rules.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_actions_legacy/api/create_legacy_notification/route.ts"
-              },
-              {
-                "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_management/api/rules/bulk_actions/route.ts"
               },
               {
@@ -17550,6 +17526,18 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_management/api/rules/coverage_overview/route.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/prebuilt_rules/api/perform_rule_upgrade/perform_rule_upgrade_route.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/prebuilt_rules/api/bootstrap_prebuilt_rules/bootstrap_prebuilt_rules.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_actions_legacy/api/create_legacy_notification/route.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -17748,42 +17736,6 @@
                 "path": "x-pack/plugins/security_solution/server/endpoint/routes/protection_updates_note/index.ts"
               },
               {
-                "plugin": "transform",
-                "path": "x-pack/plugins/transform/server/routes/api/field_histograms/register_route.ts"
-              },
-              {
-                "plugin": "transform",
-                "path": "x-pack/plugins/transform/server/routes/api/transforms_update/register_route.ts"
-              },
-              {
-                "plugin": "transform",
-                "path": "x-pack/plugins/transform/server/routes/api/reauthorize_transforms/register_route.ts"
-              },
-              {
-                "plugin": "transform",
-                "path": "x-pack/plugins/transform/server/routes/api/reset_transforms/register_route.ts"
-              },
-              {
-                "plugin": "transform",
-                "path": "x-pack/plugins/transform/server/routes/api/transforms_preview/register_route.ts"
-              },
-              {
-                "plugin": "transform",
-                "path": "x-pack/plugins/transform/server/routes/api/start_transforms/register_route.ts"
-              },
-              {
-                "plugin": "transform",
-                "path": "x-pack/plugins/transform/server/routes/api/stop_transforms/register_route.ts"
-              },
-              {
-                "plugin": "transform",
-                "path": "x-pack/plugins/transform/server/routes/api/delete_transforms/register_route.ts"
-              },
-              {
-                "plugin": "transform",
-                "path": "x-pack/plugins/transform/server/routes/api/schedule_now_transforms/register_route.ts"
-              },
-              {
                 "plugin": "synthetics",
                 "path": "x-pack/plugins/observability_solution/synthetics/server/server.ts"
               },
@@ -17802,6 +17754,62 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_management/api/rules/bulk_delete_rules/route.ts"
+              },
+              {
+                "plugin": "dataVisualizer",
+                "path": "x-pack/platform/plugins/private/data_visualizer/server/routes.ts"
+              },
+              {
+                "plugin": "dataVisualizer",
+                "path": "x-pack/platform/plugins/private/data_visualizer/server/routes.ts"
+              },
+              {
+                "plugin": "transform",
+                "path": "x-pack/platform/plugins/private/transform/server/routes/api/field_histograms/register_route.ts"
+              },
+              {
+                "plugin": "transform",
+                "path": "x-pack/platform/plugins/private/transform/server/routes/api/transforms_update/register_route.ts"
+              },
+              {
+                "plugin": "transform",
+                "path": "x-pack/platform/plugins/private/transform/server/routes/api/reauthorize_transforms/register_route.ts"
+              },
+              {
+                "plugin": "transform",
+                "path": "x-pack/platform/plugins/private/transform/server/routes/api/reset_transforms/register_route.ts"
+              },
+              {
+                "plugin": "transform",
+                "path": "x-pack/platform/plugins/private/transform/server/routes/api/transforms_preview/register_route.ts"
+              },
+              {
+                "plugin": "transform",
+                "path": "x-pack/platform/plugins/private/transform/server/routes/api/start_transforms/register_route.ts"
+              },
+              {
+                "plugin": "transform",
+                "path": "x-pack/platform/plugins/private/transform/server/routes/api/stop_transforms/register_route.ts"
+              },
+              {
+                "plugin": "transform",
+                "path": "x-pack/platform/plugins/private/transform/server/routes/api/delete_transforms/register_route.ts"
+              },
+              {
+                "plugin": "transform",
+                "path": "x-pack/platform/plugins/private/transform/server/routes/api/schedule_now_transforms/register_route.ts"
+              },
+              {
+                "plugin": "aiops",
+                "path": "x-pack/platform/plugins/shared/aiops/server/routes/log_rate_analysis_field_candidates/define_route.ts"
+              },
+              {
+                "plugin": "aiops",
+                "path": "x-pack/platform/plugins/shared/aiops/server/routes/log_rate_analysis/define_route.ts"
+              },
+              {
+                "plugin": "aiops",
+                "path": "x-pack/platform/plugins/shared/aiops/server/routes/categorization_field_validation/define_route.ts"
               },
               {
                 "plugin": "dataViewFieldEditor",
@@ -18175,39 +18183,39 @@
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/trained_models.ts"
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/trained_models.ts"
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/annotations.ts"
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/annotations.ts"
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/calendars.ts"
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/calendars.ts"
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/datafeeds.ts"
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/datafeeds.ts"
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/data_frame_analytics.ts"
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/data_frame_analytics.ts"
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/filters.ts"
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/filters.ts"
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/anomaly_detectors.ts"
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/anomaly_detectors.ts"
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/anomaly_detectors.ts"
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/anomaly_detectors.ts"
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/anomaly_detectors.ts"
+                "path": "x-pack/platform/plugins/shared/ml/server/routes/anomaly_detectors.ts"
               },
               {
                 "plugin": "elasticAssistant",

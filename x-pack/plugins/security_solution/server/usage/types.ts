@@ -33,6 +33,7 @@ export type CollectorDependencies = {
     all: string;
     latest: string;
   };
+  legacySignalsIndex: string;
 } & Pick<SetupPlugins, 'ml' | 'usageCollection'>;
 
 export interface AlertBucket {

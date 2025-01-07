@@ -46,8 +46,10 @@ export const chatCompleteRoute = (
       access: 'public',
       path: ELASTIC_AI_ASSISTANT_CHAT_COMPLETE_URL,
 
-      options: {
-        tags: ['access:elasticAssistant'],
+      security: {
+        authz: {
+          requiredPrivileges: ['elasticAssistant'],
+        },
       },
     })
     .addVersion(

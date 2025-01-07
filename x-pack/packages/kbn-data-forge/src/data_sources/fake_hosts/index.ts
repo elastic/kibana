@@ -121,6 +121,11 @@ export const generateEvent: GeneratorFunction = (config, schedule, index, timest
             bytes: generateNetworkData(timestamp.toISOString()),
           },
         },
+        core: {
+          system: {
+            ticks: randomBetween(1_000_000, 1_500_100),
+          },
+        },
       },
       metricset: {
         period: interval,
@@ -157,6 +162,11 @@ export const generateEvent: GeneratorFunction = (config, schedule, index, timest
           },
           out: {
             bytes: generateNetworkData(timestamp.toISOString()),
+          },
+        },
+        core: {
+          system: {
+            ticks: randomBetween(1_000_000, 1_500_100),
           },
         },
       },

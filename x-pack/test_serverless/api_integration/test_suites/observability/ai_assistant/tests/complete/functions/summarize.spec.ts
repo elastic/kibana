@@ -53,8 +53,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       await invokeChatCompleteWithFunctionRequest({
         connectorId,
         observabilityAIAssistantAPIClient,
-        internalReqHeader,
-        roleAuthc,
         functionCall: {
           name: 'summarize',
           trigger: MessageRole.User,
@@ -77,10 +75,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     });
 
     it('persists entry in knowledge base', async () => {
-      const res = await observabilityAIAssistantAPIClient.slsUser({
+      const res = await observabilityAIAssistantAPIClient.slsEditor({
         endpoint: 'GET /internal/observability_ai_assistant/kb/entries',
-        internalReqHeader,
-        roleAuthc,
         params: {
           query: {
             query: '',

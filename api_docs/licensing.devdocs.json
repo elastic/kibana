@@ -808,7 +808,7 @@
             },
             {
               "plugin": "aiops",
-              "path": "x-pack/plugins/aiops/public/plugin.tsx"
+              "path": "x-pack/platform/plugins/shared/aiops/public/plugin.tsx"
             },
             {
               "plugin": "licenseManagement",
@@ -816,7 +816,7 @@
             },
             {
               "plugin": "ml",
-              "path": "x-pack/plugins/ml/public/plugin.ts"
+              "path": "x-pack/platform/plugins/shared/ml/public/plugin.ts"
             },
             {
               "plugin": "crossClusterReplication",
@@ -2195,16 +2195,12 @@
               "path": "x-pack/plugins/alerting/server/plugin.ts"
             },
             {
-              "plugin": "aiops",
-              "path": "x-pack/plugins/aiops/server/plugin.ts"
-            },
-            {
               "plugin": "remoteClusters",
               "path": "x-pack/plugins/remote_clusters/server/plugin.ts"
             },
             {
               "plugin": "ml",
-              "path": "x-pack/plugins/ml/server/plugin.ts"
+              "path": "x-pack/platform/plugins/shared/ml/server/plugin.ts"
             },
             {
               "plugin": "graph",
@@ -2251,10 +2247,6 @@
               "path": "x-pack/plugins/snapshot_restore/server/services/license.ts"
             },
             {
-              "plugin": "transform",
-              "path": "x-pack/plugins/transform/server/services/license.ts"
-            },
-            {
               "plugin": "upgradeAssistant",
               "path": "x-pack/plugins/upgrade_assistant/server/lib/reindexing/reindex_service.ts"
             },
@@ -2281,6 +2273,14 @@
             {
               "plugin": "securitySolution",
               "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_types/utils/get_is_alert_suppression_active.test.ts"
+            },
+            {
+              "plugin": "transform",
+              "path": "x-pack/platform/plugins/private/transform/server/services/license.ts"
+            },
+            {
+              "plugin": "aiops",
+              "path": "x-pack/platform/plugins/shared/aiops/server/plugin.ts"
             },
             {
               "plugin": "actions",

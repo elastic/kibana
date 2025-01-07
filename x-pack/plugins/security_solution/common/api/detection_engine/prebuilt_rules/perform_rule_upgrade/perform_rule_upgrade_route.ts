@@ -115,7 +115,7 @@ export const RuleUpgradeSpecifier = z.object({
 export type UpgradeSpecificRulesRequest = z.infer<typeof UpgradeSpecificRulesRequest>;
 export const UpgradeSpecificRulesRequest = z.object({
   mode: z.literal('SPECIFIC_RULES'),
-  rules: z.array(RuleUpgradeSpecifier),
+  rules: z.array(RuleUpgradeSpecifier).min(1),
   pick_version: PickVersionValues.optional(),
 });
 

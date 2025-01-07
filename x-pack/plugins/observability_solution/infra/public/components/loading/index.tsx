@@ -7,8 +7,7 @@
 
 import { EuiLoadingChart, EuiPanel, EuiText } from '@elastic/eui';
 import * as React from 'react';
-
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import styled from '@emotion/styled';
 
 interface InfraLoadingProps {
   text: string | JSX.Element;
@@ -34,7 +33,7 @@ export class InfraLoadingPanel extends React.PureComponent<InfraLoadingProps, {}
   }
 }
 
-export const InfraLoadingStaticPanel = euiStyled.div`
+export const InfraLoadingStaticPanel = styled.div`
   position: relative;
   overflow: hidden;
   display: flex;
@@ -42,7 +41,7 @@ export const InfraLoadingStaticPanel = euiStyled.div`
   justify-content: center;
 `;
 
-export const InfraLoadingStaticContentPanel = euiStyled.div`
+export const InfraLoadingStaticContentPanel = styled.div`
   flex: 0 0 auto;
   align-self: center;
   text-align: center;

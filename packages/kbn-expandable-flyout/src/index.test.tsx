@@ -51,6 +51,7 @@ describe('ExpandableFlyout', () => {
             },
             left: undefined,
             preview: undefined,
+            history: [{ id: 'key' }],
           },
         },
       },

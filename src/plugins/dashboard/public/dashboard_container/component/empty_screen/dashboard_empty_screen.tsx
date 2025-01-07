@@ -34,6 +34,7 @@ import {
 } from '../../../services/kibana_services';
 import { getDashboardCapabilities } from '../../../utils/get_dashboard_capabilities';
 import { emptyScreenStrings } from '../../_dashboard_container_strings';
+import { addFromLibrary } from '../../embeddable/api';
 
 export function DashboardEmptyScreen() {
   const lensAlias = useMemo(
@@ -120,7 +121,7 @@ export function DashboardEmptyScreen() {
             <EuiButtonEmpty
               flush="left"
               iconType="folderOpen"
-              onClick={() => dashboardApi.addFromLibrary()}
+              onClick={() => addFromLibrary(dashboardApi)}
             >
               {emptyScreenStrings.getAddFromLibraryButtonTitle()}
             </EuiButtonEmpty>

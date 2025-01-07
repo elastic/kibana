@@ -23,7 +23,7 @@ describe('AddAnalyticsCollectionsApiLogic', () => {
       http.post.mockReturnValue(promise);
       const result = createAnalyticsCollection({ name: 'test' });
       await nextTick();
-      expect(http.post).toHaveBeenCalledWith('/internal/enterprise_search/analytics/collections', {
+      expect(http.post).toHaveBeenCalledWith('/internal/elasticsearch/analytics/collections', {
         body: JSON.stringify({ name: 'test' }),
       });
       await expect(result).resolves.toEqual({ name: 'test' });

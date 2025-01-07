@@ -28,6 +28,7 @@ export const RESPONSE_ACTION_API_COMMANDS_NAMES = [
   'execute',
   'upload',
   'scan',
+  'runscript',
 ] as const;
 
 export type ResponseActionsApiCommandNames = (typeof RESPONSE_ACTION_API_COMMANDS_NAMES)[number];
@@ -54,6 +55,7 @@ export const ENDPOINT_CAPABILITIES = [
   'execute',
   'upload_file',
   'scan',
+  'runscript',
 ] as const;
 
 export type EndpointCapabilities = (typeof ENDPOINT_CAPABILITIES)[number];
@@ -72,6 +74,7 @@ export const CONSOLE_RESPONSE_ACTION_COMMANDS = [
   'execute',
   'upload',
   'scan',
+  'runscript',
 ] as const;
 
 export type ConsoleResponseActionCommands = (typeof CONSOLE_RESPONSE_ACTION_COMMANDS)[number];
@@ -100,6 +103,7 @@ export const RESPONSE_CONSOLE_ACTION_COMMANDS_TO_RBAC_FEATURE_CONTROL: Record<
   execute: 'writeExecuteOperations',
   upload: 'writeFileOperations',
   scan: 'writeScanOperations',
+  runscript: 'writeExecuteOperations',
 });
 
 export const RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP = Object.freeze<
@@ -114,6 +118,7 @@ export const RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP = Object.freeze<
   'suspend-process': 'suspend-process',
   upload: 'upload',
   scan: 'scan',
+  runscript: 'runscript',
 });
 
 export const RESPONSE_CONSOLE_COMMAND_TO_API_COMMAND_MAP = Object.freeze<
@@ -128,6 +133,7 @@ export const RESPONSE_CONSOLE_COMMAND_TO_API_COMMAND_MAP = Object.freeze<
   'suspend-process': 'suspend-process',
   upload: 'upload',
   scan: 'scan',
+  runscript: 'runscript',
 });
 
 export const RESPONSE_CONSOLE_ACTION_COMMANDS_TO_ENDPOINT_CAPABILITY = Object.freeze<
@@ -142,6 +148,7 @@ export const RESPONSE_CONSOLE_ACTION_COMMANDS_TO_ENDPOINT_CAPABILITY = Object.fr
   'suspend-process': 'suspend_process',
   upload: 'upload_file',
   scan: 'scan',
+  runscript: 'runscript',
 });
 
 /**
@@ -159,6 +166,7 @@ export const RESPONSE_CONSOLE_ACTION_COMMANDS_TO_REQUIRED_AUTHZ = Object.freeze<
   'kill-process': 'canKillProcess',
   'suspend-process': 'canSuspendProcess',
   scan: 'canWriteScanOperations',
+  runscript: 'canWriteExecuteOperations',
 });
 
 // 4 hrs in seconds

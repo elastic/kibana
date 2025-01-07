@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { Fragment } from 'react';
 import { EuiHorizontalRule } from '@elastic/eui';
 import type { SubfieldChanges } from './types';
 import { Subfield } from './subfield';
@@ -28,16 +28,15 @@ export function SubfieldChanges({ fieldName, subfieldChanges }: SubfieldChangesP
         const shouldShowSeparator = index !== subfieldChanges.length - 1;
 
         return (
-          <>
+          <Fragment key={`${fieldName}${change.subfieldName}`}>
             <Subfield
-              key={change.subfieldName}
               fieldName={fieldName}
               subfieldName={change.subfieldName}
               oldSubfieldValue={change.oldSubfieldValue}
               newSubfieldValue={change.newSubfieldValue}
             />
             {shouldShowSeparator ? <EuiHorizontalRule margin="s" size="full" /> : null}
-          </>
+          </Fragment>
         );
       })}
     </>

@@ -63,11 +63,11 @@
           },
           {
             "plugin": "transform",
-            "path": "x-pack/plugins/transform/public/app/app_dependencies.tsx"
+            "path": "x-pack/platform/plugins/private/transform/public/app/app_dependencies.tsx"
           },
           {
             "plugin": "transform",
-            "path": "x-pack/plugins/transform/public/app/app_dependencies.tsx"
+            "path": "x-pack/platform/plugins/private/transform/public/app/app_dependencies.tsx"
           },
           {
             "plugin": "@kbn/core",

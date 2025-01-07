@@ -10,7 +10,7 @@ import type { Filter } from '@kbn/es-query';
 import type { EqlOptions } from '@kbn/timelines-plugin/common';
 import type { FieldValueQueryBar } from '../../../../../../../rule_creation_ui/components/query_bar_field';
 import type { FormData, FormSchema } from '../../../../../../../../shared_imports';
-import { RuleFieldEditFormWrapper } from '../rule_field_edit_form_wrapper';
+import { RuleFieldEditFormWrapper } from '../../../field_final_side';
 import {
   type DiffableRule,
   RuleEqlQuery,

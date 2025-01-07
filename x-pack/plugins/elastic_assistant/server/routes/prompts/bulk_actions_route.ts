@@ -112,8 +112,12 @@ export const bulkPromptsRoute = (router: ElasticAssistantPluginRouter, logger: L
     .post({
       access: 'public',
       path: ELASTIC_AI_ASSISTANT_PROMPTS_URL_BULK_ACTION,
+      security: {
+        authz: {
+          requiredPrivileges: ['elasticAssistant'],
+        },
+      },
       options: {
-        tags: ['access:elasticAssistant'],
         timeout: {
           idleSocket: moment.duration(15, 'minutes').asMilliseconds(),
         },

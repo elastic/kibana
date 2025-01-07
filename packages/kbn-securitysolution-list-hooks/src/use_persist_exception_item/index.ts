@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Dispatch, useEffect, useState } from 'react';
+import { Dispatch, useEffect, useRef, useState } from 'react';
 import type {
   CreateExceptionListItemSchema,
   PersistHookProps,
@@ -47,57 +47,63 @@ export const usePersistExceptionItem = ({
   const [isLoading, setIsLoading] = useState(false);
   const isUpdateExceptionItem = (item: unknown): item is UpdateExceptionListItemSchema =>
     Boolean(item && (item as UpdateExceptionListItemSchema).id != null);
+  const isSubscribed = useRef(false);
 
   useEffect(() => {
-    let isSubscribed = true;
-    const abortCtrl = new AbortController();
+    let abortCtrl: AbortController | null = null;
+    isSubscribed.current = true;
     setIsSaved(false);
 
     const saveExceptionItem = async (): Promise<void> => {
-      if (exceptionListItem != null) {
-        try {
-          setIsLoading(true);
+      if (exceptionListItem === null) {
+        return;
+      }
 
-          if (isUpdateExceptionItem(exceptionListItem)) {
-            // Please see `x-pack/plugins/lists/public/exceptions/transforms.ts` doc notes
-            // for context around the temporary `id`
-            const transformedList = transformOutput(exceptionListItem);
+      try {
+        abortCtrl = new AbortController();
+        setIsLoading(true);
 
-            await updateExceptionListItem({
-              http,
-              listItem: transformedList,
-              signal: abortCtrl.signal,
-            });
-          } else {
-            // Please see `x-pack/plugins/lists/public/exceptions/transforms.ts` doc notes
-            // for context around the temporary `id`
-            const transformedList = transformNewItemOutput(exceptionListItem);
+        if (isUpdateExceptionItem(exceptionListItem)) {
+          // Please see `x-pack/plugins/lists/public/exceptions/transforms.ts` doc notes
+          // for context around the temporary `id`
+          const transformedList = transformOutput(exceptionListItem);
 
-            await addExceptionListItem({
-              http,
-              listItem: transformedList,
-              signal: abortCtrl.signal,
-            });
-          }
+          await updateExceptionListItem({
+            http,
+            listItem: transformedList,
+            signal: abortCtrl.signal,
+          });
+        } else {
+          // Please see `x-pack/plugins/lists/public/exceptions/transforms.ts` doc notes
+          // for context around the temporary `id`
+          const transformedList = transformNewItemOutput(exceptionListItem);
 
-          if (isSubscribed) {
-            setIsSaved(true);
-          }
-        } catch (error) {
-          if (isSubscribed) {
-            onError(error);
-          }
+          await addExceptionListItem({
+            http,
+            listItem: transformedList,
+            signal: abortCtrl.signal,
+          });
         }
-        if (isSubscribed) {
+
+        if (isSubscribed.current) {
+          setIsSaved(true);
+        }
+      } catch (error) {
+        if (isSubscribed.current) {
+          onError(error);
+        }
+      } finally {
+        if (isSubscribed.current) {
           setIsLoading(false);
         }
       }
     };
 
     saveExceptionItem();
+
     return (): void => {
-      isSubscribed = false;
-      abortCtrl.abort();
+      isSubscribed.current = false;
+      abortCtrl?.abort();
     };
   }, [http, exceptionListItem, onError]);
 

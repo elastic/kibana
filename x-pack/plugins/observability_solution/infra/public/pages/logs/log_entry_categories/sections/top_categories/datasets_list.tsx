@@ -6,8 +6,7 @@
  */
 
 import React from 'react';
-
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import styled from '@emotion/styled';
 import { LogEntryCategoryDataset } from '../../../../../../common/log_analysis';
 import { getFriendlyNameForPartitionId } from '../../../../../../common/log_analysis';
 
@@ -30,7 +29,7 @@ export const DatasetsList: React.FunctionComponent<{
  * These aim at aligning the list with the EuiHealth list in the neighboring
  * column.
  */
-const DatasetLabel = euiStyled.div`
+const DatasetLabel = styled.div`
   display: inline-block;
   margin-bottom: 2.5px;
   margin-top: 1px;

@@ -24,6 +24,9 @@ const updateInvestigationParamsSchema = z.object({
       }),
       tags: z.array(z.string()),
       externalIncidentUrl: z.string().nullable(),
+      rootCauseAnalysis: z.object({
+        events: z.array(z.any()),
+      }),
     })
     .partial(),
 });

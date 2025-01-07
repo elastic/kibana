@@ -9,7 +9,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiEmptyPrompt, EuiButton } from '@elastic/eui';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import styled from '@emotion/styled';
 
 interface Props {
   retry: () => void;
@@ -42,6 +42,6 @@ export const LogAnalysisSetupStatusUnknownPrompt: React.FunctionComponent<Props>
   />
 );
 
-const EmptyPrompt = euiStyled(EuiEmptyPrompt)`
+const EmptyPrompt = styled(EuiEmptyPrompt)`
   align-self: center;
 `;

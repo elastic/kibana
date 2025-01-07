@@ -11,7 +11,7 @@ import { getTermsAggregationFields } from '../../../../../../../rule_creation_ui
 import { isEsqlRule, isMlRule } from '../../../../../../../../../common/detection_engine/utils';
 import { useAllEsqlRuleFields } from '../../../../../../../rule_creation_ui/hooks';
 import { useMLRuleConfig } from '../../../../../../../../common/components/ml/hooks/use_ml_rule_config';
-import type { RuleFieldEditComponentProps } from '../rule_field_edit_component_props';
+import type { RuleFieldEditComponentProps } from '../../../field_final_side';
 import { useDiffableRuleDataView } from '../hooks/use_diffable_rule_data_view';
 import * as i18n from './translations';
 

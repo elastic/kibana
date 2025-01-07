@@ -11,6 +11,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiProgress,
+  type EuiProgressProps,
   EuiText,
   EuiButtonIcon,
   EuiSpacer,
@@ -36,7 +37,7 @@ import { EMPTY_EXAMPLE } from '../examples_list/examples_list';
 interface Props {
   stats: FieldVisStats | undefined;
   fieldFormat?: any;
-  barColor?: 'primary' | 'success' | 'danger' | 'subdued' | 'accent';
+  barColor?: EuiProgressProps['color'];
   compressed?: boolean;
   onAddFilter?: (field: DataViewField | string, value: string, type: '+' | '-') => void;
   showSampledValues?: boolean;

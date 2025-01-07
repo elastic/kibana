@@ -35,12 +35,14 @@ export const ActionsLogFilter = memo(
     isFlyout,
     onChangeFilterOptions,
     'data-test-subj': dataTestSubj,
+    'data-test-height': dataTestHeight,
   }: {
     filterName: ActionsLogPopupFilters;
     typesFilters?: TypesFilters;
     isFlyout: boolean;
     onChangeFilterOptions?: (selectedOptions: string[]) => void;
     'data-test-subj'?: string;
+    'data-test-height'?: number;
   }) => {
     const getTestId = useTestIdGenerator(dataTestSubj);
 
@@ -263,6 +265,7 @@ export const ActionsLogFilter = memo(
         data-test-subj={dataTestSubj}
       >
         <EuiSelectable
+          height={dataTestHeight}
           aria-label={`${filterName}`}
           emptyMessage={UX_MESSAGES.filterEmptyMessage(filterName)}
           isLoading={isLoading}

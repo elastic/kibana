@@ -31,6 +31,8 @@ import { useFirehoseFlow } from './use_firehose_flow';
 import { VisualizeData } from './visualize_data';
 import { ObservabilityOnboardingAppServices } from '../../..';
 import { useWindowBlurDataMonitoringTrigger } from '../shared/use_window_blur_data_monitoring_trigger';
+import { ExistingDataCallout } from './existing_data_callout';
+import { usePopulatedAWSIndexList } from './use_populated_aws_index_list';
 
 const OPTIONS = [
   {
@@ -61,6 +63,9 @@ export function FirehosePanel() {
     },
   } = useKibana<ObservabilityOnboardingAppServices>();
   const { data, status, error, refetch } = useFirehoseFlow();
+  const { data: populatedAWSIndexList } = usePopulatedAWSIndexList();
+
+  const hasExistingData = Array.isArray(populatedAWSIndexList) && populatedAWSIndexList.length > 0;
 
   const telemetryEventContext: OnboardingFlowEventContext = useMemo(
     () => ({
@@ -72,12 +77,13 @@ export function FirehosePanel() {
     [cloudServiceProvider, selectedOptionId]
   );
 
-  const isMonitoringData = useWindowBlurDataMonitoringTrigger({
-    isActive: status === FETCH_STATUS.SUCCESS,
-    onboardingFlowType: 'firehose',
-    onboardingId: data?.onboardingId,
-    telemetryEventContext,
-  });
+  const isMonitoringData =
+    useWindowBlurDataMonitoringTrigger({
+      isActive: status === FETCH_STATUS.SUCCESS,
+      onboardingFlowType: 'firehose',
+      onboardingId: data?.onboardingId,
+      telemetryEventContext,
+    }) || hasExistingData;
 
   const onOptionChange = useCallback((id: string) => {
     setSelectedOptionId(id as CreateStackOption);
@@ -193,6 +199,7 @@ export function FirehosePanel() {
         <VisualizeData
           selectedCreateStackOption={selectedOptionId}
           onboardingId={data.onboardingId}
+          hasExistingData={hasExistingData}
         />
       ),
     },
@@ -200,6 +207,12 @@ export function FirehosePanel() {
 
   return (
     <EuiPanel hasBorder paddingSize="xl">
+      {hasExistingData && (
+        <>
+          <ExistingDataCallout />
+          <EuiSpacer size="xl" />
+        </>
+      )}
       <EuiSteps steps={steps} />
       <FeedbackButtons flow="firehose" />
     </EuiPanel>

@@ -26,7 +26,7 @@ import { HostPreviewPanelKey } from '../../../entity_details/host_right';
 import { HOST_PREVIEW_BANNER } from './host_entity_overview';
 import { UserPreviewPanelKey } from '../../../entity_details/user_right';
 import { USER_PREVIEW_BANNER } from './user_entity_overview';
-import { NetworkPanelKey, NETWORK_PREVIEW_BANNER } from '../../../network_details';
+import { NetworkPreviewPanelKey, NETWORK_PREVIEW_BANNER } from '../../../network_details';
 import { createTelemetryServiceMock } from '../../../../common/lib/telemetry/telemetry_service.mock';
 
 jest.mock('../../../../management/hooks');
@@ -137,10 +137,11 @@ describe('<HighlightedFieldsCell />', () => {
 
     getByTestId(HIGHLIGHTED_FIELDS_LINKED_CELL_TEST_ID).click();
     expect(mockFlyoutApi.openPreviewPanel).toHaveBeenCalledWith({
-      id: NetworkPanelKey,
+      id: NetworkPreviewPanelKey,
       params: {
         ip: '100:XXX:XXX',
         flowTarget: 'source',
+        scopeId: panelContextValue.scopeId,
         banner: NETWORK_PREVIEW_BANNER,
       },
     });

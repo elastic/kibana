@@ -6,7 +6,7 @@
  */
 
 import { useMemo } from 'react';
-import type { RuleUpgradeInfoForReview } from '../../../../../../common/api/detection_engine/prebuilt_rules';
+import type { RuleUpgradeState } from '../../../../rule_management/model/prebuilt_rule_upgrade';
 import { RuleCustomizationEnum, type FilterOptions } from '../../../../rule_management/logic/types';
 
 export type UpgradePrebuiltRulesTableFilterOptions = Pick<
@@ -14,16 +14,19 @@ export type UpgradePrebuiltRulesTableFilterOptions = Pick<
   'filter' | 'tags' | 'ruleSource'
 >;
 
-export const useFilterPrebuiltRulesToUpgrade = ({
-  rules,
-  filterOptions,
-}: {
-  rules: RuleUpgradeInfoForReview[];
+interface UseFilterPrebuiltRulesToUpgradeParams {
+  data: RuleUpgradeState[];
   filterOptions: UpgradePrebuiltRulesTableFilterOptions;
-}) => {
-  const filteredRules = useMemo(() => {
+}
+
+export const useFilterPrebuiltRulesToUpgrade = ({
+  data,
+  filterOptions,
+}: UseFilterPrebuiltRulesToUpgradeParams): RuleUpgradeState[] => {
+  return useMemo(() => {
     const { filter, tags, ruleSource } = filterOptions;
-    return rules.filter((ruleInfo) => {
+
+    return data.filter((ruleInfo) => {
       if (filter && !ruleInfo.current_rule.name.toLowerCase().includes(filter.toLowerCase())) {
         return false;
       }
@@ -53,7 +56,5 @@ export const useFilterPrebuiltRulesToUpgrade = ({
 
       return true;
     });
-  }, [filterOptions, rules]);
-
-  return filteredRules;
+  }, [filterOptions, data]);
 };

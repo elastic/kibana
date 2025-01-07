@@ -16,8 +16,7 @@ import {
 } from '@elastic/eui';
 import { get, last, max } from 'lodash';
 import React, { ReactText } from 'react';
-
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import styled from '@emotion/styled';
 import { InventoryFormatterType } from '@kbn/metrics-data-access-plugin/common';
 import { createFormatter } from '../../../../../common/formatters';
 import { SeriesOverrides, VisSectionProps } from '../types';
@@ -97,7 +96,7 @@ export const GaugesSectionVis = ({
   );
 };
 
-const GroupBox = euiStyled.div`
+const GroupBox = styled.div`
   display: flex;
   flex-flow: row wrap;
   justify-content: space-evenly;

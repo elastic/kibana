@@ -8,7 +8,7 @@
 import React from 'react';
 import type { Story } from '@storybook/react';
 import { HistoryWindowStartReadOnly } from './history_window_start';
-import { FieldReadOnly } from '../../field_readonly';
+import { FieldFinalReadOnly } from '../../field_final_readonly';
 import type { DiffableRule } from '../../../../../../../../../common/api/detection_engine';
 import { mockNewTermsRule } from '../../storybook/mocks';
 import { ThreeWayDiffStorybookProviders } from '../../storybook/three_way_diff_storybook_providers';
@@ -25,8 +25,11 @@ interface TemplateProps {
 
 const Template: Story<TemplateProps> = (args) => {
   return (
-    <ThreeWayDiffStorybookProviders finalDiffableRule={args.finalDiffableRule}>
-      <FieldReadOnly fieldName="history_window_start" />
+    <ThreeWayDiffStorybookProviders
+      finalDiffableRule={args.finalDiffableRule}
+      fieldName="history_window_start"
+    >
+      <FieldFinalReadOnly />
     </ThreeWayDiffStorybookProviders>
   );
 };

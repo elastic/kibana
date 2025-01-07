@@ -9,7 +9,16 @@ import { render } from '@testing-library/react';
 import React from 'react';
 import { TestProviders } from '../../../common/mock';
 import { mockHostRiskScoreState, mockObservedHostData } from '../mocks';
-
+import type {
+  FlyoutPanelProps,
+  ExpandableFlyoutState,
+  ExpandableFlyoutApi,
+} from '@kbn/expandable-flyout';
+import {
+  useExpandableFlyoutApi,
+  useExpandableFlyoutState,
+  useExpandableFlyoutHistory,
+} from '@kbn/expandable-flyout';
 import type { HostPanelProps } from '.';
 import { HostPanel } from '.';
 
@@ -34,10 +43,24 @@ jest.mock('./hooks/use_observed_host', () => ({
   useObservedHost: () => mockedUseObservedHost(),
 }));
 
+const flyoutContextValue = {
+  closeLeftPanel: jest.fn(),
+} as unknown as ExpandableFlyoutApi;
+
+const flyoutHistory = [{ id: 'id1', params: {} }] as unknown as FlyoutPanelProps[];
+jest.mock('@kbn/expandable-flyout', () => ({
+  useExpandableFlyoutApi: jest.fn(),
+  useExpandableFlyoutHistory: jest.fn(),
+  useExpandableFlyoutState: jest.fn(),
+}));
+
 describe('HostPanel', () => {
   beforeEach(() => {
     mockedHostRiskScore.mockReturnValue(mockHostRiskScoreState);
     mockedUseObservedHost.mockReturnValue(mockObservedHostData);
+    jest.mocked(useExpandableFlyoutHistory).mockReturnValue(flyoutHistory);
+    jest.mocked(useExpandableFlyoutState).mockReturnValue({} as unknown as ExpandableFlyoutState);
+    jest.mocked(useExpandableFlyoutApi).mockReturnValue(flyoutContextValue);
   });
 
   it('renders', () => {

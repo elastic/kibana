@@ -5,21 +5,29 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, type EuiFlexGroupProps, EuiFlexItem, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/css';
+import React from 'react';
 
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
+export const LogStatusbar = (props: EuiFlexGroupProps) => {
+  const { euiTheme } = useEuiTheme();
 
-export const LogStatusbar = euiStyled(EuiFlexGroup).attrs(() => ({
-  alignItems: 'center',
-  gutterSize: 'none',
-  justifyContent: 'flexEnd',
-}))`
-  padding: ${(props) => props.theme.eui.euiSizeS};
-  border-top: ${(props) => props.theme.eui.euiBorderThin};
-  max-height: 48px;
-  min-height: 48px;
-  background-color: ${(props) => props.theme.eui.euiColorEmptyShade};
-  flex-direction: row;
-`;
+  return (
+    <EuiFlexGroup
+      alignItems="center"
+      gutterSize="none"
+      justifyContent="flexEnd"
+      css={css`
+        padding: ${euiTheme.size.s};
+        border-top: ${euiTheme.border.thin};
+        max-height: ${euiTheme.size.xxxl};
+        min-height: ${euiTheme.size.xxxl};
+        background-color: ${euiTheme.colors.emptyShade};
+        flex-direction: row;
+      `}
+      {...props}
+    />
+  );
+};
 
 export const LogStatusbarItem = EuiFlexItem;

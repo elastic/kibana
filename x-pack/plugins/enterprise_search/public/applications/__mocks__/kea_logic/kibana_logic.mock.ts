@@ -65,7 +65,6 @@ export const mockKibanaValues = {
     hasWebCrawler: true,
   },
   renderHeaderActions: jest.fn(),
-  searchInferenceEndpoints: null,
   security: securityMock.createStart(),
   setBreadcrumbs: jest.fn(),
   setChromeIsVisible: jest.fn(),

@@ -10,6 +10,7 @@ import { findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
 import { useMemo } from 'react';
 import useAsync from 'react-use/lib/useAsync';
 import { HostMetricTypes } from '../charts/types';
+import { useChartSeriesColor } from './use_chart_series_color';
 
 export const useHostCharts = ({
   metric,
@@ -87,6 +88,8 @@ export const useHostKpiCharts = ({
   seriesColor?: string;
   getSubtitle?: (formulaValue: string) => string;
 }) => {
+  seriesColor = useChartSeriesColor(seriesColor);
+
   const { value: charts = [] } = useAsync(async () => {
     const model = findInventoryModel('host');
     const { cpu, memory, disk } = await model.metrics.getCharts();

@@ -15,18 +15,19 @@ import {
   findInvestigationsParamsSchema,
   getAllInvestigationStatsParamsSchema,
   getAllInvestigationTagsParamsSchema,
+  getEntitiesParamsSchema,
+  GetEntitiesResponse,
+  getEventsParamsSchema,
+  GetEventsResponse,
   getInvestigationItemsParamsSchema,
   getInvestigationNotesParamsSchema,
   getInvestigationParamsSchema,
   updateInvestigationItemParamsSchema,
   updateInvestigationNoteParamsSchema,
   updateInvestigationParamsSchema,
-  getEventsParamsSchema,
-  GetEventsResponse,
-  getEntitiesParamsSchema,
-  GetEntitiesResponse,
 } from '@kbn/investigation-shared';
 import { ScopedAnnotationsClient } from '@kbn/observability-plugin/server';
+import { createEntitiesESClient } from '../clients/create_entities_es_client';
 import { createInvestigation } from '../services/create_investigation';
 import { createInvestigationItem } from '../services/create_investigation_item';
 import { createInvestigationNote } from '../services/create_investigation_note';
@@ -34,20 +35,20 @@ import { deleteInvestigation } from '../services/delete_investigation';
 import { deleteInvestigationItem } from '../services/delete_investigation_item';
 import { deleteInvestigationNote } from '../services/delete_investigation_note';
 import { findInvestigations } from '../services/find_investigations';
+import { AlertsClient, getAlertsClient } from '../services/get_alerts_client';
+import { getAllInvestigationStats } from '../services/get_all_investigation_stats';
 import { getAllInvestigationTags } from '../services/get_all_investigation_tags';
+import { getEntitiesWithSource } from '../services/get_entities';
+import { getAlertEvents, getAnnotationEvents } from '../services/get_events';
 import { getInvestigation } from '../services/get_investigation';
 import { getInvestigationItems } from '../services/get_investigation_items';
 import { getInvestigationNotes } from '../services/get_investigation_notes';
 import { investigationRepositoryFactory } from '../services/investigation_repository';
 import { updateInvestigation } from '../services/update_investigation';
-import { getAlertEvents, getAnnotationEvents } from '../services/get_events';
-import { AlertsClient, getAlertsClient } from '../services/get_alerts_client';
 import { updateInvestigationItem } from '../services/update_investigation_item';
 import { updateInvestigationNote } from '../services/update_investigation_note';
 import { createInvestigateAppServerRoute } from './create_investigate_app_server_route';
-import { getAllInvestigationStats } from '../services/get_all_investigation_stats';
-import { getEntitiesWithSource } from '../services/get_entities';
-import { createEntitiesESClient } from '../clients/create_entities_es_client';
+import { rootCauseAnalysisRoute } from './rca/route';
 
 const createInvestigationRoute = createInvestigateAppServerRoute({
   endpoint: 'POST /api/observability/investigations 2023-10-31',
@@ -400,6 +401,7 @@ export function getGlobalInvestigateAppServerRouteRepository() {
     ...getEntitiesRoute,
     ...getAllInvestigationStatsRoute,
     ...getAllInvestigationTagsRoute,
+    ...rootCauseAnalysisRoute,
   };
 }
 

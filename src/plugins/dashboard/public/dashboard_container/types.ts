@@ -8,7 +8,6 @@
  */
 
 import type { ContainerOutput } from '@kbn/embeddable-plugin/public';
-import type { ReduxEmbeddableState } from '@kbn/presentation-util-plugin/public';
 import { SerializableRecord } from '@kbn/utility-types';
 
 import { ControlGroupRuntimeState } from '@kbn/controls-plugin/public';
@@ -19,11 +18,6 @@ export interface UnsavedPanelState {
   [key: string]: object | undefined;
 }
 
-export type DashboardReduxState = ReduxEmbeddableState<
-  DashboardContainerInput,
-  DashboardContainerOutput
->;
-
 export type DashboardRedirect = (props: RedirectToProps) => void;
 export type RedirectToProps =
   | { destination: 'dashboard'; id?: string; useReplace?: boolean; editMode?: boolean }
@@ -31,7 +25,7 @@ export type RedirectToProps =
 
 export type DashboardStateFromSaveModal = Pick<
   DashboardContainerInput,
-  'title' | 'description' | 'tags' | 'timeRestore' | 'timeRange' | 'refreshInterval'
+  'title' | 'description' | 'tags' | 'timeRestore'
 >;
 
 export type DashboardStateFromSettingsFlyout = DashboardStateFromSaveModal & DashboardOptions;

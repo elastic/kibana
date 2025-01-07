@@ -74,19 +74,21 @@ describe('panelsReducer', () => {
             left: leftPanel1,
             right: rightPanel1,
             preview: [previewPanel1],
+            history: [rightPanel1],
           },
         },
         needsSync: true,
       });
     });
 
-    it('should override all panels in the state', () => {
+    it('should override all panels in the state and update history', () => {
       const state: PanelsState = {
         byId: {
           [id1]: {
             left: leftPanel1,
             right: rightPanel1,
             preview: [previewPanel1, { id: 'preview' }],
+            history: [rightPanel1],
           },
         },
       };
@@ -104,6 +106,7 @@ describe('panelsReducer', () => {
             left: leftPanel2,
             right: rightPanel2,
             preview: [previewPanel2],
+            history: [rightPanel1, rightPanel2],
           },
         },
         needsSync: true,
@@ -117,6 +120,7 @@ describe('panelsReducer', () => {
             left: leftPanel1,
             right: rightPanel1,
             preview: [previewPanel1],
+            history: [rightPanel1],
           },
         },
       };
@@ -132,6 +136,7 @@ describe('panelsReducer', () => {
             left: undefined,
             right: rightPanel2,
             preview: undefined,
+            history: [rightPanel1, rightPanel2],
           },
         },
         needsSync: true,
@@ -145,6 +150,7 @@ describe('panelsReducer', () => {
             left: leftPanel1,
             right: rightPanel1,
             preview: [previewPanel1],
+            history: [rightPanel1],
           },
         },
       };
@@ -160,11 +166,13 @@ describe('panelsReducer', () => {
             left: leftPanel1,
             right: rightPanel1,
             preview: [previewPanel1],
+            history: [rightPanel1],
           },
           [id2]: {
             left: undefined,
             right: rightPanel2,
             preview: undefined,
+            history: [rightPanel2],
           },
         },
         needsSync: true,
@@ -173,7 +181,7 @@ describe('panelsReducer', () => {
   });
 
   describe('should handle openRightPanel action', () => {
-    it('should add right panel to empty state', () => {
+    it('should add right panel to empty state but does not update history', () => {
       const state: PanelsState = initialPanelsState;
       const action = openRightPanelAction({ right: rightPanel1, id: id1 });
       const newState: PanelsState = panelsReducer(state, action);
@@ -184,19 +192,21 @@ describe('panelsReducer', () => {
             left: undefined,
             right: rightPanel1,
             preview: undefined,
+            history: [],
           },
         },
         needsSync: true,
       });
     });
 
-    it('should replace right panel', () => {
+    it('should replace right panel but does not update history', () => {
       const state: PanelsState = {
         byId: {
           [id1]: {
             left: leftPanel1,
             right: rightPanel1,
             preview: [previewPanel1],
+            history: [rightPanel1],
           },
         },
       };
@@ -209,6 +219,7 @@ describe('panelsReducer', () => {
             left: leftPanel1,
             right: rightPanel2,
             preview: [previewPanel1],
+            history: [rightPanel1],
           },
         },
         needsSync: true,
@@ -222,6 +233,7 @@ describe('panelsReducer', () => {
             left: leftPanel1,
             right: rightPanel1,
             preview: [previewPanel1],
+            history: [rightPanel1],
           },
         },
       };
@@ -234,11 +246,13 @@ describe('panelsReducer', () => {
             left: leftPanel1,
             right: rightPanel1,
             preview: [previewPanel1],
+            history: [rightPanel1],
           },
           [id2]: {
             left: undefined,
             right: rightPanel2,
             preview: undefined,
+            history: [],
           },
         },
         needsSync: true,
@@ -258,6 +272,7 @@ describe('panelsReducer', () => {
             left: leftPanel1,
             right: undefined,
             preview: undefined,
+            history: [],
           },
         },
         needsSync: true,
@@ -271,6 +286,7 @@ describe('panelsReducer', () => {
             left: leftPanel1,
             right: rightPanel1,
             preview: [previewPanel1],
+            history: [],
           },
         },
       };
@@ -283,6 +299,7 @@ describe('panelsReducer', () => {
             left: leftPanel2,
             right: rightPanel1,
             preview: [previewPanel1],
+            history: [],
           },
         },
         needsSync: true,
@@ -296,6 +313,7 @@ describe('panelsReducer', () => {
             left: leftPanel1,
             right: rightPanel1,
             preview: [previewPanel1],
+            history: [],
           },
         },
       };
@@ -308,11 +326,13 @@ describe('panelsReducer', () => {
             left: leftPanel1,
             right: rightPanel1,
             preview: [previewPanel1],
+            history: [],
           },
           [id2]: {
             left: leftPanel2,
             right: undefined,
             preview: undefined,
+            history: [],
           },
         },
         needsSync: true,
@@ -332,6 +352,7 @@ describe('panelsReducer', () => {
             left: undefined,
             right: undefined,
             preview: [previewPanel1],
+            history: [],
           },
         },
         needsSync: true,
@@ -345,6 +366,7 @@ describe('panelsReducer', () => {
             left: leftPanel1,
             right: rightPanel1,
             preview: [previewPanel1],
+            history: [],
           },
         },
       };
@@ -357,6 +379,7 @@ describe('panelsReducer', () => {
             left: leftPanel1,
             right: rightPanel1,
             preview: [previewPanel1, previewPanel2],
+            history: [],
           },
         },
         needsSync: true,
@@ -370,6 +393,7 @@ describe('panelsReducer', () => {
             left: leftPanel1,
             right: rightPanel1,
             preview: [previewPanel1],
+            history: [],
           },
         },
       };
@@ -382,11 +406,13 @@ describe('panelsReducer', () => {
             left: leftPanel1,
             right: rightPanel1,
             preview: [previewPanel1],
+            history: [],
           },
           [id2]: {
             left: undefined,
             right: undefined,
             preview: [previewPanel2],
+            history: [],
           },
         },
         needsSync: true,
@@ -413,6 +439,7 @@ describe('panelsReducer', () => {
             left: leftPanel1,
             right: undefined,
             preview: [previewPanel1],
+            history: [],
           },
         },
       };
@@ -432,6 +459,7 @@ describe('panelsReducer', () => {
             left: leftPanel1,
             right: rightPanel1,
             preview: [previewPanel1],
+            history: [rightPanel1],
           },
         },
       };
@@ -445,6 +473,7 @@ describe('panelsReducer', () => {
             left: leftPanel1,
             right: undefined,
             preview: [previewPanel1],
+            history: [rightPanel1],
           },
         },
         needsSync: true,
@@ -458,6 +487,7 @@ describe('panelsReducer', () => {
             left: leftPanel1,
             right: rightPanel1,
             preview: [previewPanel1],
+            history: [rightPanel1],
           },
         },
       };
@@ -471,6 +501,7 @@ describe('panelsReducer', () => {
             left: leftPanel1,
             right: rightPanel1,
             preview: [previewPanel1],
+            history: [rightPanel1],
           },
         },
         needsSync: true,
@@ -497,6 +528,7 @@ describe('panelsReducer', () => {
             left: undefined,
             right: rightPanel1,
             preview: [previewPanel1],
+            history: [rightPanel1],
           },
         },
       };
@@ -516,6 +548,7 @@ describe('panelsReducer', () => {
             left: leftPanel1,
             right: rightPanel1,
             preview: [previewPanel1],
+            history: [rightPanel1],
           },
         },
       };
@@ -528,6 +561,7 @@ describe('panelsReducer', () => {
             left: undefined,
             right: rightPanel1,
             preview: [previewPanel1],
+            history: [rightPanel1],
           },
         },
         needsSync: true,
@@ -541,6 +575,7 @@ describe('panelsReducer', () => {
             left: leftPanel1,
             right: rightPanel1,
             preview: [previewPanel1],
+            history: [rightPanel1],
           },
         },
       };
@@ -553,6 +588,7 @@ describe('panelsReducer', () => {
             left: leftPanel1,
             right: rightPanel1,
             preview: [previewPanel1],
+            history: [rightPanel1],
           },
         },
         needsSync: true,
@@ -579,6 +615,7 @@ describe('panelsReducer', () => {
             left: leftPanel1,
             right: rightPanel1,
             preview: undefined,
+            history: [rightPanel1],
           },
         },
       };
@@ -598,6 +635,7 @@ describe('panelsReducer', () => {
             left: rightPanel1,
             right: leftPanel1,
             preview: [previewPanel1, previewPanel2],
+            history: [rightPanel1],
           },
         },
       };
@@ -610,6 +648,7 @@ describe('panelsReducer', () => {
             left: rightPanel1,
             right: leftPanel1,
             preview: undefined,
+            history: [rightPanel1],
           },
         },
         needsSync: true,
@@ -623,6 +662,7 @@ describe('panelsReducer', () => {
             left: leftPanel1,
             right: rightPanel1,
             preview: [previewPanel1],
+            history: [rightPanel1],
           },
         },
       };
@@ -635,6 +675,7 @@ describe('panelsReducer', () => {
             left: leftPanel1,
             right: rightPanel1,
             preview: [previewPanel1],
+            history: [rightPanel1],
           },
         },
         needsSync: true,
@@ -661,6 +702,7 @@ describe('panelsReducer', () => {
             left: leftPanel1,
             right: rightPanel1,
             preview: undefined,
+            history: [rightPanel1],
           },
         },
       };
@@ -677,9 +719,10 @@ describe('panelsReducer', () => {
       const state: PanelsState = {
         byId: {
           [id1]: {
-            left: rightPanel1,
-            right: leftPanel1,
+            left: leftPanel1,
+            right: rightPanel1,
             preview: [previewPanel1, previewPanel2],
+            history: [rightPanel1],
           },
         },
       };
@@ -689,9 +732,10 @@ describe('panelsReducer', () => {
       expect(newState).toEqual({
         byId: {
           [id1]: {
-            left: rightPanel1,
-            right: leftPanel1,
+            left: leftPanel1,
+            right: rightPanel1,
             preview: [previewPanel1],
+            history: [rightPanel1],
           },
         },
         needsSync: false,
@@ -705,6 +749,7 @@ describe('panelsReducer', () => {
             left: leftPanel1,
             right: rightPanel1,
             preview: [previewPanel1],
+            history: [rightPanel1],
           },
         },
       };
@@ -717,6 +762,7 @@ describe('panelsReducer', () => {
             left: leftPanel1,
             right: rightPanel1,
             preview: [previewPanel1],
+            history: [rightPanel1],
           },
         },
         needsSync: false,
@@ -743,6 +789,7 @@ describe('panelsReducer', () => {
             left: leftPanel1,
             right: rightPanel1,
             preview: [previewPanel1],
+            history: [rightPanel1],
           },
         },
       };
@@ -755,6 +802,7 @@ describe('panelsReducer', () => {
             left: undefined,
             right: undefined,
             preview: undefined,
+            history: [rightPanel1],
           },
         },
         needsSync: true,
@@ -768,6 +816,7 @@ describe('panelsReducer', () => {
             left: leftPanel1,
             right: rightPanel1,
             preview: [previewPanel1],
+            history: [rightPanel1],
           },
         },
       };
@@ -780,6 +829,7 @@ describe('panelsReducer', () => {
             left: leftPanel1,
             right: rightPanel1,
             preview: [previewPanel1],
+            history: [rightPanel1],
           },
         },
         needsSync: true,

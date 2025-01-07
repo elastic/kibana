@@ -10,24 +10,23 @@
 import '../_dashboard_container.scss';
 
 import classNames from 'classnames';
-import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
-import useUnmount from 'react-use/lib/useUnmount';
-import { v4 as uuidv4 } from 'uuid';
+import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 
 import { EuiLoadingElastic, EuiLoadingSpinner } from '@elastic/eui';
-import { ErrorEmbeddable, isErrorEmbeddable } from '@kbn/embeddable-plugin/public';
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import { LocatorPublic } from '@kbn/share-plugin/common';
 
-import { DashboardContainerInput } from '../../../common';
-import { DashboardApi } from '../../dashboard_api/types';
-import { embeddableService, screenshotModeService } from '../../services/kibana_services';
-import type { DashboardContainer } from '../embeddable/dashboard_container';
-import { DashboardContainerFactoryDefinition } from '../embeddable/dashboard_container_factory';
+import { ExitFullScreenButtonKibanaProvider } from '@kbn/shared-ux-button-exit-full-screen';
+import { DashboardApi, DashboardInternalApi } from '../../dashboard_api/types';
+import { coreServices, screenshotModeService } from '../../services/kibana_services';
 import type { DashboardCreationOptions } from '../..';
 import { DashboardLocatorParams, DashboardRedirect } from '../types';
 import { Dashboard404Page } from './dashboard_404';
+import { DashboardContext } from '../../dashboard_api/use_dashboard_api';
+import { DashboardViewport } from '../component/viewport/dashboard_viewport';
+import { loadDashboardApi } from '../../dashboard_api/load_dashboard_api';
+import { DashboardInternalContext } from '../../dashboard_api/use_dashboard_internal_api';
 
 export interface DashboardRendererProps {
   onApiAvailable?: (api: DashboardApi) => void;
@@ -46,93 +45,55 @@ export function DashboardRenderer({
   locator,
   onApiAvailable,
 }: DashboardRendererProps) {
-  const dashboardRoot = useRef(null);
   const dashboardViewport = useRef(null);
-  const [loading, setLoading] = useState(true);
-  const [dashboardContainer, setDashboardContainer] = useState<DashboardContainer>();
-  const [fatalError, setFatalError] = useState<ErrorEmbeddable | undefined>();
-  const [dashboardMissing, setDashboardMissing] = useState(false);
-
-  const id = useMemo(() => uuidv4(), []);
+  const dashboardContainer = useRef(null);
+  const [dashboardApi, setDashboardApi] = useState<DashboardApi | undefined>();
+  const [dashboardInternalApi, setDashboardInternalApi] = useState<
+    DashboardInternalApi | undefined
+  >();
+  const [error, setError] = useState<Error | undefined>();
 
   useEffect(() => {
     /* In case the locator prop changes, we need to reassign the value in the container */
-    if (dashboardContainer) dashboardContainer.locator = locator;
-  }, [dashboardContainer, locator]);
+    if (dashboardApi) dashboardApi.locator = locator;
+  }, [dashboardApi, locator]);
 
   useEffect(() => {
-    /**
-     * Here we attempt to build a dashboard or navigate to a new dashboard. Clear all error states
-     * if they exist in case this dashboard loads correctly.
-     */
-    fatalError?.destroy();
-    setDashboardMissing(false);
-    setFatalError(undefined);
+    if (error) setError(undefined);
+    if (dashboardApi) setDashboardApi(undefined);
+    if (dashboardInternalApi) setDashboardInternalApi(undefined);
 
-    if (dashboardContainer) {
-      // When a dashboard already exists, don't rebuild it, just set a new id.
-      dashboardContainer.navigateToDashboard(savedObjectId).catch((e) => {
-        dashboardContainer?.destroy();
-        setDashboardContainer(undefined);
-        setFatalError(new ErrorEmbeddable(e, { id }));
-        if (e instanceof SavedObjectNotFound) {
-          setDashboardMissing(true);
-        }
-      });
-      return;
-    }
-
-    setLoading(true);
     let canceled = false;
-    (async () => {
-      const creationOptions = await getCreationOptions?.();
-
-      const dashboardFactory = new DashboardContainerFactoryDefinition(embeddableService);
-      const container = await dashboardFactory.create(
-        { id } as unknown as DashboardContainerInput, // Input from creationOptions is used instead.
-        undefined,
-        creationOptions,
-        savedObjectId
-      );
-      setLoading(false);
-
-      if (canceled || !container) {
-        setDashboardContainer(undefined);
-        container?.destroy();
-        return;
-      }
-
-      if (isErrorEmbeddable(container)) {
-        setFatalError(container);
-        if (container.error instanceof SavedObjectNotFound) {
-          setDashboardMissing(true);
+    let cleanupDashboardApi: (() => void) | undefined;
+    loadDashboardApi({ getCreationOptions, savedObjectId })
+      .then((results) => {
+        if (!results) return;
+        if (canceled) {
+          results.cleanup();
+          return;
         }
-        return;
-      }
 
-      if (dashboardRoot.current) {
-        container.render(dashboardRoot.current);
-      }
+        cleanupDashboardApi = results.cleanup;
+        setDashboardApi(results.api);
+        setDashboardInternalApi(results.internalApi);
+        onApiAvailable?.(results.api);
+      })
+      .catch((err) => {
+        if (!canceled) setError(err);
+      });
 
-      setDashboardContainer(container);
-      onApiAvailable?.(container as DashboardApi);
-    })();
     return () => {
+      cleanupDashboardApi?.();
       canceled = true;
     };
     // Disabling exhaustive deps because embeddable should only be created on first render.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [savedObjectId]);
 
-  useUnmount(() => {
-    fatalError?.destroy();
-    dashboardContainer?.destroy();
-  });
-
   const viewportClasses = classNames(
     'dashboardViewport',
     { 'dashboardViewport--screenshotMode': screenshotModeService.isScreenshotMode() },
-    { 'dashboardViewport--loading': loading }
+    { 'dashboardViewport--loading': !error && !dashboardApi }
   );
 
   const loadingSpinner = showPlainSpinner ? (
@@ -142,22 +103,43 @@ export function DashboardRenderer({
   );
 
   const renderDashboardContents = () => {
-    if (dashboardMissing) return <Dashboard404Page dashboardRedirect={dashboardRedirect} />;
-    if (fatalError) return fatalError.render();
-    if (loading) return loadingSpinner;
-    return <div ref={dashboardRoot} />;
+    if (error) {
+      return error instanceof SavedObjectNotFound ? (
+        <Dashboard404Page dashboardRedirect={dashboardRedirect} />
+      ) : (
+        error.message
+      );
+    }
+
+    return dashboardApi && dashboardInternalApi ? (
+      <div className="dashboardContainer" ref={dashboardContainer}>
+        <ExitFullScreenButtonKibanaProvider
+          coreStart={{ chrome: coreServices.chrome, customBranding: coreServices.customBranding }}
+        >
+          <DashboardContext.Provider value={dashboardApi}>
+            <DashboardInternalContext.Provider value={dashboardInternalApi}>
+              <DashboardViewport
+                dashboardContainer={
+                  dashboardContainer.current ? dashboardContainer.current : undefined
+                }
+              />
+            </DashboardInternalContext.Provider>
+          </DashboardContext.Provider>
+        </ExitFullScreenButtonKibanaProvider>
+      </div>
+    ) : (
+      loadingSpinner
+    );
   };
 
   return (
     <div ref={dashboardViewport} className={viewportClasses}>
-      {dashboardViewport?.current &&
-        dashboardContainer &&
-        !isErrorEmbeddable(dashboardContainer) && (
-          <ParentClassController
-            viewportRef={dashboardViewport.current}
-            dashboardApi={dashboardContainer as DashboardApi}
-          />
-        )}
+      {dashboardViewport?.current && dashboardApi && (
+        <ParentClassController
+          viewportRef={dashboardViewport.current}
+          dashboardApi={dashboardApi}
+        />
+      )}
       {renderDashboardContents()}
     </div>
   );

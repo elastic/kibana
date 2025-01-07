@@ -10,7 +10,7 @@ import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import useMount from 'react-use/lib/useMount';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import styled from '@emotion/styled';
 import { useLogViewContext } from '@kbn/logs-shared-plugin/public';
 import {
   isCategoryAnomaly,
@@ -139,6 +139,6 @@ export const AnomaliesTableExpandedRow: React.FunctionComponent<{
   );
 };
 
-const ExpandedContentWrapper = euiStyled(EuiFlexGroup)`
+const ExpandedContentWrapper = styled(EuiFlexGroup)`
   overflow: hidden;
 `;

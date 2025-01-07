@@ -37,6 +37,7 @@ export const ActionsLogFilters = memo(
     onTimeChange,
     showHostsFilter,
     'data-test-subj': dataTestSubj,
+    'data-test-height': dataTestHeight,
   }: {
     dateRangePickerState: DateRangePickerValues;
     isDataLoading: boolean;
@@ -53,6 +54,7 @@ export const ActionsLogFilters = memo(
     onClick: ReturnType<typeof useGetEndpointActionList>['refetch'];
     showHostsFilter: boolean;
     'data-test-subj'?: string;
+    'data-test-height'?: number;
   }) => {
     const getTestId = useTestIdGenerator(dataTestSubj);
 
@@ -76,6 +78,7 @@ export const ActionsLogFilters = memo(
             isFlyout={isFlyout}
             onChangeFilterOptions={onChangeCommandsFilter}
             data-test-subj={dataTestSubj}
+            data-test-height={dataTestHeight}
           />
           <ActionsLogFilter
             filterName={'statuses'}
@@ -109,6 +112,7 @@ export const ActionsLogFilters = memo(
       isSentinelOneV1Enabled,
       onChangeHostsFilter,
       dataTestSubj,
+      dataTestHeight,
       onChangeCommandsFilter,
       onChangeStatusesFilter,
       onChangeAgentTypesFilter,

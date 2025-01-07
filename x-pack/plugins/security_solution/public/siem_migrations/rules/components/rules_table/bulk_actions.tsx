@@ -6,7 +6,13 @@
  */
 
 import React from 'react';
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLoadingSpinner,
+} from '@elastic/eui';
 import * as i18n from './translations';
 
 export interface BulkActionsProps {
@@ -29,13 +35,14 @@ export const BulkActions: React.FC<BulkActionsProps> = React.memo(
     installSelectedRule,
   }) => {
     const disableInstallTranslatedRulesButton = isTableLoading || !numberOfTranslatedRules;
-    const showInstallSelectedRulesButton =
-      disableInstallTranslatedRulesButton && numberOfSelectedRules > 0;
+    const showInstallSelectedRulesButton = isTableLoading || numberOfSelectedRules > 0;
     return (
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap={true}>
         {showInstallSelectedRulesButton ? (
           <EuiFlexItem grow={false}>
-            <EuiButton
+            <EuiButtonEmpty
+              iconType="plusInCircle"
+              color={'primary'}
               onClick={installSelectedRule}
               disabled={isTableLoading}
               data-test-subj="installSelectedRulesButton"
@@ -43,7 +50,7 @@ export const BulkActions: React.FC<BulkActionsProps> = React.memo(
             >
               {i18n.INSTALL_SELECTED_RULES(numberOfSelectedRules)}
               {isTableLoading && <EuiLoadingSpinner size="s" />}
-            </EuiButton>
+            </EuiButtonEmpty>
           </EuiFlexItem>
         ) : null}
         <EuiFlexItem grow={false}>

@@ -7,8 +7,7 @@
 
 import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
 import React from 'react';
-
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import styled from '@emotion/styled';
 
 interface NoDataProps {
   titleText: string;
@@ -44,6 +43,6 @@ export const NoData: React.FC<NoDataProps> = ({
   />
 );
 
-const CenteredEmptyPrompt = euiStyled(EuiEmptyPrompt)`
+const CenteredEmptyPrompt = styled(EuiEmptyPrompt)`
   align-self: center;
 `;

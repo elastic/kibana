@@ -27,7 +27,7 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { FunctionComponent, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { FunctionComponent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ILicense } from '@kbn/licensing-plugin/public';
 import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
 import {
@@ -85,6 +85,7 @@ export const DetailsPageMappingsContent: FunctionComponent<{
     overlays,
     history,
   } = useAppContext();
+  const pendingFieldsRef = useRef<HTMLDivElement>(null);
 
   const [isPlatinumLicense, setIsPlatinumLicense] = useState<boolean>(false);
   useEffect(() => {
@@ -559,7 +560,7 @@ export const DetailsPageMappingsContent: FunctionComponent<{
           </EuiFlexItem>
           {errorSavingMappings}
           {isAddingFields && (
-            <EuiFlexItem grow={false}>
+            <EuiFlexItem grow={false} ref={pendingFieldsRef} tabIndex={0}>
               <EuiPanel hasBorder paddingSize="s">
                 <EuiAccordion
                   id={pendingFieldListId}
@@ -597,11 +598,13 @@ export const DetailsPageMappingsContent: FunctionComponent<{
                         onCancelAddingNewFields={onCancelAddingNewFields}
                         isAddingFields={isAddingFields}
                         semanticTextInfo={semanticTextInfo}
+                        pendingFieldsRef={pendingFieldsRef}
                       />
                     ) : (
                       <DocumentFields
                         isAddingFields={isAddingFields}
                         semanticTextInfo={semanticTextInfo}
+                        pendingFieldsRef={pendingFieldsRef}
                       />
                     )}
                   </EuiPanel>

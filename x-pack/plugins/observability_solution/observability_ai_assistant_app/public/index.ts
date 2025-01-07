@@ -14,6 +14,8 @@ import type {
   ObservabilityAIAssistantAppPublicStart,
 } from './types';
 
+export type { ObservabilityAIAssistantAppPublicSetup, ObservabilityAIAssistantAppPublicStart };
+
 export const plugin: PluginInitializer<
   ObservabilityAIAssistantAppPublicSetup,
   ObservabilityAIAssistantAppPublicStart,

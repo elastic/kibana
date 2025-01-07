@@ -101,6 +101,7 @@ export const PresentationPanelHoverActions = ({
   api,
   index,
   getActions,
+  setDragHandle,
   actionPredicate,
   children,
   className,
@@ -111,6 +112,7 @@ export const PresentationPanelHoverActions = ({
   index?: number;
   api: DefaultPresentationPanelApi | null;
   getActions: PresentationPanelInternalProps['getActions'];
+  setDragHandle: (id: string, ref: HTMLElement | null) => void;
   actionPredicate?: (actionId: string) => boolean;
   children: ReactElement;
   className?: string;
@@ -124,9 +126,10 @@ export const PresentationPanelHoverActions = ({
   const [isContextMenuOpen, setIsContextMenuOpen] = useState<boolean>(false);
   const [notifications, setNotifications] = useState<AnyApiAction[]>([]);
   const hoverActionsRef = useRef<HTMLDivElement | null>(null);
+  const dragHandleRef = useRef<HTMLButtonElement | null>(null);
   const anchorRef = useRef<HTMLDivElement | null>(null);
-  const leftHoverActionsRef = useRef<HTMLDivElement | null>(null);
   const rightHoverActionsRef = useRef<HTMLDivElement | null>(null);
+
   const [combineHoverActions, setCombineHoverActions] = useState<boolean>(false);
   const [borderStyles, setBorderStyles] = useState<string>(TOP_ROUNDED_CORNERS);
 
@@ -138,14 +141,14 @@ export const PresentationPanelHoverActions = ({
     const anchorWidth = anchorRef.current.offsetWidth;
     const hoverActionsWidth =
       (rightHoverActionsRef.current?.offsetWidth ?? 0) +
-      (leftHoverActionsRef.current?.offsetWidth ?? 0) +
+      (dragHandleRef.current?.offsetWidth ?? 0) +
       parseInt(euiThemeVars.euiSize, 10) * 2;
     const hoverActionsHeight = rightHoverActionsRef.current?.offsetHeight ?? 0;
 
     // Left align hover actions when they would get cut off by the right edge of the window
     if (anchorLeft - (hoverActionsWidth - anchorWidth) <= parseInt(euiThemeVars.euiSize, 10)) {
-      hoverActionsRef.current.style.removeProperty('right');
-      hoverActionsRef.current.style.setProperty('left', '0');
+      dragHandleRef.current?.style.removeProperty('right');
+      dragHandleRef.current?.style.setProperty('left', '0');
     } else {
       hoverActionsRef.current.style.removeProperty('left');
       hoverActionsRef.current.style.setProperty('right', '0');
@@ -442,19 +445,30 @@ export const PresentationPanelHoverActions = ({
     />
   );
 
-  const dragHandle = (
-    <EuiIcon
-      type="move"
-      color="text"
-      className={`${viewMode === 'edit' ? 'embPanel--dragHandle' : ''}`}
-      aria-label={i18n.translate('presentationPanel.dragHandle', {
-        defaultMessage: 'Move panel',
-      })}
-      data-test-subj="embeddablePanelDragHandle"
-      css={css`
-        margin: ${euiThemeVars.euiSizeXS};
-      `}
-    />
+  const dragHandle = useMemo(
+    // memoize the drag handle to avoid calling `setDragHandle` unnecessarily
+    () => (
+      <button
+        ref={(ref) => {
+          dragHandleRef.current = ref;
+          setDragHandle('hoverActions', ref);
+        }}
+      >
+        <EuiIcon
+          type="move"
+          color="text"
+          className={`embPanel--dragHandle`}
+          aria-label={i18n.translate('presentationPanel.dragHandle', {
+            defaultMessage: 'Move panel',
+          })}
+          data-test-subj="embeddablePanelDragHandle"
+          css={css`
+            margin: ${euiThemeVars.euiSizeXS};
+          `}
+        />
+      </button>
+    ),
+    [setDragHandle]
   );
 
   const hasHoverActions = quickActionElements.length || contextMenuPanels.lastIndexOf.length;
@@ -535,7 +549,6 @@ export const PresentationPanelHoverActions = ({
         >
           {viewMode === 'edit' && !combineHoverActions ? (
             <div
-              ref={leftHoverActionsRef}
               data-test-subj="embPanel__hoverActions__left"
               className={classNames(
                 'embPanel__hoverActions',

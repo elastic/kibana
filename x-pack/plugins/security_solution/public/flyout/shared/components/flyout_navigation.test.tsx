@@ -13,13 +13,16 @@ import { FlyoutNavigation } from './flyout_navigation';
 import {
   COLLAPSE_DETAILS_BUTTON_TEST_ID,
   EXPAND_DETAILS_BUTTON_TEST_ID,
+  FLYOUT_HISTORY_BUTTON_TEST_ID,
   HEADER_ACTIONS_TEST_ID,
 } from './test_ids';
-import type { ExpandableFlyoutState } from '@kbn/expandable-flyout';
+import type { ExpandableFlyoutState, FlyoutPanelProps } from '@kbn/expandable-flyout';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import {
   useExpandableFlyoutApi,
   type ExpandableFlyoutApi,
   useExpandableFlyoutState,
+  useExpandableFlyoutHistory,
 } from '@kbn/expandable-flyout';
 
 const expandDetails = jest.fn();
@@ -31,8 +34,11 @@ const ExpandableFlyoutTestProviders: FC<PropsWithChildren<{}>> = ({ children }) 
 jest.mock('@kbn/expandable-flyout', () => ({
   useExpandableFlyoutApi: jest.fn(),
   useExpandableFlyoutState: jest.fn(),
+  useExpandableFlyoutHistory: jest.fn(),
   ExpandableFlyoutProvider: ({ children }: React.PropsWithChildren<{}>) => <>{children}</>,
 }));
+
+jest.mock('../../../common/hooks/use_experimental_features');
 
 const flyoutContextValue = {
   closeLeftPanel: jest.fn(),
@@ -42,6 +48,8 @@ describe('<FlyoutNavigation />', () => {
   beforeEach(() => {
     jest.mocked(useExpandableFlyoutApi).mockReturnValue(flyoutContextValue);
     jest.mocked(useExpandableFlyoutState).mockReturnValue({} as unknown as ExpandableFlyoutState);
+    jest.mocked(useExpandableFlyoutHistory).mockReturnValue([]);
+    jest.mocked(useIsExperimentalFeatureEnabled).mockReturnValue(false);
   });
 
   describe('when flyout is expandable', () => {
@@ -111,6 +119,64 @@ describe('<FlyoutNavigation />', () => {
       </ExpandableFlyoutTestProviders>
     );
     await act(async () => {
+      expect(container).toBeEmptyDOMElement();
+    });
+  });
+
+  it('should render empty component if isPreviewMode is true', () => {
+    const { container } = render(
+      <ExpandableFlyoutTestProviders>
+        <FlyoutNavigation isPreviewMode={true} flyoutIsExpandable={true} />
+      </ExpandableFlyoutTestProviders>
+    );
+    expect(container).toBeEmptyDOMElement();
+  });
+
+  const flyoutHistory = [
+    { id: 'id1', params: {} },
+    { id: 'id2', params: {} },
+  ] as unknown as FlyoutPanelProps[];
+
+  describe('when flyout history is enabled', () => {
+    beforeEach(() => {
+      jest.mocked(useIsExperimentalFeatureEnabled).mockReturnValue(true);
+      jest.mocked(useExpandableFlyoutHistory).mockReturnValue(flyoutHistory);
+    });
+
+    it('should render history button when there is no item in history', () => {
+      jest.mocked(useExpandableFlyoutHistory).mockReturnValue([]);
+      const { getByTestId } = render(
+        <ExpandableFlyoutTestProviders>
+          <FlyoutNavigation flyoutIsExpandable={false} />
+        </ExpandableFlyoutTestProviders>
+      );
+      expect(getByTestId(FLYOUT_HISTORY_BUTTON_TEST_ID)).toBeInTheDocument();
+    });
+
+    it('should render history button when there are more than 1 unqie item in history', () => {
+      const { getByTestId } = render(
+        <ExpandableFlyoutTestProviders>
+          <FlyoutNavigation flyoutIsExpandable={false} />
+        </ExpandableFlyoutTestProviders>
+      );
+      expect(getByTestId(FLYOUT_HISTORY_BUTTON_TEST_ID)).toBeInTheDocument();
+    });
+
+    it('should not render history button if in rule preview', () => {
+      const { container } = render(
+        <ExpandableFlyoutTestProviders>
+          <FlyoutNavigation flyoutIsExpandable={false} isPreview={true} />
+        </ExpandableFlyoutTestProviders>
+      );
+      expect(container).toBeEmptyDOMElement();
+    });
+
+    it('should render empty component if isPreviewMode is true', () => {
+      const { container } = render(
+        <ExpandableFlyoutTestProviders>
+          <FlyoutNavigation isPreviewMode={true} flyoutIsExpandable={true} />
+        </ExpandableFlyoutTestProviders>
+      );
       expect(container).toBeEmptyDOMElement();
     });
   });

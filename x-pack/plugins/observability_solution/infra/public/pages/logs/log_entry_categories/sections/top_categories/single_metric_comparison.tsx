@@ -9,8 +9,7 @@ import { EuiIcon, EuiTextColor } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import styled from '@emotion/styled';
 
 export const SingleMetricComparison: React.FunctionComponent<{
   currentValue: number;
@@ -53,6 +52,6 @@ const newCategoryTrendLabel = i18n.translate(
   }
 );
 
-const NoWrapSpan = euiStyled.span`
+const NoWrapSpan = styled.span`
   white-space: nowrap;
 `;

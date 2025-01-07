@@ -33,7 +33,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { SecurityAppError } from '@kbn/securitysolution-t-grid';
-import type { StoreStatus } from '../../../common/api/entity_analytics';
+import { EntityType, EntityTypeEnum, type StoreStatus } from '../../../common/api/entity_analytics';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import { ASSET_CRITICALITY_INDEX_PATTERN } from '../../../common/entity_analytics/asset_criticality';
 import { useKibana } from '../../common/lib/kibana';
@@ -73,13 +73,20 @@ export const EntityStoreManagementPage = () => {
   const hasAssetCriticalityWritePermissions = assetCriticalityPrivileges?.has_write_permissions;
   const [selectedTabId, setSelectedTabId] = useState(TabId.Import);
   const entityStoreStatus = useEntityStoreStatus({});
+  const isServiceEntityStoreEnabled = useIsExperimentalFeatureEnabled('serviceEntityStoreEnabled');
+  const allEntityTypes = Object.values(EntityType.Values);
+
+  const entityTypes = isServiceEntityStoreEnabled
+    ? allEntityTypes
+    : allEntityTypes.filter((value) => value !== EntityTypeEnum.service);
 
   const enableStoreMutation = useEnableEntityStoreMutation();
-  const stopEntityEngineMutation = useStopEntityEngineMutation();
+  const stopEntityEngineMutation = useStopEntityEngineMutation(entityTypes);
   const deleteEntityEngineMutation = useDeleteEntityEngineMutation({
     onSuccess: () => {
       closeClearModal();
     },
+    entityTypes,
   });
 
   const [isClearModalVisible, setIsClearModalVisible] = useState(false);

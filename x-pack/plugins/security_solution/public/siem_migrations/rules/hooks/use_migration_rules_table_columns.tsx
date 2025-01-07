@@ -10,6 +10,7 @@ import type { RuleMigration } from '../../../../common/siem_migrations/model/rul
 import type { TableColumn } from '../components/rules_table_columns';
 import {
   createActionsColumn,
+  createAuthorColumn,
   createNameColumn,
   createRiskScoreColumn,
   createSeverityColumn,
@@ -33,6 +34,7 @@ export const useMigrationRulesTableColumns = ({
       createStatusColumn(),
       createRiskScoreColumn(),
       createSeverityColumn(),
+      createAuthorColumn(),
       createActionsColumn({
         disableActions,
         openMigrationRuleDetails,

@@ -22,6 +22,7 @@ export const servers: ScoutLoaderConfig = {
     ],
   },
   kbnTestServer: {
+    ...defaultConfig.kbnTestServer,
     serverArgs: [
       ...defaultConfig.kbnTestServer.serverArgs,
       '--serverless=oblt',

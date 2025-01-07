@@ -2781,27 +2781,27 @@
           },
           {
             "plugin": "aiops",
-            "path": "x-pack/plugins/aiops/public/application/utils/search_utils.ts"
+            "path": "x-pack/platform/plugins/shared/aiops/public/application/utils/search_utils.ts"
           },
           {
             "plugin": "aiops",
-            "path": "x-pack/plugins/aiops/public/application/utils/search_utils.ts"
+            "path": "x-pack/platform/plugins/shared/aiops/public/application/utils/search_utils.ts"
           },
           {
             "plugin": "dataVisualizer",
-            "path": "x-pack/plugins/data_visualizer/common/types/index.ts"
+            "path": "x-pack/platform/plugins/private/data_visualizer/common/types/index.ts"
           },
           {
             "plugin": "dataVisualizer",
-            "path": "x-pack/plugins/data_visualizer/common/types/index.ts"
+            "path": "x-pack/platform/plugins/private/data_visualizer/common/types/index.ts"
           },
           {
             "plugin": "ml",
-            "path": "x-pack/plugins/ml/common/types/kibana.ts"
+            "path": "x-pack/platform/plugins/shared/ml/common/types/kibana.ts"
           },
           {
             "plugin": "ml",
-            "path": "x-pack/plugins/ml/common/types/kibana.ts"
+            "path": "x-pack/platform/plugins/shared/ml/common/types/kibana.ts"
           },
           {
             "plugin": "dashboardEnhanced",

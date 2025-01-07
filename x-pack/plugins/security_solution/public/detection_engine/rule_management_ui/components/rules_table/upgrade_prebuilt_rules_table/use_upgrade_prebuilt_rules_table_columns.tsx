@@ -59,7 +59,7 @@ const RULE_NAME_COLUMN: TableColumn = {
   field: 'current_rule.name',
   name: i18n.COLUMN_RULE,
   render: (value: RuleUpgradeState['current_rule']['name'], ruleUpgradeState: RuleUpgradeState) => (
-    <RuleName name={value} ruleId={ruleUpgradeState.id} />
+    <RuleName name={value} ruleId={ruleUpgradeState.rule_id} />
   ),
   sortable: true,
   truncateText: true,

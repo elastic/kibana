@@ -39,6 +39,7 @@ export {
   initializeTimeRange,
   type SerializedTimeRange,
 } from './interfaces/fetch/initialize_time_range';
+export { apiPublishesReload, type PublishesReload } from './interfaces/fetch/publishes_reload';
 export {
   apiPublishesFilters,
   apiPublishesPartialUnifiedSearch,

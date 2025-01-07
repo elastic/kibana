@@ -7,11 +7,9 @@
 
 import { EuiFieldSearch } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-
+import styled from '@emotion/styled';
 import classNames from 'classnames';
 import * as React from 'react';
-
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
 
 interface LogSearchInputProps {
   className?: string;
@@ -77,11 +75,11 @@ export const LogSearchInput = class extends React.PureComponent<
   }
 };
 
-const PlainSearchField = euiStyled(EuiFieldSearch)`
+const PlainSearchField = styled(EuiFieldSearch)`
   background: transparent;
   box-shadow: none;
 
   &:focus {
-    box-shadow: inset 0 -2px 0 0 ${(props) => props.theme.eui.euiColorPrimary};
+    box-shadow: inset 0 -2px 0 0 ${(props) => props.theme.euiTheme.colors.primary};
   }
 `;

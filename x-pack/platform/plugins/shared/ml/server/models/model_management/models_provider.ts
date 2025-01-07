@@ -237,11 +237,14 @@ export class ModelsProvider {
     const forDownload = await this.getModelDownloads();
 
     const notDownloaded: TrainedModelUIItem[] = forDownload
-      .filter(({ model_id: modelId, hidden, recommended, supported, disclaimer }) => {
+      .filter(({ model_id: modelId, hidden, recommended, supported, disclaimer, techPreview }) => {
         if (idMap.has(modelId)) {
           const model = idMap.get(modelId)! as NLPModelItem;
           if (recommended) {
             model.recommended = true;
+          }
+          if (techPreview) {
+            model.techPreview = true;
           }
           model.supported = supported;
           model.disclaimer = disclaimer;
