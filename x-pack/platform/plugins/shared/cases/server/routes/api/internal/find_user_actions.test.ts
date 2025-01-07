@@ -184,7 +184,7 @@ describe('findUserActionsRoute', () => {
       query: '',
     };
 
-    // @ts-expect-error: Kibana platform types are mocked for testing, only implementing necessary properties for handler logic
+    // @ts-expect-error: mocking necessary properties for handler logic only, no Kibana platform
     await findUserActionsRoute.handler({ context, request, response });
 
     expect(casesClientMock.attachments.bulkGet).toHaveBeenCalledWith({
