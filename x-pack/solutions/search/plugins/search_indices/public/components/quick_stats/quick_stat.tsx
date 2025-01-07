@@ -54,7 +54,7 @@ export const QuickStat: React.FC<BaseQuickStatProps> = ({
 
   const id = useGeneratedHtmlId({
     prefix: 'formAccordion',
-    suffix: title,
+    suffix: title.replace(/\s/g, '_'),
   });
 
   return (
