@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import React from 'react';
 import styled from '@emotion/styled';
 import { rgba } from 'polished';
 import {
@@ -88,52 +87,3 @@ export const EdgeLabelOnHover = styled(EdgeLabel)<EdgeLabelProps & EdgeLabelCont
     opacity: 1; /* Show on hover */
   }
 `;
-
-const Marker = ({ id, color }: { id: string; color: string }) => {
-  return (
-    <marker
-      id={id}
-      markerWidth="12"
-      markerHeight="12"
-      viewBox="-10 -10 20 20"
-      markerUnits="strokeWidth"
-      orient="auto-start-reverse"
-      refX="0"
-      refY="0"
-    >
-      <polyline
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        points="-5,-4 0,0 -5,4 -5,-4"
-        strokeWidth="1"
-        stroke={color}
-        fill={color}
-      />
-    </marker>
-  );
-};
-
-export const MarkerType = {
-  primary: 'url(#primary)',
-  danger: 'url(#danger)',
-  warning: 'url(#warning)',
-};
-
-export const getMarker = (color: string) => {
-  const colorKey = color as keyof typeof MarkerType;
-  return MarkerType[colorKey] ?? MarkerType.primary;
-};
-
-export const SvgDefsMarker = () => {
-  const { euiTheme } = useEuiTheme();
-
-  return (
-    <svg css={{ position: 'absolute', width: 0, height: 0 }}>
-      <defs>
-        <Marker id="primary" color={euiTheme.colors.primary} />
-        <Marker id="danger" color={euiTheme.colors.danger} />
-        <Marker id="warning" color={euiTheme.colors.warning} />
-      </defs>
-    </svg>
-  );
-};

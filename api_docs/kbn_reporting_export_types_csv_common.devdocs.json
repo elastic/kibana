@@ -226,11 +226,11 @@
         "references": [
           {
             "plugin": "reporting",
-            "path": "x-pack/plugins/reporting/server/routes/common/jobs/get_document_payload.ts"
+            "path": "x-pack/platform/plugins/private/reporting/server/routes/common/jobs/get_document_payload.ts"
           },
           {
             "plugin": "reporting",
-            "path": "x-pack/plugins/reporting/server/routes/common/jobs/get_document_payload.ts"
+            "path": "x-pack/platform/plugins/private/reporting/server/routes/common/jobs/get_document_payload.ts"
           }
         ],
         "initialIsOpen": false
