@@ -56,13 +56,11 @@ import {
   databaseSearchGuideConfig,
 } from '../common/guided_onboarding/search_guide_config';
 
-import { AS_TELEMETRY_NAME } from './collectors/app_search/telemetry';
 import { registerTelemetryUsageCollector as registerCNTelemetryUsageCollector } from './collectors/connectors/telemetry';
 import {
   ES_TELEMETRY_NAME,
   registerTelemetryUsageCollector as registerESTelemetryUsageCollector,
 } from './collectors/enterprise_search/telemetry';
-import { WS_TELEMETRY_NAME } from './collectors/workplace_search/telemetry';
 import { registerEnterpriseSearchIntegrations } from './integrations';
 
 import { entSearchHttpAgent } from './lib/enterprise_search_http_agent';
@@ -82,9 +80,7 @@ import { registerStatsRoutes } from './routes/enterprise_search/stats';
 import { registerTelemetryRoute } from './routes/enterprise_search/telemetry';
 import { registerWorkplaceSearchRoutes } from './routes/workplace_search';
 
-import { appSearchTelemetryType } from './saved_objects/app_search/telemetry';
 import { enterpriseSearchTelemetryType } from './saved_objects/enterprise_search/telemetry';
-import { workplaceSearchTelemetryType } from './saved_objects/workplace_search/telemetry';
 
 import { GlobalConfigService } from './services/global_config_service';
 import { uiSettings as enterpriseSearchUISettings } from './ui_settings';
@@ -194,8 +190,8 @@ export class EnterpriseSearchPlugin implements Plugin<void, void, PluginsSetup, 
           api: [],
           catalogue: PLUGIN_IDS,
           savedObject: {
-            all: [ES_TELEMETRY_NAME, AS_TELEMETRY_NAME, WS_TELEMETRY_NAME],
-            read: [ES_TELEMETRY_NAME, AS_TELEMETRY_NAME, WS_TELEMETRY_NAME],
+            all: [ES_TELEMETRY_NAME],
+            read: [ES_TELEMETRY_NAME],
           },
           ui: [],
         },
@@ -310,8 +306,6 @@ export class EnterpriseSearchPlugin implements Plugin<void, void, PluginsSetup, 
      * Bootstrap the routes, saved objects, and collector for telemetry
      */
     savedObjects.registerType(enterpriseSearchTelemetryType);
-    savedObjects.registerType(appSearchTelemetryType);
-    savedObjects.registerType(workplaceSearchTelemetryType);
     let savedObjectsStarted: SavedObjectsServiceStart;
 
     void getStartServices().then(([coreStart]) => {

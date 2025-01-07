@@ -53,15 +53,15 @@ describe('Telemetry helpers', () => {
 
     it('should increment the saved objects internal repository', async () => {
       const response = await incrementUICounter({
-        id: 'app_search_telemetry',
+        id: 'enterprise_search_telemetry',
         savedObjects: savedObjectsMock,
         uiAction: 'ui_clicked',
         metric: 'button',
       });
 
       expect(incrementCounterMock).toHaveBeenCalledWith(
-        'app_search_telemetry',
-        'app_search_telemetry',
+        'enterprise_search_telemetry',
+        'enterprise_search_telemetry',
         ['ui_clicked.button']
       );
       expect(response).toEqual({ success: true });
