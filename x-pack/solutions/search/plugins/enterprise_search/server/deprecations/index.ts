@@ -11,14 +11,18 @@ import {ConfigType} from "@kbn/enterprise-search-plugin/server";
 import {Connector, fetchConnectors} from '@kbn/search-connectors';
 
 import {i18n} from "@kbn/i18n";
+import {hasFleetServers} from "@kbn/fleet-plugin/server/services/fleet_server";
+import {isAgentlessEnabled} from "@kbn/fleet-plugin/server/services/utils/agentless";
 
 export const getRegisteredDeprecations = (config: ConfigType, isCloud: boolean): RegisterDeprecationsConfig => {
   return {
     getDeprecations: async (ctx: GetDeprecationsContext) => {
+      const hasAgentless = isAgentlessEnabled()
+      const hasFleetServer = await hasFleetServers(ctx.esClient.asInternalUser, ctx.savedObjectsClient)
       return [
         ...(getEnterpriseSearchNodeDeprecation(config, isCloud)),
         ...(await getCrawlerDeprecations(ctx)),
-        ...(await getNativeConnectorDeprecations(ctx))
+        ...(await getNativeConnectorDeprecations(ctx, hasAgentless, hasFleetServer))
       ]
     }
   }
@@ -139,83 +143,155 @@ export async function getCrawlerDeprecations(ctx: GetDeprecationsContext): Promi
  * if the customer is using Native Connectors, and agentless is unavailable, they are told that they must convert their connectors to Connector Clients
  * if the customer was using "native" connectors that don't match our connector service types, they must delete them or convert them to connector clients.
  */
-export async function getNativeConnectorDeprecations(ctx: GetDeprecationsContext): Promise<DeprecationsDetails[]> {
+export async function getNativeConnectorDeprecations(ctx: GetDeprecationsContext, hasAgentless: boolean, hasFleetServer: boolean): Promise<DeprecationsDetails[]> {
   const client = ctx.esClient.asInternalUser
   const connectors: Connector[] = await fetchConnectors(client, undefined,false, undefined)
   const nativeConnectors = connectors.filter(hit => hit.is_native)
   if (nativeConnectors.length == 0){
     return [] // no deprecations to register if there are no Native Connectors
   } else {
-    const nativeServiceTypes = [
-      "azure_blob_storage",
-      "box",
-      "confluence",
-      "dropbox",
-      "github",
-      "gmail",
-      "google_cloud_storage",
-      "google_drive",
-      "jira",
-      "mssql",
-      "mongodb",
-      "mysql",
-      "network_drive",
-      "notion",
-      "onedrive",
-      "oracle",
-      "outlook",
-      "postgresql",
-      "s3",
-      "salesforce",
-      "servicenow",
-      "sharepoint_online",
-      "sharepoint_server",
-      "slack",
-      "microsoft_teams",
-      "zoom"
-    ]
-    const nativeTypesStr = "[" + nativeServiceTypes.join(", ") + "]"
-    const fauxNativeConnectors = nativeConnectors.filter(hit => !nativeServiceTypes.includes(hit.service_type!))
+    const deprecations: DeprecationsDetails[] = []
 
-    if (fauxNativeConnectors.length > 0) {
-      return [{
+    if (nativeConnectors.length > 0 && !hasAgentless) {
+      // you can't have elastic-managed connectors in an environment that Elastic doesn't manage
+      // ... and agentless is available in every Elastic-managed environment
+
+      deprecations.push({
         level: 'critical',
         deprecationType: 'feature',
-        title: i18n.translate('xpack.enterpriseSearch.deprecations.fauxNativeConnector.title', {
-          defaultMessage: 'Connectors with `is_native: true` must be of supported service types',
+        title: i18n.translate('xpack.enterpriseSearch.deprecations.notManaged.title', {
+          defaultMessage: 'Connectors with `is_native: true` are only allowed in Elastic-managed environments',
         }),
-        message: i18n.translate('xpack.enterpriseSearch.deprecations.fauxNativeConnector.message', {
-          values: { serviceTypes: nativeTypesStr},
-          defaultMessage: 'Only specific service types are supported for Elastic-managed connectors. ' +
-            'Eligible service types for Elastic-managed connectors are: {serviceTypes}' +
-            'Connectors of other service types must be converted to Connector Clients before upgrading. ' +
-            'This is a lossless operation, and can be attempted with "quick resolve". ' +
-            'Alternatively, deleting these connectors with mismatched service types will also unblock your upgrade.',
+        message: i18n.translate('xpack.enterpriseSearch.deprecations.notManaged.message', {
+          defaultMessage: '"Native Connectors" are only intended for Elastic-managed environments like Elastic Cloud and ' +
+            'Elastic Serverless. Any connectors with `is_native: true` must be converted to connector clients or deleted ' +
+            'before this upgrade can proceed.',
         }),
         documentationUrl: 'https://elastic.co/guide/en/enterprise-search/current/upgrading-to-9-x.html',
         correctiveActions: {
           manualSteps: [
-            i18n.translate('xpack.enterpriseSearch.deprecations.fauxNativeConnector.listConnectors', {
+            i18n.translate('xpack.enterpriseSearch.deprecations.notManaged.listConnectors', {
               defaultMessage: 'Enumerate all connector records',
             }),
-            i18n.translate('xpack.enterpriseSearch.deprecations.fauxNativeConnector.convertPretenders', {
-              values: { serviceTypes: nativeTypesStr},
-              defaultMessage: '"Convert to Client" any that have `is_native: true` but have a `service_type` NOT in: {serviceTypes}.',
+            i18n.translate('xpack.enterpriseSearch.deprecations.notManaged.convertPretenders', {
+              defaultMessage: '"Convert to Client" any that have `is_native: true`.',
             }),
           ],
           api: {
             method: 'POST',
             path: '/internal/enterprise_search/deprecations/convert_connectors_to_client',
             body: {
-              ids: fauxNativeConnectors.map(it=> it.id)
+              ids: nativeConnectors.map(it=> it.id)
             },
           },
         },
-      }]
-    }
-    // const agentlessAvailable: boolean = true //TODO
-    // const integrationServerAvailable: boolean = true //TODO
+      })
+    } else {
+      const nativeServiceTypes = [
+        "azure_blob_storage",
+        "box",
+        "confluence",
+        "dropbox",
+        "github",
+        "gmail",
+        "google_cloud_storage",
+        "google_drive",
+        "jira",
+        "mssql",
+        "mongodb",
+        "mysql",
+        "network_drive",
+        "notion",
+        "onedrive",
+        "oracle",
+        "outlook",
+        "postgresql",
+        "s3",
+        "salesforce",
+        "servicenow",
+        "sharepoint_online",
+        "sharepoint_server",
+        "slack",
+        "microsoft_teams",
+        "zoom"
+      ]
+      const nativeTypesStr = "[" + nativeServiceTypes.join(", ") + "]"
+      const fauxNativeConnectors = nativeConnectors.filter(hit => !nativeServiceTypes.includes(hit.service_type!))
 
+      if (fauxNativeConnectors.length > 0) {
+        // There are some illegal service_types in their native connectors
+        deprecations.push({
+          level: 'critical',
+          deprecationType: 'feature',
+          title: i18n.translate('xpack.enterpriseSearch.deprecations.fauxNativeConnector.title', {
+            defaultMessage: 'Connectors with `is_native: true` must be of supported service types',
+          }),
+          message: i18n.translate('xpack.enterpriseSearch.deprecations.fauxNativeConnector.message', {
+            values: { serviceTypes: nativeTypesStr},
+            defaultMessage: 'Only specific service types are supported for Elastic-managed connectors. ' +
+              'Eligible service types for Elastic-managed connectors are: {serviceTypes}' +
+              'Connectors of other service types must be converted to Connector Clients before upgrading. ' +
+              'This is a lossless operation, and can be attempted with "quick resolve". ' +
+              'Alternatively, deleting these connectors with mismatched service types will also unblock your upgrade.',
+          }),
+          documentationUrl: 'https://elastic.co/guide/en/enterprise-search/current/upgrading-to-9-x.html',
+          correctiveActions: {
+            manualSteps: [
+              i18n.translate('xpack.enterpriseSearch.deprecations.fauxNativeConnector.listConnectors', {
+                defaultMessage: 'Enumerate all connector records',
+              }),
+              i18n.translate('xpack.enterpriseSearch.deprecations.fauxNativeConnector.convertPretenders', {
+                values: { serviceTypes: nativeTypesStr},
+                defaultMessage: '"Convert to Client" any that have `is_native: true` but have a `service_type` NOT in: {serviceTypes}.',
+              }),
+            ],
+            api: {
+              method: 'POST',
+              path: '/internal/enterprise_search/deprecations/convert_connectors_to_client',
+              body: {
+                ids: fauxNativeConnectors.map(it=> it.id)
+              },
+            },
+          },
+        })
+      }
+
+      if (hasAgentless && nativeConnectors.length > 0 && !hasFleetServer){
+        // the Integration Server is a required component in your deployment, for Agentless
+        deprecations.push({
+          level: 'critical',
+          deprecationType: 'feature',
+          title: i18n.translate('xpack.enterpriseSearch.deprecations.missingIntegrationServer.title', {
+            defaultMessage: 'Integration Server must be provisioned',
+          }),
+          message: i18n.translate('xpack.enterpriseSearch.deprecations.missingIntegrationServer.message', {
+            defaultMessage: 'In versions >= 9.x, Elastic-managed connectors are run through the Elastic Integrations ecosystem.  ' +
+              'This requires the Integration Server to be present in your deployment. For full details, see the documentation.',
+          }),
+          documentationUrl: 'https://elastic.co/guide/en/enterprise-search/current/upgrading-to-9-x.html',
+          correctiveActions: {
+            manualSteps: [
+              i18n.translate('xpack.enterpriseSearch.deprecations.missingIntegrationServer.gotocloud', {
+                defaultMessage: 'Go to cloud.elastic.co',
+              }),
+              i18n.translate('xpack.enterpriseSearch.deprecations.missingIntegrationServer.clickedit', {
+                defaultMessage: "Click the 'Edit' tab",
+              }),
+              i18n.translate('xpack.enterpriseSearch.deprecations.missingIntegrationServer.scrolldown', {
+                defaultMessage: "Scroll down to the 'Integration Server' section",
+              }),
+              i18n.translate('xpack.enterpriseSearch.deprecations.missingIntegrationServer.addCapacity', {
+                defaultMessage: "Click the button to '+ Add capacity' and choose a size/count",
+              }),
+              i18n.translate('xpack.enterpriseSearch.deprecations.missingIntegrationServer.clicksave', {
+                defaultMessage: "Click 'Save' and confirm",
+              }),
+            ],
+          },
+        })
+      }
+    }
+
+    return deprecations
   }
-  return [] //TODO
 }

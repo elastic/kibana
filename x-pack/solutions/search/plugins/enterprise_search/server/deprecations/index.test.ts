@@ -87,19 +87,96 @@ describe ("Native connector deprecations", () => {
       is_native: false
     } as Connector
     mockedFetchConnectors = jest.fn().mockResolvedValue([connectorClient]);
-    const deprecations = await getNativeConnectorDeprecations(ctx)
+    const deprecations = await getNativeConnectorDeprecations(ctx, true, true)
     expect(deprecations).toHaveLength(0)
   })
 
   it('Has a deprecation if there are native connectors with illegal service types', async () => {
     const nativeConnector = {
       id: 'foo',
-      is_native: true
+      is_native: true,
+      service_type: 'fake',
     } as Connector
     mockedFetchConnectors = jest.fn().mockResolvedValue([nativeConnector]);
-    const deprecations = await getNativeConnectorDeprecations(ctx)
+    const deprecations = await getNativeConnectorDeprecations(ctx, true, true)
     expect(deprecations).toHaveLength(1)
     expect(deprecations[0].correctiveActions.api?.path).toStrictEqual('/internal/enterprise_search/deprecations/convert_connectors_to_client')
     expect(deprecations[0].correctiveActions.api?.body).toStrictEqual({ids: ['foo']})
+    expect(deprecations[0].title).toMatch("must be of supported service types")
+  })
+
+  it('Does not allow "native" connectors in non-agentless environments', async () => {
+    const nativeConnector = {
+      id: 'foo',
+      is_native: true,
+      service_type: 'github'
+    } as Connector
+    const hasAgentless = false
+    mockedFetchConnectors = jest.fn().mockResolvedValue([nativeConnector]);
+    const deprecations = await getNativeConnectorDeprecations(ctx, hasAgentless, true)
+    expect(deprecations).toHaveLength(1)
+    expect(deprecations[0].correctiveActions.api?.path).toStrictEqual('/internal/enterprise_search/deprecations/convert_connectors_to_client')
+    expect(deprecations[0].correctiveActions.api?.body).toStrictEqual({ids: ['foo']})
+    expect(deprecations[0].title).toMatch("only allowed in Elastic-managed environments")
+  })
+
+  it('Does not allow native connector upgrades without fleet server', async () => {
+    const nativeConnector = {
+      id: 'foo',
+      is_native: true,
+      service_type: 'github'
+    } as Connector
+    const hasFleetServer = false
+    mockedFetchConnectors = jest.fn().mockResolvedValue([nativeConnector]);
+    const deprecations = await getNativeConnectorDeprecations(ctx, true, hasFleetServer)
+    expect(deprecations).toHaveLength(1)
+    expect(deprecations[0].title).toMatch("Integration Server must be provisioned")
+  })
+
+  it('Gives precedence to your env being ineligible for agentless', async () => {
+    const connectors = [
+      {
+        id: 'foo',
+        is_native: true,
+        service_type: 'github'
+      },
+      {
+        id: 'bar',
+        is_native: true,
+        service_type: 'fake',
+      }
+    ] as Connector[]
+    const hasAgentless = false
+    const hasFleetServer = false
+    mockedFetchConnectors = jest.fn().mockResolvedValue(connectors);
+    const deprecations = await getNativeConnectorDeprecations(ctx, hasAgentless, hasFleetServer)
+    expect(deprecations).toHaveLength(1)
+    expect(deprecations[0].correctiveActions.api?.path).toStrictEqual('/internal/enterprise_search/deprecations/convert_connectors_to_client')
+    expect(deprecations[0].correctiveActions.api?.body).toStrictEqual({ids: ['foo', 'bar']})
+    expect(deprecations[0].title).toMatch("only allowed in Elastic-managed environments")
+  })
+
+  it('can register both fleet server missing and bad service types together', async () => {
+    const connectors = [
+      {
+        id: 'foo',
+        is_native: true,
+        service_type: 'github'
+      },
+      {
+        id: 'bar',
+        is_native: true,
+        service_type: 'fake',
+      }
+    ] as Connector[]
+    const hasAgentless = true
+    const hasFleetServer = false
+    mockedFetchConnectors = jest.fn().mockResolvedValue(connectors);
+    const deprecations = await getNativeConnectorDeprecations(ctx, hasAgentless, hasFleetServer)
+    expect(deprecations).toHaveLength(2)
+    expect(deprecations[0].correctiveActions.api?.path).toStrictEqual('/internal/enterprise_search/deprecations/convert_connectors_to_client')
+    expect(deprecations[0].correctiveActions.api?.body).toStrictEqual({ids: ['bar']})
+    expect(deprecations[0].title).toMatch("must be of supported service types")
+    expect(deprecations[1].title).toMatch("Integration Server must be provisioned")
   })
 })
