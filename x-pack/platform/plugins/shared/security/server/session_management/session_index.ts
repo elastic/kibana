@@ -481,19 +481,15 @@ export class SessionIndex {
     const { auditLogger, logger } = this.options;
     logger.debug('Running cleanup routine.');
 
-    const securityIndexShardResponse = await this.options.elasticsearchClient.cat.shards({
-      index: this.aliasName,
-    });
+    const indexStats = await this.options.elasticsearchClient.indices.stats();
+    const securityIndexShardsExist = indexStats._shards.total > 0;
 
-    const hasShards = securityIndexShardResponse.length > 0;
-
-    if (!hasShards) {
-      logger.debug('No shards found for session index, skipping cleanup.');
+    if (!securityIndexShardsExist) {
+      logger.debug('No shards found for session index, skipping session cleanup.');
       return {
         state: {
           missingShardError: true,
         },
-        runAt: new Date(Date.now() + 60_000),
       };
     }
 
