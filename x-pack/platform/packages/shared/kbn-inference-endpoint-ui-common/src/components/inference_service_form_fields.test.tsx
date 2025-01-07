@@ -12,8 +12,10 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { Form, useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { I18nProvider } from '@kbn/i18n-react';
+import { httpServiceMock } from '@kbn/core-http-browser-mocks';
+import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 
-const providers = [
+const mockProviders = [
   {
     service: 'hugging_face',
     name: 'Hugging Face',
@@ -110,6 +112,15 @@ const providers = [
   },
 ] as InferenceProvider[];
 
+jest.mock('../hooks/use_providers', () => ({
+  useProviders: jest.fn(() => ({
+    data: mockProviders,
+  })),
+}));
+
+const httpMock = httpServiceMock.createStartContract();
+const notificationsMock = notificationServiceMock.createStartContract();
+
 const MockFormProvider = ({ children }: { children: React.ReactElement }) => {
   const { form } = useForm();
 
@@ -124,7 +135,7 @@ describe('Inference Services', () => {
   it('renders', () => {
     render(
       <MockFormProvider>
-        <InferenceServiceFormFields providers={providers} />
+        <InferenceServiceFormFields http={httpMock} toasts={notificationsMock.toasts} />
       </MockFormProvider>
     );
 
@@ -134,7 +145,7 @@ describe('Inference Services', () => {
   it('renders Selectable', async () => {
     render(
       <MockFormProvider>
-        <InferenceServiceFormFields providers={providers} />
+        <InferenceServiceFormFields http={httpMock} toasts={notificationsMock.toasts} />
       </MockFormProvider>
     );
 
@@ -145,7 +156,7 @@ describe('Inference Services', () => {
   it('renders selected provider fields - hugging_face', async () => {
     render(
       <MockFormProvider>
-        <InferenceServiceFormFields providers={providers} />
+        <InferenceServiceFormFields http={httpMock} toasts={notificationsMock.toasts} />
       </MockFormProvider>
     );
 
@@ -165,7 +176,7 @@ describe('Inference Services', () => {
   it('re-renders fields when selected to anthropic from hugging_face', async () => {
     render(
       <MockFormProvider>
-        <InferenceServiceFormFields providers={providers} />
+        <InferenceServiceFormFields http={httpMock} toasts={notificationsMock.toasts} />
       </MockFormProvider>
     );
 

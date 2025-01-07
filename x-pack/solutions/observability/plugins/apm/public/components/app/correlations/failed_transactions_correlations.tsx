@@ -9,8 +9,8 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { orderBy } from 'lodash';
 
+import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
-  EuiBasicTableColumn,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
@@ -30,7 +30,7 @@ import { useUiTracker } from '@kbn/observability-shared-plugin/public';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { FieldStatsPopover } from './context_popover/field_stats_popover';
 import { asPercent, asPreciseDecimal } from '../../../../common/utils/formatters';
-import { FailedTransactionsCorrelation } from '../../../../common/correlations/failed_transactions_correlations/types';
+import type { FailedTransactionsCorrelation } from '../../../../common/correlations/failed_transactions_correlations/types';
 
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { useLocalStorage } from '../../../hooks/use_local_storage';
@@ -45,7 +45,7 @@ import { DurationDistributionChart } from '../../shared/charts/duration_distribu
 import { CorrelationsEmptyStatePrompt } from './empty_state_prompt';
 import { CrossClusterSearchCompatibilityWarning } from './cross_cluster_search_warning';
 import { CorrelationsProgressControls } from './progress_controls';
-import { OnAddFilter } from './context_popover/field_stats_popover';
+import type { OnAddFilter } from './context_popover/field_stats_popover';
 
 import { useFailedTransactionsCorrelations } from './use_failed_transactions_correlations';
 import { getTransactionDistributionChartData } from './get_transaction_distribution_chart_data';
