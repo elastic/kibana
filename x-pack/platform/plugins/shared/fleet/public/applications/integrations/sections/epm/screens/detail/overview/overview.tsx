@@ -22,7 +22,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 
-import { AVCResultsBanner2024, useIsStillYear2024 } from '@kbn/avc-banner';
+import { AVCResultsBanner, useIsStillYear2025 } from '@kbn/avc-banner';
 
 import {
   isIntegrationPolicyTemplate,
@@ -336,9 +336,9 @@ export const OverviewPage: React.FC<Props> = memo(
         </SideBar>
         <EuiFlexItem grow={9} className="eui-textBreakWord">
           {isUnverified && <UnverifiedCallout />}
-          {useIsStillYear2024() && isElasticDefend && showAVCBanner && (
+          {useIsStillYear2025() && isElasticDefend && showAVCBanner && (
             <>
-              <AVCResultsBanner2024 onDismiss={onAVCBannerDismiss} />
+              <AVCResultsBanner onDismiss={onAVCBannerDismiss} />
               <EuiSpacer size="s" />
             </>
           )}
