@@ -8,10 +8,10 @@
 import type { HttpFetchOptions } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
 import { I18nProvider } from '@kbn/i18n-react';
-import { DeepPartial } from 'utility-types';
+import type { DeepPartial } from 'utility-types';
 import type { MetricsExplorerResponse } from '../../../common/http_api/metrics_explorer';
 import type { CoreProvidersProps } from '../../apps/common_providers';
-import { MetricsDataClient } from '../../lib/metrics_client';
+import type { MetricsDataClient } from '../../lib/metrics_client';
 
 export type DataResponseMock = DeepPartial<MetricsExplorerResponse>;
 export type NodeMetricsTableFetchMock = (
