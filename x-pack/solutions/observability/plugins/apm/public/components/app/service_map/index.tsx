@@ -110,7 +110,7 @@ export function ServiceMap({
   const { onPageReady } = usePerformanceContext();
 
   const {
-    data = { elements: [], serviceCount: 0, traceCount: 0 },
+    data = { elements: [], servicesCount: 0, tracesCount: 0 },
     status,
     error,
   } = useFetcher(
