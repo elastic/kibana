@@ -120,10 +120,20 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           );
         });
 
-        it('can delete all saved objects', async () => {
+        it('cannot delete ML objects', async () => {
+          // Table includes ML objects, which cannot be deleted
           await PageObjects.savedObjects.clickTableSelectAll();
           const actual = await PageObjects.savedObjects.canBeDeleted();
-          expect(actual).to.be(true);
+          expect(actual).to.be(false);
+        });
+
+        it('can delete all other saved objects', async () => {
+          // Unchecks previously selected ML object
+          await PageObjects.savedObjects.clickCheckboxByTitle(
+            'ml-trained-model [id=lang_ident_model_1]'
+          );
+          const canBeDeleted = await PageObjects.savedObjects.canBeDeleted();
+          expect(canBeDeleted).to.be(true);
         });
       });
       // From https://github.com/elastic/kibana/issues/59588 edit view became read-only json view
