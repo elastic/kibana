@@ -145,6 +145,17 @@ describe('Defend integration advanced policy fields v8.18.0', () => {
         });
       }
     );
+
+    it('should contain revision bump trigger', () => {
+      const migratedPolicyConfigSO = migrator.migrate<PackagePolicy, PackagePolicy>({
+        document: policyConfigSO,
+        fromVersion: TARGET_MODEL_VERSION - 1,
+        toVersion: TARGET_MODEL_VERSION,
+      });
+
+      const migratedPolicyConfig = getConfig(migratedPolicyConfigSO);
+      expect(migratedPolicyConfigSO.attributes).toHaveProperty('bump_agent_policy_revision', true);
+    });
   });
 
   const getConfig = (so: SavedObject<PackagePolicy>) =>

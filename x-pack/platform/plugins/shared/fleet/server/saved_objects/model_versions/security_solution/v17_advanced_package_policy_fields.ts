@@ -59,5 +59,7 @@ export const packagePolicyV17AdvancedFieldsForEndpointV818: SavedObjectModelData
     }
   }
 
-  return { attributes: updatedPackagePolicyDoc.attributes };
+  return {
+    attributes: { ...updatedPackagePolicyDoc.attributes, bump_agent_policy_revision: true },
+  };
 };
