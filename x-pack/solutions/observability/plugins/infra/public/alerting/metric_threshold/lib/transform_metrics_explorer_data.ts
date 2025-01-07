@@ -6,8 +6,8 @@
  */
 
 import { first } from 'lodash';
-import { MetricsExplorerResponse } from '../../../../common/http_api/metrics_explorer';
-import { MetricThresholdAlertParams, ExpressionChartSeries } from '../types';
+import type { MetricsExplorerResponse } from '../../../../common/http_api/metrics_explorer';
+import type { MetricThresholdAlertParams, ExpressionChartSeries } from '../types';
 
 export const transformMetricsExplorerData = (
   params: MetricThresholdAlertParams,

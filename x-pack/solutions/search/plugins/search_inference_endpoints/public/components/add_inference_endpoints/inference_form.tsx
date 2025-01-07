@@ -9,15 +9,19 @@ import { Form, useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_l
 import React, { useCallback, useState } from 'react';
 import { InferenceServiceFormFields } from '@kbn/inference-endpoint-ui-common';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import { useProviders } from '../../hooks/use_providers';
 import * as i18n from './translations';
 import { useAddEndpoint } from '../../hooks/use_add_endpoint';
 import { InferenceEndpoint } from '../../types';
+import { useKibana } from '../../hooks/use_kibana';
 
 interface InferenceFormProps {
   onSubmitSuccess: (state: boolean) => void;
 }
 export const InferenceForm: React.FC<InferenceFormProps> = ({ onSubmitSuccess }) => {
+  const {
+    http,
+    notifications: { toasts },
+  } = useKibana().services;
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const onSuccess = useCallback(() => {
     setIsLoading(false);
@@ -30,7 +34,6 @@ export const InferenceForm: React.FC<InferenceFormProps> = ({ onSubmitSuccess })
     () => onSuccess(),
     () => onError()
   );
-  const { data: providers } = useProviders();
   const { form } = useForm();
   const handleSubmit = useCallback(async () => {
     setIsLoading(true);
@@ -45,9 +48,9 @@ export const InferenceForm: React.FC<InferenceFormProps> = ({ onSubmitSuccess })
     }
   }, [addEndpoint, form]);
 
-  return providers ? (
+  return (
     <Form form={form}>
-      <InferenceServiceFormFields providers={providers} />
+      <InferenceServiceFormFields http={http} toasts={toasts} />
       <EuiSpacer size="m" />
       <EuiFlexGroup justifyContent="flexStart">
         <EuiFlexItem grow={false}>
@@ -65,5 +68,5 @@ export const InferenceForm: React.FC<InferenceFormProps> = ({ onSubmitSuccess })
         </EuiFlexItem>
       </EuiFlexGroup>
     </Form>
-  ) : null;
+  );
 };

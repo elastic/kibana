@@ -7,14 +7,14 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
-import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import type { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { rangeQuery } from '@kbn/observability-plugin/server';
 import type { CommonCorrelationsQueryParams } from '../../../../common/correlations/types';
 import {
   FIELD_PREFIX_TO_EXCLUDE_AS_CANDIDATE,
   FIELDS_TO_EXCLUDE_AS_CANDIDATE,
 } from '../../../../common/correlations/constants';
-import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
+import type { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 
 const SUPPORTED_ES_FIELD_TYPES = [
   ES_FIELD_TYPES.KEYWORD,
