@@ -125,6 +125,7 @@ const optionalArchivePackageProps: readonly OptionalPackageProp[] = [
   'screenshots',
   'icons',
   'policy_templates',
+  'policy_templates_behavior',
   'release',
   'agent',
   'elasticsearch',
