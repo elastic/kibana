@@ -42,7 +42,7 @@ export class CopyToSpaceSavedObjectsManagementAction extends SavedObjectsManagem
       return (
         object.meta.namespaceType !== 'agnostic' &&
         !object.meta.hiddenType &&
-        !object.type.startsWith('ml')
+        (object?.type ? !object?.type?.startsWith('ml') : true)
       );
     },
     onClick: (object: SavedObjectsManagementRecord) => {

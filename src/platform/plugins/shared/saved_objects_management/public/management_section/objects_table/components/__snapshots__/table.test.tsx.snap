@@ -54,17 +54,25 @@ exports[`Table should render normally 1`] = `
         <EuiPopover
           anchorPosition="downCenter"
           button={
-            <EuiButton
-              iconSide="right"
-              iconType="arrowDown"
-              isDisabled={false}
-              onClick={[Function]}
+            <EuiToolTip
+              data-test-subj="exportSOToolTip"
+              delay="regular"
+              display="inlineBlock"
+              position="top"
             >
-              <Memo(MemoizedFormattedMessage)
-                defaultMessage="Export"
-                id="savedObjectsManagement.objectsTable.table.exportPopoverButtonLabel"
-              />
-            </EuiButton>
+              <EuiButton
+                disabled={false}
+                iconSide="right"
+                iconType="arrowDown"
+                isDisabled={false}
+                onClick={[Function]}
+              >
+                <Memo(MemoizedFormattedMessage)
+                  defaultMessage="Export"
+                  id="savedObjectsManagement.objectsTable.table.exportPopoverButtonLabel"
+                />
+              </EuiButton>
+            </EuiToolTip>
           }
           closePopover={[Function]}
           display="inline-block"
@@ -96,6 +104,7 @@ exports[`Table should render normally 1`] = `
           </EuiFormRow>
           <EuiFormRow>
             <EuiButton
+              disabled={false}
               fill={true}
               iconType="exportAction"
               onClick={[Function]}
@@ -154,6 +163,7 @@ exports[`Table should render normally 1`] = `
                 "type": "icon",
               },
               Object {
+                "available": [Function],
                 "data-test-subj": "savedObjectsTableAction-relationships",
                 "description": "View the relationships this saved object has to other saved objects",
                 "icon": "kqlSelector",

@@ -31,6 +31,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
 import { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
+import { ML_SAVED_OBJECT_TYPES } from '../../../../common/constants/ml_saved_object_types';
 import type { SavedObjectManagementTypeInfo } from '../../../../common/types';
 import { getDefaultTitle, getSavedObjectLabel } from '../../../lib';
 import { SavedObjectWithMetadata } from '../../../types';
@@ -39,7 +40,6 @@ import {
   SavedObjectsManagementAction,
   SavedObjectsManagementColumnServiceStart,
 } from '../../../services';
-import { ML_SAVED_OBJECT_TYPES } from '../../../../common/constants/ml_saved_object_types';
 
 export type ItemId<T> = string | number | ((item: T) => string);
 
@@ -330,7 +330,7 @@ export class Table extends PureComponent<TableProps, TableState> {
             onClick: (object) => onShowRelationships(object),
             'data-test-subj': 'savedObjectsTableAction-relationships',
             available: (object) => {
-              return !object.type.startsWith('ml');
+              return object ? !object.type?.startsWith('ml') : true;
             },
           },
           ...actionRegistry.getAll().map((action) => {
@@ -373,20 +373,6 @@ export class Table extends PureComponent<TableProps, TableState> {
       );
     }
 
-    const button = (
-      <EuiButton
-        iconType="arrowDown"
-        iconSide="right"
-        onClick={this.toggleExportPopoverVisibility}
-        isDisabled={selectedSavedObjects.length === 0}
-      >
-        <FormattedMessage
-          id="savedObjectsManagement.objectsTable.table.exportPopoverButtonLabel"
-          defaultMessage="Export"
-        />
-      </EuiButton>
-    );
-
     const activeActionContents = this.state.activeAction?.render() ?? null;
     const exceededResultCount = totalItemCount > MAX_PAGINATED_ITEM;
 
@@ -414,6 +400,37 @@ export class Table extends PureComponent<TableProps, TableState> {
         );
       }
     };
+    const disabledExportTooltip = () => {
+      if (hasMlObjects) {
+        return (
+          <FormattedMessage
+            id="savedObjectsManagement.objectsTable.table.hasMlObjects.exportDisabledTooltip"
+            defaultMessage="Navigate to the Machine Learning management page to export machine learning objects."
+          />
+        );
+      }
+    };
+    const button = (
+      <EuiToolTip
+        data-test-subj="exportSOToolTip"
+        key="exportSOToolTip"
+        content={disabledExportTooltip()}
+      >
+        <EuiButton
+          iconType="arrowDown"
+          iconSide="right"
+          onClick={this.toggleExportPopoverVisibility}
+          isDisabled={selectedSavedObjects.length === 0}
+          disabled={hasMlObjects}
+        >
+          <FormattedMessage
+            id="savedObjectsManagement.objectsTable.table.exportPopoverButtonLabel"
+            defaultMessage="Export"
+          />
+        </EuiButton>
+      </EuiToolTip>
+    );
+
     return (
       <Fragment>
         {activeActionContents}
@@ -489,7 +506,13 @@ export class Table extends PureComponent<TableProps, TableState> {
                 />
               </EuiFormRow>
               <EuiFormRow>
-                <EuiButton key="exportSO" iconType="exportAction" onClick={this.onExportClick} fill>
+                <EuiButton
+                  key="exportSO"
+                  iconType="exportAction"
+                  onClick={this.onExportClick}
+                  fill
+                  disabled={hasMlObjects}
+                >
                   <FormattedMessage
                     id="savedObjectsManagement.objectsTable.table.exportButtonLabel"
                     defaultMessage="Export"

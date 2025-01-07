@@ -59,7 +59,7 @@ exports[`SavedObjectsTable delete should show a confirm modal 1`] = `
 
 exports[`SavedObjectsTable export should allow the user to choose when exporting all 1`] = `
 <ExportModal
-  filteredItemCount={5}
+  filteredItemCount={0}
   includeReferences={true}
   onCancel={[Function]}
   onExport={[Function]}
@@ -68,22 +68,27 @@ exports[`SavedObjectsTable export should allow the user to choose when exporting
   options={
     Array [
       Object {
+        "disabled": false,
         "id": "index-pattern",
         "label": "index-pattern (0)",
       },
       Object {
+        "disabled": false,
         "id": "visualization",
         "label": "visualization (0)",
       },
       Object {
+        "disabled": false,
         "id": "dashboard",
         "label": "dashboard (0)",
       },
       Object {
+        "disabled": false,
         "id": "search",
         "label": "search (0)",
       },
       Object {
+        "disabled": false,
         "id": "tag",
         "label": "tag (0)",
       },
@@ -104,7 +109,7 @@ exports[`SavedObjectsTable export should allow the user to choose when exporting
 exports[`SavedObjectsTable should render normally 1`] = `
 <div>
   <Header
-    filteredCount={5}
+    filteredCount={0}
     onExportAll={[Function]}
     onImport={[Function]}
     onRefresh={[Function]}
@@ -261,59 +266,7 @@ exports[`SavedObjectsTable should render normally 1`] = `
       goInspectObject={[Function]}
       isSearching={false}
       itemId={[Function]}
-      items={
-        Array [
-          Object {
-            "id": "1",
-            "meta": Object {
-              "editUrl": "#/management/kibana/dataViews/dataView/1",
-              "icon": "indexPatternApp",
-              "inAppUrl": Object {
-                "path": "/management/kibana/dataViews/dataView/1",
-                "uiCapabilitiesPath": "management.kibana.indexPatterns",
-              },
-              "title": "MyIndexPattern*",
-            },
-            "type": "index-pattern",
-          },
-          Object {
-            "id": "2",
-            "meta": Object {
-              "icon": "search",
-              "inAppUrl": Object {
-                "path": "/discover/2",
-                "uiCapabilitiesPath": "discover.show",
-              },
-              "title": "MySearch",
-            },
-            "type": "search",
-          },
-          Object {
-            "id": "3",
-            "meta": Object {
-              "icon": "dashboardApp",
-              "inAppUrl": Object {
-                "path": "/dashboard/3",
-                "uiCapabilitiesPath": "dashboard.show",
-              },
-              "title": "MyDashboard",
-            },
-            "type": "dashboard",
-          },
-          Object {
-            "id": "4",
-            "meta": Object {
-              "icon": "visualizeApp",
-              "inAppUrl": Object {
-                "path": "/edit/4",
-                "uiCapabilitiesPath": "visualize.show",
-              },
-              "title": "MyViz",
-            },
-            "type": "visualization",
-          },
-        ]
-      }
+      items={Array []}
       onActionRefresh={[Function]}
       onDelete={[Function]}
       onExport={[Function]}
@@ -334,7 +287,7 @@ exports[`SavedObjectsTable should render normally 1`] = `
           "field": "updated_at",
         }
       }
-      totalItemCount={5}
+      totalItemCount={0}
     />
   </RedirectAppLinks>
 </div>

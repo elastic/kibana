@@ -83,6 +83,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
               'A Dashboard',
               `Global Settings [${version}]`,
               `Advanced Settings [${version}]`,
+              'ml-trained-model [id=lang_ident_model_1]',
             ].sort()
           );
         });

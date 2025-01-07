@@ -44,7 +44,7 @@ export class ShareToSpaceSavedObjectsManagementAction extends SavedObjectsManage
         !!this.actionContext.capabilities.savedObjectsManagement.shareIntoSpace;
       const { namespaceType, hiddenType } = object.meta;
 
-      if (object.type.startsWith('ml-')) {
+      if (object?.type && object.type.startsWith('ml-')) {
         const hasMlShareCapabilities =
           this.actionContext?.capabilities?.ml?.canGetJobs &&
           this.actionContext?.capabilities?.ml?.canCreateJob;
