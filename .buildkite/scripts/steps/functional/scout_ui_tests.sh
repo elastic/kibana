@@ -37,12 +37,12 @@ for SUITE_NAME in "${!TEST_CONFIGS[@]}"; do
       ;;
     esac
 
-    echo "--- $TEST_NAME: '$SUITE_NAME' UI Tests"
+    echo "--- $SUITE_NAME ($RUN_MODE_NAME) UI Tests"
     if ! node scripts/scout run-tests "$RUN_MODE" --config "$TEST_CONFIG" --kibana-install-dir "$KIBANA_DIR"; then
-      echo "$TEST_NAME: failed"
+      echo "$SUITE_NAME: failed"
       EXIT_CODE=1
     else
-      echo "$TEST_NAME: passed"
+      echo "$SUITE_NAME: passed"
     fi
   done
 done
