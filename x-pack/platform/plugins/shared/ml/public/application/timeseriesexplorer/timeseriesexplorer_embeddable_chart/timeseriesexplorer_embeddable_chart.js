@@ -58,7 +58,7 @@ import { TimeseriesExplorerCheckbox } from './timeseriesexplorer_checkbox';
 import { timeBucketsServiceFactory } from '../../util/time_buckets_service';
 import { timeSeriesExplorerServiceFactory } from '../../util/time_series_explorer_service';
 import { getTimeseriesexplorerDefaultState } from '../timeseriesexplorer_utils';
-import { mlJobServiceFactory } from '../../services/job_service';
+import { mlJobServiceFactory } from '@kbn/ml-services/job_service';
 import { forecastServiceFactory } from '../../services/forecast_service';
 import { SingleMetricViewerTitle } from './timeseriesexplorer_title';
 

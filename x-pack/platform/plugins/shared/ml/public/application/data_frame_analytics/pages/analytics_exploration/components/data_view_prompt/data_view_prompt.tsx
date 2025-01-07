@@ -9,7 +9,7 @@ import type { FC } from 'react';
 import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiLink, EuiText, useEuiTheme } from '@elastic/eui';
-import { useMlKibana } from '../../../../../contexts/kibana';
+import { useMlKibana } from '@kbn/ml-kibana-context';
 
 interface Props {
   color?: string;

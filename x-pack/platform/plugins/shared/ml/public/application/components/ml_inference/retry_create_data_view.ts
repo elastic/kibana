@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import { DuplicateDataViewError } from '@kbn/data-plugin/public';
-import type { MlApi } from '../../services/ml_api_service';
+import type { MlApi } from '@kbn/ml-services/ml_api_service';
 import type { FormMessage } from '../../data_frame_analytics/pages/analytics_management/hooks/use_create_analytics_form/state';
 
 interface CreateKibanaDataViewResponse {

@@ -42,9 +42,9 @@ import type { estypes } from '@elastic/elasticsearch';
 import { SEARCH_QUERY_LANGUAGE } from '@kbn/ml-query-utils';
 import { parseInterval } from '@kbn/ml-parse-interval';
 
+import { useMlKibana } from '@kbn/ml-kibana-context';
 import type { useColorRange } from '../../../../../components/color_range_legend';
 import { ColorRangeLegend } from '../../../../../components/color_range_legend';
-import { useMlKibana } from '../../../../../contexts/kibana';
 
 import { defaultSearchQuery, renderCellPopoverFactory, SEARCH_SIZE } from '../../../../common';
 
