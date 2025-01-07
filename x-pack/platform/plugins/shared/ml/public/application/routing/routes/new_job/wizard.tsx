@@ -13,8 +13,9 @@ import { Redirect } from 'react-router-dom';
 import { dynamic } from '@kbn/shared-ux-utility';
 import { JOB_TYPE } from '@kbn/ml-common-constants/new_job';
 import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
+import { useMlKibana } from '@kbn/ml-kibana-context';
+import { checkCreateJobsCapabilitiesResolver } from '@kbn/ml-services/capabilities/check_capabilities';
 import { DataSourceContextProvider } from '../../../contexts/ml/data_source_context';
-import { useMlKibana } from '../../../contexts/kibana';
 import { basicResolvers } from '../../resolvers';
 import type { MlRoute, PageProps } from '../../router';
 import { createPath, PageLoader } from '../../router';
@@ -23,7 +24,6 @@ import {
   loadNewJobCapabilities,
   ANOMALY_DETECTOR,
 } from '../../../services/new_job_capabilities/load_new_job_capabilities';
-import { checkCreateJobsCapabilitiesResolver } from '../../../capabilities/check_capabilities';
 import {
   type NavigateToApp,
   getStackManagementBreadcrumb,

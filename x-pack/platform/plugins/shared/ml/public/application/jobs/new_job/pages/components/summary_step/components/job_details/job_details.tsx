@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFlexGroup, EuiFlexItem, EuiDescriptionList } from '@elastic/eui';
-import { useMlKibana } from '../../../../../../../contexts/kibana';
+import { useMlKibana } from '@kbn/ml-kibana-context';
 import { JobCreatorContext } from '../../../job_creator_context';
 import {
   isMultiMetricJobCreator,
