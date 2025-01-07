@@ -45,16 +45,18 @@ export async function getLatestEntitiesAlerts({
 
   const aggregations = response.aggregations as EntityTypeBucketsAggregation;
 
-  const alerts = Object.keys(identityFieldsBySource).map((sourceId) => {
-    const entityAggregation = aggregations?.[sourceId];
+  const alerts = Object.keys(identityFieldsBySource)
+    .map((sourceId) => {
+      const entityAggregation = aggregations?.[sourceId];
 
-    const buckets = entityAggregation.buckets ?? [];
+      const buckets = entityAggregation.buckets ?? [];
 
-    return buckets.map((bucket: Bucket) => ({
-      alertsCount: bucket.doc_count,
-      ...bucket.key,
-    }));
-  });
+      return buckets.map((bucket: Bucket) => ({
+        alertsCount: bucket.doc_count,
+        ...bucket.key,
+      }));
+    })
+    .flat();
 
   return alerts;
 }
