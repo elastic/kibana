@@ -123,6 +123,7 @@
     "@kbn/apm-types",
     "@kbn/ml-common-types",
     "@kbn/ml-common-constants",
+    "@kbn/ml-embeddables",
   ],
   "exclude": ["target/**/*"]
 }

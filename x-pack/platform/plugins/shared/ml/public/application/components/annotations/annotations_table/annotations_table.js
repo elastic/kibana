@@ -32,7 +32,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { withKibana } from '@kbn/kibana-react-plugin/public';
 
 import { addItemToRecentlyAccessed } from '../../../util/recently_accessed';
-import { mlJobServiceFactory } from '../../../services/job_service';
+import { mlJobServiceFactory } from '@kbn/ml-services/job_service';
 import { mlTableService } from '../../../services/table_service';
 import { ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE } from '@kbn/ml-common-constants/search';
 import {

@@ -32,7 +32,7 @@ import { useToastNotificationService } from '../../services/toast_notification_s
 import { useFieldFormatter } from '../../contexts/kibana/use_field_formatter';
 import { useRefresh } from '../../routing/use_refresh';
 import { useTableSettings } from '../../data_frame_analytics/pages/analytics_management/components/analytics_list/use_table_settings';
-import { useMlKibana } from '../../contexts/kibana';
+import { useMlKibana } from '@kbn/ml-kibana-context';
 import { useEnabledFeatures } from '../../contexts/ml';
 
 const levelBadgeMap: Record<MlNotificationMessageLevel, IconColor> = {

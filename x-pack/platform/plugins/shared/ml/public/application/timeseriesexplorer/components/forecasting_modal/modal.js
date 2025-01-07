@@ -24,7 +24,7 @@ import {
 } from '@elastic/eui';
 
 import { MessageCallOut } from '../../../components/message_call_out';
-import { useMlKibana } from '../../../contexts/kibana';
+import { useMlKibana } from '@kbn/ml-kibana-context';
 import { getMlNodeCount } from '../../../ml_nodes_check/check_ml_nodes';
 import { ForecastsList } from './forecasts_list';
 import { RunControls } from './run_controls';

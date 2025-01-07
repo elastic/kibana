@@ -13,7 +13,7 @@ import { EuiCallOut, EuiSpacer, EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { JOB_STATE } from '@kbn/ml-common-constants/states';
-import { mlApiProvider } from '../../../services/ml_api_service';
+import { mlApiProvider } from '@kbn/ml-services/ml_api_service';
 import { HttpService } from '../../../services/http_service';
 import type { CloudInfo } from '../../../services/ml_server_info';
 import { extractDeploymentId } from '../../../services/ml_server_info';

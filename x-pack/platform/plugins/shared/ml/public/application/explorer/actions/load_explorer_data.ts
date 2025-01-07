@@ -8,14 +8,15 @@
 import useObservable from 'react-use/lib/useObservable';
 
 import type { Observable } from 'rxjs';
-import { of, Subject } from 'rxjs';
-import { switchMap, map } from 'rxjs';
+import { of, Subject, switchMap, map } from 'rxjs';
 
 import { useCallback, useMemo } from 'react';
 import type { TimefilterContract } from '@kbn/data-plugin/public';
 import { useTimefilter } from '@kbn/ml-date-picker';
 import type { InfluencersFilterQuery } from '@kbn/ml-anomaly-utils';
 import type { TimeRangeBounds } from '@kbn/ml-time-buckets';
+import type { MlApi } from '@kbn/ml-services/ml_api_service';
+
 import type { AppStateSelectedCells, ExplorerJob } from '../explorer_utils';
 import {
   getSelectionInfluencers,
@@ -28,7 +29,6 @@ import type { MlResultsService } from '../../services/results_service';
 import { mlResultsServiceProvider } from '../../services/results_service';
 import type { AnomalyExplorerChartsService } from '../../services/anomaly_explorer_charts_service';
 import { useAnomalyExplorerContext } from '../anomaly_explorer_context';
-import type { MlApi } from '../../services/ml_api_service';
 import type { ExplorerState } from '../explorer_data';
 
 export interface LoadExplorerDataConfig {

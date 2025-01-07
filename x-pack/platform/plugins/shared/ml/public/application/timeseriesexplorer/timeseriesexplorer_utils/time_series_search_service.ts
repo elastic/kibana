@@ -11,15 +11,15 @@ import type { Observable } from 'rxjs';
 import { map } from 'rxjs';
 import type { MlEntityField, ES_AGGREGATION } from '@kbn/ml-anomaly-utils';
 import type { Job } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
+import type { MlApi } from '@kbn/ml-services/ml_api_service';
+import { useMlKibana } from '@kbn/ml-kibana-context';
 import type { ModelPlotOutput } from '../../services/results_service/result_service_rx';
-import type { MlApi } from '../../services/ml_api_service';
 import { type MlResultsService, mlResultsServiceProvider } from '../../services/results_service';
 import { buildConfigFromDetector } from '../../util/chart_config_builder';
 import {
   isModelPlotChartableForDetector,
   isModelPlotEnabled,
 } from '../../../../common/util/job_utils';
-import { useMlKibana } from '../../contexts/kibana';
 
 interface TimeSeriesExplorerChartDetails {
   success: boolean;

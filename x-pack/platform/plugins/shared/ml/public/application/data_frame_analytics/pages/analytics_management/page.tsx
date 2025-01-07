@@ -11,14 +11,14 @@ import React, { useState, useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { usePageUrlState, type ListingPageUrlState } from '@kbn/ml-url-state';
 import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
+import { useMlKibana, useMlManagementLocator } from '@kbn/ml-kibana-context';
+import { usePermissionCheck } from '@kbn/ml-services/capabilities/check_capabilities';
 
 import { NodeAvailableWarning } from '../../../components/node_available_warning';
 import { SavedObjectsWarning } from '../../../components/saved_objects_warning';
 import { UpgradeWarning } from '../../../components/upgrade';
 import { HelpMenu } from '../../../components/help_menu';
-import { useMlKibana, useMlManagementLocator } from '../../../contexts/kibana';
 import { MlPageHeader } from '../../../components/page_header';
-import { usePermissionCheck } from '../../../capabilities/check_capabilities';
 import { ExportJobsFlyout, ImportJobsFlyout } from '../../../components/import_export_jobs';
 import { SynchronizeSavedObjectsButton } from '../../../jobs/jobs_list/components/top_level_actions/synchronize_saved_objects_button';
 import { PageTitle } from '../../../components/page_title';

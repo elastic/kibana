@@ -33,7 +33,7 @@ import {
   createPermissionFailureMessage,
 } from '../../capabilities/check_capabilities';
 import { useEnabledFeatures } from '../../contexts/ml/serverless_context';
-import { useMlKibana } from '../../contexts/kibana';
+import { useMlKibana } from '@kbn/ml-kibana-context';
 import type { TabIdType, KibanaAssetType } from './flyout';
 import { TAB_IDS } from './flyout';
 import { DataViewsTable } from './data_views_table';

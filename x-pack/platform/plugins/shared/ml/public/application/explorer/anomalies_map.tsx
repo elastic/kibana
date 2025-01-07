@@ -31,7 +31,7 @@ import type { EMSTermJoinConfig, TableSourceDescriptor } from '@kbn/maps-plugin/
 import { isDefined } from '@kbn/ml-is-defined';
 import type { MlAnomaliesTableRecord } from '@kbn/ml-anomaly-utils';
 import type { Writable } from '@kbn/utility-types';
-import { useMlKibana } from '../contexts/kibana';
+import { useMlKibana } from '@kbn/ml-kibana-context';
 
 const MAX_ENTITY_VALUES = 3;
 

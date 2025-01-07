@@ -20,12 +20,12 @@ import {
   DEFAULT_MODEL_MEMORY_LIMIT,
   DEFAULT_BUCKET_SPAN,
 } from '@kbn/ml-common-constants/new_job';
+import type { ExistingJobsAndGroups } from '@kbn/ml-services/job_service';
 
 import { PageTitle } from '../../../../components/page_title';
 import { jobCloningService } from '../../../../services/job_cloning_service';
 import { useDataSource } from '../../../../contexts/ml';
 import { useMlApi, useMlKibana } from '../../../../contexts/kibana';
-import type { ExistingJobsAndGroups } from '../../../../services/job_service';
 import { useNewJobCapsService } from '../../../../services/new_job_capabilities/new_job_capabilities_service';
 import { getNewJobDefaults } from '../../../../services/ml_server_info';
 import { useToastNotificationService } from '../../../../services/toast_notification_service';

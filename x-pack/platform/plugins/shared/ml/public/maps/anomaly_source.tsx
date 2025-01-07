@@ -32,6 +32,8 @@ import type { SourceEditorArgs } from '@kbn/maps-plugin/public';
 import type { DataRequest } from '@kbn/maps-plugin/public';
 import type { GetFeatureActionsArgs, IVectorSource, SourceStatus } from '@kbn/maps-plugin/public';
 import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
+import type { MlApi } from '@kbn/ml-services/ml_api_service';
+
 import {
   AnomalySourceField,
   AnomalySourceTooltipProperty,
@@ -40,7 +42,6 @@ import {
 import type { MlAnomalyLayersType } from './util';
 import { getResultsForJobId, ML_ANOMALY_LAYERS } from './util';
 import { UpdateAnomalySourceEditorLazy } from './update_anomaly_source_editor_lazy';
-import type { MlApi } from '../application/services/ml_api_service';
 
 const RESULT_LIMIT = 1000;
 
@@ -81,8 +82,8 @@ export class AnomalySource implements IVectorSource {
   ): Promise<GeoJsonWithMeta> {
     // initalized mlResultsService on first call (done this way to optimize bundle sizes)
     if (!AnomalySource.mlResultsService) {
-      const { HttpService } = await import('../application/services/http_service');
-      const { mlApiProvider } = await import('../application/services/ml_api_service');
+      const { HttpService } = await import('@kbn/ml-services/http_service');
+      const { mlApiProvider } = await import('@kbn/ml-services/ml_api_service');
       const httpService = new HttpService(AnomalySource.coreStart.http);
       const mlResultsService = mlApiProvider(httpService).results;
       AnomalySource.mlResultsService = mlResultsService;

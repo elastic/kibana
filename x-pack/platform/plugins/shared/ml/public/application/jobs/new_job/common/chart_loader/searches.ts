@@ -9,7 +9,7 @@ import { get } from 'lodash';
 
 import type { RuntimeMappings } from '@kbn/ml-runtime-field-utils';
 import type { IndicesOptions } from '@kbn/ml-common-types/anomaly_detection_jobs/datafeed';
-import type { MlApi } from '../../../../services/ml_api_service';
+import type { MlApi } from '@kbn/ml-services/ml_api_service';
 
 interface CategoryResults {
   success: boolean;
