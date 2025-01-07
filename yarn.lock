@@ -5669,7 +5669,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/expression-legacy-metric-vis-plugin@link:src/plugins/chart_expressions/expression_legacy_metric":
+"@kbn/expression-legacy-metric-vis-plugin@link:src/platform/plugins/shared/chart_expressions/expression_legacy_metric":
   version "0.0.0"
   uid ""
 

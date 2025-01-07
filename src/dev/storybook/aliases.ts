@@ -36,7 +36,7 @@ export const storybookAliases = {
   expandable_flyout: 'x-pack/solutions/security/packages/expandable-flyout/.storybook',
   expression_error: 'src/platform/plugins/shared/expression_error/.storybook',
   expression_image: 'src/platform/plugins/shared/expression_image/.storybook',
-  expression_metric_vis: 'src/plugins/chart_expressions/expression_legacy_metric/.storybook',
+  expression_metric_vis: 'src/platform/plugins/shared/chart_expressions/expression_legacy_metric/.storybook',
   expression_metric: 'src/platform/plugins/shared/expression_metric/.storybook',
   expression_partition_vis: 'src/plugins/chart_expressions/expression_partition_vis/.storybook',
   expression_repeat_image: 'src/platform/plugins/shared/expression_repeat_image/.storybook',
