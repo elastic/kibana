@@ -7,11 +7,16 @@
 
 import { z } from '@kbn/zod';
 import { notFound, internal } from '@hapi/boom';
-import { getProcessorType, processingDefinitionSchema } from '@kbn/streams-schema';
+import {
+  ProcessingDefinition,
+  getProcessorType,
+  processingDefinitionSchema,
+} from '@kbn/streams-schema';
 import { get } from 'lodash';
 import {
   IngestSimulatePipelineSimulation,
   IngestSimulateResponse,
+  IngestSimulateSimulateDocumentResult,
 } from '@elastic/elasticsearch/lib/api/types';
 import { flattenObject } from '../../../../common/utils/flatten_object';
 import { calculateObjectDiff } from '../../../../common/utils/calculate_object_diff';
@@ -47,52 +52,20 @@ export const simulateProcessorRoute = createServerRoute({
       if (!hasAccess) {
         throw new DefinitionNotFound(`Stream definition for ${params.path.id} not found.`);
       }
-
-      const processors = params.body.processing.map((processor) => {
-        const type = getProcessorType(processor);
-        const config = get(processor.config, type);
-        return {
-          [type]: {
-            ...config,
-            if: processor.condition ? conditionToPainless(processor.condition) : undefined,
-          },
-        };
-      });
-
+      // Normalize processing definition to pipeline processors
+      const processors = normalizeProcessing(params.body.processing);
+      // Convert input documents to ingest simulation format
       const docs = params.body.documents.map((doc) => ({ _source: doc }));
 
       const simulationResult = await scopedClusterClient.asCurrentUser.ingest.simulate({
         verbose: true,
-        pipeline: {
-          description: 'Stream pipeline simulation',
-          processors,
-        },
+        pipeline: { processors },
         docs,
       });
 
-      const documents = simulationResult.docs.map((doc, id) => {
-        if (doc.processor_results?.every(isSuccessfulProcessor)) {
-          return {
-            value: flattenObject(
-              doc.processor_results?.at(-1)?.doc?._source ?? params.body.documents[id]
-            ),
-            isMatch: true,
-          };
-        }
-
-        return {
-          value: flattenObject(params.body.documents[id]),
-          isMatch: false,
-        };
-      });
-
-      const detectedFields = computeDetectedFields(docs, simulationResult);
-
-      const successRate =
-        simulationResult.docs.reduce((rate, doc) => {
-          return (rate += doc.processor_results?.every(isSuccessfulProcessor) ? 1 : 0);
-        }, 0) / simulationResult.docs.length;
-
+      const documents = computeSimulationDocuments(simulationResult, docs);
+      const detectedFields = computeDetectedFields(simulationResult, docs);
+      const successRate = computeSuccessRate(simulationResult);
       const failureRate = 1 - successRate;
 
       return {
@@ -111,22 +84,54 @@ export const simulateProcessorRoute = createServerRoute({
   },
 });
 
-const computeDetectedFields = (
-  sampleDocs: Array<{ _source: Record<string, unknown> }>,
-  simulation: IngestSimulateResponse
+const normalizeProcessing = (processing: ProcessingDefinition[]) => {
+  return processing.map((processor) => {
+    const type = getProcessorType(processor);
+    const config = get(processor.config, type);
+    return {
+      [type]: {
+        ...config,
+        if: processor.condition ? conditionToPainless(processor.condition) : undefined,
+      },
+    };
+  });
+};
+
+const computeSimulationDocuments = (
+  simulation: IngestSimulateResponse,
+  sampleDocs: Array<{ _source: Record<string, unknown> }>
 ) => {
+  return simulation.docs.map((doc, id) => {
+    // If every processor was successful, return and flatten the simulation doc from the last processor
+    if (isSuccessfulDocument(doc)) {
+      return {
+        value: flattenObject(doc.processor_results.at(-1)?.doc?._source ?? sampleDocs[id]._source),
+        isMatch: true,
+      };
+    }
+
+    return {
+      value: flattenObject(sampleDocs[id]._source),
+      isMatch: false,
+    };
+  });
+};
+
+const computeDetectedFields = (
+  simulation: IngestSimulateResponse,
+  sampleDocs: Array<{ _source: Record<string, unknown> }>
+) => {
+  // Since we filter out failed documents, we need to map the simulation docs to the sample docs for later retrieval
   const samplesToSimulationMap = new Map(simulation.docs.map((doc, id) => [doc, sampleDocs[id]]));
 
   const diffs = simulation.docs
-    .filter((doc) => {
-      return doc.processor_results?.every(isSuccessfulProcessor);
-    })
+    .filter(isSuccessfulDocument)
     .map((doc) => {
       const sample = samplesToSimulationMap.get(doc);
       if (sample) {
         const { added } = calculateObjectDiff(
           sample._source,
-          doc.processor_results?.at(-1)?.doc?._source
+          doc.processor_results.at(-1)?.doc?._source
         );
         return flattenObject(added);
       }
@@ -141,5 +146,15 @@ const computeDetectedFields = (
   return uniqueFields.map((name) => ({ name, type: 'unmapped' }));
 };
 
-const isSuccessfulProcessor = (processorSimulation: IngestSimulatePipelineSimulation) =>
-  processorSimulation.status === 'success';
+const computeSuccessRate = (simulation: IngestSimulateResponse) => {
+  const successfulCount = simulation.docs.reduce((rate, doc) => {
+    return (rate += isSuccessfulDocument(doc) ? 1 : 0);
+  }, 0);
+  return successfulCount / simulation.docs.length;
+};
+
+const isSuccessfulDocument = (
+  doc: IngestSimulateSimulateDocumentResult
+): doc is Required<IngestSimulateSimulateDocumentResult> =>
+  doc.processor_results?.every((processorSimulation) => processorSimulation.status === 'success') ||
+  false;

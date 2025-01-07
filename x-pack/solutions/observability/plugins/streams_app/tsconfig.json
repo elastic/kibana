@@ -38,6 +38,9 @@
     "@kbn/navigation-plugin",
     "@kbn/core-notifications-browser",
     "@kbn/streams-schema",
-    "@kbn/react-hooks"
+    "@kbn/react-hooks",
+    "@kbn/i18n-react",
+    "@kbn/react-field",
+    "@kbn/shared-ux-utility"
   ]
 }
