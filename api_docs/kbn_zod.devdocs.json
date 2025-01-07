@@ -13720,7 +13720,7 @@
         "signature": [
           "(value: unknown) => boolean"
         ],
-        "path": "packages/kbn-zod/util.ts",
+        "path": "src/platform/packages/shared/kbn-zod/util.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -13734,7 +13734,7 @@
             "signature": [
               "unknown"
             ],
-            "path": "packages/kbn-zod/util.ts",
+            "path": "src/platform/packages/shared/kbn-zod/util.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -15862,7 +15862,7 @@
           },
           "<V>"
         ],
-        "path": "packages/kbn-zod/types.ts",
+        "path": "src/platform/packages/shared/kbn-zod/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -15876,7 +15876,7 @@
             "signature": [
               "V"
             ],
-            "path": "packages/kbn-zod/types.ts",
+            "path": "src/platform/packages/shared/kbn-zod/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
