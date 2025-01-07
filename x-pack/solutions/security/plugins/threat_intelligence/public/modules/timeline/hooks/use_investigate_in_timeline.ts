@@ -35,7 +35,7 @@ export interface UseInvestigateInTimelineValue {
 /**
  * Custom hook that gets an {@link Indicator}, retrieves the field (from the RawIndicatorFieldId.Name)
  * and value, then creates DataProviders used to do the Investigate in Timeline logic
- * (see /kibana/x-pack/plugins/security_solution/public/threat_intelligence/use_investigate_in_timeline.ts)
+ * (see /kibana/x-pack/solutions/security/plugins/security_solution/public/threat_intelligence/use_investigate_in_timeline.ts)
  */
 export const useInvestigateInTimeline = ({
   indicator,

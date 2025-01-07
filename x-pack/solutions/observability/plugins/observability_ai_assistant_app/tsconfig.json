@@ -80,6 +80,7 @@
     "@kbn/observability-ai-common",
     "@kbn/llm-tasks-plugin",
     "@kbn/product-doc-common",
+    "@kbn/ai-assistant-icon",
   ],
   "exclude": [
     "target/**/*"

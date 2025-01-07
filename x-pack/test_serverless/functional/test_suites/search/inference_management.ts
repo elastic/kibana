@@ -26,10 +26,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     const endpoint = 'endpoint-1';
     const taskType = 'sparse_embedding';
     const modelConfig = {
-      service: 'elser',
+      service: 'elasticsearch',
       service_settings: {
         num_allocations: 1,
         num_threads: 1,
+        model_id: '.elser_model_2',
       },
     };
 
@@ -91,6 +92,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await ml.api.createIndex(usageIndex, indexMapping);
 
         await pageObjects.svlSearchInferenceManagementPage.InferenceTabularPage.expectEndpointWithUsageTobeDelete();
+      });
+    });
+
+    describe('create inference flyout', () => {
+      it('renders successfully', async () => {
+        await pageObjects.svlSearchInferenceManagementPage.AddInferenceFlyout.expectInferenceEndpointToBeVisible();
       });
     });
 

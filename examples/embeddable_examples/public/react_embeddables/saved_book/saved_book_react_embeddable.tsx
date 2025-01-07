@@ -81,14 +81,22 @@ export const getSavedBookEmbeddableFactory = (core: CoreStart) => {
         {
           ...titlesApi,
           onEdit: async () => {
-            openSavedBookEditor(bookAttributesManager, false, core, api);
+            openSavedBookEditor({
+              attributesManager: bookAttributesManager,
+              parent: api.parentApi,
+              isCreate: false,
+              core,
+              api,
+            }).then((result) => {
+              savedBookId$.next(result.savedBookId);
+            });
           },
           isEditingEnabled: () => true,
           getTypeDisplayName: () =>
             i18n.translate('embeddableExamples.savedbook.editBook.displayName', {
               defaultMessage: 'book',
             }),
-          serializeState: async () => {
+          serializeState: () => {
             if (!Boolean(savedBookId$.value)) {
               // if this book is currently by value, we serialize the entire state.
               const bookByValueState: BookByValueSerializedState = {
@@ -98,16 +106,11 @@ export const getSavedBookEmbeddableFactory = (core: CoreStart) => {
               return { rawState: bookByValueState };
             }
 
-            // if this book is currently by reference, we serialize the reference and write to the external store.
+            // if this book is currently by reference, we serialize the reference only.
             const bookByReferenceState: BookByReferenceSerializedState = {
               savedBookId: savedBookId$.value!,
               ...serializeTitles(),
             };
-
-            await saveBookAttributes(
-              savedBookId$.value,
-              serializeBookAttributes(bookAttributesManager)
-            );
             return { rawState: bookByReferenceState };
           },
 
