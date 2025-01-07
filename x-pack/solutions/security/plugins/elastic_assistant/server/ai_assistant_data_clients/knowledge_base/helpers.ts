@@ -47,21 +47,21 @@ export const getKBVectorSearchQuery = ({
 }): QueryDslQueryContainer => {
   const resourceFilter = kbResource
     ? [
-      {
-        term: {
-          kb_resource: kbResource,
+        {
+          term: {
+            kb_resource: kbResource,
+          },
         },
-      },
-    ]
+      ]
     : [];
   const requiredFilter = required
     ? [
-      {
-        term: {
-          required,
+        {
+          term: {
+            required,
+          },
         },
-      },
-    ]
+      ]
     : [];
 
   const userFilter = {
@@ -109,8 +109,8 @@ export const getKBVectorSearchQuery = ({
   let semanticTextFilter:
     | Array<{ semantic: { field: string; query: string } }>
     | Array<{
-      text_expansion: { 'vector.tokens': { model_id: string; model_text: string } };
-    }> = [];
+        text_expansion: { 'vector.tokens': { model_id: string; model_text: string } };
+      }> = [];
 
   if (query) {
     semanticTextFilter = [
@@ -152,10 +152,10 @@ export const getStructuredToolForIndexEntry = ({
       input.fieldType === 'string'
         ? z.string()
         : input.fieldType === 'number'
-          ? z.number()
-          : input.fieldType === 'boolean'
-            ? z.boolean()
-            : z.any();
+        ? z.number()
+        : input.fieldType === 'boolean'
+        ? z.boolean()
+        : z.any();
     return { ...prev, [input.fieldName]: fieldType.describe(input.description) };
   }, {});
 
@@ -238,9 +238,9 @@ export const getStructuredToolForIndexEntry = ({
 
         const citationElement = getCitationElement({
           citationLable: indexEntry.name,
-          citationLink: `/app/management/kibana/securityAiAssistantManagement?tab=knowledge_base&entry_search_term=${indexEntry.id}`
-        })
-        
+          citationLink: `/app/management/kibana/securityAiAssistantManagement?tab=knowledge_base&entry_search_term=${indexEntry.id}`,
+        });
+
         return `###\n Below are all relevant documents in JSON format:
 ${JSON.stringify(kbDocs)}
 citationElement: ${citationElement}

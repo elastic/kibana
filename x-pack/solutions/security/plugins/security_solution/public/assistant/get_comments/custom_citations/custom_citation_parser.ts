@@ -1,105 +1,111 @@
-import { RemarkTokenizer } from '@elastic/eui';
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { RemarkTokenizer } from '@elastic/eui';
 import type { Plugin } from 'unified';
 import type { Node } from 'unist';
 
 export interface CustomCitationNodeDetails extends Node {
-    type: 'customCitation';
-    citationLink: string;
-    citationLable: string
-    citationIndex?: number
+  type: 'customCitation';
+  citationLink: string;
+  citationLable: string;
+  citationIndex?: number;
 }
 
-const START_SIGNAL = '!{citation'
+const START_SIGNAL = '!{citation';
 
 /**
- * Parses `!{citation[citationLabel](citationLink)` into customCitation node 
+ * Parses `!{citation[citationLabel](citationLink)` into customCitation node
  */
 export const CustomCitationParser: Plugin = function CustomCitationParser() {
-    const Parser = this.Parser;
-    const tokenizers = Parser.prototype.inlineTokenizers;
-    const methods = Parser.prototype.inlineMethods;
-    let citationIndex = 1
-    const tokenizeCustomCitation: RemarkTokenizer = function tokenizeCustomCitation(
-        eat,
-        value,
-        silent
-    ) {
-        if (value.startsWith(START_SIGNAL) === false) return false;
-        
-        const nextChar = value[START_SIGNAL.length];
-        
-        if (nextChar !== '[') return false;
-        
-        let index = START_SIGNAL.length;
-        
-        function readArg(open: string, close: string) {
-            if (value[index] !== open) return ''
-            index++;
-            
-            let body = '';
-            let openBrackets = 0;
-            
-            for (; index < value.length; index++) {
-                const char = value[index];
-                if (char === close && openBrackets === 0) {
-                    index++;
-                    
-                    return body;
-                } else if (char === close) {
-                    openBrackets--;
-                } else if (char === open) {
-                    openBrackets++;
-                }
-                
-                body += char;
-            }
-            
-            return '';
-        }
-        
-        const citationLabel = readArg('[', ']');
-        const citationLink = readArg('(', ')');
-        
+  const Parser = this.Parser;
+  const tokenizers = Parser.prototype.inlineTokenizers;
+  const methods = Parser.prototype.inlineMethods;
+  let citationIndex = 1;
+  const tokenizeCustomCitation: RemarkTokenizer = function tokenizeCustomCitation(
+    eat,
+    value,
+    silent
+  ) {
+    if (value.startsWith(START_SIGNAL) === false) return false;
 
-        const now = eat.now();
+    const nextChar = value[START_SIGNAL.length];
 
-        if (!citationLabel) {
-            this.file.info('No citation lable found', {
-                line: now.line,
-                column: now.column + START_SIGNAL.length + 1
-            });
+    if (nextChar !== '[') return false;
+
+    let index = START_SIGNAL.length;
+
+    function readArg(open: string, close: string) {
+      if (value[index] !== open) return '';
+      index++;
+
+      let body = '';
+      let openBrackets = 0;
+
+      for (; index < value.length; index++) {
+        const char = value[index];
+        if (char === close && openBrackets === 0) {
+          index++;
+
+          return body;
+        } else if (char === close) {
+          openBrackets--;
+        } else if (char === open) {
+          openBrackets++;
         }
 
-        if (!citationLink) {
-            this.file.info('No citation link found', {
-                line: now.line,
-                column: now.column + START_SIGNAL.length + 3 + citationLabel.length
-            });
-        }
+        body += char;
+      }
 
-        if (!citationLink || !citationLabel) return false;
+      return '';
+    }
 
-        if (silent) {
-            return true;
-        }
+    const citationLabel = readArg('[', ']');
+    const citationLink = readArg('(', ')');
 
-        now.column += START_SIGNAL.length + 1;
-        now.offset += START_SIGNAL.length + 1;
+    const now = eat.now();
 
-        return eat(`!{citation[${citationLabel}](${citationLink})}`)({
-            type: 'customCitation',
-            citationLink: citationLink,
-            citationLable: citationLabel,
-            citationIndex: citationIndex++
-        } as CustomCitationNodeDetails);
-    };
+    if (!citationLabel) {
+      this.file.info('No citation lable found', {
+        line: now.line,
+        column: now.column + START_SIGNAL.length + 1,
+      });
+    }
 
-    tokenizeCustomCitation.notInLink = true;
+    if (!citationLink) {
+      this.file.info('No citation link found', {
+        line: now.line,
+        column: now.column + START_SIGNAL.length + 3 + citationLabel.length,
+      });
+    }
 
-    tokenizeCustomCitation.locator = (value, fromIndex) => {
-        return value.indexOf(START_SIGNAL, fromIndex);
-    };
+    if (!citationLink || !citationLabel) return false;
 
-    tokenizers.customCitation = tokenizeCustomCitation;
-    methods.splice(methods.indexOf('text'), 0, 'customCitation');
+    if (silent) {
+      return true;
+    }
+
+    now.column += START_SIGNAL.length + 1;
+    now.offset += START_SIGNAL.length + 1;
+
+    return eat(`!{citation[${citationLabel}](${citationLink})}`)({
+      type: 'customCitation',
+      citationLink,
+      citationLable: citationLabel,
+      citationIndex: citationIndex++,
+    } as CustomCitationNodeDetails);
+  };
+
+  tokenizeCustomCitation.notInLink = true;
+
+  tokenizeCustomCitation.locator = (value, fromIndex) => {
+    return value.indexOf(START_SIGNAL, fromIndex);
+  };
+
+  tokenizers.customCitation = tokenizeCustomCitation;
+  methods.splice(methods.indexOf('text'), 0, 'customCitation');
 };

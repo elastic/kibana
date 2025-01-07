@@ -22,7 +22,7 @@ export {
   replaceOriginalValuesWithUuidValues,
 } from './impl/data_anonymization/helpers';
 
-export { getCitationElement } from './impl/citations'
+export { getCitationElement } from './impl/citations';
 
 export { transformRawData } from './impl/data_anonymization/transform_raw_data';
 export { parseBedrockBuffer, handleBedrockChunk } from './impl/utils/bedrock';

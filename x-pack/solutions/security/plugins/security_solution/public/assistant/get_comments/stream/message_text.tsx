@@ -112,8 +112,13 @@ const getPluginDependencies = () => {
     ...components,
     cursor: Cursor,
     customCitation: (props) => {
-      return (<CustomCitation citationLable={props.citationLable} citationNumber={props.citationIndex} citationUrl={props.citationLink} />)
-
+      return (
+        <CustomCitation
+          citationLable={props.citationLable}
+          citationNumber={props.citationIndex}
+          citationUrl={props.citationLink}
+        />
+      );
     },
     customCodeBlock: (props) => {
       return (
@@ -145,7 +150,12 @@ const getPluginDependencies = () => {
   };
 
   return {
-    parsingPluginList: [loadingCursorPlugin, customCodeBlockLanguagePlugin, ...parsingPlugins, CustomCitationParser],
+    parsingPluginList: [
+      loadingCursorPlugin,
+      customCodeBlockLanguagePlugin,
+      ...parsingPlugins,
+      CustomCitationParser,
+    ],
     processingPluginList: processingPlugins,
   };
 };
