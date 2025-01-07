@@ -4,12 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useAbortController } from '@kbn/observability-utils-browser/hooks/use_abort_controller';
 import { useKibana } from './use_kibana';
 import { useStreamsAppFetch } from './use_streams_app_fetch';
 
 export const useDashboardsFetch = (id?: string) => {
-  const { signal } = useAbortController();
   const {
     dependencies: {
       start: {
@@ -18,19 +16,22 @@ export const useDashboardsFetch = (id?: string) => {
     },
   } = useKibana();
 
-  const dashboardsFetch = useStreamsAppFetch(() => {
-    if (!id) {
-      return Promise.resolve(undefined);
-    }
-    return streamsRepositoryClient.fetch('GET /api/streams/{id}/dashboards', {
-      signal,
-      params: {
-        path: {
-          id,
+  const dashboardsFetch = useStreamsAppFetch(
+    ({ signal }) => {
+      if (!id) {
+        return Promise.resolve(undefined);
+      }
+      return streamsRepositoryClient.fetch('GET /api/streams/{id}/dashboards', {
+        signal,
+        params: {
+          path: {
+            id,
+          },
         },
-      },
-    });
-  }, [id, signal, streamsRepositoryClient]);
+      });
+    },
+    [id, streamsRepositoryClient]
+  );
 
   return dashboardsFetch;
 };
