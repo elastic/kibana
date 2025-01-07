@@ -145,7 +145,7 @@
     "utils": "x-pack/solutions/security/packages/kbn-securitysolution-utils/src",
     "visDefaultEditor": "src/platform/plugins/private/vis_default_editor",
     "visTypeGauge": "src/platform/plugins/private/vis_types/gauge",
-    "visTypeHeatmap": "src/plugins/vis_types/heatmap",
+    "visTypeHeatmap": "src/platform/plugins/private/vis_types/heatmap",
     "visTypeMarkdown": "src/platform/plugins/private/vis_type_markdown",
     "visTypeMetric": "src/plugins/vis_types/metric",
     "visTypePie": "src/plugins/vis_types/pie",

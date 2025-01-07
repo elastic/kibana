@@ -7933,7 +7933,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/vis-type-heatmap-plugin@link:src/plugins/vis_types/heatmap":
+"@kbn/vis-type-heatmap-plugin@link:src/platform/plugins/private/vis_types/heatmap":
   version "0.0.0"
   uid ""
 
