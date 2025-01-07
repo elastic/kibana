@@ -5,16 +5,20 @@
  * 2.0.
  */
 
+import React from 'react';
+
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import type { MlApi } from '../../application/services/ml_api_service';
+
+import { I18nProvider } from '@kbn/i18n-react';
+import type { MlApi } from '@kbn/ml-services/ml_api_service';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public/context/context';
+
+import { kibanaContextMock } from '../../application/contexts/kibana/__mocks__/kibana_context';
 
 import { AnomalyChartsInitializer } from './anomaly_charts_initializer';
-import { I18nProvider } from '@kbn/i18n-react';
-import React from 'react';
 import { getDefaultExplorerChartsPanelTitle } from './utils';
-import { kibanaContextMock } from '../../application/contexts/kibana/__mocks__/kibana_context';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public/context/context';
+
 const defaultOptions = { wrapper: I18nProvider };
 jest.mock('../../application/services/anomaly_detector_service', () => {
   return {

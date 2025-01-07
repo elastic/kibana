@@ -6,7 +6,7 @@
  */
 
 import type { MlNodeCount } from '@kbn/ml-common-types/ml_server_info';
-import type { MlApi } from '../services/ml_api_service';
+import type { MlApi } from '@kbn/ml-services/ml_api_service';
 
 let mlNodeCount: number = 0;
 let lazyMlNodeCount: number = 0;

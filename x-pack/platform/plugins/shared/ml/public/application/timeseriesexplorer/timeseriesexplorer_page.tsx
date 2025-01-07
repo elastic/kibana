@@ -14,7 +14,7 @@ import { AnomalyResultsViewSelector } from '../components/anomaly_results_view_s
 import { JobSelector } from '../components/job_selector';
 
 import { HelpMenu } from '../components/help_menu';
-import { useMlKibana } from '../contexts/kibana';
+import { useMlKibana } from '@kbn/ml-kibana-context';
 import { MlPageHeader } from '../components/page_header';
 import { PageTitle } from '../components/page_title';
 import { useAnnotationStyles, useTimeseriesExplorerStyles } from './styles';

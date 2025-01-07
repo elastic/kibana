@@ -12,8 +12,8 @@ import type { ES_GEO_FIELD_TYPE, LayerDescriptor } from '@kbn/maps-plugin/common
 import type { CreateLayerDescriptorParams, MapsStartApi } from '@kbn/maps-plugin/public';
 import type { Query } from '@kbn/es-query';
 import type { Field, SplitField } from '@kbn/ml-anomaly-utils';
+import type { MlApi } from '@kbn/ml-services/ml_api_service';
 import { ChartLoader } from '../chart_loader';
-import type { MlApi } from '../../../../services/ml_api_service';
 
 const eq = (newArgs: any[], lastArgs: any[]) => isEqual(newArgs, lastArgs);
 

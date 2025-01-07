@@ -19,7 +19,7 @@ import type { Group, GroupsDictionary } from './anomaly_detection_panel';
 import { JobSelectorBadge } from '../../../components/job_selector/job_selector_badge';
 import { toLocaleString } from '../../../util/string_utils';
 import { SwimlaneContainer } from '../../../explorer/swimlane_container';
-import { useMlKibana } from '../../../contexts/kibana';
+import { useMlKibana } from '@kbn/ml-kibana-context';
 
 export enum AnomalyDetectionListColumns {
   id = 'id',

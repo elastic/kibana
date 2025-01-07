@@ -17,7 +17,7 @@ import type { InfluencersFilterQuery } from '@kbn/ml-anomaly-utils';
 import { SEARCH_QUERY_LANGUAGE } from '@kbn/ml-query-utils';
 import { PLUGIN_ID } from '@kbn/ml-common-constants/app';
 import { useAnomalyExplorerContext } from '../../anomaly_explorer_context';
-import { useMlKibana } from '../../../contexts/kibana';
+import { useMlKibana } from '@kbn/ml-kibana-context';
 
 export const DEFAULT_QUERY_LANG = SEARCH_QUERY_LANGUAGE.KUERY;
 

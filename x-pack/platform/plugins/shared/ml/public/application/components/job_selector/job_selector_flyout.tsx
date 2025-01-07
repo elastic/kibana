@@ -35,7 +35,7 @@ import {
   getTimeRangeFromSelection,
   normalizeTimes,
 } from './job_select_service_utils';
-import { useMlKibana } from '../../contexts/kibana';
+import { useMlKibana } from '@kbn/ml-kibana-context';
 import type { JobSelectionMaps } from './job_selector';
 
 export const BADGE_LIMIT = 10;

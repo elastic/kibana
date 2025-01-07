@@ -10,7 +10,7 @@ import React, { useContext, useEffect, useMemo } from 'react';
 import { createHtmlPortalNode, InPortal, OutPortal } from 'react-reverse-portal';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { useMlKibana } from '../../contexts/kibana';
+import { useMlKibana } from '@kbn/ml-kibana-context';
 import { MlPageControlsContext } from '../ml_page';
 
 export const HeaderMenuPortal: FC<PropsWithChildren<unknown>> = ({ children }) => {

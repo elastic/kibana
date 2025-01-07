@@ -53,7 +53,7 @@ import {
 } from './utils';
 
 import { getPartitioningFieldNames } from '../../../../common/util/job_utils';
-import { mlJobServiceFactory } from '../../services/job_service';
+import { mlJobServiceFactory } from '@kbn/ml-services/job_service';
 import { toastNotificationServiceProvider } from '../../services/toast_notification_service';
 
 class RuleEditorFlyoutUI extends Component {

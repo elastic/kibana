@@ -28,10 +28,10 @@ import type { TimeBucketsInterval } from '@kbn/ml-time-buckets';
 import { ANOMALY_SWIM_LANE_HARD_LIMIT } from '@kbn/ml-common-constants/explorer';
 import type { SeverityThreshold } from '@kbn/ml-common-types/anomalies';
 import type { AnomalyExplorerSwimLaneUrlState } from '@kbn/ml-common-types/locator';
+import type { MlJobService } from '@kbn/ml-services/job_service';
 
 import { resolveSeverityFormat } from '../components/controls/select_severity/severity_format_resolver';
 import type { AnomalyTimelineService } from '../services/anomaly_timeline_service';
-import type { MlJobService } from '../services/job_service';
 import type { Refresh } from '../routing/use_refresh';
 import { StateService } from '../services/state_service';
 

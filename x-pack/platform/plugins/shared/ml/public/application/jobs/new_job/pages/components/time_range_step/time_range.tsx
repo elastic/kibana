@@ -30,7 +30,7 @@ import { EventRateChart } from '../charts/event_rate_chart';
 import type { LineChartPoint } from '../../../common/chart_loader';
 import type { TimeRange } from '../../../common/components';
 import { TimeRangePicker } from '../../../common/components';
-import { useMlKibana } from '../../../../../contexts/kibana';
+import { useMlKibana } from '@kbn/ml-kibana-context';
 
 export const TimeRangeStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) => {
   const timefilter = useTimefilter();

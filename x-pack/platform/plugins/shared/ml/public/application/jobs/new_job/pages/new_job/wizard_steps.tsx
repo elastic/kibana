@@ -15,7 +15,7 @@ import { EuiSpacer, EuiTitle, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { FieldStatsServices } from '@kbn/unified-field-list/src/components/field_stats';
 import { FieldStatsFlyoutProvider } from '@kbn/ml-field-stats-flyout';
 import { JobCreatorContext } from '../components/job_creator_context';
-import { useMlKibana } from '../../../../contexts/kibana';
+import { useMlKibana } from '@kbn/ml-kibana-context';
 import { WIZARD_STEPS } from '../components/step_types';
 
 import { TimeRangeStep } from '../components/time_range_step';

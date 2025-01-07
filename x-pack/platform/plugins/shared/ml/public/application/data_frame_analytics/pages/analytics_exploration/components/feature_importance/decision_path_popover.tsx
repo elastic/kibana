@@ -21,7 +21,7 @@ import {
 import { RegressionDecisionPath } from './decision_path_regression';
 import { DecisionPathJSONViewer } from './decision_path_json_viewer';
 import { ClassificationDecisionPath } from './decision_path_classification';
-import { useMlKibana } from '../../../../../contexts/kibana';
+import { useMlKibana } from '@kbn/ml-kibana-context';
 import { getStringBasedClassName } from './use_classification_path_data';
 
 interface DecisionPathPopoverProps {

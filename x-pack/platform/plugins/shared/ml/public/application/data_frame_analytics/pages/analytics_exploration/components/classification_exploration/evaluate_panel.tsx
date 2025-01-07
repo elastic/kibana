@@ -28,7 +28,7 @@ import {
   type DataFrameTaskStateType,
 } from '@kbn/ml-data-frame-analytics-utils';
 
-import { useMlKibana } from '../../../../../contexts/kibana';
+import { useMlKibana } from '@kbn/ml-kibana-context';
 
 // Separate imports for lazy loadable VegaChart and related code
 import { VegaChart } from '../../../../../components/vega_chart';

@@ -27,7 +27,7 @@ import {
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { i18n } from '@kbn/i18n';
 import { CreateDataViewButton } from '../../../components/create_data_view_button';
-import { useMlKibana } from '../../../contexts/kibana';
+import { useMlKibana } from '@kbn/ml-kibana-context';
 import { RUNNING_STATE } from './inference_base';
 import type { InferrerType } from '.';
 

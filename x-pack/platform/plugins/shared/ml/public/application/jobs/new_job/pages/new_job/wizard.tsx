@@ -9,12 +9,12 @@ import type { FC } from 'react';
 import React, { useState, useEffect, useCallback } from 'react';
 import type { TimeBuckets } from '@kbn/ml-time-buckets';
 import { JOB_TYPE } from '@kbn/ml-common-constants/new_job';
+import type { ExistingJobsAndGroups } from '@kbn/ml-services/job_service';
 import { useModelMemoryEstimator } from '../../common/job_creator/util/model_memory_estimator';
 import { WIZARD_STEPS } from '../components/step_types';
 
 import type { JobCreatorContextValue } from '../components/job_creator_context';
 import { JobCreatorContext } from '../components/job_creator_context';
-import type { ExistingJobsAndGroups } from '../../../../services/job_service';
 
 import type { JobCreatorType } from '../../common/job_creator';
 import type { ChartLoader } from '../../common/chart_loader';

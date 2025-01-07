@@ -28,7 +28,6 @@
     "@kbn/aiops-plugin",
     "@kbn/alerting-plugin",
     "@kbn/alerts-as-data-utils",
-    "@kbn/analytics",
     "@kbn/cases-plugin",
     "@kbn/charts-plugin",
     "@kbn/cloud-plugin",
@@ -149,6 +148,8 @@
     "@kbn/presentation-publishing-schemas",
     "@kbn/ml-common-constants",
     "@kbn/ml-common-types",
+    "@kbn/ml-kibana-context",
+    "@kbn/ml-services",
     "@kbn/ml-embeddables",
   ]
 }

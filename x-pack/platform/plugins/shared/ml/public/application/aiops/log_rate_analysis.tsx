@@ -13,8 +13,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { LogRateAnalysis } from '@kbn/aiops-plugin/public';
 import { AIOPS_EMBEDDABLE_ORIGIN } from '@kbn/aiops-common/constants';
 
+import { useMlKibana } from '@kbn/ml-kibana-context';
 import { useDataSource } from '../contexts/ml/data_source_context';
-import { useMlKibana } from '../contexts/kibana';
 import { HelpMenu } from '../components/help_menu';
 import { MlPageHeader } from '../components/page_header';
 import { useEnabledFeatures } from '../contexts/ml';

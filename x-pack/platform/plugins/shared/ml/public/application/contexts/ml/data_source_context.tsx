@@ -14,9 +14,9 @@ import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { EuiEmptyPrompt } from '@elastic/eui';
+import { useMlKibana } from '@kbn/ml-kibana-context';
 import type { DataViewAndSavedSearch } from '../../util/index_utils';
 import { getDataViewAndSavedSearchCallback } from '../../util/index_utils';
-import { useMlKibana } from '../kibana';
 import { createSearchItems } from '../../jobs/new_job/utils/new_job_utils';
 
 export interface DataSourceContextValue {

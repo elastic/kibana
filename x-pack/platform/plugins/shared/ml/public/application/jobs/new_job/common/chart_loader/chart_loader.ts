@@ -11,10 +11,10 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import type { Field, SplitField, AggFieldPair } from '@kbn/ml-anomaly-utils';
 import type { RuntimeMappings } from '@kbn/ml-runtime-field-utils';
 import type { IndicesOptions } from '@kbn/ml-common-types/anomaly_detection_jobs/datafeed';
+import type { MlApi } from '@kbn/ml-services/ml_api_service';
 import { mlResultsServiceProvider } from '../../../../services/results_service';
 import { getCategoryFields as getCategoryFieldsOrig } from './searches';
 import { aggFieldPairsCanBeCharted } from '../job_creator/util/general';
-import type { MlApi } from '../../../../services/ml_api_service';
 
 type DetectorIndex = number;
 export interface LineChartPoint {

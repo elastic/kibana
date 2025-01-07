@@ -7315,11 +7315,19 @@
   version "0.0.0"
   uid ""
 
+"@kbn/ml-client@link:x-pack/platform/packages/shared/ml/ml_client":
+  version "0.0.0"
+  uid ""
+
 "@kbn/ml-common-constants@link:x-pack/platform/packages/shared/ml/common_constants":
   version "0.0.0"
   uid ""
 
 "@kbn/ml-common-types@link:x-pack/platform/packages/shared/ml/common_types":
+  version "0.0.0"
+  uid ""
+
+"@kbn/ml-common-utils@link:x-pack/platform/packages/shared/ml/common_utils":
   version "0.0.0"
   uid ""
 
@@ -7371,6 +7379,14 @@
   version "0.0.0"
   uid ""
 
+"@kbn/ml-kibana-context@link:x-pack/platform/packages/shared/ml/kibana_context":
+  version "0.0.0"
+  uid ""
+
+"@kbn/ml-license@link:x-pack/platform/packages/shared/ml/license":
+  version "0.0.0"
+  uid ""
+
 "@kbn/ml-local-storage@link:x-pack/platform/packages/private/ml/local_storage":
   version "0.0.0"
   uid ""
@@ -7408,6 +7424,18 @@
   uid ""
 
 "@kbn/ml-runtime-field-utils@link:x-pack/platform/packages/shared/ml/runtime_field_utils":
+  version "0.0.0"
+  uid ""
+
+"@kbn/ml-saved-objects@link:x-pack/platform/packages/shared/ml/saved_objects":
+  version "0.0.0"
+  uid ""
+
+"@kbn/ml-server-routes-schemas@link:x-pack/platform/packages/shared/ml/server_routes_schemas":
+  version "0.0.0"
+  uid ""
+
+"@kbn/ml-services@link:x-pack/platform/packages/shared/ml/services":
   version "0.0.0"
   uid ""
 

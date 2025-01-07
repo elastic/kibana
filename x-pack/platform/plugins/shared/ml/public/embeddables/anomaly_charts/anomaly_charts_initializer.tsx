@@ -23,13 +23,13 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
+import type { MlApi } from '@kbn/ml-services/ml_api_service';
 import type { AnomalyChartsEmbeddableState } from '../types';
 import { DEFAULT_MAX_SERIES_TO_PLOT } from '../../application/services/anomaly_explorer_charts_service_constants';
 import { JobSelectorControl } from '../../alerting/job_selector';
 import { getDefaultExplorerChartsPanelTitle } from './utils';
 import { useMlLink } from '../../application/contexts/kibana';
 import { getJobSelectionErrors } from '../utils';
-import type { MlApi } from '../../application/services/ml_api_service';
 
 export const MAX_ANOMALY_CHARTS_ALLOWED = 50;
 export interface AnomalyChartsInitializerProps {

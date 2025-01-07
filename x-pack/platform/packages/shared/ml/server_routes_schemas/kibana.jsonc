@@ -1,0 +1,5 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/ml-server-routes-schemas",
+  "owner": "@elastic/ml-ui"
+}

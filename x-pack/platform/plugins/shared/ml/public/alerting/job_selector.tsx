@@ -14,8 +14,8 @@ import { EuiButton, EuiComboBox, EuiEmptyPrompt, EuiFormRow } from '@elastic/eui
 import useMountedState from 'react-use/lib/useMountedState';
 import type { JobId } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
 import { ALL_JOBS_SELECTION } from '@kbn/ml-common-constants/alerts';
-import { useMlKibana } from '../application/contexts/kibana';
-import type { MlApi } from '../application/services/ml_api_service';
+import { useMlKibana } from '@kbn/ml-kibana-context';
+import type { MlApi } from '@kbn/ml-services/ml_api_service';
 import { LoadingIndicator } from '../application/components/loading_indicator';
 
 export interface JobSelection {

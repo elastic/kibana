@@ -16,7 +16,8 @@ import { useTimefilter } from '@kbn/ml-date-picker';
 import { ML_JOB_ID } from '@kbn/ml-anomaly-utils/constants';
 import { useTimeBuckets } from '@kbn/ml-time-buckets';
 import type { MlJobWithTimeRange } from '@kbn/ml-common-types/anomaly_detection_jobs/summary_job';
-import { useMlKibana } from '../../../contexts/kibana';
+import { useMlKibana } from '@kbn/ml-kibana-context';
+import { useMlJobService } from '@kbn/ml-services/job_service';
 
 import { useRefresh } from '../../use_refresh';
 import { Explorer } from '../../../explorer';
@@ -28,7 +29,6 @@ import { AnomalyResultsViewSelector } from '../../../components/anomaly_results_
 import { AnomalyDetectionEmptyState } from '../../../jobs/jobs_list/components/anomaly_detection_empty_state';
 import { useAnomalyExplorerContext } from '../../../explorer/anomaly_explorer_context';
 import { getInfluencers } from '../../../explorer/explorer_utils';
-import { useMlJobService } from '../../../services/job_service';
 
 export interface ExplorerUrlStateManagerProps {
   jobsWithTimeRange: MlJobWithTimeRange[];

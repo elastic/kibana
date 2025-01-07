@@ -11,7 +11,7 @@ import moment, { type Moment } from 'moment';
 import { EuiDatePicker, EuiDatePickerRange, EuiFormRow, EuiSpacer, EuiSwitch } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { useMlKibana } from '../../../contexts/kibana';
+import { useMlKibana } from '@kbn/ml-kibana-context';
 
 interface CustomUrlTimeRangePickerProps {
   onCustomTimeRangeChange: (customTimeRange?: { start: Moment; end: Moment }) => void;

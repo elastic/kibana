@@ -1,0 +1,5 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/ml-license",
+  "owner": "@elastic/ml-ui"
+}

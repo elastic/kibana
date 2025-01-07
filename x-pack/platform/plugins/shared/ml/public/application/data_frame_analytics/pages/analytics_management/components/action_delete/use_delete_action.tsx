@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
 
 import type { JobType } from '@kbn/ml-common-types/saved_objects';
-import { useMlKibana } from '../../../../../contexts/kibana';
+import { useMlKibana } from '@kbn/ml-kibana-context';
 import { useToastNotificationService } from '../../../../../services/toast_notification_service';
 
 import {

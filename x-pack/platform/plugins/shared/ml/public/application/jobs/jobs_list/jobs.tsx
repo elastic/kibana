@@ -16,7 +16,7 @@ import type { ListingPageUrlState } from '@kbn/ml-url-state';
 import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 
 import { HelpMenu } from '../../components/help_menu';
-import { useMlKibana } from '../../contexts/kibana';
+import { useMlKibana } from '@kbn/ml-kibana-context';
 import { MlPageHeader } from '../../components/page_header';
 import { HeaderMenuPortal } from '../../components/header_menu_portal';
 import { useEnabledFeatures } from '../../contexts/ml';

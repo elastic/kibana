@@ -11,9 +11,9 @@ import type {
   DfAnalyticsExplainResponse,
   FieldSelectionItem,
 } from '@kbn/ml-data-frame-analytics-utils';
+import type { MlApi } from '@kbn/ml-services/ml_api_service';
 import type { State } from '../../../analytics_management/hooks/use_create_analytics_form/state';
 import { getJobConfigFromFormState } from '../../../analytics_management/hooks/use_create_analytics_form/state';
-import type { MlApi } from '../../../../../services/ml_api_service';
 
 export const fetchExplainData = async (mlApi: MlApi, formState: State['form']) => {
   const jobConfig = getJobConfigFromFormState(formState);

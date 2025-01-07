@@ -10,7 +10,7 @@ import type { IUiSettingsClient } from '@kbn/core/public';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import moment from 'moment';
 import { type TimeRangeBounds, type TimeBucketsInterval, TimeBuckets } from '@kbn/ml-time-buckets';
-import { useMlKibana } from '../contexts/kibana';
+import { useMlKibana } from '@kbn/ml-kibana-context';
 
 // TODO Consolidate with legacy code in `ml/public/application/util/time_buckets.js`.
 export function timeBucketsServiceFactory(uiSettings: IUiSettingsClient) {
