@@ -15,7 +15,11 @@ import { omit, defaults, get } from 'lodash';
 import { SavedObjectError } from '@kbn/core-saved-objects-common';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { SavedObjectsBulkDeleteResponse, Logger } from '@kbn/core/server';
+import type {
+  SavedObjectsBulkDeleteResponse,
+  Logger,
+  SecurityServiceStart,
+} from '@kbn/core/server';
 
 import {
   SavedObject,
@@ -28,7 +32,7 @@ import {
 
 import { decodeRequestVersion, encodeVersion } from '@kbn/core-saved-objects-base-server-internal';
 import { RequestTimeoutsConfig } from './config';
-import { asOk, asErr, Result } from './lib/result_type';
+import { asOk, asErr, Result, unwrap } from './lib/result_type';
 
 import {
   ConcreteTaskInstance,
@@ -62,6 +66,7 @@ export interface StoreOpts {
   allowReadingInvalidState: boolean;
   logger: Logger;
   requestTimeouts: RequestTimeoutsConfig;
+  security: SecurityServiceStart;
 }
 
 export interface SearchOpts {
@@ -127,6 +132,7 @@ export class TaskStore {
   private serializer: ISavedObjectsSerializer;
   private adHocTaskCounter: AdHocTaskCounter;
   private requestTimeouts: RequestTimeoutsConfig;
+  private security: SecurityServiceStart;
 
   /**
    * Constructs a new TaskStore.
@@ -156,6 +162,7 @@ export class TaskStore {
       maxRetries: 0,
     });
     this.requestTimeouts = opts.requestTimeouts;
+    this.security = opts.security;
   }
 
   /**
@@ -440,6 +447,13 @@ export class TaskStore {
    * @returns {Promise<void>}
    */
   public async remove(id: string): Promise<void> {
+    const taskInstance = await this.get(id);
+
+    if (taskInstance.apiKey) {
+      const apiKeyId = Buffer.from(taskInstance.apiKey, 'base64').toString().split(':')[0];
+      this.security.authc.apiKeys.invalidateAsInternalUser({ ids: [apiKeyId] });
+    }
+
     try {
       await this.savedObjectsRepository.delete('task', id, { refresh: false });
     } catch (e) {
@@ -455,6 +469,22 @@ export class TaskStore {
    * @returns {Promise<SavedObjectsBulkDeleteResponse>}
    */
   public async bulkRemove(taskIds: string[]): Promise<SavedObjectsBulkDeleteResponse> {
+    const taskInstances = await this.bulkGet(taskIds);
+    const apiKeyIdsToRemove: string[] = [];
+
+    taskInstances.forEach((taskInstance) => {
+      const unwrappedTaskInstance = unwrap(taskInstance) as ConcreteTaskInstance;
+      if (unwrappedTaskInstance.apiKey) {
+        apiKeyIdsToRemove.push(
+          Buffer.from(unwrappedTaskInstance.apiKey, 'base64').toString().split(':')[0]
+        );
+      }
+    });
+
+    if (apiKeyIdsToRemove.length) {
+      this.security.authc.apiKeys.invalidateAsInternalUser({ ids: apiKeyIdsToRemove });
+    }
+
     try {
       const savedObjectsToDelete = taskIds.map((taskId) => ({ id: taskId, type: 'task' }));
       return await this.savedObjectsRepository.bulkDelete(savedObjectsToDelete, { refresh: false });
