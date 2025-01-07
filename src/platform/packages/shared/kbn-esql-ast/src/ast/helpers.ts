@@ -12,6 +12,7 @@ import type {
   ESQLBinaryExpression,
   ESQLColumn,
   ESQLFunction,
+  ESQLIdentifier,
   ESQLIntegerLiteral,
   ESQLLiteral,
   ESQLParamLiteral,
@@ -54,6 +55,9 @@ export const isParamLiteral = (node: unknown): node is ESQLParamLiteral =>
 
 export const isColumn = (node: unknown): node is ESQLColumn =>
   isProperNode(node) && node.type === 'column';
+
+export const isIdentifier = (node: unknown): node is ESQLIdentifier =>
+  isProperNode(node) && node.type === 'identifier';
 
 /**
  * Returns the group of a binary expression:

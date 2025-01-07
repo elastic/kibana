@@ -443,6 +443,18 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
           }
         ),
       };
+    case 'invalidJoinIndex':
+      return {
+        message: i18n.translate(
+          'kbn-esql-validation-autocomplete.esql.validation.invalidJoinIndex',
+          {
+            defaultMessage:
+              '[{identifier}] index is not a valid JOIN index.' +
+              ' Please use a "lookup" mode index JOIN commands.',
+            values: { identifier: out.identifier },
+          }
+        ),
+      };
   }
   return { message: '' };
 }
@@ -532,6 +544,11 @@ export const errors = {
   aggInAggFunction: (fn: ESQLFunction): ESQLMessage =>
     errors.byId('aggInAggFunction', fn.location, {
       nestedAgg: fn.name,
+    }),
+
+  invalidJoinIndex: (identifier: ESQLIdentifier): ESQLMessage =>
+    errors.byId('invalidJoinIndex', identifier.location, {
+      identifier: identifier.name,
     }),
 };
 

@@ -628,6 +628,24 @@ const otherDefinitions: FunctionDefinition[] = [
     ],
   },
   {
+    type: 'builtin' as const,
+    name: 'as',
+    description: i18n.translate('kbn-esql-validation-autocomplete.esql.definition.asDoc', {
+      defaultMessage: 'Rename as (AS)',
+    }),
+    supportedCommands: ['rename', 'join'],
+    supportedOptions: [],
+    signatures: [
+      {
+        params: [
+          { name: 'oldName', type: 'any' },
+          { name: 'newName', type: 'any' },
+        ],
+        returnType: 'unknown',
+      },
+    ],
+  },
+  {
     // TODO — this shouldn't be a function or an operator...
     name: 'info',
     type: 'builtin',

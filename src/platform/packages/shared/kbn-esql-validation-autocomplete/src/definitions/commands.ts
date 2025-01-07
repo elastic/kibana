@@ -38,6 +38,7 @@ import { suggest as suggestForKeep } from '../autocomplete/commands/keep';
 import { suggest as suggestForDrop } from '../autocomplete/commands/drop';
 import { suggest as suggestForStats } from '../autocomplete/commands/stats';
 import { suggest as suggestForWhere } from '../autocomplete/commands/where';
+import { suggest as suggestForJoin } from '../autocomplete/commands/join';
 
 const statsValidator = (command: ESQLCommand) => {
   const messages: ESQLMessage[] = [];
@@ -490,5 +491,54 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
       params: [],
       multipleParams: false,
     },
+  },
+  {
+    name: 'join',
+    types: [
+      {
+        name: 'left',
+        description: i18n.translate(
+          'kbn-esql-validation-autocomplete.esql.definitions.joinLeftDoc',
+          {
+            defaultMessage:
+              'Join index with another index, keep only matching documents from the right index',
+          }
+        ),
+      },
+      {
+        name: 'right',
+        description: i18n.translate(
+          'kbn-esql-validation-autocomplete.esql.definitions.joinRightDoc',
+          {
+            defaultMessage:
+              'Join index with another index, keep only matching documents from the left index',
+          }
+        ),
+      },
+      {
+        name: 'lookup',
+        description: i18n.translate(
+          'kbn-esql-validation-autocomplete.esql.definitions.joinLookupDoc',
+          {
+            defaultMessage: 'Join index with another "lookup" mode index',
+          }
+        ),
+      },
+    ],
+    description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.joinDoc', {
+      defaultMessage: 'Join table with another table.',
+    }),
+    examples: [
+      '… | <LEFT | RIGHT | LOOKUP> JOIN index ON index.field = index2.field',
+      '… | <LEFT | RIGHT | LOOKUP> JOIN index AS alias ON index.field = index2.field',
+      '… | <LEFT | RIGHT | LOOKUP> JOIN index AS alias ON index.field = index2.field, index.field2 = index2.field2',
+    ],
+    options: [],
+    modes: [],
+    signature: {
+      multipleParams: false,
+      params: [{ name: 'index', type: 'source', wildcards: true }],
+    },
+    suggest: suggestForJoin,
   },
 ];

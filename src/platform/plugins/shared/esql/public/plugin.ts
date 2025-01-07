@@ -22,8 +22,14 @@ import {
   UPDATE_ESQL_QUERY_TRIGGER,
 } from './triggers';
 import { setKibanaServices } from './kibana_services';
+import { JoinIndicesAutocompleteResult } from '../common';
 
-interface EsqlPluginStart {
+interface EsqlPluginSetupDependencies {
+  indexManagement: IndexManagementPluginSetup;
+  uiActions: UiActionsSetup;
+}
+
+interface EsqlPluginStartDependencies {
   dataViews: DataViewsPublicPluginStart;
   expressions: ExpressionsStart;
   uiActions: UiActionsStart;
@@ -32,15 +38,14 @@ interface EsqlPluginStart {
   usageCollection?: UsageCollectionStart;
 }
 
-interface EsqlPluginSetup {
-  indexManagement: IndexManagementPluginSetup;
-  uiActions: UiActionsSetup;
+export interface EsqlPluginStart {
+  getJoinIndicesAutocomplete: () => Promise<JoinIndicesAutocompleteResult>;
 }
 
-export class EsqlPlugin implements Plugin<{}, void> {
+export class EsqlPlugin implements Plugin<{}, EsqlPluginStart> {
   private indexManagement?: IndexManagementPluginSetup;
 
-  public setup(_: CoreSetup, { indexManagement, uiActions }: EsqlPluginSetup) {
+  public setup(_: CoreSetup, { indexManagement, uiActions }: EsqlPluginSetupDependencies) {
     this.indexManagement = indexManagement;
 
     uiActions.registerTrigger(updateESQLQueryTrigger);
@@ -50,12 +55,34 @@ export class EsqlPlugin implements Plugin<{}, void> {
 
   public start(
     core: CoreStart,
-    { dataViews, expressions, data, uiActions, fieldsMetadata, usageCollection }: EsqlPluginStart
-  ): void {
+    {
+      dataViews,
+      expressions,
+      data,
+      uiActions,
+      fieldsMetadata,
+      usageCollection,
+    }: EsqlPluginStartDependencies
+  ): EsqlPluginStart {
     const storage = new Storage(localStorage);
     const appendESQLAction = new UpdateESQLQueryAction(data);
+
     uiActions.addTriggerAction(UPDATE_ESQL_QUERY_TRIGGER, appendESQLAction);
+
+    const getJoinIndicesAutocomplete = async () => {
+      const result = await core.http.get<JoinIndicesAutocompleteResult>(
+        '/internal/esql/autocomplete/join/indices'
+      );
+
+      return result;
+    };
+
+    const start = {
+      getJoinIndicesAutocomplete,
+    };
+
     setKibanaServices(
+      start,
       core,
       dataViews,
       expressions,
@@ -64,6 +91,8 @@ export class EsqlPlugin implements Plugin<{}, void> {
       fieldsMetadata,
       usageCollection
     );
+
+    return start;
   }
 
   public stop() {}

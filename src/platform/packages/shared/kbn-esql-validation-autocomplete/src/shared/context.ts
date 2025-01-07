@@ -16,6 +16,7 @@ import {
   type ESQLCommandOption,
   type ESQLCommandMode,
   Walker,
+  isIdentifier,
 } from '@kbn/esql-ast';
 import { ENRICH_MODES } from '../definitions/settings';
 import { EDITOR_MARKER } from './constants';
@@ -26,7 +27,6 @@ import {
   isSettingItem,
   pipePrecedesCurrentWord,
   getFunctionDefinition,
-  isIdentifier,
 } from './helpers';
 
 function findNode(nodes: ESQLAstItem[], offset: number): ESQLSingleAstItem | undefined {

@@ -7,12 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EsqlPlugin, type EsqlPluginStart } from './plugin';
+import * as helpers from './helpers';
+import { validationJoinCommandTestSuite } from './test_suites/validation.command.join';
 
-export { ESQLLangEditor } from './create_editor';
-export type { ESQLEditorProps } from '@kbn/esql-editor';
-export type { EsqlPluginStart };
-
-export function plugin() {
-  return new EsqlPlugin();
-}
+validationJoinCommandTestSuite(helpers.setup);
