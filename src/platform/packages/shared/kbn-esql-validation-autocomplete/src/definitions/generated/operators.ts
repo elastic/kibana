@@ -1829,7 +1829,7 @@ const inDefinition: FunctionDefinition = {
         },
         {
           name: 'right',
-          type: 'boolean',
+          type: 'boolean[]',
           optional: false,
         },
       ],
@@ -1861,7 +1861,7 @@ const inDefinition: FunctionDefinition = {
         },
         {
           name: 'right',
-          type: 'cartesian_shape',
+          type: 'cartesian_shape[]',
           optional: false,
         },
       ],
@@ -1877,7 +1877,7 @@ const inDefinition: FunctionDefinition = {
         },
         {
           name: 'right',
-          type: 'double',
+          type: 'double[]',
           optional: false,
         },
       ],
@@ -1893,7 +1893,7 @@ const inDefinition: FunctionDefinition = {
         },
         {
           name: 'right',
-          type: 'geo_point',
+          type: 'geo_point[]',
           optional: false,
         },
       ],
@@ -1909,7 +1909,7 @@ const inDefinition: FunctionDefinition = {
         },
         {
           name: 'right',
-          type: 'geo_shape',
+          type: 'geo_shape[]',
           optional: false,
         },
       ],
@@ -1925,7 +1925,7 @@ const inDefinition: FunctionDefinition = {
         },
         {
           name: 'right',
-          type: 'integer',
+          type: 'integer[]',
           optional: false,
         },
       ],
@@ -1941,7 +1941,7 @@ const inDefinition: FunctionDefinition = {
         },
         {
           name: 'right',
-          type: 'ip',
+          type: 'ip[]',
           optional: false,
         },
       ],
@@ -1957,7 +1957,7 @@ const inDefinition: FunctionDefinition = {
         },
         {
           name: 'right',
-          type: 'keyword',
+          type: 'keyword[]',
           optional: false,
         },
       ],
@@ -1973,7 +1973,7 @@ const inDefinition: FunctionDefinition = {
         },
         {
           name: 'right',
-          type: 'text',
+          type: 'text[]',
           optional: false,
         },
       ],
@@ -1989,7 +1989,7 @@ const inDefinition: FunctionDefinition = {
         },
         {
           name: 'right',
-          type: 'long',
+          type: 'long[]',
           optional: false,
         },
       ],
@@ -2005,7 +2005,7 @@ const inDefinition: FunctionDefinition = {
         },
         {
           name: 'right',
-          type: 'keyword',
+          type: 'keyword[]',
           optional: false,
         },
       ],
@@ -2021,7 +2021,7 @@ const inDefinition: FunctionDefinition = {
         },
         {
           name: 'right',
-          type: 'text',
+          type: 'text[]',
           optional: false,
         },
       ],
@@ -2037,7 +2037,7 @@ const inDefinition: FunctionDefinition = {
         },
         {
           name: 'right',
-          type: 'version',
+          type: 'version[]',
           optional: false,
         },
       ],

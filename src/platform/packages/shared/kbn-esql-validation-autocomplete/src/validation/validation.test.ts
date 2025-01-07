@@ -349,14 +349,10 @@ describe('validation logic', () => {
       testErrorsAndWarnings('row var = "a" in ("a", "b", "c")', []);
       testErrorsAndWarnings('row var = "a" not in ("a", "b", "c")', []);
       testErrorsAndWarnings('row var = 1 in ("a", "b", "c")', [
-        'Argument of [in] must be [integer], found value ["a"] type [keyword]',
-        'Argument of [in] must be [integer], found value ["b"] type [keyword]',
-        'Argument of [in] must be [integer], found value ["c"] type [keyword]',
+        'Argument of [in] must be [integer[]], found value [("a", "b", "c")] type [(keyword, keyword, keyword)]',
       ]);
       testErrorsAndWarnings('row var = 5 in ("a", "b", "c")', [
-        'Argument of [in] must be [integer], found value ["a"] type [keyword]',
-        'Argument of [in] must be [integer], found value ["b"] type [keyword]',
-        'Argument of [in] must be [integer], found value ["c"] type [keyword]',
+        'Argument of [in] must be [integer[]], found value [("a", "b", "c")] type [(keyword, keyword, keyword)]',
       ]);
       testErrorsAndWarnings('row var = 5 not in ("a", "b", "c")', [
         // 'Argument of [not_in] must be [number[]], found value [("a", "b", "c")] type [(string, string, string)]',
@@ -1187,9 +1183,7 @@ describe('validation logic', () => {
       testErrorsAndWarnings('from a_index | eval textField not in ("a", "b", "c")', []);
       testErrorsAndWarnings('from a_index | eval textField not in ("a", "b", "c", textField)', []);
       testErrorsAndWarnings('from a_index | eval 1 in ("a", "b", "c")', [
-        'Argument of [in] must be [integer], found value ["a"] type [keyword]',
-        'Argument of [in] must be [integer], found value ["b"] type [keyword]',
-        'Argument of [in] must be [integer], found value ["c"] type [keyword]',
+        'Argument of [in] must be [integer[]], found value [("a", "b", "c")] type [(keyword, keyword, keyword)]',
       ]);
       testErrorsAndWarnings('from a_index | eval doubleField in ("a", "b", "c")', [
         // 'Argument of [in] must be [number[]], found value [("a", "b", "c")] type [(string, string, string)]',

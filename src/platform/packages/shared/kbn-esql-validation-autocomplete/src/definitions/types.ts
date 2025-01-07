@@ -92,6 +92,12 @@ const arrayTypes = [
   'any[]',
   'date[]',
   'date_period[]',
+  'ip[]',
+  'cartesian_point[]',
+  'cartesian_shape[]',
+  'geo_point[]',
+  'geo_shape[]',
+  'version[]',
 ] as const;
 
 export type ArrayType = (typeof arrayTypes)[number];
