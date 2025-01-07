@@ -22,13 +22,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const es = getService('es');
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantAPIClient');
 
-  describe('/internal/observability_ai_assistant/kb/setup', function () {
-    before(async () => {
-      await deleteKnowledgeBaseModel(ml).catch(() => {});
-      await deleteInferenceEndpoint({ es }).catch(() => {});
-    });
-
-    it('returns empty object when successful', async () => {
+  describe('/internal/observability_ai_assistant/kb/setup', () => {
+    it('returns model info when successful', async () => {
       await createKnowledgeBaseModel(ml);
       const res = await observabilityAIAssistantAPIClient
         .slsAdmin({
@@ -48,7 +43,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       await deleteInferenceEndpoint({ es });
     });
 
-    it('returns bad request if model cannot be installed', async () => {
+    it('returns error message if model is not deployed', async () => {
       const res = await observabilityAIAssistantAPIClient
         .slsAdmin({
           endpoint: `POST ${KNOWLEDGE_BASE_SETUP_API_URL}`,
@@ -64,6 +59,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       expect(res.body.message).to.include.string(
         'No known trained model with model_id [pt_tiny_elser]'
       );
+
+      // @ts-expect-error
+      expect(res.body.statusCode).to.be(500);
     });
 
     describe('security roles and access privileges', () => {

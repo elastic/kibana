@@ -12,9 +12,7 @@ import {
   TINY_ELSER,
   deleteKnowledgeBaseModel,
 } from '@kbn/test-suites-xpack/observability_ai_assistant_api_integration/tests/knowledge_base/helpers';
-import { AI_ASSISTANT_KB_INFERENCE_ID } from '@kbn/observability-ai-assistant-plugin/server/service/inference_endpoint';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
-import { KNOWLEDGE_BASE_SETUP_API_URL } from './knowledge_base_setup.spec';
 
 const KNOWLEDGE_BASE_STATUS_API_URL = '/internal/observability_ai_assistant/kb/status';
 
@@ -23,15 +21,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const es = getService('es');
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantAPIClient');
 
-  describe('/internal/observability_ai_assistant/kb/status', function () {
-    // Fails on MKI: https://github.com/elastic/kibana/issues/205677
-    this.tags(['failsOnMKI']);
-
-    before(async () => {
+  describe('/internal/observability_ai_assistant/kb/status', () => {
+    beforeEach(async () => {
       await createKnowledgeBaseModel(ml);
       await observabilityAIAssistantAPIClient
         .slsAdmin({
-          endpoint: `POST ${KNOWLEDGE_BASE_SETUP_API_URL}`,
+          endpoint: 'POST /internal/observability_ai_assistant/kb/setup',
           params: {
             query: {
               model_id: TINY_ELSER.id,
@@ -41,25 +36,23 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         .expect(200);
     });
 
-    after(async () => {
-      await deleteKnowledgeBaseModel(ml);
-      await deleteInferenceEndpoint({ es, name: AI_ASSISTANT_KB_INFERENCE_ID }).catch((err) => {});
+    afterEach(async () => {
+      await deleteKnowledgeBaseModel(ml).catch((e) => {});
+      await deleteInferenceEndpoint({ es }).catch((e) => {});
     });
 
     it('returns correct status after knowledge base is setup', async () => {
       const res = await observabilityAIAssistantAPIClient
-        .slsEditor({
-          endpoint: `GET ${KNOWLEDGE_BASE_STATUS_API_URL}`,
-        })
+        .slsEditor({ endpoint: `GET ${KNOWLEDGE_BASE_STATUS_API_URL}` })
         .expect(200);
 
-      expect(res.body.enabled).to.be(true);
       expect(res.body.ready).to.be(true);
+      expect(res.body.enabled).to.be(true);
       expect(res.body.endpoint?.service_settings?.model_id).to.eql(TINY_ELSER.id);
     });
 
-    it('returns correct status after elser is stopped', async () => {
-      await deleteInferenceEndpoint({ es, name: AI_ASSISTANT_KB_INFERENCE_ID });
+    it('returns correct status after model is deleted', async () => {
+      await deleteKnowledgeBaseModel(ml);
 
       const res = await observabilityAIAssistantAPIClient
         .slsEditor({
@@ -67,8 +60,27 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         })
         .expect(200);
 
-      expect(res.body.enabled).to.be(true);
       expect(res.body.ready).to.be(false);
+      expect(res.body.enabled).to.be(true);
+      expect(res.body.errorMessage).to.include.string(
+        'No known trained model with model_id [pt_tiny_elser]'
+      );
+    });
+
+    it('returns correct status after inference endpoint is deleted', async () => {
+      await deleteInferenceEndpoint({ es });
+
+      const res = await observabilityAIAssistantAPIClient
+        .slsEditor({
+          endpoint: `GET ${KNOWLEDGE_BASE_STATUS_API_URL}`,
+        })
+        .expect(200);
+
+      expect(res.body.ready).to.be(false);
+      expect(res.body.enabled).to.be(true);
+      expect(res.body.errorMessage).to.include.string(
+        'Inference endpoint not found [obs_ai_assistant_kb_inference]'
+      );
     });
 
     describe('security roles and access privileges', () => {

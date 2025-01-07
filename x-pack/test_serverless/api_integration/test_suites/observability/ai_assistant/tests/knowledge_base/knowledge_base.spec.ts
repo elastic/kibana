@@ -21,10 +21,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const es = getService('es');
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantAPIClient');
 
-  describe('Knowledge base', function () {
-    // Fails on MKI: https://github.com/elastic/kibana/issues/205581
-    this.tags(['failsOnMKI']);
-
+  describe('Knowledge base', () => {
     before(async () => {
       await createKnowledgeBaseModel(ml);
 
