@@ -23,7 +23,7 @@ import {
   ALERT_UUID,
 } from '@kbn/rule-data-utils';
 import { isDefined } from '@kbn/ml-is-defined';
-import { getSeverityColor } from '@kbn/ml-anomaly-utils';
+import { getSeverityColor } from '@kbn/ml-anomaly-utils/get_severity_color';
 import {
   ALERT_ANOMALY_DETECTION_JOB_ID,
   ALERT_ANOMALY_SCORE,
@@ -31,7 +31,7 @@ import {
   ML_ALERT_TYPES,
   ML_RULE_TYPE_IDS,
   ML_VALID_CONSUMERS,
-} from '../../../../common/constants/alerts';
+} from '@kbn/ml-common-constants/alerts';
 import { StateService } from '../../services/state_service';
 import type { AnomalyTimelineStateService } from '../anomaly_timeline_state_service';
 

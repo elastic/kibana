@@ -45,11 +45,9 @@ import { i18n } from '@kbn/i18n';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import { useActiveCursor } from '@kbn/charts-plugin/public';
 import { css } from '@emotion/react';
-import {
-  getFormattedSeverityScore,
-  ML_ANOMALY_THRESHOLD,
-  ML_SEVERITY_COLORS,
-} from '@kbn/ml-anomaly-utils';
+import { ML_SEVERITY_COLORS } from '@kbn/ml-anomaly-utils/severity_colors';
+import { ML_ANOMALY_THRESHOLD } from '@kbn/ml-anomaly-utils/anomaly_threshold';
+import { getFormattedSeverityScore } from '@kbn/ml-anomaly-utils/get_formatted_severity_score';
 import { formatHumanReadableDateTime } from '@kbn/ml-date-utils';
 import { useIsDarkTheme } from '@kbn/ml-kibana-theme';
 import type { TimeBuckets as TimeBucketsClass } from '@kbn/ml-time-buckets';
@@ -66,7 +64,7 @@ import { FormattedTooltip } from '../components/chart_tooltip/chart_tooltip';
 import './_explorer.scss';
 import { EMPTY_FIELD_VALUE_LABEL } from '../timeseriesexplorer/components/entity_control/entity_control';
 import { SWIM_LANE_LABEL_WIDTH, Y_AXIS_LABEL_PADDING } from './constants';
-import { useMlKibana } from '../contexts/kibana';
+import { useMlKibana } from '@kbn/ml-kibana-context';
 
 declare global {
   interface Window {

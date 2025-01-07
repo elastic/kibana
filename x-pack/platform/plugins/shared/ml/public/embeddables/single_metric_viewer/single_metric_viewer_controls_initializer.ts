@@ -9,7 +9,7 @@ import type { StateComparators } from '@kbn/presentation-publishing';
 import type { TitlesApi } from '@kbn/presentation-publishing/interfaces/titles/titles_api';
 import fastIsEqual from 'fast-deep-equal';
 import { BehaviorSubject } from 'rxjs';
-import type { JobId } from '../../../common/types/anomaly_detection_jobs';
+import type { JobId } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
 import type {
   SingleMetricViewerEmbeddableState,
   SingleMetricViewerEmbeddableUserInput,

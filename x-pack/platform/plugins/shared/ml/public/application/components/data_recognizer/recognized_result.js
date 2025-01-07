@@ -10,7 +10,7 @@ import PropTypes from 'prop-types';
 
 import { EuiIcon, EuiFlexItem } from '@elastic/eui';
 import { LinkCard } from '../link_card';
-import { useMlKibana } from '../../contexts/kibana';
+import { useMlKibana } from '@kbn/ml-kibana-context';
 
 export const RecognizedResult = ({ config, indexPattern, savedSearch }) => {
   const {

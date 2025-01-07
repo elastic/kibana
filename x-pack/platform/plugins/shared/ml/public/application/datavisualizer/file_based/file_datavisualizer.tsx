@@ -16,10 +16,10 @@ import type {
 } from '@kbn/data-visualizer-plugin/public';
 import { useTimefilter } from '@kbn/ml-date-picker';
 import type { ResultLinks } from '@kbn/data-visualizer-plugin/common/app';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 import { HelpMenu } from '../../components/help_menu';
 import { useMlApi, useMlKibana, useMlLocator } from '../../contexts/kibana';
 
-import { ML_PAGES } from '../../../../common/constants/locator';
 import { isFullLicense } from '../../license';
 import { mlNodesAvailable, getMlNodeCount } from '../../ml_nodes_check/check_ml_nodes';
 import { checkPermission } from '../../capabilities/check_capabilities';

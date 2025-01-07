@@ -21,9 +21,9 @@ import {
 import { useEuiTheme } from '@elastic/eui';
 import { asyncForEach } from '@kbn/std';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
-import type { Module } from '../../../../common/types/modules';
+import type { Module } from '@kbn/ml-common-types/modules';
 import { useDashboardService } from '../../services/dashboard_service';
-import { useMlKibana } from '../../contexts/kibana';
+import { useMlKibana } from '@kbn/ml-kibana-context';
 import { LABELS, type LabelId } from './overview_tab_content';
 import type { KibanaAssetType } from './flyout';
 

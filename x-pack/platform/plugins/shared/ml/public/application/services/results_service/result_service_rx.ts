@@ -17,17 +17,18 @@ import { map } from 'rxjs';
 import { each, get } from 'lodash';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import type { ErrorType } from '@kbn/ml-error-utils';
-import {
-  aggregationTypeTransform,
-  type InfluencersFilterQuery,
-  type MlEntityField,
-  type MlRecordForInfluencer,
-  ES_AGGREGATION,
+import type {
+  InfluencersFilterQuery,
+  MlEntityField,
+  MlRecordForInfluencer,
 } from '@kbn/ml-anomaly-utils';
+import { aggregationTypeTransform } from '@kbn/ml-anomaly-utils/anomaly_utils';
+import { ES_AGGREGATION } from '@kbn/ml-anomaly-utils/es_aggregation';
 import { isRuntimeMappings } from '@kbn/ml-runtime-field-utils';
-import type { Dictionary } from '../../../../common/types/common';
+import type { Dictionary } from '@kbn/ml-common-types/common';
+import type { JobId } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
+import type { Datafeed } from '@kbn/ml-common-types/anomaly_detection_jobs/datafeed';
 import { ML_MEDIAN_PERCENTS } from '../../../../common/util/job_utils';
-import type { Datafeed, JobId } from '../../../../common/types/anomaly_detection_jobs';
 import { findAggField } from '../../../../common/util/validation_utils';
 import { getDatafeedAggregations } from '../../../../common/util/datafeed_utils';
 import type { MlApi } from '../ml_api_service';

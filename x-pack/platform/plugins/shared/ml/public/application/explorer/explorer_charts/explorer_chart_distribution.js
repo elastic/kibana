@@ -19,11 +19,10 @@ import moment from 'moment';
 import { EuiPopover } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import {
-  getFormattedSeverityScore,
-  getSeverityColor,
-  getSeverityWithLow,
-} from '@kbn/ml-anomaly-utils';
+
+import { getFormattedSeverityScore } from '@kbn/ml-anomaly-utils/get_formatted_severity_score';
+import { getSeverityColor } from '@kbn/ml-anomaly-utils/get_severity_color';
+import { getSeverityWithLow } from '@kbn/ml-anomaly-utils/anomaly_utils';
 import { formatHumanReadableDateTime } from '@kbn/ml-date-utils';
 import { context } from '@kbn/kibana-react-plugin/public';
 
@@ -46,7 +45,7 @@ import { CHART_TYPE } from '../explorer_constants';
 import { CHART_HEIGHT, TRANSPARENT_BACKGROUND } from './constants';
 import { filter } from 'rxjs';
 import { drawCursor } from './utils/draw_anomaly_explorer_charts_cursor';
-import { SCHEDULE_EVENT_MARKER_ENTITY } from '../../../../common/constants/charts';
+import { SCHEDULE_EVENT_MARKER_ENTITY } from '@kbn/ml-common-constants/charts';
 import { cssMlExplorerChart } from './explorer_chart_styles';
 
 const popoverMenuOffset = 0;

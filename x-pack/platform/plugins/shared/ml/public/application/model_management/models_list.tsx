@@ -39,26 +39,24 @@ import { cloneDeep, isEmpty } from 'lodash';
 import type { FC } from 'react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import useMountedState from 'react-use/lib/useMountedState';
-import { ML_PAGES } from '../../../common/constants/locator';
-import { ML_ELSER_CALLOUT_DISMISSED } from '../../../common/types/storage';
-import type {
-  DFAModelItem,
-  NLPModelItem,
-  TrainedModelItem,
-  TrainedModelUIItem,
-} from '../../../common/types/trained_models';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
+import { ML_ELSER_CALLOUT_DISMISSED } from '@kbn/ml-common-types/storage';
 import {
+  type DFAModelItem,
+  type NLPModelItem,
+  type TrainedModelItem,
+  type TrainedModelUIItem,
   isBaseNLPModelItem,
   isBuiltInModel,
   isModelDownloadItem,
   isNLPModelItem,
-} from '../../../common/types/trained_models';
+} from '@kbn/ml-common-types/trained_models';
 import { AddInferencePipelineFlyout } from '../components/ml_inference';
 import { SavedObjectsWarning } from '../components/saved_objects_warning';
 import type { ModelsBarStats } from '../components/stats_bar';
 import { StatsBar } from '../components/stats_bar';
 import { TechnicalPreviewBadge } from '../components/technical_preview_badge';
-import { useMlKibana } from '../contexts/kibana';
+import { useMlKibana } from '@kbn/ml-kibana-context';
 import { useEnabledFeatures } from '../contexts/ml';
 import { useTableSettings } from '../data_frame_analytics/pages/analytics_management/components/analytics_list/use_table_settings';
 import { useRefresh } from '../routing/use_refresh';

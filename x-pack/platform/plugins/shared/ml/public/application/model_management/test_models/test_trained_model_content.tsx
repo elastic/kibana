@@ -8,16 +8,19 @@
 import type { FC } from 'react';
 import React, { useState, useMemo } from 'react';
 
-import { SUPPORTED_PYTORCH_TASKS } from '@kbn/ml-trained-models-utils';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFormRow, EuiSelect, EuiSpacer, EuiTab, EuiTabs, useEuiPaddingSize } from '@elastic/eui';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { TrainedModelItem } from '../../../../common/types/trained_models';
-import { isNLPModelItem } from '../../../../common/types/trained_models';
+
+import { SUPPORTED_PYTORCH_TASKS } from '@kbn/ml-trained-models-utils';
+import { FormattedMessage } from '@kbn/i18n-react';
+import type { TrainedModelItem } from '@kbn/ml-common-types/trained_models';
+import { isNLPModelItem } from '@kbn/ml-common-types/trained_models';
+
+import { type InferecePipelineCreationState } from '../create_pipeline_for_model/state';
+
 import { SelectedModel } from './selected_model';
 import { INPUT_TYPE } from './models/inference_base';
 import { useTestTrainedModelsContext } from './test_trained_models_context';
-import { type InferecePipelineCreationState } from '../create_pipeline_for_model/state';
 
 interface ContentProps {
   model: TrainedModelItem;

@@ -8,9 +8,9 @@
 import type { FC } from 'react';
 import React, { useState, useEffect, useMemo } from 'react';
 import useMountedState from 'react-use/lib/useMountedState';
-import type { MlPages } from '../../../locator';
-import { ML_PAGES } from '../../../locator';
-import { useMlKibana } from '../../contexts/kibana';
+import type { MlPages } from '@kbn/ml-common-types/locator_ml_pages';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
+import { useMlKibana } from '@kbn/ml-kibana-context';
 import { useEnabledFeatures } from '../../contexts/ml';
 
 import { useJobsApiService } from '../../services/ml_api_service/jobs';
