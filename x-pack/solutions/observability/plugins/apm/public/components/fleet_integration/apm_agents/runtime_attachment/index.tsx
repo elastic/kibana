@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import { htmlIdGenerator, euiDragDropReorder, DropResult } from '@elastic/eui';
-import React, { useState, useCallback, ReactNode, useEffect } from 'react';
+import type { DropResult } from '@elastic/eui';
+import { htmlIdGenerator, euiDragDropReorder } from '@elastic/eui';
+import type { ReactNode } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { RuntimeAttachment as RuntimeAttachmentStateless } from './runtime_attachment';
 
 export const STAGED_DISCOVERY_RULE_ID = 'STAGED_DISCOVERY_RULE_ID';

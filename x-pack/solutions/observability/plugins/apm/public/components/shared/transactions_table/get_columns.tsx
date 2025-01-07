@@ -15,27 +15,27 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { TypeOf } from '@kbn/typed-react-router-config';
-import { ValuesType } from 'utility-types';
+import type { TypeOf } from '@kbn/typed-react-router-config';
+import type { ValuesType } from 'utility-types';
 import { ALERT_STATUS_ACTIVE } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
 import {
   asMillisecondDuration,
   asPercent,
   asTransactionRate,
 } from '../../../../common/utils/formatters';
-import { APIReturnType } from '../../../services/rest/create_call_apm_api';
+import type { APIReturnType } from '../../../services/rest/create_call_apm_api';
 import { ChartType, getTimeSeriesColor } from '../charts/helper/get_timeseries_color';
 import { ImpactBar } from '../impact_bar';
 import { TransactionDetailLink } from '../links/apm/transaction_detail_link';
 import { ListMetric } from '../list_metric';
 import { isTimeComparison } from '../time_comparison/get_comparison_options';
 import { getLatencyColumnLabel } from './get_latency_column_label';
-import { ApmRoutes } from '../../routing/apm_route_config';
+import type { ApmRoutes } from '../../routing/apm_route_config';
 import { unit } from '../../../utils/style';
-import { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
+import type { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
 import { TRANSACTION_NAME, TRANSACTION_TYPE } from '../../../../common/es_fields/apm';
 import { fieldValuePairToKql } from '../../../../common/utils/field_value_pair_to_kql';
-import { ITableColumn } from '../managed_table';
+import type { ITableColumn } from '../managed_table';
 
 type TransactionGroupMainStatistics =
   APIReturnType<'GET /internal/apm/services/{serviceName}/transactions/groups/main_statistics'>;

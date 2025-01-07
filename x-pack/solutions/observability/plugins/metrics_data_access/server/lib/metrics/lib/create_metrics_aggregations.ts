@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { MetricsUIAggregation } from '../../../../common/inventory_models/types';
-import { MetricsAPIRequest } from '../../../../common/http_api/metrics_api';
+import type { MetricsUIAggregation } from '../../../../common/inventory_models/types';
+import type { MetricsAPIRequest } from '../../../../common/http_api/metrics_api';
 
 export const createMetricsAggregations = (options: MetricsAPIRequest): MetricsUIAggregation => {
   const { metrics } = options;
