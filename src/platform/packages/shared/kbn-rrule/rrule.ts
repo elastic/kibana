@@ -71,7 +71,7 @@ export class RRule {
     while (
       (!count && !until) ||
       (count && yieldedRecurrenceCount < count) ||
-      (until && current.getTime() < new Date(until).getTime())
+      (until && current.getTime() < until.getTime())
     ) {
       iters++;
       if (iters > TIMEOUT_LIMIT) {

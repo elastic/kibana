@@ -16,6 +16,7 @@ export function sanitizeOptions(opts: Options) {
   if (!options.dtstart) {
     throw new Error('Cannot create RRule: dtstart is required');
   }
+
   if (!options.tzid) {
     throw new Error('Cannot create RRule: tzid is required');
   }
@@ -23,12 +24,17 @@ export function sanitizeOptions(opts: Options) {
   if (isNaN(options.dtstart.getTime())) {
     throw new Error('Cannot create RRule: dtstart is an invalid date');
   }
+
   if (options.until && isNaN(options.until.getTime())) {
     throw new Error('Cannot create RRule: until is an invalid date');
   }
 
-  if (typeof options.interval === 'number' && options.interval < 1) {
-    throw new Error('Cannot create RRule: interval must be greater than 0');
+  if (typeof options.interval !== 'number') {
+    throw new Error('Cannot create RRule: interval must be a number');
+  } else {
+    if (options.interval < 1) {
+      throw new Error('Cannot create RRule: interval must be greater than 0');
+    }
   }
 
   // Omit invalid options
