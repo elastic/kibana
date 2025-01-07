@@ -112,6 +112,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
                 title: `Advanced Settings [${version}]`,
                 canViewInApp: false,
               },
+              {
+                title: 'ml-trained-model [id=lang_ident_model_1]',
+                canViewInApp: false,
+              },
             ].sort((a, b) => a.title.localeCompare(b.title))
           );
         });
@@ -238,6 +242,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
               },
               {
                 title: `Advanced Settings [${version}]`,
+                canViewInApp: false,
+              },
+              {
+                title: 'ml-trained-model [id=lang_ident_model_1]',
                 canViewInApp: false,
               },
             ].sort((a, b) => a.title.localeCompare(b.title))
