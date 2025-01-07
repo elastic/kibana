@@ -34,7 +34,15 @@ export const LogCategorizationDiscoverWrapper: FC<LogCategorizationEmbeddableWra
   const I18nContext = appContextValue.i18n.Context;
 
   const datePickerDeps = {
-    ...pick(appContextValue, ['data', 'http', 'notifications', 'theme', 'uiSettings', 'i18n']),
+    ...pick(appContextValue, [
+      'data',
+      'http',
+      'notifications',
+      'theme',
+      'uiSettings',
+      'userProfile',
+      'i18n',
+    ]),
     uiSettingsKeys: UI_SETTINGS,
   };
 
