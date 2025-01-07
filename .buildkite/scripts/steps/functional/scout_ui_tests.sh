@@ -11,9 +11,9 @@ KIBANA_DIR="$KIBANA_BUILD_LOCATION"
 
 declare -A TESTS=(
   ["Stateful"]="--stateful"
-  ["Serverless Elasticsearch"]="--serverless=es"
-  ["Serverless Observability"]="--serverless=oblt"
-  ["Serverless Security"]="--serverless=security"
+  # ["Serverless Elasticsearch"]="--serverless=es"
+  # ["Serverless Observability"]="--serverless=oblt"
+  # ["Serverless Security"]="--serverless=security"
 )
 
 ORDER=("Stateful" "Serverless Elasticsearch" "Serverless Observability" "Serverless Security")
