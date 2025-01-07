@@ -13403,6 +13403,68 @@
       },
       {
         "parentPluginId": "data",
+        "id": "def-common.getEsPreference",
+        "type": "Function",
+        "tags": [],
+        "label": "getEsPreference",
+        "description": [],
+        "signature": [
+          "(getConfigFn: ",
+          {
+            "pluginId": "@kbn/data-service",
+            "scope": "common",
+            "docId": "kibKbnDataServicePluginApi",
+            "section": "def-common.GetConfigFn",
+            "text": "GetConfigFn"
+          },
+          ", sessionId: string) => any"
+        ],
+        "path": "src/plugins/data/common/search/search_source/fetch/get_search_params.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "data",
+            "id": "def-common.getEsPreference.$1",
+            "type": "Function",
+            "tags": [],
+            "label": "getConfigFn",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/data-service",
+                "scope": "common",
+                "docId": "kibKbnDataServicePluginApi",
+                "section": "def-common.GetConfigFn",
+                "text": "GetConfigFn"
+              }
+            ],
+            "path": "src/plugins/data/common/search/search_source/fetch/get_search_params.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.getEsPreference.$2",
+            "type": "string",
+            "tags": [],
+            "label": "sessionId",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/plugins/data/common/search/search_source/fetch/get_search_params.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
         "id": "def-common.getEsqlFn",
         "type": "Function",
         "tags": [],
@@ -14165,53 +14227,6 @@
       },
       {
         "parentPluginId": "data",
-        "id": "def-common.getPreference",
-        "type": "Function",
-        "tags": [],
-        "label": "getPreference",
-        "description": [],
-        "signature": [
-          "(getConfig: ",
-          {
-            "pluginId": "@kbn/data-service",
-            "scope": "common",
-            "docId": "kibKbnDataServicePluginApi",
-            "section": "def-common.GetConfigFn",
-            "text": "GetConfigFn"
-          },
-          ") => any"
-        ],
-        "path": "src/plugins/data/common/search/search_source/fetch/get_search_params.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "data",
-            "id": "def-common.getPreference.$1",
-            "type": "Function",
-            "tags": [],
-            "label": "getConfig",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/data-service",
-                "scope": "common",
-                "docId": "kibKbnDataServicePluginApi",
-                "section": "def-common.GetConfigFn",
-                "text": "GetConfigFn"
-              }
-            ],
-            "path": "src/plugins/data/common/search/search_source/fetch/get_search_params.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "data",
         "id": "def-common.getRangeBucketAgg",
         "type": "Function",
         "tags": [],
@@ -14448,53 +14463,6 @@
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "data",
-        "id": "def-common.getSearchParams",
-        "type": "Function",
-        "tags": [],
-        "label": "getSearchParams",
-        "description": [],
-        "signature": [
-          "(getConfig: ",
-          {
-            "pluginId": "@kbn/data-service",
-            "scope": "common",
-            "docId": "kibKbnDataServicePluginApi",
-            "section": "def-common.GetConfigFn",
-            "text": "GetConfigFn"
-          },
-          ") => { preference: any; }"
-        ],
-        "path": "src/plugins/data/common/search/search_source/fetch/get_search_params.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "data",
-            "id": "def-common.getSearchParams.$1",
-            "type": "Function",
-            "tags": [],
-            "label": "getConfig",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/data-service",
-                "scope": "common",
-                "docId": "kibKbnDataServicePluginApi",
-                "section": "def-common.GetConfigFn",
-                "text": "GetConfigFn"
-              }
-            ],
-            "path": "src/plugins/data/common/search/search_source/fetch/get_search_params.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
         "returnComment": [],
         "initialIsOpen": false
       },

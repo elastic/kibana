@@ -11,7 +11,7 @@
         "label": "InferenceServiceFormFields",
         "description": [],
         "signature": [
-          "({ providers }: InferenceServicesProps) => React.JSX.Element"
+          "({ http, toasts, isEdit, }: InferenceServicesProps) => React.JSX.Element | null"
         ],
         "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/inference_service_form_fields.tsx",
         "deprecated": false,
@@ -22,12 +22,82 @@
             "id": "def-public.InferenceServiceFormFields.$1",
             "type": "Object",
             "tags": [],
-            "label": "{ providers }",
+            "label": "{\n  http,\n  toasts,\n  isEdit,\n}",
             "description": [],
             "signature": [
               "InferenceServicesProps"
             ],
             "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/inference_service_form_fields.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/inference-endpoint-ui-common",
+        "id": "def-public.useProviders",
+        "type": "Function",
+        "tags": [],
+        "label": "useProviders",
+        "description": [],
+        "signature": [
+          "(http: ",
+          "HttpSetup",
+          ", toasts: ",
+          "IToasts",
+          ") => ",
+          "UseQueryResult",
+          "<",
+          {
+            "pluginId": "@kbn/inference-endpoint-ui-common",
+            "scope": "public",
+            "docId": "kibKbnInferenceEndpointUiCommonPluginApi",
+            "section": "def-public.InferenceProvider",
+            "text": "InferenceProvider"
+          },
+          "[], { body: ",
+          {
+            "pluginId": "kibanaUtils",
+            "scope": "common",
+            "docId": "kibKibanaUtilsPluginApi",
+            "section": "def-common.KibanaServerError",
+            "text": "KibanaServerError"
+          },
+          "<unknown>; }>"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/hooks/use_providers.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/inference-endpoint-ui-common",
+            "id": "def-public.useProviders.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "http",
+            "description": [],
+            "signature": [
+              "HttpSetup"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/hooks/use_providers.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/inference-endpoint-ui-common",
+            "id": "def-public.useProviders.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "toasts",
+            "description": [],
+            "signature": [
+              "IToasts"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/hooks/use_providers.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
