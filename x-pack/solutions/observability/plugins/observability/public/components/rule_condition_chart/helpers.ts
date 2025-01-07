@@ -18,7 +18,7 @@ export const getLensOperationFromRuleMetric = (metric: GenericMetric): LensOpera
   const { aggType, field, filter = '' } = metric;
   let operation: string = aggType;
   const operationArgs: string[] = [];
-  const escapedFilter = filter.replace(/'/g, "\\'");
+  const escapedFilter = filter.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
 
   if (aggType === Aggregators.RATE) {
     return {

@@ -18,7 +18,7 @@ import {
   customThresholdAIAssistantLogCount,
 } from '../../alert_templates/templates';
 
-describe('alert function', () => {
+describe('Alert function', () => {
   const ruleIds: any[] = [];
 
   before(async () => {
@@ -31,12 +31,19 @@ describe('alert function', () => {
     ruleIds.push(responseApmRule.data.id);
 
     logger.info('Creating dataview');
-
-    await kibanaClient.callKibana(
-      'post',
-      { pathname: '/api/content_management/rpc/create' },
-      customThresholdAIAssistantLogCount.dataViewParams
-    );
+    try {
+      await kibanaClient.callKibana(
+        'post',
+        { pathname: '/api/content_management/rpc/create' },
+        customThresholdAIAssistantLogCount.dataViewParams
+      );
+    } catch (error) {
+      if (error?.status === 409) {
+        logger.info('Data view already exists, skipping creation');
+      } else {
+        throw error;
+      }
+    }
 
     logger.info('Creating logs rule');
     const responseLogsRule = await kibanaClient.callKibana<RuleResponse>(
@@ -47,13 +54,11 @@ describe('alert function', () => {
     ruleIds.push(responseLogsRule.data.id);
 
     logger.debug('Cleaning APM indices');
-
     await synthtraceEsClients.apmSynthtraceEsClient.clean();
 
     const myServiceInstance = apm.service('my-service', 'production', 'go').instance('my-instance');
 
     logger.debug('Indexing synthtrace data');
-
     await synthtraceEsClients.apmSynthtraceEsClient.index(
       timerange(moment().subtract(15, 'minutes'), moment())
         .interval('1m')
@@ -78,7 +83,6 @@ describe('alert function', () => {
     );
 
     logger.debug('Triggering a rule run');
-
     await Promise.all(
       ruleIds.map((ruleId) =>
         kibanaClient.callKibana<void>('post', {
@@ -95,9 +99,9 @@ describe('alert function', () => {
   });
 
   it('summary of active alerts', async () => {
-    const conversation = await chatClient.complete(
-      'Are there any active alerts over the last 4 hours?'
-    );
+    const conversation = await chatClient.complete({
+      messages: 'Are there any active alerts over the last 4 hours?',
+    });
 
     const result = await chatClient.evaluate(conversation, [
       'Correctly uses the `alerts` function to fetch data for the current time range',
@@ -109,17 +113,17 @@ describe('alert function', () => {
   });
 
   it('filtered alerts', async () => {
-    let conversation = await chatClient.complete(
-      'Do I have any active threshold alerts related to the AI Assistant?'
-    );
+    let conversation = await chatClient.complete({
+      messages: 'Do I have any active threshold alerts related to the AI Assistant?',
+    });
 
-    conversation = await chatClient.complete(
-      conversation.conversationId!,
-      conversation.messages.concat({
+    conversation = await chatClient.complete({
+      conversationId: conversation.conversationId!,
+      messages: conversation.messages.concat({
         content: 'Do I have any alerts on the service my-service?',
         role: MessageRole.User,
-      })
-    );
+      }),
+    });
 
     const result = await chatClient.evaluate(conversation, [
       'Uses the get_alerts_dataset_info function',
@@ -143,7 +147,7 @@ describe('alert function', () => {
       'post',
       { pathname: `/api/content_management/rpc/delete` },
       {
-        contentTypeId: 'index-pattern',
+        contentTypeId: customThresholdAIAssistantLogCount.dataViewParams.contentTypeId,
         id: customThresholdAIAssistantLogCount.dataViewParams.options.id,
         options: { force: true },
         version: 1,

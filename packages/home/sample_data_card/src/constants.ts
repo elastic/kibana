@@ -9,15 +9,15 @@
 
 /**
  * DataSetStatusType for an installed data set.
- * @see src/plugins/home/server/services/sample_data/lib/sample_dataset_registry_types
+ * @see src/platform/plugins/shared/home/server/services/sample_data/lib/sample_dataset_registry_types
  */
 export const INSTALLED_STATUS = 'installed';
 
 /**
  * DataSetStatusType for a data set that is not installed yet.
- * @see src/plugins/home/server/services/sample_data/lib/sample_dataset_registry_types
+ * @see src/platform/plugins/shared/home/server/services/sample_data/lib/sample_dataset_registry_types
  */
 export const UNINSTALLED_STATUS = 'not_installed';
 
-// Corresponds to src/plugins/home/server/services/sample_data/routes
+// Corresponds to src/platform/plugins/shared/home/server/services/sample_data/routes
 export const SAMPLE_DATA_API = '/api/sample_data';
