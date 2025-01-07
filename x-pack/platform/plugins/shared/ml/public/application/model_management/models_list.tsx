@@ -56,7 +56,7 @@ import { SavedObjectsWarning } from '../components/saved_objects_warning';
 import type { ModelsBarStats } from '../components/stats_bar';
 import { StatsBar } from '../components/stats_bar';
 import { TechnicalPreviewBadge } from '../components/technical_preview_badge';
-import { useMlKibana } from '../contexts/kibana';
+import { useMlKibana } from '@kbn/ml-kibana-context';
 import { useEnabledFeatures } from '../contexts/ml';
 import { useTableSettings } from '../data_frame_analytics/pages/analytics_management/components/analytics_list/use_table_settings';
 import { useRefresh } from '../routing/use_refresh';

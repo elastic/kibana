@@ -9,7 +9,7 @@ import React, { useCallback, useEffect, useRef } from 'react';
 import moment from 'moment';
 import type { KibanaReactOverlays } from '@kbn/kibana-react-plugin/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { useMlKibana } from '../kibana';
+import { useMlKibana } from '@kbn/ml-kibana-context';
 import {
   JobSelectorFlyoutContent,
   type JobSelectionResult,

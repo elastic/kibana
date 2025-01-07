@@ -46,12 +46,6 @@ export interface AppProps {
 
 const localStorage = new Storage(window.localStorage);
 
-export interface MlServicesContext {
-  mlServices: MlGlobalServices;
-}
-
-export type MlGlobalServices = ReturnType<typeof getMlGlobalServices>;
-
 export const App: FC<AppProps> = ({
   coreStart,
   deps,

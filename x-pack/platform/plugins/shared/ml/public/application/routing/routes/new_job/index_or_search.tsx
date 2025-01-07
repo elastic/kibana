@@ -13,7 +13,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { dynamic } from '@kbn/shared-ux-utility';
 import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 import type { NavigateToPath } from '../../../contexts/kibana';
-import { useMlKibana } from '../../../contexts/kibana';
+import { useMlKibana } from '@kbn/ml-kibana-context';
 import type { MlRoute, PageProps } from '../../router';
 import { createPath, PageLoader } from '../../router';
 import { useRouteResolver } from '../../use_resolver';

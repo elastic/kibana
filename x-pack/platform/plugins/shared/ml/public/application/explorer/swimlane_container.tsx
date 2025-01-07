@@ -64,7 +64,7 @@ import { FormattedTooltip } from '../components/chart_tooltip/chart_tooltip';
 import './_explorer.scss';
 import { EMPTY_FIELD_VALUE_LABEL } from '../timeseriesexplorer/components/entity_control/entity_control';
 import { SWIM_LANE_LABEL_WIDTH, Y_AXIS_LABEL_PADDING } from './constants';
-import { useMlKibana } from '../contexts/kibana';
+import { useMlKibana } from '@kbn/ml-kibana-context';
 
 declare global {
   interface Window {

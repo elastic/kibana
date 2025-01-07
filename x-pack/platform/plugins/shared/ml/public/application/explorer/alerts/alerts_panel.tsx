@@ -20,9 +20,9 @@ import type { AlertsTableStateProps } from '@kbn/triggers-actions-ui-plugin/publ
 import React, { type FC, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { ML_RULE_TYPE_IDS, ML_VALID_CONSUMERS } from '@kbn/ml-common-constants/alerts';
+import { useMlKibana } from '@kbn/ml-kibana-context';
 import { ML_ALERTS_CONFIG_ID } from '../../../alerting/anomaly_detection_alerts_table/register_alerts_table_configuration';
 import { CollapsiblePanel } from '../../components/collapsible_panel';
-import { useMlKibana } from '../../contexts/kibana';
 import { useAnomalyExplorerContext } from '../anomaly_explorer_context';
 import { AlertsSummary } from './alerts_summary';
 import { AnomalyDetectionAlertsOverviewChart } from './chart';

@@ -15,7 +15,7 @@ import { JOB_TYPE } from '@kbn/ml-common-constants/new_job';
 import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 import { DataSourceContextProvider } from '../../../contexts/ml/data_source_context';
 import type { NavigateToPath } from '../../../contexts/kibana';
-import { useMlKibana } from '../../../contexts/kibana';
+import { useMlKibana } from '@kbn/ml-kibana-context';
 import { basicResolvers } from '../../resolvers';
 import type { MlRoute, PageProps } from '../../router';
 import { createPath, PageLoader } from '../../router';

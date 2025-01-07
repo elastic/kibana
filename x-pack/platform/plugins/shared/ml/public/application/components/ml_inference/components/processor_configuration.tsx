@@ -27,6 +27,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { CodeEditor } from '@kbn/code-editor';
 import type { DFAModelItem } from '@kbn/ml-common-types/trained_models';
 
+import { useMlKibana } from '@kbn/ml-kibana-context';
 import {
   EDIT_MESSAGE,
   CANCEL_EDIT_MESSAGE,
@@ -36,7 +37,6 @@ import {
 import { validateInferenceConfig } from '../validation';
 import { isValidJson } from '../../../../../common/util/validation_utils';
 import { SaveChangesButton } from './save_changes_button';
-import { useMlKibana } from '../../../contexts/kibana';
 import type { MlInferenceState, InferenceModelTypes } from '../types';
 import { AdditionalAdvancedSettings } from './additional_advanced_settings';
 import { validateFieldMap } from '../validation';

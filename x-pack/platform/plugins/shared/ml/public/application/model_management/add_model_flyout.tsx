@@ -31,8 +31,8 @@ import React, { type FC, useMemo, useState } from 'react';
 import { groupBy } from 'lodash';
 import { ElandPythonClient } from '@kbn/inference_integration_flyout';
 import type { ModelDownloadItem } from '@kbn/ml-common-types/trained_models';
+import { useMlKibana } from '@kbn/ml-kibana-context';
 import { usePermissionCheck } from '../capabilities/check_capabilities';
-import { useMlKibana } from '../contexts/kibana';
 
 export interface AddModelFlyoutProps {
   modelDownloads: ModelDownloadItem[];

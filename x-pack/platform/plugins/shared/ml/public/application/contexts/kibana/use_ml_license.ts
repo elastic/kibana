@@ -6,7 +6,7 @@
  */
 
 import useObservable from 'react-use/lib/useObservable';
-import { useMlKibana } from './kibana_context';
+import { useMlKibana } from '@kbn/ml-kibana-context';
 
 export const useMlLicenseInfo = () => {
   const {

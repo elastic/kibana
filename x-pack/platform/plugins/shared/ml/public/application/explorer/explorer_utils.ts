@@ -36,6 +36,9 @@ import {
 import type { CombinedJob } from '@kbn/ml-common-types/anomaly_detection_jobs/combined_job';
 import type { Annotations, AnnotationsTable } from '@kbn/ml-common-types/annotations';
 import { ML_RESULTS_INDEX_PATTERN } from '@kbn/ml-common-constants/index_patterns';
+import { useMlKibana } from '@kbn/ml-kibana-context';
+import type { MlJobService } from '@kbn/ml-services/job_service';
+import type { MlApi } from '@kbn/ml-services/ml_api_service';
 
 import type { MlIndexUtils } from '../util/index_service';
 import {
@@ -44,7 +47,6 @@ import {
   isModelPlotEnabled,
   isTimeSeriesViewJob,
 } from '../../../common/util/job_utils';
-import type { MlJobService } from '../services/job_service';
 
 import type { SwimlaneType } from './explorer_constants';
 import {
@@ -54,8 +56,6 @@ import {
   VIEW_BY_JOB_LABEL,
 } from './explorer_constants';
 import type { MlResultsService } from '../services/results_service';
-import { useMlKibana } from '../contexts/kibana';
-import type { MlApi } from '../services/ml_api_service';
 import type { GroupObj } from '../components/job_selector/job_selector';
 
 export interface ExplorerJob {

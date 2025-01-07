@@ -8,12 +8,12 @@
 import { createContext } from 'react';
 import type { Field, Aggregation } from '@kbn/ml-anomaly-utils';
 import type { TimeBuckets } from '@kbn/ml-time-buckets';
+import type { ExistingJobsAndGroups } from '@kbn/ml-services/job_service';
 import type { JobCreatorType, SingleMetricJobCreator } from '../../common/job_creator';
 import type { ChartLoader } from '../../common/chart_loader';
 import type { MapLoader } from '../../common/map_loader';
 import type { ResultsLoader } from '../../common/results_loader';
 import type { JobValidator } from '../../common/job_validator';
-import type { ExistingJobsAndGroups } from '../../../../services/job_service';
 
 export interface JobCreatorContextValue {
   jobCreatorUpdated: number;

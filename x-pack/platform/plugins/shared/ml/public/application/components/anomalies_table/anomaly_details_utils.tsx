@@ -27,10 +27,10 @@ import {
 import { getSeverityColor } from '@kbn/ml-anomaly-utils/get_severity_color';
 import { ML_JOB_AGGREGATION } from '@kbn/ml-anomaly-utils/aggregation_types';
 import { formatHumanReadableDateTimeSeconds } from '@kbn/ml-date-utils';
+import { useMlKibana } from '@kbn/ml-kibana-context';
 import type { EntityCellFilter } from '../entity_cell';
 import { EntityCell } from '../entity_cell';
 import { formatValue } from '../../formatters/format_value';
-import { useMlKibana } from '../../contexts/kibana';
 
 const TIME_FIELD_NAME = 'timestamp';
 

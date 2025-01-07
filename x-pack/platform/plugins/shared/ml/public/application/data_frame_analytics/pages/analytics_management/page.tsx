@@ -20,7 +20,7 @@ import { UpgradeWarning } from '../../../components/upgrade';
 import { JobMap } from '../job_map';
 import { DataFrameAnalyticsListColumn } from './components/analytics_list/common';
 import { HelpMenu } from '../../../components/help_menu';
-import { useMlKibana } from '../../../contexts/kibana';
+import { useMlKibana } from '@kbn/ml-kibana-context';
 import { useRefreshAnalyticsList } from '../../common';
 import { MlPageHeader } from '../../../components/page_header';
 
