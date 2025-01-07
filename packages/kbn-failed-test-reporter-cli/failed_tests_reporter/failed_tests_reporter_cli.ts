@@ -103,88 +103,86 @@ run(
         return;
       }
 
-      if (!reportPaths.length) {
-        throw createFailError(`Unable to find any junit reports with patterns [${patterns}]`);
-      }
+      if (reportPaths.length) {
+        log.info('found', reportPaths.length, 'junit reports', reportPaths);
 
-      log.info('found', reportPaths.length, 'junit reports', reportPaths);
+        const existingIssues = new ExistingFailedTestIssues(log);
+        for (const reportPath of reportPaths) {
+          const report = await readTestReport(reportPath);
+          const messages = Array.from(getReportMessageIter(report));
+          const failures = getFailures(report);
 
-      const existingIssues = new ExistingFailedTestIssues(log);
-      for (const reportPath of reportPaths) {
-        const report = await readTestReport(reportPath);
-        const messages = Array.from(getReportMessageIter(report));
-        const failures = getFailures(report);
+          await existingIssues.loadForFailures(failures);
 
-        await existingIssues.loadForFailures(failures);
-
-        if (indexInEs) {
-          await reportFailuresToEs(log, failures);
-        }
-
-        for (const failure of failures) {
-          const pushMessage = (msg: string) => {
-            messages.push({
-              classname: failure.classname,
-              name: failure.name,
-              message: msg,
-            });
-          };
-
-          if (failure.likelyIrrelevant) {
-            pushMessage(
-              'Failure is likely irrelevant' +
-                (updateGithub ? ', so an issue was not created or updated' : '')
-            );
-            continue;
+          if (indexInEs) {
+            await reportFailuresToEs(log, failures);
           }
 
-          const existingIssue = existingIssues.getForFailure(failure);
-          if (existingIssue) {
-            const { newBody, newCount } = await updateFailureIssue(
+          for (const failure of failures) {
+            const pushMessage = (msg: string) => {
+              messages.push({
+                classname: failure.classname,
+                name: failure.name,
+                message: msg,
+              });
+            };
+
+            if (failure.likelyIrrelevant) {
+              pushMessage(
+                'Failure is likely irrelevant' +
+                  (updateGithub ? ', so an issue was not created or updated' : '')
+              );
+              continue;
+            }
+
+            const existingIssue = existingIssues.getForFailure(failure);
+            if (existingIssue) {
+              const { newBody, newCount } = await updateFailureIssue(
+                buildUrl,
+                existingIssue,
+                githubApi,
+                branch,
+                pipeline
+              );
+              const url = existingIssue.github.htmlUrl;
+              existingIssue.github.body = newBody;
+              failure.githubIssue = url;
+              failure.failureCount = updateGithub ? newCount : newCount - 1;
+              pushMessage(`Test has failed ${newCount - 1} times on tracked branches: ${url}`);
+              if (updateGithub) {
+                pushMessage(`Updated existing issue: ${url} (fail count: ${newCount})`);
+              }
+              continue;
+            }
+
+            const newIssue = await createFailureIssue(
               buildUrl,
-              existingIssue,
+              failure,
               githubApi,
               branch,
-              pipeline
+              pipeline,
+              prependTitle
             );
-            const url = existingIssue.github.htmlUrl;
-            existingIssue.github.body = newBody;
-            failure.githubIssue = url;
-            failure.failureCount = updateGithub ? newCount : newCount - 1;
-            pushMessage(`Test has failed ${newCount - 1} times on tracked branches: ${url}`);
+            existingIssues.addNewlyCreated(failure, newIssue);
+            pushMessage('Test has not failed recently on tracked branches');
             if (updateGithub) {
-              pushMessage(`Updated existing issue: ${url} (fail count: ${newCount})`);
+              pushMessage(`Created new issue: ${newIssue.html_url}`);
+              failure.githubIssue = newIssue.html_url;
             }
-            continue;
+            failure.failureCount = updateGithub ? 1 : 0;
           }
 
-          const newIssue = await createFailureIssue(
-            buildUrl,
-            failure,
-            githubApi,
-            branch,
-            pipeline,
-            prependTitle
-          );
-          existingIssues.addNewlyCreated(failure, newIssue);
-          pushMessage('Test has not failed recently on tracked branches');
-          if (updateGithub) {
-            pushMessage(`Created new issue: ${newIssue.html_url}`);
-            failure.githubIssue = newIssue.html_url;
-          }
-          failure.failureCount = updateGithub ? 1 : 0;
+          // mutates report to include messages and writes updated report to disk
+          await addMessagesToReport({
+            report,
+            messages,
+            log,
+            reportPath,
+            dryRun: !flags['report-update'],
+          });
+
+          await reportFailuresToFile(log, failures, bkMeta, getRootMetadata(report));
         }
-
-        // mutates report to include messages and writes updated report to disk
-        await addMessagesToReport({
-          report,
-          messages,
-          log,
-          reportPath,
-          dryRun: !flags['report-update'],
-        });
-
-        await reportFailuresToFile(log, failures, bkMeta, getRootMetadata(report));
       }
 
       // Scout test failures reporting
@@ -196,7 +194,8 @@ run(
       });
 
       if (dirs.length === 0) {
-        throw new Error(`No directories found matching pattern: ${scoutTestFailuresDirPattern}`);
+        throw createFailError(`Unable to find any junit reports with patterns [${patterns}]`);
+        // log.info(`No directories found matching pattern: ${scoutTestFailuresDirPattern}`);
       }
 
       const dirPath = dirs[0]; // temp take the last one
