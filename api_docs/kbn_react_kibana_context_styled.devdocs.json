@@ -310,15 +310,15 @@
         "references": [
           {
             "plugin": "kibanaReact",
-            "path": "src/plugins/kibana_react/common/eui_styled_components.tsx"
+            "path": "src/platform/plugins/shared/kibana_react/common/eui_styled_components.tsx"
           },
           {
             "plugin": "kibanaReact",
-            "path": "src/plugins/kibana_react/common/eui_styled_components.tsx"
+            "path": "src/platform/plugins/shared/kibana_react/common/eui_styled_components.tsx"
           },
           {
             "plugin": "kibanaReact",
-            "path": "src/plugins/kibana_react/common/index.ts"
+            "path": "src/platform/plugins/shared/kibana_react/common/index.ts"
           }
         ],
         "children": [
