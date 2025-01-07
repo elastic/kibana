@@ -319,8 +319,8 @@ export function checksFactory(
       }, {} as DeleteMLSpaceAwareItemsCheckResponse);
     }
     const canCreateGlobalMlSavedObjects = await mlSavedObjectService.canCreateGlobalMlSavedObjects(
-      mlSavedObjectType,
-      request
+      request,
+      mlSavedObjectType
     );
 
     const savedObjects =
