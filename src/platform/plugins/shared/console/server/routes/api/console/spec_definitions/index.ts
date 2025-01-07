@@ -32,5 +32,17 @@ export const registerSpecDefinitionsRoute = ({ router, services }: RouteDependen
     });
   };
 
-  router.get({ path: '/api/console/api_server', validate: false }, handler);
+  router.get(
+    {
+      path: '/api/console/api_server',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Low effort request for config info',
+        },
+      },
+      validate: false,
+    },
+    handler
+  );
 };
