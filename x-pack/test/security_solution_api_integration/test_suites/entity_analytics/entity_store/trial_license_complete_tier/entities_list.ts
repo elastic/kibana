@@ -40,7 +40,7 @@ export default ({ getService }: FtrProviderContext) => {
         );
       });
 
-      it('should return hosts in the entity store index', async () => {
+      it('should return hosts from the entity store index', async () => {
         const { body } = await securitySolutionApi.listEntities({
           query: { entity_types: ['host'] },
         });
@@ -49,7 +49,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(body.records.length).toEqual(1);
       });
 
-      it('should return users in the entity store index', async () => {
+      it('should return users from the entity store index', async () => {
         const { body } = await securitySolutionApi.listEntities({
           query: { entity_types: ['user'] },
         });
@@ -58,7 +58,16 @@ export default ({ getService }: FtrProviderContext) => {
         expect(body.records.length).toEqual(1);
       });
 
-      it('should return all entities in the entity store index', async () => {
+      it('should return services from the entity store index', async () => {
+        const { body } = await securitySolutionApi.listEntities({
+          query: { entity_types: ['service'] },
+        });
+
+        expect(body.total).toEqual(1);
+        expect(body.records.length).toEqual(1);
+      });
+
+      it('should return two entity types from the entity store index', async () => {
         const { body } = await securitySolutionApi.listEntities({
           query: { entity_types: ['user', 'host'] },
         });

@@ -15,6 +15,7 @@ import {
 import { EntityTypeToLevelField, type RiskSeverity } from '../../../../../common/search_strategy';
 import { useGlobalFilterQuery } from '../../../../common/hooks/use_global_filter_query';
 import { EntitySourceTag } from '../types';
+import { useStoreEntityTypes } from '../../../hooks/use_enabled_entity_types';
 
 interface UseEntitiesListFiltersParams {
   selectedSeverities: RiskSeverity[];
@@ -28,6 +29,7 @@ export const useEntitiesListFilters = ({
   selectedSources,
 }: UseEntitiesListFiltersParams) => {
   const { filterQuery: globalQuery } = useGlobalFilterQuery();
+  const enabledEntityTypes = useStoreEntityTypes();
 
   return useMemo(() => {
     const criticalityFilter: QueryDslQueryContainer[] = selectedCriticalities.length
@@ -58,9 +60,9 @@ export const useEntitiesListFilters = ({
       ? [
           {
             bool: {
-              should: Object.values(EntityTypeToLevelField).flatMap((levelField) => ({
+              should: enabledEntityTypes.flatMap((type) => ({
                 terms: {
-                  [levelField]: selectedSeverities,
+                  [EntityTypeToLevelField[type]]: selectedSeverities,
                 },
               })),
             },
@@ -77,7 +79,7 @@ export const useEntitiesListFilters = ({
       filterList.push(globalQuery);
     }
     return filterList;
-  }, [globalQuery, selectedCriticalities, selectedSeverities, selectedSources]);
+  }, [enabledEntityTypes, globalQuery, selectedCriticalities, selectedSeverities, selectedSources]);
 };
 
 const getSourceTagFilterQuery = (tag: EntitySourceTag): QueryDslQueryContainer => {

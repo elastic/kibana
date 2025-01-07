@@ -46,4 +46,15 @@ describe('useEntityInfo', () => {
       }
     `);
   });
+
+  it('should return service entity info', () => {
+    const { result } = renderHook(() => useEntityInfo(EntityType.service));
+    expect(result?.current).toMatchInlineSnapshot(`
+      Object {
+        "kpiQueryId": "serviceHeaderRiskScoreKpiQuery",
+        "linkProps": undefined,
+        "tableQueryId": "serviceRiskDashboardTable",
+      }
+    `);
+  });
 });

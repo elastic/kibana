@@ -24,6 +24,14 @@ export const USERS = i18n.translate('xpack.securitySolution.riskScore.overview.u
   defaultMessage: 'Users',
 });
 
+export const SERVICE = i18n.translate('xpack.securitySolution.riskScore.overview.serviceTitle', {
+  defaultMessage: 'Service',
+});
+
+export const SERVICES = i18n.translate('xpack.securitySolution.riskScore.overview.services', {
+  defaultMessage: 'Services',
+});
+
 export const ENTITY = i18n.translate('xpack.securitySolution.riskScore.overview.entityTitle', {
   defaultMessage: 'Entity',
 });
@@ -80,6 +88,8 @@ export const getRiskEntityTranslationText = (
       return plural ? HOSTS : HOST;
     case EntityType.user:
       return plural ? USERS : USER;
+    case EntityType.service:
+      return plural ? SERVICES : SERVICE;
     default:
       return plural ? ENTITIES : ENTITY;
   }

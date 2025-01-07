@@ -56,6 +56,7 @@ export enum RiskScoreFields {
   serviceRiskScore = 'service.risk.calculated_score_norm',
   serviceRisk = 'service.risk.calculated_level',
   alertsCount = 'alertsCount',
+  unsupported = 'unsupported', // Temporary value used while we don't support the universal entity
 }
 
 export interface RiskScoreItem {
@@ -89,12 +90,12 @@ export const EntityTypeToLevelField: Record<EntityType, RiskScoreFields> = {
   [EntityType.host]: RiskScoreFields.hostRisk,
   [EntityType.user]: RiskScoreFields.userRisk,
   [EntityType.service]: RiskScoreFields.serviceRisk,
-  [EntityType.universal]: RiskScoreFields.timestamp, // This is a dummy value because we don't calculate risk for the universal entity
+  [EntityType.universal]: RiskScoreFields.unsupported, // We don't calculate risk for the universal entity
 };
 
 export const EntityTypeToScoreField: Record<EntityType, RiskScoreFields> = {
   [EntityType.host]: RiskScoreFields.hostRiskScore,
   [EntityType.user]: RiskScoreFields.userRiskScore,
   [EntityType.service]: RiskScoreFields.serviceRiskScore,
-  [EntityType.universal]: RiskScoreFields.timestamp, // This is a dummy value because we don't calculate risk for the universal entity
+  [EntityType.universal]: RiskScoreFields.unsupported, // We don't calculate risk for the universal entity
 };

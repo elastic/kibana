@@ -12,7 +12,12 @@ import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/type
 import { CriticalityLevels } from '../../../../../common/constants';
 import { RiskSeverity } from '../../../../../common/search_strategy';
 import { EntitySourceTag } from '../types';
+import { mockGlobalState } from '../../../../common/mock';
 
+const mockedExperimentalFeatures = mockGlobalState.app.enableExperimental;
+jest.mock('../../../../common/hooks/use_experimental_features', () => ({
+  useEnableExperimental: () => ({ ...mockedExperimentalFeatures, serviceEntityStoreEnabled: true }),
+}));
 jest.mock('../../../../common/hooks/use_global_filter_query');
 
 describe('useEntitiesListFilters', () => {
@@ -49,12 +54,12 @@ describe('useEntitiesListFilters', () => {
           should: [
             {
               terms: {
-                'host.risk.calculated_level': ['Low', 'High'],
+                'user.risk.calculated_level': ['Low', 'High'],
               },
             },
             {
               terms: {
-                'user.risk.calculated_level': ['Low', 'High'],
+                'host.risk.calculated_level': ['Low', 'High'],
               },
             },
             {
@@ -186,12 +191,12 @@ describe('useEntitiesListFilters', () => {
           should: [
             {
               terms: {
-                'host.risk.calculated_level': ['Low'],
+                'user.risk.calculated_level': ['Low'],
               },
             },
             {
               terms: {
-                'user.risk.calculated_level': ['Low'],
+                'host.risk.calculated_level': ['Low'],
               },
             },
             {
