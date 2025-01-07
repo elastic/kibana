@@ -628,6 +628,7 @@ src/platform/plugins/private/vis_types/metric @elastic/kibana-visualizations
 src/platform/plugins/private/vis_types/pie @elastic/kibana-visualizations
 src/platform/plugins/private/vis_types/table @elastic/kibana-visualizations
 src/platform/plugins/private/vis_types/tagcloud @elastic/kibana-visualizations
+src/platform/plugins/private/vis_types/timelion @elastic/kibana-visualizations
 src/platform/plugins/shared/ai_assistant_management/selection @elastic/obs-ai-assistant
 src/platform/plugins/shared/chart_expressions/expression_gauge @elastic/kibana-visualizations
 src/platform/plugins/shared/chart_expressions/expression_heatmap @elastic/kibana-visualizations
@@ -688,7 +689,6 @@ src/platform/plugins/shared/unified_doc_viewer @elastic/kibana-data-discovery
 src/platform/plugins/shared/unified_histogram @elastic/kibana-data-discovery
 src/platform/plugins/shared/unified_search @elastic/kibana-visualizations
 src/platform/plugins/shared/usage_collection @elastic/kibana-core
-src/plugins/vis_types/timelion @elastic/kibana-visualizations
 src/plugins/vis_types/timeseries @elastic/kibana-visualizations
 src/plugins/vis_types/vega @elastic/kibana-visualizations
 src/plugins/vis_types/vislib @elastic/kibana-visualizations

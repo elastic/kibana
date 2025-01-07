@@ -7957,7 +7957,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/vis-type-timelion-plugin@link:src/plugins/vis_types/timelion":
+"@kbn/vis-type-timelion-plugin@link:src/platform/plugins/private/vis_types/timelion":
   version "0.0.0"
   uid ""
 
