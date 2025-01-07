@@ -7749,7 +7749,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/transpose-utils@link:packages/kbn-transpose-utils":
+"@kbn/transpose-utils@link:src/platform/packages/private/kbn-transpose-utils":
   version "0.0.0"
   uid ""
 

@@ -224,7 +224,6 @@ packages/kbn-test-eui-helpers @elastic/kibana-visualizations
 packages/kbn-test-jest-helpers @elastic/kibana-operations @elastic/appex-qa
 packages/kbn-test-subj-selector @elastic/kibana-operations @elastic/appex-qa
 packages/kbn-tooling-log @elastic/kibana-operations
-packages/kbn-transpose-utils @elastic/kibana-visualizations
 packages/kbn-ts-projects @elastic/kibana-operations
 packages/kbn-ts-type-check-cli @elastic/kibana-operations
 packages/kbn-ui-actions-browser @elastic/appex-sharedux
@@ -433,6 +432,7 @@ src/platform/packages/private/kbn-reporting/server @elastic/appex-sharedux
 src/platform/packages/private/kbn-screenshotting-server @elastic/appex-sharedux
 src/platform/packages/private/kbn-timelion-grammar @elastic/kibana-visualizations
 src/platform/packages/private/kbn-tinymath @elastic/kibana-visualizations
+src/platform/packages/private/kbn-transpose-utils @elastic/kibana-visualizations
 src/platform/packages/private/kbn-ui-shared-deps-npm @elastic/kibana-operations
 src/platform/packages/private/kbn-ui-shared-deps-src @elastic/kibana-operations
 src/platform/packages/private/kbn-unsaved-changes-badge @elastic/kibana-data-discovery
