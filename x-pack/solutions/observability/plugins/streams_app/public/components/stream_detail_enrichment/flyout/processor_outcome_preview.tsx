@@ -31,7 +31,7 @@ import {
   ReadStreamDefinition,
   isWiredReadStream,
 } from '@kbn/streams-schema';
-import { useController, useFieldArray, useFormContext } from 'react-hook-form';
+import { useController, useFieldArray } from 'react-hook-form';
 import { css } from '@emotion/react';
 import { useStreamsAppFetch } from '../../../hooks/use_streams_app_fetch';
 import { useKibana } from '../../../hooks/use_kibana';
@@ -55,8 +55,6 @@ export const ProcessorOutcomePreview = ({
     streams: { streamsRepositoryClient },
   } = dependencies.start;
 
-  const { setValue } = useFormContext();
-
   const {
     timeRange,
     absoluteTimeRange: { start, end },
@@ -69,7 +67,7 @@ export const ProcessorOutcomePreview = ({
   const { value: samples, refresh: refreshSamples } = useStreamsAppFetch(
     ({ signal }) => {
       if (!definition) {
-        return Promise.resolve({ documents: [] });
+        return { documents: [] };
       }
 
       return streamsRepositoryClient.fetch('POST /api/streams/{id}/_sample', {
@@ -123,8 +121,6 @@ export const ProcessorOutcomePreview = ({
         }
       );
 
-      setValue('detected_fields', simulationResult.detected_fields);
-
       return simulationResult;
     },
     [definition, samples, streamsRepositoryClient],
@@ -132,25 +128,21 @@ export const ProcessorOutcomePreview = ({
   );
 
   const simulationDocuments = useMemo(() => {
-    if (!simulation?.documents) {
-      return [];
-    }
+    if (!simulation?.documents) return [];
 
-    let docs = simulation.documents;
+    const filterDocuments = (filter: DocsFilterOption) => {
+      switch (filter) {
+        case 'outcome_filter_matched':
+          return simulation.documents.filter((doc) => doc.isMatch);
+        case 'outcome_filter_unmatched':
+          return simulation.documents.filter((doc) => !doc.isMatch);
+        case 'outcome_filter_all':
+        default:
+          return simulation.documents;
+      }
+    };
 
-    if (selectedDocsFilter === 'outcome_filter_all') {
-      docs = simulation.documents;
-    }
-
-    if (selectedDocsFilter === 'outcome_filter_matched') {
-      docs = simulation.documents.filter((doc) => doc.isMatch);
-    }
-
-    if (selectedDocsFilter === 'outcome_filter_unmatched') {
-      docs = simulation.documents.filter((doc) => !doc.isMatch);
-    }
-
-    return docs.map((doc) => doc.value);
+    return filterDocuments(selectedDocsFilter).map((doc) => doc.value);
   }, [simulation?.documents, selectedDocsFilter]);
 
   const detectedFieldsColumns = simulation?.detected_fields
@@ -158,7 +150,7 @@ export const ProcessorOutcomePreview = ({
     : [];
 
   const detectedFieldsEnabled =
-    isWiredReadStream(definition) && simulation && simulation.detected_fields.length > 0;
+    isWiredReadStream(definition) && simulation && !isEmpty(simulation.detected_fields);
 
   return (
     <EuiPanel hasShadow={false} paddingSize="none">
@@ -313,6 +305,72 @@ const OutcomeControls = ({
   );
 };
 
+const DetectedFields = ({ detectedFields }: { detectedFields: DetectedField[] }) => {
+  const { euiTheme } = useEuiTheme();
+  const { fields, replace } = useFieldArray<{ detected_fields: DetectedField[] }>({
+    name: 'detected_fields',
+  });
+
+  useEffect(() => {
+    replace(detectedFields);
+  }, [detectedFields, replace]);
+
+  return (
+    <EuiFormRow
+      label={i18n.translate(
+        'xpack.streams.streamDetailView.managementTab.enrichment.processorFlyout.detectedFieldsLabel',
+        { defaultMessage: 'Detected fields' }
+      )}
+      css={css`
+        margin-bottom: ${euiTheme.size.l};
+      `}
+      fullWidth
+    >
+      <EuiFlexGroup gutterSize="s" wrap>
+        {fields.map((field, id) => (
+          <DetectedFieldSelector key={field.name} selectorId={`detected_fields.${id}`} />
+        ))}
+      </EuiFlexGroup>
+    </EuiFormRow>
+  );
+};
+
+const DetectedFieldSelector = ({ selectorId }: { selectorId: string }) => {
+  const { field } = useController({ name: selectorId });
+
+  const options = useMemo(() => getDetectedFieldSelectOptions(field.value), [field]);
+
+  return (
+    <EuiSuperSelect
+      options={options}
+      valueOfSelected={field.value.type}
+      onChange={(type) => field.onChange({ ...field.value, type })}
+      css={css`
+        min-inline-size: 180px;
+      `}
+    />
+  );
+};
+
+const getDetectedFieldSelectOptions = (
+  fieldValue: DetectedField
+): Array<EuiSuperSelectOption<string>> =>
+  [...FIELD_DEFINITION_TYPES, 'unmapped'].map((type) => ({
+    value: type,
+    inputDisplay: (
+      <EuiFlexGroup alignItems="center" gutterSize="s">
+        <FieldIcon type={fieldValue.type} size="s" />
+        {fieldValue.name}
+      </EuiFlexGroup>
+    ),
+    dropdownDisplay: (
+      <EuiFlexGroup alignItems="center" gutterSize="s">
+        <FieldIcon type={type} size="s" />
+        {type}
+      </EuiFlexGroup>
+    ),
+  }));
+
 interface OutcomePreviewTableProps {
   documents?: Array<Record<PropertyKey, unknown>>;
   columns: string[];
@@ -390,70 +448,4 @@ const OutcomePreviewTable = ({
   }
 
   return <PreviewTable documents={documents} displayColumns={columns} height={500} />;
-};
-
-export const DetectedFields = ({ detectedFields }: { detectedFields: DetectedField[] }) => {
-  const { euiTheme } = useEuiTheme();
-  const { fields, replace } = useFieldArray<{ detected_fields: DetectedField[] }>({
-    name: 'detected_fields',
-  });
-
-  useEffect(() => {
-    replace(detectedFields);
-  }, [detectedFields, replace]);
-
-  return (
-    <EuiFormRow
-      label={i18n.translate(
-        'xpack.streams.streamDetailView.managementTab.enrichment.processorFlyout.detectedFieldsLabel',
-        { defaultMessage: 'Detected fields' }
-      )}
-      css={css`
-        margin-bottom: ${euiTheme.size.l};
-      `}
-      fullWidth
-    >
-      <EuiFlexGroup gutterSize="s" wrap>
-        {fields.map((field, id) => (
-          <DetectedFieldSelector key={field.name} selectorId={`detected_fields.${id}`} />
-        ))}
-      </EuiFlexGroup>
-    </EuiFormRow>
-  );
-};
-
-const getDetectedFieldSelectOptions = (
-  fieldValue: DetectedField
-): Array<EuiSuperSelectOption<string>> =>
-  [...FIELD_DEFINITION_TYPES, 'unmapped'].map((type) => ({
-    value: type,
-    inputDisplay: (
-      <EuiFlexGroup alignItems="center" gutterSize="s">
-        <FieldIcon type={fieldValue.type} size="s" />
-        {fieldValue.name}
-      </EuiFlexGroup>
-    ),
-    dropdownDisplay: (
-      <EuiFlexGroup alignItems="center" gutterSize="s">
-        <FieldIcon type={type} size="s" />
-        {type}
-      </EuiFlexGroup>
-    ),
-  }));
-
-const DetectedFieldSelector = ({ selectorId }: { selectorId: string }) => {
-  const { field } = useController({ name: selectorId });
-
-  const options = useMemo(() => getDetectedFieldSelectOptions(field.value), [field]);
-
-  return (
-    <EuiSuperSelect
-      options={options}
-      valueOfSelected={field.value.type}
-      onChange={(type) => field.onChange({ ...field.value, type })}
-      css={css`
-        min-inline-size: 180px;
-      `}
-    />
-  );
 };

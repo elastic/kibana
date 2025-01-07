@@ -11,14 +11,22 @@ import { EuiCallOut, EuiForm, EuiButton, EuiSpacer, EuiHorizontalRule } from '@e
 import { i18n } from '@kbn/i18n';
 import { ProcessingDefinition, ReadStreamDefinition } from '@kbn/streams-schema';
 import { isEqual } from 'lodash';
+import { dynamic } from '@kbn/shared-ux-utility';
 import { ProcessorTypeSelector } from './processor_type_selector';
 import { ProcessorFlyoutTemplate } from './processor_flyout_template';
 import { DetectedField, ProcessorDefinition, ProcessorFormState } from '../types';
 import { DangerZone } from './danger_zone';
 import { DissectProcessorForm } from './dissect';
 import { GrokProcessorForm } from './grok';
-import { ProcessorOutcomePreview } from './processor_outcome_preview';
 import { convertFormStateToProcessing, getDefaultFormState } from '../utils';
+
+const ProcessorOutcomePreview = dynamic(() =>
+  import(/* webpackChunkName: "management_processor_outcome" */ './processor_outcome_preview').then(
+    (mod) => ({
+      default: mod.ProcessorOutcomePreview,
+    })
+  )
+);
 
 export interface ProcessorFlyoutProps {
   onClose: () => void;
