@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { SearchSessionProvider } from '../../hooks/use_search_session';
+import { ReloadRequestTimeProvider } from '../../hooks/use_reload_request_time';
 import { AssetDetailsRenderPropsProvider } from './hooks/use_asset_details_render_props';
 import { DatePickerProvider } from './hooks/use_date_picker';
 import { LoadingStateProvider } from './hooks/use_loading_state';
@@ -22,7 +22,7 @@ const RenderWithOptionalSearchSessionProvider = ({
 }) => {
   if (renderMode.mode === 'flyout') {
     // flyout mode requires its own search session so that it doesn't interfere with the main page
-    return <SearchSessionProvider>{children}</SearchSessionProvider>;
+    return <ReloadRequestTimeProvider>{children}</ReloadRequestTimeProvider>;
   }
   return <>{children}</>;
 };
