@@ -137,13 +137,17 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await removeGlobalSettings(); // Make sure we start from a clean state
         await browser.refresh();
 
+        log.info('check if solution tour shows after first refresh');
         await testSubjects.missingOrFail('spaceSolutionTour', { timeout: 3000 });
+        log.info('solution tour does not show after first refresh');
 
         await spacesService.delete('foo-space');
         await browser.refresh();
 
         // The tour still does not appear after refresh, even with 1 space with a solution set
+        log.info('check if solution tour shows after second refresh');
         await testSubjects.missingOrFail('spaceSolutionTour', { timeout: 3000 });
+        log.info('solution tour does not show after second refresh');
       });
     });
   });
