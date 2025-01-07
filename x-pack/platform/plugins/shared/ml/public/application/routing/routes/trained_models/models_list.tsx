@@ -13,7 +13,7 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { dynamic } from '@kbn/shared-ux-utility';
 import { ML_PAGES } from '../../../../locator';
 import type { NavigateToPath } from '../../../contexts/kibana';
-import type { MlRoute } from '../../router';
+import type { MlRoute, PageProps } from '../../router';
 import { createPath, PageLoader } from '../../router';
 import { useRouteResolver } from '../../use_resolver';
 import { basicResolvers } from '../../resolvers';
@@ -34,7 +34,7 @@ export const modelsListRouteFactory = (
   title: i18n.translate('xpack.ml.modelManagement.trainedModels.docTitle', {
     defaultMessage: 'Trained Models',
   }),
-  render: () => <PageWrapper />,
+  render: (props, pageDeps) => <PageWrapper {...props} deps={pageDeps} />,
   breadcrumbs: [
     getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath, basePath),
     getBreadcrumbWithUrlForApp('TRAINED_MODELS', navigateToPath, basePath),
@@ -48,7 +48,7 @@ export const modelsListRouteFactory = (
   'data-test-subj': 'mlPageModelManagement',
 });
 
-const PageWrapper: FC = () => {
+const PageWrapper: FC<PageProps> = ({ deps }) => {
   const { initSavedObjects } = useSavedObjectsApiService();
 
   const initSavedObjectsWrapper = useCallback(async () => {
@@ -76,7 +76,7 @@ const PageWrapper: FC = () => {
           </EuiFlexItem>
         </EuiFlexGroup>
       </MlPageHeader>
-      <ModelsList />
+      <ModelsList history={deps.history} />
     </PageLoader>
   );
 };

@@ -40,6 +40,11 @@ interface ModelState {
   isLoading: boolean;
 }
 
+interface ModelOperation {
+  modelId: string;
+  type: 'downloading' | 'deploying';
+}
+
 const DOWNLOAD_POLL_INTERVAL = 3000;
 
 export class TrainedModelsService {
@@ -51,7 +56,7 @@ export class TrainedModelsService {
   private initialized = false;
   private onFetchCallbacks: Array<(items: TrainedModelUIItem[]) => void> = [];
   private downloadStatusFetchInProgress = false;
-  private downloadQueue = new Map<string, Promise<void>>();
+  private _activeOperations$ = new BehaviorSubject<ModelOperation[]>([]);
 
   constructor(private readonly trainedModelsApiService: TrainedModelsApiService) {}
 
@@ -64,6 +69,14 @@ export class TrainedModelsService {
     map((state) => state.isLoading),
     distinctUntilChanged()
   );
+
+  public readonly activeOperations$ = this._activeOperations$.pipe(
+    distinctUntilChanged((prev, curr) => isEqual(prev, curr))
+  );
+
+  public get activeOperations(): ModelOperation[] {
+    return this._activeOperations$.getValue();
+  }
 
   public get models(): TrainedModelUIItem[] {
     return this.modelState$.getValue().items;
@@ -113,22 +126,21 @@ export class TrainedModelsService {
   public async downloadModel(modelId: string) {
     this.setLoading(true);
 
-    const downloadPromise = async () => {
-      await this.trainedModelsApiService.installElasticTrainedModelConfig(modelId);
-      await this.fetchModels();
-    };
+    this.addActiveOperation({
+      modelId,
+      type: 'downloading',
+    });
 
     try {
-      const queuedDownload = downloadPromise();
-      this.downloadQueue.set(modelId, queuedDownload);
-      await queuedDownload;
+      await this.trainedModelsApiService.installElasticTrainedModelConfig(modelId);
     } catch (error) {
-      // Rethrow to be handled by the caller
-      throw error;
-    } finally {
+      this.removeActiveOperation(modelId, 'downloading');
       this.setLoading(false);
-      this.downloadQueue.delete(modelId);
+      throw error;
     }
+
+    await this.fetchModels();
+    this.setLoading(false);
   }
 
   public async startModelDeployment(
@@ -137,23 +149,24 @@ export class TrainedModelsService {
     adaptiveAllocationsParams?: AdaptiveAllocationsParams
   ) {
     this.setLoading(true);
-    try {
-      const pendingDownload = this.downloadQueue.get(modelId);
 
-      if (pendingDownload) {
-        await pendingDownload;
-      }
+    try {
+      await this.ensureModelIsDownloaded(modelId);
+
+      this.addActiveOperation({ modelId, type: 'deploying' });
 
       await this.trainedModelsApiService.startModelAllocation(
         modelId,
         deploymentParams,
         adaptiveAllocationsParams
       );
+
       await this.fetchModels();
     } catch (error) {
       // Rethrow to be handled by the caller
       throw error;
     } finally {
+      this.removeActiveOperation(modelId, 'deploying');
       this.setLoading(false);
     }
   }
@@ -216,19 +229,60 @@ export class TrainedModelsService {
     return this.downloadStatus$.getValue()[modelId];
   }
 
-  private mergeModelItems(newItems: TrainedModelUIItem[]) {
-    return newItems.map((item) => {
-      const prevItem = this.modelState$.getValue().items.find((i) => i.model_id === item.model_id);
+  private async ensureModelIsDownloaded(modelId: string) {
+    const model = this.getModel(modelId);
 
-      return {
-        ...item,
-        ...(isBaseNLPModelItem(prevItem) && prevItem?.state === MODEL_STATE.DOWNLOADING
-          ? { state: prevItem.state, downloadState: prevItem.downloadState }
-          : {}),
-      };
+    if (!isBaseNLPModelItem(model)) return;
+
+    if (model?.state === MODEL_STATE.DOWNLOADED) {
+      return;
+    }
+
+    const isNotDownloaded = model.state === MODEL_STATE.NOT_DOWNLOADED;
+    const alreadyDownloading = this.activeOperations.some(
+      (op) => op.modelId === modelId && op.type === 'downloading'
+    );
+
+    // If there's no "downloading" operation yet and the model is not downloaded, start downloading
+    if (isNotDownloaded && !alreadyDownloading) {
+      await this.downloadModel(modelId);
+    }
+
+    // Wait until the poll sets the model as fully downloaded
+    await new Promise<void>((resolve) => {
+      const subscription = this.getModel$(modelId).subscribe((updatedModel) => {
+        if (!isBaseNLPModelItem(updatedModel)) return;
+
+        if (updatedModel?.state === MODEL_STATE.DOWNLOADED) {
+          subscription.unsubscribe();
+          resolve();
+        }
+      });
     });
   }
 
+  private mergeModelItems(newItems: TrainedModelUIItem[]) {
+    const existingItems = this.modelState$.getValue().items;
+
+    return newItems.map((item) => {
+      const prevItem = existingItems.find((i) => i.model_id === item.model_id);
+
+      if (!prevItem) return item;
+
+      if (isBaseNLPModelItem(prevItem) && prevItem.state === MODEL_STATE.DOWNLOADING) {
+        return { ...item, state: prevItem.state, downloadState: prevItem.downloadState };
+      }
+
+      return item;
+    });
+  }
+
+  /**
+   * The polling logic is the single source of truth for whether the model
+   * is still in-progress downloading. If we see an item is no longer in the
+   * returned statuses, that means it’s finished or aborted, so remove the
+   * "downloading" operation in activeOperations (if present).
+   */
   private startDownloadStatusPolling() {
     if (this.downloadStatusFetchInProgress) return;
     this.stopPolling();
@@ -248,6 +302,11 @@ export class TrainedModelsService {
           const updatedItems = currentItems.map((item) => {
             if (!isBaseNLPModelItem(item)) return item;
 
+            /* Unfortunately, model download status does not report 100% download state, only from 1 to 99. Hence, there might be 3 cases
+             * 1. Model is not downloaded at all
+             * 2. Model download was in progress and finished
+             * 3. Model download was in progress and aborted
+             */
             if (downloadStatus[item.model_id]) {
               downloadInProgress.add(item.model_id);
               return {
@@ -256,20 +315,19 @@ export class TrainedModelsService {
                 downloadState: downloadStatus[item.model_id],
               };
             } else {
-              /* Unfortunately, model download status does not report 100% download state, only from 1 to 99. Hence, there might be 3 cases
-               * 1. Model is not downloaded at all
-               * 2. Model download was in progress and finished
-               * 3. Model download was in progress and aborted
-               */
+              // Not in 'downloadStatus' => either done or aborted
               const newItem = { ...item };
               delete newItem.downloadState;
 
               if (this.abortedDownloads.has(item.model_id)) {
-                // Change downloading state to not downloaded
+                // Aborted
                 this.abortedDownloads.delete(item.model_id);
                 newItem.state = MODEL_STATE.NOT_DOWNLOADED;
+                this.removeActiveOperation(item.model_id, 'downloading');
               } else if (downloadInProgress.has(item.model_id) || !item.state) {
+                // Finished downloading
                 newItem.state = MODEL_STATE.DOWNLOADED;
+                this.removeActiveOperation(item.model_id, 'downloading');
               }
               downloadInProgress.delete(item.model_id);
               return newItem;
@@ -318,6 +376,18 @@ export class TrainedModelsService {
 
   private setLoading(isLoading: boolean): void {
     this.modelState$.next({ ...this.modelState$.getValue(), isLoading });
+  }
+
+  private addActiveOperation(operation: ModelOperation) {
+    const currentOperations = this._activeOperations$.getValue();
+    this._activeOperations$.next([...currentOperations, operation]);
+  }
+
+  private removeActiveOperation(modelId: string, operationType: ModelOperation['type']) {
+    const currentOperations = this._activeOperations$.getValue();
+    this._activeOperations$.next(
+      currentOperations.filter((op) => op.modelId !== modelId && op.type !== operationType)
+    );
   }
 
   public destroy() {

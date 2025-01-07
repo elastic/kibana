@@ -38,6 +38,8 @@ import { dynamic } from '@kbn/shared-ux-utility';
 import type { FC } from 'react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
+import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
+import type { ScopedHistory } from '@kbn/core/public';
 import { ML_PAGES } from '../../../common/constants/locator';
 import { ML_ELSER_CALLOUT_DISMISSED } from '../../../common/types/storage';
 import type {
@@ -95,6 +97,7 @@ export const getDefaultModelsListState = (): ListingPageUrlState => ({
 });
 
 interface Props {
+  history: ScopedHistory<unknown>;
   pageState?: ListingPageUrlState;
   updatePageState?: (update: Partial<ListingPageUrlState>) => void;
 }
@@ -102,11 +105,14 @@ interface Props {
 export const ModelsList: FC<Props> = ({
   pageState: pageStateExternal,
   updatePageState: updatePageStateExternal,
+  history,
 }) => {
   const {
     services: {
-      application: { capabilities },
+      application: { capabilities, navigateToUrl },
       docLinks,
+      overlays,
+      http,
     },
   } = useMlKibana();
 
@@ -114,6 +120,31 @@ export const ModelsList: FC<Props> = ({
   const isInitialized = trainedModelsService.isInitialized();
   const items = useObservable(trainedModelsService.models$, trainedModelsService.models);
   const isLoading = useObservable(trainedModelsService.isLoading$, trainedModelsService.isLoading);
+  const activeOperations = useObservable(
+    trainedModelsService.activeOperations$,
+    trainedModelsService.activeOperations
+  );
+
+  // Navigation blocker when there are active operations
+  useUnsavedChangesPrompt({
+    hasUnsavedChanges: activeOperations.length > 0,
+    openConfirm: overlays.openConfirm,
+    history,
+    http,
+    navigateToUrl,
+    messageText: i18n.translate('xpack.ml.trainedModels.modelsList.leavePageMessage', {
+      defaultMessage: 'You have active operations. Are you sure you want to leave this page?',
+    }),
+    titleText: i18n.translate('xpack.ml.trainedModels.modelsList.leavePageTitle', {
+      defaultMessage: 'You have active operations',
+    }),
+    confirmButtonText: i18n.translate('xpack.ml.trainedModels.modelsList.leavePageConfirmButton', {
+      defaultMessage: 'Leave',
+    }),
+    cancelButtonText: i18n.translate('xpack.ml.trainedModels.modelsList.leavePageCancelButton', {
+      defaultMessage: 'Cancel',
+    }),
+  });
 
   const nlpElserDocUrl = docLinks.links.ml.nlpElser;
 
