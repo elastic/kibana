@@ -165,7 +165,7 @@
     "unifiedDataTable": "src/platform/packages/shared/kbn-unified-data-table",
     "unsavedChangesBadge": "src/platform/packages/private/kbn-unsaved-changes-badge",
     "unsavedChangesPrompt": "src/platform/packages/shared/kbn-unsaved-changes-prompt",
-    "managedContentBadge": "packages/kbn-managed-content-badge",
+    "managedContentBadge": "src/platform/packages/private/kbn-managed-content-badge",
     "responseOpsRuleForm": "packages/response-ops/rule_form"
   },
   "translations": []
