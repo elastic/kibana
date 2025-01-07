@@ -10,5 +10,5 @@
 module.exports = {
   preset: '@kbn/test',
   rootDir: '../../../../../../..',
-  roots: ['<rootDir>/packages/shared-ux/code_editor'],
+  roots: ['<rootDir>/src/platform/packages/shared/shared-ux/code_editor'],
 };
