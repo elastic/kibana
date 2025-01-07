@@ -103,7 +103,7 @@ describe('ActionsClientLlm', () => {
       expect(actionsClient.execute).toHaveBeenCalledWith({
         actionId: 'mock-connector-id',
         params: {
-          subAction: 'completion',
+          subAction: 'unified_completion',
           subActionParams: {
             body: {
               messages: [

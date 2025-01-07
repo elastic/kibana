@@ -49,7 +49,7 @@ import { chunksIntoMessage, eventSourceStreamIntoObservable } from './helpers';
 export class InferenceConnector extends SubActionConnector<Config, Secrets> {
   // Not using Axios
   protected getResponseErrorMessage(error: AxiosError): string {
-    throw new Error(error.message ?? 'Method not implemented.');
+    throw new Error(error.message || 'Method not implemented.');
   }
 
   private inferenceId;
@@ -134,7 +134,7 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
       }),
       tap((line) => {
         if ('error' in line) {
-          throw new Error(line.error.message ?? line.error.reason ?? 'Unknown error');
+          throw new Error(line.error.message || line.error.reason || 'Unknown error');
         }
         if (
           'choices' in line &&
