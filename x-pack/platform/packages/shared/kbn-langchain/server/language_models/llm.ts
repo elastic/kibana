@@ -96,7 +96,7 @@ export class ActionsClientLlm extends LLM {
       params:
         this.llmType === 'inference'
           ? {
-              subAction: 'completion',
+              subAction: 'unified_completion',
               subActionParams: {
                 body: {
                   model: this.model,
