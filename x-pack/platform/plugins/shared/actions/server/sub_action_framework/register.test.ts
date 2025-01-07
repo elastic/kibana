@@ -117,7 +117,29 @@ describe('Registration', () => {
     });
   });
 
-  it('add support for setting the kibana privileges for system connectors', async () => {
+  it('registers a sub-feature connector correctly', async () => {
+    register<TestConfig, TestSecrets>({
+      actionTypeRegistry,
+      connector: { ...connector, subFeature: 'endpointSecurity' },
+      configurationUtilities: mockedActionsConfig,
+      logger,
+    });
+
+    expect(actionTypeRegistry.register).toHaveBeenCalledTimes(1);
+    expect(actionTypeRegistry.register).toHaveBeenCalledWith({
+      id: connector.id,
+      name: connector.name,
+      minimumLicenseRequired: connector.minimumLicenseRequired,
+      supportedFeatureIds: connector.supportedFeatureIds,
+      validate: expect.anything(),
+      executor: expect.any(Function),
+      getService: expect.any(Function),
+      renderParameterTemplates: expect.any(Function),
+      subFeature: 'endpointSecurity',
+    });
+  });
+
+  it('add support for setting the kibana privileges', async () => {
     const getKibanaPrivileges = () => ['my-privilege'];
 
     register<TestConfig, TestSecrets>({

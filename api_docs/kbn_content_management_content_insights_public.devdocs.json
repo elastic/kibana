@@ -65,13 +65,7 @@
                     "label": "http",
                     "description": [],
                     "signature": [
-                      {
-                        "pluginId": "@kbn/core-http-browser",
-                        "scope": "public",
-                        "docId": "kibKbnCoreHttpBrowserPluginApi",
-                        "section": "def-public.HttpSetup",
-                        "text": "HttpSetup"
-                      }
+                      "HttpSetup"
                     ],
                     "path": "packages/content-management/content_insights/content_insights_public/src/client.ts",
                     "deprecated": false,
