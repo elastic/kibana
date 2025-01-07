@@ -86,12 +86,13 @@ const createSLORoute = createSloServerRoute({
     },
   },
   params: createSLOParamsSchema,
-  handler: async ({ context, response, params, logger, request, plugins, corePlugins }) => {
+  handler: async ({ context, params, logger, request, plugins, corePlugins }) => {
     await assertPlatinumLicense(plugins);
 
     const sloContext = await context.slo;
     const dataViews = await plugins.dataViews.start();
     const core = await context.core;
+    const userId = core.security.authc.getCurrentUser()?.username!;
     const scopedClusterClient = core.elasticsearch.client;
     const esClient = core.elasticsearch.client.asCurrentUser;
     const soClient = core.savedObjects.client;
@@ -127,7 +128,8 @@ const createSLORoute = createSloServerRoute({
       summaryTransformManager,
       logger,
       spaceId,
-      basePath
+      basePath,
+      userId
     );
 
     return await executeWithErrorHandler(() => createSLO.execute(params.body));
@@ -153,6 +155,7 @@ const inspectSLORoute = createSloServerRoute({
     const core = await context.core;
     const scopedClusterClient = core.elasticsearch.client;
     const esClient = core.elasticsearch.client.asCurrentUser;
+    const userId = core.security.authc.getCurrentUser()?.username!;
     const soClient = core.savedObjects.client;
     const repository = new KibanaSavedObjectsSLORepository(soClient, logger);
     const dataViewsService = await dataViews.dataViewsServiceFactory(soClient, esClient);
@@ -181,7 +184,8 @@ const inspectSLORoute = createSloServerRoute({
       summaryTransformManager,
       logger,
       spaceId,
-      basePath
+      basePath,
+      userId
     );
 
     return await executeWithErrorHandler(() => createSLO.inspect(params.body));
@@ -208,6 +212,8 @@ const updateSLORoute = createSloServerRoute({
     const core = await context.core;
     const scopedClusterClient = core.elasticsearch.client;
     const esClient = core.elasticsearch.client.asCurrentUser;
+    const userId = core.security.authc.getCurrentUser()?.username!;
+
     const soClient = core.savedObjects.client;
     const dataViewsService = await dataViews.dataViewsServiceFactory(soClient, esClient);
     const repository = new KibanaSavedObjectsSLORepository(soClient, logger);
@@ -236,7 +242,8 @@ const updateSLORoute = createSloServerRoute({
       scopedClusterClient,
       logger,
       spaceId,
-      basePath
+      basePath,
+      userId
     );
 
     return await executeWithErrorHandler(() => updateSLO.execute(params.path.id, params.body));
