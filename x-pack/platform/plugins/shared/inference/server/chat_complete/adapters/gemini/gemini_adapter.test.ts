@@ -239,6 +239,86 @@ describe('geminiAdapter', () => {
       ]);
     });
 
+    it('correctly formats content parts', () => {
+      geminiAdapter.chatComplete({
+        executor: executorMock,
+        logger,
+        messages: [
+          {
+            role: MessageRole.User,
+            content: [
+              {
+                type: 'text',
+                text: 'question',
+              },
+            ],
+          },
+          {
+            role: MessageRole.Assistant,
+            content: 'answer',
+          },
+          {
+            role: MessageRole.User,
+            content: [
+              {
+                type: 'image',
+                source: {
+                  data: 'aaaaaa',
+                  mimeType: 'image/png',
+                },
+              },
+              {
+                type: 'image',
+                source: {
+                  data: 'bbbbbb',
+                  mimeType: 'image/png',
+                },
+              },
+            ],
+          },
+        ],
+      });
+
+      expect(executorMock.invoke).toHaveBeenCalledTimes(1);
+
+      const { messages } = getCallParams();
+      expect(messages).toEqual([
+        {
+          parts: [
+            {
+              text: 'question',
+            },
+          ],
+          role: 'user',
+        },
+        {
+          parts: [
+            {
+              text: 'answer',
+            },
+          ],
+          role: 'assistant',
+        },
+        {
+          parts: [
+            {
+              inlineData: {
+                data: 'aaaaaa',
+                mimeType: 'image/png',
+              },
+            },
+            {
+              inlineData: {
+                data: 'bbbbbb',
+                mimeType: 'image/png',
+              },
+            },
+          ],
+          role: 'user',
+        },
+      ]);
+    });
+
     it('groups messages from the same user', () => {
       geminiAdapter.chatComplete({
         logger,
