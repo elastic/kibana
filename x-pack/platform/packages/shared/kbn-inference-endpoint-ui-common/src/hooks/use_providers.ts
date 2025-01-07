@@ -7,10 +7,10 @@
 
 import type { HttpSetup } from '@kbn/core-http-browser';
 import { useQuery } from '@tanstack/react-query';
-import { FieldType, InferenceProvider } from '@kbn/inference-endpoint-ui-common';
 import { KibanaServerError } from '@kbn/kibana-utils-plugin/common';
-import { useKibana } from './use_kibana';
-import * as i18n from './translations';
+import { IToasts } from '@kbn/core/public';
+import { FieldType, InferenceProvider } from '../..';
+import * as i18n from '../translations';
 
 const getProviders = (http: HttpSetup): InferenceProvider[] => {
   return [
@@ -624,9 +624,7 @@ const getProviders = (http: HttpSetup): InferenceProvider[] => {
   ];
 };
 
-export const useProviders = () => {
-  const { services } = useKibana();
-  const toasts = services.notifications?.toasts;
+export const useProviders = (http: HttpSetup, toasts: IToasts) => {
   const onErrorFn = (error: { body: KibanaServerError }) => {
     toasts?.addError(new Error(error.body.message), {
       title: i18n.GET_PROVIDERS_FAILED,
@@ -635,7 +633,7 @@ export const useProviders = () => {
   };
 
   const query = useQuery(['user-profile'], {
-    queryFn: () => getProviders(services.http),
+    queryFn: () => getProviders(http),
     staleTime: Infinity,
     refetchOnWindowFocus: false,
     onError: onErrorFn,
