@@ -6,7 +6,7 @@
  */
 
 import React, { useState } from 'react';
-import type { StoryFn } from '@storybook/react';
+import type { StoryObj } from '@storybook/react';
 
 import { KibanaReactStorybookDecorator } from '../../../utils/kibana_react.storybook_decorator';
 import { AutoRefreshButton as Component } from './auto_refresh_button';
@@ -17,7 +17,7 @@ export default {
   decorators: [KibanaReactStorybookDecorator],
 };
 
-const Template: StoryFn<typeof Component> = () => {
+const Template = () => {
   const [isAutoRefreshing, setIsAutoRefreshing] = useState(true);
 
   const toggleEnabled = () => {
@@ -32,7 +32,7 @@ const defaultProps = {
   disabled: false,
 };
 
-export const AutoRefreshButton = {
+export const AutoRefreshButton: StoryObj = {
   render: Template,
   args: defaultProps,
 };
