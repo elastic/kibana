@@ -714,9 +714,6 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
     } = this.state;
     const { http, taggingApi, allowedTypes, applications } = this.props;
 
-    // @TODO: remove
-    // console.log(`--@@applications.capabilities`, applications?.capabilities);
-
     const selectionConfig = {
       onSelectionChange: this.onSelectionChanged,
     };

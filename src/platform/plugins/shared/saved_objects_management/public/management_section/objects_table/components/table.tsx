@@ -387,7 +387,7 @@ export class Table extends PureComponent<TableProps, TableState> {
         return (
           <FormattedMessage
             id="savedObjectsManagement.objectsTable.table.hasMlObjects.deleteDisabledTooltip"
-            defaultMessage="Navigate to the Machine Learning management page to delete machine learning objects."
+            defaultMessage="Navigate to the Machine Learning management pages to delete machine learning jobs."
           />
         );
       }
@@ -401,14 +401,27 @@ export class Table extends PureComponent<TableProps, TableState> {
       }
     };
     const disabledExportTooltip = () => {
-      if (hasMlObjects) {
-        return (
-          <FormattedMessage
-            id="savedObjectsManagement.objectsTable.table.hasMlObjects.exportDisabledTooltip"
-            defaultMessage="Navigate to the Machine Learning management page to export machine learning objects."
-          />
+      const messages = [];
+      if (selectedSavedObjects.some(({ type }) => type === 'ml-job')) {
+        messages.push(
+          i18n.translate('savedObjectsManagement.objectsTable.table.mlJob.exportDisabledTooltip', {
+            defaultMessage:
+              'Navigate to the Machine Learning managements pages to export machine learning jobs.',
+          })
         );
       }
+      if (selectedSavedObjects.some(({ type }) => type === 'ml-trained-model')) {
+        messages.push(
+          i18n.translate(
+            'savedObjectsManagement.objectsTable.table.mlTrainedModel.exportDisabledTooltip',
+            {
+              defaultMessage: 'Trained model saved objects cannot be exported.',
+            }
+          )
+        );
+      }
+
+      return messages.join(' ');
     };
     const button = (
       <EuiToolTip
