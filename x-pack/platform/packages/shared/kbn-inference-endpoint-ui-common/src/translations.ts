@@ -127,3 +127,10 @@ export const RE_ENTER_SECRETS = (label: string) => {
     values: { label },
   });
 };
+
+export const GET_PROVIDERS_FAILED = i18n.translate(
+  'xpack.searchInferenceEndpoints.addEndpoint.unableToFindProvidersQueryMessage',
+  {
+    defaultMessage: 'Unable to find providers',
+  }
+);

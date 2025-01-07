@@ -10,8 +10,6 @@ import { InferenceServiceFormFields } from '@kbn/inference-endpoint-ui-common';
 import { type ActionConnectorFieldsProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { useKibana } from '@kbn/triggers-actions-ui-plugin/public';
 
-import { useProviders } from './providers/get_providers';
-
 const InferenceAPIConnectorFields: React.FunctionComponent<ActionConnectorFieldsProps> = ({
   isEdit,
 }) => {
@@ -20,11 +18,7 @@ const InferenceAPIConnectorFields: React.FunctionComponent<ActionConnectorFields
     notifications: { toasts },
   } = useKibana().services;
 
-  const { data: providers, isLoading } = useProviders(http, toasts);
-
-  return !isLoading ? (
-    <InferenceServiceFormFields providers={providers ?? []} isEdit={isEdit} />
-  ) : null;
+  return <InferenceServiceFormFields http={http} isEdit={isEdit} toasts={toasts} />;
 };
 
 // eslint-disable-next-line import/no-default-export

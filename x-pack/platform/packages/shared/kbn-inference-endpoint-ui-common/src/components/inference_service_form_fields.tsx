@@ -26,8 +26,9 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ConnectorFormSchema } from '@kbn/triggers-actions-ui-plugin/public';
 
+import { HttpSetup, IToasts } from '@kbn/core/public';
 import * as LABELS from '../translations';
-import { Config, ConfigEntryView, FieldType, InferenceProvider, Secrets } from '../types/types';
+import { Config, ConfigEntryView, FieldType, Secrets } from '../types/types';
 import { SERVICE_PROVIDERS } from './providers/render_service_provider/service_provider';
 import { DEFAULT_TASK_TYPE, ServiceProviderKeys } from '../constants';
 import { SelectableProvider } from './providers/selectable';
@@ -36,16 +37,20 @@ import { ConfigurationFormItems } from './configuration/configuration_form_items
 import { AdditionalOptionsFields } from './additional_options_fields';
 import { ProviderSecretHiddenField } from './hidden_fields/provider_secret_hidden_field';
 import { ProviderConfigHiddenField } from './hidden_fields/provider_config_hidden_field';
+import { useProviders } from './hooks/use_providers';
 
 interface InferenceServicesProps {
-  providers: InferenceProvider[];
+  http: HttpSetup;
+  toasts: IToasts;
   isEdit?: boolean;
 }
 
 export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
-  providers,
+  http,
+  toasts,
   isEdit,
 }) => {
+  const { data: providers, isLoading } = useProviders(http, toasts);
   const [isProviderPopoverOpen, setProviderPopoverOpen] = useState(false);
   const [providerSchema, setProviderSchema] = useState<ConfigEntryView[]>([]);
   const [taskTypeOptions, setTaskTypeOptions] = useState<TaskTypeOption[]>([]);
@@ -350,7 +355,7 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
                 className="rightArrowIcon"
               >
                 <SelectableProvider
-                  providers={providers}
+                  providers={providers ?? []}
                   onClosePopover={closeProviderPopover}
                   onProviderChange={onProviderChange}
                 />
