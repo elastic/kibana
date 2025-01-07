@@ -304,8 +304,9 @@
             "label": "security",
             "description": [],
             "signature": [
+              "Pick<",
               "RouteSecurity",
-              " | undefined"
+              ", \"authz\"> | undefined"
             ],
             "path": "src/core/packages/http/server/src/versioning/types.ts",
             "deprecated": false,
@@ -3804,10 +3805,6 @@
                 "path": "x-pack/platform/plugins/shared/stack_connectors/server/routes/get_well_known_email_service.ts"
               },
               {
-                "plugin": "stackConnectors",
-                "path": "x-pack/platform/plugins/shared/stack_connectors/server/routes/get_inference_services.ts"
-              },
-              {
                 "plugin": "customBranding",
                 "path": "x-pack/platform/plugins/private/custom_branding/server/routes/info.ts"
               },
@@ -4561,6 +4558,14 @@
               },
               {
                 "plugin": "@kbn/core",
+                "path": "src/core/packages/http/server-internal/src/http_server.test.ts"
+              },
+              {
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/http/server-internal/src/http_server.test.ts"
+              },
+              {
+                "plugin": "@kbn/core",
                 "path": "src/core/packages/http/router-server-internal/src/versioned_router/core_versioned_route.test.ts"
               },
               {
@@ -4650,10 +4655,6 @@
               {
                 "plugin": "ruleRegistry",
                 "path": "x-pack/platform/plugins/shared/rule_registry/server/routes/__mocks__/server.ts"
-              },
-              {
-                "plugin": "stackConnectors",
-                "path": "x-pack/platform/plugins/shared/stack_connectors/server/routes/get_inference_services.test.ts"
               },
               {
                 "plugin": "stackConnectors",
@@ -11403,14 +11404,6 @@
               },
               {
                 "plugin": "security",
-                "path": "x-pack/platform/plugins/shared/security/server/routes/authentication/common.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/platform/plugins/shared/security/server/routes/authentication/common.ts"
-              },
-              {
-                "plugin": "security",
                 "path": "x-pack/platform/plugins/shared/security/server/routes/authentication/oidc.ts"
               },
               {
@@ -11784,14 +11777,6 @@
               {
                 "plugin": "ml",
                 "path": "x-pack/platform/plugins/shared/ml/server/lib/capabilities/capabilities_switcher.ts"
-              },
-              {
-                "plugin": "@kbn/core",
-                "path": "src/core/packages/http/router-server-internal/src/request.test.ts"
-              },
-              {
-                "plugin": "@kbn/core",
-                "path": "src/core/packages/http/router-server-internal/src/request.test.ts"
               },
               {
                 "plugin": "@kbn/core",
@@ -14402,6 +14387,10 @@
               {
                 "plugin": "@kbn/core",
                 "path": "src/core/packages/http/router-server-internal/src/versioned_router/core_versioned_router.ts"
+              },
+              {
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/http/router-server-internal/src/versioned_router/core_versioned_route.test.ts"
               },
               {
                 "plugin": "@kbn/core",
@@ -18216,9 +18205,9 @@
         "label": "RouteSecurityGetter",
         "description": [],
         "signature": [
-          "(request: { headers: ",
+          "(request?: { headers: ",
           "Headers",
-          "; query?: unknown; }) => ",
+          "; query?: unknown; } | undefined) => ",
           "RouteSecurity",
           " | undefined"
         ],
@@ -18237,7 +18226,7 @@
             "signature": [
               "{ headers: ",
               "Headers",
-              "; query?: unknown; }"
+              "; query?: unknown; } | undefined"
             ],
             "path": "src/core/packages/http/server/src/router/request.ts",
             "deprecated": false,
