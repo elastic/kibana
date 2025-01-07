@@ -8,7 +8,7 @@
 import { expect, tags } from '@kbn/scout';
 import { test, testData, assertionMessages } from '../fixtures';
 
-test.describe.only(
+test.describe(
   'Discover app - value suggestions: useTimeRange enabled',
   { tag: tags.DEPLOYMENT_AGNOSTIC },
   () => {
