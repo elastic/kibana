@@ -484,17 +484,24 @@ export class SessionIndex {
     const indexStats = await this.options.elasticsearchClient.indices.stats();
     const securityIndexShardsExist = indexStats._shards.total > 0;
 
+    let error: Error | undefined;
+    let indexNeedsRefresh = false;
+
     if (!securityIndexShardsExist) {
+      const shardMissingCounter = taskInstance.state?.shardMissingCounter ?? 0;
+      if (shardMissingCounter > 10) {
+        logger.error('Session index shards are still missing, skipping session cleanup.');
+        return;
+      }
+
       logger.debug('No shards found for session index, skipping session cleanup.');
       return {
         state: {
-          missingShardError: true,
+          shardMissingCounter: +1,
         },
       };
     }
 
-    let error: Error | undefined;
-    let indexNeedsRefresh = false;
     try {
       for await (const sessionValues of this.getSessionValuesInBatches()) {
         const operations = sessionValues.map(({ _id, _source }) => {
