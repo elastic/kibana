@@ -15,8 +15,6 @@ import type {
   InfraTimerangeInput,
   SnapshotCustomMetricInput,
 } from '../../../../../common/http_api';
-import type { LogQueryFields } from '../../../metrics/types';
-import type { InfraSource } from '../../../sources';
 import { createRequest } from './create_request';
 import type { AdditionalContext } from '../../common/utils';
 import { doFieldsExist, KUBERNETES_POD_UID, termsAggField } from '../../common/utils';
@@ -81,8 +79,8 @@ export const getData = async (
   nodeType: InventoryItemType,
   metric: SnapshotMetricType,
   timerange: InfraTimerangeInput,
-  source: InfraSource,
-  logQueryFields: LogQueryFields | undefined,
+  metricIndices: string,
+  logIndices: string,
   compositeSize: number,
   condition: InventoryMetricConditions,
   logger: Logger,
@@ -119,8 +117,8 @@ export const getData = async (
         nodeType,
         metric,
         timerange,
-        source,
-        logQueryFields,
+        metricIndices,
+        logIndices,
         compositeSize,
         condition,
         logger,
@@ -133,10 +131,7 @@ export const getData = async (
     return previous;
   };
 
-  const index =
-    metric === 'logRate' && logQueryFields
-      ? logQueryFields.indexPattern
-      : source.configuration.metricAlias;
+  const index = metric === 'logRate' ? logIndices : metricIndices;
 
   const fieldsExisted =
     nodeType === 'pod'

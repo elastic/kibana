@@ -36,7 +36,6 @@ import { getCustomMetricLabel } from '../../../../common/formatters/get_custom_m
 import { METRIC_FORMATTERS } from '../../../../common/formatters/snapshot_metric_formats';
 import { toMetricOpt } from '../../../../common/snapshot_metric_i18n';
 import type { InfraBackendLibs, InfraLocators } from '../../infra_types';
-import type { LogQueryFields } from '../../metrics/types';
 import {
   buildErrorAlertReason,
   buildFiredAlertReason,
@@ -114,11 +113,40 @@ export const createInventoryMetricThresholdExecutor =
 
     const esClient = services.scopedClusterClient.asCurrentUser;
 
-    const { savedObjectsClient, alertsClient } = services;
+    const { savedObjectsClient, alertsClient, getDataViews } = services;
+
+    const searchSourceClient = await services.getSearchSourceClient();
 
     if (!alertsClient) {
       throw new AlertsClientError();
     }
+
+    let ruleDataView;
+    let metricDataView;
+    let logDataView;
+
+    if (params.searchConfiguration) {
+      const initialSearchSource = await searchSourceClient.create(params.searchConfiguration);
+      ruleDataView = initialSearchSource.getField('index')!;
+      const { timeFieldName } = ruleDataView;
+      const dataViewIndexPattern = ruleDataView.getIndexPattern();
+
+      if (!dataViewIndexPattern) {
+        throw new Error('No matched data view');
+      } else if (!timeFieldName) {
+        throw new Error('The selected data view does not have a timestamp field');
+      }
+    } else {
+      metricDataView = await (await getDataViews()).get('infra_rules_data_view');
+      logDataView = await (await getDataViews()).get('log_rules_data_view');
+    }
+
+    const metricIndices = ruleDataView
+      ? ruleDataView.getIndexPattern()
+      : metricDataView.getIndexPattern();
+    const logIndices = ruleDataView
+      ? ruleDataView.getIndexPattern()
+      : logDataView.getIndexPattern();
 
     if (!params.filterQuery && params.filterQueryText) {
       try {
@@ -162,23 +190,6 @@ export const createInventoryMetricThresholdExecutor =
         return { state: {} };
       }
     }
-    const source = await libs.sources.getSourceConfiguration(savedObjectsClient, sourceId);
-
-    const [, { logsShared, logsDataAccess }] = await libs.getStartServices();
-
-    const logSourcesService =
-      logsDataAccess.services.logSourcesServiceFactory.getLogSourcesService(savedObjectsClient);
-
-    const logQueryFields: LogQueryFields | undefined = await logsShared.logViews
-      .getClient(savedObjectsClient, esClient, logSourcesService)
-      .getResolvedLogView({
-        type: 'log-view-reference',
-        logViewId: sourceId,
-      })
-      .then(
-        ({ indices }) => ({ indexPattern: indices }),
-        () => undefined
-      );
 
     const compositeSize = libs.configuration.alerting.inventory_threshold.group_by_page_size;
     const { dateEnd } = getTimeRange();
@@ -191,9 +202,9 @@ export const createInventoryMetricThresholdExecutor =
           executionTimestamp: new Date(dateEnd),
           filterQuery,
           logger,
-          logQueryFields,
           nodeType,
-          source,
+          metricIndices,
+          logIndices,
         })
       )
     );

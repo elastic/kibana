@@ -11,8 +11,6 @@ import type { Logger } from '@kbn/logging';
 import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 import type { InventoryMetricConditions } from '../../../../common/alerting/metrics';
 import type { InfraTimerangeInput } from '../../../../common/http_api';
-import type { LogQueryFields } from '../../metrics/types';
-import type { InfraSource } from '../../sources';
 import { calculateFromBasedOnMetric } from './lib/calculate_from_based_on_metric';
 import { getData } from './lib/get_data';
 import type { AdditionalContext } from '../common/utils';
@@ -29,8 +27,8 @@ export type ConditionResult = InventoryMetricConditions & {
 export const evaluateCondition = async ({
   condition,
   nodeType,
-  source,
-  logQueryFields,
+  metricIndices,
+  logIndices,
   esClient,
   compositeSize,
   filterQuery,
@@ -40,8 +38,8 @@ export const evaluateCondition = async ({
 }: {
   condition: InventoryMetricConditions;
   nodeType: InventoryItemType;
-  source: InfraSource;
-  logQueryFields: LogQueryFields | undefined;
+  metricIndices: string;
+  logIndices: string;
   esClient: ElasticsearchClient;
   compositeSize: number;
   filterQuery?: string;
@@ -67,8 +65,8 @@ export const evaluateCondition = async ({
     nodeType,
     metric,
     timerange,
-    source,
-    logQueryFields,
+    metricIndices,
+    logIndices,
     compositeSize,
     condition,
     logger,

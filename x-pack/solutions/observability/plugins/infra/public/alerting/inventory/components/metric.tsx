@@ -26,8 +26,8 @@ import { debounce } from 'lodash';
 import React, { useCallback, useMemo, useState } from 'react';
 import type { IErrorObject } from '@kbn/triggers-actions-ui-plugin/public';
 import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import { HOST_METRICS_DOC_HREF } from '../../../common/visualizations';
-import { useMetricsDataViewContext } from '../../../containers/metrics_source';
 import { getCustomMetricLabel } from '../../../../common/formatters/get_custom_metric_label';
 import type {
   SnapshotCustomAggregation,
@@ -47,6 +47,7 @@ interface Props {
   onChange: (metric?: string) => void;
   onChangeCustom: (customMetric?: SnapshotCustomMetricInput) => void;
   customMetric?: SnapshotCustomMetricInput;
+  dataView: DataView;
   popupPosition?:
     | 'upCenter'
     | 'upLeft'
@@ -98,12 +99,12 @@ export const MetricExpression = ({
   onChangeCustom,
   popupPosition,
   nodeType,
+  dataView,
 }: Props) => {
   const [popoverOpen, setPopoverOpen] = useState(false);
   const [customMetricTabOpen, setCustomMetricTabOpen] = useState(metric?.value === 'custom');
   const [selectedOption, setSelectedOption] = useState(metric?.value);
   const [fieldDisplayedCustomLabel, setFieldDisplayedCustomLabel] = useState(customMetric?.label);
-  const { metricsView } = useMetricsDataViewContext();
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const firstFieldOption = {
@@ -115,10 +116,10 @@ export const MetricExpression = ({
 
   const fieldOptions = useMemo(
     () =>
-      (metricsView?.fields ?? [])
+      (dataView.fields ?? [])
         .filter((f) => f.aggregatable && f.type === 'number' && !(customMetric?.field === f.name))
         .map((f) => ({ label: f.name })),
-    [metricsView?.fields, customMetric?.field]
+    [dataView.fields, customMetric?.field]
   );
 
   const expressionDisplayValue = useMemo(() => {
