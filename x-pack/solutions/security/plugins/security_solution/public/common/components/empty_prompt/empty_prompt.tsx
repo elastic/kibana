@@ -50,13 +50,13 @@ const useEmptyPromptStyles = () => {
 
   const flexItemStyles = css`
     background: ${euiTheme.colors.backgroundBaseSubdued};
-    padding: 20px;
+    padding: ${euiTheme.base * 1.25}px;
   `;
 
   const cardStyles = css`
     img {
-      margin-top: 20px;
-      max-width: 400px;
+      margin-top: ${euiTheme.base * 1.25}px;
+      max-width: ${euiTheme.components.forms.maxWidth};
     }
   `;
 
@@ -67,7 +67,7 @@ const useEmptyPromptStyles = () => {
     }
     max-width: 600px;
     display: block;
-    margin: 20px auto 0;
+    margin: ${euiTheme.base * 1.25}px auto 0;
   `;
 
   return useMemo(
