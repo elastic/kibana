@@ -98,7 +98,7 @@
     "links": "src/platform/plugins/private/links",
     "newsfeed": "src/platform/plugins/shared/newsfeed",
     "presentationUtil": "src/platform/plugins/shared/presentation_util",
-    "randomSampling": "x-pack/packages/kbn-random-sampling",
+    "randomSampling": "x-pack/platform/packages/private/kbn-random-sampling",
     "reactPackages": "packages/react",
     "esqlEditor": "src/platform/packages/private/kbn-esql-editor",
     "esqlUtils": "src/platform/packages/shared/kbn-esql-utils",

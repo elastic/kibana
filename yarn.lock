@@ -6693,7 +6693,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/random-sampling@link:x-pack/packages/kbn-random-sampling":
+"@kbn/random-sampling@link:x-pack/platform/packages/private/kbn-random-sampling":
   version "0.0.0"
   uid ""
 
