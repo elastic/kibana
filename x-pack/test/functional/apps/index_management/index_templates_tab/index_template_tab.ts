@@ -47,11 +47,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.click('show-filters-button');
       await testSubjects.click('filter-option-h');
       // Navigate to the last step of the wizard
-      await testSubjects.click('nextButton');
-      await testSubjects.click('nextButton');
-      await testSubjects.click('nextButton');
-      await testSubjects.click('nextButton');
-      await testSubjects.click('nextButton');
+      await testSubjects.click('formWizardStep-5');
       await pageObjects.header.waitUntilLoadingHasFinished();
 
       expect(await testSubjects.getVisibleText('lifecycleValue')).to.be('7 hours');
@@ -72,11 +68,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.click('index_mode_logsdb');
 
       // Navigate to the last step of the wizard
-      await testSubjects.click('nextButton');
-      await testSubjects.click('nextButton');
-      await testSubjects.click('nextButton');
-      await testSubjects.click('nextButton');
-      await testSubjects.click('nextButton');
+      await testSubjects.click('formWizardStep-5');
       await pageObjects.header.waitUntilLoadingHasFinished();
 
       expect(await testSubjects.exists('indexModeTitle')).to.be(true);
