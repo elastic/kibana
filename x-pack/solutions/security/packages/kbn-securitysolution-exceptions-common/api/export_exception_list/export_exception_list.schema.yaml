@@ -17,17 +17,20 @@ paths:
           description: Exception list's identifier
           schema:
             $ref: '../model/exception_list_common.schema.yaml#/components/schemas/ExceptionListId'
+          example: 9e5fc75a-a3da-46c5-96e3-a2ec59c6bb85
         - name: list_id
           in: query
           required: true
           description: Exception list's human identifier
           schema:
             $ref: '../model/exception_list_common.schema.yaml#/components/schemas/ExceptionListHumanId'
+          example: simple_list
         - name: namespace_type
           in: query
           required: true
           schema:
             $ref: '../model/exception_list_common.schema.yaml#/components/schemas/ExceptionNamespaceType'
+          example: single
         - name: include_expired_exceptions
           in: query
           required: true
@@ -36,6 +39,7 @@ paths:
             type: string
             enum: ['true', 'false']
             default: 'true'
+          example: true
       responses:
         200:
           description: Successful response

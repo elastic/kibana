@@ -56,9 +56,7 @@ const expectedValidEsqlQuery =
   'from auditbeat* | stats _count=count(event.category) by event.category';
 
 // Skipping in MKI due to flake
-// Failing: See https://github.com/elastic/kibana/issues/184557
-// Failing: See https://github.com/elastic/kibana/issues/184556
-describe.skip(
+describe(
   'Detection ES|QL rules, edit',
   {
     tags: ['@ess', '@serverless', '@skipInServerlessMKI'],
@@ -130,7 +128,8 @@ describe.skip(
         });
       });
 
-      it('displays suppress options correctly on edit form and allows its editing', () => {
+      // Failing: See https://github.com/elastic/kibana/issues/184556
+      it.skip('displays suppress options correctly on edit form and allows its editing', () => {
         visit(RULES_MANAGEMENT_URL);
 
         interceptEsqlQueryFieldsRequest(expectedValidEsqlQuery, 'esqlSuppressionFieldsRequest');
@@ -174,7 +173,8 @@ describe.skip(
         });
       });
 
-      it('enables suppression on time interval', () => {
+      // Failing: See https://github.com/elastic/kibana/issues/184557
+      it.skip('enables suppression on time interval', () => {
         visit(RULES_MANAGEMENT_URL);
 
         interceptEsqlQueryFieldsRequest(expectedValidEsqlQuery, 'esqlSuppressionFieldsRequest');

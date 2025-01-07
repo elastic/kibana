@@ -19,6 +19,7 @@ paths:
             type: array
             items:
               $ref: '../model/exception_list_common.schema.yaml#/components/schemas/ExceptionListHumanId'
+          example: simple_list
         - name: filter
           in: query
           required: false
@@ -30,6 +31,7 @@ paths:
             items:
               $ref: '#/components/schemas/FindExceptionListItemsFilter'
             default: []
+          example: [exception-list.attributes.name:%My%20item]
         - name: namespace_type
           in: query
           required: false
@@ -41,11 +43,13 @@ paths:
             items:
               $ref: '../model/exception_list_common.schema.yaml#/components/schemas/ExceptionNamespaceType'
             default: [single]
+          example: [single]
         - name: search
           in: query
           required: false
           schema:
             type: string
+          example: host.name
         - name: page
           in: query
           required: false
@@ -53,6 +57,7 @@ paths:
           schema:
             type: integer
             minimum: 0
+          example: 1
         - name: per_page
           in: query
           required: false
@@ -60,12 +65,14 @@ paths:
           schema:
             type: integer
             minimum: 0
+          example: 20
         - name: sort_field
           in: query
           required: false
           description: Determines which field is used to sort the results
           schema:
             $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/primitives.schema.yaml#/components/schemas/NonEmptyString'
+          example: 'name'
         - name: sort_order
           in: query
           required: false
@@ -73,6 +80,7 @@ paths:
           schema:
             type: string
             enum: [desc, asc]
+          example: desc
       responses:
         200:
           description: Successful response
@@ -101,6 +109,37 @@ paths:
                   - page
                   - per_page
                   - total
+              examples:
+                simpleListItems:
+                  value:
+                    data:
+                      - id: 459c5e7e-f8b2-4f0b-b136-c1fc702f72da
+                        item_id: simple_list_item
+                        list_id: simple_list
+                        type: simple
+                        name: Sample Exception List Item
+                        description: This is a sample exception item.
+                        entries:
+                          - type: exists
+                            field: actingProcess.file.signer
+                            operator: excluded
+                          - type: match_any
+                            field: host.name
+                            value: [jupiter, saturn]
+                            operator: included
+                        namespace_type: single
+                        os_types: [linux]
+                        tags: [malware]
+                        comments: []
+                        _version: WzgsMV0=
+                        tie_breaker_id: ad0754ff-7b19-49ca-b73e-e6aff6bfa2d0
+                        created_at: 2025-01-07T21:12:25.512Z
+                        created_by: elastic
+                        updated_at: 2025-01-07T21:12:25.512Z
+                        updated_by: elastic
+                    page: 1
+                    per_page: 20
+                    total: 1
         400:
           description: Invalid input data response
           content:

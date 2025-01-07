@@ -1,6 +1,6 @@
 {
   "comments": [],
-  "description": "Test comments - exception list item",
+  "description": "Updated description",
   "entries": [
     {
       "field": "host.name",
@@ -10,7 +10,7 @@
     }
   ],
   "item_id": "simple_list_item",
-  "name": "Test comments - exception list item",
+  "name": "Updated name",
   "namespace_type": "single",
   "tags": [],
   "type": "simple"

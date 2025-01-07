@@ -255,7 +255,7 @@ export class Client {
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-   * Get a list of all exception lists.
+   * Get a list of all exception list containers.
    */
   async findExceptionLists(props: FindExceptionListsProps) {
     this.log.info(`${new Date().toISOString()} Calling API FindExceptionLists`);

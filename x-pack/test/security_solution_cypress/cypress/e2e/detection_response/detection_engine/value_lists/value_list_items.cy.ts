@@ -41,8 +41,7 @@ import {
 import { RULES_MANAGEMENT_URL } from '../../../../urls/rules_management';
 import { getDefaultUsername } from '../../../../tasks/common/users';
 
-// Failing: See https://github.com/elastic/kibana/issues/183713
-describe.skip(
+describe(
   'Value list items',
   {
     tags: ['@ess', '@serverless'],
@@ -122,7 +121,8 @@ describe.skip(
       );
     });
 
-    it('displays a toaster error when list item actions fail', () => {
+    // Failing: See https://github.com/elastic/kibana/issues/183713
+    it.skip('displays a toaster error when list item actions fail', () => {
       mockCreateListItemError();
       mockUpdateListItemError();
       mockDeleteListItemError();

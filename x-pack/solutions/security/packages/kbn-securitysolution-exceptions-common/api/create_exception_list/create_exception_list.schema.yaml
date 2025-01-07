@@ -20,6 +20,14 @@ paths:
           application/json:
             schema:
               type: object
+              example:
+                list_id: simple_list
+                type: detection
+                name: Sample Detection Exception List
+                description: This is a sample detection type exception list.
+                namespace_type: single
+                tags: [malware]
+                os_types: [linux]
               properties:
                 list_id:
                   $ref: '../model/exception_list_common.schema.yaml#/components/schemas/ExceptionListHumanId'
@@ -53,6 +61,25 @@ paths:
             application/json:
               schema:
                 $ref: '../model/exception_list_common.schema.yaml#/components/schemas/ExceptionList'
+              examples:
+                simpleList:
+                  value:
+                    id: 9e5fc75a-a3da-46c5-96e3-a2ec59c6bb85
+                    list_id: simple_list
+                    type: detection
+                    name: Sample Detection Exception List
+                    description: This is a sample detection type exception list.
+                    immutable: false
+                    namespace_type: single
+                    os_types: [linux]
+                    tags: [malware]
+                    version: 1
+                    _version: WzIsMV0=
+                    tie_breaker_id: 78f1aca1-f8ee-4eb5-9ceb-f5c3ee656cb3
+                    created_at: '2025-01-07T19:34:27.942Z'
+                    created_by: elastic
+                    updated_at: '2025-01-07T19:34:27.942Z'
+                    updated_by: elastic
         400:
           description: Invalid input data response
           content:

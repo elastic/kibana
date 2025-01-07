@@ -67,8 +67,7 @@ const workaroundForResizeObserver = () =>
     }
   });
 
-// Failing: See https://github.com/elastic/kibana/issues/184558
-describe.skip(
+describe(
   'Detection ES|QL rules, creation',
   {
     tags: ['@ess', '@serverless', '@skipInServerlessMKI'],
@@ -215,7 +214,8 @@ describe.skip(
         login();
         visit(CREATE_RULE_URL);
       });
-      it('shows custom ES|QL field in investigation fields autocomplete and saves it in rule', function () {
+      // Failing: See https://github.com/elastic/kibana/issues/184558
+      xit('shows custom ES|QL field in investigation fields autocomplete and saves it in rule', function () {
         const CUSTOM_ESQL_FIELD = '_custom_agent_name';
         const queryWithCustomFields = [
           `from auditbeat* metadata _id, _version, _index`,
@@ -248,7 +248,8 @@ describe.skip(
         login();
         visit(CREATE_RULE_URL);
       });
-      it('shows custom ES|QL field in investigation fields autocomplete and saves it in rule', function () {
+      // Failing: See https://github.com/elastic/kibana/issues/184558
+      xit('shows custom ES|QL field in investigation fields autocomplete and saves it in rule', function () {
         const CUSTOM_ESQL_FIELD = '_custom_agent_name';
         const SUPPRESS_BY_FIELDS = [CUSTOM_ESQL_FIELD, 'agent.type'];
 

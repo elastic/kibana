@@ -57,6 +57,19 @@ paths:
                 - name
                 - description
                 - entries
+            example:
+              comments: []
+              description: Updated description
+              entries:
+                - field: host.name
+                  type: match
+                  value: rock01
+                  operator: included
+              item_id: simple_list_item
+              name: Updated name
+              namespace_type: single
+              tags: []
+              type: simple
       responses:
         200:
           description: Successful response
@@ -64,6 +77,30 @@ paths:
             application/json:
               schema:
                 $ref: '../model/exception_list_common.schema.yaml#/components/schemas/ExceptionListItem'
+              examples:
+                simpleListItem:
+                  value:
+                    id: 459c5e7e-f8b2-4f0b-b136-c1fc702f72da
+                    item_id: simple_list_item
+                    list_id: simple_list
+                    type: simple
+                    name: Updated name
+                    description: Updated description
+                    entries:
+                      - type: match
+                        field: host.name
+                        value: rock01
+                        operator: included
+                    namespace_type: single
+                    os_types: []
+                    tags: []
+                    comments: []
+                    _version: WzEyLDFd
+                    tie_breaker_id: ad0754ff-7b19-49ca-b73e-e6aff6bfa2d0
+                    created_at: 2025-01-07T21:12:25.512Z
+                    created_by: elastic
+                    updated_at: 2025-01-07T21:34:50.233Z
+                    updated_by: elastic
         400:
           description: Invalid input data response
           content:

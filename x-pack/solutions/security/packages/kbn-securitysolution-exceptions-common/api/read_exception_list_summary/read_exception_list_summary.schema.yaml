@@ -17,24 +17,28 @@ paths:
           description: Exception list's identifier generated upon creation
           schema:
             $ref: '../model/exception_list_common.schema.yaml#/components/schemas/ExceptionListId'
+          example: 9e5fc75a-a3da-46c5-96e3-a2ec59c6bb85
         - name: list_id
           in: query
           required: false
           description: Exception list's human readable identifier
           schema:
             $ref: '../model/exception_list_common.schema.yaml#/components/schemas/ExceptionListHumanId'
+          example: simple_list
         - name: namespace_type
           in: query
           required: false
           schema:
             $ref: '../model/exception_list_common.schema.yaml#/components/schemas/ExceptionNamespaceType'
             default: single
+          example: single
         - name: filter
           in: query
           required: false
           description: Search filter clause
           schema:
             type: string
+          example: exception-list-agnostic.attributes.tags:"policy:policy-1" OR exception-list-agnostic.attributes.tags:"policy:all"
       responses:
         200:
           description: Successful response
@@ -55,6 +59,13 @@ paths:
                   total:
                     type: integer
                     minimum: 0
+              examples:
+                summary:
+                  value:
+                    windows: 0
+                    linux: 0
+                    macos: 0
+                    total: 0
         400:
           description: Invalid input data response
           content:

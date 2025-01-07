@@ -31,18 +31,21 @@ paths:
           schema:
             type: boolean
             default: false
+          example: false
         - name: overwrite_exceptions
           in: query
           required: false
           schema:
             type: boolean
             default: false
+          example: false
         - name: overwrite_action_connectors
           in: query
           required: false
           schema:
             type: boolean
             default: false
+          example: false
         - name: as_new_list
           in: query
           required: false
@@ -53,6 +56,7 @@ paths:
           schema:
             type: boolean
             default: false
+          example: false
       responses:
         200:
           description: Successful response
@@ -86,6 +90,16 @@ paths:
                   - success_count_exception_lists
                   - success_exception_list_items
                   - success_count_exception_list_items
+              examples:
+                summary:
+                  value:
+                    errors: []
+                    success: true
+                    success_count: 2
+                    success_exception_lists: true,
+                    success_count_exception_lists: 1
+                    success_exception_list_items: true
+                    success_count_exception_list_items: 1
         400:
           description: Invalid input data response
           content:

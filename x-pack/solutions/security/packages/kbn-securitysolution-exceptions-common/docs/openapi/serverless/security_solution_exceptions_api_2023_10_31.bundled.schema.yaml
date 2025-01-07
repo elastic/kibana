@@ -29,6 +29,28 @@ paths:
         content:
           application/json:
             schema:
+              example:
+                items:
+                  - description: This is a sample detection type exception item.
+                    entries:
+                      - field: actingProcess.file.signer
+                        operator: excluded
+                        type: exists
+                      - field: host.name
+                        operator: included
+                        type: match_any
+                        value:
+                          - saturn
+                          - jupiter
+                    item_id: simple_list_item
+                    list_id: simple_list
+                    name: Sample Exception List Item
+                    namespace_type: single
+                    os_types:
+                      - linux
+                    tags:
+                      - malware
+                    type: simple
               type: object
               properties:
                 items:
@@ -37,12 +59,44 @@ paths:
                   type: array
               required:
                 - items
-        description: Rule exception list items
+        description: Rule exception items.
         required: true
       responses:
         '200':
           content:
             application/json:
+              examples:
+                simpleList:
+                  value:
+                    items:
+                      - _version: WzQsMV0=
+                        comments: []
+                        created_at: 2025-01-07T20:07:33.119Z
+                        created_by: elastic
+                        description: This is a sample detection type exception item.
+                        entries:
+                          - field: actingProcess.file.signer
+                            operator: excluded
+                            type: exists
+                          - field: host.name
+                            operator: included
+                            type: match_any
+                            value:
+                              - saturn
+                              - jupiter
+                        id: 71a9f4b2-c85c-49b4-866f-c71eb9e67da2
+                        item_id: simple_list_item
+                        list_id: simple_list
+                        name: Sample Exception List Item
+                        namespace_type: single
+                        os_types:
+                          - linux
+                        tags:
+                          - malware
+                        tie_breaker_id: 09434836-9db9-4942-a234-5a9268e0b34c
+                        type: simple
+                        updated_at: 2025-01-07T20:07:33.119Z
+                        updated_by: elastic
               schema:
                 items:
                   $ref: '#/components/schemas/ExceptionListItem'
@@ -74,7 +128,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/SiemErrorResponse'
           description: Internal server error response
-      summary: Create rule exception list items
+      summary: Create rule exception items
       tags:
         - Security Exceptions API
   /api/exception_lists:
@@ -83,18 +137,21 @@ paths:
       operationId: DeleteExceptionList
       parameters:
         - description: Either `id` or `list_id` must be specified
+          example: 71a9f4b2-c85c-49b4-866f-c71eb9e67da2
           in: query
           name: id
           required: false
           schema:
             $ref: '#/components/schemas/ExceptionListId'
         - description: Either `id` or `list_id` must be specified
+          example: simple_list
           in: query
           name: list_id
           required: false
           schema:
             $ref: '#/components/schemas/ExceptionListHumanId'
-        - in: query
+        - example: single
+          in: query
           name: namespace_type
           required: false
           schema:
@@ -104,6 +161,27 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                simpleList:
+                  value:
+                    _version: WzIsMV0=
+                    created_at: 2025-01-07T19:34:27.942Z
+                    created_by: elastic
+                    description: This is a sample detection type exception list.
+                    id: 9e5fc75a-a3da-46c5-96e3-a2ec59c6bb85
+                    immutable: false
+                    list_id: simple_list
+                    name: Sample Detection Exception List
+                    namespace_type: single
+                    os_types:
+                      - linux
+                    tags:
+                      - malware
+                    tie_breaker_id: 78f1aca1-f8ee-4eb5-9ceb-f5c3ee656cb3
+                    type: detection
+                    updated_at: 2025-01-07T19:34:27.942Z
+                    updated_by: elastic
+                    version: 1
               schema:
                 $ref: '#/components/schemas/ExceptionList'
           description: Successful response
@@ -130,6 +208,11 @@ paths:
         '404':
           content:
             application/json:
+              examples:
+                notFound:
+                  value:
+                    message: 'exception list list_id: simple-list does not exist'
+                    status_code: 404
               schema:
                 $ref: '#/components/schemas/SiemErrorResponse'
           description: Exception list not found response
@@ -147,18 +230,21 @@ paths:
       operationId: ReadExceptionList
       parameters:
         - description: Either `id` or `list_id` must be specified
+          example: 9e5fc75a-a3da-46c5-96e3-a2ec59c6bb85
           in: query
           name: id
           required: false
           schema:
             $ref: '#/components/schemas/ExceptionListId'
         - description: Either `id` or `list_id` must be specified
+          example: simple_list
           in: query
           name: list_id
           required: false
           schema:
             $ref: '#/components/schemas/ExceptionListHumanId'
-        - in: query
+        - example: single
+          in: query
           name: namespace_type
           required: false
           schema:
@@ -168,6 +254,27 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                simpleList:
+                  value:
+                    _version: WzIsMV0=
+                    created_at: 2025-01-07T19:34:27.942Z
+                    created_by: elastic
+                    description: This is a sample detection type exception list.
+                    id: 9e5fc75a-a3da-46c5-96e3-a2ec59c6bb85
+                    immutable: false
+                    list_id: simple_list
+                    name: Sample Detection Exception List
+                    namespace_type: single
+                    os_types:
+                      - linux
+                    tags:
+                      - malware
+                    tie_breaker_id: 78f1aca1-f8ee-4eb5-9ceb-f5c3ee656cb3
+                    type: detection
+                    updated_at: 2025-01-07T19:34:27.942Z
+                    updated_by: elastic
+                    version: 1
               schema:
                 $ref: '#/components/schemas/ExceptionList'
           description: Successful response
@@ -225,6 +332,16 @@ paths:
         content:
           application/json:
             schema:
+              example:
+                description: This is a sample detection type exception list.
+                list_id: simple_list
+                name: Sample Detection Exception List
+                namespace_type: single
+                os_types:
+                  - linux
+                tags:
+                  - malware
+                type: detection
               type: object
               properties:
                 description:
@@ -258,6 +375,27 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                simpleList:
+                  value:
+                    _version: WzIsMV0=
+                    created_at: '2025-01-07T19:34:27.942Z'
+                    created_by: elastic
+                    description: This is a sample detection type exception list.
+                    id: 9e5fc75a-a3da-46c5-96e3-a2ec59c6bb85
+                    immutable: false
+                    list_id: simple_list
+                    name: Sample Detection Exception List
+                    namespace_type: single
+                    os_types:
+                      - linux
+                    tags:
+                      - malware
+                    tie_breaker_id: 78f1aca1-f8ee-4eb5-9ceb-f5c3ee656cb3
+                    type: detection
+                    updated_at: '2025-01-07T19:34:27.942Z'
+                    updated_by: elastic
+                    version: 1
               schema:
                 $ref: '#/components/schemas/ExceptionList'
           description: Successful response
@@ -303,6 +441,15 @@ paths:
         content:
           application/json:
             schema:
+              example:
+                description: Different description
+                list_id: simple_list
+                name: Updated exception list name
+                os_types:
+                  - linux
+                tags:
+                  - draft malware
+                type: detection
               type: object
               properties:
                 _version:
@@ -339,6 +486,26 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                simpleList:
+                  value:
+                    _version: WzExLDFd
+                    created_at: 2025-01-07T20:43:55.264Z
+                    created_by: elastic
+                    description: Different description
+                    id: fa7f545f-191b-4d32-b1f0-c7cd62a79e55
+                    immutable: false
+                    list_id: simple_list
+                    name: Updated exception list name
+                    namespace_type: single
+                    os_types: []
+                    tags:
+                      - draft malware
+                    tie_breaker_id: 319fe983-acdd-4806-b6c4-3098eae9392f
+                    type: detection
+                    updated_at: 2025-01-07T21:32:03.726Z
+                    updated_by: elastic
+                    version: 2
               schema:
                 $ref: '#/components/schemas/ExceptionList'
           description: Successful response
@@ -383,12 +550,14 @@ paths:
       operationId: DuplicateExceptionList
       parameters:
         - description: Exception list's human identifier
+          example: simple_list
           in: query
           name: list_id
           required: true
           schema:
             $ref: '#/components/schemas/ExceptionListHumanId'
-        - in: query
+        - example: single
+          in: query
           name: namespace_type
           required: true
           schema:
@@ -396,6 +565,7 @@ paths:
         - description: >-
             Determines whether to include expired exceptions in the exported
             list
+          example: true
           in: query
           name: include_expired_exceptions
           required: true
@@ -432,6 +602,17 @@ paths:
               schema:
                 $ref: '#/components/schemas/PlatformErrorResponse'
           description: Not enough privileges response
+        '404':
+          content:
+            application/json:
+              examples:
+                notFound:
+                  value:
+                    message": 'exception list id: "foo" does not exist'
+                    status_code": 404
+              schema:
+                $ref: '#/components/schemas/PlatformErrorResponse'
+          description: Exception list not found
         '405':
           content:
             application/json:
@@ -453,18 +634,21 @@ paths:
       operationId: ExportExceptionList
       parameters:
         - description: Exception list's identifier
+          example: 9e5fc75a-a3da-46c5-96e3-a2ec59c6bb85
           in: query
           name: id
           required: true
           schema:
             $ref: '#/components/schemas/ExceptionListId'
         - description: Exception list's human identifier
+          example: simple_list
           in: query
           name: list_id
           required: true
           schema:
             $ref: '#/components/schemas/ExceptionListHumanId'
-        - in: query
+        - example: single
+          in: query
           name: namespace_type
           required: true
           schema:
@@ -472,6 +656,7 @@ paths:
         - description: >-
             Determines whether to include expired exceptions in the exported
             list
+          example: true
           in: query
           name: include_expired_exceptions
           required: true
@@ -529,7 +714,7 @@ paths:
         - Security Exceptions API
   /api/exception_lists/_find:
     get:
-      description: Get a list of all exception lists.
+      description: Get a list of all exception list containers.
       operationId: FindExceptionLists
       parameters:
         - description: >
@@ -545,6 +730,7 @@ paths:
 
             - `exception-list-agnostic`: Specify an exception list that is
             shared across spaces.
+          example: exception-list.attributes.name:%Detection%20List
           in: query
           name: filter
           required: false
@@ -555,6 +741,7 @@ paths:
             with a Kibana space
 
             or available in all spaces (`agnostic` or `single`)
+          example: single
           in: query
           name: namespace_type
           required: false
@@ -565,6 +752,7 @@ paths:
               $ref: '#/components/schemas/ExceptionNamespaceType'
             type: array
         - description: The page number to return
+          example: 1
           in: query
           name: page
           required: false
@@ -572,6 +760,7 @@ paths:
             minimum: 1
             type: integer
         - description: The number of exception lists to return per page
+          example: 20
           in: query
           name: per_page
           required: false
@@ -579,12 +768,14 @@ paths:
             minimum: 1
             type: integer
         - description: Determines which field is used to sort the results
+          example: name
           in: query
           name: sort_field
           required: false
           schema:
             type: string
         - description: Determines the sort order, which can be `desc` or `asc`
+          example: desc
           in: query
           name: sort_order
           required: false
@@ -597,6 +788,30 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                simpleLists:
+                  value:
+                    data:
+                      - id: 9e5fc75a-a3da-46c5-96e3-a2ec59c6bb85
+                      - list_id: simple_list
+                      - type: detection
+                      - name: Detection Exception List
+                      - description: This is a sample detection type exception list.
+                      - immutable: false
+                      - namespace_type: single
+                      - os_types: []
+                      - tags:
+                          - malware
+                      - version: 1
+                      - _version: WzIsMV0=
+                      - tie_breaker_id: 78f1aca1-f8ee-4eb5-9ceb-f5c3ee656cb3
+                      - created_at: '2025-01-07T19:34:27.942Z'
+                      - created_by: elastic
+                      - updated_at: '2025-01-07T19:34:27.942Z'
+                      - updated_by: elastic
+                    page: 1
+                    per_page: 20
+                    total: 1
               schema:
                 type: object
                 properties:
@@ -659,19 +874,22 @@ paths:
 
             If any exception items have the same `item_id`, those are also
             overwritten.
+          example: false
           in: query
           name: overwrite
           required: false
           schema:
             default: false
             type: boolean
-        - in: query
+        - example: false
+          in: query
           name: overwrite_exceptions
           required: false
           schema:
             default: false
             type: boolean
-        - in: query
+        - example: false
+          in: query
           name: overwrite_action_connectors
           required: false
           schema:
@@ -685,6 +903,7 @@ paths:
             the exception
 
             list and its items are overwritten.
+          example: false
           in: query
           name: as_new_list
           required: false
@@ -706,6 +925,16 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                summary:
+                  value:
+                    errors: []
+                    success: true
+                    success_count: 2
+                    success_count_exception_list_items: 1
+                    success_count_exception_lists: 1
+                    success_exception_list_items: true
+                    success_exception_lists: true,
               schema:
                 type: object
                 properties:
@@ -770,18 +999,21 @@ paths:
       operationId: DeleteExceptionListItem
       parameters:
         - description: Either `id` or `item_id` must be specified
+          example: 71a9f4b2-c85c-49b4-866f-c71eb9e67da2
           in: query
           name: id
           required: false
           schema:
             $ref: '#/components/schemas/ExceptionListItemId'
         - description: Either `id` or `item_id` must be specified
+          example: simple_list_item
           in: query
           name: item_id
           required: false
           schema:
             $ref: '#/components/schemas/ExceptionListItemHumanId'
-        - in: query
+        - example: single
+          in: query
           name: namespace_type
           required: false
           schema:
@@ -791,6 +1023,37 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                simpleListItem:
+                  value:
+                    _version: WzQsMV0=
+                    comments: []
+                    created_at: 2025-01-07T20:07:33.119Z
+                    created_by: elastic
+                    description: This is a sample detection type exception item.
+                    entries:
+                      - field: actingProcess.file.signer
+                        operator: excluded
+                        type: exists
+                      - field: host.name
+                        operator: included
+                        type: match_any
+                        value:
+                          - saturn
+                          - jupiter
+                    id: 71a9f4b2-c85c-49b4-866f-c71eb9e67da2
+                    item_id: simple_list_item
+                    list_id: simple_list
+                    name: Sample Exception List Item
+                    namespace_type: single
+                    os_types:
+                      - linux
+                    tags:
+                      - malware
+                    tie_breaker_id: 09434836-9db9-4942-a234-5a9268e0b34c
+                    type: simple
+                    updated_at: 2025-01-07T20:07:33.119Z
+                    updated_by: elastic
               schema:
                 $ref: '#/components/schemas/ExceptionListItem'
           description: Successful response
@@ -836,18 +1099,21 @@ paths:
       operationId: ReadExceptionListItem
       parameters:
         - description: Either `id` or `item_id` must be specified
+          example: 71a9f4b2-c85c-49b4-866f-c71eb9e67da2
           in: query
           name: id
           required: false
           schema:
             $ref: '#/components/schemas/ExceptionListItemId'
         - description: Either `id` or `item_id` must be specified
+          example: simple_list_item
           in: query
           name: item_id
           required: false
           schema:
             $ref: '#/components/schemas/ExceptionListItemHumanId'
-        - in: query
+        - example: single
+          in: query
           name: namespace_type
           required: false
           schema:
@@ -857,6 +1123,37 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                simpleListItem:
+                  value:
+                    _version: WzQsMV0=
+                    comments: []
+                    created_at: 2025-01-07T20:07:33.119Z
+                    created_by: elastic
+                    description: This is a sample detection type exception item.
+                    entries:
+                      - field: actingProcess.file.signer
+                        operator: excluded
+                        type: exists
+                      - field: host.name
+                        operator: included
+                        type: match_any
+                        value:
+                          - saturn
+                          - jupiter
+                    id: 71a9f4b2-c85c-49b4-866f-c71eb9e67da2
+                    item_id: simple_list_item
+                    list_id: simple_list
+                    name: Sample Exception List Item
+                    namespace_type: single
+                    os_types:
+                      - linux
+                    tags:
+                      - malware
+                    tie_breaker_id: 09434836-9db9-4942-a234-5a9268e0b34c
+                    type: simple
+                    updated_at: 2025-01-07T20:07:33.119Z
+                    updated_by: elastic
               schema:
                 $ref: '#/components/schemas/ExceptionListItem'
           description: Successful response
@@ -908,6 +1205,27 @@ paths:
         content:
           application/json:
             schema:
+              example:
+                description: This is a sample detection type exception item.
+                entries:
+                  - field: actingProcess.file.signer
+                    operator: excluded
+                    type: exists
+                  - field: host.name
+                    operator: included
+                    type: match_any
+                    value:
+                      - saturn
+                      - jupiter
+                item_id: simple_list_item
+                list_id: simple_list
+                name: Sample Exception List Item
+                namespace_type: single
+                os_types:
+                  - linux
+                tags:
+                  - malware
+                type: simple
               type: object
               properties:
                 comments:
@@ -951,6 +1269,37 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                simpleListItem:
+                  value:
+                    _version: WzQsMV0=
+                    comments: []
+                    created_at: 2025-01-07T20:07:33.119Z
+                    created_by: elastic
+                    description: This is a sample detection type exception item.
+                    entries:
+                      - field: actingProcess.file.signer
+                        operator: excluded
+                        type: exists
+                      - field: host.name
+                        operator: included
+                        type: match_any
+                        value:
+                          - saturn
+                          - jupiter
+                    id: 71a9f4b2-c85c-49b4-866f-c71eb9e67da2
+                    item_id: simple_list_item
+                    list_id: simple_list
+                    name: Sample Exception List Item
+                    namespace_type: single
+                    os_types:
+                      - linux
+                    tags:
+                      - malware
+                    tie_breaker_id: 09434836-9db9-4942-a234-5a9268e0b34c
+                    type: simple
+                    updated_at: 2025-01-07T20:07:33.119Z
+                    updated_by: elastic
               schema:
                 $ref: '#/components/schemas/ExceptionListItem'
           description: Successful response
@@ -995,6 +1344,19 @@ paths:
       requestBody:
         content:
           application/json:
+            example:
+              comments: []
+              description: Updated description
+              entries:
+                - field: host.name
+                  operator: included
+                  type: match
+                  value: rock01
+              item_id: simple_list_item
+              name: Updated name
+              namespace_type: single
+              tags: []
+              type: simple
             schema:
               type: object
               properties:
@@ -1043,6 +1405,30 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                simpleListItem:
+                  value:
+                    _version: WzEyLDFd
+                    comments: []
+                    created_at: 2025-01-07T21:12:25.512Z
+                    created_by: elastic
+                    description: Updated description
+                    entries:
+                      - field: host.name
+                        operator: included
+                        type: match
+                        value: rock01
+                    id: 459c5e7e-f8b2-4f0b-b136-c1fc702f72da
+                    item_id: simple_list_item
+                    list_id: simple_list
+                    name: Updated name
+                    namespace_type: single
+                    os_types: []
+                    tags: []
+                    tie_breaker_id: ad0754ff-7b19-49ca-b73e-e6aff6bfa2d0
+                    type: simple
+                    updated_at: 2025-01-07T21:34:50.233Z
+                    updated_by: elastic
               schema:
                 $ref: '#/components/schemas/ExceptionListItem'
           description: Successful response
@@ -1087,6 +1473,7 @@ paths:
       operationId: FindExceptionListItems
       parameters:
         - description: List's id
+          example: simple_list
           in: query
           name: list_id
           required: true
@@ -1099,6 +1486,8 @@ paths:
             field,
 
             using the `<field name>:<field value>` syntax.
+          example:
+            - exception-list.attributes.name:%My%20item
           in: query
           name: filter
           required: false
@@ -1112,6 +1501,8 @@ paths:
             with a Kibana space
 
             or available in all spaces (`agnostic` or `single`)
+          example:
+            - single
           in: query
           name: namespace_type
           required: false
@@ -1121,12 +1512,14 @@ paths:
             items:
               $ref: '#/components/schemas/ExceptionNamespaceType'
             type: array
-        - in: query
+        - example: host.name
+          in: query
           name: search
           required: false
           schema:
             type: string
         - description: The page number to return
+          example: 1
           in: query
           name: page
           required: false
@@ -1134,6 +1527,7 @@ paths:
             minimum: 0
             type: integer
         - description: The number of exception list items to return per page
+          example: 20
           in: query
           name: per_page
           required: false
@@ -1141,12 +1535,14 @@ paths:
             minimum: 0
             type: integer
         - description: Determines which field is used to sort the results
+          example: name
           in: query
           name: sort_field
           required: false
           schema:
             $ref: '#/components/schemas/NonEmptyString'
         - description: Determines the sort order, which can be `desc` or `asc`
+          example: desc
           in: query
           name: sort_order
           required: false
@@ -1159,6 +1555,41 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                simpleListItems:
+                  value:
+                    data:
+                      - _version: WzgsMV0=
+                        comments: []
+                        created_at: 2025-01-07T21:12:25.512Z
+                        created_by: elastic
+                        description: This is a sample exception item.
+                        entries:
+                          - field: actingProcess.file.signer
+                            operator: excluded
+                            type: exists
+                          - field: host.name
+                            operator: included
+                            type: match_any
+                            value:
+                              - jupiter
+                              - saturn
+                        id: 459c5e7e-f8b2-4f0b-b136-c1fc702f72da
+                        item_id: simple_list_item
+                        list_id: simple_list
+                        name: Sample Exception List Item
+                        namespace_type: single
+                        os_types:
+                          - linux
+                        tags:
+                          - malware
+                        tie_breaker_id: ad0754ff-7b19-49ca-b73e-e6aff6bfa2d0
+                        type: simple
+                        updated_at: 2025-01-07T21:12:25.512Z
+                        updated_by: elastic
+                    page: 1
+                    per_page: 20
+                    total: 1
               schema:
                 type: object
                 properties:
@@ -1224,24 +1655,30 @@ paths:
       operationId: ReadExceptionListSummary
       parameters:
         - description: Exception list's identifier generated upon creation
+          example: 9e5fc75a-a3da-46c5-96e3-a2ec59c6bb85
           in: query
           name: id
           required: false
           schema:
             $ref: '#/components/schemas/ExceptionListId'
         - description: Exception list's human readable identifier
+          example: simple_list
           in: query
           name: list_id
           required: false
           schema:
             $ref: '#/components/schemas/ExceptionListHumanId'
-        - in: query
+        - example: single
+          in: query
           name: namespace_type
           required: false
           schema:
             $ref: '#/components/schemas/ExceptionNamespaceType'
             default: single
         - description: Search filter clause
+          example: >-
+            exception-list-agnostic.attributes.tags:"policy:policy-1" OR
+            exception-list-agnostic.attributes.tags:"policy:all"
           in: query
           name: filter
           required: false
@@ -1251,6 +1688,13 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                summary:
+                  value:
+                    linux: 0
+                    macos: 0
+                    total: 0
+                    windows: 0
               schema:
                 type: object
                 properties:
