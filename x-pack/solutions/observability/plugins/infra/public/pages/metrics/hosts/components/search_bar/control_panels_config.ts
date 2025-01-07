@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ControlPanels } from '@kbn/observability-shared-plugin/public';
+import type { ControlPanels } from '@kbn/observability-shared-plugin/public';
 
 export const availableControlsPanels = {
   HOST_OS_NAME: 'host.os.name',

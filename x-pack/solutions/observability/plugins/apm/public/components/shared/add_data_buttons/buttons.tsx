@@ -8,16 +8,15 @@
 // Disabling it for now until the EUI team fixes it
 /* eslint-disable @elastic/eui/href-or-on-click */
 
-import { EuiButton, EuiButtonSize } from '@elastic/eui';
+import type { EuiButtonSize } from '@elastic/eui';
+import { EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { OBSERVABILITY_ONBOARDING_LOCATOR } from '@kbn/deeplinks-observability';
-import { LocatorPublic } from '@kbn/share-plugin/common';
+import type { LocatorPublic } from '@kbn/share-plugin/common';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
-import {
-  ApmOnboardingLocatorCategory,
-  ApmOnboardingLocatorParams,
-} from '../../../locator/onboarding_locator';
+import type { ApmOnboardingLocatorParams } from '../../../locator/onboarding_locator';
+import { ApmOnboardingLocatorCategory } from '../../../locator/onboarding_locator';
 
 export const addApmDataProps = (locator: LocatorPublic<ApmOnboardingLocatorParams> | undefined) => {
   return {

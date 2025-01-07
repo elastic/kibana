@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { fromKueryExpression } from '@kbn/es-query';
 import React, { useEffect, useState } from 'react';
-import { QuerySuggestion } from '@kbn/unified-search-plugin/public';
+import type { QuerySuggestion } from '@kbn/unified-search-plugin/public';
 import { AutocompleteField } from '@kbn/observability-plugin/public';
 import { useEuiTheme } from '@elastic/eui';
 import { useMetricsDataViewContext } from '../../../../containers/metrics_source';

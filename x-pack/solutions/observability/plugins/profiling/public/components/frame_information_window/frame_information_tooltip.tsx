@@ -6,7 +6,8 @@
  */
 import { EuiFlyout, EuiFlyoutBody } from '@elastic/eui';
 import React from 'react';
-import { FrameInformationWindow, Props as FrameInformationWindowProps } from '.';
+import type { Props as FrameInformationWindowProps } from '.';
+import { FrameInformationWindow } from '.';
 
 interface Props extends FrameInformationWindowProps {
   onClose: () => void;
