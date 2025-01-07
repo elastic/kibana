@@ -7985,7 +7985,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/visualizations-plugin@link:src/plugins/visualizations":
+"@kbn/visualizations-plugin@link:src/platform/plugins/shared/visualizations":
   version "0.0.0"
   uid ""
 
