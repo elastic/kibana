@@ -55,6 +55,7 @@ describe('UseInfiniteFindCaseUserActions', () => {
         data: {
           pages: [
             {
+              latestAttachments: [],
               userActions: [...findCaseUserActionsResponse.userActions],
               total: 30,
               perPage: 10,
