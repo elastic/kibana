@@ -5829,7 +5829,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/generate-csv@link:packages/kbn-generate-csv":
+"@kbn/generate-csv@link:src/platform/packages/private/kbn-generate-csv":
   version "0.0.0"
   uid ""
 
@@ -6781,39 +6781,39 @@
   version "0.0.0"
   uid ""
 
-"@kbn/reporting-common@link:packages/kbn-reporting/common":
+"@kbn/reporting-common@link:src/platform/packages/private/kbn-reporting/common":
   version "0.0.0"
   uid ""
 
-"@kbn/reporting-csv-share-panel@link:packages/kbn-reporting/get_csv_panel_actions":
+"@kbn/reporting-csv-share-panel@link:src/platform/packages/private/kbn-reporting/get_csv_panel_actions":
   version "0.0.0"
   uid ""
 
-"@kbn/reporting-export-types-csv-common@link:packages/kbn-reporting/export_types/csv_common":
+"@kbn/reporting-export-types-csv-common@link:src/platform/packages/private/kbn-reporting/export_types/csv_common":
   version "0.0.0"
   uid ""
 
-"@kbn/reporting-export-types-csv@link:packages/kbn-reporting/export_types/csv":
+"@kbn/reporting-export-types-csv@link:src/platform/packages/private/kbn-reporting/export_types/csv":
   version "0.0.0"
   uid ""
 
-"@kbn/reporting-export-types-pdf-common@link:packages/kbn-reporting/export_types/pdf_common":
+"@kbn/reporting-export-types-pdf-common@link:src/platform/packages/private/kbn-reporting/export_types/pdf_common":
   version "0.0.0"
   uid ""
 
-"@kbn/reporting-export-types-pdf@link:packages/kbn-reporting/export_types/pdf":
+"@kbn/reporting-export-types-pdf@link:src/platform/packages/private/kbn-reporting/export_types/pdf":
   version "0.0.0"
   uid ""
 
-"@kbn/reporting-export-types-png-common@link:packages/kbn-reporting/export_types/png_common":
+"@kbn/reporting-export-types-png-common@link:src/platform/packages/private/kbn-reporting/export_types/png_common":
   version "0.0.0"
   uid ""
 
-"@kbn/reporting-export-types-png@link:packages/kbn-reporting/export_types/png":
+"@kbn/reporting-export-types-png@link:src/platform/packages/private/kbn-reporting/export_types/png":
   version "0.0.0"
   uid ""
 
-"@kbn/reporting-mocks-server@link:packages/kbn-reporting/mocks_server":
+"@kbn/reporting-mocks-server@link:src/platform/packages/private/kbn-reporting/mocks_server":
   version "0.0.0"
   uid ""
 
@@ -6821,11 +6821,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/reporting-public@link:packages/kbn-reporting/public":
+"@kbn/reporting-public@link:src/platform/packages/private/kbn-reporting/public":
   version "0.0.0"
   uid ""
 
-"@kbn/reporting-server@link:packages/kbn-reporting/server":
+"@kbn/reporting-server@link:src/platform/packages/private/kbn-reporting/server":
   version "0.0.0"
   uid ""
 
@@ -6993,7 +6993,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/screenshotting-server@link:packages/kbn-screenshotting-server":
+"@kbn/screenshotting-server@link:src/platform/packages/private/kbn-screenshotting-server":
   version "0.0.0"
   uid ""
 
