@@ -28,7 +28,6 @@ import {
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFormRow,
   EuiSpacer,
   EuiPanel,
   EuiTitle,
@@ -64,7 +63,6 @@ import { mlJobServiceFactory } from '../services/job_service';
 import { mlResultsServiceProvider } from '../services/results_service';
 import { toastNotificationServiceProvider } from '../services/toast_notification_service';
 
-import { ForecastingModal } from './components/forecasting_modal/forecasting_modal';
 import { TimeseriesexplorerNoChartData } from './components/timeseriesexplorer_no_chart_data';
 import { TimeSeriesExplorerPage } from './timeseriesexplorer_page';
 import { TimeSeriesExplorerHelpPopover } from './timeseriesexplorer_help_popover';
@@ -115,6 +113,7 @@ export class TimeSeriesExplorer extends React.Component {
     tableInterval: PropTypes.string,
     tableSeverity: PropTypes.number,
     zoom: PropTypes.object,
+    handleJobSelectionChange: PropTypes.func,
   };
 
   state = getTimeseriesexplorerDefaultState();
@@ -1009,7 +1008,11 @@ export class TimeSeriesExplorer extends React.Component {
 
     if (selectedDetectorIndex === undefined || mlJobService.getJob(selectedJobId) === undefined) {
       return (
-        <TimeSeriesExplorerPage dateFormatTz={dateFormatTz} resizeRef={this.resizeRef}>
+        <TimeSeriesExplorerPage
+          handleJobSelectionChange={this.props.handleJobSelectionChange}
+          dateFormatTz={dateFormatTz}
+          resizeRef={this.resizeRef}
+        >
           <ExplorerNoJobsSelected />
         </TimeSeriesExplorerPage>
       );
@@ -1039,7 +1042,12 @@ export class TimeSeriesExplorer extends React.Component {
     this.previousShowModelBounds = showModelBounds;
 
     return (
-      <TimeSeriesExplorerPage dateFormatTz={dateFormatTz} resizeRef={this.resizeRef}>
+      <TimeSeriesExplorerPage
+        dateFormatTz={dateFormatTz}
+        resizeRef={this.resizeRef}
+        handleJobSelectionChange={this.props.handleJobSelectionChange}
+        selectedJobId={[selectedJobId]}
+      >
         {fieldNamesWithEmptyValues.length > 0 && (
           <>
             <EuiCallOut
@@ -1070,20 +1078,34 @@ export class TimeSeriesExplorer extends React.Component {
           setFunctionDescription={this.setFunctionDescription}
         >
           {arePartitioningFieldsProvided && (
-            <EuiFlexItem style={{ textAlign: 'right' }}>
-              <EuiFormRow hasEmptyLabelSpace style={{ maxWidth: '100%' }}>
-                <ForecastingModal
-                  job={selectedJob}
-                  jobState={selectedJob.state}
-                  detectorIndex={selectedDetectorIndex}
-                  entities={entityControls}
-                  earliestRecordTimestamp={selectedJob.data_counts.earliest_record_timestamp}
-                  latestRecordTimestamp={selectedJob.data_counts.latest_record_timestamp}
-                  setForecastId={this.setForecastId}
-                  className="forecast-controls"
-                  selectedForecastId={this.props.selectedForecastId}
-                />
-              </EuiFormRow>
+            <EuiFlexItem>
+              <TimeSeriesExplorerControls
+                forecastId={this.props.selectedForecastId}
+                selectedDetectorIndex={selectedDetectorIndex}
+                selectedEntities={selectedEntities}
+                selectedJob={selectedJob}
+                showAnnotationsCheckbox={showAnnotationsCheckbox}
+                showAnnotations={showAnnotations}
+                showForecastCheckbox={showForecastCheckbox}
+                showForecast={showForecast}
+                showModelBoundsCheckbox={showModelBoundsCheckbox}
+                showModelBounds={showModelBounds}
+                onShowModelBoundsChange={this.toggleShowModelBoundsHandler}
+                onShowAnnotationsChange={this.toggleShowAnnotationsHandler}
+                onShowForecastChange={this.toggleShowForecastHandler}
+                fullRefresh={fullRefresh}
+                loading={loading}
+                hasResults={hasResults}
+                setForecastId={this.setForecastId}
+                entities={entityControls}
+                jobs={jobs}
+                selectedJobId={selectedJobId}
+                // It seems like props below can be easily extracted from the selectedJob
+                // However, it seems like we are losing sync at some point and they need to be passed directly
+                jobState={selectedJob.state}
+                earliestRecordTimestamp={selectedJob.data_counts.earliest_record_timestamp}
+                latestRecordTimestamp={selectedJob.data_counts.latest_record_timestamp}
+              />
             </EuiFlexItem>
           )}
         </SeriesControls>
@@ -1181,22 +1203,6 @@ export class TimeSeriesExplorer extends React.Component {
                   <TimeSeriesExplorerHelpPopover />
                 </EuiFlexItem>
               </EuiFlexGroup>
-
-              <TimeSeriesExplorerControls
-                forecastId={this.props.selectedForecastId}
-                selectedDetectorIndex={selectedDetectorIndex}
-                selectedEntities={selectedEntities}
-                selectedJobId={selectedJobId}
-                showAnnotationsCheckbox={showAnnotationsCheckbox}
-                showAnnotations={showAnnotations}
-                showForecastCheckbox={showForecastCheckbox}
-                showForecast={showForecast}
-                showModelBoundsCheckbox={showModelBoundsCheckbox}
-                showModelBounds={showModelBounds}
-                onShowModelBoundsChange={this.toggleShowModelBoundsHandler}
-                onShowAnnotationsChange={this.toggleShowAnnotationsHandler}
-                onShowForecastChange={this.toggleShowForecastHandler}
-              />
 
               <TimeSeriesChartWithTooltips
                 chartProps={chartProps}
