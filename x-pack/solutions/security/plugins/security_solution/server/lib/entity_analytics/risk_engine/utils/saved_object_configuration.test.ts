@@ -21,6 +21,11 @@ describe('#getDefaultRiskEngineConfiguration', () => {
           "required": false,
           "type": "date",
         },
+        "event.ingested": Object {
+          "array": false,
+          "required": false,
+          "type": "date",
+        },
         "host.name": Object {
           "array": false,
           "required": false,

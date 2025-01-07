@@ -56,6 +56,13 @@ describe('AssetCriticalityDataClient', () => {
               criticality_level: {
                 type: 'keyword',
               },
+              event: {
+                properties: {
+                  ingested: {
+                    type: 'date',
+                  },
+                },
+              },
               '@timestamp': {
                 type: 'date',
                 ignore_malformed: false,
@@ -113,6 +120,9 @@ describe('AssetCriticalityDataClient', () => {
                 },
               },
             },
+          },
+          settings: {
+            default_pipeline: 'entity_analytics_create_eventIngest_from_timestamp-pipeline-default',
           },
         },
       });

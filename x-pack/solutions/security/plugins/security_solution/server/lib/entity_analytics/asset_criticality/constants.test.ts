@@ -27,6 +27,11 @@ describe('asset criticality - constants', () => {
           "required": false,
           "type": "keyword",
         },
+        "event.ingested": Object {
+          "array": false,
+          "required": false,
+          "type": "date",
+        },
         "host.asset.criticality": Object {
           "array": false,
           "required": false,
