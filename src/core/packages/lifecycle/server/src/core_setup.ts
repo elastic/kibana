@@ -40,7 +40,7 @@ import type { CoreStart } from './core_start';
  *                     consuming {@link Plugin}'s `TStart` type. Used by `getStartServices`.
  * @public
  */
-export interface CoreSetup<TPluginsStart extends object = object, TStart = unknown> {
+export interface CoreSetup<TPluginsStart extends Record<string, any> = {}, TStart = unknown> {
   /** {@link AnalyticsServiceSetup} */
   analytics: AnalyticsServiceSetup;
   /** {@link CapabilitiesSetup} */

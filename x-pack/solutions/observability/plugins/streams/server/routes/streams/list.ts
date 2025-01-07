@@ -28,7 +28,7 @@ export const listStreamsRoute = createServerRoute({
   handler: async ({ request, getScopedClients }): Promise<ListStreamsResponse> => {
     try {
       const { scopedClusterClient } = await getScopedClients({ request });
-      return listStreams({ scopedClusterClient });
+      return await listStreams({ scopedClusterClient });
     } catch (e) {
       if (e instanceof DefinitionNotFound) {
         throw notFound(e);

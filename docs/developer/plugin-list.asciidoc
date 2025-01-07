@@ -808,7 +808,7 @@ Elastic.
 |Welcome to the home of the runtime field editor and everything related to runtime fields!
 
 
-|{kib-repo}blob/{branch}/x-pack/platform/plugins/private/saved_objects_tagging/README.md[savedObjectsTagging]
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/shared/saved_objects_tagging/README.md[savedObjectsTagging]
 |Add tagging capability to saved objects
 
 
