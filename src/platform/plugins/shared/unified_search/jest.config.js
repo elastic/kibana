@@ -9,10 +9,10 @@
 
 module.exports = {
   preset: '@kbn/test',
-  rootDir: '../../..',
-  roots: ['<rootDir>/src/plugins/unified_search'],
-  coverageDirectory: '<rootDir>/target/kibana-coverage/jest/src/plugins/unified_search',
+  rootDir: '../../../../..',
+  roots: ['<rootDir>/src/platform/plugins/shared/unified_search'],
+  coverageDirectory: '<rootDir>/target/kibana-coverage/jest/src/platform/plugins/shared/unified_search',
   coverageReporters: ['text', 'html'],
-  collectCoverageFrom: ['<rootDir>/src/plugins/unified_search/public/**/*.{ts,tsx}'],
+  collectCoverageFrom: ['<rootDir>/src/platform/plugins/shared/unified_search/public/**/*.{ts,tsx}'],
   setupFiles: ['jest-canvas-mock'],
 };

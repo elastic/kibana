@@ -159,7 +159,7 @@
     "visualizationUiComponents": "packages/kbn-visualization-ui-components",
     "visualizationUtils": "packages/kbn-visualization-utils",
     "unifiedDocViewer": ["src/platform/plugins/shared/unified_doc_viewer", "src/platform/packages/shared/kbn-unified-doc-viewer"],
-    "unifiedSearch": "src/plugins/unified_search",
+    "unifiedSearch": "src/platform/plugins/shared/unified_search",
     "unifiedFieldList": "src/platform/packages/shared/kbn-unified-field-list",
     "unifiedHistogram": "src/platform/plugins/shared/unified_histogram",
     "unifiedDataTable": "src/platform/packages/shared/kbn-unified-data-table",
