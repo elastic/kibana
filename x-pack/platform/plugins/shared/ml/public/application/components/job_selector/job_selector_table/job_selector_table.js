@@ -24,7 +24,7 @@ import {
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import { useMlKibana } from '../../../contexts/kibana';
+import { useMlKibana } from '@kbn/ml-kibana-context';
 import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 import { PLUGIN_ID } from '@kbn/ml-common-constants/app';
 import { MlNodeAvailableWarningShared } from '../../node_available_warning';

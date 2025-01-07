@@ -36,8 +36,8 @@ import type { Datafeed, DatafeedId } from '@kbn/ml-common-types/anomaly_detectio
 import type { CREATED_BY_LABEL } from '@kbn/ml-common-constants/new_job';
 import { JOB_TYPE, SHARED_RESULTS_INDEX_NAME } from '@kbn/ml-common-constants/new_job';
 import type { MlCalendar } from '@kbn/ml-common-types/calendars';
+import type { MlApi } from '@kbn/ml-services/ml_api_service';
 import { createDatafeedId } from '../../../../../../common/util/job_utils';
-import type { MlApi } from '../../../../services/ml_api_service';
 import { getQueryFromSavedSearchObject } from '../../../../util/index_utils';
 import { combineFieldsAndAggs } from '../../../../../../common/util/fields_utils';
 import { createEmptyJob, createEmptyDatafeed } from './util/default_configs';

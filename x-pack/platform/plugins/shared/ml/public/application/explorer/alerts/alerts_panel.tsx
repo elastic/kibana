@@ -38,10 +38,10 @@ import {
   ALERT_ANOMALY_SCORE,
   ALERT_ANOMALY_TIMESTAMP,
 } from '@kbn/ml-common-constants/alerts';
+import { useMlKibana } from '@kbn/ml-kibana-context';
 import { AlertActions } from '../../../alerting/anomaly_detection_alerts_table/alert_actions';
 import { AlertsTableFlyoutBody } from '../../../alerting/anomaly_detection_alerts_table/flyout_body';
 import { CollapsiblePanel } from '../../components/collapsible_panel';
-import { useMlKibana } from '../../contexts/kibana';
 import { useAnomalyExplorerContext } from '../anomaly_explorer_context';
 import { AlertsSummary } from './alerts_summary';
 import { AnomalyDetectionAlertsOverviewChart } from './chart';

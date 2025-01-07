@@ -22,7 +22,7 @@ import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { DefaultAlertActions } from '@kbn/response-ops-alerts-table/components/default_alert_actions';
 import { STACK_MANAGEMENT_RULE_PAGE_URL_PREFIX } from '@kbn/response-ops-alerts-table/constants';
 import { PLUGIN_ID } from '@kbn/ml-common-constants/app';
-import { useMlKibana } from '../../application/contexts/kibana';
+import { useMlKibana } from '@kbn/ml-kibana-context';
 
 export const AlertActions: GetAlertsTableProp<'renderActionsCell'> = (props) => {
   const { alert, refresh } = props;

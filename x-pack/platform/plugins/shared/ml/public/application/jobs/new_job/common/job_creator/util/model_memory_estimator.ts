@@ -24,13 +24,13 @@ import { useEffect, useMemo } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { type MLHttpFetchError, extractErrorMessage } from '@kbn/ml-error-utils';
-
 import { DEFAULT_MODEL_MEMORY_LIMIT } from '@kbn/ml-common-constants/new_job';
+import { useMlKibana } from '@kbn/ml-kibana-context';
+import type { MlApi } from '@kbn/ml-services/ml_api_service';
+
 import type { JobValidator } from '../../job_validator/job_validator';
 import { VALIDATION_DELAY_MS } from '../../job_validator/job_validator';
-import { useMlKibana } from '../../../../../contexts/kibana';
 import type { JobCreator } from '../job_creator';
-import type { MlApi } from '../../../../../services/ml_api_service';
 
 export type CalculatePayload = Parameters<MlApi['calculateModelMemoryLimit$']>[0];
 

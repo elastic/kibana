@@ -15,7 +15,7 @@ import type { JobId } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
 import { ML_ALERT_TYPES } from '@kbn/ml-common-types/alerts';
 import { PLUGIN_ID } from '@kbn/ml-common-constants/app';
 import type { MlAnomalyDetectionAlertRule } from '@kbn/ml-common-types/alerts';
-import { useMlKibana } from '../application/contexts/kibana';
+import { useMlKibana } from '@kbn/ml-kibana-context';
 
 interface MlAnomalyAlertFlyoutProps {
   initialAlert?: MlAnomalyDetectionAlertRule & Rule;

@@ -26,10 +26,10 @@ import {
   DEFAULT_BUCKET_SPAN,
   DEFAULT_RARE_BUCKET_SPAN,
 } from '@kbn/ml-common-constants/new_job';
+import type { MlApi } from '@kbn/ml-services/ml_api_service';
 
 import { JobCreator } from './job_creator';
 import { createBasicDetector } from './util/default_configs';
-import type { MlApi } from '../../../../services/ml_api_service';
 import type { NewJobCapsService } from '../../../../services/new_job_capabilities/new_job_capabilities_service';
 
 import { getRichDetectors } from './util/general';

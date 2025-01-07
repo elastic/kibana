@@ -40,7 +40,7 @@ import { isValidLabel } from '../../../util/custom_url_utils';
 import type { TimeRangeType } from './constants';
 import { TIME_RANGE_TYPE, URL_TYPE } from './constants';
 import { CustomTimeRangePicker } from './custom_time_range_picker';
-import { useMlKibana } from '../../../contexts/kibana';
+import { useMlKibana } from '@kbn/ml-kibana-context';
 import { getDropDownOptions } from './get_dropdown_options';
 import { IntervalTimerangeSelector } from './interval_time_range_selector';
 

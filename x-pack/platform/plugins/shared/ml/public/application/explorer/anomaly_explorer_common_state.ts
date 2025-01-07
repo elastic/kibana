@@ -19,9 +19,9 @@ import { isEqual } from 'lodash';
 import type { InfluencersFilterQuery } from '@kbn/ml-anomaly-utils';
 import type { GlobalState, UrlStateService } from '@kbn/ml-url-state/src/url_state';
 import type { AnomalyExplorerFilterUrlState } from '@kbn/ml-common-types/locator';
+import type { MlJobService } from '@kbn/ml-services/job_service';
 
 import { StateService } from '../services/state_service';
-import type { MlJobService } from '../services/job_service';
 import type { GroupObj } from '../components/job_selector/job_selector';
 
 import { createJobs } from './explorer_utils';

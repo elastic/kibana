@@ -24,7 +24,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { AdditionalSettings, MlInferenceState } from '../types';
 import { SaveChangesButton } from './save_changes_button';
-import { useMlKibana } from '../../../contexts/kibana';
+import { useMlKibana } from '@kbn/ml-kibana-context';
 
 interface Props {
   condition?: string;

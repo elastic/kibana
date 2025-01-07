@@ -17,10 +17,10 @@ import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { isDefined } from '@kbn/ml-is-defined';
 import type { MlAnomalyDetectionJobsHealthRuleParams } from '@kbn/ml-common-types/alerts';
 import { ALL_JOBS_SELECTION } from '@kbn/ml-common-constants/alerts';
+import { useMlKibana } from '@kbn/ml-kibana-context';
 import { JobSelectorControl, type JobSelection } from '../job_selector';
 import { jobsApiProvider } from '../../application/services/ml_api_service/jobs';
 import { HttpService } from '../../application/services/http_service';
-import { useMlKibana } from '../../application/contexts/kibana';
 import { TestsSelectionControl } from './tests_selection_control';
 
 export type MlAnomalyAlertTriggerProps =

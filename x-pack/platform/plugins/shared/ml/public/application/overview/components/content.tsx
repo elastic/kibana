@@ -12,7 +12,7 @@ import { AnomalyDetectionPanel } from './anomaly_detection_panel';
 import { AnalyticsPanel } from './analytics_panel';
 import { AnomalyTimelineService } from '../../services/anomaly_timeline_service';
 import { mlResultsServiceProvider } from '../../services/results_service';
-import { useMlKibana } from '../../contexts/kibana';
+import { useMlKibana } from '@kbn/ml-kibana-context';
 import { useEnabledFeatures } from '../../contexts/ml';
 
 interface Props {

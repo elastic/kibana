@@ -21,13 +21,13 @@ import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import type { ExperimentalFeatures, MlFeatures, NLPSettings } from '@kbn/ml-common-constants/app';
 import { ML_STORAGE_KEYS } from '@kbn/ml-common-types/storage';
+import { getMlGlobalServices } from '@kbn/ml-services/get_services';
+import type { StartServices } from '@kbn/ml-kibana-context';
 import type { MlSetupDependencies, MlStartDependencies } from '../plugin';
 import { setLicenseCache } from './license';
 import { MlRouter } from './routing';
 import type { PageDependencies } from './routing/router';
 import { EnabledFeaturesContextProvider, MlServerInfoContextProvider } from './contexts/ml';
-import type { StartServices } from './contexts/kibana';
-import { getMlGlobalServices } from './util/get_services';
 import { MlTelemetryContextProvider } from './contexts/ml/ml_telemetry_context';
 import type { ManagementSectionId } from './management';
 
@@ -49,12 +49,6 @@ export interface AppProps {
 }
 
 const localStorage = new Storage(window.localStorage);
-
-export interface MlServicesContext {
-  mlServices: MlGlobalServices;
-}
-
-export type MlGlobalServices = ReturnType<typeof getMlGlobalServices>;
 
 export const App: FC<AppProps> = ({
   coreStart,

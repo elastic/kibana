@@ -25,6 +25,7 @@ import { mlTimefilterRefresh$ } from '@kbn/ml-date-picker';
 import type { InfluencersFilterQuery } from '@kbn/ml-anomaly-utils';
 import type { TimeBucketsInterval } from '@kbn/ml-time-buckets';
 import type { AnomalyExplorerSwimLaneUrlState } from '@kbn/ml-common-types/locator';
+import type { MlJobService } from '@kbn/ml-services/job_service';
 import type { AnomalyTimelineService } from '../services/anomaly_timeline_service';
 import type {
   AppStateSelectedCells,
@@ -38,7 +39,6 @@ import {
   SWIMLANE_TYPE,
   VIEW_BY_JOB_LABEL,
 } from './explorer_constants';
-import type { MlJobService } from '../services/job_service';
 import { getSelectionInfluencers, getSelectionTimeRange } from './explorer_utils';
 import type { Refresh } from '../routing/use_refresh';
 import { StateService } from '../services/state_service';
