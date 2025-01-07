@@ -66,7 +66,7 @@ To use the storage index adapter, instantiate it with an authenticated Elasticse
     storageSettings
   );
 
-  // get the client (which is shared across all adapters)
+  // get the client (its interface is shared across all adapters)
   const client = adapter.getClient();
 
   const response = await client.search('operation_name', {
