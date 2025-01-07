@@ -19,7 +19,6 @@ import {
   EuiFormRow,
   EuiPopover,
   EuiPopoverFooter,
-  EuiPopoverTitle,
 } from '@elastic/eui';
 
 import { css } from '@emotion/react';
@@ -95,7 +94,6 @@ export function FiltersNotificationPopover({ api }: { api: FiltersNotificationAc
       }}
       anchorPosition="upCenter"
     >
-      <EuiPopoverTitle>{displayName}</EuiPopoverTitle>
       <EuiForm
         component="div"
         css={css`
