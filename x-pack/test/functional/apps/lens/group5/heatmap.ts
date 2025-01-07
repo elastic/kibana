@@ -55,11 +55,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // assert legend
       expect(debugState?.legend!.items).to.eql([
-        { key: '5,722.775 - 8,529.22', name: '5,722.775 - 8,529.22', color: '#599dff' },
-        { key: '8,529.22 - 11,335.665', name: '8,529.22 - 11,335.665', color: '#c5deff' },
+        { key: '5,722.775 - 8,529.22', name: '5,722.775 - 8,529.22', color: '#61a2ff' },
+        { key: '8,529.22 - 11,335.665', name: '8,529.22 - 11,335.665', color: '#c8deff' },
         { key: '11,335.665 - 14,142.11', name: '11,335.665 - 14,142.11', color: '#f6f9fc' },
-        { key: '14,142.11 - 16,948.555', name: '14,142.11 - 16,948.555', color: '#ffcbc5' },
-        { key: '≥ 16,948.555', name: '≥ 16,948.555', color: '#f66d64' },
+        { key: '14,142.11 - 16,948.555', name: '14,142.11 - 16,948.555', color: '#ffccc6' },
+        { key: '≥ 16,948.555', name: '≥ 16,948.555', color: '#f6726a' },
       ]);
     });
 
@@ -77,11 +77,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // assert legend has changed
       expect(debugState?.legend!.items).to.eql([
-        { key: '7,125.997 - 8,529.22', name: '7,125.997 - 8,529.22', color: '#599dff' },
-        { key: '8,529.22 - 11,335.665', name: '8,529.22 - 11,335.665', color: '#c5deff' },
+        { key: '7,125.997 - 8,529.22', name: '7,125.997 - 8,529.22', color: '#61a2ff' },
+        { key: '8,529.22 - 11,335.665', name: '8,529.22 - 11,335.665', color: '#c8deff' },
         { key: '11,335.665 - 14,142.11', name: '11,335.665 - 14,142.11', color: '#f6f9fc' },
-        { key: '14,142.11 - 16,948.555', name: '14,142.11 - 16,948.555', color: '#ffcbc5' },
-        { key: '≥ 16,948.555', name: '≥ 16,948.555', color: '#f66d64' },
+        { key: '14,142.11 - 16,948.555', name: '14,142.11 - 16,948.555', color: '#ffccc6' },
+        { key: '≥ 16,948.555', name: '≥ 16,948.555', color: '#f6726a' },
       ]);
     });
 
@@ -91,12 +91,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // assert legend has changed
       expect(debugState?.legend!.items).to.eql([
-        { key: '7,125.99 - 8,529.2', name: '7,125.99 - 8,529.2', color: '#599dff' },
-        { key: '8,529.2 - 11,335.66', name: '8,529.2 - 11,335.66', color: '#c5deff' },
+        { key: '7,125.99 - 8,529.2', name: '7,125.99 - 8,529.2', color: '#61a2ff' },
+        { key: '8,529.2 - 11,335.66', name: '8,529.2 - 11,335.66', color: '#c8deff' },
         { key: '11,335.66 - 14,142.1', name: '11,335.66 - 14,142.1', color: '#f6f9fc' },
-        { key: '14,142.1 - 16,948.55', name: '14,142.1 - 16,948.55', color: '#ffcbc5' },
+        { key: '14,142.1 - 16,948.55', name: '14,142.1 - 16,948.55', color: '#ffccc6' },
         {
-          color: '#f66d64',
+          color: '#f6726a',
           key: '≥ 16,948.55',
           name: '≥ 16,948.55',
         },
@@ -112,11 +112,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // assert legend has changed
       expect(debugState?.legend!.items).to.eql([
-        { key: '0 - 8,529.2', name: '0 - 8,529.2', color: '#599dff' },
-        { key: '8,529.2 - 11,335.66', name: '8,529.2 - 11,335.66', color: '#c5deff' },
+        { key: '0 - 8,529.2', name: '0 - 8,529.2', color: '#61a2ff' },
+        { key: '8,529.2 - 11,335.66', name: '8,529.2 - 11,335.66', color: '#c8deff' },
         { key: '11,335.66 - 14,142.1', name: '11,335.66 - 14,142.1', color: '#f6f9fc' },
-        { key: '14,142.1 - 16,948.55', name: '14,142.1 - 16,948.55', color: '#ffcbc5' },
-        { key: '≥ 16,948.55', name: '≥ 16,948.55', color: '#f66d64' },
+        { key: '14,142.1 - 16,948.55', name: '14,142.1 - 16,948.55', color: '#ffccc6' },
+        { key: '≥ 16,948.55', name: '≥ 16,948.55', color: '#f6726a' },
       ]);
     });
 
@@ -130,15 +130,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // assert legend has a rounded value
       expect(debugState?.legend!.items).to.eql([
-        { key: '5,722.775 - 8,529.2', name: '5,722.775 - 8,529.2', color: '#599dff' },
-        { key: '8,529.2 - 11,335.66', name: '8,529.2 - 11,335.66', color: '#c5deff' },
+        { key: '5,722.775 - 8,529.2', name: '5,722.775 - 8,529.2', color: '#61a2ff' },
+        { key: '8,529.2 - 11,335.66', name: '8,529.2 - 11,335.66', color: '#c8deff' },
         { key: '11,335.66 - 14,142.1', name: '11,335.66 - 14,142.1', color: '#f6f9fc' },
-        { key: '14,142.1 - 16,948.55', name: '14,142.1 - 16,948.55', color: '#ffcbc5' },
-        { key: '≥ 16,948.55', name: '≥ 16,948.55', color: '#f66d64' },
+        { key: '14,142.1 - 16,948.55', name: '14,142.1 - 16,948.55', color: '#ffccc6' },
+        { key: '≥ 16,948.55', name: '≥ 16,948.55', color: '#f6726a' },
       ]);
       // assert the cell has the correct coloring despite the legend rounding
       expect(debugState?.heatmap!.cells[debugState.heatmap!.cells.length - 1].fill).to.be(
-        'rgba(89, 157, 255, 1)' // rgba version of #599dff
+        'rgba(97, 162, 255, 1)' // rgba version of #61a2ff
       );
     });
 
@@ -149,11 +149,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // assert legend has changed
       expect(debugState?.legend!.items).to.eql([
-        { key: '5,722.775 - 8,529.22', name: '5,722.775 - 8,529.22', color: '#23be8f' },
-        { key: '8,529.22 - 11,335.665', name: '8,529.22 - 11,335.665', color: '#9dedce' },
-        { key: '11,335.665 - 14,142.11', name: '11,335.665 - 14,142.11', color: '#fcd279' },
-        { key: '14,142.11 - 16,948.555', name: '14,142.11 - 16,948.555', color: '#ffc0b8' },
-        { key: '≥ 16,948.555', name: '≥ 16,948.555', color: '#f66d64' },
+        { key: '5,722.775 - 8,529.22', name: '5,722.775 - 8,529.22', color: '#24c292' },
+        { key: '8,529.22 - 11,335.665', name: '8,529.22 - 11,335.665', color: '#aee8d2' },
+        { key: '11,335.665 - 14,142.11', name: '11,335.665 - 14,142.11', color: '#fcd883' },
+        { key: '14,142.11 - 16,948.555', name: '14,142.11 - 16,948.555', color: '#ffc9c2' },
+        { key: '≥ 16,948.555', name: '≥ 16,948.555', color: '#f6726a' },
       ]);
     });
 
@@ -164,11 +164,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // assert legend has not changed
       expect(debugState?.legend!.items).to.eql([
-        { key: '5,722.775 - 8,529.22', name: '5,722.775 - 8,529.22', color: '#23be8f' },
-        { key: '8,529.22 - 11,335.665', name: '8,529.22 - 11,335.665', color: '#9dedce' },
-        { key: '11,335.665 - 14,142.11', name: '11,335.665 - 14,142.11', color: '#fcd279' },
-        { key: '14,142.11 - 16,948.555', name: '14,142.11 - 16,948.555', color: '#ffc0b8' },
-        { key: '≥ 16,948.555', name: '≥ 16,948.555', color: '#f66d64' },
+        { key: '5,722.775 - 8,529.22', name: '5,722.775 - 8,529.22', color: '#24c292' },
+        { key: '8,529.22 - 11,335.665', name: '8,529.22 - 11,335.665', color: '#aee8d2' },
+        { key: '11,335.665 - 14,142.11', name: '11,335.665 - 14,142.11', color: '#fcd883' },
+        { key: '14,142.11 - 16,948.555', name: '14,142.11 - 16,948.555', color: '#ffc9c2' },
+        { key: '≥ 16,948.555', name: '≥ 16,948.555', color: '#f6726a' },
       ]);
     });
 
