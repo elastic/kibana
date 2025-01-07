@@ -27,6 +27,7 @@ import { getResultTestConfig } from '../../../../common/utils/alerts';
 import type {
   ErrorMessagesTransformResponse,
   TransformHealthAlertContext,
+  TransformHealthAlertState,
   TransformStateReportResponse,
 } from './register_transform_health_rule_type';
 import type { TransformHealthAlertRule } from '../../../../common/types/alerting';
@@ -260,7 +261,10 @@ export function transformHealthServiceProvider({
      * Returns results of the transform health checks
      * @param params
      */
-    async getHealthChecksResults(params: TransformHealthRuleParams) {
+    async getHealthChecksResults(
+      params: TransformHealthRuleParams,
+      previousState: TransformHealthAlertState
+    ) {
       const includeAll = params.includeTransforms.some((id) => id === ALL_TRANSFORMS_SELECTION);
 
       const transforms = (
@@ -286,10 +290,17 @@ export function transformHealthServiceProvider({
           transformIds
         );
 
+        const prevNotStartedSet: Set<string> = new Set(previousState?.notStarted ?? []);
+        const recoveredTransforms = startedTransforms.filter((t) =>
+          prevNotStartedSet.has(t.transform_id)
+        );
+
         const isHealthy = notStartedTransform.length === 0;
 
-        const count = isHealthy ? startedTransforms.length : notStartedTransform.length;
-        const transformsString = (isHealthy ? startedTransforms : notStartedTransform)
+        // if healthy, mention transforms that were not started
+        const count = isHealthy ? recoveredTransforms.length : notStartedTransform.length;
+
+        const transformsString = (isHealthy ? recoveredTransforms : notStartedTransform)
           .map((t) => t.transform_id)
           .join(', ');
 
@@ -297,19 +308,19 @@ export function transformHealthServiceProvider({
           isHealthy,
           name: TRANSFORM_HEALTH_CHECK_NAMES.notStarted.name,
           context: {
-            results: isHealthy ? startedTransforms : notStartedTransform,
+            results: isHealthy ? recoveredTransforms : notStartedTransform,
             message: isHealthy
               ? i18n.translate(
                   'xpack.transform.alertTypes.transformHealth.notStartedRecoveryMessage',
                   {
                     defaultMessage:
-                      '{count, plural, one {# transform is} other {# transforms are}} started: {transformsString}.',
+                      '{count, plural, =0 {All transforms are started} one {{transformsString} is started} other {# transforms are started: {transformsString}}}.',
                     values: { count, transformsString },
                   }
                 )
               : i18n.translate('xpack.transform.alertTypes.transformHealth.notStartedMessage', {
                   defaultMessage:
-                    '{count, plural, one {# transform is} other {# transforms are}} not started: {transformsString}.',
+                    '{count, plural, one {{transformsString} is not started} other {# transforms are not started: {transformsString}}}.',
                   values: { count, transformsString },
                 }),
           },
@@ -349,8 +360,10 @@ export function transformHealthServiceProvider({
       if (testsConfig.healthCheck.enabled) {
         const response = await this.getUnhealthyTransformsReport(transformIds);
         const isHealthy = response.length === 0;
-        const count = response.length;
-        const transformsString = response.map((t) => t.transform_id).join(', ');
+        const count: number = isHealthy ? previousState?.unhealthy?.length ?? 0 : response.length;
+        const transformsString = isHealthy
+          ? previousState?.unhealthy?.join(', ')
+          : response.map((t) => t.transform_id).join(', ');
         result.push({
           isHealthy,
           name: TRANSFORM_HEALTH_CHECK_NAMES.healthCheck.name,
@@ -361,13 +374,13 @@ export function transformHealthServiceProvider({
                   'xpack.transform.alertTypes.transformHealth.healthCheckRecoveryMessage',
                   {
                     defaultMessage:
-                      '{count, plural, one {# transform is} other {# transforms are}} healthy: {transformsString}.',
+                      '{count, plural, =0 {All transforms are healthy} one {{transformsString} is healthy} other {# transforms are healthy: {transformsString}}}.',
                     values: { count, transformsString },
                   }
                 )
               : i18n.translate('xpack.transform.alertTypes.transformHealth.healthCheckMessage', {
                   defaultMessage:
-                    '{count, plural, one {# transform is} other {# transforms are}} unhealthy: {transformsString}.',
+                    '{count, plural, one {{transformsString} is unhealthy} other {# transforms are unhealthy: {transformsString}}}.',
                   values: { count, transformsString },
                 }),
           },
