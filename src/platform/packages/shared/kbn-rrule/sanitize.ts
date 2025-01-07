@@ -29,9 +29,11 @@ export function sanitizeOptions(opts: Options) {
     throw new Error('Cannot create RRule: until is an invalid date');
   }
 
-  if (typeof options.interval !== 'number') {
-    throw new Error('Cannot create RRule: interval must be a number');
-  } else {
+  if (options.interval != null) {
+    if (typeof options.interval !== 'number') {
+      throw new Error('Cannot create RRule: interval must be a number');
+    }
+
     if (options.interval < 1) {
       throw new Error('Cannot create RRule: interval must be greater than 0');
     }

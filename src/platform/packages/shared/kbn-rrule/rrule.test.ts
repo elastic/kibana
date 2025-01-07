@@ -1119,6 +1119,7 @@ describe('RRule', () => {
         `"Cannot create RRule: until is an invalid date"`
       );
     });
+
     it('throws an error on an interval of 0', () => {
       const testFn = () =>
         new RRule({
@@ -1131,6 +1132,7 @@ describe('RRule', () => {
         `"Cannot create RRule: interval must be greater than 0"`
       );
     });
+
     it('throws an error when exceeding the iteration limit', () => {
       const testFn = () => {
         const rule = new RRule({
