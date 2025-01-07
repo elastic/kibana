@@ -7929,7 +7929,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/vis-type-gauge-plugin@link:src/plugins/vis_types/gauge":
+"@kbn/vis-type-gauge-plugin@link:src/platform/plugins/private/vis_types/gauge":
   version "0.0.0"
   uid ""
 
