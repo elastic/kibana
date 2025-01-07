@@ -216,7 +216,7 @@ describe('KnowledgeBaseSettingsManagement', () => {
     });
   });
 
-  it.only('uses entry_search_term as default query', async () => {
+  it('uses entry_search_term as default query', async () => {
     const rawHistory = createMemoryHistory({
       initialEntries: ['/example?entry_search_term=testQuery']
     });
