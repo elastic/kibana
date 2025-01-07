@@ -266,7 +266,6 @@ export function LayerPanels(
               {...props}
               attributes={props.attributes}
               data={props.data}
-              dataViews={props.dataViews}
               setCurrentAttributes={props.setCurrentAttributes}
               updateSuggestion={props.updateSuggestion}
               dataLoading$={props.dataLoading$}

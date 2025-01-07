@@ -41,7 +41,7 @@ export interface ConfigPanelWrapperProps {
   hideLayerHeader?: boolean;
   setIsInlineFlyoutVisible?: (status: boolean) => void;
   onlyAllowSwitchToSubtypes?: boolean;
-  attributes: TypedLensSerializedState['attributes'];
+  attributes?: TypedLensSerializedState['attributes'];
   /** Embeddable output observable, useful for dashboard flyout  */
   dataLoading$?: PublishingSubject<boolean | undefined>;
   /** Contains the active data, necessary for some panel configuration such as coloring */
@@ -52,12 +52,11 @@ export interface ConfigPanelWrapperProps {
 }
 
 export interface LayerPanelProps {
-  attributes: TypedLensSerializedState['attributes'];
+  attributes?: TypedLensSerializedState['attributes'];
   /** Embeddable output observable, useful for dashboard flyout  */
   dataLoading$?: PublishingSubject<boolean | undefined>;
   /** Contains the active data, necessary for some panel configuration such as coloring */
   lensAdapters?: ReturnType<LensInspector['getInspectorAdapters']>;
-  dataViews: DataViewsPublicPluginStart;
   data: DataPublicPluginStart;
   updateSuggestion?: (attrs: TypedLensSerializedState['attributes']) => void;
   /** Set the attributes state */

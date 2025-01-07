@@ -94,10 +94,7 @@ export function LayerPanel(props: LayerPanelProps) {
     setCurrentAttributes,
   } = props;
 
-  const startDependencies = useMemo(
-    () => ({ data, dataViews: props.dataViews }),
-    [data, props.dataViews]
-  );
+  const startDependencies = useMemo(() => ({ data, dataViews: data.dataViews }), [data]);
 
   const isInlineEditing = Boolean(props?.setIsInlineFlyoutVisible);
 
@@ -379,8 +376,10 @@ export function LayerPanel(props: LayerPanelProps) {
   );
   const layerActionsFlyoutRef = useRef<HTMLDivElement | null>(null);
 
-  const prevQuery = useRef<AggregateQuery | Query>(attributes.state.query);
-  const [query, setQuery] = useState<AggregateQuery | Query>(attributes.state.query);
+  const prevQuery = useRef<AggregateQuery | Query>(attributes?.state.query || { esql: '' });
+  const [query, setQuery] = useState<AggregateQuery | Query>(
+    attributes?.state.query || { esql: '' }
+  );
   const [errors, setErrors] = useState<Error[] | undefined>();
   const [isLayerAccordionOpen, setIsLayerAccordionOpen] = useState(true);
   const [suggestsLimitedColumns, setSuggestsLimitedColumns] = useState(false);
@@ -389,7 +388,9 @@ export function LayerPanel(props: LayerPanelProps) {
   const [isVisualizationLoading, setIsVisualizationLoading] = useState(false);
   const [dataGridAttrs, setDataGridAttrs] = useState<ESQLDataGridAttrs | undefined>(undefined);
 
-  const adHocDataViews = Object.values(attributes.state.adHocDataViews!);
+  const adHocDataViews = attributes
+    ? Object.values(attributes.state.adHocDataViews!)
+    : Object.values(framePublicAPI.dataViews.indexPatterns).map((index) => index.spec);
   const hideTimeFilterInfo = false;
 
   const datasourceState = layerDatasourceState;
@@ -588,7 +589,7 @@ export function LayerPanel(props: LayerPanelProps) {
               <ESQLDataGridAccordion
                 dataGridAttrs={dataGridAttrs}
                 isAccordionOpen={isESQLResultsAccordionOpen}
-                isTableView={attributes.visualizationType !== 'lnsDatatable'}
+                isTableView={attributes?.visualizationType !== 'lnsDatatable'}
                 setIsAccordionOpen={setIsESQLResultsAccordionOpen}
                 query={query as AggregateQuery}
                 onAccordionToggleCb={(status) => {
