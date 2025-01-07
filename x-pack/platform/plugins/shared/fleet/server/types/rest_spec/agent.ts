@@ -135,6 +135,7 @@ export const AgentResponseSchema = schema.object({
   enrolled_at: schema.string(),
   unenrolled_at: schema.maybe(schema.string()),
   unenrollment_started_at: schema.maybe(schema.string()),
+  audit_unenrolled_reason: schema.maybe(schema.string()),
   upgraded_at: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
   upgrade_started_at: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
   upgrade_details: schema.maybe(
