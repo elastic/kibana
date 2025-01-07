@@ -61,7 +61,9 @@
           "\nGraph investigation view allows the user to expand nodes and view related entities."
         ],
         "signature": [
-          "React.NamedExoticComponent<GraphInvestigationProps>"
+          "React.NamedExoticComponent<",
+          "GraphInvestigationProps",
+          ">"
         ],
         "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/graph/src/components/graph_investigation/graph_investigation.tsx",
         "deprecated": false,
@@ -412,6 +414,22 @@
             ],
             "signature": [
               "boolean | undefined"
+            ],
+            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/graph/src/components/graph/graph.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/cloud-security-posture-graph",
+            "id": "def-public.GraphProps.children",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "children",
+            "description": [
+              "\nAdditional children to be rendered inside the graph component."
+            ],
+            "signature": [
+              "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
             ],
             "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/graph/src/components/graph/graph.tsx",
             "deprecated": false,

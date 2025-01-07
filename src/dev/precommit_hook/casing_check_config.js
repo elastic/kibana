@@ -38,7 +38,7 @@ export const IGNORE_FILE_GLOBS = [
   'x-pack/docs/**/*',
   'src/core/packages/apps/server-internal/assets/fonts/**/*',
   'src/dev/code_coverage/ingest_coverage/integration_tests/mocks/**/*',
-  'packages/kbn-utility-types/test-d/**/*',
+  'src/platform/packages/shared/kbn-utility-types/test-d/**/*',
   'Dockerfile*',
   'vars/*',
   'packages/kbn-test/jest-preset.js',
@@ -46,7 +46,7 @@ export const IGNORE_FILE_GLOBS = [
   'test/package/Vagrantfile',
   'x-pack/solutions/security/plugins/security_solution/scripts/endpoint/common/vagrant/Vagrantfile',
   '**/test/**/fixtures/**/*',
-  'packages/kbn-router-to-openapispec/openapi-types.d.ts',
+  'src/platform/packages/shared/kbn-router-to-openapispec/openapi-types.d.ts',
 
   // Required to match the name in the docs.elastic.dev repo.
   'dev_docs/nav-kibana-dev.docnav.json',
@@ -62,11 +62,11 @@ export const IGNORE_FILE_GLOBS = [
   '**/preview-head.html',
 
   // filename must match upstream filenames from lodash
-  'packages/kbn-safer-lodash-set/**/*',
+  'src/platform/packages/shared/kbn-safer-lodash-set/**/*',
 
   // filename must match upstream filenames from handlebars
-  'packages/kbn-handlebars/src/upstream/**/*',
-  'packages/kbn-handlebars/.patches/**/*',
+  'src/platform/packages/private/kbn-handlebars/src/upstream/**/*',
+  'src/platform/packages/private/kbn-handlebars/.patches/**/*',
 
   'x-pack/platform/plugins/shared/maps/server/fonts/**/*',
 
