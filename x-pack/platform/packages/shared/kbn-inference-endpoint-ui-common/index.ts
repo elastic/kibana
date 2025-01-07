@@ -6,5 +6,6 @@
  */
 
 export { InferenceServiceFormFields } from './src/components/inference_service_form_fields';
+export { useProviders } from './src/hooks/use_providers';
 
 export * from './src/types/types';

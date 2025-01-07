@@ -9,6 +9,7 @@ import type { FleetAuthzRouter } from '../../services/security';
 
 import { API_VERSIONS } from '../../../common/constants';
 
+import { FLEET_API_PRIVILEGES } from '../../constants/api_privileges';
 import { PRECONFIGURATION_API_ROUTES } from '../../constants';
 import { PostResetOnePreconfiguredAgentPoliciesSchema } from '../../types';
 
@@ -19,8 +20,15 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .post({
       path: PRECONFIGURATION_API_ROUTES.RESET_PATTERN,
       access: 'public',
-      fleetAuthz: {
-        fleet: { all: true },
+      security: {
+        authz: {
+          requiredPrivileges: [
+            FLEET_API_PRIVILEGES.AGENTS.ALL,
+            FLEET_API_PRIVILEGES.AGENT_POLICIES.ALL,
+            FLEET_API_PRIVILEGES.SETTINGS.ALL,
+            FLEET_API_PRIVILEGES.INTEGRATIONS.READ,
+          ],
+        },
       },
     })
     .addVersion(
@@ -35,8 +43,15 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .post({
       path: PRECONFIGURATION_API_ROUTES.RESET_ONE_PATTERN,
       access: 'public',
-      fleetAuthz: {
-        fleet: { all: true },
+      security: {
+        authz: {
+          requiredPrivileges: [
+            FLEET_API_PRIVILEGES.AGENTS.ALL,
+            FLEET_API_PRIVILEGES.AGENT_POLICIES.ALL,
+            FLEET_API_PRIVILEGES.SETTINGS.ALL,
+            FLEET_API_PRIVILEGES.INTEGRATIONS.READ,
+          ],
+        },
       },
     })
     .addVersion(

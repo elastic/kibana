@@ -6,7 +6,7 @@
  */
 
 import datemath from '@elastic/datemath';
-import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
+import type { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 import { getErrorGroupMainStatistics } from '../../errors/get_error_groups/get_error_group_main_statistics';
 import { getDownstreamServiceResource } from './get_downstream_dependency_name';
 
