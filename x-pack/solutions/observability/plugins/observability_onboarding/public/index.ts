@@ -35,6 +35,7 @@ export interface AppContext {
   isServerless: boolean;
   stackVersion: string;
   cloudServiceProvider?: string;
+  kibanaBranch: string;
 }
 
 export interface ObservabilityOnboardingAppServices {

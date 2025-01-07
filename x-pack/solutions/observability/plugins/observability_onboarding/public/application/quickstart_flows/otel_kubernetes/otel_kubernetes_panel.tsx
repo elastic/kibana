@@ -26,28 +26,30 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { css } from '@emotion/react';
+import { ObservabilityOnboardingAppServices } from '../../..';
 import { EmptyPrompt } from '../shared/empty_prompt';
 import { GetStartedPanel } from '../shared/get_started_panel';
 import { FeedbackButtons } from '../shared/feedback_buttons';
 import { CopyToClipboardButton } from '../shared/copy_to_clipboard_button';
-import { ObservabilityOnboardingContextValue } from '../../../plugin';
 import { useKubernetesFlow } from '../kubernetes/use_kubernetes_flow';
 
 const OTEL_HELM_CHARTS_REPO = 'https://open-telemetry.github.io/opentelemetry-helm-charts';
 const OTEL_KUBE_STACK_VERSION = '0.3.3';
-const OTEL_KUBE_STACK_VALUES_FILE_URL =
-  'https://raw.githubusercontent.com/elastic/opentelemetry/refs/heads/8.16/resources/kubernetes/operator/helm/values.yaml';
 const CLUSTER_OVERVIEW_DASHBOARD_ID = 'kubernetes_otel-cluster-overview';
 
 export const OtelKubernetesPanel: React.FC = () => {
   const { data, error, refetch } = useKubernetesFlow('kubernetes_otel');
   const [idSelected, setIdSelected] = useState('nodejs');
   const {
-    services: { share },
-  } = useKibana<ObservabilityOnboardingContextValue>();
+    services: {
+      share,
+      context: { kibanaBranch },
+    },
+  } = useKibana<ObservabilityOnboardingAppServices>();
   const apmLocator = share.url.locators.get('APM_LOCATOR');
   const dashboardLocator = share.url.locators.get(DASHBOARD_APP_LOCATOR);
   const theme = useEuiTheme();
+  const otelKubeStackValuesFileUrl = `https://raw.githubusercontent.com/elastic/elastic-agent/refs/heads/${kibanaBranch}/deploy/helm/edot-collector/kube-stack/values.yaml`;
 
   if (error) {
     return (
@@ -65,7 +67,7 @@ kubectl create secret generic elastic-secret-otel \\
   --from-literal=elastic_api_key='${data.apiKeyEncoded}'
 helm install opentelemetry-kube-stack open-telemetry/opentelemetry-kube-stack \\
   --namespace ${namespace} \\
-  --values '${OTEL_KUBE_STACK_VALUES_FILE_URL}' \\
+  --values '${otelKubeStackValuesFileUrl}' \\
   --version '${OTEL_KUBE_STACK_VERSION}'`
     : undefined;
 
@@ -160,7 +162,7 @@ helm install opentelemetry-kube-stack open-telemetry/opentelemetry-kube-stack \\
                   <EuiFlexItem grow={false}>
                     <EuiButtonEmpty
                       iconType="download"
-                      href={OTEL_KUBE_STACK_VALUES_FILE_URL}
+                      href={otelKubeStackValuesFileUrl}
                       flush="left"
                       target="_blank" // The `download` attribute does not work cross-origin so it's better to open the file in a new tab
                       data-test-subj="observabilityOnboardingOtelKubernetesPanelDownloadValuesFileButton"
