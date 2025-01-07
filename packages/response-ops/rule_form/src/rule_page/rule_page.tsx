@@ -13,34 +13,25 @@ import {
   EuiConfirmModal,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiHorizontalRule,
   EuiPageTemplate,
   EuiSpacer,
   EuiSteps,
-  EuiStepsProps,
   useEuiBackgroundColorCSS,
 } from '@elastic/eui';
 import { checkActionFormActionTypeEnabled } from '@kbn/alerts-ui-shared';
 import React, { useCallback, useMemo, useState } from 'react';
-import type { RuleFormData } from '../types';
-import { RuleActions } from '../rule_actions';
-import { RuleDefinition } from '../rule_definition';
-import { RuleDetails } from '../rule_details';
-import { RulePageFooter } from './rule_page_footer';
-import { RulePageNameInput } from './rule_page_name_input';
-import { useRuleFormState } from '../hooks';
+import { useRuleFormState, useRuleFormSteps } from '../hooks';
 import {
   DISABLED_ACTIONS_WARNING_TITLE,
   RULE_FORM_CANCEL_MODAL_CANCEL,
   RULE_FORM_CANCEL_MODAL_CONFIRM,
   RULE_FORM_CANCEL_MODAL_DESCRIPTION,
   RULE_FORM_CANCEL_MODAL_TITLE,
-  RULE_FORM_PAGE_RULE_ACTIONS_TITLE,
-  RULE_FORM_PAGE_RULE_DEFINITION_TITLE,
-  RULE_FORM_PAGE_RULE_DETAILS_TITLE,
   RULE_FORM_RETURN_TITLE,
 } from '../translations';
-import { hasActionsError, hasActionsParamsErrors, hasParamsErrors } from '../validation';
+import type { RuleFormData } from '../types';
+import { RulePageFooter } from './rule_page_footer';
+import { RulePageNameInput } from './rule_page_name_input';
 
 export interface RulePageProps {
   isEdit?: boolean;
@@ -53,22 +44,12 @@ export const RulePage = (props: RulePageProps) => {
   const { isEdit = false, isSaving = false, onCancel = () => {}, onSave } = props;
   const [isCancelModalOpen, setIsCancelModalOpen] = useState<boolean>(false);
 
-  const {
-    plugins: { application },
-    baseErrors = {},
-    paramsErrors = {},
-    actionsErrors = {},
-    actionsParamsErrors = {},
-    formData,
-    multiConsumerSelection,
-    connectorTypes,
-    connectors,
-    touched,
-  } = useRuleFormState();
+  const { formData, multiConsumerSelection, connectorTypes, connectors, touched } =
+    useRuleFormState();
+
+  const { steps } = useRuleFormSteps();
 
   const { actions } = formData;
-
-  const canReadConnectors = !!application.capabilities.actions?.show;
 
   const styles = useEuiBackgroundColorCSS().transparent;
 
@@ -101,63 +82,6 @@ export const RulePage = (props: RulePageProps) => {
       return !actionType.enabled && !checkEnabledResult.isEnabled;
     });
   }, [actions, connectors, connectorTypes]);
-
-  const hasRuleDefinitionErrors = useMemo(() => {
-    return !!(
-      hasParamsErrors(paramsErrors) ||
-      baseErrors.interval?.length ||
-      baseErrors.alertDelay?.length
-    );
-  }, [paramsErrors, baseErrors]);
-
-  const hasActionErrors = useMemo(() => {
-    return hasActionsError(actionsErrors) || hasActionsParamsErrors(actionsParamsErrors);
-  }, [actionsErrors, actionsParamsErrors]);
-
-  const hasRuleDetailsError = useMemo(() => {
-    return baseErrors.name?.length || baseErrors.tags?.length;
-  }, [baseErrors]);
-
-  const actionComponent: EuiStepsProps['steps'] = useMemo(() => {
-    if (canReadConnectors) {
-      return [
-        {
-          title: RULE_FORM_PAGE_RULE_ACTIONS_TITLE,
-          status: hasActionErrors ? 'danger' : undefined,
-          children: (
-            <>
-              <RuleActions />
-              <EuiSpacer />
-              <EuiHorizontalRule margin="none" />
-            </>
-          ),
-        },
-      ];
-    }
-    return [];
-  }, [hasActionErrors, canReadConnectors]);
-
-  const steps: EuiStepsProps['steps'] = useMemo(() => {
-    return [
-      {
-        title: RULE_FORM_PAGE_RULE_DEFINITION_TITLE,
-        status: hasRuleDefinitionErrors ? 'danger' : undefined,
-        children: <RuleDefinition />,
-      },
-      ...actionComponent,
-      {
-        title: RULE_FORM_PAGE_RULE_DETAILS_TITLE,
-        status: hasRuleDetailsError ? 'danger' : undefined,
-        children: (
-          <>
-            <RuleDetails />
-            <EuiSpacer />
-            <EuiHorizontalRule margin="none" />
-          </>
-        ),
-      },
-    ];
-  }, [hasRuleDefinitionErrors, hasRuleDetailsError, actionComponent]);
 
   return (
     <>
