@@ -311,7 +311,7 @@ const getPipeline = (filename: string, removeSteps = true) => {
         /^package.json/,
         /^src\/platform\/packages\/shared\/kbn-discover-utils/,
         /^packages\/kbn-doc-links/,
-        /^packages\/kbn-dom-drag-drop/,
+        /^src\/platform\/packages\/shared\/kbn-dom-drag-drop/,
         /^src\/platform\/packages\/shared\/kbn-es-query/,
         /^src\/platform\/packages\/shared\/kbn-i18n/,
         /^src\/platform\/packages\/shared\/kbn-i18n-react/,
