@@ -5661,7 +5661,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/expression-heatmap-plugin@link:src/plugins/chart_expressions/expression_heatmap":
+"@kbn/expression-heatmap-plugin@link:src/platform/plugins/shared/chart_expressions/expression_heatmap":
   version "0.0.0"
   uid ""
 
