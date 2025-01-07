@@ -37,7 +37,9 @@ export const stripFirstChunk = (path: string): string => {
 export const calculateModuleTargetFolder = (module: Package): string => {
   const group = module.manifest.group!;
   const isPlugin = module.manifest.type === 'plugin';
-  const fullPath = join(BASE_FOLDER, module.directory);
+  const fullPath = module.directory.startsWith(BASE_FOLDER)
+    ? module.directory
+    : join(BASE_FOLDER, module.directory);
 
   let moduleDelimiter: string;
   if (!fullPath.includes('/plugins/') && !fullPath.includes('/packages/')) {
