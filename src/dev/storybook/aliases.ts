@@ -17,8 +17,8 @@ export const storybookAliases = {
   canvas: 'x-pack/platform/plugins/private/canvas/storybook',
   cases: 'src/platform/packages/shared/kbn-cases-components/.storybook',
   cell_actions: 'src/platform/packages/shared/kbn-cell-actions/.storybook',
-  cloud_security_posture_packages:
-    'x-pack/solutions/security/packages/kbn-cloud-security-posture/.storybook',
+  cloud_security_posture_graph:
+    'x-pack/solutions/security/packages/kbn-cloud-security-posture/graph/.storybook',
   cloud: 'src/platform/packages/shared/cloud/.storybook',
   coloring: 'packages/kbn-coloring/.storybook',
   language_documentation_popover:
@@ -67,7 +67,7 @@ export const storybookAliases = {
   security_solution: 'x-pack/solutions/security/plugins/security_solution/.storybook',
   security_solution_packages: 'x-pack/solutions/security/packages/storybook/config',
   serverless: 'packages/serverless/storybook/config',
-  shared_ux: 'packages/shared-ux/storybook/config',
+  shared_ux: 'src/platform/packages/private/shared-ux/storybook/config',
   threat_intelligence: 'x-pack/solutions/security/plugins/threat_intelligence/.storybook',
   triggers_actions_ui: 'x-pack/platform/plugins/shared/triggers_actions_ui/.storybook',
   ui_actions_enhanced: 'src/platform/plugins/shared/ui_actions_enhanced/.storybook',
