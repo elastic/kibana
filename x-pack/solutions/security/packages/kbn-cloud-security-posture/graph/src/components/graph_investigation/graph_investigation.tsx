@@ -31,6 +31,7 @@ import { GRAPH_INVESTIGATION_TEST_ID } from '../test_ids';
 import {
   ACTOR_ENTITY_ID,
   EVENT_ACTION,
+  EVENT_ID,
   RELATED_ENTITY,
   TARGET_ENTITY_ID,
 } from '../../common/constants';
@@ -216,12 +217,12 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
     const onInvestigateInTimelineCallback = useCallback(() => {
       const query = { ...kquery };
       const filters = originEventIds.reduce<Filter[]>((acc, { id }) => {
-        return addFilter(dataView?.id ?? '', acc, 'event.id', id);
+        return addFilter(dataView?.id ?? '', acc, EVENT_ID, id);
       }, searchFilters);
 
       if (query.query.trim() !== '' && originEventIds.length > 0) {
         query.query = `(${query.query})${originEventIds
-          .map(({ id }) => ` OR event.id: "${id}"`)
+          .map(({ id }) => ` OR ${EVENT_ID}: "${id}"`)
           .join('')}`;
       }
 
