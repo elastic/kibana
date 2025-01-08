@@ -13,3 +13,4 @@ export * from './security_exception';
 export * from './index_template_not_found';
 export * from './fork_condition_missing';
 export * from './component_template_not_found';
+export * from './root_stream_immutability_exception';

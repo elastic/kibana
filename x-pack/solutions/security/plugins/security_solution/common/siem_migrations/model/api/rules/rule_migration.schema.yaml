@@ -286,6 +286,57 @@ paths:
         204:
           description: Indicates the migration id was not found.
 
+  /internal/siem_migrations/rules/{migration_id}/retry:
+    put:
+      summary: Retries a rule migration
+      operationId: RetryRuleMigration
+      x-codegen-enabled: true
+      x-internal: true
+      description: Retries a SIEM rules migration using the migration id provided
+      tags:
+        - SIEM Rule Migrations
+      parameters:
+        - name: migration_id
+          in: path
+          required: true
+          schema:
+            description: The migration id to retry
+            $ref: '../../../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - connector_id
+              properties:
+                connector_id:
+                  $ref: '../../common.schema.yaml#/components/schemas/ConnectorId'
+                langsmith_options:
+                  $ref: '../../common.schema.yaml#/components/schemas/LangSmithOptions'
+                failed:
+                  type: boolean
+                  description: The indicator to retry only failed rules
+                not_fully_translated:
+                  type: boolean
+                  description: The indicator to retry only not fully translated rules
+      responses:
+        200:
+          description: Indicates the migration retry request has been processed successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - started
+                properties:
+                  started:
+                    type: boolean
+                    description: Indicates the migration retry has been started. `false` means the migration does not need to be retried.
+        204:
+          description: Indicates the migration id was not found.
+
   /internal/siem_migrations/rules/{migration_id}/stats:
     get:
       summary: Gets a rule migration task stats
