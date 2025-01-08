@@ -21,8 +21,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { SearchEmptyPrompt, DecorativeHorizontalStepper } from '@kbn/search-shared-ui';
 
 import { COMING_SOON_LABEL } from '../../../shared/constants';
-import { CrawlerIcon } from '../../../shared/icons/crawler';
 import { GithubIcon } from '../../../shared/icons/github_icon';
+import CrawlerIcon from '../../../shared/icons/web_crawlers.svg';
 import { KibanaLogic } from '../../../shared/kibana';
 import { CRAWLERS_ELASTIC_MANAGED_PATH } from '../../routes';
 

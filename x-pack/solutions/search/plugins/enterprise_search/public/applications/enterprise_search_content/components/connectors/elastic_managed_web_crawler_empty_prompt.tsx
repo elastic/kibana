@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { SearchEmptyPrompt, DecorativeHorizontalStepper } from '@kbn/search-shared-ui';
 
 import { BACK_BUTTON_LABEL, COMING_SOON_LABEL } from '../../../shared/constants';
-import { CrawlerIcon } from '../../../shared/icons/crawler';
+import CrawlerIcon from '../../../shared/icons/web_crawlers.svg';
 import { KibanaLogic } from '../../../shared/kibana';
 import { CRAWLERS_PATH } from '../../routes';
 
