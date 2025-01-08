@@ -153,7 +153,6 @@ describe('Defend integration advanced policy fields v8.18.0', () => {
         toVersion: TARGET_MODEL_VERSION,
       });
 
-      const migratedPolicyConfig = getConfig(migratedPolicyConfigSO);
       expect(migratedPolicyConfigSO.attributes).toHaveProperty('bump_agent_policy_revision', true);
     });
   });
