@@ -107,13 +107,7 @@
               ">, [], any>; }; rendering: jest.Mocked<",
               "InternalRenderingServiceSetup",
               ">; uiSettings: jest.Mocked<",
-              {
-                "pluginId": "@kbn/core-ui-settings-server",
-                "scope": "server",
-                "docId": "kibKbnCoreUiSettingsServerPluginApi",
-                "section": "def-server.UiSettingsServiceSetup",
-                "text": "UiSettingsServiceSetup"
-              },
+              "UiSettingsServiceSetup",
               ">; logging: jest.Mocked<",
               "InternalLoggingServicePreboot",
               ">; metrics: jest.Mocked<",
@@ -167,13 +161,7 @@
               ">; savedObjects: jest.Mocked<",
               "InternalSavedObjectsServiceStart",
               ">; uiSettings: jest.Mocked<",
-              {
-                "pluginId": "@kbn/core-ui-settings-server",
-                "scope": "server",
-                "docId": "kibKbnCoreUiSettingsServerPluginApi",
-                "section": "def-server.UiSettingsServiceStart",
-                "text": "UiSettingsServiceStart"
-              },
+              "UiSettingsServiceStart",
               ">; coreUsageData: jest.Mocked<",
               "CoreUsageDataStart",
               ">; executionContext: jest.Mocked<",
