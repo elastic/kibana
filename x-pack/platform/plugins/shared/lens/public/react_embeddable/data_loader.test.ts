@@ -84,7 +84,7 @@ type ChangeFnType = ({
   services: LensEmbeddableStartServices;
 }) => Promise<void | boolean>;
 
-async function callDataLoader(
+async function expectRerenderOnDataLoder(
   changeFn: ChangeFnType,
   runtimeState: LensRuntimeState = { attributes: getLensAttributesMock() },
   parentApiOverrides?: Partial<
@@ -171,7 +171,7 @@ describe('Data Loader', () => {
   beforeEach(() => jest.clearAllMocks());
 
   it('should re-render once on filter change', async () => {
-    await callDataLoader(async ({ api }) => {
+    await expectRerenderOnDataLoder(async ({ api }) => {
       (api.filters$ as BehaviorSubject<Filter[]>).next([
         { meta: { alias: 'test', negate: false, disabled: false } },
       ]);
@@ -179,7 +179,7 @@ describe('Data Loader', () => {
   });
 
   it('should re-render once on search session change', async () => {
-    await callDataLoader(async ({ api }) => {
+    await expectRerenderOnDataLoder(async ({ api }) => {
       // dispatch a new searchSessionId
 
       (
@@ -189,7 +189,7 @@ describe('Data Loader', () => {
   });
 
   it('should re-render once on attributes change', async () => {
-    await callDataLoader(async ({ internalApi }) => {
+    await expectRerenderOnDataLoder(async ({ internalApi }) => {
       // trigger a change by changing the title in the attributes
       (internalApi.attributes$ as BehaviorSubject<LensDocument | undefined>).next({
         ...internalApi.attributes$.getValue(),
@@ -199,7 +199,7 @@ describe('Data Loader', () => {
   });
 
   it('should re-render when dashboard view/edit mode changes if dynamic actions are set', async () => {
-    await callDataLoader(async ({ api, getState }) => {
+    await expectRerenderOnDataLoder(async ({ api, getState }) => {
       getState.mockReturnValue({
         attributes: getLensAttributesMock(),
         enhancements: {
@@ -214,7 +214,7 @@ describe('Data Loader', () => {
   });
 
   it('should not re-render when dashboard view/edit mode changes if dynamic actions are not set', async () => {
-    await callDataLoader(async ({ api }) => {
+    await expectRerenderOnDataLoder(async ({ api }) => {
       // the default get state does not have dynamic actions
       // trigger a change by changing the title in the attributes
       (api.viewMode as BehaviorSubject<ViewMode | undefined>).next('view');
@@ -227,7 +227,7 @@ describe('Data Loader', () => {
     const query: Query = { language: 'kquery', query: '' };
     const filters: Filter[] = [{ meta: { alias: 'test', negate: false, disabled: false } }];
 
-    await callDataLoader(
+    await expectRerenderOnDataLoder(
       async ({ internalApi }) => {
         await waitForValue(
           internalApi.expressionParams$,
@@ -247,7 +247,7 @@ describe('Data Loader', () => {
   });
 
   it('should pass render mode to expression', async () => {
-    await callDataLoader(async ({ internalApi }) => {
+    await expectRerenderOnDataLoder(async ({ internalApi }) => {
       await waitForValue(
         internalApi.expressionParams$,
         (v: unknown) => isObject(v) && 'renderMode' in v
@@ -284,7 +284,7 @@ describe('Data Loader', () => {
       ],
     };
 
-    await callDataLoader(
+    await expectRerenderOnDataLoder(
       async ({ internalApi }) => {
         await waitForValue(
           internalApi.expressionParams$,
@@ -310,7 +310,7 @@ describe('Data Loader', () => {
   });
 
   it('should call onload after rerender and onData$ call', async () => {
-    await callDataLoader(async ({ parentApi, internalApi, api }) => {
+    await expectRerenderOnDataLoder(async ({ parentApi, internalApi, api }) => {
       expect(parentApi.onLoad).toHaveBeenLastCalledWith(true);
 
       await waitForValue(
@@ -330,7 +330,7 @@ describe('Data Loader', () => {
   });
 
   it('should initialize dateViews api with deduped list of index patterns', async () => {
-    await callDataLoader(
+    await expectRerenderOnDataLoder(
       async ({ internalApi }) => {
         await waitForValue(
           internalApi.dataViews,
@@ -357,7 +357,7 @@ describe('Data Loader', () => {
   });
 
   it('should override noPadding in the display options if noPadding is set in the embeddable input', async () => {
-    await callDataLoader(async ({ internalApi }) => {
+    await expectRerenderOnDataLoder(async ({ internalApi }) => {
       await waitForValue(
         internalApi.expressionParams$,
         (v: unknown) => isObject(v) && 'expression' in v && typeof v.expression != null
@@ -370,7 +370,7 @@ describe('Data Loader', () => {
   });
 
   it('should reload only once when the attributes or savedObjectId and the search context change at the same time', async () => {
-    await callDataLoader(async ({ internalApi, api }) => {
+    await expectRerenderOnDataLoder(async ({ internalApi, api }) => {
       // trigger a change by changing the title in the attributes
       (internalApi.attributes$ as BehaviorSubject<LensDocument | undefined>).next({
         ...internalApi.attributes$.getValue(),
@@ -381,7 +381,7 @@ describe('Data Loader', () => {
   });
 
   it('should pass over the overrides as variables', async () => {
-    await callDataLoader(
+    await expectRerenderOnDataLoder(
       async ({ internalApi }) => {
         await waitForValue(
           internalApi.expressionParams$,
