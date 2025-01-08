@@ -15880,9 +15880,13 @@ paths:
                         type: number
                       online:
                         type: number
+                      orphaned:
+                        type: number
                       other:
                         type: number
                       unenrolled:
+                        type: number
+                      uninstalled:
                         type: number
                       updating:
                         type: number
