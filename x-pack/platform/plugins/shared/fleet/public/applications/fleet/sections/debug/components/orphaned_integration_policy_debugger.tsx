@@ -6,6 +6,7 @@
  */
 
 import React, { useState } from 'react';
+import { css } from '@emotion/react';
 import {
   EuiSpacer,
   EuiText,
@@ -142,7 +143,7 @@ export const OrphanedIntegrationPolicyDebugger: React.FunctionComponent = () => 
       <EuiFlexGroup>
         <EuiFlexItem
           grow={false}
-          css={`
+          css={css`
             min-width: 400px;
           `}
         >

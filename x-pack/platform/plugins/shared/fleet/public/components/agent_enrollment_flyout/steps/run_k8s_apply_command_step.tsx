@@ -6,7 +6,7 @@
  */
 
 import React, { useState } from 'react';
-
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 
 import type { EuiContainedStepProps } from '@elastic/eui/src/components/steps/steps';
@@ -58,7 +58,7 @@ export const KubernetesManifestApplyStep = ({
           fontSize="m"
           isCopyable={!fullCopyButton}
           paddingSize="m"
-          css={`
+          css={css`
             max-width: 1100px;
           `}
         >

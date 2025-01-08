@@ -6,6 +6,7 @@
  */
 
 import React, { useState } from 'react';
+import { css } from '@emotion/react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -198,7 +199,7 @@ export const IntegrationDebugger: React.FunctionComponent = () => {
       <EuiFlexGroup alignItems="center" justifyContent="flexStart">
         <EuiFlexItem
           grow={false}
-          css={`
+          css={css`
             min-width: 600px;
           `}
         >

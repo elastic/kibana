@@ -6,6 +6,7 @@
  */
 
 import React, { useState } from 'react';
+import { css } from '@emotion/react';
 import { useQuery } from '@tanstack/react-query';
 import {
   EuiFlexGroup,
@@ -126,7 +127,7 @@ export const SavedObjectDebugger: React.FunctionComponent = () => {
       <EuiFlexGroup alignItems="center" justifyContent="flexStart">
         <EuiFlexItem
           grow={false}
-          css={`
+          css={css`
             min-width: 300px;
           `}
         >
@@ -145,7 +146,7 @@ export const SavedObjectDebugger: React.FunctionComponent = () => {
         </EuiFlexItem>
         <EuiFlexItem
           grow={false}
-          css={`
+          css={css`
             min-width: 400px;
           `}
         >
