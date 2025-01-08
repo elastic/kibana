@@ -19,7 +19,6 @@ import { coreMock } from '@kbn/core/public/mocks';
 import { UserProfileService } from '@kbn/core/public';
 import { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
 import { of } from 'rxjs';
-import { I18nProvider } from '@kbn/i18n-react';
 import { EuiThemeProvider } from '@elastic/eui';
 
 import { UserProfileService } from '@kbn/core/public';
