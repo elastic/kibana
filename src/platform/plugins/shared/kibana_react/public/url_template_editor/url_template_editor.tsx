@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { css } from '@emotion/react';
 import * as React from 'react';
+import { useEuiTheme } from '@elastic/eui';
 import { monaco } from '@kbn/monaco';
 import { CodeEditor, HandlebarsLang, type CodeEditorProps } from '@kbn/code-editor';
-
-import './styles.scss';
 
 export interface UrlTemplateEditorVariable {
   label: string;
@@ -125,8 +125,15 @@ export const UrlTemplateEditor: React.FC<UrlTemplateEditorProps> = ({
     };
   }, [variables]);
 
+  const { euiTheme } = useEuiTheme();
+  const editorStyle = css({
+    '.monaco-editor .lines-content.monaco-editor-background': {
+      margin: `0 ${euiTheme.size.s}`,
+    },
+  });
+
   return (
-    <div className={'urlTemplateEditor__container'} onKeyDown={handleKeyDown}>
+    <div data-test-subj="url-template-editor-container" css={editorStyle} onKeyDown={handleKeyDown}>
       <Editor
         languageId={HandlebarsLang}
         height={height}
