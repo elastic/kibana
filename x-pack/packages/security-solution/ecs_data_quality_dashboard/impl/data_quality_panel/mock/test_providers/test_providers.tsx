@@ -10,13 +10,10 @@ import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import { AssistantAvailability, AssistantProvider } from '@kbn/elastic-assistant';
 import { I18nProvider } from '@kbn/i18n-react';
-import { euiDarkVars } from '@kbn/ui-theme';
 import React from 'react';
-import { ThemeProvider } from 'styled-components';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Theme } from '@elastic/charts';
 import { coreMock } from '@kbn/core/public/mocks';
-import { UserProfileService } from '@kbn/core/public';
 import { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
 import { of } from 'rxjs';
 import { EuiThemeProvider } from '@elastic/eui';
@@ -36,6 +33,7 @@ import {
   FetchHistoricalResultsReducerState,
   UseHistoricalResultsReturnValue,
 } from '../../data_quality_details/indices_details/pattern/hooks/use_historical_results/types';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 
 interface TestExternalProvidersProps {
   children: React.ReactNode;
