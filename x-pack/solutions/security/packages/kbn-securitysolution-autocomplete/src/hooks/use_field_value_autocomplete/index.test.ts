@@ -13,7 +13,7 @@ import { getField } from '../../fields/index.mock';
 import { autocompleteStartMock } from '../../autocomplete/index.mock';
 import { DataViewFieldBase } from '@kbn/es-query';
 
-// Copied from "src/plugins/data/common/index_patterns/index_pattern.stub.ts"
+// Copied from "src/platform/plugins/shared/data/common/index_patterns/index_pattern.stub.ts"
 // TODO: Remove this in favor of the above if/when it is ported, https://github.com/elastic/kibana/issues/100715
 export const stubIndexPatternWithFields = {
   id: '1234',
