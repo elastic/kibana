@@ -5,8 +5,14 @@
  * 2.0.
  */
 import type { DragDropIdentifier } from '@kbn/dom-drag-drop';
-import type { IncompleteColumn, GenericIndexPatternColumn } from './operations';
+import { AggregateQuery } from '@kbn/es-query';
+import { Datatable } from '@kbn/expressions-plugin/common';
+import { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
+import { IndexPatternRef, TextBasedLayerColumn } from './esql_layer/types';
 import type { IndexPattern, IndexPatternField, DragDropOperation } from '../../types';
+import type { IncompleteColumn, GenericIndexPatternColumn } from './operations';
+import { VisualizeEditorContext } from '../../types';
+import { ValueFormatConfig } from './operations/definitions/column_types';
 
 export type {
   GenericIndexPatternColumn,
@@ -46,7 +52,22 @@ export type DraggedField = DragDropIdentifier & {
   indexPatternId: string;
 };
 
+export interface TextBasedLayer {
+  type: 'esql';
+  index?: string;
+  indexPatternId?: string;
+  query?: AggregateQuery | undefined;
+  table?: Datatable;
+  columns: TextBasedLayerColumn[];
+  timeField?: string;
+  params?: {
+    format?: ValueFormatConfig;
+  };
+  errors?: Error[];
+}
+
 export interface FormBasedLayer {
+  type: 'form' | undefined;
   columnOrder: string[];
   columns: Record<string, GenericIndexPatternColumn>;
   // Each layer is tied to the index pattern that created it
@@ -59,14 +80,16 @@ export interface FormBasedLayer {
 }
 
 export interface FormBasedPersistedState {
-  layers: Record<string, Omit<FormBasedLayer, 'indexPatternId'>>;
+  layers: Record<string, Omit<FormBasedLayer, 'indexPatternId'> | TextBasedLayer>;
 }
 
 export type PersistedIndexPatternLayer = Omit<FormBasedLayer, 'indexPatternId'>;
 
 export interface FormBasedPrivateState {
   currentIndexPatternId: string;
-  layers: Record<string, FormBasedLayer>;
+  indexPatternRefs: IndexPatternRef[];
+  initialContext?: VisualizeFieldContext | VisualizeEditorContext;
+  layers: Record<string, FormBasedLayer | TextBasedLayer>;
 }
 
 export interface DataViewDragDropOperation extends DragDropOperation {

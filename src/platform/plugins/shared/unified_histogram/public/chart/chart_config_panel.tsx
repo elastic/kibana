@@ -113,7 +113,7 @@ export function ChartConfigPanel({
             setIsFlyoutVisible(false);
           }}
           wrapInFlyout
-          datasourceId="textBased"
+          datasourceId="formBased"
           hidesSuggestions={currentSuggestionType !== UnifiedHistogramSuggestionType.lensSuggestion}
         />
       );
