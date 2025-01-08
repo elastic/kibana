@@ -11,5 +11,5 @@ module.exports = {
   roots: ['<rootDir>/x-pack/plugins/drilldowns'],
   coverageDirectory: '<rootDir>/target/kibana-coverage/jest/x-pack/plugins/drilldowns',
   coverageReporters: ['text', 'html'],
-  collectCoverageFrom: ['<rootDir>/x-pack/plugins/drilldowns/url_drilldown/public/**/*.{ts,tsx}'],
+  collectCoverageFrom: ['<rootDir>/x-pack/platform/plugins/private/drilldowns/url_drilldown/public/**/*.{ts,tsx}'],
 };
