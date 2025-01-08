@@ -8,7 +8,7 @@ import React from 'react';
 import { css } from '@emotion/react';
 import { EuiHealth, EuiBadge, EuiSpacer, EuiFlexGroup, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { getMisconfigurationStatusColor } from '@kbn/cloud-security-posture';
+import { useMisconfigurationStatusColor } from '@kbn/cloud-security-posture/src/hooks/use_misconfiguration_status_color';
 import { getAbbreviatedNumber, MISCONFIGURATION_STATUS } from '@kbn/cloud-security-posture-common';
 import { RULE_FAILED, RULE_PASSED } from '../../../../common/constants';
 import type { Evaluation } from '../../../../common/types_old';
@@ -36,6 +36,7 @@ export const FindingsDistributionBar = (props: Props) => (
 );
 const Counters = ({ passed, failed }: Pick<Props, 'passed' | 'failed'>) => {
   const { euiTheme } = useEuiTheme();
+  const { getMisconfigurationStatusColor } = useMisconfigurationStatusColor();
 
   return (
     <EuiFlexGroup
@@ -44,11 +45,11 @@ const Counters = ({ passed, failed }: Pick<Props, 'passed' | 'failed'>) => {
         gap: ${euiTheme.size.m};
       `}
     >
-      <EuiHealth color={getMisconfigurationStatusColor(MISCONFIGURATION_STATUS.PASSED, euiTheme)}>
+      <EuiHealth color={getMisconfigurationStatusColor(MISCONFIGURATION_STATUS.PASSED)}>
         {I18N_PASSED_FINDINGS}
       </EuiHealth>
       <EuiBadge>{getAbbreviatedNumber(passed)}</EuiBadge>
-      <EuiHealth color={getMisconfigurationStatusColor(MISCONFIGURATION_STATUS.FAILED, euiTheme)}>
+      <EuiHealth color={getMisconfigurationStatusColor(MISCONFIGURATION_STATUS.FAILED)}>
         {I18N_FAILED_FINDINGS}
       </EuiHealth>
       <EuiBadge>{getAbbreviatedNumber(failed)}</EuiBadge>
@@ -62,6 +63,7 @@ const DistributionBar: React.FC<Omit<Props, 'pageEnd' | 'pageStart'>> = ({
   distributionOnClick,
 }) => {
   const { euiTheme } = useEuiTheme();
+  const { getMisconfigurationStatusColor } = useMisconfigurationStatusColor();
 
   return (
     <EuiFlexGroup
@@ -73,7 +75,7 @@ const DistributionBar: React.FC<Omit<Props, 'pageEnd' | 'pageStart'>> = ({
     >
       <DistributionBarPart
         value={passed}
-        color={getMisconfigurationStatusColor(MISCONFIGURATION_STATUS.PASSED, euiTheme)}
+        color={getMisconfigurationStatusColor(MISCONFIGURATION_STATUS.PASSED)}
         distributionOnClick={() => {
           distributionOnClick(RULE_PASSED);
         }}
@@ -82,7 +84,7 @@ const DistributionBar: React.FC<Omit<Props, 'pageEnd' | 'pageStart'>> = ({
       />
       <DistributionBarPart
         value={failed}
-        color={getMisconfigurationStatusColor(MISCONFIGURATION_STATUS.FAILED, euiTheme)}
+        color={getMisconfigurationStatusColor(MISCONFIGURATION_STATUS.FAILED)}
         distributionOnClick={() => {
           distributionOnClick(RULE_FAILED);
         }}

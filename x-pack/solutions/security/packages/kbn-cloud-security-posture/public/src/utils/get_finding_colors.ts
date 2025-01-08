@@ -25,7 +25,7 @@ export const getSeverityStatusColor = (
   severity: VulnSeverity,
   euiTheme: EuiThemeComputed
 ): string => {
-  // TOOD: remove old mapping when severity palette is fixed (atm it is inverted)
+  // TODO: remove old mapping when severity palette is fixed (atm it is inverted)
   if (euiTheme && isAmsterdam(euiTheme.themeName)) {
     switch (severity) {
       case VULNERABILITIES_SEVERITY.LOW:
@@ -56,7 +56,7 @@ export const getSeverityStatusColor = (
 };
 
 export const getCvsScoreColor = (score: number, euiTheme: EuiThemeComputed): string | undefined => {
-  // TOOD: remove old mapping when severity palette is fixed (atm it is inverted)
+  // TODO: remove old mapping when severity palette is fixed (atm it is inverted)
   if (euiTheme && isAmsterdam(euiTheme.themeName)) {
     if (score <= 4) {
       return euiThemeVars.euiColorVis0; // low severity

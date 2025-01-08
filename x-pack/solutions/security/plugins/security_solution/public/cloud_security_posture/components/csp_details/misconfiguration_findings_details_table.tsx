@@ -6,13 +6,8 @@
  */
 
 import React, { memo, useCallback, useEffect, useState } from 'react';
-import type {
-  Criteria,
-  EuiBasicTableColumn,
-  EuiTableSortingType,
-  EuiThemeComputed,
-} from '@elastic/eui';
-import { EuiSpacer, EuiPanel, EuiText, EuiBasicTable, EuiIcon, useEuiTheme } from '@elastic/eui';
+import type { Criteria, EuiBasicTableColumn, EuiTableSortingType } from '@elastic/eui';
+import { EuiSpacer, EuiPanel, EuiText, EuiBasicTable, EuiIcon } from '@elastic/eui';
 import type { MisconfigurationFindingDetailFields } from '@kbn/cloud-security-posture/src/hooks/use_misconfiguration_findings';
 import {
   useMisconfigurationFindings,
@@ -26,7 +21,8 @@ import {
 } from '@kbn/cloud-security-posture-common';
 import { DistributionBar } from '@kbn/security-solution-distribution-bar';
 import type { CspBenchmarkRuleMetadata } from '@kbn/cloud-security-posture-common/schema/rules/latest';
-import { CspEvaluationBadge, getMisconfigurationStatusColor } from '@kbn/cloud-security-posture';
+import { CspEvaluationBadge } from '@kbn/cloud-security-posture';
+import { useMisconfigurationStatusColor } from '@kbn/cloud-security-posture/src/hooks/use_misconfiguration_status_color';
 import {
   ENTITY_FLYOUT_EXPAND_MISCONFIGURATION_VIEW_VISITS,
   NAV_TO_FINDINGS_BY_HOST_NAME_FRPOM_ENTITY_FLYOUT,
@@ -50,7 +46,7 @@ const getFindingsStats = (
   failedFindingsStats: number,
   filterFunction: (filter: string) => void,
   currentFilter: string,
-  euiTheme: EuiThemeComputed
+  getMisconfigurationStatusColor: (status: 'passed' | 'failed' | 'unknown') => string
 ) => {
   if (passedFindingsStats === 0 && failedFindingsStats === 0) return [];
   return [
@@ -62,7 +58,7 @@ const getFindingsStats = (
         }
       ),
       count: passedFindingsStats,
-      color: getMisconfigurationStatusColor(MISCONFIGURATION_STATUS.PASSED, euiTheme),
+      color: getMisconfigurationStatusColor(MISCONFIGURATION_STATUS.PASSED),
       filter: () => {
         filterFunction(MISCONFIGURATION_STATUS.PASSED);
       },
@@ -80,7 +76,7 @@ const getFindingsStats = (
         }
       ),
       count: failedFindingsStats,
-      color: getMisconfigurationStatusColor(MISCONFIGURATION_STATUS.FAILED, euiTheme),
+      color: getMisconfigurationStatusColor(MISCONFIGURATION_STATUS.FAILED),
       filter: () => {
         filterFunction(MISCONFIGURATION_STATUS.FAILED);
       },
@@ -98,7 +94,7 @@ const getFindingsStats = (
  */
 export const MisconfigurationFindingsDetailsTable = memo(
   ({ field, value }: { field: 'host.name' | 'user.name'; value: string }) => {
-    const { euiTheme } = useEuiTheme();
+    const { getMisconfigurationStatusColor } = useMisconfigurationStatusColor();
 
     useEffect(() => {
       uiMetricService.trackUiMetric(
@@ -192,12 +188,12 @@ export const MisconfigurationFindingsDetailsTable = memo(
     const linkWidth = 40;
     const resultWidth = 74;
 
-    const misconfgurationStats = getFindingsStats(
+    const misconfigurationStats = getFindingsStats(
       passedFindings,
       failedFindings,
       setCurrentFilter,
       currentFilter,
-      euiTheme
+      getMisconfigurationStatusColor
     );
 
     const columns: Array<EuiBasicTableColumn<MisconfigurationFindingDetailFields>> = [
@@ -279,7 +275,7 @@ export const MisconfigurationFindingsDetailsTable = memo(
             <EuiIcon type={'popout'} />
           </SecuritySolutionLinkAnchor>
           <EuiSpacer size="xl" />
-          <DistributionBar stats={misconfgurationStats} />
+          <DistributionBar stats={misconfigurationStats} />
           <EuiSpacer size="l" />
           <EuiBasicTable
             items={pageOfItems || []}

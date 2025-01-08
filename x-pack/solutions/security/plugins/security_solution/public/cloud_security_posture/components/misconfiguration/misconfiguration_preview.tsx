@@ -7,13 +7,12 @@
 
 import React, { useCallback, useEffect, useMemo } from 'react';
 import { css } from '@emotion/react';
-import type { EuiThemeComputed } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, useEuiTheme, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { DistributionBar } from '@kbn/security-solution-distribution-bar';
 import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/use_has_misconfigurations';
 import { i18n } from '@kbn/i18n';
-import { getMisconfigurationStatusColor } from '@kbn/cloud-security-posture';
+import { useMisconfigurationStatusColor } from '@kbn/cloud-security-posture/src/hooks/use_misconfiguration_status_color';
 import { MISCONFIGURATION_STATUS } from '@kbn/cloud-security-posture-common';
 import { METRIC_TYPE } from '@kbn/analytics';
 import {
@@ -30,7 +29,7 @@ import {
 export const getFindingsStats = (
   passedFindingsStats: number,
   failedFindingsStats: number,
-  euiTheme: EuiThemeComputed
+  getMisconfigurationStatusColor: (status: 'passed' | 'failed' | 'unknown') => string
 ) => {
   if (passedFindingsStats === 0 && failedFindingsStats === 0) return [];
   return [
@@ -42,7 +41,7 @@ export const getFindingsStats = (
         }
       ),
       count: passedFindingsStats,
-      color: getMisconfigurationStatusColor(MISCONFIGURATION_STATUS.PASSED, euiTheme),
+      color: getMisconfigurationStatusColor(MISCONFIGURATION_STATUS.PASSED),
     },
     {
       key: i18n.translate(
@@ -52,7 +51,7 @@ export const getFindingsStats = (
         }
       ),
       count: failedFindingsStats,
-      color: getMisconfigurationStatusColor(MISCONFIGURATION_STATUS.FAILED, euiTheme),
+      color: getMisconfigurationStatusColor(MISCONFIGURATION_STATUS.FAILED),
     },
   ];
 };
@@ -60,12 +59,12 @@ export const getFindingsStats = (
 const MisconfigurationPreviewScore = ({
   passedFindings,
   failedFindings,
-  euiTheme,
 }: {
   passedFindings: number;
   failedFindings: number;
-  euiTheme: EuiThemeComputed<{}>;
 }) => {
+  const { euiTheme } = useEuiTheme();
+
   return (
     <EuiFlexItem>
       <EuiFlexGroup direction="column" gutterSize="none">
@@ -114,6 +113,7 @@ export const MisconfigurationsPreview = ({
     uiMetricService.trackUiMetric(METRIC_TYPE.CLICK, ENTITY_FLYOUT_WITH_MISCONFIGURATION_VISIT);
   }, []);
   const { euiTheme } = useEuiTheme();
+  const { getMisconfigurationStatusColor } = useMisconfigurationStatusColor();
 
   const goToEntityInsightTab = useCallback(() => {
     openDetailsPanel({
@@ -162,7 +162,6 @@ export const MisconfigurationsPreview = ({
         <MisconfigurationPreviewScore
           passedFindings={passedFindings}
           failedFindings={failedFindings}
-          euiTheme={euiTheme}
         />
 
         <EuiFlexItem grow={2}>
@@ -170,7 +169,13 @@ export const MisconfigurationsPreview = ({
             <EuiFlexItem />
             <EuiFlexItem>
               <EuiSpacer />
-              <DistributionBar stats={getFindingsStats(passedFindings, failedFindings, euiTheme)} />
+              <DistributionBar
+                stats={getFindingsStats(
+                  passedFindings,
+                  failedFindings,
+                  getMisconfigurationStatusColor
+                )}
+              />
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
