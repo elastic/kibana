@@ -18,7 +18,7 @@ export async function enableStreams(supertest: Agent) {
 }
 
 export async function indexDocument(esClient: Client, index: string, document: JsonObject) {
-  const response = await esClient.index({ index, document });
+  const response = await esClient.index({ index, document, refresh: 'wait_for' });
   return response;
 }
 
@@ -38,13 +38,13 @@ export async function forkStream(supertest: Agent, root: string, body: JsonObjec
 }
 
 export async function putStream(supertest: Agent, name: string, body: StreamConfigDefinition) {
-  const req = supertest.put(`/api/streams/${name}`).set('kbn-xsrf', 'xxx');
+  const req = supertest.put(`/api/streams/${encodeURIComponent(name)}`).set('kbn-xsrf', 'xxx');
   const response = await req.send(body).expect(200);
   return response.body;
 }
 
 export async function getStream(supertest: Agent, name: string) {
-  const req = supertest.get(`/api/streams/${name}`).set('kbn-xsrf', 'xxx');
+  const req = supertest.get(`/api/streams/${encodeURIComponent(name)}`).set('kbn-xsrf', 'xxx');
   const response = await req.send().expect(200);
   return response.body;
 }
