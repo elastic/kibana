@@ -5,4 +5,10 @@
  * 2.0.
  */
 
-export { InferenceEndpointManager } from './endpoint_manager';
+/**
+ * Constants for all default (preconfigured) inference endpoints.
+ */
+export const defaultInferenceEndpoints = {
+  ELSER: '.elser-2-elasticsearch',
+  MULTILINGUAL_E5_SMALL: '.multilingual-e5-small-elasticsearch',
+};

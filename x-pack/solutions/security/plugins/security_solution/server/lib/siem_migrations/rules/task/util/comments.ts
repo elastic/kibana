@@ -5,6 +5,7 @@
  * 2.0.
  */
 
-export { waitUntilModelDeployed } from './wait_until_model_deployed';
-export { getModelInstallStatus } from './get_model_install_status';
-export { installElser } from './install_elser';
+export const cleanMarkdown = (markdown: string): string => {
+  // Use languages known by the code block plugin
+  return markdown.replaceAll('```esql', '```sql').replaceAll('```spl', '```splunk-spl');
+};
