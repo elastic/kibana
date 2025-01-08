@@ -9,8 +9,21 @@
 
 import { useHeathBarLinearGradient, useHealthHexCodes } from './gradient';
 
+jest.mock('@elastic/eui', () => ({
+  useEuiTheme: () => ({
+    euiTheme: {
+      colors: {
+        backgroundFilledSuccess: 'green',
+        backgroundLightWarning: 'yellow',
+        backgroundFilledDanger: 'red',
+      },
+    },
+  }),
+}));
+
 describe('useHeathBarLinearGradient', () => {
   const healthHexCodes = useHealthHexCodes();
+
   test('should return linear-gradient with percentages for each status', () => {
     expect(useHeathBarLinearGradient(5, 1, 1, 2)).toBe(
       `linear-gradient(to right, ${healthHexCodes.successful} 0% 56%, ${healthHexCodes.partial} 56% 67%, ${healthHexCodes.skipped} 67% 78%, ${healthHexCodes.failed} 78% 100%)`

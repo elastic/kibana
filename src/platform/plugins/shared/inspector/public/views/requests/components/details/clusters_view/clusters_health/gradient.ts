@@ -15,7 +15,6 @@ export function useHealthHexCodes() {
     successful: euiTheme.colors.backgroundFilledSuccess,
     partial: euiTheme.colors.backgroundLightWarning,
     skipped: euiTheme.colors.backgroundFilledWarning,
-    // skipped: '#DA8B45',
     failed: euiTheme.colors.backgroundFilledDanger,
   };
 }
