@@ -199,13 +199,11 @@ const singleColumnStyles = css`
   .kbnGridRow {
     grid-template-columns: 100% !important;
     grid-template-rows: auto !important;
+    grid-auto-flow: row;
   }
 
   .kbnGridPanel {
-    grid-column-start: 1 !important;
-    grid-column-end: 1 !important;
-    grid-row-end: auto !important;
-    grid-row-start: auto !important;
+    grid-area: unset !important;
   }
 `;
 
