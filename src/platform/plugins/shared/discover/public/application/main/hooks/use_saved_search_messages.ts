@@ -99,8 +99,12 @@ export function sendLoadingMoreFinishedMsg(
 /**
  * Send ERROR message
  */
-export function sendErrorMsg(data$: DataMain$ | DataDocuments$ | DataTotalHits$, error?: Error) {
-  data$.next({ fetchStatus: FetchStatus.ERROR, error });
+export function sendErrorMsg<T extends DataMsg>(
+  data$: DataMain$ | DataDocuments$ | DataTotalHits$,
+  error?: Error,
+  props?: Omit<T, 'fetchStatus' | 'error'>
+) {
+  data$.next({ fetchStatus: FetchStatus.ERROR, error, ...props });
 }
 
 /**
