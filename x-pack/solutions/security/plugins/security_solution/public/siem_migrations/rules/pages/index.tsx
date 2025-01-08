@@ -41,8 +41,6 @@ export const MigrationRulesPage: React.FC<MigrationRulesPageProps> = React.memo(
     const { navigateTo } = useNavigation();
     const { data: ruleMigrationsStats, isLoading, refreshStats } = useLatestStats();
 
-    const { data: ruleMigrationsStatsAll, isLoading: isLoadingMigrationsStats } = useLatestStats();
-
     const [integrations, setIntegrations] = React.useState<
       Record<string, RelatedIntegration> | undefined
     >();
@@ -52,15 +50,6 @@ export const MigrationRulesPage: React.FC<MigrationRulesPageProps> = React.memo(
     useEffect(() => {
       getIntegrations();
     }, [getIntegrations]);
-
-    const finishedRuleMigrationsStats = useMemo(() => {
-      if (isLoadingMigrationsStats || !ruleMigrationsStatsAll?.length) {
-        return [];
-      }
-      return ruleMigrationsStatsAll.filter(
-        (migration) => migration.status === SiemMigrationTaskStatus.FINISHED
-      );
-    }, [isLoadingMigrationsStats, ruleMigrationsStatsAll]);
 
     useEffect(() => {
       if (isLoading) {
