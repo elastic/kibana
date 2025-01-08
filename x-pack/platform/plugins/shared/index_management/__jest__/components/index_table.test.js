@@ -492,7 +492,6 @@ describe('index table', () => {
       expect(findTestSubject(rendered, 'refreshIndexMenuButton').length).toBe(0);
       expect(findTestSubject(rendered, 'clearCacheIndexMenuButton').length).toBe(0);
       expect(findTestSubject(rendered, 'flushIndexMenuButton').length).toBe(0);
-      expect(findTestSubject(rendered, 'unfreezeIndexMenuButton').length).toBe(0);
     });
   });
 });
