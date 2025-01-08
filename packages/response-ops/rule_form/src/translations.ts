@@ -233,6 +233,28 @@ export const ADD_ACTION_TEXT = i18n.translate(
   }
 );
 
+export const ADD_ACTION_HEADER = i18n.translate(
+  'responseOpsRuleForm.ruleForm.ruleActions.addActionHeader',
+  {
+    defaultMessage: 'Add an action',
+  }
+);
+
+export const ADD_ACTION_OPTIONAL_TEXT = i18n.translate(
+  'responseOpsRuleForm.ruleForm.ruleActions.addActionOptionalText',
+  {
+    defaultMessage: 'Optional',
+  }
+);
+
+export const ADD_ACTION_DESCRIPTION_TEXT = i18n.translate(
+  'responseOpsRuleForm.ruleForm.ruleActions.addActionDescriptionText',
+  {
+    defaultMessage:
+      'Select a connector and configure the actions to be performed when an alert is triggered',
+  }
+);
+
 export const RULE_DETAILS_TITLE = i18n.translate('responseOpsRuleForm.ruleForm.ruleDetails.title', {
   defaultMessage: 'Rule name and tags',
 });

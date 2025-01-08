@@ -1,0 +1,27 @@
+.ruleForm__container {
+  container: ruleForm / inline-size;
+}
+
+.ruleFormFlyout__container {
+  container: ruleForm / inline-size;
+}
+
+@container (max-width: 768px) {
+  .euiDescribedFormGroup {
+    flex-direction: column;
+  }
+  .euiDescribedFormGroup > .euiFlexItem {
+    width: 100%;
+  }
+  .ruleDefinitionHeader {
+    flex-direction: column;
+    gap: 12px;
+  }
+  .ruleDefinitionHeaderRuleTypeName {
+    font-size: 18px;
+    margin-bottom: 4px;
+  }
+  .ruleDefinitionHeaderRuleTypeDescription, .ruleDefinitionHeaderDocsLink {
+    font-size: 14px;
+  }
+}
