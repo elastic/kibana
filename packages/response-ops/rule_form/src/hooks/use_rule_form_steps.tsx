@@ -175,6 +175,7 @@ export const useRuleFormSteps: () => RuleFormVerticalSteps = () => {
   const reportOnBlur = useCallback(
     (stepId: RuleFormStepId, element: React.JSX.Element) => (
       <div
+        data-test-subj={`ruleFormStep-${stepId}-reportOnBlur`}
         onBlur={() =>
           !touchedSteps[stepId] &&
           setTouchedSteps({
