@@ -19,7 +19,6 @@ import type { AgentConfigOptions as RUMAgentConfigOptions } from '@elastic/apm-r
 const DEFAULT_CONFIG: AgentConfigOptions = {
   active: false,
   environment: 'development',
-  logUncaughtExceptions: true,
   globalLabels: {},
 };
 

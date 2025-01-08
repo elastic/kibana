@@ -90,7 +90,6 @@ describe('ApmConfiguration', () => {
         "centralConfig": false,
         "environment": "development",
         "globalLabels": Object {},
-        "logUncaughtExceptions": true,
         "metricsInterval": "30s",
         "propagateTracestate": true,
         "secretToken": "JpBCcOQxN81D5yucs2",
@@ -114,7 +113,6 @@ describe('ApmConfiguration', () => {
         "globalLabels": Object {
           "git_rev": "sha",
         },
-        "logUncaughtExceptions": true,
         "metricsInterval": "120s",
         "propagateTracestate": true,
         "secretToken": "JpBCcOQxN81D5yucs2",
