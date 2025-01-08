@@ -17,6 +17,7 @@ import type {
 
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type { AuditLogger } from '@kbn/security-plugin-types-server';
+import { type RunContext, TaskStatus } from '@kbn/task-manager-plugin/server';
 
 import {
   getSessionIndexSettings,
@@ -38,6 +39,22 @@ describe('Session index', () => {
   const indexName = '.kibana_some_tenant_security_session_1';
   const aliasName = '.kibana_some_tenant_security_session';
   const indexTemplateName = '.kibana_some_tenant_security_session_index_template_1';
+
+  const mockRunContext: RunContext = {
+    taskInstance: {
+      id: 'TASK_ID',
+      taskType: 'TASK_TYPE',
+      params: {},
+      state: {},
+      scheduledAt: new Date(),
+      attempts: 0,
+      retryAt: new Date(),
+      ownerId: 'OWNER_ID',
+      startedAt: new Date(),
+      runAt: new Date(),
+      status: TaskStatus.Idle,
+    },
+  };
 
   const createSessionIndexOptions = (
     config: Record<string, any> = { session: { idleTimeout: null, lifespan: null } }
@@ -367,6 +384,7 @@ describe('Session index', () => {
       _source: { usernameHash: 'USERNAME_HASH', provider: { name: 'basic1', type: 'basic' } },
       sort: [0],
     };
+
     beforeEach(() => {
       mockElasticsearchClient.openPointInTime.mockResponse({
         id: 'PIT_ID',
@@ -388,7 +406,7 @@ describe('Session index', () => {
       );
       mockElasticsearchClient.search.mockRejectedValue(failureReason);
 
-      await expect(sessionIndex.cleanUp()).rejects.toBe(failureReason);
+      await expect(sessionIndex.cleanUp(mockRunContext)).rejects.toBe(failureReason);
       expect(mockElasticsearchClient.openPointInTime).toHaveBeenCalledTimes(1);
       expect(mockElasticsearchClient.search).toHaveBeenCalledTimes(1);
       expect(mockElasticsearchClient.bulk).not.toHaveBeenCalled();
@@ -402,7 +420,7 @@ describe('Session index', () => {
       );
       mockElasticsearchClient.bulk.mockRejectedValue(failureReason);
 
-      await expect(sessionIndex.cleanUp()).rejects.toBe(failureReason);
+      await expect(sessionIndex.cleanUp(mockRunContext)).rejects.toBe(failureReason);
       expect(mockElasticsearchClient.openPointInTime).toHaveBeenCalledTimes(1);
       expect(mockElasticsearchClient.search).toHaveBeenCalledTimes(1);
       expect(mockElasticsearchClient.bulk).toHaveBeenCalledTimes(1);
@@ -415,7 +433,7 @@ describe('Session index', () => {
       );
       mockElasticsearchClient.indices.refresh.mockRejectedValue(failureReason);
 
-      await sessionIndex.cleanUp();
+      await sessionIndex.cleanUp(mockRunContext);
       expect(mockElasticsearchClient.openPointInTime).toHaveBeenCalledTimes(1);
       expect(mockElasticsearchClient.search).toHaveBeenCalledTimes(1);
       expect(mockElasticsearchClient.bulk).toHaveBeenCalledTimes(1);
@@ -439,7 +457,7 @@ describe('Session index', () => {
         };
       });
 
-      await sessionIndex.cleanUp();
+      await sessionIndex.cleanUp(mockRunContext);
       expect(mockElasticsearchClient.openPointInTime).toHaveBeenCalledTimes(2);
       expect(mockElasticsearchClient.openPointInTime).toHaveBeenNthCalledWith(
         1,
@@ -469,7 +487,7 @@ describe('Session index', () => {
     });
 
     it('when neither `lifespan` nor `idleTimeout` is configured', async () => {
-      await sessionIndex.cleanUp();
+      await sessionIndex.cleanUp(mockRunContext);
 
       expect(mockElasticsearchClient.openPointInTime).toHaveBeenCalledTimes(1);
       expect(mockElasticsearchClient.search).toHaveBeenCalledTimes(1);
@@ -551,7 +569,7 @@ describe('Session index', () => {
         auditLogger,
       });
 
-      await sessionIndex.cleanUp();
+      await sessionIndex.cleanUp(mockRunContext);
 
       expect(mockElasticsearchClient.openPointInTime).toHaveBeenCalledTimes(1);
       expect(mockElasticsearchClient.search).toHaveBeenCalledTimes(1);
@@ -645,7 +663,7 @@ describe('Session index', () => {
         auditLogger,
       });
 
-      await sessionIndex.cleanUp();
+      await sessionIndex.cleanUp(mockRunContext);
 
       expect(mockElasticsearchClient.openPointInTime).toHaveBeenCalledTimes(1);
       expect(mockElasticsearchClient.search).toHaveBeenCalledTimes(1);
@@ -733,7 +751,7 @@ describe('Session index', () => {
         auditLogger,
       });
 
-      await sessionIndex.cleanUp();
+      await sessionIndex.cleanUp(mockRunContext);
 
       expect(mockElasticsearchClient.openPointInTime).toHaveBeenCalledTimes(1);
       expect(mockElasticsearchClient.search).toHaveBeenCalledTimes(1);
@@ -846,7 +864,7 @@ describe('Session index', () => {
         auditLogger,
       });
 
-      await sessionIndex.cleanUp();
+      await sessionIndex.cleanUp(mockRunContext);
 
       expect(mockElasticsearchClient.openPointInTime).toHaveBeenCalledTimes(1);
       expect(mockElasticsearchClient.search).toHaveBeenCalledTimes(1);
@@ -970,7 +988,7 @@ describe('Session index', () => {
         } as SearchResponse);
       }
 
-      await sessionIndex.cleanUp();
+      await sessionIndex.cleanUp(mockRunContext);
 
       expect(mockElasticsearchClient.openPointInTime).toHaveBeenCalledTimes(1);
       expect(mockElasticsearchClient.search).toHaveBeenCalledTimes(2);
@@ -984,7 +1002,7 @@ describe('Session index', () => {
         hits: { hits: new Array(10_000).fill(sessionValue, 0) },
       } as SearchResponse);
 
-      await sessionIndex.cleanUp();
+      await sessionIndex.cleanUp(mockRunContext);
 
       expect(mockElasticsearchClient.openPointInTime).toHaveBeenCalledTimes(1);
       expect(mockElasticsearchClient.search).toHaveBeenCalledTimes(10);
@@ -994,7 +1012,7 @@ describe('Session index', () => {
     });
 
     it('should log audit event', async () => {
-      await sessionIndex.cleanUp();
+      await sessionIndex.cleanUp(mockRunContext);
 
       expect(auditLogger.log).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -1077,7 +1095,7 @@ describe('Session index', () => {
       it('when concurrent session limit is not configured', async () => {
         sessionIndex = new SessionIndex(createSessionIndexOptions());
 
-        await sessionIndex.cleanUp();
+        await sessionIndex.cleanUp(mockRunContext);
 
         // Only search call for the invalid sessions (use `pit` as marker, since concurrent session limit cleanup
         // routine doesn't rely on PIT).
@@ -1095,7 +1113,7 @@ describe('Session index', () => {
           aggregations: { sessions_grouped_by_user: { sum_other_doc_count: 1 } },
         } as unknown as SearchResponse);
 
-        await sessionIndex.cleanUp();
+        await sessionIndex.cleanUp(mockRunContext);
 
         // Only search call for the invalid sessions (use `pit` as marker, since concurrent session limit cleanup
         // routine doesn't rely on PIT).
@@ -1122,7 +1140,7 @@ describe('Session index', () => {
           responses: [{ status: 200, hits: { hits: [{ _id: 'some-id' }, { _id: 'some-id-2' }] } }],
         } as MsearchMultiSearchResult);
 
-        await sessionIndex.cleanUp();
+        await sessionIndex.cleanUp(mockRunContext);
 
         // Only search call for the invalid sessions (use `pit` as marker, since concurrent session limit cleanup
         // routine doesn't rely on PIT).
@@ -1174,7 +1192,7 @@ describe('Session index', () => {
           ],
         } as MsearchMultiSearchResult);
 
-        await sessionIndex.cleanUp();
+        await sessionIndex.cleanUp(mockRunContext);
 
         // Only search call for the invalid sessions (use `pit` as marker, since concurrent session limit cleanup
         // routine doesn't rely on PIT).
@@ -1236,7 +1254,7 @@ describe('Session index', () => {
           ],
         } as MsearchMultiSearchResult);
 
-        await sessionIndex.cleanUp();
+        await sessionIndex.cleanUp(mockRunContext);
 
         expect(mockElasticsearchClient.bulk).toHaveBeenCalledTimes(2);
         expect(mockElasticsearchClient.bulk).toHaveBeenNthCalledWith(
@@ -1287,7 +1305,7 @@ describe('Session index', () => {
           ],
         } as MsearchMultiSearchResult);
 
-        await sessionIndex.cleanUp();
+        await sessionIndex.cleanUp(mockRunContext);
 
         expect(auditLogger.log).toHaveBeenCalledTimes(2);
         expect(auditLogger.log).toHaveBeenCalledWith(

@@ -19,13 +19,13 @@ import semver from 'semver';
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { AuditLogger } from '@kbn/security-plugin-types-server';
+import type { RunContext } from '@kbn/task-manager-plugin/server';
 
 import type { AuthenticationProvider } from '../../common';
 import { sessionCleanupConcurrentLimitEvent, sessionCleanupEvent } from '../audit';
 import { AnonymousAuthenticationProvider } from '../authentication';
 import type { ConfigType } from '../config';
 import { getDetailedErrorMessage, getErrorStatusCode } from '../errors';
-import { RunContext } from '@kbn/task-manager-plugin/server';
 
 export interface SessionIndexOptions {
   readonly elasticsearchClient: ElasticsearchClient;
