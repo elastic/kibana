@@ -10,24 +10,29 @@ import { agentStatusesToSummary } from './agent_statuses_to_summary';
 describe('agentStatusesToSummary', () => {
   it('should return the correct summary', () => {
     expect(
-      agentStatusesToSummary({
-        online: 1,
-        error: 2,
-        degraded: 3,
-        inactive: 4,
-        offline: 5,
-        updating: 6,
-        enrolling: 7,
-        unenrolling: 8,
-        unenrolled: 9,
-      })
+      agentStatusesToSummary(
+        {
+          online: 1,
+          error: 2,
+          degraded: 3,
+          inactive: 4,
+          offline: 5,
+          updating: 6,
+          enrolling: 7,
+          unenrolling: 8,
+          unenrolled: 9,
+        },
+        []
+      )
     ).toEqual({
       healthy: 1,
       unhealthy: 5,
+      orphaned: 0,
       inactive: 4,
       offline: 5,
       updating: 21,
       unenrolled: 9,
+      uninstalled: 0,
     });
   });
 });

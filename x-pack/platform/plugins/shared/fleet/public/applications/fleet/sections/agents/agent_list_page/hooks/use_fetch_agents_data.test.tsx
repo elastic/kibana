@@ -121,7 +121,13 @@ describe('useFetchAgentsData', () => {
     const { result } = renderer.renderHook(() => useFetchAgentsData());
     await waitFor(() => new Promise((resolve) => resolve(null)));
 
-    expect(result?.current.selectedStatus).toEqual(['healthy', 'unhealthy', 'updating', 'offline']);
+    expect(result?.current.selectedStatus).toEqual([
+      'healthy',
+      'unhealthy',
+      'orphaned',
+      'updating',
+      'offline',
+    ]);
     expect(result?.current.allAgentPolicies).toEqual([
       {
         id: 'agent-policy-1',

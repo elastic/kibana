@@ -54,29 +54,33 @@ export const getKuery = ({
   }
 
   if (selectedStatus?.length) {
-    const kueryStatus = selectedStatus
-      .map((status) => {
-        switch (status) {
-          case 'healthy':
-            return AgentStatusKueryHelper.buildKueryForOnlineAgents();
-          case 'unhealthy':
-            return AgentStatusKueryHelper.buildKueryForErrorAgents();
-          case 'offline':
-            return AgentStatusKueryHelper.buildKueryForOfflineAgents();
-          case 'updating':
-            return AgentStatusKueryHelper.buildKueryForUpdatingAgents();
-          case 'inactive':
-            return AgentStatusKueryHelper.buildKueryForInactiveAgents();
-          case 'unenrolled':
-            return AgentStatusKueryHelper.buildKueryForUnenrolledAgents();
-          case 'orphaned':
-            return AgentStatusKueryHelper.buildKueryForOfflineAgents();
-          case 'uninstalled':
-            return AgentStatusKueryHelper.buildKueryForOfflineAgents();
-        }
+    const kueryStatus = Array.from(
+      new Set(
+        selectedStatus.map((status) => {
+          switch (status) {
+            case 'healthy':
+              return AgentStatusKueryHelper.buildKueryForOnlineAgents();
+            case 'unhealthy':
+              return AgentStatusKueryHelper.buildKueryForErrorAgents();
+            case 'offline':
+              return AgentStatusKueryHelper.buildKueryForOfflineAgents();
+            case 'updating':
+              return AgentStatusKueryHelper.buildKueryForUpdatingAgents();
+            case 'inactive':
+              return AgentStatusKueryHelper.buildKueryForInactiveAgents();
+            case 'unenrolled':
+              return AgentStatusKueryHelper.buildKueryForUnenrolledAgents();
+            case 'orphaned':
+              return AgentStatusKueryHelper.buildKueryForOfflineAgents();
+            case 'uninstalled':
+              return AgentStatusKueryHelper.buildKueryForOfflineAgents();
+          }
 
-        return undefined;
-      })
+          return undefined;
+        })
+      )
+    )
+
       .filter((statusKuery) => statusKuery !== undefined)
       .join(' or ');
     if (kueryBuilder) {
