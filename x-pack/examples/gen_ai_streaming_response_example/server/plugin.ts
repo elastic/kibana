@@ -26,7 +26,9 @@ interface MessageBody {
   messages: Message[];
 }
 
-export class GenAiStreamingResponseExamplePlugin implements Plugin<void, void> {
+export class GenAiStreamingResponseExamplePlugin
+  implements Plugin<void, void, {}, GenAiStreamingResponseExamplePluginStart>
+{
   public setup({ http, getStartServices }: CoreSetup<GenAiStreamingResponseExamplePluginStart>) {
     const router = http.createRouter();
 
