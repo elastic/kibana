@@ -62,7 +62,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       expect(definitions.results[0]).eql({
         budgetingMethod: 'occurrences',
         updatedAt: definitions.results[0].updatedAt,
+        updatedBy: 'elastic_admin',
         createdAt: definitions.results[0].createdAt,
+        createdBy: 'elastic_admin',
         description: 'Fixture for api integration tests',
         enabled: true,
         groupBy: 'tags',

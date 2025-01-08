@@ -118,9 +118,9 @@ Array [
       },
       "sliValue": -1,
       "slo": Object {
-        "addedBy": "some-user-id",
         "budgetingMethod": "occurrences",
         "createdAt": "2024-01-01T00:00:00.000Z",
+        "createdBy": "some-user-id",
         "description": "irrelevant",
         "groupBy": "*",
         "groupings": Object {},

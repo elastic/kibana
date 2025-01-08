@@ -120,9 +120,9 @@ exports[`ResetSLO happy path resets all associated resources 6`] = `
   "calls": Array [
     Array [
       Object {
-        "addedBy": "irrelevant",
         "budgetingMethod": "occurrences",
         "createdAt": 2023-01-01T00:00:00.000Z,
+        "createdBy": "irrelevant",
         "description": "irrelevant",
         "enabled": true,
         "groupBy": "*",
@@ -535,7 +535,7 @@ exports[`ResetSLO happy path resets all associated resources 8`] = `
           },
           Object {
             "set": Object {
-              "field": "addedBy",
+              "field": "createdBy",
               "value": "irrelevant",
             },
           },
@@ -561,9 +561,9 @@ exports[`ResetSLO happy path resets all associated resources 9`] = `
   "calls": Array [
     Array [
       Object {
-        "addedBy": "irrelevant",
         "budgetingMethod": "occurrences",
         "createdAt": 2023-01-01T00:00:00.000Z,
+        "createdBy": "irrelevant",
         "description": "irrelevant",
         "enabled": true,
         "groupBy": "*",
@@ -682,9 +682,9 @@ exports[`ResetSLO happy path resets all associated resources 11`] = `
           },
           "sliValue": -1,
           "slo": Object {
-            "addedBy": "irrelevant",
             "budgetingMethod": "occurrences",
             "createdAt": "2023-01-01T00:00:00.000Z",
+            "createdBy": "irrelevant",
             "description": "irrelevant",
             "groupBy": "*",
             "groupings": Object {},
