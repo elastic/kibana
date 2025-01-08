@@ -28,7 +28,6 @@ export {
   useLoadIndexSettings,
   createIndex,
   useLoadInferenceEndpoints,
-  getInferenceServices,
   createInferenceEndpoint,
 } from './api';
 

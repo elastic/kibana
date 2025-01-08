@@ -10,7 +10,6 @@ import type { SerializedEnrichPolicy } from '@kbn/index-management-shared-types'
 import { IndicesStatsResponse } from '@elastic/elasticsearch/lib/api/types';
 import { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 import { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { InferenceProvider } from '@kbn/inference-endpoint-ui-common';
 import {
   API_BASE_PATH,
   INTERNAL_API_BASE_PATH,
@@ -457,13 +456,6 @@ export function updateIndexMappings(indexName: string, newFields: Fields) {
 export function getInferenceEndpoints() {
   return sendRequest<InferenceAPIConfigResponse[]>({
     path: `${API_BASE_PATH}/inference/all`,
-    method: 'get',
-  });
-}
-
-export function getInferenceServices() {
-  return sendRequest<InferenceProvider[]>({
-    path: `${API_BASE_PATH}/inference/services`,
     method: 'get',
   });
 }

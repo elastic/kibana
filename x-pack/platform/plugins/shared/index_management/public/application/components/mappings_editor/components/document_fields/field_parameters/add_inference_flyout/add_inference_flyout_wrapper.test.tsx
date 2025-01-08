@@ -13,11 +13,11 @@ import { act } from 'react-dom/test-utils';
 import React from 'react';
 
 import { AddInferenceFlyoutWrapper } from './add_inference_flyout_wrapper';
-import { MockProviders } from '../../../../../../../services/provider.mock';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 const mockAddEndpoint = jest.fn();
 const mockResendRequest = jest.fn();
-const onClose = jest.fn();
+const mockOnClose = jest.fn();
 
 jest.mock('../../../../../../hooks/use_add_endpoint', () => ({
   useAddEndpoint: () => ({
@@ -25,17 +25,27 @@ jest.mock('../../../../../../hooks/use_add_endpoint', () => ({
   }),
 }));
 
-jest.mock('../../../../../../hooks/use_providers', () => ({
-  useProviders: jest.fn(() => ({
-    fetchInferenceServices: jest.fn().mockResolvedValue(MockProviders),
-  })),
+jest.mock('../../../../../../app_context', () => ({
+  useAppContext: jest.fn().mockReturnValue({
+    core: {
+      http: jest.fn(),
+    },
+    services: {
+      notificationService: {
+        toasts: jest.fn(),
+      },
+    },
+  }),
 }));
 
 const MockFormProvider = ({ children }: { children: React.ReactElement }) => {
   const { form } = useForm();
+  const queryClient = new QueryClient();
   return (
     <I18nProvider>
-      <Form form={form}>{children}</Form>
+      <QueryClientProvider client={queryClient}>
+        <Form form={form}>{children}</Form>
+      </QueryClientProvider>
     </I18nProvider>
   );
 };
@@ -47,7 +57,10 @@ describe('AddInferenceFlyout', () => {
     await act(async () => {
       render(
         <MockFormProvider>
-          <AddInferenceFlyoutWrapper onFlyoutClose={onClose} resendRequest={mockResendRequest} />
+          <AddInferenceFlyoutWrapper
+            onFlyoutClose={mockOnClose}
+            resendRequest={mockResendRequest}
+          />
         </MockFormProvider>
       );
     });
@@ -57,8 +70,6 @@ describe('AddInferenceFlyout', () => {
     expect(screen.getByTestId('create-inference-flyout')).toBeInTheDocument();
     expect(screen.getByTestId('create-inference-flyout-header')).toBeInTheDocument();
     expect(screen.getByTestId('create-inference-flyout-header')).toBeInTheDocument();
-    expect(screen.getByTestId('provider-select')).toBeInTheDocument();
-    expect(screen.getByTestId('add-inference-endpoint-submit-button')).toBeInTheDocument();
     expect(screen.getByTestId('create-inference-flyout-close-button')).toBeInTheDocument();
   });
 
@@ -69,16 +80,8 @@ describe('AddInferenceFlyout', () => {
     expect(screen.getByTestId('add-inference-endpoint-submit-button')).toBeDisabled();
   });
 
-  it('valid submission', async () => {
-    await userEvent.click(screen.getByTestId('provider-select'));
-    await userEvent.click(screen.getByText('Anthropic'));
-    await userEvent.type(await screen.findByTestId('api_key-password'), 'test api passcode');
-    await userEvent.type(
-      await screen.findByTestId('model_id-input'),
-      'sample model name from Anthropic'
-    );
-
-    await userEvent.click(screen.getByTestId('add-inference-endpoint-submit-button'));
-    expect(mockAddEndpoint).toHaveBeenCalled();
-  }, 10e3);
+  it('closes flyout', async () => {
+    await userEvent.click(screen.getByTestId('create-inference-flyout-close-button'));
+    expect(mockOnClose).toBeCalled();
+  });
 });

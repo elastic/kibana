@@ -64,15 +64,6 @@ export function useMLModelNotificationToasts() {
     });
   };
 
-  const showProviderFetchErrorToasts = (error: ErrorType) => {
-    const errorObj = extractErrorProperties(error);
-    return toasts.addError(new MLRequestFailure(errorObj, error), {
-      title: i18n.translate('xpack.idxMgmt.mappingsEditor.createField.fetchProviderErrorTitle', {
-        defaultMessage: 'Unable to find providers',
-      }),
-    });
-  };
-
   const showInferenceSuccessToast = () => {
     return toasts.addSuccess({
       title: i18n.translate('xpack.idxMgmt.mappingsEditor.createField.endpointAddedSuccess', {
@@ -85,7 +76,6 @@ export function useMLModelNotificationToasts() {
     showErrorToasts,
     showSuccessfullyDeployedToast,
     showInferenceCreationErrorToasts,
-    showProviderFetchErrorToasts,
     showInferenceSuccessToast,
   };
 }

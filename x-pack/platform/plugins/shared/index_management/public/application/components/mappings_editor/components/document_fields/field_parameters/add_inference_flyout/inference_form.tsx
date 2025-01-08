@@ -7,12 +7,12 @@
 
 import { Form, useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { i18n } from '@kbn/i18n';
-import React, { useCallback, useEffect, useState } from 'react';
-import { InferenceProvider, InferenceServiceFormFields } from '@kbn/inference-endpoint-ui-common';
+import React, { useCallback, useState } from 'react';
+import { InferenceServiceFormFields } from '@kbn/inference-endpoint-ui-common';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 
+import { useAppContext } from '../../../../../../app_context';
 import { useAddEndpoint } from '../../../../../../hooks/use_add_endpoint';
-import { useProviders } from '../../../../../../hooks/use_providers';
 import { InferenceEndpoint } from '../../../../../../../../common/types/inference';
 
 interface InferenceFormProps {
@@ -20,8 +20,14 @@ interface InferenceFormProps {
   resendRequest: () => void;
 }
 export const InferenceForm: React.FC<InferenceFormProps> = ({ onSubmitSuccess, resendRequest }) => {
+  const {
+    core: { http },
+    services: {
+      notificationService: { toasts },
+    },
+  } = useAppContext();
+
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [providers, setProviders] = useState<InferenceProvider[] | null>();
 
   const onSuccess = useCallback(() => {
     setIsLoading(false);
@@ -35,7 +41,7 @@ export const InferenceForm: React.FC<InferenceFormProps> = ({ onSubmitSuccess, r
     () => onSuccess(),
     () => onError()
   );
-  const { fetchInferenceServices } = useProviders();
+
   const { form } = useForm();
   const handleSubmit = useCallback(async () => {
     setIsLoading(true);
@@ -47,19 +53,9 @@ export const InferenceForm: React.FC<InferenceFormProps> = ({ onSubmitSuccess, r
       setIsLoading(false);
     }
   }, [addInferenceEndpoint, form]);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      const services = await fetchInferenceServices();
-      setProviders(services);
-    };
-
-    fetchData();
-  }, [fetchInferenceServices]);
-
-  return providers ? (
+  return (
     <Form form={form}>
-      <InferenceServiceFormFields providers={providers} />
+      <InferenceServiceFormFields http={http} toasts={toasts} />
       <EuiSpacer size="m" />
       <EuiFlexGroup justifyContent="flexStart">
         <EuiFlexItem grow={false}>
@@ -82,5 +78,5 @@ export const InferenceForm: React.FC<InferenceFormProps> = ({ onSubmitSuccess, r
         </EuiFlexItem>
       </EuiFlexGroup>
     </Form>
-  ) : null;
+  );
 };
