@@ -150,7 +150,6 @@ packages/kbn-generate @elastic/kibana-operations
 packages/kbn-generate-console-definitions @elastic/kibana-management
 packages/kbn-get-repo-files @elastic/kibana-operations
 packages/kbn-grid-layout @elastic/kibana-presentation
-packages/kbn-guided-onboarding @elastic/appex-sharedux
 packages/kbn-import-locator @elastic/kibana-operations
 packages/kbn-import-resolver @elastic/kibana-operations
 packages/kbn-item-buffer @elastic/appex-sharedux
@@ -485,6 +484,7 @@ src/platform/packages/shared/kbn-field-types @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-field-utils @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-flot-charts @elastic/kibana-presentation @elastic/stack-monitoring
 src/platform/packages/shared/kbn-grouping @elastic/response-ops
+src/platform/packages/shared/kbn-guided-onboarding @elastic/appex-sharedux
 src/platform/packages/shared/kbn-i18n @elastic/kibana-core
 src/platform/packages/shared/kbn-i18n-react @elastic/kibana-core
 src/platform/packages/shared/kbn-interpreter @elastic/kibana-visualizations
