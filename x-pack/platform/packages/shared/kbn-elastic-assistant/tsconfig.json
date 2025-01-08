@@ -35,5 +35,6 @@
     "@kbn/data-views-plugin",
     "@kbn/user-profile-components",
     "@kbn/ai-assistant-icon",
+    "@kbn/ui-theme",
   ]
 }
