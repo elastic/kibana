@@ -29,12 +29,12 @@
     "@kbn/actions-plugin",
     "@kbn/core-notifications-browser",
     "@kbn/i18n-react",
+    "@kbn/ui-theme",
     "@kbn/core-doc-links-browser",
     "@kbn/core",
     "@kbn/zod",
     "@kbn/data-views-plugin",
     "@kbn/user-profile-components",
-    "@kbn/ai-assistant-icon",
-    "@kbn/ui-theme",
+    "@kbn/ai-assistant-icon"
   ]
 }
