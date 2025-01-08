@@ -40,7 +40,7 @@ If you are unsure, please reach out to the Security team for guidance at `#kiban
 
 If you have determined that the test in question is failing due to the FIPS overrides, you can skip the test by adding the `this.tags('skipFIPS')` tag to the nearest possible `describe` block in the suite.
 
-You may need to create a new `describe` block so that the minimum amount of tests are skipped. Ensure the `describe` block is not using an arrow function.
+It is imperative to skip only the tests that are affected by FIPS overrides. If necessary, create a new `describe` block to isolate the affected tests. Ensure the `describe` block is not using an arrow function.
 
 This will still allow the test to run as part of regular CI, but will skip the test in the FIPS pipeline.
 
