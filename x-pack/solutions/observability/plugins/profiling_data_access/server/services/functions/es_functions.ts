@@ -27,7 +27,7 @@ export interface FetchFunctionsParams {
   indices?: string[];
   stacktraceIdsField?: string;
   query: QueryDslQueryContainer;
-  aggregationField?: AggregationField;
+  aggregationFields?: AggregationField[];
   limit?: number;
   totalSeconds: number;
 }
@@ -41,7 +41,7 @@ export function createFetchESFunctions({ createProfilingEsClient }: RegisterServ
     indices,
     stacktraceIdsField,
     query,
-    aggregationField,
+    aggregationFields,
     limit,
     totalSeconds,
   }: FetchFunctionsParams) => {
@@ -72,7 +72,7 @@ export function createFetchESFunctions({ createProfilingEsClient }: RegisterServ
       query,
       indices,
       stacktraceIdsField,
-      aggregationField,
+      aggregationFields,
       co2PerKWH,
       datacenterPUE,
       pervCPUWattX86,
