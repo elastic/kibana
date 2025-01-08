@@ -20,6 +20,8 @@ import {
   StreamLifecycle,
   ReadStreamDefinition,
   IngestReadStreamDefinition,
+  isWiredReadStream,
+  WiredReadStreamDefinition,
 } from '@kbn/streams-schema';
 import { omit } from 'lodash';
 import { STREAMS_INDEX } from '../../../common/constants';
@@ -172,7 +174,7 @@ async function upsertInternalStream({
   return scopedClusterClient.asInternalUser.index({
     id: definition.name,
     index: STREAMS_INDEX,
-    document: { ...omit(definition, 'elasticsearch_assets', 'inherited_fields') },
+    document: { ...omit(definition, 'elasticsearch_assets', 'inherited_fields', 'lifecycle') },
     refresh: 'wait_for',
   });
 }
@@ -422,7 +424,7 @@ export async function readAncestors({
             scopedClusterClient,
             id: ancestorId,
             skipAccessCheck: true,
-          }) as unknown as WiredStreamDefinition
+          }) as unknown as WiredReadStreamDefinition
       )
     ),
   };
@@ -469,7 +471,7 @@ export async function validateAncestorFields(
     for (const name in fields) {
       if (
         Object.hasOwn(fields, name) &&
-        isWiredStream(ancestor) &&
+        isWiredReadStream(ancestor) &&
         Object.entries(ancestor.stream.ingest.wired.fields).some(
           ([ancestorFieldName, attr]) =>
             attr.type !== fields[name].type && ancestorFieldName === name
@@ -570,7 +572,7 @@ export async function syncStream({
   rootDefinition,
   logger,
 }: SyncStreamParams) {
-  if (!isWiredStream(definition)) {
+  if (!isWiredStream(definition) && !isWiredReadStream(definition)) {
     await syncUnmanagedStream({ scopedClusterClient, definition, logger, assetClient });
     await upsertInternalStream({
       scopedClusterClient,
@@ -641,9 +643,6 @@ interface ExecutionPlanStep {
 }
 
 async function syncUnmanagedStream({ scopedClusterClient, definition }: SyncStreamParams) {
-  if (isWiredStream(definition)) {
-    throw new Error('Got an unmanaged stream that is marked as managed');
-  }
   if (definition.stream.ingest.routing.length) {
     throw new Error('Unmanaged streams cannot have managed children, coming soon');
   }
