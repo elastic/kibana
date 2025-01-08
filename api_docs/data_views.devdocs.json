@@ -5417,13 +5417,7 @@
                 "label": "uiSettings",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-ui-settings-browser",
-                    "scope": "public",
-                    "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
-                    "section": "def-public.IUiSettingsClient",
-                    "text": "IUiSettingsClient"
-                  }
+                  "IUiSettingsClient"
                 ],
                 "path": "src/platform/plugins/shared/data_views/public/ui_settings_wrapper.ts",
                 "deprecated": false,
@@ -5474,21 +5468,9 @@
             "description": [],
             "signature": [
               "<T = unknown>() => Promise<Record<string, (",
-              {
-                "pluginId": "@kbn/core-ui-settings-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
-                "section": "def-public.PublicUiSettingsParams",
-                "text": "PublicUiSettingsParams"
-              },
+              "PublicUiSettingsParams",
               " & ",
-              {
-                "pluginId": "@kbn/core-ui-settings-common",
-                "scope": "common",
-                "docId": "kibKbnCoreUiSettingsCommonPluginApi",
-                "section": "def-common.UserProvidedValues",
-                "text": "UserProvidedValues"
-              },
+              "UserProvidedValues",
               "<T>) | undefined>>"
             ],
             "path": "src/platform/plugins/shared/data_views/public/ui_settings_wrapper.ts",

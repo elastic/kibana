@@ -46,3 +46,11 @@ export function twoMinute(): Duration {
 export function fiveMinute(): Duration {
   return new Duration(5, DurationUnit.Minute);
 }
+
+export function sevenMinutes(): Duration {
+  return new Duration(7, DurationUnit.Minute);
+}
+
+export function twoHoursInMinutes(): Duration {
+  return new Duration(120, DurationUnit.Minute);
+}
