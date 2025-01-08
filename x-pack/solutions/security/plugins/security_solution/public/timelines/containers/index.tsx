@@ -215,13 +215,6 @@ export const useTimelineEventsHandler = ({
     };
   }, []);
 
-  const refetchGrid = useCallback(() => {
-    if (refetch.current != null) {
-      refetch.current();
-    }
-    loadBatchHandler(0);
-  }, [loadBatchHandler]);
-
   useEffect(() => {
     // when batch size changes, refetch DataGrid
     setActiveBatch(0);
@@ -233,7 +226,7 @@ export const useTimelineEventsHandler = ({
       dsl: [],
       response: [],
     },
-    refetch: refetchGrid,
+    refetch: () => {},
     totalCount: -1,
     pageInfo: {
       activePage: 0,
@@ -352,6 +345,30 @@ export const useTimelineEventsHandler = ({
     },
     [pageName, skip, id, activeBatch, startTracking, data.search, dataViewId]
   );
+
+  const refetchGrid = useCallback(() => {
+    /*
+     *
+     * Trigger search with a new request object to fetch the latest data.
+     *
+     */
+    const newTimelineRequest: typeof timelineRequest = {
+      ...timelineRequest,
+      factoryQueryType: TimelineEventsQueries.all,
+      language,
+      sort,
+      fieldRequested: timelineRequest?.fieldRequested ?? fields,
+      fields: timelineRequest?.fieldRequested ?? fields,
+      pagination: {
+        activePage: 0,
+        querySize: (activeBatch + 1) * limit,
+      },
+    };
+
+    setTimelineRequest(newTimelineRequest);
+
+    timelineSearch(newTimelineRequest);
+  }, [timelineRequest, timelineSearch, activeBatch, limit, language, sort, fields]);
 
   useEffect(() => {
     if (indexNames.length === 0) {
@@ -475,7 +492,7 @@ export const useTimelineEventsHandler = ({
           dsl: [],
           response: [],
         },
-        refetch: refetchGrid,
+        refetch: () => {},
         totalCount: -1,
         pageInfo: {
           activePage: 0,
@@ -486,7 +503,7 @@ export const useTimelineEventsHandler = ({
         refreshedAt: 0,
       });
     }
-  }, [filterQuery, id, refetchGrid, loadNextBatch]);
+  }, [filterQuery, id, loadNextBatch]);
 
   const timelineSearchHandler = useCallback(
     async (onNextHandler?: OnNextResponseHandler) => {
