@@ -34,7 +34,7 @@ describe('Stackframe', () => {
     });
 
     it('should have isLibraryFrame=false as default', () => {
-      expect(wrapper.find('Context').prop('isLibraryFrame')).toBe(false);
+      expect(wrapper.find('FrameHeading').prop('isLibraryFrame')).toBe(false);
     });
   });
 
