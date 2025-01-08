@@ -15,7 +15,7 @@ import {
   useEuiTheme,
   EuiButtonEmpty,
 } from '@elastic/eui';
-import { css } from '@emotion/css';
+import { css } from '@emotion/react';
 import { OnboardingCardId } from '../../../onboarding/constants';
 import { SecurityPageName } from '../../../../common';
 
