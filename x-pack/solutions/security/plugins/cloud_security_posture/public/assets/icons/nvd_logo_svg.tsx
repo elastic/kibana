@@ -8,6 +8,7 @@
 import { useEuiTheme } from '@elastic/eui';
 import React from 'react';
 
+// TODO: replace fullShade with a proper color token
 export const NvdLogo = () => {
   const { euiTheme } = useEuiTheme();
 

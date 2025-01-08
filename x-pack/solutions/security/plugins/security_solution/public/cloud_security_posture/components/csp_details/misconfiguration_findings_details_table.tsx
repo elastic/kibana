@@ -6,7 +6,12 @@
  */
 
 import React, { memo, useCallback, useEffect, useState } from 'react';
-import type { Criteria, EuiBasicTableColumn, EuiTableSortingType, EuiThemeComputed } from '@elastic/eui';
+import type {
+  Criteria,
+  EuiBasicTableColumn,
+  EuiTableSortingType,
+  EuiThemeComputed,
+} from '@elastic/eui';
 import { EuiSpacer, EuiPanel, EuiText, EuiBasicTable, EuiIcon, useEuiTheme } from '@elastic/eui';
 import type { MisconfigurationFindingDetailFields } from '@kbn/cloud-security-posture/src/hooks/use_misconfiguration_findings';
 import {
@@ -21,7 +26,7 @@ import {
 } from '@kbn/cloud-security-posture-common';
 import { DistributionBar } from '@kbn/security-solution-distribution-bar';
 import type { CspBenchmarkRuleMetadata } from '@kbn/cloud-security-posture-common/schema/rules/latest';
-import { CspEvaluationBadge } from '@kbn/cloud-security-posture';
+import { CspEvaluationBadge, getMisconfigurationStatusColor } from '@kbn/cloud-security-posture';
 import {
   ENTITY_FLYOUT_EXPAND_MISCONFIGURATION_VIEW_VISITS,
   NAV_TO_FINDINGS_BY_HOST_NAME_FRPOM_ENTITY_FLYOUT,
@@ -57,7 +62,7 @@ const getFindingsStats = (
         }
       ),
       count: passedFindingsStats,
-      color: euiTheme.colors.success,
+      color: getMisconfigurationStatusColor(MISCONFIGURATION_STATUS.PASSED, euiTheme),
       filter: () => {
         filterFunction(MISCONFIGURATION_STATUS.PASSED);
       },
@@ -75,7 +80,7 @@ const getFindingsStats = (
         }
       ),
       count: failedFindingsStats,
-      color: euiTheme.colors.danger,
+      color: getMisconfigurationStatusColor(MISCONFIGURATION_STATUS.FAILED, euiTheme),
       filter: () => {
         filterFunction(MISCONFIGURATION_STATUS.FAILED);
       },
