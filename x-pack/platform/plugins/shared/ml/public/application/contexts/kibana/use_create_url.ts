@@ -12,6 +12,7 @@ import { MANAGEMENT_APP_LOCATOR } from '@kbn/deeplinks-management/constants';
 import { useMlKibana } from './kibana_context';
 import { ML_APP_LOCATOR } from '../../../../common/constants/locator';
 import type { MlLocatorParams } from '../../../../common/types/locator';
+import { MlManagementLocatorInternal } from '../../../locator/ml_management_locator';
 
 export const useMlManagementLocator = () => {
   const {
@@ -19,6 +20,14 @@ export const useMlManagementLocator = () => {
   } = useMlKibana();
 
   return share.url.locators.get(MANAGEMENT_APP_LOCATOR);
+};
+
+export const useMlManagementLocatorInternal = () => {
+  const {
+    services: { share },
+  } = useMlKibana();
+
+  return new MlManagementLocatorInternal(share);
 };
 
 export const useMlLocator = () => {
@@ -78,11 +87,48 @@ export const useCreateAndNavigateToMlLink = (
 
       // TODO: fix ts only interpreting it as MlUrlGenericState if pageState is passed
       // @ts-ignore
-      const url = await mlLocator.getUrl({ page: _page, pageState });
+      let url = await mlLocator.getUrl({ page: _page, pageState });
+
       await navigateToUrl(url);
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [mlLocator, navigateToUrl]
+  );
+
+  // returns the onClick callback
+  return useCallback(() => redirectToMlPage(page), [redirectToMlPage, page]);
+};
+
+
+export const useCreateAndNavigateToManagementMlLink = (
+  page: MlLocatorParams['page'],
+  appId: string,
+): (() => Promise<void>) => {
+  const MlManagementLocatorInternal = useMlManagementLocatorInternal();
+  const [globalState] = useUrlState('_g');
+
+  const {
+    services: {
+      application: { navigateToUrl },
+    },
+  } = useMlKibana();
+
+  const redirectToMlPage = useCallback(
+    async (_page: MlLocatorParams['page']) => {
+      const pageState =
+        globalState?.refreshInterval !== undefined
+          ? {
+              globalState: {
+                refreshInterval: globalState.refreshInterval,
+              },
+            }
+          : undefined;
+
+      const { path } = await MlManagementLocatorInternal.getUrl({ page: _page, pageState }, appId);
+      await MlManagementLocatorInternal.navigate(path, appId);
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [MlManagementLocatorInternal, navigateToUrl]
   );
 
   // returns the onClick callback

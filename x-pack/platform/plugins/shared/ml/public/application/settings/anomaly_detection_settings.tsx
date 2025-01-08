@@ -26,8 +26,9 @@ import { useMlApi } from '../contexts/kibana';
 import { usePermissionCheck } from '../capabilities/check_capabilities';
 import { useToastNotificationService } from '../services/toast_notification_service';
 import { ML_PAGES } from '../../../common/constants/locator';
-import { useCreateAndNavigateToMlLink } from '../contexts/kibana/use_create_url';
+import { useCreateAndNavigateToManagementMlLink } from '../contexts/kibana/use_create_url';
 import { separateCalendarsByType } from './calendars/dst_utils';
+const SETTINGS_APP_ID = 'settings';
 
 export const AnomalyDetectionSettings: FC = () => {
   const mlApi = useMlApi();
@@ -44,12 +45,30 @@ export const AnomalyDetectionSettings: FC = () => {
   ]);
 
   const { displayErrorToast } = useToastNotificationService();
-  const redirectToCalendarList = useCreateAndNavigateToMlLink(ML_PAGES.CALENDARS_MANAGE);
-  const redirectToCalendarDstList = useCreateAndNavigateToMlLink(ML_PAGES.CALENDARS_DST_MANAGE);
-  const redirectToNewCalendarPage = useCreateAndNavigateToMlLink(ML_PAGES.CALENDARS_NEW);
-  const redirectToNewCalendarDstPage = useCreateAndNavigateToMlLink(ML_PAGES.CALENDARS_DST_NEW);
-  const redirectToFilterLists = useCreateAndNavigateToMlLink(ML_PAGES.FILTER_LISTS_MANAGE);
-  const redirectToNewFilterListPage = useCreateAndNavigateToMlLink(ML_PAGES.FILTER_LISTS_NEW);
+  const redirectToCalendarList = useCreateAndNavigateToManagementMlLink(
+    ML_PAGES.CALENDARS_MANAGE,
+    SETTINGS_APP_ID
+  );
+  const redirectToCalendarDstList = useCreateAndNavigateToManagementMlLink(
+    ML_PAGES.CALENDARS_DST_MANAGE,
+    SETTINGS_APP_ID
+  );
+  const redirectToNewCalendarPage = useCreateAndNavigateToManagementMlLink(
+    ML_PAGES.CALENDARS_NEW,
+    SETTINGS_APP_ID
+  );
+  const redirectToNewCalendarDstPage = useCreateAndNavigateToManagementMlLink(
+    ML_PAGES.CALENDARS_DST_NEW,
+    SETTINGS_APP_ID
+  );
+  const redirectToFilterLists = useCreateAndNavigateToManagementMlLink(
+    ML_PAGES.FILTER_LISTS_MANAGE,
+    SETTINGS_APP_ID
+  );
+  const redirectToNewFilterListPage = useCreateAndNavigateToManagementMlLink(
+    ML_PAGES.FILTER_LISTS_NEW,
+    SETTINGS_APP_ID
+  );
 
   useEffect(() => {
     loadSummaryStats();
