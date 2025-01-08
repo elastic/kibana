@@ -120,6 +120,20 @@ export const createCustomHeadersPreResponseHandler = (config: HttpConfig): OnPre
   };
 };
 
+export const createDeprecationWarningHeaderPreResponseHandler = (kibanaVersion: string): OnPreResponseHandler => {
+  return (request, response, toolkit) => {
+    if (!request.route.options.deprecated) {
+      return toolkit.next();
+    }
+    const deprecationMessage = request.route.options.deprecated.message ?? 'This endpoint is deprecated';
+    const warningString = `299 Kibana-${kibanaVersion} "${deprecationMessage}"`;
+    const additionalHeaders = {
+      warning: warningString
+    };
+    return toolkit.next({ headers: { ...additionalHeaders } });
+  };
+};
+
 const shouldLogBuildNumberMismatch = (
   serverBuild: { number: number; string: string },
   request: KibanaRequest,
