@@ -244,7 +244,7 @@ const columns: Array<EuiBasicTableColumn<PrevalenceDetailsRow>> = [
         ],
       }));
 
-      if (data.alertCount === 0) {
+      if (data.docCount === 0) {
         return getEmptyTagValue();
       }
 
