@@ -165,7 +165,11 @@ export default function ({ getService }: FtrProviderContext) {
         label: 'Test private location 1',
       });
 
-      httpMonitorJson.locations.push(omit(pvtLoc2, ['spaces']));
+      httpMonitorJson.locations.push({
+        id: pvtLoc2.id,
+        label: pvtLoc2.label,
+        isServiceManaged: false,
+      });
 
       const apiResponse = await supertestAPI
         .put(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS + '/' + newMonitorId)
