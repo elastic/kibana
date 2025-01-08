@@ -34,6 +34,7 @@ export interface ExportModalProps {
   selectedOptions: Record<string, boolean>;
   includeReferences: boolean;
   onIncludeReferenceChange: (newIncludeReference: boolean) => void;
+  disabled?: boolean;
 }
 
 export const ExportModal: FC<ExportModalProps> = ({
@@ -45,6 +46,7 @@ export const ExportModal: FC<ExportModalProps> = ({
   selectedOptions,
   includeReferences,
   onIncludeReferenceChange,
+  disabled = false,
 }) => {
   return (
     <EuiModal onClose={onCancel}>
@@ -108,7 +110,7 @@ export const ExportModal: FC<ExportModalProps> = ({
                 </EuiButtonEmpty>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiButton fill onClick={onExport}>
+                <EuiButton fill onClick={onExport} disabled={disabled}>
                   <FormattedMessage
                     id="savedObjectsManagement.objectsTable.exportObjectsConfirmModal.exportAllButtonLabel"
                     defaultMessage="Export all"

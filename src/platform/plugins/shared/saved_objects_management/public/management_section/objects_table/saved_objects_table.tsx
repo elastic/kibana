@@ -671,14 +671,19 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       exportAllOptions,
       exportAllSelectedOptions,
       isIncludeReferencesDeepChecked,
+      savedObjects,
     } = this.state;
 
     if (!isShowingExportAllOptionsModal) {
       return null;
     }
 
+    const shouldDisableExportAll =
+      savedObjects.length === 0 || savedObjects.every((obj) => ML_SAVED_OBJECT_TYPES.has(obj.type));
+
     return (
       <ExportModal
+        disabled={shouldDisableExportAll}
         onExport={this.onExportAll}
         onCancel={() => {
           this.setState({ isShowingExportAllOptionsModal: false });
@@ -727,6 +732,9 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       view: `${type.displayName} (${savedObjectCounts[type.name] || 0})`,
     }));
 
+    const shouldDisableExportAll =
+      savedObjects.length === 0 || savedObjects.every((obj) => ML_SAVED_OBJECT_TYPES.has(obj.type));
+
     return (
       <div>
         {this.renderFlyout()}
@@ -734,6 +742,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
         {this.renderDeleteConfirmModal()}
         {this.renderExportAllOptionsModal()}
         <Header
+          disabled={shouldDisableExportAll}
           onExportAll={() => this.setState({ isShowingExportAllOptionsModal: true })}
           onImport={this.showImportFlyout}
           onRefresh={this.refreshAllObjects}

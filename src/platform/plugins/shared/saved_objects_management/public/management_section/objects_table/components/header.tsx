@@ -16,11 +16,13 @@ export const Header = ({
   onImport,
   onRefresh,
   filteredCount,
+  disabled = false,
 }: {
   onExportAll: () => void;
   onImport: () => void;
   onRefresh: () => void;
   filteredCount: number;
+  disabled?: boolean;
 }) => (
   <EuiPageHeader
     pageTitle={
@@ -42,6 +44,7 @@ export const Header = ({
         iconType="exportAction"
         data-test-subj="exportAllObjects"
         onClick={onExportAll}
+        disabled={disabled}
       >
         <FormattedMessage
           id="savedObjectsManagement.objectsTable.header.exportButtonLabel"
