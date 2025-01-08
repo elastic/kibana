@@ -12,8 +12,8 @@ import { createHtmlPortalNode, OutPortal, InPortal } from 'react-reverse-portal'
 import { EuiToolTip, EuiButton, EuiFlexGroup, EuiFlexItem, EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ChromeStyle } from '@kbn/core-chrome-browser';
-import { AssistantIcon } from '@kbn/ai-assistant-icon';
 import { useAssistantContext } from '.';
+import { AssistantAvatar } from '../assistant/assistant_avatar/assistant_avatar';
 
 const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
 
@@ -83,7 +83,7 @@ export const AssistantNavLink: FC = () => {
         >
           <EuiFlexGroup gutterSize="s" alignItems="center">
             <EuiFlexItem grow={false}>
-              <AssistantIcon size="m" />
+              <AssistantAvatar size="xs" />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>{LINK_LABEL}</EuiFlexItem>
           </EuiFlexGroup>
