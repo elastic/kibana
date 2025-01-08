@@ -23,7 +23,7 @@ export const HostsTable = () => {
   const { loading } = useHostsViewContext();
   const { loading: hostCountLoading } = useHostCountContext();
   const { onPageReady } = usePerformanceContext();
-  const { parsedDateRange } = useUnifiedSearchContext();
+  const { searchCriteria } = useUnifiedSearchContext();
 
   const {
     columns,
@@ -44,12 +44,12 @@ export const HostsTable = () => {
     if (!loading && !hostCountLoading) {
       onPageReady({
         meta: {
-          rangeFrom: parsedDateRange.from,
-          rangeTo: parsedDateRange.to,
+          rangeFrom: searchCriteria.dateRange.from,
+          rangeTo: searchCriteria.dateRange.to,
         },
       });
     }
-  }, [loading, hostCountLoading, onPageReady, parsedDateRange]);
+  }, [loading, hostCountLoading, onPageReady, searchCriteria]);
 
   return (
     <>
