@@ -310,7 +310,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         expect(indexTemplate.index_template.template!.settings).to.eql({
           index: {
-            deafult_pipeline: defaultPipeline,
+            default_pipeline: defaultPipeline,
             mapping: {
               total_fields: {
                 limit: '1000',
