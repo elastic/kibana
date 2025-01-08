@@ -250,9 +250,12 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
         );
       } catch (err) {
         notifications?.toasts.addError(err, {
-          title: i18n.translate('xpack.securitySolution.graphInvestigation.errorBuildingQuery', {
-            defaultMessage: 'Unable to retrieve search results',
-          }),
+          title: i18n.translate(
+            'securitySolutionPackages.csp.graph.investigation.errorBuildingQuery',
+            {
+              defaultMessage: 'Unable to retrieve search results',
+            }
+          ),
         });
       }
       return lastValidEsQuery.current;
