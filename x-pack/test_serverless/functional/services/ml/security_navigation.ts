@@ -28,5 +28,8 @@ export function MachineLearningNavigationProviderSecurity({ getService }: FtrPro
     async navigateToTrainedModels() {
       await navigateToArea('nodesOverview');
     },
+    async navigateToMemoryUsage() {
+      await navigateToArea('memoryUsage');
+    },
   };
 }
