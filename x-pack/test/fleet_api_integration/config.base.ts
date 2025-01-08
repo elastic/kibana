@@ -15,10 +15,11 @@ import {
 
 const getFullPath = (relativePath: string) => path.join(path.dirname(__filename), relativePath);
 // Docker image to use for Fleet API integration tests.
-// This hash comes from the latest successful build of the Production Distribution of the Package Registry, for
-// example: https://internal-ci.elastic.co/blue/organizations/jenkins/package_storage%2Findexing-job/detail/main/1884/pipeline/147.
-// It should be updated any time there is a new package published.
-export const dockerImage = 'docker.elastic.co/package-registry/distribution:lite';
+// This image comes from the latest successful build of https://buildkite.com/elastic/kibana-package-registry-promote
+// which is promoted after acceptance tests succeed against docker.elastic.co/package-registry/distribution:lite
+export const dockerImage =
+  process.env.FLEET_PACKAGE_REGISTRY_DOCKER_IMAGE ||
+  'docker.elastic.co/kibana-ci/package-registry-distribution:lite';
 
 export const BUNDLED_PACKAGE_DIR = '/tmp/fleet_bundled_packages';
 
@@ -90,8 +91,13 @@ export default async function ({ readConfigFile, log }: FtrConfigProviderContext
           'agentTamperProtectionEnabled',
           'enableStrictKQLValidation',
           'subfeaturePrivileges',
-          'enablePackagesStateMachine',
         ])}`,
+        `--xpack.cloud.id='123456789'`,
+        `--xpack.fleet.agentless.enabled=true`,
+        `--xpack.fleet.agentless.api.url=https://api.agentless.url/api/v1/ess`,
+        `--xpack.fleet.agentless.api.tls.certificate=./config/node.crt`,
+        `--xpack.fleet.agentless.api.tls.key=./config/node.key`,
+        `--xpack.fleet.agentless.api.tls.ca=./config/ca.crt`,
         `--logging.loggers=${JSON.stringify([
           ...getKibanaCliLoggers(xPackAPITestsConfig.get('kbnTestServer.serverArgs')),
 

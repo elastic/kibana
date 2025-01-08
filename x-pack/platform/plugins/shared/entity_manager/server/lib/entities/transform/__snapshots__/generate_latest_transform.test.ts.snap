@@ -1,0 +1,184 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`generateLatestTransform(definition) should generate a valid latest transform 1`] = `
+Object {
+  "_meta": Object {
+    "definition_version": "1.0.0",
+    "managed": false,
+  },
+  "defer_validation": true,
+  "dest": Object {
+    "index": ".entities.v1.latest.noop",
+    "pipeline": "entities-v1-latest-admin-console-services",
+  },
+  "frequency": "30s",
+  "pivot": Object {
+    "aggs": Object {
+      "_errorRate_A": Object {
+        "filter": Object {
+          "bool": Object {
+            "minimum_should_match": 1,
+            "should": Array [
+              Object {
+                "match_phrase": Object {
+                  "log.level": "ERROR",
+                },
+              },
+            ],
+          },
+        },
+      },
+      "_logRate_A": Object {
+        "filter": Object {
+          "bool": Object {
+            "minimum_should_match": 1,
+            "should": Array [
+              Object {
+                "exists": Object {
+                  "field": "log.level",
+                },
+              },
+            ],
+          },
+        },
+      },
+      "entity.last_seen_timestamp": Object {
+        "max": Object {
+          "field": "@timestamp",
+        },
+      },
+      "entity.metadata.host.name": Object {
+        "aggs": Object {
+          "data": Object {
+            "terms": Object {
+              "field": "host.name",
+              "size": 10,
+            },
+          },
+        },
+        "filter": Object {
+          "range": Object {
+            "@timestamp": Object {
+              "gte": "now-10m",
+            },
+          },
+        },
+      },
+      "entity.metadata.host.os.name": Object {
+        "aggs": Object {
+          "data": Object {
+            "terms": Object {
+              "field": "host.os.name",
+              "size": 10,
+            },
+          },
+        },
+        "filter": Object {
+          "range": Object {
+            "@timestamp": Object {
+              "gte": "now-10m",
+            },
+          },
+        },
+      },
+      "entity.metadata.sourceIndex": Object {
+        "aggs": Object {
+          "data": Object {
+            "terms": Object {
+              "field": "_index",
+              "size": 10,
+            },
+          },
+        },
+        "filter": Object {
+          "range": Object {
+            "@timestamp": Object {
+              "gte": "now-10m",
+            },
+          },
+        },
+      },
+      "entity.metadata.tags": Object {
+        "aggs": Object {
+          "data": Object {
+            "terms": Object {
+              "field": "tags",
+              "size": 10,
+            },
+          },
+        },
+        "filter": Object {
+          "range": Object {
+            "@timestamp": Object {
+              "gte": "now-10m",
+            },
+          },
+        },
+      },
+      "entity.metrics.errorRate": Object {
+        "bucket_script": Object {
+          "buckets_path": Object {
+            "A": "_errorRate_A>_count",
+          },
+          "script": Object {
+            "lang": "painless",
+            "source": "params.A",
+          },
+        },
+      },
+      "entity.metrics.logRate": Object {
+        "bucket_script": Object {
+          "buckets_path": Object {
+            "A": "_logRate_A>_count",
+          },
+          "script": Object {
+            "lang": "painless",
+            "source": "params.A",
+          },
+        },
+      },
+    },
+    "group_by": Object {
+      "entity.identity.log.logger": Object {
+        "terms": Object {
+          "field": "log.logger",
+        },
+      },
+    },
+  },
+  "settings": Object {
+    "deduce_mappings": false,
+    "unattended": true,
+  },
+  "source": Object {
+    "index": Array [
+      "kbn-data-forge-fake_stack.*",
+    ],
+    "query": Object {
+      "bool": Object {
+        "filter": Array [
+          Object {
+            "exists": Object {
+              "field": "log.logger",
+            },
+          },
+          Object {
+            "range": Object {
+              "@timestamp": Object {
+                "gte": "now-10m",
+              },
+            },
+          },
+        ],
+      },
+    },
+  },
+  "sync": Object {
+    "time": Object {
+      "delay": "10s",
+      "field": "@timestamp",
+    },
+  },
+  "transform_id": "entities-v1-latest-admin-console-services",
+}
+`;

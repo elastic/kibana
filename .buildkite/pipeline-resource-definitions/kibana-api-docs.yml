@@ -27,7 +27,6 @@ spec:
       default_branch: main
       repository: elastic/kibana
       pipeline_file: .buildkite/pipelines/build_api_docs.yml
-      skip_intermediate_builds: false
       provider_settings:
         build_branches: false
         build_pull_requests: false
@@ -49,3 +48,5 @@ spec:
           cronline: 0 0 * * * America/New_York
           message: Daily build
           branch: main
+      tags:
+        - kibana

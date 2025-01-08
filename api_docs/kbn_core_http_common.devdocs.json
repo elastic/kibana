@@ -29,7 +29,7 @@
         "description": [
           "\nA policy describing whether access to an external destination is allowed."
         ],
-        "path": "packages/core/http/core-http-common/src/external_url_policy.ts",
+        "path": "src/core/packages/http/common/src/external_url_policy.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -42,7 +42,7 @@
             "description": [
               "\nIndicates if this policy allows or denies access to the described destination."
             ],
-            "path": "packages/core/http/core-http-common/src/external_url_policy.ts",
+            "path": "src/core/packages/http/common/src/external_url_policy.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -58,7 +58,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/core/http/core-http-common/src/external_url_policy.ts",
+            "path": "src/core/packages/http/common/src/external_url_policy.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -74,7 +74,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/core/http/core-http-common/src/external_url_policy.ts",
+            "path": "src/core/packages/http/common/src/external_url_policy.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -100,7 +100,7 @@
         "signature": [
           "string"
         ],
-        "path": "packages/core/http/core-http-common/src/versioning.ts",
+        "path": "src/core/packages/http/common/src/versioning.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -115,7 +115,7 @@
         "signature": [
           "\"elastic-api-version\""
         ],
-        "path": "packages/core/http/core-http-common/src/constants.ts",
+        "path": "src/core/packages/http/common/src/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -130,7 +130,7 @@
         "signature": [
           "\"apiVersion\""
         ],
-        "path": "packages/core/http/core-http-common/src/constants.ts",
+        "path": "src/core/packages/http/common/src/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -145,7 +145,7 @@
         "signature": [
           "\"elasticInternalOrigin\""
         ],
-        "path": "packages/core/http/core-http-common/src/constants.ts",
+        "path": "src/core/packages/http/common/src/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -160,7 +160,7 @@
         "signature": [
           "\"x-elastic-internal-origin\""
         ],
-        "path": "packages/core/http/core-http-common/src/constants.ts",
+        "path": "src/core/packages/http/common/src/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

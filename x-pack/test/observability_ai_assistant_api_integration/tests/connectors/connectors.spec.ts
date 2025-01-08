@@ -8,10 +8,15 @@
 import expect from '@kbn/expect';
 import type { Agent as SuperTestAgent } from 'supertest';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
+import { createProxyActionConnector, deleteActionConnector } from '../../common/action_connectors';
+import { ForbiddenApiError } from '../../common/config';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantAPIClient');
   const supertest = getService('supertest');
+  const log = getService('log');
+
+  const CONNECTOR_API_URL = '/internal/observability_ai_assistant/connectors';
 
   describe('List connectors', () => {
     before(async () => {
@@ -24,49 +29,43 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
     it('Returns a 2xx for enterprise license', async () => {
       await observabilityAIAssistantAPIClient
-        .editorUser({
-          endpoint: 'GET /internal/observability_ai_assistant/connectors',
+        .editor({
+          endpoint: `GET ${CONNECTOR_API_URL}`,
         })
         .expect(200);
     });
 
     it('returns an empty list of connectors', async () => {
-      const res = await observabilityAIAssistantAPIClient.editorUser({
-        endpoint: 'GET /internal/observability_ai_assistant/connectors',
+      const res = await observabilityAIAssistantAPIClient.editor({
+        endpoint: `GET ${CONNECTOR_API_URL}`,
       });
 
       expect(res.body.length).to.be(0);
     });
 
     it("returns the gen ai connector if it's been created", async () => {
-      const connectorCreateResponse = await supertest
-        .post('/api/actions/connector')
-        .set('kbn-xsrf', 'foo')
-        .send({
-          name: 'OpenAI',
-          connector_type_id: '.gen-ai',
-          config: {
-            apiProvider: 'OpenAI',
-            apiUrl: 'http://localhost:9200',
-          },
-          secrets: {
-            apiKey: 'my-api-key',
-          },
-        })
-        .expect(200);
+      const connectorId = await createProxyActionConnector({ supertest, log, port: 1234 });
 
-      const res = await observabilityAIAssistantAPIClient.editorUser({
-        endpoint: 'GET /internal/observability_ai_assistant/connectors',
+      const res = await observabilityAIAssistantAPIClient.editor({
+        endpoint: `GET ${CONNECTOR_API_URL}`,
       });
 
       expect(res.body.length).to.be(1);
 
-      const connectorId = connectorCreateResponse.body.id;
+      await deleteActionConnector({ supertest, connectorId, log });
+    });
 
-      await supertest
-        .delete(`/api/actions/connector/${connectorId}`)
-        .set('kbn-xsrf', 'foo')
-        .expect(204);
+    describe('security roles and access privileges', () => {
+      it('should deny access for users without the ai_assistant privilege', async () => {
+        try {
+          await observabilityAIAssistantAPIClient.unauthorizedUser({
+            endpoint: `GET ${CONNECTOR_API_URL}`,
+          });
+          throw new ForbiddenApiError('Expected unauthorizedUser() to throw a 403 Forbidden error');
+        } catch (e) {
+          expect(e.status).to.be(403);
+        }
+      });
     });
   });
 }

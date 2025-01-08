@@ -6,18 +6,20 @@
  */
 
 import { resolve } from 'path';
-import { FtrConfigProviderContext } from '@kbn/test';
-import { services } from '../functional/services';
+
+import type { FtrConfigProviderContext } from '@kbn/test';
+
 import { pageObjects } from '../functional/page_objects';
+import { services } from '../functional/services';
 
 // the default export of config files must be a config provider
 // that returns an object with the projects config values
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const kibanaCommonConfig = await readConfigFile(
-    require.resolve('../../../test/common/config.js')
+    require.resolve('@kbn/test-suites-src/common/config')
   );
   const kibanaFunctionalConfig = await readConfigFile(
-    require.resolve('../../../test/functional/config.base.js')
+    require.resolve('@kbn/test-suites-src/functional/config.base')
   );
 
   const kibanaPort = kibanaFunctionalConfig.get('servers.kibana.port');
@@ -70,6 +72,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         `--plugin-path=${samlIdPPlugin}`,
         `--plugin-path=${testEndpointsPlugin}`,
         '--server.uuid=5b2de169-2785-441b-ae8c-186a1936b17d',
+        '--server.restrictInternalApis=false',
         '--xpack.security.encryptionKey="wuGNaIhoMpk5sO4UBxgr3NyW1sFcLgIf"',
         `--xpack.security.loginHelp="Some-login-help."`,
         `--xpack.security.authc.providers=${JSON.stringify({

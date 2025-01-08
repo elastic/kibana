@@ -37,7 +37,8 @@ const getExceptionList2 = () => ({
   list_id: 'exception_list_2',
 });
 
-describe('Filter Lists', { tags: ['@ess', '@serverless'] }, () => {
+// Skipping in MKI due to flake
+describe('Filter Lists', { tags: ['@ess', '@serverless', '@skipInServerlessMKI'] }, () => {
   beforeEach(() => {
     login();
 

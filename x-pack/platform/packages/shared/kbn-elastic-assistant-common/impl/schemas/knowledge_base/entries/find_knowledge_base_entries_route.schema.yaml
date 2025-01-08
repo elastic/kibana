@@ -1,0 +1,105 @@
+openapi: 3.0.0
+info:
+  title: Find Knowledge Base Entries API endpoint
+  version: '1'
+paths:
+  /internal/elastic_assistant/knowledge_base/entries/_find:
+    get:
+      x-codegen-enabled: true
+      # Targeted to update to public by 8.18
+      x-internal: true
+      x-labels: [ess, serverless]
+      operationId: FindKnowledgeBaseEntries
+      description: Finds Knowledge Base Entries that match the given query.
+      summary: Finds Knowledge Base Entries that match the given query.
+      tags:
+        - Knowledge Base Entries API
+      parameters:
+        - name: 'fields'
+          in: query
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+        - name: 'filter'
+          in: query
+          description: Search query
+          required: false
+          schema:
+            type: string
+        - name: 'sort_field'
+          in: query
+          description: Field to sort by
+          required: false
+          schema:
+            $ref: '#/components/schemas/FindKnowledgeBaseEntriesSortField'
+        - name: 'sort_order'
+          in: query
+          description: Sort order
+          required: false
+          schema:
+            $ref: '../../common_attributes.schema.yaml#/components/schemas/SortOrder'
+        - name: 'page'
+          in: query
+          description: Page number
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: 'per_page'
+          in: query
+          description: Knowledge Base Entries per page
+          required: false
+          schema:
+            type: integer
+            minimum: 0
+            default: 20
+
+      responses:
+        200:
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  page:
+                    type: integer
+                  perPage:
+                    type: integer
+                  total:
+                    type: integer
+                  data:
+                    type: array
+                    items:
+                      $ref: './common_attributes.schema.yaml#/components/schemas/KnowledgeBaseEntryResponse'
+                required:
+                  - page
+                  - perPage
+                  - total
+                  - data
+        400:
+          description: Generic Error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: number
+                  error:
+                    type: string
+                  message:
+                    type: string
+
+components:
+  schemas:
+    FindKnowledgeBaseEntriesSortField:
+      type: string
+      enum:
+        - 'created_at'
+        - 'is_default'
+        - 'title'
+        - 'updated_at'

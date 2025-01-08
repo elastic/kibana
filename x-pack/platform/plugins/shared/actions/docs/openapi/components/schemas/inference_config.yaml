@@ -1,0 +1,23 @@
+title: Connector request properties for an Inference API connector
+description: Defines properties for connectors when type is `.inference`.
+type: object
+required:
+  - provider
+  - taskType
+  - inferenceId
+properties:
+  provider:
+    type: string
+    description: The Inference API service provider.
+  taskType:
+    type: string
+    description: The Inference task type supported by provider.
+  providerConfig:
+    type: object
+    description: The provider settings.
+  taskTypeConfig:
+    type: object
+    description: The task type settings.
+  inferenceId:
+    type: string
+    description: The task type settings.

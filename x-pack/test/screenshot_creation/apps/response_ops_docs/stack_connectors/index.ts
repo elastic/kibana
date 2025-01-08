@@ -56,11 +56,13 @@ export default function ({ loadTestFile, getService }: FtrProviderContext) {
     loadTestFile(require.resolve('./connectors'));
     loadTestFile(require.resolve('./bedrock_connector'));
     loadTestFile(require.resolve('./cases_webhook_connector'));
+    loadTestFile(require.resolve('./crowdstrike_connector'));
     loadTestFile(require.resolve('./email_connector'));
     loadTestFile(require.resolve('./generative_ai_connector'));
     loadTestFile(require.resolve('./ibm_resilient_connector'));
     loadTestFile(require.resolve('./index_connector'));
     loadTestFile(require.resolve('./jira_connector'));
+    loadTestFile(require.resolve('./microsoft_teams_connector'));
     loadTestFile(require.resolve('./opsgenie_connector'));
     loadTestFile(require.resolve('./pagerduty_connector'));
     loadTestFile(require.resolve('./sentinelone_connector'));
@@ -69,6 +71,7 @@ export default function ({ loadTestFile, getService }: FtrProviderContext) {
     loadTestFile(require.resolve('./servicenow_itsm_connector'));
     loadTestFile(require.resolve('./servicenow_sir_connector'));
     loadTestFile(require.resolve('./slack_connector'));
+    loadTestFile(require.resolve('./thehive_connector'));
     loadTestFile(require.resolve('./tines_connector'));
     loadTestFile(require.resolve('./webhook_connector'));
     loadTestFile(require.resolve('./xmatters_connector'));

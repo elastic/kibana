@@ -12,7 +12,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const config = getService('config');
   const spacesService = getService('spaces');
-  const PageObjects = getPageObjects(['common', 'settings', 'security']);
+  const { common, settings } = getPageObjects(['common', 'settings', 'security']);
   const testSubjects = getService('testSubjects');
   const appsMenu = getService('appsMenu');
   const kibanaServer = getService('kibanaServer');
@@ -41,7 +41,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('shows Management navlink', async () => {
-        await PageObjects.common.navigateToApp('home', {
+        await common.navigateToApp('home', {
           basePath: '/s/custom_space',
         });
         const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
@@ -49,8 +49,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it(`data views listing shows create button`, async () => {
-        await PageObjects.settings.navigateTo();
-        await PageObjects.settings.clickKibanaIndexPatterns();
+        await settings.navigateTo();
+        await settings.clickKibanaIndexPatterns();
         await testSubjects.existOrFail('createDataViewButton');
       });
     });
@@ -73,7 +73,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it(`redirects to management home`, async () => {
-        await PageObjects.common.navigateToUrl('management', 'kibana/indexPatterns', {
+        await common.navigateToUrl('management', 'kibana/indexPatterns', {
           basePath: `/s/custom_space`,
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,

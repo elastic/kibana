@@ -5,9 +5,9 @@
  * 2.0.
  */
 import type { Client } from '@elastic/elasticsearch';
-import pRetry from 'p-retry';
 import { ToolingLog } from '@kbn/tooling-log';
-import { APM_ALERTS_INDEX } from './alerting_api_helper';
+import pRetry from 'p-retry';
+import { APM_ALERTS_INDEX } from '../../../../api_integration/deployment_agnostic/apis/observability/apm/alerts/helpers/alerting_helper';
 
 export async function getActiveApmAlerts({
   ruleId,

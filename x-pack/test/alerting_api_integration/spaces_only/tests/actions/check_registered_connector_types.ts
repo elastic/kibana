@@ -46,6 +46,7 @@ export default function createRegisteredConnectorTypeTests({ getService }: FtrPr
           '.observability-ai-assistant',
           '.resilient',
           '.teams',
+          '.thehive',
           '.tines',
           '.torq',
           '.opsgenie',
@@ -55,6 +56,7 @@ export default function createRegisteredConnectorTypeTests({ getService }: FtrPr
           '.sentinelone',
           '.cases',
           '.crowdstrike',
+          '.microsoft_defender_endpoint',
         ].sort()
       );
     });

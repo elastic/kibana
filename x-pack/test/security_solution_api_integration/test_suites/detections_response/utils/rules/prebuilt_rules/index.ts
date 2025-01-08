@@ -7,7 +7,7 @@
 export * from './create_prebuilt_rule_saved_objects';
 export * from './delete_all_prebuilt_rule_assets';
 export * from './delete_all_timelines';
-export * from './delete_prebuilt_rules_fleet_package';
+export * from './delete_fleet_packages';
 export * from './get_installed_rules';
 export * from './get_prebuilt_rules_and_timelines_status';
 export * from './get_prebuilt_rules_status';
@@ -19,4 +19,4 @@ export * from './install_prebuilt_rules_fleet_package';
 export * from './install_prebuilt_rules';
 export * from './review_install_prebuilt_rules';
 export * from './review_upgrade_prebuilt_rules';
-export * from './upgrade_prebuilt_rules';
+export * from './perform_upgrade_prebuilt_rules';

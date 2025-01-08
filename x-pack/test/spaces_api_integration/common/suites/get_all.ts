@@ -5,10 +5,12 @@
  * 2.0.
  */
 
+import type { SuperTest } from 'supertest';
+
 import expect from '@kbn/expect';
-import { SuperTest } from 'supertest';
+
 import { getTestScenariosForSpace } from '../lib/space_test_utils';
-import { DescribeFn, TestDefinitionAuthentication } from '../lib/types';
+import type { DescribeFn, TestDefinitionAuthentication } from '../lib/types';
 
 interface GetAllTest {
   statusCode: number;
@@ -35,7 +37,17 @@ interface AuthorizedPurposes {
   shareSavedObjectsIntoSpace: boolean;
 }
 
-const ALL_SPACE_RESULTS = [
+interface Space {
+  id: string;
+  name: string;
+  color?: string;
+  description: string;
+  solution?: string;
+  _reserved?: boolean;
+  disabledFeatures: string[];
+}
+
+const ALL_SPACE_RESULTS: Space[] = [
   {
     id: 'default',
     name: 'Default',
@@ -56,14 +68,43 @@ const ALL_SPACE_RESULTS = [
     description: 'This is the second test space',
     disabledFeatures: [],
   },
+  {
+    id: 'space_3',
+    name: 'Space 3',
+    description: 'This is the third test space',
+    solution: 'es',
+    disabledFeatures: [
+      // Disabled features are automatically added to the space when a solution is set
+      'apm',
+      'infrastructure',
+      'inventory',
+      'logs',
+      'observabilityCases',
+      'observabilityCasesV2',
+      'securitySolutionAssistant',
+      'securitySolutionAttackDiscovery',
+      'securitySolutionCases',
+      'securitySolutionCasesV2',
+      'siem',
+      'slo',
+      'uptime',
+    ],
+  },
 ];
+
+const sortDisabledFeatures = (space: Space) => {
+  return {
+    ...space,
+    disabledFeatures: [...space.disabledFeatures].sort(),
+  };
+};
 
 export function getAllTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) {
   const createExpectResults =
     (...spaceIds: string[]) =>
     (resp: { [key: string]: any }) => {
       const expectedBody = ALL_SPACE_RESULTS.filter((entry) => spaceIds.includes(entry.id));
-      expect(resp.body).to.eql(expectedBody);
+      expect(resp.body.map(sortDisabledFeatures)).to.eql(expectedBody.map(sortDisabledFeatures));
     };
 
   const createExpectAllPurposesResults =
@@ -72,7 +113,7 @@ export function getAllTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
       const expectedBody = ALL_SPACE_RESULTS.filter((entry) => spaceIds.includes(entry.id)).map(
         (x) => ({ ...x, authorizedPurposes })
       );
-      expect(resp.body).to.eql(expectedBody);
+      expect(resp.body.map(sortDisabledFeatures)).to.eql(expectedBody.map(sortDisabledFeatures));
     };
 
   const expectEmptyResult = (resp: { [key: string]: any }) => {

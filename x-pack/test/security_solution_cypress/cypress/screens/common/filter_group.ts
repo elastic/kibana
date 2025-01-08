@@ -12,7 +12,7 @@ export const CONTROL_FRAMES = '[data-test-subj="control-frame"]';
 
 export const CONTROL_FRAME_TITLE = '[data-test-subj="control-frame-title"]';
 
-export const OPTION_LIST_LABELS = '.controlFrame__labelToolTip';
+export const OPTION_LIST_LABELS = '.controlPanel--label';
 
 export const OPTION_LIST_VALUES = (idx: number) => `[data-test-subj="optionsList-control-${idx}"]`;
 
@@ -63,7 +63,7 @@ export const FILTER_GROUP_EDIT_CONTROL_PANEL_ITEMS = {
   CANCEL: getDataTestSubjectSelector('control-editor-cancel'),
   FILTER_FIELD_TYPE: getDataTestSubjectSelector('toggleFieldFilterButton'),
   FIELD_TYPES: {
-    STRING: getDataTestSubjectSelector('typeFilter-string'),
+    STRING: getDataTestSubjectSelector('typeFilter-keyword'),
     BOOLEAN: getDataTestSubjectSelector('typeFilter-boolean'),
     IP: getDataTestSubjectSelector('typeFilter-ip'),
     NUMBER: getDataTestSubjectSelector('typeFilter-number'),

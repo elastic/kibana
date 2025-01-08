@@ -1,0 +1,31 @@
+openapi: 3.0.0
+info:
+  title: Get Running Processes Schema
+  version: '2023-10-31'
+paths:
+  /api/endpoint/action/running_procs:
+    post:
+      summary: Get running processes
+      operationId: EndpointGetProcessesAction
+      description: Get a list of all processes running on an endpoint.
+      x-codegen-enabled: true
+      x-labels: [ess, serverless]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GetProcessesRouteRequestBody'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '../../../model/schema/common.schema.yaml#/components/schemas/SuccessResponse'
+
+components:
+  schemas:
+    GetProcessesRouteRequestBody:
+      allOf:
+        - $ref: '../../../model/schema/common.schema.yaml#/components/schemas/NoParametersRequestSchema'

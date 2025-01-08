@@ -14,18 +14,10 @@
     "interfaces": [],
     "enums": [],
     "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
     "objects": [
       {
         "parentPluginId": "@kbn/core-user-settings-server-mocks",
-        "id": "def-common.userSettingsServiceMock",
+        "id": "def-server.userSettingsServiceMock",
         "type": "Object",
         "tags": [],
         "label": "userSettingsServiceMock",
@@ -36,7 +28,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-user-settings-server-mocks",
-            "id": "def-common.userSettingsServiceMock.create",
+            "id": "def-server.userSettingsServiceMock.create",
             "type": "Function",
             "tags": [],
             "label": "create",
@@ -62,7 +54,7 @@
           },
           {
             "parentPluginId": "@kbn/core-user-settings-server-mocks",
-            "id": "def-common.userSettingsServiceMock.createSetupContract",
+            "id": "def-server.userSettingsServiceMock.createSetupContract",
             "type": "Function",
             "tags": [],
             "label": "createSetupContract",
@@ -82,5 +74,13 @@
         "initialIsOpen": false
       }
     ]
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
   }
 }

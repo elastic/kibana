@@ -7,12 +7,12 @@
 
 import expect from '@kbn/expect';
 
-import type { PutTransformsRequestSchema } from '@kbn/transform-plugin/common/api_schemas/transforms';
+import type { PutTransformsRequestSchema } from '@kbn/transform-plugin/server/routes/api_schemas/transforms';
 import { TransformState, TRANSFORM_STATE } from '@kbn/transform-plugin/common/constants';
 import type { TransformStats } from '@kbn/transform-plugin/common/types/transform_stats';
 
-import type { GetTransformsResponseSchema } from '@kbn/transform-plugin/common/api_schemas/transforms';
-import type { PostTransformsUpdateRequestSchema } from '@kbn/transform-plugin/common/api_schemas/update_transforms';
+import type { GetTransformsResponseSchema } from '@kbn/transform-plugin/server/routes/api_schemas/transforms';
+import type { PostTransformsUpdateRequestSchema } from '@kbn/transform-plugin/server/routes/api_schemas/update_transforms';
 import type { TransformPivotConfig } from '@kbn/transform-plugin/common/types/transform';
 import type { IndicesCreateRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { FtrProviderContext } from '../../ftr_provider_context';
@@ -279,6 +279,15 @@ export function TransformAPIProvider({ getService }: FtrProviderContext) {
     async startTransform(transformId: string, assertSuccess = true) {
       log.debug(`Starting transform '${transformId}' ...`);
       const { body, status } = await esSupertest.post(`/_transform/${transformId}/_start`);
+
+      if (assertSuccess) {
+        this.assertResponseStatusCode(200, status, body);
+      }
+    },
+
+    async scheduleTransform(transformId: string, assertSuccess = true) {
+      log.debug(`Scheduling now transform '${transformId}' ...`);
+      const { body, status } = await esSupertest.post(`/_transform/${transformId}/_schedule_now`);
 
       if (assertSuccess) {
         this.assertResponseStatusCode(200, status, body);

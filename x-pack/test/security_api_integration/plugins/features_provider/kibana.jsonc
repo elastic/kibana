@@ -1,0 +1,14 @@
+{
+  "type": "plugin",
+  "id": "@kbn/features-provider-plugin",
+  "owner": "@elastic/kibana-security",
+  "plugin": {
+    "id": "featuresProviderPlugin",
+    "server": true,
+    "browser": false,
+    "requiredPlugins": [
+      "alerting",
+      "features"
+    ]
+  }
+}

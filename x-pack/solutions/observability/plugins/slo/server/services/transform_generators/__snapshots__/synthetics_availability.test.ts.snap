@@ -1,0 +1,117 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Synthetics Availability Transform Generator when serverless is disabled returns the expected transform params 1`] = `
+Object {
+  "_meta": Object {
+    "managed": true,
+    "managed_by": "observability",
+    "version": 3.3,
+  },
+  "defer_validation": true,
+  "description": "Rolled-up SLI data for SLO: irrelevant [id: irrelevant, revision: 1]",
+  "dest": Object {
+    "index": ".slo-observability.sli-v3.3",
+    "pipeline": ".slo-observability.sli.pipeline-irrelevant-1",
+  },
+  "frequency": "1m",
+  "pivot": Object {
+    "aggregations": Object {
+      "slo.denominator": Object {
+        "filter": Object {
+          "term": Object {
+            "summary.final_attempt": true,
+          },
+        },
+      },
+      "slo.numerator": Object {
+        "filter": Object {
+          "term": Object {
+            "monitor.status": "up",
+          },
+        },
+      },
+    },
+    "group_by": Object {
+      "@timestamp": Object {
+        "date_histogram": Object {
+          "field": "@timestamp",
+          "fixed_interval": "1m",
+        },
+      },
+      "monitor.config_id": Object {
+        "terms": Object {
+          "field": "config_id",
+        },
+      },
+      "monitor.name": Object {
+        "terms": Object {
+          "field": "monitor.name",
+        },
+      },
+      "observer.geo.name": Object {
+        "terms": Object {
+          "field": "observer.geo.name",
+        },
+      },
+      "observer.name": Object {
+        "terms": Object {
+          "field": "observer.name",
+        },
+      },
+      "slo.groupings.monitor.id": Object {
+        "terms": Object {
+          "field": "monitor.id",
+        },
+      },
+      "slo.groupings.monitor.name": Object {
+        "terms": Object {
+          "field": "monitor.name",
+        },
+      },
+      "slo.groupings.observer.geo.name": Object {
+        "terms": Object {
+          "field": "observer.geo.name",
+        },
+      },
+    },
+  },
+  "settings": Object {
+    "deduce_mappings": false,
+    "unattended": true,
+  },
+  "source": Object {
+    "index": "synthetics-*",
+    "query": Object {
+      "bool": Object {
+        "filter": Array [
+          Object {
+            "term": Object {
+              "summary.final_attempt": true,
+            },
+          },
+          Object {
+            "term": Object {
+              "meta.space_id": "custom-space",
+            },
+          },
+          Object {
+            "range": Object {
+              "@timestamp": Object {
+                "gte": "now-7d/d",
+              },
+            },
+          },
+        ],
+      },
+    },
+    "runtime_mappings": Object {},
+  },
+  "sync": Object {
+    "time": Object {
+      "delay": "1m",
+      "field": "event.ingested",
+    },
+  },
+  "transform_id": "slo-irrelevant-1",
+}
+`;

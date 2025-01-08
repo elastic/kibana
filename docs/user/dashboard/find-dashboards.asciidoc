@@ -1,0 +1,29 @@
+[[find-dashboards]]
+= Browse dashboards
+
+When looking for specific dashboards to open or share, several actions are available to you to help you find them quicker.
+
+**Search by name, description, or tag**
+
+On your list of **Dashboards**, use the search field to look for specific terms. These terms will be highlighted in real time in your dashboard list to help you locate what's relevant to you.
+
+**Filter by tag**
+
+When creating or editing dashboards, you can assign them tags that allow you to retrieve them faster in the future. 
+
+On your dashboard list, you have an option that lets you filter dashboards in or out based on their tags.
+
+**Filter by creator**
+
+The user who created or imported a dashboard is identified as the dashboard's **creator**. This information is visible right from the dashboard list, and you can filter that list by creator.
+
+Similarly, managed dashboards created by integrations are identified as created by Elastic. 
+
+NOTE: The creator information is only available for dashboards created on or after version 8.14. For dashboards from previous versions, the creator is empty.
+
+image::images/dashboard-filter-by-creator.png[Option to filter the list of dashboards by creator]
+
+**Sort by name or last update date**
+
+By default, your most recently viewed dashboards are displayed first. You can instead sort the dashboard list based on their name or their last update date. 
+

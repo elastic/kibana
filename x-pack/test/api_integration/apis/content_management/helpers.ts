@@ -21,25 +21,49 @@ export const sampleDashboard = {
   version: 2,
 };
 
-const role = 'content_manager_dashboard';
-const users = ['content_manager_dashboard_1', 'content_manager_dashboard_2'] as const;
+const roleEditor = 'content_manager_dashboard';
+const roleReader = 'content_reader_dashboard';
+const usersEditor = ['content_manager_dashboard_1', 'content_manager_dashboard_2'] as const;
+const usersReader = ['content_reader_dashboard_1', 'content_reader_dashboard_2'] as const;
 export async function setupInteractiveUser({ getService }: Pick<FtrProviderContext, 'getService'>) {
   const security = getService('security');
-  await security.role.create(role, {
+  const spaces = getService('spaces');
+  await spaces.create({ id: 'custom', name: 'Custom Space' });
+
+  await security.role.create(roleEditor, {
     elasticsearch: { cluster: [], indices: [], run_as: [] },
     kibana: [
       {
-        spaces: ['default'],
+        spaces: ['default', 'custom'],
         base: [],
         feature: { dashboard: ['all'] },
       },
     ],
   });
+  await security.role.create(roleReader, {
+    elasticsearch: { cluster: [], indices: [], run_as: [] },
+    kibana: [
+      {
+        spaces: ['default', 'custom'],
+        base: [],
+        feature: { dashboard: ['read'] },
+      },
+    ],
+  });
 
-  for (const user of users) {
+  for (const user of usersEditor) {
     await security.user.create(user, {
       password: user,
-      roles: [role],
+      roles: [roleEditor],
+      full_name: user.toUpperCase(),
+      email: `${user}@elastic.co`,
+    });
+  }
+
+  for (const user of usersReader) {
+    await security.user.create(user, {
+      password: user,
+      roles: [roleReader],
       full_name: user.toUpperCase(),
       email: `${user}@elastic.co`,
     });
@@ -49,11 +73,17 @@ export async function setupInteractiveUser({ getService }: Pick<FtrProviderConte
 export async function cleanupInteractiveUser({
   getService,
 }: Pick<FtrProviderContext, 'getService'>) {
+  await getService('spaces').delete('custom');
+
   const security = getService('security');
-  for (const user of users) {
+  for (const user of usersEditor) {
     await security.user.delete(user);
   }
-  await security.role.delete(role);
+  for (const user of usersReader) {
+    await security.user.delete(user);
+  }
+  await security.role.delete(roleEditor);
+  await security.role.delete(roleReader);
 }
 
 export interface LoginAsInteractiveUserResponse {
@@ -64,9 +94,9 @@ export interface LoginAsInteractiveUserResponse {
 }
 export async function loginAsInteractiveUser({
   getService,
-  username = users[0],
+  username = usersEditor[0],
 }: Pick<FtrProviderContext, 'getService'> & {
-  username?: typeof users[number];
+  username?: (typeof usersEditor)[number] | (typeof usersReader)[number];
 }): Promise<LoginAsInteractiveUserResponse> {
   const supertest = getService('supertestWithoutAuth');
 

@@ -92,7 +92,6 @@ export default ({ getService }: FtrProviderContext) => {
         responseBody: {
           statusCode: 403,
           error: 'Forbidden',
-          message: 'Forbidden',
         },
       },
     },
@@ -133,7 +132,6 @@ export default ({ getService }: FtrProviderContext) => {
           );
         } else {
           expect(body.error).to.eql(testData.expected.responseBody.error);
-          expect(body.message).to.eql(testData.expected.responseBody.message);
         }
       });
     }

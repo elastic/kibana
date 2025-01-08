@@ -1,13 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { dirname } from 'path';
-import { isPlainObject } from 'lodash';
 import { IRefResolver } from '../ref_resolver/ref_resolver';
 import { ResolvedDocument } from '../ref_resolver/resolved_document';
 import { parseRef } from '../../utils/parse_ref';
@@ -146,8 +146,8 @@ function isTraversableNode(maybeTraversableNode: unknown): boolean {
   return typeof maybeTraversableNode === 'object' && maybeTraversableNode !== null;
 }
 
-export function isRefNode(node: DocumentNode): node is { $ref: string } {
-  return isPlainObject(node) && '$ref' in node;
+export function isRefNode(node: unknown): node is { $ref: string } {
+  return isPlainObjectType(node) && '$ref' in node;
 }
 
 function applyEnterProcessors(

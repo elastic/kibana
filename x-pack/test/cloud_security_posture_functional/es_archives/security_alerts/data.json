@@ -1,0 +1,708 @@
+{
+  "type": "doc",
+  "value": {
+    "id": "589e086d7ceec7d4b353340578bd607e96fbac7eab9e2926f110990be15122f1",
+    "index": ".internal.alerts-security.alerts-default-000001",
+    "source": {
+      "@timestamp": "2024-09-01T12:44:02.109Z",
+      "actor": {
+        "entity": {
+          "id": "admin@example.com"
+        }
+      },
+      "client": {
+        "user": {
+          "email": "admin@example.com"
+        }
+      },
+      "cloud": {
+        "project": {
+          "id": "your-project-id"
+        },
+        "provider": "gcp"
+      },
+      "ecs": {
+        "version": "8.11.0"
+      },
+      "event": {
+        "action": "google.iam.admin.v1.CreateRole",
+        "agent_id_status": "missing",
+        "category": [
+          "session",
+          "network",
+          "configuration"
+        ],
+        "dataset": "gcp.audit",
+        "id": "kabcd1234efgh5678",
+        "ingested": "2024-09-01T12:40:17Z",
+        "module": "gcp",
+        "outcome": "success",
+        "provider": "activity",
+        "type": [
+          "end",
+          "access",
+          "allowed"
+        ]
+      },
+      "event.kind": "signal",
+      "gcp": {
+        "audit": {
+          "authorization_info": [
+            {
+              "granted": true,
+              "permission": "iam.roles.create",
+              "resource": "projects/your-project-id"
+            }
+          ],
+          "logentry_operation": {
+            "id": "operation-0987654321"
+          },
+          "request": {
+            "@type": "type.googleapis.com/google.iam.admin.v1.CreateRoleRequest",
+            "parent": "projects/your-project-id",
+            "role": {
+              "description": "A custom role with specific permissions",
+              "includedPermissions": [
+                "resourcemanager.projects.get",
+                "resourcemanager.projects.list"
+              ],
+              "name": "projects/your-project-id/roles/customRole",
+              "title": "Custom Role"
+            },
+            "roleId": "customRole"
+          },
+          "resource_name": "projects/your-project-id/roles/customRole",
+          "response": {
+            "@type": "type.googleapis.com/google.iam.admin.v1.Role",
+            "description": "A custom role with specific permissions",
+            "includedPermissions": [
+              "resourcemanager.projects.get",
+              "resourcemanager.projects.list"
+            ],
+            "name": "projects/your-project-id/roles/customRole",
+            "stage": "GA",
+            "title": "Custom Role"
+          },
+          "type": "type.googleapis.com/google.cloud.audit.AuditLog"
+        }
+      },
+      "kibana.alert.ancestors": [
+        {
+          "depth": 0,
+          "id": "MhKch5IBGYRrfvcTQNbO",
+          "index": ".ds-logs-gcp.audit-default-2024.10.13-000001",
+          "type": "event"
+        }
+      ],
+      "kibana.alert.depth": 1,
+      "kibana.alert.intended_timestamp": "2024-09-01T12:44:02.117Z",
+      "kibana.alert.last_detected": "2024-09-01T12:44:02.117Z",
+      "kibana.alert.original_event.action": "google.iam.admin.v1.CreateRole",
+      "kibana.alert.original_event.agent_id_status": "missing",
+      "kibana.alert.original_event.category": [
+        "session",
+        "network",
+        "configuration"
+      ],
+      "kibana.alert.original_event.dataset": "gcp.audit",
+      "kibana.alert.original_event.id": "kabcd1234efgh5678",
+      "kibana.alert.original_event.ingested": "2024-09-01T12:40:17Z",
+      "kibana.alert.original_event.kind": "event",
+      "kibana.alert.original_event.module": "gcp",
+      "kibana.alert.original_event.outcome": "success",
+      "kibana.alert.original_event.provider": "activity",
+      "kibana.alert.original_event.type": [
+        "end",
+        "access",
+        "allowed"
+      ],
+      "kibana.alert.original_time": "2024-09-01T12:34:56.789Z",
+      "kibana.alert.reason": "session, network, configuration event with source 10.0.0.1 created medium alert GCP IAM Custom Role Creation.",
+      "kibana.alert.risk_score": 47,
+      "kibana.alert.rule.actions": [
+      ],
+      "kibana.alert.rule.author": [
+        "Elastic"
+      ],
+      "kibana.alert.rule.category": "Custom Query Rule",
+      "kibana.alert.rule.consumer": "siem",
+      "kibana.alert.rule.created_at": "2024-09-01T12:38:49.650Z",
+      "kibana.alert.rule.created_by": "elastic",
+      "kibana.alert.rule.description": "Identifies an Identity and Access Management (IAM) custom role creation in Google Cloud Platform (GCP). Custom roles are user-defined, and allow for the bundling of one or more supported permissions to meet specific needs. Custom roles will not be updated automatically and could lead to privilege creep if not carefully scrutinized.",
+      "kibana.alert.rule.enabled": true,
+      "kibana.alert.rule.exceptions_list": [
+      ],
+      "kibana.alert.rule.execution.timestamp": "2024-09-01T12:44:02.117Z",
+      "kibana.alert.rule.execution.uuid": "a440f349-1900-4087-b507-f2b98c6cfa79",
+      "kibana.alert.rule.false_positives": [
+        "Custom role creations may be done by a system or network administrator. Verify whether the user email, resource name, and/or hostname should be making changes in your environment. Role creations by unfamiliar users or hosts should be investigated. If known behavior is causing false positives, it can be exempted from the rule."
+      ],
+      "kibana.alert.rule.from": "now-6m",
+      "kibana.alert.rule.immutable": true,
+      "kibana.alert.rule.indices": [
+        "filebeat-*",
+        "logs-gcp*"
+      ],
+      "kibana.alert.rule.interval": "5m",
+      "kibana.alert.rule.license": "Elastic License v2",
+      "kibana.alert.rule.max_signals": 100,
+      "kibana.alert.rule.name": "GCP IAM Custom Role Creation",
+      "kibana.alert.rule.note": "",
+      "kibana.alert.rule.parameters": {
+        "author": [
+          "Elastic"
+        ],
+        "description": "Identifies an Identity and Access Management (IAM) custom role creation in Google Cloud Platform (GCP). Custom roles are user-defined, and allow for the bundling of one or more supported permissions to meet specific needs. Custom roles will not be updated automatically and could lead to privilege creep if not carefully scrutinized.",
+        "exceptions_list": [
+        ],
+        "false_positives": [
+          "Custom role creations may be done by a system or network administrator. Verify whether the user email, resource name, and/or hostname should be making changes in your environment. Role creations by unfamiliar users or hosts should be investigated. If known behavior is causing false positives, it can be exempted from the rule."
+        ],
+        "from": "now-6m",
+        "immutable": true,
+        "index": [
+          "filebeat-*",
+          "logs-gcp*"
+        ],
+        "language": "kuery",
+        "license": "Elastic License v2",
+        "max_signals": 100,
+        "note": "",
+        "query": "event.dataset:gcp.audit and event.action:google.iam.admin.v*.CreateRole and event.outcome:success\n",
+        "references": [
+          "https://cloud.google.com/iam/docs/understanding-custom-roles"
+        ],
+        "related_integrations": [
+          {
+            "integration": "audit",
+            "package": "gcp",
+            "version": "^2.0.0"
+          }
+        ],
+        "required_fields": [
+          {
+            "ecs": true,
+            "name": "event.action",
+            "type": "keyword"
+          },
+          {
+            "ecs": true,
+            "name": "event.dataset",
+            "type": "keyword"
+          },
+          {
+            "ecs": true,
+            "name": "event.outcome",
+            "type": "keyword"
+          }
+        ],
+        "risk_score": 47,
+        "risk_score_mapping": [
+        ],
+        "rule_id": "aa8007f0-d1df-49ef-8520-407857594827",
+        "rule_source": {
+          "is_customized": false,
+          "type": "external"
+        },
+        "setup": "The GCP Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
+        "severity": "medium",
+        "severity_mapping": [
+        ],
+        "threat": [
+          {
+            "framework": "MITRE ATT&CK",
+            "tactic": {
+              "id": "TA0001",
+              "name": "Initial Access",
+              "reference": "https://attack.mitre.org/tactics/TA0001/"
+            },
+            "technique": [
+              {
+                "id": "T1078",
+                "name": "Valid Accounts",
+                "reference": "https://attack.mitre.org/techniques/T1078/"
+              }
+            ]
+          },
+          {
+            "framework": "MITRE ATT&CK",
+            "tactic": {
+              "id": "TA0003",
+              "name": "Persistence",
+              "reference": "https://attack.mitre.org/tactics/TA0003/"
+            },
+            "technique": [
+              {
+                "id": "T1078",
+                "name": "Valid Accounts",
+                "reference": "https://attack.mitre.org/techniques/T1078/"
+              }
+            ]
+          }
+        ],
+        "timestamp_override": "event.ingested",
+        "to": "now",
+        "type": "query",
+        "version": 104
+      },
+      "kibana.alert.rule.producer": "siem",
+      "kibana.alert.rule.references": [
+        "https://cloud.google.com/iam/docs/understanding-custom-roles"
+      ],
+      "kibana.alert.rule.revision": 0,
+      "kibana.alert.rule.risk_score": 47,
+      "kibana.alert.rule.risk_score_mapping": [
+      ],
+      "kibana.alert.rule.rule_id": "aa8007f0-d1df-49ef-8520-407857594827",
+      "kibana.alert.rule.rule_type_id": "siem.queryRule",
+      "kibana.alert.rule.severity": "medium",
+      "kibana.alert.rule.severity_mapping": [
+      ],
+      "kibana.alert.rule.tags": [
+        "Domain: Cloud",
+        "Data Source: GCP",
+        "Data Source: Google Cloud Platform",
+        "Use Case: Identity and Access Audit",
+        "Tactic: Initial Access"
+      ],
+      "kibana.alert.rule.threat": [
+        {
+          "framework": "MITRE ATT&CK",
+          "tactic": {
+            "id": "TA0001",
+            "name": "Initial Access",
+            "reference": "https://attack.mitre.org/tactics/TA0001/"
+          },
+          "technique": [
+            {
+              "id": "T1078",
+              "name": "Valid Accounts",
+              "reference": "https://attack.mitre.org/techniques/T1078/"
+            }
+          ]
+        },
+        {
+          "framework": "MITRE ATT&CK",
+          "tactic": {
+            "id": "TA0003",
+            "name": "Persistence",
+            "reference": "https://attack.mitre.org/tactics/TA0003/"
+          },
+          "technique": [
+            {
+              "id": "T1078",
+              "name": "Valid Accounts",
+              "reference": "https://attack.mitre.org/techniques/T1078/"
+            }
+          ]
+        }
+      ],
+      "kibana.alert.rule.timestamp_override": "event.ingested",
+      "kibana.alert.rule.to": "now",
+      "kibana.alert.rule.type": "query",
+      "kibana.alert.rule.updated_at": "2024-09-01T12:39:00.099Z",
+      "kibana.alert.rule.updated_by": "elastic",
+      "kibana.alert.rule.uuid": "c6f64115-5941-46ef-bfa3-61a4ecb4f3ba",
+      "kibana.alert.rule.version": 104,
+      "kibana.alert.severity": "medium",
+      "kibana.alert.start": "2024-09-01T12:44:02.117Z",
+      "kibana.alert.status": "active",
+      "kibana.alert.uuid": "589e086d7ceec7d4b353340578bd607e96fbac7eab9e2926f110990be15122f1",
+      "kibana.alert.workflow_assignee_ids": [
+      ],
+      "kibana.alert.workflow_status": "open",
+      "kibana.alert.workflow_tags": [
+      ],
+      "kibana.space_ids": [
+        "default"
+      ],
+      "kibana.version": "9.0.0",
+      "log": {
+        "level": "NOTICE",
+        "logger": "projects/your-project-id/logs/cloudaudit.googleapis.com%2Factivity"
+      },
+      "related": {
+        "ip": [
+          "10.0.0.1"
+        ],
+        "user": [
+          "admin@example.com"
+        ]
+      },
+      "service": {
+        "name": "iam.googleapis.com"
+      },
+      "source": {
+        "ip": "10.0.0.1"
+      },
+      "tags": [
+        "_geoip_database_unavailable_GeoLite2-City.mmdb",
+        "_geoip_database_unavailable_GeoLite2-ASN.mmdb"
+      ],
+      "target": {
+        "entity": {
+          "id": "projects/your-project-id/roles/customRole"
+        }
+      },
+      "user_agent": {
+        "device": {
+          "name": "Other"
+        },
+        "name": "Other",
+        "original": "google-cloud-sdk/324.0.0"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "838ea37ab43ab7d2754d007fbe8191be53d7d637bea62f6189f8db1503c0e250",
+    "index": ".internal.alerts-security.alerts-default-000001",
+    "source": {
+      "@timestamp": "2024-09-01T12:39:03.646Z",
+      "actor": {
+        "entity": {
+          "id": "admin@example.com"
+        }
+      },
+      "client": {
+        "user": {
+          "email": "admin@example.com"
+        }
+      },
+      "cloud": {
+        "project": {
+          "id": "your-project-id"
+        },
+        "provider": "gcp"
+      },
+      "ecs": {
+        "version": "8.11.0"
+      },
+      "event": {
+        "action": "google.iam.admin.v1.CreateRole",
+        "agent_id_status": "missing",
+        "category": [
+          "session",
+          "network",
+          "configuration"
+        ],
+        "dataset": "gcp.audit",
+        "id": "kabcd1234efgh5678",
+        "ingested": "2024-09-01T12:38:13Z",
+        "module": "gcp",
+        "outcome": "success",
+        "provider": "activity",
+        "type": [
+          "end",
+          "access",
+          "allowed"
+        ]
+      },
+      "event.kind": "signal",
+      "gcp": {
+        "audit": {
+          "authorization_info": [
+            {
+              "granted": true,
+              "permission": "iam.roles.create",
+              "resource": "projects/your-project-id"
+            }
+          ],
+          "logentry_operation": {
+            "id": "operation-0987654321"
+          },
+          "request": {
+            "@type": "type.googleapis.com/google.iam.admin.v1.CreateRoleRequest",
+            "parent": "projects/your-project-id",
+            "role": {
+              "description": "A custom role with specific permissions",
+              "includedPermissions": [
+                "resourcemanager.projects.get",
+                "resourcemanager.projects.list"
+              ],
+              "name": "projects/your-project-id/roles/customRole",
+              "title": "Custom Role"
+            },
+            "roleId": "customRole"
+          },
+          "resource_name": "projects/your-project-id/roles/customRole",
+          "response": {
+            "@type": "type.googleapis.com/google.iam.admin.v1.Role",
+            "description": "A custom role with specific permissions",
+            "includedPermissions": [
+              "resourcemanager.projects.get",
+              "resourcemanager.projects.list"
+            ],
+            "name": "projects/your-project-id/roles/customRole",
+            "stage": "GA",
+            "title": "Custom Role"
+          },
+          "type": "type.googleapis.com/google.cloud.audit.AuditLog"
+        }
+      },
+      "kibana.alert.ancestors": [
+        {
+          "depth": 0,
+          "id": "rhKah5IBGYRrfvcTXtWe",
+          "index": ".ds-logs-gcp.audit-default-2024.10.13-000001",
+          "type": "event"
+        }
+      ],
+      "kibana.alert.depth": 1,
+      "kibana.alert.intended_timestamp": "2024-09-01T12:39:03.657Z",
+      "kibana.alert.last_detected": "2024-09-01T12:39:03.657Z",
+      "kibana.alert.original_event.action": "google.iam.admin.v1.CreateRole",
+      "kibana.alert.original_event.agent_id_status": "missing",
+      "kibana.alert.original_event.category": [
+        "session",
+        "network",
+        "configuration"
+      ],
+      "kibana.alert.original_event.dataset": "gcp.audit",
+      "kibana.alert.original_event.id": "kabcd1234efgh5678",
+      "kibana.alert.original_event.ingested": "2024-09-01T12:38:13Z",
+      "kibana.alert.original_event.kind": "event",
+      "kibana.alert.original_event.module": "gcp",
+      "kibana.alert.original_event.outcome": "success",
+      "kibana.alert.original_event.provider": "activity",
+      "kibana.alert.original_event.type": [
+        "end",
+        "access",
+        "allowed"
+      ],
+      "kibana.alert.original_time": "2024-09-01T12:34:56.789Z",
+      "kibana.alert.reason": "session, network, configuration event with source 10.0.0.1 created medium alert GCP IAM Custom Role Creation.",
+      "kibana.alert.risk_score": 47,
+      "kibana.alert.rule.actions": [
+      ],
+      "kibana.alert.rule.author": [
+        "Elastic"
+      ],
+      "kibana.alert.rule.category": "Custom Query Rule",
+      "kibana.alert.rule.consumer": "siem",
+      "kibana.alert.rule.created_at": "2024-09-01T12:38:49.650Z",
+      "kibana.alert.rule.created_by": "elastic",
+      "kibana.alert.rule.description": "Identifies an Identity and Access Management (IAM) custom role creation in Google Cloud Platform (GCP). Custom roles are user-defined, and allow for the bundling of one or more supported permissions to meet specific needs. Custom roles will not be updated automatically and could lead to privilege creep if not carefully scrutinized.",
+      "kibana.alert.rule.enabled": true,
+      "kibana.alert.rule.exceptions_list": [
+      ],
+      "kibana.alert.rule.execution.timestamp": "2024-09-01T12:39:03.657Z",
+      "kibana.alert.rule.execution.uuid": "939d34e1-1e74-480d-90ae-24079d9b40d3",
+      "kibana.alert.rule.false_positives": [
+        "Custom role creations may be done by a system or network administrator. Verify whether the user email, resource name, and/or hostname should be making changes in your environment. Role creations by unfamiliar users or hosts should be investigated. If known behavior is causing false positives, it can be exempted from the rule."
+      ],
+      "kibana.alert.rule.from": "now-6m",
+      "kibana.alert.rule.immutable": true,
+      "kibana.alert.rule.indices": [
+        "filebeat-*",
+        "logs-gcp*"
+      ],
+      "kibana.alert.rule.interval": "5m",
+      "kibana.alert.rule.license": "Elastic License v2",
+      "kibana.alert.rule.max_signals": 100,
+      "kibana.alert.rule.name": "GCP IAM Custom Role Creation",
+      "kibana.alert.rule.note": "",
+      "kibana.alert.rule.parameters": {
+        "author": [
+          "Elastic"
+        ],
+        "description": "Identifies an Identity and Access Management (IAM) custom role creation in Google Cloud Platform (GCP). Custom roles are user-defined, and allow for the bundling of one or more supported permissions to meet specific needs. Custom roles will not be updated automatically and could lead to privilege creep if not carefully scrutinized.",
+        "exceptions_list": [
+        ],
+        "false_positives": [
+          "Custom role creations may be done by a system or network administrator. Verify whether the user email, resource name, and/or hostname should be making changes in your environment. Role creations by unfamiliar users or hosts should be investigated. If known behavior is causing false positives, it can be exempted from the rule."
+        ],
+        "from": "now-6m",
+        "immutable": true,
+        "index": [
+          "filebeat-*",
+          "logs-gcp*"
+        ],
+        "language": "kuery",
+        "license": "Elastic License v2",
+        "max_signals": 100,
+        "note": "",
+        "query": "event.dataset:gcp.audit and event.action:google.iam.admin.v*.CreateRole and event.outcome:success\n",
+        "references": [
+          "https://cloud.google.com/iam/docs/understanding-custom-roles"
+        ],
+        "related_integrations": [
+          {
+            "integration": "audit",
+            "package": "gcp",
+            "version": "^2.0.0"
+          }
+        ],
+        "required_fields": [
+          {
+            "ecs": true,
+            "name": "event.action",
+            "type": "keyword"
+          },
+          {
+            "ecs": true,
+            "name": "event.dataset",
+            "type": "keyword"
+          },
+          {
+            "ecs": true,
+            "name": "event.outcome",
+            "type": "keyword"
+          }
+        ],
+        "risk_score": 47,
+        "risk_score_mapping": [
+        ],
+        "rule_id": "aa8007f0-d1df-49ef-8520-407857594827",
+        "rule_source": {
+          "is_customized": false,
+          "type": "external"
+        },
+        "setup": "The GCP Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
+        "severity": "medium",
+        "severity_mapping": [
+        ],
+        "threat": [
+          {
+            "framework": "MITRE ATT&CK",
+            "tactic": {
+              "id": "TA0001",
+              "name": "Initial Access",
+              "reference": "https://attack.mitre.org/tactics/TA0001/"
+            },
+            "technique": [
+              {
+                "id": "T1078",
+                "name": "Valid Accounts",
+                "reference": "https://attack.mitre.org/techniques/T1078/"
+              }
+            ]
+          },
+          {
+            "framework": "MITRE ATT&CK",
+            "tactic": {
+              "id": "TA0003",
+              "name": "Persistence",
+              "reference": "https://attack.mitre.org/tactics/TA0003/"
+            },
+            "technique": [
+              {
+                "id": "T1078",
+                "name": "Valid Accounts",
+                "reference": "https://attack.mitre.org/techniques/T1078/"
+              }
+            ]
+          }
+        ],
+        "timestamp_override": "event.ingested",
+        "to": "now",
+        "type": "query",
+        "version": 104
+      },
+      "kibana.alert.rule.producer": "siem",
+      "kibana.alert.rule.references": [
+        "https://cloud.google.com/iam/docs/understanding-custom-roles"
+      ],
+      "kibana.alert.rule.revision": 0,
+      "kibana.alert.rule.risk_score": 47,
+      "kibana.alert.rule.risk_score_mapping": [
+      ],
+      "kibana.alert.rule.rule_id": "aa8007f0-d1df-49ef-8520-407857594827",
+      "kibana.alert.rule.rule_type_id": "siem.queryRule",
+      "kibana.alert.rule.severity": "medium",
+      "kibana.alert.rule.severity_mapping": [
+      ],
+      "kibana.alert.rule.tags": [
+        "Domain: Cloud",
+        "Data Source: GCP",
+        "Data Source: Google Cloud Platform",
+        "Use Case: Identity and Access Audit",
+        "Tactic: Initial Access"
+      ],
+      "kibana.alert.rule.threat": [
+        {
+          "framework": "MITRE ATT&CK",
+          "tactic": {
+            "id": "TA0001",
+            "name": "Initial Access",
+            "reference": "https://attack.mitre.org/tactics/TA0001/"
+          },
+          "technique": [
+            {
+              "id": "T1078",
+              "name": "Valid Accounts",
+              "reference": "https://attack.mitre.org/techniques/T1078/"
+            }
+          ]
+        },
+        {
+          "framework": "MITRE ATT&CK",
+          "tactic": {
+            "id": "TA0003",
+            "name": "Persistence",
+            "reference": "https://attack.mitre.org/tactics/TA0003/"
+          },
+          "technique": [
+            {
+              "id": "T1078",
+              "name": "Valid Accounts",
+              "reference": "https://attack.mitre.org/techniques/T1078/"
+            }
+          ]
+        }
+      ],
+      "kibana.alert.rule.timestamp_override": "event.ingested",
+      "kibana.alert.rule.to": "now",
+      "kibana.alert.rule.type": "query",
+      "kibana.alert.rule.updated_at": "2024-09-01T12:39:00.099Z",
+      "kibana.alert.rule.updated_by": "elastic",
+      "kibana.alert.rule.uuid": "c6f64115-5941-46ef-bfa3-61a4ecb4f3ba",
+      "kibana.alert.rule.version": 104,
+      "kibana.alert.severity": "medium",
+      "kibana.alert.start": "2024-09-01T12:39:03.657Z",
+      "kibana.alert.status": "active",
+      "kibana.alert.uuid": "838ea37ab43ab7d2754d007fbe8191be53d7d637bea62f6189f8db1503c0e250",
+      "kibana.alert.workflow_assignee_ids": [
+      ],
+      "kibana.alert.workflow_status": "open",
+      "kibana.alert.workflow_tags": [
+      ],
+      "kibana.space_ids": [
+        "default"
+      ],
+      "kibana.version": "9.0.0",
+      "log": {
+        "level": "NOTICE",
+        "logger": "projects/your-project-id/logs/cloudaudit.googleapis.com%2Factivity"
+      },
+      "related": {
+        "ip": [
+          "10.0.0.1"
+        ],
+        "user": [
+          "admin@example.com"
+        ]
+      },
+      "service": {
+        "name": "iam.googleapis.com"
+      },
+      "source": {
+        "ip": "10.0.0.1"
+      },
+      "tags": [
+        "_geoip_database_unavailable_GeoLite2-City.mmdb",
+        "_geoip_database_unavailable_GeoLite2-ASN.mmdb"
+      ],
+      "user_agent": {
+        "device": {
+          "name": "Other"
+        },
+        "name": "Other",
+        "original": "google-cloud-sdk/324.0.0"
+      }
+    }
+  }
+}

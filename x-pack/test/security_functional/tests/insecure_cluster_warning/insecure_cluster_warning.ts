@@ -6,7 +6,8 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../ftr_provider_context';
+
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common']);
@@ -16,6 +17,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
 
   describe('Insecure Cluster Warning', function () {
+    this.tags('skipFIPS');
     before(async () => {
       await es.indices.create({ index: 'my-index-001' });
       await es.index({ index: 'my-index-001', body: { foo: 'bar' } });

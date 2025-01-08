@@ -42,7 +42,8 @@ export default ({ getService }: FtrProviderContext) => {
         responseCode: 403,
         responseBody: {
           error: 'Forbidden',
-          message: 'Forbidden',
+          message:
+            'API [PUT /internal/ml/filters] is unauthorized for user, this action is granted by the Kibana privileges [ml:canCreateFilter]',
         },
       },
     },
@@ -58,7 +59,8 @@ export default ({ getService }: FtrProviderContext) => {
         responseCode: 403,
         responseBody: {
           error: 'Forbidden',
-          message: 'Forbidden',
+          message:
+            'API [PUT /internal/ml/filters] is unauthorized for user, this action is granted by the Kibana privileges [ml:canCreateFilter]',
         },
       },
     },

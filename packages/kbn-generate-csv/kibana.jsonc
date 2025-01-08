@@ -1,5 +1,0 @@
-{
-  "type": "shared-server",
-  "id": "@kbn/generate-csv",
-  "owner": "@elastic/appex-sharedux"
-}

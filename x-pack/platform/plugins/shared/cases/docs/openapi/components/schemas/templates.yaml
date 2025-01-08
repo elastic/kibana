@@ -1,0 +1,66 @@
+type: array
+x-state: Technical preview
+items:
+  type: object
+  properties:
+    caseFields:
+      type: object
+      properties:
+        assignees:
+          $ref: 'assignees.yaml'
+        category:
+          $ref: 'case_category.yaml'
+        connector:
+          type: object
+          properties:
+            $ref: 'case_configure_connector_properties.yaml'
+        customFields:
+          type: array
+          x-state: Technical preview
+          description: Custom field values in the template.
+          items:
+            type: object
+            properties:
+              key:
+                type: string
+                description: The unique key for the custom field.
+              type:
+                type: string
+                enum:
+                  - text
+                  - toggle
+                description: The type of the custom field.
+              value:
+                oneOf:
+                  - type: string
+                  - type: boolean
+                description: >
+                  The default value for the custom field when a case uses the template.
+                  If the `type` is `text`, the default value must be a string.
+                  If the `type` is `toggle`, the default value must be boolean.
+        description:
+          $ref: 'case_description.yaml'
+        settings:
+          $ref: 'settings.yaml'
+        severity:
+          $ref: 'case_severity.yaml'
+        tags:
+          $ref: 'case_tags.yaml'
+        title:
+          $ref: 'case_title.yaml'
+    description:
+      type: string
+      description: A description for the template.
+    key:
+      type: string
+      description: >
+        A unique key for the template.
+        Must be lower case and composed only of a-z, 0-9, '_', and '-' characters.
+        It is used in API calls to refer to a specific template.
+    name:
+      type: string
+      description: The name of the template.
+    tags:
+      $ref: 'template_tags.yaml'
+      
+     

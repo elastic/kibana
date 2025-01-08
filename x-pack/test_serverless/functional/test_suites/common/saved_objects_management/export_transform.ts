@@ -42,7 +42,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('allows to mutate the objects during an export', async () => {
-        await supertest
+        const resp = await supertest
           .post('/api/saved_objects/_export')
           .set(svlCommonApi.getCommonRequestHeader())
           .set(svlCommonApi.getInternalRequestHeader())
@@ -50,24 +50,23 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             type: ['test-export-transform'],
             excludeExportDetails: true,
           })
-          .expect(200)
-          .then((resp) => {
-            const objects = parseNdJson(resp.text);
-            expect(objects.map((obj) => ({ id: obj.id, enabled: obj.attributes.enabled }))).to.eql([
-              {
-                id: 'type_1-obj_1',
-                enabled: false,
-              },
-              {
-                id: 'type_1-obj_2',
-                enabled: false,
-              },
-            ]);
-          });
+          .expect(200);
+
+        const objects = parseNdJson(resp.text);
+        expect(objects.map((obj) => ({ id: obj.id, enabled: obj.attributes.enabled }))).to.eql([
+          {
+            id: 'type_1-obj_1',
+            enabled: false,
+          },
+          {
+            id: 'type_1-obj_2',
+            enabled: false,
+          },
+        ]);
       });
 
       it('allows to add additional objects to an export', async () => {
-        await supertest
+        const resp = await supertest
           .post('/api/saved_objects/_export')
           .set(svlCommonApi.getCommonRequestHeader())
           .set(svlCommonApi.getInternalRequestHeader())
@@ -80,15 +79,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             ],
             excludeExportDetails: true,
           })
-          .expect(200)
-          .then((resp) => {
-            const objects = parseNdJson(resp.text);
-            expect(objects.map((obj) => obj.id)).to.eql(['type_2-obj_1', 'type_dep-obj_1']);
-          });
+          .expect(200);
+        const objects = parseNdJson(resp.text);
+        expect(objects.map((obj) => obj.id)).to.eql(['type_2-obj_1', 'type_dep-obj_1']);
       });
 
       it('allows to add additional objects to an export when exporting by type', async () => {
-        await supertest
+        const resp = await supertest
           .post('/api/saved_objects/_export')
           .set(svlCommonApi.getCommonRequestHeader())
           .set(svlCommonApi.getInternalRequestHeader())
@@ -96,20 +93,18 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             type: ['test-export-add'],
             excludeExportDetails: true,
           })
-          .expect(200)
-          .then((resp) => {
-            const objects = parseNdJson(resp.text);
-            expect(objects.map((obj) => obj.id)).to.eql([
-              'type_2-obj_1',
-              'type_2-obj_2',
-              'type_dep-obj_1',
-              'type_dep-obj_2',
-            ]);
-          });
+          .expect(200);
+        const objects = parseNdJson(resp.text);
+        expect(objects.map((obj) => obj.id)).to.eql([
+          'type_2-obj_1',
+          'type_2-obj_2',
+          'type_dep-obj_1',
+          'type_dep-obj_2',
+        ]);
       });
 
       it('returns a 400 when the type causes a transform error', async () => {
-        await supertest
+        const resp = await supertest
           .post('/api/saved_objects/_export')
           .set(svlCommonApi.getCommonRequestHeader())
           .set(svlCommonApi.getInternalRequestHeader())
@@ -117,21 +112,19 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             type: ['test-export-transform-error'],
             excludeExportDetails: true,
           })
-          .expect(400)
-          .then((resp) => {
-            const { attributes, ...error } = resp.body;
-            expect(error).to.eql({
-              error: 'Bad Request',
-              message: 'Error transforming objects to export',
-              statusCode: 400,
-            });
-            expect(attributes.cause).to.eql('Error during transform');
-            expect(attributes.objects.map((obj: any) => obj.id)).to.eql(['type_4-obj_1']);
-          });
+          .expect(400);
+        const { attributes, ...error } = resp.body;
+        expect(error).to.eql({
+          error: 'Bad Request',
+          message: 'Error transforming objects to export',
+          statusCode: 400,
+        });
+        expect(attributes.cause).to.eql('Error during transform');
+        expect(attributes.objects.map((obj: any) => obj.id)).to.eql(['type_4-obj_1']);
       });
 
       it('returns a 400 when the type causes an invalid transform', async () => {
-        await supertest
+        const resp = await supertest
           .post('/api/saved_objects/_export')
           .set(svlCommonApi.getCommonRequestHeader())
           .set(svlCommonApi.getInternalRequestHeader())
@@ -139,17 +132,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             type: ['test-export-invalid-transform'],
             excludeExportDetails: true,
           })
-          .expect(400)
-          .then((resp) => {
-            expect(resp.body).to.eql({
-              error: 'Bad Request',
-              message: 'Invalid transform performed on objects to export',
-              statusCode: 400,
-              attributes: {
-                objectKeys: ['test-export-invalid-transform|type_3-obj_1'],
-              },
-            });
-          });
+          .expect(400);
+        expect(resp.body).to.eql({
+          error: 'Bad Request',
+          message: 'Invalid transform performed on objects to export',
+          statusCode: 400,
+          attributes: {
+            objectKeys: ['test-export-invalid-transform|type_3-obj_1'],
+          },
+        });
       });
     });
 
@@ -172,7 +163,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('execute export transforms for reference objects', async () => {
-        await supertest
+        const resp = await supertest
           .post('/api/saved_objects/_export')
           .set(svlCommonApi.getCommonRequestHeader())
           .set(svlCommonApi.getInternalRequestHeader())
@@ -186,21 +177,17 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             includeReferencesDeep: true,
             excludeExportDetails: true,
           })
-          .expect(200)
-          .then((resp) => {
-            const objects = parseNdJson(resp.text).sort((obj1, obj2) =>
-              obj1.id.localeCompare(obj2.id)
-            );
-            expect(objects.map((obj) => obj.id)).to.eql([
-              'type_1-obj_1',
-              'type_1-obj_2',
-              'type_2-obj_1',
-              'type_dep-obj_1',
-            ]);
+          .expect(200);
+        const objects = parseNdJson(resp.text).sort((obj1, obj2) => obj1.id.localeCompare(obj2.id));
+        expect(objects.map((obj) => obj.id)).to.eql([
+          'type_1-obj_1',
+          'type_1-obj_2',
+          'type_2-obj_1',
+          'type_dep-obj_1',
+        ]);
 
-            expect(objects[0].attributes.enabled).to.eql(false);
-            expect(objects[1].attributes.enabled).to.eql(false);
-          });
+        expect(objects[0].attributes.enabled).to.eql(false);
+        expect(objects[1].attributes.enabled).to.eql(false);
       });
     });
 
@@ -223,7 +210,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('should only export objects returning `true` for `isExportable`', async () => {
-        await supertest
+        const resp = await supertest
           .post('/api/saved_objects/_export')
           .set(svlCommonApi.getCommonRequestHeader())
           .set(svlCommonApi.getInternalRequestHeader())
@@ -237,21 +224,17 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             includeReferencesDeep: true,
             excludeExportDetails: true,
           })
-          .expect(200)
-          .then((resp) => {
-            const objects = parseNdJson(resp.text).sort((obj1, obj2) =>
-              obj1.id.localeCompare(obj2.id)
-            );
-            expect(objects.map((obj) => `${obj.type}:${obj.id}`)).to.eql([
-              'test-is-exportable:1',
-              'test-is-exportable:3',
-              'test-is-exportable:5',
-            ]);
-          });
+          .expect(200);
+        const objects = parseNdJson(resp.text).sort((obj1, obj2) => obj1.id.localeCompare(obj2.id));
+        expect(objects.map((obj) => `${obj.type}:${obj.id}`)).to.eql([
+          'test-is-exportable:1',
+          'test-is-exportable:3',
+          'test-is-exportable:5',
+        ]);
       });
 
       it('lists objects that got filtered', async () => {
-        await supertest
+        const resp = await supertest
           .post('/api/saved_objects/_export')
           .set(svlCommonApi.getCommonRequestHeader())
           .set(svlCommonApi.getInternalRequestHeader())
@@ -265,31 +248,29 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             includeReferencesDeep: true,
             excludeExportDetails: false,
           })
-          .expect(200)
-          .then((resp) => {
-            const objects = parseNdJson(resp.text);
-            const exportDetails = objects[
-              objects.length - 1
-            ] as unknown as SavedObjectsExportResultDetails;
+          .expect(200);
+        const objects = parseNdJson(resp.text);
+        const exportDetails = objects[
+          objects.length - 1
+        ] as unknown as SavedObjectsExportResultDetails;
 
-            expect(exportDetails.excludedObjectsCount).to.eql(2);
-            expect(exportDetails.excludedObjects).to.eql([
-              {
-                type: 'test-is-exportable',
-                id: '2',
-                reason: 'excluded',
-              },
-              {
-                type: 'test-is-exportable',
-                id: '4',
-                reason: 'excluded',
-              },
-            ]);
-          });
+        expect(exportDetails.excludedObjectsCount).to.eql(2);
+        expect(exportDetails.excludedObjects).to.eql([
+          {
+            type: 'test-is-exportable',
+            id: '2',
+            reason: 'excluded',
+          },
+          {
+            type: 'test-is-exportable',
+            id: '4',
+            reason: 'excluded',
+          },
+        ]);
       });
 
       it('excludes objects if `isExportable` throws', async () => {
-        await supertest
+        const resp = await supertest
           .post('/api/saved_objects/_export')
           .set(svlCommonApi.getCommonRequestHeader())
           .set(svlCommonApi.getInternalRequestHeader())
@@ -307,24 +288,20 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             includeReferencesDeep: true,
             excludeExportDetails: false,
           })
-          .expect(200)
-          .then((resp) => {
-            const objects = parseNdJson(resp.text);
-            expect(objects.length).to.eql(2);
-            expect([objects[0]].map((obj) => `${obj.type}:${obj.id}`)).to.eql([
-              'test-is-exportable:5',
-            ]);
-            const exportDetails = objects[
-              objects.length - 1
-            ] as unknown as SavedObjectsExportResultDetails;
-            expect(exportDetails.excludedObjects).to.eql([
-              {
-                type: 'test-is-exportable',
-                id: 'error',
-                reason: 'predicate_error',
-              },
-            ]);
-          });
+          .expect(200);
+        const objects = parseNdJson(resp.text);
+        expect(objects.length).to.eql(2);
+        expect([objects[0]].map((obj) => `${obj.type}:${obj.id}`)).to.eql(['test-is-exportable:5']);
+        const exportDetails = objects[
+          objects.length - 1
+        ] as unknown as SavedObjectsExportResultDetails;
+        expect(exportDetails.excludedObjects).to.eql([
+          {
+            type: 'test-is-exportable',
+            id: 'error',
+            reason: 'predicate_error',
+          },
+        ]);
       });
     });
   });

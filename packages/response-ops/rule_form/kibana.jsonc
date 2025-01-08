@@ -1,0 +1,5 @@
+{
+  "type": "shared-browser",
+  "id": "@kbn/response-ops-rule-form",
+  "owner": "@elastic/response-ops"
+}

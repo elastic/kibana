@@ -23,6 +23,8 @@ import {
 } from '../../../../cases_api_integration/common/lib/api';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
+const ADD_TO_EXISTING_CASE_DATA_TEST_SUBJ = 'embeddablePanelAction-embeddable_addToExistingCase';
+
 const createLogStashDataView = async (
   supertest: SuperTest.Agent
 ): Promise<{ data_view: { id: string } }> => {
@@ -63,6 +65,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const listingTable = getService('listingTable');
   const toasts = getService('toasts');
   const browser = getService('browser');
+  const dashboardPanelActions = getService('dashboardPanelActions');
 
   const createAttachmentAndNavigate = async (attachment: AttachmentRequest) => {
     const caseData = await cases.api.createCase({
@@ -252,7 +255,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
              * The flyout close automatically after submitting a case
              */
             await cases.create.createCase({ owner });
-            await cases.common.expectToasterToContain('has been updated');
+            await cases.common.expectToasterToContain('updated');
             await toasts.dismissAllWithChecks();
           }
 
@@ -265,8 +268,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         });
       });
 
-      // FLAKY: https://github.com/elastic/kibana/issues/157642
-      describe.skip('Modal', () => {
+      describe('Modal', () => {
         const createdCases = new Map<string, string>();
 
         const openModal = async () => {
@@ -350,7 +352,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
             await cases.casesTable.getCaseById(currentCaseId);
             await testSubjects.click(`cases-table-row-select-${currentCaseId}`);
 
-            await cases.common.expectToasterToContain('has been updated');
+            await cases.common.expectToasterToContain('updated');
             await toasts.dismissAllWithChecks();
             await ensureFirstCommentOwner(currentCaseId, owner);
           }
@@ -400,10 +402,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await common.navigateToApp('dashboard');
         await dashboard.preserveCrossAppState();
         await dashboard.loadSavedDashboard(myDashboardName);
-
-        await testSubjects.click('embeddablePanelToggleMenuIcon');
-        await testSubjects.click('embeddablePanelMore-mainMenu');
-        await testSubjects.click('embeddablePanelAction-embeddable_addToExistingCase');
+        await dashboardPanelActions.clickPanelAction(ADD_TO_EXISTING_CASE_DATA_TEST_SUBJ);
         await testSubjects.click('cases-table-add-case-filter-bar');
 
         await cases.create.createCase({
@@ -413,7 +412,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         });
         await testSubjects.click('create-case-submit');
 
-        await cases.common.expectToasterToContain(`${caseTitle} has been updated`);
+        await cases.common.expectToasterToContain(`Case ${caseTitle} updated`);
         await testSubjects.click('toaster-content-case-view-link');
         await toasts.dismissAllWithChecks();
 
@@ -435,13 +434,11 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await dashboard.preserveCrossAppState();
         await dashboard.loadSavedDashboard(myDashboardName);
 
-        await testSubjects.click('embeddablePanelToggleMenuIcon');
-        await testSubjects.click('embeddablePanelMore-mainMenu');
-        await testSubjects.click('embeddablePanelAction-embeddable_addToExistingCase');
+        await dashboardPanelActions.clickPanelAction(ADD_TO_EXISTING_CASE_DATA_TEST_SUBJ);
 
         await testSubjects.click(`cases-table-row-select-${theCase.id}`);
 
-        await cases.common.expectToasterToContain(`${theCaseTitle} has been updated`);
+        await cases.common.expectToasterToContain(`Case ${theCaseTitle} updated`);
         await testSubjects.click('toaster-content-case-view-link');
         await toasts.dismissAllWithChecks();
 

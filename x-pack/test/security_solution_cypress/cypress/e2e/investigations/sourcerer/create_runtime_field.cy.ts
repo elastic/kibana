@@ -8,7 +8,10 @@
 import { login } from '../../../tasks/login';
 import { visitWithTimeRange } from '../../../tasks/navigation';
 import { openTimelineUsingToggle } from '../../../tasks/security_main';
-import { openTimelineFieldsBrowser, populateTimeline } from '../../../tasks/timeline';
+import {
+  createRuntimeFieldFromTimelne as createRuntimeFieldFromTimeline,
+  populateTimeline,
+} from '../../../tasks/timeline';
 
 import { hostsUrl, ALERTS_URL } from '../../../urls/navigation';
 
@@ -20,14 +23,13 @@ import { waitForAlertsToPopulate } from '../../../tasks/create_new_rule';
 import { createField } from '../../../tasks/create_runtime_field';
 import { openAlertsFieldBrowser } from '../../../tasks/alerts';
 import { GET_DATA_GRID_HEADER } from '../../../screens/common/data_grid';
-import { GET_TIMELINE_HEADER } from '../../../screens/timeline';
 import { deleteRuntimeField } from '../../../tasks/api_calls/sourcerer';
+import { SAVE_FIELD_BUTTON } from '../../../screens/create_runtime_field';
 
 const alertRunTimeField = 'field.name.alert.page';
 const timelineRuntimeField = 'field.name.timeline';
 
-// FLAKY: https://github.com/elastic/kibana/issues/183104
-describe.skip('Create DataView runtime field', { tags: ['@ess', '@serverless'] }, () => {
+describe('Create DataView runtime field', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
     login();
     deleteRuntimeField('security-solution-default', alertRunTimeField);
@@ -48,9 +50,9 @@ describe.skip('Create DataView runtime field', { tags: ['@ess', '@serverless'] }
     visitWithTimeRange(hostsUrl('allHosts'));
     openTimelineUsingToggle();
     populateTimeline();
-    openTimelineFieldsBrowser();
-
-    createField(timelineRuntimeField);
-    cy.get(GET_TIMELINE_HEADER(timelineRuntimeField)).should('exist');
+    createRuntimeFieldFromTimeline(timelineRuntimeField);
+    // NOTE: the field creation dialog should be closed now
+    // meaning that the field creation has been successful
+    cy.get(SAVE_FIELD_BUTTON).should('not.exist');
   });
 });

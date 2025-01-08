@@ -1,0 +1,20 @@
+summary: Resolve missing reference errors
+description: >
+  Resolve missing reference errors for a visualization by ignoring the error.
+  NOTE: If a prior copy attempt resulted in resolvable errors, you must include a retry for each object you want to copy, including any that were returned in the successResults array.
+  In this example, we retried copying the dashboard and canvas accordingly.
+value:
+  objects:
+    - type: dashboard
+      id: my-dashboard
+  includeReferences: true
+  createNewCopies: false
+  retries:
+    marketing:
+      - type: visualization
+        id: my-vis
+        ignoreMissingReferences: true
+      - type: canvas
+        id: my-canvas
+      - type: dashboard
+        id: my-dashboard

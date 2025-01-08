@@ -14,7 +14,7 @@
       "tags": [],
       "label": "ServerlessPluginSetup",
       "description": [],
-      "path": "x-pack/plugins/serverless/public/types.ts",
+      "path": "x-pack/platform/plugins/shared/serverless/public/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -28,7 +28,7 @@
       "tags": [],
       "label": "ServerlessPluginStart",
       "description": [],
-      "path": "x-pack/plugins/serverless/public/types.ts",
+      "path": "x-pack/platform/plugins/shared/serverless/public/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -43,30 +43,30 @@
             "(breadcrumbs: ",
             {
               "pluginId": "@kbn/core-chrome-browser",
-              "scope": "common",
+              "scope": "public",
               "docId": "kibKbnCoreChromeBrowserPluginApi",
-              "section": "def-common.ChromeBreadcrumb",
+              "section": "def-public.ChromeBreadcrumb",
               "text": "ChromeBreadcrumb"
             },
             " | ",
             {
               "pluginId": "@kbn/core-chrome-browser",
-              "scope": "common",
+              "scope": "public",
               "docId": "kibKbnCoreChromeBrowserPluginApi",
-              "section": "def-common.ChromeBreadcrumb",
+              "section": "def-public.ChromeBreadcrumb",
               "text": "ChromeBreadcrumb"
             },
             "[], params?: Partial<",
             {
               "pluginId": "@kbn/core-chrome-browser",
-              "scope": "common",
+              "scope": "public",
               "docId": "kibKbnCoreChromeBrowserPluginApi",
-              "section": "def-common.ChromeSetProjectBreadcrumbsParams",
+              "section": "def-public.ChromeSetProjectBreadcrumbsParams",
               "text": "ChromeSetProjectBreadcrumbsParams"
             },
             "> | undefined) => void"
           ],
-          "path": "x-pack/plugins/serverless/public/types.ts",
+          "path": "x-pack/platform/plugins/shared/serverless/public/types.ts",
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -80,22 +80,22 @@
               "signature": [
                 {
                   "pluginId": "@kbn/core-chrome-browser",
-                  "scope": "common",
+                  "scope": "public",
                   "docId": "kibKbnCoreChromeBrowserPluginApi",
-                  "section": "def-common.ChromeBreadcrumb",
+                  "section": "def-public.ChromeBreadcrumb",
                   "text": "ChromeBreadcrumb"
                 },
                 " | ",
                 {
                   "pluginId": "@kbn/core-chrome-browser",
-                  "scope": "common",
+                  "scope": "public",
                   "docId": "kibKbnCoreChromeBrowserPluginApi",
-                  "section": "def-common.ChromeBreadcrumb",
+                  "section": "def-public.ChromeBreadcrumb",
                   "text": "ChromeBreadcrumb"
                 },
                 "[]"
               ],
-              "path": "x-pack/plugins/serverless/public/types.ts",
+              "path": "x-pack/platform/plugins/shared/serverless/public/types.ts",
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -111,14 +111,14 @@
                 "Partial<",
                 {
                   "pluginId": "@kbn/core-chrome-browser",
-                  "scope": "common",
+                  "scope": "public",
                   "docId": "kibKbnCoreChromeBrowserPluginApi",
-                  "section": "def-common.ChromeSetProjectBreadcrumbsParams",
+                  "section": "def-public.ChromeSetProjectBreadcrumbsParams",
                   "text": "ChromeSetProjectBreadcrumbsParams"
                 },
                 "> | undefined"
               ],
-              "path": "x-pack/plugins/serverless/public/types.ts",
+              "path": "x-pack/platform/plugins/shared/serverless/public/types.ts",
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": false
@@ -136,7 +136,7 @@
           "signature": [
             "(homeHref: string) => void"
           ],
-          "path": "x-pack/plugins/serverless/public/types.ts",
+          "path": "x-pack/platform/plugins/shared/serverless/public/types.ts",
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -150,7 +150,7 @@
               "signature": [
                 "string"
               ],
-              "path": "x-pack/plugins/serverless/public/types.ts",
+              "path": "x-pack/platform/plugins/shared/serverless/public/types.ts",
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -166,22 +166,30 @@
           "label": "initNavigation",
           "description": [],
           "signature": [
-            "(id: string, navigationTree$: ",
+            "(id: ",
+            {
+              "pluginId": "@kbn/core-chrome-browser",
+              "scope": "public",
+              "docId": "kibKbnCoreChromeBrowserPluginApi",
+              "section": "def-public.SolutionId",
+              "text": "SolutionId"
+            },
+            ", navigationTree$: ",
             "Observable",
             "<",
             {
               "pluginId": "@kbn/core-chrome-browser",
-              "scope": "common",
+              "scope": "public",
               "docId": "kibKbnCoreChromeBrowserPluginApi",
-              "section": "def-common.NavigationTreeDefinition",
+              "section": "def-public.NavigationTreeDefinition",
               "text": "NavigationTreeDefinition"
             },
             "<",
             {
               "pluginId": "@kbn/core-chrome-browser",
-              "scope": "common",
+              "scope": "public",
               "docId": "kibKbnCoreChromeBrowserPluginApi",
-              "section": "def-common.AppDeepLinkId",
+              "section": "def-public.AppDeepLinkId",
               "text": "AppDeepLinkId"
             },
             ", string, string>>, config?: { dataTestSubj?: string | undefined; panelContentProvider?: ",
@@ -194,21 +202,27 @@
             },
             " | undefined; } | undefined) => void"
           ],
-          "path": "x-pack/plugins/serverless/public/types.ts",
+          "path": "x-pack/platform/plugins/shared/serverless/public/types.ts",
           "deprecated": false,
           "trackAdoption": false,
           "children": [
             {
               "parentPluginId": "serverless",
               "id": "def-public.ServerlessPluginStart.initNavigation.$1",
-              "type": "string",
+              "type": "CompoundType",
               "tags": [],
               "label": "id",
               "description": [],
               "signature": [
-                "string"
+                {
+                  "pluginId": "@kbn/core-chrome-browser",
+                  "scope": "public",
+                  "docId": "kibKbnCoreChromeBrowserPluginApi",
+                  "section": "def-public.SolutionId",
+                  "text": "SolutionId"
+                }
               ],
-              "path": "x-pack/plugins/serverless/public/types.ts",
+              "path": "x-pack/platform/plugins/shared/serverless/public/types.ts",
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -225,22 +239,22 @@
                 "<",
                 {
                   "pluginId": "@kbn/core-chrome-browser",
-                  "scope": "common",
+                  "scope": "public",
                   "docId": "kibKbnCoreChromeBrowserPluginApi",
-                  "section": "def-common.NavigationTreeDefinition",
+                  "section": "def-public.NavigationTreeDefinition",
                   "text": "NavigationTreeDefinition"
                 },
                 "<",
                 {
                   "pluginId": "@kbn/core-chrome-browser",
-                  "scope": "common",
+                  "scope": "public",
                   "docId": "kibKbnCoreChromeBrowserPluginApi",
-                  "section": "def-common.AppDeepLinkId",
+                  "section": "def-public.AppDeepLinkId",
                   "text": "AppDeepLinkId"
                 },
                 ", string, string>>"
               ],
-              "path": "x-pack/plugins/serverless/public/types.ts",
+              "path": "x-pack/platform/plugins/shared/serverless/public/types.ts",
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -252,7 +266,7 @@
               "tags": [],
               "label": "config",
               "description": [],
-              "path": "x-pack/plugins/serverless/public/types.ts",
+              "path": "x-pack/platform/plugins/shared/serverless/public/types.ts",
               "deprecated": false,
               "trackAdoption": false,
               "children": [
@@ -266,7 +280,7 @@
                   "signature": [
                     "string | undefined"
                   ],
-                  "path": "x-pack/plugins/serverless/public/types.ts",
+                  "path": "x-pack/platform/plugins/shared/serverless/public/types.ts",
                   "deprecated": false,
                   "trackAdoption": false
                 },
@@ -287,7 +301,7 @@
                     },
                     " | undefined"
                   ],
-                  "path": "x-pack/plugins/serverless/public/types.ts",
+                  "path": "x-pack/platform/plugins/shared/serverless/public/types.ts",
                   "deprecated": false,
                   "trackAdoption": false
                 }
@@ -309,14 +323,14 @@
             "(navigation: ",
             {
               "pluginId": "@kbn/core-chrome-browser",
-              "scope": "common",
+              "scope": "public",
               "docId": "kibKbnCoreChromeBrowserPluginApi",
-              "section": "def-common.SideNavComponent",
+              "section": "def-public.SideNavComponent",
               "text": "SideNavComponent"
             },
             ") => void"
           ],
-          "path": "x-pack/plugins/serverless/public/types.ts",
+          "path": "x-pack/platform/plugins/shared/serverless/public/types.ts",
           "deprecated": true,
           "trackAdoption": false,
           "references": [],
@@ -331,13 +345,13 @@
               "signature": [
                 {
                   "pluginId": "@kbn/core-chrome-browser",
-                  "scope": "common",
+                  "scope": "public",
                   "docId": "kibKbnCoreChromeBrowserPluginApi",
-                  "section": "def-common.SideNavComponent",
+                  "section": "def-public.SideNavComponent",
                   "text": "SideNavComponent"
                 }
               ],
-              "path": "x-pack/plugins/serverless/public/types.ts",
+              "path": "x-pack/platform/plugins/shared/serverless/public/types.ts",
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -371,7 +385,7 @@
             },
             "> | undefined"
           ],
-          "path": "x-pack/plugins/serverless/public/types.ts",
+          "path": "x-pack/platform/plugins/shared/serverless/public/types.ts",
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -385,7 +399,7 @@
               "signature": [
                 "boolean | undefined"
               ],
-              "path": "x-pack/plugins/serverless/public/types.ts",
+              "path": "x-pack/platform/plugins/shared/serverless/public/types.ts",
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": false
@@ -408,7 +422,7 @@
                 },
                 "> | undefined"
               ],
-              "path": "x-pack/plugins/serverless/public/types.ts",
+              "path": "x-pack/platform/plugins/shared/serverless/public/types.ts",
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": false
@@ -435,7 +449,7 @@
       "tags": [],
       "label": "ServerlessServerSetup",
       "description": [],
-      "path": "x-pack/plugins/serverless/server/types.ts",
+      "path": "x-pack/platform/plugins/shared/serverless/server/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -449,7 +463,7 @@
           "signature": [
             "(keys: string[]) => void"
           ],
-          "path": "x-pack/plugins/serverless/server/types.ts",
+          "path": "x-pack/platform/plugins/shared/serverless/server/types.ts",
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -463,7 +477,7 @@
               "signature": [
                 "string[]"
               ],
-              "path": "x-pack/plugins/serverless/server/types.ts",
+              "path": "x-pack/platform/plugins/shared/serverless/server/types.ts",
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -482,7 +496,7 @@
       "tags": [],
       "label": "ServerlessServerStart",
       "description": [],
-      "path": "x-pack/plugins/serverless/server/types.ts",
+      "path": "x-pack/platform/plugins/shared/serverless/server/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -508,7 +522,7 @@
         "signature": [
           "\"/internal/serverless/switch_project\""
         ],
-        "path": "x-pack/plugins/serverless/common/index.ts",
+        "path": "x-pack/platform/plugins/shared/serverless/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -523,7 +537,7 @@
         "signature": [
           "\"serverless\""
         ],
-        "path": "x-pack/plugins/serverless/common/index.ts",
+        "path": "x-pack/platform/plugins/shared/serverless/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -538,7 +552,7 @@
         "signature": [
           "\"serverless\""
         ],
-        "path": "x-pack/plugins/serverless/common/index.ts",
+        "path": "x-pack/platform/plugins/shared/serverless/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

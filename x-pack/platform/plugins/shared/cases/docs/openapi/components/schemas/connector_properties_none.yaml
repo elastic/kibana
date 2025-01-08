@@ -1,0 +1,28 @@
+title: Create or update case request properties for no connector
+required:
+  - fields
+  - id
+  - name
+  - type
+description: Defines properties for connectors when type is `.none`.
+type: object
+properties:
+  fields:
+    description: An object containing the connector fields. To create a case without a connector, specify null. To update a case to remove the connector, specify null.
+    nullable: true
+    type: string
+    example: null
+  id:
+    description: The identifier for the connector. To create a case without a connector, use `none`. To update a case to remove the connector, specify `none`.
+    type: string
+    example: none
+  name:
+    description: The name of the connector. To create a case without a connector, use `none`. To update a case to remove the connector, specify `none`.
+    type: string
+    example: none
+  type: 
+    description: The type of connector. To create a case without a connector, use `.none`. To update a case to remove the connector, specify `.none`.
+    type: string
+    example: .none
+    enum:
+      - .none

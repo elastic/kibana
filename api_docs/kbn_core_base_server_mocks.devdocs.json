@@ -14,18 +14,10 @@
     "interfaces": [],
     "enums": [],
     "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
     "objects": [
       {
         "parentPluginId": "@kbn/core-base-server-mocks",
-        "id": "def-common.mockCoreContext",
+        "id": "def-server.mockCoreContext",
         "type": "Object",
         "tags": [],
         "label": "mockCoreContext",
@@ -36,7 +28,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-base-server-mocks",
-            "id": "def-common.mockCoreContext.create",
+            "id": "def-server.mockCoreContext.create",
             "type": "Function",
             "tags": [],
             "label": "create",
@@ -45,9 +37,9 @@
               "({ env, logger, configService, }?: { env?: ",
               {
                 "pluginId": "@kbn/config",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnConfigPluginApi",
-                "section": "def-common.Env",
+                "section": "def-server.Env",
                 "text": "Env"
               },
               " | undefined; logger?: jest.Mocked<",
@@ -79,7 +71,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-base-server-mocks",
-                "id": "def-common.mockCoreContext.create.$1",
+                "id": "def-server.mockCoreContext.create.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "__0",
@@ -88,9 +80,9 @@
                   "{ env?: ",
                   {
                     "pluginId": "@kbn/config",
-                    "scope": "common",
+                    "scope": "server",
                     "docId": "kibKbnConfigPluginApi",
-                    "section": "def-common.Env",
+                    "section": "def-server.Env",
                     "text": "Env"
                   },
                   " | undefined; logger?: jest.Mocked<",
@@ -115,5 +107,13 @@
         "initialIsOpen": false
       }
     ]
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
   }
 }

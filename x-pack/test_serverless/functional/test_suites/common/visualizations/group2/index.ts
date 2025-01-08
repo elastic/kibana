@@ -9,6 +9,8 @@ import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default ({ loadTestFile }: FtrProviderContext) => {
   describe('Visualizations - Group 2', function () {
+    this.tags(['esGate']);
+
     loadTestFile(require.resolve('./open_in_lens/agg_based'));
   });
 };

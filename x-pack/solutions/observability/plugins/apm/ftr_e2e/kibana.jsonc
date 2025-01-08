@@ -1,0 +1,8 @@
+{
+  "type": "test-helper",
+  "id": "@kbn/apm-ftr-e2e",
+  "owner": "@elastic/obs-ux-infra_services-team",
+  "group": "observability",
+  "visibility": "private",
+  "devOnly": true
+}

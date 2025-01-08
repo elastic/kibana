@@ -36,13 +36,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // after(async () => {
       //   await kibanaServer.uiSettings.unset('bfetch:disable');
       // });
+      const appId = 'searchExamples';
 
-      testSearchExample();
-    });
-
-    const appId = 'searchExamples';
-
-    function testSearchExample() {
       before(async function () {
         await PageObjects.common.navigateToApp(appId, { insertTimestamp: false });
         await comboBox.setCustom('dataViewSelector', 'logstash-*');
@@ -100,6 +95,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const text: string = await textEl.getVisibleText();
         expect(text).to.contain('Watch out!');
       });
-    }
+    });
   });
 }

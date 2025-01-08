@@ -27,7 +27,6 @@ spec:
       default_branch: main
       repository: elastic/kibana
       pipeline_file: .buildkite/pipelines/performance/daily.yml
-      skip_intermediate_builds: false
       provider_settings:
         trigger_mode: none
         build_branches: true
@@ -48,3 +47,5 @@ spec:
           cronline: 0 */3 * * * Europe/Berlin
           message: Single user daily test
           branch: main
+      tags:
+        - kibana

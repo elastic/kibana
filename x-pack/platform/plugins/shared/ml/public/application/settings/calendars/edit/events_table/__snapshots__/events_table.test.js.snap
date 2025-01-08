@@ -1,0 +1,185 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`EventsTable Renders events table with no search bar 1`] = `
+<Fragment>
+  <EuiSpacer
+    size="m"
+  />
+  <EuiInMemoryTable
+    columns={
+      Array [
+        Object {
+          "field": "description",
+          "name": "Description",
+          "scope": "row",
+          "sortable": true,
+          "truncateText": true,
+        },
+        Object {
+          "field": "start_time",
+          "name": <span>
+            Start
+          </span>,
+          "render": [Function],
+          "sortable": true,
+        },
+        Object {
+          "field": "end_time",
+          "name": <span>
+            End
+          </span>,
+          "render": [Function],
+          "sortable": true,
+        },
+        Object {
+          "field": "",
+          "name": "",
+          "render": [Function],
+        },
+      ]
+    }
+    data-test-subj="mlCalendarEventsTable"
+    itemId="event_id"
+    items={
+      Array [
+        Object {
+          "calendar_id": "test-calendar",
+          "description": "test description",
+          "end_time": 1486657800000,
+          "event_id": "test-event-one",
+          "start_time": 1486656600000,
+        },
+      ]
+    }
+    pagination={
+      Object {
+        "initialPageSize": 5,
+        "pageSizeOptions": Array [
+          5,
+          10,
+        ],
+      }
+    }
+    rowProps={[Function]}
+    searchFormat="eql"
+    sorting={
+      Object {
+        "sort": Object {
+          "direction": "asc",
+          "field": "start_time",
+        },
+      }
+    }
+    tableLayout="fixed"
+  />
+</Fragment>
+`;
+
+exports[`EventsTable Renders events table with search bar 1`] = `
+<Fragment>
+  <EuiSpacer
+    size="m"
+  />
+  <EuiInMemoryTable
+    columns={
+      Array [
+        Object {
+          "field": "description",
+          "name": "Description",
+          "scope": "row",
+          "sortable": true,
+          "truncateText": true,
+        },
+        Object {
+          "field": "start_time",
+          "name": <span>
+            Start
+          </span>,
+          "render": [Function],
+          "sortable": true,
+        },
+        Object {
+          "field": "end_time",
+          "name": <span>
+            End
+          </span>,
+          "render": [Function],
+          "sortable": true,
+        },
+        Object {
+          "field": "",
+          "name": "",
+          "render": [Function],
+        },
+      ]
+    }
+    data-test-subj="mlCalendarEventsTable"
+    itemId="event_id"
+    items={
+      Array [
+        Object {
+          "calendar_id": "test-calendar",
+          "description": "test description",
+          "end_time": 1486657800000,
+          "event_id": "test-event-one",
+          "start_time": 1486656600000,
+        },
+      ]
+    }
+    pagination={
+      Object {
+        "initialPageSize": 5,
+        "pageSizeOptions": Array [
+          5,
+          10,
+        ],
+      }
+    }
+    rowProps={[Function]}
+    search={
+      Object {
+        "box": Object {
+          "incremental": true,
+        },
+        "filters": Array [],
+        "toolsRight": Array [
+          <EuiButton
+            data-test-subj="mlCalendarNewEventButton"
+            iconType="plusInCircle"
+            isDisabled={false}
+            onClick={[MockFunction]}
+            size="s"
+          >
+            <Memo(MemoizedFormattedMessage)
+              defaultMessage="New event"
+              id="xpack.ml.calendarsEdit.eventsTable.newEventButtonLabel"
+            />
+          </EuiButton>,
+          <EuiButton
+            data-test-subj="mlCalendarImportEventsButton"
+            iconType="importAction"
+            isDisabled={false}
+            onClick={[MockFunction]}
+            size="s"
+          >
+            <Memo(MemoizedFormattedMessage)
+              defaultMessage="Import events"
+              id="xpack.ml.calendarsEdit.eventsTable.importEventsButtonLabel"
+            />
+          </EuiButton>,
+        ],
+      }
+    }
+    searchFormat="eql"
+    sorting={
+      Object {
+        "sort": Object {
+          "direction": "asc",
+          "field": "start_time",
+        },
+      }
+    }
+    tableLayout="fixed"
+  />
+</Fragment>
+`;

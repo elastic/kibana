@@ -196,7 +196,7 @@ export class DetectionsPageObject extends FtrService {
    */
   async openResponseConsoleFromAlertDetails(): Promise<void> {
     await this.testSubjects.existOrFail('eventDetails');
-    await this.testSubjects.click('take-action-dropdown-btn');
+    await this.testSubjects.click('securitySolutionFlyoutFooterDropdownButton');
     await this.testSubjects.clickWhenNotDisabled('endpointResponseActions-action-item');
     await this.testSubjects.existOrFail('consolePageOverlay');
   }

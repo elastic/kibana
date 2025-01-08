@@ -1,7 +1,0 @@
-{
-  "name": "@kbn/es-types",
-  "private": true,
-  "version": "1.0.0",
-  "author": "Kibana Core",
-  "license": "SSPL-1.0 OR Elastic License 2.0"
-}

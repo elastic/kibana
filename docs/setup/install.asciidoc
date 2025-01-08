@@ -2,9 +2,9 @@
 == Install {kib}
 
 [float]
-=== Hosted {kib}
+=== {kib} on Elastic Cloud
 
-If you are running our hosted Elasticsearch Service on Elastic Cloud, you access Kibana with a single click. (You can {ess-trial}[sign up for a free trial] and start exploring data in minutes.)
+If you are using Elastic Cloud, you access Kibana with a single click. (You can {ess-trial}[sign up for a free trial] and start exploring data in minutes.)
 
 [float]
 === Install {kib} yourself

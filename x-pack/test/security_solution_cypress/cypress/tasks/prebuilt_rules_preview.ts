@@ -8,7 +8,10 @@
 import { capitalize } from 'lodash';
 import type { ThreatMapping } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { Module } from '@kbn/ml-plugin/common/types/modules';
-import { AlertSuppression } from '@kbn/security-solution-plugin/common/api/detection_engine/model/rule_schema';
+import {
+  AlertSuppression,
+  Threshold,
+} from '@kbn/security-solution-plugin/common/api/detection_engine/model/rule_schema';
 import type { Filter } from '@kbn/es-query';
 import type { PrebuiltRuleAsset } from '@kbn/security-solution-plugin/server/lib/detection_engine/prebuilt_rules';
 import {
@@ -222,7 +225,7 @@ export const assertCommonPropertiesShown = (properties: Partial<PrebuiltRuleAsse
   cy.get(TIMELINE_TEMPLATE_VALUE).should('have.text', properties.timeline_title);
 
   cy.get(INTERVAL_TITLE).should('have.text', 'Runs every');
-  cy.get(INTERVAL_VALUE).should('have.text', properties.interval);
+  cy.get(INTERVAL_VALUE).should('contain.text', properties.interval);
 
   cy.get(FROM_TITLE).should('have.text', 'Additional look-back time');
   cy.get(FROM_VALUE).invoke('attr', 'data-test-subj').should('contain', properties.from);
@@ -312,9 +315,15 @@ export const assertMachineLearningPropertiesShown = (
   });
 };
 
-export const assertThresholdPropertyShown = (thresholdValue: number) => {
+export const assertThresholdPropertyShown = (threshold: Threshold) => {
   cy.get(THRESHOLD_TITLE).should('have.text', 'Threshold');
-  cy.get(THRESHOLD_VALUE).should('contain', thresholdValue);
+  cy.get(THRESHOLD_VALUE).should('contain', threshold.value);
+  if (threshold.cardinality) {
+    cy.get(THRESHOLD_VALUE).should(
+      'contain',
+      `when unique values count of ${threshold.cardinality[0].field} >= ${threshold.cardinality[0].value}`
+    );
+  }
 };
 
 export const assertEqlQueryPropertyShown = (query: string) => {

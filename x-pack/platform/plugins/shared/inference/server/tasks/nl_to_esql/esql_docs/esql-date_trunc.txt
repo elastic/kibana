@@ -1,0 +1,54 @@
+# DATE_TRUNC
+
+The DATE_TRUNC function rounds down a date to the nearest specified interval.
+
+## Syntax
+
+`DATE_TRUNC(interval, date)`
+
+### Parameters
+
+#### interval
+
+This is the interval to which the date will be rounded down. It is expressed using the timespan literal syntax.
+
+#### date
+
+This is the date expression that will be rounded down.
+
+## Important notes
+
+The *interval* parameter of DATE_TRUNC is a timespan literal, NOT a string.
+  - GOOD: `DATE_TRUNC(1 year, date)`
+  - BAD: `DATE_TRUNC("year", date)`
+
+When grouping data by time interval, it is recommended to use BUCKET instead of DATE_TRUNC.
+
+## Examples
+
+The following example rounds down the hire_date to the nearest year:
+
+```esql
+FROM employees
+| KEEP first_name, last_name, hire_date
+| EVAL year_hired = DATE_TRUNC(1 year, hire_date)
+```
+
+You can combine DATE_TRUNC with STATS ... BY to create date histograms. For example, the number of hires per year:
+
+```esql
+FROM employees
+| EVAL year = DATE_TRUNC(1 year, hire_date)
+| STATS hires = COUNT(emp_no) BY year
+| SORT year
+```
+
+Or, you can calculate an hourly error rate:
+
+```esql
+FROM sample_data
+| EVAL error = CASE(message LIKE "*error*", 1, 0)
+| EVAL hour = DATE_TRUNC(1 hour, @timestamp)
+| STATS error_rate = AVG(error) BY hour
+| SORT hour
+```

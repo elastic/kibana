@@ -6,16 +6,17 @@
  */
 
 import expect from '@kbn/expect';
-import { SuperTest } from 'supertest';
 import { CSV_QUOTE_VALUES_SETTING } from '@kbn/share-plugin/common/constants';
 import {
   ELASTIC_HTTP_VERSION_HEADER,
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
 import { FtrProviderContext } from '../../../ftr_provider_context';
+import { retryRequestIfConflicts } from './utils';
 
 export default function featureControlsTests({ getService }: FtrProviderContext) {
-  const supertest: SuperTest<any> = getService('supertestWithoutAuth');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
+  const log = getService('log');
   const security = getService('security');
   const spaces = getService('spaces');
   const deployment = getService('deployment');
@@ -55,11 +56,14 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
   async function saveAdvancedSetting(username: string, password: string, spaceId?: string) {
     const basePath = spaceId ? `/s/${spaceId}` : '';
 
-    return await supertest
-      .post(`${basePath}/internal/kibana/settings`)
-      .auth(username, password)
-      .set('kbn-xsrf', 'foo')
-      .send({ changes: { [CSV_QUOTE_VALUES_SETTING]: null } })
+    const sendRequest = async () =>
+      await supertestWithoutAuth
+        .post(`${basePath}/internal/kibana/settings`)
+        .auth(username, password)
+        .set('kbn-xsrf', 'foo')
+        .send({ changes: { [CSV_QUOTE_VALUES_SETTING]: null } });
+
+    return await retryRequestIfConflicts(log, 'saveAdvancedSetting', sendRequest)
       .then((response: any) => ({ error: undefined, response }))
       .catch((error: any) => ({ error, response: undefined }));
   }
@@ -67,13 +71,16 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
   async function saveTelemetrySetting(username: string, password: string, spaceId?: string) {
     const basePath = spaceId ? `/s/${spaceId}` : '';
 
-    return await supertest
-      .post(`${basePath}/internal/telemetry/optIn`)
-      .auth(username, password)
-      .set('kbn-xsrf', 'foo')
-      .set(ELASTIC_HTTP_VERSION_HEADER, '2')
-      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-      .send({ enabled: true })
+    const sendRequest = async () =>
+      await supertestWithoutAuth
+        .post(`${basePath}/internal/telemetry/optIn`)
+        .auth(username, password)
+        .set('kbn-xsrf', 'foo')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .send({ enabled: true });
+
+    return await retryRequestIfConflicts(log, 'saveTelemetrySetting', sendRequest)
       .then((response: any) => ({ error: undefined, response }))
       .catch((error: any) => ({ error, response: undefined }));
   }
@@ -104,7 +111,7 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
         expectResponse(regularSettingResult);
 
         const telemetryResult = await saveTelemetrySetting(username, password);
-        expectTelemetryResponse(telemetryResult, true);
+        await expectTelemetryResponse(telemetryResult, true);
       } finally {
         await security.role.delete(roleName);
         await security.user.delete(username);
@@ -136,7 +143,7 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
         expect403(regularSettingResult);
 
         const telemetryResult = await saveTelemetrySetting(username, password);
-        expectTelemetryResponse(telemetryResult, false);
+        await expectTelemetryResponse(telemetryResult, false);
       } finally {
         await security.role.delete(roleName);
         await security.user.delete(username);
@@ -210,7 +217,7 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
         expectResponse(regularSettingResult);
 
         const telemetryResult = await saveTelemetrySetting(username, password, space1Id);
-        expectTelemetryResponse(telemetryResult, true);
+        await expectTelemetryResponse(telemetryResult, true);
       });
 
       it(`user_1 can only save telemetry in space_2`, async () => {
@@ -218,7 +225,7 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
         expect403(regularSettingResult);
 
         const telemetryResult = await saveTelemetrySetting(username, password, space2Id);
-        expectTelemetryResponse(telemetryResult, true);
+        await expectTelemetryResponse(telemetryResult, true);
       });
 
       it(`user_1 can't save either settings or telemetry in space_3`, async () => {
@@ -226,7 +233,7 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
         expect403(regularSettingResult);
 
         const telemetryResult = await saveTelemetrySetting(username, password, space3Id);
-        expectTelemetryResponse(telemetryResult, false);
+        await expectTelemetryResponse(telemetryResult, false);
       });
     });
   });

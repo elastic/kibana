@@ -8,7 +8,8 @@
     ]
   },
   "include": [
-    "**/*.ts"
+    "**/*.ts",
+    "../../typings/**/*"
   ],
   "exclude": [
     "**/__fixtures__/**/*",
@@ -17,6 +18,7 @@
   "kbn_references": [
     "@kbn/config-schema",
     "@kbn/dev-utils",
+    "@kbn/core-ui-settings-common",
     "@kbn/optimizer-webpack-helpers",
     "@kbn/std",
     "@kbn/ui-shared-deps-npm",

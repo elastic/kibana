@@ -9,29 +9,43 @@ import { ToolingLog } from '@kbn/tooling-log';
 import getPort from 'get-port';
 import http, { type Server } from 'http';
 import { once, pull } from 'lodash';
+import OpenAI from 'openai';
+import { TITLE_CONVERSATION_FUNCTION_NAME } from '@kbn/observability-ai-assistant-plugin/server/service/client/operators/get_generated_title';
 import { createOpenAiChunk } from './create_openai_chunk';
 
 type Request = http.IncomingMessage;
 type Response = http.ServerResponse<http.IncomingMessage> & { req: http.IncomingMessage };
 
-type RequestHandler = (request: Request, response: Response, body: string) => void;
+type RequestHandler = (
+  request: Request,
+  response: Response,
+  body: OpenAI.Chat.ChatCompletionCreateParamsNonStreaming
+) => void;
 
 interface RequestInterceptor {
   name: string;
-  when: (body: string) => boolean;
+  when: (body: OpenAI.Chat.ChatCompletionCreateParamsNonStreaming) => boolean;
 }
 
 export interface LlmResponseSimulator {
-  body: string;
+  body: OpenAI.Chat.ChatCompletionCreateParamsNonStreaming;
   status: (code: number) => Promise<void>;
   next: (
     msg:
       | string
       | {
           content?: string;
-          function_call?: { name: string; arguments: string };
+          tool_calls?: Array<{
+            id: string;
+            index: string;
+            function?: {
+              name: string;
+              arguments: string;
+            };
+          }>;
         }
   ) => Promise<void>;
+  tokenCount: (msg: { completion: number; prompt: number; total: number }) => Promise<void>;
   error: (error: any) => Promise<void>;
   complete: () => Promise<void>;
   rawWrite: (chunk: string) => Promise<void>;
@@ -40,10 +54,13 @@ export interface LlmResponseSimulator {
 
 export class LlmProxy {
   server: Server;
+  interval: NodeJS.Timeout;
 
   interceptors: Array<RequestInterceptor & { handle: RequestHandler }> = [];
 
   constructor(private readonly port: number, private readonly log: ToolingLog) {
+    this.interval = setInterval(() => this.log.debug(`LLM proxy listening on port ${port}`), 1000);
+
     this.server = http
       .createServer()
       .on('request', async (request, response) => {
@@ -62,7 +79,9 @@ export class LlmProxy {
           }
         }
 
-        response.writeHead(500, 'No interceptors found to handle request: ' + request.url);
+        const errorMessage = `No interceptors found to handle request: ${request.method} ${request.url}`;
+        this.log.error(`${errorMessage}. Messages: ${JSON.stringify(body.messages, null, 2)}`);
+        response.writeHead(500, { errorMessage, messages: JSON.stringify(body.messages) });
         response.end();
       })
       .on('error', (error) => {
@@ -80,11 +99,34 @@ export class LlmProxy {
   }
 
   close() {
+    this.log.debug(`Closing LLM Proxy on port ${this.port}`);
+    clearInterval(this.interval);
     this.server.close();
   }
 
   waitForAllInterceptorsSettled() {
     return Promise.all(this.interceptors);
+  }
+
+  interceptConversation({
+    name = 'default_interceptor_conversation_name',
+    response,
+  }: {
+    name?: string;
+    response: string;
+  }) {
+    return this.intercept(name, (body) => !isFunctionTitleRequest(body), response);
+  }
+
+  interceptConversationTitle(title: string) {
+    return this.intercept('conversation_title', (body) => isFunctionTitleRequest(body), [
+      {
+        function_call: {
+          name: TITLE_CONVERSATION_FUNCTION_NAME,
+          arguments: JSON.stringify({ title }),
+        },
+      },
+    ]);
   }
 
   intercept<
@@ -124,6 +166,17 @@ export class LlmProxy {
                   Connection: 'keep-alive',
                 });
               }),
+              tokenCount: (msg) => {
+                const chunk = {
+                  object: 'chat.completion.chunk',
+                  usage: {
+                    completion_tokens: msg.completion,
+                    prompt_tokens: msg.prompt,
+                    total_tokens: msg.total,
+                  },
+                };
+                return write(`data: ${JSON.stringify(chunk)}\n\n`);
+              },
               next: (msg) => {
                 const chunk = createOpenAiChunk(msg);
                 return write(`data: ${JSON.stringify(chunk)}\n\n`);
@@ -167,6 +220,7 @@ export class LlmProxy {
         for (const chunk of parsedChunks) {
           await simulator.next(chunk);
         }
+        await simulator.tokenCount({ completion: 1, prompt: 1, total: 1 });
         await simulator.complete();
       },
     } as any;
@@ -175,11 +229,13 @@ export class LlmProxy {
 
 export async function createLlmProxy(log: ToolingLog) {
   const port = await getPort({ port: getPort.makeRange(9000, 9100) });
-
+  log.debug(`Starting LLM Proxy on port ${port}`);
   return new LlmProxy(port, log);
 }
 
-async function getRequestBody(request: http.IncomingMessage): Promise<string> {
+async function getRequestBody(
+  request: http.IncomingMessage
+): Promise<OpenAI.Chat.ChatCompletionCreateParamsNonStreaming> {
   return new Promise((resolve, reject) => {
     let data = '';
 
@@ -188,11 +244,17 @@ async function getRequestBody(request: http.IncomingMessage): Promise<string> {
     });
 
     request.on('close', () => {
-      resolve(data);
+      resolve(JSON.parse(data));
     });
 
     request.on('error', (error) => {
       reject(error);
     });
   });
+}
+
+export function isFunctionTitleRequest(body: OpenAI.Chat.ChatCompletionCreateParamsNonStreaming) {
+  return (
+    body.tools?.find((fn) => fn.function.name === TITLE_CONVERSATION_FUNCTION_NAME) !== undefined
+  );
 }

@@ -61,6 +61,7 @@ export default function ({ getService }: FtrProviderContext) {
         nextGenerationManagedBy: 'Index Lifecycle Management',
         storageSize: expect.any(String),
         storageSizeBytes: expect.any(Number),
+        indexMode: 'standard',
       });
     });
   });

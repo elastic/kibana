@@ -11,10 +11,10 @@ Save this query, and you can embed the search results in dashboards,
 use them as a foundation for building a visualization,
 and share them in a link or CVS form.
 
-Saved queries are different than <<save-open-search,saved searches>>,
+Saved queries are different than <<save-open-search,saved Discover sessions>>,
 which include the *Discover* configuration&mdash;selected columns in the document table, sort order, and
 {data-source}&mdash;in addition to the query.
-Saved searches are primarily used for adding search results to a dashboard.
+Discover sessions are primarily used for adding search results to a dashboard.
 
 [role="xpack"]
 ==== Read-only access

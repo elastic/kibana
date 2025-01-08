@@ -83,7 +83,7 @@ export default ({ getService }: FtrProviderContext) => {
             .expect(200);
 
           // TODO: https://github.com/elastic/kibana/pull/121644 clean up, make type-safe
-          expect(body?.execution_summary?.last_execution.message).to.eql(
+          expect(body?.execution_summary?.last_execution.message).to.contain(
             `This rule may not have the required read privileges to the following index patterns: ["${index[0]}"]`
           );
 

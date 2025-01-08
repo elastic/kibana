@@ -10,7 +10,7 @@ import moment from 'moment';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['visualize', 'lens', 'common', 'header']);
+  const { visualize, lens, common } = getPageObjects(['visualize', 'lens', 'common']);
   const elasticChart = getService('elasticChart');
   const testSubjects = getService('testSubjects');
   const comboBox = getService('comboBox');
@@ -23,92 +23,91 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('lens terms', () => {
     describe('lens multi terms suite', () => {
       it('should allow creation of lens xy chart with multi terms categories', async () => {
-        await PageObjects.visualize.navigateToNewVisualization();
-        await PageObjects.visualize.clickVisType('lens');
+        await visualize.navigateToNewVisualization();
+        await visualize.clickVisType('lens');
         await elasticChart.setNewChartUiDebugFlag(true);
-        await PageObjects.lens.goToTimeRange();
 
-        await PageObjects.lens.configureDimension({
+        await lens.configureDimension({
           dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
           operation: 'average',
           field: 'bytes',
         });
 
-        await PageObjects.lens.configureDimension({
+        await lens.configureDimension({
           dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
           operation: 'terms',
           field: 'geo.src',
           keepOpen: true,
         });
 
-        await PageObjects.lens.addTermToAgg('geo.dest');
+        await lens.addTermToAgg('geo.dest');
 
-        await PageObjects.lens.closeDimensionEditor();
+        await lens.closeDimensionEditor();
 
-        expect(await PageObjects.lens.getDimensionTriggerText('lnsXY_xDimensionPanel', 0)).to.eql(
+        expect(await lens.getDimensionTriggerText('lnsXY_xDimensionPanel', 0)).to.eql(
           'Top values of geo.src + 1 other'
         );
 
-        await PageObjects.lens.openDimensionEditor('lnsXY_xDimensionPanel');
+        await lens.openDimensionEditor('lnsXY_xDimensionPanel');
 
-        await PageObjects.lens.addTermToAgg('bytes');
+        await lens.addTermToAgg('bytes');
 
-        await PageObjects.lens.closeDimensionEditor();
+        await lens.closeDimensionEditor();
 
-        expect(await PageObjects.lens.getDimensionTriggerText('lnsXY_xDimensionPanel', 0)).to.eql(
+        expect(await lens.getDimensionTriggerText('lnsXY_xDimensionPanel', 0)).to.eql(
           'Top values of geo.src + 2 others'
         );
 
-        const data = await PageObjects.lens.getCurrentChartDebugState('xyVisChart');
+        const data = await lens.getCurrentChartDebugState('xyVisChart');
         expect(data!.bars![0].bars[0].x).to.eql('PE › US › 19,986');
       });
 
       it('should allow creation of lens xy chart with multi terms categories split', async () => {
-        await PageObjects.lens.removeDimension('lnsXY_xDimensionPanel');
+        await lens.removeDimension('lnsXY_xDimensionPanel');
 
-        await PageObjects.lens.configureDimension({
+        await lens.configureDimension({
           dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
           operation: 'date_histogram',
           field: '@timestamp',
         });
 
-        await PageObjects.lens.configureDimension({
+        await lens.configureDimension({
           dimension: 'lnsXY_splitDimensionPanel > lns-empty-dimension',
           operation: 'terms',
           field: 'geo.src',
           keepOpen: true,
         });
 
-        await PageObjects.lens.addTermToAgg('geo.dest');
-        await PageObjects.lens.addTermToAgg('bytes');
+        await lens.addTermToAgg('geo.dest');
+        await lens.addTermToAgg('bytes');
 
-        await PageObjects.lens.closeDimensionEditor();
+        await lens.closeDimensionEditor();
 
-        const data = await PageObjects.lens.getCurrentChartDebugState('xyVisChart');
+        const data = await lens.getCurrentChartDebugState('xyVisChart');
         expect(data?.bars?.[0]?.name).to.eql('PE › US › 19,986');
       });
 
       it('should not show existing defined fields for new term', async () => {
-        await PageObjects.lens.openDimensionEditor('lnsXY_splitDimensionPanel');
+        await lens.openDimensionEditor('lnsXY_splitDimensionPanel');
 
-        await PageObjects.lens.checkTermsAreNotAvailableToAgg(['bytes', 'geo.src', 'geo.dest']);
+        await lens.checkTermsAreNotAvailableToAgg(['bytes', 'geo.src', 'geo.dest']);
 
-        await PageObjects.lens.closeDimensionEditor();
+        await lens.closeDimensionEditor();
       });
     });
     describe('rank by', () => {
       describe('reset rank on metric change', () => {
         it('should reset the ranking when using decimals on percentile', async () => {
-          await PageObjects.visualize.navigateToNewVisualization();
-          await PageObjects.visualize.clickVisType('lens');
+          await visualize.navigateToNewVisualization();
+          await visualize.clickVisType('lens');
 
-          await PageObjects.lens.configureDimension({
+          await lens.configureDimension({
             dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
             operation: 'terms',
             field: 'geo.src',
           });
 
-          await PageObjects.lens.configureDimension({
+          await lens.configureDimension({
             dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
             operation: 'percentile',
             field: 'bytes',
@@ -118,7 +117,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await retry.try(async () => {
             const value = '60.5';
             // Can not use testSubjects because data-test-subj is placed range input and number input
-            const percentileInput = await PageObjects.lens.getNumericFieldReady(
+            const percentileInput = await lens.getNumericFieldReady(
               'lns-indexPattern-percentile-input'
             );
             await percentileInput.clearValueWithKeyboard();
@@ -136,11 +135,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           // note: this has also the side effect to close the dimension editor
           await testSubjects.click('toastCloseButton');
 
-          await PageObjects.lens.openDimensionEditor(
-            'lnsXY_yDimensionPanel > lns-dimensionTrigger'
-          );
+          await lens.openDimensionEditor('lnsXY_yDimensionPanel > lns-dimensionTrigger');
 
-          await PageObjects.lens.selectOperation('percentile_rank');
+          await lens.selectOperation('percentile_rank');
 
           await retry.try(async () => {
             const value = '600.5';
@@ -163,18 +160,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
       describe('sorting by custom metric', () => {
         it('should allow sort by custom metric', async () => {
-          await PageObjects.visualize.navigateToNewVisualization();
-          await PageObjects.visualize.clickVisType('lens');
+          await visualize.navigateToNewVisualization();
+          await visualize.clickVisType('lens');
           await elasticChart.setNewChartUiDebugFlag(true);
-          await PageObjects.lens.goToTimeRange();
 
-          await PageObjects.lens.configureDimension({
+          await lens.configureDimension({
             dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
             operation: 'average',
             field: 'bytes',
           });
 
-          await PageObjects.lens.configureDimension({
+          await lens.configureDimension({
             dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
             operation: 'terms',
             field: 'geo.src',
@@ -196,7 +192,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
           await retry.try(async () => {
             // Can not use testSubjects because data-test-subj is placed range input and number input
-            const percentileInput = await PageObjects.lens.getNumericFieldReady(
+            const percentileInput = await lens.getNumericFieldReady(
               'lns-indexPattern-percentile-input'
             );
             await percentileInput.type('60');
@@ -207,14 +203,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             }
           });
 
-          await PageObjects.lens.waitForVisualization('xyVisChart');
-          await PageObjects.lens.closeDimensionEditor();
+          await lens.waitForVisualization('xyVisChart');
+          await lens.closeDimensionEditor();
 
-          expect(await PageObjects.lens.getDimensionTriggerText('lnsXY_xDimensionPanel', 0)).to.eql(
+          expect(await lens.getDimensionTriggerText('lnsXY_xDimensionPanel', 0)).to.eql(
             'Top 5 values of geo.src'
           );
 
-          const data = await PageObjects.lens.getCurrentChartDebugState('xyVisChart');
+          const data = await lens.getCurrentChartDebugState('xyVisChart');
           expect(data!.bars![0].bars[0].x).to.eql('BN');
           expect(data!.bars![0].bars[0].y).to.eql(19265);
         });
@@ -281,88 +277,87 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
       });
       it('should work with empty string values as buckets', async () => {
-        await PageObjects.visualize.navigateToNewVisualization();
-        await PageObjects.visualize.clickVisType('lens');
+        await visualize.navigateToNewVisualization();
+        await visualize.clickVisType('lens');
         await elasticChart.setNewChartUiDebugFlag(true);
-        await PageObjects.lens.goToTimeRange();
-        await PageObjects.lens.switchDataPanelIndexPattern(esIndexPrefix);
+        await lens.switchDataPanelIndexPattern(esIndexPrefix);
 
-        await PageObjects.lens.configureDimension({
+        await lens.configureDimension({
           dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
           operation: 'count',
         });
 
-        await PageObjects.lens.configureDimension({
+        await lens.configureDimension({
           dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
           operation: 'terms',
           field: 'a',
         });
 
-        await PageObjects.lens.waitForVisualization('xyVisChart');
-        const data = await PageObjects.lens.getCurrentChartDebugState('xyVisChart');
+        await lens.waitForVisualization('xyVisChart');
+        const data = await lens.getCurrentChartDebugState('xyVisChart');
         const seriesBar = data!.bars![0].bars;
         expect(seriesBar[0].x).to.eql('(empty)');
         expect(seriesBar[seriesBar.length - 1].x).to.eql('Other');
       });
 
       it('should work with empty string as breakdown', async () => {
-        await PageObjects.lens.removeDimension('lnsXY_xDimensionPanel');
+        await lens.removeDimension('lnsXY_xDimensionPanel');
 
-        await PageObjects.lens.configureDimension({
+        await lens.configureDimension({
           dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
           operation: 'date_histogram',
           field: '@timestamp',
         });
 
-        await PageObjects.lens.configureDimension({
+        await lens.configureDimension({
           dimension: 'lnsXY_splitDimensionPanel > lns-empty-dimension',
           operation: 'terms',
           field: 'a',
         });
 
-        await PageObjects.lens.waitForVisualization('xyVisChart');
-        const data = await PageObjects.lens.getCurrentChartDebugState('xyVisChart');
+        await lens.waitForVisualization('xyVisChart');
+        const data = await lens.getCurrentChartDebugState('xyVisChart');
         expect(data!.bars![0].name).to.eql('(empty)');
         expect(data!.bars![data!.bars!.length - 1].name).to.eql('Other');
       });
 
       it('should work with nested empty string values', async () => {
-        await PageObjects.lens.switchToVisualization('lnsDatatable');
+        await lens.switchToVisualization('lnsDatatable');
 
-        await PageObjects.lens.removeLayer();
+        await lens.removeLayer();
 
-        await PageObjects.lens.configureDimension({
+        await lens.configureDimension({
           dimension: 'lnsDatatable_rows > lns-empty-dimension',
           operation: 'terms',
           field: 'a',
           keepOpen: true,
         });
-        await PageObjects.lens.setTermsNumberOfValues(4);
-        await PageObjects.lens.closeDimensionEditor();
+        await lens.setTermsNumberOfValues(4);
+        await lens.closeDimensionEditor();
 
-        await PageObjects.lens.configureDimension({
+        await lens.configureDimension({
           dimension: 'lnsDatatable_rows > lns-empty-dimension',
           operation: 'terms',
           field: 'b',
           keepOpen: true,
         });
-        await PageObjects.lens.setTermsNumberOfValues(1);
-        await PageObjects.lens.closeDimensionEditor();
+        await lens.setTermsNumberOfValues(1);
+        await lens.closeDimensionEditor();
 
-        await PageObjects.lens.configureDimension({
+        await lens.configureDimension({
           dimension: 'lnsDatatable_metrics > lns-empty-dimension',
           operation: 'count',
         });
-        await PageObjects.lens.waitForVisualization();
-        await PageObjects.common.sleep(20000);
+        await lens.waitForVisualization();
+        await common.sleep(20000);
         // a empty value
-        expect(await PageObjects.lens.getDatatableCellText(1, 0)).to.eql('(empty)');
+        expect(await lens.getDatatableCellText(1, 0)).to.eql('(empty)');
         // b Other value
-        expect(await PageObjects.lens.getDatatableCellText(1, 1)).to.eql('Other');
+        expect(await lens.getDatatableCellText(1, 1)).to.eql('Other');
         // a Other value
-        expect(await PageObjects.lens.getDatatableCellText(5, 0)).to.eql('Other');
+        expect(await lens.getDatatableCellText(5, 0)).to.eql('Other');
         // b empty value
-        expect(await PageObjects.lens.getDatatableCellText(5, 1)).to.eql('(empty)');
+        expect(await lens.getDatatableCellText(5, 1)).to.eql('(empty)');
       });
     });
   });

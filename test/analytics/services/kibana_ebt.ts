@@ -1,13 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import '@kbn/analytics-ftr-helpers-plugin/public/types';
 import type { EBTHelpersContract } from '@kbn/analytics-ftr-helpers-plugin/common/types';
+import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
 import type { FtrProviderContext } from '../../functional/ftr_provider_context';
 
 export function KibanaEBTServerProvider({ getService }: FtrProviderContext): EBTHelpersContract {
@@ -17,6 +19,7 @@ export function KibanaEBTServerProvider({ getService }: FtrProviderContext): EBT
     await supertest
       .post(`/internal/analytics_ftr_helpers/opt_in`)
       .set('kbn-xsrf', 'xxx')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .query({ consent: optIn })
       .expect(200);
   };
@@ -25,7 +28,7 @@ export function KibanaEBTServerProvider({ getService }: FtrProviderContext): EBT
     setOptIn,
     getEvents: async (
       takeNumberOfEvents,
-      { eventTypes = [], withTimeoutMs, fromTimestamp } = {}
+      { eventTypes = [], withTimeoutMs, fromTimestamp, filters } = {}
     ) => {
       await setOptIn(true);
       const resp = await supertest
@@ -35,18 +38,26 @@ export function KibanaEBTServerProvider({ getService }: FtrProviderContext): EBT
           eventTypes: JSON.stringify(eventTypes),
           withTimeoutMs,
           fromTimestamp,
+          filters: JSON.stringify(filters),
         })
         .set('kbn-xsrf', 'xxx')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .expect(200);
 
       return resp.body;
     },
-    getEventCount: async ({ eventTypes = [], withTimeoutMs, fromTimestamp }) => {
+    getEventCount: async ({ eventTypes = [], withTimeoutMs, fromTimestamp, filters }) => {
       await setOptIn(true);
       const resp = await supertest
         .get(`/internal/analytics_ftr_helpers/count_events`)
-        .query({ eventTypes: JSON.stringify(eventTypes), withTimeoutMs, fromTimestamp })
+        .query({
+          eventTypes: JSON.stringify(eventTypes),
+          withTimeoutMs,
+          fromTimestamp,
+          filters: JSON.stringify(filters),
+        })
         .set('kbn-xsrf', 'xxx')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .expect(200);
 
       return resp.body.count;

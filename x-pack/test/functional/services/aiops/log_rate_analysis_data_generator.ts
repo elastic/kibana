@@ -27,7 +27,7 @@ const LOG_RATE_ANALYSYS_DATA_GENERATOR = {
   LARGE_ARRAYS: 'large_arrays',
 } as const;
 export type LogRateAnalysisDataGenerator =
-  typeof LOG_RATE_ANALYSYS_DATA_GENERATOR[keyof typeof LOG_RATE_ANALYSYS_DATA_GENERATOR];
+  (typeof LOG_RATE_ANALYSYS_DATA_GENERATOR)[keyof typeof LOG_RATE_ANALYSYS_DATA_GENERATOR];
 
 export interface GeneratedDoc {
   user: string;

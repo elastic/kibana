@@ -8,19 +8,18 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-const logsPages = ['logs/stream', 'logs/anomalies', 'logs/log-categories', 'logs/settings'];
+const logsPages = ['logs/anomalies', 'logs/log-categories'];
 
 const metricsPages = [
   'metrics/inventory',
   'metrics/hosts',
   'metrics/explorer',
-  'metrics/settings',
   'metrics/detail/hosts/host_name',
 ];
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
-  const find = getService('find');
   const pageObjects = getPageObjects(['common', 'infraHome']);
+  const find = getService('find');
   const testSubjects = getService('testSubjects');
 
   describe('Infra Not Found page', function () {

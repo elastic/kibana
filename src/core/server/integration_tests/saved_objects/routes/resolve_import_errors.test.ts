@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 jest.mock('uuid');
@@ -11,6 +12,7 @@ jest.mock('uuid');
 import supertest from 'supertest';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import type { ICoreUsageStatsClient } from '@kbn/core-usage-data-base-server-internal';
+import type { Logger, LogLevelId } from '@kbn/logging';
 import {
   coreUsageStatsClientMock,
   coreUsageDataServiceMock,
@@ -60,6 +62,17 @@ describe(`POST ${URL}`, () => {
     references: [],
     managed: false,
   };
+  const mockLogger: jest.Mocked<Logger> = {
+    debug: jest.fn(),
+    info: jest.fn(),
+    error: jest.fn(),
+    warn: jest.fn(),
+    trace: jest.fn(),
+    fatal: jest.fn(),
+    log: jest.fn(),
+    isLevelEnabled: jest.fn((level: LogLevelId) => true),
+    get: jest.fn(() => mockLogger),
+  };
 
   beforeEach(async () => {
     ({ server, httpSetup, handlerContext } = await setupServer());
@@ -81,6 +94,7 @@ describe(`POST ${URL}`, () => {
       savedObjectsClient,
       typeRegistry: handlerContext.savedObjects.typeRegistry,
       importSizeLimit: 10000,
+      logger: mockLogger,
     });
 
     handlerContext.savedObjects.getImporter = jest

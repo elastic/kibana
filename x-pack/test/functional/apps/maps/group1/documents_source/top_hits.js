@@ -10,7 +10,7 @@ import expect from '@kbn/expect';
 const VECTOR_SOURCE_ID = 'z52lq';
 
 export default function ({ getPageObjects, getService }) {
-  const PageObjects = getPageObjects(['maps', 'common']);
+  const { maps } = getPageObjects(['maps']);
   const inspector = getService('inspector');
   const find = getService('find');
   const security = getService('security');
@@ -22,7 +22,7 @@ export default function ({ getPageObjects, getService }) {
         await security.testUser.setRoles(['global_maps_all', 'test_logstash_reader'], {
           skipBrowserRefresh: true,
         });
-        await PageObjects.maps.loadSavedMap('document example top hits');
+        await maps.loadSavedMap('document example top hits');
       });
 
       after(async () => {
@@ -33,18 +33,18 @@ export default function ({ getPageObjects, getService }) {
         await inspector.open();
         await inspector.openInspectorRequestsView();
         const requestStats = await inspector.getTableData();
-        const hits = PageObjects.maps.getInspectorStatRowHit(requestStats, 'Hits');
+        const hits = maps.getInspectorStatRowHit(requestStats, 'Hits');
         expect(hits).to.equal('0'); // aggregation requests do not return any documents
       });
 
       it('should display top hits per entity', async () => {
-        const mapboxStyle = await PageObjects.maps.getMapboxStyle();
+        const mapboxStyle = await maps.getMapboxStyle();
         expect(mapboxStyle.sources[VECTOR_SOURCE_ID].data.features.length).to.equal(10);
       });
 
       describe('configuration', () => {
         before(async () => {
-          await PageObjects.maps.openLayerPanel('logstash');
+          await maps.openLayerPanel('logstash');
 
           await retry.try(async () => {
             // Can not use testSubjects because data-test-subj is placed range input and number input
@@ -61,31 +61,31 @@ export default function ({ getPageObjects, getService }) {
             }
           });
 
-          await PageObjects.maps.waitForLayersToLoad();
+          await maps.waitForLayersToLoad();
         });
 
         after(async () => {
-          await PageObjects.maps.closeLayerPanel();
+          await maps.closeLayerPanel();
         });
 
         it('should update top hits when configation changes', async () => {
-          const mapboxStyle = await PageObjects.maps.getMapboxStyle();
+          const mapboxStyle = await maps.getMapboxStyle();
           expect(mapboxStyle.sources[VECTOR_SOURCE_ID].data.features.length).to.equal(15);
         });
       });
 
       describe('query', () => {
         before(async () => {
-          await PageObjects.maps.setAndSubmitQuery('machine.os.raw : "win 8"');
+          await maps.setAndSubmitQuery('machine.os.raw : "win 8"');
         });
 
         after(async () => {
-          await PageObjects.maps.setAndSubmitQuery('');
+          await maps.setAndSubmitQuery('');
         });
 
         it('should apply query to top hits request', async () => {
-          await PageObjects.maps.setAndSubmitQuery('machine.os.raw : "win 8"');
-          const mapboxStyle = await PageObjects.maps.getMapboxStyle();
+          await maps.setAndSubmitQuery('machine.os.raw : "win 8"');
+          const mapboxStyle = await maps.getMapboxStyle();
           expect(mapboxStyle.sources[VECTOR_SOURCE_ID].data.features.length).to.equal(2);
         });
       });
@@ -93,11 +93,11 @@ export default function ({ getPageObjects, getService }) {
 
     describe('split on scripted field', () => {
       before(async () => {
-        await PageObjects.maps.loadSavedMap('document example top hits split with scripted field');
+        await maps.loadSavedMap('document example top hits split with scripted field');
       });
 
       it('should display top hits per entity', async () => {
-        const mapboxStyle = await PageObjects.maps.getMapboxStyle();
+        const mapboxStyle = await maps.getMapboxStyle();
         expect(mapboxStyle.sources[VECTOR_SOURCE_ID].data.features.length).to.equal(24);
       });
     });

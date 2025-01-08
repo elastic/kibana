@@ -186,7 +186,7 @@ locations for an RPM-based system:
 | logs
   | Logs files location
   | /var/log/kibana
-  | path.logs
+  | <<logging-configuration, Logging configuration>>
 
 | plugins
   | Plugin files location. Each plugin will be contained in a subdirectory.

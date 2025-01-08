@@ -46,9 +46,11 @@ export default ({ getService }: FtrProviderContext) => {
       beforeEach(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/rule_registry/alerts');
       });
+
       afterEach(async () => {
         await esArchiver.unload('x-pack/test/functional/es_archives/rule_registry/alerts');
       });
+
       it(`${superUser.username} should be able to update the APM alert in ${SPACE1}`, async () => {
         const apmIndex = await getAPMIndexName(superUser);
         await supertestWithoutAuth

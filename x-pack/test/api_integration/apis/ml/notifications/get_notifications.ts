@@ -18,9 +18,11 @@ export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertestWithoutAuth');
   const esArchiver = getService('esArchiver');
   const ml = getService('ml');
+  let testStart: number;
 
   describe('GET notifications', () => {
     before(async () => {
+      testStart = Date.now();
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/bm_classification');
       await ml.api.initSavedObjects();
       await ml.testResources.setKibanaTimeZoneToUTC();
@@ -45,7 +47,7 @@ export default ({ getService }: FtrProviderContext) => {
     it('return all notifications ', async () => {
       const { body, status } = await supertest
         .get(`/internal/ml/notifications`)
-        .query({ earliest: 'now-1d', latest: 'now' })
+        .query({ earliest: testStart, latest: 'now' })
         .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
         .set(getCommonRequestHeader('1'));
       ml.api.assertResponseStatusCode(200, status, body);
@@ -56,7 +58,7 @@ export default ({ getService }: FtrProviderContext) => {
     it('return notifications based on the query string', async () => {
       const { body, status } = await supertest
         .get(`/internal/ml/notifications`)
-        .query({ earliest: 'now-1d', latest: 'now', queryString: 'job_type:anomaly_detector' })
+        .query({ earliest: testStart, latest: 'now', queryString: 'job_type:anomaly_detector' })
         .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
         .set(getCommonRequestHeader('1'));
       ml.api.assertResponseStatusCode(200, status, body);
@@ -72,7 +74,7 @@ export default ({ getService }: FtrProviderContext) => {
     it('supports sorting asc sorting by field', async () => {
       const { body, status } = await supertest
         .get(`/internal/ml/notifications`)
-        .query({ earliest: 'now-1d', latest: 'now', sortField: 'job_id', sortDirection: 'asc' })
+        .query({ earliest: testStart, latest: 'now', sortField: 'job_id', sortDirection: 'asc' })
         .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
         .set(getCommonRequestHeader('1'));
       ml.api.assertResponseStatusCode(200, status, body);
@@ -83,7 +85,7 @@ export default ({ getService }: FtrProviderContext) => {
     it('supports sorting desc sorting by field', async () => {
       const { body, status } = await supertest
         .get(`/internal/ml/notifications`)
-        .query({ earliest: 'now-1h', latest: 'now', sortField: 'job_id', sortDirection: 'desc' })
+        .query({ earliest: testStart, latest: 'now', sortField: 'job_id', sortDirection: 'desc' })
         .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
         .set(getCommonRequestHeader('1'));
       ml.api.assertResponseStatusCode(200, status, body);

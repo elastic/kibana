@@ -8,7 +8,7 @@ import expect from '@kbn/expect';
 import { sortBy } from 'lodash';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
-import { setupFleetAndAgents } from '../agents/services';
+import { getInstallationInfo } from './helper';
 const PACKAGE_NAME = 'input_package_upgrade';
 const START_VERSION = '1.0.0';
 
@@ -18,6 +18,8 @@ const expectIdArraysEqual = (arr1: any[], arr2: any[]) => {
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const supertest = getService('supertest');
+  const fleetAndAgents = getService('fleetAndAgents');
+
   const uninstallPackage = async (name: string, version: string) => {
     await supertest.delete(`/api/fleet/epm/packages/${name}/${version}`).set('kbn-xsrf', 'xxxx');
   };
@@ -28,11 +30,6 @@ export default function (providerContext: FtrProviderContext) {
       .set('kbn-xsrf', 'xxxx')
       .send({ force: true })
       .expect(200);
-  };
-
-  const getInstallationSavedObject = async (name: string, version: string) => {
-    const res = await supertest.get(`/api/fleet/epm/packages/${name}/${version}`).expect(200);
-    return res.body.item.savedObject.attributes;
   };
 
   const getPackage = async (name: string, version: string) => {
@@ -102,19 +99,19 @@ export default function (providerContext: FtrProviderContext) {
       .send({ agentPolicyId });
   };
 
-  describe('input package policy rollback', async function () {
+  describe('input package policy rollback', function () {
     skipIfNoDockerRegistry(providerContext);
 
     let agentPolicyId: string;
     before(async () => {
       const agentPolicy = await createAgentPolicy();
       agentPolicyId = agentPolicy.id;
+      await fleetAndAgents.setup();
     });
 
     after(async () => {
       await deleteAgentPolicy(agentPolicyId);
     });
-    setupFleetAndAgents(providerContext);
 
     it('should rollback package install on package policy create failure', async () => {
       const res = await createPackagePolicyWithDataset(agentPolicyId, 'test*', 400);
@@ -130,7 +127,7 @@ export default function (providerContext: FtrProviderContext) {
       await installPackage(PACKAGE_NAME, START_VERSION);
       await createPackagePolicyWithDataset(agentPolicyId, 'test*', 400);
 
-      const installation = await getInstallationSavedObject(PACKAGE_NAME, START_VERSION);
+      const installation = await getInstallationInfo(supertest, PACKAGE_NAME, START_VERSION);
       expectIdArraysEqual(installation.installed_es, []);
 
       await uninstallPackage(PACKAGE_NAME, START_VERSION);

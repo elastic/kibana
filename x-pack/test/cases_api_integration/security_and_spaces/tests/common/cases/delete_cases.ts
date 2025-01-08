@@ -79,6 +79,9 @@ export default ({ getService }: FtrProviderContext): void => {
 
   describe('delete_cases', () => {
     afterEach(async () => {
+      await deleteAllFiles({
+        supertest,
+      });
       await deleteAllCaseItems(es);
     });
 

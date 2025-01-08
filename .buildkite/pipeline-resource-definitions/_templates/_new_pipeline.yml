@@ -44,7 +44,6 @@ spec:
       repository: elastic/kibana
       # Point to a pipeline implementation, detailing the pipeline steps to run
       pipeline_file: .buildkite/pipelines/your-pipeline-name.yml
-      skip_intermediate_builds: false
       provider_settings:
         prefix_pull_request_fork_branch_names: false
         skip_pull_request_builds_for_existing_commits: true
@@ -70,3 +69,5 @@ spec:
           # Optionally, set schedule-specific env-vars here
           env:
             SCHEDULED: 'true'
+      tags:
+        - kibana

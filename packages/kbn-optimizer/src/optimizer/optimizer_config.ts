@@ -1,24 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import Path from 'path';
 import Os from 'os';
 import { getPackages, getPluginPackagesFilter, type PluginSelector } from '@kbn/repo-packages';
+import { ThemeTag, ThemeTags, parseThemeTags } from '@kbn/core-ui-settings-common';
 
-import {
-  Bundle,
-  WorkerConfig,
-  CacheableWorkerConfig,
-  ThemeTag,
-  ThemeTags,
-  parseThemeTags,
-  omit,
-} from '../common';
+import { Bundle, WorkerConfig, CacheableWorkerConfig, omit } from '../common';
 
 import { toKibanaPlatformPlugin, KibanaPlatformPlugin } from './kibana_platform_plugins';
 import { getPluginBundles } from './get_plugin_bundles';
@@ -125,6 +119,7 @@ export interface ParsedOptions {
   includeCoreBundle: boolean;
   themeTags: ThemeTags;
   pluginSelector: PluginSelector;
+  reactVersion: string;
 }
 
 export class OptimizerConfig {
@@ -139,6 +134,7 @@ export class OptimizerConfig {
     const includeCoreBundle = !!options.includeCoreBundle;
     const filters = options.filter || [];
     const focus = options.focus || [];
+    const reactVersion = process.env.REACT_18 ? '18' : '17';
 
     const repoRoot = options.repoRoot;
     if (!Path.isAbsolute(repoRoot)) {
@@ -183,6 +179,7 @@ export class OptimizerConfig {
       outputRoot,
       maxWorkerCount,
       profileWebpack,
+      reactVersion,
       cache,
       filters,
       focus,
@@ -240,7 +237,8 @@ export class OptimizerConfig {
       options.maxWorkerCount,
       options.dist,
       options.profileWebpack,
-      options.themeTags
+      options.themeTags,
+      options.reactVersion
     );
   }
 
@@ -255,7 +253,8 @@ export class OptimizerConfig {
     public readonly maxWorkerCount: number,
     public readonly dist: boolean,
     public readonly profileWebpack: boolean,
-    public readonly themeTags: ThemeTags
+    public readonly themeTags: ThemeTags,
+    public readonly reactVersion: string
   ) {}
 
   getWorkerConfig(optimizerCacheKey: unknown): WorkerConfig {
@@ -268,6 +267,7 @@ export class OptimizerConfig {
       optimizerCacheKey,
       themeTags: this.themeTags,
       browserslistEnv: this.dist ? 'production' : process.env.BROWSERSLIST_ENV || 'dev',
+      reactVersion: this.reactVersion,
     };
   }
 

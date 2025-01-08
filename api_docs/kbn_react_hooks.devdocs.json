@@ -36,7 +36,7 @@
             "text": "UseBooleanResult"
           }
         ],
-        "path": "packages/kbn-react-hooks/src/use_boolean/use_boolean.ts",
+        "path": "src/platform/packages/shared/kbn-react-hooks/src/use_boolean/use_boolean.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -50,12 +50,30 @@
             "signature": [
               "boolean"
             ],
-            "path": "packages/kbn-react-hooks/src/use_boolean/use_boolean.ts",
+            "path": "src/platform/packages/shared/kbn-react-hooks/src/use_boolean/use_boolean.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
           }
         ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/react-hooks",
+        "id": "def-common.useErrorTextStyle",
+        "type": "Function",
+        "tags": [],
+        "label": "useErrorTextStyle",
+        "description": [],
+        "signature": [
+          "() => ",
+          "SerializedStyles"
+        ],
+        "path": "src/platform/packages/shared/kbn-react-hooks/src/use_error_text_style/use_error_text_style.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
         "returnComment": [],
         "initialIsOpen": false
       }
@@ -68,7 +86,7 @@
         "tags": [],
         "label": "UseBooleanHandlers",
         "description": [],
-        "path": "packages/kbn-react-hooks/src/use_boolean/use_boolean.ts",
+        "path": "src/platform/packages/shared/kbn-react-hooks/src/use_boolean/use_boolean.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -82,7 +100,7 @@
             "signature": [
               "() => void"
             ],
-            "path": "packages/kbn-react-hooks/src/use_boolean/use_boolean.ts",
+            "path": "src/platform/packages/shared/kbn-react-hooks/src/use_boolean/use_boolean.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -98,7 +116,7 @@
             "signature": [
               "() => void"
             ],
-            "path": "packages/kbn-react-hooks/src/use_boolean/use_boolean.ts",
+            "path": "src/platform/packages/shared/kbn-react-hooks/src/use_boolean/use_boolean.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -114,7 +132,7 @@
             "signature": [
               "(nextValue?: any) => void"
             ],
-            "path": "packages/kbn-react-hooks/src/use_boolean/use_boolean.ts",
+            "path": "src/platform/packages/shared/kbn-react-hooks/src/use_boolean/use_boolean.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -159,7 +177,7 @@
           },
           "]"
         ],
-        "path": "packages/kbn-react-hooks/src/use_boolean/use_boolean.ts",
+        "path": "src/platform/packages/shared/kbn-react-hooks/src/use_boolean/use_boolean.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

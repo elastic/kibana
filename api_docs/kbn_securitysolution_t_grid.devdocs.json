@@ -31,7 +31,7 @@
           "DropResult",
           ") => boolean"
         ],
-        "path": "packages/kbn-securitysolution-t-grid/src/utils/drag_and_drop/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-t-grid/src/utils/drag_and_drop/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -45,7 +45,7 @@
             "signature": [
               "DropResult"
             ],
-            "path": "packages/kbn-securitysolution-t-grid/src/utils/drag_and_drop/index.ts",
+            "path": "x-pack/solutions/security/packages/kbn-securitysolution-t-grid/src/utils/drag_and_drop/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -66,7 +66,7 @@
           "DropResult",
           ") => boolean"
         ],
-        "path": "packages/kbn-securitysolution-t-grid/src/utils/drag_and_drop/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-t-grid/src/utils/drag_and_drop/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -80,7 +80,7 @@
             "signature": [
               "DropResult"
             ],
-            "path": "packages/kbn-securitysolution-t-grid/src/utils/drag_and_drop/index.ts",
+            "path": "x-pack/solutions/security/packages/kbn-securitysolution-t-grid/src/utils/drag_and_drop/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -101,7 +101,7 @@
           "DropResult",
           ") => boolean"
         ],
-        "path": "packages/kbn-securitysolution-t-grid/src/utils/drag_and_drop/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-t-grid/src/utils/drag_and_drop/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -115,7 +115,7 @@
             "signature": [
               "DropResult"
             ],
-            "path": "packages/kbn-securitysolution-t-grid/src/utils/drag_and_drop/index.ts",
+            "path": "x-pack/solutions/security/packages/kbn-securitysolution-t-grid/src/utils/drag_and_drop/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -136,7 +136,7 @@
           "DropResult",
           " | { draggableId: string; }) => boolean"
         ],
-        "path": "packages/kbn-securitysolution-t-grid/src/utils/drag_and_drop/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-t-grid/src/utils/drag_and_drop/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -151,7 +151,7 @@
               "DropResult",
               " | { draggableId: string; }"
             ],
-            "path": "packages/kbn-securitysolution-t-grid/src/utils/drag_and_drop/index.ts",
+            "path": "x-pack/solutions/security/packages/kbn-securitysolution-t-grid/src/utils/drag_and_drop/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -172,7 +172,7 @@
           "DropResult",
           " | { draggableId: string; }) => boolean"
         ],
-        "path": "packages/kbn-securitysolution-t-grid/src/utils/drag_and_drop/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-t-grid/src/utils/drag_and_drop/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -187,7 +187,7 @@
               "DropResult",
               " | { draggableId: string; }"
             ],
-            "path": "packages/kbn-securitysolution-t-grid/src/utils/drag_and_drop/index.ts",
+            "path": "x-pack/solutions/security/packages/kbn-securitysolution-t-grid/src/utils/drag_and_drop/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -206,7 +206,7 @@
         "signature": [
           "(path: string) => string"
         ],
-        "path": "packages/kbn-securitysolution-t-grid/src/utils/drag_and_drop/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-t-grid/src/utils/drag_and_drop/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -220,7 +220,7 @@
             "signature": [
               "string"
             ],
-            "path": "packages/kbn-securitysolution-t-grid/src/utils/drag_and_drop/index.ts",
+            "path": "x-pack/solutions/security/packages/kbn-securitysolution-t-grid/src/utils/drag_and_drop/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -239,7 +239,7 @@
         "signature": [
           "(path: string) => string"
         ],
-        "path": "packages/kbn-securitysolution-t-grid/src/utils/drag_and_drop/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-t-grid/src/utils/drag_and_drop/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -253,7 +253,7 @@
             "signature": [
               "string"
             ],
-            "path": "packages/kbn-securitysolution-t-grid/src/utils/drag_and_drop/index.ts",
+            "path": "x-pack/solutions/security/packages/kbn-securitysolution-t-grid/src/utils/drag_and_drop/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -272,7 +272,7 @@
         "signature": [
           "(path: string) => string"
         ],
-        "path": "packages/kbn-securitysolution-t-grid/src/utils/drag_and_drop/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-t-grid/src/utils/drag_and_drop/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -286,7 +286,7 @@
             "signature": [
               "string"
             ],
-            "path": "packages/kbn-securitysolution-t-grid/src/utils/drag_and_drop/index.ts",
+            "path": "x-pack/solutions/security/packages/kbn-securitysolution-t-grid/src/utils/drag_and_drop/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -307,7 +307,7 @@
           "DropResult",
           ") => boolean"
         ],
-        "path": "packages/kbn-securitysolution-t-grid/src/utils/drag_and_drop/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-t-grid/src/utils/drag_and_drop/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -321,7 +321,7 @@
             "signature": [
               "DropResult"
             ],
-            "path": "packages/kbn-securitysolution-t-grid/src/utils/drag_and_drop/index.ts",
+            "path": "x-pack/solutions/security/packages/kbn-securitysolution-t-grid/src/utils/drag_and_drop/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -340,7 +340,7 @@
         "signature": [
           "({ contextId, fieldId, }: { contextId: string; fieldId: string; }) => string"
         ],
-        "path": "packages/kbn-securitysolution-t-grid/src/utils/drag_and_drop/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-t-grid/src/utils/drag_and_drop/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -351,7 +351,7 @@
             "tags": [],
             "label": "{\n  contextId,\n  fieldId,\n}",
             "description": [],
-            "path": "packages/kbn-securitysolution-t-grid/src/utils/drag_and_drop/index.ts",
+            "path": "x-pack/solutions/security/packages/kbn-securitysolution-t-grid/src/utils/drag_and_drop/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -362,7 +362,7 @@
                 "tags": [],
                 "label": "contextId",
                 "description": [],
-                "path": "packages/kbn-securitysolution-t-grid/src/utils/drag_and_drop/index.ts",
+                "path": "x-pack/solutions/security/packages/kbn-securitysolution-t-grid/src/utils/drag_and_drop/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -373,7 +373,7 @@
                 "tags": [],
                 "label": "fieldId",
                 "description": [],
-                "path": "packages/kbn-securitysolution-t-grid/src/utils/drag_and_drop/index.ts",
+                "path": "x-pack/solutions/security/packages/kbn-securitysolution-t-grid/src/utils/drag_and_drop/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -393,7 +393,7 @@
         "signature": [
           "(dataProviderId: string) => string"
         ],
-        "path": "packages/kbn-securitysolution-t-grid/src/utils/drag_and_drop/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-t-grid/src/utils/drag_and_drop/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -407,7 +407,7 @@
             "signature": [
               "string"
             ],
-            "path": "packages/kbn-securitysolution-t-grid/src/utils/drag_and_drop/index.ts",
+            "path": "x-pack/solutions/security/packages/kbn-securitysolution-t-grid/src/utils/drag_and_drop/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -426,7 +426,7 @@
         "signature": [
           "(visualizationPlaceholderId: string) => string"
         ],
-        "path": "packages/kbn-securitysolution-t-grid/src/utils/drag_and_drop/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-t-grid/src/utils/drag_and_drop/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -440,7 +440,7 @@
             "signature": [
               "string"
             ],
-            "path": "packages/kbn-securitysolution-t-grid/src/utils/drag_and_drop/index.ts",
+            "path": "x-pack/solutions/security/packages/kbn-securitysolution-t-grid/src/utils/drag_and_drop/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -461,7 +461,7 @@
           "DropResult",
           ") => string"
         ],
-        "path": "packages/kbn-securitysolution-t-grid/src/utils/drag_and_drop/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-t-grid/src/utils/drag_and_drop/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -475,7 +475,7 @@
             "signature": [
               "DropResult"
             ],
-            "path": "packages/kbn-securitysolution-t-grid/src/utils/drag_and_drop/index.ts",
+            "path": "x-pack/solutions/security/packages/kbn-securitysolution-t-grid/src/utils/drag_and_drop/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -496,7 +496,7 @@
           "DropResult",
           ") => string"
         ],
-        "path": "packages/kbn-securitysolution-t-grid/src/utils/drag_and_drop/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-t-grid/src/utils/drag_and_drop/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -510,7 +510,7 @@
             "signature": [
               "DropResult"
             ],
-            "path": "packages/kbn-securitysolution-t-grid/src/utils/drag_and_drop/index.ts",
+            "path": "x-pack/solutions/security/packages/kbn-securitysolution-t-grid/src/utils/drag_and_drop/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -529,7 +529,7 @@
         "signature": [
           "({ dataProviderId, groupIndex, timelineId, }: { dataProviderId: string; groupIndex: number; timelineId: string; }) => string"
         ],
-        "path": "packages/kbn-securitysolution-t-grid/src/utils/drag_and_drop/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-t-grid/src/utils/drag_and_drop/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -540,7 +540,7 @@
             "tags": [],
             "label": "{\n  dataProviderId,\n  groupIndex,\n  timelineId,\n}",
             "description": [],
-            "path": "packages/kbn-securitysolution-t-grid/src/utils/drag_and_drop/index.ts",
+            "path": "x-pack/solutions/security/packages/kbn-securitysolution-t-grid/src/utils/drag_and_drop/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -551,7 +551,7 @@
                 "tags": [],
                 "label": "dataProviderId",
                 "description": [],
-                "path": "packages/kbn-securitysolution-t-grid/src/utils/drag_and_drop/index.ts",
+                "path": "x-pack/solutions/security/packages/kbn-securitysolution-t-grid/src/utils/drag_and_drop/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -562,7 +562,7 @@
                 "tags": [],
                 "label": "groupIndex",
                 "description": [],
-                "path": "packages/kbn-securitysolution-t-grid/src/utils/drag_and_drop/index.ts",
+                "path": "x-pack/solutions/security/packages/kbn-securitysolution-t-grid/src/utils/drag_and_drop/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -573,7 +573,7 @@
                 "tags": [],
                 "label": "timelineId",
                 "description": [],
-                "path": "packages/kbn-securitysolution-t-grid/src/utils/drag_and_drop/index.ts",
+                "path": "x-pack/solutions/security/packages/kbn-securitysolution-t-grid/src/utils/drag_and_drop/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -593,7 +593,7 @@
         "signature": [
           "({ groupIndex, timelineId, }: { groupIndex: number; timelineId: string; }) => string"
         ],
-        "path": "packages/kbn-securitysolution-t-grid/src/utils/drag_and_drop/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-t-grid/src/utils/drag_and_drop/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -604,7 +604,7 @@
             "tags": [],
             "label": "{\n  groupIndex,\n  timelineId,\n}",
             "description": [],
-            "path": "packages/kbn-securitysolution-t-grid/src/utils/drag_and_drop/index.ts",
+            "path": "x-pack/solutions/security/packages/kbn-securitysolution-t-grid/src/utils/drag_and_drop/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -615,7 +615,7 @@
                 "tags": [],
                 "label": "groupIndex",
                 "description": [],
-                "path": "packages/kbn-securitysolution-t-grid/src/utils/drag_and_drop/index.ts",
+                "path": "x-pack/solutions/security/packages/kbn-securitysolution-t-grid/src/utils/drag_and_drop/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -626,7 +626,7 @@
                 "tags": [],
                 "label": "timelineId",
                 "description": [],
-                "path": "packages/kbn-securitysolution-t-grid/src/utils/drag_and_drop/index.ts",
+                "path": "x-pack/solutions/security/packages/kbn-securitysolution-t-grid/src/utils/drag_and_drop/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -653,7 +653,7 @@
             "text": "AppError"
           }
         ],
-        "path": "packages/kbn-securitysolution-t-grid/src/utils/api/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-t-grid/src/utils/api/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -667,7 +667,7 @@
             "signature": [
               "unknown"
             ],
-            "path": "packages/kbn-securitysolution-t-grid/src/utils/api/index.ts",
+            "path": "x-pack/solutions/security/packages/kbn-securitysolution-t-grid/src/utils/api/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -693,7 +693,7 @@
             "text": "KibanaError"
           }
         ],
-        "path": "packages/kbn-securitysolution-t-grid/src/utils/api/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-t-grid/src/utils/api/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -707,7 +707,7 @@
             "signature": [
               "unknown"
             ],
-            "path": "packages/kbn-securitysolution-t-grid/src/utils/api/index.ts",
+            "path": "x-pack/solutions/security/packages/kbn-securitysolution-t-grid/src/utils/api/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -726,7 +726,7 @@
         "signature": [
           "(error: unknown) => boolean"
         ],
-        "path": "packages/kbn-securitysolution-t-grid/src/utils/api/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-t-grid/src/utils/api/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -740,7 +740,7 @@
             "signature": [
               "unknown"
             ],
-            "path": "packages/kbn-securitysolution-t-grid/src/utils/api/index.ts",
+            "path": "x-pack/solutions/security/packages/kbn-securitysolution-t-grid/src/utils/api/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -766,7 +766,7 @@
             "text": "SecurityAppError"
           }
         ],
-        "path": "packages/kbn-securitysolution-t-grid/src/utils/api/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-t-grid/src/utils/api/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -780,7 +780,7 @@
             "signature": [
               "unknown"
             ],
-            "path": "packages/kbn-securitysolution-t-grid/src/utils/api/index.ts",
+            "path": "x-pack/solutions/security/packages/kbn-securitysolution-t-grid/src/utils/api/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -801,7 +801,7 @@
           "DropResult",
           ") => boolean"
         ],
-        "path": "packages/kbn-securitysolution-t-grid/src/utils/drag_and_drop/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-t-grid/src/utils/drag_and_drop/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -815,7 +815,7 @@
             "signature": [
               "DropResult"
             ],
-            "path": "packages/kbn-securitysolution-t-grid/src/utils/drag_and_drop/index.ts",
+            "path": "x-pack/solutions/security/packages/kbn-securitysolution-t-grid/src/utils/drag_and_drop/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -836,7 +836,7 @@
           "DropResult",
           ") => boolean"
         ],
-        "path": "packages/kbn-securitysolution-t-grid/src/utils/drag_and_drop/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-t-grid/src/utils/drag_and_drop/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -850,7 +850,7 @@
             "signature": [
               "DropResult"
             ],
-            "path": "packages/kbn-securitysolution-t-grid/src/utils/drag_and_drop/index.ts",
+            "path": "x-pack/solutions/security/packages/kbn-securitysolution-t-grid/src/utils/drag_and_drop/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -871,7 +871,7 @@
           "DropResult",
           ") => boolean"
         ],
-        "path": "packages/kbn-securitysolution-t-grid/src/utils/drag_and_drop/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-t-grid/src/utils/drag_and_drop/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -885,7 +885,7 @@
             "signature": [
               "DropResult"
             ],
-            "path": "packages/kbn-securitysolution-t-grid/src/utils/drag_and_drop/index.ts",
+            "path": "x-pack/solutions/security/packages/kbn-securitysolution-t-grid/src/utils/drag_and_drop/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -906,7 +906,7 @@
           "DropResult",
           ") => boolean"
         ],
-        "path": "packages/kbn-securitysolution-t-grid/src/utils/drag_and_drop/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-t-grid/src/utils/drag_and_drop/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -920,7 +920,7 @@
             "signature": [
               "DropResult"
             ],
-            "path": "packages/kbn-securitysolution-t-grid/src/utils/drag_and_drop/index.ts",
+            "path": "x-pack/solutions/security/packages/kbn-securitysolution-t-grid/src/utils/drag_and_drop/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -939,7 +939,7 @@
         "signature": [
           "(path: string) => string"
         ],
-        "path": "packages/kbn-securitysolution-t-grid/src/utils/drag_and_drop/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-t-grid/src/utils/drag_and_drop/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -953,7 +953,7 @@
             "signature": [
               "string"
             ],
-            "path": "packages/kbn-securitysolution-t-grid/src/utils/drag_and_drop/index.ts",
+            "path": "x-pack/solutions/security/packages/kbn-securitysolution-t-grid/src/utils/drag_and_drop/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -974,7 +974,7 @@
           "DropResult",
           ") => boolean"
         ],
-        "path": "packages/kbn-securitysolution-t-grid/src/utils/drag_and_drop/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-t-grid/src/utils/drag_and_drop/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -988,7 +988,7 @@
             "signature": [
               "DropResult"
             ],
-            "path": "packages/kbn-securitysolution-t-grid/src/utils/drag_and_drop/index.ts",
+            "path": "x-pack/solutions/security/packages/kbn-securitysolution-t-grid/src/utils/drag_and_drop/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1016,7 +1016,7 @@
           },
           " extends Error"
         ],
-        "path": "packages/kbn-securitysolution-t-grid/src/utils/api/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-t-grid/src/utils/api/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1030,7 +1030,7 @@
             "signature": [
               "{ message: string; }"
             ],
-            "path": "packages/kbn-securitysolution-t-grid/src/utils/api/index.ts",
+            "path": "x-pack/solutions/security/packages/kbn-securitysolution-t-grid/src/utils/api/index.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1061,7 +1061,7 @@
             "text": "AppError"
           }
         ],
-        "path": "packages/kbn-securitysolution-t-grid/src/utils/api/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-t-grid/src/utils/api/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1075,7 +1075,7 @@
             "signature": [
               "{ message: string; statusCode: number; }"
             ],
-            "path": "packages/kbn-securitysolution-t-grid/src/utils/api/index.ts",
+            "path": "x-pack/solutions/security/packages/kbn-securitysolution-t-grid/src/utils/api/index.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1106,7 +1106,7 @@
             "text": "AppError"
           }
         ],
-        "path": "packages/kbn-securitysolution-t-grid/src/utils/api/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-t-grid/src/utils/api/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1120,7 +1120,7 @@
             "signature": [
               "{ message: string; status_code: number; }"
             ],
-            "path": "packages/kbn-securitysolution-t-grid/src/utils/api/index.ts",
+            "path": "x-pack/solutions/security/packages/kbn-securitysolution-t-grid/src/utils/api/index.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1142,7 +1142,7 @@
         "signature": [
           "\"drag-type-field\""
         ],
-        "path": "packages/kbn-securitysolution-t-grid/src/utils/drag_and_drop/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-t-grid/src/utils/drag_and_drop/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1157,7 +1157,7 @@
         "signature": [
           "\"draggable-keyboard-wrapper\""
         ],
-        "path": "packages/kbn-securitysolution-t-grid/src/constants/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-t-grid/src/constants/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1169,7 +1169,7 @@
         "tags": [],
         "label": "draggableContentPrefix",
         "description": [],
-        "path": "packages/kbn-securitysolution-t-grid/src/utils/drag_and_drop/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-t-grid/src/utils/drag_and_drop/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1181,7 +1181,7 @@
         "tags": [],
         "label": "draggableFieldPrefix",
         "description": [],
-        "path": "packages/kbn-securitysolution-t-grid/src/utils/drag_and_drop/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-t-grid/src/utils/drag_and_drop/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1196,7 +1196,7 @@
         "signature": [
           "\"draggableId\""
         ],
-        "path": "packages/kbn-securitysolution-t-grid/src/utils/drag_and_drop/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-t-grid/src/utils/drag_and_drop/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1208,7 +1208,7 @@
         "tags": [],
         "label": "draggableTimelineProvidersPrefix",
         "description": [],
-        "path": "packages/kbn-securitysolution-t-grid/src/utils/drag_and_drop/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-t-grid/src/utils/drag_and_drop/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1220,7 +1220,7 @@
         "tags": [],
         "label": "droppableContentPrefix",
         "description": [],
-        "path": "packages/kbn-securitysolution-t-grid/src/utils/drag_and_drop/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-t-grid/src/utils/drag_and_drop/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1232,7 +1232,7 @@
         "tags": [],
         "label": "droppableFieldPrefix",
         "description": [],
-        "path": "packages/kbn-securitysolution-t-grid/src/utils/drag_and_drop/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-t-grid/src/utils/drag_and_drop/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1247,7 +1247,7 @@
         "signature": [
           "\"droppableId\""
         ],
-        "path": "packages/kbn-securitysolution-t-grid/src/utils/drag_and_drop/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-t-grid/src/utils/drag_and_drop/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1259,7 +1259,7 @@
         "tags": [],
         "label": "droppableTimelineColumnsPrefix",
         "description": [],
-        "path": "packages/kbn-securitysolution-t-grid/src/utils/drag_and_drop/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-t-grid/src/utils/drag_and_drop/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1271,7 +1271,7 @@
         "tags": [],
         "label": "droppableTimelineFlyoutBottomBarPrefix",
         "description": [],
-        "path": "packages/kbn-securitysolution-t-grid/src/utils/drag_and_drop/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-t-grid/src/utils/drag_and_drop/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1283,7 +1283,7 @@
         "tags": [],
         "label": "droppableTimelineProvidersPrefix",
         "description": [],
-        "path": "packages/kbn-securitysolution-t-grid/src/utils/drag_and_drop/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-t-grid/src/utils/drag_and_drop/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1298,7 +1298,7 @@
         "signature": [
           "\"empty-providers-group\""
         ],
-        "path": "packages/kbn-securitysolution-t-grid/src/constants/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-t-grid/src/constants/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1313,7 +1313,7 @@
         "signature": [
           "{ category: string; field: string; isObjectArray: boolean; originalValue: string[]; values: string[]; }[]"
         ],
-        "path": "packages/kbn-securitysolution-t-grid/src/mock/mock_event_details.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-t-grid/src/mock/mock_event_details.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1328,7 +1328,7 @@
         "signature": [
           "\"highlighted-drop-target\""
         ],
-        "path": "packages/kbn-securitysolution-t-grid/src/constants/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-t-grid/src/constants/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1343,7 +1343,7 @@
         "signature": [
           "\"hover-actions-always-show\""
         ],
-        "path": "packages/kbn-securitysolution-t-grid/src/constants/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-t-grid/src/constants/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1360,7 +1360,7 @@
         "signature": [
           "\"is-dragging\""
         ],
-        "path": "packages/kbn-securitysolution-t-grid/src/constants/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-t-grid/src/constants/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1377,7 +1377,7 @@
         "signature": [
           "\"is-timeline-field-dragging\""
         ],
-        "path": "packages/kbn-securitysolution-t-grid/src/utils/drag_and_drop/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-t-grid/src/utils/drag_and_drop/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1394,7 +1394,7 @@
         "signature": [
           "20"
         ],
-        "path": "packages/kbn-securitysolution-t-grid/src/constants/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-t-grid/src/constants/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1409,7 +1409,7 @@
         "signature": [
           "\"note-content\""
         ],
-        "path": "packages/kbn-securitysolution-t-grid/src/constants/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-t-grid/src/constants/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1424,7 +1424,7 @@
         "signature": [
           "\"notes-container\""
         ],
-        "path": "packages/kbn-securitysolution-t-grid/src/constants/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-t-grid/src/constants/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1439,7 +1439,7 @@
         "signature": [
           "\"row-renderer\""
         ],
-        "path": "packages/kbn-securitysolution-t-grid/src/constants/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-t-grid/src/constants/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1453,7 +1453,7 @@
         "tags": [],
         "label": "eventHit",
         "description": [],
-        "path": "packages/kbn-securitysolution-t-grid/src/mock/mock_event_details.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-t-grid/src/mock/mock_event_details.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1464,7 +1464,7 @@
             "tags": [],
             "label": "_index",
             "description": [],
-            "path": "packages/kbn-securitysolution-t-grid/src/mock/mock_event_details.ts",
+            "path": "x-pack/solutions/security/packages/kbn-securitysolution-t-grid/src/mock/mock_event_details.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1475,7 +1475,7 @@
             "tags": [],
             "label": "_id",
             "description": [],
-            "path": "packages/kbn-securitysolution-t-grid/src/mock/mock_event_details.ts",
+            "path": "x-pack/solutions/security/packages/kbn-securitysolution-t-grid/src/mock/mock_event_details.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1486,7 +1486,7 @@
             "tags": [],
             "label": "_score",
             "description": [],
-            "path": "packages/kbn-securitysolution-t-grid/src/mock/mock_event_details.ts",
+            "path": "x-pack/solutions/security/packages/kbn-securitysolution-t-grid/src/mock/mock_event_details.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1497,7 +1497,7 @@
             "tags": [],
             "label": "_type",
             "description": [],
-            "path": "packages/kbn-securitysolution-t-grid/src/mock/mock_event_details.ts",
+            "path": "x-pack/solutions/security/packages/kbn-securitysolution-t-grid/src/mock/mock_event_details.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1508,7 +1508,7 @@
             "tags": [],
             "label": "fields",
             "description": [],
-            "path": "packages/kbn-securitysolution-t-grid/src/mock/mock_event_details.ts",
+            "path": "x-pack/solutions/security/packages/kbn-securitysolution-t-grid/src/mock/mock_event_details.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1522,7 +1522,7 @@
                 "signature": [
                   "string[]"
                 ],
-                "path": "packages/kbn-securitysolution-t-grid/src/mock/mock_event_details.ts",
+                "path": "x-pack/solutions/security/packages/kbn-securitysolution-t-grid/src/mock/mock_event_details.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1536,7 +1536,7 @@
                 "signature": [
                   "number[]"
                 ],
-                "path": "packages/kbn-securitysolution-t-grid/src/mock/mock_event_details.ts",
+                "path": "x-pack/solutions/security/packages/kbn-securitysolution-t-grid/src/mock/mock_event_details.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1550,7 +1550,7 @@
                 "signature": [
                   "string[]"
                 ],
-                "path": "packages/kbn-securitysolution-t-grid/src/mock/mock_event_details.ts",
+                "path": "x-pack/solutions/security/packages/kbn-securitysolution-t-grid/src/mock/mock_event_details.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1564,7 +1564,7 @@
                 "signature": [
                   "string[]"
                 ],
-                "path": "packages/kbn-securitysolution-t-grid/src/mock/mock_event_details.ts",
+                "path": "x-pack/solutions/security/packages/kbn-securitysolution-t-grid/src/mock/mock_event_details.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1578,7 +1578,7 @@
                 "signature": [
                   "string[]"
                 ],
-                "path": "packages/kbn-securitysolution-t-grid/src/mock/mock_event_details.ts",
+                "path": "x-pack/solutions/security/packages/kbn-securitysolution-t-grid/src/mock/mock_event_details.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1592,7 +1592,7 @@
                 "signature": [
                   "number[]"
                 ],
-                "path": "packages/kbn-securitysolution-t-grid/src/mock/mock_event_details.ts",
+                "path": "x-pack/solutions/security/packages/kbn-securitysolution-t-grid/src/mock/mock_event_details.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1606,7 +1606,7 @@
                 "signature": [
                   "string[]"
                 ],
-                "path": "packages/kbn-securitysolution-t-grid/src/mock/mock_event_details.ts",
+                "path": "x-pack/solutions/security/packages/kbn-securitysolution-t-grid/src/mock/mock_event_details.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1620,7 +1620,7 @@
                 "signature": [
                   "string[]"
                 ],
-                "path": "packages/kbn-securitysolution-t-grid/src/mock/mock_event_details.ts",
+                "path": "x-pack/solutions/security/packages/kbn-securitysolution-t-grid/src/mock/mock_event_details.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1634,7 +1634,7 @@
                 "signature": [
                   "string[]"
                 ],
-                "path": "packages/kbn-securitysolution-t-grid/src/mock/mock_event_details.ts",
+                "path": "x-pack/solutions/security/packages/kbn-securitysolution-t-grid/src/mock/mock_event_details.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1648,7 +1648,7 @@
                 "signature": [
                   "string[]"
                 ],
-                "path": "packages/kbn-securitysolution-t-grid/src/mock/mock_event_details.ts",
+                "path": "x-pack/solutions/security/packages/kbn-securitysolution-t-grid/src/mock/mock_event_details.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1662,7 +1662,7 @@
                 "signature": [
                   "string[]"
                 ],
-                "path": "packages/kbn-securitysolution-t-grid/src/mock/mock_event_details.ts",
+                "path": "x-pack/solutions/security/packages/kbn-securitysolution-t-grid/src/mock/mock_event_details.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1676,7 +1676,7 @@
                 "signature": [
                   "string[]"
                 ],
-                "path": "packages/kbn-securitysolution-t-grid/src/mock/mock_event_details.ts",
+                "path": "x-pack/solutions/security/packages/kbn-securitysolution-t-grid/src/mock/mock_event_details.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1690,7 +1690,7 @@
                 "signature": [
                   "string[]"
                 ],
-                "path": "packages/kbn-securitysolution-t-grid/src/mock/mock_event_details.ts",
+                "path": "x-pack/solutions/security/packages/kbn-securitysolution-t-grid/src/mock/mock_event_details.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1704,7 +1704,7 @@
                 "signature": [
                   "string[]"
                 ],
-                "path": "packages/kbn-securitysolution-t-grid/src/mock/mock_event_details.ts",
+                "path": "x-pack/solutions/security/packages/kbn-securitysolution-t-grid/src/mock/mock_event_details.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1718,7 +1718,7 @@
                 "signature": [
                   "string[]"
                 ],
-                "path": "packages/kbn-securitysolution-t-grid/src/mock/mock_event_details.ts",
+                "path": "x-pack/solutions/security/packages/kbn-securitysolution-t-grid/src/mock/mock_event_details.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1732,7 +1732,7 @@
                 "signature": [
                   "string[]"
                 ],
-                "path": "packages/kbn-securitysolution-t-grid/src/mock/mock_event_details.ts",
+                "path": "x-pack/solutions/security/packages/kbn-securitysolution-t-grid/src/mock/mock_event_details.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1746,7 +1746,7 @@
                 "signature": [
                   "string[]"
                 ],
-                "path": "packages/kbn-securitysolution-t-grid/src/mock/mock_event_details.ts",
+                "path": "x-pack/solutions/security/packages/kbn-securitysolution-t-grid/src/mock/mock_event_details.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1760,7 +1760,7 @@
                 "signature": [
                   "string[]"
                 ],
-                "path": "packages/kbn-securitysolution-t-grid/src/mock/mock_event_details.ts",
+                "path": "x-pack/solutions/security/packages/kbn-securitysolution-t-grid/src/mock/mock_event_details.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1774,7 +1774,7 @@
                 "signature": [
                   "string[]"
                 ],
-                "path": "packages/kbn-securitysolution-t-grid/src/mock/mock_event_details.ts",
+                "path": "x-pack/solutions/security/packages/kbn-securitysolution-t-grid/src/mock/mock_event_details.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1788,7 +1788,7 @@
                 "signature": [
                   "string[]"
                 ],
-                "path": "packages/kbn-securitysolution-t-grid/src/mock/mock_event_details.ts",
+                "path": "x-pack/solutions/security/packages/kbn-securitysolution-t-grid/src/mock/mock_event_details.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1802,7 +1802,7 @@
                 "signature": [
                   "string[]"
                 ],
-                "path": "packages/kbn-securitysolution-t-grid/src/mock/mock_event_details.ts",
+                "path": "x-pack/solutions/security/packages/kbn-securitysolution-t-grid/src/mock/mock_event_details.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1816,7 +1816,7 @@
                 "signature": [
                   "string[]"
                 ],
-                "path": "packages/kbn-securitysolution-t-grid/src/mock/mock_event_details.ts",
+                "path": "x-pack/solutions/security/packages/kbn-securitysolution-t-grid/src/mock/mock_event_details.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1830,7 +1830,7 @@
                 "signature": [
                   "{ coordinates: number[]; type: string; }[]"
                 ],
-                "path": "packages/kbn-securitysolution-t-grid/src/mock/mock_event_details.ts",
+                "path": "x-pack/solutions/security/packages/kbn-securitysolution-t-grid/src/mock/mock_event_details.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1844,7 +1844,7 @@
                 "signature": [
                   "({ 'matched.field': string[]; 'indicator.first_seen': string[]; 'indicator.provider': string[]; 'indicator.type': string[]; 'matched.atomic': string[]; lazer: { 'great.field': string[]; }[]; } | { 'matched.field': string[]; 'indicator.first_seen': string[]; 'indicator.provider': string[]; 'indicator.type': string[]; 'matched.atomic': string[]; lazer: { 'great.field': { wowoe: { fooooo: string[]; }[]; astring: string; aNumber: number; neat: boolean; }[]; }[]; } | { 'matched.field': string[]; 'matched.index': string[]; 'matched.type': string[]; 'matched.id': string[]; 'matched.atomic': string[]; })[]"
                 ],
-                "path": "packages/kbn-securitysolution-t-grid/src/mock/mock_event_details.ts",
+                "path": "x-pack/solutions/security/packages/kbn-securitysolution-t-grid/src/mock/mock_event_details.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1857,7 +1857,7 @@
             "tags": [],
             "label": "_source",
             "description": [],
-            "path": "packages/kbn-securitysolution-t-grid/src/mock/mock_event_details.ts",
+            "path": "x-pack/solutions/security/packages/kbn-securitysolution-t-grid/src/mock/mock_event_details.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": []
@@ -1872,7 +1872,7 @@
             "signature": [
               "string[]"
             ],
-            "path": "packages/kbn-securitysolution-t-grid/src/mock/mock_event_details.ts",
+            "path": "x-pack/solutions/security/packages/kbn-securitysolution-t-grid/src/mock/mock_event_details.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1883,7 +1883,7 @@
             "tags": [],
             "label": "aggregations",
             "description": [],
-            "path": "packages/kbn-securitysolution-t-grid/src/mock/mock_event_details.ts",
+            "path": "x-pack/solutions/security/packages/kbn-securitysolution-t-grid/src/mock/mock_event_details.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": []

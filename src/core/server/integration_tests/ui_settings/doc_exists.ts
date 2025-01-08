@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { getServices, chance } from './lib';
@@ -50,7 +51,9 @@ export const docExistsSuite = (savedObjectsIndex: string) => () => {
         },
       });
 
-      const { body } = await supertest('get', '/internal/kibana/settings').expect(200);
+      const { body } = await supertest('get', '/internal/kibana/settings')
+        .set('x-elastic-internal-origin', 'kibana')
+        .expect(200);
 
       expect(body).toMatchObject({
         settings: {
@@ -76,6 +79,7 @@ export const docExistsSuite = (savedObjectsIndex: string) => () => {
       const defaultIndex = chance.word();
 
       const { body } = await supertest('post', '/internal/kibana/settings/defaultIndex')
+        .set('x-elastic-internal-origin', 'kibana')
         .send({
           value: defaultIndex,
         })
@@ -101,6 +105,7 @@ export const docExistsSuite = (savedObjectsIndex: string) => () => {
       const { supertest } = await setup();
 
       const { body } = await supertest('delete', '/internal/kibana/settings/foo')
+        .set('x-elastic-internal-origin', 'kibana')
         .send({
           value: 'baz',
         })
@@ -120,6 +125,7 @@ export const docExistsSuite = (savedObjectsIndex: string) => () => {
 
       const defaultIndex = chance.word();
       const { body } = await supertest('post', '/internal/kibana/settings')
+        .set('x-elastic-internal-origin', 'kibana')
         .send({
           changes: {
             defaultIndex,
@@ -147,6 +153,7 @@ export const docExistsSuite = (savedObjectsIndex: string) => () => {
       const { supertest } = await setup();
 
       const { body } = await supertest('post', '/internal/kibana/settings')
+        .set('x-elastic-internal-origin', 'kibana')
         .send({
           changes: {
             foo: 'baz',
@@ -172,9 +179,9 @@ export const docExistsSuite = (savedObjectsIndex: string) => () => {
 
       expect(await uiSettings.get('defaultIndex')).toBe(defaultIndex);
 
-      const { body } = await supertest('delete', '/internal/kibana/settings/defaultIndex').expect(
-        200
-      );
+      const { body } = await supertest('delete', '/internal/kibana/settings/defaultIndex')
+        .set('x-elastic-internal-origin', 'kibana')
+        .expect(200);
 
       expect(body).toMatchObject({
         settings: {
@@ -191,7 +198,9 @@ export const docExistsSuite = (savedObjectsIndex: string) => () => {
     it('returns a 400 if deleting overridden value', async () => {
       const { supertest } = await setup();
 
-      const { body } = await supertest('delete', '/internal/kibana/settings/foo').expect(400);
+      const { body } = await supertest('delete', '/internal/kibana/settings/foo')
+        .set('x-elastic-internal-origin', 'kibana')
+        .expect(400);
 
       expect(body).toEqual({
         error: 'Bad Request',
@@ -212,7 +221,9 @@ export const docExistsSuite = (savedObjectsIndex: string) => () => {
           },
         });
 
-        const { body } = await supertest('get', '/internal/kibana/global_settings').expect(200);
+        const { body } = await supertest('get', '/internal/kibana/global_settings')
+          .set('x-elastic-internal-origin', 'kibana')
+          .expect(200);
 
         expect(body).toMatchObject({
           settings: {
@@ -234,6 +245,7 @@ export const docExistsSuite = (savedObjectsIndex: string) => () => {
         const defaultIndex = chance.word();
 
         const { body } = await supertest('post', '/internal/kibana/global_settings/defaultIndex')
+          .set('x-elastic-internal-origin', 'kibana')
           .send({
             value: defaultIndex,
           })
@@ -256,6 +268,7 @@ export const docExistsSuite = (savedObjectsIndex: string) => () => {
         const { supertest } = await setup();
 
         const { body } = await supertest('delete', '/internal/kibana/global_settings/foo')
+          .set('x-elastic-internal-origin', 'kibana')
           .send({
             value: 'baz',
           })
@@ -275,6 +288,7 @@ export const docExistsSuite = (savedObjectsIndex: string) => () => {
 
         const defaultIndex = chance.word();
         const { body } = await supertest('post', '/internal/kibana/global_settings')
+          .set('x-elastic-internal-origin', 'kibana')
           .send({
             changes: {
               defaultIndex,
@@ -299,6 +313,7 @@ export const docExistsSuite = (savedObjectsIndex: string) => () => {
         const { supertest } = await setup();
 
         const { body } = await supertest('post', '/internal/kibana/global_settings')
+          .set('x-elastic-internal-origin', 'kibana')
           .send({
             changes: {
               foo: 'baz',
@@ -324,10 +339,9 @@ export const docExistsSuite = (savedObjectsIndex: string) => () => {
 
         expect(await uiSettingsGlobal.get('defaultIndex')).toBe(defaultIndex);
 
-        const { body } = await supertest(
-          'delete',
-          '/internal/kibana/global_settings/defaultIndex'
-        ).expect(200);
+        const { body } = await supertest('delete', '/internal/kibana/global_settings/defaultIndex')
+          .set('x-elastic-internal-origin', 'kibana')
+          .expect(200);
 
         expect(body).toMatchObject({
           settings: {
@@ -341,9 +355,9 @@ export const docExistsSuite = (savedObjectsIndex: string) => () => {
       it.skip('returns a 400 if deleting overridden value', async () => {
         const { supertest } = await setup();
 
-        const { body } = await supertest('delete', '/internal/kibana/global_settings/foo').expect(
-          400
-        );
+        const { body } = await supertest('delete', '/internal/kibana/global_settings/foo')
+          .set('x-elastic-internal-origin', 'kibana')
+          .expect(400);
 
         expect(body).toEqual({
           error: 'Bad Request',

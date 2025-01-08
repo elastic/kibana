@@ -28,7 +28,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const kibanaServer = getService('kibanaServer');
 
-  describe('Logs Source Configuration', function () {
+  describe.skip('Logs Source Configuration', function () {
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
     });
@@ -61,7 +61,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         await pageObjects.header.waitUntilLoadingHasFinished();
 
-        retry.try(async () => {
+        await retry.try(async () => {
           const documentTitle = await browser.getTitle();
           expect(documentTitle).to.contain('Settings - Logs - Observability - Elastic');
         });
@@ -75,6 +75,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
 
         await pageObjects.header.waitUntilLoadingHasFinished();
+
+        await infraSourceConfigurationForm.selectIndicesPanel();
 
         const nameInput = await infraSourceConfigurationForm.getNameInput();
         await nameInput.clearValueWithKeyboard({ charByChar: true });

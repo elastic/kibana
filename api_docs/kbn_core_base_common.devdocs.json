@@ -29,7 +29,7 @@
         "description": [
           "\nSmall container object used to expose information about discovered plugins that may\nor may not have been started."
         ],
-        "path": "packages/core/base/core-base-common/src/plugins.ts",
+        "path": "src/core/packages/base/common/src/plugins.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -42,7 +42,7 @@
             "description": [
               "\nIdentifier of the plugin."
             ],
-            "path": "packages/core/base/core-base-common/src/plugins.ts",
+            "path": "src/core/packages/base/common/src/plugins.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -58,7 +58,7 @@
             "signature": [
               "string | string[]"
             ],
-            "path": "packages/core/base/core-base-common/src/plugins.ts",
+            "path": "src/core/packages/base/common/src/plugins.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -72,15 +72,9 @@
               "\nType of the plugin, defaults to `standard`."
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/core-base-common",
-                "scope": "common",
-                "docId": "kibKbnCoreBaseCommonPluginApi",
-                "section": "def-common.PluginType",
-                "text": "PluginType"
-              }
+              "PluginType"
             ],
-            "path": "packages/core/base/core-base-common/src/plugins.ts",
+            "path": "src/core/packages/base/common/src/plugins.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -96,7 +90,7 @@
             "signature": [
               "readonly string[]"
             ],
-            "path": "packages/core/base/core-base-common/src/plugins.ts",
+            "path": "src/core/packages/base/common/src/plugins.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -112,7 +106,7 @@
             "signature": [
               "readonly string[]"
             ],
-            "path": "packages/core/base/core-base-common/src/plugins.ts",
+            "path": "src/core/packages/base/common/src/plugins.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -128,7 +122,7 @@
             "signature": [
               "readonly string[]"
             ],
-            "path": "packages/core/base/core-base-common/src/plugins.ts",
+            "path": "src/core/packages/base/common/src/plugins.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -144,7 +138,7 @@
             "signature": [
               "readonly string[]"
             ],
-            "path": "packages/core/base/core-base-common/src/plugins.ts",
+            "path": "src/core/packages/base/common/src/plugins.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -160,7 +154,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "packages/core/base/core-base-common/src/plugins.ts",
+            "path": "src/core/packages/base/common/src/plugins.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -176,7 +170,7 @@
         "tags": [],
         "label": "PluginType",
         "description": [],
-        "path": "packages/core/base/core-base-common/src/plugins.ts",
+        "path": "src/core/packages/base/common/src/plugins.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -193,7 +187,7 @@
         "signature": [
           "\"eui-global\""
         ],
-        "path": "packages/core/base/core-base-common/src/eui.ts",
+        "path": "src/core/packages/base/common/src/eui.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -208,7 +202,7 @@
         "signature": [
           "\"eui-utilities\""
         ],
-        "path": "packages/core/base/core-base-common/src/eui.ts",
+        "path": "src/core/packages/base/common/src/eui.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -225,7 +219,7 @@
         "signature": [
           "string"
         ],
-        "path": "packages/core/base/core-base-common/src/plugins.ts",
+        "path": "src/core/packages/base/common/src/plugins.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -240,7 +234,7 @@
         "signature": [
           "symbol"
         ],
-        "path": "packages/core/base/core-base-common/src/plugins.ts",
+        "path": "src/core/packages/base/common/src/plugins.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

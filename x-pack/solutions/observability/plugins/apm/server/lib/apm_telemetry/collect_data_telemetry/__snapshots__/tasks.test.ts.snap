@@ -1,0 +1,1795 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`data telemetry collection tasks agents should return agent data per agent name 1`] = `
+Object {
+  "agents": Object {
+    "android/java": Object {
+      "agent": Object {
+        "activation_method": Array [],
+        "version": Array [],
+      },
+      "service": Object {
+        "framework": Object {
+          "composite": Array [],
+          "name": Array [],
+          "version": Array [],
+        },
+        "language": Object {
+          "composite": Array [],
+          "name": Array [],
+          "version": Array [],
+        },
+        "runtime": Object {
+          "composite": Array [],
+          "name": Array [],
+          "version": Array [],
+        },
+      },
+    },
+    "dotnet": Object {
+      "agent": Object {
+        "activation_method": Array [],
+        "version": Array [],
+      },
+      "service": Object {
+        "framework": Object {
+          "composite": Array [],
+          "name": Array [],
+          "version": Array [],
+        },
+        "language": Object {
+          "composite": Array [],
+          "name": Array [],
+          "version": Array [],
+        },
+        "runtime": Object {
+          "composite": Array [],
+          "name": Array [],
+          "version": Array [],
+        },
+      },
+    },
+    "go": Object {
+      "agent": Object {
+        "activation_method": Array [],
+        "version": Array [],
+      },
+      "service": Object {
+        "framework": Object {
+          "composite": Array [],
+          "name": Array [],
+          "version": Array [],
+        },
+        "language": Object {
+          "composite": Array [],
+          "name": Array [],
+          "version": Array [],
+        },
+        "runtime": Object {
+          "composite": Array [],
+          "name": Array [],
+          "version": Array [],
+        },
+      },
+    },
+    "iOS/swift": Object {
+      "agent": Object {
+        "activation_method": Array [],
+        "version": Array [],
+      },
+      "service": Object {
+        "framework": Object {
+          "composite": Array [],
+          "name": Array [],
+          "version": Array [],
+        },
+        "language": Object {
+          "composite": Array [],
+          "name": Array [],
+          "version": Array [],
+        },
+        "runtime": Object {
+          "composite": Array [],
+          "name": Array [],
+          "version": Array [],
+        },
+      },
+    },
+    "ios/swift": Object {
+      "agent": Object {
+        "activation_method": Array [],
+        "version": Array [],
+      },
+      "service": Object {
+        "framework": Object {
+          "composite": Array [],
+          "name": Array [],
+          "version": Array [],
+        },
+        "language": Object {
+          "composite": Array [],
+          "name": Array [],
+          "version": Array [],
+        },
+        "runtime": Object {
+          "composite": Array [],
+          "name": Array [],
+          "version": Array [],
+        },
+      },
+    },
+    "java": Object {
+      "agent": Object {
+        "activation_method": Array [
+          "k8s-attach",
+        ],
+        "version": Array [
+          "1.38.0",
+        ],
+      },
+      "service": Object {
+        "framework": Object {
+          "composite": Array [
+            "Spring Web MVC/1.10.1",
+          ],
+          "name": Array [
+            "Spring Web MVC",
+          ],
+          "version": Array [
+            "6.1.11",
+          ],
+        },
+        "language": Object {
+          "composite": Array [
+            "Java/17.0.12",
+          ],
+          "name": Array [
+            "Java",
+          ],
+          "version": Array [
+            "17.0.12",
+          ],
+        },
+        "runtime": Object {
+          "composite": Array [
+            "Java/17.0.12",
+          ],
+          "name": Array [
+            "Java",
+          ],
+          "version": Array [
+            "17.0.12",
+          ],
+        },
+      },
+    },
+    "js-base": Object {
+      "agent": Object {
+        "activation_method": Array [],
+        "version": Array [],
+      },
+      "service": Object {
+        "framework": Object {
+          "composite": Array [],
+          "name": Array [],
+          "version": Array [],
+        },
+        "language": Object {
+          "composite": Array [],
+          "name": Array [],
+          "version": Array [],
+        },
+        "runtime": Object {
+          "composite": Array [],
+          "name": Array [],
+          "version": Array [],
+        },
+      },
+    },
+    "nodejs": Object {
+      "agent": Object {
+        "activation_method": Array [],
+        "version": Array [],
+      },
+      "service": Object {
+        "framework": Object {
+          "composite": Array [],
+          "name": Array [],
+          "version": Array [],
+        },
+        "language": Object {
+          "composite": Array [],
+          "name": Array [],
+          "version": Array [],
+        },
+        "runtime": Object {
+          "composite": Array [],
+          "name": Array [],
+          "version": Array [],
+        },
+      },
+    },
+    "opentelemetry": Object {
+      "agent": Object {
+        "activation_method": Array [
+          "k8s-attach",
+        ],
+        "version": Array [
+          "1.38.0",
+        ],
+      },
+      "service": Object {
+        "framework": Object {
+          "composite": Array [
+            "Spring Web MVC/1.10.1",
+          ],
+          "name": Array [
+            "Spring Web MVC",
+          ],
+          "version": Array [
+            "6.1.11",
+          ],
+        },
+        "language": Object {
+          "composite": Array [
+            "Java/17.0.12",
+          ],
+          "name": Array [
+            "Java",
+          ],
+          "version": Array [
+            "17.0.12",
+          ],
+        },
+        "runtime": Object {
+          "composite": Array [
+            "Java/17.0.12",
+          ],
+          "name": Array [
+            "Java",
+          ],
+          "version": Array [
+            "17.0.12",
+          ],
+        },
+      },
+    },
+    "opentelemetry/android": Object {
+      "agent": Object {
+        "activation_method": Array [],
+        "version": Array [],
+      },
+      "service": Object {
+        "framework": Object {
+          "composite": Array [],
+          "name": Array [],
+          "version": Array [],
+        },
+        "language": Object {
+          "composite": Array [],
+          "name": Array [],
+          "version": Array [],
+        },
+        "runtime": Object {
+          "composite": Array [],
+          "name": Array [],
+          "version": Array [],
+        },
+      },
+    },
+    "opentelemetry/cpp": Object {
+      "agent": Object {
+        "activation_method": Array [],
+        "version": Array [],
+      },
+      "service": Object {
+        "framework": Object {
+          "composite": Array [],
+          "name": Array [],
+          "version": Array [],
+        },
+        "language": Object {
+          "composite": Array [],
+          "name": Array [],
+          "version": Array [],
+        },
+        "runtime": Object {
+          "composite": Array [],
+          "name": Array [],
+          "version": Array [],
+        },
+      },
+    },
+    "opentelemetry/dotnet": Object {
+      "agent": Object {
+        "activation_method": Array [],
+        "version": Array [],
+      },
+      "service": Object {
+        "framework": Object {
+          "composite": Array [],
+          "name": Array [],
+          "version": Array [],
+        },
+        "language": Object {
+          "composite": Array [],
+          "name": Array [],
+          "version": Array [],
+        },
+        "runtime": Object {
+          "composite": Array [],
+          "name": Array [],
+          "version": Array [],
+        },
+      },
+    },
+    "opentelemetry/erlang": Object {
+      "agent": Object {
+        "activation_method": Array [],
+        "version": Array [],
+      },
+      "service": Object {
+        "framework": Object {
+          "composite": Array [],
+          "name": Array [],
+          "version": Array [],
+        },
+        "language": Object {
+          "composite": Array [],
+          "name": Array [],
+          "version": Array [],
+        },
+        "runtime": Object {
+          "composite": Array [],
+          "name": Array [],
+          "version": Array [],
+        },
+      },
+    },
+    "opentelemetry/go": Object {
+      "agent": Object {
+        "activation_method": Array [],
+        "version": Array [],
+      },
+      "service": Object {
+        "framework": Object {
+          "composite": Array [],
+          "name": Array [],
+          "version": Array [],
+        },
+        "language": Object {
+          "composite": Array [],
+          "name": Array [],
+          "version": Array [],
+        },
+        "runtime": Object {
+          "composite": Array [],
+          "name": Array [],
+          "version": Array [],
+        },
+      },
+    },
+    "opentelemetry/java": Object {
+      "agent": Object {
+        "activation_method": Array [
+          "k8s-attach",
+        ],
+        "version": Array [
+          "1.38.0",
+        ],
+      },
+      "service": Object {
+        "framework": Object {
+          "composite": Array [
+            "Spring Web MVC/1.10.1",
+          ],
+          "name": Array [
+            "Spring Web MVC",
+          ],
+          "version": Array [
+            "6.1.11",
+          ],
+        },
+        "language": Object {
+          "composite": Array [
+            "Java/17.0.12",
+          ],
+          "name": Array [
+            "Java",
+          ],
+          "version": Array [
+            "17.0.12",
+          ],
+        },
+        "runtime": Object {
+          "composite": Array [
+            "Java/17.0.12",
+          ],
+          "name": Array [
+            "Java",
+          ],
+          "version": Array [
+            "17.0.12",
+          ],
+        },
+      },
+    },
+    "opentelemetry/java/elastic": Object {
+      "agent": Object {
+        "activation_method": Array [
+          "k8s-attach",
+        ],
+        "version": Array [
+          "1.38.0",
+        ],
+      },
+      "service": Object {
+        "framework": Object {
+          "composite": Array [
+            "Spring Web MVC/1.10.1",
+          ],
+          "name": Array [
+            "Spring Web MVC",
+          ],
+          "version": Array [
+            "6.1.11",
+          ],
+        },
+        "language": Object {
+          "composite": Array [
+            "Java/17.0.12",
+          ],
+          "name": Array [
+            "Java",
+          ],
+          "version": Array [
+            "17.0.12",
+          ],
+        },
+        "runtime": Object {
+          "composite": Array [
+            "Java/17.0.12",
+          ],
+          "name": Array [
+            "Java",
+          ],
+          "version": Array [
+            "17.0.12",
+          ],
+        },
+      },
+    },
+    "opentelemetry/nodejs": Object {
+      "agent": Object {
+        "activation_method": Array [],
+        "version": Array [],
+      },
+      "service": Object {
+        "framework": Object {
+          "composite": Array [],
+          "name": Array [],
+          "version": Array [],
+        },
+        "language": Object {
+          "composite": Array [],
+          "name": Array [],
+          "version": Array [],
+        },
+        "runtime": Object {
+          "composite": Array [],
+          "name": Array [],
+          "version": Array [],
+        },
+      },
+    },
+    "opentelemetry/php": Object {
+      "agent": Object {
+        "activation_method": Array [],
+        "version": Array [],
+      },
+      "service": Object {
+        "framework": Object {
+          "composite": Array [],
+          "name": Array [],
+          "version": Array [],
+        },
+        "language": Object {
+          "composite": Array [],
+          "name": Array [],
+          "version": Array [],
+        },
+        "runtime": Object {
+          "composite": Array [],
+          "name": Array [],
+          "version": Array [],
+        },
+      },
+    },
+    "opentelemetry/python": Object {
+      "agent": Object {
+        "activation_method": Array [],
+        "version": Array [],
+      },
+      "service": Object {
+        "framework": Object {
+          "composite": Array [],
+          "name": Array [],
+          "version": Array [],
+        },
+        "language": Object {
+          "composite": Array [],
+          "name": Array [],
+          "version": Array [],
+        },
+        "runtime": Object {
+          "composite": Array [],
+          "name": Array [],
+          "version": Array [],
+        },
+      },
+    },
+    "opentelemetry/ruby": Object {
+      "agent": Object {
+        "activation_method": Array [],
+        "version": Array [],
+      },
+      "service": Object {
+        "framework": Object {
+          "composite": Array [],
+          "name": Array [],
+          "version": Array [],
+        },
+        "language": Object {
+          "composite": Array [],
+          "name": Array [],
+          "version": Array [],
+        },
+        "runtime": Object {
+          "composite": Array [],
+          "name": Array [],
+          "version": Array [],
+        },
+      },
+    },
+    "opentelemetry/rust": Object {
+      "agent": Object {
+        "activation_method": Array [],
+        "version": Array [],
+      },
+      "service": Object {
+        "framework": Object {
+          "composite": Array [],
+          "name": Array [],
+          "version": Array [],
+        },
+        "language": Object {
+          "composite": Array [],
+          "name": Array [],
+          "version": Array [],
+        },
+        "runtime": Object {
+          "composite": Array [],
+          "name": Array [],
+          "version": Array [],
+        },
+      },
+    },
+    "opentelemetry/swift": Object {
+      "agent": Object {
+        "activation_method": Array [],
+        "version": Array [],
+      },
+      "service": Object {
+        "framework": Object {
+          "composite": Array [],
+          "name": Array [],
+          "version": Array [],
+        },
+        "language": Object {
+          "composite": Array [],
+          "name": Array [],
+          "version": Array [],
+        },
+        "runtime": Object {
+          "composite": Array [],
+          "name": Array [],
+          "version": Array [],
+        },
+      },
+    },
+    "opentelemetry/webjs": Object {
+      "agent": Object {
+        "activation_method": Array [],
+        "version": Array [],
+      },
+      "service": Object {
+        "framework": Object {
+          "composite": Array [],
+          "name": Array [],
+          "version": Array [],
+        },
+        "language": Object {
+          "composite": Array [],
+          "name": Array [],
+          "version": Array [],
+        },
+        "runtime": Object {
+          "composite": Array [],
+          "name": Array [],
+          "version": Array [],
+        },
+      },
+    },
+    "otlp": Object {
+      "agent": Object {
+        "activation_method": Array [
+          "k8s-attach",
+        ],
+        "version": Array [
+          "1.38.0",
+        ],
+      },
+      "service": Object {
+        "framework": Object {
+          "composite": Array [
+            "Spring Web MVC/1.10.1",
+          ],
+          "name": Array [
+            "Spring Web MVC",
+          ],
+          "version": Array [
+            "6.1.11",
+          ],
+        },
+        "language": Object {
+          "composite": Array [
+            "Java/17.0.12",
+          ],
+          "name": Array [
+            "Java",
+          ],
+          "version": Array [
+            "17.0.12",
+          ],
+        },
+        "runtime": Object {
+          "composite": Array [
+            "Java/17.0.12",
+          ],
+          "name": Array [
+            "Java",
+          ],
+          "version": Array [
+            "17.0.12",
+          ],
+        },
+      },
+    },
+    "otlp/android": Object {
+      "agent": Object {
+        "activation_method": Array [],
+        "version": Array [],
+      },
+      "service": Object {
+        "framework": Object {
+          "composite": Array [],
+          "name": Array [],
+          "version": Array [],
+        },
+        "language": Object {
+          "composite": Array [],
+          "name": Array [],
+          "version": Array [],
+        },
+        "runtime": Object {
+          "composite": Array [],
+          "name": Array [],
+          "version": Array [],
+        },
+      },
+    },
+    "otlp/cpp": Object {
+      "agent": Object {
+        "activation_method": Array [],
+        "version": Array [],
+      },
+      "service": Object {
+        "framework": Object {
+          "composite": Array [],
+          "name": Array [],
+          "version": Array [],
+        },
+        "language": Object {
+          "composite": Array [],
+          "name": Array [],
+          "version": Array [],
+        },
+        "runtime": Object {
+          "composite": Array [],
+          "name": Array [],
+          "version": Array [],
+        },
+      },
+    },
+    "otlp/dotnet": Object {
+      "agent": Object {
+        "activation_method": Array [],
+        "version": Array [],
+      },
+      "service": Object {
+        "framework": Object {
+          "composite": Array [],
+          "name": Array [],
+          "version": Array [],
+        },
+        "language": Object {
+          "composite": Array [],
+          "name": Array [],
+          "version": Array [],
+        },
+        "runtime": Object {
+          "composite": Array [],
+          "name": Array [],
+          "version": Array [],
+        },
+      },
+    },
+    "otlp/erlang": Object {
+      "agent": Object {
+        "activation_method": Array [],
+        "version": Array [],
+      },
+      "service": Object {
+        "framework": Object {
+          "composite": Array [],
+          "name": Array [],
+          "version": Array [],
+        },
+        "language": Object {
+          "composite": Array [],
+          "name": Array [],
+          "version": Array [],
+        },
+        "runtime": Object {
+          "composite": Array [],
+          "name": Array [],
+          "version": Array [],
+        },
+      },
+    },
+    "otlp/go": Object {
+      "agent": Object {
+        "activation_method": Array [],
+        "version": Array [],
+      },
+      "service": Object {
+        "framework": Object {
+          "composite": Array [],
+          "name": Array [],
+          "version": Array [],
+        },
+        "language": Object {
+          "composite": Array [],
+          "name": Array [],
+          "version": Array [],
+        },
+        "runtime": Object {
+          "composite": Array [],
+          "name": Array [],
+          "version": Array [],
+        },
+      },
+    },
+    "otlp/java": Object {
+      "agent": Object {
+        "activation_method": Array [
+          "k8s-attach",
+        ],
+        "version": Array [
+          "1.38.0",
+        ],
+      },
+      "service": Object {
+        "framework": Object {
+          "composite": Array [
+            "Spring Web MVC/1.10.1",
+          ],
+          "name": Array [
+            "Spring Web MVC",
+          ],
+          "version": Array [
+            "6.1.11",
+          ],
+        },
+        "language": Object {
+          "composite": Array [
+            "Java/17.0.12",
+          ],
+          "name": Array [
+            "Java",
+          ],
+          "version": Array [
+            "17.0.12",
+          ],
+        },
+        "runtime": Object {
+          "composite": Array [
+            "Java/17.0.12",
+          ],
+          "name": Array [
+            "Java",
+          ],
+          "version": Array [
+            "17.0.12",
+          ],
+        },
+      },
+    },
+    "otlp/java/elastic": Object {
+      "agent": Object {
+        "activation_method": Array [
+          "k8s-attach",
+        ],
+        "version": Array [
+          "1.38.0",
+        ],
+      },
+      "service": Object {
+        "framework": Object {
+          "composite": Array [
+            "Spring Web MVC/1.10.1",
+          ],
+          "name": Array [
+            "Spring Web MVC",
+          ],
+          "version": Array [
+            "6.1.11",
+          ],
+        },
+        "language": Object {
+          "composite": Array [
+            "Java/17.0.12",
+          ],
+          "name": Array [
+            "Java",
+          ],
+          "version": Array [
+            "17.0.12",
+          ],
+        },
+        "runtime": Object {
+          "composite": Array [
+            "Java/17.0.12",
+          ],
+          "name": Array [
+            "Java",
+          ],
+          "version": Array [
+            "17.0.12",
+          ],
+        },
+      },
+    },
+    "otlp/nodejs": Object {
+      "agent": Object {
+        "activation_method": Array [],
+        "version": Array [],
+      },
+      "service": Object {
+        "framework": Object {
+          "composite": Array [],
+          "name": Array [],
+          "version": Array [],
+        },
+        "language": Object {
+          "composite": Array [],
+          "name": Array [],
+          "version": Array [],
+        },
+        "runtime": Object {
+          "composite": Array [],
+          "name": Array [],
+          "version": Array [],
+        },
+      },
+    },
+    "otlp/php": Object {
+      "agent": Object {
+        "activation_method": Array [],
+        "version": Array [],
+      },
+      "service": Object {
+        "framework": Object {
+          "composite": Array [],
+          "name": Array [],
+          "version": Array [],
+        },
+        "language": Object {
+          "composite": Array [],
+          "name": Array [],
+          "version": Array [],
+        },
+        "runtime": Object {
+          "composite": Array [],
+          "name": Array [],
+          "version": Array [],
+        },
+      },
+    },
+    "otlp/python": Object {
+      "agent": Object {
+        "activation_method": Array [],
+        "version": Array [],
+      },
+      "service": Object {
+        "framework": Object {
+          "composite": Array [],
+          "name": Array [],
+          "version": Array [],
+        },
+        "language": Object {
+          "composite": Array [],
+          "name": Array [],
+          "version": Array [],
+        },
+        "runtime": Object {
+          "composite": Array [],
+          "name": Array [],
+          "version": Array [],
+        },
+      },
+    },
+    "otlp/ruby": Object {
+      "agent": Object {
+        "activation_method": Array [],
+        "version": Array [],
+      },
+      "service": Object {
+        "framework": Object {
+          "composite": Array [],
+          "name": Array [],
+          "version": Array [],
+        },
+        "language": Object {
+          "composite": Array [],
+          "name": Array [],
+          "version": Array [],
+        },
+        "runtime": Object {
+          "composite": Array [],
+          "name": Array [],
+          "version": Array [],
+        },
+      },
+    },
+    "otlp/rust": Object {
+      "agent": Object {
+        "activation_method": Array [],
+        "version": Array [],
+      },
+      "service": Object {
+        "framework": Object {
+          "composite": Array [],
+          "name": Array [],
+          "version": Array [],
+        },
+        "language": Object {
+          "composite": Array [],
+          "name": Array [],
+          "version": Array [],
+        },
+        "runtime": Object {
+          "composite": Array [],
+          "name": Array [],
+          "version": Array [],
+        },
+      },
+    },
+    "otlp/swift": Object {
+      "agent": Object {
+        "activation_method": Array [],
+        "version": Array [],
+      },
+      "service": Object {
+        "framework": Object {
+          "composite": Array [],
+          "name": Array [],
+          "version": Array [],
+        },
+        "language": Object {
+          "composite": Array [],
+          "name": Array [],
+          "version": Array [],
+        },
+        "runtime": Object {
+          "composite": Array [],
+          "name": Array [],
+          "version": Array [],
+        },
+      },
+    },
+    "otlp/webjs": Object {
+      "agent": Object {
+        "activation_method": Array [],
+        "version": Array [],
+      },
+      "service": Object {
+        "framework": Object {
+          "composite": Array [],
+          "name": Array [],
+          "version": Array [],
+        },
+        "language": Object {
+          "composite": Array [],
+          "name": Array [],
+          "version": Array [],
+        },
+        "runtime": Object {
+          "composite": Array [],
+          "name": Array [],
+          "version": Array [],
+        },
+      },
+    },
+    "php": Object {
+      "agent": Object {
+        "activation_method": Array [],
+        "version": Array [],
+      },
+      "service": Object {
+        "framework": Object {
+          "composite": Array [],
+          "name": Array [],
+          "version": Array [],
+        },
+        "language": Object {
+          "composite": Array [],
+          "name": Array [],
+          "version": Array [],
+        },
+        "runtime": Object {
+          "composite": Array [],
+          "name": Array [],
+          "version": Array [],
+        },
+      },
+    },
+    "python": Object {
+      "agent": Object {
+        "activation_method": Array [],
+        "version": Array [],
+      },
+      "service": Object {
+        "framework": Object {
+          "composite": Array [],
+          "name": Array [],
+          "version": Array [],
+        },
+        "language": Object {
+          "composite": Array [],
+          "name": Array [],
+          "version": Array [],
+        },
+        "runtime": Object {
+          "composite": Array [],
+          "name": Array [],
+          "version": Array [],
+        },
+      },
+    },
+    "ruby": Object {
+      "agent": Object {
+        "activation_method": Array [],
+        "version": Array [],
+      },
+      "service": Object {
+        "framework": Object {
+          "composite": Array [],
+          "name": Array [],
+          "version": Array [],
+        },
+        "language": Object {
+          "composite": Array [],
+          "name": Array [],
+          "version": Array [],
+        },
+        "runtime": Object {
+          "composite": Array [],
+          "name": Array [],
+          "version": Array [],
+        },
+      },
+    },
+    "rum-js": Object {
+      "agent": Object {
+        "activation_method": Array [],
+        "version": Array [],
+      },
+      "service": Object {
+        "framework": Object {
+          "composite": Array [],
+          "name": Array [],
+          "version": Array [],
+        },
+        "language": Object {
+          "composite": Array [],
+          "name": Array [],
+          "version": Array [],
+        },
+        "runtime": Object {
+          "composite": Array [],
+          "name": Array [],
+          "version": Array [],
+        },
+      },
+    },
+  },
+}
+`;
+
+exports[`data telemetry collection tasks indices_stats returns a map of index stats 1`] = `
+Object {
+  "indices": Object {
+    "all": Object {
+      "total": Object {
+        "docs": Object {
+          "count": 2,
+        },
+        "store": Object {
+          "size_in_bytes": 100,
+        },
+      },
+    },
+    "metric": Object {
+      "all": Object {
+        "total": Object {
+          "docs": Object {
+            "count": 2,
+          },
+          "store": Object {
+            "size_in_bytes": 100,
+          },
+        },
+      },
+      "metricset": Object {
+        "app": Object {
+          "1d": Object {
+            "doc_count": 6,
+          },
+          "all": Object {
+            "total": Object {
+              "docs": Object {
+                "count": 1,
+              },
+              "shards": 2,
+              "store": Object {
+                "size_in_bytes": 50,
+              },
+            },
+          },
+        },
+        "service_destination-10m": Object {
+          "1d": Object {
+            "doc_count": 3,
+          },
+          "all": Object {
+            "total": Object {
+              "docs": Object {
+                "count": 1,
+              },
+              "shards": 2,
+              "store": Object {
+                "size_in_bytes": 50,
+              },
+            },
+          },
+        },
+        "service_destination-1m": Object {
+          "1d": Object {
+            "doc_count": 3,
+          },
+          "all": Object {
+            "total": Object {
+              "docs": Object {
+                "count": 1,
+              },
+              "shards": 2,
+              "store": Object {
+                "size_in_bytes": 50,
+              },
+            },
+          },
+        },
+        "service_destination-60m": Object {
+          "1d": Object {
+            "doc_count": 3,
+          },
+          "all": Object {
+            "total": Object {
+              "docs": Object {
+                "count": 1,
+              },
+              "shards": 2,
+              "store": Object {
+                "size_in_bytes": 50,
+              },
+            },
+          },
+        },
+        "service_summary-10m": Object {
+          "1d": Object {
+            "doc_count": 9,
+          },
+          "all": Object {
+            "total": Object {
+              "docs": Object {
+                "count": 1,
+              },
+              "shards": 2,
+              "store": Object {
+                "size_in_bytes": 50,
+              },
+            },
+          },
+        },
+        "service_summary-1m": Object {
+          "1d": Object {
+            "doc_count": 12,
+          },
+          "all": Object {
+            "total": Object {
+              "docs": Object {
+                "count": 1,
+              },
+              "shards": 2,
+              "store": Object {
+                "size_in_bytes": 50,
+              },
+            },
+          },
+        },
+        "service_summary-60m": Object {
+          "1d": Object {
+            "doc_count": 9,
+          },
+          "all": Object {
+            "total": Object {
+              "docs": Object {
+                "count": 1,
+              },
+              "shards": 2,
+              "store": Object {
+                "size_in_bytes": 50,
+              },
+            },
+          },
+        },
+        "service_transaction-10m": Object {
+          "1d": Object {
+            "doc_count": 6,
+          },
+          "all": Object {
+            "total": Object {
+              "docs": Object {
+                "count": 1,
+              },
+              "shards": 2,
+              "store": Object {
+                "size_in_bytes": 50,
+              },
+            },
+          },
+        },
+        "service_transaction-1m": Object {
+          "1d": Object {
+            "doc_count": 6,
+          },
+          "all": Object {
+            "total": Object {
+              "docs": Object {
+                "count": 1,
+              },
+              "shards": 2,
+              "store": Object {
+                "size_in_bytes": 50,
+              },
+            },
+          },
+        },
+        "service_transaction-60m": Object {
+          "1d": Object {
+            "doc_count": 6,
+          },
+          "all": Object {
+            "total": Object {
+              "docs": Object {
+                "count": 1,
+              },
+              "shards": 2,
+              "store": Object {
+                "size_in_bytes": 50,
+              },
+            },
+          },
+        },
+        "span_breakdown-10m": Object {
+          "1d": Object {
+            "doc_count": 0,
+          },
+          "all": Object {
+            "total": Object {
+              "docs": Object {
+                "count": 1,
+              },
+              "shards": 2,
+              "store": Object {
+                "size_in_bytes": 50,
+              },
+            },
+          },
+        },
+        "span_breakdown-1m": Object {
+          "1d": Object {
+            "doc_count": 0,
+          },
+          "all": Object {
+            "total": Object {
+              "docs": Object {
+                "count": 1,
+              },
+              "shards": 2,
+              "store": Object {
+                "size_in_bytes": 50,
+              },
+            },
+          },
+        },
+        "span_breakdown-60m": Object {
+          "1d": Object {
+            "doc_count": 0,
+          },
+          "all": Object {
+            "total": Object {
+              "docs": Object {
+                "count": 1,
+              },
+              "shards": 2,
+              "store": Object {
+                "size_in_bytes": 50,
+              },
+            },
+          },
+        },
+        "transaction-10m": Object {
+          "1d": Object {
+            "doc_count": 6,
+          },
+          "all": Object {
+            "total": Object {
+              "docs": Object {
+                "count": 1,
+              },
+              "shards": 2,
+              "store": Object {
+                "size_in_bytes": 50,
+              },
+            },
+          },
+        },
+        "transaction-1m": Object {
+          "1d": Object {
+            "doc_count": 6,
+          },
+          "all": Object {
+            "total": Object {
+              "docs": Object {
+                "count": 1,
+              },
+              "shards": 2,
+              "store": Object {
+                "size_in_bytes": 50,
+              },
+            },
+          },
+        },
+        "transaction-60m": Object {
+          "1d": Object {
+            "doc_count": 6,
+          },
+          "all": Object {
+            "total": Object {
+              "docs": Object {
+                "count": 1,
+              },
+              "shards": 2,
+              "store": Object {
+                "size_in_bytes": 50,
+              },
+            },
+          },
+        },
+      },
+      "shards": Object {
+        "total": 2,
+      },
+    },
+    "shards": Object {
+      "total": 2,
+    },
+    "traces": Object {
+      "all": Object {
+        "total": Object {
+          "docs": Object {
+            "count": 2,
+          },
+          "store": Object {
+            "size_in_bytes": 100,
+          },
+        },
+      },
+      "shards": Object {
+        "total": 2,
+      },
+    },
+  },
+}
+`;
+
+exports[`data telemetry collection tasks indices_stats with no results 1`] = `
+Object {
+  "indices": Object {
+    "all": Object {
+      "total": Object {
+        "docs": Object {
+          "count": 0,
+        },
+        "store": Object {
+          "size_in_bytes": 0,
+        },
+      },
+    },
+    "metric": Object {
+      "all": Object {
+        "total": Object {
+          "docs": Object {
+            "count": 0,
+          },
+          "store": Object {
+            "size_in_bytes": 0,
+          },
+        },
+      },
+      "metricset": Object {
+        "app": Object {
+          "1d": Object {
+            "doc_count": 0,
+          },
+          "all": Object {
+            "total": Object {
+              "docs": Object {
+                "count": 0,
+              },
+              "shards": 0,
+              "store": Object {
+                "size_in_bytes": 0,
+              },
+            },
+          },
+        },
+        "service_destination-10m": Object {
+          "1d": Object {
+            "doc_count": 0,
+          },
+          "all": Object {
+            "total": Object {
+              "docs": Object {
+                "count": 0,
+              },
+              "shards": 0,
+              "store": Object {
+                "size_in_bytes": 0,
+              },
+            },
+          },
+        },
+        "service_destination-1m": Object {
+          "1d": Object {
+            "doc_count": 0,
+          },
+          "all": Object {
+            "total": Object {
+              "docs": Object {
+                "count": 0,
+              },
+              "shards": 0,
+              "store": Object {
+                "size_in_bytes": 0,
+              },
+            },
+          },
+        },
+        "service_destination-60m": Object {
+          "1d": Object {
+            "doc_count": 0,
+          },
+          "all": Object {
+            "total": Object {
+              "docs": Object {
+                "count": 0,
+              },
+              "shards": 0,
+              "store": Object {
+                "size_in_bytes": 0,
+              },
+            },
+          },
+        },
+        "service_summary-10m": Object {
+          "1d": Object {
+            "doc_count": 0,
+          },
+          "all": Object {
+            "total": Object {
+              "docs": Object {
+                "count": 0,
+              },
+              "shards": 0,
+              "store": Object {
+                "size_in_bytes": 0,
+              },
+            },
+          },
+        },
+        "service_summary-1m": Object {
+          "1d": Object {
+            "doc_count": 0,
+          },
+          "all": Object {
+            "total": Object {
+              "docs": Object {
+                "count": 0,
+              },
+              "shards": 0,
+              "store": Object {
+                "size_in_bytes": 0,
+              },
+            },
+          },
+        },
+        "service_summary-60m": Object {
+          "1d": Object {
+            "doc_count": 0,
+          },
+          "all": Object {
+            "total": Object {
+              "docs": Object {
+                "count": 0,
+              },
+              "shards": 0,
+              "store": Object {
+                "size_in_bytes": 0,
+              },
+            },
+          },
+        },
+        "service_transaction-10m": Object {
+          "1d": Object {
+            "doc_count": 0,
+          },
+          "all": Object {
+            "total": Object {
+              "docs": Object {
+                "count": 0,
+              },
+              "shards": 0,
+              "store": Object {
+                "size_in_bytes": 0,
+              },
+            },
+          },
+        },
+        "service_transaction-1m": Object {
+          "1d": Object {
+            "doc_count": 0,
+          },
+          "all": Object {
+            "total": Object {
+              "docs": Object {
+                "count": 0,
+              },
+              "shards": 0,
+              "store": Object {
+                "size_in_bytes": 0,
+              },
+            },
+          },
+        },
+        "service_transaction-60m": Object {
+          "1d": Object {
+            "doc_count": 0,
+          },
+          "all": Object {
+            "total": Object {
+              "docs": Object {
+                "count": 0,
+              },
+              "shards": 0,
+              "store": Object {
+                "size_in_bytes": 0,
+              },
+            },
+          },
+        },
+        "span_breakdown-10m": Object {
+          "1d": Object {
+            "doc_count": 0,
+          },
+          "all": Object {
+            "total": Object {
+              "docs": Object {
+                "count": 0,
+              },
+              "shards": 0,
+              "store": Object {
+                "size_in_bytes": 0,
+              },
+            },
+          },
+        },
+        "span_breakdown-1m": Object {
+          "1d": Object {
+            "doc_count": 0,
+          },
+          "all": Object {
+            "total": Object {
+              "docs": Object {
+                "count": 0,
+              },
+              "shards": 0,
+              "store": Object {
+                "size_in_bytes": 0,
+              },
+            },
+          },
+        },
+        "span_breakdown-60m": Object {
+          "1d": Object {
+            "doc_count": 0,
+          },
+          "all": Object {
+            "total": Object {
+              "docs": Object {
+                "count": 0,
+              },
+              "shards": 0,
+              "store": Object {
+                "size_in_bytes": 0,
+              },
+            },
+          },
+        },
+        "transaction-10m": Object {
+          "1d": Object {
+            "doc_count": 0,
+          },
+          "all": Object {
+            "total": Object {
+              "docs": Object {
+                "count": 0,
+              },
+              "shards": 0,
+              "store": Object {
+                "size_in_bytes": 0,
+              },
+            },
+          },
+        },
+        "transaction-1m": Object {
+          "1d": Object {
+            "doc_count": 0,
+          },
+          "all": Object {
+            "total": Object {
+              "docs": Object {
+                "count": 0,
+              },
+              "shards": 0,
+              "store": Object {
+                "size_in_bytes": 0,
+              },
+            },
+          },
+        },
+        "transaction-60m": Object {
+          "1d": Object {
+            "doc_count": 0,
+          },
+          "all": Object {
+            "total": Object {
+              "docs": Object {
+                "count": 0,
+              },
+              "shards": 0,
+              "store": Object {
+                "size_in_bytes": 0,
+              },
+            },
+          },
+        },
+      },
+      "shards": Object {
+        "total": 0,
+      },
+    },
+    "shards": Object {
+      "total": 0,
+    },
+    "traces": Object {
+      "all": Object {
+        "total": Object {
+          "docs": Object {
+            "count": 0,
+          },
+          "store": Object {
+            "size_in_bytes": 0,
+          },
+        },
+      },
+      "shards": Object {
+        "total": 0,
+      },
+    },
+  },
+}
+`;
+
+exports[`data telemetry collection tasks services should return services per agent name 1`] = `
+Object {
+  "has_any_services": true,
+  "has_any_services_per_official_agent": true,
+  "services_per_agent": Object {
+    "android/java": 0,
+    "dotnet": 0,
+    "go": 0,
+    "iOS/swift": 0,
+    "ios/swift": 0,
+    "java": 10,
+    "js-base": 0,
+    "nodejs": 0,
+    "opentelemetry": 4,
+    "opentelemetry/android": 0,
+    "opentelemetry/cpp": 0,
+    "opentelemetry/dotnet": 0,
+    "opentelemetry/erlang": 0,
+    "opentelemetry/go": 0,
+    "opentelemetry/java": 5,
+    "opentelemetry/java/elastic": 6,
+    "opentelemetry/nodejs": 0,
+    "opentelemetry/php": 0,
+    "opentelemetry/python": 0,
+    "opentelemetry/ruby": 0,
+    "opentelemetry/rust": 0,
+    "opentelemetry/swift": 0,
+    "opentelemetry/webjs": 0,
+    "otlp": 1,
+    "otlp/android": 0,
+    "otlp/cpp": 0,
+    "otlp/dotnet": 0,
+    "otlp/erlang": 0,
+    "otlp/go": 0,
+    "otlp/java": 2,
+    "otlp/java/elastic": 3,
+    "otlp/nodejs": 0,
+    "otlp/php": 0,
+    "otlp/python": 0,
+    "otlp/ruby": 0,
+    "otlp/rust": 0,
+    "otlp/swift": 0,
+    "otlp/webjs": 0,
+    "php": 0,
+    "python": 0,
+    "ruby": 0,
+    "rum-js": 0,
+  },
+}
+`;

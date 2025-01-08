@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { resolve } from 'path';
@@ -32,26 +33,48 @@ import { preventParallelCalls } from './prevent_parallel_calls';
 import { Browsers } from './browsers';
 import { NetworkProfile, NETWORK_PROFILES } from './network_profiles';
 
-const throttleOption: string = process.env.TEST_THROTTLE_NETWORK as string;
-const headlessBrowser: string = process.env.TEST_BROWSER_HEADLESS as string;
-const browserBinaryPath: string = process.env.TEST_BROWSER_BINARY_PATH as string;
-const remoteDebug: string = process.env.TEST_REMOTE_DEBUG as string;
-const certValidation: string = process.env.NODE_TLS_REJECT_UNAUTHORIZED as string;
-const noCache: string = process.env.TEST_DISABLE_CACHE as string;
+interface Configuration {
+  throttleOption: string;
+  headlessBrowser: string;
+  browserBinaryPath: string;
+  remoteDebug: string;
+  certValidation: string;
+  noCache: string;
+  chromiumUserPrefs: Record<string, any>;
+}
+
+const now = Date.now();
 const SECOND = 1000;
 const MINUTE = 60 * SECOND;
 const NO_QUEUE_COMMANDS = ['getLog', 'getStatus', 'newSession', 'quit'];
 const downloadDir = resolve(REPO_ROOT, 'target/functional-tests/downloads');
-const chromiumUserPrefs = {
-  'download.default_directory': downloadDir,
-  'download.prompt_for_download': false,
-  'profile.content_settings.exceptions.clipboard': {
-    '[*.],*': {
-      last_modified: Date.now(),
-      setting: 1,
-    },
-  },
-};
+let runtimeEnvVariables: Configuration | undefined;
+
+// ENV variables may be injected dynamically by the test runner CLI script
+// so do not read on module load, rather read on demand.
+function getConfiguration(): Configuration {
+  if (!runtimeEnvVariables) {
+    runtimeEnvVariables = {
+      throttleOption: process.env.TEST_THROTTLE_NETWORK as string,
+      headlessBrowser: process.env.TEST_BROWSER_HEADLESS as string,
+      browserBinaryPath: process.env.TEST_BROWSER_BINARY_PATH as string,
+      remoteDebug: process.env.TEST_REMOTE_DEBUG as string,
+      certValidation: process.env.NODE_TLS_REJECT_UNAUTHORIZED as string,
+      noCache: process.env.TEST_DISABLE_CACHE as string,
+      chromiumUserPrefs: {
+        'download.default_directory': downloadDir,
+        'download.prompt_for_download': false,
+        'profile.content_settings.exceptions.clipboard': {
+          '[*.],*': {
+            last_modified: now,
+            setting: 1,
+          },
+        },
+      },
+    };
+  }
+  return runtimeEnvVariables;
+}
 
 const sleep$ = (ms: number) => Rx.timer(ms).pipe(ignoreElements());
 
@@ -75,6 +98,14 @@ export interface BrowserConfig {
 
 function initChromiumOptions(browserType: Browsers, acceptInsecureCerts: boolean) {
   const options = browserType === Browsers.Chrome ? new chrome.Options() : new edge.Options();
+  const {
+    headlessBrowser,
+    certValidation,
+    remoteDebug,
+    browserBinaryPath,
+    noCache,
+    chromiumUserPrefs,
+  } = getConfiguration();
 
   options.addArguments(
     // Disables the sandbox for all process types that are normally sandboxed.
@@ -86,7 +117,11 @@ function initChromiumOptions(browserType: Browsers, acceptInsecureCerts: boolean
     // Use fake device for Media Stream to replace actual camera and microphone.
     'use-fake-device-for-media-stream',
     // Bypass the media stream infobar by selecting the default device for media streams (e.g. WebRTC). Works with --use-fake-device-for-media-stream.
-    'use-fake-ui-for-media-stream'
+    'use-fake-ui-for-media-stream',
+    // Do not show "Choose your search engine" dialog (> Chrome v127)
+    'disable-search-engine-choice-screen',
+    // Disable component updater used for Chrome Certificate Verifier
+    'disable-component-update'
   );
 
   if (process.platform === 'linux') {
@@ -162,6 +197,7 @@ async function attemptToCreateCommand(
   const attemptId = ++attemptCounter;
   log.debug('[webdriver] Creating session');
   const remoteSessionUrl = process.env.REMOTE_SESSION_URL;
+  const { headlessBrowser, throttleOption, noCache } = getConfiguration();
 
   const buildDriverInstance = async () => {
     switch (browserType) {

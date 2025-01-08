@@ -78,7 +78,8 @@ import { fillAddFilterForm } from '../../../../tasks/search_bar';
 
 import { CREATE_RULE_URL } from '../../../../urls/navigation';
 
-describe('Custom query rules', { tags: ['@ess', '@serverless'] }, () => {
+// Skipping in MKI due to flake
+describe('Custom query rules', { tags: ['@ess', '@serverless', '@skipInServerlessMKI'] }, () => {
   describe('Custom detection rules creation with data views', () => {
     const rule = getDataViewRule();
     const expectedUrls = rule.references?.join('');

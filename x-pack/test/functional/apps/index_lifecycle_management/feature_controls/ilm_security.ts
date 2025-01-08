@@ -38,10 +38,18 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(links.map((link) => link.text)).to.contain('Stack Management');
       });
 
-      it('should not render the "Data" section', async () => {
-        await PageObjects.common.navigateToApp('management');
-        const sections = (await managementMenu.getSections()).map((section) => section.sectionId);
-        expect(sections).to.eql(['insightsAndAlerting', 'kibana']);
+      describe('"Data" section', function () {
+        this.tags('skipFIPS');
+        it('should render only data_quality section', async () => {
+          await PageObjects.common.navigateToApp('management');
+          const sections = await managementMenu.getSections();
+
+          const sectionIds = sections.map((section) => section.sectionId);
+          expect(sectionIds).to.eql(['data', 'insightsAndAlerting', 'kibana']);
+
+          const dataSection = sections.find((section) => section.sectionId === 'data');
+          expect(dataSection?.sectionLinks).to.eql(['data_quality']);
+        });
       });
     });
 
@@ -57,15 +65,19 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(links.map((link) => link.text)).to.contain('Stack Management');
       });
 
-      it('should render the "Data" section with ILM', async () => {
-        await PageObjects.common.navigateToApp('management');
-        const sections = await managementMenu.getSections();
-        // Changed sections to have a length of 2 because of
-        // https://github.com/elastic/kibana/pull/121262
-        expect(sections).to.have.length(2);
-        expect(sections[0]).to.eql({
-          sectionId: 'data',
-          sectionLinks: ['index_lifecycle_management'],
+      describe('"Data" section with ILM', function () {
+        this.tags('skipFIPS');
+
+        it('should render', async () => {
+          await PageObjects.common.navigateToApp('management');
+          const sections = await managementMenu.getSections();
+          // Changed sections to have a length of 2 because of
+          // https://github.com/elastic/kibana/pull/121262
+          expect(sections).to.have.length(2);
+          expect(sections[0]).to.eql({
+            sectionId: 'data',
+            sectionLinks: ['index_lifecycle_management'],
+          });
         });
       });
     });

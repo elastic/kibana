@@ -1,0 +1,119 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`it renders without crashing 1`] = `
+<Fragment>
+  <EuiSpacer
+    size="m"
+  />
+  <EuiFlexGroup
+    alignItems="center"
+    className="remote-cluster-privilege-form"
+    responsive={false}
+  >
+    <EuiFlexItem>
+      <EuiPanel
+        color="subdued"
+      >
+        <EuiFlexGrid
+          css={
+            Object {
+              "map": undefined,
+              "name": "1hh4o6r",
+              "next": undefined,
+              "styles": "
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                @media (max-width: 575pxpx) {
+                  grid-template-columns: repeat(1, minmax(0, 1fr));
+                }
+              ",
+              "toString": [Function],
+            }
+          }
+        >
+          <EuiFlexItem>
+            <EuiFormRow
+              fullWidth={true}
+              isInvalid={false}
+              label={
+                <Memo(MemoizedFormattedMessage)
+                  defaultMessage="Remote clusters"
+                  id="xpack.security.management.editRole.remoteClusterPrivilegeForm.clustersFormRowLabel"
+                />
+              }
+            >
+              <RemoteClusterComboBox
+                data-test-subj="remoteClusterClustersInput0"
+                fullWidth={true}
+                isDisabled={false}
+                onChange={[Function]}
+                onCreateOption={[Function]}
+                placeholder="Add a remote cluster…"
+                remoteClusters={Array []}
+                selectedOptions={
+                  Array [
+                    Object {
+                      "label": "cluster1",
+                    },
+                  ]
+                }
+                type="remote_cluster"
+              />
+            </EuiFormRow>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiFormRow
+              fullWidth={true}
+              isInvalid={false}
+              label={
+                <Memo(MemoizedFormattedMessage)
+                  defaultMessage="Privileges"
+                  id="xpack.security.management.editRole.remoteClusterPrivilegeForm.privilegesFormRowLabel"
+                />
+              }
+            >
+              <EuiComboBox
+                async={false}
+                compressed={false}
+                data-test-subj="remoteClusterPrivilegesInput0"
+                fullWidth={true}
+                isClearable={true}
+                isDisabled={false}
+                onChange={[Function]}
+                optionMatcher={[Function]}
+                options={
+                  Array [
+                    Object {
+                      "label": "monitor_enrich",
+                    },
+                  ]
+                }
+                placeholder="Add an action…"
+                selectedOptions={
+                  Array [
+                    Object {
+                      "label": "monitor_enrich",
+                    },
+                  ]
+                }
+                singleSelection={false}
+                sortMatchesBy="none"
+              />
+            </EuiFormRow>
+          </EuiFlexItem>
+        </EuiFlexGrid>
+      </EuiPanel>
+    </EuiFlexItem>
+    <EuiFlexItem
+      grow={false}
+    >
+      <EuiButtonIcon
+        aria-label="Delete remote cluster privilege"
+        color="danger"
+        data-test-subj="deleteRemoteClusterPrivilegesButton0"
+        iconType="trash"
+        onClick={[MockFunction]}
+      />
+    </EuiFlexItem>
+  </EuiFlexGroup>
+</Fragment>
+`;

@@ -19,7 +19,7 @@ import type { ToolingLog } from '@kbn/tooling-log';
  * Example usage:
  * ```ts
   const fleetResponse = await retry<InstallPackageResponse>({
-    test: async () => {
+    testFn: async () => {
       const testResponse = await supertest
         .post(`/api/fleet/epm/packages/security_detection_engine`)
         .set('kbn-xsrf', 'xxxx')
@@ -45,7 +45,7 @@ import type { ToolingLog } from '@kbn/tooling-log';
  * @returns The response from the test
  */
 export const retry = async <T>({
-  test,
+  testFn,
   retryService,
   utilityName,
   retries = 3,
@@ -53,7 +53,7 @@ export const retry = async <T>({
   retryDelay = 200,
   logger,
 }: {
-  test: () => Promise<T>;
+  testFn: () => Promise<T>;
   utilityName: string;
   retryService: RetryService;
   retries?: number;
@@ -77,7 +77,7 @@ export const retry = async <T>({
 
       retryAttempt = retryAttempt + 1;
 
-      return await test();
+      return await testFn();
     },
     undefined,
     retryDelay

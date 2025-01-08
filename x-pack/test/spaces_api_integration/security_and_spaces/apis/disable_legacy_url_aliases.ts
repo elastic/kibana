@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { SPACES } from '../../common/lib/spaces';
 import { getTestScenarios } from '../../../saved_object_api_integration/common/lib/saved_object_test_utils';
-import { TestUser } from '../../../saved_object_api_integration/common/lib/types';
+import type { TestUser } from '../../../saved_object_api_integration/common/lib/types';
+import type { FtrProviderContext } from '../../common/ftr_provider_context';
+import { SPACES } from '../../common/lib/spaces';
+import type { DisableLegacyUrlAliasesTestDefinition } from '../../common/suites/disable_legacy_url_aliases';
 import {
   disableLegacyUrlAliasesTestSuiteFactory,
-  TEST_CASE_TARGET_TYPE,
   TEST_CASE_SOURCE_ID,
-  DisableLegacyUrlAliasesTestDefinition,
+  TEST_CASE_TARGET_TYPE,
 } from '../../common/suites/disable_legacy_url_aliases';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
 
 const {
   DEFAULT: { spaceId: DEFAULT_SPACE_ID },

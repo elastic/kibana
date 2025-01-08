@@ -20,6 +20,7 @@ export default function ({ getService }: FtrProviderContext) {
   ];
 
   describe('for user with full ML access', function () {
+    this.tags('skipFIPS');
     for (const testUser of testUsers) {
       describe(`(${testUser.user})`, function () {
         const ecIndexPattern = 'ft_module_sample_ecommerce';
@@ -31,8 +32,6 @@ export default function ({ getService }: FtrProviderContext) {
         const expectedUploadFileTitle = 'artificial_server_log';
 
         before(async () => {
-          await ml.api.cleanMlIndices();
-
           await esArchiver.loadIfNeeded(
             'x-pack/test/functional/es_archives/ml/module_sample_ecommerce'
           );

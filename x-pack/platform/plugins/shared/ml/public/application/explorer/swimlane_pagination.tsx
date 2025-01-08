@@ -1,0 +1,119 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { FC } from 'react';
+import React, { useCallback, useState } from 'react';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPopover,
+  EuiContextMenuPanel,
+  EuiPagination,
+  EuiContextMenuItem,
+  EuiButtonEmpty,
+} from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
+import { calculateRowOptions } from './calculate_row_options';
+
+interface SwimLanePaginationProps {
+  fromPage: number;
+  perPage: number;
+  cardinality: number;
+  onPaginationChange: (arg: { perPage?: number; fromPage?: number }) => void;
+}
+
+export const SwimLanePagination: FC<SwimLanePaginationProps> = ({
+  cardinality,
+  fromPage,
+  perPage,
+  onPaginationChange,
+}) => {
+  const componentFromPage = fromPage - 1;
+
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+
+  const onButtonClick = () => setIsPopoverOpen(() => !isPopoverOpen);
+  const closePopover = () => setIsPopoverOpen(false);
+
+  const goToPage = useCallback((pageNumber: number) => {
+    onPaginationChange({ fromPage: pageNumber + 1 });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const setPerPage = useCallback((perPageUpdate: number) => {
+    onPaginationChange({ perPage: perPageUpdate });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const pageCount = Math.ceil(cardinality / perPage);
+
+  const rowOptions = [5, 10, 20, 50, 100];
+  const items = calculateRowOptions(rowOptions, cardinality);
+
+  const menuItems = items.map((v) => (
+    <EuiContextMenuItem
+      key={`${v}_rows`}
+      icon={v === perPage ? 'check' : 'empty'}
+      onClick={() => {
+        closePopover();
+        setPerPage(v);
+      }}
+      data-test-subj={`${v} rows`}
+    >
+      <FormattedMessage
+        id="xpack.ml.explorer.swimLaneSelectRowsPerPage"
+        defaultMessage="{rowsCount} rows"
+        values={{ rowsCount: v }}
+      />
+    </EuiContextMenuItem>
+  ));
+
+  return (
+    <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+      <EuiFlexItem grow={false}>
+        <EuiPopover
+          button={
+            <EuiButtonEmpty
+              size="xs"
+              color="text"
+              iconType="arrowDown"
+              iconSide="right"
+              onClick={onButtonClick}
+              data-test-subj="mlSwimLanePageSizeControl"
+            >
+              <span data-test-subj={perPage}>
+                <FormattedMessage
+                  id="xpack.ml.explorer.swimLaneRowsPerPage"
+                  defaultMessage="Rows per page: {rowsCount}"
+                  values={{ rowsCount: perPage }}
+                />
+              </span>
+            </EuiButtonEmpty>
+          }
+          isOpen={isPopoverOpen}
+          closePopover={closePopover}
+          panelPaddingSize="none"
+        >
+          <EuiContextMenuPanel items={menuItems} data-test-subj="mlSwimLanePageSizePanel" />
+        </EuiPopover>
+      </EuiFlexItem>
+
+      <EuiFlexItem grow={false}>
+        <EuiPagination
+          aria-label={i18n.translate('xpack.ml.explorer.swimLanePagination', {
+            defaultMessage: 'Anomaly swim lane pagination',
+          })}
+          pageCount={pageCount}
+          activePage={componentFromPage}
+          onPageClick={goToPage}
+          data-test-subj="mlSwimLanePagination"
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+};

@@ -19,7 +19,6 @@
     "@kbn/alerting-plugin",
     "@kbn/triggers-actions-ui-plugin",
     "@kbn/developer-examples-plugin",
-    "@kbn/rule-data-utils",
     "@kbn/data-plugin",
     "@kbn/i18n-react",
     "@kbn/shared-ux-router",
@@ -29,8 +28,8 @@
     "@kbn/charts-plugin",
     "@kbn/data-views-plugin",
     "@kbn/unified-search-plugin",
-    "@kbn/alerts-ui-shared",
     "@kbn/data-view-editor-plugin",
     "@kbn/react-kibana-context-render",
+    "@kbn/response-ops-rule-form",
   ]
 }

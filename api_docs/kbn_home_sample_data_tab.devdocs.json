@@ -29,7 +29,7 @@
           "\nThe content for the Sample Data Tab in the `home` plugin."
         ],
         "signature": [
-          "() => JSX.Element"
+          "() => React.JSX.Element"
         ],
         "path": "packages/home/sample_data_tab/src/sample_data_tab.tsx",
         "deprecated": false,
@@ -48,9 +48,9 @@
           "\nKibana-specific Provider that maps dependencies to services."
         ],
         "signature": [
-          "({ children, ...dependencies }: React.PropsWithChildren<React.PropsWithChildren<",
+          "({ children, ...dependencies }: React.PropsWithChildren<",
           "SampleDataTabKibanaDependencies",
-          ">>) => JSX.Element"
+          ">) => React.JSX.Element"
         ],
         "path": "packages/home/sample_data_tab/src/services.tsx",
         "deprecated": false,
@@ -64,9 +64,9 @@
             "label": "{ children, ...dependencies }",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<React.PropsWithChildren<",
+              "React.PropsWithChildren<",
               "SampleDataTabKibanaDependencies",
-              ">>"
+              ">"
             ],
             "path": "packages/home/sample_data_tab/src/services.tsx",
             "deprecated": false,
@@ -87,9 +87,9 @@
           "\nA Context Provider that provides services to the component and its dependencies."
         ],
         "signature": [
-          "({ children, ...services }: React.PropsWithChildren<React.PropsWithChildren<",
+          "({ children, ...services }: React.PropsWithChildren<",
           "SampleDataTabServices",
-          ">>) => JSX.Element"
+          ">) => React.JSX.Element"
         ],
         "path": "packages/home/sample_data_tab/src/services.tsx",
         "deprecated": false,
@@ -103,9 +103,9 @@
             "label": "{\n  children,\n  ...services\n}",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<React.PropsWithChildren<",
+              "React.PropsWithChildren<",
               "SampleDataTabServices",
-              ">>"
+              ">"
             ],
             "path": "packages/home/sample_data_tab/src/services.tsx",
             "deprecated": false,

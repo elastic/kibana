@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { RuleTester } from 'eslint';
@@ -51,13 +52,13 @@ for (const [name, tester] of [tsTester, babelTester]) {
           {
             name: 'When a string literal is passed to FormattedMessage the ID attribute should start with the correct i18n identifier, and if no existing defaultMessage is passed, it should add an empty default.',
             filename:
-              '/x-pack/plugins/observability_solution/observability/public/test_component.tsx',
+              '/x-pack/solutions/observability/plugins/observability/public/test_component.tsx',
             code: `<FormattedMessage id="xpack.observability." defaultMessage="" />`,
           },
           {
             name: 'When a string literal is passed to FormattedMessage the ID attribute should start with the correct i18n identifier, and if an existing id and defaultMessage is passed, it should leave them alone.',
             filename:
-              '/x-pack/plugins/observability_solution/observability/public/test_component.tsx',
+              '/x-pack/solutions/observability/plugins/observability/public/test_component.tsx',
             code: `<FormattedMessage id="xpack.observability.testComponent" defaultMessage="foo" />`,
           },
         ],
@@ -65,7 +66,7 @@ for (const [name, tester] of [tsTester, babelTester]) {
           {
             name: 'When a string literal is passed to FormattedMessage the ID attribute should start with the correct i18n identifier, and if no existing defaultMessage is passed, it should add an empty default.',
             filename:
-              '/x-pack/plugins/observability_solution/observability/public/test_component.tsx',
+              '/x-pack/solutions/observability/plugins/observability/public/test_component.tsx',
             code: `
   import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -88,7 +89,7 @@ for (const [name, tester] of [tsTester, babelTester]) {
           {
             name: 'When a string literal is passed to the ID attribute of <FormattedMessage /> and the root of the i18n identifier is not correct, it should keep the existing identifier but only update the right base app, and keep the default message if available.',
             filename:
-              '/x-pack/plugins/observability_solution/observability/public/test_component.tsx',
+              '/x-pack/solutions/observability/plugins/observability/public/test_component.tsx',
             code: `
   import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -111,7 +112,7 @@ for (const [name, tester] of [tsTester, babelTester]) {
           {
             name: 'When no string literal is passed to the ID attribute of <FormattedMessage /> it should start with the correct i18n identifier.',
             filename:
-              '/x-pack/plugins/observability_solution/observability/public/test_component.tsx',
+              '/x-pack/solutions/observability/plugins/observability/public/test_component.tsx',
             code: `
   import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -134,7 +135,7 @@ for (const [name, tester] of [tsTester, babelTester]) {
           {
             name: 'When i18n is not imported yet, the rule should add it.',
             filename:
-              '/x-pack/plugins/observability_solution/observability/public/test_component.tsx',
+              '/x-pack/solutions/observability/plugins/observability/public/test_component.tsx',
             code: `
   function TestComponent() {
     return <FormattedMessage />;

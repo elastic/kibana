@@ -29,7 +29,7 @@
         "signature": [
           "({ from, to }: { from: string; to: string; }) => { startDate: string; endDate: string; }"
         ],
-        "path": "packages/kbn-timerange/src/index.ts",
+        "path": "src/platform/packages/shared/kbn-timerange/src/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -40,7 +40,7 @@
             "tags": [],
             "label": "{ from, to }",
             "description": [],
-            "path": "packages/kbn-timerange/src/index.ts",
+            "path": "src/platform/packages/shared/kbn-timerange/src/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -51,7 +51,7 @@
                 "tags": [],
                 "label": "from",
                 "description": [],
-                "path": "packages/kbn-timerange/src/index.ts",
+                "path": "src/platform/packages/shared/kbn-timerange/src/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -62,7 +62,7 @@
                 "tags": [],
                 "label": "to",
                 "description": [],
-                "path": "packages/kbn-timerange/src/index.ts",
+                "path": "src/platform/packages/shared/kbn-timerange/src/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -82,7 +82,7 @@
         "signature": [
           "({ from, to }: { from: string; to: string; }) => { startDate: number; endDate: number; }"
         ],
-        "path": "packages/kbn-timerange/src/index.ts",
+        "path": "src/platform/packages/shared/kbn-timerange/src/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -93,7 +93,7 @@
             "tags": [],
             "label": "{ from, to }",
             "description": [],
-            "path": "packages/kbn-timerange/src/index.ts",
+            "path": "src/platform/packages/shared/kbn-timerange/src/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -104,7 +104,7 @@
                 "tags": [],
                 "label": "from",
                 "description": [],
-                "path": "packages/kbn-timerange/src/index.ts",
+                "path": "src/platform/packages/shared/kbn-timerange/src/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -115,7 +115,93 @@
                 "tags": [],
                 "label": "to",
                 "description": [],
-                "path": "packages/kbn-timerange/src/index.ts",
+                "path": "src/platform/packages/shared/kbn-timerange/src/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/timerange",
+        "id": "def-common.getOffsetFromNowInSeconds",
+        "type": "Function",
+        "tags": [],
+        "label": "getOffsetFromNowInSeconds",
+        "description": [],
+        "signature": [
+          "(epochDate: number) => number"
+        ],
+        "path": "src/platform/packages/shared/kbn-timerange/src/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/timerange",
+            "id": "def-common.getOffsetFromNowInSeconds.$1",
+            "type": "number",
+            "tags": [],
+            "label": "epochDate",
+            "description": [],
+            "signature": [
+              "number"
+            ],
+            "path": "src/platform/packages/shared/kbn-timerange/src/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/timerange",
+        "id": "def-common.getTimeDifferenceInSeconds",
+        "type": "Function",
+        "tags": [],
+        "label": "getTimeDifferenceInSeconds",
+        "description": [],
+        "signature": [
+          "({\n  startDate,\n  endDate,\n}: { startDate: number; endDate: number; }) => number"
+        ],
+        "path": "src/platform/packages/shared/kbn-timerange/src/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/timerange",
+            "id": "def-common.getTimeDifferenceInSeconds.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  startDate,\n  endDate,\n}",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-timerange/src/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/timerange",
+                "id": "def-common.getTimeDifferenceInSeconds.$1.startDate",
+                "type": "number",
+                "tags": [],
+                "label": "startDate",
+                "description": [],
+                "path": "src/platform/packages/shared/kbn-timerange/src/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/timerange",
+                "id": "def-common.getTimeDifferenceInSeconds.$1.endDate",
+                "type": "number",
+                "tags": [],
+                "label": "endDate",
+                "description": [],
+                "path": "src/platform/packages/shared/kbn-timerange/src/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }

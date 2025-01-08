@@ -62,7 +62,7 @@ export default ({ getService }: FtrProviderContext) => {
       expect(body).to.eql({ [jobIdSpace1]: { exists: true, isGroup: false } });
     });
 
-    it('should find single job from same space', async () => {
+    it('should find single group from same space', async () => {
       const body = await runRequest(idSpace1, 200, [groupSpace1]);
       expect(body).to.eql({ [groupSpace1]: { exists: true, isGroup: true } });
     });

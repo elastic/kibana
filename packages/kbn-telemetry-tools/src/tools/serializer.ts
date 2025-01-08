@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import ts from 'typescript';
@@ -98,8 +99,13 @@ export function getConstraints(node: ts.Node, program: ts.Program): any {
     return node.literal.text;
   }
 
-  if (ts.isStringLiteral(node)) {
+  if (ts.isStringLiteral(node) || ts.isStringLiteralLike(node)) {
     return node.text;
+  }
+
+  // template literals such as `smth/${string}`
+  if (ts.isTemplateLiteralTypeNode(node) || ts.isTemplateExpression(node)) {
+    return '@@INDEX@@'; // just map it to any kind of string. We can enforce it further in the future if we see fit.
   }
 
   if (ts.isImportSpecifier(node) || ts.isExportSpecifier(node)) {
@@ -179,9 +185,9 @@ export function getDescriptor(node: ts.Node, program: ts.Program): Descriptor | 
       const constraintsArray = Array.isArray(constraints) ? constraints : [constraints];
       if (typeof constraintsArray[0] === 'string') {
         return constraintsArray.reduce((acc, c) => {
-          (acc as Record<string, unknown>)[c] = descriptor;
+          acc[c] = descriptor;
           return acc;
-        }, {});
+        }, {} as Record<string, unknown>);
       }
     }
     return { '@@INDEX@@': descriptor };

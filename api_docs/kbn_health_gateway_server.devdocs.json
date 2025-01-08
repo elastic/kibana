@@ -21,7 +21,7 @@
         "signature": [
           "() => Promise<void>"
         ],
-        "path": "packages/kbn-health-gateway-server/src/index.ts",
+        "path": "src/platform/packages/private/kbn-health-gateway-server/src/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [],

@@ -12,7 +12,7 @@ is_pr_with_label() {
 
   IFS=',' read -ra labels <<< "${GITHUB_PR_LABELS:-}"
 
-  for label in "${labels[@]}"
+  for label in "${labels[@]:-}"
   do
     if [ "$label" == "$match" ]; then
       return
@@ -33,10 +33,10 @@ check_for_changed_files() {
 
   SHOULD_AUTO_COMMIT_CHANGES="${2:-}"
   CUSTOM_FIX_MESSAGE="${3:-}"
-  GIT_CHANGES="$(git status --porcelain -- . ':!:.bazelrc' ':!:config/node.options')"
+  GIT_CHANGES="$(git status --porcelain -- . ':!:.bazelrc' ':!:config/node.options' ':!config/kibana.yml')"
 
   if [ "$GIT_CHANGES" ]; then
-    if ! is_auto_commit_disabled && [[ "$SHOULD_AUTO_COMMIT_CHANGES" == "true" && "${BUILDKITE_PULL_REQUEST:-}" ]]; then
+    if ! is_auto_commit_disabled && [[ "$SHOULD_AUTO_COMMIT_CHANGES" == "true" && "${BUILDKITE_PULL_REQUEST:-false}" != "false" ]]; then
       NEW_COMMIT_MESSAGE="[CI] Auto-commit changed files from '$1'"
       PREVIOUS_COMMIT_MESSAGE="$(git log -1 --pretty=%B)"
 
@@ -56,7 +56,7 @@ check_for_changed_files() {
       git config --global user.name kibanamachine
       git config --global user.email '42973632+kibanamachine@users.noreply.github.com'
       gh pr checkout "${BUILDKITE_PULL_REQUEST}"
-      git add -A -- . ':!.bazelrc' ':!config/node.options'
+      git add -A -- . ':!.bazelrc' ':!WORKSPACE.bazel' ':!config/node.options' ':!config/kibana.yml'
 
       git commit -m "$NEW_COMMIT_MESSAGE"
       git push
@@ -177,4 +177,33 @@ print_if_dry_run() {
   if [[ "${DRY_RUN:-}" =~ ^(1|true)$ ]]; then
     echo "DRY_RUN is enabled."
   fi
+}
+
+docker_with_retry () {
+  cmd=$1
+  shift
+  args=("$@")
+  attempt=0
+  max_retries=5
+  sleep_time=15
+
+  while true
+  do
+    attempt=$((attempt+1))
+
+    if [ $attempt -gt $max_retries ]
+    then
+      echo "Docker $cmd retries exceeded, aborting."
+      exit 1
+    fi
+
+    if docker "$cmd" "${args[@]}"
+    then
+      echo "Docker $cmd successful."
+      break
+    else
+      echo "Docker $cmd unsuccessful, attempt '$attempt'... Retrying in $sleep_time"
+      sleep $sleep_time
+    fi
+  done
 }

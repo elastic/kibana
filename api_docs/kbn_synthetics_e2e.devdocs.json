@@ -1,0 +1,168 @@
+{
+  "id": "@kbn/synthetics-e2e",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/synthetics-e2e",
+        "id": "def-common.loginPageProvider",
+        "type": "Function",
+        "tags": [],
+        "label": "loginPageProvider",
+        "description": [],
+        "signature": [
+          "({\n  page,\n  isRemote = false,\n  username = 'elastic',\n  password = 'changeme',\n}: { page: ",
+          "Page",
+          "; isRemote?: boolean | undefined; username?: string | undefined; password?: string | undefined; }) => { waitForLoadingToFinish(): Promise<void>; loginToKibana(usernameT?: \"editor\" | \"viewer\" | undefined, passwordT?: string | undefined): Promise<void>; }"
+        ],
+        "path": "x-pack/solutions/observability/plugins/synthetics/e2e/page_objects/login.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/synthetics-e2e",
+            "id": "def-common.loginPageProvider.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  page,\n  isRemote = false,\n  username = 'elastic',\n  password = 'changeme',\n}",
+            "description": [],
+            "path": "x-pack/solutions/observability/plugins/synthetics/e2e/page_objects/login.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/synthetics-e2e",
+                "id": "def-common.loginPageProvider.$1.page",
+                "type": "Object",
+                "tags": [],
+                "label": "page",
+                "description": [],
+                "signature": [
+                  "Page"
+                ],
+                "path": "x-pack/solutions/observability/plugins/synthetics/e2e/page_objects/login.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/synthetics-e2e",
+                "id": "def-common.loginPageProvider.$1.isRemote",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "isRemote",
+                "description": [],
+                "signature": [
+                  "boolean | undefined"
+                ],
+                "path": "x-pack/solutions/observability/plugins/synthetics/e2e/page_objects/login.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/synthetics-e2e",
+                "id": "def-common.loginPageProvider.$1.username",
+                "type": "string",
+                "tags": [],
+                "label": "username",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "x-pack/solutions/observability/plugins/synthetics/e2e/page_objects/login.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/synthetics-e2e",
+                "id": "def-common.loginPageProvider.$1.password",
+                "type": "string",
+                "tags": [],
+                "label": "password",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "x-pack/solutions/observability/plugins/synthetics/e2e/page_objects/login.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/synthetics-e2e",
+        "id": "def-common.utilsPageProvider",
+        "type": "Function",
+        "tags": [],
+        "label": "utilsPageProvider",
+        "description": [],
+        "signature": [
+          "({ page }: { page: ",
+          "Page",
+          "; }) => { byTestId(testId: string): string; waitForLoadingToFinish(): Promise<void>; assertText({ text }: { text: string; }): Promise<void>; fillByTestSubj(dataTestSubj: string, value: string): Promise<void>; selectByTestSubj(dataTestSubj: string, value: string): Promise<void>; checkByTestSubj(dataTestSubj: string, value: string): Promise<void>; clickByTestSubj(dataTestSubj: string): Promise<void>; findByTestSubj(dataTestSubj: string): Promise<",
+          "ElementHandle",
+          "<HTMLElement | SVGElement>>; findByText(text: string): Promise<",
+          "ElementHandle",
+          "<HTMLElement | SVGElement>>; }"
+        ],
+        "path": "x-pack/solutions/observability/plugins/synthetics/e2e/page_objects/utils.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/synthetics-e2e",
+            "id": "def-common.utilsPageProvider.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ page }",
+            "description": [],
+            "path": "x-pack/solutions/observability/plugins/synthetics/e2e/page_objects/utils.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/synthetics-e2e",
+                "id": "def-common.utilsPageProvider.$1.page",
+                "type": "Object",
+                "tags": [],
+                "label": "page",
+                "description": [],
+                "signature": [
+                  "Page"
+                ],
+                "path": "x-pack/solutions/observability/plugins/synthetics/e2e/page_objects/utils.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

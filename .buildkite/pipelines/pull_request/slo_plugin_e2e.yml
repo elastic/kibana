@@ -7,9 +7,14 @@ steps:
     depends_on:
       - build
       - quick_checks
+      - checks
+      - linting
+      - linting_with_types
+      - check_types
+      - check_oas_snapshot
     timeout_in_minutes: 30
     artifact_paths:
-      - 'x-pack/plugins/observability_solution/slo/e2e/.journeys/**/*'
+      - 'x-pack/solutions/observability/plugins/slo/e2e/.journeys/**/*'
     retry:
       automatic:
         - exit_status: '-1'

@@ -71,10 +71,7 @@ export const getArtificialLogDataViewTestData = ({
   }
 
   function getFieldSelectorPopover() {
-    if (zeroDocsFallback) {
-      return [...(textField ? ['message'] : []), 'response_code', 'url', 'user', 'version'];
-    }
-    return [...(textField ? ['message'] : []), 'response_code', 'url', 'user'];
+    return [...(textField ? ['message'] : []), 'response_code', 'url', 'user', 'version'];
   }
 
   function getSuiteTitle() {

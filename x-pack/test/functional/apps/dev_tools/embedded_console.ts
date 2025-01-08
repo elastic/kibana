@@ -14,6 +14,7 @@ export async function testEmbeddedConsole(pageObjects: PageObjects) {
   await pageObjects.embeddedConsole.expectEmbeddedConsoleToBeClosed();
   await pageObjects.embeddedConsole.clickEmbeddedConsoleControlBar();
   await pageObjects.embeddedConsole.expectEmbeddedConsoleToBeOpen();
+  await pageObjects.embeddedConsole.expectEmbeddedConsoleHaveFullscreenToggle();
   await pageObjects.embeddedConsole.clickEmbeddedConsoleControlBar();
   await pageObjects.embeddedConsole.expectEmbeddedConsoleToBeClosed();
 }

@@ -11,7 +11,6 @@ import moment from 'moment';
 import { AGENTS_INDEX, PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
-import { setupFleetAndAgents } from './services';
 import { skipIfNoDockerRegistry, generateAgent, makeSnapshotVersion } from '../../helpers';
 import { testUsers } from '../test_users';
 
@@ -22,13 +21,14 @@ export default function (providerContext: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
+  const fleetAndAgents = getService('fleetAndAgents');
 
   describe('fleet_upgrade_agent', () => {
     skipIfNoDockerRegistry(providerContext);
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/fleet/agents');
+      await fleetAndAgents.setup();
     });
-    setupFleetAndAgents(providerContext);
 
     beforeEach(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/fleet/agents');
@@ -708,10 +708,8 @@ export default function (providerContext: FtrProviderContext) {
           'fleet-server-policy',
           fleetServerVersion
         );
-      });
 
-      beforeEach(async () => {
-        es.updateByQuery({
+        await es.updateByQuery({
           index: '.fleet-agents',
           body: {
             script: "ctx._source.remove('upgrade_started_at')",
@@ -1527,7 +1525,7 @@ export default function (providerContext: FtrProviderContext) {
 
       it('enrolled in a hosted agent policy bulk upgrade should respond with 200 and object of results. Should not update the hosted agent SOs', async () => {
         // move agent2 to policy2 to keep it regular
-        await supertest.put(`/api/fleet/agents/agent2/reassign`).set('kbn-xsrf', 'xxx').send({
+        await supertest.post(`/api/fleet/agents/agent2/reassign`).set('kbn-xsrf', 'xxx').send({
           policy_id: 'policy2',
         });
         // update enrolled policy to hosted

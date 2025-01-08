@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { CoreContext } from '@kbn/core-base-server-internal';
@@ -63,11 +64,18 @@ export class UserSettingsService {
   }
 }
 
+/**
+ * Extracts the dark mode setting from the user settings.
+ * Returning "undefined" means that we will use the space default settings.
+ */
 const getUserSettingDarkMode = (
   userSettings: Record<string, string>
 ): DarkModeValue | undefined => {
-  if (userSettings?.darkMode) {
-    return userSettings.darkMode.toUpperCase() === 'DARK';
+  if (userSettings.darkMode) {
+    const { darkMode } = userSettings;
+    if (darkMode === 'space_default') return undefined;
+
+    return darkMode.toUpperCase() === 'SYSTEM' ? 'system' : darkMode.toUpperCase() === 'DARK';
   }
   return undefined;
 };

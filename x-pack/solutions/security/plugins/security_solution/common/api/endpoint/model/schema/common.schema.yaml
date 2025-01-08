@@ -1,0 +1,199 @@
+openapi: 3.0.0
+info:
+  title: Common Endpoint Attributes
+  version: '2023-10-31'
+paths: {}
+components:
+  schemas:
+    Id:
+      type: string
+    IdOrUndefined:
+      $ref: '#/components/schemas/Id'
+      nullable: true
+    Page:
+      type: integer
+      default: 1
+      minimum: 1
+      description: Page number
+    PageSize:
+      type: integer
+      default: 10
+      minimum: 1
+      maximum: 100
+      description: Number of items per page
+    StartDate:
+      type: string
+      description: Start date
+    EndDate:
+      type: string
+      description: End date
+    AgentId:
+      type: string
+      description: Agent ID
+
+    AgentIds:
+      oneOf:
+        - type: array
+          items:
+            type: string
+            minLength: 1
+          minItems: 1
+          maxItems: 50
+        - type: string
+          minLength: 1
+      minLength: 1
+
+    Command:
+      type: string
+      enum:
+        - isolate
+        - unisolate
+        - kill-process
+        - suspend-process
+        - running-processes
+        - get-file
+        - execute
+        - upload
+        - scan
+      minLength: 1
+      description: The command to be executed (cannot be an empty string)
+
+    Commands:
+      type: array
+      items:
+        $ref: '#/components/schemas/Command'
+
+    Timeout:
+      type: integer
+      minimum: 1
+      description: The maximum timeout value in milliseconds (optional)
+
+    Status:
+      type: string
+      enum:
+        - failed
+        - pending
+        - successful
+
+    Statuses:
+      type: array
+      items:
+        $ref: '#/components/schemas/Status'
+      minLength: 1
+      maxLength: 3
+
+    UserIds:
+      oneOf:
+        - type: array
+          items:
+            type: string
+            minLength: 1
+          minItems: 1
+        - type: string
+          minLength: 1
+      description: User IDs
+
+    WithOutputs:
+      oneOf:
+        - type: array
+          items:
+            type: string
+            minLength: 1
+          minItems: 1
+        - type: string
+          minLength: 1
+      description: Shows detailed outputs for an action response
+
+    Type:
+      type: string
+      description: Type of response action
+      enum:
+        - automated
+        - manual
+
+    Types:
+      type: array
+      description: List of types of response actions
+      items:
+        $ref: '#/components/schemas/Type'
+      minLength: 1
+      maxLength: 2
+
+    EndpointIds:
+      type: array
+      items:
+        type: string
+        minLength: 1
+      minItems: 1
+      description: List of endpoint IDs (cannot contain empty strings)
+    CaseIds:
+      type: array
+      items:
+        type: string
+        minLength: 1
+      minItems: 1
+      description: Case IDs to be updated (cannot contain empty strings)
+    Comment:
+      type: string
+      description: Optional comment
+    Parameters:
+      type: object
+      description: Optional parameters object
+    AgentTypes:
+      type: string
+      enum:
+        - endpoint
+        - sentinel_one
+        - crowdstrike
+
+    BaseActionSchema:
+      x-inline: true
+      type: object
+      properties:
+        endpoint_ids:
+          $ref: '#/components/schemas/EndpointIds'
+        alert_ids:
+          $ref: '../../../model/alert.schema.yaml#/components/schemas/AlertIds'
+        case_ids:
+          $ref: '#/components/schemas/CaseIds'
+        comment:
+          $ref: '#/components/schemas/Comment'
+        parameters:
+          $ref: '#/components/schemas/Parameters'
+        agent_type:
+          $ref: '#/components/schemas/AgentTypes'
+      required:
+        - endpoint_ids
+
+    NoParametersRequestSchema:
+      type: object
+      required:
+        - body
+      properties:
+        body:
+          $ref: '#/components/schemas/BaseActionSchema'
+
+    Pid:
+      type: object
+      properties:
+        pid:
+          type: integer
+          minimum: 1
+
+    EntityId:
+      type: object
+      properties:
+        entity_id:
+          type: string
+          minLength: 1
+
+    ProtectionUpdatesNoteResponse:
+      type: object
+      properties:
+        note:
+          type: string
+
+    SuccessResponse:
+      type: object
+      properties: {}
+      # Define properties for the success response if needed

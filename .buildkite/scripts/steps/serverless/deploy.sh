@@ -56,7 +56,7 @@ deploy() {
 
   PROJECT_ID=$(jq -r '[.items[] | select(.name == "'$PROJECT_NAME'")] | .[0].id' $PROJECT_EXISTS_LOGS)
   if is_pr_with_label "ci:project-redeploy"; then
-    if [ -z "${PROJECT_ID}" ]; then
+    if [ -z "${PROJECT_ID}" ] || [ "${PROJECT_ID}" == "null" ]; then
       echo "No project to remove"
     else
       echo "Shutting down previous project..."
@@ -159,14 +159,13 @@ EOF
 }
 
 is_pr_with_label "ci:project-deploy-elasticsearch" && deploy "elasticsearch"
+is_pr_with_label "ci:project-deploy-security" && deploy "security"
 if is_pr_with_label "ci:project-deploy-observability" ; then
   # Only deploy observability if the PR is targeting main
   if [[ "$BUILDKITE_PULL_REQUEST_BASE_BRANCH" == "main" ]]; then
     create_github_issue_oblt_test_environments
-    echo "--- Deploy observability with Kibana CI"
-    deploy "observability"
+    buildkite-agent annotate --context obl-test-info --style info 'See linked [Deploy Serverless Kibana] issue in pull request for project deployment information'
   fi
 fi
-is_pr_with_label "ci:project-deploy-security" && deploy "security"
 
 exit 0;

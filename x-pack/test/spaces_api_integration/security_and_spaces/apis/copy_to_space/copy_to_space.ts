@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import type { FtrProviderContext } from '../../../common/ftr_provider_context';
 import { AUTHENTICATION } from '../../../common/lib/authentication';
 import { SPACES } from '../../../common/lib/spaces';
 import { copyToSpaceTestSuiteFactory } from '../../../common/suites/copy_to_space';
-import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default function copyToSpaceSpacesAndSecuritySuite(context: FtrProviderContext) {

@@ -6,26 +6,10 @@
     "interfaces": [],
     "enums": [],
     "misc": [],
-    "objects": []
-  },
-  "server": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
     "objects": [
       {
         "parentPluginId": "@kbn/core-fatal-errors-browser-mocks",
-        "id": "def-common.fatalErrorsServiceMock",
+        "id": "def-public.fatalErrorsServiceMock",
         "type": "Object",
         "tags": [],
         "label": "fatalErrorsServiceMock",
@@ -36,7 +20,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-fatal-errors-browser-mocks",
-            "id": "def-common.fatalErrorsServiceMock.create",
+            "id": "def-public.fatalErrorsServiceMock.create",
             "type": "Function",
             "tags": [],
             "label": "create",
@@ -52,20 +36,14 @@
           },
           {
             "parentPluginId": "@kbn/core-fatal-errors-browser-mocks",
-            "id": "def-common.fatalErrorsServiceMock.createSetupContract",
+            "id": "def-public.fatalErrorsServiceMock.createSetupContract",
             "type": "Function",
             "tags": [],
             "label": "createSetupContract",
             "description": [],
             "signature": [
               "() => jest.Mocked<",
-              {
-                "pluginId": "@kbn/core-fatal-errors-browser",
-                "scope": "common",
-                "docId": "kibKbnCoreFatalErrorsBrowserPluginApi",
-                "section": "def-common.FatalErrorsSetup",
-                "text": "FatalErrorsSetup"
-              },
+              "FatalErrorsSetup",
               ">"
             ],
             "path": "packages/core/fatal-errors/core-fatal-errors-browser-mocks/src/fatal_errors_service.mock.ts",
@@ -76,20 +54,14 @@
           },
           {
             "parentPluginId": "@kbn/core-fatal-errors-browser-mocks",
-            "id": "def-common.fatalErrorsServiceMock.createStartContract",
+            "id": "def-public.fatalErrorsServiceMock.createStartContract",
             "type": "Function",
             "tags": [],
             "label": "createStartContract",
             "description": [],
             "signature": [
               "() => jest.Mocked<",
-              {
-                "pluginId": "@kbn/core-fatal-errors-browser",
-                "scope": "common",
-                "docId": "kibKbnCoreFatalErrorsBrowserPluginApi",
-                "section": "def-common.FatalErrorsSetup",
-                "text": "FatalErrorsSetup"
-              },
+              "FatalErrorsSetup",
               ">"
             ],
             "path": "packages/core/fatal-errors/core-fatal-errors-browser-mocks/src/fatal_errors_service.mock.ts",
@@ -102,5 +74,21 @@
         "initialIsOpen": false
       }
     ]
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
   }
 }

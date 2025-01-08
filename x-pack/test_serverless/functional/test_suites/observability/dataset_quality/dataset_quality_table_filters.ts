@@ -52,7 +52,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           namespace: productionNamespace,
         }),
       ]);
-      await PageObjects.svlCommonPage.loginWithRole('admin');
+      await PageObjects.svlCommonPage.loginWithPrivilegedRole();
       await PageObjects.datasetQuality.navigateTo();
     });
 

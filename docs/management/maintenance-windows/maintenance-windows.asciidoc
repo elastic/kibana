@@ -46,7 +46,7 @@ image::images/create-maintenance-window.png[The Create Maintenance Window user i
 
 By default, maintenance windows affect all categories of rules.
 The category-specific maintenance window options alter this behavior.
-For the definitive list of rule types in each category, refer to the <<list-rule-types-api,get rule types API>>.
+For the definitive list of rule types in each category, refer to the {api-kibana}/group/endpoint-alerting[get rule types API].
 
 If you turn on *Filter alerts*, you can use KQL to filter the alerts affected by the maintenance window:
 

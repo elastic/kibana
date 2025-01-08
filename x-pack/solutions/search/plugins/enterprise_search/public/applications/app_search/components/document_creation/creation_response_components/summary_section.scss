@@ -1,0 +1,20 @@
+.documentCreationSummarySection {
+  padding: $euiSize $euiSizeM;
+  color: $euiTextSubduedColor;
+  border-top: $euiBorderThin;
+  border-bottom: $euiBorderThin;
+
+  & + & {
+    border-top: 0;
+  }
+
+  &__title {
+    display: flex;
+    align-items: center;
+    height: $euiSizeL;
+
+    .euiIcon {
+      margin-right: $euiSizeS;
+    }
+  }
+}

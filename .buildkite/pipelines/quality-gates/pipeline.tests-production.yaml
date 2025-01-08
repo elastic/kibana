@@ -10,19 +10,22 @@ steps:
       env:
         TARGET_ENV: production
         CHECK_SLO: true
-        CHECK_SLO_TAG: kibana
+        CHECK_SLO_TAG: kbn-quality-gate
         CHECK_SLO_WAITING_PERIOD: 15m
         CHECK_SLO_BURN_RATE_THRESHOLD: 0.1
+        DEPLOYMENT_SLICES: ${DEPLOYMENT_SLICES:-""}
     soft_fail: true
 
-  - label: ":rocket: control-plane e2e tests"
+  - label: ":rocket: Run serverless synthetics check"
     if: build.env("ENVIRONMENT") == "production-canary"
-    trigger: "ess-k8s-production-e2e-tests" # https://buildkite.com/elastic/ess-k8s-production-e2e-tests
+    trigger: "serverless-quality-gates"
     build:
-      env:
-        REGION_ID: aws-us-east-1
-        NAME_PREFIX: ci_test_kibana-promotion_
       message: "${BUILDKITE_MESSAGE} (triggered by pipeline.tests-production.yaml)"
+      env:
+        TARGET_ENV: production
+        SERVICE: kibana
+        CHECK_SYNTHETICS: true
+        CHECK_SYNTHETICS_TAG: serverless-platform-core-validation
 
   - label: ":cookie: 24h bake time before continuing promotion"
     if: build.env("ENVIRONMENT") == "production-canary"

@@ -29,7 +29,7 @@ For help generating the encryption key, refer to the <<kibana-encryption-keys, `
 
 Many policies and best practices stipulate that encryption keys should be periodically rotated to decrease the amount of content encrypted with one key and therefore limit the potential damage if the key is compromised. {kib} allows you to rotate encryption keys whenever there is a need.
 
-When you change an encryption key, be sure to keep the old one for some time. Although {kib} only uses a new encryption key to encrypt all new and updated data, it still may need the old one to decrypt data that was encrypted using the old key. It's possible to have multiple old keys used only for decryption. {kib} doesn't automatically re-encrypt existing saved objects with the new encryption key. Re-encryption only happens when you update existing object or use the <<saved-objects-api-rotate-encryption-key, rotate encryption key API>>.
+When you change an encryption key, be sure to keep the old one for some time. Although {kib} only uses a new encryption key to encrypt all new and updated data, it still may need the old one to decrypt data that was encrypted using the old key. It's possible to have multiple old keys used only for decryption. {kib} doesn't automatically re-encrypt existing saved objects with the new encryption key. Re-encryption only happens when you update existing object or use the {api-kibana}/group/endpoint-saved-objects[rotate encryption key API].
 
 Here is how your `kibana.yml` might look if you use key rotation functionality:
 
@@ -49,7 +49,7 @@ xpack.encryptedSavedObjects:
 You might also leverage this functionality if multiple {kib} instances connected to the same {es} cluster use different encryption keys. In this case, you might have a mix of saved objects encrypted with different keys, and every {kib} instance can only deal with a specific subset of objects. To fix this, you must choose a single primary encryption key for `xpack.encryptedSavedObjects.encryptionKey`, move all other encryption keys to `xpack.encryptedSavedObjects.keyRotation.decryptionOnlyKeys`, and sync this configuration across all {kib} instances.
 ============================================================================
 
-At some point, you might want to dispose of old encryption keys completely. Make sure there are no saved objects that {kib} encrypted with these encryption keys. You can use the <<saved-objects-api-rotate-encryption-key, rotate encryption key API>> to determine which existing saved objects require decryption-only keys and re-encrypt them with the primary key.
+At some point, you might want to dispose of old encryption keys completely. Make sure there are no saved objects that {kib} encrypted with these encryption keys. You can use the {api-kibana}/group/endpoint-saved-objects[rotate encryption key API] to determine which existing saved objects require decryption-only keys and re-encrypt them with the primary key.
 
 [[encryption-key-docker-configuration]]
 ==== Docker configuration

@@ -1,0 +1,213 @@
+# overlays.yaml
+overlay: 1.0.0
+info:
+  title: Overlays for the Kibana API document
+  version: 0.0.1
+actions:
+# Clean up server definitions
+  - target: '$.servers.*'
+    description: Remove all servers so we can add our own.
+    remove: true
+  - target: '$.servers'
+    description: Add server into the now empty server array.
+    update:
+      - url: https://{kibana_url}
+        variables:
+          kibana_url:
+            default: localhost:5601
+# Add an introduction to spaces
+  - target: '$'
+    description: Add an extra page about spaces
+    update:
+      x-topics:
+        - title: Kibana spaces
+          content: |
+            Spaces enable you to organize your dashboards and other saved objects into meaningful categories.
+            You can use the default space or create your own spaces.
+
+            To run APIs in non-default spaces, you must add `s/{space_id}/` to the path.
+            For example:
+
+            ```
+            curl -X GET "http://localhost:5601/s/marketing/api/data_views"
+            ```
+
+            If you use the Kibana console to send API requests, it automatically adds the appropriate space identifier.
+
+            To learn more, check out [Spaces](https://www.elastic.co/guide/en/kibana/master/xpack-spaces.html).
+# Add some tag descriptions and displayNames
+  - target: '$.tags[?(@.name=="alerting")]'
+    description: Change tag description and displayName
+    update:
+      description: >
+        Alerting enables you to define rules, which detect complex conditions within your data.
+        When a condition is met, the rule tracks it as an alert and runs the actions that are defined in the rule. 
+        Actions typically involve the use of connectors to interact with Kibana services or third party integrations.
+      externalDocs:
+        description: Alerting documentation
+        url: https://www.elastic.co/guide/en/kibana/master/alerting-getting-started.html
+      x-displayName: "Alerting"
+  - target: '$.tags[?(@.name=="cases")]'
+    description: Change tag description and displayName
+    update:
+      description: >
+        Cases are used to open and track issues.
+        You can add assignees and tags to your cases, set their severity and status, and add alerts, comments, and visualizations.
+        You can also send cases to external incident management systems by configuring connectors.
+      externalDocs:
+        description: Cases documentation
+        url: https://www.elastic.co/guide/en/kibana/master/cases.html
+      x-displayName: "Cases"
+  - target: '$.tags[?(@.name=="connectors")]'
+    description: Change tag description and displayName
+    update:
+      description: >
+        Connectors provide a central place to store connection information for services and integrations with Elastic or third party systems.
+        Alerting rules can use connectors to run actions when rule conditions are met.
+      externalDocs:
+        description: Connector documentation
+        url: https://www.elastic.co/guide/en/kibana/current/action-types.html
+      x-displayName: "Connectors"
+  - target: '$.tags[?(@.name=="data views")]'
+    description: Change displayName
+    update:
+      x-displayName: "Data views"
+  - target: '$.tags[?(@.name=="ml")]'
+    description: Change displayName
+    update:
+      x-displayName: "Machine learning"
+  - target: '$.tags[?(@.name=="roles")]'
+    description: Change displayName and description
+    update:
+      x-displayName: "Roles"
+      description: Manage the roles that grant Elasticsearch and Kibana privileges.
+      externalDocs:
+        description: Kibana role management
+        url: https://www.elastic.co/guide/en/kibana/master/kibana-role-management.html
+  - target: '$.tags[?(@.name=="slo")]'
+    description: Change displayName
+    update:
+      x-displayName: "Service level objectives"
+  - target: '$.tags[?(@.name=="spaces")]'
+    description: Change displayName
+    update:
+      x-displayName: "Spaces"
+      description: Manage your Kibana spaces.
+      externalDocs:
+        url: https://www.elastic.co/guide/en/kibana/master/xpack-spaces.html
+        description: Space overview
+  - target: '$.tags[?(@.name=="system")]'
+    description: Change displayName and description
+    update:
+      x-displayName: "System"
+      description: >
+        Get information about the system status, resource usage, and installed plugins.
+# Remove extra tags from operations
+  - target: "$.paths[*][*].tags[1:]"
+    description: Remove all but first tag from operations
+    remove: true
+# Examples that are not applicable to serverless
+  - target: "$.paths['/api/spaces/_copy_saved_objects']['post']"
+    description: "Add example to copy saved objects to space API"
+    update: 
+      requestBody: 
+        content: 
+          application/json; Elastic-Api-Version=2023-10-31: 
+            examples:
+              copySavedObjectsRequestExample1:
+                $ref: "../examples/copy_saved_objects_request1.yaml"
+              copySavedObjectsRequestExample2:
+                $ref: "../examples/copy_saved_objects_request2.yaml"
+      responses:
+        200: 
+          content: 
+            application/json; Elastic-Api-Version=2023-10-31: 
+              examples:
+                copySavedObjectsResponseExample1:
+                  $ref: "../examples/copy_saved_objects_response1.yaml"
+                copySavedObjectsResponseExample2:
+                  $ref: "../examples/copy_saved_objects_response2.yaml"
+                copySavedObjectsResponseExample3:
+                  $ref: "../examples/copy_saved_objects_response3.yaml"
+                copySavedObjectsResponseExample4:
+                  $ref: "../examples/copy_saved_objects_response4.yaml"
+  - target: "$.paths['/api/spaces/_resolve_copy_saved_objects_errors']['post']"
+    description: "Add example to resolve copy saved objects to space conflicts API"
+    update: 
+      requestBody: 
+        content: 
+          application/json; Elastic-Api-Version=2023-10-31: 
+            examples:
+              resolveCopySavedObjectsRequestExample1:
+                $ref: "../examples/resolve_copy_saved_objects_request1.yaml"
+              resolveCopySavedObjectsRequestExample2:
+                $ref: "../examples/resolve_copy_saved_objects_request2.yaml"
+      responses:
+        200: 
+          content: 
+            application/json; Elastic-Api-Version=2023-10-31: 
+              examples:
+                resolveCopySavedObjectsResponseExample1:
+                  $ref: "../examples/copy_saved_objects_response1.yaml"
+                resolveCopySavedObjectsResponseExample2:
+                  $ref: "../examples/copy_saved_objects_response2.yaml"
+  - target: "$.paths['/api/spaces/_disable_legacy_url_aliases']['post']"
+    description: "Add example to disable legacy URL aliases API"
+    update: 
+      requestBody: 
+        content: 
+          application/json; Elastic-Api-Version=2023-10-31: 
+            examples:
+              disableLegacyURLRequestExample1:
+                $ref: "../examples/disable_legacy_url_request1.yaml"
+  - target: "$.paths['/api/spaces/_update_objects_spaces']['post']"
+    description: "Add example to update saved object spaces API"
+    update: 
+      requestBody: 
+        content: 
+          application/json; Elastic-Api-Version=2023-10-31: 
+            examples:
+              updateObjectSpacesRequestExample1:
+                $ref: "../examples/update_saved_objects_spaces_request1.yaml"
+      responses:
+        200: 
+          content: 
+            application/json; Elastic-Api-Version=2023-10-31: 
+              examples:
+                updateObjectSpacesResponseExample1:
+                  $ref: "../examples/update_saved_objects_spaces_response1.yaml"
+  - target: "$.paths['/api/security/role/{name}']['put']"
+    description: "Add examples to create role API"
+    update: 
+      requestBody:
+        content: 
+          application/json; Elastic-Api-Version=2023-10-31: 
+            examples:
+              createRoleRequest1:
+                $ref: "../examples/create_role_request1.yaml"
+              createRoleRequest2:
+                $ref: "../examples/create_role_request2.yaml"
+              createRoleRequest3:
+                $ref: "../examples/create_role_request3.yaml"
+              createRoleRequest4:
+                $ref: "../examples/create_role_request4.yaml"
+  - target: "$.paths['/api/security/role/{name}']['get']"
+    description: "Add example to get role API"
+    update:
+      responses:
+        200:
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              examples:
+                getRoleResponse1:
+                  $ref: '../examples/get_role_response1.yaml'
+  - target: "$.paths['/api/security/role']['get']"
+    description: "Add example to get roles API"
+    update:
+      responses:
+        200:
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              examples:
+                getRolesResponse1:
+                  $ref: '../examples/get_roles_response1.yaml'

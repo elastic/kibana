@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import expect from '@kbn/expect';
@@ -96,8 +97,7 @@ export class InspectorService extends FtrService {
    * @param size rows count
    */
   public async setTablePageSize(size: number): Promise<void> {
-    const panel = await this.testSubjects.find('inspectorPanel');
-    await this.find.clickByButtonText('Rows per page: 20', panel);
+    await this.testSubjects.click('tablePaginationPopoverButton');
     // The buttons for setting table page size are in a popover element. This popover
     // element appears as if it's part of the inspectorPanel but it's really attached
     // to the body element by a portal.
@@ -327,5 +327,10 @@ export class InspectorService extends FtrService {
     const comboBoxOptions = await this.comboBox.getOptionsList('inspectorRequestChooser');
 
     return value === comboBoxOptions;
+  }
+
+  public async getRequestTotalTime() {
+    const [ms] = (await this.testSubjects.getVisibleText('inspectorRequestTotalTime')).split('ms');
+    return parseFloat(ms);
   }
 }

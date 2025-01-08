@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { mockCoreContext } from '@kbn/core-base-server-mocks';
@@ -69,8 +70,42 @@ describe('#setup', () => {
     });
   });
 
+  it('fetches userSettings when client is set and returns `system` when `darkMode` is set to `system`', async () => {
+    startDeps.userProfile.getCurrent.mockResolvedValue(createUserProfile('system'));
+
+    const { getUserSettingDarkMode } = service.setup();
+    service.start(startDeps);
+
+    const kibanaRequest = httpServerMock.createKibanaRequest();
+    const darkMode = await getUserSettingDarkMode(kibanaRequest);
+
+    expect(darkMode).toEqual('system');
+    expect(startDeps.userProfile.getCurrent).toHaveBeenCalledTimes(1);
+    expect(startDeps.userProfile.getCurrent).toHaveBeenCalledWith({
+      request: kibanaRequest,
+      dataPath: 'userSettings',
+    });
+  });
+
   it('fetches userSettings when client is set and returns `undefined` when `darkMode` is set to `` (the default value)', async () => {
     startDeps.userProfile.getCurrent.mockResolvedValue(createUserProfile(''));
+
+    const { getUserSettingDarkMode } = service.setup();
+    service.start(startDeps);
+
+    const kibanaRequest = httpServerMock.createKibanaRequest();
+    const darkMode = await getUserSettingDarkMode(kibanaRequest);
+
+    expect(darkMode).toEqual(undefined);
+    expect(startDeps.userProfile.getCurrent).toHaveBeenCalledTimes(1);
+    expect(startDeps.userProfile.getCurrent).toHaveBeenCalledWith({
+      request: kibanaRequest,
+      dataPath: 'userSettings',
+    });
+  });
+
+  it('fetches userSettings when client is set and returns `undefined` when `darkMode` is set to `space_default`', async () => {
+    startDeps.userProfile.getCurrent.mockResolvedValue(createUserProfile('space_default'));
 
     const { getUserSettingDarkMode } = service.setup();
     service.start(startDeps);

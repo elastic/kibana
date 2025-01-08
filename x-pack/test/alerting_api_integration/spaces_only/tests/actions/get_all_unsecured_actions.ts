@@ -125,7 +125,7 @@ export default function createUnsecuredActionTests({ getService }: FtrProviderCo
           },
         })
         .expect(200);
-      objectRemover.add(Spaces.space1.id, createdConnector1.id, 'action', 'actions');
+      objectRemover.add(Spaces.space1.id, createdConnector1.id, 'connector', 'actions');
 
       const { body: createdConnector2 } = await supertest
         .post(`${getUrlPrefix(Spaces.other.id)}/api/actions/connector`)
@@ -141,7 +141,7 @@ export default function createUnsecuredActionTests({ getService }: FtrProviderCo
           },
         })
         .expect(200);
-      objectRemover.add(Spaces.other.id, createdConnector2.id, 'action', 'actions');
+      objectRemover.add(Spaces.other.id, createdConnector2.id, 'connector', 'actions');
 
       const space1SpaceResponse = await supertest
         .post(`/api/get_all_unsecured_actions`)

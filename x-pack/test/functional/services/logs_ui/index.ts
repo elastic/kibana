@@ -15,5 +15,21 @@ export function LogsUiProvider(context: FtrProviderContext) {
     logEntryCategoriesPage: LogEntryCategoriesPageProvider(context),
     logEntryRatePage: LogEntryRatePageProvider(context),
     logStreamPage: LogStreamPageProvider(context),
+    cleanIndices: createCleanIndicesHandler(context),
   };
 }
+
+const createCleanIndicesHandler = (context: FtrProviderContext) => async () => {
+  const es = context.getService('es');
+  const log = context.getService('log');
+
+  log.info('Deleting all the indices');
+
+  const indicesResponse = await es.indices.get({ index: '*' });
+
+  const indicesDeletionPromises = Object.keys(indicesResponse).map((index) =>
+    es.indices.delete({ index })
+  );
+
+  return Promise.all(indicesDeletionPromises);
+};

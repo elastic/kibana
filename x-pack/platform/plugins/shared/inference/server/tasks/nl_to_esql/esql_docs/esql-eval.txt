@@ -1,0 +1,70 @@
+# EVAL
+
+The EVAL command allows you to append new columns with calculated values to your data.
+
+## Syntax
+
+`EVAL [column1 =] value1[, ..., [columnN =] valueN]`
+
+### Parameters
+
+#### {columnX}
+
+This is the name of the column. If a column with the same name already exists, it will be replaced. If a column name is used more than once, only the rightmost duplicate will create a column.
+
+#### {valueX}
+
+This is the value for the column. It can be a literal, an expression, or a function. Columns defined to the left of this one can be used.
+
+## Notes
+
+EVAL supports the following types of functions:
+- Mathematical functions
+- String functions
+- Date-time functions
+- Type conversation functions
+- Conditional functions and expressions
+- Multi-value functions
+
+Aggregation functions are NOT supported for EVAL.
+
+## Examples
+
+The following example multiplies the `height` column by 3.281 and 100 to create new columns `height_feet` and `height_cm`:
+
+```esql
+FROM employees
+| SORT emp_no
+| KEEP first_name, last_name, height
+| EVAL height_feet = height * 3.281, height_cm = height * 100
+```
+
+If the specified column already exists, the existing column will be replaced, and the new column will be appended to the table:
+
+```esql
+FROM employees
+| SORT emp_no
+| KEEP first_name, last_name, height
+| EVAL height = height * 3.281
+```
+
+Specifying the output column name is optional. If not specified, the new column name is equal to the expression. The following query adds a column named `height*3.281`:
+
+```esql
+FROM employees
+| SORT emp_no
+| KEEP first_name, last_name, height
+| EVAL height * 3.281
+```
+
+Because this name contains special characters, it needs to be quoted with backticks (`) when using it in subsequent commands:
+
+```esql
+FROM employees
+| EVAL height * 3.281
+| STATS avg_height_feet = AVG(`height * 3.281`)
+```
+
+### Limitations
+- If a column with the same name already exists, the existing column is dropped.
+- If a column name is used more than once, only the rightmost duplicate creates a column.

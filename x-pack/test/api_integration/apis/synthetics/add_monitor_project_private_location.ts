@@ -24,9 +24,6 @@ export default function ({ getService }: FtrProviderContext) {
     let projectMonitors: ProjectMonitorsRequest;
 
     const monitorTestService = new SyntheticsMonitorTestService(getService);
-
-    let testPolicyId = '';
-    const testPolicyName = 'Fleet test server policy' + Date.now();
     const testPrivateLocations = new PrivateLocationTestService(getService);
 
     const setUniqueIds = (request: ProjectMonitorsRequest) => {
@@ -42,10 +39,7 @@ export default function ({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'true')
         .expect(200);
       await testPrivateLocations.installSyntheticsPackage();
-
-      const apiResponse = await testPrivateLocations.addFleetPolicy(testPolicyName);
-      testPolicyId = apiResponse.body.item.id;
-      await testPrivateLocations.setTestLocations([testPolicyId]);
+      await testPrivateLocations.addPrivateLocation();
     });
 
     after(async () => {
