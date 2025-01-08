@@ -18,7 +18,6 @@ import {
   forcemergeIndices as forcemergeIndicesRequest,
   openIndices as openIndicesRequest,
   refreshIndices as refreshIndicesRequest,
-  unfreezeIndices as unfreezeIndicesRequest,
 } from '../../../../services';
 import { notificationService } from '../../../../services/notification';
 import { httpService } from '../../../../services/http';
@@ -162,24 +161,6 @@ export const ManageIndexButton: FunctionComponent<Props> = ({
     }
   }, [reloadIndices, indexNames]);
 
-  const unfreezeIndices = useCallback(async () => {
-    setIsLoading(true);
-    try {
-      await unfreezeIndicesRequest(indexNames);
-      await reloadIndices();
-      setIsLoading(false);
-      notificationService.showSuccessToast(
-        i18n.translate('xpack.idxMgmt.unfreezeIndicesAction.indexUnfrozenMessage', {
-          defaultMessage: 'The index {indexNames} was unfrozen.',
-          values: { indexNames: indexNames.join(', ') },
-        })
-      );
-    } catch (error) {
-      setIsLoading(false);
-      notificationService.showDangerToast(error.body.message);
-    }
-  }, [reloadIndices, indexNames]);
-
   const forcemergeIndices = useCallback(
     async (maxNumSegments: string) => {
       setIsLoading(true);
@@ -251,7 +232,6 @@ export const ManageIndexButton: FunctionComponent<Props> = ({
       flushIndices={flushIndices}
       refreshIndices={refreshIndices}
       clearCacheIndices={clearCacheIndices}
-      unfreezeIndices={unfreezeIndices}
       forcemergeIndices={forcemergeIndices}
       deleteIndices={deleteIndices}
       performExtensionAction={performExtensionAction}
