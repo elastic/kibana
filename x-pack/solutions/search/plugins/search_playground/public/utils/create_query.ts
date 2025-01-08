@@ -192,24 +192,32 @@ export function createQuery(
   // for single Elser support to make it easy to read - skips bool query
   if (boolMatches.queryMatches.length === 1 && boolMatches.knnMatches.length === 0) {
     const semanticField = boolMatches.queryMatches[0].semantic?.field ?? null;
+
+    let isSourceField = false;
+    indices.forEach((index) => {
+      if (sourceFields[index].includes(semanticField)) {
+        isSourceField = true;
+      }
+    });
+
     return {
       retriever: {
         standard: {
           query: boolMatches.queryMatches[0],
         },
-        ...(semanticField
-          ? {
-              highlight: {
-                fields: {
-                  [semanticField]: {
-                    type: SEMANTIC_FIELD_TYPE,
-                    number_of_fragments: 2,
-                  },
+      },
+      ...(isSourceField
+        ? {
+            highlight: {
+              fields: {
+                [semanticField]: {
+                  type: SEMANTIC_FIELD_TYPE,
+                  number_of_fragments: 2,
                 },
               },
-            }
-          : {}),
-      },
+            },
+          }
+        : {}),
     };
   }
 
