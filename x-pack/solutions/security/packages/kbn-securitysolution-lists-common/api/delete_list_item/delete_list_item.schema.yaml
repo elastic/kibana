@@ -17,18 +17,21 @@ paths:
           description: Required if `list_id` and `value` are not specified
           schema:
             $ref: '../model/list_common.schema.yaml#/components/schemas/ListId'
+          example: pd1WRJQBs4HAK3VQeHFI
         - name: list_id
           in: query
           required: false
           description: Required if `id` is not specified
           schema:
             $ref: '../model/list_common.schema.yaml#/components/schemas/ListId'
+          example: ip_list
         - name: value
           in: query
           required: false
           description: Required if `id` is not specified
           schema:
             type: string
+          example: 255.255.255.255
         - name: refresh
           in: query
           required: false
@@ -37,6 +40,7 @@ paths:
             type: string
             enum: ['true', 'false', 'wait_for']
             default: 'false'
+          example: false
       responses:
         200:
           description: Successful response
@@ -48,6 +52,20 @@ paths:
                   - type: array
                     items:
                       $ref: '../model/list_schemas.schema.yaml#/components/schemas/ListItem'
+                examples:
+                  ipItem:
+                    value:
+                      id: pd1WRJQBs4HAK3VQeHFI
+                      type: ip
+                      list_id: ip_list
+                      value: 255.255.255.255
+                      @timestamp: 2025-01-08T05:15:05.159Z
+                      _version: WzIwLDFd
+                      tie_breaker_id: eee41dc7-1666-4876-982f-8b0f7b59eca3
+                      created_at: 2025-01-08T05:15:05.159Z
+                      created_by: elastic
+                      updated_at: 2025-01-08T05:44:14.009Z
+                      updated_by: elastic
         400:
           description: Invalid input data response
           content:

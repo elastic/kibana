@@ -27,6 +27,74 @@ paths:
                   - lists
                   - listItems
                   - is_authenticated
+              examples:
+                privileges:
+                  value:
+                    listItems:
+                      username: elastic
+                      has_all_requested: true
+                      cluster:
+                        all: true
+                        monitor_ml: true
+                        manage_transform: true
+                        manage_index_templates: true
+                        monitor_transform: true
+                        manage_ml: true
+                        monitor: true
+                        manage_pipeline: true
+                        manage_api_key: true
+                        manage_security: true
+                        manage_own_api_key: true
+                        manage: true
+                      index:
+                        .items-default:
+                          all: true
+                          create: true
+                          create_doc: true
+                          create_index: true
+                          delete: true
+                          delete_index: true
+                          index: true
+                          maintenance: true
+                          manage: true
+                          monitor: true
+                          read: true
+                          view_index_metadata: true
+                          write: true
+                      application: {}
+                    lists:
+                      username: elastic
+                      has_all_requested: true
+                      cluster:
+                        all: true
+                        monitor_ml: true
+                        manage_transform: true
+                        manage_index_templates: true
+                        monitor_transform: true
+                        manage_ml: true
+                        monitor: true
+                        manage_pipeline: true
+                        manage_api_key: true
+                        manage_security: true
+                        manage_own_api_key: true
+                        manage: true
+                      index:
+                        .lists-default:
+                          all: true
+                          create: true
+                          create_doc: true
+                          create_index: true
+                          delete: true
+                          delete_index: true
+                          index: true
+                          maintenance: true
+                          manage: true
+                          monitor: true
+                          read: true
+                          view_index_metadata: true
+                          write: true
+                      application: {}
+                    is_authenticated: true
         400:
           description: Invalid input data response
           content:
