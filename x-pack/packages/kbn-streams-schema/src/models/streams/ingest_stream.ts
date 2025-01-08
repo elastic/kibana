@@ -14,6 +14,7 @@ export const ingestStreamDefinitonSchema = z
     name: z.string(),
     elasticsearch_assets: z.optional(elasticsearchAssetSchema),
     stream: ingestStreamConfigDefinitonSchema,
+    dashboards: z.optional(z.array(z.string())),
   })
   .strict();
 

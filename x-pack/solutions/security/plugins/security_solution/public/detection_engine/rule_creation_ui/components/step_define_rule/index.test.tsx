@@ -817,12 +817,10 @@ function TestForm({
         isLoading={false}
         form={form}
         indicesConfig={[]}
-        threatIndicesConfig={[]}
         indexPattern={indexPattern}
         isIndexPatternLoading={false}
         isQueryBarValid={true}
         setIsQueryBarValid={jest.fn()}
-        setIsThreatQueryBarValid={jest.fn()}
         index={stepDefineDefaultValue.index}
         threatIndex={stepDefineDefaultValue.threatIndex}
         alertSuppressionFields={stepDefineDefaultValue[ALERT_SUPPRESSION_FIELDS_FIELD_NAME]}
