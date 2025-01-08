@@ -5793,10 +5793,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/formatters@link:packages/kbn-formatters":
-  version "0.0.0"
-  uid ""
-
 "@kbn/ftr-apis-plugin@link:src/platform/plugins/private/ftr_apis":
   version "0.0.0"
   uid ""
@@ -6834,10 +6830,6 @@
   uid ""
 
 "@kbn/resolver-test-plugin@link:x-pack/test/plugin_functional/plugins/resolver_test":
-  version "0.0.0"
-  uid ""
-
-"@kbn/response-ops-feature-flag-service@link:packages/response-ops/feature_flag_service":
   version "0.0.0"
   uid ""
 
