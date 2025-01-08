@@ -15,7 +15,6 @@ import {
   CoreStart,
   KibanaRequest,
   Logger,
-  Plugin,
   PluginInitializerContext,
   SharedGlobalConfig,
   StartServicesAccessor,
@@ -28,7 +27,6 @@ import type {
   IEsSearchRequest,
   IEsSearchResponse,
 } from '@kbn/search-types';
-import { BfetchServerSetup } from '@kbn/bfetch-plugin/server';
 import { ExpressionsServerSetup } from '@kbn/expressions-plugin/server';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
@@ -106,7 +104,6 @@ type StrategyMap = Record<string, ISearchStrategy<any, any>>;
 
 /** @internal */
 export interface SearchServiceSetupDependencies {
-  bfetch: BfetchServerSetup;
   expressions: ExpressionsServerSetup;
   usageCollection?: UsageCollectionSetup;
 }
@@ -123,7 +120,7 @@ export interface SearchRouteDependencies {
   globalConfig$: Observable<SharedGlobalConfig>;
 }
 
-export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
+export class SearchService {
   private readonly aggsService = new AggsService();
   private readonly searchSourceService = new SearchSourceService();
   private searchStrategies: StrategyMap = {};
@@ -145,7 +142,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
 
   public setup(
     core: CoreSetup<DataPluginStartDependencies, DataPluginStart>,
-    { bfetch, expressions, usageCollection }: SearchServiceSetupDependencies
+    { expressions, usageCollection }: SearchServiceSetupDependencies
   ): ISearchSetup {
     core.savedObjects.registerType(searchSessionSavedObjectType);
     const usage = usageCollection ? usageProvider(core) : undefined;
