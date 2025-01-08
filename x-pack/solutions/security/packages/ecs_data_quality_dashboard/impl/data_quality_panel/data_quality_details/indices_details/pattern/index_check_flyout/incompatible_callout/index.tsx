@@ -17,7 +17,7 @@ import {
   MAPPINGS_THAT_CONFLICT_WITH_ECS,
   PAGES_MAY_NOT_DISPLAY_EVENTS,
 } from '../../../../../translations';
-import { CalloutItem } from '../styles';
+import { calloutItemCss } from '../styles';
 
 export interface Props {
   incompatibleFieldCount?: number;
@@ -41,15 +41,15 @@ const IncompatibleCalloutComponent: React.FC<Props> = ({
     >
       <div data-test-subj="fieldsAreIncompatible">{INCOMPATIBLE_CALLOUT(ecsVersion)}</div>
       <EuiSpacer size="xs" />
-      <CalloutItem data-test-subj="rulesMayNotMatch">
+      <div css={calloutItemCss} data-test-subj="rulesMayNotMatch">
         {DETECTION_ENGINE_RULES_MAY_NOT_MATCH}
-      </CalloutItem>
-      <CalloutItem data-test-subj="pagesMayNotDisplayEvents">
+      </div>
+      <div css={calloutItemCss} data-test-subj="pagesMayNotDisplayEvents">
         {PAGES_MAY_NOT_DISPLAY_EVENTS}
-      </CalloutItem>
-      <CalloutItem data-test-subj="mappingsThatDontComply">
+      </div>
+      <div css={calloutItemCss} data-test-subj="mappingsThatDontComply">
         {MAPPINGS_THAT_CONFLICT_WITH_ECS}
-      </CalloutItem>
+      </div>
     </EuiCallOut>
   );
 };
