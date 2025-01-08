@@ -93,7 +93,7 @@ export const DragHandle = React.forwardRef<
         }
       };
     },
-    [onDragStart, onDragEnd, gridLayoutStateManager.accessMode$]
+    [onDragStart, onDragEnd]
   );
 
   useEffect(() => {
