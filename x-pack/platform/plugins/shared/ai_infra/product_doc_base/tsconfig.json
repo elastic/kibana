@@ -25,5 +25,6 @@
     "@kbn/logging-mocks",
     "@kbn/licensing-plugin",
     "@kbn/task-manager-plugin",
+    "@kbn/inference-common",
   ]
 }
