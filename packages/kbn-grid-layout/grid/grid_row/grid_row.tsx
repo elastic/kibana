@@ -62,8 +62,7 @@ export const GridRow = forwardRef<HTMLDivElement, GridRowProps>(
       const { columnCount, rowHeight } = runtimeSettings;
 
       return css`
-        --gridWidth: calc(100% - ((var(--kbnGridGutterSize) * ${columnCount - 1}) * 1px));
-        grid-template-columns: repeat(${columnCount}, calc(var(--gridWidth) / ${columnCount}));
+        grid-template-columns: repeat(${columnCount}, minmax(0, 1fr));
         grid-template-rows: repeat(${getRowCount(initialRow)}, ${rowHeight}px);
         gap: calc(var(--kbnGridGutterSize) * 1px);
       `;
