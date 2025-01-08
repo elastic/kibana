@@ -100,8 +100,12 @@ interface LensApiProps {}
 
 export type LensSavedObjectAttributes = Omit<LensDocument, 'savedObjectId' | 'type'>;
 
+/**
+ * This visualization context can have a different attributes than the
+ * one stored in the Lens API attributes
+ */
 export interface VisualizationContext {
-  doc: LensDocument | undefined;
+  activeAttributes: LensDocument | undefined;
   mergedSearchContext: ExecutionContextSearch;
   indexPatterns: IndexPatternMap;
   indexPatternRefs: IndexPatternRef[];
@@ -111,6 +115,7 @@ export interface VisualizationContext {
 }
 
 export interface VisualizationContextHelper {
+  // the doc prop here is a convenience reference to the internalApi.attributes
   getVisualizationContext: () => VisualizationContext;
   updateVisualizationContext: (newContext: Partial<VisualizationContext>) => void;
 }
@@ -399,7 +404,8 @@ export type LensApi = Simplify<
 // there's some overlapping between this and the LensApi but they are shared references
 export type LensInternalApi = Simplify<
   Pick<IntegrationCallbacks, 'updateAttributes' | 'updateOverrides'> &
-    PublishesDataViews & {
+    PublishesDataViews &
+    VisualizationContextHelper & {
       attributes$: PublishingSubject<LensRuntimeState['attributes']>;
       overrides$: PublishingSubject<LensOverrides['overrides']>;
       disableTriggers$: PublishingSubject<LensPanelProps['disableTriggers']>;

@@ -18,10 +18,12 @@ import {
   DocumentDetailsAnalyzerPanelKey,
 } from '../constants/panel_keys';
 import { ANALYZE_GRAPH_ID, ANALYZER_PREVIEW_BANNER } from '../../left/components/analyze_graph';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 
 jest.mock('@kbn/expandable-flyout');
 jest.mock('../../../../common/lib/kibana');
 jest.mock('./use_which_flyout');
+jest.mock('../../../../common/hooks/use_experimental_features');
 
 const mockedUseKibana = mockUseKibana();
 (useKibana as jest.Mock).mockReturnValue(mockedUseKibana);
@@ -38,12 +40,19 @@ describe('useNavigateToAnalyzer', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     jest.mocked(useExpandableFlyoutApi).mockReturnValue(mockFlyoutApi);
+    (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(false);
   });
 
-  it('when isFlyoutOpen is true, should return callback that opens left and preview panels', () => {
+  it('when isFlyoutOpen is true and not in preview mode, should return callback that opens left and preview panels', () => {
     mockUseWhichFlyout.mockReturnValue(FLYOUT_KEY);
     const hookResult = renderHook(() =>
-      useNavigateToAnalyzer({ isFlyoutOpen: true, eventId, indexName, scopeId })
+      useNavigateToAnalyzer({
+        isFlyoutOpen: true,
+        eventId,
+        indexName,
+        scopeId,
+        isPreviewMode: false,
+      })
     );
     hookResult.result.current.navigateToAnalyzer();
 
@@ -69,11 +78,33 @@ describe('useNavigateToAnalyzer', () => {
     });
   });
 
+  it('when isFlyoutOpen is true and in preview mode, navigation is not enabled', () => {
+    mockUseWhichFlyout.mockReturnValue(FLYOUT_KEY);
+    const hookResult = renderHook(() =>
+      useNavigateToAnalyzer({
+        isFlyoutOpen: true,
+        eventId,
+        indexName,
+        scopeId,
+        isPreviewMode: true,
+      })
+    );
+    hookResult.result.current.navigateToAnalyzer();
+    expect(mockFlyoutApi.openLeftPanel).not.toHaveBeenCalled();
+    expect(mockFlyoutApi.openPreviewPanel).not.toHaveBeenCalled();
+  });
+
   it('when isFlyoutOpen is false and scopeId is not timeline, should return callback that opens a new flyout', () => {
     mockUseWhichFlyout.mockReturnValue(null);
 
     const hookResult = renderHook(() =>
-      useNavigateToAnalyzer({ isFlyoutOpen: false, eventId, indexName, scopeId })
+      useNavigateToAnalyzer({
+        isFlyoutOpen: false,
+        eventId,
+        indexName,
+        scopeId,
+        isPreviewMode: true,
+      })
     );
     hookResult.result.current.navigateToAnalyzer();
     expect(mockFlyoutApi.openFlyout).toHaveBeenCalledWith({
@@ -111,7 +142,13 @@ describe('useNavigateToAnalyzer', () => {
     mockUseWhichFlyout.mockReturnValue(null);
     const timelineId = 'timeline-1';
     const hookResult = renderHook(() =>
-      useNavigateToAnalyzer({ isFlyoutOpen: false, eventId, indexName, scopeId: timelineId })
+      useNavigateToAnalyzer({
+        isFlyoutOpen: false,
+        eventId,
+        indexName,
+        scopeId: timelineId,
+        isPreviewMode: true,
+      })
     );
     hookResult.result.current.navigateToAnalyzer();
     expect(mockFlyoutApi.openFlyout).toHaveBeenCalledWith({
@@ -142,6 +179,179 @@ describe('useNavigateToAnalyzer', () => {
           banner: ANALYZER_PREVIEW_BANNER,
         },
       },
+    });
+  });
+
+  describe('when new navigation is enabled', () => {
+    beforeEach(() => {
+      (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
+    });
+
+    it('when isFlyoutOpen is true and not in preview mode, should return callback that opens left and preview panels', () => {
+      mockUseWhichFlyout.mockReturnValue(FLYOUT_KEY);
+      const hookResult = renderHook(() =>
+        useNavigateToAnalyzer({
+          isFlyoutOpen: true,
+          eventId,
+          indexName,
+          scopeId,
+          isPreviewMode: false,
+        })
+      );
+      hookResult.result.current.navigateToAnalyzer();
+
+      expect(mockFlyoutApi.openLeftPanel).toHaveBeenCalledWith({
+        id: DocumentDetailsLeftPanelKey,
+        path: {
+          tab: 'visualize',
+          subTab: ANALYZE_GRAPH_ID,
+        },
+        params: {
+          id: eventId,
+          indexName,
+          scopeId,
+        },
+      });
+
+      expect(mockFlyoutApi.openPreviewPanel).toHaveBeenCalledWith({
+        id: DocumentDetailsAnalyzerPanelKey,
+        params: {
+          resolverComponentInstanceID: `${FLYOUT_KEY}-${scopeId}`,
+          banner: ANALYZER_PREVIEW_BANNER,
+        },
+      });
+    });
+
+    it('when isFlyoutOpen is true and in preview mode, should return callback that opens new flyout', () => {
+      mockUseWhichFlyout.mockReturnValue(FLYOUT_KEY);
+      const hookResult = renderHook(() =>
+        useNavigateToAnalyzer({
+          isFlyoutOpen: true,
+          eventId,
+          indexName,
+          scopeId,
+          isPreviewMode: true,
+        })
+      );
+      hookResult.result.current.navigateToAnalyzer();
+
+      expect(mockFlyoutApi.openFlyout).toHaveBeenCalledWith({
+        right: {
+          id: DocumentDetailsRightPanelKey,
+          params: {
+            id: eventId,
+            indexName,
+            scopeId,
+          },
+        },
+        left: {
+          id: DocumentDetailsLeftPanelKey,
+          path: {
+            tab: 'visualize',
+            subTab: ANALYZE_GRAPH_ID,
+          },
+          params: {
+            id: eventId,
+            indexName,
+            scopeId,
+          },
+        },
+        preview: {
+          id: DocumentDetailsAnalyzerPanelKey,
+          params: {
+            resolverComponentInstanceID: `${FLYOUT_KEY}-${scopeId}`,
+            banner: ANALYZER_PREVIEW_BANNER,
+          },
+        },
+      });
+    });
+
+    it('when isFlyoutOpen is false and scopeId is not timeline, should return callback that opens a new flyout', () => {
+      mockUseWhichFlyout.mockReturnValue(null);
+
+      const hookResult = renderHook(() =>
+        useNavigateToAnalyzer({
+          isFlyoutOpen: false,
+          eventId,
+          indexName,
+          scopeId,
+          isPreviewMode: true,
+        })
+      );
+      hookResult.result.current.navigateToAnalyzer();
+      expect(mockFlyoutApi.openFlyout).toHaveBeenCalledWith({
+        right: {
+          id: DocumentDetailsRightPanelKey,
+          params: {
+            id: eventId,
+            indexName,
+            scopeId,
+          },
+        },
+        left: {
+          id: DocumentDetailsLeftPanelKey,
+          path: {
+            tab: 'visualize',
+            subTab: ANALYZE_GRAPH_ID,
+          },
+          params: {
+            id: eventId,
+            indexName,
+            scopeId,
+          },
+        },
+        preview: {
+          id: DocumentDetailsAnalyzerPanelKey,
+          params: {
+            resolverComponentInstanceID: `${FLYOUT_KEY}-${scopeId}`,
+            banner: ANALYZER_PREVIEW_BANNER,
+          },
+        },
+      });
+    });
+
+    it('when isFlyoutOpen is false and scopeId is current timeline, should return callback that opens a new flyout in timeline', () => {
+      mockUseWhichFlyout.mockReturnValue(null);
+      const timelineId = 'timeline-1';
+      const hookResult = renderHook(() =>
+        useNavigateToAnalyzer({
+          isFlyoutOpen: false,
+          eventId,
+          indexName,
+          scopeId: timelineId,
+          isPreviewMode: true,
+        })
+      );
+      hookResult.result.current.navigateToAnalyzer();
+      expect(mockFlyoutApi.openFlyout).toHaveBeenCalledWith({
+        right: {
+          id: DocumentDetailsRightPanelKey,
+          params: {
+            id: eventId,
+            indexName,
+            scopeId: timelineId,
+          },
+        },
+        left: {
+          id: DocumentDetailsLeftPanelKey,
+          path: {
+            tab: 'visualize',
+            subTab: ANALYZE_GRAPH_ID,
+          },
+          params: {
+            id: eventId,
+            indexName,
+            scopeId: timelineId,
+          },
+        },
+        preview: {
+          id: DocumentDetailsAnalyzerPanelKey,
+          params: {
+            resolverComponentInstanceID: `${TIMELINE_FLYOUT_KEY}-${timelineId}`,
+            banner: ANALYZER_PREVIEW_BANNER,
+          },
+        },
+      });
     });
   });
 });

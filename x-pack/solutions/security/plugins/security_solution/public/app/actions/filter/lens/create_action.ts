@@ -11,13 +11,14 @@ import {
   filterOutNullableValues,
   valueToArray,
 } from '@kbn/cell-actions/actions/utils';
-import { isErrorEmbeddable } from '@kbn/embeddable-plugin/public';
-import type { CellValueContext, IEmbeddable } from '@kbn/embeddable-plugin/public';
+import { hasBlockingError } from '@kbn/presentation-publishing';
+import type { CellValueContext } from '@kbn/embeddable-plugin/public';
 import { createAction } from '@kbn/ui-actions-plugin/public';
 import { ACTION_INCOMPATIBLE_VALUE_WARNING } from '@kbn/cell-actions/src/actions/translations';
 import { i18n } from '@kbn/i18n';
+import { isLensApi } from '@kbn/lens-plugin/public';
 import { timelineSelectors } from '../../../../timelines/store';
-import { fieldHasCellActions, isInSecurityApp, isLensEmbeddable } from '../../utils';
+import { fieldHasCellActions, isInSecurityApp } from '../../utils';
 import { TimelineId } from '../../../../../common/types';
 import { DefaultCellActionTypes } from '../../constants';
 import type { SecurityAppStore } from '../../../../common/store';
@@ -77,8 +78,8 @@ export const createFilterLensAction = ({
           }),
     type: DefaultCellActionTypes.FILTER,
     isCompatible: async ({ embeddable, data }) =>
-      !isErrorEmbeddable(embeddable as IEmbeddable) &&
-      isLensEmbeddable(embeddable as IEmbeddable) &&
+      !!hasBlockingError(embeddable) &&
+      isLensApi(embeddable) &&
       isDataColumnsValid(data) &&
       isInSecurityApp(currentAppId),
     execute: async ({ data }) => {

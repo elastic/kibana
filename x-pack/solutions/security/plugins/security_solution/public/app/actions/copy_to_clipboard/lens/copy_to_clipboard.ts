@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import type { CellValueContext, IEmbeddable } from '@kbn/embeddable-plugin/public';
-import { isErrorEmbeddable } from '@kbn/embeddable-plugin/public';
+import type { CellValueContext } from '@kbn/embeddable-plugin/public';
 import { createAction } from '@kbn/ui-actions-plugin/public';
 import copy from 'copy-to-clipboard';
+import { isLensApi } from '@kbn/lens-plugin/public';
+import { hasBlockingError } from '@kbn/presentation-publishing';
 import { KibanaServices } from '../../../../common/lib/kibana';
-import { fieldHasCellActions, isCountField, isInSecurityApp, isLensEmbeddable } from '../../utils';
+import { fieldHasCellActions, isCountField, isInSecurityApp } from '../../utils';
 import { COPY_TO_CLIPBOARD, COPY_TO_CLIPBOARD_ICON, COPY_TO_CLIPBOARD_SUCCESS } from '../constants';
 
 export const ACTION_ID = 'embeddable_copyToClipboard';
@@ -37,8 +38,8 @@ export const createCopyToClipboardLensAction = ({ order }: { order?: number }) =
     getIconType: () => COPY_TO_CLIPBOARD_ICON,
     getDisplayName: () => COPY_TO_CLIPBOARD,
     isCompatible: async ({ embeddable, data }) =>
-      !isErrorEmbeddable(embeddable as IEmbeddable) &&
-      isLensEmbeddable(embeddable as IEmbeddable) &&
+      !hasBlockingError(embeddable) &&
+      isLensApi(embeddable) &&
       isDataColumnsValid(data) &&
       isInSecurityApp(currentAppId),
     execute: async ({ data }) => {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import { TimelineTabs } from '@kbn/securitysolution-data-table';
 import { EuiLink, EuiMark } from '@elastic/eui';
@@ -23,6 +23,7 @@ import { AnalyzerPreview } from './analyzer_preview';
 import { ANALYZER_PREVIEW_TEST_ID } from './test_ids';
 import { useNavigateToAnalyzer } from '../../shared/hooks/use_navigate_to_analyzer';
 import { ExpandablePanel } from '../../../shared/components/expandable_panel';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 
 const timelineId = 'timeline-1';
 
@@ -35,6 +36,9 @@ export const AnalyzerPreviewContainer: React.FC = () => {
 
   const [visualizationInFlyoutEnabled] = useUiSetting$<boolean>(
     ENABLE_VISUALIZATIONS_IN_FLYOUT_SETTING
+  );
+  const isNewNavigationEnabled = useIsExperimentalFeatureEnabled(
+    'newExpandableFlyoutNavigationEnabled'
   );
   // decide whether to show the analyzer preview or not
   const isEnabled = useIsInvestigateInResolverActionEnabled(dataAsNestedObject);
@@ -66,7 +70,26 @@ export const AnalyzerPreviewContainer: React.FC = () => {
     indexName,
     isFlyoutOpen: true,
     scopeId,
+    isPreviewMode,
   });
+
+  const iconType = useMemo(() => {
+    const icon = visualizationInFlyoutEnabled ? 'arrowStart' : 'timeline';
+    return !isPreviewMode ? icon : undefined;
+  }, [visualizationInFlyoutEnabled, isPreviewMode]);
+
+  const isNavigationEnabled = useMemo(() => {
+    // if the analyzer is not enabled or in rule preview mode, the navigation is not enabled
+    if (!isEnabled || isPreview) {
+      return false;
+    }
+    // if the new navigation is enabled, the navigation is enabled (flyout or timeline)
+    if (isNewNavigationEnabled) {
+      return true;
+    }
+    // if the new navigation is not enabled, the navigation is enabled if the flyout is not in preview mode
+    return !isPreviewMode;
+  }, [isNewNavigationEnabled, isPreviewMode, isEnabled, isPreview]);
 
   return (
     <ExpandablePanel
@@ -77,25 +100,23 @@ export const AnalyzerPreviewContainer: React.FC = () => {
             defaultMessage="Analyzer preview"
           />
         ),
-        iconType: visualizationInFlyoutEnabled ? 'arrowStart' : 'timeline',
-        ...(isEnabled &&
-          !isPreview &&
-          !isPreviewMode && {
-            link: {
-              callback: visualizationInFlyoutEnabled ? navigateToAnalyzer : goToAnalyzerTab,
-              tooltip: visualizationInFlyoutEnabled ? (
-                <FormattedMessage
-                  id="xpack.securitySolution.flyout.right.visualizations.analyzerPreview.analyzerPreviewOpenAnalyzerTooltip"
-                  defaultMessage="Open analyzer graph"
-                />
-              ) : (
-                <FormattedMessage
-                  id="xpack.securitySolution.flyout.right.visualizations.analyzerPreview.analyzerPreviewInvestigateTooltip"
-                  defaultMessage="Investigate in timeline"
-                />
-              ),
-            },
-          }),
+        iconType,
+        ...(isNavigationEnabled && {
+          link: {
+            callback: visualizationInFlyoutEnabled ? navigateToAnalyzer : goToAnalyzerTab,
+            tooltip: visualizationInFlyoutEnabled ? (
+              <FormattedMessage
+                id="xpack.securitySolution.flyout.right.visualizations.analyzerPreview.analyzerPreviewOpenAnalyzerTooltip"
+                defaultMessage="Open analyzer graph"
+              />
+            ) : (
+              <FormattedMessage
+                id="xpack.securitySolution.flyout.right.visualizations.analyzerPreview.analyzerPreviewInvestigateTooltip"
+                defaultMessage="Investigate in timeline"
+              />
+            ),
+          },
+        }),
       }}
       data-test-subj={ANALYZER_PREVIEW_TEST_ID}
     >

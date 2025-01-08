@@ -25,7 +25,7 @@ export const GetTimelineRequestQuery = z.object({
    */
   template_timeline_id: z.string().optional(),
   /**
-   * The ID of the timeline to retrieve
+   * The ID of the Timeline to retrieve.
    */
   id: z.string().optional(),
 });

@@ -10,7 +10,7 @@ import { TestProviders } from '../../../../common/mock';
 import React from 'react';
 import { DocumentDetailsContext } from '../../shared/context';
 import { SessionPreviewContainer } from './session_preview_container';
-import { useSessionPreview } from '../hooks/use_session_preview';
+import { useSessionViewConfig } from '../../shared/hooks/use_session_view_config';
 import { useLicense } from '../../../../common/hooks/use_license';
 import { SESSION_PREVIEW_TEST_ID } from './test_ids';
 import {
@@ -21,9 +21,15 @@ import {
   EXPANDABLE_PANEL_TOGGLE_ICON_TEST_ID,
 } from '../../../shared/components/test_ids';
 import { mockContextValue } from '../../shared/mocks/mock_context';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { useInvestigateInTimeline } from '../../../../detections/components/alerts_table/timeline_actions/use_investigate_in_timeline';
 
-jest.mock('../hooks/use_session_preview');
+jest.mock('../../shared/hooks/use_session_view_config');
 jest.mock('../../../../common/hooks/use_license');
+jest.mock('../../../../common/hooks/use_experimental_features');
+jest.mock(
+  '../../../../detections/components/alerts_table/timeline_actions/use_investigate_in_timeline'
+);
 
 const mockNavigateToSessionView = jest.fn();
 jest.mock('../../shared/hooks/use_navigate_to_session_view', () => {
@@ -36,6 +42,15 @@ jest.mock('@kbn/kibana-react-plugin/public', () => {
   return {
     ...original,
     useUiSetting$: () => mockUseUiSetting(),
+  };
+});
+
+jest.mock('react-redux', () => {
+  const original = jest.requireActual('react-redux');
+
+  return {
+    ...original,
+    useDispatch: () => jest.fn(),
   };
 });
 
@@ -62,10 +77,14 @@ const renderSessionPreview = (context = mockContextValue) =>
 describe('SessionPreviewContainer', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(false);
+    (useInvestigateInTimeline as jest.Mock).mockReturnValue({
+      investigateInTimelineAlertClick: jest.fn(),
+    });
   });
 
   it('should render component and link in header', () => {
-    (useSessionPreview as jest.Mock).mockReturnValue(sessionViewConfig);
+    (useSessionViewConfig as jest.Mock).mockReturnValue(sessionViewConfig);
     (useLicense as jest.Mock).mockReturnValue({ isEnterprise: () => true });
 
     const { getByTestId } = renderSessionPreview();
@@ -96,7 +115,7 @@ describe('SessionPreviewContainer', () => {
   });
 
   it('should render error message and text in header if no sessionConfig', () => {
-    (useSessionPreview as jest.Mock).mockReturnValue(null);
+    (useSessionViewConfig as jest.Mock).mockReturnValue(null);
     (useLicense as jest.Mock).mockReturnValue({ isEnterprise: () => true });
 
     const { getByTestId, queryByTestId } = renderSessionPreview();
@@ -114,7 +133,7 @@ describe('SessionPreviewContainer', () => {
   });
 
   it('should render upsell message in header if no correct license', () => {
-    (useSessionPreview as jest.Mock).mockReturnValue(sessionViewConfig);
+    (useSessionViewConfig as jest.Mock).mockReturnValue(sessionViewConfig);
     (useLicense as jest.Mock).mockReturnValue({ isEnterprise: () => false });
 
     const { getByTestId, queryByTestId } = renderSessionPreview();
@@ -133,7 +152,7 @@ describe('SessionPreviewContainer', () => {
   });
 
   it('should not render link to session viewer if flyout is open in preview', () => {
-    (useSessionPreview as jest.Mock).mockReturnValue(sessionViewConfig);
+    (useSessionViewConfig as jest.Mock).mockReturnValue(sessionViewConfig);
     (useLicense as jest.Mock).mockReturnValue({ isEnterprise: () => true });
 
     const { getByTestId, queryByTestId } = renderSessionPreview({
@@ -160,7 +179,7 @@ describe('SessionPreviewContainer', () => {
   });
 
   it('should not render link to session viewer if flyout is open in preview mode', () => {
-    (useSessionPreview as jest.Mock).mockReturnValue(sessionViewConfig);
+    (useSessionViewConfig as jest.Mock).mockReturnValue(sessionViewConfig);
     (useLicense as jest.Mock).mockReturnValue({ isEnterprise: () => true });
 
     const { getByTestId, queryByTestId } = renderSessionPreview({
@@ -180,7 +199,7 @@ describe('SessionPreviewContainer', () => {
   describe('when visualization in flyout flag is enabled', () => {
     it('should open left panel vizualization tab when visualization in flyout flag is on', () => {
       mockUseUiSetting.mockReturnValue([true]);
-      (useSessionPreview as jest.Mock).mockReturnValue(sessionViewConfig);
+      (useSessionViewConfig as jest.Mock).mockReturnValue(sessionViewConfig);
       (useLicense as jest.Mock).mockReturnValue({ isEnterprise: () => true });
 
       const { getByTestId } = renderSessionPreview();
@@ -193,7 +212,7 @@ describe('SessionPreviewContainer', () => {
     });
 
     it('should not render link to session viewer if flyout is open in rule preview', () => {
-      (useSessionPreview as jest.Mock).mockReturnValue(sessionViewConfig);
+      (useSessionViewConfig as jest.Mock).mockReturnValue(sessionViewConfig);
       (useLicense as jest.Mock).mockReturnValue({ isEnterprise: () => true });
 
       const { getByTestId, queryByTestId } = renderSessionPreview({
@@ -211,7 +230,7 @@ describe('SessionPreviewContainer', () => {
     });
 
     it('should not render link to session viewer if flyout is open in preview mode', () => {
-      (useSessionPreview as jest.Mock).mockReturnValue(sessionViewConfig);
+      (useSessionViewConfig as jest.Mock).mockReturnValue(sessionViewConfig);
       (useLicense as jest.Mock).mockReturnValue({ isEnterprise: () => true });
 
       const { getByTestId, queryByTestId } = renderSessionPreview({
@@ -226,6 +245,105 @@ describe('SessionPreviewContainer', () => {
       expect(
         queryByTestId(EXPANDABLE_PANEL_HEADER_TITLE_LINK_TEST_ID(SESSION_PREVIEW_TEST_ID))
       ).not.toBeInTheDocument();
+    });
+  });
+
+  describe('when new navigation is enabled', () => {
+    describe('when visualization in flyout flag is enabled', () => {
+      beforeEach(() => {
+        jest.clearAllMocks();
+        mockUseUiSetting.mockReturnValue([true]);
+        (useSessionViewConfig as jest.Mock).mockReturnValue(sessionViewConfig);
+        (useLicense as jest.Mock).mockReturnValue({ isEnterprise: () => true });
+        (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
+      });
+
+      it('should open left panel vizualization tab when visualization in flyout flag is on', () => {
+        const { getByTestId } = renderSessionPreview();
+
+        expect(
+          getByTestId(EXPANDABLE_PANEL_HEADER_TITLE_LINK_TEST_ID(SESSION_PREVIEW_TEST_ID))
+        ).toBeInTheDocument();
+        getByTestId(EXPANDABLE_PANEL_HEADER_TITLE_LINK_TEST_ID(SESSION_PREVIEW_TEST_ID)).click();
+
+        expect(mockNavigateToSessionView).toHaveBeenCalled();
+      });
+
+      it('should not render link to session viewer if flyout is open in rule preview', () => {
+        const { getByTestId, queryByTestId } = renderSessionPreview({
+          ...mockContextValue,
+          isPreview: true,
+        });
+
+        expect(getByTestId(SESSION_PREVIEW_TEST_ID)).toBeInTheDocument();
+        expect(
+          getByTestId(EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID(SESSION_PREVIEW_TEST_ID))
+        ).toBeInTheDocument();
+        expect(
+          queryByTestId(EXPANDABLE_PANEL_HEADER_TITLE_LINK_TEST_ID(SESSION_PREVIEW_TEST_ID))
+        ).not.toBeInTheDocument();
+      });
+
+      it('should render link to session viewer if flyout is open in preview mode', () => {
+        const { getByTestId } = renderSessionPreview({
+          ...mockContextValue,
+          isPreviewMode: true,
+        });
+
+        expect(getByTestId(SESSION_PREVIEW_TEST_ID)).toBeInTheDocument();
+        expect(
+          getByTestId(EXPANDABLE_PANEL_HEADER_TITLE_LINK_TEST_ID(SESSION_PREVIEW_TEST_ID))
+        ).toBeInTheDocument();
+
+        getByTestId(EXPANDABLE_PANEL_HEADER_TITLE_LINK_TEST_ID(SESSION_PREVIEW_TEST_ID)).click();
+        expect(mockNavigateToSessionView).toHaveBeenCalled();
+      });
+    });
+
+    describe('when visualization in flyout flag is not enabled', () => {
+      beforeEach(() => {
+        jest.clearAllMocks();
+        mockUseUiSetting.mockReturnValue([false]);
+        (useSessionViewConfig as jest.Mock).mockReturnValue(sessionViewConfig);
+        (useLicense as jest.Mock).mockReturnValue({ isEnterprise: () => true });
+        (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
+      });
+
+      it('should open session viewer in timeline', () => {
+        const { getByTestId } = renderSessionPreview();
+        const { investigateInTimelineAlertClick } = useInvestigateInTimeline({});
+        expect(
+          getByTestId(EXPANDABLE_PANEL_HEADER_TITLE_LINK_TEST_ID(SESSION_PREVIEW_TEST_ID))
+        ).toBeInTheDocument();
+        getByTestId(EXPANDABLE_PANEL_HEADER_TITLE_LINK_TEST_ID(SESSION_PREVIEW_TEST_ID)).click();
+
+        expect(investigateInTimelineAlertClick).toHaveBeenCalled();
+      });
+
+      it('should not render link to session viewer if flyout is open in rule preview', () => {
+        const { getByTestId, queryByTestId } = renderSessionPreview({
+          ...mockContextValue,
+          isPreview: true,
+        });
+
+        expect(getByTestId(SESSION_PREVIEW_TEST_ID)).toBeInTheDocument();
+        expect(
+          getByTestId(EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID(SESSION_PREVIEW_TEST_ID))
+        ).toBeInTheDocument();
+        expect(
+          queryByTestId(EXPANDABLE_PANEL_HEADER_TITLE_LINK_TEST_ID(SESSION_PREVIEW_TEST_ID))
+        ).not.toBeInTheDocument();
+      });
+
+      it('should render link to open session viewer in timeline if flyout is open in preview mode', () => {
+        const { getByTestId } = renderSessionPreview({
+          ...mockContextValue,
+          isPreviewMode: true,
+        });
+        const { investigateInTimelineAlertClick } = useInvestigateInTimeline({});
+        getByTestId(EXPANDABLE_PANEL_HEADER_TITLE_LINK_TEST_ID(SESSION_PREVIEW_TEST_ID)).click();
+        expect(investigateInTimelineAlertClick).toHaveBeenCalled();
+      });
     });
   });
 });

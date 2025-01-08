@@ -35,6 +35,8 @@ export const CHAT_BUTTON_TEST_ID = 'newChatByTitle' as const;
 
 export const NOTES_TITLE_TEST_ID = `${FLYOUT_HEADER_TEST_ID}NotesTitle` as const;
 export const NOTES_ADD_NOTE_BUTTON_TEST_ID = `${FLYOUT_HEADER_TEST_ID}NotesAddNoteButton` as const;
+export const NOTES_VIEW_NOTES_BUTTON_TEST_ID =
+  `${FLYOUT_HEADER_TEST_ID}NotesViewNotesButton` as const;
 export const NOTES_ADD_NOTE_ICON_BUTTON_TEST_ID =
   `${FLYOUT_HEADER_TEST_ID}NotesAddNoteIconButton` as const;
 export const NOTES_COUNT_TEST_ID = `${FLYOUT_HEADER_TEST_ID}NotesCount` as const;
@@ -72,6 +74,10 @@ export const MITRE_ATTACK_TITLE_TEST_ID = `${MITRE_ATTACK_TEST_ID}Title` as cons
 export const MITRE_ATTACK_DETAILS_TEST_ID = `${MITRE_ATTACK_TEST_ID}Details` as const;
 
 export const EVENT_RENDERER_TEST_ID = `${PREFIX}EventRenderer` as const;
+
+export const WORKFLOW_STATUS_TEST_ID = `${PREFIX}WorkflowStatus` as const;
+export const WORKFLOW_STATUS_TITLE_TEST_ID = `${WORKFLOW_STATUS_TEST_ID}Title` as const;
+export const WORKFLOW_STATUS_DETAILS_TEST_ID = `${WORKFLOW_STATUS_TEST_ID}Details` as const;
 
 /* Investigation section */
 
