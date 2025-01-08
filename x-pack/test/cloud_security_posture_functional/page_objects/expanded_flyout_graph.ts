@@ -27,8 +27,6 @@ export class ExpandedFlyoutGraph extends FtrService {
   private readonly pageObjects = this.ctx.getPageObjects(['common', 'header']);
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly filterBar = this.ctx.getService('filterBar');
-  // @ts-expect-error queryBarProvider is not a public service
-  private readonly queryBarProvider: QueryBarProvider = this.ctx.getService('queryBarProvider');
 
   async expandGraph(): Promise<void> {
     await this.testSubjects.click(GRAPH_PREVIEW_TITLE_LINK_TEST_ID);
@@ -131,7 +129,10 @@ export class ExpandedFlyoutGraph extends FtrService {
   }
 
   async setKqlQuery(kql: string): Promise<void> {
-    const queryBar = this.queryBarProvider.getQueryBar(GRAPH_INVESTIGATION_TEST_ID);
+    // @ts-expect-error queryBarProvider is not a public service
+    const queryBarProvider: QueryBarProvider = this.ctx.getService('queryBarProvider');
+
+    const queryBar = queryBarProvider.getQueryBar(GRAPH_INVESTIGATION_TEST_ID);
     await queryBar.setQuery(kql);
     await queryBar.submitQuery();
     await this.pageObjects.header.waitUntilLoadingHasFinished();
