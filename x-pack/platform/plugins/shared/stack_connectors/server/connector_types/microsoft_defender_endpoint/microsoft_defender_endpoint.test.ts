@@ -205,4 +205,31 @@ describe('Microsoft Defender for Endpoint Connector', () => {
       }
     );
   });
+
+  describe('#getAgentList()', () => {
+    it('should return expected response', async () => {
+      await expect(
+        connectorMock.instanceMock.getAgentList({ id: '1-2-3' }, connectorMock.usageCollector)
+      ).resolves.toEqual({
+        '@odata.context': 'https://api-us3.securitycenter.microsoft.com/api/$metadata#Machines',
+        '@odata.count': 1,
+        page: 1,
+        pageSize: 20,
+        total: 1,
+        value: [expect.any(Object)],
+      });
+    });
+
+    it('should call Microsoft API with expected query params', async () => {
+      await connectorMock.instanceMock.getAgentList({ id: '1-2-3' }, connectorMock.usageCollector);
+
+      expect(connectorMock.instanceMock.request).toHaveBeenCalledWith(
+        expect.objectContaining({
+          url: 'https://api.mock__microsoft.com/api/machines',
+          params: { $count: true, $filter: 'id eq 1-2-3', $top: 20 },
+        }),
+        connectorMock.usageCollector
+      );
+    });
+  });
 });
