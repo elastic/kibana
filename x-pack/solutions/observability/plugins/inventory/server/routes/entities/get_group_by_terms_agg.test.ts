@@ -7,15 +7,17 @@
 
 import { getGroupByTermsAgg } from './get_group_by_terms_agg';
 
+type Fields = Record<string, string[]>;
+
 describe('getGroupByTermsAgg', () => {
   it('should return an empty object when fields is empty', () => {
-    const fields: { [key: string]: string[] } = {};
+    const fields: Fields = {};
     const result = getGroupByTermsAgg(fields);
     expect(result).toEqual({});
   });
 
   it('should correctly generate aggregation structure for service, host, and container entity types', () => {
-    const fields: { [key: string]: string[] } = {
+    const fields: Fields = {
       service: ['service.name', 'service.environment'],
       host: ['host.name'],
       container: ['container.id', 'foo.bar'],
@@ -57,7 +59,7 @@ describe('getGroupByTermsAgg', () => {
     });
   });
   it('should override maxSize when provided', () => {
-    const fields: {} = {
+    const fields: Fields = {
       host: ['host.name'],
     };
 

@@ -34,7 +34,7 @@ describe('EntityGroupAccordion', () => {
     );
     expect(screen.getByText(props.groups[0].label)).toBeInTheDocument();
     const container = screen.getByTestId(
-      'entityCountBadge_entity.type_built_in_hosts_from_ecs_data'
+      'entityCountBadge_entityType_built_in_hosts_from_ecs_data'
     );
     expect(within(container).getByText('Entities:')).toBeInTheDocument();
     expect(within(container).getByText(props.groups[0].count)).toBeInTheDocument();

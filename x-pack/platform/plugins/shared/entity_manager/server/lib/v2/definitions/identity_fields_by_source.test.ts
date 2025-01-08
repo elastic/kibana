@@ -9,7 +9,7 @@ import { EntityV2 } from '@kbn/entities-schema';
 import { readSourceDefinitions } from './source_definition';
 import { loggerMock } from '@kbn/logging-mocks';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
-import { EntitySourceDefinition } from '../types';
+import type { EntitySourceDefinition } from '../types';
 import { UnknownEntityType } from '../errors/unknown_entity_type';
 import { identityFieldsBySource } from './identity_fields_by_source';
 

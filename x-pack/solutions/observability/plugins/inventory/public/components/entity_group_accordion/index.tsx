@@ -41,17 +41,17 @@ export function EntityGroupAccordion({ groupValue, groupLabel, groupCount, isLoa
         `}
       >
         <EuiAccordion
-          data-test-subj={`inventoryGroup_entity.type_${groupValue}`}
-          id={`inventory-group-entity.type-${groupValue}`}
+          data-test-subj={`inventoryGroup_entityType_${groupValue}`}
+          id={`inventoryGroup-entityType-${groupValue}`}
           buttonContent={
             <EuiTitle size="xs">
-              <h4 data-test-subj={`inventoryGroupTitle_entity.type_${groupValue}`}>{groupLabel}</h4>
+              <h4 data-test-subj={`inventoryGroupTitle_entityType_${groupValue}`}>{groupLabel}</h4>
             </EuiTitle>
           }
           buttonElement="div"
           extraAction={
             <EntityCountBadge
-              data-test-subj={`entityCountBadge_entity.type_${groupValue}`}
+              data-test-subj={`entityCountBadge_entityType_${groupValue}`}
               name={ENTITIES_COUNT_BADGE}
               value={groupCount}
             />
