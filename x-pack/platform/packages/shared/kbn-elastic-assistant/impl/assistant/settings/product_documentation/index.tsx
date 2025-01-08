@@ -48,12 +48,12 @@ export const ProductDocumentationManagement: React.FC = React.memo(() => {
 
   const content = useMemo(() => {
     if (isStatusLoading) {
-      return <EuiLoadingSpinner size="m" />;
+      return <EuiLoadingSpinner data-test-subj="statusLoading" size="m" />;
     }
     if (isInstalling) {
       return (
         <EuiFlexGroup justifyContent="flexStart" alignItems="center">
-          <EuiLoadingSpinner size="m" />
+          <EuiLoadingSpinner size="m" data-test-subj="installing" />
           <EuiText size="s">{i18n.INSTALLING}</EuiText>
         </EuiFlexGroup>
       );
