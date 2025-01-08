@@ -38,7 +38,7 @@ deprecations are discovered as data is migrated. Starting in 7.x, deprecation lo
 Elasticsearch deprecations can be handled in a number of ways:
 
 * **Reindexing.** When a user's index contains deprecations (e.g. mappings) a reindex solves them. The Upgrade Assistant only automates reindexing for indices. For example, if you are currently on 7.x, and want to migrate to 8.0, but you still have indices that were created on 6.x. For this scenario, the user will see a "Reindex" button that they can click, which will perform the reindex.
-  * Reindexing is an idempotent action in Upgrade Assistant. It works like this ([overview in code](https://github.com/elastic/kibana/blob/b320a37d8b703b2fa101a93b6971b36ee2c37f06/x-pack/platform/plugins/private/upgrade_assistant/server/lib/reindexing/reindex_service.ts#L498-L540)):
+  * Reindexing is an idempotent action in Upgrade Assistant. It works like this ([overview in code](https://github.com/elastic/kibana/blob/5c13e901ac1bf01bcbcca1d4103c43438ee8f6e6/x-pack/platform/plugins/private/upgrade_assistant/server/lib/reindexing/reindex_service.ts#L503-L545)):
     1. Set a write-block on the original index, no new data can be written during reindexing.
     2. Create a target index with the following name `reindexed-v{majorVersion}-{originalIndex}`. E.g., if `my-index` is the original, the target will be named `reindexed-v8-my-index`.    
       **NOTE:** It overrides the index settings `number_of_replicas` and `refresh_interval` for reindexing performance. They are restored after completion.
@@ -336,7 +336,7 @@ For a complete list of Kibana deprecations, refer to the [8.0 Kibana deprecation
 
 This is a non-exhaustive list of different error scenarios in Upgrade Assistant. It's recommended to use the [tweak browser extension](https://chrome.google.com/webstore/detail/tweak-mock-api-calls/feahianecghpnipmhphmfgmpdodhcapi?hl=en), or something similar, to mock the API calls.
 
-- **Error loading deprecation logging status.** Mock a `404` status code to `GET /api/upgrade_assistant/deprecation_logging`. Alternatively, edit [this line](https://github.com/elastic/kibana/blob/545c1420c285af8f5eee56f414bd6eca735aea11/x-pack/platform/plugins/private/upgrade_assistant/public/application/lib/api.ts#L70) locally and replace `deprecation_logging` with `fake_deprecation_logging`.
+- **Error loading deprecation logging status.** Mock a `404` status code to `GET /api/upgrade_assistant/deprecation_logging`. Alternatively, edit [this line](https://github.com/elastic/kibana/blob/5c13e901ac1bf01bcbcca1d4103c43438ee8f6e6/x-pack/platform/plugins/private/upgrade_assistant/public/application/lib/api.ts#L71) locally and replace `deprecation_logging` with `fake_deprecation_logging`.
 - **Error updating deprecation logging status.** Mock a `404` status code to `PUT /api/upgrade_assistant/deprecation_logging`. Alternatively, edit [this line](https://github.com/elastic/kibana/blob/545c1420c285af8f5eee56f414bd6eca735aea11/x-pack/platform/plugins/private/upgrade_assistant/public/application/lib/api.ts#L77) locally and replace `deprecation_logging` with `fake_deprecation_logging`.
 - **Unauthorized error fetching ES deprecations.** Mock a `403` status code to `GET /api/upgrade_assistant/es_deprecations` with the response payload: `{ "statusCode": 403 }`
 - **Partially upgraded error fetching ES deprecations.** Mock a `426` status code to `GET /api/upgrade_assistant/es_deprecations` with the response payload: `{ "statusCode": 426, "attributes": { "allNodesUpgraded": false } }`

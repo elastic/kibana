@@ -104,6 +104,52 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
+    it('should match the same original index settings after reindex', async () => {
+      await esArchiver.load('x-pack/test/functional/es_archives/upgrade_assistant/reindex');
+
+      const originalSettings = {
+        'index.number_of_replicas': 1,
+        'index.refresh_interval': '10s',
+      };
+
+      // Forcing custom settings
+      await es.indices.putSettings({
+        index: 'dummydata',
+        settings: originalSettings,
+      });
+
+      await supertest
+        .post(`/api/upgrade_assistant/reindex/dummydata`)
+        .set('kbn-xsrf', 'xxx')
+        .expect(200);
+
+      const lastState = await waitForReindexToComplete('dummydata');
+      expect(lastState.errorMessage).to.equal(null);
+      expect(lastState.status).to.equal(ReindexStatus.completed);
+
+      const { newIndexName } = lastState;
+      const indexSummary = await es.indices.get({ index: 'dummydata', flat_settings: true });
+
+      // The new index was created
+      expect(indexSummary[newIndexName]).to.be.an('object');
+      // The original index name is aliased to the new one
+      expect(indexSummary[newIndexName].aliases?.dummydata).to.be.an('object');
+      // Verify mappings exist on new index
+      expect(indexSummary[newIndexName].mappings?.properties).to.be.an('object');
+      // Verify settings exist on new index
+      expect(indexSummary[newIndexName].settings).to.be.an('object');
+      expect({
+        'index.number_of_replicas':
+          indexSummary[newIndexName].settings?.['index.number_of_replicas'],
+        'index.refresh_interval': indexSummary[newIndexName].settings?.['index.refresh_interval'],
+      }).to.eql(originalSettings);
+
+      // Cleanup newly created index
+      await es.indices.delete({
+        index: lastState.newIndexName,
+      });
+    });
+
     it('can resume after reindexing was stopped right after creating the new index', async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/upgrade_assistant/reindex');
 
