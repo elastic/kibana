@@ -7,11 +7,10 @@
 
 import type { FC, PropsWithChildren } from 'react';
 import React, { useCallback, useMemo } from 'react';
-import { EuiText, EuiHorizontalRule } from '@elastic/eui';
+import { useEuiTheme, EuiText, EuiHorizontalRule } from '@elastic/eui';
 import type { SerializedStyles } from '@emotion/react';
 import { css } from '@emotion/react';
 import type { Category } from '@kbn/aiops-log-pattern-analysis/types';
-import { useIsDarkTheme } from '../../hooks/use_eui_theme';
 
 interface Props {
   category: Category;
@@ -38,7 +37,8 @@ interface Styles {
 }
 
 const useStyles = (): Styles => {
-  const isDarkTheme = useIsDarkTheme();
+  const { colorMode } = useEuiTheme();
+  const isDarkTheme = colorMode === 'DARK';
 
   return useMemo(
     () =>

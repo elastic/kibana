@@ -6,13 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import {
-  deleteStream,
-  enableStreams,
-  fetchDocument,
-  forkStream,
-  indexDocument,
-} from './helpers/requests';
+import { enableStreams, fetchDocument, forkStream, indexDocument } from './helpers/requests';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { waitForDocumentInIndex } from '../../../alerting_api_integration/observability/helpers/alerting_wait_for_helpers';
 import { cleanUpRootStream } from './helpers/cleanup';
@@ -25,8 +19,10 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('Basic functionality', () => {
     after(async () => {
-      await deleteStream(supertest, 'logs.nginx');
       await cleanUpRootStream(esClient);
+      await esClient.indices.deleteDataStream({
+        name: ['logs*'],
+      });
     });
 
     // Note: Each step is dependent on the previous
@@ -60,9 +56,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('Fork logs to logs.nginx', async () => {
         const body = {
           stream: {
-            id: 'logs.nginx',
-            fields: [],
-            processing: [],
+            name: 'logs.nginx',
           },
           condition: {
             field: 'log.logger',
@@ -99,9 +93,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('Fork logs to logs.nginx.access', async () => {
         const body = {
           stream: {
-            id: 'logs.nginx.access',
-            fields: [],
-            processing: [],
+            name: 'logs.nginx.access',
           },
           condition: { field: 'log.level', operator: 'eq', value: 'info' },
         };
@@ -139,9 +131,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('Fork logs to logs.nginx.error with invalid condition', async () => {
         const body = {
           stream: {
-            id: 'logs.nginx.error',
-            fields: [],
-            processing: [],
+            name: 'logs.nginx.error',
           },
           condition: { field: 'log', operator: 'eq', value: 'error' },
         };
@@ -181,9 +171,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('Fork logs to logs.number-test', async () => {
         const body = {
           stream: {
-            id: 'logs.number-test',
-            fields: [],
-            processing: [],
+            name: 'logs.number-test',
           },
           condition: { field: 'code', operator: 'gte', value: '500' },
         };
@@ -224,9 +212,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('Fork logs to logs.string-test', async () => {
         const body = {
           stream: {
-            id: 'logs.string-test',
-            fields: [],
-            processing: [],
+            name: 'logs.string-test',
           },
           condition: {
             or: [
