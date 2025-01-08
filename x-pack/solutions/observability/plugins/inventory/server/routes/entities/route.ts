@@ -11,7 +11,11 @@ import moment from 'moment';
 import { DATA_STREAM_TYPE } from '@kbn/dataset-quality-plugin/common/es_fields';
 import { joinByKey } from '@kbn/observability-utils-common/array/join_by_key';
 import { BUILT_IN_ENTITY_TYPES } from '@kbn/observability-shared-plugin/common';
-import { type InventoryEntity, entityColumnIdsRt } from '../../../common/entities';
+import {
+  type InventoryEntity,
+  entityColumnIdsRt,
+  MAX_NUMBER_OF_ENTITIES,
+} from '../../../common/entities';
 import { createInventoryServerRoute } from '../create_inventory_server_route';
 import { createAlertsClient } from '../../lib/create_alerts_client/create_alerts_client';
 import { getLatestEntitiesAlerts } from './get_latest_entities_alerts';
@@ -108,7 +112,7 @@ export const listLatestEntitiesRoute = createInventoryServerRoute({
       entityManagerClient.v2.searchEntities({
         start: moment().subtract(15, 'm').toISOString(),
         end: moment().toISOString(),
-        limit: 500,
+        limit: MAX_NUMBER_OF_ENTITIES,
         type: entityType,
         metadata_fields: METADATA_BY_TYPE[entityType] || METADATA_BY_TYPE.default,
         filters: kuery ? [kuery] : [],
