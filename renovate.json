@@ -67,7 +67,7 @@
         "team:kibana-operations"
       ],
       "matchBaseBranches": [
-        "*"
+        "/.*/"
       ],
       "labels": [
         "Team:Operations",
@@ -94,7 +94,7 @@
         "team:kibana-operations"
       ],
       "matchBaseBranches": [
-        "*"
+        "/.*/"
       ],
       "labels": [
         "Team:Operations",
@@ -2442,7 +2442,7 @@
         "team:kibana-operations"
       ],
       "matchBaseBranches": [
-        "*"
+        "/.*/"
       ],
       "labels": [
         "Team:Operations",
