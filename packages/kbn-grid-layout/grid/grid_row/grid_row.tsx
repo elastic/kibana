@@ -43,30 +43,19 @@ export const GridRow = forwardRef<HTMLDivElement, GridRowProps>(
 
     const { euiTheme } = useEuiTheme();
 
-    const getRowCount = useCallback(
-      (row: GridRowData) => {
-        const maxRow = Object.values(row.panels).reduce((acc, panel) => {
-          return Math.max(acc, panel.row + panel.height);
-        }, 0);
-        return maxRow || 1;
-      },
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-      [rowIndex]
-    );
     const rowContainer = useRef<HTMLDivElement | null>(null);
 
     /** Set initial styles based on state at mount to prevent styles from "blipping" */
     const initialStyles = useMemo(() => {
-      const initialRow = gridLayoutStateManager.gridLayout$.getValue()[rowIndex];
       const runtimeSettings = gridLayoutStateManager.runtimeSettings$.getValue();
       const { columnCount, rowHeight } = runtimeSettings;
 
       return css`
+        grid-auto-rows: ${rowHeight}px;
         grid-template-columns: repeat(${columnCount}, minmax(0, 1fr));
-        grid-template-rows: repeat(${getRowCount(initialRow)}, ${rowHeight}px);
         gap: calc(var(--kbnGridGutterSize) * 1px);
       `;
-    }, [gridLayoutStateManager, getRowCount, rowIndex]);
+    }, [gridLayoutStateManager]);
 
     useEffect(
       () => {
@@ -82,10 +71,6 @@ export const GridRow = forwardRef<HTMLDivElement, GridRowProps>(
             if (!rowRef) return;
 
             const { gutterSize, rowHeight, columnPixelWidth } = runtimeSettings;
-
-            rowRef.style.gridTemplateRows = `repeat(${getRowCount(
-              gridLayout[rowIndex]
-            )}, ${rowHeight}px)`;
 
             const targetRow = interactionEvent?.targetRowIndex;
             if (rowIndex === targetRow && interactionEvent) {

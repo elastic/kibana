@@ -7,11 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import deepEqual from 'fast-deep-equal';
+import { cloneDeep, pick } from 'lodash';
 import { useEffect, useMemo, useRef } from 'react';
 import { BehaviorSubject, combineLatest, debounceTime } from 'rxjs';
 import useResizeObserver, { type ObservedSize } from 'use-resize-observer/polyfilled';
-import { cloneDeep } from 'lodash';
+
 import { useEuiTheme } from '@elastic/eui';
+
 import {
   ActivePanel,
   GridAccessMode,
@@ -72,10 +75,12 @@ export const useGridLayoutState = ({
   );
 
   useEffect(() => {
-    runtimeSettings$.next({
-      ...gridSettings,
-      columnPixelWidth: 0,
-    });
+    const runtimeSettings = runtimeSettings$.getValue();
+    if (!deepEqual(gridSettings, pick(runtimeSettings, ['gutterSize', 'rowHeight', 'columnCount'])))
+      runtimeSettings$.next({
+        ...gridSettings,
+        columnPixelWidth: runtimeSettings.columnPixelWidth,
+      });
   }, [gridSettings, runtimeSettings$]);
 
   const gridLayoutStateManager = useMemo(() => {
