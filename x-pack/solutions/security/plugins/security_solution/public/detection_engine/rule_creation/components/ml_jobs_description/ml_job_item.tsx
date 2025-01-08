@@ -9,6 +9,7 @@ import type { FC, ReactNode } from 'react';
 import React, { memo } from 'react';
 import styled from 'styled-components';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { euiThemeVars } from '@kbn/ui-theme';
 
 import type { MlSummaryJob } from '@kbn/ml-plugin/public';
 import * as i18n from './translations';
@@ -21,6 +22,7 @@ import { MlJobStatusBadge } from '../ml_job_status_badge';
 
 const Wrapper = styled.div`
   overflow: hidden;
+  margin-bottom: ${euiThemeVars.euiSizeS};
 `;
 
 const MlJobItemComponent: FC<{

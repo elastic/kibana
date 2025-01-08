@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { NodeBucket } from './types';
+import type { NodeBucket } from './types';
 
 interface Metadata {
   name: string | null;
