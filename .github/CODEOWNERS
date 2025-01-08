@@ -2541,7 +2541,6 @@ x-pack/solutions/security/plugins/security_solution/common/security_integrations
 x-pack/solutions/security/plugins/security_solution/public/security_integrations @elastic/security-service-integrations
 x-pack/solutions/security/plugins/security_solution/server/security_integrations @elastic/security-service-integrations
 x-pack/solutions/security/plugins/security_solution/server/lib/security_integrations @elastic/security-service-integrations
-rity/plugins/security_solution/public/asset_inventory @elastic/security-asset-inventory
 
 
 # Kibana design
