@@ -105,10 +105,12 @@ ACOS: returns the arccosine of a number
 ASIN: returns the arcsine of a number
 ATAN: returns the arctangent of a number
 ATAN2: returns the angle from the positive x-axis to a point (x, y)
+CBRT: calculates the cube root of a given number
 CEIL: rounds a number up to the nearest integer
 COS: returns the cosine of a given angle
 COSH: returns the hyperbolic cosine of a given angle
 E: returns Euler's number
+EXP: returns the value of Euler's number raised to the power of a given number
 FLOOR: rounds a number down to the nearest integer
 HYPOT: calculate the hypotenuse of two numbers
 LOG: calculates the logarithm of a given value to a specified base
@@ -160,7 +162,7 @@ IP_PREFIX: truncates an IP address to a specified prefix length
 TO_BOOLEAN
 TO_CARTESIANPOINT
 TO_CARTESIANSHAPE
-TO_DATETIME
+TO_DATETIME (prefer DATE_PARSE to convert strings to datetime)
 TO_DATEPERIOD
 TO_DEGREES
 TO_DOUBLE
@@ -192,7 +194,7 @@ MV_MEDIAN_ABSOLUTE_DEVIATION: returns the median absolute deviation of a multiva
 MV_MIN: returns the min value of a multivalued field
 MV_PERCENTILE: returns the specified percentile of a multivalued field
 MV_SLIDE: extract a subset of a multivalued field using specified start and end index values
-NV_SORT: sorts a multivalued field in lexicographical order.
+MV_SORT: sorts a multivalued field in lexicographical order.
 MV_SUM: returns the sum of all values of a multivalued field
 MV_ZIP: combines the values from two multivalued fields with a specified delimiter
 
@@ -269,7 +271,7 @@ FROM postgres-logs*
 // keep columns created by the dissect command
 | KEEP date, msg, ip
 // evaluate date from string representation
-| EVAL date = TO_DATETIME(date)
+| EVAL date = DATE_PARSE("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", date)
 ```
 
 **Find contributors which first name starts with "b", sort them by number of commits and
@@ -342,16 +344,18 @@ FROM employees
 | SORT first_letter
 ```
 
+**Retrieving the min, max and average value from a multivalued field**
 ```esql
-FROM employees
-| WHERE still_hired == true
-| EVAL hired = DATE_FORMAT("YYYY", hire_date)
-| STATS avg_salary = AVG(salary) BY languages
-| EVAL avg_salary = ROUND(avg_salary)
-| EVAL lang_code = TO_STRING(languages)
-| ENRICH languages_policy ON lang_code WITH lang = language_name
-| WHERE lang IS NOT NULL
-| KEEP avg_salary, lang
-| SORT avg_salary ASC
-| LIMIT 3
+FROM bag_of_numbers
+| EVAL min = MV_MIN(numbers), max = MV_MAX(numbers), avg = MV_AVG(numbers)
+| KEEP bad_id, min, max, avg
+```
+
+**Converts a date string into datetime using DATE_PARSE**
+```esql
+FROM personal_info
+// birth_date is a text field storing date with the "yyyy-MM-dd" format
+| EVAL birth=DATE_PARSE("yyyy-MM-dd", birth_date)
+| KEEP user_name, birth
+| SORT birth
 ```
