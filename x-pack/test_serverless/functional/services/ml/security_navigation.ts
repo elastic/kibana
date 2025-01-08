@@ -31,5 +31,8 @@ export function MachineLearningNavigationProviderSecurity({ getService }: FtrPro
     async navigateToMemoryUsage() {
       await navigateToArea('memoryUsage');
     },
+    async navigateToNotifications() {
+      await navigateToArea('notifications');
+    },
   };
 }
