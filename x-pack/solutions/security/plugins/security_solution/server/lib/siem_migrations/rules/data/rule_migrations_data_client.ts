@@ -6,6 +6,7 @@
  */
 
 import type { IScopedClusterClient, Logger } from '@kbn/core/server';
+import type { PackageService } from '@kbn/fleet-plugin/server';
 import { RuleMigrationsDataIntegrationsClient } from './rule_migrations_data_integrations_client';
 import { RuleMigrationsDataPrebuiltRulesClient } from './rule_migrations_data_prebuilt_rules_client';
 import { RuleMigrationsDataResourcesClient } from './rule_migrations_data_resources_client';
@@ -27,7 +28,8 @@ export class RuleMigrationsDataClient {
     indexNameProviders: IndexNameProviders,
     username: string,
     esScopedClient: IScopedClusterClient,
-    logger: Logger
+    logger: Logger,
+    packageService?: PackageService
   ) {
     this.rules = new RuleMigrationsDataRulesClient(
       indexNameProviders.rules,
@@ -45,7 +47,8 @@ export class RuleMigrationsDataClient {
       indexNameProviders.integrations,
       username,
       esScopedClient.asInternalUser,
-      logger
+      logger,
+      packageService
     );
     this.prebuiltRules = new RuleMigrationsDataPrebuiltRulesClient(
       indexNameProviders.prebuiltrules,
