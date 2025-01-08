@@ -26,6 +26,7 @@ import {
 import { RULE_EDIT_ERROR_TEXT, RULE_EDIT_SUCCESS_TEXT } from './translations';
 import { getAvailableRuleTypes, parseRuleCircuitBreakerErrorMessage } from './utils';
 import { DEFAULT_VALID_CONSUMERS, getDefaultFormData } from './constants';
+import { RuleFlyout } from './rule_flyout';
 
 export interface EditRuleFormProps {
   id: string;
@@ -211,7 +212,7 @@ export const EditRuleForm = (props: EditRuleFormProps) => {
           showMustacheAutocompleteSwitch,
         }}
       >
-        <RulePage isEdit={true} isSaving={isSaving} onSave={onSave} onCancel={onCancel} />
+        <RuleFlyout isEdit={true} isSaving={isSaving} onSave={onSave} onCancel={onCancel} />
       </RuleFormStateProvider>
     </div>
   );

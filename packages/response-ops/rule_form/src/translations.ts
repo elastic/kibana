@@ -307,6 +307,55 @@ export const RULE_PAGE_FOOTER_SAVE_TEXT = i18n.translate(
   }
 );
 
+export const RULE_FLYOUT_HEADER_CREATE_TITLE = i18n.translate(
+  'responseOpsRuleForm.ruleForm.ruleFlyoutHeader.createTitle',
+  {
+    defaultMessage: 'Create rule',
+  }
+);
+
+export const RULE_FLYOUT_HEADER_EDIT_TITLE = i18n.translate(
+  'responseOpsRuleForm.ruleForm.ruleFlyoutHeader.editTitle',
+  {
+    defaultMessage: 'Edit rule',
+  }
+);
+
+export const RULE_FLYOUT_FOOTER_CANCEL_TEXT = i18n.translate(
+  'responseOpsRuleForm.ruleForm.ruleFlyoutFooter.cancelText',
+  {
+    defaultMessage: 'Cancel',
+  }
+);
+
+export const RULE_FLYOUT_FOOTER_BACK_TEXT = i18n.translate(
+  'responseOpsRuleForm.ruleForm.ruleFlyoutFooter.backText',
+  {
+    defaultMessage: 'Back',
+  }
+);
+
+export const RULE_FLYOUT_FOOTER_NEXT_TEXT = i18n.translate(
+  'responseOpsRuleForm.ruleForm.ruleFlyoutFooter.nextText',
+  {
+    defaultMessage: 'Next',
+  }
+);
+
+export const RULE_FLYOUT_FOOTER_CREATE_TEXT = i18n.translate(
+  'responseOpsRuleForm.ruleForm.ruleFlyoutFooter.createText',
+  {
+    defaultMessage: 'Create rule',
+  }
+);
+
+export const RULE_FLYOUT_FOOTER_SAVE_TEXT = i18n.translate(
+  'responseOpsRuleForm.ruleForm.ruleFlyoutFooter.saveText',
+  {
+    defaultMessage: 'Save changes',
+  }
+);
+
 export const HEALTH_CHECK_ALERTS_ERROR_TITLE = i18n.translate(
   'responseOpsRuleForm.healthCheck.alertsErrorTitle',
   {
@@ -490,6 +539,13 @@ export const RULE_FORM_PAGE_RULE_DEFINITION_TITLE = i18n.translate(
   }
 );
 
+export const RULE_FORM_PAGE_RULE_DEFINITION_TITLE_SHORT = i18n.translate(
+  'responseOpsRuleForm.ruleForm.ruleDefinitionTitleShort',
+  {
+    defaultMessage: 'Definition',
+  }
+);
+
 export const RULE_FORM_PAGE_RULE_ACTIONS_TITLE = i18n.translate(
   'responseOpsRuleForm.ruleForm.ruleActionsTitle',
   {
@@ -515,6 +571,13 @@ export const RULE_FORM_PAGE_RULE_DETAILS_TITLE = i18n.translate(
   'responseOpsRuleForm.ruleForm.ruleDetailsTitle',
   {
     defaultMessage: 'Rule details',
+  }
+);
+
+export const RULE_FORM_PAGE_RULE_DETAILS_TITLE_SHORT = i18n.translate(
+  'responseOpsRuleForm.ruleForm.ruleDetailsTitleShort',
+  {
+    defaultMessage: 'Details',
   }
 );
 
