@@ -1,19 +1,27 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { isEmpty, isPlainObject } from 'lodash';
 
-interface DiffResult<T> {
-  added: Partial<T>;
-  removed: Partial<T>;
-}
-
 interface Obj {
   [key: PropertyKey]: Obj | unknown;
+}
+
+type DeepPartial<TInputObj> = {
+  [Prop in keyof TInputObj]?: TInputObj[Prop] extends Obj
+    ? DeepPartial<TInputObj[Prop]>
+    : TInputObj[Prop];
+};
+
+interface ObjectDiffResult<TBase, TCompare> {
+  added: DeepPartial<TCompare>;
+  removed: DeepPartial<TBase>;
 }
 
 /**
@@ -22,17 +30,20 @@ interface Obj {
  * @param newObj - The comparison object.
  * @returns An object containing added and removed properties.
  */
-export function calculateObjectDiff(oldObj: Obj, newObj?: Obj): DiffResult<Obj> {
-  const added: Partial<Obj> = {};
-  const removed: Partial<Obj> = {};
+export function calculateObjectDiff<TBase extends Obj, TCompare extends Obj>(
+  oldObj: TBase,
+  newObj?: TCompare
+): ObjectDiffResult<TBase, TCompare> {
+  const added: DeepPartial<TCompare> = {};
+  const removed: DeepPartial<TBase> = {};
 
   if (!newObj) return { added, removed };
 
   function diffRecursive(
     base: Obj,
     compare: Obj,
-    addedMap: Partial<Obj>,
-    removedMap: Partial<Obj>
+    addedMap: DeepPartial<Obj>,
+    removedMap: DeepPartial<Obj>
   ): void {
     for (const key in compare) {
       if (!(key in base)) {
@@ -53,7 +64,7 @@ export function calculateObjectDiff(oldObj: Obj, newObj?: Obj): DiffResult<Obj> 
 
     for (const key in base) {
       if (!(key in compare)) {
-        removed[key] = base[key];
+        removedMap[key] = base[key];
       }
     }
   }

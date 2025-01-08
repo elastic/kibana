@@ -507,6 +507,7 @@ src/platform/packages/shared/kbn-management/settings/components/field_row @elast
 src/platform/packages/shared/kbn-management/settings/field_definition @elastic/kibana-management
 src/platform/packages/shared/kbn-management/settings/types @elastic/kibana-management
 src/platform/packages/shared/kbn-management/settings/utilities @elastic/kibana-management
+src/platform/packages/shared/kbn-object-utils @elastic/kibana-core
 src/platform/packages/shared/kbn-openapi-common @elastic/security-detection-rule-management
 src/platform/packages/shared/kbn-osquery-io-ts-types @elastic/security-asset-management
 src/platform/packages/shared/kbn-profiling-utils @elastic/obs-ux-infra_services-team

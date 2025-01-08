@@ -13,13 +13,12 @@ import {
   getProcessorType,
   processingDefinitionSchema,
 } from '@kbn/streams-schema';
+import { calculateObjectDiff, flattenObject } from '@kbn/object-utils';
 import { get } from 'lodash';
 import {
   IngestSimulateResponse,
   IngestSimulateSimulateDocumentResult,
 } from '@elastic/elasticsearch/lib/api/types';
-import { flattenObject } from '../../../../common/utils/flatten_object';
-import { calculateObjectDiff } from '../../../../common/utils/calculate_object_diff';
 import { createServerRoute } from '../../create_server_route';
 import { DefinitionNotFound } from '../../../lib/streams/errors';
 import { checkReadAccess } from '../../../lib/streams/stream_crud';
