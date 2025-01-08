@@ -39,6 +39,8 @@ import { UpgradeFlyoutSubHeader } from './upgrade_flyout_subheader';
 import * as ruleDetailsI18n from '../../../../rule_management/components/rule_details/translations';
 import * as i18n from './translations';
 
+const REVIEW_PREBUILT_RULES_UPGRADE_REFRESH_INTERVAL = 5 * 60 * 1000;
+
 export interface UpgradePrebuiltRulesTableState {
   /**
    * Rule upgrade state after applying `filterOptions`
@@ -110,6 +112,13 @@ interface UpgradePrebuiltRulesTableContextProviderProps {
   children: React.ReactNode;
 }
 
+/**
+ * Provides necessary data and actions for Rules Upgrade table.
+ *
+ * It periodically re-fetches prebuilt rules upgrade review data to detect possible cases of:
+ *  - editing prebuilt rules (revision change)
+ *  - releasing a new prebuilt rules package (version change)
+ */
 export const UpgradePrebuiltRulesTableContextProvider = ({
   children,
 }: UpgradePrebuiltRulesTableContextProviderProps) => {
@@ -135,7 +144,7 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
     isLoading,
     isRefetching,
   } = usePrebuiltRulesUpgradeReview({
-    refetchInterval: false, // Disable automatic refetching since request is expensive
+    refetchInterval: REVIEW_PREBUILT_RULES_UPGRADE_REFRESH_INTERVAL,
     keepPreviousData: true, // Use this option so that the state doesn't jump between "success" and "loading" on page change
   });
   const { rulesUpgradeState, setRuleFieldResolvedValue } =
