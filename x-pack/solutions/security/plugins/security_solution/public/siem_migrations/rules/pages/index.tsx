@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 
 import { EuiSkeletonLoading, EuiSkeletonText, EuiSkeletonTitle } from '@elastic/eui';
 import type { RouteComponentProps } from 'react-router-dom';
@@ -23,6 +23,11 @@ import { MissingPrivilegesCallOut } from '../../../detections/components/callout
 import { HeaderButtons } from '../components/header_buttons';
 import { UnknownMigration } from '../components/unknown_migration';
 import { useLatestStats } from '../service/hooks/use_latest_stats';
+import { RuleMigrationDataInputWrapper } from '../components/data_input_flyout/data_input_wrapper';
+import { MigrationReadyPanel } from '../components/migration_status_panels/migration_ready_panel';
+import { MigrationProgressPanel } from '../components/migration_status_panels/migration_progress_panel';
+import { useInvalidateGetMigrationRules } from '../logic/use_get_migration_rules';
+import { useInvalidateGetMigrationTranslationStats } from '../logic/use_get_migration_translation_stats';
 import { useGetIntegrations } from '../service/hooks/use_get_integrations';
 
 type MigrationRulesPageProps = RouteComponentProps<{ migrationId?: string }>;
@@ -34,6 +39,7 @@ export const MigrationRulesPage: React.FC<MigrationRulesPageProps> = React.memo(
     },
   }) => {
     const { navigateTo } = useNavigation();
+    const { data: ruleMigrationsStats, isLoading, refreshStats } = useLatestStats();
 
     const { data: ruleMigrationsStatsAll, isLoading: isLoadingMigrationsStats } = useLatestStats();
 
@@ -57,12 +63,12 @@ export const MigrationRulesPage: React.FC<MigrationRulesPageProps> = React.memo(
     }, [isLoadingMigrationsStats, ruleMigrationsStatsAll]);
 
     useEffect(() => {
-      if (isLoadingMigrationsStats) {
+      if (isLoading) {
         return;
       }
 
       // Navigate to landing page if there are no migrations
-      if (!finishedRuleMigrationsStats.length) {
+      if (!ruleMigrationsStats.length) {
         navigateTo({ deepLinkId: SecurityPageName.landing, path: 'siem_migrations' });
         return;
       }
@@ -71,27 +77,59 @@ export const MigrationRulesPage: React.FC<MigrationRulesPageProps> = React.memo(
       if (!migrationId) {
         navigateTo({
           deepLinkId: SecurityPageName.siemMigrationsRules,
-          path: finishedRuleMigrationsStats[0].id,
+          path: ruleMigrationsStats[0].id,
         });
       }
-    }, [isLoadingMigrationsStats, migrationId, finishedRuleMigrationsStats, navigateTo]);
+    }, [isLoading, migrationId, navigateTo, ruleMigrationsStats]);
 
     const onMigrationIdChange = (selectedId?: string) => {
       navigateTo({ deepLinkId: SecurityPageName.siemMigrationsRules, path: selectedId });
     };
 
+    const invalidateGetRuleMigrations = useInvalidateGetMigrationRules();
+    const invalidateGetMigrationTranslationStats = useInvalidateGetMigrationTranslationStats();
+    const refetchData = useCallback(() => {
+      if (!migrationId) {
+        return;
+      }
+      refreshStats();
+      invalidateGetRuleMigrations(migrationId);
+      invalidateGetMigrationTranslationStats(migrationId);
+    }, [
+      invalidateGetMigrationTranslationStats,
+      invalidateGetRuleMigrations,
+      migrationId,
+      refreshStats,
+    ]);
+
     const content = useMemo(() => {
-      if (!migrationId || !finishedRuleMigrationsStats.some((stats) => stats.id === migrationId)) {
+      const migrationStats = ruleMigrationsStats.find((stats) => stats.id === migrationId);
+      if (!migrationId || !migrationStats) {
         return <UnknownMigration />;
       }
+      if (migrationStats.status === SiemMigrationTaskStatus.FINISHED) {
+        return (
+          <MigrationRulesTable
+            migrationId={migrationId}
+            refetchData={refetchData}
+            integrations={integrations}
+            isIntegrationsLoading={isIntegrationsLoading}
+          />
+        );
+      }
       return (
-        <MigrationRulesTable
-          migrationId={migrationId}
-          integrations={integrations}
-          isIntegrationsLoading={isIntegrationsLoading}
-        />
+        <RuleMigrationDataInputWrapper onFlyoutClosed={refetchData}>
+          <>
+            {migrationStats.status === SiemMigrationTaskStatus.READY && (
+              <MigrationReadyPanel migrationStats={migrationStats} />
+            )}
+            {migrationStats.status === SiemMigrationTaskStatus.RUNNING && (
+              <MigrationProgressPanel migrationStats={migrationStats} />
+            )}
+          </>
+        </RuleMigrationDataInputWrapper>
       );
-    }, [migrationId, finishedRuleMigrationsStats, integrations, isIntegrationsLoading]);
+    }, [migrationId, refetchData, ruleMigrationsStats, integrations, isIntegrationsLoading]);
 
     return (
       <>
@@ -101,13 +139,13 @@ export const MigrationRulesPage: React.FC<MigrationRulesPageProps> = React.memo(
         <SecuritySolutionPageWrapper>
           <HeaderPage title={i18n.PAGE_TITLE}>
             <HeaderButtons
-              ruleMigrationsStats={finishedRuleMigrationsStats}
+              ruleMigrationsStats={ruleMigrationsStats}
               selectedMigrationId={migrationId}
               onMigrationIdChange={onMigrationIdChange}
             />
           </HeaderPage>
           <EuiSkeletonLoading
-            isLoading={isLoadingMigrationsStats}
+            isLoading={isLoading}
             loadingContent={
               <>
                 <EuiSkeletonTitle />

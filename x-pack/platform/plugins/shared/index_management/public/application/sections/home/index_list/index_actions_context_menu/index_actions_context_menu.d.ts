@@ -33,7 +33,6 @@ export interface IndexActionsContextMenuProps {
   flushIndices: () => Promise<void>;
   refreshIndices: () => Promise<void>;
   clearCacheIndices: () => Promise<void>;
-  unfreezeIndices: () => Promise<void>;
   forcemergeIndices: (maxNumSegments: string) => Promise<void>;
   deleteIndices: () => Promise<void>;
 

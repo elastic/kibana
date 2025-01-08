@@ -384,6 +384,9 @@ import type {
   InstallMigrationRulesResponse,
   InstallTranslatedMigrationRulesRequestParamsInput,
   InstallTranslatedMigrationRulesResponse,
+  RetryRuleMigrationRequestParamsInput,
+  RetryRuleMigrationRequestBodyInput,
+  RetryRuleMigrationResponse,
   StartRuleMigrationRequestParamsInput,
   StartRuleMigrationRequestBodyInput,
   StartRuleMigrationResponse,
@@ -2026,6 +2029,22 @@ detection engine rules.
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+   * Retries a SIEM rules migration using the migration id provided
+   */
+  async retryRuleMigration(props: RetryRuleMigrationProps) {
+    this.log.info(`${new Date().toISOString()} Calling API RetryRuleMigration`);
+    return this.kbnClient
+      .request<RetryRuleMigrationResponse>({
+        path: replaceParams('/internal/siem_migrations/rules/{migration_id}/retry', props.params),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'PUT',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
   async riskEngineGetPrivileges() {
     this.log.info(`${new Date().toISOString()} Calling API RiskEngineGetPrivileges`);
     return this.kbnClient
@@ -2560,6 +2579,10 @@ export interface ReadRuleProps {
 }
 export interface ResolveTimelineProps {
   query: ResolveTimelineRequestQueryInput;
+}
+export interface RetryRuleMigrationProps {
+  params: RetryRuleMigrationRequestParamsInput;
+  body: RetryRuleMigrationRequestBodyInput;
 }
 export interface RulePreviewProps {
   query: RulePreviewRequestQueryInput;
