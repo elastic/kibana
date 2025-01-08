@@ -248,7 +248,7 @@ describe('getActiveSnoozeIfExist', () => {
       } as RRuleRecord,
       id: '9141dc1f-ed85-4656-91e4-119173105432',
     };
-    expect(isSnoozeActive(snoozeA)).toMatchInlineSnapshot(`null`);
+    expect(getActiveSnoozeIfExist(snoozeA)).toMatchInlineSnapshot(`null`);
     fakeTimer.restore();
   });
 });
