@@ -14,16 +14,12 @@ export const useDiscoverRedirect = (entity: InventoryEntity, definitionIndexPatt
     services: { share, application, entityManager },
   } = useKibana();
   const { dataView } = useAdHocDataView(definitionIndexPatterns ?? '');
-
   const discoverLocator = share.url.locators.get('DISCOVER_APP_LOCATOR');
 
   const getDiscoverEntitiesRedirectUrl = useCallback(() => {
     const entityKqlFilter = entity
       ? entityManager.entityClient.asKqlFilter({
-          entity: {
-            identity_fields: entity.entityIdentityFields,
-          },
-          ...entity,
+          entity,
         })
       : '';
 
