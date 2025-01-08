@@ -23,6 +23,7 @@ import {
   EuiSpacer,
   EuiPopoverFooter,
 } from '@elastic/eui';
+import { euiThemeVars } from '@kbn/ui-theme';
 
 import type { InternalApplicationStart } from '@kbn/core-application-browser-internal';
 import type {
@@ -194,7 +195,7 @@ export class HeaderHelpMenu extends Component<Props, State> {
           {defaultContent}
           {customContent && (
             <>
-              <EuiPopoverFooter css={{ padding: '8px' }} />
+              <EuiPopoverFooter css={{ padding: euiThemeVars.euiSizeS }} />
               {customContent}
             </>
           )}
