@@ -71,11 +71,16 @@ export const GridPanel = forwardRef<HTMLDivElement, GridPanelProps>(
     /** Set initial styles based on state at mount to prevent styles from "blipping" */
     const initialStyles = useMemo(() => {
       const initialPanel = gridLayoutStateManager.gridLayout$.getValue()[rowIndex].panels[panelId];
-      const { gutterSize, rowHeight } = gridLayoutStateManager.runtimeSettings$.getValue();
+      const { rowHeight } = gridLayoutStateManager.runtimeSettings$.getValue();
       return css`
         position: relative;
-        height: ${initialPanel.height * (rowHeight + gutterSize) - gutterSize}px;
-
+        height: calc(
+          1px *
+            (
+              ${initialPanel.height} * (${rowHeight} + var(--kbnGridGutterSize)) -
+                var(--kbnGridGutterSize)
+            )
+        );
         grid-column-start: ${initialPanel.column + 1};
         grid-column-end: ${initialPanel.column + 1 + initialPanel.width};
         grid-row-start: ${initialPanel.row + 1};
@@ -133,7 +138,7 @@ export const GridPanel = forwardRef<HTMLDivElement, GridPanelProps>(
                 ref.style.gridArea = `auto`; // shortcut to set all grid styles to `auto`
               }
             } else {
-              const { gutterSize, rowHeight } = gridLayoutStateManager.runtimeSettings$.getValue();
+              const { rowHeight } = gridLayoutStateManager.runtimeSettings$.getValue();
 
               ref.style.zIndex = `auto`;
 
@@ -142,7 +147,8 @@ export const GridPanel = forwardRef<HTMLDivElement, GridPanelProps>(
               ref.style.left = ``;
               ref.style.top = ``;
               ref.style.width = ``;
-              ref.style.height = `${panel.height * (rowHeight + gutterSize) - gutterSize}px`;
+              // setting the height is necessary for mobile mode
+              ref.style.height = `calc(1px * (${panel.height} * (${rowHeight} + var(--kbnGridGutterSize)) - var(--kbnGridGutterSize)))`;
 
               // and render the panel locked to the grid
               ref.style.gridColumnStart = `${panel.column + 1}`;

@@ -7,13 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { cloneDeep } from 'lodash';
 import React, { forwardRef, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { combineLatest, map, pairwise, skip } from 'rxjs';
 
 import { transparentize, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 
-import { cloneDeep } from 'lodash';
 import { DragPreview } from '../drag_preview';
 import { GridPanel } from '../grid_panel';
 import { GridLayoutStateManager, GridRowData, PanelInteractionEvent } from '../types';
@@ -65,6 +65,7 @@ export const GridRow = forwardRef<HTMLDivElement, GridRowProps>(
         --gridWidth: calc(100% - ((var(--kbnGridGutterSize) * ${columnCount - 1}) * 1px));
         grid-template-columns: repeat(${columnCount}, calc(var(--gridWidth) / ${columnCount}));
         grid-template-rows: repeat(${getRowCount(initialRow)}, ${rowHeight}px);
+        gap: calc(var(--kbnGridGutterSize) * 1px);
       `;
     }, [gridLayoutStateManager, getRowCount, rowIndex]);
 
@@ -147,6 +148,9 @@ export const GridRow = forwardRef<HTMLDivElement, GridRowProps>(
             }
           });
 
+        /**
+         * This subscription adds and/or removes the necessary class name for expanded panel styling;
+         */
         const expandedPanelSubscription = gridLayoutStateManager.expandedPanelId$
           .pipe(skip(1)) // skip the first emit because the `initialStyles` will take care of it
           .subscribe((expandedPanelId) => {
@@ -154,6 +158,7 @@ export const GridRow = forwardRef<HTMLDivElement, GridRowProps>(
             if (!rowContainerRef) return;
 
             if (expandedPanelId) {
+              // only add the expanded panel class if this row contains the expanded panel
               const panelsIds = Object.keys(
                 gridLayoutStateManager.gridLayout$.getValue()[rowIndex].panels
               );
@@ -269,7 +274,6 @@ export const GridRow = forwardRef<HTMLDivElement, GridRowProps>(
               display: grid;
               justify-items: stretch;
               transition: background-color 300ms linear;
-              gap: calc(var(--kbnGridGutterSize) * 1px);
               ${initialStyles};
             `}
           >

@@ -7,13 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { GridLayout, type GridLayoutData } from '@kbn/grid-layout';
 import classNames from 'classnames';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-
-import { ViewMode } from '@kbn/embeddable-plugin/public';
+import React, { useCallback, useMemo, useRef } from 'react';
 
 import { useAppFixedViewport } from '@kbn/core-rendering-browser';
+import { ViewMode } from '@kbn/embeddable-plugin/public';
+import { GridLayout, type GridLayoutData } from '@kbn/grid-layout';
+
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import { DashboardPanelState } from '../../../../common';
 import { arePanelLayoutsEqual } from '../../../dashboard_api/are_panel_layouts_equal';
@@ -29,14 +29,12 @@ export const DashboardGrid = () => {
   const dashboardApi = useDashboardApi();
   const panelRefs = useRef<{ [panelId: string]: React.Ref<HTMLDivElement> }>({});
 
-  const [expandedPanelId, panels, useMargins, viewMode, controlGroupApi] =
-    useBatchedPublishingSubjects(
-      dashboardApi.expandedPanelId,
-      dashboardApi.panels$,
-      dashboardApi.settings.useMargins$,
-      dashboardApi.viewMode,
-      dashboardApi.controlGroupApi$
-    );
+  const [expandedPanelId, panels, useMargins, viewMode] = useBatchedPublishingSubjects(
+    dashboardApi.expandedPanelId,
+    dashboardApi.panels$,
+    dashboardApi.settings.useMargins$,
+    dashboardApi.viewMode
+  );
 
   const currentLayout: GridLayoutData = useMemo(() => {
     const singleRow: GridLayoutData[number] = {
@@ -128,21 +126,8 @@ export const DashboardGrid = () => {
     };
   }, [useMargins]);
 
-  const [controlGroupReady, setControlGroupReady] = useState<boolean>(false);
-  useEffect(() => {
-    // used to wait for the "true height" when the dashboard is loading with an expanded panel VIA the url
-    let mounted = true;
-    controlGroupApi?.untilInitialized().then(() => {
-      if (!mounted) return;
-      setControlGroupReady(true);
-    });
-    return () => {
-      mounted = false;
-    };
-  }, [controlGroupApi]);
-
   const memoizedgridLayout = useMemo(() => {
-    // TODO - test to see if this memo makes a difference
+    // memoizing this component reduces the number of times it gets re-rendered to a minimum
     return (
       <GridLayout
         layout={currentLayout}
@@ -155,14 +140,5 @@ export const DashboardGrid = () => {
     );
   }, [currentLayout, gridSettings, renderPanelContents, onLayoutChange, expandedPanelId, viewMode]);
 
-  // // in print mode, dashboard layout is not controlled by React Grid Layout
-  // if (viewMode === ViewMode.PRINT) {
-  //   return <>{panelComponents}</>;
-  // }
-
-  return (
-    <div className={classes}>
-      {!expandedPanelId || controlGroupReady ? memoizedgridLayout : <></>}
-    </div>
-  );
+  return <div className={classes}>{memoizedgridLayout}</div>;
 };

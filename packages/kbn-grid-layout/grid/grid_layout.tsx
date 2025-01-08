@@ -12,6 +12,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { combineLatest, distinctUntilChanged, filter, map, pairwise, skip } from 'rxjs';
 
 import { css } from '@emotion/react';
+
 import { GridHeightSmoother } from './grid_height_smoother';
 import { GridRow } from './grid_row';
 import { GridAccessMode, GridLayoutData, GridSettings } from './types';
@@ -32,57 +33,6 @@ export interface GridLayoutProps {
   accessMode?: GridAccessMode;
 }
 
-const singleColumnStyles = css`
-  .kbnGridRow {
-    grid-template-columns: 100% !important;
-    grid-template-rows: auto !important;
-  }
-
-  .kbnGridPanel {
-    grid-column-start: 1 !important;
-    grid-column-end: 1 !important;
-    grid-row-end: auto !important;
-    grid-row-start: auto !important;
-  }
-`;
-
-const expandedPanelStyles = css`
-  height: 100%;
-
-  .kbnGridRowContainer {
-    &:not(.kbnGridRowContainer--hasExpandedPanel) {
-      // hide the rows that do not contain the expanded panel
-      position: absolute;
-      top: -9999px;
-      left: -9999px;
-    }
-    &--hasExpandedPanel {
-      .kbnGridRowHeader {
-        height: 0px; // used instead of 'display: none' due to a11y concerns
-      }
-
-      .kbnGridRow {
-        display: block !important; // overwrite grid display
-        height: 100%;
-
-        .kbnGridPanel {
-          &:not(.kbnGridPanel--isExpanded) {
-            // hide the non-expanded panels
-            position: absolute;
-            top: -9999px;
-            left: -9999px;
-            visibility: hidden; // remove hidden panels and their contents from tab order for a11y
-          }
-          &--isExpanded {
-            // show only the expanded panel and make it take up the full height
-            height: 100% !important;
-          }
-        }
-      }
-    }
-  }
-`;
-
 export const GridLayout = ({
   layout,
   gridSettings,
@@ -97,6 +47,7 @@ export const GridLayout = ({
     expandedPanelId,
     accessMode,
   });
+  console.log('render');
   useGridLayoutEvents({ gridLayoutStateManager });
   const layoutRef = useRef<HTMLDivElement | null>(null);
 
@@ -140,6 +91,9 @@ export const GridLayout = ({
         setRowCount(newRowCount);
       });
 
+    /**
+     * This subscription calls the passed `onLayoutChange` callback when the layout changes
+     */
     const onLayoutChangeSubscription = combineLatest([
       gridLayoutStateManager.gridLayout$,
       gridLayoutStateManager.interactionEvent$,
@@ -157,6 +111,10 @@ export const GridLayout = ({
         }
       });
 
+    /**
+     * This subscription adds and/or removes the necessary class names related to styling for
+     * expanded panels, mobile view, and a static (non-interactable) grid layout
+     */
     const gridLayoutClassSubscription = combineLatest([
       gridLayoutStateManager.expandedPanelId$,
       gridLayoutStateManager.accessMode$,
@@ -237,3 +195,54 @@ export const GridLayout = ({
     </GridHeightSmoother>
   );
 };
+
+const singleColumnStyles = css`
+  .kbnGridRow {
+    grid-template-columns: 100% !important;
+    grid-template-rows: auto !important;
+  }
+
+  .kbnGridPanel {
+    grid-column-start: 1 !important;
+    grid-column-end: 1 !important;
+    grid-row-end: auto !important;
+    grid-row-start: auto !important;
+  }
+`;
+
+const expandedPanelStyles = css`
+  height: 100%;
+
+  .kbnGridRowContainer {
+    &:not(.kbnGridRowContainer--hasExpandedPanel) {
+      // hide the rows that do not contain the expanded panel
+      position: absolute;
+      top: -9999px;
+      left: -9999px;
+    }
+    &--hasExpandedPanel {
+      .kbnGridRowHeader {
+        height: 0px; // used instead of 'display: none' due to a11y concerns
+      }
+
+      .kbnGridRow {
+        display: block !important; // overwrite grid display
+        height: 100%;
+
+        .kbnGridPanel {
+          &:not(.kbnGridPanel--isExpanded) {
+            // hide the non-expanded panels
+            position: absolute;
+            top: -9999px;
+            left: -9999px;
+            visibility: hidden; // remove hidden panels and their contents from tab order for a11y
+          }
+          &--isExpanded {
+            // show only the expanded panel and make it take up the full height
+            height: 100% !important;
+          }
+        }
+      }
+    }
+  }
+`;
