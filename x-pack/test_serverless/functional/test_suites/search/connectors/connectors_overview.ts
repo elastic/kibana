@@ -19,8 +19,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
 
-  // Failing: See https://github.com/elastic/kibana/issues/203477
-  describe.skip('connectors', function () {
+  describe('connectors', function () {
     before(async () => {
       await pageObjects.svlSearchConnectorsPage.helpers.deleteAllConnectors();
       await pageObjects.svlCommonPage.loginWithRole('developer');
@@ -36,11 +35,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await pageObjects.svlSearchConnectorsPage.connectorOverviewPage.expectConnectorOverviewPageComponentsToExist();
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/203462
-    describe.skip('create and configure connector', () => {
+    describe('create and configure connector', () => {
       it('create connector and confirm connector configuration page is loaded', async () => {
+        await pageObjects.common.navigateToApp('serverlessConnectors');
         await pageObjects.svlSearchConnectorsPage.connectorConfigurationPage.createConnector();
-        await pageObjects.svlSearchConnectorsPage.connectorConfigurationPage.editType('zoom');
+        await pageObjects.svlSearchConnectorsPage.connectorConfigurationPage.selectConnectorType(
+          'zoom'
+        );
         const connectorDetails =
           await pageObjects.svlSearchConnectorsPage.connectorConfigurationPage.getConnectorDetails();
         const connectorId = connectorDetails.match(/connector_id: (.*)/)?.[1];
@@ -48,28 +49,24 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           connectorId!
         );
       });
-      it('edit description', async () => {
+      it('can edit connector - description and name', async () => {
         await pageObjects.svlSearchConnectorsPage.connectorConfigurationPage.editDescription(
           'test description'
         );
-      });
-      it('edit name', async () => {
         await pageObjects.svlSearchConnectorsPage.connectorConfigurationPage.editName(
           TEST_CONNECTOR_NAME
         );
       });
-      it('edit type', async () => {
-        await pageObjects.svlSearchConnectorsPage.connectorConfigurationPage.editType('zoom');
-      });
-      it('confirm connector is created', async () => {
-        await pageObjects.svlCommonNavigation.sidenav.clickLink({
-          deepLinkId: 'serverlessConnectors',
-        });
-        await browser.refresh();
-        await pageObjects.svlSearchConnectorsPage.connectorOverviewPage.expectConnectorTableToExist();
-      });
     });
     describe('connector table', () => {
+      before(async () => {
+        await browser.refresh();
+        await pageObjects.common.navigateToApp('serverlessConnectors');
+      });
+      it('confirm connector is exists', async () => {
+        await pageObjects.svlSearchConnectorsPage.connectorOverviewPage.expectConnectorTableToExist();
+      });
+
       it('confirm searchBar to exist', async () => {
         await pageObjects.svlSearchConnectorsPage.connectorOverviewPage.expectSearchBarToExist();
       });
@@ -98,6 +95,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
     });
     describe('delete connector', () => {
+      before(async () => {
+        await pageObjects.common.navigateToApp('serverlessConnectors');
+      });
       it('delete connector button exist in table', async () => {
         await pageObjects.svlSearchConnectorsPage.connectorOverviewPage.expectDeleteConnectorButtonExist();
       });

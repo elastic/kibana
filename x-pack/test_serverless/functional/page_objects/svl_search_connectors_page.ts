@@ -61,10 +61,10 @@ export function SvlSearchConnectorsPageProvider({ getService }: FtrProviderConte
         await testSubjects.exists('serverlessSearchConnectorName');
         expect(await testSubjects.getVisibleText('serverlessSearchConnectorName')).to.be(name);
       },
-      async editType(type: string) {
+      async selectConnectorType(type: string) {
         await testSubjects.existOrFail('serverlessSearchEditConnectorType');
         await testSubjects.existOrFail('serverlessSearchEditConnectorTypeChoices');
-        await comboBox.filterOptionsList('serverlessSearchEditConnectorTypeChoices', type);
+        await comboBox.set('serverlessSearchEditConnectorTypeChoices', type);
       },
       async expectConnectorIdToMatchUrl(connectorId: string) {
         expect(await browser.getCurrentUrl()).contain(`/app/connectors/${connectorId}`);
