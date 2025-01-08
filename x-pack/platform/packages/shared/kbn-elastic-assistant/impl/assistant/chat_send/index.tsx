@@ -33,8 +33,6 @@ export const ChatSend: React.FC<Props> = ({
 }) => {
   const { euiTheme } = useEuiTheme();
 
-  console.error('eui', euiTheme);
-
   // For auto-focusing prompt within timeline
   const promptTextAreaRef = useRef<HTMLTextAreaElement>(null);
   useEffect(() => {
@@ -80,9 +78,9 @@ export const ChatSend: React.FC<Props> = ({
         css={css`
           right: 0;
           position: absolute;
+          margin-right: ${euiTheme.size.s};
+          margin-bottom: ${euiTheme.size.s};
         `}
-        // margin-right: ${euiTheme.size.s};
-        // margin-bottom: ${euiTheme.size.s};
         grow={false}
       >
         <ChatActions

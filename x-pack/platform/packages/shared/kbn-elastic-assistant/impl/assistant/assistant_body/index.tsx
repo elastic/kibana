@@ -72,7 +72,7 @@ export const AssistantBody: FunctionComponent<Props> = ({
         <EuiText
           data-test-subj="assistant-disclaimer"
           textAlign="center"
-          color={euiTheme.colors.backgroundBaseFormsControlDisabled}
+          color={euiTheme.colors.mediumShade}
           size="xs"
           css={css`
             margin: 0 ${euiTheme.size.l} ${euiTheme.size.m} ${euiTheme.size.l};

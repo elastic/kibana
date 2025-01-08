@@ -10,6 +10,7 @@ import React, { useCallback } from 'react';
 import { EuiCallOut, EuiCodeBlock } from '@elastic/eui';
 
 import { NewChat } from '@kbn/elastic-assistant';
+import { css } from '@emotion/react';
 import { FormattedDate } from '../../../../common/components/formatted_date';
 import type { RuleExecutionStatus } from '../../../../../common/api/detection_engine/rule_monitoring';
 import { RuleExecutionStatusEnum } from '../../../../../common/api/detection_engine/rule_monitoring';
@@ -48,7 +49,7 @@ const RuleStatusFailedCallOutComponent: React.FC<RuleStatusFailedCallOutProps> =
 
   return (
     <div
-      css={`
+      css={css`
         pre {
           margin-block-end: 0;
           margin-right: 24px; // Otherwise the copy button overlaps the scrollbar

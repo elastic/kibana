@@ -72,10 +72,9 @@ const SelectedPromptContextsComponent: React.FC<Props> = ({
               }
               id={id}
               paddingSize="s"
-              // background: ${euiTheme.colors.backgroundPage};
               css={css`
-                background: red;
-                border-radius: ${euiTheme.border.radius};
+                background: ${euiTheme.colors.backgroundBaseSubdued};
+                border-radius: ${euiTheme.border.radius.medium};
 
                 > div:first-child {
                   color: ${euiTheme.colors.primary};
