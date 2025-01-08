@@ -11,10 +11,11 @@ import { services } from './services';
 import { pageObjects } from './page_objects';
 
 // Docker image to use for Fleet API integration tests.
-// This hash comes from the latest successful build of the Production Distribution of the Package Registry, for
-// example: https://internal-ci.elastic.co/blue/organizations/jenkins/package_storage%2Findexing-job/detail/main/1884/pipeline/147.
-// It should be updated any time there is a new package published.
-export const dockerImage = 'docker.elastic.co/package-registry/distribution:lite';
+// This image comes from the latest successful build of https://buildkite.com/elastic/kibana-package-registry-promote
+// which is promoted after acceptance tests succeed against docker.elastic.co/package-registry/distribution:lite
+export const dockerImage =
+  process.env.FLEET_PACKAGE_REGISTRY_DOCKER_IMAGE ||
+  'docker.elastic.co/kibana-ci/package-registry-distribution:lite';
 
 // the default export of config files must be a config provider
 // that returns an object with the projects config values
