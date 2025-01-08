@@ -10,11 +10,11 @@
 import React from 'react';
 import { dynamic } from '@kbn/shared-ux-utility';
 import { PanelLoader } from '@kbn/panel-loader';
-import type { Props } from './presentation_panel_error_internal';
+import type { PresentationPanelErrorProps } from './presentation_panel_error_internal';
 
 const Component = dynamic(
   async () => {
-    const { PresentationPanelErrorInternal } = await import('./presentation_panel_error_internal');
+    const { PresentationPanelErrorInternal } = await import('./panel_module');
     return {
       default: PresentationPanelErrorInternal,
     };
@@ -22,6 +22,6 @@ const Component = dynamic(
   { fallback: <PanelLoader /> }
 );
 
-export function PresentationPanelError(props: Props) {
+export function PresentationPanelError(props: PresentationPanelErrorProps) {
   return <Component {...props} />;
 }

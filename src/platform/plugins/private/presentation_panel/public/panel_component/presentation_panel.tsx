@@ -16,8 +16,7 @@ import React from 'react';
 import useAsync from 'react-use/lib/useAsync';
 import { css } from '@emotion/react';
 import { untilPluginStartServicesReady } from '../kibana_services';
-import { PresentationPanelError } from './presentation_panel_error';
-import { DefaultPresentationPanelApi, PresentationPanelProps } from './types';
+import type { DefaultPresentationPanelApi, PresentationPanelProps } from './types';
 import { getErrorLoadingPanel } from './presentation_panel_strings';
 
 export const PresentationPanel = <
@@ -38,15 +37,28 @@ export const PresentationPanel = <
     }
 
     const startServicesPromise = untilPluginStartServicesReady();
-    const modulePromise = await import('./presentation_panel_internal');
     const componentPromise = isPromise(Component) ? Component : Promise.resolve(Component);
-    const [, unwrappedComponent, panelModule] = await Promise.all([
+    const results = await Promise.allSettled([
       startServicesPromise,
       componentPromise,
-      modulePromise,
+      import('./panel_module'),
     ]);
-    const Panel = panelModule.PresentationPanelInternal;
-    return { Panel, unwrappedComponent };
+
+    for (const result of results) {
+      if (result.status === 'rejected') {
+        throw new Error(result.reason);
+      }
+    }
+
+    return {
+      Panel:
+        results[2].status === 'fulfilled' ? results[2].value?.PresentationPanelInternal : undefined,
+      PanelError:
+        results[2].status === 'fulfilled'
+          ? results[2].value?.PresentationPanelErrorInternal
+          : undefined,
+      unwrappedComponent: results[1].status === 'fulfilled' ? results[1].value : undefined,
+    };
 
     // Ancestry chain is expected to use 'key' attribute to reset DOM and state
     // when unwrappedComponent needs to be re-loaded
@@ -66,6 +78,7 @@ export const PresentationPanel = <
     );
 
   const Panel = value?.Panel;
+  const PanelError = value?.PanelError;
   const UnwrappedComponent = value?.unwrappedComponent;
   const shouldHavePanel = !hidePanelChrome;
   if (error || (shouldHavePanel && !Panel) || !UnwrappedComponent) {
@@ -76,7 +89,13 @@ export const PresentationPanel = <
         data-test-subj="embeddableError"
         justifyContent="center"
       >
-        <PresentationPanelError error={error ?? new Error(getErrorLoadingPanel())} />
+        {PanelError ? (
+          <PanelError error={error ?? new Error(getErrorLoadingPanel())} />
+        ) : error ? (
+          error.message
+        ) : (
+          getErrorLoadingPanel()
+        )}
       </EuiFlexGroup>
     );
   }

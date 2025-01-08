@@ -25,12 +25,12 @@ import { executeEditPanelAction } from '../panel_actions/edit_panel_action/execu
 import { ACTION_EDIT_PANEL } from '../panel_actions/edit_panel_action/constants';
 import { CONTEXT_MENU_TRIGGER } from '../panel_actions';
 
-export interface Props {
+export interface PresentationPanelErrorProps {
   error: ErrorLike;
   api?: DefaultPresentationPanelApi;
 }
 
-export const PresentationPanelErrorInternal = ({ api, error }: Props) => {
+export const PresentationPanelErrorInternal = ({ api, error }: PresentationPanelErrorProps) => {
   const errorTextStyle = useErrorTextStyle();
 
   const [isEditable, setIsEditable] = useState(false);
