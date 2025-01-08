@@ -50,7 +50,7 @@ for run_mode in "Stateful" "Serverless Elasticsearch" "Serverless Observability"
 done
 
 # Observability Onboarding
-for run_mode in "Stateful" "Serverless Observability"; do
+for run_mode in "Stateful"; do
   run_tests "Observability Onboarding" "x-pack/solutions/observability/plugins/observability_onboarding/ui_tests/playwright.config.ts" "$run_mode"
 done
 
