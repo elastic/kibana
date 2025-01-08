@@ -6,5 +6,46 @@
  */
 
 import { IRouter, Logger } from '@kbn/core/server';
+import { APIRoutes } from '../common/api_routes';
 
-export function defineRoutes({ logger, router }: { logger: Logger; router: IRouter }) {}
+import { errorHandler } from './utils/error_handler';
+import { fetchSynonymSets } from './lib/fetch_synonym_sets';
+
+export function defineRoutes({ logger, router }: { logger: Logger; router: IRouter }) {
+  router.get(
+    {
+      path: APIRoutes.SYNONYM_SETS,
+      options: {
+        access: 'internal',
+        tags: ['synonyms:read'],
+      },
+      security: {
+        authz: {
+          requiredPrivileges: ['synonyms:read'],
+        },
+      },
+      validate: {},
+    },
+    errorHandler(logger)(async (context, request, response) => {
+      const core = await context.core;
+      const {
+        client: { asCurrentUser },
+      } = core.elasticsearch;
+      const user = core.security.authc.getCurrentUser();
+      if (!user) {
+        return response.customError({
+          statusCode: 502,
+          body: 'Could not retrieve current user, security plugin is not ready',
+        });
+      }
+      const hasSearchSynonymsPrivilege = await asCurrentUser.security.hasPrivileges({
+        cluster: ['manage_search_synonyms'],
+      });
+      // TODO: no permissions check for synonyms:read and return 403
+      const result = await fetchSynonymSets(asCurrentUser);
+      return response.ok({
+        body: result,
+      });
+    })
+  );
+}

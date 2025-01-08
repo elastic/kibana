@@ -9,13 +9,15 @@ import React, { useMemo } from 'react';
 
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { useKibana } from '../../hooks/use_kibana';
-import { EmptyPrompt } from '../empty_prompt/empty_prompt';
 import { SynonymSets } from '../synonym_sets/synonym_sets';
+import { useFetchSynonymsSets } from '../../hooks/use_fetch_synonyms_sets';
 
 export const SearchSynonymsOverview = () => {
   const {
     services: { console: consolePlugin, history, searchNavigation },
   } = useKibana();
+  const data = useFetchSynonymsSets();
+  console.log(data);
 
   const embeddableConsole = useMemo(
     () => (consolePlugin?.EmbeddableConsole ? <consolePlugin.EmbeddableConsole /> : null),
@@ -29,7 +31,9 @@ export const SearchSynonymsOverview = () => {
       data-test-subj="searchSynonymsOverviewPage"
       solutionNav={searchNavigation?.useClassicNavigation(history)}
     >
-      <SynonymSets />
+      <KibanaPageTemplate.Section restrictWidth>
+        <SynonymSets />
+      </KibanaPageTemplate.Section>
       {/* <EmptyPrompt /> */}
       {embeddableConsole}
     </KibanaPageTemplate>

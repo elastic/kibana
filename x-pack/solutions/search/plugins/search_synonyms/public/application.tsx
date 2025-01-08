@@ -12,9 +12,11 @@ import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { I18nProvider } from '@kbn/i18n-react';
 import { Route, Router, Routes } from '@kbn/shared-ux-router';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AppPluginStartDependencies } from './types';
 import { SearchSynonymsOverview } from './components/overview/overview';
 
+const queryClient = new QueryClient({});
 export const renderApp = async (
   core: CoreStart,
   services: AppPluginStartDependencies,
@@ -24,13 +26,15 @@ export const renderApp = async (
     <KibanaRenderContextProvider {...core}>
       <KibanaContextProvider services={{ ...core, ...services }}>
         <I18nProvider>
-          <Router history={services.history}>
-            <Routes>
-              <Route path="/">
-                <SearchSynonymsOverview />
-              </Route>
-            </Routes>
-          </Router>
+          <QueryClientProvider client={queryClient}>
+            <Router history={services.history}>
+              <Routes>
+                <Route path="/">
+                  <SearchSynonymsOverview />
+                </Route>
+              </Routes>
+            </Router>
+          </QueryClientProvider>
         </I18nProvider>
       </KibanaContextProvider>
     </KibanaRenderContextProvider>,
