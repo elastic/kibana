@@ -28,7 +28,7 @@
             "text": "ContentInsightsClientPublic"
           }
         ],
-        "path": "packages/content-management/content_insights/content_insights_public/src/client.ts",
+        "path": "src/platform/packages/shared/content-management/content_insights/content_insights_public/src/client.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -42,7 +42,7 @@
             "signature": [
               "any"
             ],
-            "path": "packages/content-management/content_insights/content_insights_public/src/client.ts",
+            "path": "src/platform/packages/shared/content-management/content_insights/content_insights_public/src/client.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -53,7 +53,7 @@
                 "tags": [],
                 "label": "deps",
                 "description": [],
-                "path": "packages/content-management/content_insights/content_insights_public/src/client.ts",
+                "path": "src/platform/packages/shared/content-management/content_insights/content_insights_public/src/client.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -67,7 +67,7 @@
                     "signature": [
                       "HttpSetup"
                     ],
-                    "path": "packages/content-management/content_insights/content_insights_public/src/client.ts",
+                    "path": "src/platform/packages/shared/content-management/content_insights/content_insights_public/src/client.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -80,7 +80,7 @@
                 "tags": [],
                 "label": "config",
                 "description": [],
-                "path": "packages/content-management/content_insights/content_insights_public/src/client.ts",
+                "path": "src/platform/packages/shared/content-management/content_insights/content_insights_public/src/client.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -91,7 +91,7 @@
                     "tags": [],
                     "label": "domainId",
                     "description": [],
-                    "path": "packages/content-management/content_insights/content_insights_public/src/client.ts",
+                    "path": "src/platform/packages/shared/content-management/content_insights/content_insights_public/src/client.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -110,7 +110,7 @@
             "signature": [
               "(id: string, eventType: \"viewed\") => void"
             ],
-            "path": "packages/content-management/content_insights/content_insights_public/src/client.ts",
+            "path": "src/platform/packages/shared/content-management/content_insights/content_insights_public/src/client.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -124,7 +124,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/content-management/content_insights/content_insights_public/src/client.ts",
+                "path": "src/platform/packages/shared/content-management/content_insights/content_insights_public/src/client.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -139,7 +139,7 @@
                 "signature": [
                   "\"viewed\""
                 ],
-                "path": "packages/content-management/content_insights/content_insights_public/src/client.ts",
+                "path": "src/platform/packages/shared/content-management/content_insights/content_insights_public/src/client.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -165,7 +165,7 @@
               },
               ">"
             ],
-            "path": "packages/content-management/content_insights/content_insights_public/src/client.ts",
+            "path": "src/platform/packages/shared/content-management/content_insights/content_insights_public/src/client.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -179,7 +179,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/content-management/content_insights/content_insights_public/src/client.ts",
+                "path": "src/platform/packages/shared/content-management/content_insights/content_insights_public/src/client.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -194,7 +194,7 @@
                 "signature": [
                   "\"viewed\""
                 ],
-                "path": "packages/content-management/content_insights/content_insights_public/src/client.ts",
+                "path": "src/platform/packages/shared/content-management/content_insights/content_insights_public/src/client.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -225,7 +225,7 @@
           },
           ") => React.JSX.Element"
         ],
-        "path": "packages/content-management/content_insights/content_insights_public/src/components/activity_view.tsx",
+        "path": "src/platform/packages/shared/content-management/content_insights/content_insights_public/src/components/activity_view.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -245,7 +245,7 @@
                 "text": "ActivityViewProps"
               }
             ],
-            "path": "packages/content-management/content_insights/content_insights_public/src/components/activity_view.tsx",
+            "path": "src/platform/packages/shared/content-management/content_insights/content_insights_public/src/components/activity_view.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -274,7 +274,7 @@
           },
           ">>) => React.JSX.Element"
         ],
-        "path": "packages/content-management/content_insights/content_insights_public/src/services.tsx",
+        "path": "src/platform/packages/shared/content-management/content_insights/content_insights_public/src/services.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -296,7 +296,7 @@
               },
               ">>"
             ],
-            "path": "packages/content-management/content_insights/content_insights_public/src/services.tsx",
+            "path": "src/platform/packages/shared/content-management/content_insights/content_insights_public/src/services.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -323,7 +323,7 @@
           },
           " | null"
         ],
-        "path": "packages/content-management/content_insights/content_insights_public/src/services.tsx",
+        "path": "src/platform/packages/shared/content-management/content_insights/content_insights_public/src/services.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -348,7 +348,7 @@
           },
           "; }) => React.JSX.Element"
         ],
-        "path": "packages/content-management/content_insights/content_insights_public/src/components/views_stats/views_stats.tsx",
+        "path": "src/platform/packages/shared/content-management/content_insights/content_insights_public/src/components/views_stats/views_stats.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -359,7 +359,7 @@
             "tags": [],
             "label": "{ item }",
             "description": [],
-            "path": "packages/content-management/content_insights/content_insights_public/src/components/views_stats/views_stats.tsx",
+            "path": "src/platform/packages/shared/content-management/content_insights/content_insights_public/src/components/views_stats/views_stats.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -379,7 +379,7 @@
                     "text": "UserContentCommonSchema"
                   }
                 ],
-                "path": "packages/content-management/content_insights/content_insights_public/src/components/views_stats/views_stats.tsx",
+                "path": "src/platform/packages/shared/content-management/content_insights/content_insights_public/src/components/views_stats/views_stats.tsx",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -398,7 +398,7 @@
         "tags": [],
         "label": "ActivityViewProps",
         "description": [],
-        "path": "packages/content-management/content_insights/content_insights_public/src/components/activity_view.tsx",
+        "path": "src/platform/packages/shared/content-management/content_insights/content_insights_public/src/components/activity_view.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -412,7 +412,7 @@
             "signature": [
               "{ createdBy?: string | undefined; updatedBy?: string | undefined; createdAt?: string | undefined; updatedAt?: string | undefined; managed?: boolean | undefined; }"
             ],
-            "path": "packages/content-management/content_insights/content_insights_public/src/components/activity_view.tsx",
+            "path": "src/platform/packages/shared/content-management/content_insights/content_insights_public/src/components/activity_view.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -426,7 +426,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/content-management/content_insights/content_insights_public/src/components/activity_view.tsx",
+            "path": "src/platform/packages/shared/content-management/content_insights/content_insights_public/src/components/activity_view.tsx",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -442,7 +442,7 @@
         "description": [
           "\nPublic interface of the Content Management Insights service."
         ],
-        "path": "packages/content-management/content_insights/content_insights_public/src/client.ts",
+        "path": "src/platform/packages/shared/content-management/content_insights/content_insights_public/src/client.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -456,7 +456,7 @@
             "signature": [
               "(id: string, eventType: \"viewed\") => void"
             ],
-            "path": "packages/content-management/content_insights/content_insights_public/src/client.ts",
+            "path": "src/platform/packages/shared/content-management/content_insights/content_insights_public/src/client.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -470,7 +470,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/content-management/content_insights/content_insights_public/src/client.ts",
+                "path": "src/platform/packages/shared/content-management/content_insights/content_insights_public/src/client.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -485,7 +485,7 @@
                 "signature": [
                   "\"viewed\""
                 ],
-                "path": "packages/content-management/content_insights/content_insights_public/src/client.ts",
+                "path": "src/platform/packages/shared/content-management/content_insights/content_insights_public/src/client.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -511,7 +511,7 @@
               },
               ">"
             ],
-            "path": "packages/content-management/content_insights/content_insights_public/src/client.ts",
+            "path": "src/platform/packages/shared/content-management/content_insights/content_insights_public/src/client.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -525,7 +525,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/content-management/content_insights/content_insights_public/src/client.ts",
+                "path": "src/platform/packages/shared/content-management/content_insights/content_insights_public/src/client.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -540,7 +540,7 @@
                 "signature": [
                   "\"viewed\""
                 ],
-                "path": "packages/content-management/content_insights/content_insights_public/src/client.ts",
+                "path": "src/platform/packages/shared/content-management/content_insights/content_insights_public/src/client.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -560,7 +560,7 @@
         "description": [
           "\nAbstract external services for this component."
         ],
-        "path": "packages/content-management/content_insights/content_insights_public/src/services.tsx",
+        "path": "src/platform/packages/shared/content-management/content_insights/content_insights_public/src/services.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -580,7 +580,7 @@
                 "text": "ContentInsightsClientPublic"
               }
             ],
-            "path": "packages/content-management/content_insights/content_insights_public/src/services.tsx",
+            "path": "src/platform/packages/shared/content-management/content_insights/content_insights_public/src/services.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -593,7 +593,7 @@
             "description": [
               "\nWhether versioning is enabled for the current kibana instance. (aka is Serverless)\nThis is used to determine if we should show the version mentions in the help text."
             ],
-            "path": "packages/content-management/content_insights/content_insights_public/src/services.tsx",
+            "path": "src/platform/packages/shared/content-management/content_insights/content_insights_public/src/services.tsx",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -613,7 +613,7 @@
         "signature": [
           "\"viewed\""
         ],
-        "path": "packages/content-management/content_insights/content_insights_public/src/client.ts",
+        "path": "src/platform/packages/shared/content-management/content_insights/content_insights_public/src/client.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
