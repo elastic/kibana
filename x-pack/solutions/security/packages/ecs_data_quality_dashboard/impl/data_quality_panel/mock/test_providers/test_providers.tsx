@@ -18,7 +18,7 @@ import { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
 import { of } from 'rxjs';
 import { I18nProvider } from '@kbn/i18n-react';
 import { EuiThemeProvider } from '@elastic/eui';
-
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { DataQualityProvider, DataQualityProviderProps } from '../../data_quality_context';
 import { ResultsRollupContext } from '../../contexts/results_rollup_context';
 import { IndicesCheckContext } from '../../contexts/indices_check_context';
