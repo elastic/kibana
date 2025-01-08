@@ -7,7 +7,7 @@
 
 import moment from 'moment';
 
-import type { KibanaRequest } from '@kbn/core/server';
+import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
 import type { DefendInsightsPostRequestBody } from '@kbn/elastic-assistant-common';
 
 import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
@@ -65,6 +65,13 @@ describe('buildIncompatibleAntivirusWorkflowInsights', () => {
       },
     } as unknown as KibanaRequest<unknown, unknown, DefendInsightsPostRequestBody>,
     endpointMetadataService,
+    esClient: {
+      search: jest.fn().mockResolvedValue({
+        hits: {
+          hits: [],
+        },
+      }),
+    } as unknown as ElasticsearchClient,
   });
 
   const buildExpectedInsight = (os: string, field: string, value: string) =>
@@ -140,6 +147,25 @@ describe('buildIncompatibleAntivirusWorkflowInsights', () => {
     });
     const params = generateParams('test.com');
 
+    params.esClient.search = jest.fn().mockResolvedValue({
+      hits: {
+        hits: [
+          {
+            _source: {
+              process: {
+                Ext: {
+                  code_signature: {
+                    trusted: true,
+                    subject_name: 'test.com',
+                  },
+                },
+              },
+            },
+          },
+        ],
+      },
+    });
+
     const result = await buildIncompatibleAntivirusWorkflowInsights(params);
 
     expect(result).toEqual([
@@ -157,6 +183,23 @@ describe('buildIncompatibleAntivirusWorkflowInsights', () => {
     });
 
     const params = generateParams('test.com');
+
+    params.esClient.search = jest.fn().mockResolvedValue({
+      hits: {
+        hits: [
+          {
+            _source: {
+              process: {
+                code_signature: {
+                  trusted: true,
+                  subject_name: 'test.com',
+                },
+              },
+            },
+          },
+        ],
+      },
+    });
 
     const result = await buildIncompatibleAntivirusWorkflowInsights(params);
 

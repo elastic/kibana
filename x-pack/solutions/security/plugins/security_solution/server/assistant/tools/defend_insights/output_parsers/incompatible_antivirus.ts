@@ -18,10 +18,6 @@ export function getIncompatibleVirusOutputParser() {
           .object({
             id: z.string().describe('The event ID'),
             endpointId: z.string().describe('The endpoint ID'),
-            signerId: z
-              .string()
-              .optional()
-              .describe('The process.code_signature.signing_id value of the event, if present'),
             value: z.string().describe('The process.executable value of the event'),
           })
           .array()

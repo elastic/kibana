@@ -128,6 +128,7 @@ class SecurityWorkflowInsightsService {
       defendInsights,
       request,
       endpointMetadataService: this.endpointContext.getEndpointMetadataService(),
+      esClient: this.esClient,
     });
     return Promise.all(workflowInsights.map((insight) => this.create(insight)));
   }
