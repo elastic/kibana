@@ -37,9 +37,14 @@ export async function forkStream(supertest: Agent, root: string, body: JsonObjec
   return response.body;
 }
 
-export async function putStream(supertest: Agent, name: string, body: StreamConfigDefinition) {
+export async function putStream(
+  supertest: Agent,
+  name: string,
+  body: StreamConfigDefinition,
+  expectStatusCode?: number
+) {
   const req = supertest.put(`/api/streams/${encodeURIComponent(name)}`).set('kbn-xsrf', 'xxx');
-  const response = await req.send(body).expect(200);
+  const response = await req.send(body).expect(expectStatusCode ?? 200);
   return response.body;
 }
 

@@ -22,7 +22,7 @@ import type {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import useToggle from 'react-use/lib/useToggle';
-import { isWiredReadStream, ReadStreamDefinition } from '@kbn/streams-schema';
+import { isRootStream, isWiredReadStream, ReadStreamDefinition } from '@kbn/streams-schema';
 import { FieldType } from './field_type';
 import { FieldStatus } from './field_status';
 import { FieldEntry, SchemaEditorEditingState } from './hooks/use_editing_state';
@@ -155,111 +155,113 @@ const FieldsTable = ({ definition, fields, editingState, unpromotingState }: Fie
   const [visibleColumns, setVisibleColumns] = useState(Object.keys(COLUMNS));
 
   const trailingColumns = useMemo(() => {
-    return [
-      {
-        id: 'actions',
-        width: 40,
-        headerCellRender: () => null,
-        rowCellRender: ({ rowIndex }) => {
-          const field = fields[rowIndex];
+    return !isRootStream(definition)
+      ? ([
+          {
+            id: 'actions',
+            width: 40,
+            headerCellRender: () => null,
+            rowCellRender: ({ rowIndex }) => {
+              const field = fields[rowIndex];
 
-          let actions: ActionsCellActionsDescriptor[] = [];
+              let actions: ActionsCellActionsDescriptor[] = [];
 
-          switch (field.status) {
-            case 'mapped':
-              actions = [
-                {
-                  name: i18n.translate('xpack.streams.actions.viewFieldLabel', {
-                    defaultMessage: 'View field',
-                  }),
-                  disabled: editingState.isSaving,
-                  onClick: (fieldEntry: FieldEntry) => {
-                    editingState.selectField(fieldEntry, false);
-                  },
-                },
-                {
-                  name: i18n.translate('xpack.streams.actions.editFieldLabel', {
-                    defaultMessage: 'Edit field',
-                  }),
-                  disabled: editingState.isSaving,
-                  onClick: (fieldEntry: FieldEntry) => {
-                    editingState.selectField(fieldEntry, true);
-                  },
-                },
-                {
-                  name: i18n.translate('xpack.streams.actions.unpromoteFieldLabel', {
-                    defaultMessage: 'Unmap field',
-                  }),
-                  disabled: unpromotingState.isUnpromotingField,
-                  onClick: (fieldEntry: FieldEntry) => {
-                    unpromotingState.setSelectedField(fieldEntry.name);
-                  },
-                },
-              ];
-              break;
-            case 'unmapped':
-              actions = [
-                {
-                  name: i18n.translate('xpack.streams.actions.viewFieldLabel', {
-                    defaultMessage: 'View field',
-                  }),
-                  disabled: editingState.isSaving,
-                  onClick: (fieldEntry: FieldEntry) => {
-                    editingState.selectField(fieldEntry, false);
-                  },
-                },
-                {
-                  name: i18n.translate('xpack.streams.actions.mapFieldLabel', {
-                    defaultMessage: 'Map field',
-                  }),
-                  disabled: editingState.isSaving,
-                  onClick: (fieldEntry: FieldEntry) => {
-                    editingState.selectField(fieldEntry, true);
-                  },
-                },
-              ];
-              break;
-            case 'inherited':
-              actions = [
-                {
-                  name: i18n.translate('xpack.streams.actions.viewFieldLabel', {
-                    defaultMessage: 'View field',
-                  }),
-                  disabled: editingState.isSaving,
-                  onClick: (fieldEntry: FieldEntry) => {
-                    editingState.selectField(fieldEntry, false);
-                  },
-                },
-              ];
-              break;
-          }
-
-          return (
-            <ActionsCell
-              panels={[
-                {
-                  id: 0,
-                  title: i18n.translate(
-                    'xpack.streams.streamDetailSchemaEditorFieldsTableActionsTitle',
+              switch (field.status) {
+                case 'mapped':
+                  actions = [
                     {
-                      defaultMessage: 'Actions',
-                    }
-                  ),
-                  items: actions.map((action) => ({
-                    name: action.name,
-                    icon: action.icon,
-                    onClick: (event) => {
-                      action.onClick(field);
+                      name: i18n.translate('xpack.streams.actions.viewFieldLabel', {
+                        defaultMessage: 'View field',
+                      }),
+                      disabled: editingState.isSaving,
+                      onClick: (fieldEntry: FieldEntry) => {
+                        editingState.selectField(fieldEntry, false);
+                      },
                     },
-                  })),
-                },
-              ]}
-            />
-          );
-        },
-      },
-    ] as EuiDataGridProps['trailingControlColumns'];
-  }, [editingState, fields, unpromotingState]);
+                    {
+                      name: i18n.translate('xpack.streams.actions.editFieldLabel', {
+                        defaultMessage: 'Edit field',
+                      }),
+                      disabled: editingState.isSaving,
+                      onClick: (fieldEntry: FieldEntry) => {
+                        editingState.selectField(fieldEntry, true);
+                      },
+                    },
+                    {
+                      name: i18n.translate('xpack.streams.actions.unpromoteFieldLabel', {
+                        defaultMessage: 'Unmap field',
+                      }),
+                      disabled: unpromotingState.isUnpromotingField,
+                      onClick: (fieldEntry: FieldEntry) => {
+                        unpromotingState.setSelectedField(fieldEntry.name);
+                      },
+                    },
+                  ];
+                  break;
+                case 'unmapped':
+                  actions = [
+                    {
+                      name: i18n.translate('xpack.streams.actions.viewFieldLabel', {
+                        defaultMessage: 'View field',
+                      }),
+                      disabled: editingState.isSaving,
+                      onClick: (fieldEntry: FieldEntry) => {
+                        editingState.selectField(fieldEntry, false);
+                      },
+                    },
+                    {
+                      name: i18n.translate('xpack.streams.actions.mapFieldLabel', {
+                        defaultMessage: 'Map field',
+                      }),
+                      disabled: editingState.isSaving,
+                      onClick: (fieldEntry: FieldEntry) => {
+                        editingState.selectField(fieldEntry, true);
+                      },
+                    },
+                  ];
+                  break;
+                case 'inherited':
+                  actions = [
+                    {
+                      name: i18n.translate('xpack.streams.actions.viewFieldLabel', {
+                        defaultMessage: 'View field',
+                      }),
+                      disabled: editingState.isSaving,
+                      onClick: (fieldEntry: FieldEntry) => {
+                        editingState.selectField(fieldEntry, false);
+                      },
+                    },
+                  ];
+                  break;
+              }
+
+              return (
+                <ActionsCell
+                  panels={[
+                    {
+                      id: 0,
+                      title: i18n.translate(
+                        'xpack.streams.streamDetailSchemaEditorFieldsTableActionsTitle',
+                        {
+                          defaultMessage: 'Actions',
+                        }
+                      ),
+                      items: actions.map((action) => ({
+                        name: action.name,
+                        icon: action.icon,
+                        onClick: (event) => {
+                          action.onClick(field);
+                        },
+                      })),
+                    },
+                  ]}
+                />
+              );
+            },
+          },
+        ] as EuiDataGridProps['trailingControlColumns'])
+      : undefined;
+  }, [definition, editingState, fields, unpromotingState]);
 
   return (
     <EuiDataGrid
