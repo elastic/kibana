@@ -18,6 +18,7 @@ import {
 } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 
+import type { RelatedIntegration, RuleResponse } from '../../../../../common/api/detection_engine';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import type { RuleMigration } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import { EmptyMigration } from './empty_migration';
@@ -49,13 +50,23 @@ export interface MigrationRulesTableProps {
    * Re-fetches latest rule migration data
    */
   refetchData?: () => void;
+
+  /**
+   * Existing integrations.
+   */
+  integrations?: Record<string, RelatedIntegration>;
+
+  /**
+   * Indicates whether the integrations loading is in progress.
+   */
+  isIntegrationsLoading?: boolean;
 }
 
 /**
  * Table Component for displaying SIEM rules migrations
  */
 export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.memo(
-  ({ migrationId, refetchData }) => {
+  ({ migrationId, refetchData, integrations, isIntegrationsLoading }) => {
     const { addError } = useAppToasts();
 
     const [pageIndex, setPageIndex] = useState(0);
@@ -233,13 +244,35 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
       [installSingleRule, isLoading]
     );
 
-    const getMigrationRule = useCallback(
+    const getMigrationRuleData = useCallback(
       (ruleId: string) => {
         if (!isLoading && ruleMigrations.length) {
-          return ruleMigrations.find((item) => item.id === ruleId);
+          const ruleMigration = ruleMigrations.find((item) => item.id === ruleId);
+          let matchedPrebuiltRule: RuleResponse | undefined;
+          const relatedIntegrations: RelatedIntegration[] = [];
+          if (ruleMigration) {
+            // Find matched prebuilt rule if any and prioritize its installed version
+            const matchedPrebuiltRuleVersion = ruleMigration.elastic_rule?.prebuilt_rule_id
+              ? prebuiltRules[ruleMigration.elastic_rule.prebuilt_rule_id]
+              : undefined;
+            matchedPrebuiltRule =
+              matchedPrebuiltRuleVersion?.current ?? matchedPrebuiltRuleVersion?.target;
+
+            if (integrations) {
+              if (matchedPrebuiltRule?.related_integrations) {
+                relatedIntegrations.push(...matchedPrebuiltRule.related_integrations);
+              } else if (ruleMigration.elastic_rule?.integration_id) {
+                const integration = integrations[ruleMigration.elastic_rule.integration_id];
+                if (integration) {
+                  relatedIntegrations.push(integration);
+                }
+              }
+            }
+          }
+          return { ruleMigration, matchedPrebuiltRule, relatedIntegrations, isIntegrationsLoading };
         }
       },
-      [isLoading, ruleMigrations]
+      [integrations, isIntegrationsLoading, isLoading, prebuiltRules, ruleMigrations]
     );
 
     const {
@@ -247,8 +280,7 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
       openMigrationRuleDetails: openRulePreview,
     } = useMigrationRuleDetailsFlyout({
       isLoading,
-      prebuiltRules,
-      getMigrationRule,
+      getMigrationRuleData,
       ruleActionsFactory,
     });
 
@@ -256,6 +288,7 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
       disableActions: isTableLoading,
       openMigrationRuleDetails: openRulePreview,
       installMigrationRule: installSingleRule,
+      getMigrationRuleData,
     });
 
     return (

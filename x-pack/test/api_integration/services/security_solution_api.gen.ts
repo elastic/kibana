@@ -979,6 +979,16 @@ finalize it.
         .query(props.query);
     },
     /**
+     * Retrieves all related integrations
+     */
+    getRuleMigrationIntegrations(kibanaSpace: string = 'default') {
+      return supertest
+        .get(routeWithNamespace('/internal/siem_migrations/rules/integrations', kibanaSpace))
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
+    },
+    /**
      * Retrieves all available prebuilt rules (installed and installable)
      */
     getRuleMigrationPrebuiltRules(

@@ -6,6 +6,7 @@
  */
 import type { AuthenticatedUser, ElasticsearchClient, Logger } from '@kbn/core/server';
 import { IndexPatternAdapter, type FieldMap, type InstallParams } from '@kbn/index-adapter';
+import type { PackageService } from '@kbn/fleet-plugin/server';
 import type { IndexNameProvider, IndexNameProviders } from './rule_migrations_data_client';
 import { RuleMigrationsDataClient } from './rule_migrations_data_client';
 import {
@@ -24,6 +25,7 @@ interface CreateClientParams {
   spaceId: string;
   currentUser: AuthenticatedUser;
   esClient: ElasticsearchClient;
+  packageService?: PackageService;
 }
 
 export class RuleMigrationsDataService {
@@ -58,7 +60,7 @@ export class RuleMigrationsDataService {
     ]);
   }
 
-  public createClient({ spaceId, currentUser, esClient }: CreateClientParams) {
+  public createClient({ spaceId, currentUser, esClient, packageService }: CreateClientParams) {
     const indexNameProviders: IndexNameProviders = {
       rules: this.createIndexNameProvider('rules', spaceId),
       resources: this.createIndexNameProvider('resources', spaceId),
@@ -70,7 +72,8 @@ export class RuleMigrationsDataService {
       indexNameProviders,
       currentUser.username,
       esClient,
-      this.logger
+      this.logger,
+      packageService
     );
   }
 

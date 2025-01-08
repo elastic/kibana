@@ -34,6 +34,14 @@ export const conditions = {
       },
     };
   },
+  isCustom(): QueryDslQueryContainer {
+    return {
+      nested: {
+        path: 'elastic_rule',
+        query: { bool: { must_not: { exists: { field: 'elastic_rule.prebuilt_rule_id' } } } },
+      },
+    };
+  },
   matchTitle(title: string): QueryDslQueryContainer {
     return {
       nested: {
