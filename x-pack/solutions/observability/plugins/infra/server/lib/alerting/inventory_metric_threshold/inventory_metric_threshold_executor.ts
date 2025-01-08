@@ -102,7 +102,7 @@ export const createInventoryMetricThresholdExecutor =
 
     const startTime = Date.now();
 
-    const { criteria, filterQuery, sourceId = 'default', nodeType, alertOnNoData } = params;
+    const { criteria, filterQuery, nodeType, alertOnNoData } = params;
 
     if (criteria.length === 0) throw new Error('Cannot execute an alert with 0 conditions');
 
@@ -113,7 +113,7 @@ export const createInventoryMetricThresholdExecutor =
 
     const esClient = services.scopedClusterClient.asCurrentUser;
 
-    const { savedObjectsClient, alertsClient, getDataViews } = services;
+    const { alertsClient, getDataViews } = services;
 
     const searchSourceClient = await services.getSearchSourceClient();
 
@@ -143,10 +143,14 @@ export const createInventoryMetricThresholdExecutor =
 
     const metricIndices = ruleDataView
       ? ruleDataView.getIndexPattern()
-      : metricDataView.getIndexPattern();
+      : metricDataView
+      ? metricDataView.getIndexPattern()
+      : 'unknown-index';
     const logIndices = ruleDataView
       ? ruleDataView.getIndexPattern()
-      : logDataView.getIndexPattern();
+      : logDataView
+      ? logDataView.getIndexPattern()
+      : 'unknown-index';
 
     if (!params.filterQuery && params.filterQueryText) {
       try {

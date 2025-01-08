@@ -69,7 +69,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     condition: baseCondition,
     nodeType: 'host' as InventoryItemType,
     source,
-    logQueryFields: void 0,
+    metricIndices: 'metricbeat-*',
+    logIndices: '',
     compositeSize: 10000,
     executionTimestamp: new Date(DATES['8.0.0'].hosts_only.max),
     logger,
@@ -481,7 +482,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       it('should work FOR LAST 1 minute', async () => {
         const results = await evaluateCondition({
           ...baseOptions,
-          logQueryFields: { indexPattern: 'metricbeat-*' },
+          logIndices: 'metricbeat-*',
           condition: {
             ...baseCondition,
             metric: 'logRate',
@@ -537,7 +538,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       it('should work FOR LAST 5 minute', async () => {
         const options = {
           ...baseOptions,
-          logQueryFields: { indexPattern: 'metricbeat-*' },
+          logIndices: 'metricbeat-*',
           condition: {
             ...baseCondition,
             metric: 'logRate' as SnapshotMetricType,
@@ -658,7 +659,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const results = await evaluateCondition({
           ...baseOptions,
           executionTimestamp: new Date(DATES['8.0.0'].pods_only.max),
-          logQueryFields: { indexPattern: 'metricbeat-*' },
+          logIndices: 'metricbeat-*',
           nodeType: 'pod',
           condition: {
             ...baseCondition,

@@ -16,7 +16,6 @@ import { COMPARATORS } from '@kbn/alerting-comparators';
 import type { InventoryMetricConditions } from '../../../../common/alerting/metrics';
 import type { AlertContextMeta } from './expression';
 import { defaultExpression, ExpressionRow, Expressions } from './expression';
-import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import type { ResolvedDataView } from '../../../utils/data_view';
 import { TIMESTAMP_FIELD } from '../../../../common/constants';
 import type { SnapshotCustomMetricInput } from '../../../../common/http_api';
@@ -67,8 +66,6 @@ const exampleCustomMetric = {
   type: 'custom',
 } as SnapshotCustomMetricInput;
 
-const dataViewMock = dataViewPluginMocks.createStartContract();
-
 describe('Expression', () => {
   async function setup(currentOptions: AlertContextMeta) {
     const ruleParams = {
@@ -86,7 +83,7 @@ describe('Expression', () => {
         setRuleParams={(key, value) => Reflect.set(ruleParams, key, value)}
         setRuleProperty={() => {}}
         metadata={currentOptions}
-        dataViews={dataViewMock}
+        onChangeMetaData={() => {}}
       />
     );
 
@@ -107,6 +104,7 @@ describe('Expression', () => {
       nodeType: 'pod',
       customMetrics: [],
       options: { metric: { type: 'memory' } },
+      adHocDataViewList: [],
     };
     const { ruleParams } = await setup(currentOptions as AlertContextMeta);
     expect(ruleParams.nodeType).toBe('pod');
@@ -151,8 +149,8 @@ describe('Expression', () => {
         errors={{}}
         setRuleParams={(key, value) => Reflect.set(ruleParams, key, value)}
         setRuleProperty={() => {}}
-        metadata={{}}
-        dataViews={dataViewMock}
+        metadata={{ adHocDataViewList: [] }}
+        onChangeMetaData={() => {}}
       />
     );
 
@@ -205,6 +203,7 @@ describe('ExpressionRow', () => {
           metric: [],
         }}
         expression={expression}
+        dataView={mockDataView}
       />
     );
 
