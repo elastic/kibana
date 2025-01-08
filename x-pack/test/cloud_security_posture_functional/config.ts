@@ -9,6 +9,7 @@ import { resolve } from 'path';
 import type { FtrConfigProviderContext } from '@kbn/test';
 import { CLOUD_SECURITY_PLUGIN_VERSION } from '@kbn/cloud-security-posture-plugin/common/constants';
 import { pageObjects } from './page_objects';
+import { services } from './services';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const xpackFunctionalConfig = await readConfigFile(
@@ -17,6 +18,10 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
 
   return {
     ...xpackFunctionalConfig.getAll(),
+    services: {
+      ...xpackFunctionalConfig.get('services'),
+      ...services,
+    },
     pageObjects,
     testFiles: [resolve(__dirname, './pages')],
     junit: {

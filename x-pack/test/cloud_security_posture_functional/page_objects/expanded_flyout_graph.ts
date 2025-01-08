@@ -9,6 +9,7 @@ import expect from '@kbn/expect';
 import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import type { FilterBarService } from '@kbn/test-suites-src/functional/services/filter_bar';
 import { FtrService } from '../../functional/ftr_provider_context';
+import type { QueryBarProvider } from '../services/query_bar_provider';
 
 const GRAPH_PREVIEW_TITLE_LINK_TEST_ID = 'securitySolutionFlyoutGraphPreviewTitleLink';
 const NODE_EXPAND_BUTTON_TEST_ID = 'nodeExpandButton';
@@ -26,6 +27,8 @@ export class ExpandedFlyoutGraph extends FtrService {
   private readonly pageObjects = this.ctx.getPageObjects(['common', 'header']);
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly filterBar = this.ctx.getService('filterBar');
+  // @ts-expect-error queryBarProvider is not a public service
+  private readonly queryBarProvider: QueryBarProvider = this.ctx.getService('queryBarProvider');
 
   async expandGraph(): Promise<void> {
     await this.testSubjects.click(GRAPH_PREVIEW_TITLE_LINK_TEST_ID);
@@ -124,6 +127,13 @@ export class ExpandedFlyoutGraph extends FtrService {
 
   async clickOnInvestigateInTimelineButton(): Promise<void> {
     await this.testSubjects.click(GRAPH_ACTIONS_INVESTIGATE_IN_TIMELINE_ID);
+    await this.pageObjects.header.waitUntilLoadingHasFinished();
+  }
+
+  async setKqlQuery(kql: string): Promise<void> {
+    const queryBar = this.queryBarProvider.getQueryBar(GRAPH_INVESTIGATION_TEST_ID);
+    await queryBar.setQuery(kql);
+    await queryBar.submitQuery();
     await this.pageObjects.header.waitUntilLoadingHasFinished();
   }
 }

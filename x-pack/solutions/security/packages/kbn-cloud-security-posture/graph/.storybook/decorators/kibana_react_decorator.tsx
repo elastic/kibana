@@ -118,6 +118,7 @@ const services: Partial<KibanaServices> = {
   data: {
     query: {
       savedQueries: {
+        getSavedQueryCount: () => 0,
         findSavedQueries: () =>
           Promise.resolve({
             queries: [],

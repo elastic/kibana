@@ -7,9 +7,9 @@
 
 import { useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import type { Filter } from '@kbn/es-query';
+import type { Filter, Query } from '@kbn/es-query';
 import { useCreateTimeline } from '../../../timelines/hooks/use_create_timeline';
-import { updateProviders, setFilters } from '../../../timelines/store/actions';
+import { updateProviders, setFilters, applyKqlFilterQuery } from '../../../timelines/store/actions';
 import { SourcererScopeName } from '../../../sourcerer/store/model';
 import type { DataProvider } from '../../../../common/types';
 import { sourcererSelectors } from '../../store';
@@ -21,6 +21,11 @@ import { TimelineId } from '../../../../common/types/timeline';
 import { TimelineTypeEnum } from '../../../../common/api/timeline';
 
 interface InvestigateInTimelineArgs {
+  /**
+   * The query to apply to the timeline.
+   */
+  query?: Query;
+
   /**
    * The data providers to apply to the timeline.
    */
@@ -64,12 +69,18 @@ export const useInvestigateInTimeline = () => {
   });
 
   const investigateInTimeline = useCallback(
-    async ({ dataProviders, filters, timeRange, keepDataView }: InvestigateInTimelineArgs) => {
+    async ({
+      query,
+      dataProviders,
+      filters,
+      timeRange,
+      keepDataView,
+    }: InvestigateInTimelineArgs) => {
       const hasTemplateProviders =
         dataProviders && dataProviders.find((provider) => provider.type === 'template');
       const clearTimeline = hasTemplateProviders ? clearTimelineTemplate : clearTimelineDefault;
 
-      if (dataProviders || filters) {
+      if (dataProviders || filters || query) {
         // Reset the current timeline
         if (timeRange) {
           await clearTimeline({
@@ -93,6 +104,20 @@ export const useInvestigateInTimeline = () => {
             setFilters({
               id: TimelineId.active,
               filters,
+            })
+          );
+        }
+        if (query) {
+          dispatch(
+            applyKqlFilterQuery({
+              id: TimelineId.active,
+              filterQuery: {
+                kuery: {
+                  kind: 'kuery',
+                  expression: query.query as string,
+                },
+                serializedQuery: query.query as string,
+              },
             })
           );
         }
