@@ -17,7 +17,8 @@ import { coreMock } from '@kbn/core/public/mocks';
 import { UserProfileService } from '@kbn/core/public';
 import { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
 import { of } from 'rxjs';
-import { EuiThemeProvider } from '@elastic/eui';
+import { ThemeProvider } from 'styled-components';
+import { euiDarkVars } from '@kbn/ui-theme';
 
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { DataQualityProvider, DataQualityProviderProps } from '../../data_quality_context';
@@ -64,7 +65,7 @@ const TestExternalProvidersComponent: React.FC<TestExternalProvidersProps> = ({ 
     logger: {
       log: jest.fn(),
       warn: jest.fn(),
-      error: () => {},
+      error: () => { },
     },
   });
   const chrome = chromeServiceMock.createStartContract();
@@ -73,7 +74,7 @@ const TestExternalProvidersComponent: React.FC<TestExternalProvidersProps> = ({ 
   return (
     <KibanaRenderContextProvider {...coreMock.createStart()}>
       <I18nProvider>
-        <EuiThemeProvider>
+        <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
           <QueryClientProvider client={queryClient}>
             <AssistantProvider
               actionTypeRegistry={actionTypeRegistry}
@@ -95,7 +96,7 @@ const TestExternalProvidersComponent: React.FC<TestExternalProvidersProps> = ({ 
               {children}
             </AssistantProvider>
           </QueryClientProvider>
-        </EuiThemeProvider>
+        </ThemeProvider>
       </I18nProvider>
     </KibanaRenderContextProvider>
   );
