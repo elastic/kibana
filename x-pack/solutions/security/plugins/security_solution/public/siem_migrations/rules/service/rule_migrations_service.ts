@@ -15,12 +15,12 @@ import {
 import type { LangSmithOptions } from '../../../../common/siem_migrations/model/common.gen';
 import type {
   RuleMigrationResourceBase,
+  RuleMigrationRetryFilter,
   RuleMigrationTaskStats,
 } from '../../../../common/siem_migrations/model/rule_migration.gen';
 import type {
   CreateRuleMigrationRequestBody,
   GetRuleMigrationStatsResponse,
-  RetryRuleMigrationResponse,
   StartRuleMigrationResponse,
   UpsertRuleMigrationResourcesRequestBody,
 } from '../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
@@ -36,9 +36,8 @@ import {
   type GetRuleMigrationsStatsAllParams,
   getMissingResources,
   upsertMigrationResources,
-  retryRuleMigration,
 } from '../api';
-import type { RetryRuleMigrationFilter, RuleMigrationStats } from '../types';
+import type { RuleMigrationStats } from '../types';
 import { getSuccessToast } from './success_notification';
 import { RuleMigrationsStorage } from './storage';
 import * as i18n from './translations';
@@ -121,30 +120,10 @@ export class SiemRulesMigrationsService {
     }
   }
 
-  public async startRuleMigration(migrationId: string): Promise<StartRuleMigrationResponse> {
-    const connectorId = this.connectorIdStorage.get();
-    if (!connectorId) {
-      throw new Error(i18n.MISSING_CONNECTOR_ERROR);
-    }
-
-    const langSmithSettings = this.traceOptionsStorage.get();
-    let langSmithOptions: LangSmithOptions | undefined;
-    if (langSmithSettings) {
-      langSmithOptions = {
-        project_name: langSmithSettings.langSmithProject,
-        api_key: langSmithSettings.langSmithApiKey,
-      };
-    }
-
-    const result = await startRuleMigration({ migrationId, connectorId, langSmithOptions });
-    this.startPolling();
-    return result;
-  }
-
-  public async retryRuleMigration(
+  public async startRuleMigration(
     migrationId: string,
-    filter?: RetryRuleMigrationFilter
-  ): Promise<RetryRuleMigrationResponse> {
+    retry?: RuleMigrationRetryFilter
+  ): Promise<StartRuleMigrationResponse> {
     const connectorId = this.connectorIdStorage.get();
     if (!connectorId) {
       throw new Error(i18n.MISSING_CONNECTOR_ERROR);
@@ -159,12 +138,7 @@ export class SiemRulesMigrationsService {
       };
     }
 
-    const result = await retryRuleMigration({
-      migrationId,
-      connectorId,
-      langSmithOptions,
-      ...filter,
-    });
+    const result = await startRuleMigration({ migrationId, connectorId, retry, langSmithOptions });
     this.startPolling();
     return result;
   }

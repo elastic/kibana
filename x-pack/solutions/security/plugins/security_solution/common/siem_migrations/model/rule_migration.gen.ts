@@ -418,3 +418,11 @@ export const RuleMigrationResource = RuleMigrationResourceBase.merge(
     updated_by: z.string().optional(),
   })
 );
+
+/**
+ * The rule migrations retry filter criteria.
+ */
+export type RuleMigrationRetryFilter = z.infer<typeof RuleMigrationRetryFilter>;
+export const RuleMigrationRetryFilter = z.enum(['failed', 'notFullyTranslated']);
+export type RuleMigrationRetryFilterEnum = typeof RuleMigrationRetryFilter.enum;
+export const RuleMigrationRetryFilterEnum = RuleMigrationRetryFilter.enum;

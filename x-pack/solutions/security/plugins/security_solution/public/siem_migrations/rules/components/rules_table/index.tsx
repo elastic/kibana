@@ -33,7 +33,7 @@ import { BulkActions } from './bulk_actions';
 import { SearchField } from './search_field';
 import { RuleTranslationResult } from '../../../../../common/siem_migrations/constants';
 import * as i18n from './translations';
-import { useRetryRuleMigration } from '../../service/hooks/use_retry_rules';
+import { useStartMigration } from '../../service/hooks/use_start_migration';
 
 const DEFAULT_PAGE_SIZE = 10;
 const DEFAULT_SORT_FIELD = 'translation_result';
@@ -138,7 +138,7 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
     const { mutateAsync: installMigrationRules } = useInstallMigrationRules(migrationId);
     const { mutateAsync: installTranslatedMigrationRules } =
       useInstallTranslatedMigrationRules(migrationId);
-    const { retryRuleMigration, isLoading: isRetryLoading } = useRetryRuleMigration(refetchData);
+    const { startMigration, isLoading: isRetryLoading } = useStartMigration(refetchData);
 
     const [isTableLoading, setTableLoading] = useState(false);
     const installSingleRule = useCallback(
@@ -188,8 +188,8 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
     );
 
     const reprocessFailedRules = useCallback(async () => {
-      retryRuleMigration(migrationId, { failed: true });
-    }, [migrationId, retryRuleMigration]);
+      startMigration(migrationId, 'failed');
+    }, [migrationId, startMigration]);
 
     const isLoading =
       isStatsLoading || isPrebuiltRulesLoading || isDataLoading || isTableLoading || isRetryLoading;

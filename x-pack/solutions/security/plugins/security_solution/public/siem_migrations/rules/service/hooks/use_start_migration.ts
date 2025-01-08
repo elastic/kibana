@@ -7,6 +7,7 @@
 
 import { useCallback, useReducer } from 'react';
 import { i18n } from '@kbn/i18n';
+import type { RuleMigrationRetryFilter } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import { useKibana } from '../../../../common/lib/kibana/kibana_react';
 import { reducer, initialState } from './common/api_request_reducer';
 
@@ -19,7 +20,7 @@ export const RULES_DATA_INPUT_START_MIGRATION_ERROR = i18n.translate(
   { defaultMessage: 'Error starting migration.' }
 );
 
-export type StartMigration = (migrationId: string) => void;
+export type StartMigration = (migrationId: string, retry?: RuleMigrationRetryFilter) => void;
 export type OnSuccess = () => void;
 
 export const useStartMigration = (onSuccess?: OnSuccess) => {
@@ -27,11 +28,11 @@ export const useStartMigration = (onSuccess?: OnSuccess) => {
   const [state, dispatch] = useReducer(reducer, initialState);
 
   const startMigration = useCallback<StartMigration>(
-    (migrationId) => {
+    (migrationId, retry) => {
       (async () => {
         try {
           dispatch({ type: 'start' });
-          await siemMigrations.rules.startRuleMigration(migrationId);
+          await siemMigrations.rules.startRuleMigration(migrationId, retry);
 
           notifications.toasts.addSuccess(RULES_DATA_INPUT_START_MIGRATION_SUCCESS);
           dispatch({ type: 'success' });

@@ -23,14 +23,24 @@ export interface RuleMigrationsPanelsProps {
 export const RuleMigrationsPanels = React.memo<RuleMigrationsPanelsProps>(
   ({ migrationsStats, isConnectorsCardComplete, expandConnectorsCard }) => {
     const latestMigrationsStats = useMemo(() => migrationsStats.reverse(), [migrationsStats]);
-    const [expandedCardId, setExpandedCardId] = useState<string | undefined>();
+
+    const [expandedCardId, setExpandedCardId] = useState<string | undefined>(() => {
+      if (latestMigrationsStats[0]?.status === SiemMigrationTaskStatus.FINISHED) {
+        return latestMigrationsStats[0]?.id;
+      }
+      return undefined;
+    });
 
     useEffect(() => {
-      const [lastMigrationStats] = latestMigrationsStats;
-      if (lastMigrationStats && lastMigrationStats.status === SiemMigrationTaskStatus.FINISHED) {
-        setExpandedCardId(lastMigrationStats.id);
+      if (!expandedCardId && latestMigrationsStats.length > 0) {
+        const runningMigration = latestMigrationsStats.find(
+          ({ status }) => status === SiemMigrationTaskStatus.RUNNING
+        );
+        if (runningMigration) {
+          setExpandedCardId(runningMigration.id); // Set the next migration to be expanded when it finishes
+        }
       }
-    }, [latestMigrationsStats]);
+    }, [latestMigrationsStats, expandedCardId]);
 
     const getOnToggleCollapsed = useCallback(
       (id: string) => (isCollapsed: boolean) => {

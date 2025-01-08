@@ -24,6 +24,7 @@ import { Chart, BarSeries, Settings, ScaleType } from '@elastic/charts';
 import { SecurityPageName } from '@kbn/security-solution-navigation';
 import { AssistantIcon } from '@kbn/ai-assistant-icon';
 import { useElasticChartsTheme } from '@kbn/charts-theme';
+import { css } from '@emotion/css';
 import { PanelText } from '../../../../common/components/panel_text';
 import {
   convertTranslationResultIntoText,
@@ -36,11 +37,19 @@ import { SecuritySolutionLinkButton } from '../../../../common/components/links'
 import type { RuleMigrationStats } from '../../types';
 import { RuleTranslationResult } from '../../../../../common/siem_migrations/constants';
 import * as i18n from './translations';
+import { RuleMigrationsUploadMissingPanel } from './upload_missing_panel';
+
+const headerStyle = css`
+  &:hover {
+    cursor: pointer;
+    text-decoration: underline;
+  }
+`;
 
 export interface MigrationResultPanelProps {
   migrationStats: RuleMigrationStats;
-  isCollapsed?: boolean;
-  onToggleCollapsed?: (isCollapsed: boolean) => void;
+  isCollapsed: boolean;
+  onToggleCollapsed: (isCollapsed: boolean) => void;
 }
 
 export const MigrationResultPanel = React.memo<MigrationResultPanelProps>(
@@ -52,7 +61,7 @@ export const MigrationResultPanel = React.memo<MigrationResultPanelProps>(
       <EuiPanel hasShadow={false} hasBorder paddingSize="none">
         <EuiPanel hasShadow={false} hasBorder={false} paddingSize="m">
           <EuiFlexGroup direction="row" alignItems="center" gutterSize="s">
-            <EuiFlexItem>
+            <EuiFlexItem onClick={() => onToggleCollapsed(!isCollapsed)} className={headerStyle}>
               <EuiFlexGroup direction="column" alignItems="flexStart" gutterSize="xs">
                 <EuiFlexItem grow={false}>
                   <PanelText size="s" semiBold>
@@ -71,17 +80,13 @@ export const MigrationResultPanel = React.memo<MigrationResultPanelProps>(
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlexItem>
-            {onToggleCollapsed && (
-              <EuiFlexItem grow={false}>
-                <EuiButtonIcon
-                  iconType={isCollapsed ? 'arrowDown' : 'arrowUp'}
-                  onClick={() => onToggleCollapsed(!isCollapsed)}
-                  aria-label={
-                    isCollapsed ? i18n.RULE_MIGRATION_EXPAND : i18n.RULE_MIGRATION_COLLAPSE
-                  }
-                />
-              </EuiFlexItem>
-            )}
+            <EuiFlexItem grow={false}>
+              <EuiButtonIcon
+                iconType={isCollapsed ? 'arrowDown' : 'arrowUp'}
+                onClick={() => onToggleCollapsed(!isCollapsed)}
+                aria-label={isCollapsed ? i18n.RULE_MIGRATION_EXPAND : i18n.RULE_MIGRATION_COLLAPSE}
+              />
+            </EuiFlexItem>
           </EuiFlexGroup>
         </EuiPanel>
         <EuiAccordion
@@ -139,7 +144,7 @@ export const MigrationResultPanel = React.memo<MigrationResultPanelProps>(
                 </EuiPanel>
               </EuiFlexItem>
             </EuiFlexGroup>
-            {/* TODO: uncomment when retry API is ready <RuleMigrationsUploadMissingPanel migrationStats={migrationStats} spacerSizeTop="s" /> */}
+            <RuleMigrationsUploadMissingPanel migrationStats={migrationStats} topSpacerSize="s" />
           </EuiPanel>
         </EuiAccordion>
       </EuiPanel>

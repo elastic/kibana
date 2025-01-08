@@ -41,7 +41,11 @@ export const registerSiemRuleMigrationsStartRoute = (
       withLicense(
         async (context, req, res): Promise<IKibanaResponse<StartRuleMigrationResponse>> => {
           const migrationId = req.params.migration_id;
-          const { langsmith_options: langsmithOptions, connector_id: connectorId } = req.body;
+          const {
+            langsmith_options: langsmithOptions,
+            connector_id: connectorId,
+            retry,
+          } = req.body;
 
           try {
             const ctx = await context.resolve(['core', 'actions', 'alerting', 'securitySolution']);
@@ -51,6 +55,13 @@ export const registerSiemRuleMigrationsStartRoute = (
             const actionsClient = ctx.actions.getActionsClient();
             const soClient = ctx.core.savedObjects.client;
             const rulesClient = await ctx.alerting.getRulesClient();
+
+            if (retry) {
+              const { updated } = await ruleMigrationsClient.task.updateToRetry(migrationId, retry);
+              if (!updated) {
+                return res.ok({ body: { started: false } });
+              }
+            }
 
             const invocationConfig = {
               callbacks: [
