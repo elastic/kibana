@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiButtonIcon } from '@elastic/eui';
+import { EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 import { isEndpointPreconfigured } from '../../../../../../utils/preconfigured_endpoint_helper';
@@ -38,7 +38,7 @@ export const DeleteAction: React.FC<DeleteActionProps> = ({ selectedEndpoint }) 
 
   return (
     <>
-      <EuiButtonIcon
+      <EuiButtonEmpty
         aria-label={i18n.translate('xpack.searchInferenceEndpoints.actions.deleteEndpoint', {
           defaultMessage: 'Delete inference endpoint {selectedEndpointName}',
           values: { selectedEndpointName: selectedEndpoint.endpoint },
@@ -49,7 +49,11 @@ export const DeleteAction: React.FC<DeleteActionProps> = ({ selectedEndpoint }) 
         iconType="trash"
         color="danger"
         onClick={() => setIsModalVisible(true)}
-      />
+      >
+        {i18n.translate('xpack.searchInferenceEndpoints.actions.deleteEndpoint.menuLabel', {
+          defaultMessage: 'Delete endpoint ',
+        })}
+      </EuiButtonEmpty>
       {isModalVisible && (
         <ConfirmDeleteEndpointModal
           onCancel={() => setIsModalVisible(false)}

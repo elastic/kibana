@@ -24,6 +24,7 @@ import { ServiceProvider } from './render_table_columns/render_service_provider/
 import { TaskType } from './render_table_columns/render_task_type/task_type';
 import { DeleteAction } from './render_table_columns/render_actions/actions/delete/delete_action';
 import { CopyIDAction } from './render_table_columns/render_actions/actions/copy_id/copy_id_action';
+import { ViewAction } from './render_table_columns/render_actions/actions/view/view_action';
 
 interface TabularPageProps {
   inferenceEndpoints: InferenceAPIConfigResponse[];
@@ -95,13 +96,20 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) 
       actions: [
         {
           render: (inferenceEndpoint: InferenceEndpointUI) => (
+            <ViewAction selectedEndpoint={inferenceEndpoint} />
+          ),
+        },
+        {
+          render: (inferenceEndpoint: InferenceEndpointUI) => (
             <CopyIDAction inferenceId={inferenceEndpoint.endpoint} />
           ),
+          isPrimary: true,
         },
         {
           render: (inferenceEndpoint: InferenceEndpointUI) => (
             <DeleteAction selectedEndpoint={inferenceEndpoint} />
           ),
+          isPrimary: true,
         },
       ],
       width: '165px',

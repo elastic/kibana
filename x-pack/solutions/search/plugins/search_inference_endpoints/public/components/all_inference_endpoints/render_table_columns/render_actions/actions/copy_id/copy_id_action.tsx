@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiButtonIcon, EuiCopy } from '@elastic/eui';
+import { EuiButtonEmpty, EuiCopy } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useKibana } from '../../../../../../hooks/use_kibana';
@@ -23,7 +23,7 @@ export const CopyIDAction = ({ inferenceId }: CopyIDActionProps) => {
   return (
     <EuiCopy textToCopy={inferenceId}>
       {(copy) => (
-        <EuiButtonIcon
+        <EuiButtonEmpty
           aria-label={i18n.translate('xpack.searchInferenceEndpoints.actions.copyID', {
             defaultMessage: 'Copy inference endpoint ID {inferenceId}',
             values: { inferenceId },
@@ -40,7 +40,11 @@ export const CopyIDAction = ({ inferenceId }: CopyIDActionProps) => {
             });
           }}
           size="s"
-        />
+        >
+          {i18n.translate('xpack.searchInferenceEndpoints.actions.copyID.menuLabel', {
+            defaultMessage: 'Copy endpoint ID',
+          })}
+        </EuiButtonEmpty>
       )}
     </EuiCopy>
   );
