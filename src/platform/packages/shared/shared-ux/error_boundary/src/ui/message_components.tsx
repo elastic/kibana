@@ -124,13 +124,11 @@ export const SectionErrorPrompt = withErrorDetails(
             <p data-test-subj="sectionErrorBoundaryPromptBody">
               {strings.section.callout.body(sectionName)}
             </p>
-            {showErrorDetails && (
-              <p>
-                <EuiButton color="danger" onClick={showErrorDetails}>
-                  {strings.section.callout.showDetailsButton()}
-                </EuiButton>
-              </p>
-            )}
+            <p>
+              <EuiLink color="danger" onClick={showErrorDetails}>
+                {strings.section.callout.showDetailsButton()}
+              </EuiLink>
+            </p>
           </>
         }
       />
