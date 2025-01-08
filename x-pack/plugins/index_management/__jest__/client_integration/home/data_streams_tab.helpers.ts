@@ -182,14 +182,10 @@ export const setup = async (
   };
 
   const clickConfirmDelete = async () => {
-    const modal = document.body.querySelector('[data-test-subj="deleteDataStreamsConfirmation"]');
-    const confirmButton: HTMLButtonElement | null = modal!.querySelector(
-      '[data-test-subj="confirmModalConfirmButton"]'
-    );
-
     await act(async () => {
-      confirmButton!.click();
+      testBed.find('confirmModalConfirmButton').simulate('click');
     });
+    testBed.component.update();
   };
 
   const clickDeleteDataStreamButton = () => {

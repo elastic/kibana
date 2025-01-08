@@ -543,11 +543,7 @@ describe('Data Streams tab', () => {
 
         clickBulkEditDataRetentionButton();
 
-        httpRequestsMockHelpers.setEditDataRetentionResponse('dataStream1', {
-          success: true,
-        });
-
-        httpRequestsMockHelpers.setEditDataRetentionResponse('dataStream2', {
+        httpRequestsMockHelpers.setEditDataRetentionResponse({
           success: true,
         });
 
@@ -583,11 +579,7 @@ describe('Data Streams tab', () => {
 
         clickBulkEditDataRetentionButton();
 
-        httpRequestsMockHelpers.setEditDataRetentionResponse('dataStream1', {
-          success: true,
-        });
-
-        httpRequestsMockHelpers.setEditDataRetentionResponse('dataStream2', {
+        httpRequestsMockHelpers.setEditDataRetentionResponse({
           success: true,
         });
 
@@ -616,11 +608,7 @@ describe('Data Streams tab', () => {
 
         clickBulkEditDataRetentionButton();
 
-        httpRequestsMockHelpers.setEditDataRetentionResponse('dataStream1', {
-          success: true,
-        });
-
-        httpRequestsMockHelpers.setEditDataRetentionResponse('dataStream2', {
+        httpRequestsMockHelpers.setEditDataRetentionResponse({
           success: true,
         });
 
@@ -732,7 +720,7 @@ describe('Data Streams tab', () => {
 
           clickEditDataRetentionButton();
 
-          httpRequestsMockHelpers.setEditDataRetentionResponse('dataStream1', {
+          httpRequestsMockHelpers.setEditDataRetentionResponse({
             success: true,
           });
 
@@ -764,7 +752,7 @@ describe('Data Streams tab', () => {
 
           clickEditDataRetentionButton();
 
-          httpRequestsMockHelpers.setEditDataRetentionResponse('dataStream1', {
+          httpRequestsMockHelpers.setEditDataRetentionResponse({
             success: true,
           });
 
@@ -792,7 +780,7 @@ describe('Data Streams tab', () => {
 
           clickEditDataRetentionButton();
 
-          httpRequestsMockHelpers.setEditDataRetentionResponse('dataStream1', {
+          httpRequestsMockHelpers.setEditDataRetentionResponse({
             success: true,
           });
 
