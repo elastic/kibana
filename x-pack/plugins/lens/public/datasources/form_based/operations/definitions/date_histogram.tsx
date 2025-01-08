@@ -94,19 +94,18 @@ function getTimeZoneAndInterval(
   indexPattern: IndexPattern
 ) {
   const usedField = indexPattern.getFieldByName(column.sourceField);
-  let timeZone: string | undefined;
-  let interval = column.params?.interval ?? autoInterval;
-
+ 
   if (
     usedField &&
     usedField.aggregationRestrictions &&
     usedField.aggregationRestrictions.date_histogram
   ) {
-    interval = restrictedInterval(usedField.aggregationRestrictions) as string;
-    timeZone = usedField.aggregationRestrictions.date_histogram.time_zone;
+    return {
+      interval: restrictedInterval(usedField.aggregationRestrictions),
+      timeZone: usedField.aggregationRestrictions.date_histogram.time_zone,
+      usedField,
   }
-
-  return { usedField, timeZone, interval };
+  return { usedField: undefined, timeZone: undefined, interval: column.params?.interval ?? autoInterval  };
 }
 
 export function mapToEsqlInterval(dateRange: DateRange, _interval: string) {

@@ -37,14 +37,7 @@ export function getESQLForLayer(
 
   const timeZone = getUserTimeZone((key) => uiSettings.get(key), true);
   if (timeZone !== 'UTC') return;
-  if (Object.values(layer.columns).find((col) => col.operationType === 'formula')) return;
-  if (Object.values(layer.columns).find((col) => col.timeShift)) return;
-  if (
-    Object.values(layer.columns).find(
-      (col) => 'sourceField' in col && indexPattern.getFieldByName(col.sourceField)?.runtime
-    )
-  )
-    return;
+  if (Object.values(layer.columns).find((col) => col.operationType === 'formula' || col.timeShift ||  'sourceField' in col && indexPattern.getFieldByName(col.sourceField)?.runtime)) return;
 
   let esql = `FROM ${indexPattern.title} | `;
   if (indexPattern.timeFieldName) {
@@ -111,7 +104,7 @@ export function getESQLForLayer(
 
       if (!def.toESQL) return undefined;
 
-      let metricESQL = def.toESQL!(
+      let metricESQL = def.toESQL(
         {
           ...col,
           timeShift: resolveTimeShift(
@@ -152,7 +145,7 @@ export function getESQLForLayer(
     });
 
   if (metrics.some((m) => !m)) return;
-  esql += 'STATS ' + metrics.join(', ');
+  esql += `STATS ${metrics.join(', ')}`;
 
   const buckets = esAggEntries
     .filter(([id, col]) => col.isBucketed)
@@ -245,7 +238,7 @@ export function getESQLForLayer(
 
       return (
         `${esAggsId} = ` +
-        def.toESQL!(
+        def.toESQL(
           {
             ...col,
             timeShift: resolveTimeShift(

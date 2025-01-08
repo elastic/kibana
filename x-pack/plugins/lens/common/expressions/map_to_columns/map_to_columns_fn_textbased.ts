@@ -40,7 +40,6 @@ export const mapToOriginalColumnsTextBased: MapToColumnsExpressionFunction['fn']
           ...column.meta,
           ...(originalColumn.sourceField ? { field: originalColumn.sourceField } : {}),
           ...(originalColumn.format ? { params: originalColumn.format } : {}),
-          ...(originalColumn.sourceField ? { field: originalColumn.sourceField } : {}),
           sourceParams: {
             ...(column.meta?.sourceParams ?? {}),
             ...('sourceField' in originalColumn ? { sourceField: originalColumn.sourceField } : {}),

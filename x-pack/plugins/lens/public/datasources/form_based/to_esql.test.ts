@@ -13,19 +13,16 @@ import { DateHistogramIndexPatternColumn } from '../..';
 describe('to_esql', () => {
   const { uiSettings } = createCoreSetupMock();
   uiSettings.get.mockImplementation((key: string) => {
-    if (key === 'dateFormat') {
+    switch(key) {
+    case  'dateFormat':
       return 'MMM D, YYYY @ HH:mm:ss.SSS';
-    }
-    if (key === 'dateFormat:scaled') {
+    case 'dateFormat:scaled':
       return [[]];
-    }
-    if (key === 'dateFormat:tz') {
+    case 'dateFormat:tz':
       return 'UTC';
-    }
-    if (key === 'histogram:barTarget') {
+    case 'histogram:barTarget':
       return 50;
-    }
-    if (key === 'histogram:maxBars') {
+    case 'histogram:maxBars':
       return 100;
     }
   });
