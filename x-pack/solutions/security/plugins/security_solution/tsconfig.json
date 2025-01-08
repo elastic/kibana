@@ -237,6 +237,6 @@
     "@kbn/core-http-server-utils",
     "@kbn/llm-tasks-plugin",
     "@kbn/ai-assistant-icon",
-    "@kbn/charts-theme",
+    "@kbn/charts-theme"
   ]
 }
