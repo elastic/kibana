@@ -40,7 +40,7 @@ export const DashboardGrid = () => {
 
   const currentLayout: GridLayoutData = useMemo(() => {
     const singleRow: GridLayoutData[number] = {
-      title: 'First row',
+      title: '', // we only support a single section currently, and it does not have a title
       isCollapsed: false,
       panels: {},
     };
