@@ -16,7 +16,6 @@ export enum Frequency {
   DAILY = 3,
   HOURLY = 4,
   MINUTELY = 5,
-  SECONDLY = 6,
 }
 
 export enum Weekday {
