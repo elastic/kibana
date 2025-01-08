@@ -80,6 +80,8 @@ export const AgentStatusSchema = schema.oneOf([
   schema.literal('unenrolled'),
   schema.literal('updating'),
   schema.literal('degraded'),
+  schema.literal('uninstalled'),
+  schema.literal('orphaned'),
 ]);
 
 export const AgentResponseSchema = schema.object({

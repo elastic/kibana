@@ -40,28 +40,11 @@ type Props = EuiBadgeProps & {
   fromDetails?: boolean;
 };
 
-function convertAuditUnenrolledReason(reason: string | undefined) {
-  if (!reason) {
-    return undefined;
-  }
-
-  switch (reason) {
-    case 'uninstall':
-      return 'Uninstalled';
-    case 'orphaned':
-      return 'Orphaned';
-    default:
-      return reason;
-  }
-}
-
 function getStatusComponent({
   status,
-  uninstallReason,
   ...restOfProps
 }: {
   status: Agent['status'];
-  uninstallReason: string | undefined;
 } & EuiBadgeProps): React.ReactElement {
   switch (status) {
     case 'error':
@@ -84,30 +67,32 @@ function getStatusComponent({
         </EuiBadge>
       );
     case 'offline':
-      // if theres an uninstall reason, and its offline, then need to show the status based on that reason
-      if (uninstallReason) {
-        uninstallReason = convertAuditUnenrolledReason(uninstallReason);
-        return (
-          <EuiBadge
-            color={uninstallReason === 'Uninstalled' ? 'default' : 'warning'}
-            {...restOfProps}
-          >
-            <FormattedMessage
-              id="xpack.fleet.agentHealth.orphanedOrUninstalledStatusText"
-              defaultMessage={uninstallReason}
-            />
-          </EuiBadge>
-        );
-      } else {
-        return (
-          <EuiBadge color="default" {...restOfProps}>
-            <FormattedMessage
-              id="xpack.fleet.agentHealth.offlineStatusText"
-              defaultMessage="Offline"
-            />
-          </EuiBadge>
-        );
-      }
+      return (
+        <EuiBadge color="default" {...restOfProps}>
+          <FormattedMessage
+            id="xpack.fleet.agentHealth.offlineStatusText"
+            defaultMessage="Offline"
+          />
+        </EuiBadge>
+      );
+    case 'uninstalled':
+      return (
+        <EuiBadge color="default" {...restOfProps}>
+          <FormattedMessage
+            id="xpack.fleet.agentHealth.orphanedStatusText"
+            defaultMessage="Uninstalled"
+          />
+        </EuiBadge>
+      );
+    case 'orphaned':
+      return (
+        <EuiBadge color="warning" {...restOfProps}>
+          <FormattedMessage
+            id="xpack.fleet.agentHealth.uninstalledStatusText"
+            defaultMessage="Orphaned"
+          />
+        </EuiBadge>
+      );
 
     case 'unenrolling':
     case 'enrolling':
@@ -221,7 +206,6 @@ export const AgentHealth: React.FunctionComponent<Props> = ({
           <div className="eui-textNoWrap">
             {getStatusComponent({
               status: agent.status,
-              uninstallReason: agent.audit_unenrolled_reason,
               ...restOfProps,
             })}
             &nbsp;
@@ -231,13 +215,11 @@ export const AgentHealth: React.FunctionComponent<Props> = ({
           <>
             {getStatusComponent({
               status: agent.status,
-              uninstallReason: agent.audit_unenrolled_reason,
               ...restOfProps,
             })}
             {previousToOfflineStatus
               ? getStatusComponent({
                   status: previousToOfflineStatus,
-                  uninstallReason: agent.audit_unenrolled_reason,
                   ...restOfProps,
                 })
               : null}

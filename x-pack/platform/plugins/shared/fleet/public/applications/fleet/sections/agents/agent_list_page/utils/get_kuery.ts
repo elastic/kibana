@@ -71,9 +71,9 @@ export const getKuery = ({
             case 'unenrolled':
               return AgentStatusKueryHelper.buildKueryForUnenrolledAgents();
             case 'orphaned':
-              return AgentStatusKueryHelper.buildKueryForOfflineAgents();
+              return AgentStatusKueryHelper.buildKueryForOrphanedAgents();
             case 'uninstalled':
-              return AgentStatusKueryHelper.buildKueryForOfflineAgents();
+              return AgentStatusKueryHelper.buildKueryForUninstalledAgents();
           }
 
           return undefined;
