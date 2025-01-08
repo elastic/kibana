@@ -21,7 +21,7 @@ snapshots.js
 
 # plugin overrides
 /src/core/lib/kbn_internal_native_observable
-/src/plugins/data/common/es_query/kuery/ast/_generated_/**
+/src/platform/plugins/shared/data/common/es_query/kuery/ast/_generated_/**
 /x-pack/platform/plugins/private/canvas/canvas_plugin
 /x-pack/platform/plugins/private/canvas/shareable_runtime/build
 /x-pack/platform/plugins/private/canvas/storybook/build

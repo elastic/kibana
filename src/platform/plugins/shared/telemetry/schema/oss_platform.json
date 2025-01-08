@@ -10171,6 +10171,19 @@
         }
       }
     },
+    "kql": {
+      "properties": {
+        "optInCount": {
+          "type": "long"
+        },
+        "optOutCount": {
+          "type": "long"
+        },
+        "defaultQueryLanguage": {
+          "type": "keyword"
+        }
+      }
+    },
     "localization": {
       "properties": {
         "locale": {
@@ -10266,6 +10279,32 @@
               "description": "List of SO types that showed up in the break down but are not registered in Kibana. They could be a potential cause of future migration failures."
             }
           }
+        }
+      }
+    },
+    "search": {
+      "properties": {
+        "successCount": {
+          "type": "long"
+        },
+        "errorCount": {
+          "type": "long"
+        },
+        "averageDuration": {
+          "type": "float"
+        }
+      }
+    },
+    "search-session": {
+      "properties": {
+        "transientCount": {
+          "type": "long"
+        },
+        "persistedCount": {
+          "type": "long"
+        },
+        "totalCount": {
+          "type": "long"
         }
       }
     },
