@@ -11,6 +11,8 @@ import { QuickPromptSettings } from './quick_prompt_settings';
 import { TestProviders } from '../../../mock/test_providers/test_providers';
 import { MOCK_QUICK_PROMPTS } from '../../../mock/quick_prompt';
 import { mockPromptContexts } from '../../../mock/prompt_context';
+import { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
+import { of } from 'rxjs';
 
 const onSelectedQuickPromptChange = jest.fn();
 const setPromptsBulkActions = jest.fn();
@@ -28,6 +30,13 @@ const testProps = {
 };
 const mockContext = {
   basePromptContexts: MOCK_QUICK_PROMPTS,
+  chrome: {
+    getChromeStyle$: jest.fn(() => of('classic')),
+    navControls: chromeServiceMock.createStartContract().navControls,
+  },
+  assistantAvailability: {
+    hasAssistantPrivilege: true,
+  },
 };
 
 jest.mock('../../../assistant_context', () => ({
