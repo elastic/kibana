@@ -397,7 +397,7 @@ And the user should not be able to upgrade them directly from the table
 And there should be a message/tooltip indicating why the rule cannot be upgraded directly
 ```
 
-#### **Scenario: User can bulk upgrade selected rules with rule type changes**
+#### **Scenario: User can not bulk upgrade selected rules with rule type changes**
 
 **Automation**: 1 e2e test with mock rules
 
@@ -412,7 +412,7 @@ And the user should not be able to upgrade them directly from the table
 And there should be a message/tooltip indicating why the rule cannot be upgraded directly
 ```
 
-#### **Scenario: User can bulk upgrade all rules with rule type changes**
+#### **Scenario: User can not bulk upgrade all rules with rule type changes**
 
 **Automation**: 1 e2e test with mock rules
 
