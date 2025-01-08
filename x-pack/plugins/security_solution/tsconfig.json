@@ -232,5 +232,14 @@
     "@kbn/core-user-profile-browser",
     "@kbn/core-lifecycle-server",
     "@kbn/core-user-profile-common",
+    "@kbn/langchain",
+    "@kbn/discover-shared-plugin",
+    "@kbn/react-hooks",
+    "@kbn/index-adapter",
+    "@kbn/core-http-server-utils",
+    "@kbn/core-chrome-browser-mocks",
+    "@kbn/ai-assistant-icon",
+    "@kbn/llm-tasks-plugin",
+    "@kbn/charts-theme"
   ]
 }
