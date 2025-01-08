@@ -17,10 +17,10 @@ export default defineCypressConfig({
     runMode: 2,
   },
   screenshotOnRunFailure: false,
-  screenshotsFolder: '../../../target/kibana-fleet/cypress/screenshots',
+  screenshotsFolder: '../../../../target/kibana-fleet/cypress/screenshots',
   trashAssetsBeforeRuns: false,
   video: false,
-  videosFolder: '../../../target/kibana-fleet/cypress/videos',
+  videosFolder: '../../../../target/kibana-fleet/cypress/videos',
   viewportHeight: 900,
   viewportWidth: 1440,
 
@@ -33,6 +33,6 @@ export default defineCypressConfig({
   // eslint-disable-next-line sort-keys
   e2e: {
     baseUrl: 'http://localhost:5601',
-    supportFile: './cypress/support/e2e.ts',
+    supportFile: './support/e2e.ts',
   },
 });

@@ -6,7 +6,7 @@
  */
 
 // TODO: https://github.com/elastic/kibana/issues/110895
-/* eslint-disable @kbn/eslint/no_export_all */
+
 export * from './rule';
 export * from './rules_settings';
 export type * from './rule_type';

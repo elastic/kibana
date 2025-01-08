@@ -1055,8 +1055,7 @@ module.exports = {
       ],
       rules: {
         'import/no-nodejs-modules': 'error',
-        'no-duplicate-imports': 'off',
-        '@typescript-eslint/no-duplicate-imports': 'error',
+        'import/no-duplicates': 'error',
         '@typescript-eslint/consistent-type-imports': 'error',
         'no-restricted-imports': [
           'error',
@@ -1116,8 +1115,7 @@ module.exports = {
       ],
       rules: {
         'import/no-nodejs-modules': 'error',
-        'no-duplicate-imports': 'off',
-        '@typescript-eslint/no-duplicate-imports': ['error'],
+        'import/no-duplicates': ['error'],
         'no-restricted-imports': [
           'error',
           {
@@ -1232,7 +1230,6 @@ module.exports = {
         'no-continue': 'error',
         'no-dupe-keys': 'error',
         'no-duplicate-case': 'error',
-        'no-duplicate-imports': 'off',
         'no-empty-character-class': 'error',
         'no-empty-pattern': 'error',
         'no-ex-assign': 'error',
@@ -1303,7 +1300,7 @@ module.exports = {
         'require-atomic-updates': 'error',
         'symbol-description': 'error',
         'vars-on-top': 'error',
-        '@typescript-eslint/no-duplicate-imports': ['error'],
+        'import/no-duplicates': ['error'],
       },
       overrides: [
         {
@@ -1472,7 +1469,7 @@ module.exports = {
         'no-continue': 'error',
         'no-dupe-keys': 'error',
         'no-duplicate-case': 'error',
-        'no-duplicate-imports': 'error',
+        'import/no-duplicates': 'error',
         'no-empty-character-class': 'error',
         'no-empty-pattern': 'error',
         'no-ex-assign': 'error',
@@ -1953,6 +1950,22 @@ module.exports = {
       ],
       rules: {
         '@kbn/eslint/no_export_all': 'error',
+      },
+    },
+    {
+      // TODO: https://github.com/elastic/kibana/issues/110892 https://github.com/elastic/kibana/issues/110893 https://github.com/elastic/kibana/issues/110894 https://github.com/elastic/kibana/issues/110895 https://github.com/elastic/kibana/issues/110907
+      files: [
+        'src/plugins/expression_metric/common/index.ts',
+        'src/plugins/expression_repeat_image/common/index.ts',
+        'src/plugins/inspector/public/index.ts',
+        'src/plugins/visualizations/common/index.ts',
+        'x-pack/plugins/actions/common/index.ts',
+        'x-pack/plugins/alerting/common/index.ts',
+        'x-pack/plugins/index_management/common/index.ts',
+        'x-pack/plugins/rule_registry/server/index.ts',
+      ],
+      rules: {
+        '@kbn/eslint/no_export_all': 'off',
       },
     },
 
