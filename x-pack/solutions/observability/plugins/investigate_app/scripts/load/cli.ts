@@ -26,12 +26,6 @@ export const elasticsearchOption = {
   }),
 };
 
-function getISOStringWithoutMicroseconds(): string {
-  const now = new Date();
-  const isoString = now.toISOString();
-  return isoString.split('.')[0] + 'Z';
-}
-
 export async function options(y: Argv) {
   const argv = y
     .option('kibana', kibanaOption)

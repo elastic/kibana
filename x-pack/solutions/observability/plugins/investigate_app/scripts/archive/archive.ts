@@ -5,23 +5,13 @@
  * 2.0.
  */
 
-import axios from 'axios';
 import { spawnSync } from 'child_process';
 import { run } from '@kbn/dev-cli-runner';
 import yargs from 'yargs';
-// @ts-expect-error
 import { options } from './cli';
 import { getServiceUrls } from '../common/get_service_urls';
 
-async function archiveAllRelevantData({
-  filePath,
-  kibanaUrl,
-  esUrl,
-}: {
-  filePath: string;
-  kibanaUrl: string;
-  esUrl: string;
-}) {
+async function archiveAllRelevantData({ filePath, esUrl }: { filePath: string; esUrl: string }) {
   spawnSync(
     'node',
     [
@@ -50,7 +40,6 @@ function archiveData() {
             kibana: argv.kibana,
           });
           await archiveAllRelevantData({
-            kibanaUrl: serviceUrls.kibanaUrl,
             esUrl: serviceUrls.esUrl,
             filePath: argv.filePath,
           });
@@ -66,21 +55,6 @@ function archiveData() {
       );
     })
     .parse();
-}
-
-async function getAPMIndexPattern({
-  kibanaUrl,
-}: {
-  kibanaUrl: string;
-}): Promise<Record<string, string>> {
-  const response = await axios.get(`${kibanaUrl}/internal/apm/settings/apm-indices`, {
-    headers: {
-      'kbn-xsrf': 'foo',
-      'x-elastic-internal-origin': 'observability-ai-assistant',
-    },
-  });
-  const apmIndices = response.data;
-  return apmIndices;
 }
 
 archiveData();

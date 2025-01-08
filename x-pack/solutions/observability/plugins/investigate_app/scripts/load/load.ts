@@ -11,17 +11,14 @@ import { ToolingLog } from '@kbn/tooling-log';
 import yargs from 'yargs';
 import fs from 'fs';
 import path from 'path';
-// @ts-expect-error
 import { options } from './cli';
 import { getServiceUrls } from '../common/get_service_urls';
 
 async function loadFixtureData({
-  filePath,
   esUrl,
   kibanaUrl,
   log,
 }: {
-  filePath: string;
   esUrl: string;
   kibanaUrl: string;
   log: ToolingLog;
@@ -73,7 +70,6 @@ function loadData() {
             kibana: argv.kibana,
           });
           loadFixtureData({
-            filePath: argv.filePath,
             esUrl: serviceUrls.esUrl,
             kibanaUrl: serviceUrls.kibanaUrl,
             log,

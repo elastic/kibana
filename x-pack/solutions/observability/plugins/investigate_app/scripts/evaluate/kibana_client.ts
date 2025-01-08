@@ -29,6 +29,7 @@ export type RCAChatClient = ChatClient & {
     to: string;
     alert: EcsFieldsResponse;
   }) => Promise<RootCauseAnalysisEvent[]>;
+  getAlert: (params: { alertId: string }) => Promise<EcsFieldsResponse>;
   getTimeRange: (params: {
     alert: EcsFieldsResponse;
     fromOffset: string;
@@ -36,7 +37,6 @@ export type RCAChatClient = ChatClient & {
   }) => Promise<{ from: number; to: number }>;
   createInvestigation: (params: { alertId: string; from: number; to: number }) => Promise<string>;
   deleteInvestigation: (params: { investigationId: string }) => Promise<void>;
-  archiveData: () => Promise<void>;
 };
 
 export class RCAKibanaClient extends KibanaClient {
@@ -70,17 +70,6 @@ export class RCAKibanaClient extends KibanaClient {
     });
     const that = this;
 
-    async function getAPMIndexPattern(): Promise<string> {
-      const response = await that.axios.get(
-        that.getUrl({
-          pathname: '/internal/apm/settings/apm-indices',
-        })
-      );
-      const apmIndices = response.data;
-      const apmIndexPattern = Object.values(apmIndices).join(',');
-      return apmIndexPattern;
-    }
-
     async function getAlert(alertId: string) {
       const response = await that.axios.get(
         that.getUrl({
@@ -96,17 +85,22 @@ export class RCAKibanaClient extends KibanaClient {
     }
 
     async function getTimeRange({
-      fromOffset,
-      toOffset,
+      fromOffset = 'now-15m',
+      toOffset = 'now+15m',
       alert,
     }: {
       fromOffset: string;
       toOffset: string;
       alert: EcsFieldsResponse;
     }) {
-      const alertStart = alert['kibana.alert.start'];
-      const from = datemath.parse(fromOffset, { forceNow: new Date(alertStart) }).valueOf();
-      const to = datemath.parse(toOffset, { forceNow: new Date(alertStart) }).valueOf();
+      const alertStart = alert['kibana.alert.start'] as string | undefined;
+      if (!alertStart) {
+        throw new Error(
+          'Alert start time is missing from the alert data. Please double check your alert fixture.'
+        );
+      }
+      const from = datemath.parse(fromOffset, { forceNow: new Date(alertStart) })?.valueOf()!;
+      const to = datemath.parse(toOffset, { forceNow: new Date(alertStart) })?.valueOf()!;
       return {
         from,
         to,
@@ -169,11 +163,21 @@ export class RCAKibanaClient extends KibanaClient {
       investigationId: string;
       from: string;
       to: string;
-      alert: EcsFieldsResponse;
+      alert?: EcsFieldsResponse;
     }) {
       const chat$ = defer(() => {
-        that.log.debug(`Calling chat API`);
-        const serviceName = alert['service.name'];
+        that.log.debug(`Calling root cause analysis API`);
+        const serviceName = alert?.['service.name'] as string | undefined;
+        if (!alert) {
+          throw new Error(
+            'Alert not found. Please ensure you have loaded test fixture data prior to running tests.'
+          );
+        }
+        if (!serviceName) {
+          throw new Error(
+            'Service name is missing from the alert data. Please double check your alert fixture.'
+          );
+        }
         const context = getRCAContext(alert, serviceName);
         const body = {
           investigationId,
@@ -290,8 +294,8 @@ export class RCAKibanaClient extends KibanaClient {
         to,
       }: {
         alertId: string;
-        from: string;
-        to: string;
+        from: number;
+        to: number;
       }) => {
         return await createInvestigation({ alertId, from, to });
       },

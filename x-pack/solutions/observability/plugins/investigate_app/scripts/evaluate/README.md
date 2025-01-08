@@ -24,13 +24,13 @@ Once your cluster is created, paste the the yml config provided in your `kibana.
 
 To load the fixtures needed for the tests, first run:
 
-`$ node x-pack/plugins/observability_solution/investigate_app/scripts/load/index.js`
+`$ node x-pack/solutions/observability/plugins/investigate_app/scripts/load/index.js`
 
 ### Executing tests
 
 Run the tool using:
 
-`$ node x-pack/plugins/observability_solution/investigate_app/scripts/evaluate/index.js`
+`$ node x-pack/solutions/observability/plugins/investigate_app/scripts/evaluate/index.js`
 
 This will evaluate all existing scenarios, and write the evaluation results to the terminal.
 
