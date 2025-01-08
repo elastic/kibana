@@ -20,9 +20,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dashboardAddPanel = getService('dashboardAddPanel');
   const browser = getService('browser');
   const comboBox = getService('comboBox');
-  const elasticChart = getService('elasticChart');
 
-  describe('dashboard - add a field type ES|QL control', function () {
+  describe('dashboard - add a value type ES|QL control', function () {
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
       await kibanaServer.importExport.load(
@@ -38,7 +37,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.click('discard-unsaved-New-Dashboard');
     });
 
-    it('should add an ES|QL field control', async () => {
+    it('should add an ES|QL value control', async () => {
       await dashboard.navigateToApp();
       await dashboard.clickNewDashboard();
       await timePicker.setDefaultDataRange();
@@ -57,21 +56,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await retry.waitFor('control flyout to open', async () => {
         await monacoEditor.setCodeEditorValue(''); // clear the default query
         await monacoEditor.typeCodeEditorValue(
-          'FROM logstash* | STATS COUNT(*) BY ',
+          'FROM logstash-* | WHERE geo.dest == ',
           'InlineEditingESQLEditor'
         );
         // Wait until suggestions are loaded
         await common.sleep(1000);
-        // Create control is the third suggestion
-        await browser.pressKeys(browser.keys.ARROW_DOWN);
-        await browser.pressKeys(browser.keys.ARROW_DOWN);
+        // Create control is the first suggestion
         await browser.pressKeys(browser.keys.ENTER);
 
         return await testSubjects.exists('create_esql_control_flyout');
       });
 
-      await comboBox.set('esqlFieldsOptions', 'geo.dest');
-      await comboBox.set('esqlFieldsOptions', 'clientip');
+      const valuesQueryEditorValue = await monacoEditor.getCodeEditorValue();
+      expect(valuesQueryEditorValue).to.contain('FROM logstash-* | STATS BY geo.dest');
 
       // create the control
       await testSubjects.click('saveEsqlControlsFlyoutButton');
@@ -84,17 +81,26 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // Check Lens editor has been updated accordingly
       const editorValue = await monacoEditor.getCodeEditorValue();
-      expect(editorValue).to.contain('FROM logstash* | STATS COUNT(*) BY ?field');
+      expect(editorValue).to.contain('FROM logstash-* | WHERE geo.dest == ?geo_dest');
+
+      // change the table to keep only the column with the control
+      await monacoEditor.setCodeEditorValue(
+        'FROM logstash-* | WHERE geo.dest == ?geo_dest | KEEP geo.dest'
+      );
+      // run the query
+      await testSubjects.click('ESQLEditor-run-query-button');
+
+      // save the changes
+      await testSubjects.click('applyFlyoutButton');
     });
 
     it('should update the Lens chart accordingly', async () => {
-      await elasticChart.setNewChartUiDebugFlag(true);
       // change the control value
-      await comboBox.set('esqlControlValuesDropdown', 'clientip');
+      await comboBox.set('esqlControlValuesDropdown', 'AO');
       await dashboard.waitForRenderComplete();
 
-      const data = await elasticChart.getChartDebugData('xyVisChart');
-      expect(data?.axes?.x[0]?.title).to.be('clientip');
+      const tableContent = await testSubjects.getVisibleText('lnsTableCellContent');
+      expect(tableContent).to.contain('AO');
     });
   });
 }
