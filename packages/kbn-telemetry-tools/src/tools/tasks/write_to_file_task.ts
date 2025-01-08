@@ -15,7 +15,7 @@ export function writeToFileTask({ roots }: TaskContext) {
   return roots.map((root) => ({
     task: async () => {
       const fullPath = path.resolve(process.cwd(), root.config.output);
-      if (root.mapping && Object.keys(root.mapping.properties).length > 0) {
+      if (root.mapping) {
         // Sort first-level properties alphabetically
         root.mapping.properties = Object.fromEntries(
           Object.entries(root.mapping.properties).sort(([a], [b]) => {
