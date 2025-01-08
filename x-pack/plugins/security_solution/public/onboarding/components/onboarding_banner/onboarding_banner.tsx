@@ -8,7 +8,7 @@
 import React, { useCallback } from 'react';
 
 import { AVCResultsBanner, useIsStillYear2025 } from '@kbn/avc-banner';
-import { useStoredIsAVCBannerDismissed } from '../hooks/use_stored_state';
+import { useStoredIsAVCBannerDismissed } from '../../hooks/use_stored_state';
 
 export const OnboardingBanner = React.memo(() => {
   const [isAVCBannerDismissed, setIsAVCBannerDismissed] = useStoredIsAVCBannerDismissed();
