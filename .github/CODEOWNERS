@@ -208,7 +208,6 @@ packages/kbn-yarn-lock-validator @elastic/kibana-operations
 packages/response-ops/feature_flag_service @elastic/response-ops
 packages/response-ops/rule_form @elastic/response-ops
 packages/serverless/storybook/config @elastic/appex-sharedux
-packages/serverless/types @elastic/appex-sharedux
 src/core @elastic/kibana-core
 src/core/packages/analytics/browser @elastic/kibana-core
 src/core/packages/analytics/browser-internal @elastic/kibana-core
@@ -402,6 +401,7 @@ src/platform/packages/private/kbn-ui-shared-deps-src @elastic/kibana-operations
 src/platform/packages/private/kbn-unsaved-changes-badge @elastic/kibana-data-discovery
 src/platform/packages/private/serverless/project_switcher @elastic/appex-sharedux
 src/platform/packages/private/serverless/settings/common @elastic/appex-sharedux @elastic/kibana-management
+src/platform/packages/private/serverless/types @elastic/appex-sharedux
 src/platform/packages/private/shared-ux/page/analytics_no_data/impl @elastic/appex-sharedux
 src/platform/packages/private/shared-ux/page/analytics_no_data/mocks @elastic/appex-sharedux
 src/platform/packages/private/shared-ux/page/analytics_no_data/types @elastic/appex-sharedux
