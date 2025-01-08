@@ -100,7 +100,7 @@ export const EmptyPromptComponent = memo(({ onSkip }: { onSkip?: () => void }) =
             <EuiPageHeader
               pageTitle={i18n.SIEM_HEADER}
               iconType="logoSecurity"
-              className={pageHeaderStyles}
+              css={pageHeaderStyles}
             />
             <EuiCard
               display="plain"
@@ -112,7 +112,7 @@ export const EmptyPromptComponent = memo(({ onSkip }: { onSkip?: () => void }) =
                   {i18n.SIEM_CTA}
                 </EuiButton>
               }
-              className={headerCardStyles}
+              css={headerCardStyles}
             />
           </EuiFlexItem>
           <EuiFlexItem>
@@ -131,7 +131,7 @@ export const EmptyPromptComponent = memo(({ onSkip }: { onSkip?: () => void }) =
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
-      <EuiFlexItem className={flexItemStyles}>
+      <EuiFlexItem css={flexItemStyles}>
         <EuiFlexGroup gutterSize="m">
           <EuiFlexItem>
             <EuiCard
@@ -140,7 +140,7 @@ export const EmptyPromptComponent = memo(({ onSkip }: { onSkip?: () => void }) =
               image={imgUrls.siem}
               textAlign="center"
               title={i18n.SIEM_CARD_TITLE}
-              className={cardStyles}
+              css={cardStyles}
             />
           </EuiFlexItem>
           <EuiFlexItem>
@@ -150,7 +150,7 @@ export const EmptyPromptComponent = memo(({ onSkip }: { onSkip?: () => void }) =
               image={imgUrls.endpoint}
               textAlign="center"
               title={i18n.ENDPOINT_TITLE}
-              className={cardStyles}
+              css={cardStyles}
             />
           </EuiFlexItem>
           <EuiFlexItem>
@@ -160,7 +160,7 @@ export const EmptyPromptComponent = memo(({ onSkip }: { onSkip?: () => void }) =
               image={imgUrls.cloud}
               textAlign="center"
               title={i18n.CLOUD_CARD_TITLE}
-              className={cardStyles}
+              css={cardStyles}
             />
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -188,7 +188,7 @@ export const EmptyPromptComponent = memo(({ onSkip }: { onSkip?: () => void }) =
               )}
             </EuiFlexGroup>
           }
-          className={footerStyles}
+          css={footerStyles}
         />
       </EuiFlexItem>
     </EuiFlexGroup>
