@@ -307,7 +307,6 @@ export async function getNativeConnectorDeprecations(
               i18n.translate(
                 'xpack.enterpriseSearch.deprecations.fauxNativeConnector.convertPretenders',
                 {
-                  values: { serviceTypes: nativeTypesStr },
                   defaultMessage:
                     'Select "Convert to Client" for any connectors where `is_native: true` but the `service_type` is NOT supported, per the list above.',
                 }
@@ -356,7 +355,8 @@ export async function getNativeConnectorDeprecations(
               i18n.translate(
                 'xpack.enterpriseSearch.deprecations.missingIntegrationServer.gotocloud',
                 {
-                  defaultMessage: 'Go to cloud.elastic.co',
+                  values: { baseUrl: cloud.baseUrl },
+                  defaultMessage: 'Go to {baseUrl}',
                 }
               ),
               i18n.translate(
