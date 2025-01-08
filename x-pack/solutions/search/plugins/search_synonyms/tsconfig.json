@@ -20,6 +20,8 @@
     "@kbn/console-plugin",
     "@kbn/features-plugin",
     "@kbn/search-navigation",
+    "@kbn/doc-links",
+    "@kbn/shared-ux-page-kibana-template",
   ],
   "exclude": [
     "target/**/*",
