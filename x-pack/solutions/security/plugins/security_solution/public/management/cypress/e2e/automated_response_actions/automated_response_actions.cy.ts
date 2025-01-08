@@ -19,7 +19,7 @@ import type { CreateAndEnrollEndpointHostResponse } from '../../../../../scripts
 import { createEndpointHost } from '../../tasks/create_endpoint_host';
 import { deleteAllLoadedEndpointData } from '../../tasks/delete_all_endpoint_data';
 import { enableAllPolicyProtections } from '../../tasks/endpoint_policy';
-
+// test suite for automated response actions
 describe(
   'Automated Response Actions',
   {
