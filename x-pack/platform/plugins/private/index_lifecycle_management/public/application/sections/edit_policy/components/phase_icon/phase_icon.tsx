@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FunctionComponent } from 'react';
+import React, { FunctionComponent } from 'react';
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { EuiIcon, useEuiTheme } from '@elastic/eui';
