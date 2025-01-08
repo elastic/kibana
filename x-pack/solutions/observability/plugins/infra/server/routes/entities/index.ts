@@ -36,7 +36,12 @@ export const initEntitiesConfigurationRoutes = (libs: InfraBackendLibs) => {
       },
     },
     async (requestContext, request, response) => {
-      const { entityId, entityType } = request.params;
+      const { entityId, entityType: entityFilterType } = request.params;
+      const mapTypeToV2 = {
+        [BUILT_IN_ENTITY_TYPES.HOST]: BUILT_IN_ENTITY_TYPES.HOST_V2,
+        [BUILT_IN_ENTITY_TYPES.CONTAINER]: BUILT_IN_ENTITY_TYPES.CONTAINER_V2,
+      };
+      const entityType = mapTypeToV2[entityFilterType];
       const { from, to } = request.query;
       const [coreContext, infraContext] = await Promise.all([
         requestContext.core,
@@ -66,6 +71,7 @@ export const initEntitiesConfigurationRoutes = (libs: InfraBackendLibs) => {
           entityId,
           entityManagerClient,
           entityType,
+          entityFilterType,
           infraMetricsClient,
           obsEsClient,
           logger,
@@ -78,6 +84,7 @@ export const initEntitiesConfigurationRoutes = (libs: InfraBackendLibs) => {
             sourceDataStreams: sourceDataStreamTypes,
             entityId,
             entityType,
+            entityFilterType,
           },
         });
       } catch (error) {

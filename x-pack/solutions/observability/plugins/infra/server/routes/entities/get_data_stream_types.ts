@@ -19,6 +19,7 @@ import { getLatestEntity } from './get_latest_entity';
 interface Params {
   entityId: string;
   entityType: string;
+  entityFilterType: string;
   entityCentricExperienceEnabled: boolean;
   infraMetricsClient: InfraMetricsClient;
   obsEsClient: ObservabilityElasticsearchClient;
@@ -33,6 +34,7 @@ export async function getDataStreamTypes({
   entityId,
   entityManagerClient,
   entityType,
+  entityFilterType,
   infraMetricsClient,
   from,
   to,
@@ -41,7 +43,7 @@ export async function getDataStreamTypes({
   const hasMetricsData = await getHasMetricsData({
     infraMetricsClient,
     entityId,
-    field: findInventoryFields(entityType as InventoryItemType).id,
+    field: findInventoryFields(entityFilterType as InventoryItemType).id,
   });
 
   const sourceDataStreams = new Set(hasMetricsData ? [EntityDataStreamType.METRICS] : []);

@@ -38,7 +38,8 @@ describe('getDataStreamTypes', () => {
 
     const params = {
       entityId: 'entity123',
-      entityType: 'host',
+      entityType: 'built_in_hosts_from_ecs_data',
+      entityFilterType: 'host',
       entityCentricExperienceEnabled: false,
       infraMetricsClient,
       obsEsClient,
@@ -63,7 +64,8 @@ describe('getDataStreamTypes', () => {
 
     const params = {
       entityId: 'entity123',
-      entityType: 'container',
+      entityFilterType: 'container',
+      entityType: 'built_in_containers_from_ecs_data',
       entityCentricExperienceEnabled: false,
       infraMetricsClient,
       obsEsClient,
@@ -85,7 +87,8 @@ describe('getDataStreamTypes', () => {
 
     const params = {
       entityId: 'entity123',
-      entityType: 'host',
+      entityType: 'built_in_hosts_from_ecs_data',
+      entityFilterType: 'host',
       entityCentricExperienceEnabled: true,
       infraMetricsClient,
       obsEsClient,
@@ -101,7 +104,7 @@ describe('getDataStreamTypes', () => {
     expect(getHasMetricsData).toHaveBeenCalled();
     expect(getLatestEntity).toHaveBeenCalledWith({
       entityId: 'entity123',
-      entityType: 'host',
+      entityType: 'built_in_hosts_from_ecs_data',
       entityManagerClient,
       logger,
       from: '2024-12-09T10:49:15Z',
@@ -115,7 +118,8 @@ describe('getDataStreamTypes', () => {
 
     const params = {
       entityId: 'entity123',
-      entityType: 'host',
+      entityType: 'built_in_hosts_from_ecs_data',
+      entityFilterType: 'host',
       entityCentricExperienceEnabled: true,
       infraMetricsClient,
       obsEsClient,
@@ -137,7 +141,8 @@ describe('getDataStreamTypes', () => {
 
     const params = {
       entityId: 'entity123',
-      entityType: 'host',
+      entityType: 'built_in_hosts_from_ecs_data',
+      entityFilterType: 'host',
       entityCentricExperienceEnabled: true,
       infraMetricsClient,
       obsEsClient,

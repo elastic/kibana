@@ -12,9 +12,13 @@ import {
 } from '@kbn/observability-shared-plugin/common';
 import { useFetcher } from '../../../hooks/use_fetcher';
 
-const EntityTypeSchema = z.union([
+const EntityFilterTypeSchema = z.union([
   z.literal(BUILT_IN_ENTITY_TYPES.HOST),
   z.literal(BUILT_IN_ENTITY_TYPES.CONTAINER),
+]);
+const EntityTypeSchema = z.union([
+  z.literal(BUILT_IN_ENTITY_TYPES.HOST_V2),
+  z.literal(BUILT_IN_ENTITY_TYPES.CONTAINER_V2),
 ]);
 const EntityDataStreamSchema = z.union([
   z.literal(EntityDataStreamType.METRICS),
@@ -22,6 +26,7 @@ const EntityDataStreamSchema = z.union([
 ]);
 
 const EntitySummarySchema = z.object({
+  entityFilterType: EntityFilterTypeSchema,
   entityType: EntityTypeSchema,
   entityId: z.string(),
   sourceDataStreams: z.array(EntityDataStreamSchema),
