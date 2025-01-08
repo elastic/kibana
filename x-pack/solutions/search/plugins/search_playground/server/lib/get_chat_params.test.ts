@@ -11,6 +11,7 @@ import {
   OPENAI_CONNECTOR_ID,
   BEDROCK_CONNECTOR_ID,
   GEMINI_CONNECTOR_ID,
+  INFERENCE_CONNECTOR_ID,
 } from '@kbn/stack-connectors-plugin/public/common';
 import { Prompt, QuestionRewritePrompt } from '../../common/prompt';
 import { KibanaRequest, Logger } from '@kbn/core/server';
@@ -186,6 +187,42 @@ describe('getChatParams', () => {
       traceId: 'test-uuid',
       temperature: 0.2,
       maxRetries: 0,
+    });
+    expect(result.chatPrompt).toContain('How does it work?');
+  });
+
+  it('returns the correct chat model and uses the default model for inference connector', async () => {
+    mockActionsClient.get.mockResolvedValue({
+      id: '2',
+      actionTypeId: INFERENCE_CONNECTOR_ID,
+      config: { defaultModel: 'local' },
+    });
+
+    const result = await getChatParams(
+      {
+        connectorId: '2',
+        prompt: 'How does it work?',
+        citations: false,
+      },
+      { actions, request, logger }
+    );
+
+    expect(Prompt).toHaveBeenCalledWith('How does it work?', {
+      citations: false,
+      context: true,
+      type: 'openai',
+    });
+    expect(QuestionRewritePrompt).toHaveBeenCalledWith({
+      type: 'openai',
+    });
+    expect(ActionsClientChatOpenAI).toHaveBeenCalledWith({
+      logger: expect.anything(),
+      model: 'local',
+      connectorId: '2',
+      actionsClient: expect.anything(),
+      temperature: 0.2,
+      maxRetries: 0,
+      llmType: 'inference',
     });
     expect(result.chatPrompt).toContain('How does it work?');
   });

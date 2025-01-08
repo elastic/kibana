@@ -17,8 +17,10 @@ import {
   OpenAiProviderType,
   BEDROCK_CONNECTOR_ID,
   GEMINI_CONNECTOR_ID,
+  INFERENCE_CONNECTOR_ID,
 } from '@kbn/stack-connectors-plugin/public/common';
-import { UserConfiguredActionConnector } from '@kbn/triggers-actions-ui-plugin/public/types';
+import type { UserConfiguredActionConnector } from '@kbn/triggers-actions-ui-plugin/public/types';
+import { isSupportedConnector } from '@kbn/inference-common';
 import { useKibana } from './use_kibana';
 import { LLMs } from '../types';
 
@@ -97,6 +99,18 @@ const connectorTypeToLLM: Array<{
         defaultMessage: 'Gemini',
       }),
       type: LLMs.gemini,
+    }),
+  },
+  {
+    actionId: INFERENCE_CONNECTOR_ID,
+    match: (connector) =>
+      connector.actionTypeId === INFERENCE_CONNECTOR_ID && isSupportedConnector(connector),
+    transform: (connector) => ({
+      ...connector,
+      title: i18n.translate('xpack.searchPlayground.aiConnectorTitle', {
+        defaultMessage: 'AI Connector',
+      }),
+      type: LLMs.inference,
     }),
   },
 ];

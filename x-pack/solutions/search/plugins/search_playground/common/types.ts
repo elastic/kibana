@@ -60,6 +60,7 @@ export enum LLMs {
   openai_other = 'openai_other',
   bedrock = 'bedrock',
   gemini = 'gemini',
+  inference = 'inference',
 }
 
 export interface ChatRequestData {

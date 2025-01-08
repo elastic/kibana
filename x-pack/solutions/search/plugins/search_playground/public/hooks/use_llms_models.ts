@@ -8,15 +8,20 @@
 import { i18n } from '@kbn/i18n';
 import { BedrockLogo, OpenAILogo, GeminiLogo } from '@kbn/stack-connectors-plugin/public/common';
 import { ComponentType, useMemo } from 'react';
+import { SERVICE_PROVIDERS } from '@kbn/inference-endpoint-ui-common';
+import type { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public';
+import type { ServiceProviderKeys } from '@kbn/inference-endpoint-ui-common';
 import { LLMs } from '../../common/types';
 import { LLMModel } from '../types';
 import { useLoadConnectors } from './use_load_connectors';
 import { MODELS } from '../../common/models';
 
+type InferenceConnector = ActionConnector & { config: { provider: ServiceProviderKeys } };
+
 const mapLlmToModels: Record<
   LLMs,
   {
-    icon: ComponentType;
+    icon: ComponentType | ((connector: InferenceConnector) => ComponentType | string);
     getModels: (
       connectorName: string,
       includeName: boolean
@@ -72,6 +77,19 @@ const mapLlmToModels: Record<
         promptTokenLimit: model.promptTokenLimit,
       })),
   },
+  [LLMs.inference]: {
+    icon: (connector: InferenceConnector) => {
+      return SERVICE_PROVIDERS[connector.config.provider].icon;
+    },
+    getModels: (connectorName) => [
+      {
+        label: i18n.translate('xpack.searchPlayground.inferenceModel', {
+          defaultMessage: '{name} (AI Connector)',
+          values: { name: connectorName },
+        }),
+      },
+    ],
+  },
 };
 
 export const useLLMsModels = (): LLMModel[] => {
@@ -111,7 +129,8 @@ export const useLLMsModels = (): LLMModel[] => {
               connectorType: connector.type,
               connectorName: connector.name,
               showConnectorName,
-              icon: llmParams.icon,
+              icon:
+                typeof llmParams.icon === 'function' ? llmParams.icon(connector) : llmParams.icon,
               disabled: !connector,
               connectorId: connector.id,
               promptTokenLimit,
