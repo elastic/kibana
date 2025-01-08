@@ -9,9 +9,9 @@ import type {
   BulkRequest,
   BulkResponse,
   DeleteRequest,
-  DeleteResponse,
   IndexRequest,
   IndexResponse,
+  Result,
   SearchRequest,
 } from '@elastic/elasticsearch/lib/api/types';
 import { InferSearchResponseOf } from '@kbn/es-types';
@@ -52,7 +52,11 @@ export type StorageAdapterBulkRequest<TDocument extends Record<string, any>> = O
 export type StorageAdapterBulkResponse = BulkResponse;
 
 export type StorageAdapterDeleteRequest = DeleteRequest;
-export type StorageAdapterDeleteResponse = DeleteResponse;
+
+export interface StorageAdapterDeleteResponse {
+  acknowledged: boolean;
+  result: Extract<Result, 'deleted' | 'not_found'>;
+}
 
 export type StorageAdapterIndexRequest<TDocument = unknown> = Omit<
   IndexRequest<TDocument>,

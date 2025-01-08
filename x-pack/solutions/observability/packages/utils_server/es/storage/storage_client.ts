@@ -7,14 +7,22 @@
 
 import { withSpan } from '@kbn/apm-utils';
 import { Logger } from '@kbn/core/server';
-import { compact } from 'lodash';
+import type { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
 import {
   IStorageAdapter,
   StorageAdapterBulkOperation,
+  StorageAdapterBulkResponse,
+  StorageAdapterDeleteResponse,
+  StorageAdapterIndexResponse,
   StorageDocumentOf,
   StorageSettings,
 } from '.';
-import { ObservabilityESSearchRequest } from '../client/create_observability_es_client';
+
+type StrictSearchRequest = SearchRequest & {
+  index: string | string[];
+  track_total_hits: number | boolean;
+  size: number;
+};
 
 type StorageBulkOperation<TDocument extends { _id?: string }> =
   | {
@@ -25,7 +33,7 @@ type StorageBulkOperation<TDocument extends { _id?: string }> =
 export class StorageClient<TStorageSettings extends StorageSettings> {
   constructor(private readonly storage: IStorageAdapter<TStorageSettings>, logger: Logger) {}
 
-  search<TSearchRequest extends Omit<ObservabilityESSearchRequest, 'index'>>(
+  search<TSearchRequest extends Omit<StrictSearchRequest, 'index'>>(
     operationName: string,
     request: TSearchRequest
   ) {
@@ -42,15 +50,15 @@ export class StorageClient<TStorageSettings extends StorageSettings> {
   }: {
     id?: string;
     document: Omit<StorageDocumentOf<TStorageSettings>, '_id'>;
-  }) {
-    await this.storage.index<Omit<StorageDocumentOf<TStorageSettings>, '_id'>>({
+  }): Promise<StorageAdapterIndexResponse> {
+    return await this.storage.index<Omit<StorageDocumentOf<TStorageSettings>, '_id'>>({
       document,
       refresh: 'wait_for',
       id,
     });
   }
 
-  async delete(id: string) {
+  async delete(id: string): Promise<StorageAdapterDeleteResponse> {
     const searchResponse = await this.storage.search({
       query: {
         bool: {
@@ -74,11 +82,13 @@ export class StorageClient<TStorageSettings extends StorageSettings> {
       deleted = true;
     }
 
-    return { acknowledged: true, deleted };
+    return { acknowledged: true, result: deleted ? 'deleted' : 'not_found' };
   }
 
-  async bulk(operations: Array<StorageBulkOperation<StorageDocumentOf<TStorageSettings>>>) {
-    const result = await this.storage.bulk({
+  async bulk(
+    operations: Array<StorageBulkOperation<StorageDocumentOf<TStorageSettings>>>
+  ): Promise<StorageAdapterBulkResponse> {
+    return await this.storage.bulk({
       refresh: 'wait_for',
       operations: operations.flatMap((operation): StorageAdapterBulkOperation[] => {
         if ('index' in operation) {
@@ -95,21 +105,5 @@ export class StorageClient<TStorageSettings extends StorageSettings> {
         return [operation];
       }),
     });
-
-    if (result.errors) {
-      const errors = compact(
-        result.items.map((item) => {
-          const error = Object.values(item).find((operation) => operation.error)?.error;
-          return error;
-        })
-      );
-      return {
-        errors,
-      };
-    }
-
-    return {
-      acknowledged: true,
-    };
   }
 }

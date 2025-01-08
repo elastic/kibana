@@ -207,7 +207,7 @@ export class StorageIndexAdapter<TStorageSettings extends IndexStorageSettings>
 
   private async updateMappingsOfExistingIndex({ name }: { name: string }) {
     const simulateIndexTemplateResponse = await this.esClient.indices.simulateIndexTemplate({
-      name: getIndexTemplateName(this.storage.name),
+      name: getBackingIndexName(this.storage.name, 999999),
     });
 
     if (simulateIndexTemplateResponse.template.settings) {
@@ -375,11 +375,13 @@ export class StorageIndexAdapter<TStorageSettings extends IndexStorageSettings>
     index,
     refresh,
   }: StorageAdapterDeleteRequest): Promise<StorageAdapterDeleteResponse> {
-    return await this.esClient.delete({
+    const response = await this.esClient.delete({
       index,
       id,
       refresh,
     });
+
+    return { acknowledged: true, result: response.result === 'deleted' ? 'deleted' : 'not_found' };
   }
 
   getClient(): StorageClient<TStorageSettings> {
