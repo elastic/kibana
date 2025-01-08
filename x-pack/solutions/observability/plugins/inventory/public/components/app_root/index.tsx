@@ -12,11 +12,11 @@ import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { RouteRenderer, RouterProvider } from '@kbn/typed-react-router-config';
 import React from 'react';
 import { InventoryContextProvider } from '../../context/inventory_context_provider';
-import { KibanaEnvironment } from '../../hooks/use_kibana';
+import type { KibanaEnvironment } from '../../hooks/use_kibana';
 import { UnifiedSearchProvider } from '../../hooks/use_unified_search_context';
 import { inventoryRouter } from '../../routes/config';
-import { InventoryServices } from '../../services/types';
-import { InventoryStartDependencies } from '../../types';
+import type { InventoryServices } from '../../services/types';
+import type { InventoryStartDependencies } from '../../types';
 import { HeaderActionMenuItems } from './header_action_menu';
 
 export function AppRoot({

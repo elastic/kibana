@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { InventoryMetric } from '../../types';
+import type { InventoryMetric } from '../../types';
 
 export const nginx: InventoryMetric[] = [
   'nginxHits',
