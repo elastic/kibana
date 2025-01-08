@@ -25,7 +25,7 @@ export const aSummaryDocument = (
 
 export const aHitFromSummaryIndex = (_source: any) => {
   return {
-    _index: '.slo-observability.summary-v2',
+    _index: '.slo-observability.summary-v3.3',
     _id: uuidv4(),
     _score: 1,
     _source,
@@ -34,7 +34,7 @@ export const aHitFromSummaryIndex = (_source: any) => {
 
 export const aHitFromTempSummaryIndex = (_source: any) => {
   return {
-    _index: '.slo-observability.summary-v2.temp',
+    _index: '.slo-observability.summary-v3.3.temp',
     _id: uuidv4(),
     _score: 1,
     _source,

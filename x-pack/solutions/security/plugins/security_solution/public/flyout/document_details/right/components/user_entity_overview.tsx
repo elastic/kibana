@@ -15,7 +15,7 @@ import {
   useEuiFontSize,
   EuiSkeletonText,
 } from '@elastic/eui';
-import { css } from '@emotion/css';
+import { css } from '@emotion/react';
 import { getOr } from 'lodash/fp';
 import { i18n } from '@kbn/i18n';
 import { useDocumentDetailsContext } from '../../shared/context';
