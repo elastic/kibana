@@ -1032,11 +1032,15 @@ describe('Session index', () => {
       expect(runResult?.state.shardMissingCounter).toBe(1);
     });
 
-    it('should throw error if shards are missing for more than 10 times', async () => {
+    it('should throw error if shards are missing for more than 10 tries', async () => {
       mockElasticsearchClient.indices.stats.mockResolvedValue({
         _shards: { total: 0, failed: 1, successful: 0 },
         _all: {},
       });
+
+      const failureReason = new Error(
+        'Failed to clean up sessions: Shards for session index are missing. Cleanup routine has failed 10 times.'
+      );
 
       const runContext = {
         taskInstance: {
@@ -1045,7 +1049,7 @@ describe('Session index', () => {
         },
       };
 
-      await expect(sessionIndex.cleanUp(runContext)).rejects.toBe('');
+      await expect(sessionIndex.cleanUp(runContext)).rejects.toEqual(failureReason);
     });
 
     describe('concurrent session limit', () => {
