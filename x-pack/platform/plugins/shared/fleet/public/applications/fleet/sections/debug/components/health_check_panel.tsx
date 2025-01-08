@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React, { useEffect, useState, useMemo } from 'react';
-import { css } from '@emotion/react';
+
 import {
   EuiSpacer,
   EuiText,
@@ -108,7 +108,7 @@ export const HealthCheckPanel: React.FunctionComponent = () => {
       <EuiFlexGroup alignItems="center">
         <EuiFlexItem
           grow={false}
-          css={css`
+          css={`
             min-width: 600px;
           `}
         >

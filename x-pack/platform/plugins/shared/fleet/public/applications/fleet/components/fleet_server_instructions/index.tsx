@@ -6,7 +6,6 @@
  */
 
 import React, { useState, useCallback } from 'react';
-import { css } from '@emotion/react';
 import {
   EuiButtonGroup,
   EuiFlexGroup,
@@ -176,7 +175,7 @@ export const AddFleetServerLanding: React.FunctionComponent = () => {
 
         <EuiFlexItem>
           <EuiText
-            css={css`
+            css={`
               max-width: 500px;
               text-align: center;
             `}
