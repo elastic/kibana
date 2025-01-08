@@ -234,7 +234,7 @@ export const TabSummary: React.FunctionComponent<Props> = ({ templateDetails }) 
                     defaultMessage="Index mode"
                   />
                 </EuiDescriptionListTitle>
-                <EuiDescriptionListDescription>
+                <EuiDescriptionListDescription data-test-subj="indexModeValue">
                   {indexModeLabels[indexMode]}
                 </EuiDescriptionListDescription>
               </>
