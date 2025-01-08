@@ -12,7 +12,7 @@ import { createServerRoute } from '../create_server_route';
 import { DefinitionNotFound } from '../../lib/streams/errors';
 import { readStream } from '../../lib/streams/stream_crud';
 
-interface StreamDetailsResponse {
+export interface StreamDetailsResponse {
   details: {
     count: number;
   };
