@@ -28,7 +28,7 @@ export enum Aggregators {
   LAST_VALUE = 'last_value',
 }
 
-//utils?
+// utils?
 export const oneOfLiterals = (arrayOfLiterals: Readonly<string[]>) =>
   schema.string({
     validate: (value) =>

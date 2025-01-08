@@ -10,5 +10,7 @@
     "@kbn/config-schema",
     "@kbn/ml-anomaly-utils",
     "@kbn/alerting-comparators",
+    "@kbn/data-views-plugin",
+    "@kbn/logs-shared-plugin"
   ]
 }

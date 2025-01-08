@@ -35,6 +35,8 @@ import { getEcsGroups, type Group } from '@kbn/observability-alerting-rule-utils
 
 import { ecsFieldMap } from '@kbn/rule-registry-plugin/common/assets/field_maps/ecs_field_map';
 import { decodeOrThrow } from '@kbn/io-ts-utils';
+import type { LogThresholdParams } from '@kbn/response-ops-rule-params/log_threshold';
+import { logThresholdParamsRT } from '@kbn/response-ops-rule-params/log_threshold';
 import { getChartGroupNames } from '../../../../common/utils/get_chart_group_names';
 import type {
   CountRuleParams,
@@ -57,10 +59,6 @@ import {
   isRatioRuleParams,
   UngroupedSearchQueryResponseRT,
 } from '../../../../common/alerting/logs/log_threshold';
-import {
-  logThresholdParamsRT,
-  LogThresholdParams,
-} from '@kbn/response-ops-rule-params/log_threshold';
 import { getLogsAppAlertUrl } from '../../../../common/formatters/alert_link';
 import type { InfraBackendLibs } from '../../infra_types';
 import type { AdditionalContext } from '../common/utils';
