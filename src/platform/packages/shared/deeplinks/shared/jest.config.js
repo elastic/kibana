@@ -9,6 +9,6 @@
 
 module.exports = {
   preset: '@kbn/test',
-  rootDir: '../../..',
-  roots: ['<rootDir>/packages/deeplinks/shared'],
+  rootDir: '../../../../../..',
+  roots: ['<rootDir>/src/platform/packages/shared/deeplinks/shared'],
 };
