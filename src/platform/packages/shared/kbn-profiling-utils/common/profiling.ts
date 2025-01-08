@@ -40,7 +40,7 @@ export enum FrameType {
 
   // Artificial frame types for grouping, set by the ES profiling plugin
   Root = 0x100,
-  ExecutableName = 0x101,
+  ProcessName = 0x101,
   ThreadName = 0x102,
 }
 
@@ -59,7 +59,7 @@ const frameTypeDescriptions = {
   [FrameType.ErrorFlag]: 'ErrorFlag',
   [FrameType.Error]: 'Error',
   [FrameType.Root]: 'Root',
-  [FrameType.ExecutableName]: 'Process', // Due to OTEL semconv issues, "process name" is currently more correct than "executable name"
+  [FrameType.ProcessName]: 'Process', // Due to OTEL semconv issues, "process name" is currently more correct than "executable name"
   [FrameType.ThreadName]: 'Thread',
 };
 

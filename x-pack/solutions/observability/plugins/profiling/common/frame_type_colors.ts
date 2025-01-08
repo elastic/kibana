@@ -47,7 +47,7 @@ export const FRAME_TYPE_COLOR_MAP = {
   [FrameType.ErrorFlag]: [0x0, 0x0, 0x0, 0x0], // This is a special case, it's not a real frame type
   [FrameType.Error]: [0xfd8484, 0xfd9d9d, 0xfeb5b5, 0xfecece],
   [FrameType.Root]: [RED, RED, RED, RED],
-  [FrameType.ExecutableName]: [ORANGE, ORANGE, ORANGE, ORANGE],
+  [FrameType.ProcessName]: [ORANGE, ORANGE, ORANGE, ORANGE],
   [FrameType.ThreadName]: [YELLOW, YELLOW, YELLOW, YELLOW],
 };
 
