@@ -7,67 +7,72 @@
 
 import { EuiButtonEmpty, EuiLink, EuiPopover } from '@elastic/eui';
 import React, { useState } from 'react';
-import { CustomCitationNode } from './custom_citation_parser';
+import type { CustomCitationNode } from './custom_citation_parser';
 
-type CustomCitationProps = Pick<CustomCitationNode, "citationLable" | 'citationLink' | 'citationNumber' | 'incomplete'>
+type CustomCitationProps = Pick<
+  CustomCitationNode,
+  'citationLable' | 'citationLink' | 'citationNumber' | 'incomplete'
+>;
 
 export const CustomCitation: React.FC<CustomCitationProps> = ({
-    citationLable,
-    citationLink,
-    citationNumber,
-    incomplete,
+  citationLable,
+  citationLink,
+  citationNumber,
+  incomplete,
 }) => {
-    const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
-    const togglePopover = () => setIsPopoverOpen((prev) => !prev);
-    const closePopover = () => setIsPopoverOpen(false);
-    const openPopover = () => setIsPopoverOpen(true);
+  const togglePopover = () => setIsPopoverOpen((prev) => !prev);
+  const closePopover = () => setIsPopoverOpen(false);
+  const openPopover = () => setIsPopoverOpen(true);
 
-    if (incomplete) {
-        return <EuiButtonEmpty
-            size="xs"
-            style={{
-                padding: 0,
-            }}
-            contentProps={{
-                style: {
-                    alignItems: 'start',
-                },
-            }}
-        >
-            <sup>{`[...]`}</sup>
-        </EuiButtonEmpty>
-    }
-
-    const button = (
-        <EuiButtonEmpty
-            onClick={togglePopover}
-            onMouseEnter={openPopover}
-            size="xs"
-            style={{
-                padding: 0,
-            }}
-            contentProps={{
-                style: {
-                    alignItems: 'start',
-                },
-            }}
-        >
-            <sup>{`[${citationNumber}]`}</sup>
-        </EuiButtonEmpty>
-    );
-
+  if (incomplete) {
     return (
-        <EuiPopover
-            button={button}
-            isOpen={isPopoverOpen}
-            closePopover={closePopover}
-            onMouseLeave={closePopover}
-            anchorPosition="upCenter"
-        >
-            <EuiLink href={citationLink} target="_blank">
-                {citationLable}
-            </EuiLink>
-        </EuiPopover>
+      <EuiButtonEmpty
+        size="xs"
+        style={{
+          padding: 0,
+        }}
+        contentProps={{
+          style: {
+            alignItems: 'start',
+          },
+        }}
+      >
+        <sup>{`[...]`}</sup>
+      </EuiButtonEmpty>
     );
+  }
+
+  const button = (
+    <EuiButtonEmpty
+      onClick={togglePopover}
+      onMouseEnter={openPopover}
+      size="xs"
+      style={{
+        padding: 0,
+      }}
+      contentProps={{
+        style: {
+          alignItems: 'start',
+        },
+      }}
+    >
+      <sup>{`[${citationNumber}]`}</sup>
+    </EuiButtonEmpty>
+  );
+
+  return (
+    <EuiPopover
+      button={button}
+      isOpen={isPopoverOpen}
+      closePopover={closePopover}
+      onMouseLeave={closePopover}
+      anchorPosition="upCenter"
+    >
+      <EuiLink href={citationLink} target="_blank">
+        {citationLable}
+      </EuiLink>
+    </EuiPopover>
+  );
 };

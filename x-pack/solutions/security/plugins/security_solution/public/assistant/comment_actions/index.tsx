@@ -27,7 +27,7 @@ interface Props {
 
 function getTextToCopy(content: string): string {
   // Removes citations from text to copy
-  return content.replaceAll(/!\{citation\[.*?\]\(.*?\)\}/g, "")
+  return content.replaceAll(/!\{citation\[.*?\]\(.*?\)\}/g, '');
 }
 
 const CommentActionsComponent: React.FC<Props> = ({ message }) => {
@@ -96,7 +96,7 @@ const CommentActionsComponent: React.FC<Props> = ({ message }) => {
   //         ? `${basePath}/app/apm/services/kibana/transactions/view?kuery=&rangeFrom=now-1y&rangeTo=now&environment=ENVIRONMENT_ALL&serviceGroup=&comparisonEnabled=true&traceId=${message.traceData.traceId}&transactionId=${message.traceData.transactionId}&transactionName=POST%20/internal/elastic_assistant/actions/connector/?/_execute&transactionType=request&offset=1d&latencyAggregationType=avg`
   //         : undefined;
 
-  const textToCopy = getTextToCopy(content)
+  const textToCopy = getTextToCopy(content);
 
   return (
     // APM Trace support is currently behind the Model Evaluation feature flag until wider testing is performed
