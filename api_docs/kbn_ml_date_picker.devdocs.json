@@ -481,6 +481,22 @@
           },
           {
             "parentPluginId": "@kbn/ml-date-picker",
+            "id": "def-public.DatePickerDependencies.userProfile",
+            "type": "Object",
+            "tags": [],
+            "label": "userProfile",
+            "description": [
+              "\nKibana Security User Profile Service"
+            ],
+            "signature": [
+              "UserProfileService"
+            ],
+            "path": "x-pack/platform/packages/private/ml/date_picker/src/hooks/use_date_picker_context.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-date-picker",
             "id": "def-public.DatePickerDependencies.theme",
             "type": "Object",
             "tags": [],
@@ -505,13 +521,7 @@
               "\nKibana UI advanced settings"
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/core-ui-settings-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
-                "section": "def-public.IUiSettingsClient",
-                "text": "IUiSettingsClient"
-              }
+              "IUiSettingsClient"
             ],
             "path": "x-pack/platform/packages/private/ml/date_picker/src/hooks/use_date_picker_context.tsx",
             "deprecated": false,

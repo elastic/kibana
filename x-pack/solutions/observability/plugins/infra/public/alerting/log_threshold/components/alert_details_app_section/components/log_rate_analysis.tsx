@@ -233,6 +233,7 @@ export const LogRateAnalysis: FC<AlertDetailsLogRateAnalysisSectionProps> = ({ r
                 'uiSettings',
                 'unifiedSearch',
                 'theme',
+                'userProfile',
                 'lens',
                 'i18n',
               ]),

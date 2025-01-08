@@ -230,4 +230,25 @@ describe('isSnoozeActive', () => {
     expect(isSnoozeActive(snoozeA)).toMatchInlineSnapshot(`null`);
     fakeTimer.restore();
   });
+
+  test('snooze still works with invalid bymonth value', () => {
+    // Set the current time as:
+    //   - Feb 27 2023 08:15:00 GMT+0000 - Monday
+    fakeTimer = sinon.useFakeTimers(new Date('2023-02-09T08:15:00.000Z'));
+
+    const snoozeA = {
+      duration: moment('2023-01', 'YYYY-MM').daysInMonth() * 24 * 60 * 60 * 1000, // 1 month
+      rRule: {
+        freq: Frequency.YEARLY,
+        interval: 1,
+        bymonthday: [1],
+        bymonth: [0],
+        tzid: 'Europe/Madrid',
+        dtstart: '2023-01-01T00:00:00.000Z',
+      } as RRuleRecord,
+      id: '9141dc1f-ed85-4656-91e4-119173105432',
+    };
+    expect(isSnoozeActive(snoozeA)).toMatchInlineSnapshot(`null`);
+    fakeTimer.restore();
+  });
 });
