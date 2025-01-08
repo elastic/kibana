@@ -338,7 +338,7 @@ export interface AddVersionOpts<P, Q, B> {
    */
   validate: false | VersionedRouteValidation<P, Q, B> | (() => VersionedRouteValidation<P, Q, B>); // Provide a way to lazily load validation schemas
 
-  security?: RouteSecurity;
+  security?: Pick<RouteSecurity, 'authz'>;
 
   options?: {
     deprecated?: RouteDeprecationInfo;
