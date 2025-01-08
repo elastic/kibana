@@ -211,12 +211,14 @@ export const GridRow = forwardRef<HTMLDivElement, GridRowProps>(
               gridLayoutStateManager={gridLayoutStateManager}
               renderPanelContents={renderPanelContents}
               interactionStart={(type, e) => {
-                console.log('hola');
                 e.stopPropagation();
 
                 // Disable interactions when a panel is expanded
                 const isInteractive = gridLayoutStateManager.expandedPanelId$.value === undefined;
                 if (!isInteractive) return;
+
+                const panelRef = gridLayoutStateManager.panelRefs.current[rowIndex][panelId];
+                if (!panelRef) return;
 
                 if (type === 'drop') {
                   setInteractionEvent(undefined);
@@ -229,9 +231,6 @@ export const GridRow = forwardRef<HTMLDivElement, GridRowProps>(
                     getKeysInOrder(gridLayoutStateManager.gridLayout$.getValue()[rowIndex].panels)
                   );
                 } else {
-                  const panelRef = gridLayoutStateManager.panelRefs.current[rowIndex][panelId];
-                  if (!panelRef) return;
-
                   const panelRect = panelRef.getBoundingClientRect();
                   const pointerOffsets = getPointerOffsets(e, panelRect);
 
