@@ -78,6 +78,8 @@ export const getPendingActionsSummary = async (
         unExpiredAction.wasSuccessful &&
         (unExpiredAction.command === 'isolate' || unExpiredAction.command === 'unisolate')
       ) {
+        // FIXME:PT fix this here - code should only be called if agent type is endpoint
+
         // For Isolate and Un-Isolate, we want to ensure that the isolation status being reported in the
         // endpoint metadata was received after the action was completed. This is to ensure that the
         // isolation status being reported in the UI remains as accurate as possible.

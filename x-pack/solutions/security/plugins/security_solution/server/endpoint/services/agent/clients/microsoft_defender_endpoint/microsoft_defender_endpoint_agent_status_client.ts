@@ -99,7 +99,7 @@ export class MicrosoftDefenderEndpointAgentStatusClient extends AgentStatusClien
           isolated: false,
           lastSeen: thisMachine?.lastSeen ?? '',
           status: this.getAgentStatusFromMachineHealthStatus(thisMachine?.healthStatus),
-          pendingActions: thisAgentPendingActions.pending_actions ?? {},
+          pendingActions: thisAgentPendingActions?.pending_actions ?? {},
         };
 
         return acc;
