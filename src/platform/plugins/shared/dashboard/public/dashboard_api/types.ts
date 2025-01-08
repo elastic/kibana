@@ -175,7 +175,6 @@ export type DashboardApi = CanExpandPanels &
   };
 
 export interface DashboardInternalApi {
-  animatePanelTransforms$: PublishingSubject<boolean>;
   controlGroupReload$: Subject<void>;
   panelsReload$: Subject<void>;
   getRuntimeStateForControlGroup: () => object | undefined;

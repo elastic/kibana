@@ -14,14 +14,10 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 
 import { useAppFixedViewport } from '@kbn/core-rendering-browser';
-import {
-  useBatchedPublishingSubjects,
-  useStateFromPublishingSubject,
-} from '@kbn/presentation-publishing';
+import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import { DashboardPanelState } from '../../../../common';
 import { arePanelLayoutsEqual } from '../../../dashboard_api/are_panel_layouts_equal';
 import { useDashboardApi } from '../../../dashboard_api/use_dashboard_api';
-import { useDashboardInternalApi } from '../../../dashboard_api/use_dashboard_internal_api';
 import {
   DASHBOARD_GRID_COLUMN_COUNT,
   DASHBOARD_GRID_HEIGHT,
@@ -31,12 +27,8 @@ import { DashboardGridItem } from './dashboard_grid_item';
 
 export const DashboardGrid = () => {
   const dashboardApi = useDashboardApi();
-  const dashboardInternalApi = useDashboardInternalApi();
   const panelRefs = useRef<{ [panelId: string]: React.Ref<HTMLDivElement> }>({});
 
-  const animatePanelTransforms = useStateFromPublishingSubject(
-    dashboardInternalApi.animatePanelTransforms$
-  );
   const [expandedPanelId, panels, useMargins, viewMode, controlGroupApi] =
     useBatchedPublishingSubjects(
       dashboardApi.expandedPanelId,
@@ -98,9 +90,8 @@ export const DashboardGrid = () => {
 
   const classes = classNames({
     'dshLayout-withoutMargins': !useMargins,
-    'dshLayout--viewing': viewMode === ViewMode.VIEW,
-    'dshLayout--editing': viewMode !== ViewMode.VIEW,
-    'dshLayout--noAnimation': !animatePanelTransforms,
+    'dshLayout--viewing': viewMode === 'view',
+    'dshLayout--editing': viewMode !== 'view',
     'dshLayout-isMaximizedPanel': expandedPanelId !== undefined,
   });
 
