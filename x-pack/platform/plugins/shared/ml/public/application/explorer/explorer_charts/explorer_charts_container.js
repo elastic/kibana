@@ -240,7 +240,7 @@ function ExplorerChartContainer({
       <div style={{ width: 0, height: 0 }}>
         <Chart ref={chartRef}>
           <Settings
-            // TODO connect to charts.theme service see src/plugins/charts/public/services/theme/README.md
+            // TODO connect to charts.theme service see src/platform/plugins/shared/charts/public/services/theme/README.md
             baseTheme={LEGACY_LIGHT_THEME}
             noResults={<div />}
             width={0}
