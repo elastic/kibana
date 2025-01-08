@@ -96,10 +96,10 @@ export function getEnterpriseSearchNodeDeprecation(
         message: i18n.translate('xpack.enterpriseSearch.deprecations.entsearchhost.message', {
           defaultMessage:
             'Enterprise Search is not supported in versions >= 9.x. ' +
-            'You must remove Enterprise Search node(s) from your deployment to proceed with the upgrade. ' +
+            'You must remove any Enterprise Search nodes from your deployment to proceed with the upgrade. ' +
             'Note that once Enterprise Search is stopped, products such as App Search, Workplace Search, and Elastic Crawler ' +
-            'will cease to operate. Native Connectors will also stop running syncs, between when Enterprise Search is stopped ' +
-            'and when the 9.x upgrade completes. For full details, see the documentation.',
+            'will cease to operate. Native Connectors will also stop running syncs until the 9.x upgrade is completed. ' +
+            'For full details, see the documentation.',
         }),
         documentationUrl:
           'https://elastic.co/guide/en/enterprise-search/current/upgrading-to-9-x.html',
@@ -130,13 +130,12 @@ export async function getCrawlerDeprecations(
         deprecationType: 'feature',
         title: i18n.translate('xpack.enterpriseSearch.deprecations.crawler.title', {
           defaultMessage:
-            'Elastic Crawler metadata records in the .elastic-connectors index must be removed.',
+            'Elastic Crawler metadata records in the `.elastic-connectors` index must be removed.',
         }),
         message: i18n.translate('xpack.enterpriseSearch.deprecations.crawler.message', {
           defaultMessage:
-            'Enterprise Search is not supported in versions >= 9.x. ' +
-            'Therefore, Elastic Crawler is not supported in versions >= 9.x. ' +
-            'In order to upgrade other Native Connectors, metadata records in the `.elastic-connectors` index specific to ' +
+            'Enterprise Search, including Elastic Crawler, is not supported in versions >= 9.x. ' +
+            'In order to upgrade Native Connectors, metadata records in the `.elastic-connectors` index specific to ' +
             'Elastic Crawler must be removed. For full details, see the documentation.',
         }),
         documentationUrl:
@@ -190,11 +189,11 @@ export async function getNativeConnectorDeprecations(
         deprecationType: 'feature',
         title: i18n.translate('xpack.enterpriseSearch.deprecations.notManaged.title', {
           defaultMessage:
-            'Connectors with `is_native: true` are only allowed in Elastic-managed environments',
+            'Connectors with `is_native: true` are not supported in self-managed environments',
         }),
         message: i18n.translate('xpack.enterpriseSearch.deprecations.notManaged.message', {
           defaultMessage:
-            '"Native Connectors" are only intended for Elastic-managed environments like Elastic Cloud and ' +
+            '"Native Connectors" are managed services in Elastic-managed environments such as Elastic Cloud Hosted and ' +
             'Elastic Serverless. Any connectors with `is_native: true` must be converted to connector clients or deleted ' +
             'before this upgrade can proceed.',
         }),
@@ -206,7 +205,7 @@ export async function getNativeConnectorDeprecations(
               defaultMessage: 'Enumerate all connector records',
             }),
             i18n.translate('xpack.enterpriseSearch.deprecations.notManaged.convertPretenders', {
-              defaultMessage: '"Convert to Client" any that have `is_native: true`.',
+              defaultMessage: 'Select "Convert to Client" for any connectors where `is_native: true`.',
             }),
           ],
           api: {
@@ -265,9 +264,9 @@ export async function getNativeConnectorDeprecations(
             {
               values: { serviceTypes: nativeTypesStr },
               defaultMessage:
-                'Only specific service types are supported for Elastic-managed connectors. ' +
-                'Eligible service types for Elastic-managed connectors are: {serviceTypes}' +
-                'Connectors of other service types must be converted to Connector Clients before upgrading. ' +
+                'Not all service types are supported by Elastic-managed connectors. ' +
+                'The following service types are supported for Elastic-managed connectors: {serviceTypes}' +
+                'Unsupported service types must be converted to Connector Clients before upgrading. ' +
                 'This is a lossless operation, and can be attempted with "quick resolve". ' +
                 'Alternatively, deleting these connectors with mismatched service types will also unblock your upgrade.',
             }
@@ -287,7 +286,7 @@ export async function getNativeConnectorDeprecations(
                 {
                   values: { serviceTypes: nativeTypesStr },
                   defaultMessage:
-                    '"Convert to Client" any that have `is_native: true` but have a `service_type` NOT in: {serviceTypes}.',
+                    'Select "Convert to Client" for any connectors where `is_native: true` but the `service_type` is NOT supported, per the list above.',
                 }
               ),
             ],
