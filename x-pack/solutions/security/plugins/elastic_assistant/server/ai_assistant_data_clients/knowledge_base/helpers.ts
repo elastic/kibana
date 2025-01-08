@@ -214,7 +214,7 @@ export const getStructuredToolForIndexEntry = ({
           }
 
           return {
-            text: hit.highlight?.[indexEntry.field].join(' '),
+            text: hit.highlight?.[indexEntry.field].join('\n --- \n'),
           };
         });
 
