@@ -7,7 +7,6 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
-import { i18n } from '@kbn/i18n';
 import { parseNextURL } from '@kbn/std';
 
 import type { RouteDefinitionParams } from '..';
@@ -34,130 +33,71 @@ export function defineCommonRoutes({
   license,
   logger,
   buildFlavor,
-  docLinks,
 }: RouteDefinitionParams) {
-  // Generate two identical routes with new and deprecated URL and issue a warning if route with deprecated URL is ever used.
-  // For a serverless build, do not register deprecated versioned routes
-  for (const path of [
-    '/api/security/logout',
-    ...(buildFlavor !== 'serverless' ? ['/api/security/v1/logout'] : []),
-  ]) {
-    const isDeprecated = path === '/api/security/v1/logout';
-    router.get(
-      {
-        path,
-        security: {
-          authz: {
-            enabled: false,
-            reason: 'This route must remain accessible to 3rd-party IdPs',
-          },
-          authc: {
-            enabled: false,
-            reason:
-              'This route is used for authentication - it does not require existing authentication',
-          },
+  router.get(
+    {
+      path: '/api/security/logout',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route must remain accessible to 3rd-party IdPs',
         },
-        // Allow unknown query parameters as this endpoint can be hit by the 3rd-party with any
-        // set of query string parameters (e.g. SAML/OIDC logout request/response parameters).
-        validate: { query: schema.object({}, { unknowns: 'allow' }) },
-        options: {
-          access: 'public',
-          excludeFromOAS: true,
-          tags: [ROUTE_TAG_CAN_REDIRECT, ROUTE_TAG_AUTH_FLOW],
-          ...(isDeprecated && {
-            deprecated: {
-              documentationUrl: docLinks.links.security.deprecatedV1Endpoints,
-              severity: 'warning',
-              message: i18n.translate('xpack.security.deprecations.logoutRouteMessage', {
-                defaultMessage:
-                  'The "{path}" URL is deprecated and will be removed in the next major version. Use "/api/security/logout" instead.',
-                values: { path },
-              }),
-              reason: {
-                type: 'migrate',
-                newApiMethod: 'GET',
-                newApiPath: '/api/security/logout',
-              },
-            },
-          }),
+        authc: {
+          enabled: false,
+          reason: 'This route must remain accessible to 3rd-party IdPs',
         },
       },
-      async (context, request, response) => {
-        const serverBasePath = basePath.serverBasePath;
-        if (isDeprecated) {
-          logger.warn(
-            `The "${serverBasePath}${path}" URL is deprecated and will stop working in the next major version. Use "${serverBasePath}/api/security/logout" URL instead.`,
-            { tags: ['deprecation'] }
-          );
-        }
-
-        if (!canRedirectRequest(request)) {
-          return response.badRequest({
-            body: 'Client should be able to process redirect response.',
-          });
-        }
-
-        try {
-          const deauthenticationResult = await getAuthenticationService().logout(request);
-          if (deauthenticationResult.failed()) {
-            return response.customError(wrapIntoCustomErrorResponse(deauthenticationResult.error));
-          }
-
-          return response.redirected({
-            headers: { location: deauthenticationResult.redirectURL || `${serverBasePath}/` },
-          });
-        } catch (error) {
-          return response.customError(wrapIntoCustomErrorResponse(error));
-        }
+      // Allow unknown query parameters as this endpoint can be hit by the 3rd-party with any
+      // set of query string parameters (e.g. SAML/OIDC logout request/response parameters).
+      validate: { query: schema.object({}, { unknowns: 'allow' }) },
+      options: {
+        access: 'public',
+        excludeFromOAS: true,
+        tags: [ROUTE_TAG_CAN_REDIRECT, ROUTE_TAG_AUTH_FLOW],
+      },
+    },
+    async (context, request, response) => {
+      const serverBasePath = basePath.serverBasePath;
+      if (!canRedirectRequest(request)) {
+        return response.badRequest({
+          body: 'Client should be able to process redirect response.',
+        });
       }
-    );
-  }
 
-  // Generate two identical routes with new and deprecated URL and issue a warning if route with deprecated URL is ever used.
-  // For a serverless build, do not register deprecated versioned routes
-  for (const path of [
-    '/internal/security/me',
-    ...(buildFlavor !== 'serverless' ? ['/api/security/v1/me'] : []),
-  ]) {
-    const isDeprecated = path === '/api/security/v1/me';
-    router.get(
-      {
-        path,
-        security: {
-          authz: {
-            enabled: false,
-            reason: `This route delegates authorization to Core's security service; there must be an authenticated user for this route to return information`,
-          },
-        },
-        validate: false,
-        options: {
-          access: isDeprecated ? 'public' : 'internal',
-          ...(isDeprecated && {
-            deprecated: {
-              documentationUrl: docLinks.links.security.deprecatedV1Endpoints,
-              severity: 'warning',
-              message: i18n.translate('xpack.security.deprecations.meRouteMessage', {
-                defaultMessage:
-                  'The "{path}" endpoint is deprecated and will be removed in the next major version.',
-                values: { path },
-              }),
-              reason: { type: 'remove' },
-            },
-          }),
+      try {
+        const deauthenticationResult = await getAuthenticationService().logout(request);
+        if (deauthenticationResult.failed()) {
+          return response.customError(wrapIntoCustomErrorResponse(deauthenticationResult.error));
+        }
+
+        return response.redirected({
+          headers: { location: deauthenticationResult.redirectURL || `${serverBasePath}/` },
+        });
+      } catch (error) {
+        return response.customError(wrapIntoCustomErrorResponse(error));
+      }
+    }
+  );
+
+  router.get(
+    {
+      path: '/internal/security/me',
+      security: {
+        authz: {
+          enabled: false,
+          reason: `This route delegates authorization to Core's security service; there must be an authenticated user for this route to return information`,
         },
       },
-      createLicensedRouteHandler(async (context, request, response) => {
-        if (isDeprecated) {
-          logger.warn(
-            `The "${basePath.serverBasePath}${path}" endpoint is deprecated and will be removed in the next major version.`,
-            { tags: ['deprecation'] }
-          );
-        }
-        const { security: coreSecurity } = await context.core;
-        return response.ok({ body: coreSecurity.authc.getCurrentUser()! });
-      })
-    );
-  }
+      validate: false,
+      options: {
+        access: 'internal',
+      },
+    },
+    createLicensedRouteHandler(async (context, request, response) => {
+      const { security: coreSecurity } = await context.core;
+      return response.ok({ body: coreSecurity.authc.getCurrentUser()! });
+    })
+  );
 
   const basicParamsSchema = schema.object({
     username: schema.string({ minLength: 1 }),
