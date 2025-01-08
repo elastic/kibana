@@ -59,10 +59,9 @@ export const GridRow = forwardRef<HTMLDivElement, GridRowProps>(
     const initialStyles = useMemo(() => {
       const initialRow = gridLayoutStateManager.gridLayout$.getValue()[rowIndex];
       const runtimeSettings = gridLayoutStateManager.runtimeSettings$.getValue();
-      const { gutterSize, columnCount, rowHeight } = runtimeSettings;
+      const { columnCount, rowHeight } = runtimeSettings;
 
       return css`
-        gap: ${gutterSize}px;
         grid-template-columns: repeat(${columnCount}, 1fr);
         grid-template-rows: repeat(${getRowCount(initialRow)}, ${rowHeight}px);
       `;
@@ -83,8 +82,6 @@ export const GridRow = forwardRef<HTMLDivElement, GridRowProps>(
 
             const { gutterSize, rowHeight, columnPixelWidth } = runtimeSettings;
 
-            console.log('runtimeSettings', runtimeSettings);
-            rowRef.style.gap = `${gutterSize}px`;
             rowRef.style.gridTemplateRows = `repeat(${getRowCount(
               gridLayout[rowIndex]
             )}, ${rowHeight}px)`;
@@ -271,6 +268,7 @@ export const GridRow = forwardRef<HTMLDivElement, GridRowProps>(
               display: grid;
               justify-items: stretch;
               transition: background-color 300ms linear;
+              gap: var(--kbnGridGutterSize);
               ${initialStyles};
             `}
           >

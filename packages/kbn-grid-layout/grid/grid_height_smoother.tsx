@@ -8,7 +8,7 @@
  */
 
 import { css } from '@emotion/react';
-import React, { PropsWithChildren, useEffect, useRef } from 'react';
+import React, { PropsWithChildren, useEffect, useRef, useState } from 'react';
 import { combineLatest, distinctUntilChanged, map } from 'rxjs';
 import { GridLayoutStateManager } from './types';
 
@@ -18,6 +18,9 @@ export const GridHeightSmoother = ({
 }: PropsWithChildren<{ gridLayoutStateManager: GridLayoutStateManager }>) => {
   // set the parent div size directly to smooth out height changes.
   const smoothHeightRef = useRef<HTMLDivElement | null>(null);
+  // set up global CSS variables
+  const [cssVariables, setCssVariables] = useState<string>('');
+
   useEffect(() => {
     const interactionStyleSubscription = combineLatest([
       gridLayoutStateManager.gridDimensions$,
@@ -54,20 +57,19 @@ export const GridHeightSmoother = ({
       }
     );
 
-    const marginSubscription = gridLayoutStateManager.runtimeSettings$
+    const defineCssVariablesSubscription = gridLayoutStateManager.runtimeSettings$
       .pipe(
         map(({ gutterSize }) => gutterSize),
         distinctUntilChanged()
       )
       .subscribe((gutterSize) => {
-        if (!smoothHeightRef.current) return;
-        smoothHeightRef.current.style.margin = `${gutterSize}px`;
+        setCssVariables(`--kbnGridGutterSize: ${gutterSize}px;`);
       });
 
     return () => {
       interactionStyleSubscription.unsubscribe();
       expandedPanelSubscription.unsubscribe();
-      marginSubscription.unsubscribe();
+      defineCssVariablesSubscription.unsubscribe();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -77,6 +79,9 @@ export const GridHeightSmoother = ({
       ref={smoothHeightRef}
       className={'kbnGridWrapper'}
       css={css`
+        ${cssVariables}
+
+        margin: var(--kbnGridGutterSize);
         overflow-anchor: none;
         transition: height 500ms linear;
 
@@ -86,7 +91,7 @@ export const GridHeightSmoother = ({
           transition: none;
           // switch to padding so that the panel does not extend the height of the parent
           margin: 0px;
-          padding: ${gridLayoutStateManager.runtimeSettings$.getValue().gutterSize}px;
+          padding: var(--kbnGridGutterSize);
         }
       `}
     >
