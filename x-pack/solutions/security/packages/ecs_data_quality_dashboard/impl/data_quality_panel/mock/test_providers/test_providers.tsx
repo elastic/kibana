@@ -15,6 +15,8 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Theme } from '@elastic/charts';
 import { coreMock } from '@kbn/core/public/mocks';
 import { UserProfileService } from '@kbn/core/public';
+import { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
+import { of } from 'rxjs';
 import { I18nProvider } from '@kbn/i18n-react';
 import { EuiThemeProvider } from '@elastic/eui';
 
@@ -65,6 +67,8 @@ const TestExternalProvidersComponent: React.FC<TestExternalProvidersProps> = ({ 
       error: () => {},
     },
   });
+  const chrome = chromeServiceMock.createStartContract();
+  chrome.getChromeStyle$.mockReturnValue(of('classic'));
 
   return (
     <KibanaRenderContextProvider {...coreMock.createStart()}>
@@ -86,6 +90,7 @@ const TestExternalProvidersComponent: React.FC<TestExternalProvidersProps> = ({ 
               navigateToApp={mockNavigateToApp}
               currentAppId={'securitySolutionUI'}
               userProfileService={jest.fn() as unknown as UserProfileService}
+              chrome={chrome}
             >
               {children}
             </AssistantProvider>
