@@ -140,33 +140,22 @@ export const Expressions: React.FC<Props> = (props) => {
       let initialSearchConfiguration = ruleParams.searchConfiguration;
 
       if (!ruleParams.searchConfiguration || !ruleParams.searchConfiguration.index) {
-        // if (metadata?.currentOptions?.searchConfiguration) {
-        //   initialSearchConfiguration = {
-        //     query: {
-        //       query: ruleParams.searchConfiguration?.query ?? '',
-        //       language: 'kuery',
-        //     },
-        //     ...metadata.currentOptions.searchConfiguration,
-        //   };
-        // } else
-        {
-          const newSearchSource = data.search.searchSource.createEmpty();
-          newSearchSource.setField('query', data.query.queryString.getDefaultQuery());
+        const newSearchSource = data.search.searchSource.createEmpty();
+        newSearchSource.setField('query', data.query.queryString.getDefaultQuery());
 
-          const metricsDataView =
-            (await data.dataViews.get('infra_rules_data_view')) ??
-            (await data.dataViews.getDefaultDataView());
+        const metricsDataView =
+          (await data.dataViews.get('infra_rules_data_view')) ??
+          (await data.dataViews.getDefaultDataView());
 
-          if (metricsDataView) {
-            newSearchSource.setField('index', metricsDataView);
-            setDataView(metricsDataView);
-          }
-
-          initialSearchConfiguration = getSearchConfiguration(
-            newSearchSource.getSerializedFields(),
-            setParamsWarning
-          );
+        if (metricsDataView) {
+          newSearchSource.setField('index', metricsDataView);
+          setDataView(metricsDataView);
         }
+
+        initialSearchConfiguration = getSearchConfiguration(
+          newSearchSource.getSerializedFields(),
+          setParamsWarning
+        );
       }
 
       try {
