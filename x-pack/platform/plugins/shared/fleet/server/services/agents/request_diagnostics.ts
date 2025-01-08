@@ -88,6 +88,6 @@ export async function bulkRequestDiagnostics(
         spaceId: currentSpaceId,
       },
       { pitId: await openPointInTime(esClient) }
-    ).runActionAsyncWithRetry();
+    ).runActionAsyncTask();
   }
 }
