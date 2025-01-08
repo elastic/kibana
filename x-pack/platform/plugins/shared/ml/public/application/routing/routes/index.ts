@@ -5,16 +5,12 @@
  * 2.0.
  */
 
-export * from './overview';
-// export * from './new_job';
 export * from './datavisualizer';
-// export * from './jobs_list';
-// export * from './settings';
+export * from './overview_ml';
+export * from './new_job/index_or_search';
 export * from './data_frame_analytics';
 export * from './aiops';
 export { timeSeriesExplorerRouteFactory } from './timeseriesexplorer';
 export * from './explorer';
-// export * from './trained_models';
 export * from './notifications';
 export * from './memory_usage';
-// export * from './supplied_configurations';

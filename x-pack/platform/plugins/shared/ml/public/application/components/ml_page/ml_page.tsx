@@ -199,7 +199,6 @@ export const MlPage: FC<{ pageDeps: PageDependencies; entryPoint?: string }> = R
               setIsHeaderMounted={setIsHeaderMounted}
               pageDeps={pageDeps}
               routeList={routeList}
-              entryPoint={entryPoint}
             />
           </>
         )}
@@ -213,44 +212,39 @@ interface CommonPageWrapperProps {
   pageDeps: PageDependencies;
   routeList: MlRoute[];
   headerPortal: HtmlPortalNode;
-  entryPoint?: string;
 }
 
-const CommonPageWrapper: FC<CommonPageWrapperProps> = React.memo(
-  ({ pageDeps, routeList, entryPoint }) => {
-    const {
-      services: { application },
-    } = useMlKibana();
+const CommonPageWrapper: FC<CommonPageWrapperProps> = React.memo(({ pageDeps, routeList }) => {
+  const {
+    services: { application },
+  } = useMlKibana();
 
-    return (
-      /** RedirectAppLinks intercepts all <a> tags to use navigateToUrl
-       * avoiding full page reload **/
-      <RedirectAppLinks coreStart={{ application }}>
-        <EuiPageSection restrictWidth={false}>
-          <Routes>
-            {routeList.map((route) => {
-              return (
-                <Route
-                  key={route.path}
-                  path={route.path}
-                  exact
-                  render={(props) => {
-                    window.setTimeout(() => {
-                      pageDeps.setBreadcrumbs(route.breadcrumbs);
-                    });
-                    return (
-                      <MlPageWrapper path={route.path}>
-                        {route.render(props, pageDeps)}
-                      </MlPageWrapper>
-                    );
-                  }}
-                />
-              );
-            })}
-            <Redirect to="/" />
-          </Routes>
-        </EuiPageSection>
-      </RedirectAppLinks>
-    );
-  }
-);
+  return (
+    /** RedirectAppLinks intercepts all <a> tags to use navigateToUrl
+     * avoiding full page reload **/
+    <RedirectAppLinks coreStart={{ application }}>
+      <EuiPageSection restrictWidth={false}>
+        <Routes>
+          {routeList.map((route) => {
+            return (
+              <Route
+                key={route.path}
+                path={route.path}
+                exact
+                render={(props) => {
+                  window.setTimeout(() => {
+                    pageDeps.setBreadcrumbs(route.breadcrumbs);
+                  });
+                  return (
+                    <MlPageWrapper path={route.path}>{route.render(props, pageDeps)}</MlPageWrapper>
+                  );
+                }}
+              />
+            );
+          })}
+          <Redirect to="/" />
+        </Routes>
+      </EuiPageSection>
+    </RedirectAppLinks>
+  );
+});
