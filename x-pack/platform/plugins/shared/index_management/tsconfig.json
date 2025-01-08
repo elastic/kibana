@@ -57,7 +57,6 @@
     "@kbn/core-application-browser",
     "@kbn/inference-endpoint-ui-common",
     "@kbn/safer-lodash-set",
-    "@kbn/search-connectors"
   ],
   "exclude": ["target/**/*"]
 }
