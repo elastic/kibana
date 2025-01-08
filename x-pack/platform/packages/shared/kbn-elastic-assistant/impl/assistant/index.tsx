@@ -427,7 +427,7 @@ const AssistantComponent: React.FC<Props> = ({
           grow={false}
           css={css`
             inline-size: ${CONVERSATION_SIDE_PANEL_WIDTH}px;
-            border-right: 1px solid ${euiTheme.colors.lightShade};
+            border-right: 1px solid ${euiTheme.border.color};
           `}
         >
           <ConversationSidePanel
@@ -533,7 +533,7 @@ const AssistantComponent: React.FC<Props> = ({
               <EuiFlyoutFooter
                 css={css`
                   background: none;
-                  border-top: 1px solid ${euiTheme.colors.lightShade};
+                  border-top: 1px solid ${euiTheme.border.color};
                   overflow: hidden;
                   max-height: 60%;
                   display: flex;
@@ -593,7 +593,7 @@ const AssistantComponent: React.FC<Props> = ({
                 {!isDisabled && (
                   <EuiPanel
                     css={css`
-                      background: ${euiTheme.colors.lightestShade};
+                      background: ${euiTheme.colors.backgroundBaseSubdued};
                     `}
                     hasShadow={false}
                     paddingSize="m"

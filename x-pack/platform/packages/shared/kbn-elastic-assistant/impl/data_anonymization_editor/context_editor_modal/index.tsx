@@ -22,6 +22,7 @@ import {
   EuiFlexItem,
   useGeneratedHtmlId,
   EuiFormRow,
+  useEuiTheme,
 } from '@elastic/eui';
 import { i18n as I18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
@@ -187,7 +188,7 @@ const SelectedPromptContextEditorModalComponent = ({ onClose, onSave, promptCont
 
       <EuiModalFooter
         css={css`
-          background: ${euiTheme.colors.lightestShade};
+          background: ${euiTheme.colors.backgroundBaseSubdued};
           padding-block: 16px;
         `}
       >

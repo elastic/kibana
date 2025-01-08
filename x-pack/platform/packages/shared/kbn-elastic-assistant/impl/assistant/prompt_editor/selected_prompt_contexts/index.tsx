@@ -77,7 +77,7 @@ const SelectedPromptContextsComponent: React.FC<Props> = ({
                 border-radius: ${euiTheme.border.radius.medium};
 
                 > div:first-child {
-                  color: ${euiTheme.colors.primary};
+                  color: ${euiTheme.colors.textPrimary};
                   padding: ${euiTheme.size.m};
                 }
               `}

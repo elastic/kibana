@@ -140,7 +140,7 @@ export const SettingsContextMenu: React.FC<Params> = React.memo(
           icon={'refresh'}
           data-test-subj={'clear-chat'}
           css={css`
-            color: ${euiTheme.colors.danger};
+            color: ${euiTheme.colors.textDanger};
           `}
         >
           {i18n.RESET_CONVERSATION}
@@ -148,7 +148,7 @@ export const SettingsContextMenu: React.FC<Params> = React.memo(
       ],
 
       [
-        euiTheme.colors.danger,
+        euiTheme.colors.textDanger,
         handleNavigateToAnonymization,
         handleNavigateToKnowledgeBase,
         handleNavigateToSettings,

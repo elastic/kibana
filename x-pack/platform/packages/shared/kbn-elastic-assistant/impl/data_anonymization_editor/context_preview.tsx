@@ -18,8 +18,8 @@ import { SelectedPromptContext } from '../assistant/prompt_context/types';
 const Strong = styled.strong<{ showRealValues: boolean }>`
   color: ${(props) =>
     props.showRealValues
-      ? props.theme.euiTheme.colors.success
-      : props.theme.euiTheme.colors.accent};
+      ? props.theme.euiTheme.colors.textPrimary
+      : props.theme.euiTheme.colors.textAccent};
   cursor: pointer;
 `;
 export interface Props {

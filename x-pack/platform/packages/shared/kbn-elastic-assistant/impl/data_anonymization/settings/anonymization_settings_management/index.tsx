@@ -17,6 +17,7 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiText,
+  useEuiTheme,
 } from '@elastic/eui';
 import React, { useCallback, useState } from 'react';
 
@@ -51,6 +52,7 @@ const AnonymizationSettingsManagementComponent: React.FC<Props> = ({
   modalMode = false,
   onClose,
 }) => {
+  const { euiTheme } = useEuiTheme();
   const { toasts } = useAssistantContext();
   const { data: anonymizationFields } = useFetchAnonymizationFields();
   const [hasPendingChanges, setHasPendingChanges] = useState(false);

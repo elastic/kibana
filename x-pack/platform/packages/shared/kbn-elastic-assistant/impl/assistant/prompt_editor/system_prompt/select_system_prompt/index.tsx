@@ -169,10 +169,10 @@ const SelectSystemPromptComponent: React.FC<Props> = ({
                 inline-size: 16px;
                 block-size: 16px;
                 border-radius: 16px;
-                background: ${euiTheme.colors.backgroundBaseFormsControlDisabled};
+                background: ${euiTheme.colors.backgroundBaseSubdued};
 
                 :hover:not(:disabled) {
-                  background: ${euiTheme.colors.backgroundBaseFormsControlDisabled};
+                  background: ${euiTheme.colors.backgroundBaseSubdued};
                   transform: none;
                 }
 
