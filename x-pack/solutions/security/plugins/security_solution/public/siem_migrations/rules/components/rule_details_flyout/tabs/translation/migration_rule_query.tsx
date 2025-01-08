@@ -8,6 +8,7 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import {
   EuiButtonEmpty,
+  EuiCodeBlock,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
@@ -107,8 +108,12 @@ export const MigrationRuleQuery: React.FC<MigrationRuleQueryProps> = React.memo(
           <EuiTitle size="xxs">
             <h3>{ruleName}</h3>
           </EuiTitle>
+          {/* <EuiSpacer size="m" />
+          <EuiMarkdownFormat textSize="xs">{query}</EuiMarkdownFormat> */}
           <EuiSpacer size="m" />
-          <EuiMarkdownFormat textSize="xs">{query}</EuiMarkdownFormat>
+          <EuiCodeBlock language={canEdit ? 'sql' : 'splunk-spl'} fontSize="s" paddingSize="s">
+            {query}
+          </EuiCodeBlock>
         </>
       );
     }, [canEdit, editMode, onEdit, query, ruleName]);
