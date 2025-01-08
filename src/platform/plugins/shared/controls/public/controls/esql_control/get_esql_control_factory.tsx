@@ -121,8 +121,15 @@ export const getESQLControlFactory = (): ControlFactory<ESQLControlState, ESQLCo
           return (
             <div className={controlPanelClassName}>
               <EuiComboBox
-                aria-label="Accessible screen reader label"
-                placeholder="Select a single option"
+                aria-label={i18n.translate('controls.controlGroup.manageControl.esql.ariaLabel', {
+                  defaultMessage: 'ES|QL variable control',
+                })}
+                placeholder={i18n.translate(
+                  'controls.controlGroup.manageControl.esql.placeholder',
+                  {
+                    defaultMessage: 'Select a single value',
+                  }
+                )}
                 data-test-subj="esqlControlValuesDropdown"
                 singleSelection={{ asPlainText: true }}
                 options={availableOptions.map((option) => ({ label: option }))}

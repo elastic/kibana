@@ -149,12 +149,18 @@ export const getQueryColumnsFromESQLQuery = (esql: string): string[] => {
 
   return columns.map((column) => column.name);
 };
-
+/**
+ * This function is used to map the variables to the columns in the datatable
+ * @param esql:string
+ * @param variables:ESQLControlVariable[]
+ * @param columns:DatatableColumn[]
+ * @returns DatatableColumn[]
+ */
 export const mapVariableToColumn = (
   esql: string,
   variables: ESQLControlVariable[],
   columns: DatatableColumn[]
-) => {
+): DatatableColumn[] => {
   if (!variables.length) {
     return columns;
   }

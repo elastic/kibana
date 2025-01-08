@@ -14,14 +14,21 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const kibanaServer = getService('kibanaServer');
-  const { dashboard, timePicker, common } = getPageObjects(['dashboard', 'timePicker', 'common']);
+  const { dashboard, timePicker, common, dashboardControls } = getPageObjects([
+    'dashboard',
+    'timePicker',
+    'common',
+    'dashboardControls',
+  ]);
+  const find = getService('find');
   const testSubjects = getService('testSubjects');
   const monacoEditor = getService('monacoEditor');
   const dashboardAddPanel = getService('dashboardAddPanel');
   const browser = getService('browser');
   const comboBox = getService('comboBox');
 
-  describe('dashboard - add a value type ES|QL control', function () {
+  // describe('dashboard - add a value type ES|QL control', function () {
+  describe('meow', function () {
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
       await kibanaServer.importExport.load(
@@ -101,6 +108,26 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       const tableContent = await testSubjects.getVisibleText('lnsTableCellContent');
       expect(tableContent).to.contain('AO');
+    });
+
+    it('should handle properly a query to retrieve the values that returns more than one column', async () => {
+      const firstId = (await dashboardControls.getAllControlIds())[0];
+      await dashboardControls.editExistingControl(firstId);
+
+      await monacoEditor.setCodeEditorValue('FROM logstash-*');
+      // run the query
+      await testSubjects.click('ESQLEditor-run-query-button');
+      expect(await testSubjects.exists('esqlMoreThanOneColumnCallout')).to.be(true);
+      await testSubjects.click('chooseColumnBtn');
+      const searchInput = await testSubjects.find('selectableColumnSearch');
+      await searchInput.type('geo.dest');
+      const option = await find.byCssSelector('.euiSelectableListItem');
+      option.click();
+
+      await common.sleep(1000);
+
+      const editorValue = await monacoEditor.getCodeEditorValue();
+      expect(editorValue).to.contain('FROM logstash-*\n| STATS BY geo.dest');
     });
   });
 }

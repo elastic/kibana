@@ -394,6 +394,7 @@ export function ValueControlForm({
                         defaultMessage: 'Your query must return a single column',
                       })}
                       iconType="warning"
+                      data-test-subj="esqlMoreThanOneColumnCallout"
                     >
                       <p>
                         <FormattedMessage
