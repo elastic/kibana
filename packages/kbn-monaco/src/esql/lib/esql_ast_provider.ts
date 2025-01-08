@@ -41,7 +41,12 @@ export class ESQLAstAdapter {
   async validate(model: monaco.editor.ITextModel, code: string) {
     const getAstFn = await this.getAstWorker(model);
     const text = code ?? model.getValue();
-    const { errors, warnings } = await validateQuery(text, getAstFn, undefined, this.callbacks);
+    const { errors, warnings } = await validateQuery(
+      text,
+      getAstFn,
+      { ignoreOnMissingCallbacks: true },
+      this.callbacks
+    );
     const monacoErrors = wrapAsMonacoMessages(text, errors);
     const monacoWarnings = wrapAsMonacoMessages(text, warnings);
     return { errors: monacoErrors, warnings: monacoWarnings };

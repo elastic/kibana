@@ -78,6 +78,7 @@ export const ESQLEditor = memo(function ESQLEditor({
   hasOutline,
   displayDocumentationAsFlyout,
   disableAutoFocus,
+  syntaxValidationOnly,
 }: ESQLEditorProps) {
   const popoverRef = useRef<HTMLDivElement>(null);
   const datePickerOpenStatusRef = useRef<boolean>(false);
@@ -331,6 +332,9 @@ export const ESQLEditor = memo(function ESQLEditor({
   }, []);
 
   const esqlCallbacks: ESQLCallbacks = useMemo(() => {
+    if (syntaxValidationOnly) {
+      return {};
+    }
     const callbacks: ESQLCallbacks = {
       getSources: async () => {
         clearCacheWhenOld(dataSourcesCache, query.esql);
@@ -386,6 +390,7 @@ export const ESQLEditor = memo(function ESQLEditor({
     return callbacks;
   }, [
     query.esql,
+    syntaxValidationOnly,
     memoizedSources,
     dataSourcesCache,
     dataViews,
