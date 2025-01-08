@@ -16,6 +16,7 @@ import { faker } from '@faker-js/faker';
 import type { SharingSavedObjectProps, UserMessage } from '../../types';
 import type { UserMessagesDisplayLocationId } from '../../types';
 import { BehaviorSubject } from 'rxjs';
+import { EDITOR_MISSING_VIS_TYPE, EDITOR_UNKNOWN_DATASOURCE_TYPE } from '../../user_messages_ids';
 
 const ALL_LOCATIONS: UserMessagesDisplayLocationId[] = [
   'toolbar',
@@ -198,7 +199,7 @@ describe('User Messages API', () => {
       });
       for (const locationId of ALL_LOCATIONS) {
         expect(userMessagesApi.getUserMessages(locationId).map(({ uniqueId }) => uniqueId)).toEqual(
-          ['editor_missing_vis_type', 'editor_unknown_datasource_type']
+          [EDITOR_MISSING_VIS_TYPE, EDITOR_UNKNOWN_DATASOURCE_TYPE]
         );
       }
     });
