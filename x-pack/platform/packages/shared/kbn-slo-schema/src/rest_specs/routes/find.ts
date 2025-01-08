@@ -37,9 +37,17 @@ const searchAfterSchema = new t.Type<SearchAfterArray, string, unknown>(
         if (isRight(decoded)) {
           return t.success(decoded.right);
         }
-        return t.failure(input, context);
+        return t.failure(
+          input,
+          context,
+          'Invalid searchAfter value, must be a JSON array of strings or numbers'
+        );
       } catch (err) {
-        return t.failure(input, context);
+        return t.failure(
+          input,
+          context,
+          'Invalid searchAfter value, must be a JSON array of strings or numbers'
+        );
       }
     }),
   (input: SearchAfterArray): string => JSON.stringify(input)
