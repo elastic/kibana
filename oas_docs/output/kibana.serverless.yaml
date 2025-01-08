@@ -31776,18 +31776,21 @@ paths:
       operationId: DeleteList
       parameters:
         - description: List's `id` value
+          examples: ip_list
           in: query
           name: id
           required: true
           schema:
             $ref: '#/components/schemas/Security_Lists_API_ListId'
-        - in: query
+        - example: false
+          in: query
           name: deleteReferences
           required: false
           schema:
             default: false
             type: boolean
-        - in: query
+        - example: false
+          in: query
           name: ignoreReferences
           required: false
           schema:
@@ -31799,6 +31802,25 @@ paths:
             application/json; Elastic-Api-Version=2023-10-31:
               schema:
                 $ref: '#/components/schemas/Security_Lists_API_List'
+                examples:
+                  ipList:
+                    value:
+                      _version: WzIsMV0=
+                      '@timestamp': |
+                        2025-01-08T04:47:34.273Z
+                      created_at: |
+                        2025-01-08T04:47:34.273Z
+                      created_by: elastic
+                      description: Some other description here for you
+                      id: ip_list
+                      immutable: false
+                      name: Changed the name here to something else
+                      tie_breaker_id: f5508188-b1e9-4e6e-9662-d039a7d89899
+                      type: ip
+                      updated_at: |
+                        2025-01-08T05:39:39.292Z
+                      updated_by: elastic
+                      version: 3
           description: Successful response
         '400':
           content:
@@ -31841,6 +31863,7 @@ paths:
       operationId: ReadList
       parameters:
         - description: List's `id` value
+          example: ip_list
           in: query
           name: id
           required: true
@@ -31852,6 +31875,25 @@ paths:
             application/json; Elastic-Api-Version=2023-10-31:
               schema:
                 $ref: '#/components/schemas/Security_Lists_API_List'
+                examples:
+                  ipList:
+                    value:
+                      _version: WzEsMV0=
+                      '@timestamp': |
+                        2025-01-08T04:47:34.273Z
+                      created_at: |
+                        2025-01-08T04:47:34.273Z
+                      created_by: elastic
+                      description: This list describes bad internet ip
+                      id: ip_list
+                      immutable: false
+                      name: My bad ips
+                      tie_breaker_id: f5508188-b1e9-4e6e-9662-d039a7d89899
+                      type: ip
+                      updated_at: |
+                        2025-01-08T05:21:53.843Z
+                      updated_by: elastic
+                      version: 1
           description: Successful response
         '400':
           content:
@@ -31895,6 +31937,9 @@ paths:
       requestBody:
         content:
           application/json; Elastic-Api-Version=2023-10-31:
+            example:
+              id: ip_list
+              name: Changed the name here to something else
             schema:
               type: object
               properties:
@@ -31921,6 +31966,25 @@ paths:
             application/json; Elastic-Api-Version=2023-10-31:
               schema:
                 $ref: '#/components/schemas/Security_Lists_API_List'
+                examples:
+                  ipList:
+                    value:
+                      _version: WzEsMV0=
+                      '@timestamp': |
+                        2025-01-08T04:47:34.273Z
+                      created_at: |
+                        2025-01-08T04:47:34.273Z
+                      created_by: elastic
+                      description: This list describes bad internet ip
+                      id: ip_list
+                      immutable: false
+                      name: Changed the name here to something else
+                      tie_breaker_id: f5508188-b1e9-4e6e-9662-d039a7d89899
+                      type: ip
+                      updated_at: |
+                        2025-01-08T05:21:53.843Z
+                      updated_by: elastic
+                      version: 2
           description: Successful response
         '400':
           content:
@@ -31964,6 +32028,11 @@ paths:
       requestBody:
         content:
           application/json; Elastic-Api-Version=2023-10-31:
+            example:
+              description: This list describes bad internet ips
+              id: ip_list
+              name: Simple list with ips
+              type: ip
             schema:
               type: object
               properties:
@@ -31995,12 +32064,36 @@ paths:
         '200':
           content:
             application/json; Elastic-Api-Version=2023-10-31:
+              examples:
+                successfulList:
+                  value:
+                    _version: WzAsMV0=
+                    '@timestamp': |
+                      2025-01-08T04:47:34.273Z
+                    created_at: |
+                      2025-01-08T04:47:34.273Z
+                    created_by: elastic
+                    description: This list describes bad internet ips
+                    id: ip_list
+                    immutable: false
+                    name: Simple list with ips
+                    tie_breaker_id: f5508188-b1e9-4e6e-9662-d039a7d89899
+                    type: ip
+                    updated_at: |
+                      2025-01-08T04:47:34.273Z
+                    updated_by: elastic
+                    version: 1
               schema:
                 $ref: '#/components/schemas/Security_Lists_API_List'
           description: Successful response
         '400':
           content:
             application/json; Elastic-Api-Version=2023-10-31:
+              examples:
+                dataStreamDoesNotExist:
+                  value:
+                    message: To create a list, the data stream must exist first. Data stream \".lists-default\" does not exist
+                    status_code: 400
               schema:
                 oneOf:
                   - $ref: '#/components/schemas/Security_Lists_API_PlatformErrorResponse'
@@ -32043,6 +32136,10 @@ paths:
       requestBody:
         content:
           application/json; Elastic-Api-Version=2023-10-31:
+            example:
+              description: Latest list of bad ips
+              id: ip_list
+              name: Bad ips - updated
             schema:
               type: object
               properties:
@@ -32071,6 +32168,25 @@ paths:
             application/json; Elastic-Api-Version=2023-10-31:
               schema:
                 $ref: '#/components/schemas/Security_Lists_API_List'
+                examples:
+                  ipList:
+                    value:
+                      _version: WzIsMV0=
+                      '@timestamp': |
+                        2025-01-08T04:47:34.273Z
+                      created_at: |
+                        2025-01-08T04:47:34.273Z
+                      created_by: elastic
+                      description: Latest list of bad ips
+                      id: ip_list
+                      immutable: false
+                      name: Bad ips - updated
+                      tie_breaker_id: f5508188-b1e9-4e6e-9662-d039a7d89899
+                      type: ip
+                      updated_at: |
+                        2025-01-08T05:39:39.292Z
+                      updated_by: elastic
+                      version: 3
           description: Successful response
         '400':
           content:
@@ -32114,24 +32230,28 @@ paths:
       operationId: FindLists
       parameters:
         - description: The page number to return
+          example: 1
           in: query
           name: page
           required: false
           schema:
             type: integer
         - description: The number of lists to return per page
+          example: 20
           in: query
           name: per_page
           required: false
           schema:
             type: integer
         - description: Determines which field is used to sort the results
+          example: name
           in: query
           name: sort_field
           required: false
           schema:
             $ref: '#/components/schemas/Security_Lists_API_NonEmptyString'
         - description: Determines the sort order, which can be `desc` or `asc`
+          example: asc
           in: query
           name: sort_order
           required: false
@@ -32144,6 +32264,7 @@ paths:
             Returns the list that come after the last list returned in the previous call
             (use the cursor value returned in the previous call). This parameter uses
             the `tie_breaker_id` field to ensure all lists are sorted and returned correctly.
+          example: WzIwLFsiZjU1MDgxODgtYjFlOS00ZTZlLTk2NjItZDAzOWE3ZDg5ODk5Il1d
           in: query
           name: cursor
           required: false
@@ -32152,6 +32273,8 @@ paths:
         - description: |
             Filters the returned results according to the value of the specified field,
             using the <field name>:<field value> syntax.
+          example: |
+            type:ip
           in: query
           name: filter
           required: false
@@ -32161,6 +32284,30 @@ paths:
         '200':
           content:
             application/json; Elastic-Api-Version=2023-10-31:
+              examples:
+                ipList:
+                  value:
+                    cursor: WzIwLFsiZjU1MDgxODgtYjFlOS00ZTZlLTk2NjItZDAzOWE3ZDg5ODk5Il1d
+                    data:
+                      - _version: WzAsMV0=
+                        '@timestamp': |
+                          2025-01-08T04:47:34.273Z
+                        created_at: |
+                          2025-01-08T04:47:34.273Z
+                        created_by: elastic
+                        description: This list describes bad internet ip
+                        id: ip_list
+                        immutable: false
+                        name: Simple list with an ip
+                        tie_breaker_id: f5508188-b1e9-4e6e-9662-d039a7d89899
+                        type: ip
+                        updated_at: |
+                          2025-01-08T04:47:34.273Z
+                        updated_by: elastic
+                        version: 1
+                    page: 1
+                    per_page: 20
+                    total: 1
               schema:
                 type: object
                 properties:
@@ -32379,24 +32526,28 @@ paths:
       operationId: DeleteListItem
       parameters:
         - description: Required if `list_id` and `value` are not specified
+          example: pd1WRJQBs4HAK3VQeHFI
           in: query
           name: id
           required: false
           schema:
             $ref: '#/components/schemas/Security_Lists_API_ListId'
         - description: Required if `id` is not specified
+          example: ip_list
           in: query
           name: list_id
           required: false
           schema:
             $ref: '#/components/schemas/Security_Lists_API_ListId'
         - description: Required if `id` is not specified
+          example: 255.255.255.255
           in: query
           name: value
           required: false
           schema:
             type: string
         - description: Determines when changes made by the request are made visible to search
+          example: false
           in: query
           name: refresh
           required: false
@@ -32412,6 +32563,23 @@ paths:
           content:
             application/json; Elastic-Api-Version=2023-10-31:
               schema:
+                examples:
+                  ipItem:
+                    value:
+                      _version: WzIwLDFd
+                      '@timestamp': |
+                        2025-01-08T05:15:05.159Z
+                      created_at: |
+                        2025-01-08T05:15:05.159Z
+                      created_by: elastic
+                      id: pd1WRJQBs4HAK3VQeHFI
+                      list_id: ip_list
+                      tie_breaker_id: eee41dc7-1666-4876-982f-8b0f7b59eca3
+                      type: ip
+                      updated_at: |
+                        2025-01-08T05:44:14.009Z
+                      updated_by: elastic
+                      value: 255.255.255.255
                 oneOf:
                   - $ref: '#/components/schemas/Security_Lists_API_ListItem'
                   - items:
@@ -32459,18 +32627,21 @@ paths:
       operationId: ReadListItem
       parameters:
         - description: Required if `list_id` and `value` are not specified
+          example: qN1XRJQBs4HAK3VQs3Gc
           in: query
           name: id
           required: false
           schema:
             $ref: '#/components/schemas/Security_Lists_API_ListId'
         - description: Required if `id` is not specified
+          example: ip_list
           in: query
           name: list_id
           required: false
           schema:
             $ref: '#/components/schemas/Security_Lists_API_ListId'
         - description: Required if `id` is not specified
+          example: 127.0.0.2
           in: query
           name: value
           required: false
@@ -32481,6 +32652,23 @@ paths:
           content:
             application/json; Elastic-Api-Version=2023-10-31:
               schema:
+                examples:
+                  ipItem:
+                    value:
+                      _version: WzExLDFd
+                      '@timestamp': |
+                        2025-01-08T05:16:25.882Z
+                      created_at: |
+                        2025-01-08T05:16:25.882Z
+                      created_by: elastic
+                      id: qN1XRJQBs4HAK3VQs3Gc
+                      list_id: ip_list
+                      tie_breaker_id: a9a34c02-a385-436e-86a0-02a3942f3537
+                      type: ip
+                      updated_at: |
+                        2025-01-08T05:16:25.882Z
+                      updated_by: elastic
+                      value: 127.0.0.2
                 oneOf:
                   - $ref: '#/components/schemas/Security_Lists_API_ListItem'
                   - items:
@@ -32529,6 +32717,9 @@ paths:
       requestBody:
         content:
           application/json; Elastic-Api-Version=2023-10-31:
+            example:
+              id: pd1WRJQBs4HAK3VQeHFI
+              value: 255.255.255.255
             schema:
               type: object
               properties:
@@ -32557,6 +32748,23 @@ paths:
             application/json; Elastic-Api-Version=2023-10-31:
               schema:
                 $ref: '#/components/schemas/Security_Lists_API_ListItem'
+                examples:
+                  ipItem:
+                    value:
+                      _version: WzE5LDFd
+                      '@timestamp': |
+                        2025-01-08T05:15:05.159Z
+                      created_at: |
+                        2025-01-08T05:15:05.159Z
+                      created_by: elastic
+                      id: pd1WRJQBs4HAK3VQeHFI
+                      list_id: ip_list
+                      tie_breaker_id: eee41dc7-1666-4876-982f-8b0f7b59eca3
+                      type: ip
+                      updated_at: |
+                        2025-01-08T05:23:37.602Z
+                      updated_by: elastic
+                      value: 255.255.255.255
           description: Successful response
         '400':
           content:
@@ -32605,6 +32813,9 @@ paths:
       requestBody:
         content:
           application/json; Elastic-Api-Version=2023-10-31:
+            example:
+              list_id: ip_list
+              value: 127.0.0.1
             schema:
               type: object
               properties:
@@ -32632,6 +32843,23 @@ paths:
         '200':
           content:
             application/json; Elastic-Api-Version=2023-10-31:
+              examples:
+                ipItem:
+                  value:
+                    _version: WzAsMV0=
+                    '@timestamp': |
+                      2025-01-08T04:59:06.154Z
+                    created_at: |
+                      2025-01-08T04:59:06.154Z
+                    created_by: elastic
+                    id: 21b01cfb-058d-44b9-838c-282be16c91cc
+                    list_id: ip_list
+                    tie_breaker_id: b57c762c-3036-465c-9bfb-7bfb5e6e515a
+                    type: ip
+                    updated_at: |
+                      2025-01-08T04:59:06.154Z
+                    updated_by: elastic
+                    value: 127.0.0.1
               schema:
                 $ref: '#/components/schemas/Security_Lists_API_ListItem'
           description: Successful response
@@ -32680,6 +32908,9 @@ paths:
       requestBody:
         content:
           application/json; Elastic-Api-Version=2023-10-31:
+            example:
+              id: ip_item
+              value: 255.255.255.255
             schema:
               type: object
               properties:
@@ -32702,6 +32933,23 @@ paths:
             application/json; Elastic-Api-Version=2023-10-31:
               schema:
                 $ref: '#/components/schemas/Security_Lists_API_ListItem'
+                examples:
+                  ipItem:
+                    value:
+                      _version: WzIwLDFd
+                      '@timestamp': |
+                        2025-01-08T05:15:05.159Z
+                      created_at: |
+                        2025-01-08T05:15:05.159Z
+                      created_by: elastic
+                      id: pd1WRJQBs4HAK3VQeHFI
+                      list_id: ip_list
+                      tie_breaker_id: eee41dc7-1666-4876-982f-8b0f7b59eca3
+                      type: ip
+                      updated_at: |
+                        2025-01-08T05:44:14.009Z
+                      updated_by: elastic
+                      value: 255.255.255.255
           description: Successful response
         '400':
           content:
@@ -32745,6 +32993,7 @@ paths:
       operationId: ExportListItems
       parameters:
         - description: List's id to export
+          example: ip_list
           in: query
           name: list_id
           required: true
@@ -32801,30 +33050,35 @@ paths:
       operationId: FindListItems
       parameters:
         - description: List's id
+          example: ip_list
           in: query
           name: list_id
           required: true
           schema:
             $ref: '#/components/schemas/Security_Lists_API_ListId'
         - description: The page number to return
+          example: 1
           in: query
           name: page
           required: false
           schema:
             type: integer
         - description: The number of list items to return per page
+          example: 20
           in: query
           name: per_page
           required: false
           schema:
             type: integer
         - description: Determines which field is used to sort the results
+          example: value
           in: query
           name: sort_field
           required: false
           schema:
             $ref: '#/components/schemas/Security_Lists_API_NonEmptyString'
         - description: Determines the sort order, which can be `desc` or `asc`
+          example: asc
           in: query
           name: sort_order
           required: false
@@ -32837,6 +33091,7 @@ paths:
             Returns the list that come after the last list returned in the previous call
             (use the cursor value returned in the previous call). This parameter uses
             the `tie_breaker_id` field to ensure all lists are sorted and returned correctly.
+          example: WzIwLFsiYjU3Yzc2MmMtMzAzNi00NjVjLTliZmItN2JmYjVlNmU1MTVhIl1d
           in: query
           name: cursor
           required: false
@@ -32845,6 +33100,8 @@ paths:
         - description: |
             Filters the returned results according to the value of the specified field,
             using the <field name>:<field value> syntax.
+          example: |
+            value:127.0.0.1
           in: query
           name: filter
           required: false
@@ -32854,6 +33111,28 @@ paths:
         '200':
           content:
             application/json; Elastic-Api-Version=2023-10-31:
+              examples:
+                ipItems:
+                  cursor: WzIwLFsiYjU3Yzc2MmMtMzAzNi00NjVjLTliZmItN2JmYjVlNmU1MTVhIl1d
+                  page: 1
+                  per_page: 20
+                  total: 1
+                  value:
+                    data:
+                      - _version: WzAsMV0=
+                        '@timestamp': |
+                          2025-01-08T04:59:06.154Z
+                        created_at: |
+                          2025-01-08T04:59:06.154Z
+                        created_by: elastic
+                        id: 21b01cfb-058d-44b9-838c-282be16c91cc
+                        list_id: ip_list
+                        tie_breaker_id: b57c762c-3036-465c-9bfb-7bfb5e6e515a
+                        type: ip
+                        updated_at: |
+                          2025-01-08T04:59:06.154Z
+                        updated_by: elastic
+                        value: 127.0.0.1
               schema:
                 type: object
                 properties:
@@ -32921,6 +33200,7 @@ paths:
             List's id.
 
             Required when importing to an existing list.
+          example: ip_list
           in: query
           name: list_id
           required: false
@@ -32930,22 +33210,27 @@ paths:
             Type of the importing list.
 
             Required when importing a new list that is `list_id` is not specified.
+          example: ip
           in: query
           name: type
           required: false
           schema:
             $ref: '#/components/schemas/Security_Lists_API_ListType'
-        - in: query
+        - example: (?<value>((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?))
+          in: query
           name: serializer
           required: false
           schema:
             type: string
-        - in: query
+        - example: |
+            {{value}}
+          in: query
           name: deserializer
           required: false
           schema:
             type: string
         - description: Determines when changes made by the request are made visible to search
+          example: true
           in: query
           name: refresh
           required: false
@@ -32972,6 +33257,25 @@ paths:
             application/json; Elastic-Api-Version=2023-10-31:
               schema:
                 $ref: '#/components/schemas/Security_Lists_API_List'
+                examples:
+                  ipListItems:
+                    value:
+                      _version: WzAsMV0=
+                      '@timestamp': |
+                        2025-01-08T04:47:34.273Z
+                      created_at: |
+                        2025-01-08T04:47:34.273Z
+                      created_by: elastic
+                      description: This list describes bad internet ip
+                      id: ip_list
+                      immutable: false
+                      name: Simple list with an ip
+                      tie_breaker_id: f5508188-b1e9-4e6e-9662-d039a7d89899
+                      type: ip
+                      updated_at: |
+                        2025-01-08T04:47:34.273Z
+                      updated_by: elastic
+                      version: 1
           description: Successful response
         '400':
           content:
@@ -33016,6 +33320,74 @@ paths:
         '200':
           content:
             application/json; Elastic-Api-Version=2023-10-31:
+              examples:
+                privileges:
+                  value:
+                    is_authenticated: true
+                    listItems:
+                      application: {}
+                      cluster:
+                        all: true
+                        manage: true
+                        manage_api_key: true
+                        manage_index_templates: true
+                        manage_ml: true
+                        manage_own_api_key: true
+                        manage_pipeline: true
+                        manage_security: true
+                        manage_transform: true
+                        monitor: true
+                        monitor_ml: true
+                        monitor_transform: true
+                      has_all_requested: true
+                      index:
+                        .items-default:
+                          all: true
+                          create: true
+                          create_doc: true
+                          create_index: true
+                          delete: true
+                          delete_index: true
+                          index: true
+                          maintenance: true
+                          manage: true
+                          monitor: true
+                          read: true
+                          view_index_metadata: true
+                          write: true
+                      username: elastic
+                    lists:
+                      application: {}
+                      cluster:
+                        all: true
+                        manage: true
+                        manage_api_key: true
+                        manage_index_templates: true
+                        manage_ml: true
+                        manage_own_api_key: true
+                        manage_pipeline: true
+                        manage_security: true
+                        manage_transform: true
+                        monitor: true
+                        monitor_ml: true
+                        monitor_transform: true
+                      has_all_requested: true
+                      index:
+                        .lists-default:
+                          all: true
+                          create: true
+                          create_doc: true
+                          create_index: true
+                          delete: true
+                          delete_index: true
+                          index: true
+                          maintenance: true
+                          manage: true
+                          monitor: true
+                          read: true
+                          view_index_metadata: true
+                          write: true
+                      username: elastic
               schema:
                 type: object
                 properties:
