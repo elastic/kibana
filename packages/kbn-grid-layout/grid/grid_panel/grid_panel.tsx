@@ -158,6 +158,9 @@ export const GridPanel = forwardRef<HTMLDivElement, GridPanelProps>(
             }
           });
 
+        /**
+         * This subscription adds and/or removes the necessary class name for expanded panel styling
+         */
         const expandedPanelSubscription = gridLayoutStateManager.expandedPanelId$
           .pipe(skip(1)) // skip the first emit because the `initialStyles` will take care of it
           .subscribe((expandedPanelId) => {

@@ -47,7 +47,6 @@ export const GridLayout = ({
     expandedPanelId,
     accessMode,
   });
-  console.log('render');
   useGridLayoutEvents({ gridLayoutStateManager });
   const layoutRef = useRef<HTMLDivElement | null>(null);
 

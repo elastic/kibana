@@ -36,6 +36,8 @@ export const DashboardGrid = () => {
     dashboardApi.viewMode
   );
 
+  const appFixedViewport = useAppFixedViewport();
+
   const currentLayout: GridLayoutData = useMemo(() => {
     const singleRow: GridLayoutData[number] = {
       title: 'First row',
@@ -56,8 +58,6 @@ export const DashboardGrid = () => {
 
     return [singleRow];
   }, [panels]);
-
-  const appFixedViewport = useAppFixedViewport();
 
   const onLayoutChange = useCallback(
     (newLayout: GridLayoutData) => {
@@ -86,13 +86,6 @@ export const DashboardGrid = () => {
     [dashboardApi, viewMode]
   );
 
-  const classes = classNames({
-    'dshLayout-withoutMargins': !useMargins,
-    'dshLayout--viewing': viewMode === 'view',
-    'dshLayout--editing': viewMode !== 'view',
-    'dshLayout-isMaximizedPanel': expandedPanelId !== undefined,
-  });
-
   const renderPanelContents = useCallback(
     (id: string, setDragHandles?: (refs: Array<HTMLElement | null>) => void) => {
       const currentPanels = dashboardApi.panels$.getValue();
@@ -118,27 +111,30 @@ export const DashboardGrid = () => {
     [appFixedViewport, dashboardApi]
   );
 
-  const gridSettings = useMemo(() => {
-    return {
-      gutterSize: useMargins ? DASHBOARD_MARGIN_SIZE : 0,
-      rowHeight: DASHBOARD_GRID_HEIGHT,
-      columnCount: DASHBOARD_GRID_COLUMN_COUNT,
-    };
-  }, [useMargins]);
-
   const memoizedgridLayout = useMemo(() => {
     // memoizing this component reduces the number of times it gets re-rendered to a minimum
     return (
       <GridLayout
         layout={currentLayout}
-        gridSettings={gridSettings}
+        gridSettings={{
+          gutterSize: useMargins ? DASHBOARD_MARGIN_SIZE : 0,
+          rowHeight: DASHBOARD_GRID_HEIGHT,
+          columnCount: DASHBOARD_GRID_COLUMN_COUNT,
+        }}
         renderPanelContents={renderPanelContents}
         onLayoutChange={onLayoutChange}
         expandedPanelId={expandedPanelId}
         accessMode={viewMode === 'view' ? 'VIEW' : 'EDIT'}
       />
     );
-  }, [currentLayout, gridSettings, renderPanelContents, onLayoutChange, expandedPanelId, viewMode]);
+  }, [currentLayout, useMargins, renderPanelContents, onLayoutChange, expandedPanelId, viewMode]);
+
+  const classes = classNames({
+    'dshLayout-withoutMargins': !useMargins,
+    'dshLayout--viewing': viewMode === 'view',
+    'dshLayout--editing': viewMode !== 'view',
+    'dshLayout-isMaximizedPanel': expandedPanelId !== undefined,
+  });
 
   return <div className={classes}>{memoizedgridLayout}</div>;
 };
