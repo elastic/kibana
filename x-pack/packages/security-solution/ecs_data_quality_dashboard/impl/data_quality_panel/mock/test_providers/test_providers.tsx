@@ -19,6 +19,7 @@ import { of } from 'rxjs';
 import { EuiThemeProvider } from '@elastic/eui';
 
 import { UserProfileService } from '@kbn/core/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { DataQualityProvider, DataQualityProviderProps } from '../../data_quality_context';
 import { ResultsRollupContext } from '../../contexts/results_rollup_context';
 import { IndicesCheckContext } from '../../contexts/indices_check_context';
@@ -33,7 +34,6 @@ import {
   FetchHistoricalResultsReducerState,
   UseHistoricalResultsReturnValue,
 } from '../../data_quality_details/indices_details/pattern/hooks/use_historical_results/types';
-import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 
 interface TestExternalProvidersProps {
   children: React.ReactNode;
