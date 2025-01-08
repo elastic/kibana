@@ -16084,6 +16084,8 @@ paths:
                           required:
                             - id
                             - version
+                        audit_unenrolled_reason:
+                          type: string
                         components:
                           items:
                             additionalProperties: false
@@ -16529,6 +16531,8 @@ paths:
                         required:
                           - id
                           - version
+                      audit_unenrolled_reason:
+                        type: string
                       components:
                         items:
                           additionalProperties: false
@@ -16866,6 +16870,8 @@ paths:
                         required:
                           - id
                           - version
+                      audit_unenrolled_reason:
+                        type: string
                       components:
                         items:
                           additionalProperties: false
