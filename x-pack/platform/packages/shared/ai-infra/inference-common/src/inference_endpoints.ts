@@ -5,6 +5,10 @@
  * 2.0.
  */
 
-export { waitUntilModelDeployed } from './wait_until_model_deployed';
-export { getModelInstallStatus } from './get_model_install_status';
-export { installElser } from './install_elser';
+/**
+ * Constants for all default (preconfigured) inference endpoints.
+ */
+export const defaultInferenceEndpoints = {
+  ELSER: '.elser-2-elasticsearch',
+  MULTILINGUAL_E5_SMALL: '.multilingual-e5-small-elasticsearch',
+};
