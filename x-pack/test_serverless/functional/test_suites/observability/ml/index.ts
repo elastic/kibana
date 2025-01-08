@@ -14,5 +14,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     this.tags(['failsOnMKI']);
     loadTestFile(require.resolve('./anomaly_detection_jobs_list'));
     loadTestFile(require.resolve('./search_bar_features'));
+    loadTestFile(require.resolve('./memory_usage'));
   });
 }

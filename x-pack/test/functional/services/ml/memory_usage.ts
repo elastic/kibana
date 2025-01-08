@@ -106,5 +106,13 @@ export function MachineLearningMemoryUsageProvider({ getService }: FtrProviderCo
     async assertEmptyTreeChartExists() {
       await testSubjects.existOrFail('mlJobTreeMap empty');
     },
+
+    async assertJobTreeComboBoxExists() {
+      await testSubjects.existOrFail('mlJobTreeMapComboBox');
+    },
+
+    async getJobTreeComboBoxOptions() {
+      return await comboBox.getOptions('mlJobTreeMapComboBox');
+    },
   };
 }
