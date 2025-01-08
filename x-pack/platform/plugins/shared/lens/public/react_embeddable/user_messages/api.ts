@@ -268,9 +268,9 @@ export function buildUserMessagesHelpers(
         addLog(`Blocking error: ${error?.message}`);
       }
 
-      if (error?.message !== api.blockingError.getValue()?.message) {
+      if (error?.message !== api.blockingError$.getValue()?.message) {
         const finalError = error?.message === '' ? undefined : error;
-        (api.blockingError as BehaviorSubject<Error | undefined>).next(finalError);
+        (api.blockingError$ as BehaviorSubject<Error | undefined>).next(finalError);
       }
     },
     updateWarnings: () => {

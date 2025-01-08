@@ -38,6 +38,7 @@ import { mountInlineEditPanel } from '../inline_editing/mount';
 import { StateManagementConfig } from './initialize_state_management';
 import { apiPublishesInlineEditingCapabilities } from '../type_guards';
 import { SearchContextConfig } from './initialize_search_context';
+import { BehaviorSubject } from 'rxjs';
 
 function getSupportedTriggers(
   getState: GetStateType,
@@ -83,16 +84,13 @@ export function initializeEditApi(
     extractInheritedViewModeObservable(parentApi)
   );
 
-  const { disabledActionIds, setDisabledActionIds } = apiPublishesDisabledActionIds(parentApi)
+  const { disabledActionIds$, setDisabledActionIds } = apiPublishesDisabledActionIds(parentApi)
     ? parentApi
-    : { disabledActionIds: undefined, setDisabledActionIds: noop };
-  const [disabledActionIds$, disabledActionIdsComparator] = buildObservableVariable<
-    string[] | undefined
-  >(disabledActionIds);
-
+    : { disabledActionIds$: new BehaviorSubject<string[] | undefined>(undefined), setDisabledActionIds: noop };
+  
   if (isTextBasedLanguage(initialState)) {
     // do not expose the drilldown action for ES|QL
-    disabledActionIds$.next(disabledActionIds$.getValue()?.concat(['OPEN_FLYOUT_ADD_DRILLDOWN']));
+    setDisabledActionIds(disabledActionIds$?.getValue()?.concat(['OPEN_FLYOUT_ADD_DRILLDOWN']));
   }
 
   /**
@@ -192,18 +190,21 @@ export function initializeEditApi(
     : true;
 
   return {
-    comparators: { disabledActionIds: disabledActionIdsComparator },
+    comparators: { disabledActionIds$: [
+      disabledActionIds$,
+      setDisabledActionIds
+    ]},
     serialize: emptySerializer,
     cleanup: noop,
     api: {
       uuid,
-      viewMode: viewMode$,
+      viewMode$,
       getTypeDisplayName: () =>
         i18n.translate('xpack.lens.embeddableDisplayName', {
           defaultMessage: 'Lens',
         }),
       supportedTriggers,
-      disabledActionIds: disabledActionIds$,
+      disabledActionIds$,
       setDisabledActionIds,
 
       /**

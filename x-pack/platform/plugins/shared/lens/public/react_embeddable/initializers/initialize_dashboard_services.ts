@@ -9,12 +9,12 @@ import { noop } from 'lodash';
 import {
   HasInPlaceLibraryTransforms,
   HasLibraryTransforms,
-  PublishesWritablePanelTitle,
-  PublishesWritablePanelDescription,
+  PublishesWritableTitle,
+  PublishesWritableDescription,
   SerializedTitles,
   StateComparators,
   getUnchangingComparator,
-  initializeTitles,
+  initializeTitleManager,
 } from '@kbn/presentation-publishing';
 import { apiIsPresentationContainer, apiPublishesSettings } from '@kbn/presentation-containers';
 import { buildObservableVariable, isTextBasedLanguage } from '../helper';
@@ -36,8 +36,8 @@ import { StateManagementConfig } from './initialize_state_management';
 type SerializedProps = SerializedTitles & LensPanelProps & LensOverrides & LensSharedProps;
 
 export interface DashboardServicesConfig {
-  api: PublishesWritablePanelTitle &
-    PublishesWritablePanelDescription &
+  api: PublishesWritableTitle &
+    PublishesWritableDescription &
     HasInPlaceLibraryTransforms &
     HasLibraryTransforms<LensRuntimeState> &
     Pick<LensApi, 'parentApi'> &
@@ -58,15 +58,15 @@ export function initializeDashboardServices(
   internalApi: LensInternalApi,
   stateConfig: StateManagementConfig,
   parentApi: unknown,
+  titleManager: ReturnType<typeof initializeTitleManager>,
   { attributeService, uiActions }: LensEmbeddableStartServices
 ): DashboardServicesConfig {
-  const { titlesApi, serializeTitles, titleComparators } = initializeTitles(initialState);
   // For some legacy reason the title and description default value is picked differently
   // ( based on existing FTR tests ).
-  const [defaultPanelTitle$] = buildObservableVariable<string | undefined>(
+  const [defaultTitle$] = buildObservableVariable<string | undefined>(
     initialState.title || internalApi.attributes$.getValue().title
   );
-  const [defaultPanelDescription$] = buildObservableVariable<string | undefined>(
+  const [defaultDescription$] = buildObservableVariable<string | undefined>(
     initialState.savedObjectId
       ? internalApi.attributes$.getValue().description || initialState.description
       : initialState.description
@@ -83,10 +83,10 @@ export function initializeDashboardServices(
   return {
     api: {
       parentApi: apiIsPresentationContainer(parentApi) ? parentApi : undefined,
-      defaultPanelTitle: defaultPanelTitle$,
-      defaultPanelDescription: defaultPanelDescription$,
-      ...titlesApi,
-      libraryId$: stateConfig.api.savedObjectId,
+      defaultTitle$,
+      defaultDescription$,
+      ...titleManager.api,
+      libraryId$: stateConfig.api.savedObjectId$,
       updateOverrides: internalApi.updateOverrides,
       getTriggerCompatibleActions: uiActions.getTriggerCompatibleActions,
       // The functions below brings the HasInPlaceLibraryTransforms compliance (new interface)
@@ -126,14 +126,14 @@ export function initializeDashboardServices(
         // broadcast the change to the main state serializer
         stateConfig.api.updateSavedObjectId(undefined);
 
-        if ((titlesApi.panelTitle.getValue() ?? '').length === 0) {
-          titlesApi.setPanelTitle(defaultPanelTitle$.getValue());
+        if ((titleManager.api.title$.getValue() ?? '').length === 0) {
+          titleManager.api.setTitle(defaultTitle$.getValue());
         }
-        if ((titlesApi.panelDescription.getValue() ?? '').length === 0) {
-          titlesApi.setPanelDescription(defaultPanelDescription$.getValue());
+        if ((titleManager.api.description$.getValue() ?? '').length === 0) {
+          titleManager.api.setDescription(defaultDescription$.getValue());
         }
-        defaultPanelTitle$.next(undefined);
-        defaultPanelDescription$.next(undefined);
+        defaultTitle$.next(undefined);
+        defaultDescription$.next(undefined);
       },
       getByValueRuntimeSnapshot: (): Omit<LensRuntimeState, 'savedObjectId'> => {
         const { savedObjectId, ...rest } = getLatestState();
@@ -158,7 +158,7 @@ export function initializeDashboardServices(
           }
         : {};
       return {
-        ...serializeTitles(),
+        ...titleManager.serializeTitles(),
         style,
         className,
         ...settings,
@@ -168,7 +168,7 @@ export function initializeDashboardServices(
       };
     },
     comparators: {
-      ...titleComparators,
+      ...titleManager.comparators,
       id: getUnchangingComparator<SerializedTitles & LensPanelProps, 'id'>(),
       palette: getUnchangingComparator<SerializedTitles & LensPanelProps, 'palette'>(),
       renderMode: getUnchangingComparator<SerializedTitles & LensPanelProps, 'renderMode'>(),

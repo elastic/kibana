@@ -16,6 +16,7 @@ import {
   isOfQueryType,
 } from '@kbn/es-query';
 import {
+  PublishesTitle,
   PublishingSubject,
   StateComparators,
   apiPublishesUnifiedSearch,
@@ -241,7 +242,7 @@ export function initializeActionApi(
   getLatestState: GetStateType,
   parentApi: unknown,
   searchContextApi: { timeRange$: PublishingSubject<TimeRange | undefined> },
-  titleApi: { panelTitle: PublishingSubject<string | undefined> },
+  title$: PublishesTitle['title$'],
   internalApi: LensInternalApi,
   services: LensEmbeddableStartServices
 ): {
@@ -252,7 +253,7 @@ export function initializeActionApi(
 } {
   const dynamicActionsApi = services.embeddableEnhanced?.initializeReactEmbeddableDynamicActions(
     uuid,
-    () => titleApi.panelTitle.getValue(),
+    () => title$.getValue(),
     initialState
   );
   const maybeStopDynamicActions = dynamicActionsApi?.startDynamicActions();

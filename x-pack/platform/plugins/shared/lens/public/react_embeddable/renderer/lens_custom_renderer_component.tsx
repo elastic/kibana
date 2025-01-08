@@ -61,7 +61,7 @@ export function LensRenderer({
   disabledActions,
   searchSessionId,
   forceDSL,
-  hidePanelTitles,
+  hideTitles,
   lastReloadRequestTime,
   ...props
 }: LensRendererProps) {
@@ -76,7 +76,7 @@ export function LensRenderer({
   const disabledActionIds$ = useObservableVariable(disabledActions);
   const viewMode$ = useObservableVariable(viewMode);
   const searchSessionId$ = useObservableVariable(searchSessionId);
-  const hidePanelTitles$ = useObservableVariable(hidePanelTitles);
+  const hidePanelTitles$ = useObservableVariable(hideTitles);
 
   // Lens API will be set once, but when set trigger a reflow to adopt the latest attributes
   const [lensApi, setLensApi] = useState<LensApi | undefined>(undefined);

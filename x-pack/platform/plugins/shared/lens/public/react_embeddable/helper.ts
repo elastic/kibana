@@ -138,7 +138,7 @@ export function extractInheritedViewModeObservable(
   parentApi?: unknown
 ): PublishingSubject<ViewMode> {
   if (apiPublishesViewMode(parentApi)) {
-    return parentApi.viewMode;
+    return parentApi.viewMode$;
   }
   if (apiHasParentApi(parentApi)) {
     return extractInheritedViewModeObservable(parentApi.parentApi);
