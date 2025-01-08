@@ -183,6 +183,12 @@ export const AutoDetectPanel: FunctionComponent = () => {
                                       href: assetDetailsLocator.getRedirectUrl({
                                         assetType: 'host',
                                         assetId: integration.metadata?.hostname,
+                                        assetDetails: {
+                                          dateRange: {
+                                            from: 'now-15m',
+                                            to: 'now',
+                                          },
+                                        },
                                       }),
                                     },
                                   ]
