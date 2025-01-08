@@ -6,11 +6,11 @@
  */
 
 import hash from 'object-hash';
-import {
+import type {
   AgentConfiguration,
   AgentConfigurationIntake,
 } from '../../../../common/agent_configuration/configuration_types';
-import {
+import type {
   APMIndexDocumentParams,
   APMInternalESClient,
 } from '../../../lib/helpers/create_es_client/create_internal_es_client';
