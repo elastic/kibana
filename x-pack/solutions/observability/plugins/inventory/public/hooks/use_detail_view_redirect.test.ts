@@ -61,14 +61,10 @@ describe('useDetailViewRedirect', () => {
   it('getEntityRedirectUrl should return the correct URL for host entity', () => {
     const entity: InventoryEntity = {
       ...(commonEntityFields as InventoryEntity),
-      entityType: 'host',
-      entityIdentityFields: ['host.name'],
-      host: {
-        name: 'host-1',
-      },
-      cloud: {
-        provider: null,
-      },
+      entityType: 'built_in_hosts_from_ecs_data',
+      entityIdentityFields: { source1: ['host.name'] },
+      'host.name': 'host-1',
+      'cloud.provider': null,
     };
 
     mockGetIdentityFieldsValue.mockReturnValue({ [HOST_NAME]: 'host-1' });
@@ -84,14 +80,10 @@ describe('useDetailViewRedirect', () => {
   it('getEntityRedirectUrl should return the correct URL for container entity', () => {
     const entity: InventoryEntity = {
       ...(commonEntityFields as InventoryEntity),
-      entityType: 'container',
-      entityIdentityFields: ['container.id'],
-      container: {
-        id: 'container-1',
-      },
-      cloud: {
-        provider: null,
-      },
+      entityType: 'built_in_containers_from_ecs_data',
+      entityIdentityFields: { source1: ['container.id'] },
+      'container.id': 'container-1',
+      'cloud.provider': null,
     };
 
     mockGetIdentityFieldsValue.mockReturnValue({ [CONTAINER_ID]: 'container-1' });
@@ -110,15 +102,11 @@ describe('useDetailViewRedirect', () => {
   it('getEntityRedirectUrl should return the correct URL for service entity', () => {
     const entity: InventoryEntity = {
       ...(commonEntityFields as InventoryEntity),
-      entityType: 'service',
-      entityIdentityFields: ['service.name'],
-      agent: {
-        name: 'node',
-      },
-      service: {
-        name: 'service-1',
-        environment: 'prod',
-      },
+      entityType: 'built_in_services_from_ecs_data',
+      entityIdentityFields: { source1: ['service.name'] },
+      'service.name': 'service-1',
+      'agent.name': 'node',
+      'service.environment': 'prod',
     };
     mockGetIdentityFieldsValue.mockReturnValue({ [SERVICE_NAME]: 'service-1' });
     mockGetRedirectUrl.mockReturnValue('service-overview-url');
@@ -134,27 +122,40 @@ describe('useDetailViewRedirect', () => {
 
   [
     [
-      BUILT_IN_ENTITY_TYPES.KUBERNETES.CLUSTER.ecs,
+      BUILT_IN_ENTITY_TYPES.KUBERNETES_V2.CLUSTER.ecs,
       'kubernetes-f4dc26db-1b53-4ea2-a78b-1bfab8ea267c',
     ],
-    [BUILT_IN_ENTITY_TYPES.KUBERNETES.CLUSTER.semconv, 'kubernetes_otel-cluster-overview'],
+    [BUILT_IN_ENTITY_TYPES.KUBERNETES_V2.CLUSTER.semconv, 'kubernetes_otel-cluster-overview'],
     [
-      BUILT_IN_ENTITY_TYPES.KUBERNETES.CRONJOB.ecs,
+      BUILT_IN_ENTITY_TYPES.KUBERNETES_V2.CRON_JOB.ecs,
       'kubernetes-0a672d50-bcb1-11ec-b64f-7dd6e8e82013',
     ],
     [
-      BUILT_IN_ENTITY_TYPES.KUBERNETES.DAEMONSET.ecs,
+      BUILT_IN_ENTITY_TYPES.KUBERNETES_V2.DAEMON_SET.ecs,
       'kubernetes-85879010-bcb1-11ec-b64f-7dd6e8e82013',
     ],
     [
-      BUILT_IN_ENTITY_TYPES.KUBERNETES.DEPLOYMENT.ecs,
+      BUILT_IN_ENTITY_TYPES.KUBERNETES_V2.DEPLOYMENT.ecs,
       'kubernetes-5be46210-bcb1-11ec-b64f-7dd6e8e82013',
     ],
-    [BUILT_IN_ENTITY_TYPES.KUBERNETES.JOB.ecs, 'kubernetes-9bf990a0-bcb1-11ec-b64f-7dd6e8e82013'],
-    [BUILT_IN_ENTITY_TYPES.KUBERNETES.NODE.ecs, 'kubernetes-b945b7b0-bcb1-11ec-b64f-7dd6e8e82013'],
-    [BUILT_IN_ENTITY_TYPES.KUBERNETES.POD.ecs, 'kubernetes-3d4d9290-bcb1-11ec-b64f-7dd6e8e82013'],
     [
-      BUILT_IN_ENTITY_TYPES.KUBERNETES.STATEFULSET.ecs,
+      BUILT_IN_ENTITY_TYPES.KUBERNETES_V2.JOB.ecs,
+      'kubernetes-9bf990a0-bcb1-11ec-b64f-7dd6e8e82013',
+    ],
+    [
+      BUILT_IN_ENTITY_TYPES.KUBERNETES_V2.NODE.ecs,
+      'kubernetes-b945b7b0-bcb1-11ec-b64f-7dd6e8e82013',
+    ],
+    [
+      BUILT_IN_ENTITY_TYPES.KUBERNETES_V2.POD.ecs,
+      'kubernetes-3d4d9290-bcb1-11ec-b64f-7dd6e8e82013',
+    ],
+    [
+      BUILT_IN_ENTITY_TYPES.KUBERNETES_V2.SERVICE,
+      'kubernetes-ff1b3850-bcb1-11ec-b64f-7dd6e8e82013',
+    ],
+    [
+      BUILT_IN_ENTITY_TYPES.KUBERNETES_V2.STATEFUL_SET.ecs,
       'kubernetes-21694370-bcb2-11ec-b64f-7dd6e8e82013',
     ],
   ].forEach(([entityType, dashboardId]) => {
@@ -162,10 +163,8 @@ describe('useDetailViewRedirect', () => {
       const entity: InventoryEntity = {
         ...(commonEntityFields as InventoryEntity),
         entityType,
-        entityIdentityFields: ['some.field'],
-        some: {
-          field: 'some-value',
-        },
+        entityIdentityFields: { source1: ['some.field'] },
+        'some.field': 'some-value',
       };
 
       mockAsKqlFilter.mockReturnValue('kql-query');
