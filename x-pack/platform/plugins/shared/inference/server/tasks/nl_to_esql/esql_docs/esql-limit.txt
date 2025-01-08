@@ -58,7 +58,7 @@ FROM employees
 
 `LIMIT` can and should be used as soon as possible in the query
 
-For example this query use SORT and LIMIT as soon as it can and before further computations:
+For example this query uses SORT and LIMIT as soon as it can and before further computations:
 
 ```esql
 FROM sets

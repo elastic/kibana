@@ -1,4 +1,4 @@
-      # ST_XMAX
+# ST_XMAX
 
 The ST_XMAX function extracts the maximum value of the x coordinates from the supplied geometry.
 

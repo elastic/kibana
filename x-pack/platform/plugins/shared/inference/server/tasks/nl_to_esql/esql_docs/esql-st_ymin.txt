@@ -1,4 +1,4 @@
-      # ST_YMIN
+# ST_YMIN
 
 The ST_YMIN function extracts the smallest value of the `y` coordinates from the provided geometry.
 

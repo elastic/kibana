@@ -16,12 +16,9 @@ This is the string whose bit length you want to calculate. If `null` is provided
 
 ## Examples
 
-In the below example, the `BIT_LENGTH` function is used to calculate the bit length of the 'city' field from the 'airports' index where the 'country' is "India".
-
 ```esql
 FROM airports
 | WHERE country == "India"
 | KEEP city
 | EVAL fn_length = LENGTH(city), fn_bit_length = BIT_LENGTH(city)
 ```
-This will return two new fields - 'fn_length' representing the length of the city name and 'fn_bit_length' representing the bit length of the city name.
