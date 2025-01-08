@@ -33,6 +33,7 @@ import {
   FetchHistoricalResultsReducerState,
   UseHistoricalResultsReturnValue,
 } from '../../data_quality_details/indices_details/pattern/hooks/use_historical_results/types';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 
 interface TestExternalProvidersProps {
   children: React.ReactNode;
