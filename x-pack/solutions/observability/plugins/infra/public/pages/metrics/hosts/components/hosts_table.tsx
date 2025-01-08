@@ -14,6 +14,7 @@ import type { HostNodeRow } from '../hooks/use_hosts_table';
 import { useHostsTableContext } from '../hooks/use_hosts_table';
 import { useHostsViewContext } from '../hooks/use_hosts_view';
 import { useHostCountContext } from '../hooks/use_host_count';
+import { useUnifiedSearchContext } from '../hooks/use_unified_search';
 import { FlyoutWrapper } from './host_details_flyout/flyout_wrapper';
 import { DEFAULT_PAGE_SIZE, PAGE_SIZE_OPTIONS } from '../constants';
 import { FilterAction } from './table/filter_action';
@@ -22,6 +23,7 @@ export const HostsTable = () => {
   const { loading } = useHostsViewContext();
   const { loading: hostCountLoading } = useHostCountContext();
   const { onPageReady } = usePerformanceContext();
+  const { parsedDateRange } = useUnifiedSearchContext();
 
   const {
     columns,
@@ -40,9 +42,14 @@ export const HostsTable = () => {
 
   useEffect(() => {
     if (!loading && !hostCountLoading) {
-      onPageReady();
+      onPageReady({
+        meta: {
+          rangeFrom: parsedDateRange.from,
+          rangeTo: parsedDateRange.to,
+        },
+      });
     }
-  }, [loading, hostCountLoading, onPageReady]);
+  }, [loading, hostCountLoading, onPageReady, parsedDateRange]);
 
   return (
     <>
