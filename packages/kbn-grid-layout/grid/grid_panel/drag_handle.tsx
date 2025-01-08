@@ -42,7 +42,7 @@ export const DragHandle = React.forwardRef<
   const dragHandleRefs = useRef<Array<HTMLElement | null>>([]);
 
   /**
-   * We need to memoize the `onDragStart`, `onTouchStart` and `onTouchEnd` callbacks so that we don't assign a new event handler
+   * We need to memoize the `onDragStart` and `onDragEnd` callbacks so that we don't assign a new event handler
    * every time `setDragHandles` is called
    */
   const onDragStart = useCallback(
