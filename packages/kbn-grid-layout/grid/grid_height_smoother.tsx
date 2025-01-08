@@ -18,10 +18,15 @@ export const GridHeightSmoother = ({
 }: PropsWithChildren<{ gridLayoutStateManager: GridLayoutStateManager }>) => {
   // set the parent div size directly to smooth out height changes.
   const smoothHeightRef = useRef<HTMLDivElement | null>(null);
-  // the global CSS variables are currently only used for gutter size, but could be used for column count, etc.
+
   const [globalCssVariables, setGlobalCssVariables] = useState<string>('');
 
   useEffect(() => {
+    /**
+     * When the user is interacting with an element, the page can grow, but it cannot
+     * shrink. This is to stop a behaviour where the page would scroll up automatically
+     * making the panel shrink or grow unpredictably.
+     */
     const interactionStyleSubscription = combineLatest([
       gridLayoutStateManager.gridDimensions$,
       gridLayoutStateManager.interactionEvent$,
@@ -34,11 +39,6 @@ export const GridHeightSmoother = ({
         return;
       }
 
-      /**
-       * When the user is interacting with an element, the page can grow, but it cannot
-       * shrink. This is to stop a behaviour where the page would scroll up automatically
-       * making the panel shrink or grow unpredictably.
-       */
       smoothHeightRef.current.style.height = `${Math.max(
         dimensions.height ?? 0,
         smoothHeightRef.current.getBoundingClientRect().height
@@ -46,6 +46,9 @@ export const GridHeightSmoother = ({
       smoothHeightRef.current.style.userSelect = 'none';
     });
 
+    /**
+     * This subscription adds and/or removes the necessary class name for expanded panel styling
+     */
     const expandedPanelSubscription = gridLayoutStateManager.expandedPanelId$.subscribe(
       (expandedPanelId) => {
         if (!smoothHeightRef.current) return;
@@ -57,13 +60,18 @@ export const GridHeightSmoother = ({
       }
     );
 
+    /**
+     * This subscription sets global CSS variables that can be used by all components contained within
+     * this wrapper; note that this is **currently** only used for the gutter size, but things like column
+     * count could be added here once we add the ability to change these values
+     */
     const globalCssVariableSubscription = gridLayoutStateManager.runtimeSettings$
       .pipe(
         map(({ gutterSize }) => gutterSize),
         distinctUntilChanged()
       )
       .subscribe((gutterSize) => {
-        setGlobalCssVariables(`--kbnGridGutterSize: ${gutterSize}px;`);
+        setGlobalCssVariables(`--kbnGridGutterSize: ${gutterSize};`);
       });
 
     return () => {
@@ -81,7 +89,7 @@ export const GridHeightSmoother = ({
       css={css`
         ${globalCssVariables}
 
-        margin: var(--kbnGridGutterSize);
+        margin: calc(var(--kbnGridGutterSize) * 1px);
         overflow-anchor: none;
         transition: height 500ms linear;
 
@@ -91,7 +99,7 @@ export const GridHeightSmoother = ({
           transition: none;
           // switch to padding so that the panel does not extend the height of the parent
           margin: 0px;
-          padding: var(--kbnGridGutterSize);
+          padding: calc(var(--kbnGridGutterSize) * 1px);
         }
       `}
     >

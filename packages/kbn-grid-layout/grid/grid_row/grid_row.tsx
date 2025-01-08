@@ -62,7 +62,8 @@ export const GridRow = forwardRef<HTMLDivElement, GridRowProps>(
       const { columnCount, rowHeight } = runtimeSettings;
 
       return css`
-        grid-template-columns: repeat(${columnCount}, 1fr);
+        --gridWidth: calc(100% - ((var(--kbnGridGutterSize) * ${columnCount - 1}) * 1px));
+        grid-template-columns: repeat(${columnCount}, calc(var(--gridWidth) / ${columnCount}));
         grid-template-rows: repeat(${getRowCount(initialRow)}, ${rowHeight}px);
       `;
     }, [gridLayoutStateManager, getRowCount, rowIndex]);
@@ -268,7 +269,7 @@ export const GridRow = forwardRef<HTMLDivElement, GridRowProps>(
               display: grid;
               justify-items: stretch;
               transition: background-color 300ms linear;
-              gap: var(--kbnGridGutterSize);
+              gap: calc(var(--kbnGridGutterSize) * 1px);
               ${initialStyles};
             `}
           >
