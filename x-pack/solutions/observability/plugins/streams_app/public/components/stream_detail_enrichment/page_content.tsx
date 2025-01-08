@@ -17,6 +17,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { ReadStreamDefinition } from '@kbn/streams-schema';
 import { useBoolean } from '@kbn/react-hooks';
+import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
 import { EnrichmentEmptyPrompt } from './enrichment_empty_prompt';
 import { AddProcessorButton } from './add_processor_button';
 import { AddProcessorFlyout } from './flyout';
@@ -24,6 +25,7 @@ import { DraggableProcessorListItem } from './processors_list';
 import { ManagementBottomBar } from '../management_bottom_bar';
 import { SortableList } from './sortable_list';
 import { useDefinition } from './hooks/use_definition';
+import { useKibana } from '../../hooks/use_kibana';
 
 interface StreamDetailEnrichmentContentProps {
   definition: ReadStreamDefinition;
@@ -34,8 +36,11 @@ export function StreamDetailEnrichmentContent({
   definition,
   refreshDefinition,
 }: StreamDetailEnrichmentContentProps) {
+  const { appParams, core } = useKibana();
+
   const [isBottomBarOpen, { on: openBottomBar, off: closeBottomBar }] = useBoolean();
   const [isAddProcessorOpen, { on: openAddProcessor, off: closeAddProcessor }] = useBoolean();
+
   const {
     processors,
     addProcessor,
@@ -59,6 +64,14 @@ export function StreamDetailEnrichmentContent({
     if (hasChanges) openBottomBar();
     else closeBottomBar();
   }, [closeBottomBar, hasChanges, openBottomBar]);
+
+  useUnsavedChangesPrompt({
+    hasUnsavedChanges: hasChanges,
+    history: appParams.history,
+    http: core.http,
+    navigateToUrl: core.application.navigateToUrl,
+    openConfirm: core.overlays.openConfirm,
+  });
 
   const handleSaveChanges = async () => {
     await saveChanges();

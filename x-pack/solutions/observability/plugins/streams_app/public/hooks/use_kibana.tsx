@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import type { CoreStart } from '@kbn/core/public';
+import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { useMemo } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { StreamsAppStartDependencies } from '../types';
 import type { StreamsAppServices } from '../services/types';
 
 export interface StreamsAppKibanaContext {
+  appParams: AppMountParameters;
   core: CoreStart;
   dependencies: {
     start: StreamsAppStartDependencies;
@@ -23,9 +24,10 @@ const useTypedKibana = (): StreamsAppKibanaContext => {
   const context = useKibana<CoreStart & Omit<StreamsAppKibanaContext, 'core'>>();
 
   return useMemo(() => {
-    const { dependencies, services, ...core } = context.services;
+    const { appParams, dependencies, services, ...core } = context.services;
 
     return {
+      appParams,
       core,
       dependencies,
       services,

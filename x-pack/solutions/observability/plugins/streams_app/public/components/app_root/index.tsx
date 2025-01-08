@@ -33,6 +33,7 @@ export function AppRoot({
   const { history } = appMountParameters;
 
   const context = {
+    appParams: appMountParameters,
     core: coreStart,
     dependencies: {
       start: pluginsStart,
