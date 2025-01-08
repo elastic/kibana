@@ -227,7 +227,14 @@ export class UploadState {
     const upload$ = this.files$$.pipe(
       Rx.take(1),
       Rx.switchMap((files$) =>
-        Rx.forkJoin(files$.map((file$) => this.uploadFile(file$, abort$, meta)))
+        Rx.forkJoin(
+          files$.map((file$) => {
+            if (file$.getValue().error) {
+              return Rx.of(undefined);
+            }
+            return this.uploadFile(file$, abort$, meta);
+          })
+        )
       ),
       Rx.map(() => undefined),
       Rx.finalize(() => {
