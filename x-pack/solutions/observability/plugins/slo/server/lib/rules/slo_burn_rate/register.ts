@@ -85,7 +85,7 @@ export function sloBurnRateRuleType(
     producer: sloFeatureId,
     minimumLicenseRequired: 'platinum' as LicenseType,
     isExportable: true,
-    executor: getRuleExecutor({ basePath, alertsLocator }),
+    executor: getRuleExecutor(basePath),
     doesSetRecoveryContext: true,
     actionVariables: {
       context: [
