@@ -36,7 +36,7 @@ import {
   RuleUiAction,
 } from './common/types';
 
-export * from './common/types';
+export type * from './common/types';
 
 export interface RuleFormData<Params extends RuleTypeParams = RuleTypeParams> {
   name: Rule<Params>['name'];

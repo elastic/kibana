@@ -27,7 +27,7 @@ import { createNetworkEventsRoute } from './network_events';
 import { createJourneyFailedStepsRoute } from './pings/journeys';
 import { createLastSuccessfulCheckRoute } from './synthetics/last_successful_check';
 
-export * from './types';
+export type * from './types';
 export { createRouteWithAuth } from './create_route_with_auth';
 export { uptimeRouteWrapper } from './uptime_route_wrapper';
 

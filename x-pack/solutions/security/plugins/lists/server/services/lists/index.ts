@@ -12,5 +12,5 @@ export * from './get_list_index';
 export * from './get_list_template';
 export * from './get_list';
 export * from './list_client';
-export * from './types';
+export type * from './types';
 export * from './update_list';

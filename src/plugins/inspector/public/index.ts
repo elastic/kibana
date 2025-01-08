@@ -33,4 +33,4 @@ export {
 } from './adapters/has_inspector_adapters';
 export { InspectorPublicPlugin as Plugin } from './plugin';
 export type { Setup, Start } from './plugin';
-export * from './types';
+export type * from './types';

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './src/types';
+export type * from './src/types';
 export * from './src/schema';
 export * from './src/saved_object_content_storage';
 export * from './src/utils';

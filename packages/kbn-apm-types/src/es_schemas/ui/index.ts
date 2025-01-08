@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './apm_error';
-export * from './event';
-export * from './metric';
-export * from './span';
-export * from './transaction';
+export type * from './apm_error';
+export type * from './event';
+export type * from './metric';
+export type * from './span';
+export type * from './transaction';

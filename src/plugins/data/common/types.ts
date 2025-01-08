@@ -8,5 +8,5 @@
  */
 
 export type { GetConfigFn } from '@kbn/data-service/src/types';
-export * from './query/types';
+export type * from './query/types';
 export * from './kbn_field_types/types';

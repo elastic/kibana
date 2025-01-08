@@ -6,10 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-
-// TODO: https://github.com/elastic/kibana/issues/110893
 /* eslint-disable @kbn/eslint/no_export_all */
-
 export * from './constants';
-export * from './types';
+export type * from './types';
 export * from './expression_functions';

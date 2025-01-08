@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export * from './types';
+export type * from './types';
 
 export { DEFAULT_MAP_STATE, map } from './map';
 

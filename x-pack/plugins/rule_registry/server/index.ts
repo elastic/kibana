@@ -26,7 +26,7 @@ export * from './rule_data_client';
 export * from './alert_data_client/audit_events';
 
 export { createPersistenceRuleTypeWrapper } from './utils/create_persistence_rule_type_wrapper';
-export * from './utils/persistence_types';
+export type * from './utils/persistence_types';
 export type { AlertsClient } from './alert_data_client/alerts_client';
 
 export const plugin = async (initContext: PluginInitializerContext) => {

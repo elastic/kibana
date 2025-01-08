@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export * from './src/types';
+export type * from './src/types';
 export * from './src/constants/component_constants';
 export * from './src/constants/navigation';
 export type { NavFilter } from './src/utils/query_utils';

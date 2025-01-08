@@ -11,7 +11,7 @@
 /* eslint-disable @kbn/eslint/no_export_all */
 
 /** @public types */
-export * from './types';
+export type * from './types';
 export * from './utils';
 export * from './expression_functions';
 export * from './convert_to_lens';

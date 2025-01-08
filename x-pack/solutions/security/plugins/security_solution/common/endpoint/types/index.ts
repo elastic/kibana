@@ -12,9 +12,9 @@ import type { ManifestSchema } from '../schema/manifest';
 export * from './actions';
 export * from './os';
 export * from './trusted_apps';
-export * from './utility_types';
-export * from './agents';
-export * from './sentinel_one';
+export type * from './utility_types';
+export type * from './agents';
+export type * from './sentinel_one';
 export type { ConditionEntriesMap, ConditionEntry } from './exception_list_items';
 
 /**

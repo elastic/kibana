@@ -24,7 +24,7 @@ export function registerCloudProviderUsageCollector(
 ) {
   const ac = new AbortController();
   // we are stopping, we need to cancel async requests
-  firstValueFrom(pluginStop$).finally(() => ac.abort());
+  void firstValueFrom(pluginStop$).finally(() => ac.abort());
 
   const cloudDetector = new CloudDetector();
   // determine the cloud service in the background

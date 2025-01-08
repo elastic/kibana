@@ -12,6 +12,6 @@ export * from './default_embeddable_factory_provider';
 export { Embeddable } from './embeddable';
 export { EmbeddableErrorHandler } from './embeddable_error_handler';
 export * from './embeddable_factory';
-export * from './embeddable_factory_definition';
+export type * from './embeddable_factory_definition';
 export { ErrorEmbeddable } from './error_embeddable';
 export type { EmbeddableInput, EmbeddableOutput, IEmbeddable } from './i_embeddable';
