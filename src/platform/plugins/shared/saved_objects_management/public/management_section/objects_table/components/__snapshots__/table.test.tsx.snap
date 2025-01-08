@@ -55,6 +55,7 @@ exports[`Table should render normally 1`] = `
           anchorPosition="downCenter"
           button={
             <EuiToolTip
+              content=""
               data-test-subj="exportSOToolTip"
               delay="regular"
               display="inlineBlock"
