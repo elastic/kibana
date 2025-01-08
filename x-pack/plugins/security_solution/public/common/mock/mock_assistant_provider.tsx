@@ -13,6 +13,7 @@ import { AssistantProvider } from '@kbn/elastic-assistant';
 import { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
 import { of } from 'rxjs';
 import { BASE_SECURITY_CONVERSATIONS } from '../../assistant/content/conversations';
+import { UserProfileService } from '@kbn/core/public';
 
 interface Props {
   assistantAvailability?: AssistantAvailability;
@@ -38,6 +39,11 @@ export const MockAssistantProviderComponent: React.FC<Props> = ({
     hasManageGlobalKnowledgeBase: true,
     isAssistantEnabled: true,
   };
+
+  const mockUserProfileService = {
+    getCurrent: jest.fn(() => Promise.resolve({ avatar: 'avatar' })),
+  } as unknown as UserProfileService;
+  
   const chrome = chromeServiceMock.createStartContract();
   chrome.getChromeStyle$.mockReturnValue(of('classic'));
 
