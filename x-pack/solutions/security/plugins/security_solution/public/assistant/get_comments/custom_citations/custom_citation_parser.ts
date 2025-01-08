@@ -65,7 +65,7 @@ export const CustomCitationParser: Plugin = function CustomCitationParser() {
         body += char;
       }
 
-      return '';
+      return body;
     }
 
     const citationLabel = readArg('[', ']');

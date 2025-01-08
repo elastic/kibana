@@ -161,82 +161,80 @@ describe('CustomCitationParser', () => {
       .use([[markdown, {}], CustomCitationParser])
       .parse('Hello world !{citation[foo](bar)} hello world !{citation[2323') as Parent;
 
-    expect(file.children[0].children).toEqual(
-      [
-        {
-          "position": {
-            "end": {
-              "column": 13,
-              "line": 1,
-              "offset": 12
-            },
-            "indent": [],
-            "start": {
-              "column": 1,
-              "line": 1,
-              "offset": 0
-            }
+    expect(file.children[0].children).toEqual([
+      {
+        "position": {
+          "end": {
+            "column": 13,
+            "line": 1,
+            "offset": 12
           },
-          "type": "text",
-          "value": "Hello world "
+          "indent": [],
+          "start": {
+            "column": 1,
+            "line": 1,
+            "offset": 0
+          }
         },
-        {
-          "citationLable": "foo",
-          "citationLink": "bar",
-          "citationNumber": 1,
-          "position": {
-            "end": {
-              "column": 34,
-              "line": 1,
-              "offset": 33
-            },
-            "indent": [],
-            "start": {
-              "column": 13,
-              "line": 1,
-              "offset": 12
-            }
+        "type": "text",
+        "value": "Hello world "
+      },
+      {
+        "citationLable": "foo",
+        "citationLink": "bar",
+        "citationNumber": 1,
+        "position": {
+          "end": {
+            "column": 34,
+            "line": 1,
+            "offset": 33
           },
-          "type": "customCitation"
+          "indent": [],
+          "start": {
+            "column": 13,
+            "line": 1,
+            "offset": 12
+          }
         },
-        {
-          "position": {
-            "end": {
-              "column": 47,
-              "line": 1,
-              "offset": 46
-            },
-            "indent": [],
-            "start": {
-              "column": 34,
-              "line": 1,
-              "offset": 33
-            }
+        "type": "customCitation"
+      },
+      {
+        "position": {
+          "end": {
+            "column": 47,
+            "line": 1,
+            "offset": 46
           },
-          "type": "text",
-          "value": " hello world "
+          "indent": [],
+          "start": {
+            "column": 34,
+            "line": 1,
+            "offset": 33
+          }
         },
-        {
-          "citationLable": "",
-          "citationLink": "",
-          "citationNumber": 2,
-          "incomplete": true,
-          "position": {
-            "end": {
-              "column": 62,
-              "line": 1,
-              "offset": 61
-            },
-            "indent": [],
-            "start": {
-              "column": 47,
-              "line": 1,
-              "offset": 46
-            }
+        "type": "text",
+        "value": " hello world "
+      },
+      {
+        "citationLable": "2323",
+        "citationLink": "",
+        "citationNumber": 2,
+        "incomplete": true,
+        "position": {
+          "end": {
+            "column": 62,
+            "line": 1,
+            "offset": 61
           },
-          "type": "customCitation"
-        }
-      ]
-    );
+          "indent": [],
+          "start": {
+            "column": 47,
+            "line": 1,
+            "offset": 46
+          }
+        },
+        "type": "customCitation"
+      }
+    ]);
   });
 });
