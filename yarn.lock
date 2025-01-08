@@ -4089,7 +4089,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/calculate-width-from-char-count@link:packages/kbn-calculate-width-from-char-count":
+"@kbn/calculate-width-from-char-count@link:src/platform/packages/shared/kbn-calculate-width-from-char-count":
   version "0.0.0"
   uid ""
 
@@ -4121,15 +4121,15 @@
   version "0.0.0"
   uid ""
 
-"@kbn/chart-expressions-common@link:src/plugins/chart_expressions/common":
+"@kbn/chart-expressions-common@link:src/platform/packages/shared/chart-expressions-common":
   version "0.0.0"
   uid ""
 
-"@kbn/chart-icons@link:packages/kbn-chart-icons":
+"@kbn/chart-icons@link:src/platform/packages/shared/kbn-chart-icons":
   version "0.0.0"
   uid ""
 
-"@kbn/charts-plugin@link:src/plugins/charts":
+"@kbn/charts-plugin@link:src/platform/plugins/shared/charts":
   version "0.0.0"
   uid ""
 
@@ -4229,7 +4229,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/coloring@link:packages/kbn-coloring":
+"@kbn/coloring@link:src/platform/packages/shared/kbn-coloring":
   version "0.0.0"
   uid ""
 
@@ -5253,7 +5253,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/data-plugin@link:src/plugins/data":
+"@kbn/data-plugin@link:src/platform/plugins/shared/data":
   version "0.0.0"
   uid ""
 
@@ -5265,7 +5265,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/data-service@link:packages/kbn-data-service":
+"@kbn/data-service@link:src/platform/packages/shared/kbn-data-service":
   version "0.0.0"
   uid ""
 
@@ -5429,7 +5429,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/dom-drag-drop@link:packages/kbn-dom-drag-drop":
+"@kbn/dom-drag-drop@link:src/platform/packages/shared/kbn-dom-drag-drop":
   version "0.0.0"
   uid ""
 
@@ -5613,19 +5613,19 @@
   version "0.0.0"
   uid ""
 
-"@kbn/event-annotation-common@link:packages/kbn-event-annotation-common":
+"@kbn/event-annotation-common@link:src/platform/packages/shared/kbn-event-annotation-common":
   version "0.0.0"
   uid ""
 
-"@kbn/event-annotation-components@link:packages/kbn-event-annotation-components":
+"@kbn/event-annotation-components@link:src/platform/packages/shared/kbn-event-annotation-components":
   version "0.0.0"
   uid ""
 
-"@kbn/event-annotation-listing-plugin@link:src/plugins/event_annotation_listing":
+"@kbn/event-annotation-listing-plugin@link:src/platform/plugins/private/event_annotation_listing":
   version "0.0.0"
   uid ""
 
-"@kbn/event-annotation-plugin@link:src/plugins/event_annotation":
+"@kbn/event-annotation-plugin@link:src/platform/plugins/private/event_annotation":
   version "0.0.0"
   uid ""
 
@@ -5657,11 +5657,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/expression-gauge-plugin@link:src/plugins/chart_expressions/expression_gauge":
+"@kbn/expression-gauge-plugin@link:src/platform/plugins/shared/chart_expressions/expression_gauge":
   version "0.0.0"
   uid ""
 
-"@kbn/expression-heatmap-plugin@link:src/plugins/chart_expressions/expression_heatmap":
+"@kbn/expression-heatmap-plugin@link:src/platform/plugins/shared/chart_expressions/expression_heatmap":
   version "0.0.0"
   uid ""
 
@@ -5669,7 +5669,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/expression-legacy-metric-vis-plugin@link:src/plugins/chart_expressions/expression_legacy_metric":
+"@kbn/expression-legacy-metric-vis-plugin@link:src/platform/plugins/shared/chart_expressions/expression_legacy_metric":
   version "0.0.0"
   uid ""
 
@@ -5677,11 +5677,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/expression-metric-vis-plugin@link:src/plugins/chart_expressions/expression_metric":
+"@kbn/expression-metric-vis-plugin@link:src/platform/plugins/shared/chart_expressions/expression_metric":
   version "0.0.0"
   uid ""
 
-"@kbn/expression-partition-vis-plugin@link:src/plugins/chart_expressions/expression_partition_vis":
+"@kbn/expression-partition-vis-plugin@link:src/platform/plugins/shared/chart_expressions/expression_partition_vis":
   version "0.0.0"
   uid ""
 
@@ -5697,11 +5697,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/expression-tagcloud-plugin@link:src/plugins/chart_expressions/expression_tagcloud":
+"@kbn/expression-tagcloud-plugin@link:src/platform/plugins/shared/chart_expressions/expression_tagcloud":
   version "0.0.0"
   uid ""
 
-"@kbn/expression-xy-plugin@link:src/plugins/chart_expressions/expression_xy":
+"@kbn/expression-xy-plugin@link:src/platform/plugins/shared/chart_expressions/expression_xy":
   version "0.0.0"
   uid ""
 
@@ -5709,7 +5709,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/expressions-plugin@link:src/plugins/expressions":
+"@kbn/expressions-plugin@link:src/platform/plugins/shared/expressions":
   version "0.0.0"
   uid ""
 
@@ -5857,7 +5857,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/graph-plugin@link:x-pack/plugins/graph":
+"@kbn/graph-plugin@link:x-pack/platform/plugins/private/graph":
   version "0.0.0"
   uid ""
 
@@ -6021,7 +6021,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/interpreter@link:packages/kbn-interpreter":
+"@kbn/interpreter@link:src/platform/packages/shared/kbn-interpreter":
   version "0.0.0"
   uid ""
 
@@ -6137,7 +6137,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/lens-formula-docs@link:packages/kbn-lens-formula-docs":
+"@kbn/lens-formula-docs@link:src/platform/packages/private/kbn-lens-formula-docs":
   version "0.0.0"
   uid ""
 
@@ -6145,7 +6145,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/lens-plugin@link:x-pack/plugins/lens":
+"@kbn/lens-plugin@link:x-pack/platform/plugins/shared/lens":
   version "0.0.0"
   uid ""
 
@@ -6213,7 +6213,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/managed-content-badge@link:packages/kbn-managed-content-badge":
+"@kbn/managed-content-badge@link:src/platform/packages/private/kbn-managed-content-badge":
   version "0.0.0"
   uid ""
 
@@ -6693,7 +6693,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/random-sampling@link:x-pack/packages/kbn-random-sampling":
+"@kbn/random-sampling@link:x-pack/platform/packages/private/kbn-random-sampling":
   version "0.0.0"
   uid ""
 
@@ -7545,7 +7545,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/sort-predicates@link:packages/kbn-sort-predicates":
+"@kbn/sort-predicates@link:src/platform/packages/shared/kbn-sort-predicates":
   version "0.0.0"
   uid ""
 
@@ -7725,7 +7725,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/timelion-grammar@link:packages/kbn-timelion-grammar":
+"@kbn/timelion-grammar@link:src/platform/packages/private/kbn-timelion-grammar":
   version "0.0.0"
   uid ""
 
@@ -7733,7 +7733,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/tinymath@link:packages/kbn-tinymath":
+"@kbn/tinymath@link:src/platform/packages/private/kbn-tinymath":
   version "0.0.0"
   uid ""
 
@@ -7749,7 +7749,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/transpose-utils@link:packages/kbn-transpose-utils":
+"@kbn/transpose-utils@link:src/platform/packages/private/kbn-transpose-utils":
   version "0.0.0"
   uid ""
 
@@ -7849,7 +7849,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/unified-search-plugin@link:src/plugins/unified_search":
+"@kbn/unified-search-plugin@link:src/platform/plugins/shared/unified_search":
   version "0.0.0"
   uid ""
 
@@ -7873,7 +7873,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/url-forwarding-plugin@link:src/plugins/url_forwarding":
+"@kbn/url-forwarding-plugin@link:src/platform/plugins/private/url_forwarding":
   version "0.0.0"
   uid ""
 
@@ -7925,15 +7925,15 @@
   version "0.0.0"
   uid ""
 
-"@kbn/vis-default-editor-plugin@link:src/plugins/vis_default_editor":
+"@kbn/vis-default-editor-plugin@link:src/platform/plugins/private/vis_default_editor":
   version "0.0.0"
   uid ""
 
-"@kbn/vis-type-gauge-plugin@link:src/plugins/vis_types/gauge":
+"@kbn/vis-type-gauge-plugin@link:src/platform/plugins/private/vis_types/gauge":
   version "0.0.0"
   uid ""
 
-"@kbn/vis-type-heatmap-plugin@link:src/plugins/vis_types/heatmap":
+"@kbn/vis-type-heatmap-plugin@link:src/platform/plugins/private/vis_types/heatmap":
   version "0.0.0"
   uid ""
 
@@ -7941,51 +7941,51 @@
   version "0.0.0"
   uid ""
 
-"@kbn/vis-type-metric-plugin@link:src/plugins/vis_types/metric":
+"@kbn/vis-type-metric-plugin@link:src/platform/plugins/private/vis_types/metric":
   version "0.0.0"
   uid ""
 
-"@kbn/vis-type-pie-plugin@link:src/plugins/vis_types/pie":
+"@kbn/vis-type-pie-plugin@link:src/platform/plugins/private/vis_types/pie":
   version "0.0.0"
   uid ""
 
-"@kbn/vis-type-table-plugin@link:src/plugins/vis_types/table":
+"@kbn/vis-type-table-plugin@link:src/platform/plugins/private/vis_types/table":
   version "0.0.0"
   uid ""
 
-"@kbn/vis-type-tagcloud-plugin@link:src/plugins/vis_types/tagcloud":
+"@kbn/vis-type-tagcloud-plugin@link:src/platform/plugins/private/vis_types/tagcloud":
   version "0.0.0"
   uid ""
 
-"@kbn/vis-type-timelion-plugin@link:src/plugins/vis_types/timelion":
+"@kbn/vis-type-timelion-plugin@link:src/platform/plugins/private/vis_types/timelion":
   version "0.0.0"
   uid ""
 
-"@kbn/vis-type-timeseries-plugin@link:src/plugins/vis_types/timeseries":
+"@kbn/vis-type-timeseries-plugin@link:src/platform/plugins/shared/vis_types/timeseries":
   version "0.0.0"
   uid ""
 
-"@kbn/vis-type-vega-plugin@link:src/plugins/vis_types/vega":
+"@kbn/vis-type-vega-plugin@link:src/platform/plugins/private/vis_types/vega":
   version "0.0.0"
   uid ""
 
-"@kbn/vis-type-vislib-plugin@link:src/plugins/vis_types/vislib":
+"@kbn/vis-type-vislib-plugin@link:src/platform/plugins/private/vis_types/vislib":
   version "0.0.0"
   uid ""
 
-"@kbn/vis-type-xy-plugin@link:src/plugins/vis_types/xy":
+"@kbn/vis-type-xy-plugin@link:src/platform/plugins/private/vis_types/xy":
   version "0.0.0"
   uid ""
 
-"@kbn/visualization-ui-components@link:packages/kbn-visualization-ui-components":
+"@kbn/visualization-ui-components@link:src/platform/packages/shared/kbn-visualization-ui-components":
   version "0.0.0"
   uid ""
 
-"@kbn/visualization-utils@link:packages/kbn-visualization-utils":
+"@kbn/visualization-utils@link:src/platform/packages/shared/kbn-visualization-utils":
   version "0.0.0"
   uid ""
 
-"@kbn/visualizations-plugin@link:src/plugins/visualizations":
+"@kbn/visualizations-plugin@link:src/platform/plugins/shared/visualizations":
   version "0.0.0"
   uid ""
 
