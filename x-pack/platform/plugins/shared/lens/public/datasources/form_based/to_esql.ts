@@ -37,7 +37,15 @@ export function getESQLForLayer(
 
   const timeZone = getUserTimeZone((key) => uiSettings.get(key), true);
   if (timeZone !== 'UTC') return;
-  if (Object.values(layer.columns).find((col) => col.operationType === 'formula' || col.timeShift ||  'sourceField' in col && indexPattern.getFieldByName(col.sourceField)?.runtime)) return;
+  if (
+    Object.values(layer.columns).find(
+      (col) =>
+        col.operationType === 'formula' ||
+        col.timeShift ||
+        ('sourceField' in col && indexPattern.getFieldByName(col.sourceField)?.runtime)
+    )
+  )
+    return;
 
   let esql = `FROM ${indexPattern.title} | `;
   if (indexPattern.timeFieldName) {
