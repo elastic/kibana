@@ -73,7 +73,7 @@ const TestExternalProvidersComponent: React.FC<TestExternalProvidersProps> = ({ 
   return (
     <KibanaRenderContextProvider {...coreMock.createStart()}>
       <I18nProvider>
-      <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
+        <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
           <QueryClientProvider client={queryClient}>
             <AssistantProvider
               actionTypeRegistry={actionTypeRegistry}
@@ -95,8 +95,8 @@ const TestExternalProvidersComponent: React.FC<TestExternalProvidersProps> = ({ 
               {children}
             </AssistantProvider>
           </QueryClientProvider>
-          </ThemeProvider>
-          </I18nProvider>
+        </ThemeProvider>
+      </I18nProvider>
     </KibanaRenderContextProvider>
   );
 };
