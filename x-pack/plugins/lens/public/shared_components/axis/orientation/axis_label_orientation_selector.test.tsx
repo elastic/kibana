@@ -40,7 +40,7 @@ describe('AxisLabelOrientationSelector', () => {
     const button = screen.getByRole('button', { name: /vertical/i });
     await userEvent.click(button);
 
-    expect(setLabelOrientation.mock.calls.length).toBe(1);
-    expect(setLabelOrientation.mock.calls[0][0]).toBe(-90);
+    expect(setLabelOrientation).toBeCalledTimes(1);
+    expect(setLabelOrientation).toBeCalledWith(-90);
   });
 });

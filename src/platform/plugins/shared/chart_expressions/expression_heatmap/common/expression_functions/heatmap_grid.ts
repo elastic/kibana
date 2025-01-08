@@ -76,7 +76,7 @@ export const heatmapGridConfig: ExpressionFunctionDefinition<
     xAxisLabelRotation: {
       types: ['number'],
       help: i18n.translate('expressionHeatmap.function.args.grid.xAxisLabelRotation.help', {
-        defaultMessage: 'Specifies the rotation of the x axis labels',
+        defaultMessage: 'Specifies the rotation of the X-axis labels.',
       }),
     },
     isXAxisTitleVisible: {
