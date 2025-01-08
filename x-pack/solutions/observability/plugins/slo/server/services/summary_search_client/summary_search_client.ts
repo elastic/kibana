@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import { isCCSRemoteIndexName } from '@kbn/es-query';
