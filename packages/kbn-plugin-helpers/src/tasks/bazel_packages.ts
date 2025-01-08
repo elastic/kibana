@@ -19,7 +19,7 @@ export async function buildBazelPackages({ log, dist }: TaskContext) {
         'build',
         '//src/platform/packages/private/kbn-ui-shared-deps-npm:shared_built_assets',
         '//src/platform/packages/private/kbn-ui-shared-deps-src:shared_built_assets',
-        '//packages/kbn-monaco:target_workers',
+        '//src/platform/packages/shared/kbn-monaco:target_workers',
         '--show_result=1',
       ].concat(dist ? [`--define=dist=true`] : []),
       {
