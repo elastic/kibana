@@ -79,7 +79,7 @@ function getStatusComponent({
       return (
         <EuiBadge color="default" {...restOfProps}>
           <FormattedMessage
-            id="xpack.fleet.agentHealth.orphanedStatusText"
+            id="xpack.fleet.agentHealth.uninstalledStatusText"
             defaultMessage="Uninstalled"
           />
         </EuiBadge>
@@ -88,7 +88,7 @@ function getStatusComponent({
       return (
         <EuiBadge color="warning" {...restOfProps}>
           <FormattedMessage
-            id="xpack.fleet.agentHealth.uninstalledStatusText"
+            id="xpack.fleet.agentHealth.orphanedStatusText"
             defaultMessage="Orphaned"
           />
         </EuiBadge>
