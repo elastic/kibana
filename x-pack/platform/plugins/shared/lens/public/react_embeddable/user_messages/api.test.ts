@@ -13,7 +13,7 @@ import {
   makeEmbeddableServices,
 } from '../mocks';
 import { faker } from '@faker-js/faker';
-import type { SharingSavedObjectProps, UserMessage } from '../../types';
+import type { Datasource, SharingSavedObjectProps, UserMessage, Visualization } from '../../types';
 import type { UserMessagesDisplayLocationId } from '../../types';
 import { BehaviorSubject } from 'rxjs';
 import { EDITOR_MISSING_VIS_TYPE, EDITOR_UNKNOWN_DATASOURCE_TYPE } from '../../user_messages_ids';
@@ -43,12 +43,24 @@ function createUserMessage(
   };
 }
 
-function buildUserMessagesApi(metaInfo?: SharingSavedObjectProps) {
+function buildUserMessagesApi(
+  metaInfo?: SharingSavedObjectProps,
+  {
+    visOverrides,
+    dataOverrides,
+  }: {
+    visOverrides?: { id: string } & Partial<Visualization>;
+    dataOverrides?: { id: string } & Partial<Datasource>;
+  } = {
+    visOverrides: { id: 'lnsXY' },
+    dataOverrides: { id: 'formBased' },
+  }
+) {
   const api = getLensApiMock();
   const internalApi = getLensInternalApiMock();
   const services = makeEmbeddableServices(new BehaviorSubject<string>(''), undefined, {
-    visOverrides: { id: 'lnsXY' },
-    dataOverrides: { id: 'formBased' },
+    visOverrides,
+    dataOverrides,
   });
   // fill the context with some data
   internalApi.updateVisualizationContext({
@@ -250,7 +262,20 @@ describe('User Messages API', () => {
       expect(userMessagesApi.getUserMessages('visualizationOnEmbeddable').length).toEqual(0);
     });
 
-    it('should return deeper validation messages from both datasource and visualization', () => {});
+    it('should return deeper validation messages from both datasource and visualization', () => {
+      const vizGetUserMessages = jest.fn();
+      const datasourceGetUserMessages = jest.fn();
+      const { userMessagesApi } = buildUserMessagesApi(undefined, {
+        visOverrides: { id: 'lnsXY', getUserMessages: vizGetUserMessages },
+        dataOverrides: { id: 'formBased', getUserMessages: datasourceGetUserMessages },
+      });
+      // now add a message, then check that it has been called in both the visualization and datasource
+      const userMessageVisualization = createUserMessage(['visualization']);
+      userMessagesApi.addUserMessages([userMessageVisualization]);
+      userMessagesApi.getUserMessages('visualization');
+      expect(vizGetUserMessages).toHaveBeenCalled();
+      expect(datasourceGetUserMessages).toHaveBeenCalled();
+    });
 
     it('should enable consumers to filter the final list of messages', () => {
       const { userMessagesApi, onBeforeBadgesRender } = buildUserMessagesApi();
