@@ -184,6 +184,9 @@ export const allowedExperimentalValues = Object.freeze({
    */
   jamfDataInAnalyzerEnabled: true,
 
+  // The feature flag has been removed from the codebase and the feature is already enabled without setting it to true.
+  // prebuiltRulesCustomizationEnabled: true,
+
   /**
    * Makes Elastic Defend integration's Malware On-Write Scan option available to edit.
    */
