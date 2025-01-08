@@ -28,11 +28,11 @@ jest.mock('uuid', () => ({
 }));
 
 const riskColors = {
-  [RiskSeverity.Critical]: '#FF0000',
-  [RiskSeverity.High]: '#FFA500',
-  [RiskSeverity.Moderate]: '#FFD700',
-  [RiskSeverity.Low]: '#008000',
-  [RiskSeverity.Unknown]: '#808080',
+  [RiskSeverity.Critical]: '#E7664C',
+  [RiskSeverity.High]: '#DA8B45',
+  [RiskSeverity.Moderate]: '#D6BF57',
+  [RiskSeverity.Low]: '#54B399',
+  [RiskSeverity.Unknown]: '#98a2b3',
 };
 
 describe('getRiskScoreSummaryAttributes', () => {
