@@ -10,6 +10,7 @@ import { EuiFlexItem, type EuiFlexGroupProps, useEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/css';
 import { useVulnerabilitiesPreview } from '@kbn/cloud-security-posture/src/hooks/use_vulnerabilities_preview';
+import { useGetSeverityStatusColor } from '@kbn/cloud-security-posture/src/hooks/use_get_severity_status_color';
 import { buildGenericEntityFlyoutPreviewQuery } from '@kbn/cloud-security-posture-common';
 import { getVulnerabilityStats, hasVulnerabilitiesData } from '@kbn/cloud-security-posture';
 import {
@@ -52,6 +53,7 @@ export const VulnerabilitiesInsight: React.FC<VulnerabilitiesInsightProps> = ({
 }) => {
   const { scopeId, isPreview } = useDocumentDetailsContext();
   const { euiTheme } = useEuiTheme();
+  const { getSeverityStatusColor } = useGetSeverityStatusColor();
   const { data } = useVulnerabilitiesPreview({
     query: buildGenericEntityFlyoutPreviewQuery('host.name', hostName),
     sort: [],
@@ -95,9 +97,9 @@ export const VulnerabilitiesInsight: React.FC<VulnerabilitiesInsightProps> = ({
           low: LOW,
           none: NONE,
         },
-        euiTheme
+        getSeverityStatusColor
       ),
-    [CRITICAL, HIGH, MEDIUM, LOW, NONE, euiTheme]
+    [CRITICAL, HIGH, MEDIUM, LOW, NONE, getSeverityStatusColor]
   );
 
   const count = useMemo(

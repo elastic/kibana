@@ -7,11 +7,11 @@
 
 import React, { useCallback, useEffect, useMemo } from 'react';
 import { css } from '@emotion/react';
-import type { EuiThemeComputed } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, useEuiTheme, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { DistributionBar } from '@kbn/security-solution-distribution-bar';
 import { useVulnerabilitiesPreview } from '@kbn/cloud-security-posture/src/hooks/use_vulnerabilities_preview';
+import { useGetSeverityStatusColor } from '@kbn/cloud-security-posture/src/hooks/use_get_severity_status_color';
 import {
   buildGenericEntityFlyoutPreviewQuery,
   getAbbreviatedNumber,
@@ -31,11 +31,11 @@ import {
 
 const VulnerabilitiesCount = ({
   vulnerabilitiesTotal,
-  euiTheme,
 }: {
   vulnerabilitiesTotal: string | number;
-  euiTheme: EuiThemeComputed<{}>;
 }) => {
+  const { euiTheme } = useEuiTheme();
+
   return (
     <EuiFlexItem>
       <EuiFlexGroup direction="column" gutterSize="none">
@@ -99,6 +99,7 @@ export const VulnerabilitiesPreview = ({
   });
 
   const { euiTheme } = useEuiTheme();
+  const { getSeverityStatusColor } = useGetSeverityStatusColor();
 
   const goToEntityInsightTab = useCallback(() => {
     openDetailsPanel({
@@ -131,7 +132,7 @@ export const VulnerabilitiesPreview = ({
       low: LOW,
       none: NONE,
     },
-    euiTheme
+    getSeverityStatusColor
   );
 
   return (
@@ -157,7 +158,6 @@ export const VulnerabilitiesPreview = ({
       <EuiFlexGroup gutterSize="none">
         <VulnerabilitiesCount
           vulnerabilitiesTotal={getAbbreviatedNumber(totalVulnerabilities)}
-          euiTheme={euiTheme}
         />
         <EuiFlexItem grow={2}>
           <EuiFlexGroup direction="column" gutterSize="none">
