@@ -6,8 +6,8 @@
  */
 
 import { Type } from '@kbn/config-schema';
-import type { RequestHandler, RouteConfig } from '@kbn/core/server';
 import { kibanaResponseFactory } from '@kbn/core/server';
+import type { AuthzDisabled, RequestHandler, RouteConfig } from '@kbn/core/server';
 import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
 import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 
@@ -65,9 +65,11 @@ describe('Common authentication routes', () => {
     });
 
     it('correctly defines route.', async () => {
+      expect(routeConfig.security?.authc?.enabled).toEqual(false);
+      expect((routeConfig.security?.authz as AuthzDisabled).enabled).toEqual(false);
+
       expect(routeConfig.options).toEqual({
         access: 'public',
-        authRequired: false,
         tags: [ROUTE_TAG_CAN_REDIRECT, ROUTE_TAG_AUTH_FLOW],
         excludeFromOAS: true,
       });
@@ -75,6 +77,16 @@ describe('Common authentication routes', () => {
         body: undefined,
         query: expect.any(Type),
         params: undefined,
+      });
+      expect(routeConfig.security).toEqual({
+        authz: {
+          enabled: false,
+          reason: 'This route must remain accessible to 3rd-party IdPs',
+        },
+        authc: {
+          enabled: false,
+          reason: 'This route must remain accessible to 3rd-party IdPs',
+        },
       });
 
       const queryValidator = (routeConfig.validate as any).query as Type<any>;
@@ -201,11 +213,24 @@ describe('Common authentication routes', () => {
     });
 
     it('correctly defines route.', () => {
-      expect(routeConfig.options).toEqual({ authRequired: false });
+      expect(routeConfig.security?.authc?.enabled).toEqual(false);
+      expect((routeConfig.security?.authz as AuthzDisabled).enabled).toEqual(false);
+
       expect(routeConfig.validate).toEqual({
         body: expect.any(Type),
         query: undefined,
         params: undefined,
+      });
+      expect(routeConfig.security).toEqual({
+        authz: {
+          enabled: false,
+          reason: `This route provides basic and token login capability, which is delegated to the internal authentication service`,
+        },
+        authc: {
+          enabled: false,
+          reason:
+            'This route is used for authentication - it does not require existing authentication',
+        },
       });
 
       const bodyValidator = (routeConfig.validate as any).body as Type<any>;
