@@ -3,10 +3,14 @@
   "compilerOptions": {
     "outDir": "target/types"
   },
-  "include": ["*.ts", "**/*.tsx", "src/**/*", "__mocks__/**/*.ts"],
-  "exclude": [
-    "target/**/*"
+  "include": [
+    "*.ts",
+    "**/*.tsx",
+    "src/**/*",
+    "__mocks__/**/*.ts",
+    "../../../../../typings/emotion.d.ts"
   ],
+  "exclude": ["target/**/*"],
   "kbn_references": [
     "@kbn/i18n",
     "@kbn/data-views-plugin",
@@ -16,7 +20,6 @@
     "@kbn/expressions-plugin",
     "@kbn/test-jest-helpers",
     "@kbn/i18n-react",
-    "@kbn/ui-theme",
     "@kbn/field-types",
     "@kbn/kibana-utils-plugin",
     "@kbn/cell-actions",
@@ -39,6 +42,6 @@
     "@kbn/unified-field-list",
     "@kbn/core-notifications-browser",
     "@kbn/core-capabilities-browser-mocks",
-    "@kbn/sort-predicates",
+    "@kbn/sort-predicates"
   ]
 }
