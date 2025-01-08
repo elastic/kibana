@@ -65,7 +65,7 @@ const TestExternalProvidersComponent: React.FC<TestExternalProvidersProps> = ({ 
     logger: {
       log: jest.fn(),
       warn: jest.fn(),
-      error: () => { },
+      error: () => {},
     },
   });
   const chrome = chromeServiceMock.createStartContract();
