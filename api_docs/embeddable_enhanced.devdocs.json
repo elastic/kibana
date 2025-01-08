@@ -45,7 +45,7 @@
           },
           "; } | undefined>; }>>"
         ],
-        "path": "x-pack/plugins/embeddable_enhanced/public/embeddables/interfaces/has_dynamic_actions.ts",
+        "path": "x-pack/platform/plugins/shared/embeddable_enhanced/public/embeddables/interfaces/has_dynamic_actions.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -59,7 +59,7 @@
             "signature": [
               "unknown"
             ],
-            "path": "x-pack/plugins/embeddable_enhanced/public/embeddables/interfaces/has_dynamic_actions.ts",
+            "path": "x-pack/platform/plugins/shared/embeddable_enhanced/public/embeddables/interfaces/has_dynamic_actions.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -77,7 +77,7 @@
         "tags": [],
         "label": "SetupDependencies",
         "description": [],
-        "path": "x-pack/plugins/embeddable_enhanced/public/plugin.ts",
+        "path": "x-pack/platform/plugins/shared/embeddable_enhanced/public/plugin.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -97,7 +97,7 @@
                 "text": "EmbeddableSetup"
               }
             ],
-            "path": "x-pack/plugins/embeddable_enhanced/public/plugin.ts",
+            "path": "x-pack/platform/plugins/shared/embeddable_enhanced/public/plugin.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -117,7 +117,7 @@
                 "text": "SetupContract"
               }
             ],
-            "path": "x-pack/plugins/embeddable_enhanced/public/plugin.ts",
+            "path": "x-pack/platform/plugins/shared/embeddable_enhanced/public/plugin.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -131,7 +131,7 @@
         "tags": [],
         "label": "StartDependencies",
         "description": [],
-        "path": "x-pack/plugins/embeddable_enhanced/public/plugin.ts",
+        "path": "x-pack/platform/plugins/shared/embeddable_enhanced/public/plugin.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -151,7 +151,7 @@
                 "text": "EmbeddableStart"
               }
             ],
-            "path": "x-pack/plugins/embeddable_enhanced/public/plugin.ts",
+            "path": "x-pack/platform/plugins/shared/embeddable_enhanced/public/plugin.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -171,7 +171,7 @@
                 "text": "StartContract"
               }
             ],
-            "path": "x-pack/plugins/embeddable_enhanced/public/plugin.ts",
+            "path": "x-pack/platform/plugins/shared/embeddable_enhanced/public/plugin.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -223,7 +223,7 @@
           },
           "; } | undefined> | undefined; }"
         ],
-        "path": "x-pack/plugins/embeddable_enhanced/public/embeddables/interfaces/has_dynamic_actions.ts",
+        "path": "x-pack/platform/plugins/shared/embeddable_enhanced/public/embeddables/interfaces/has_dynamic_actions.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -237,7 +237,7 @@
       "tags": [],
       "label": "SetupContract",
       "description": [],
-      "path": "x-pack/plugins/embeddable_enhanced/public/plugin.ts",
+      "path": "x-pack/platform/plugins/shared/embeddable_enhanced/public/plugin.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -251,7 +251,7 @@
       "tags": [],
       "label": "StartContract",
       "description": [],
-      "path": "x-pack/plugins/embeddable_enhanced/public/plugin.ts",
+      "path": "x-pack/platform/plugins/shared/embeddable_enhanced/public/plugin.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -268,7 +268,7 @@
             ") => ",
             "ReactEmbeddableDynamicActionsApi"
           ],
-          "path": "x-pack/plugins/embeddable_enhanced/public/plugin.ts",
+          "path": "x-pack/platform/plugins/shared/embeddable_enhanced/public/plugin.ts",
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -282,7 +282,7 @@
               "signature": [
                 "string"
               ],
-              "path": "x-pack/plugins/embeddable_enhanced/public/plugin.ts",
+              "path": "x-pack/platform/plugins/shared/embeddable_enhanced/public/plugin.ts",
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -297,7 +297,7 @@
               "signature": [
                 "() => string | undefined"
               ],
-              "path": "x-pack/plugins/embeddable_enhanced/public/plugin.ts",
+              "path": "x-pack/platform/plugins/shared/embeddable_enhanced/public/plugin.ts",
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -312,7 +312,7 @@
               "signature": [
                 "DynamicActionsSerializedState"
               ],
-              "path": "x-pack/plugins/embeddable_enhanced/public/plugin.ts",
+              "path": "x-pack/platform/plugins/shared/embeddable_enhanced/public/plugin.ts",
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
