@@ -74,9 +74,6 @@ export const DragHandle = React.forwardRef<
 
   const setDragHandles = useCallback(
     (dragHandles: Array<HTMLElement | null>) => {
-      if (gridLayoutStateManager.accessMode$.getValue() !== 'EDIT') {
-        return;
-      }
       setDragHandleCount(dragHandles.length);
       dragHandleRefs.current = dragHandles;
 

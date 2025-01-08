@@ -74,17 +74,18 @@ export const useGridLayoutEvents = ({
         scrollInterval.current = null;
       }
     };
-    const calculateUserEvent = (e: Event, shouldAutoScroll = true) => {
+    const calculateUserEvent = (e: Event) => {
       const interactionEvent = interactionEvent$.value;
       if (!interactionEvent) {
         // if no interaction event, stop auto scroll (if necessary) and return early
         stopAutoScrollIfNecessary();
         return;
       }
+
+      e.stopPropagation();
       // make sure when the user is dragging through touchmove, the page doesn't scroll
       if (isTouchEvent(e)) {
         e.preventDefault();
-        e.stopPropagation();
       }
 
       const gridRowElements = gridLayoutStateManager.rowRefs.current;
@@ -129,6 +130,10 @@ export const useGridLayoutEvents = ({
       const lastRowIndex = interactionEvent?.targetRowIndex;
       const targetRowIndex = (() => {
         if (isResize) return lastRowIndex;
+        // TODO: a temporary workaround for the issue where the panel moves to a different row when the user uses touch events.
+        // Touch events don't work properly when the DOM element is removed and replaced (which is how we handle moving to another row) so we blocked the ability to move panels to another row.
+        // Reference: https://stackoverflow.com/questions/33298828/touch-move-event-dont-fire-after-touch-start-target-is-removed
+        if (isTouchEvent(e)) return lastRowIndex;
 
         let highestOverlap = -Infinity;
         let highestOverlapRowIndex = -1;
@@ -189,7 +194,7 @@ export const useGridLayoutEvents = ({
       const atTheTop = window.scrollY <= 0;
       const atTheBottom = window.innerHeight + window.scrollY >= document.body.scrollHeight;
 
-      if (shouldAutoScroll) {
+      if (!isTouchEvent(e)) {
         const startScrollingUp = !isResize && heightPercentage < 5 && !atTheTop; // don't scroll up when resizing
         const startScrollingDown = heightPercentage > 95 && !atTheBottom;
         if (startScrollingUp || startScrollingDown) {
@@ -236,7 +241,7 @@ export const useGridLayoutEvents = ({
       // Note: When an item is being interacted with, `mousemove` events continue to be fired, even when the
       // mouse moves out of the window (i.e. when a panel is being dragged around outside the window).
       pointerClientPosition.current = getPointerClientPosition(e);
-      calculateUserEvent(e, !isTouchEvent(e));
+      calculateUserEvent(e);
     };
 
     document.addEventListener('mousemove', onPointerMove, { passive: true });
