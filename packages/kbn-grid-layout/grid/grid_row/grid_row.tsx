@@ -8,7 +8,7 @@
  */
 
 import { cloneDeep } from 'lodash';
-import React, { forwardRef, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { forwardRef, useEffect, useMemo, useRef, useState } from 'react';
 import { combineLatest, map, pairwise, skip } from 'rxjs';
 
 import { transparentize, useEuiTheme } from '@elastic/eui';
@@ -16,7 +16,7 @@ import { css } from '@emotion/react';
 
 import { DragPreview } from '../drag_preview';
 import { GridPanel } from '../grid_panel';
-import { GridLayoutStateManager, GridRowData, PanelInteractionEvent } from '../types';
+import { GridLayoutStateManager, PanelInteractionEvent } from '../types';
 import { getKeysInOrder } from '../utils/resolve_grid_row';
 import { GridRowHeader } from './grid_row_header';
 
