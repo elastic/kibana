@@ -97,7 +97,7 @@ export default function (providerContext: FtrProviderContext) {
           );
         });
         it('should restrict non authorized agent policy namespace', async () => {
-          expectToRejectWithError(
+          await expectToRejectWithError(
             () =>
               apiClient.createAgentPolicy(TEST_SPACE_1, {
                 namespace: 'default',
