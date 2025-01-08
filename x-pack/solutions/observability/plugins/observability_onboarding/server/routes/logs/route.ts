@@ -96,7 +96,7 @@ const createAPIKeyRoute = createObservabilityOnboardingServerRoute({
 });
 
 const testOasGeneration = createObservabilityOnboardingServerRoute({
-  endpoint: 'GET /internal/test_os_generation',
+  endpoint: 'GET /api/test_os_generation',
   options: { tags: [] },
   params: z.object({
     query: z.object({
@@ -104,20 +104,18 @@ const testOasGeneration = createObservabilityOnboardingServerRoute({
     }),
   }),
   responseValidation: {
-    400: {
-      description: 'Bad Request',
-      body: z.object({
-        success: z.boolean(),
-        data: z.never(),
-        error: z.string(),
-      }),
-      bodyContentType: 'application/json',
-    },
     200: {
       description: 'Success response',
       body: z.object({
-        success: z.boolean(),
+        success: z.literal(true),
         data: z.array(z.object({ id: z.number() })),
+      }),
+      bodyContentType: 'application/json',
+    },
+    400: {
+      description: 'Bad Request',
+      body: z.object({
+        success: z.literal(false),
         error: z.string(),
       }),
       bodyContentType: 'application/json',
@@ -126,14 +124,13 @@ const testOasGeneration = createObservabilityOnboardingServerRoute({
   async handler(resources) {
     const start = resources.params.query?.start;
 
-    if (start === 'true') {
+    if (start) {
       return {
         success: true,
         data: [{ id: 1 }, { id: 2 }],
-        error: '',
       };
     } else {
-      return { success: false, data: [], error: '' };
+      return { success: false, error: 'Example error' };
     }
   },
 });

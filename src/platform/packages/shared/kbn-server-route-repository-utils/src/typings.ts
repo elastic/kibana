@@ -132,11 +132,19 @@ export type ServerRouteHandlerReturnType =
   | ServerRouteHandlerReturnTypeWithoutRecord
   | Record<string, any>;
 
-export type TRouteResponse<TReturnType extends ServerRouteHandlerReturnType> = {
+interface TRouteResponseStatusCodes {
   [statusCode: number]: {
-    body: z.ZodSchema<TReturnType>;
-  } & Omit<VersionedRouteResponseValidation<TReturnType>[number], 'body'>;
-} & Omit<VersionedRouteResponseValidation<TReturnType>, number>;
+    body: z.ZodSchema<ServerRouteHandlerReturnType>;
+  } & Omit<VersionedRouteResponseValidation<ServerRouteHandlerReturnType>[number], 'body'>;
+}
+
+type TRouteResponse = TRouteResponseStatusCodes & {
+  [StatusCode in keyof TRouteResponseStatusCodes]: {
+    body: z.infer<TRouteResponseStatusCodes[StatusCode]['body']>;
+  };
+};
+
+type ExtractBodyTypes<T> = T extends Record<number, { body: z.ZodSchema<infer U> }> ? U : never;
 
 type ServerRouteHandler<
   TRouteHandlerResources extends ServerRouteHandlerResources,
@@ -156,15 +164,21 @@ export type CreateServerRouteFactory<
   TRouteCreateOptions extends DefaultRouteCreateOptions | undefined
 > = <
   TEndpoint extends string,
-  TReturnType extends ServerRouteHandlerReturnType,
   TRouteParamsRT extends RouteParamsRT | undefined = undefined,
-  TRouteAccess extends RouteAccess | undefined = undefined
+  TRouteAccess extends RouteAccess | undefined = undefined,
+  TResponseValidation extends TRouteResponse | undefined = undefined
 >(
   options: {
     endpoint: ValidateEndpoint<TEndpoint, TRouteAccess> extends true ? TEndpoint : never;
-    handler: ServerRouteHandler<TRouteHandlerResources, TRouteParamsRT, TReturnType>;
+    handler: ServerRouteHandler<
+      TRouteHandlerResources,
+      TRouteParamsRT,
+      TResponseValidation extends TRouteResponse
+        ? ExtractBodyTypes<TResponseValidation>
+        : ServerRouteHandlerReturnType
+    >;
     params?: TRouteParamsRT;
-    responseValidation?: TRouteResponse<TReturnType>;
+    responseValidation?: TResponseValidation;
     security?: RouteSecurity;
   } & Required<
     {
@@ -181,9 +195,9 @@ export type CreateServerRouteFactory<
     TEndpoint,
     TRouteParamsRT,
     TRouteHandlerResources,
-    'responseValidation' extends keyof typeof options
-      ? VersionedRouteResponseValidation<TReturnType>
-      : TReturnType,
+    TResponseValidation extends TRouteResponse
+      ? ExtractBodyTypes<TResponseValidation>
+      : ServerRouteHandlerReturnType,
     TRouteCreateOptions
   >
 >;
@@ -202,7 +216,7 @@ export type ServerRoute<
   (TRouteCreateOptions extends DefaultRouteCreateOptions
     ? { options: TRouteCreateOptions }
     : {}) & {
-    responseValidation?: TRouteResponse<TReturnType>;
+    responseValidation?: TRouteResponse;
   };
 
 export type ServerRouteRepository = Record<
