@@ -12,6 +12,7 @@ import {
   DEFAULT_ASSISTANT_NAMESPACE,
   TRACE_OPTIONS_SESSION_STORAGE_KEY,
 } from '@kbn/elastic-assistant/impl/assistant_context/constants';
+import type { RelatedIntegration } from '../../../../common/api/detection_engine';
 import type { LangSmithOptions } from '../../../../common/siem_migrations/model/common.gen';
 import type {
   RuleMigrationResourceData,
@@ -37,6 +38,7 @@ import {
   getMissingResources,
   upsertMigrationResources,
   retryRuleMigration,
+  getIntegrations,
 } from '../api';
 import type { RetryRuleMigrationFilter, RuleMigrationStats } from '../types';
 import { getSuccessToast } from './success_notification';
@@ -209,6 +211,10 @@ export class SiemRulesMigrationsService {
       }
       return this.getRuleMigrationsStatsWithRetry(params, nextSleepSecs);
     });
+  }
+
+  public async getIntegrations(): Promise<Record<string, RelatedIntegration>> {
+    return getIntegrations({});
   }
 
   private async startTaskStatsPolling(): Promise<void> {
