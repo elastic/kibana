@@ -21,9 +21,6 @@ const isAmsterdam = (euiThemeName: string) => {
   return euiThemeName?.toLowerCase().includes('amsterdam');
 };
 
-// TODO: replace with severity color palette
-// TODO: replace with euiTheme.colors.vis.* from useEuiTheme hook
-// TODO: replace #aaa with proper color token
 export const getSeverityStatusColor = (
   severity: VulnSeverity,
   euiTheme: EuiThemeComputed
@@ -46,7 +43,7 @@ export const getSeverityStatusColor = (
 
   switch (severity) {
     case VULNERABILITIES_SEVERITY.LOW:
-      return euiTheme.colors.vis.euiColorVis0; // TODO: use color from the severity palette?
+      return euiTheme.colors.vis.euiColorVis0; // TODO: use color from the severity palette? It's not green, decision from design is needed
     case VULNERABILITIES_SEVERITY.MEDIUM:
       return euiTheme.colors.vis.euiColorSeverity7;
     case VULNERABILITIES_SEVERITY.HIGH:
@@ -58,8 +55,6 @@ export const getSeverityStatusColor = (
   }
 };
 
-// TODO: replace with severity color palette
-// TODO: replace with euiTheme.colors.vis.* from useEuiTheme hook
 export const getCvsScoreColor = (score: number, euiTheme: EuiThemeComputed): string | undefined => {
   // TOOD: remove old mapping when severity palette is fixed (atm it is inverted)
   if (euiTheme && isAmsterdam(euiTheme.themeName)) {
