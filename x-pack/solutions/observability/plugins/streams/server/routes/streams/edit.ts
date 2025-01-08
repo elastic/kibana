@@ -10,13 +10,20 @@ import { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import { Logger } from '@kbn/logging';
 import { badRequest, internal, notFound } from '@hapi/boom';
 import {
+  isWiredStream,
+  isWiredStreamConfig,
+  streamConfigDefinitionSchema,
+  StreamDefinition,
+  WiredStreamConfigDefinition,
+  WiredStreamDefinition,
+} from '@kbn/streams-schema';
+import {
   DefinitionNotFound,
   ForkConditionMissing,
   IndexTemplateNotFound,
   SecurityException,
 } from '../../lib/streams/errors';
 import { createServerRoute } from '../create_server_route';
-import { StreamDefinition, streamWithoutIdDefinitonSchema } from '../../../common/types';
 import {
   syncStream,
   readStream,
@@ -27,6 +34,7 @@ import {
 import { MalformedStreamId } from '../../lib/streams/errors/malformed_stream_id';
 import { getParentId } from '../../lib/streams/helpers/hierarchy';
 import { MalformedChildren } from '../../lib/streams/errors/malformed_children';
+import { AssetClient } from '../../lib/streams/assets/asset_client';
 import { validateCondition } from '../../lib/streams/helpers/condition_fields';
 
 export const editStreamRoute = createServerRoute({
@@ -45,52 +53,69 @@ export const editStreamRoute = createServerRoute({
     path: z.object({
       id: z.string(),
     }),
-    body: streamWithoutIdDefinitonSchema,
+    body: streamConfigDefinitionSchema,
   }),
-  handler: async ({ response, params, logger, request, getScopedClients }) => {
+  handler: async ({ params, logger, request, getScopedClients }) => {
     try {
-      const { scopedClusterClient } = await getScopedClients({ request });
-      const streamDefinition = { ...params.body, id: params.path.id };
+      const { scopedClusterClient, assetClient } = await getScopedClients({ request });
+      const streamDefinition: StreamDefinition = { stream: params.body, name: params.path.id };
 
-      if (!streamDefinition.managed) {
+      if (!isWiredStream(streamDefinition)) {
         await syncStream({
           scopedClusterClient,
-          definition: { ...streamDefinition, id: params.path.id },
+          definition: streamDefinition,
           rootDefinition: undefined,
           logger,
+          assetClient,
         });
         return { acknowledged: true };
       }
 
-      await validateStreamChildren(scopedClusterClient, params.path.id, params.body.children);
-      await validateAncestorFields(scopedClusterClient, params.path.id, params.body.fields);
-      await validateDescendantFields(scopedClusterClient, params.path.id, params.body.fields);
+      await validateStreamChildren(scopedClusterClient, params.path.id, params.body.ingest.routing);
+      if (isWiredStreamConfig(params.body)) {
+        await validateAncestorFields(
+          scopedClusterClient,
+          params.path.id,
+          params.body.ingest.wired.fields
+        );
+        await validateDescendantFields(
+          scopedClusterClient,
+          params.path.id,
+          params.body.ingest.wired.fields
+        );
+      }
 
       const parentId = getParentId(params.path.id);
-      let parentDefinition: StreamDefinition | undefined;
+      let parentDefinition: WiredStreamDefinition | undefined;
 
       // always need to go from the leaves to the parent when syncing ingest pipelines, otherwise data
       // will be routed before the data stream is ready
 
-      for (const child of streamDefinition.children) {
+      for (const child of streamDefinition.stream.ingest.routing) {
         const streamExists = await checkStreamExists({
           scopedClusterClient,
-          id: child.id,
+          id: child.name,
         });
         if (streamExists) {
           continue;
         }
         // create empty streams for each child if they don't exist
-        const childDefinition = {
-          id: child.id,
-          children: [],
-          fields: [],
-          processing: [],
-          managed: true,
+        const childDefinition: WiredStreamDefinition = {
+          name: child.name,
+          stream: {
+            ingest: {
+              processing: [],
+              routing: [],
+              wired: {
+                fields: {},
+              },
+            },
+          },
         };
 
         await syncStream({
           scopedClusterClient,
+          assetClient,
           definition: childDefinition,
           logger,
         });
@@ -98,14 +123,16 @@ export const editStreamRoute = createServerRoute({
 
       await syncStream({
         scopedClusterClient,
-        definition: { ...streamDefinition, id: params.path.id, managed: true },
+        definition: { ...streamDefinition, name: params.path.id },
         rootDefinition: parentDefinition,
         logger,
+        assetClient,
       });
 
       if (parentId) {
         parentDefinition = await updateParentStream(
           scopedClusterClient,
+          assetClient,
           parentId,
           params.path.id,
           logger
@@ -133,43 +160,45 @@ export const editStreamRoute = createServerRoute({
 
 async function updateParentStream(
   scopedClusterClient: IScopedClusterClient,
+  assetClient: AssetClient,
   parentId: string,
   id: string,
   logger: Logger
 ) {
-  const { definition: parentDefinition } = await readStream({
+  const parentDefinition = await readStream({
     scopedClusterClient,
     id: parentId,
   });
 
-  if (!parentDefinition.children.some((child) => child.id === id)) {
+  if (!parentDefinition.stream.ingest.routing.some((child) => child.name === id)) {
     // add the child to the parent stream with an empty condition for now
-    parentDefinition.children.push({
-      id,
+    parentDefinition.stream.ingest.routing.push({
+      name: id,
       condition: undefined,
     });
 
     await syncStream({
       scopedClusterClient,
+      assetClient,
       definition: parentDefinition,
       logger,
     });
   }
-  return parentDefinition;
+  return parentDefinition as WiredStreamDefinition;
 }
 
 async function validateStreamChildren(
   scopedClusterClient: IScopedClusterClient,
   id: string,
-  children: StreamDefinition['children']
+  children: WiredStreamConfigDefinition['ingest']['routing']
 ) {
   try {
-    const { definition: oldDefinition } = await readStream({
+    const oldDefinition = await readStream({
       scopedClusterClient,
       id,
     });
-    const oldChildren = oldDefinition.children.map((child) => child.id);
-    const newChildren = new Set(children.map((child) => child.id));
+    const oldChildren = oldDefinition.stream.ingest.routing.map((child) => child.name);
+    const newChildren = new Set(children.map((child) => child.name));
     children.forEach((child) => {
       validateCondition(child.condition);
     });

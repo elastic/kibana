@@ -134,6 +134,7 @@ import {
   PREVIEW_LOGGED_REQUESTS_CHECKBOX,
   ALERT_SUPPRESSION_DURATION_VALUE_INPUT,
   ALERT_SUPPRESSION_DURATION_UNIT_INPUT,
+  THREAT_MATCH_QUERY_REQUIRED,
 } from '../screens/create_new_rule';
 import {
   INDEX_SELECTOR,
@@ -783,6 +784,9 @@ export const getCustomIndicatorQueryInput = () => cy.get(THREAT_MATCH_QUERY_INPU
 
 /** Returns custom query required content */
 export const getCustomQueryInvalidationText = () => cy.contains(CUSTOM_QUERY_REQUIRED);
+
+/** Returns threat match query required content */
+export const getThreatMatchQueryInvalidationText = () => cy.contains(THREAT_MATCH_QUERY_REQUIRED);
 
 /**
  * Fills in the define indicator match rules and then presses the continue button
