@@ -14,6 +14,13 @@ import { GridLayout, GridLayoutProps } from './grid_layout';
 import { gridSettings, mockRenderPanelContents } from './test_utils/mocks';
 import { cloneDeep } from 'lodash';
 
+class TouchEventFake extends Event {
+  constructor(public touches: Array<{ clientX: number; clientY: number }>) {
+    super('touchmove');
+    this.touches = [{ clientX: 256, clientY: 128 }];
+  }
+}
+
 describe('GridLayout', () => {
   const renderGridLayout = (propsOverrides: Partial<GridLayoutProps> = {}) => {
     const defaultProps: GridLayoutProps = {
@@ -38,16 +45,29 @@ describe('GridLayout', () => {
       .getAllByRole('button', { name: /panelId:panel/i })
       .map((el) => el.getAttribute('aria-label')?.replace(/panelId:/g, ''));
 
-  const startDragging = (handle: HTMLElement, options = { clientX: 0, clientY: 0 }) => {
+  const mouseStartDragging = (handle: HTMLElement, options = { clientX: 0, clientY: 0 }) => {
     fireEvent.mouseDown(handle, options);
   };
 
-  const moveTo = (options = { clientX: 256, clientY: 128 }) => {
+  const mouseMoveTo = (options = { clientX: 256, clientY: 128 }) => {
     fireEvent.mouseMove(document, options);
   };
 
-  const drop = (handle: HTMLElement) => {
+  const mouseDrop = (handle: HTMLElement) => {
     fireEvent.mouseUp(handle);
+  };
+  const touchStart = (handle: HTMLElement, options = { touches: [{ clientX: 0, clientY: 0 }] }) => {
+    fireEvent.touchStart(handle, options);
+  };
+  const touchMoveTo = (options = { touches: [{ clientX: 256, clientY: 128 }] }) => {
+    const realTouchEvent = window.TouchEvent;
+    // @ts-expect-error
+    window.TouchEvent = TouchEventFake;
+    fireEvent.touchMove(document, new TouchEventFake(options.touches));
+    window.TouchEvent = realTouchEvent;
+  };
+  const touchEnd = (handle: HTMLElement) => {
+    fireEvent.touchEnd(handle);
   };
 
   const assertTabThroughPanel = async (panelId: string) => {
@@ -81,11 +101,11 @@ describe('GridLayout', () => {
     jest.clearAllMocks();
 
     const panel1DragHandle = screen.getAllByRole('button', { name: /drag to move/i })[0];
-    startDragging(panel1DragHandle);
-    moveTo({ clientX: 256, clientY: 128 });
+    mouseStartDragging(panel1DragHandle);
+    mouseMoveTo({ clientX: 256, clientY: 128 });
     expect(mockRenderPanelContents).toHaveBeenCalledTimes(0); // renderPanelContents should not be called during dragging
 
-    drop(panel1DragHandle);
+    mouseDrop(panel1DragHandle);
     expect(mockRenderPanelContents).toHaveBeenCalledTimes(0); // renderPanelContents should not be called after reordering
   });
 
@@ -107,12 +127,34 @@ describe('GridLayout', () => {
       renderGridLayout();
 
       const panel1DragHandle = screen.getAllByRole('button', { name: /drag to move/i })[0];
-      startDragging(panel1DragHandle);
+      mouseStartDragging(panel1DragHandle);
 
-      moveTo({ clientX: 256, clientY: 128 });
-      expect(getAllThePanelIds()).toEqual(expectedInitialOrder); // the panels shouldn't be reordered till we drop
+      mouseMoveTo({ clientX: 256, clientY: 128 });
+      expect(getAllThePanelIds()).toEqual(expectedInitialOrder); // the panels shouldn't be reordered till we mouseDrop
 
-      drop(panel1DragHandle);
+      mouseDrop(panel1DragHandle);
+      expect(getAllThePanelIds()).toEqual([
+        'panel2',
+        'panel5',
+        'panel3',
+        'panel7',
+        'panel1',
+        'panel8',
+        'panel6',
+        'panel4',
+        'panel9',
+        'panel10',
+      ]);
+    });
+    it('after reordering some panels via touch events', async () => {
+      renderGridLayout();
+
+      const panel1DragHandle = screen.getAllByRole('button', { name: /drag to move/i })[0];
+      touchStart(panel1DragHandle);
+      touchMoveTo({ touches: [{ clientX: 256, clientY: 128 }] });
+      expect(getAllThePanelIds()).toEqual(expectedInitialOrder); // the panels shouldn't be reordered till we mouseDrop
+
+      touchEnd(panel1DragHandle);
       expect(getAllThePanelIds()).toEqual([
         'panel2',
         'panel5',

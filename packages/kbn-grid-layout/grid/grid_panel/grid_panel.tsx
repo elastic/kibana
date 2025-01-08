@@ -13,7 +13,7 @@ import { combineLatest, skip } from 'rxjs';
 import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 
-import { GridLayoutStateManager, PanelInteractionEvent } from '../types';
+import { GridLayoutStateManager, UserInteractionEvent, PanelInteractionEvent } from '../types';
 import { getKeysInOrder } from '../utils/resolve_grid_row';
 import { DragHandle, DragHandleApi } from './drag_handle';
 import { ResizeHandle } from './resize_handle';
@@ -25,10 +25,7 @@ export interface GridPanelProps {
     panelId: string,
     setDragHandles?: (refs: Array<HTMLElement | null>) => void
   ) => React.ReactNode;
-  interactionStart: (
-    type: PanelInteractionEvent['type'] | 'drop',
-    e: MouseEvent | React.MouseEvent<HTMLButtonElement, MouseEvent>
-  ) => void;
+  interactionStart: (type: PanelInteractionEvent['type'] | 'drop', e: UserInteractionEvent) => void;
   gridLayoutStateManager: GridLayoutStateManager;
 }
 

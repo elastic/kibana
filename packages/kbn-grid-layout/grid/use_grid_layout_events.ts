@@ -12,6 +12,7 @@ import { useEffect, useRef } from 'react';
 import { resolveGridRow } from './utils/resolve_grid_row';
 import { GridPanelData, GridLayoutStateManager } from './types';
 import { isGridDataEqual } from './utils/equality_checks';
+import { isMouseEvent, isTouchEvent } from './utils/sensors';
 
 const MIN_SPEED = 50;
 const MAX_SPEED = 150;
@@ -57,7 +58,7 @@ export const useGridLayoutEvents = ({
 }: {
   gridLayoutStateManager: GridLayoutStateManager;
 }) => {
-  const mouseClientPosition = useRef({ x: 0, y: 0 });
+  const pointerClientPosition = useRef({ x: 0, y: 0 });
   const lastRequestedPanelPosition = useRef<GridPanelData | undefined>(undefined);
   const scrollInterval = useRef<NodeJS.Timeout | null>(null);
 
@@ -73,18 +74,22 @@ export const useGridLayoutEvents = ({
         scrollInterval.current = null;
       }
     };
-
     const calculateUserEvent = (e: Event) => {
-      if (!interactionEvent$.value) {
+      const interactionEvent = interactionEvent$.value;
+      if (!interactionEvent) {
         // if no interaction event, stop auto scroll (if necessary) and return early
         stopAutoScrollIfNecessary();
         return;
       }
+
       e.stopPropagation();
+      // make sure when the user is dragging through touchmove, the page doesn't scroll
+      if (isTouchEvent(e)) {
+        e.preventDefault();
+      }
 
       const gridRowElements = gridLayoutStateManager.rowRefs.current;
 
-      const interactionEvent = interactionEvent$.value;
       const isResize = interactionEvent?.type === 'resize';
 
       const currentLayout = gridLayout$.value;
@@ -99,16 +104,22 @@ export const useGridLayoutEvents = ({
         return;
       }
 
-      const mouseTargetPixel = {
-        x: mouseClientPosition.current.x,
-        y: mouseClientPosition.current.y,
+      const pointerClientPixel = {
+        x: pointerClientPosition.current.x,
+        y: pointerClientPosition.current.y,
       };
       const panelRect = interactionEvent.panelDiv.getBoundingClientRect();
+
+      const { columnCount, gutterSize, rowHeight, columnPixelWidth } = runtimeSettings$.value;
+      const gridWidth = (gutterSize + columnPixelWidth) * columnCount + gutterSize * 2;
+
       const previewRect = {
-        left: isResize ? panelRect.left : mouseTargetPixel.x - interactionEvent.mouseOffsets.left,
-        top: isResize ? panelRect.top : mouseTargetPixel.y - interactionEvent.mouseOffsets.top,
-        bottom: mouseTargetPixel.y - interactionEvent.mouseOffsets.bottom,
-        right: mouseTargetPixel.x - interactionEvent.mouseOffsets.right,
+        left: isResize
+          ? panelRect.left
+          : pointerClientPixel.x - interactionEvent.pointerOffsets.left,
+        top: isResize ? panelRect.top : pointerClientPixel.y - interactionEvent.pointerOffsets.top,
+        bottom: pointerClientPixel.y - interactionEvent.pointerOffsets.bottom,
+        right: Math.min(pointerClientPixel.x - interactionEvent.pointerOffsets.right, gridWidth),
       };
 
       gridLayoutStateManager.activePanel$.next({ id: interactionEvent.id, position: previewRect });
@@ -119,6 +130,10 @@ export const useGridLayoutEvents = ({
       const lastRowIndex = interactionEvent?.targetRowIndex;
       const targetRowIndex = (() => {
         if (isResize) return lastRowIndex;
+        // TODO: a temporary workaround for the issue where the panel moves to a different row when the user uses touch events.
+        // Touch events don't work properly when the DOM element is removed and replaced (which is how we handle moving to another row) so we blocked the ability to move panels to another row.
+        // Reference: https://stackoverflow.com/questions/33298828/touch-move-event-dont-fire-after-touch-start-target-is-removed
+        if (isTouchEvent(e)) return lastRowIndex;
 
         let highestOverlap = -Infinity;
         let highestOverlapRowIndex = -1;
@@ -145,7 +160,6 @@ export const useGridLayoutEvents = ({
       }
 
       // calculate the requested grid position
-      const { columnCount, gutterSize, rowHeight, columnPixelWidth } = runtimeSettings$.value;
       const targetedGridRow = gridRowElements[targetRowIndex];
       const targetedGridLeft = targetedGridRow?.getBoundingClientRect().left ?? 0;
       const targetedGridTop = targetedGridRow?.getBoundingClientRect().top ?? 0;
@@ -176,19 +190,21 @@ export const useGridLayoutEvents = ({
 
       // auto scroll when an event is happening close to the top or bottom of the screen
       const heightPercentage =
-        100 - ((window.innerHeight - mouseTargetPixel.y) / window.innerHeight) * 100;
+        100 - ((window.innerHeight - pointerClientPixel.y) / window.innerHeight) * 100;
       const atTheTop = window.scrollY <= 0;
       const atTheBottom = window.innerHeight + window.scrollY >= document.body.scrollHeight;
 
-      const startScrollingUp = !isResize && heightPercentage < 5 && !atTheTop; // don't scroll up when resizing
-      const startScrollingDown = heightPercentage > 95 && !atTheBottom;
-      if (startScrollingUp || startScrollingDown) {
-        if (!scrollInterval.current) {
-          // only start scrolling if it's not already happening
-          scrollInterval.current = scrollOnInterval(startScrollingUp ? 'up' : 'down');
+      if (!isTouchEvent(e)) {
+        const startScrollingUp = !isResize && heightPercentage < 5 && !atTheTop; // don't scroll up when resizing
+        const startScrollingDown = heightPercentage > 95 && !atTheBottom;
+        if (startScrollingUp || startScrollingDown) {
+          if (!scrollInterval.current) {
+            // only start scrolling if it's not already happening
+            scrollInterval.current = scrollOnInterval(startScrollingUp ? 'up' : 'down');
+          }
+        } else {
+          stopAutoScrollIfNecessary();
         }
-      } else {
-        stopAutoScrollIfNecessary();
       }
 
       // resolve the new grid layout
@@ -221,20 +237,32 @@ export const useGridLayoutEvents = ({
       }
     };
 
-    const onMouseMove = (e: MouseEvent) => {
+    const onPointerMove = (e: Event) => {
       // Note: When an item is being interacted with, `mousemove` events continue to be fired, even when the
       // mouse moves out of the window (i.e. when a panel is being dragged around outside the window).
-      mouseClientPosition.current = { x: e.clientX, y: e.clientY };
+      pointerClientPosition.current = getPointerClientPosition(e);
       calculateUserEvent(e);
     };
 
-    document.addEventListener('mousemove', onMouseMove, { passive: true });
+    document.addEventListener('mousemove', onPointerMove, { passive: true });
     document.addEventListener('scroll', calculateUserEvent, { passive: true });
+    document.addEventListener('touchmove', onPointerMove, { passive: false });
 
     return () => {
-      document.removeEventListener('mousemove', onMouseMove);
+      document.removeEventListener('mousemove', onPointerMove);
       document.removeEventListener('scroll', calculateUserEvent);
+      document.removeEventListener('touchmove', onPointerMove);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 };
+
+function getPointerClientPosition(e: Event) {
+  if (isTouchEvent(e)) {
+    return { x: e.touches[0].clientX, y: e.touches[0].clientY };
+  }
+  if (isMouseEvent(e)) {
+    return { x: e.clientX, y: e.clientY };
+  }
+  throw new Error('Unknown event type');
+}
