@@ -67,18 +67,21 @@
       description: If basic_auth is enabled, this is the password used for authentication against the HTTP listener. Requires username to also be set.
       required: false
       show_user: false
+      secret: true
     - name: secret_header
       type: text
       title: Secret Header
       description: The header to check for a specific value specified by secret.value. Certain webhooks provide the possibility to include a special header and secret to identify the source.
       required: false
       show_user: false
+      secret: true
     - name: secret_value
       type: password
       title: Secret Value
       description: The secret stored in the header name specified by secret.header. Certain webhooks provide the possibility to include a special header and secret to identify the source.
       required: false
       show_user: false
+      secret: true
     - name: hmac_header
       type: text
       title: HMAC Header
@@ -91,6 +94,7 @@
       description: The secret key used to calculate the HMAC signature. Typically, the webhook sender provides this value.
       required: false
       show_user: false
+      secret: true
     - name: hmac_type
       type: text
       title: HMAC Type
