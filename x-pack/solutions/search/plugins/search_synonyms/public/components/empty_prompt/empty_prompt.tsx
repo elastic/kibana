@@ -42,7 +42,7 @@ export const EmptyPrompt: React.FC = () => {
                 <h2>
                   <FormattedMessage
                     id="xpack.searchSynonyms.emptyPrompt.title"
-                    defaultMessage="Search with Synonyms"
+                    defaultMessage="Search with synonyms"
                   />
                 </h2>
               </EuiTitle>
@@ -53,7 +53,7 @@ export const EmptyPrompt: React.FC = () => {
                     <p>
                       <FormattedMessage
                         id="xpack.searchSynonyms.emptyPrompt.subtitle"
-                        defaultMessage="Improve the search experience and increase the scope of search results."
+                        defaultMessage="Improve search relevance by matching terms that express the same concept."
                       />
                     </p>
                   </EuiText>
@@ -87,7 +87,7 @@ export const EmptyPrompt: React.FC = () => {
                                 <h5>
                                   <FormattedMessage
                                     id="xpack.searchSynonyms.emptyPrompt.improveSearchRelevance.title"
-                                    defaultMessage="Improve search relevance"
+                                    defaultMessage="Expand search coverage"
                                   />
                                 </h5>
                               </EuiTitle>
@@ -99,7 +99,7 @@ export const EmptyPrompt: React.FC = () => {
                             <p>
                               <FormattedMessage
                                 id="xpack.searchSynonyms.emptyPrompt.improveSearchRelevance.description"
-                                defaultMessage="Use different terms to express the same concept."
+                                defaultMessage="Include related terms your users actually use."
                               />
                             </p>
                           </EuiText>
@@ -119,7 +119,7 @@ export const EmptyPrompt: React.FC = () => {
                                 <h5>
                                   <FormattedMessage
                                     id="xpack.searchSynonyms.emptyPrompt.domainSpecific.title"
-                                    defaultMessage="Domain-specific vocabulary"
+                                    defaultMessage="Match domain-specific terms"
                                   />
                                 </h5>
                               </EuiTitle>
@@ -131,7 +131,7 @@ export const EmptyPrompt: React.FC = () => {
                             <p>
                               <FormattedMessage
                                 id="xpack.searchSynonyms.emptyPrompt.domainSpecific.description"
-                                defaultMessage="Allow users to use search terms they are more familiar with."
+                                defaultMessage="Connect industry terms with common search phrases."
                               />
                             </p>
                           </EuiText>
@@ -151,7 +151,7 @@ export const EmptyPrompt: React.FC = () => {
                                 <h5>
                                   <FormattedMessage
                                     id="xpack.searchSynonyms.emptyPrompt.improvePerformance.title"
-                                    defaultMessage="Improved performance"
+                                    defaultMessage="Optimize performance"
                                   />
                                 </h5>
                               </EuiTitle>
@@ -163,7 +163,7 @@ export const EmptyPrompt: React.FC = () => {
                             <p>
                               <FormattedMessage
                                 id="xpack.searchSynonyms.emptyPrompt.improvedPerformance.description"
-                                defaultMessage="The Synonyms API provides better performance and flexibility."
+                                defaultMessage="Uses the built-in synonyms API for improved performance and flexibility."
                               />
                             </p>
                           </EuiText>
@@ -180,7 +180,7 @@ export const EmptyPrompt: React.FC = () => {
                   <span>
                     <FormattedMessage
                       id="xpack.searchSynonyms.emptyPrompt.footer"
-                      defaultMessage="Prefer to use API?"
+                      defaultMessage="Prefer to use the APIs?"
                     />
                   </span>
                 </EuiTitle>
