@@ -37,6 +37,11 @@ export enum FrameType {
   DotNET,
   ErrorFlag = 0x80,
   Error = 0xff,
+
+  // Artificial frame types for grouping, set by the ES profiling plugin
+  Root = 0x100,
+  ProcessName = 0x101,
+  ThreadName = 0x102,
 }
 
 const frameTypeDescriptions = {
@@ -53,6 +58,9 @@ const frameTypeDescriptions = {
   [FrameType.DotNET]: '.NET',
   [FrameType.ErrorFlag]: 'ErrorFlag',
   [FrameType.Error]: 'Error',
+  [FrameType.Root]: 'Root',
+  [FrameType.ProcessName]: 'Process', // Due to OTEL semconv issues, "process name" is currently more correct than "executable name"
+  [FrameType.ThreadName]: 'Thread',
 };
 
 export function isErrorFrame(ft: FrameType): boolean {

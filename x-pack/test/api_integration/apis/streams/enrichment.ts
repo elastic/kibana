@@ -27,11 +27,6 @@ export default function ({ getService }: FtrProviderContext) {
   const logger = getService('log');
 
   describe('Enrichment', () => {
-    after(async () => {
-      await deleteStream(supertest, 'logs.nginx');
-      await cleanUpRootStream(esClient);
-    });
-
     before(async () => {
       await enableStreams(supertest);
       const body = {
@@ -46,6 +41,14 @@ export default function ({ getService }: FtrProviderContext) {
       };
       // We use a forked stream as processing changes cannot be made to the root stream
       await forkStream(supertest, 'logs', body);
+    });
+
+    after(async () => {
+      await deleteStream(supertest, 'logs.nginx');
+      await cleanUpRootStream(esClient);
+      await esClient.indices.deleteDataStream({
+        name: ['logs*'],
+      });
     });
 
     it('Place processing steps', async () => {
