@@ -6,25 +6,26 @@
  */
 import React from 'react';
 import type { FC } from 'react';
-import { EuiPopoverFooter, EuiSwitch, EuiProgress, useEuiBackgroundColor } from '@elastic/eui';
+import { EuiPopoverFooter, EuiSwitch, EuiProgress, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { euiThemeVars } from '@kbn/ui-theme';
 
 export const OptionsListPopoverFooter: FC<{
   showEmptyFields: boolean;
   setShowEmptyFields: (showEmptyFields: boolean) => void;
   isLoading?: boolean;
 }> = ({ showEmptyFields, setShowEmptyFields, isLoading }) => {
+  const { euiTheme } = useEuiTheme();
+
   return (
     <EuiPopoverFooter
       paddingSize="none"
       css={css({
-        height: euiThemeVars.euiButtonHeight,
-        backgroundColor: useEuiBackgroundColor('subdued'),
+        height: euiTheme.size.xxl,
+        backgroundColor: euiTheme.colors.backgroundBaseSubdued,
         alignItems: 'center',
         display: 'flex',
-        paddingLeft: euiThemeVars.euiSizeS,
+        paddingLeft: euiTheme.size.s,
       })}
     >
       {isLoading ? (
