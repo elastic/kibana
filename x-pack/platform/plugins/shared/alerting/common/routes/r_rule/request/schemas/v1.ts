@@ -6,13 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import {
-  validateStartDateV1,
-  validateEndDateV1,
-  validateByWeekDayV1,
-  validateByMonthDayV1,
-  validateByMonthV1,
-} from '../../validation';
+import { validateStartDateV1, validateEndDateV1 } from '../../validation';
 import { validateTimezone } from '../../../rule/validation/validate_timezone/v1';
 
 export const rRuleRequestSchema = schema.object({
@@ -53,19 +47,9 @@ export const rRuleRequestSchema = schema.object({
         schema.literal('SA'),
         schema.literal('SU'),
       ]),
-      {
-        validate: validateByWeekDayV1,
-      }
+      { minSize: 1 }
     )
   ),
-  bymonthday: schema.maybe(
-    schema.arrayOf(schema.number({ min: 1, max: 31 }), {
-      validate: validateByMonthDayV1,
-    })
-  ),
-  bymonth: schema.maybe(
-    schema.arrayOf(schema.number({ min: 1, max: 12 }), {
-      validate: validateByMonthV1,
-    })
-  ),
+  bymonthday: schema.maybe(schema.arrayOf(schema.number({ min: 1, max: 31 }), { minSize: 1 })),
+  bymonth: schema.maybe(schema.arrayOf(schema.number({ min: 1, max: 12 }), { minSize: 1 })),
 });
