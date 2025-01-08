@@ -33,12 +33,6 @@ export const createEventIngestedFromTimestamp = async (
               value: '{{_ingest.timestamp}}',
             },
           },
-          {
-            set: {
-              field: 'error.message',
-              value: '{{ _ingest.on_failure_message }}',
-            },
-          },
         ],
       },
     };

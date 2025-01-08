@@ -349,14 +349,13 @@ export class RiskScoreDataClient {
     });
   }
 
-  public copyTimestampToEventIngested = (abortSignal?: AbortSignal) => {
+  public copyTimestampToEventIngestedForRiskScore = (abortSignal?: AbortSignal) => {
     return this.options.esClient.updateByQuery(
       {
         index: getRiskScoreLatestIndex(this.options.namespace),
         conflicts: 'proceed',
         ignore_unavailable: true,
         allow_no_indices: true,
-        scroll_size: 10000,
         body: {
           query: {
             bool: {

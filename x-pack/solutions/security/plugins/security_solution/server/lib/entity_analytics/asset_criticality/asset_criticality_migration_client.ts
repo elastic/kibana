@@ -96,14 +96,13 @@ export class AssetCriticalityMigrationClient {
     );
   };
 
-  public copyTimestampToEventIngested = (abortSignal?: AbortSignal) => {
+  public CopyTimestampToEventIngestedForAssetCriticality = (abortSignal?: AbortSignal) => {
     return this.options.esClient.updateByQuery(
       {
         index: this.assetCriticalityDataClient.getIndex(),
         conflicts: 'proceed',
         ignore_unavailable: true,
         allow_no_indices: true,
-        scroll_size: 10000,
         body: {
           query: {
             bool: {

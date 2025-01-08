@@ -75,9 +75,10 @@ export const createMigrationTask =
           auditLogger,
         });
 
-        const assetCriticalityResponse = await assetCrticalityClient.copyTimestampToEventIngested(
-          abortController.signal
-        );
+        const assetCriticalityResponse =
+          await assetCrticalityClient.CopyTimestampToEventIngestedForAssetCriticality(
+            abortController.signal
+          );
 
         const failures = assetCriticalityResponse.failures?.map((failure) => failure.cause);
         const hasFailures = failures && failures?.length > 0;
