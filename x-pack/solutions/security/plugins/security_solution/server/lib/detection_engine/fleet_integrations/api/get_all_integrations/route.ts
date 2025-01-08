@@ -6,6 +6,7 @@
  */
 
 import { transformError } from '@kbn/securitysolution-es-utils';
+import { SO_SEARCH_LIMIT } from '@kbn/fleet-plugin/common/constants';
 import { PREBUILT_RULES_PACKAGE_NAME } from '../../../../../../common/detection_engine/constants';
 import { buildSiemResponse } from '../../../routes/utils';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
@@ -43,7 +44,9 @@ export const getAllIntegrationsRoute = (router: SecuritySolutionPluginRouter) =>
 
           const [packages, packagePolicies] = await Promise.all([
             fleet.packages.getPackages(),
-            fleet.packagePolicy.list(fleet.savedObjects.createInternalScopedSoClient(), {}),
+            fleet.packagePolicy.list(fleet.savedObjects.createInternalScopedSoClient(), {
+              perPage: SO_SEARCH_LIMIT,
+            }),
           ]);
           // Elastic prebuilt rules is a special package and should be skipped
           const packagesWithoutPrebuiltSecurityRules = packages.filter(
