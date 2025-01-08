@@ -53,7 +53,7 @@
       "platform/plugins/private/global_search_bar"
     ],
     "xpack.graph": [
-      "plugins/graph"
+      "platform/plugins/private/graph"
     ],
     "xpack.grokDebugger": "platform/plugins/private/grokdebugger",
     "xpack.idxMgmt": "platform/plugins/shared/index_management",
@@ -72,7 +72,7 @@
     "xpack.investigate": "solutions/observability/plugins/investigate",
     "xpack.investigateApp": "solutions/observability/plugins/investigate_app",
     "xpack.kubernetesSecurity": "solutions/security/plugins/kubernetes_security",
-    "xpack.lens": "plugins/lens",
+    "xpack.lens": "platform/plugins/shared/lens",
     "xpack.licenseApiGuard": "platform/plugins/private/license_api_guard",
     "xpack.licenseMgmt": "platform/plugins/shared/license_management",
     "xpack.licensing": "platform/plugins/shared/licensing",

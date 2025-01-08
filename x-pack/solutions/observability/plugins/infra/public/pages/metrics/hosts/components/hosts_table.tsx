@@ -18,10 +18,13 @@ import { useUnifiedSearchContext } from '../hooks/use_unified_search';
 import { FlyoutWrapper } from './host_details_flyout/flyout_wrapper';
 import { DEFAULT_PAGE_SIZE, PAGE_SIZE_OPTIONS } from '../constants';
 import { FilterAction } from './table/filter_action';
+import { useUnifiedSearchContext } from '../hooks/use_unified_search';
 
 export const HostsTable = () => {
   const { loading } = useHostsViewContext();
-  const { loading: hostCountLoading } = useHostCountContext();
+  const { loading: hostCountLoading, count } = useHostCountContext();
+  const { searchCriteria } = useUnifiedSearchContext();
+
   const { onPageReady } = usePerformanceContext();
   const { searchCriteria } = useUnifiedSearchContext();
 
@@ -47,9 +50,16 @@ export const HostsTable = () => {
           rangeFrom: searchCriteria.dateRange.from,
           rangeTo: searchCriteria.dateRange.to,
         },
+        customMetrics: {
+          key1: 'num_of_hosts',
+          value1: count,
+          key2: `max_hosts_per_page`,
+          value2: searchCriteria.limit,
+        },        
       });
     }
-  }, [loading, hostCountLoading, onPageReady, searchCriteria]);
+  }, [loading, hostCountLoading, onPageReady, count, searchCriteria]);
+
 
   return (
     <>
