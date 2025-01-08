@@ -71,4 +71,26 @@ export const mockConnectors: AIConnector[] = [
       apiProvider: 'OpenAI',
     },
   },
+  {
+    id: 'c29c28a0-20fe-11ee-9386-a1f4d42ec542',
+    name: 'Regular Inference Connector',
+    isMissingSecrets: false,
+    actionTypeId: '.inference',
+    secrets: {},
+    isPreconfigured: false,
+    isDeprecated: false,
+    isSystemAction: false,
+    config: {
+      apiProvider: 'OpenAI',
+    },
+  },
+  {
+    id: 'c29c28a0-20fe-11ee-9396-a1f4d42ec542',
+    name: 'Preconfigured Inference Connector',
+    isMissingSecrets: false,
+    actionTypeId: '.inference',
+    isPreconfigured: true,
+    isDeprecated: false,
+    isSystemAction: false,
+  },
 ];
