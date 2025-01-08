@@ -57,13 +57,16 @@ paths:
                       name: Bad ips - updated
                       description: Latest list of bad ips
                       immutable: false
-                      @timestamp: 2025-01-08T04:47:34.273Z
+                      '@timestamp': |
+                        2025-01-08T04:47:34.273Z
                       version: 3
                       _version: WzIsMV0=
                       tie_breaker_id: f5508188-b1e9-4e6e-9662-d039a7d89899
-                      created_at: 2025-01-08T04:47:34.273Z
+                      created_at: |
+                        2025-01-08T04:47:34.273Z
                       created_by: elastic
-                      updated_at: 2025-01-08T05:39:39.292Z
+                      updated_at: |
+                        2025-01-08T05:39:39.292Z
                       updated_by: elastic
         400:
           description: Invalid input data response

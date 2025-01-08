@@ -33,13 +33,16 @@ paths:
                       name: My bad ips
                       description: This list describes bad internet ip
                       immutable: false
-                      @timestamp: 2025-01-08T04:47:34.273Z
+                      '@timestamp': |
+                        2025-01-08T04:47:34.273Z
                       version: 1
                       _version: WzEsMV0=
                       tie_breaker_id: f5508188-b1e9-4e6e-9662-d039a7d89899
-                      created_at: 2025-01-08T04:47:34.273Z
+                      created_at: |
+                        2025-01-08T04:47:34.273Z
                       created_by: elastic
-                      updated_at: 2025-01-08T05:21:53.843Z
+                      updated_at: |
+                        2025-01-08T05:21:53.843Z
                       updated_by: elastic
         400:
           description: Invalid input data response

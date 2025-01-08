@@ -58,12 +58,15 @@ paths:
                     type: ip
                     list_id: ip_list
                     value: 127.0.0.1
-                    @timestamp: 2025-01-08T04:59:06.154Z
+                    '@timestamp': |
+                      2025-01-08T04:59:06.154Z
                     _version: WzAsMV0=
                     tie_breaker_id: b57c762c-3036-465c-9bfb-7bfb5e6e515a
-                    created_at: 2025-01-08T04:59:06.154Z
+                    created_at: |
+                      2025-01-08T04:59:06.154Z
                     created_by: elastic
-                    updated_at: 2025-01-08T04:59:06.154Z
+                    updated_at: |
+                      2025-01-08T04:59:06.154Z
                     updated_by: elastic
         400:
           description: Invalid input data response
