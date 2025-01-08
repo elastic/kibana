@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
+import type { TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
 import { kqlQuery } from '@kbn/observability-plugin/server';
 import { profilingFetchTopNFunctionsFromStacktraces } from '@kbn/observability-plugin/common';
-import { IDLE_SOCKET_TIMEOUT, RouteRegisterParameters } from '.';
+import type { RouteRegisterParameters } from '.';
+import { IDLE_SOCKET_TIMEOUT } from '.';
 import { getRoutePaths } from '../../common';
 import { handleRouteHandlerError } from '../utils/handle_route_error_handler';
 import { getClient } from './compat';
@@ -87,7 +89,7 @@ export function registerTopNFunctionsSearchRoute({
               core,
               esClient,
               query,
-              aggregationField: 'service.name',
+              aggregationFields: ['service.name'],
               totalSeconds,
             });
 

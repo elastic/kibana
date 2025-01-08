@@ -147,7 +147,6 @@
     "@kbn/reporting-common",
     "@kbn/observability-logs-explorer-plugin",
     "@kbn/io-ts-utils",
-    "@kbn/logs-explorer-plugin",
     "@kbn/security-plugin-types-common",
     "@kbn/slo-schema",
     "@kbn/typed-react-router-config",
@@ -190,6 +189,9 @@
     "@kbn/gen-ai-functional-testing",
     "@kbn/integration-assistant-plugin",
     "@kbn/core-elasticsearch-server",
-    "@kbn/streams-schema"
+    "@kbn/streams-schema",
+    "@kbn/server-route-repository-utils",
+    "@kbn/streams-plugin",
+    "@kbn/response-ops-rule-params"
   ]
 }

@@ -7,13 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export interface EmbeddableApiContext {
-  /**
-   * TODO: once all actions are entirely decoupled from the embeddable system, this key should be renamed to "api"
-   * to reflect the fact that this context could contain any api.
-   */
-  embeddable: unknown;
-}
+export { isEmbeddableApiContext, type EmbeddableApiContext } from './embeddable_api_context';
 
 export {
   getInitialValuesFromComparators,
