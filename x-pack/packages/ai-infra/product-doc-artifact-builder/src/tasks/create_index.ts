@@ -8,13 +8,15 @@
 import type { Client } from '@elastic/elasticsearch';
 import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 
+const DEFAULT_ELSER = '.elser-2-elasticsearch';
+
 const mappings: MappingTypeMapping = {
   dynamic: 'strict',
   properties: {
     content_title: { type: 'text' },
     content_body: {
       type: 'semantic_text',
-      inference_id: 'kibana-elser2',
+      inference_id: DEFAULT_ELSER,
     },
     product_name: { type: 'keyword' },
     root_type: { type: 'keyword' },
@@ -24,11 +26,11 @@ const mappings: MappingTypeMapping = {
     ai_subtitle: { type: 'text' },
     ai_summary: {
       type: 'semantic_text',
-      inference_id: 'kibana-elser2',
+      inference_id: DEFAULT_ELSER,
     },
     ai_questions_answered: {
       type: 'semantic_text',
-      inference_id: 'kibana-elser2',
+      inference_id: DEFAULT_ELSER,
     },
     ai_tags: { type: 'keyword' },
   },
