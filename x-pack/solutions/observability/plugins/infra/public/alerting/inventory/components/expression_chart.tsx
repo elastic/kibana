@@ -39,6 +39,7 @@ interface Props {
   sourceId: string;
   accountId?: string;
   region?: string;
+  indexPattern: string;
 }
 
 export const ExpressionChart: React.FC<Props> = ({
@@ -48,6 +49,7 @@ export const ExpressionChart: React.FC<Props> = ({
   sourceId,
   accountId = '',
   region = '',
+  indexPattern,
 }) => {
   const chartTheme = useTimelineChartTheme();
   const timerange = useMemo(
@@ -76,6 +78,7 @@ export const ExpressionChart: React.FC<Props> = ({
     groupBy: [],
     nodeType,
     sourceId,
+    indexPattern,
     currentTime: 0,
     accountId,
     region,

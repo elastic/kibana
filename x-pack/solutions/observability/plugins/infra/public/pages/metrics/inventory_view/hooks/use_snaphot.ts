@@ -66,6 +66,7 @@ const buildPayload = (args: UseSnapshotRequest): SnapshotRequest => {
     region = '',
     sourceId,
     timerange,
+    indexPattern,
   } = args;
 
   return {
@@ -77,6 +78,7 @@ const buildPayload = (args: UseSnapshotRequest): SnapshotRequest => {
     metrics,
     nodeType,
     sourceId,
+    indexPattern,
     overrideCompositeSize,
     region,
     timerange: timerange ?? {

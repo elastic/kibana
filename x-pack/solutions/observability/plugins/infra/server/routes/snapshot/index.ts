@@ -64,7 +64,8 @@ export const initSnapshotRoute = (libs: InfraBackendLibs) => {
           snapshotRequest,
           source,
           compositeSize,
-          logQueryFields
+          logQueryFields,
+          snapshotRequest.indexPattern
         );
         return response.ok({
           body: SnapshotNodeResponseRT.encode(snapshotResponse),

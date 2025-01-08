@@ -116,6 +116,7 @@ export const SnapshotRequestRT = rt.intersection([
     filterQuery: rt.union([rt.string, rt.null]),
     overrideCompositeSize: rt.number,
     dropPartialBuckets: rt.boolean,
+    indexPattern: rt.string,
   }),
 ]);
 

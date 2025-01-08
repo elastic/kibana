@@ -476,6 +476,7 @@ export const Expressions: React.FC<Props> = (props) => {
                 sourceId={ruleParams.sourceId}
                 accountId={ruleParams.accountId}
                 region={ruleParams.region}
+                indexPattern={dataView.getIndexPattern()}
                 data-test-subj="preview-chart"
               />
             </ExpressionRow>

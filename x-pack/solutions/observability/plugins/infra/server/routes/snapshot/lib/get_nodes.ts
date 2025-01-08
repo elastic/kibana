@@ -51,7 +51,8 @@ export const getNodes = async (
   snapshotRequest: SnapshotRequest,
   source: InfraSource,
   compositeSize: number,
-  logQueryFields?: LogQueryFields
+  logQueryFields?: LogQueryFields,
+  indexPattern?: string
 ) => {
   let nodes;
 
@@ -64,7 +65,7 @@ export const getNodes = async (
           snapshotRequest,
           source,
           compositeSize,
-          sourceOverrides: logQueryFields,
+          sourceOverrides: indexPattern ? { indexPattern } : logQueryFields,
         });
       } else {
         nodes = { nodes: [], interval: '60s' };
@@ -79,6 +80,7 @@ export const getNodes = async (
         snapshotRequest: { ...snapshotRequest, metrics: metricsWithoutLogsMetrics },
         source,
         compositeSize,
+        sourceOverrides: indexPattern ? { indexPattern } : undefined,
       });
       const logRateNodes =
         logQueryFields != null
@@ -87,7 +89,7 @@ export const getNodes = async (
               snapshotRequest: { ...snapshotRequest, metrics: [{ type: 'logRate' }] },
               source,
               compositeSize,
-              sourceOverrides: logQueryFields,
+              sourceOverrides: indexPattern ? { indexPattern } : logQueryFields,
             })
           : { nodes: [], interval: '60s' };
       // Merge nodes where possible - e.g. a single host is shipping metrics and logs
@@ -112,7 +114,13 @@ export const getNodes = async (
       };
     }
   } else {
-    nodes = await transformAndQueryData({ client, snapshotRequest, source, compositeSize });
+    nodes = await transformAndQueryData({
+      client,
+      snapshotRequest,
+      source,
+      compositeSize,
+      sourceOverrides: indexPattern ? { indexPattern } : undefined,
+    });
   }
 
   return nodes;
