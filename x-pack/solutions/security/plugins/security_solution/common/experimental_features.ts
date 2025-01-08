@@ -193,7 +193,7 @@ export const allowedExperimentalValues = Object.freeze({
    * Turned: TBD
    * Expires: TBD
    */
-  prebuiltRulesCustomizationEnabled: false,
+  prebuiltRulesCustomizationEnabled: true,
 
   /**
    * Makes Elastic Defend integration's Malware On-Write Scan option available to edit.
