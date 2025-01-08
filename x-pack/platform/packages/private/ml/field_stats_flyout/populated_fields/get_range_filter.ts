@@ -14,6 +14,10 @@ interface RangeFilter {
   range: Record<string, estypes.QueryDslRangeQuery>;
 }
 
+interface MatchAllFilter {
+  bool: { must: { match_all: {} } };
+}
+
 /**
  * Get range filter for datetime field. Both arguments are optional.
  * @param datetimeField
@@ -23,7 +27,7 @@ interface RangeFilter {
 export const getRangeFilter = (
   datetimeField?: string,
   timeRange?: TimeRangeMs
-): RangeFilter | undefined => {
+): RangeFilter | MatchAllFilter => {
   if (
     datetimeField !== undefined &&
     isPopulatedObject(timeRange, ['from', 'to']) &&
@@ -39,4 +43,8 @@ export const getRangeFilter = (
       },
     };
   }
+
+  return {
+    bool: { must: { match_all: {} } },
+  };
 };

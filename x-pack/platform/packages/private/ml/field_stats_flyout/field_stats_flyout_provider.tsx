@@ -95,18 +95,20 @@ export const FieldStatsFlyoutProvider: FC<FieldStatsFlyoutProviderProps> = (prop
         abortController.current = new AbortController();
       }
 
-      const indexPattern = dataView.getIndexPattern();
       const indexFilter = getRangeFilter(dataView.getTimeField()?.name, timeRangeMs);
-      const cacheKey = stringHash(JSON.stringify(indexFilter ?? '')).toString();
+      const cacheKey = stringHash(JSON.stringify(indexFilter)).toString();
 
       const fetchPopulatedFields = async function () {
         try {
-          const nonEmptyFields = await fieldStatsServices.dataViews.getFieldsForWildcard({
-            pattern: indexPattern,
-            includeEmptyFields: false,
-            indexFilter: getRangeFilter(dataView.getTimeField()?.name, timeRangeMs),
-            metaFields: [],
-          });
+          const nonEmptyFields = await fieldStatsServices.dataViews.getFieldsForIndexPattern(
+            dataView,
+            {
+              // filled in by data views service
+              pattern: '',
+              includeEmptyFields: false,
+              indexFilter,
+            }
+          );
 
           const fieldsWithData = new Set([...nonEmptyFields.map((field) => field.name)]);
 

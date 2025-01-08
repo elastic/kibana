@@ -9,7 +9,9 @@ import { getRangeFilter } from './get_range_filter';
 
 describe('getRangeFilter()', () => {
   it('should return undefined when all arguments are undefined', () => {
-    expect(getRangeFilter()).toBe(undefined);
+    expect(getRangeFilter()).toBe({
+      bool: { must: { match_all: {} } },
+    });
   });
 
   it('should return the range filter to the query if timeRange and datetimeField are provided', () => {

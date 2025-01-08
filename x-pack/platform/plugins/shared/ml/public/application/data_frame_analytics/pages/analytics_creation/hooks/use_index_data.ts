@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import useMountedState from 'react-use/lib/useMountedState';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
@@ -91,17 +91,27 @@ export const useIndexData = (
   const mlApi = useMlApi();
   const [dataViewFields, setDataViewFields] = useState<string[]>();
   const [timeRangeMs, setTimeRangeMs] = useState<TimeRangeMs | undefined>();
+  const abortController = useRef(new AbortController());
 
   useEffect(() => {
     async function fetchPopulatedFields() {
+      if (abortController.current) {
+        abortController.current.abort();
+        abortController.current = new AbortController();
+      }
+
       setErrorMessage('');
       setStatus(INDEX_STATUS.LOADING);
 
       try {
-        const indexPattern = dataView.getIndexPattern();
-        const nonEmptyFields = await dataViewsService.getFieldsForWildcard({
-          pattern: indexPattern,
+        const nonEmptyFields = await dataViewsService.getFieldsForIndexPattern(dataView, {
+          // filled in by data views service
+          pattern: '',
           includeEmptyFields: false,
+          // dummy filter, if no filter was provided the function would return all fields.
+          indexFilter: {
+            bool: { must: { match_all: {} } },
+          },
         });
 
         const populatedFields = nonEmptyFields.map((field) => field.name);
@@ -116,6 +126,10 @@ export const useIndexData = (
     }
 
     fetchPopulatedFields();
+
+    return () => {
+      abortController.current.abort();
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
