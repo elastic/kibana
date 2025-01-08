@@ -45,9 +45,9 @@ export const HostsTable = () => {
     if (!loading && !hostCountLoading) {
       onPageReady({
         customMetrics: {
-          key1: 'hostsCount',
+          key1: 'num_of_hosts',
           value1: count,
-          key2: `hostsLimit`,
+          key2: `max_hosts_per_page`,
           value2: searchCriteria.limit,
         },
       });

@@ -34,7 +34,7 @@ export interface IEnvOptions {
 
 export interface ServiceMapTelemetry {
   tracesCount: number;
-  servicesCount: number;
+  nodesCount: number;
 }
 
 async function getConnectionData({
@@ -148,7 +148,7 @@ export function getServiceMap(
     return {
       ...transformedResponse,
       tracesCount: connectionData.tracesCount,
-      servicesCount: transformedResponse.servicesCount,
+      nodesCount: transformedResponse.nodesCount,
     };
   });
 }
