@@ -553,9 +553,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // change title
       await testSubjects.click('editIndexPatternButton');
-      await testSubjects.setValue('createIndexPatternTitleInput', 'search-s', {
-        clearWithKeyboard: true,
-        typeCharByChar: true,
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await retry.try(async () => {
+        await PageObjects.settings.setIndexPatternField('search-s*');
       });
       await testSubjects.click('saveIndexPatternButton');
       await testSubjects.click('confirmModalConfirmButton');

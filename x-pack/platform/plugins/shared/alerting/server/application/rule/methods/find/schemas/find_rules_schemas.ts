@@ -7,6 +7,11 @@
 
 import { schema } from '@kbn/config-schema';
 
+const savedObjectReferenceSchema = schema.object({
+  type: schema.string(),
+  id: schema.string(),
+});
+
 export const findRulesOptionsSchema = schema.object(
   {
     perPage: schema.maybe(schema.number()),
@@ -19,10 +24,7 @@ export const findRulesOptionsSchema = schema.object(
     sortField: schema.maybe(schema.string()),
     sortOrder: schema.maybe(schema.oneOf([schema.literal('asc'), schema.literal('desc')])),
     hasReference: schema.maybe(
-      schema.object({
-        type: schema.string(),
-        id: schema.string(),
-      })
+      schema.oneOf([savedObjectReferenceSchema, schema.arrayOf(savedObjectReferenceSchema)])
     ),
     fields: schema.maybe(schema.arrayOf(schema.string())),
     filter: schema.maybe(
