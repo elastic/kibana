@@ -29,12 +29,15 @@ jest.mock('../rule_details', () => ({
   RuleDetails: () => <div />,
 }));
 
-jest.mock('../hooks', () => ({
+jest.mock('../hooks/use_rule_form_state', () => ({
   useRuleFormState: jest.fn(),
+}));
+
+jest.mock('../hooks/use_rule_form_dispatch', () => ({
   useRuleFormDispatch: jest.fn(),
 }));
 
-const { useRuleFormState } = jest.requireMock('../hooks');
+const { useRuleFormState } = jest.requireMock('../hooks/use_rule_form_state');
 
 const navigateToUrl = jest.fn();
 
