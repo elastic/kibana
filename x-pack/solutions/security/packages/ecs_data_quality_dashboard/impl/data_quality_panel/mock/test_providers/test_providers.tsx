@@ -17,7 +17,8 @@ import { UserProfileService } from '@kbn/core/public';
 import { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
 import { of } from 'rxjs';
 import { I18nProvider } from '@kbn/i18n-react';
-import { EuiThemeProvider } from '@elastic/eui';
+import { ThemeProvider } from 'styled-components';
+import { euiDarkVars } from '@kbn/ui-theme';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { DataQualityProvider, DataQualityProviderProps } from '../../data_quality_context';
 import { ResultsRollupContext } from '../../contexts/results_rollup_context';
@@ -72,7 +73,7 @@ const TestExternalProvidersComponent: React.FC<TestExternalProvidersProps> = ({ 
   return (
     <KibanaRenderContextProvider {...coreMock.createStart()}>
       <I18nProvider>
-        <EuiThemeProvider>
+      <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
           <QueryClientProvider client={queryClient}>
             <AssistantProvider
               actionTypeRegistry={actionTypeRegistry}
@@ -94,8 +95,8 @@ const TestExternalProvidersComponent: React.FC<TestExternalProvidersProps> = ({ 
               {children}
             </AssistantProvider>
           </QueryClientProvider>
-        </EuiThemeProvider>
-      </I18nProvider>
+          </ThemeProvider>
+          </I18nProvider>
     </KibanaRenderContextProvider>
   );
 };
