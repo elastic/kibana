@@ -14,6 +14,7 @@ import {
   EuiLink,
   EuiSwitch,
   EuiTitle,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
@@ -180,7 +181,7 @@ function StreamNode({
         esql: `FROM ${indexPatterns.join(', ')}`,
       },
     });
-  }, [discoverLocator, node.definition]);
+  }, [discoverLocator, node]);
 
   return (
     <EuiFlexGroup
@@ -242,28 +243,46 @@ function StreamNode({
           alignItems="center"
           gutterSize="s"
         >
-          <EuiButtonIcon
-            aria-label={i18n.translate('xpack.streams.streamsTable.openInNewTab', {
+          <EuiToolTip
+            content={i18n.translate('xpack.streams.streamsTable.openInNewTab', {
               defaultMessage: 'Open in new tab',
             })}
-            iconType="popout"
-            target="_blank"
-            href={router.link('/{key}', { path: { key: node.id } })}
-          />
-          <EuiButtonIcon
-            iconType="discoverApp"
-            href={discoverUrl}
-            aria-label={i18n.translate('xpack.streams.streamsTable.openInDiscover', {
+          >
+            <EuiButtonIcon
+              aria-label={i18n.translate('xpack.streams.streamsTable.openInNewTab', {
+                defaultMessage: 'Open in new tab',
+              })}
+              iconType="popout"
+              target="_blank"
+              href={router.link('/{key}', { path: { key: node.id } })}
+            />
+          </EuiToolTip>
+          <EuiToolTip
+            content={i18n.translate('xpack.streams.streamsTable.openInDiscover', {
               defaultMessage: 'Open in Discover',
             })}
-          />
-          <EuiButtonIcon
-            iconType="gear"
-            aria-label={i18n.translate('xpack.streams.streamsTable.management', {
+          >
+            <EuiButtonIcon
+              iconType="discoverApp"
+              href={discoverUrl}
+              aria-label={i18n.translate('xpack.streams.streamsTable.openInDiscover', {
+                defaultMessage: 'Open in Discover',
+              })}
+            />
+          </EuiToolTip>
+          <EuiToolTip
+            content={i18n.translate('xpack.streams.streamsTable.management', {
               defaultMessage: 'Management',
             })}
-            href={router.link('/{key}/management', { path: { key: node.id } })}
-          />
+          >
+            <EuiButtonIcon
+              iconType="gear"
+              aria-label={i18n.translate('xpack.streams.streamsTable.management', {
+                defaultMessage: 'Management',
+              })}
+              href={router.link('/{key}/management', { path: { key: node.id } })}
+            />
+          </EuiToolTip>
         </EuiFlexGroup>
       </EuiFlexGroup>
       {node.children.length > 0 && !collapsed?.[node.id] && (

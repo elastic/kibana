@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { ReadStreamDefinition, isIngestReadStream, isWiredReadStream } from '@kbn/streams-schema';
+import { StreamDefinition, isIngestStream, isWiredStream } from '@kbn/streams-schema';
 
-export function getIndexPatterns(definition: ReadStreamDefinition | undefined) {
+export function getIndexPatterns(definition: StreamDefinition | undefined) {
   if (!definition) {
     return undefined;
   }
-  if (!isWiredReadStream(definition) && isIngestReadStream(definition)) {
+  if (!isWiredStream(definition) && isIngestStream(definition)) {
     return [definition.name as string];
   }
   const isRoot = definition.name.indexOf('.') === -1;
