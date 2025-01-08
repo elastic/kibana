@@ -38,7 +38,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const retry = getService('retry');
 
   // Failing: See https://github.com/elastic/kibana/issues/205656
-  describe.skip('Knowledge base user instructions', function () {
+  describe('Knowledge base user instructions', function () {
     // TODO: https://github.com/elastic/kibana/issues/192751
     this.tags(['skipMKI']);
     let editorRoleAuthc: RoleCredentials;
