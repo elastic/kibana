@@ -15,7 +15,6 @@ import {
   CoreStart,
   KibanaRequest,
   Logger,
-  Plugin,
   PluginInitializerContext,
   SharedGlobalConfig,
   StartServicesAccessor,
@@ -124,7 +123,7 @@ export interface SearchRouteDependencies {
   globalConfig$: Observable<SharedGlobalConfig>;
 }
 
-export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
+export class SearchService {
   private readonly aggsService = new AggsService();
   private readonly searchSourceService = new SearchSourceService();
   private searchStrategies: StrategyMap = {};

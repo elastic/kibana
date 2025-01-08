@@ -130,6 +130,7 @@
     "@kbn/saved-search-component",
     "@kbn/saved-search-plugin",
     "@kbn/entityManager-plugin",
+    "@kbn/response-ops-rule-params"
   ],
   "exclude": ["target/**/*"]
 }
