@@ -9,7 +9,6 @@ import expect from '@kbn/expect';
 import { InventoryMetricConditions } from '@kbn/infra-plugin/common/alerting/metrics';
 import { InventoryItemType, SnapshotMetricType } from '@kbn/metrics-data-access-plugin/common';
 import { evaluateCondition } from '@kbn/infra-plugin/server/lib/alerting/inventory_metric_threshold/evaluate_condition';
-import { InfraSource } from '@kbn/infra-plugin/server/lib/sources';
 import { COMPARATORS } from '@kbn/alerting-comparators';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import { DATES } from './utils/constants';
@@ -30,46 +29,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     comparator: COMPARATORS.GREATER_THAN,
   };
 
-  const source: InfraSource = {
-    id: 'default',
-    origin: 'internal',
-    configuration: {
-      name: 'Default',
-      description: '',
-      logIndices: {
-        type: 'index_pattern',
-        indexPatternId: 'some-test-id',
-      },
-      metricAlias: 'metrics-*,metricbeat-*',
-      inventoryDefaultView: 'default',
-      metricsExplorerDefaultView: 'default',
-      anomalyThreshold: 70,
-      logColumns: [
-        {
-          timestampColumn: {
-            id: '5e7f964a-be8a-40d8-88d2-fbcfbdca0e2f',
-          },
-        },
-        {
-          fieldColumn: {
-            id: ' eb9777a8-fcd3-420e-ba7d-172fff6da7a2',
-            field: 'event.dataset',
-          },
-        },
-        {
-          messageColumn: {
-            id: 'b645d6da-824b-4723-9a2a-e8cece1645c0',
-          },
-        },
-      ],
-    },
-  };
-
   const baseOptions = {
     condition: baseCondition,
     nodeType: 'host' as InventoryItemType,
-    source,
-    metricIndices: 'metricbeat-*',
+    metricIndices: 'metrics-*,metricbeat-*',
     logIndices: '',
     compositeSize: 10000,
     executionTimestamp: new Date(DATES['8.0.0'].hosts_only.max),

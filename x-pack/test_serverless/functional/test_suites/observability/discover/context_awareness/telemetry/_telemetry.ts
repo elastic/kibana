@@ -155,11 +155,6 @@ export default function ({ getService, getPageObjects }: ObservabilityTelemetryF
 
         expect(events[1].properties).to.eql({
           contextLevel: 'dataSourceLevel',
-          profileId: 'default-data-source-profile',
-        });
-
-        expect(events[2].properties).to.eql({
-          contextLevel: 'dataSourceLevel',
           profileId: 'observability-logs-data-source-profile',
         });
 
@@ -173,7 +168,7 @@ export default function ({ getService, getPageObjects }: ObservabilityTelemetryF
           withTimeoutMs: 500,
         });
 
-        expect(events.length).to.be(3);
+        expect(events.length).to.be(2);
 
         // should detect a new data source profile when switching to a different data source
         await monacoEditor.setCodeEditorValue('from my-example-* | sort @timestamp desc');
@@ -208,7 +203,7 @@ export default function ({ getService, getPageObjects }: ObservabilityTelemetryF
           withTimeoutMs: 500,
         });
 
-        expect(events.length).to.be(3);
+        expect(events.length).to.be(2);
 
         // should trigger a new event after opening the doc viewer
         await dataGrid.clickRowToggle();

@@ -30,6 +30,14 @@ const params: RuleParams = {
   ],
 };
 
+const paramsWithReferenceName = {
+  ...params,
+  logView: {
+    ...params.logView,
+    logViewId: 'log-view-reference-0',
+  },
+};
+
 const brokenParams = {
   ...params,
   logView: {
@@ -50,7 +58,7 @@ describe('Log threshold references manager', () => {
   describe('extractReferences', () => {
     it('should return the extracted references and update the logViewId with reference name', () => {
       expect(extractReferences(params)).toEqual({
-        params,
+        params: paramsWithReferenceName,
         references,
       });
     });
@@ -65,12 +73,12 @@ describe('Log threshold references manager', () => {
 
   describe('injectReferences', () => {
     it('should return updated params with the matched reference id from the references list', () => {
-      expect(injectReferences(params, references)).toEqual(params);
+      expect(injectReferences(paramsWithReferenceName, references)).toEqual(params);
     });
 
     it('should throw an error if no reference match by name is found', () => {
       const invalidCaller = () =>
-        injectReferences(params, [
+        injectReferences(paramsWithReferenceName, [
           {
             name: 'random-name',
             type: 'infrastructure-monitoring-log-view',

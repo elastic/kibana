@@ -143,12 +143,13 @@ export const createInventoryMetricThresholdExecutor =
 
     const metricIndices = ruleDataView
       ? ruleDataView.getIndexPattern()
-      : metricDataView
+      : metricDataView && Object.keys(metricDataView).length !== 0
       ? metricDataView.getIndexPattern()
       : 'unknown-index';
+
     const logIndices = ruleDataView
       ? ruleDataView.getIndexPattern()
-      : logDataView
+      : logDataView && Object.keys(logDataView).length !== 0
       ? logDataView.getIndexPattern()
       : 'unknown-index';
 
