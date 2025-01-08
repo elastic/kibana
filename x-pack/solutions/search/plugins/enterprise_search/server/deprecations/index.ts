@@ -14,10 +14,12 @@ import { i18n } from '@kbn/i18n';
 import { Connector, fetchConnectors } from '@kbn/search-connectors';
 
 import { ConfigType } from '..';
+import {CloudSetup} from "@kbn/cloud-plugin/server";
 
 export const getRegisteredDeprecations = (
   config: ConfigType,
-  isCloud: boolean
+  cloud: CloudSetup,
+  docsUrl: string,
 ): RegisterDeprecationsConfig => {
   return {
     getDeprecations: async (ctx: GetDeprecationsContext) => {
@@ -27,9 +29,9 @@ export const getRegisteredDeprecations = (
         ctx.savedObjectsClient
       );
       return [
-        ...getEnterpriseSearchNodeDeprecation(config, isCloud),
-        ...(await getCrawlerDeprecations(ctx)),
-        ...(await getNativeConnectorDeprecations(ctx, hasAgentless, hasFleetServer)),
+        ...getEnterpriseSearchNodeDeprecation(config, cloud, docsUrl),
+        ...(await getCrawlerDeprecations(ctx, docsUrl)),
+        ...(await getNativeConnectorDeprecations(ctx, hasAgentless, hasFleetServer, cloud, docsUrl)),
       ];
     },
   };
@@ -41,15 +43,19 @@ export const getRegisteredDeprecations = (
  */
 export function getEnterpriseSearchNodeDeprecation(
   config: ConfigType,
-  isCloud: boolean
+  cloud: CloudSetup,
+  docsUrl: string,
 ): DeprecationsDetails[] {
   if (config.host) {
     const steps = [];
+    let addendum: string = "";
+    const isCloud = !!cloud?.cloudId;
     if (isCloud) {
       steps.push(
         ...[
           i18n.translate('xpack.enterpriseSearch.deprecations.entsearchhost.gotocloud', {
-            defaultMessage: 'Go to cloud.elastic.co',
+            values: { baseUrl: cloud.baseUrl },
+            defaultMessage: 'Go to {baseUrl}',
           }),
           i18n.translate('xpack.enterpriseSearch.deprecations.entsearchhost.clickedit', {
             defaultMessage: "Click the 'Edit' tab",
@@ -68,6 +74,7 @@ export function getEnterpriseSearchNodeDeprecation(
           }),
         ]
       );
+      addendum = `\n\n[Click here to manage your deployment](${cloud.baseUrl + '/deployments/' + cloud.deploymentId}).`
     } else {
       steps.push(
         ...[
@@ -93,16 +100,22 @@ export function getEnterpriseSearchNodeDeprecation(
         title: i18n.translate('xpack.enterpriseSearch.deprecations.entsearchhost.title', {
           defaultMessage: 'Enterprise Search host(s) must be removed',
         }),
-        message: i18n.translate('xpack.enterpriseSearch.deprecations.entsearchhost.message', {
-          defaultMessage:
-            'Enterprise Search is not supported in versions >= 9.x. ' +
-            'You must remove any Enterprise Search nodes from your deployment to proceed with the upgrade. ' +
-            'Note that once Enterprise Search is stopped, products such as App Search, Workplace Search, and Elastic Crawler ' +
-            'will cease to operate. Native Connectors will also stop running syncs until the 9.x upgrade is completed. ' +
-            'For full details, see the documentation.',
-        }),
-        documentationUrl:
-          'https://elastic.co/guide/en/enterprise-search/current/upgrading-to-9-x.html',
+        message: {
+          type: "markdown",
+          content: i18n.translate('xpack.enterpriseSearch.deprecations.entsearchhost.message', {
+            defaultMessage:
+              'Enterprise Search is not supported in versions >= 9.x.\n\n' +
+              'Please note the following:\n' +
+              '- You must remove any Enterprise Search nodes from your deployment to proceed with the upgrade.\n' +
+              '- Once Enterprise Search is stopped, products such as App Search, Workplace Search, and Elastic Crawler ' +
+              'will cease to operate.\n' +
+              '- Native Connectors will also stop running syncs until the 9.x upgrade is completed.\n\n' +
+              'For full details, see the documentation.' +
+              addendum
+            ,
+          })
+        },
+        documentationUrl: docsUrl,
         correctiveActions: {
           manualSteps: steps,
         },
@@ -117,7 +130,8 @@ export function getEnterpriseSearchNodeDeprecation(
  * if the customer was using Elastic Crawler, they must delete the connector records
  */
 export async function getCrawlerDeprecations(
-  ctx: GetDeprecationsContext
+  ctx: GetDeprecationsContext,
+  docsUrl: string,
 ): Promise<DeprecationsDetails[]> {
   const client = ctx.esClient.asInternalUser;
   const crawlers: Connector[] = await fetchConnectors(client, undefined, true, undefined);
@@ -132,14 +146,16 @@ export async function getCrawlerDeprecations(
           defaultMessage:
             'Elastic Crawler metadata records in the `.elastic-connectors` index must be removed.',
         }),
-        message: i18n.translate('xpack.enterpriseSearch.deprecations.crawler.message', {
-          defaultMessage:
-            'Enterprise Search, including Elastic Crawler, is not supported in versions >= 9.x. ' +
-            'In order to upgrade Native Connectors, metadata records in the `.elastic-connectors` index specific to ' +
-            'Elastic Crawler must be removed. For full details, see the documentation.',
-        }),
-        documentationUrl:
-          'https://elastic.co/guide/en/enterprise-search/current/upgrading-to-9-x.html',
+        message: {
+          type: "markdown",
+          content: i18n.translate('xpack.enterpriseSearch.deprecations.crawler.message', {
+            defaultMessage:
+              'Enterprise Search, including Elastic Crawler, is not supported in versions >= 9.x.\n\n' +
+              'In order to upgrade Native Connectors, metadata records in the `.elastic-connectors` index specific to ' +
+              'Elastic Crawler must be removed. For full details, see the documentation. '
+          })
+        },
+        documentationUrl: docsUrl,
         correctiveActions: {
           manualSteps: [
             i18n.translate('xpack.enterpriseSearch.deprecations.crawler.listConnectors', {
@@ -170,7 +186,9 @@ export async function getCrawlerDeprecations(
 export async function getNativeConnectorDeprecations(
   ctx: GetDeprecationsContext,
   hasAgentless: boolean,
-  hasFleetServer: boolean
+  hasFleetServer: boolean,
+  cloud: CloudSetup,
+  docsUrl: string,
 ): Promise<DeprecationsDetails[]> {
   const client = ctx.esClient.asInternalUser;
   const connectors: Connector[] = await fetchConnectors(client, undefined, false, undefined);
@@ -191,14 +209,16 @@ export async function getNativeConnectorDeprecations(
           defaultMessage:
             'Connectors with `is_native: true` are not supported in self-managed environments',
         }),
-        message: i18n.translate('xpack.enterpriseSearch.deprecations.notManaged.message', {
-          defaultMessage:
-            '"Native Connectors" are managed services in Elastic-managed environments such as Elastic Cloud Hosted and ' +
-            'Elastic Serverless. Any connectors with `is_native: true` must be converted to connector clients or deleted ' +
-            'before this upgrade can proceed.',
-        }),
-        documentationUrl:
-          'https://elastic.co/guide/en/enterprise-search/current/upgrading-to-9-x.html',
+        message: {
+          type: 'markdown',
+          content: i18n.translate('xpack.enterpriseSearch.deprecations.notManaged.message', {
+            defaultMessage:
+              '"Native Connectors" are managed services in Elastic-managed environments such as Elastic Cloud Hosted and ' +
+              'Elastic Serverless. Any connectors with `is_native: true` must be converted to connector clients or deleted ' +
+              'before this upgrade can proceed.',
+          })
+        },
+        documentationUrl: docsUrl,
         correctiveActions: {
           manualSteps: [
             i18n.translate('xpack.enterpriseSearch.deprecations.notManaged.listConnectors', {
@@ -246,7 +266,7 @@ export async function getNativeConnectorDeprecations(
         'microsoft_teams',
         'zoom',
       ];
-      const nativeTypesStr = '[' + nativeServiceTypes.join(', ') + ']';
+      const nativeTypesStr = '- `' + nativeServiceTypes.join('`\n- `') + '`\n\n';
       const fauxNativeConnectors = nativeConnectors.filter(
         (hit) => !nativeServiceTypes.includes(hit.service_type!)
       );
@@ -257,22 +277,24 @@ export async function getNativeConnectorDeprecations(
           level: 'critical',
           deprecationType: 'feature',
           title: i18n.translate('xpack.enterpriseSearch.deprecations.fauxNativeConnector.title', {
-            defaultMessage: 'Connectors with `is_native: true` must be of supported service types',
+            defaultMessage: 'Native connectors must be of supported service types',
           }),
-          message: i18n.translate(
-            'xpack.enterpriseSearch.deprecations.fauxNativeConnector.message',
-            {
-              values: { serviceTypes: nativeTypesStr },
-              defaultMessage:
-                'Not all service types are supported by Elastic-managed connectors. ' +
-                'The following service types are supported for Elastic-managed connectors: {serviceTypes}' +
-                'Unsupported service types must be converted to Connector Clients before upgrading. ' +
-                'This is a lossless operation, and can be attempted with "quick resolve". ' +
-                'Alternatively, deleting these connectors with mismatched service types will also unblock your upgrade.',
-            }
-          ),
-          documentationUrl:
-            'https://elastic.co/guide/en/enterprise-search/current/upgrading-to-9-x.html',
+          message:{
+            type: 'markdown',
+            content: i18n.translate(
+              'xpack.enterpriseSearch.deprecations.fauxNativeConnector.message',
+              {
+                values: { serviceTypes: nativeTypesStr },
+                defaultMessage:
+                  'Not all service types are supported by Elastic-managed connectors.\n\n' +
+                  'The following service types are supported for Elastic-managed connectors:\n' +
+                  '{serviceTypes}' +
+                  'Unsupported service types must be converted to Connector Clients before upgrading. ' +
+                  'This is a lossless operation, and can be attempted with "quick resolve".\n\n' +
+                  'Alternatively, deleting these connectors with mismatched service types will also unblock your upgrade.',
+              })
+          },
+          documentationUrl: docsUrl,
           correctiveActions: {
             manualSteps: [
               i18n.translate(
@@ -312,16 +334,22 @@ export async function getNativeConnectorDeprecations(
               defaultMessage: 'Integration Server must be provisioned',
             }
           ),
-          message: i18n.translate(
-            'xpack.enterpriseSearch.deprecations.missingIntegrationServer.message',
-            {
-              defaultMessage:
-                'In versions >= 9.x, Elastic-managed connectors are run through the Elastic Integrations ecosystem.  ' +
-                'This requires the Integration Server to be present in your deployment. For full details, see the documentation.',
-            }
-          ),
-          documentationUrl:
-            'https://elastic.co/guide/en/enterprise-search/current/upgrading-to-9-x.html',
+          message:{
+            type: 'markdown',
+            content: i18n.translate(
+              'xpack.enterpriseSearch.deprecations.missingIntegrationServer.message',
+              {
+                defaultMessage:
+                  'In versions >= 9.x, Elastic-managed connectors are run through the Elastic Integrations ecosystem. ' +
+                  'This requires the Integration Server to be present in your deployment.\n\n' +
+                  'For full details, see the documentation.' +
+                  `\n\n[Click here to manage your deployment](${cloud.baseUrl + '/deployments/' + cloud.deploymentId}).`
+
+                ,
+              }
+            )
+          },
+          documentationUrl: docsUrl,
           correctiveActions: {
             manualSteps: [
               i18n.translate(

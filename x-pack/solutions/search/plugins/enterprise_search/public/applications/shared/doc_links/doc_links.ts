@@ -114,6 +114,7 @@ class DocLinks {
   public enterpriseSearchEngines: string;
   public enterpriseSearchMailService: string;
   public enterpriseSearchTroubleshootSetup: string;
+  public enterpriseSearchUpgrade9x: string;
   public enterpriseSearchUsersAccess: string;
   public indexApi: string;
   public inferenceApiCreate: string;
@@ -297,6 +298,7 @@ class DocLinks {
     this.enterpriseSearchEngines = '';
     this.enterpriseSearchMailService = '';
     this.enterpriseSearchTroubleshootSetup = '';
+    this.enterpriseSearchUpgrade9x = '';
     this.enterpriseSearchUsersAccess = '';
     this.indexApi = '';
     this.inferenceApiCreate = '';
@@ -482,6 +484,7 @@ class DocLinks {
     this.enterpriseSearchEngines = docLinks.links.enterpriseSearch.engines;
     this.enterpriseSearchMailService = docLinks.links.enterpriseSearch.mailService;
     this.enterpriseSearchTroubleshootSetup = docLinks.links.enterpriseSearch.troubleshootSetup;
+    this.enterpriseSearchUpgrade9x = docLinks.links.enterpriseSearch.upgrade9x;
     this.enterpriseSearchUsersAccess = docLinks.links.enterpriseSearch.usersAccess;
     this.indexApi = docLinks.links.enterpriseSearch.indexApi;
     this.inferenceApiCreate = docLinks.links.enterpriseSearch.inferenceApiCreate;

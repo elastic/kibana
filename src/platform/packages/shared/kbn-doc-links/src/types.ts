@@ -194,6 +194,7 @@ export interface DocLinks {
     readonly trainedModels: string;
     readonly textEmbedding: string;
     readonly troubleshootSetup: string;
+    readonly upgrade9x: string;
     readonly usersAccess: string;
   };
   readonly workplaceSearch: {

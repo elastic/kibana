@@ -161,6 +161,7 @@ export class EnterpriseSearchPlugin implements Plugin<void, void, PluginsSetup, 
       savedObjects,
       getStartServices,
       uiSettings,
+      docLinks,
     }: CoreSetup<PluginsStart>,
     {
       usageCollection,
@@ -449,7 +450,7 @@ export class EnterpriseSearchPlugin implements Plugin<void, void, PluginsSetup, 
      * Register deprecations
      */
     registerDeprecationRoutes(dependencies);
-    deprecations.registerDeprecations(getRegisteredDeprecations(config, isCloud));
+    deprecations.registerDeprecations(getRegisteredDeprecations(config, cloud, docLinks.links.enterpriseSearch.upgrade9x));
   }
 
   public start() {}

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import {CloudSetup} from "@kbn/cloud-plugin/server";
+
 let mockedFetchConnectors = jest.fn();
 jest.mock('@kbn/search-connectors', () => {
   return {
@@ -30,10 +32,13 @@ const ctx = {
     asInternalUser: {},
   },
 } as GetDeprecationsContext;
+const cloud = { baseUrl: 'cloud.elastic.co', deploymentId: '123', cloudId: 'abc' } as CloudSetup;
+const notCloud = {} as CloudSetup
+const docsUrl = 'example.com'
 describe('Enterprise Search node deprecation', () => {
   it('Tells you to remove capacity if running on cloud', () => {
     const config = { host: 'example.com' } as ConfigType;
-    const deprecations = getEnterpriseSearchNodeDeprecation(config, true);
+    const deprecations = getEnterpriseSearchNodeDeprecation(config, cloud, docsUrl);
     expect(deprecations).toHaveLength(1);
     const steps = deprecations[0].correctiveActions.manualSteps;
     expect(steps).toHaveLength(6);
@@ -44,7 +49,7 @@ describe('Enterprise Search node deprecation', () => {
 
   it('Tells you to remove the config if running self-managed', () => {
     const config = { host: 'example.com' } as ConfigType;
-    const deprecations = getEnterpriseSearchNodeDeprecation(config, false);
+    const deprecations = getEnterpriseSearchNodeDeprecation(config, notCloud, docsUrl);
     expect(deprecations).toHaveLength(1);
     const steps = deprecations[0].correctiveActions.manualSteps;
     expect(steps).toHaveLength(4);
@@ -55,7 +60,7 @@ describe('Enterprise Search node deprecation', () => {
 
   it('Has no deprecations if Enterprise Search is not there', () => {
     const config = {} as ConfigType;
-    const deprecations = getEnterpriseSearchNodeDeprecation(config, true);
+    const deprecations = getEnterpriseSearchNodeDeprecation(config, cloud, docsUrl);
     expect(deprecations).toHaveLength(0);
   });
 });
@@ -88,7 +93,7 @@ describe('Native connector deprecations', () => {
       is_native: false,
     } as Connector;
     mockedFetchConnectors = jest.fn().mockResolvedValue([connectorClient]);
-    const deprecations = await getNativeConnectorDeprecations(ctx, true, true);
+    const deprecations = await getNativeConnectorDeprecations(ctx, true, true, cloud, docsUrl);
     expect(deprecations).toHaveLength(0);
   });
 
@@ -99,7 +104,7 @@ describe('Native connector deprecations', () => {
       service_type: 'fake',
     } as Connector;
     mockedFetchConnectors = jest.fn().mockResolvedValue([nativeConnector]);
-    const deprecations = await getNativeConnectorDeprecations(ctx, true, true);
+    const deprecations = await getNativeConnectorDeprecations(ctx, true, true, cloud, docsUrl);
     expect(deprecations).toHaveLength(1);
     expect(deprecations[0].correctiveActions.api?.path).toStrictEqual(
       '/internal/enterprise_search/deprecations/convert_connectors_to_client'
@@ -116,13 +121,13 @@ describe('Native connector deprecations', () => {
     } as Connector;
     const hasAgentless = false;
     mockedFetchConnectors = jest.fn().mockResolvedValue([nativeConnector]);
-    const deprecations = await getNativeConnectorDeprecations(ctx, hasAgentless, true);
+    const deprecations = await getNativeConnectorDeprecations(ctx, hasAgentless, true, notCloud, docsUrl);
     expect(deprecations).toHaveLength(1);
     expect(deprecations[0].correctiveActions.api?.path).toStrictEqual(
       '/internal/enterprise_search/deprecations/convert_connectors_to_client'
     );
     expect(deprecations[0].correctiveActions.api?.body).toStrictEqual({ ids: ['foo'] });
-    expect(deprecations[0].title).toMatch('only allowed in Elastic-managed environments');
+    expect(deprecations[0].title).toMatch('not supported in self-managed environments');
   });
 
   it('Does not allow native connector upgrades without fleet server', async () => {
@@ -133,7 +138,7 @@ describe('Native connector deprecations', () => {
     } as Connector;
     const hasFleetServer = false;
     mockedFetchConnectors = jest.fn().mockResolvedValue([nativeConnector]);
-    const deprecations = await getNativeConnectorDeprecations(ctx, true, hasFleetServer);
+    const deprecations = await getNativeConnectorDeprecations(ctx, true, hasFleetServer, cloud, docsUrl);
     expect(deprecations).toHaveLength(1);
     expect(deprecations[0].title).toMatch('Integration Server must be provisioned');
   });
@@ -154,13 +159,13 @@ describe('Native connector deprecations', () => {
     const hasAgentless = false;
     const hasFleetServer = false;
     mockedFetchConnectors = jest.fn().mockResolvedValue(connectors);
-    const deprecations = await getNativeConnectorDeprecations(ctx, hasAgentless, hasFleetServer);
+    const deprecations = await getNativeConnectorDeprecations(ctx, hasAgentless, hasFleetServer, notCloud, docsUrl);
     expect(deprecations).toHaveLength(1);
     expect(deprecations[0].correctiveActions.api?.path).toStrictEqual(
       '/internal/enterprise_search/deprecations/convert_connectors_to_client'
     );
     expect(deprecations[0].correctiveActions.api?.body).toStrictEqual({ ids: ['foo', 'bar'] });
-    expect(deprecations[0].title).toMatch('only allowed in Elastic-managed environments');
+    expect(deprecations[0].title).toMatch('not supported in self-managed environments');
   });
 
   it('can register both fleet server missing and bad service types together', async () => {
@@ -179,7 +184,7 @@ describe('Native connector deprecations', () => {
     const hasAgentless = true;
     const hasFleetServer = false;
     mockedFetchConnectors = jest.fn().mockResolvedValue(connectors);
-    const deprecations = await getNativeConnectorDeprecations(ctx, hasAgentless, hasFleetServer);
+    const deprecations = await getNativeConnectorDeprecations(ctx, hasAgentless, hasFleetServer, cloud, docsUrl);
     expect(deprecations).toHaveLength(2);
     expect(deprecations[0].correctiveActions.api?.path).toStrictEqual(
       '/internal/enterprise_search/deprecations/convert_connectors_to_client'
