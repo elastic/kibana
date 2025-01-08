@@ -482,7 +482,7 @@ export class SessionIndex {
     logger.debug('Running cleanup routine.');
 
     const indexStats = await this.options.elasticsearchClient.indices.stats();
-    console.log({ indexStats });
+
     const securityIndexShardsExist = indexStats._shards.total > 0;
 
     let error: Error | undefined;
