@@ -18,8 +18,8 @@ export const GridHeightSmoother = ({
 }: PropsWithChildren<{ gridLayoutStateManager: GridLayoutStateManager }>) => {
   // set the parent div size directly to smooth out height changes.
   const smoothHeightRef = useRef<HTMLDivElement | null>(null);
-  // set up global CSS variables
-  const [cssVariables, setCssVariables] = useState<string>('');
+  // the global CSS variables are currently only used for gutter size, but could be used for column count, etc.
+  const [globalCssVariables, setGlobalCssVariables] = useState<string>('');
 
   useEffect(() => {
     const interactionStyleSubscription = combineLatest([
@@ -57,19 +57,19 @@ export const GridHeightSmoother = ({
       }
     );
 
-    const defineCssVariablesSubscription = gridLayoutStateManager.runtimeSettings$
+    const globalCssVariableSubscription = gridLayoutStateManager.runtimeSettings$
       .pipe(
         map(({ gutterSize }) => gutterSize),
         distinctUntilChanged()
       )
       .subscribe((gutterSize) => {
-        setCssVariables(`--kbnGridGutterSize: ${gutterSize}px;`);
+        setGlobalCssVariables(`--kbnGridGutterSize: ${gutterSize}px;`);
       });
 
     return () => {
       interactionStyleSubscription.unsubscribe();
       expandedPanelSubscription.unsubscribe();
-      defineCssVariablesSubscription.unsubscribe();
+      globalCssVariableSubscription.unsubscribe();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -79,7 +79,7 @@ export const GridHeightSmoother = ({
       ref={smoothHeightRef}
       className={'kbnGridWrapper'}
       css={css`
-        ${cssVariables}
+        ${globalCssVariables}
 
         margin: var(--kbnGridGutterSize);
         overflow-anchor: none;
