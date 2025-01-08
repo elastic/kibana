@@ -3,7 +3,9 @@
     "actionTypeId",
     "name"
   ],
-  "action_task_params": [],
+  "action_task_params": [
+    "apiKeyId"
+  ],
   "ad_hoc_run_params": [
     "apiKeyId",
     "createdAt",
@@ -1104,6 +1106,7 @@
     "enabled",
     "ownerId",
     "partition",
+    "priority",
     "retryAt",
     "runAt",
     "schedule",

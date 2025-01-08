@@ -6,7 +6,7 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { Meta } from '@storybook/react';
+import type { Meta } from '@storybook/react';
 import React from 'react';
 import { FrameType } from '@kbn/profiling-utils';
 import { MockProfilingDependenciesStorybook } from '../contexts/profiling_dependencies/mock_profiling_dependencies_storybook';

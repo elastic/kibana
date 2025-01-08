@@ -21,14 +21,11 @@ import {
   EuiImage,
   EuiCallOut,
 } from '@elastic/eui';
-import {
-  AllDatasetsLocatorParams,
-  ALL_DATASETS_LOCATOR_ID,
-} from '@kbn/deeplinks-observability/locators';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { type LogsLocatorParams, LOGS_LOCATOR_ID } from '@kbn/logs-shared-plugin/common';
 import { ObservabilityOnboardingAppServices } from '../../..';
 import { useFetcher } from '../../../hooks/use_fetcher';
 import { MultiIntegrationInstallBanner } from './multi_integration_install_banner';
@@ -73,19 +70,15 @@ export const OtelLogsPanel: React.FC = () => {
     isServerless && setup ? setup.elasticAgentVersionInfo.agentVersion : stackVersion;
   const urlEncodedAgentVersion = encodeURIComponent(agentVersion);
 
-  const allDatasetsLocator =
-    share.url.locators.get<AllDatasetsLocatorParams>(ALL_DATASETS_LOCATOR_ID);
-
+  const logsLocator = share.url.locators.get<LogsLocatorParams>(LOGS_LOCATOR_ID);
   const hostsLocator = share.url.locators.get('HOSTS_LOCATOR');
 
   const [{ value: deeplinks }, getDeeplinks] = useAsyncFn(async () => {
     return {
-      logs: allDatasetsLocator?.getRedirectUrl({
-        type: 'logs',
-      }),
+      logs: logsLocator?.getRedirectUrl({}),
       metrics: hostsLocator?.getRedirectUrl({}),
     };
-  }, [allDatasetsLocator]);
+  }, [logsLocator]);
 
   useEffect(() => {
     getDeeplinks();
@@ -280,7 +273,7 @@ rm ./otel.yml && cp ./otel_samples/platformlogs_hostmetrics.yml ./otel.yml && mk
                                 {i18n.translate(
                                   'xpack.observability_onboarding.otelLogsPanel.exploreLogs',
                                   {
-                                    defaultMessage: 'Open Logs Explorer',
+                                    defaultMessage: 'Explore logs',
                                   }
                                 )}
                               </EuiLink>

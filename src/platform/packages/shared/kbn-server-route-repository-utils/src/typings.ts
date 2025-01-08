@@ -247,7 +247,7 @@ type DecodedRequestParamsOfType<TRouteParamsRT extends RouteParamsRT> =
     : never;
 
 export type EndpointOf<TServerRouteRepository extends ServerRouteRepository> =
-  keyof TServerRouteRepository;
+  keyof TServerRouteRepository & string;
 
 export type ReturnOf<
   TServerRouteRepository extends ServerRouteRepository,
