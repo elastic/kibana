@@ -52,13 +52,13 @@ export const EDIT = i18n.translate(
 export const READONLY_MODE = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.upgradeRules.readonlyMode',
   {
-    defaultMessage: 'Readonly mode',
+    defaultMessage: 'Field view',
   }
 );
 
 export const EDIT_MODE = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.upgradeRules.editMode',
   {
-    defaultMessage: 'Edit mode',
+    defaultMessage: 'Field editing view',
   }
 );
