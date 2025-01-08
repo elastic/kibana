@@ -22,9 +22,9 @@ import {
   EuiTabbedContent,
 } from '@elastic/eui';
 import numeral from '@elastic/numeral';
-import styled from '@emotion/styled';
 import { isEmpty } from 'lodash';
 import type { EsQuerySnapshot } from '@kbn/alerting-types';
+import { css } from '@emotion/react';
 import * as i18n from '../translations';
 
 export interface ModalInspectProps {
@@ -48,19 +48,6 @@ interface Response {
   aggregations: Record<string, unknown>;
 }
 
-const MyEuiModal = styled(EuiModal)`
-  width: min(768px, calc(100vw - 16px));
-  min-height: 41vh;
-  .euiModal__flex {
-    width: 60vw;
-  }
-  .euiCodeBlock {
-    height: auto !important;
-    max-width: 718px;
-  }
-`;
-
-MyEuiModal.displayName = 'MyEuiModal';
 const parse = function <T>(str: string): T {
   try {
     return JSON.parse(str);
@@ -192,7 +179,21 @@ const AlertsQueryInspectorModalComponent = ({
   ];
 
   return (
-    <MyEuiModal onClose={closeModal} data-test-subj="modal-inspect-euiModal">
+    <EuiModal
+      onClose={closeModal}
+      data-test-subj="modal-inspect-euiModal"
+      css={css`
+        width: min(768px, calc(100vw - 16px));
+        min-height: 41vh;
+        .euiModal__flex {
+          width: 60vw;
+        }
+        .euiCodeBlock {
+          height: auto !important;
+          max-width: 718px;
+        }
+      `}
+    >
       <EuiModalHeader>
         <EuiModalHeaderTitle>
           {i18n.INSPECT} {title}
@@ -208,7 +209,7 @@ const AlertsQueryInspectorModalComponent = ({
           {i18n.CLOSE}
         </EuiButton>
       </EuiModalFooter>
-    </MyEuiModal>
+    </EuiModal>
   );
 };
 

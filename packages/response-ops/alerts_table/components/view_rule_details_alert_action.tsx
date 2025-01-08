@@ -11,15 +11,8 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiContextMenuItem } from '@elastic/eui';
 import { ALERT_RULE_UUID } from '@kbn/rule-data-utils';
-import styled from '@emotion/styled';
 import type { AdditionalContext, AlertActionsProps } from '../types';
 import { typedMemo } from '../utils/react';
-
-const MenuItem = styled(EuiContextMenuItem)`
-  &:hover {
-    text-decoration: underline;
-  }
-`;
 
 /**
  * Alerts table row action to open the rule to which the selected alert is associated
@@ -44,11 +37,16 @@ export const ViewRuleDetailsAlertAction = typedMemo(
     }
 
     return (
-      <MenuItem data-test-subj="viewRuleDetails" key="viewRuleDetails" href={linkToRule} size="s">
+      <EuiContextMenuItem
+        data-test-subj="viewRuleDetails"
+        key="viewRuleDetails"
+        href={linkToRule}
+        size="s"
+      >
         {i18n.translate('xpack.triggersActionsUI.alertsTable.viewRuleDetails', {
           defaultMessage: 'View rule details',
         })}
-      </MenuItem>
+      </EuiContextMenuItem>
     );
   }
 );
