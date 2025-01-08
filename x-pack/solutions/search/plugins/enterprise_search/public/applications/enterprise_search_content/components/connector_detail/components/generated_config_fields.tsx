@@ -106,14 +106,13 @@ export const GeneratedConfigFields: React.FC<GeneratedConfigFieldsProps> = ({
   const SearchIndicesLinkProps = useMemo(() => {
     const props = {
       target: '_blank',
-      external: true,
     };
     if (searchIndexDetailsUrl) {
       return {
         ...props,
         href: searchIndexDetailsUrl,
         onClick: async (event: React.MouseEvent<HTMLAnchorElement>) => {
-          event.preventDefault();
+          event.stopImmediatePropagation();
           navigateToUrl(searchIndexDetailsUrl, {
             shouldNotCreateHref: true,
             shouldNotPrepend: true,
@@ -122,8 +121,8 @@ export const GeneratedConfigFields: React.FC<GeneratedConfigFieldsProps> = ({
       };
     } else {
       return {
+        ...props,
         disabled: true,
-        target: undefined,
       };
     }
   }, [navigateToUrl, searchIndexDetailsUrl]);
