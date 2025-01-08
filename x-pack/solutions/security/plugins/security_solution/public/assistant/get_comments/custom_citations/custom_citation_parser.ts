@@ -15,6 +15,7 @@ export interface CustomCitationNode extends Node {
   citationLink: string;
   citationLable: string;
   citationNumber?: number;
+  incomplete?: boolean
 }
 
 const START_SIGNAL = '!{citation';
@@ -33,6 +34,8 @@ export const CustomCitationParser: Plugin = function CustomCitationParser() {
     silent
   ) {
     if (value.startsWith(START_SIGNAL) === false) return false;
+    
+    if(value.includes('\n')) return false
 
     const nextChar = value[START_SIGNAL.length];
 
@@ -84,14 +87,23 @@ export const CustomCitationParser: Plugin = function CustomCitationParser() {
       });
     }
 
-    if (!citationLink || !citationLabel) return false;
-
     if (silent) {
       return true;
     }
 
     now.column += START_SIGNAL.length + 1;
     now.offset += START_SIGNAL.length + 1;
+
+    if (!citationLink || !citationLabel) {
+      // Partial citation
+      return eat(value)({
+        type: 'customCitation',
+        citationLink,
+        citationLable: citationLabel,
+        citationNumber: citationNumber++,
+        incomplete: true
+      } as CustomCitationNode);
+    };
 
     const citationElement: CitationElement = `!{citation[${citationLabel}](${citationLink})}`;
 

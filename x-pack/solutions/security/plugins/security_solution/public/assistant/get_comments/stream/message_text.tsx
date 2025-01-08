@@ -116,7 +116,8 @@ const getPluginDependencies = () => {
         <CustomCitation
           citationLable={props.citationLable}
           citationNumber={props.citationNumber}
-          citationUrl={props.citationLink}
+          citationLink={props.citationLink}
+          incomplete={props.incomplete}
         />
       );
     },
@@ -165,7 +166,7 @@ export function MessageText({ loading, content, index, 'data-test-subj': dataTes
     overflow-wrap: anywhere;
   `;
 
-  const { parsingPluginList, processingPluginList } = getPluginDependencies();
+  const { parsingPluginList, processingPluginList } = getPluginDependencies()
 
   return (
     <EuiText className={containerClassName} data-test-subj={dataTestSubj}>

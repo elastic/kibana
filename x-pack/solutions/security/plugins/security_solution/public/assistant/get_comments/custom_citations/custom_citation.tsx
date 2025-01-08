@@ -5,55 +5,71 @@
  * 2.0.
  */
 
-import { EuiButtonEmpty, EuiLink, EuiPopover } from '@elastic/eui';
+import { EuiButtonEmpty, EuiLink, EuiLoadingSpinner, EuiPopover } from '@elastic/eui';
 import React, { useState } from 'react';
+import { CustomCitationNode } from './custom_citation_parser';
 
-interface CustomCitationProps {
-  citationLable: string;
-  citationUrl: string;
-  citationNumber: number;
-}
+type CustomCitationProps = Pick<CustomCitationNode, "citationLable" | 'citationLink' | 'citationNumber' | 'incomplete'>
 
-export const CustomCitation: React.FC<CustomCitationProps> = ({
-  citationLable,
-  citationUrl,
-  citationNumber,
+export const CustomCitation: React.FC<CustomCitationProps> = React.memo(({
+    citationLable,
+    citationLink,
+    citationNumber,
+    incomplete,
 }) => {
-  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+    const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
-  const togglePopover = () => setIsPopoverOpen((prev) => !prev);
-  const closePopover = () => setIsPopoverOpen(false);
-  const openPopover = () => setIsPopoverOpen(true);
+    const togglePopover = () => setIsPopoverOpen((prev) => !prev);
+    const closePopover = () => setIsPopoverOpen(false);
+    const openPopover = () => setIsPopoverOpen(true);
 
-  const button = (
-    <EuiButtonEmpty
-      onClick={togglePopover}
-      onMouseEnter={openPopover}
-      size="xs"
-      style={{
-        padding: 0,
-      }}
-      contentProps={{
-        style: {
-          alignItems: 'start',
-        },
-      }}
-    >
-      <sup>{`[${citationNumber}]`}</sup>
-    </EuiButtonEmpty>
-  );
+    if (incomplete) {
+        return <EuiButtonEmpty
+            size="xs"
+            style={{
+                padding: 0,
+            }}
+            contentProps={{
+                style: {
+                    alignItems: 'start',
+                },
+            }}
+        >
+            <sup>{`[...]`}</sup>
+        </EuiButtonEmpty>
+    }
 
-  return (
-    <EuiPopover
-      button={button}
-      isOpen={isPopoverOpen}
-      closePopover={closePopover}
-      onMouseLeave={closePopover}
-      anchorPosition="upCenter"
-    >
-      <EuiLink href={citationUrl} target="_blank">
-        {citationLable}
-      </EuiLink>
-    </EuiPopover>
-  );
-};
+    const button = (
+        <EuiButtonEmpty
+            onClick={togglePopover}
+            onMouseEnter={openPopover}
+            size="xs"
+            style={{
+                padding: 0,
+            }}
+            contentProps={{
+                style: {
+                    alignItems: 'start',
+                },
+            }}
+        >
+            <sup>{`[${citationNumber}]`}</sup>
+        </EuiButtonEmpty>
+    );
+
+    return (
+        <EuiPopover
+            button={button}
+            isOpen={isPopoverOpen}
+            closePopover={closePopover}
+            onMouseLeave={closePopover}
+            anchorPosition="upCenter"
+        >
+            <EuiLink href={citationLink} target="_blank">
+                {citationLable}
+            </EuiLink>
+        </EuiPopover>
+    );
+}, (prevProps, nextProps) => {
+    return prevProps.incomplete === nextProps.incomplete;
+});

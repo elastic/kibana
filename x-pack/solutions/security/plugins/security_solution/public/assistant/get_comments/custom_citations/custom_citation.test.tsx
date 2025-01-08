@@ -15,7 +15,7 @@ describe('CustomCitation', () => {
     render(
       <CustomCitation
         citationLable={'exampleLable'}
-        citationUrl={'/example/link'}
+        citationLink={'/example/link'}
         citationNumber={5}
       />
     );
