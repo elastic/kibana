@@ -16,6 +16,9 @@ import { contextServiceMock } from '@kbn/core-http-context-server-mocks';
 import { ensureRawRequest } from '@kbn/core-http-router-server-internal';
 import { HttpService } from '@kbn/core-http-server-internal';
 import { createHttpService } from '@kbn/core-http-server-mocks';
+import { Env } from '@kbn/config';
+import { REPO_ROOT } from '@kbn/repo-info';
+import { getEnvOptions } from '@kbn/config-mocks';
 
 let server: HttpService;
 
@@ -27,6 +30,8 @@ const setupDeps = {
   context: contextSetup,
   executionContext: executionContextServiceMock.createInternalSetupContract(),
 };
+
+const kibanaVersion = Env.createDefault(REPO_ROOT, getEnvOptions()).packageInfo.version;
 
 beforeEach(async () => {
   logger = loggingSystemMock.create();
@@ -1500,6 +1505,62 @@ describe('runs with default preResponse handlers', () => {
     expect(response.header['content-security-policy-report-only']).toBe(
       `form-action 'report-sample' 'self'`
     );
+  });
+});
+
+describe('runs with default preResponse deprecation handlers', () => {
+  it('should handle a deprecated route and include deprecation warning headers', async () => {
+    const { server: innerServer, createRouter } = await server.setup(setupDeps);
+    const router = createRouter('/');
+    const deprecationMessage = 'This is a deprecated endpoint for testing reasons';
+    const warningString = `299 Kibana-${kibanaVersion} "${deprecationMessage}"`;
+
+    router.get(
+      {
+        path: '/deprecated',
+        validate: false,
+        options: {
+          deprecated: {
+            documentationUrl: 'https://fake-url.com',
+            reason: { type: 'deprecate' },
+            severity: 'warning',
+            message: deprecationMessage,
+          },
+        },
+      },
+      (context, req, res) =>
+        res.ok({
+        })
+    );
+
+    await server.start();
+
+    const response = await supertest(innerServer.listener).get('/deprecated').expect(200);
+
+    // Check that the warning message is in the response headers
+    expect(response.header.warning).toMatch(warningString);
+  });
+
+  it('should not add a deprecation warning header to a non deprecated route', async () => {
+    const { server: innerServer, createRouter } = await server.setup(setupDeps);
+    const router = createRouter('/');
+
+    router.get(
+      {
+        path: '/deprecated',
+        validate: false,
+      },
+      (context, req, res) =>
+        res.ok({
+        })
+    );
+
+    await server.start();
+
+    const response = await supertest(innerServer.listener).get('/deprecated').expect(200);
+
+    // Check that the warning message is in the response headers
+    expect(response.header.warning).toBeUndefined();
   });
 });
 
