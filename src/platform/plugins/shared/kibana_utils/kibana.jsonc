@@ -1,0 +1,19 @@
+{
+  "type": "plugin",
+  "id": "@kbn/kibana-utils-plugin",
+  "owner": [
+    "@elastic/appex-sharedux"
+  ],
+  "group": "platform",
+  "visibility": "shared",
+  "plugin": {
+    "id": "kibanaUtils",
+    "browser": true,
+    "server": false,
+    "extraPublicDirs": [
+      "common",
+      "demos/state_containers/todomvc",
+      "common/state_containers"
+    ]
+  }
+}

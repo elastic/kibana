@@ -98,6 +98,50 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(data).to.eql({ ...getConfigurationOutput(true), customFields });
     });
 
+    it('should patch a configuration with observableTypes', async () => {
+      const observableTypes = [
+        {
+          key: '50d4d08c-12b4-4055-a343-b303e0ab3724',
+          label: 'type 1',
+        },
+      ] as ConfigurationPatchRequest['observableTypes'];
+      const configuration = await createConfiguration(supertest);
+      expect(configuration.observableTypes.length).to.be(0);
+
+      const updatedConfiguration = await updateConfiguration(supertest, configuration.id, {
+        version: configuration.version,
+        observableTypes,
+      });
+
+      expect(updatedConfiguration.observableTypes.length).to.be.greaterThan(0);
+      expect(updatedConfiguration.observableTypes[0].key).to.equal(observableTypes?.[0].key);
+      expect(updatedConfiguration.observableTypes[0].label).to.equal(observableTypes?.[0].label);
+    });
+
+    it('should not patch a configuration with duplicated observableTypes', async () => {
+      const observableTypes = [
+        {
+          key: '50d4d08c-12b4-4055-a343-b303e0ab3724',
+          label: 'duplicate',
+        },
+        {
+          key: 'fc3ff698-589a-44fd-bbc4-ffaa0b7211f7',
+          label: 'duplicate',
+        },
+      ] as ConfigurationPatchRequest['observableTypes'];
+      const configuration = await createConfiguration(supertest);
+
+      await updateConfiguration(
+        supertest,
+        configuration.id,
+        {
+          version: configuration.version,
+          observableTypes,
+        },
+        400
+      );
+    });
+
     it('should update mapping when changing connector', async () => {
       const configuration = await createConfiguration(supertest);
       await updateConfiguration(supertest, configuration.id, {
@@ -147,7 +191,7 @@ export default ({ getService }: FtrProviderContext): void => {
         },
       ];
 
-      const templates = [
+      const mockTemplates = [
         {
           key: 'test_template_1',
           name: 'First test template',
@@ -196,23 +240,61 @@ export default ({ getService }: FtrProviderContext): void => {
             tags: ['sample-3'],
           },
         },
-      ] as ConfigurationPatchRequest['templates'];
+      ];
 
       const configuration = await createConfiguration(supertest, {
         ...getConfigurationRequest(),
         customFields: customFieldsConfiguration as ConfigurationPatchRequest['customFields'],
       });
+
       const newConfiguration = await updateConfiguration(supertest, configuration.id, {
         version: configuration.version,
         customFields: customFieldsConfiguration,
-        templates,
+        templates: mockTemplates as ConfigurationPatchRequest['templates'],
       });
 
       const data = removeServerGeneratedPropertiesFromSavedObject(newConfiguration);
       expect(data).to.eql({
         ...getConfigurationOutput(true),
         customFields: customFieldsConfiguration as ConfigurationPatchRequest['customFields'],
-        templates,
+        templates: [
+          {
+            ...mockTemplates[0],
+            caseFields: {
+              customFields: [
+                {
+                  key: 'text_field_1',
+                  type: CustomFieldTypes.TEXT,
+                  value: null,
+                },
+                {
+                  key: 'toggle_field_1',
+                  value: false,
+                  type: CustomFieldTypes.TOGGLE,
+                },
+              ],
+            },
+          },
+          { ...mockTemplates[1] },
+          {
+            ...mockTemplates[2],
+            caseFields: {
+              ...mockTemplates[2].caseFields,
+              customFields: [
+                {
+                  key: 'text_field_1',
+                  type: CustomFieldTypes.TEXT,
+                  value: null,
+                },
+                {
+                  key: 'toggle_field_1',
+                  value: false,
+                  type: CustomFieldTypes.TOGGLE,
+                },
+              ],
+            },
+          },
+        ] as ConfigurationPatchRequest['templates'],
       });
     });
 
@@ -228,6 +310,12 @@ export default ({ getService }: FtrProviderContext): void => {
           key: 'toggle_field_1',
           label: '#2',
           type: CustomFieldTypes.TOGGLE,
+          required: false,
+        },
+        {
+          key: 'number_field_1',
+          label: 'Number field 1',
+          type: CustomFieldTypes.NUMBER,
           required: false,
         },
       ];
@@ -254,6 +342,11 @@ export default ({ getService }: FtrProviderContext): void => {
                 key: 'toggle_field_1',
                 value: true,
                 type: CustomFieldTypes.TOGGLE,
+              },
+              {
+                key: 'number_field_1',
+                value: 123,
+                type: CustomFieldTypes.NUMBER,
               },
             ],
             connector: {
@@ -425,35 +518,6 @@ export default ({ getService }: FtrProviderContext): void => {
                 label: '#2',
                 type: CustomFieldTypes.TOGGLE,
                 required: false,
-              },
-            ],
-          },
-          400
-        );
-      });
-
-      it("should not update a configuration with templates with custom fields that don't exist in the configuration", async () => {
-        const configuration = await createConfiguration(supertest);
-
-        await updateConfiguration(
-          supertest,
-          configuration.id,
-          {
-            version: configuration.version,
-            templates: [
-              {
-                key: 'test_template_1',
-                name: 'First test template',
-                description: 'This is a first test template',
-                caseFields: {
-                  customFields: [
-                    {
-                      key: 'random_key',
-                      type: CustomFieldTypes.TEXT,
-                      value: 'Test',
-                    },
-                  ],
-                },
               },
             ],
           },

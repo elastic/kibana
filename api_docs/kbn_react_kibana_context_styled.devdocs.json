@@ -243,7 +243,7 @@
             "section": "def-common.EuiTheme",
             "text": "EuiTheme"
           },
-          ">, \"theme\"> & { darkMode?: boolean | undefined; }) => JSX.Element"
+          ">, \"theme\"> & { darkMode?: boolean | undefined; }) => React.JSX.Element"
         ],
         "path": "packages/react/kibana_context/styled/styled_provider.tsx",
         "deprecated": false,
@@ -302,7 +302,7 @@
           "StoryFnReactReturnType",
           ">, ",
           "Args",
-          ">) => JSX.Element"
+          ">) => React.JSX.Element"
         ],
         "path": "packages/react/kibana_context/styled/styled_provider.tsx",
         "deprecated": true,
@@ -310,15 +310,15 @@
         "references": [
           {
             "plugin": "kibanaReact",
-            "path": "src/plugins/kibana_react/common/eui_styled_components.tsx"
+            "path": "src/platform/plugins/shared/kibana_react/common/eui_styled_components.tsx"
           },
           {
             "plugin": "kibanaReact",
-            "path": "src/plugins/kibana_react/common/eui_styled_components.tsx"
+            "path": "src/platform/plugins/shared/kibana_react/common/eui_styled_components.tsx"
           },
           {
             "plugin": "kibanaReact",
-            "path": "src/plugins/kibana_react/common/index.ts"
+            "path": "src/platform/plugins/shared/kibana_react/common/index.ts"
           }
         ],
         "children": [

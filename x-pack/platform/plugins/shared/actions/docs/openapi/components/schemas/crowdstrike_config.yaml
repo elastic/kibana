@@ -1,0 +1,11 @@
+title: Connector request config properties for a Crowdstrike connector
+required:
+  - url
+description: Defines config properties for connectors when type is `.crowdstrike`.
+type: object
+properties:
+  url:
+    description: >
+      The CrowdStrike tenant URL.
+      If you are using the `xpack.actions.allowedHosts` setting, add the hostname to the allowed hosts.
+    type: string    

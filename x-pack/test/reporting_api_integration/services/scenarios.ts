@@ -8,7 +8,7 @@
 import type { LoadActionPerfOptions } from '@kbn/es-archiver';
 import { INTERNAL_ROUTES } from '@kbn/reporting-common';
 import type { JobParamsCSV } from '@kbn/reporting-export-types-csv-common';
-import type { JobParamsPDFDeprecated } from '@kbn/reporting-export-types-pdf-common';
+import type { JobParamsPDFV2 } from '@kbn/reporting-export-types-pdf-common';
 import type { JobParamsPNGV2 } from '@kbn/reporting-export-types-png-common';
 import {
   REPORTING_DATA_STREAM_WILDCARD,
@@ -25,9 +25,9 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
   const security = getService('security');
   const esArchiver = getService('esArchiver');
   const log = getService('log');
-  const supertest = getService('supertest');
   const esSupertest = getService('esSupertest');
   const kibanaServer = getService('kibanaServer');
+  const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const retry = getService('retry');
 
@@ -142,10 +142,10 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
     });
   };
 
-  const generatePdf = async (username: string, password: string, job: JobParamsPDFDeprecated) => {
+  const generatePdf = async (username: string, password: string, job: JobParamsPDFV2) => {
     const jobParams = rison.encode(job);
     return await supertestWithoutAuth
-      .post(`/api/reporting/generate/printablePdf`)
+      .post(`/api/reporting/generate/printablePdfV2`)
       .auth(username, password)
       .set('kbn-xsrf', 'xxx')
       .send({ jobParams });
@@ -172,10 +172,15 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
       .send({ jobParams });
   };
 
-  const postJob = async (apiPath: string): Promise<string> => {
+  const postJob = async (
+    apiPath: string,
+    username = 'elastic',
+    password = process.env.TEST_KIBANA_PASS || 'changeme'
+  ): Promise<string> => {
     log.debug(`ReportingAPI.postJob(${apiPath})`);
-    const { body } = await supertest
+    const { body } = await supertestWithoutAuth
       .post(removeWhitespace(apiPath))
+      .auth(username, password)
       .set('kbn-xsrf', 'xxx')
       .expect(200);
     return body.path;
@@ -183,7 +188,7 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
 
   const postJobJSON = async (apiPath: string, jobJSON: object = {}): Promise<string> => {
     log.debug(`ReportingAPI.postJobJSON((${apiPath}): ${JSON.stringify(jobJSON)})`);
-    const { body } = await supertest.post(apiPath).set('kbn-xsrf', 'xxx').send(jobJSON);
+    const { body } = await supertest.post(apiPath).set('kbn-xsrf', 'xxx').send(jobJSON).expect(200);
     return body.path;
   };
 

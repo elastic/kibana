@@ -23,8 +23,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     await PageObjects.dashboard.loadSavedDashboard(dashboardTitle);
     await ml.dashboardEmbeddables.assertDashboardPanelExists(selectedPanelTitle);
 
-    const header = await dashboardPanelActions.getPanelHeading(selectedPanelTitle);
-    await dashboardPanelActions.openContextMenuMorePanel(header);
+    await dashboardPanelActions.openContextMenuByTitle(selectedPanelTitle);
   }
 
   describe('create jobs from dashboard map', function () {
@@ -62,7 +61,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await dashboardPreparation(selectedPanelTitle);
 
-      await ml.lensVisualizations.clickCreateMLJobMenuAction();
+      await ml.lensVisualizations.clickCreateMLJobMenuAction(selectedPanelTitle);
 
       await ml.lensVisualizations.assertLayerSelectorExists();
 

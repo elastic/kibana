@@ -29,11 +29,11 @@ export default ({ getService }: FtrProviderContext) => {
   const log = getService('log');
   const utils = getService('securitySolutionUtils');
 
-  describe('@ess @serverless create_list_items', () => {
+  describe('@ess @serverless @serverlessQA create_list_items', () => {
     let supertest: TestAgent;
 
     before(async () => {
-      supertest = await utils.createSuperTest('admin');
+      supertest = await utils.createSuperTest();
     });
 
     describe('validation errors', () => {

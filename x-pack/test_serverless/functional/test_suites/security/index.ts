@@ -9,7 +9,8 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('serverless security UI', function () {
-    loadTestFile(require.resolve('./ftr/landing_page'));
+    this.tags(['esGate']);
+
     loadTestFile(require.resolve('./ftr/navigation'));
     loadTestFile(require.resolve('./ftr/cases'));
     loadTestFile(require.resolve('./ftr/advanced_settings'));

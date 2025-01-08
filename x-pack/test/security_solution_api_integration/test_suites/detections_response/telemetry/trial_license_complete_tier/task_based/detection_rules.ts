@@ -35,7 +35,7 @@ export default ({ getService }: FtrProviderContext) => {
   const log = getService('log');
   const retry = getService('retry');
 
-  describe('@ess @serverless Detection rule task telemetry', async () => {
+  describe('@ess @serverless Detection rule task telemetry', () => {
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/security_solution/telemetry');
     });

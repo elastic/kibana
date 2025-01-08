@@ -12,7 +12,6 @@ import {
   AGENT_POLICY_INDEX,
 } from '@kbn/fleet-plugin/common';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
-import { setupFleetAndAgents } from './services';
 import { skipIfNoDockerRegistry } from '../../helpers';
 
 const ES_INDEX_OPTIONS = { headers: { 'X-elastic-product-origin': 'fleet' } };
@@ -22,13 +21,14 @@ export default function (providerContext: FtrProviderContext) {
   const supertest = getService('supertest');
   const es = getService('es');
   const esArchiver = getService('esArchiver');
+  const fleetAndAgents = getService('fleetAndAgents');
 
   describe('action_status_api', () => {
     skipIfNoDockerRegistry(providerContext);
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/fleet/agents');
+      await fleetAndAgents.setup();
     });
-    setupFleetAndAgents(providerContext);
 
     after(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/fleet/agents');

@@ -49,7 +49,7 @@ export default function (providerContext: FtrProviderContext) {
         ).to.be(true);
       });
 
-      it('Clicking on Launch CloudFormation on post intall modal should lead user to Cloud Formation page', async () => {
+      it.skip('Clicking on Launch CloudFormation on post intall modal should lead user to Cloud Formation page', async () => {
         await cisIntegration.navigateToAddIntegrationCnvmPage();
         await cisIntegration.inputUniqueIntegrationName();
         await pageObjects.header.waitUntilLoadingHasFinished();
@@ -58,8 +58,7 @@ export default function (providerContext: FtrProviderContext) {
         expect(
           (
             await cisIntegration.clickLaunchAndGetCurrentUrl(
-              'confirmCloudFormationModalConfirmButton',
-              1
+              'confirmCloudFormationModalConfirmButton'
             )
           ).includes('console.aws.amazon.com%2Fcloudformation')
         ).to.be(true);

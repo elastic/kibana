@@ -31,7 +31,7 @@ export default ({ getService }: FtrProviderContext) => {
   const auditbeatPath = dataPathBuilder.getPath('auditbeat/hosts');
 
   describe('create_ml_rules', () => {
-    describe('Creating Machine Learning rules', () => {
+    describe('Creating Machine Learning rules', function () {
       before(async () => {
         await esArchiver.load(auditbeatPath);
       });
@@ -49,21 +49,26 @@ export default ({ getService }: FtrProviderContext) => {
         await deleteAllRules(supertest, log);
       });
 
-      it('@ess should give a 403 when trying to create a single Machine Learning rule since the license is basic', async () => {
-        const { body } = await supertest
-          .post(DETECTION_ENGINE_RULES_URL)
-          .set('kbn-xsrf', 'true')
-          .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-          .send(getSimpleMlRule())
-          .expect(403);
+      describe('@ess', function () {
+        /* Wrapped in `describe` block, because `this.tags` only works in `describe` blocks */
+        this.tags('skipFIPS');
+        it('should give a 403 when trying to create a single Machine Learning rule since the license is basic', async function () {
+          const { body } = await supertest
+            .post(DETECTION_ENGINE_RULES_URL)
+            .set('kbn-xsrf', 'true')
+            .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+            .send(getSimpleMlRule())
+            .expect(403);
 
-        const bodyToCompare = removeServerGeneratedProperties(body);
-        expect(bodyToCompare).toEqual({
-          message: 'Your license does not support machine learning. Please upgrade your license.',
-          status_code: 403,
+          const bodyToCompare = removeServerGeneratedProperties(body);
+          expect(bodyToCompare).toEqual({
+            message: 'Your license does not support machine learning. Please upgrade your license.',
+            status_code: 403,
+          });
         });
       });
-      it('@serverless should give a 200 when trying to create a single Machine Learning rule since the license is essentials', async () => {
+
+      it('@serverless @serverlessQA should give a 200 when trying to create a single Machine Learning rule since the license is essentials', async () => {
         const { body } = await supertest
           .post(DETECTION_ENGINE_RULES_URL)
           .set('kbn-xsrf', 'true')

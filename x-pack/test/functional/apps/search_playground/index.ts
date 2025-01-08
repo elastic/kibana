@@ -7,7 +7,7 @@
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
-  describe('playground', async () => {
+  describe('playground', () => {
     loadTestFile(require.resolve('./playground_overview.ess.ts'));
   });
 }

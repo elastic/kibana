@@ -1,0 +1,16 @@
+openapi: 3.0.0
+info:
+  title: Get agent status schema
+  version: '1'
+paths: {}
+components:
+  schemas:
+    GetAgentStatusRequestParams:
+      type: object
+    GetAgentStatusRequestQueryParams:
+      type: object
+      properties:
+        kuery:
+          $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/KueryOrUndefined'
+        policyId:
+          $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/Id'

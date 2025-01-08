@@ -29,7 +29,6 @@ spec:
       default_branch: main
       repository: elastic/kibana
       pipeline_file: .buildkite/pipelines/code_coverage/daily.yml
-      skip_intermediate_builds: false
       provider_settings:
         prefix_pull_request_fork_branch_names: false
         skip_pull_request_builds_for_existing_commits: true
@@ -48,3 +47,5 @@ spec:
           cronline: 0 5 * * *
           message: Daily 6 am UTC
           branch: main
+      tags:
+        - kibana

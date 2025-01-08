@@ -1,7 +1,0 @@
-[[esql-example-queries]]
-
-The following is NOT an example of an ES|QL query:
-
-```
-Pagination is not supported
-```

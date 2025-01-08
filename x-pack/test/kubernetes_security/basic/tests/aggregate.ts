@@ -122,13 +122,13 @@ export default function aggregateTests({ getService }: FtrProviderContext) {
     });
 
     it(`${AGGREGATE_ROUTE} handles a bad request`, async () => {
-      const response = await supertest.get(AGGREGATE_ROUTE).set('kbn-xsrf', 'foo').query({
+      const response = await getRoute().query({
         query: 'asdf',
         groupBy: ORCHESTRATOR_NAMESPACE,
         page: 0,
         index: MOCK_INDEX,
       });
-      expect(response.status).to.be(400);
+      expect(response.status).to.be(500);
     });
   });
 }

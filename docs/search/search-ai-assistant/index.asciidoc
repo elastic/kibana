@@ -1,0 +1,143 @@
+[role="xpack"]
+[[search-ai-assistant]]
+== AI Assistant
+
+[TIP]
+====
+Don't confuse AI Assistant with <<playground,Playground>>! Use Playground to chat with your data, test and tweak different {es} queries in the Playground UI, and download the code to integrate into your own RAG application.
+
+Use AI Assistant to get help with Elasticsearch and Kibana tasks directly in the UI.
+====
+
+.Observability use cases
+****
+Refer to the {observability-guide}/obs-ai-assistant.html[Observability documentation] for more information on how to use AI Assistant in Observability contexts.
+****
+
+*AI Assistant for Observability and Search* uses generative AI to help you with a variety of tasks related to Elasticsearch and Kibana, including:
+
+1. *Constructing Queries*: Assists you in building queries to search and analyze your data.
+2. *Indexing Data*: Guides you on how to index data into Elasticsearch.
+3. *Searching Data*: Helps you search for specific data within your Elasticsearch indices.
+4. *Using Elasticsearch APIs*: Calls Elasticsearch APIs on your behalf if you need specific operations performed.
+5. *Generating Sample Data*: Helps you create sample data for testing and development purposes.
+6. *Visualizing and Analyzing Data*: Assists you in creating visualizations and analyzing your data using Kibana.
+7. *Explaining ES|QL*: Explains how ES|QL works and help you convert queries from other languages to {ref}/esql.html[ES|QL.]
+
+[discrete]
+[[ai-assistant-requirements]]
+=== Requirements
+
+To use AI Assistant in *Search* contexts, you must have the following:
+
+* Elastic Stack version 8.16.0, or an Elasticsearch Serverless project.
+* A <<action-types,generative AI connector>> to connect to a LLM provider, or a local model.
+** You need an account with a third-party generative AI provider, which AI Assistant uses to generate responses, or else you need to host your own local model.
+** To set up AI Assistant, you need the `Actions and Connectors : All` <<kibana-privileges,privilege>>.
+* To use AI Assistant, you need at least the `Elastic AI Assistant : All` and `Actions and Connectors : Read` <<kibana-privileges,privilege>>.
+* AI Assistant requires {ml-docs}/ml-nlp-elser.html[ELSER], Elastic's proprietary semantic search model.
+
+[discrete]
+[[ai-assistant-data-information]]
+=== Your data and AI Assistant
+
+Elastic does not use customer data for model training. This includes anything you send the model, such as alert or event data, detection rule configurations, queries, and prompts. However, any data you provide to AI Assistant will be processed by the third-party provider you chose when setting up the generative AI connector as part of the assistant setup.
+
+Elastic does not control third-party tools, and assumes no responsibility or liability for their content, operation, or use, nor for any loss or damage that may arise from your using such tools. Please exercise caution when using AI tools with personal, sensitive, or confidential information. Any data you submit may be used by the provider for AI training or other purposes. There is no guarantee that the provider will keep any information you provide secure or confidential. You should familiarize yourself with the privacy practices and terms of use of any generative AI tools prior to use.
+
+[discrete]
+[[ai-assistant-using]]
+=== Using AI Assistant
+
+To open AI Assistant, select the **AI Assistant** button in the top toolbar in the UI.
+You can also use the global search field in the UI to find AI Assistant.
+// <<kibana-concepts-finding-your-apps-objects,global search field>>
+// TODO link will be available once https://github.com/elastic/kibana/pull/199352 is merged.
+
+[role="screenshot"]
+image::images/ai-assistant-button.png[AI Assistant button,50]
+
+This opens the AI Assistant chat interface flyout.
+
+[role="screenshot]
+image::images/ai-assistant-welcome-chat.png[AI Assistant Welcome chat,450]
+
+You can get started by selecting *✨ Suggest* to get some example prompts, or by typing into the chat field.
+
+[discrete]
+[[ai-assistant-add-custom-data]]
+=== Add data to the AI Assistant knowledge base
+
+[NOTE]
+====
+This functionality is not available on Elastic Cloud Serverless projects.
+====
+
+You can improve the relevance of AI Assistant’s responses by indexing your own data into AI Assistant's knowledge base.
+AI Assistant uses {ml-docs}/ml-nlp-elser.html[ELSER], Elastic's proprietary semantic search model, to power its search capabilities.
+
+[discrete]
+[[search-ai-assistant-use-the-ui]]
+==== Use the UI
+
+To add external data to the knowledge base in UI:
+
+. In the AI Assistant UI, select the **Settings** icon: `⋮`.
+. Under *Actions*, click **Manage knowledge base**.
+. Click the **New entry** button, and choose either:
++
+** **Single entry**: Write content for a single entry in the UI.
+** **Bulk import**: Upload a newline delimited JSON (`ndjson`) file containing a list of entries to add to the knowledge base.
+Each object should conform to the following format:
++
+[source,json]
+----
+{
+  "id": "a_unique_human_readable_id",
+  "text": "Contents of item",
+}
+----
+
+[discrete]
+[[observability-ai-assistant-add-data-to-kb]]
+==== Use Search connectors
+
+// Will be updated to mention reindex option for arbitrary indices
+// Need to consolidate docs with obs team first
+
+[NOTE]
+====
+This functionality is not available on Elastic Cloud Serverless projects.
+====
+
+You can ingest external data (GitHub issues, Markdown files, Jira tickets, text files, etc.) into {es} using {ref}/es-connectors.html[Search Connectors]. Connectors sync third party data sources to {es}. 
+
+Supported service types include {ref}/es-connectors-github.html[GitHub], {ref}/es-connectors-slack.html[Slack], {ref}/es-connectors-jira.html[Jira], and more. These can be Elastic managed or self-managed on your own infrastructure.
+
+To create a connector and make its content available to the AI Assistant knowledge base, follow these steps:
+
+. *In {kib} UI, go to _Search -> Content -> Connectors_ and follow the instructions to create a new connector.*
++
+For example, if you create a {ref}/es-connectors-github.html[GitHub connector] you must set a `name`, attach it to a new or existing `index`, add your `personal access token` and include the `list of repositories` to synchronize.
++
+TIP: Learn more about configuring and {ref}/es-connectors-usage.html[using connectors] in the Elasticsearch documentation.
++
+. *Create a pipeline and process the data with ELSER.*
++
+To process connector data using {ml-docs}/ml-nlp-elser.html[ELSER], you must create an *ML Inference Pipeline*:
++
+.. Open the previously created connector and select the *Pipelines* tab.
+.. Select *Copy and customize* button at the `Unlock your custom pipelines` box.
+.. Select *Add Inference Pipeline* button at the `Machine Learning Inference Pipelines` box.
+.. Select *ELSER (Elastic Learned Sparse EncodeR)* ML model to add the necessary embeddings to the data.
+.. Select the fields that need to be evaluated as part of the inference pipeline.
+.. Test and save the inference pipeline and the overall pipeline.
+. *Sync data.*
++
+Once the pipeline is set up, perform a *Full Content Sync* of the connector. The inference pipeline will process the data as follows:
++
+* As data comes in, the ELSER model processes the data, creating sparse embeddings for each document.
+* If you inspect the ingested documents, you can see how the weights and tokens are added to the `predicted_value` field.
+. *Confirm AI Assistant can access the index.*
++
+Ask the AI Assistant a specific question to confirm that the data is available for the AI Assistant knowledge base.

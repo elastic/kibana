@@ -1,35 +1,78 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import chalk from 'chalk';
 import { OpenAPIV3 } from 'openapi-types';
-import { logger } from '../../logger';
-import { BundledDocument } from '../bundle_document';
+import { ResolvedDocument } from '../ref_resolver/resolved_document';
 import { mergePaths } from './merge_paths';
 import { mergeSharedComponents } from './merge_shared_components';
+import { mergeServers } from './merge_servers';
+import { mergeSecurityRequirements } from './merge_security_requirements';
+import { mergeTags } from './merge_tags';
+import { getOasVersion } from '../../utils/get_oas_version';
+import { getOasDocumentVersion } from '../../utils/get_oas_document_version';
+import { enrichWithVersionMimeParam } from './enrich_with_version_mime_param';
+import { MergeOptions } from './merge_options';
+
+interface MergeDocumentsOptions extends MergeOptions {
+  splitDocumentsByVersion: boolean;
+}
 
 export async function mergeDocuments(
-  bundledDocuments: BundledDocument[],
-  blankOasFactory: (oasVersion: string, apiVersion: string) => OpenAPIV3.Document
+  resolvedDocuments: ResolvedDocument[],
+  blankOasDocumentFactory: (oasVersion: string, apiVersion: string) => OpenAPIV3.Document,
+  options: MergeDocumentsOptions
 ): Promise<Map<string, OpenAPIV3.Document>> {
-  const bundledDocumentsByVersion = splitByVersion(bundledDocuments);
+  const documentsByVersion = options.splitDocumentsByVersion
+    ? splitByVersion(resolvedDocuments)
+    : new Map([['', resolvedDocuments]]);
   const mergedByVersion = new Map<string, OpenAPIV3.Document>();
 
-  for (const [apiVersion, singleVersionBundledDocuments] of bundledDocumentsByVersion.entries()) {
-    const oasVersion = extractOasVersion(singleVersionBundledDocuments);
-    const mergedDocument = blankOasFactory(oasVersion, apiVersion);
+  if (!options.splitDocumentsByVersion) {
+    enrichWithVersionMimeParam(resolvedDocuments);
+  }
 
-    mergedDocument.paths = mergePaths(singleVersionBundledDocuments);
+  for (const [apiVersion, documentsGroup] of documentsByVersion.entries()) {
+    validateSameOasVersion(documentsGroup);
+
+    const oasVersion = getOasVersion(documentsGroup[0]);
+    const mergedDocument = blankOasDocumentFactory(oasVersion, apiVersion);
+    // Any shared components defined in the blank OAS like `securitySchemes` should
+    // preserve in the result document. Passing this document in the merge pipeline
+    // is the simplest way to take initial components into account.
+    const documentsToMerge = [
+      {
+        absolutePath: 'MERGED RESULT',
+        document: mergedDocument as unknown as ResolvedDocument['document'],
+      },
+      ...documentsGroup,
+    ];
+
+    mergedDocument.paths = mergePaths(documentsToMerge, options);
     mergedDocument.components = {
-      // Copy components defined in the blank OpenAPI document
       ...mergedDocument.components,
-      ...mergeSharedComponents(singleVersionBundledDocuments),
+      ...mergeSharedComponents(documentsToMerge, options),
     };
+
+    if (!options.skipServers) {
+      mergedDocument.servers = mergeServers(documentsToMerge);
+    }
+
+    if (!options.skipSecurity) {
+      mergedDocument.security = mergeSecurityRequirements(documentsToMerge);
+    }
+
+    const mergedTags = [...(options.addTags ?? []), ...(mergeTags(documentsToMerge) ?? [])];
+
+    if (mergedTags.length) {
+      mergedDocument.tags = mergedTags;
+    }
 
     mergedByVersion.set(mergedDocument.info.version, mergedDocument);
   }
@@ -37,65 +80,35 @@ export async function mergeDocuments(
   return mergedByVersion;
 }
 
-function splitByVersion(bundledDocuments: BundledDocument[]): Map<string, BundledDocument[]> {
-  const splitBundledDocuments = new Map<string, BundledDocument[]>();
+function splitByVersion(resolvedDocuments: ResolvedDocument[]): Map<string, ResolvedDocument[]> {
+  const splitBundledDocuments = new Map<string, ResolvedDocument[]>();
 
-  for (const bundledDocument of bundledDocuments) {
-    const documentInfo = bundledDocument.document.info as OpenAPIV3.InfoObject;
-
-    if (!documentInfo.version) {
-      logger.warning(`OpenAPI version is missing in ${chalk.bold(bundledDocument.absolutePath)}`);
-
-      continue;
-    }
-
-    const versionBundledDocuments = splitBundledDocuments.get(documentInfo.version);
+  for (const resolvedDocument of resolvedDocuments) {
+    const version = getOasDocumentVersion(resolvedDocument);
+    const versionBundledDocuments = splitBundledDocuments.get(version);
 
     if (!versionBundledDocuments) {
-      splitBundledDocuments.set(documentInfo.version, [bundledDocument]);
+      splitBundledDocuments.set(version, [resolvedDocument]);
     } else {
-      versionBundledDocuments.push(bundledDocument);
+      versionBundledDocuments.push(resolvedDocument);
     }
   }
 
   return splitBundledDocuments;
 }
 
-function extractOasVersion(bundledDocuments: BundledDocument[]): string {
-  if (bundledDocuments.length === 0) {
-    throw new Error('Empty bundled document list');
-  }
+function validateSameOasVersion(resolvedDocuments: ResolvedDocument[]): void {
+  const firstDocumentOasVersion = getOasVersion(resolvedDocuments[0]);
 
-  const firstBundledDocument = bundledDocuments[0];
-
-  for (let i = 1; i < bundledDocuments.length; ++i) {
-    if (
-      !areOasVersionsEqual(
-        bundledDocuments[i].document.openapi as string,
-        firstBundledDocument.document.openapi as string
-      )
-    ) {
+  for (let i = 1; i < resolvedDocuments.length; ++i) {
+    if (getOasVersion(resolvedDocuments[i]) !== firstDocumentOasVersion) {
       throw new Error(
         `OpenAPI specs must use the same OpenAPI version, encountered ${chalk.blue(
-          bundledDocuments[i].document.openapi
-        )} at ${chalk.bold(bundledDocuments[i].absolutePath)} does not match ${chalk.blue(
-          firstBundledDocument.document.openapi
-        )} at ${chalk.bold(firstBundledDocument.absolutePath)}`
+          resolvedDocuments[i].document.openapi
+        )} at ${chalk.bold(resolvedDocuments[i].absolutePath)} does not match ${chalk.blue(
+          resolvedDocuments[0].document.openapi
+        )} at ${chalk.bold(resolvedDocuments[0].absolutePath)}`
       );
     }
   }
-
-  const version = firstBundledDocument.document.openapi as string;
-
-  // Automatically promote to the recent OAS 3.0 version which is 3.0.3
-  // 3.0.3 is the version used in the specification https://swagger.io/specification/v3/
-  return version < '3.0.3' ? '3.0.3' : version;
-}
-
-/**
- * Tells if versions are equal by comparing only major and minor OAS version parts
- */
-function areOasVersionsEqual(versionA: string, versionB: string): boolean {
-  // versionA.substring(0, 3) results in `3.0` or `3.1`
-  return versionA.substring(0, 3) === versionB.substring(0, 3);
 }

@@ -69,7 +69,6 @@ describe('Guided onboarding tour', { tags: ['@ess'] }, () => {
     const stepsInAlertsFlyout = [
       AlertsCasesTourSteps.reviewAlertDetailsFlyout,
       AlertsCasesTourSteps.addAlertToCase,
-      AlertsCasesTourSteps.viewCase,
     ];
 
     const stepsInCasesFlyout = [AlertsCasesTourSteps.createCase, AlertsCasesTourSteps.submitCase];

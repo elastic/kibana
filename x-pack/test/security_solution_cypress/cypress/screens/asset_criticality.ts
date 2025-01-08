@@ -7,7 +7,7 @@
 
 import { getDataTestSubjectSelector } from '../helpers/common';
 
-export const PAGE_TITLE = getDataTestSubjectSelector('assetCriticalityUploadPage');
+export const PAGE_TITLE = getDataTestSubjectSelector('entityStoreManagementPage');
 export const FILE_PICKER = getDataTestSubjectSelector('asset-criticality-file-picker');
 export const ASSIGN_BUTTON = getDataTestSubjectSelector('asset-criticality-assign-button');
 export const RESULT_STEP = getDataTestSubjectSelector('asset-criticality-result-step-success');

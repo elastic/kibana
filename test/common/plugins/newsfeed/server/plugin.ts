@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { CoreSetup, Plugin, PluginInitializerContext } from '@kbn/core/server';
@@ -45,7 +46,9 @@ export class NewsFeedSimulatorPlugin implements Plugin {
       items: [
         {
           title: { en: `You are functionally testing the newsfeed widget with fixtures!` },
-          description: { en: 'See test/common/plugins/newsfeed/newsfeed_simulation' },
+          description: {
+            en: 'See test/common/platform/plugins/shared/newsfeed/newsfeed_simulation',
+          },
           link_text: { en: 'Generic feed-viewer could go here' },
           link_url: { en: 'https://feeds.elastic.co' },
           languages: null,

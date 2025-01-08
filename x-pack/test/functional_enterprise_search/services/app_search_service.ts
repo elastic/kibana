@@ -49,12 +49,12 @@ export class AppSearchService {
     return engine;
   }
 
-  createMetaEngine(sourceEngines: string[]): Promise<IEngine> {
+  async createMetaEngine(sourceEngines: string[]): Promise<IEngine> {
     const engineName = `test-meta-engine-${new Date().getTime()}`;
     return createMetaEngine(engineName, sourceEngines);
   }
 
-  destroyEngine(engineName: string) {
+  async destroyEngine(engineName: string) {
     return destroyEngine(engineName);
   }
 }

@@ -1,0 +1,15 @@
+.enterpriseSearchInferencePipelineFlyout {
+  .resizableContainer {
+    min-height: $euiSizeXL * 10;
+
+    .reviewCodeBlock {
+      height: 100%;
+    }
+  }
+
+  .enterpriseSearchInferencePipelineFlyoutFooter {
+    .euiButtonEmpty {
+      padding-inline: $euiSizeM;
+    }
+  }
+}

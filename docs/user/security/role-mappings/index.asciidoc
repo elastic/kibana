@@ -8,7 +8,8 @@ describe which roles to assign to your users using a set of rules.
 Role mappings are required when authenticating via an external identity provider, such as Active Directory, Kerberos, PKI, OIDC, or SAML.
 Role mappings have no effect for users inside the `native` or `file` realms.
 
-To manage your role mappings, open the main menu, then click *Stack Management > Role Mappings*.
+You can find the *Role mappings* management page using the navigation menu or the 
+<<kibana-navigation-search,global search field>>.
 
 With *Role mappings*, you can:
 
@@ -27,7 +28,8 @@ The `manage_security` cluster privilege is required to manage Role Mappings.
 [float]
 === Create a role mapping
 
-. Open the main menu, then click *Stack Management > Role Mappings*.
+. Go to the *Role mappings* management page using the navigation menu or the 
+<<kibana-navigation-search,global search field>>.
 . Click *Create role mapping*.
 . Give your role mapping a unique name, and choose which roles you wish to assign to your users.
 +

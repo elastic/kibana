@@ -72,17 +72,20 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   registry.when(
     'fetching service anomalies with a basic license',
     { config: 'basic', archives: [] },
-    () => {
-      it('returns a 501', async () => {
-        const status = await statusOf(
-          getAnomalyCharts({
-            serviceName: 'a',
-            transactionType: 'request',
-            environment: 'ENVIRONMENT_ALL',
-          })
-        );
+    function () {
+      describe('should return a 501', function () {
+        this.tags('skipFIPS');
+        it('returns a 501', async function () {
+          const status = await statusOf(
+            getAnomalyCharts({
+              serviceName: 'a',
+              transactionType: 'request',
+              environment: 'ENVIRONMENT_ALL',
+            })
+          );
 
-        expect(status).to.eql(501);
+          expect(status).to.eql(501);
+        });
       });
     }
   );

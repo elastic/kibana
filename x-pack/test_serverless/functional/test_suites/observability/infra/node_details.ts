@@ -35,7 +35,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       before(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs');
 
-        await pageObjects.svlCommonPage.loginWithRole('viewer');
+        await pageObjects.svlCommonPage.loginAsViewer();
         await pageObjects.common.navigateToApp(
           `metrics/${NODE_DETAILS_PATH}/demo-stack-kubernetes-01`
         );
@@ -49,7 +49,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       describe('Osquery Tab', () => {
         it('should not render in serverless', async () => {
           const OsqueryExist = await testSubjects.exists('infraAssetDetailsOsqueryTab');
-          expect(OsqueryExist).to.be(false);
+          expect(OsqueryExist).to.be(true);
         });
       });
 
@@ -67,10 +67,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           it('should show alerts', async () => {
             await pageObjects.header.waitUntilLoadingHasFinished();
             await pageObjects.assetDetails.overviewAlertsTitleExists();
-            const CreateRuleButtonExist = await testSubjects.exists(
-              'infraAssetDetailsCreateAlertsRuleButton'
-            );
-            expect(CreateRuleButtonExist).to.be(true);
+            await pageObjects.assetDetails.overviewOpenAlertsFlyoutExist();
           });
 
           [

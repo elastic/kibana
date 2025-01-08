@@ -1,0 +1,33 @@
+# VALUES
+
+The VALUES function returns all values in a group as a multivalued field.
+
+## Syntax
+
+`VALUES (field)`
+
+### Parameters
+
+#### field
+
+The field for which all values are to be returned.
+
+## Description
+
+The VALUES function is used to return all values in a group as a multivalued field. It's important to note that the order of the returned values is not guaranteed. If you need the values returned in a specific order, you should use the `MV_SORT` function.
+
+## Examples
+
+The following example demonstrates how to use the VALUES function:
+
+```esql
+FROM employees
+| EVAL first_letter = SUBSTRING(first_name, 0, 1)
+| STATS first_name = MV_SORT(VALUES(first_name)) BY first_letter
+| SORT first_letter
+```
+
+## Limitations
+
+- This functionality is in technical preview and may be changed or removed in a future release
+- The VALUES function can consume a significant amount of memory. ES|QL does not currently support growing aggregations beyond memory. Therefore, if the function collects more values than can fit into memory, it will fail the query with a Circuit Breaker Error.

@@ -1,0 +1,70 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`api_tags getApiTags constructs the https tags for the owner: cases 1`] = `
+Object {
+  "all": Array [
+    "casesSuggestUserProfiles",
+    "bulkGetUserProfiles",
+    "casesGetConnectorsConfigure",
+    "casesFilesCasesRead",
+  ],
+  "createComment": Array [
+    "casesFilesCasesCreate",
+  ],
+  "delete": Array [
+    "casesFilesCasesDelete",
+  ],
+  "read": Array [
+    "casesSuggestUserProfiles",
+    "bulkGetUserProfiles",
+    "casesGetConnectorsConfigure",
+    "casesFilesCasesRead",
+  ],
+}
+`;
+
+exports[`api_tags getApiTags constructs the https tags for the owner: observability 1`] = `
+Object {
+  "all": Array [
+    "casesSuggestUserProfiles",
+    "bulkGetUserProfiles",
+    "casesGetConnectorsConfigure",
+    "observabilityFilesCasesRead",
+  ],
+  "createComment": Array [
+    "observabilityFilesCasesCreate",
+  ],
+  "delete": Array [
+    "observabilityFilesCasesDelete",
+  ],
+  "read": Array [
+    "casesSuggestUserProfiles",
+    "bulkGetUserProfiles",
+    "casesGetConnectorsConfigure",
+    "observabilityFilesCasesRead",
+  ],
+}
+`;
+
+exports[`api_tags getApiTags constructs the https tags for the owner: securitySolution 1`] = `
+Object {
+  "all": Array [
+    "casesSuggestUserProfiles",
+    "bulkGetUserProfiles",
+    "casesGetConnectorsConfigure",
+    "securitySolutionFilesCasesRead",
+  ],
+  "createComment": Array [
+    "securitySolutionFilesCasesCreate",
+  ],
+  "delete": Array [
+    "securitySolutionFilesCasesDelete",
+  ],
+  "read": Array [
+    "casesSuggestUserProfiles",
+    "bulkGetUserProfiles",
+    "casesGetConnectorsConfigure",
+    "securitySolutionFilesCasesRead",
+  ],
+}
+`;

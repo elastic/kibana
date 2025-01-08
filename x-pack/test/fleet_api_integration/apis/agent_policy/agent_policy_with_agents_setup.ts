@@ -13,7 +13,6 @@ import {
 import { ENROLLMENT_API_KEYS_INDEX } from '@kbn/fleet-plugin/common/constants';
 import { skipIfNoDockerRegistry } from '../../helpers';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
-import { setupFleetAndAgents } from '../agents/services';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
@@ -21,6 +20,7 @@ export default function (providerContext: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const esClient = getService('es');
   const kibanaServer = getService('kibanaServer');
+  const fleetAndAgents = getService('fleetAndAgents');
 
   async function getEnrollmentKeyForPolicyId(policyId: string) {
     const listRes = await supertest.get(`/api/fleet/enrollment_api_keys`).expect(200);
@@ -89,16 +89,14 @@ export default function (providerContext: FtrProviderContext) {
 
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/fleet/agents');
+      await fleetAndAgents.setup();
     });
     after(async () => {
       // Wait before agent status is updated
-      return new Promise((resolve) => setTimeout(resolve, AGENT_UPDATE_LAST_CHECKIN_INTERVAL_MS));
-    });
-    after(async () => {
+      await new Promise((resolve) => setTimeout(resolve, AGENT_UPDATE_LAST_CHECKIN_INTERVAL_MS));
+
       await esArchiver.unload('x-pack/test/functional/es_archives/fleet/agents');
     });
-
-    setupFleetAndAgents(providerContext);
 
     describe('In default space', () => {
       describe('POST /api/fleet/agent_policies', () => {

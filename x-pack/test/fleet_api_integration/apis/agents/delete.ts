@@ -41,7 +41,7 @@ export default function ({ getService }: FtrProviderContext) {
   describe('fleet_delete_agent', () => {
     before(async () => {
       for (const roleName in users) {
-        if (users.hasOwnProperty(roleName)) {
+        if (Object.hasOwn(users, roleName)) {
           const user = users[roleName];
 
           if (user.permissions) {

@@ -93,7 +93,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
     }
 
-    describe('correctly fails to import bad data', async () => {
+    describe('correctly fails to import bad data', () => {
       it('selects and reads file', async () => {
         await ml.testExecution.logTestStep('selects job import');
         await ml.stackManagementJobs.openImportFlyout();

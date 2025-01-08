@@ -1,0 +1,17 @@
+.enterpriseSearchDataType {
+  &--number,
+  &--float {
+    color: $euiColorAccentText;
+    font-family: $euiCodeFontFamily;
+  }
+
+  &--geolocation,
+  &--location {
+    color: $euiColorSuccessText;
+    font-family: $euiCodeFontFamily;
+  }
+
+  &--date {
+    font-family: $euiCodeFontFamily;
+  }
+}

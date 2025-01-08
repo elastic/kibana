@@ -1,0 +1,393 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Flyout conflicts should allow conflict resolution 1`] = `
+<EuiFlyout
+  data-test-subj="importSavedObjectsFlyout"
+  onClose={[MockFunction]}
+  size="s"
+>
+  <EuiFlyoutHeader
+    hasBorder={true}
+  >
+    <EuiTitle
+      size="m"
+    >
+      <h2>
+        <MemoizedFormattedMessage
+          defaultMessage="Import saved objects"
+          id="savedObjectsManagement.objectsTable.flyout.importSavedObjectTitle"
+        />
+      </h2>
+    </EuiTitle>
+  </EuiFlyoutHeader>
+  <EuiFlyoutBody>
+    <span>
+      <EuiSpacer
+        size="s"
+      />
+      <EuiCallOut
+        color="warning"
+        data-test-subj="importSavedObjectsConflictsWarning"
+        iconType="help"
+        title={
+          <Memo(MemoizedFormattedMessage)
+            defaultMessage="Data Views Conflicts"
+            id="savedObjectsManagement.objectsTable.flyout.indexPatternConflictsTitle"
+          />
+        }
+      >
+        <p>
+          <MemoizedFormattedMessage
+            defaultMessage="The following saved objects use data views that do not exist. Please select the data views you'd like re-associated with them. You can {indexPatternLink} if necessary."
+            id="savedObjectsManagement.objectsTable.flyout.indexPatternConflictsDescription"
+            values={
+              Object {
+                "indexPatternLink": <EuiLink
+                  href=""
+                >
+                  <Memo(MemoizedFormattedMessage)
+                    defaultMessage="create a new data view"
+                    id="savedObjectsManagement.objectsTable.flyout.indexPatternConflictsCalloutLinkText"
+                  />
+                </EuiLink>,
+              }
+            }
+          />
+        </p>
+      </EuiCallOut>
+    </span>
+    <EuiInMemoryTable
+      columns={
+        Array [
+          Object {
+            "description": "ID of the data view",
+            "field": "existingIndexPatternId",
+            "name": "ID",
+            "sortable": true,
+          },
+          Object {
+            "description": "How many affected objects",
+            "field": "list",
+            "name": "Count",
+            "render": [Function],
+          },
+          Object {
+            "description": "Sample of affected objects",
+            "field": "list",
+            "name": "Sample of affected objects",
+            "render": [Function],
+          },
+          Object {
+            "field": "existingIndexPatternId",
+            "name": "New data view",
+            "render": [Function],
+          },
+        ]
+      }
+      items={
+        Array [
+          Object {
+            "existingIndexPatternId": "MyIndexPattern*",
+            "list": Array [
+              Object {
+                "id": "1",
+                "title": "My Visualization",
+                "type": "visualization",
+              },
+            ],
+            "newIndexPatternId": undefined,
+          },
+        ]
+      }
+      onTableChange={[Function]}
+      pagination={
+        Object {
+          "pageSize": 5,
+          "pageSizeOptions": Array [
+            5,
+            10,
+            25,
+          ],
+        }
+      }
+      searchFormat="eql"
+      tableLayout="fixed"
+    />
+  </EuiFlyoutBody>
+  <EuiFlyoutFooter>
+    <EuiFlexGroup
+      justifyContent="spaceBetween"
+    >
+      <EuiFlexItem
+        grow={false}
+      >
+        <EuiButtonEmpty
+          data-test-subj="importSavedObjectsCancelBtn"
+          disabled={false}
+          onClick={[MockFunction]}
+          size="s"
+        >
+          <MemoizedFormattedMessage
+            defaultMessage="Cancel"
+            id="savedObjectsManagement.objectsTable.flyout.import.cancelButtonLabel"
+          />
+        </EuiButtonEmpty>
+      </EuiFlexItem>
+      <EuiFlexItem
+        grow={false}
+      >
+        <EuiButton
+          data-test-subj="importSavedObjectsConfirmBtn"
+          fill={true}
+          isLoading={false}
+          onClick={[Function]}
+          size="s"
+        >
+          <MemoizedFormattedMessage
+            defaultMessage="Confirm all changes"
+            id="savedObjectsManagement.objectsTable.flyout.importSuccessful.confirmAllChangesButtonLabel"
+          />
+        </EuiButton>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  </EuiFlyoutFooter>
+</EuiFlyout>
+`;
+
+exports[`Flyout conflicts should allow conflict resolution 2`] = `
+[MockFunction] {
+  "calls": Array [
+    Array [
+      Object {
+        "getConflictResolutions": [Function],
+        "http": Object {
+          "addLoadingCountSource": [MockFunction],
+          "anonymousPaths": Object {
+            "isAnonymous": [MockFunction],
+            "register": [MockFunction],
+          },
+          "basePath": BasePath {
+            "assetsHrefBase": "",
+            "basePath": "",
+            "get": [Function],
+            "prepend": [Function],
+            "publicBaseUrl": undefined,
+            "remove": [Function],
+            "serverBasePath": "",
+          },
+          "delete": [MockFunction],
+          "externalUrl": Object {
+            "isInternalUrl": [MockFunction],
+            "validateUrl": [MockFunction],
+          },
+          "fetch": [MockFunction],
+          "get": [MockFunction],
+          "getLoadingCount$": [MockFunction],
+          "head": [MockFunction],
+          "intercept": [MockFunction],
+          "options": [MockFunction],
+          "patch": [MockFunction],
+          "post": [MockFunction],
+          "put": [MockFunction],
+          "staticAssets": Object {
+            "getPluginAssetHref": [MockFunction],
+          },
+        },
+        "state": Object {
+          "conflictingRecord": undefined,
+          "error": undefined,
+          "failedImports": Array [
+            Object {
+              "error": Object {
+                "references": Array [
+                  Object {
+                    "id": "MyIndexPattern*",
+                    "type": "index-pattern",
+                  },
+                ],
+                "type": "missing_references",
+              },
+              "obj": Object {
+                "id": "1",
+                "title": "My Visualization",
+                "type": "visualization",
+              },
+            },
+          ],
+          "file": Object {
+            "name": "foo.ndjson",
+            "path": "/home/foo.ndjson",
+          },
+          "importCount": 0,
+          "importMode": Object {
+            "createNewCopies": false,
+            "overwrite": true,
+          },
+          "importWarnings": undefined,
+          "indexPatterns": Array [
+            Object {
+              "id": "1",
+              "title": undefined,
+            },
+            Object {
+              "id": "2",
+              "title": undefined,
+            },
+          ],
+          "loadingMessage": undefined,
+          "status": "loading",
+          "successfulImports": Array [],
+          "unmatchedReferences": Array [
+            Object {
+              "existingIndexPatternId": "MyIndexPattern*",
+              "list": Array [
+                Object {
+                  "id": "1",
+                  "title": "My Visualization",
+                  "type": "visualization",
+                },
+              ],
+              "newIndexPatternId": "2",
+            },
+          ],
+        },
+      },
+    ],
+  ],
+  "results": Array [
+    Object {
+      "type": "return",
+      "value": Object {
+        "failedImports": Array [],
+        "importCount": 1,
+        "status": "success",
+      },
+    },
+  ],
+}
+`;
+
+exports[`Flyout should render import step 1`] = `
+<EuiFlyout
+  data-test-subj="importSavedObjectsFlyout"
+  onClose={[MockFunction]}
+  size="s"
+>
+  <EuiFlyoutHeader
+    hasBorder={true}
+  >
+    <EuiTitle
+      size="m"
+    >
+      <h2>
+        <MemoizedFormattedMessage
+          defaultMessage="Import saved objects"
+          id="savedObjectsManagement.objectsTable.flyout.importSavedObjectTitle"
+        />
+      </h2>
+    </EuiTitle>
+  </EuiFlyoutHeader>
+  <EuiFlyoutBody>
+    <EuiForm>
+      <EuiFormRow
+        fullWidth={true}
+        label={
+          <EuiTitle
+            size="xs"
+          >
+            <span>
+              <Memo(MemoizedFormattedMessage)
+                defaultMessage="Select a file to import"
+                id="savedObjectsManagement.objectsTable.flyout.selectFileToImportFormRowLabel"
+              />
+            </span>
+          </EuiTitle>
+        }
+      >
+        <EuiFilePickerClass
+          accept=".ndjson"
+          fullWidth={true}
+          initialPromptText={
+            <Memo(MemoizedFormattedMessage)
+              defaultMessage="Import"
+              id="savedObjectsManagement.objectsTable.flyout.importPromptText"
+            />
+          }
+          onChange={[Function]}
+        />
+      </EuiFormRow>
+      <EuiFormRow
+        fullWidth={true}
+      >
+        <ImportModeControl
+          initialValues={
+            Object {
+              "createNewCopies": false,
+              "overwrite": true,
+            }
+          }
+          updateSelection={[Function]}
+        />
+      </EuiFormRow>
+    </EuiForm>
+  </EuiFlyoutBody>
+  <EuiFlyoutFooter>
+    <EuiFlexGroup
+      justifyContent="spaceBetween"
+    >
+      <EuiFlexItem
+        grow={false}
+      >
+        <EuiButtonEmpty
+          data-test-subj="importSavedObjectsCancelBtn"
+          disabled={false}
+          onClick={[MockFunction]}
+          size="s"
+        >
+          <MemoizedFormattedMessage
+            defaultMessage="Cancel"
+            id="savedObjectsManagement.objectsTable.flyout.import.cancelButtonLabel"
+          />
+        </EuiButtonEmpty>
+      </EuiFlexItem>
+      <EuiFlexItem
+        grow={false}
+      >
+        <EuiButton
+          data-test-subj="importSavedObjectsImportBtn"
+          fill={true}
+          isDisabled={true}
+          isLoading={false}
+          onClick={[Function]}
+          size="s"
+        >
+          <MemoizedFormattedMessage
+            defaultMessage="Import"
+            id="savedObjectsManagement.objectsTable.flyout.import.confirmButtonLabel"
+          />
+        </EuiButton>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  </EuiFlyoutFooter>
+</EuiFlyout>
+`;
+
+exports[`Flyout summary should display summary when import is complete 1`] = `
+<ImportSummary
+  allowedTypes={Array []}
+  basePath={
+    BasePath {
+      "assetsHrefBase": "",
+      "basePath": "",
+      "get": [Function],
+      "prepend": [Function],
+      "publicBaseUrl": undefined,
+      "remove": [Function],
+      "serverBasePath": "",
+    }
+  }
+  failedImports={Symbol()}
+  importWarnings={Array []}
+  successfulImports={Symbol()}
+/>
+`;

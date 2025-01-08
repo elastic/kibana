@@ -24,7 +24,7 @@ Index settings in the APM app take precedence over those set in `kibana.yml`.
 
 Starting in version 8.2.0, APM indices are {kib} Spaces-aware;
 Changes to APM index settings will only apply to the currently enabled space.
-See <<apm-spaces>> for more information.
+// See <<apm-spaces>> for more information.
 
 [role="screenshot"]
 image::settings/images/apm-settings.png[APM app settings in Kibana]
@@ -82,19 +82,19 @@ Sets a `fixed_interval` for date histograms in metrics aggregations. Defaults to
 Set to `false` to disable cloud APM migrations. Defaults to `true`.
 
 `xpack.apm.indices.error` {ess-icon}::
-Matcher for all error indices. Defaults to `logs-apm*,apm-*`.
+Matcher for all error indices. Defaults to `logs-apm*,apm-*,traces-*.otel-*`.
 
 `xpack.apm.indices.onboarding` {ess-icon}::
 Matcher for all onboarding indices. Defaults to `apm-*`.
 
 `xpack.apm.indices.span` {ess-icon}::
-Matcher for all span indices. Defaults to `traces-apm*,apm-*`.
+Matcher for all span indices. Defaults to `traces-apm*,apm-*,traces-*.otel-*`.
 
 `xpack.apm.indices.transaction` {ess-icon}::
-Matcher for all transaction indices. Defaults to `traces-apm*,apm-*`.
+Matcher for all transaction indices. Defaults to `traces-apm*,apm-*,traces-*.otel-*`.
 
 `xpack.apm.indices.metric` {ess-icon}::
-Matcher for all metrics indices. Defaults to `metrics-apm*,apm-*`.
+Matcher for all metrics indices. Defaults to `metrics-apm*,apm-*,metrics-*.otel-*`.
 
 `xpack.apm.indices.sourcemap` {ess-icon}::
 Matcher for all source map indices. Defaults to `apm-*`.

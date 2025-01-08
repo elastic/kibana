@@ -1,5 +1,9 @@
 {
-  "type": "shared-common",
+  "type": "shared-server",
   "id": "@kbn/core-user-settings-server-internal",
-  "owner": "@elastic/kibana-security",
+  "owner": [
+    "@elastic/kibana-security"
+  ],
+  "group": "platform",
+  "visibility": "private"
 }

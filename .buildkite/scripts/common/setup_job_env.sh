@@ -8,6 +8,8 @@ if [[ "$(type -t vault_get)" != "function" ]]; then
   source .buildkite/scripts/common/vault_fns.sh
 fi
 
+source .buildkite/scripts/common/util.sh
+
 # Set up general-purpose tokens and credentials
 {
   BUILDKITE_TOKEN="$(vault_get buildkite-ci buildkite_token_all_jobs)"
@@ -18,9 +20,12 @@ fi
 
   KIBANA_DOCKER_USERNAME="$(vault_get container-registry username)"
   KIBANA_DOCKER_PASSWORD="$(vault_get container-registry password)"
-  if (command -v docker && docker version) &> /dev/null; then
-    echo "$KIBANA_DOCKER_PASSWORD" | docker login -u "$KIBANA_DOCKER_USERNAME" --password-stdin docker.elastic.co
-  fi
+  function docker_login() {
+      if (command -v docker && docker version) &> /dev/null; then
+        echo "$KIBANA_DOCKER_PASSWORD" | docker login -u "$KIBANA_DOCKER_USERNAME" --password-stdin docker.elastic.co
+      fi
+  }
+  retry 5 15 docker_login
 }
 
 # Set up a custom ES Snapshot Manifest if one has been specified for this build
@@ -125,6 +130,14 @@ EOF
 
   ELASTIC_APM_API_KEY=$(vault_get project-kibana-ci-apm apm_server_api_key)
   export ELASTIC_APM_API_KEY
+}
+
+# Set up GenAI keys
+{
+  if [[ "${FTR_GEN_AI:-}" =~ ^(1|true)$ ]]; then
+    echo "FTR_GEN_AI was set - exposing LLM connectors"
+    export KIBANA_TESTING_AI_CONNECTORS="$(vault_get ai-infra-ci-connectors connectors-config)"
+  fi
 }
 
 # Set up GCS Service Account for CDN

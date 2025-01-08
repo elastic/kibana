@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import expect from '@kbn/expect';
@@ -11,41 +12,44 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['dashboard', 'header', 'common']);
+  const { dashboard, header, common } = getPageObjects(['dashboard', 'header', 'common']);
   const browser = getService('browser');
   const listingTable = getService('listingTable');
   const dashboardAddPanel = getService('dashboardAddPanel');
+  const testSubjects = getService('testSubjects');
+  const retry = getService('retry');
 
-  describe('dashboard listing page', function describeIndexTests() {
+  // Failing: See https://github.com/elastic/kibana/issues/192564
+  describe.skip('dashboard listing page', function describeIndexTests() {
     const dashboardName = 'Dashboard Listing Test';
 
     before(async function () {
-      await PageObjects.dashboard.initTests();
+      await dashboard.initTests();
     });
 
     describe('create prompt', () => {
       it('appears when there are no dashboards', async function () {
-        const promptExists = await PageObjects.dashboard.getCreateDashboardPromptExists();
+        const promptExists = await dashboard.getCreateDashboardPromptExists();
         expect(promptExists).to.be(true);
       });
 
       it('creates a new dashboard', async function () {
-        await PageObjects.dashboard.clickCreateDashboardPrompt();
-        await PageObjects.dashboard.saveDashboard(dashboardName);
+        await dashboard.clickCreateDashboardPrompt();
+        await dashboard.saveDashboard(dashboardName);
 
-        await PageObjects.dashboard.gotoDashboardLandingPage();
+        await dashboard.gotoDashboardLandingPage();
         await listingTable.searchAndExpectItemsCount('dashboard', dashboardName, 1);
       });
 
       it('is not shown when there is a dashboard', async function () {
-        const promptExists = await PageObjects.dashboard.getCreateDashboardPromptExists();
+        const promptExists = await dashboard.getCreateDashboardPromptExists();
         expect(promptExists).to.be(false);
       });
 
       it('is not shown when there are no dashboards shown during a search', async function () {
         await listingTable.searchAndExpectItemsCount('dashboard', 'gobeldeguck', 0);
 
-        const promptExists = await PageObjects.dashboard.getCreateDashboardPromptExists();
+        const promptExists = await dashboard.getCreateDashboardPromptExists();
         expect(promptExists).to.be(false);
         await listingTable.clearSearchFilter();
       });
@@ -57,11 +61,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await listingTable.checkListingSelectAllCheckbox();
         await listingTable.clickDeleteSelected();
 
-        await PageObjects.common.expectConfirmModalOpenState(true);
+        await common.expectConfirmModalOpenState(true);
 
-        await PageObjects.common.pressEnterKey();
+        await common.pressEnterKey();
 
-        await PageObjects.common.expectConfirmModalOpenState(false);
+        await common.expectConfirmModalOpenState(false);
 
         await listingTable.searchAndExpectItemsCount('dashboard', dashboardName, 1);
       });
@@ -70,7 +74,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await listingTable.checkListingSelectAllCheckbox();
         await listingTable.clickDeleteSelected();
 
-        await PageObjects.common.clickConfirmOnModal();
+        await common.clickConfirmOnModal();
 
         await listingTable.searchAndExpectItemsCount('dashboard', dashboardName, 0);
       });
@@ -79,9 +83,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('search', function () {
       before(async () => {
         await listingTable.clearSearchFilter();
-        await PageObjects.dashboard.clickNewDashboard();
-        await PageObjects.dashboard.saveDashboard('Two Words');
-        await PageObjects.dashboard.gotoDashboardLandingPage();
+        await dashboard.clickNewDashboard();
+        await dashboard.saveDashboard('Two Words');
+        await dashboard.gotoDashboardLandingPage();
       });
 
       it('matches on the first word', async function () {
@@ -123,37 +127,37 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const useTimeStamp = true;
         await browser.get(newUrl.toString(), useTimeStamp);
 
-        await PageObjects.header.awaitKibanaChrome();
-        await PageObjects.header.waitUntilLoadingHasFinished();
-        const onDashboardLandingPage = await PageObjects.dashboard.onDashboardLandingPage();
+        await header.awaitKibanaChrome();
+        await header.waitUntilLoadingHasFinished();
+        const onDashboardLandingPage = await dashboard.onDashboardLandingPage();
         expect(onDashboardLandingPage).to.equal(false);
       });
 
       it('title match is case insensitive', async function () {
-        await PageObjects.dashboard.gotoDashboardLandingPage();
+        await dashboard.gotoDashboardLandingPage();
         const currentUrl = await browser.getCurrentUrl();
         const newUrl = currentUrl + '&title=two%20words';
         // Only works on a hard refresh.
         const useTimeStamp = true;
         await browser.get(newUrl.toString(), useTimeStamp);
 
-        await PageObjects.header.awaitKibanaChrome();
-        await PageObjects.header.waitUntilLoadingHasFinished();
-        const onDashboardLandingPage = await PageObjects.dashboard.onDashboardLandingPage();
+        await header.awaitKibanaChrome();
+        await header.waitUntilLoadingHasFinished();
+        const onDashboardLandingPage = await dashboard.onDashboardLandingPage();
         expect(onDashboardLandingPage).to.equal(false);
       });
 
       it('stays on listing page if title matches no dashboards', async function () {
-        await PageObjects.dashboard.gotoDashboardLandingPage();
+        await dashboard.gotoDashboardLandingPage();
         const currentUrl = await browser.getCurrentUrl();
         const newUrl = currentUrl + '&title=nodashboardsnamedme';
         // Only works on a hard refresh.
         const useTimeStamp = true;
         await browser.get(newUrl.toString(), useTimeStamp);
 
-        await PageObjects.header.awaitKibanaChrome();
-        await PageObjects.header.waitUntilLoadingHasFinished();
-        const onDashboardLandingPage = await PageObjects.dashboard.onDashboardLandingPage();
+        await header.awaitKibanaChrome();
+        await header.waitUntilLoadingHasFinished();
+        const onDashboardLandingPage = await dashboard.onDashboardLandingPage();
         expect(onDashboardLandingPage).to.equal(true);
       });
 
@@ -163,21 +167,21 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('stays on listing page if title matches two dashboards', async function () {
-        await PageObjects.dashboard.clickNewDashboard();
-        await PageObjects.dashboard.saveDashboard('two words', {
+        await dashboard.clickNewDashboard();
+        await dashboard.saveDashboard('two words', {
           saveAsNew: true,
           needsConfirm: true,
         });
-        await PageObjects.dashboard.gotoDashboardLandingPage();
+        await dashboard.gotoDashboardLandingPage();
         const currentUrl = await browser.getCurrentUrl();
         const newUrl = currentUrl + '&title=two%20words';
         // Only works on a hard refresh.
         const useTimeStamp = true;
         await browser.get(newUrl.toString(), useTimeStamp);
 
-        await PageObjects.header.awaitKibanaChrome();
-        await PageObjects.header.waitUntilLoadingHasFinished();
-        const onDashboardLandingPage = await PageObjects.dashboard.onDashboardLandingPage();
+        await header.awaitKibanaChrome();
+        await header.waitUntilLoadingHasFinished();
+        const onDashboardLandingPage = await dashboard.onDashboardLandingPage();
         expect(onDashboardLandingPage).to.equal(true);
       });
 
@@ -187,9 +191,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('matches a title with many special characters', async function () {
-        await PageObjects.dashboard.clickNewDashboard();
-        await PageObjects.dashboard.saveDashboard('i am !@#$%^&*()_+~`,.<>{}[]; so special');
-        await PageObjects.dashboard.gotoDashboardLandingPage();
+        await dashboard.clickNewDashboard();
+        await dashboard.saveDashboard('i am !@#$%^&*()_+~`,.<>{}[]; so special');
+        await dashboard.gotoDashboardLandingPage();
         const currentUrl = await browser.getCurrentUrl();
         // Need to encode that one.
         const newUrl =
@@ -199,24 +203,24 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const useTimeStamp = true;
         await browser.get(newUrl.toString(), useTimeStamp);
 
-        await PageObjects.header.awaitKibanaChrome();
-        await PageObjects.header.waitUntilLoadingHasFinished();
-        const onDashboardLandingPage = await PageObjects.dashboard.onDashboardLandingPage();
+        await header.awaitKibanaChrome();
+        await header.waitUntilLoadingHasFinished();
+        const onDashboardLandingPage = await dashboard.onDashboardLandingPage();
         expect(onDashboardLandingPage).to.equal(false);
       });
     });
 
     describe('edit meta data', () => {
       it('saves changes to dashboard metadata', async () => {
-        await PageObjects.dashboard.gotoDashboardLandingPage();
-        await PageObjects.dashboard.clickCreateDashboardPrompt();
+        await dashboard.gotoDashboardLandingPage();
+        await dashboard.clickCreateDashboardPrompt();
         await dashboardAddPanel.clickOpenAddPanel();
         await dashboardAddPanel.addEveryEmbeddableOnCurrentPage();
         await dashboardAddPanel.ensureAddPanelIsClosed();
-        await PageObjects.dashboard.saveDashboard(`${dashboardName}-editMetaData`);
-        const originalPanelCount = await PageObjects.dashboard.getPanelCount();
+        await dashboard.saveDashboard(`${dashboardName}-editMetaData`);
+        const originalPanelCount = await dashboard.getPanelCount();
 
-        await PageObjects.dashboard.gotoDashboardLandingPage();
+        await dashboard.gotoDashboardLandingPage();
         await listingTable.searchForItemWithName(`${dashboardName}-editMetaData`);
         await listingTable.inspectVisualization();
         await listingTable.editVisualizationDetails({
@@ -228,10 +232,53 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await listingTable.setSearchFilterValue('new description');
         await listingTable.expectItemsCount('dashboard', 1);
         await listingTable.clickItemLink('dashboard', 'new title');
-        await PageObjects.dashboard.waitForRenderComplete();
+        await dashboard.waitForRenderComplete();
 
-        const newPanelCount = await PageObjects.dashboard.getPanelCount();
+        const newPanelCount = await dashboard.getPanelCount();
         expect(newPanelCount).to.equal(originalPanelCount);
+      });
+    });
+
+    describe('insights', function () {
+      this.tags('skipFIPS');
+      const DASHBOARD_NAME = 'Insights Dashboard';
+
+      before(async () => {
+        await dashboard.navigateToApp();
+        await dashboard.clickNewDashboard();
+        await dashboard.saveDashboard(DASHBOARD_NAME, {
+          saveAsNew: true,
+          waitDialogIsClosed: false,
+          exitFromEditMode: false,
+        });
+        await dashboard.gotoDashboardLandingPage();
+      });
+
+      it('shows the insights panel and counts the views', async () => {
+        await listingTable.searchForItemWithName(DASHBOARD_NAME);
+
+        async function getViewsCount() {
+          await listingTable.inspectVisualization();
+          const totalViewsStats = await testSubjects.find('views-stats-total-views');
+          const viewsStr = await (
+            await totalViewsStats.findByCssSelector('.euiStat__title')
+          ).getVisibleText();
+          await listingTable.closeInspector();
+          return Number(viewsStr);
+        }
+
+        const views1 = await getViewsCount();
+        expect(views1).to.be(1);
+
+        await listingTable.clickItemLink('dashboard', DASHBOARD_NAME);
+        await dashboard.waitForRenderComplete();
+        await dashboard.gotoDashboardLandingPage();
+
+        // it might take a bit for the view to be counted
+        await retry.try(async () => {
+          const views2 = await getViewsCount();
+          expect(views2).to.be(2);
+        });
       });
     });
   });

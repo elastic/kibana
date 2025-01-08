@@ -12,13 +12,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const config = getService('config');
   const spacesService = getService('spaces');
-  const PageObjects = getPageObjects([
+  const { common, error, timePicker, unifiedFieldList } = getPageObjects([
     'common',
     'error',
-    'discover',
     'timePicker',
-    'security',
-    'spaceSelector',
     'unifiedFieldList',
   ]);
   const testSubjects = getService('testSubjects');
@@ -26,7 +23,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
 
   async function setDiscoverTimeRange() {
-    await PageObjects.timePicker.setDefaultAbsoluteRange();
+    await timePicker.setDefaultAbsoluteRange();
   }
 
   describe('spaces', () => {
@@ -64,7 +61,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('shows discover navlink', async () => {
-        await PageObjects.common.navigateToApp('home', {
+        await common.navigateToApp('home', {
           basePath: '/s/custom_space',
         });
         const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
@@ -72,7 +69,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('shows save button', async () => {
-        await PageObjects.common.navigateToApp('discover', {
+        await common.navigateToApp('discover', {
           basePath: '/s/custom_space',
         });
         await testSubjects.existOrFail('discoverSaveButton', {
@@ -81,12 +78,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('shows "visualize" field button', async () => {
-        await PageObjects.common.navigateToApp('discover', {
+        await common.navigateToApp('discover', {
           basePath: '/s/custom_space',
         });
         await setDiscoverTimeRange();
-        await PageObjects.unifiedFieldList.clickFieldListItem('bytes');
-        await PageObjects.unifiedFieldList.expectFieldListItemVisualize('bytes');
+        await unifiedFieldList.clickFieldListItem('bytes');
+        await unifiedFieldList.expectFieldListItemVisualize('bytes');
       });
     });
 
@@ -112,7 +109,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it(`doesn't show discover navlink`, async () => {
-        await PageObjects.common.navigateToApp('home', {
+        await common.navigateToApp('home', {
           basePath: '/s/custom_space',
         });
         const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
@@ -120,13 +117,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it(`shows 404`, async () => {
-        await PageObjects.common.navigateToUrl('discover', '', {
+        await common.navigateToUrl('discover', '', {
           basePath: '/s/custom_space',
           shouldLoginIfPrompted: false,
           ensureCurrentUrl: false,
           useActualUrl: true,
         });
-        await PageObjects.error.expectNotFound();
+        await error.expectNotFound();
       });
     });
 
@@ -151,12 +148,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('Does not show the "visualize" field button', async () => {
-        await PageObjects.common.navigateToApp('discover', {
+        await common.navigateToApp('discover', {
           basePath: '/s/custom_space',
         });
         await setDiscoverTimeRange();
-        await PageObjects.unifiedFieldList.clickFieldListItem('bytes');
-        await PageObjects.unifiedFieldList.expectMissingFieldListItemVisualize('bytes');
+        await unifiedFieldList.clickFieldListItem('bytes');
+        await unifiedFieldList.expectMissingFieldListItemVisualize('bytes');
       });
     });
 
@@ -177,7 +174,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('shows empty prompt when no data views exist', async () => {
-        await PageObjects.common.navigateToUrl('discover', '', {
+        await common.navigateToUrl('discover', '', {
           basePath: '/s/custom_space_no_index_patterns',
           ensureCurrentUrl: false,
           shouldUseHashForSubUrl: false,

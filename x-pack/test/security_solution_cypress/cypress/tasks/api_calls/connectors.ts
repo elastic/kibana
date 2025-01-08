@@ -5,20 +5,49 @@
  * 2.0.
  */
 
+import { Connector } from '@kbn/actions-plugin/server/application/connector/types';
+import { rootRequest } from './common';
+
 export const createConnector = (connector: Record<string, unknown>) =>
-  cy.request({
+  rootRequest<Connector>({
     method: 'POST',
-    url: '/api/actions/action',
+    url: '/api/actions/connector',
     body: connector,
-    headers: { 'kbn-xsrf': 'cypress-creds', 'x-elastic-internal-origin': 'security-solution' },
   });
 
 const slackConnectorAPIPayload = {
-  actionTypeId: '.slack',
+  connector_type_id: '.slack',
   secrets: {
     webhookUrl: 'http://localhost:123',
   },
   name: 'Slack cypress test e2e connector',
 };
 
+export const azureConnectorAPIPayload = {
+  connector_type_id: '.gen-ai',
+  secrets: {
+    apiKey: '123',
+  },
+  config: {
+    apiUrl:
+      'https://goodurl.com/openai/deployments/good-gpt4o/chat/completions?api-version=2024-02-15-preview',
+    apiProvider: 'Azure OpenAI',
+  },
+  name: 'Azure OpenAI cypress test e2e connector',
+};
+
+export const bedrockConnectorAPIPayload = {
+  connector_type_id: '.bedrock',
+  secrets: {
+    accessKey: '123',
+    secret: '123',
+  },
+  config: {
+    apiUrl: 'https://bedrock.com',
+  },
+  name: 'Bedrock cypress test e2e connector',
+};
+
 export const createSlackConnector = () => createConnector(slackConnectorAPIPayload);
+export const createAzureConnector = () => createConnector(azureConnectorAPIPayload);
+export const createBedrockConnector = () => createConnector(bedrockConnectorAPIPayload);

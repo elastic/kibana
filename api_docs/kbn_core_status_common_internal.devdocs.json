@@ -319,9 +319,9 @@
               "Omit<",
               {
                 "pluginId": "@kbn/core-metrics-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreMetricsServerPluginApi",
-                "section": "def-common.OpsMetrics",
+                "section": "def-server.OpsMetrics",
                 "text": "OpsMetrics"
               },
               ", \"collected_at\"> & { last_updated: string; collection_interval_in_millis: number; requests: { status_codes: Record<number, number>; }; }"
@@ -347,9 +347,9 @@
           "Omit<",
           {
             "pluginId": "@kbn/core-metrics-server",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCoreMetricsServerPluginApi",
-            "section": "def-common.OpsMetrics",
+            "section": "def-server.OpsMetrics",
             "text": "OpsMetrics"
           },
           ", \"collected_at\"> & { last_updated: string; collection_interval_in_millis: number; requests: { status_codes: Record<number, number>; }; }"

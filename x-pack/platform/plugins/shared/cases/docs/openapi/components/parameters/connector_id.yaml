@@ -1,0 +1,7 @@
+in: path
+name: connectorId
+description: An identifier for the connector. To retrieve connector IDs, use the find connectors API.
+required: true
+schema:
+  type: string
+  example: abed3a70-71bd-11ea-a0b2-c51ea50a58e2

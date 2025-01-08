@@ -6,26 +6,10 @@
     "interfaces": [],
     "enums": [],
     "misc": [],
-    "objects": []
-  },
-  "server": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
     "objects": [
       {
         "parentPluginId": "@kbn/core-deprecations-browser-mocks",
-        "id": "def-common.deprecationsServiceMock",
+        "id": "def-public.deprecationsServiceMock",
         "type": "Object",
         "tags": [],
         "label": "deprecationsServiceMock",
@@ -36,7 +20,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-deprecations-browser-mocks",
-            "id": "def-common.deprecationsServiceMock.create",
+            "id": "def-public.deprecationsServiceMock.create",
             "type": "Function",
             "tags": [],
             "label": "create",
@@ -51,13 +35,7 @@
                 "text": "PublicMethodsOf"
               },
               "<",
-              {
-                "pluginId": "@kbn/core-deprecations-browser-internal",
-                "scope": "common",
-                "docId": "kibKbnCoreDeprecationsBrowserInternalPluginApi",
-                "section": "def-common.DeprecationsService",
-                "text": "DeprecationsService"
-              },
+              "DeprecationsService",
               ">>"
             ],
             "path": "packages/core/deprecations/core-deprecations-browser-mocks/src/deprecations_service.mock.ts",
@@ -68,7 +46,7 @@
           },
           {
             "parentPluginId": "@kbn/core-deprecations-browser-mocks",
-            "id": "def-common.deprecationsServiceMock.createSetupContract",
+            "id": "def-public.deprecationsServiceMock.createSetupContract",
             "type": "Function",
             "tags": [],
             "label": "createSetupContract",
@@ -84,20 +62,14 @@
           },
           {
             "parentPluginId": "@kbn/core-deprecations-browser-mocks",
-            "id": "def-common.deprecationsServiceMock.createStartContract",
+            "id": "def-public.deprecationsServiceMock.createStartContract",
             "type": "Function",
             "tags": [],
             "label": "createStartContract",
             "description": [],
             "signature": [
               "() => jest.Mocked<",
-              {
-                "pluginId": "@kbn/core-deprecations-browser",
-                "scope": "common",
-                "docId": "kibKbnCoreDeprecationsBrowserPluginApi",
-                "section": "def-common.DeprecationsServiceStart",
-                "text": "DeprecationsServiceStart"
-              },
+              "DeprecationsServiceStart",
               ">"
             ],
             "path": "packages/core/deprecations/core-deprecations-browser-mocks/src/deprecations_service.mock.ts",
@@ -110,5 +82,21 @@
         "initialIsOpen": false
       }
     ]
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
   }
 }

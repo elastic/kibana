@@ -1,5 +1,0 @@
-{
-  "type": "shared-common",
-  "id": "@kbn/safer-lodash-set",
-  "owner": "@elastic/kibana-security"
-}

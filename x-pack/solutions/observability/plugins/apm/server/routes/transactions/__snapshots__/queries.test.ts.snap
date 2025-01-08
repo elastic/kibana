@@ -1,0 +1,401 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`transaction queries fetches a transaction 1`] = `
+Object {
+  "apm": Object {
+    "sources": Array [
+      Object {
+        "documentType": "transactionEvent",
+        "rollupInterval": "none",
+      },
+    ],
+  },
+  "body": Object {
+    "_source": Array [
+      "span.links",
+      "transaction.agent.marks",
+    ],
+    "fields": Array [
+      "trace.id",
+      "agent.name",
+      "processor.event",
+      "@timestamp",
+      "timestamp.us",
+      "service.name",
+      "transaction.id",
+      "transaction.duration.us",
+      "transaction.name",
+      "transaction.sampled",
+      "transaction.type",
+      "processor.name",
+      "service.language.name",
+    ],
+    "query": Object {
+      "bool": Object {
+        "filter": Array [
+          Object {
+            "term": Object {
+              "transaction.id": "foo",
+            },
+          },
+          Object {
+            "term": Object {
+              "trace.id": "bar",
+            },
+          },
+          Object {
+            "range": Object {
+              "@timestamp": Object {
+                "format": "epoch_millis",
+                "gte": 0,
+                "lte": 50000,
+              },
+            },
+          },
+        ],
+      },
+    },
+    "size": 1,
+    "terminate_after": 1,
+    "track_total_hits": false,
+  },
+}
+`;
+
+exports[`transaction queries fetches breakdown data for transactions 1`] = `
+Object {
+  "apm": Object {
+    "events": Array [
+      "metric",
+    ],
+  },
+  "body": Object {
+    "aggs": Object {
+      "by_date": Object {
+        "aggs": Object {
+          "sum_all_self_times": Object {
+            "sum": Object {
+              "field": "span.self_time.sum.us",
+            },
+          },
+          "types": Object {
+            "aggs": Object {
+              "subtypes": Object {
+                "aggs": Object {
+                  "total_self_time_per_subtype": Object {
+                    "sum": Object {
+                      "field": "span.self_time.sum.us",
+                    },
+                  },
+                },
+                "terms": Object {
+                  "field": "span.subtype",
+                  "missing": "",
+                  "order": Object {
+                    "_count": "desc",
+                  },
+                  "size": 20,
+                },
+              },
+            },
+            "terms": Object {
+              "field": "span.type",
+              "order": Object {
+                "_count": "desc",
+              },
+              "size": 20,
+            },
+          },
+        },
+        "date_histogram": Object {
+          "extended_bounds": Object {
+            "max": 50000,
+            "min": 0,
+          },
+          "field": "@timestamp",
+          "fixed_interval": "30s",
+          "min_doc_count": 0,
+        },
+      },
+      "sum_all_self_times": Object {
+        "sum": Object {
+          "field": "span.self_time.sum.us",
+        },
+      },
+      "types": Object {
+        "aggs": Object {
+          "subtypes": Object {
+            "aggs": Object {
+              "total_self_time_per_subtype": Object {
+                "sum": Object {
+                  "field": "span.self_time.sum.us",
+                },
+              },
+            },
+            "terms": Object {
+              "field": "span.subtype",
+              "missing": "",
+              "order": Object {
+                "_count": "desc",
+              },
+              "size": 20,
+            },
+          },
+        },
+        "terms": Object {
+          "field": "span.type",
+          "order": Object {
+            "_count": "desc",
+          },
+          "size": 20,
+        },
+      },
+    },
+    "query": Object {
+      "bool": Object {
+        "filter": Array [
+          Object {
+            "term": Object {
+              "service.name": "foo",
+            },
+          },
+          Object {
+            "term": Object {
+              "transaction.type": "bar",
+            },
+          },
+          Object {
+            "range": Object {
+              "@timestamp": Object {
+                "format": "epoch_millis",
+                "gte": 0,
+                "lte": 50000,
+              },
+            },
+          },
+          Object {
+            "exists": Object {
+              "field": "span.self_time.sum.us",
+            },
+          },
+        ],
+      },
+    },
+    "size": 0,
+    "track_total_hits": false,
+  },
+}
+`;
+
+exports[`transaction queries fetches breakdown data for transactions for a transaction name 1`] = `
+Object {
+  "apm": Object {
+    "events": Array [
+      "metric",
+    ],
+  },
+  "body": Object {
+    "aggs": Object {
+      "by_date": Object {
+        "aggs": Object {
+          "sum_all_self_times": Object {
+            "sum": Object {
+              "field": "span.self_time.sum.us",
+            },
+          },
+          "types": Object {
+            "aggs": Object {
+              "subtypes": Object {
+                "aggs": Object {
+                  "total_self_time_per_subtype": Object {
+                    "sum": Object {
+                      "field": "span.self_time.sum.us",
+                    },
+                  },
+                },
+                "terms": Object {
+                  "field": "span.subtype",
+                  "missing": "",
+                  "order": Object {
+                    "_count": "desc",
+                  },
+                  "size": 20,
+                },
+              },
+            },
+            "terms": Object {
+              "field": "span.type",
+              "order": Object {
+                "_count": "desc",
+              },
+              "size": 20,
+            },
+          },
+        },
+        "date_histogram": Object {
+          "extended_bounds": Object {
+            "max": 50000,
+            "min": 0,
+          },
+          "field": "@timestamp",
+          "fixed_interval": "30s",
+          "min_doc_count": 0,
+        },
+      },
+      "sum_all_self_times": Object {
+        "sum": Object {
+          "field": "span.self_time.sum.us",
+        },
+      },
+      "types": Object {
+        "aggs": Object {
+          "subtypes": Object {
+            "aggs": Object {
+              "total_self_time_per_subtype": Object {
+                "sum": Object {
+                  "field": "span.self_time.sum.us",
+                },
+              },
+            },
+            "terms": Object {
+              "field": "span.subtype",
+              "missing": "",
+              "order": Object {
+                "_count": "desc",
+              },
+              "size": 20,
+            },
+          },
+        },
+        "terms": Object {
+          "field": "span.type",
+          "order": Object {
+            "_count": "desc",
+          },
+          "size": 20,
+        },
+      },
+    },
+    "query": Object {
+      "bool": Object {
+        "filter": Array [
+          Object {
+            "term": Object {
+              "service.name": "foo",
+            },
+          },
+          Object {
+            "term": Object {
+              "transaction.type": "bar",
+            },
+          },
+          Object {
+            "range": Object {
+              "@timestamp": Object {
+                "format": "epoch_millis",
+                "gte": 0,
+                "lte": 50000,
+              },
+            },
+          },
+          Object {
+            "exists": Object {
+              "field": "span.self_time.sum.us",
+            },
+          },
+          Object {
+            "term": Object {
+              "transaction.name": "baz",
+            },
+          },
+        ],
+      },
+    },
+    "size": 0,
+    "track_total_hits": false,
+  },
+}
+`;
+
+exports[`transaction queries fetches transaction trace samples 1`] = `
+Object {
+  "_source": Array [
+    "transaction.id",
+    "trace.id",
+    "@timestamp",
+  ],
+  "apm": Object {
+    "events": Array [
+      "transaction",
+    ],
+  },
+  "body": Object {
+    "fields": Array [
+      "transaction.id",
+      "trace.id",
+      "@timestamp",
+    ],
+    "query": Object {
+      "bool": Object {
+        "filter": Array [
+          Object {
+            "term": Object {
+              "service.name": "foo",
+            },
+          },
+          Object {
+            "term": Object {
+              "transaction.type": "baz",
+            },
+          },
+          Object {
+            "term": Object {
+              "transaction.name": "bar",
+            },
+          },
+          Object {
+            "range": Object {
+              "@timestamp": Object {
+                "format": "epoch_millis",
+                "gte": 0,
+                "lte": 50000,
+              },
+            },
+          },
+          Object {
+            "term": Object {
+              "transaction.sampled": true,
+            },
+          },
+        ],
+        "should": Array [
+          Object {
+            "term": Object {
+              "trace.id": "qux",
+            },
+          },
+          Object {
+            "term": Object {
+              "transaction.id": "quz",
+            },
+          },
+        ],
+      },
+    },
+    "size": 500,
+    "sort": Array [
+      Object {
+        "_score": Object {
+          "order": "desc",
+        },
+      },
+      Object {
+        "@timestamp": Object {
+          "order": "desc",
+        },
+      },
+    ],
+    "track_total_hits": false,
+  },
+}
+`;

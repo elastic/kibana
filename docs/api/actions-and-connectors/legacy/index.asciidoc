@@ -1,4 +1,0 @@
-[[actions-and-connectors-legacy-apis]]
-=== Deprecated 7.x APIs
-
-These APIs are deprecated and will be removed in a future release.

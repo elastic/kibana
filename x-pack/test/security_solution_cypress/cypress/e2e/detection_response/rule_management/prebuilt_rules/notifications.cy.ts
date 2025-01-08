@@ -32,7 +32,7 @@ const RULE_1 = createRuleAssetSavedObject({
 
 describe(
   'Detection rules, Prebuilt Rules Installation and Update Notifications',
-  { tags: ['@ess', '@serverless'] },
+  { tags: ['@ess', '@serverless', '@skipInServerlessMKI'] },
   () => {
     beforeEach(() => {
       login();
@@ -72,7 +72,7 @@ describe(
     });
 
     // https://github.com/elastic/kibana/issues/179968
-    describe('Notifications', { tags: ['@skipInServerlessMKI'] }, () => {
+    describe('Notifications', () => {
       beforeEach(() => {
         installPrebuiltRuleAssets([RULE_1]);
       });

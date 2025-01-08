@@ -1,76 +1,48 @@
 {
   "id": "@kbn/core-http-browser-internal",
   "client": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "server": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
     "classes": [
       {
         "parentPluginId": "@kbn/core-http-browser-internal",
-        "id": "def-common.BasePath",
+        "id": "def-public.BasePath",
         "type": "Class",
         "tags": [],
         "label": "BasePath",
         "description": [],
         "signature": [
-          {
-            "pluginId": "@kbn/core-http-browser-internal",
-            "scope": "common",
-            "docId": "kibKbnCoreHttpBrowserInternalPluginApi",
-            "section": "def-common.BasePath",
-            "text": "BasePath"
-          },
+          "BasePath",
           " implements ",
-          {
-            "pluginId": "@kbn/core-http-browser",
-            "scope": "common",
-            "docId": "kibKbnCoreHttpBrowserPluginApi",
-            "section": "def-common.IBasePath",
-            "text": "IBasePath"
-          }
+          "IBasePath"
         ],
-        "path": "packages/core/http/core-http-browser-internal/src/base_path.ts",
+        "path": "src/core/packages/http/browser-internal/src/base_path.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-http-browser-internal",
-            "id": "def-common.BasePath.serverBasePath",
+            "id": "def-public.BasePath.serverBasePath",
             "type": "string",
             "tags": [],
             "label": "serverBasePath",
             "description": [],
-            "path": "packages/core/http/core-http-browser-internal/src/base_path.ts",
+            "path": "src/core/packages/http/browser-internal/src/base_path.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-http-browser-internal",
-            "id": "def-common.BasePath.assetsHrefBase",
+            "id": "def-public.BasePath.assetsHrefBase",
             "type": "string",
             "tags": [],
             "label": "assetsHrefBase",
             "description": [],
-            "path": "packages/core/http/core-http-browser-internal/src/base_path.ts",
+            "path": "src/core/packages/http/browser-internal/src/base_path.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-http-browser-internal",
-            "id": "def-common.BasePath.publicBaseUrl",
+            "id": "def-public.BasePath.publicBaseUrl",
             "type": "string",
             "tags": [],
             "label": "publicBaseUrl",
@@ -78,13 +50,13 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/core/http/core-http-browser-internal/src/base_path.ts",
+            "path": "src/core/packages/http/browser-internal/src/base_path.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-http-browser-internal",
-            "id": "def-common.BasePath.Unnamed",
+            "id": "def-public.BasePath.Unnamed",
             "type": "Function",
             "tags": [],
             "label": "Constructor",
@@ -92,35 +64,35 @@
             "signature": [
               "any"
             ],
-            "path": "packages/core/http/core-http-browser-internal/src/base_path.ts",
+            "path": "src/core/packages/http/browser-internal/src/base_path.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-http-browser-internal",
-                "id": "def-common.BasePath.Unnamed.$1",
+                "id": "def-public.BasePath.Unnamed.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "{\n    basePath,\n    serverBasePath,\n    assetsHrefBase,\n    publicBaseUrl,\n  }",
                 "description": [],
-                "path": "packages/core/http/core-http-browser-internal/src/base_path.ts",
+                "path": "src/core/packages/http/browser-internal/src/base_path.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
                   {
                     "parentPluginId": "@kbn/core-http-browser-internal",
-                    "id": "def-common.BasePath.Unnamed.$1.basePath",
+                    "id": "def-public.BasePath.Unnamed.$1.basePath",
                     "type": "string",
                     "tags": [],
                     "label": "basePath",
                     "description": [],
-                    "path": "packages/core/http/core-http-browser-internal/src/base_path.ts",
+                    "path": "src/core/packages/http/browser-internal/src/base_path.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   },
                   {
                     "parentPluginId": "@kbn/core-http-browser-internal",
-                    "id": "def-common.BasePath.Unnamed.$1.serverBasePath",
+                    "id": "def-public.BasePath.Unnamed.$1.serverBasePath",
                     "type": "string",
                     "tags": [],
                     "label": "serverBasePath",
@@ -128,13 +100,13 @@
                     "signature": [
                       "string | undefined"
                     ],
-                    "path": "packages/core/http/core-http-browser-internal/src/base_path.ts",
+                    "path": "src/core/packages/http/browser-internal/src/base_path.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   },
                   {
                     "parentPluginId": "@kbn/core-http-browser-internal",
-                    "id": "def-common.BasePath.Unnamed.$1.assetsHrefBase",
+                    "id": "def-public.BasePath.Unnamed.$1.assetsHrefBase",
                     "type": "string",
                     "tags": [],
                     "label": "assetsHrefBase",
@@ -142,13 +114,13 @@
                     "signature": [
                       "string | undefined"
                     ],
-                    "path": "packages/core/http/core-http-browser-internal/src/base_path.ts",
+                    "path": "src/core/packages/http/browser-internal/src/base_path.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   },
                   {
                     "parentPluginId": "@kbn/core-http-browser-internal",
-                    "id": "def-common.BasePath.Unnamed.$1.publicBaseUrl",
+                    "id": "def-public.BasePath.Unnamed.$1.publicBaseUrl",
                     "type": "string",
                     "tags": [],
                     "label": "publicBaseUrl",
@@ -156,7 +128,7 @@
                     "signature": [
                       "string | undefined"
                     ],
-                    "path": "packages/core/http/core-http-browser-internal/src/base_path.ts",
+                    "path": "src/core/packages/http/browser-internal/src/base_path.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -167,7 +139,7 @@
           },
           {
             "parentPluginId": "@kbn/core-http-browser-internal",
-            "id": "def-common.BasePath.get",
+            "id": "def-public.BasePath.get",
             "type": "Function",
             "tags": [],
             "label": "get",
@@ -175,7 +147,7 @@
             "signature": [
               "() => string"
             ],
-            "path": "packages/core/http/core-http-browser-internal/src/base_path.ts",
+            "path": "src/core/packages/http/browser-internal/src/base_path.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -183,7 +155,7 @@
           },
           {
             "parentPluginId": "@kbn/core-http-browser-internal",
-            "id": "def-common.BasePath.prepend",
+            "id": "def-public.BasePath.prepend",
             "type": "Function",
             "tags": [],
             "label": "prepend",
@@ -191,13 +163,13 @@
             "signature": [
               "(path: string) => string"
             ],
-            "path": "packages/core/http/core-http-browser-internal/src/base_path.ts",
+            "path": "src/core/packages/http/browser-internal/src/base_path.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-http-browser-internal",
-                "id": "def-common.BasePath.prepend.$1",
+                "id": "def-public.BasePath.prepend.$1",
                 "type": "string",
                 "tags": [],
                 "label": "path",
@@ -205,7 +177,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/core/http/core-http-browser-internal/src/base_path.ts",
+                "path": "src/core/packages/http/browser-internal/src/base_path.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -215,7 +187,7 @@
           },
           {
             "parentPluginId": "@kbn/core-http-browser-internal",
-            "id": "def-common.BasePath.remove",
+            "id": "def-public.BasePath.remove",
             "type": "Function",
             "tags": [],
             "label": "remove",
@@ -223,13 +195,13 @@
             "signature": [
               "(path: string) => string"
             ],
-            "path": "packages/core/http/core-http-browser-internal/src/base_path.ts",
+            "path": "src/core/packages/http/browser-internal/src/base_path.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-http-browser-internal",
-                "id": "def-common.BasePath.remove.$1",
+                "id": "def-public.BasePath.remove.$1",
                 "type": "string",
                 "tags": [],
                 "label": "path",
@@ -237,7 +209,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/core/http/core-http-browser-internal/src/base_path.ts",
+                "path": "src/core/packages/http/browser-internal/src/base_path.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -255,55 +227,59 @@
     "misc": [
       {
         "parentPluginId": "@kbn/core-http-browser-internal",
-        "id": "def-common.InternalHttpSetup",
+        "id": "def-public.InternalHttpSetup",
         "type": "Type",
         "tags": [],
         "label": "InternalHttpSetup",
         "description": [],
         "signature": [
           "Omit<",
-          {
-            "pluginId": "@kbn/core-http-browser",
-            "scope": "common",
-            "docId": "kibKbnCoreHttpBrowserPluginApi",
-            "section": "def-common.HttpSetup",
-            "text": "HttpSetup"
-          },
+          "HttpSetup",
           ", \"staticAssets\"> & { staticAssets: ",
           "InternalStaticAssets",
           "; }"
         ],
-        "path": "packages/core/http/core-http-browser-internal/src/types.ts",
+        "path": "src/core/packages/http/browser-internal/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/core-http-browser-internal",
-        "id": "def-common.InternalHttpStart",
+        "id": "def-public.InternalHttpStart",
         "type": "Type",
         "tags": [],
         "label": "InternalHttpStart",
         "description": [],
         "signature": [
           "Omit<",
-          {
-            "pluginId": "@kbn/core-http-browser",
-            "scope": "common",
-            "docId": "kibKbnCoreHttpBrowserPluginApi",
-            "section": "def-common.HttpSetup",
-            "text": "HttpSetup"
-          },
+          "HttpSetup",
           ", \"staticAssets\"> & { staticAssets: ",
           "InternalStaticAssets",
           "; }"
         ],
-        "path": "packages/core/http/core-http-browser-internal/src/types.ts",
+        "path": "src/core/packages/http/browser-internal/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
     "objects": []
   }
 }

@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 
 export default ({ getService, getPageObjects }) => {
-  describe('Cross cluster search test in discover', async () => {
+  describe('Cross cluster search test in discover', () => {
     const PageObjects = getPageObjects([
       'common',
       'settings',
@@ -88,9 +88,7 @@ export default ({ getService, getPageObjects }) => {
         }
       ]`,
       });
-    });
 
-    before(async () => {
       if (process.env.SECURITY === 'YES') {
         log.debug(
           '### provisionedEnv.SECURITY === YES so log in as elastic superuser to create cross cluster indices'

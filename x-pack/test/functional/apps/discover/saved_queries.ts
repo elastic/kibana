@@ -12,9 +12,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const spaces = getService('spaces');
-  const PageObjects = getPageObjects([
+  const { common, settings, shareSavedObjectsToSpace } = getPageObjects([
     'common',
-    'discover',
     'settings',
     'shareSavedObjectsToSpace',
   ]);
@@ -48,7 +47,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('Manage saved queries', () => {
       it('delete saved query shared in multiple spaces', async () => {
         // Navigate to Discover & create a saved query
-        await PageObjects.common.navigateToApp('discover');
+        await common.navigateToApp('discover');
         await queryBar.setQuery('response:200');
         await queryBar.submitQuery();
         await savedQueryManagementComponent.saveNewQuery(savedQueryName, '', true, false);
@@ -56,16 +55,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await savedQueryManagementComponent.closeSavedQueryManagementComponent();
 
         // Navigate to settings & share the saved query between multiple spaces
-        await PageObjects.common.navigateToApp('settings');
-        await PageObjects.settings.clickKibanaSavedObjects();
-        await PageObjects.shareSavedObjectsToSpace.openShareToSpaceFlyoutForObject(savedQueryName);
-        await PageObjects.shareSavedObjectsToSpace.setupForm({
+        await common.navigateToApp('settings');
+        await settings.clickKibanaSavedObjects();
+        await shareSavedObjectsToSpace.openShareToSpaceFlyoutForObject(savedQueryName);
+        await shareSavedObjectsToSpace.setupForm({
           destinationSpaceId,
         });
-        await PageObjects.shareSavedObjectsToSpace.saveShare();
+        await shareSavedObjectsToSpace.saveShare();
 
         // Navigate back to Discover and delete the query
-        await PageObjects.common.navigateToApp('discover');
+        await common.navigateToApp('discover');
         await savedQueryManagementComponent.deleteSavedQuery(savedQueryName);
 
         // Refresh to ensure the object is actually deleted
@@ -77,7 +76,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const name = `${savedQueryName}-update`;
 
         // Navigate to Discover & create a saved query
-        await PageObjects.common.navigateToApp('discover');
+        await common.navigateToApp('discover');
         await queryBar.setQuery('response:200');
         await queryBar.submitQuery();
         await savedQueryManagementComponent.saveNewQuery(name, '', true, false);
@@ -90,7 +89,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await savedQueryManagementComponent.updateCurrentlyLoadedQuery('', true, false);
 
         // Navigate to Discover ensure updated query exists
-        await PageObjects.common.navigateToApp('discover');
+        await common.navigateToApp('discover');
         await savedQueryManagementComponent.savedQueryExistOrFail(name);
         await savedQueryManagementComponent.closeSavedQueryManagementComponent();
         await savedQueryManagementComponent.deleteSavedQuery(name);

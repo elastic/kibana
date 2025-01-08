@@ -8,6 +8,8 @@
 import { expect } from 'expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
+const ADD_TO_CASE_DATA_TEST_SUBJ = 'embeddablePanelAction-embeddable_addToExistingCase';
+
 export default ({ getPageObject, getService }: FtrProviderContext) => {
   const dashboard = getPageObject('dashboard');
   const lens = getPageObject('lens');
@@ -22,6 +24,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const find = getService('find');
   const toasts = getService('toasts');
   const retry = getService('retry');
+  const dashboardPanelActions = getService('dashboardPanelActions');
 
   describe('Cases persistable attachments', function () {
     describe('lens visualization', () => {
@@ -55,9 +58,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       it('adds lens visualization to a new case', async () => {
         const caseTitle = 'case created in observability from my dashboard with lens visualization';
 
-        await testSubjects.click('embeddablePanelToggleMenuIcon');
-        await testSubjects.click('embeddablePanelMore-mainMenu');
-        await testSubjects.click('embeddablePanelAction-embeddable_addToExistingCase');
+        await dashboardPanelActions.clickPanelAction(ADD_TO_CASE_DATA_TEST_SUBJ);
 
         await retry.waitFor('wait for the modal to open', async () => {
           return (
@@ -81,7 +82,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await testSubjects.missingOrFail('caseOwnerSelector');
         await testSubjects.click('create-case-submit');
 
-        await cases.common.expectToasterToContain(`${caseTitle} has been updated`);
+        await cases.common.expectToasterToContain(`Case ${caseTitle} updated`);
         await testSubjects.click('toaster-content-case-view-link');
         await toasts.dismissAllWithChecks();
 
@@ -108,16 +109,13 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'dashboards' });
 
-        await testSubjects.click('embeddablePanelToggleMenuIcon');
-        await testSubjects.click('embeddablePanelMore-mainMenu');
-        await testSubjects.click('embeddablePanelAction-embeddable_addToExistingCase');
-
+        await dashboardPanelActions.clickPanelAction(ADD_TO_CASE_DATA_TEST_SUBJ);
         // verify that solution filter is not visible
         await testSubjects.missingOrFail('options-filter-popover-button-owner');
 
         await testSubjects.click(`cases-table-row-select-${theCase.id}`);
 
-        await cases.common.expectToasterToContain(`${theCaseTitle} has been updated`);
+        await cases.common.expectToasterToContain(`Case ${theCaseTitle} updated`);
         await testSubjects.click('toaster-content-case-view-link');
         await toasts.dismissAllWithChecks();
 

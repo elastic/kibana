@@ -1,0 +1,9 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/apm-data-view",
+  "owner": [
+    "@elastic/obs-ux-infra_services-team"
+  ],
+  "group": "platform",
+  "visibility": "shared"
+}

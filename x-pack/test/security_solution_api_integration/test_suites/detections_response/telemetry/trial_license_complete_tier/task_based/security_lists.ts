@@ -33,7 +33,7 @@ export default ({ getService }: FtrProviderContext) => {
   const es = getService('es');
 
   // Failing: See https://github.com/elastic/kibana/issues/164334
-  describe.skip('@ess @serverless Security lists task telemetry', async () => {
+  describe.skip('@ess @serverless Security lists task telemetry', () => {
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/security_solution/telemetry');
     });

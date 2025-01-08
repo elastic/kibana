@@ -21,11 +21,11 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('scroll_count', () => {
     before(async () => {
-      roleAuthc = await svlUserManager.createApiKeyForRole('admin');
+      roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
     });
 
     after(async () => {
-      await svlUserManager.invalidateApiKeyForRole(roleAuthc);
+      await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
     });
     describe('scroll_count with more than 10k objects', () => {
       const importVisualizations = async ({

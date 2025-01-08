@@ -1,0 +1,86 @@
+openapi: 3.0.0
+info:
+  version: '1'
+  title: Risk Scoring API
+  description: These APIs allow the consumer to manage Entity Risk Scores within Entity Analytics.
+paths:
+  # TODO delete on a future serverless release
+  /api/risk_scores/calculation/entity:
+    post:
+      x-labels: [ess, serverless]
+      x-internal: true
+      x-codegen-enabled: true
+      operationId: DeprecatedTriggerRiskScoreCalculation
+      summary: Deprecated Trigger calculation of Risk Scores for an entity. Moved to /internal/risk_score/calculation/entity
+      description: Calculates and persists Risk Scores for an entity, returning the calculated risk score.
+      deprecated: true
+      requestBody:
+        description: The entity type and identifier
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RiskScoresEntityCalculationRequest'
+        required: true
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RiskScoresEntityCalculationResponse'
+        '400':
+          description: Invalid request
+
+  /internal/risk_score/calculation/entity:
+    post:
+      x-labels: [ess, serverless]
+      x-codegen-enabled: true
+      operationId: TriggerRiskScoreCalculation
+      summary: Trigger calculation of Risk Scores for an entity
+      description: Calculates and persists Risk Scores for an entity, returning the calculated risk score.
+      requestBody:
+        description: The entity type and identifier
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RiskScoresEntityCalculationRequest'
+        required: true
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RiskScoresEntityCalculationResponse'
+        '400':
+          description: Invalid request
+
+components:
+  schemas:
+    RiskScoresEntityCalculationRequest:
+      type: object
+      required:
+        - identifier
+        - identifier_type
+      properties:
+        identifier:
+          description: Used to identify the entity.
+          type: string
+          example: 'my.host'
+        identifier_type:
+          description: Used to define the type of entity.
+          $ref: '../common/common.schema.yaml#/components/schemas/IdentifierType'
+        refresh:
+          type: string
+          enum: [wait_for]
+          description: If 'wait_for' the request will wait for the index refresh.
+
+    RiskScoresEntityCalculationResponse:
+      type: object
+      required:
+        - success
+      properties:
+        success:
+          type: boolean
+        score:
+          $ref: '../common/common.schema.yaml#/components/schemas/EntityRiskScoreRecord'

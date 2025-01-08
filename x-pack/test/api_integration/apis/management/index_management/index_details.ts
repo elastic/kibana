@@ -19,7 +19,7 @@ export default function ({ getService }: FtrProviderContext) {
   };
 
   const testIndex = 'test_index';
-  describe('index details', async () => {
+  describe('index details', () => {
     before(async () => {
       await createIndex(testIndex);
     });

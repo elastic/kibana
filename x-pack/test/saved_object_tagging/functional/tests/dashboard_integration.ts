@@ -75,7 +75,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
     });
 
-    describe('creating', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/160583
+    describe.skip('creating', () => {
       beforeEach(async () => {
         await PageObjects.common.navigateToApp('dashboard');
         await PageObjects.dashboard.gotoDashboardLandingPage();

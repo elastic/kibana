@@ -6,16 +6,24 @@
  */
 
 import { FtrConfigProviderContext } from '@kbn/test';
+import { commonFunctionalServices } from '@kbn/ftr-common-functional-services';
+import { commonFunctionalUIServices } from '@kbn/ftr-common-functional-ui-services';
 import { EnterpriseSearchCypressCliTestRunner } from './runner';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const kibanaCommonTestsConfig = await readConfigFile(
-    require.resolve('../../../test/common/config.js')
+    require.resolve('@kbn/test-suites-src/common/config')
   );
   const baseConfig = await readConfigFile(require.resolve('./cypress.config'));
 
   return {
     ...kibanaCommonTestsConfig.getAll(),
+
+    services: {
+      ...commonFunctionalServices,
+      ...commonFunctionalUIServices,
+    },
+
     // default to the xpack functional config
     ...baseConfig.getAll(),
 

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { resolve } from 'path';
@@ -54,9 +55,12 @@ describe('dev/mocha/junit report generation', () => {
     const [testsuite] = report.testsuites.testsuite;
     expect(testsuite.$.time).toMatch(DURATION_REGEX);
     expect(testsuite.$.timestamp).toMatch(ISO_DATE_SEC_REGEX);
-    expect(testsuite.$).toEqual({
-      'command-line':
-        'node scripts/jest --config=packages/kbn-test/jest.config.js --runInBand --coverage=false --passWithNoTests',
+    const expectedCommandLine = process.env.CI
+      ? 'node scripts/jest --config=packages/kbn-test/jest.config.js --runInBand --coverage=false --passWithNoTests'
+      : 'node node_modules/jest-worker/build/workers/processChild.js';
+
+    expect(testsuite.$).toMatchObject({
+      'command-line': expectedCommandLine,
       failures: '2',
       name: 'test',
       skipped: '1',

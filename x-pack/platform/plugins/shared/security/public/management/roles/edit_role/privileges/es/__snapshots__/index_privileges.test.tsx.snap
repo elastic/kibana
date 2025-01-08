@@ -1,0 +1,54 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`it renders without crashing 1`] = `
+<IndexPrivileges
+  availableIndexPrivileges={
+    Array [
+      "all",
+      "read",
+      "write",
+      "index",
+    ]
+  }
+  editable={true}
+  indexPatterns={Array []}
+  indexType="indices"
+  indicesAPIClient={
+    Object {
+      "getFields": [MockFunction],
+    }
+  }
+  license={
+    Object {
+      "features$": Observable {
+        "_subscribe": [Function],
+      },
+      "getFeatures": [MockFunction],
+      "getLicenseType": [MockFunction],
+      "getUnavailableReason": [MockFunction],
+      "hasAtLeast": [MockFunction],
+      "isEnabled": [MockFunction],
+      "isLicenseAvailable": [MockFunction],
+    }
+  }
+  onChange={[MockFunction]}
+  role={
+    Object {
+      "elasticsearch": Object {
+        "cluster": Array [],
+        "indices": Array [],
+        "remote_cluster": Array [],
+        "run_as": Array [],
+      },
+      "kibana": Array [],
+      "name": "",
+    }
+  }
+  validator={
+    RoleValidator {
+      "buildFlavor": undefined,
+      "shouldValidate": undefined,
+    }
+  }
+/>
+`;

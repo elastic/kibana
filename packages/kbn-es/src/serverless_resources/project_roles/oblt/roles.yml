@@ -25,6 +25,11 @@ viewer:
         - 'read'
         - 'view_index_metadata'
       allow_restricted_indices: false
+    - names:
+        - '.slo-observability.*'
+      privileges:
+        - 'read'
+        - 'view_index_metadata'
   applications:
     - application: 'kibana-.kibana'
       privileges:
@@ -69,6 +74,13 @@ editor:
         - 'write'
         - 'maintenance'
       allow_restricted_indices: false
+    - names:
+        - '.slo-observability.*'
+      privileges:
+        - 'write'
+        - 'read'
+        - 'view_index_metadata'
+        - 'manage'
   applications:
     - application: 'kibana-.kibana'
       privileges:

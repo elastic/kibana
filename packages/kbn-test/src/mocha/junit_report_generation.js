@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { REPO_ROOT } from '@kbn/repo-info';
-import { getCodeOwnersForFile, getPathsWithOwnersReversed } from '@kbn/code-owners';
+import { getOwningTeamsForPath, getCodeOwnersEntries } from '@kbn/code-owners';
 import { dirname, relative } from 'path';
 import { writeFileSync, mkdirSync } from 'fs';
 import { inspect } from 'util';
@@ -93,10 +94,10 @@ export function setupJUnitReportGeneration(runner, options = {}) {
       .filter((node) => node.pending || !results.find((result) => result.node === node))
       .map((node) => ({ skipped: true, node }));
 
-    // cache codeowners for quicker lookup
-    let reversedCodeowners = [];
+    // cache codeowner entries for quicker lookup
+    let codeOwnersEntries = [];
     try {
-      reversedCodeowners = getPathsWithOwnersReversed();
+      codeOwnersEntries = getCodeOwnersEntries();
     } catch {
       /* no-op */
     }
@@ -141,8 +142,9 @@ export function setupJUnitReportGeneration(runner, options = {}) {
       // adding code owners only for the failed test case
       if (failed) {
         const testCaseRelativePath = getPath(node);
-        const owners = getCodeOwnersForFile(testCaseRelativePath, reversedCodeowners);
-        attrs.owners = owners || ''; // empty string when no codeowners are defined
+
+        // Comma-separated list of owners. Empty string if no owners are found.
+        attrs.owners = getOwningTeamsForPath(testCaseRelativePath, codeOwnersEntries).join(',');
       }
 
       return testsuitesEl.ele('testcase', attrs);

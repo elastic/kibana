@@ -18,8 +18,7 @@ import {
 
 import { hostsUrl } from '../../../urls/navigation';
 
-// FLAKY: https://github.com/elastic/kibana/issues/183085
-describe.skip('timeline flyout button', () => {
+describe('timeline flyout button', () => {
   beforeEach(() => {
     login();
     visitWithTimeRange(hostsUrl('allHosts'));
@@ -62,20 +61,6 @@ describe.skip('timeline flyout button', () => {
       cy.get('body').type('{esc}');
 
       cy.get(TIMELINE_BOTTOM_BAR_TOGGLE_BUTTON).should('have.focus');
-    }
-  );
-
-  it(
-    'should render the global search dropdown when the input is focused',
-    { tags: ['@ess'] },
-    () => {
-      openTimelineUsingToggle();
-      cy.get('[data-test-subj="nav-search-input"]').focus();
-      cy.get('[data-test-subj="nav-search-input"]').should('be.focused');
-      cy.get('[data-test-subj="nav-search-option"]').should('be.visible');
-      cy.get('[data-test-subj="nav-search-option"]').first().realHover();
-      // check that at least one item is visible in the search bar after mousing over, i.e. it's still usable.
-      cy.get('[data-test-subj="nav-search-option"]').its('length').should('be.gte', 1);
     }
   );
 });

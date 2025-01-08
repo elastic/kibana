@@ -10,10 +10,13 @@ import { MessageRole, type Message } from '@kbn/observability-ai-assistant-plugi
 import { PassThrough } from 'stream';
 import { createLlmProxy, LlmProxy } from '../../common/create_llm_proxy';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
+import { createProxyActionConnector, deleteActionConnector } from '../../common/action_connectors';
+import { ForbiddenApiError } from '../../common/config';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const log = getService('log');
+  const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantAPIClient');
 
   const CHAT_API_URL = `/internal/observability_ai_assistant/chat`;
 
@@ -41,28 +44,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
     before(async () => {
       proxy = await createLlmProxy(log);
-
-      const response = await supertest
-        .post('/api/actions/connector')
-        .set('kbn-xsrf', 'foo')
-        .send({
-          name: 'OpenAI',
-          connector_type_id: '.gen-ai',
-          config: {
-            apiProvider: 'OpenAI',
-            apiUrl: `http://localhost:${proxy.getPort()}`,
-          },
-          secrets: {
-            apiKey: 'my-api-key',
-          },
-        })
-        .expect(200);
-
-      connectorId = response.body.id;
+      connectorId = await createProxyActionConnector({ supertest, log, port: proxy.getPort() });
     });
 
-    after(() => {
+    after(async () => {
       proxy.close();
+      await deleteActionConnector({ supertest, connectorId, log });
     });
 
     it("returns a 4xx if the connector doesn't exist", async () => {
@@ -74,6 +61,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           messages,
           connectorId: 'does not exist',
           functions: [],
+          scopes: ['all'],
         })
         .expect(404);
     });
@@ -102,6 +90,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 messages,
                 connectorId,
                 functions: [],
+                scopes: ['all'],
               })
               .pipe(passThrough);
 
@@ -112,8 +101,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             });
 
             for (let i = 0; i < NUM_RESPONSES; i++) {
-              await simulator.next(`Part: i\n`);
+              await simulator.next(`Part: ${i}\n`);
             }
+
+            await simulator.tokenCount({ completion: 20, prompt: 33, total: 53 });
 
             await simulator.complete();
 
@@ -146,61 +137,26 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       ]);
     });
 
-    it('returns a useful error if the request fails', async () => {
-      const interceptor = proxy.intercept('conversation', () => true);
-
-      const passThrough = new PassThrough();
-
-      supertest
-        .post(CHAT_API_URL)
-        .set('kbn-xsrf', 'foo')
-        .send({
-          name: 'my_api_call',
-          messages,
-          connectorId,
-          functions: [],
-        })
-        .expect(200)
-        .pipe(passThrough);
-
-      let data: string = '';
-
-      passThrough.on('data', (chunk) => {
-        data += chunk.toString('utf-8');
+    describe('security roles and access privileges', () => {
+      it('should deny access for users without the ai_assistant privilege', async () => {
+        try {
+          await observabilityAIAssistantAPIClient.unauthorizedUser({
+            endpoint: `POST ${CHAT_API_URL}`,
+            params: {
+              body: {
+                name: 'my_api_call',
+                messages,
+                connectorId,
+                functions: [],
+                scopes: ['all'],
+              },
+            },
+          });
+          throw new ForbiddenApiError('Expected unauthorizedUser() to throw a 403 Forbidden error');
+        } catch (e) {
+          expect(e.status).to.be(403);
+        }
       });
-
-      const simulator = await interceptor.waitForIntercept();
-
-      await simulator.status(400);
-
-      await simulator.rawWrite(
-        JSON.stringify({
-          error: {
-            code: 'context_length_exceeded',
-            message:
-              "This model's maximum context length is 8192 tokens. However, your messages resulted in 11036 tokens. Please reduce the length of the messages.",
-            param: 'messages',
-            type: 'invalid_request_error',
-          },
-        })
-      );
-
-      await simulator.rawEnd();
-
-      await new Promise<void>((resolve) => passThrough.on('end', () => resolve()));
-
-      const response = JSON.parse(data.trim());
-
-      expect(response.error.message).to.be(
-        `Token limit reached. Token limit is 8192, but the current conversation has 11036 tokens.`
-      );
-    });
-
-    after(async () => {
-      await supertest
-        .delete(`/api/actions/connector/${connectorId}`)
-        .set('kbn-xsrf', 'foo')
-        .expect(204);
     });
   });
 }

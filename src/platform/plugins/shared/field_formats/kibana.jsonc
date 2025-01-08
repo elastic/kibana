@@ -1,0 +1,18 @@
+{
+  "type": "plugin",
+  "id": "@kbn/field-formats-plugin",
+  "owner": [
+    "@elastic/kibana-data-discovery"
+  ],
+  "group": "platform",
+  "visibility": "shared",
+  "description": "Index pattern fields and ambiguous values formatters",
+  "plugin": {
+    "id": "fieldFormats",
+    "browser": true,
+    "server": true,
+    "extraPublicDirs": [
+      "common"
+    ]
+  }
+}

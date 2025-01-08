@@ -1,0 +1,95 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`EnabledFeatures renders as expected 1`] = `
+<SectionPanel
+  dataTestSubj="enabled-features-panel"
+>
+  <EuiFlexGroup>
+    <EuiFlexItem>
+      <EuiTitle
+        size="xs"
+      >
+        <h3>
+          <MemoizedFormattedMessage
+            defaultMessage="Set feature visibility"
+            id="xpack.spaces.management.enabledSpaceFeatures.enableFeaturesInSpaceMessage"
+          />
+        </h3>
+      </EuiTitle>
+      <EuiSpacer
+        size="s"
+      />
+      <EuiText
+        color="subdued"
+        size="s"
+      >
+        <p>
+          <MemoizedFormattedMessage
+            defaultMessage="Choose the features to display in the navigation menu for users of this space. If you want to focus on a single solution, you can simplify the navigation even more by selecting a {solutionView}."
+            id="xpack.spaces.management.enabledSpaceFeatures.chooseFeaturesToDisplayMessage"
+            values={
+              Object {
+                "solutionView": <Memo(MemoizedFormattedMessage)
+                  defaultMessage="Solution view"
+                  id="xpack.spaces.management.enabledSpaceFeatures.chooseFeaturesToDisplaySolutionViewText"
+                />,
+              }
+            }
+          />
+        </p>
+      </EuiText>
+    </EuiFlexItem>
+    <EuiFlexItem>
+      <FeatureTable
+        features={
+          Array [
+            Object {
+              "app": Array [],
+              "category": Object {
+                "euiIconType": "logoKibana",
+                "id": "kibana",
+                "label": "Analytics",
+                "order": 1000,
+              },
+              "id": "feature-1",
+              "name": "Feature 1",
+              "privileges": null,
+              "scope": Array [
+                "spaces",
+                "security",
+              ],
+            },
+            Object {
+              "app": Array [],
+              "category": Object {
+                "euiIconType": "logoKibana",
+                "id": "kibana",
+                "label": "Analytics",
+                "order": 1000,
+              },
+              "id": "feature-2",
+              "name": "Feature 2",
+              "privileges": null,
+              "scope": Array [
+                "spaces",
+                "security",
+              ],
+            },
+          ]
+        }
+        onChange={[MockFunction]}
+        space={
+          Object {
+            "disabledFeatures": Array [
+              "feature-1",
+              "feature-2",
+            ],
+            "id": "my-space",
+            "name": "my space",
+          }
+        }
+      />
+    </EuiFlexItem>
+  </EuiFlexGroup>
+</SectionPanel>
+`;

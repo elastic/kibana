@@ -1,15 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import Path from 'path';
 
+import { ThemeTags, parseThemeTags } from '@kbn/core-ui-settings-common';
 import { UnknownVals } from './ts_helpers';
-import { ThemeTags, parseThemeTags } from './theme_tags';
 
 export interface WorkerConfig {
   readonly repoRoot: string;
@@ -20,6 +21,7 @@ export interface WorkerConfig {
   readonly profileWebpack: boolean;
   readonly browserslistEnv: string;
   readonly optimizerCacheKey: unknown;
+  readonly reactVersion: string;
 }
 
 export type CacheableWorkerConfig = Omit<WorkerConfig, 'watch' | 'profileWebpack' | 'cache'>;
@@ -71,6 +73,11 @@ export function parseWorkerConfig(json: string): WorkerConfig {
       throw new Error('`browserslistEnv` must be a string');
     }
 
+    const reactVersion = parsed.reactVersion;
+    if (typeof reactVersion !== 'string') {
+      throw new Error('`reactVersion` must be a string');
+    }
+
     const themes = parseThemeTags(parsed.themeTags);
 
     return {
@@ -82,6 +89,7 @@ export function parseWorkerConfig(json: string): WorkerConfig {
       optimizerCacheKey,
       browserslistEnv,
       themeTags: themes,
+      reactVersion,
     };
   } catch (error) {
     throw new Error(`unable to parse worker config: ${error.message}`);

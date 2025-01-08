@@ -9,29 +9,21 @@
     "objects": []
   },
   "server": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
     "classes": [
       {
         "parentPluginId": "@kbn/core-analytics-server-internal",
-        "id": "def-common.AnalyticsService",
+        "id": "def-server.AnalyticsService",
         "type": "Class",
         "tags": [],
         "label": "AnalyticsService",
         "description": [],
-        "path": "packages/core/analytics/core-analytics-server-internal/src/analytics_service.ts",
+        "path": "src/core/packages/analytics/server-internal/src/analytics_service.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-analytics-server-internal",
-            "id": "def-common.AnalyticsService.Unnamed",
+            "id": "def-server.AnalyticsService.Unnamed",
             "type": "Function",
             "tags": [],
             "label": "Constructor",
@@ -39,13 +31,13 @@
             "signature": [
               "any"
             ],
-            "path": "packages/core/analytics/core-analytics-server-internal/src/analytics_service.ts",
+            "path": "src/core/packages/analytics/server-internal/src/analytics_service.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-analytics-server-internal",
-                "id": "def-common.AnalyticsService.Unnamed.$1",
+                "id": "def-server.AnalyticsService.Unnamed.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "core",
@@ -53,7 +45,7 @@
                 "signature": [
                   "CoreContext"
                 ],
-                "path": "packages/core/analytics/core-analytics-server-internal/src/analytics_service.ts",
+                "path": "src/core/packages/analytics/server-internal/src/analytics_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -63,22 +55,16 @@
           },
           {
             "parentPluginId": "@kbn/core-analytics-server-internal",
-            "id": "def-common.AnalyticsService.preboot",
+            "id": "def-server.AnalyticsService.preboot",
             "type": "Function",
             "tags": [],
             "label": "preboot",
             "description": [],
             "signature": [
               "() => ",
-              {
-                "pluginId": "@kbn/core-analytics-server",
-                "scope": "common",
-                "docId": "kibKbnCoreAnalyticsServerPluginApi",
-                "section": "def-common.AnalyticsServicePreboot",
-                "text": "AnalyticsServicePreboot"
-              }
+              "AnalyticsServicePreboot"
             ],
-            "path": "packages/core/analytics/core-analytics-server-internal/src/analytics_service.ts",
+            "path": "src/core/packages/analytics/server-internal/src/analytics_service.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -86,22 +72,16 @@
           },
           {
             "parentPluginId": "@kbn/core-analytics-server-internal",
-            "id": "def-common.AnalyticsService.setup",
+            "id": "def-server.AnalyticsService.setup",
             "type": "Function",
             "tags": [],
             "label": "setup",
             "description": [],
             "signature": [
               "() => ",
-              {
-                "pluginId": "@kbn/core-analytics-server",
-                "scope": "common",
-                "docId": "kibKbnCoreAnalyticsServerPluginApi",
-                "section": "def-common.AnalyticsServiceSetup",
-                "text": "AnalyticsServiceSetup"
-              }
+              "AnalyticsServiceSetup"
             ],
-            "path": "packages/core/analytics/core-analytics-server-internal/src/analytics_service.ts",
+            "path": "src/core/packages/analytics/server-internal/src/analytics_service.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -109,22 +89,16 @@
           },
           {
             "parentPluginId": "@kbn/core-analytics-server-internal",
-            "id": "def-common.AnalyticsService.start",
+            "id": "def-server.AnalyticsService.start",
             "type": "Function",
             "tags": [],
             "label": "start",
             "description": [],
             "signature": [
               "() => ",
-              {
-                "pluginId": "@kbn/core-analytics-server",
-                "scope": "common",
-                "docId": "kibKbnCoreAnalyticsServerPluginApi",
-                "section": "def-common.AnalyticsServiceStart",
-                "text": "AnalyticsServiceStart"
-              }
+              "AnalyticsServiceStart"
             ],
-            "path": "packages/core/analytics/core-analytics-server-internal/src/analytics_service.ts",
+            "path": "src/core/packages/analytics/server-internal/src/analytics_service.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -132,7 +106,7 @@
           },
           {
             "parentPluginId": "@kbn/core-analytics-server-internal",
-            "id": "def-common.AnalyticsService.stop",
+            "id": "def-server.AnalyticsService.stop",
             "type": "Function",
             "tags": [],
             "label": "stop",
@@ -140,7 +114,7 @@
             "signature": [
               "() => Promise<void>"
             ],
-            "path": "packages/core/analytics/core-analytics-server-internal/src/analytics_service.ts",
+            "path": "src/core/packages/analytics/server-internal/src/analytics_service.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -150,6 +124,14 @@
         "initialIsOpen": false
       }
     ],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
     "functions": [],
     "interfaces": [],
     "enums": [],

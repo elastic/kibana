@@ -17,7 +17,7 @@ export default function ({ getService }: FtrProviderContext) {
   const ml = getService('ml');
   const inferenceId = 'my-elser-model';
   const taskType = 'sparse_embedding';
-  const service = 'elser';
+  const service = 'elasticsearch';
   const modelId = '.elser_model_2';
 
   describe('Inference endpoints', function () {
@@ -52,9 +52,9 @@ export default function ({ getService }: FtrProviderContext) {
       expect(inferenceEndpoints).to.be.ok();
       expect(
         inferenceEndpoints.some(
-          (endpoint: InferenceAPIConfigResponse) => endpoint.model_id === inferenceId
+          (endpoint: InferenceAPIConfigResponse) => endpoint.inference_id === inferenceId
         )
-      ).to.be(true);
+      ).to.eql(true, `${inferenceId} not found in the GET _inference/_all response`);
     });
     it('can delete inference endpoint', async () => {
       log.debug(`Deleting inference endpoint`);

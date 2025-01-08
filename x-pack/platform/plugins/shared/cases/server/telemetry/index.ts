@@ -1,0 +1,103 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { CoreSetup, Logger, PluginInitializerContext } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import type { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import { FILE_SO_TYPE } from '@kbn/files-plugin/common';
+import { collectTelemetryData } from './collect_telemetry_data';
+import {
+  CASE_TELEMETRY_SAVED_OBJECT,
+  CASES_TELEMETRY_TASK_NAME,
+  CASE_TELEMETRY_SAVED_OBJECT_ID,
+  SAVED_OBJECT_TYPES,
+  CASE_RULES_SAVED_OBJECT,
+} from '../../common/constants';
+import type { CasesTelemetry } from './types';
+import { casesSchema } from './schema';
+import { TelemetrySavedObjectsClient } from './telemetry_saved_objects_client';
+
+export { scheduleCasesTelemetryTask } from './schedule_telemetry_task';
+
+interface CreateCasesTelemetryArgs {
+  core: CoreSetup;
+  taskManager: TaskManagerSetupContract;
+  usageCollection: UsageCollectionSetup;
+  logger: Logger;
+  kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];
+}
+
+export const createCasesTelemetry = ({
+  core,
+  taskManager,
+  usageCollection,
+  logger,
+}: CreateCasesTelemetryArgs) => {
+  const getInternalSavedObjectClient = async (): Promise<TelemetrySavedObjectsClient> => {
+    const [coreStart] = await core.getStartServices();
+    const soClient = coreStart.savedObjects.createInternalRepository([
+      ...SAVED_OBJECT_TYPES,
+      FILE_SO_TYPE,
+      CASE_RULES_SAVED_OBJECT,
+    ]);
+
+    // Wrapping the internalRepository with the `TelemetrySavedObjectsClient`
+    // to ensure some best practices when collecting "all the telemetry"
+    // (i.e.: `.find` requests should query all spaces)
+    return new TelemetrySavedObjectsClient(soClient);
+  };
+
+  taskManager.registerTaskDefinitions({
+    [CASES_TELEMETRY_TASK_NAME]: {
+      title: 'Collect Cases telemetry data',
+      createTaskRunner: () => {
+        return {
+          run: async () => {
+            await collectAndStore();
+          },
+          cancel: async () => {},
+        };
+      },
+    },
+  });
+
+  const collectAndStore = async () => {
+    const savedObjectsClient = await getInternalSavedObjectClient();
+    const telemetryData = await collectTelemetryData({ savedObjectsClient, logger });
+
+    await savedObjectsClient.create(CASE_TELEMETRY_SAVED_OBJECT, telemetryData, {
+      id: CASE_TELEMETRY_SAVED_OBJECT_ID,
+      overwrite: true,
+    });
+  };
+
+  const collector = usageCollection.makeUsageCollector<CasesTelemetry | {}>({
+    type: 'cases',
+    schema: casesSchema,
+    isReady: () => true,
+    fetch: async () => {
+      try {
+        const savedObjectsClient = await getInternalSavedObjectClient();
+        const data = (
+          await savedObjectsClient.get(CASE_TELEMETRY_SAVED_OBJECT, CASE_TELEMETRY_SAVED_OBJECT_ID)
+        ).attributes as CasesTelemetry;
+
+        return data;
+      } catch (err) {
+        if (SavedObjectsErrorHelpers.isNotFoundError(err)) {
+          // task has not run yet, so no saved object to return
+          return {};
+        }
+
+        throw err;
+      }
+    },
+  });
+
+  usageCollection.registerCollector(collector);
+};
