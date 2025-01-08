@@ -21,7 +21,7 @@ import {
 } from '@elastic/elasticsearch/lib/api/types';
 import { createServerRoute } from '../../create_server_route';
 import { DefinitionNotFound } from '../../../lib/streams/errors';
-import { checkReadAccess } from '../../../lib/streams/stream_crud';
+import { checkAccess } from '../../../lib/streams/stream_crud';
 import { conditionToPainless } from '../../../lib/streams/helpers/condition_to_painless';
 
 export const simulateProcessorRoute = createServerRoute({
@@ -47,7 +47,7 @@ export const simulateProcessorRoute = createServerRoute({
     try {
       const { scopedClusterClient } = await getScopedClients({ request });
 
-      const hasAccess = await checkReadAccess({ id: params.path.id, scopedClusterClient });
+      const hasAccess = await checkAccess({ id: params.path.id, scopedClusterClient });
       if (!hasAccess) {
         throw new DefinitionNotFound(`Stream definition for ${params.path.id} not found.`);
       }

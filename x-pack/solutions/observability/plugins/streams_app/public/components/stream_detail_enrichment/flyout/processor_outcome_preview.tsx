@@ -128,7 +128,9 @@ export const ProcessorOutcomePreview = ({
   );
 
   const simulationDocuments = useMemo(() => {
-    if (!simulation?.documents) return [];
+    if (!simulation?.documents) {
+      return (samples?.documents ?? []) as Array<Record<PropertyKey, unknown>>;
+    }
 
     const filterDocuments = (filter: DocsFilterOption) => {
       switch (filter) {
@@ -143,7 +145,7 @@ export const ProcessorOutcomePreview = ({
     };
 
     return filterDocuments(selectedDocsFilter).map((doc) => doc.value);
-  }, [simulation?.documents, selectedDocsFilter]);
+  }, [samples?.documents, simulation?.documents, selectedDocsFilter]);
 
   const detectedFieldsColumns = simulation?.detected_fields
     ? simulation.detected_fields.map((field) => field.name)
