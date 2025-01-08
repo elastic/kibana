@@ -35,6 +35,8 @@
     "@kbn/data-views-plugin",
     "@kbn/user-profile-components",
     "@kbn/shared-ux-router",
+    "@kbn/core-chrome-browser-mocks",
+    "@kbn/core-chrome-browser",
     "@kbn/ai-assistant-icon",
   ]
 }
