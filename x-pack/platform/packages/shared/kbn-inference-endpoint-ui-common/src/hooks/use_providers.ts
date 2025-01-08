@@ -37,15 +37,6 @@ const getProviders = (http: HttpSetup): InferenceProvider[] => {
           updatable: true,
           type: FieldType.STRING,
         },
-        max_input_tokens: {
-          default_value: null,
-          description: 'Allows you to specify the maximum number of tokens per input.',
-          label: 'Maximum Input Tokens',
-          required: false,
-          sensitive: false,
-          updatable: true,
-          type: FieldType.INTEGER,
-        },
       },
     },
     {
