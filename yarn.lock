@@ -6729,7 +6729,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/react-mute-legacy-root-warning@link:packages/kbn-react-mute-legacy-root-warning":
+"@kbn/react-mute-legacy-root-warning@link:src/platform/packages/private/kbn-react-mute-legacy-root-warning":
   version "0.0.0"
   uid ""
 
