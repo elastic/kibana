@@ -67,8 +67,16 @@ class SectionErrorBoundaryInternal extends React.Component<
 }
 
 /**
- * Implementation of Kibana Error Boundary to catch errors in app sections.
- * A section represents a small chunk of UI where an error may happen.
+ * `KibanaSectionErrorBoundary` is designed to capture errors at a granular level.
+ *
+ * In general, it's best to use `KibanaErrorBoundary` and block the whole page.
+ * Users will see an error state on the page and think that there are instabilities in the system.
+ * They will be / should be wary about making any changes in a UI showing an error, since it risks
+ * further instability.
+ *
+ * If it is acceptable to assume the risk of allowing users to interact with a UI that
+ * has an error state, then using `KibanaSectionErrorBoundary` may be an acceptable alternative,
+ * but this must be judged on a case-by-case basis.
  */
 export const KibanaSectionErrorBoundary = (
   props: React.PropsWithChildren<SectionErrorBoundaryProps>
