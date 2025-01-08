@@ -24,7 +24,7 @@ SRCS = glob(
 DEPS = [
   "@npm//react",
   "//src/platform/packages/shared/react/kibana_context/common",
-  "//packages/react/kibana_context/root",
+  "//src/platform/packages/shared/react/kibana_context/root",
 ]
 
 js_library(
