@@ -28,7 +28,7 @@ export const riskScoreCopyTimestampToEventIngested = async ({
 
   taskManager.registerTaskDefinitions({
     [TASK_TYPE]: {
-      title: `Copy @timestamp value to events.ingested`,
+      title: `Copy Risk Score @timestamp value to events.ingested`,
       timeout: TASK_TIMEOUT,
       createTaskRunner: createMigrationTask({ auditLogger, logger, getStartServices }),
     },

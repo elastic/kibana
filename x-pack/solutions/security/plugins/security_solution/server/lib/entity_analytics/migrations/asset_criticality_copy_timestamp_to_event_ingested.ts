@@ -27,7 +27,7 @@ export const assetCrticalityCopyTimestampToEventIngested = async ({
 
   taskManager.registerTaskDefinitions({
     [TASK_TYPE]: {
-      title: `Copy @timestamp value to events.ingested`,
+      title: `Copy Asset Criticality @timestamp value to events.ingested`,
       timeout: TASK_TIMEOUT,
       createTaskRunner: createMigrationTask({ auditLogger, logger, getStartServices }),
     },
