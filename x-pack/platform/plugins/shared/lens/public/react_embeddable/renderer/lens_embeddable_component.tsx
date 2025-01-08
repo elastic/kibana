@@ -62,8 +62,7 @@ export function LensEmbeddableComponent({
     : { 'data-title': api.title$?.getValue() ?? api.defaultTitle$?.getValue() };
   const description = api.description$?.getValue()
     ? {
-        'data-description':
-          api.description$?.getValue() ?? api.defaultDescription$?.getValue(),
+        'data-description': api.description$?.getValue() ?? api.defaultDescription$?.getValue(),
       }
     : undefined;
 

@@ -19,6 +19,7 @@ import { noop } from 'lodash';
 import { EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
 import { tracksOverlays } from '@kbn/presentation-containers';
 import { i18n } from '@kbn/i18n';
+import { BehaviorSubject } from 'rxjs';
 import { APP_ID, getEditPath } from '../../../common/constants';
 import {
   GetStateType,
@@ -38,7 +39,6 @@ import { mountInlineEditPanel } from '../inline_editing/mount';
 import { StateManagementConfig } from './initialize_state_management';
 import { apiPublishesInlineEditingCapabilities } from '../type_guards';
 import { SearchContextConfig } from './initialize_search_context';
-import { BehaviorSubject } from 'rxjs';
 
 function getSupportedTriggers(
   getState: GetStateType,
@@ -86,8 +86,11 @@ export function initializeEditApi(
 
   const { disabledActionIds$, setDisabledActionIds } = apiPublishesDisabledActionIds(parentApi)
     ? parentApi
-    : { disabledActionIds$: new BehaviorSubject<string[] | undefined>(undefined), setDisabledActionIds: noop };
-  
+    : {
+        disabledActionIds$: new BehaviorSubject<string[] | undefined>(undefined),
+        setDisabledActionIds: noop,
+      };
+
   if (isTextBasedLanguage(initialState)) {
     // do not expose the drilldown action for ES|QL
     setDisabledActionIds(disabledActionIds$?.getValue()?.concat(['OPEN_FLYOUT_ADD_DRILLDOWN']));
@@ -190,10 +193,7 @@ export function initializeEditApi(
     : true;
 
   return {
-    comparators: { disabledActionIds$: [
-      disabledActionIds$,
-      setDisabledActionIds
-    ]},
+    comparators: { disabledActionIds$: [disabledActionIds$, setDisabledActionIds] },
     serialize: emptySerializer,
     cleanup: noop,
     api: {
