@@ -33,6 +33,7 @@ import { BulkActions } from './bulk_actions';
 import { SearchField } from './search_field';
 import { RuleTranslationResult } from '../../../../../common/siem_migrations/constants';
 import * as i18n from './translations';
+import { useRetryRuleMigration } from '../../service/hooks/use_retry_rules';
 
 const DEFAULT_PAGE_SIZE = 10;
 const DEFAULT_SORT_FIELD = 'translation_result';
@@ -43,13 +44,18 @@ export interface MigrationRulesTableProps {
    * Selected rule migration id
    */
   migrationId: string;
+
+  /**
+   * Re-fetches latest rule migration data
+   */
+  refetchData?: () => void;
 }
 
 /**
  * Table Component for displaying SIEM rules migrations
  */
 export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.memo(
-  ({ migrationId }) => {
+  ({ migrationId, refetchData }) => {
     const { addError } = useAppToasts();
 
     const [pageIndex, setPageIndex] = useState(0);
@@ -132,6 +138,7 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
     const { mutateAsync: installMigrationRules } = useInstallMigrationRules(migrationId);
     const { mutateAsync: installTranslatedMigrationRules } =
       useInstallTranslatedMigrationRules(migrationId);
+    const { retryRuleMigration, isLoading: isRetryLoading } = useRetryRuleMigration(refetchData);
 
     const [isTableLoading, setTableLoading] = useState(false);
     const installSingleRule = useCallback(
@@ -180,7 +187,12 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
       [addError, installTranslatedMigrationRules]
     );
 
-    const isLoading = isStatsLoading || isPrebuiltRulesLoading || isDataLoading || isTableLoading;
+    const reprocessFailedRules = useCallback(async () => {
+      retryRuleMigration(migrationId, { failed: true });
+    }, [migrationId, retryRuleMigration]);
+
+    const isLoading =
+      isStatsLoading || isPrebuiltRulesLoading || isDataLoading || isTableLoading || isRetryLoading;
 
     const ruleActionsFactory = useCallback(
       (ruleMigration: RuleMigration, closeRulePreview: () => void) => {
@@ -268,10 +280,12 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
                   <EuiFlexItem grow={false}>
                     <BulkActions
                       isTableLoading={isLoading}
-                      numberOfTranslatedRules={translationStats?.rules.success.installable ?? 0}
+                      numberOfFailedRules={translationStats.rules.failed}
+                      numberOfTranslatedRules={translationStats.rules.success.installable}
                       numberOfSelectedRules={selectedRuleMigrations.length}
                       installTranslatedRule={installTranslatedRules}
                       installSelectedRule={installSelectedRule}
+                      reprocessFailedRules={reprocessFailedRules}
                     />
                   </EuiFlexItem>
                 </EuiFlexGroup>
