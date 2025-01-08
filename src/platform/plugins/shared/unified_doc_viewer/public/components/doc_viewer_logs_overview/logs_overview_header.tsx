@@ -37,6 +37,9 @@ export function LogsOverviewHeader({ doc }: { doc: LogDocumentOverview }) {
   const { field, value, formattedValue } = getMessageFieldWithFallbacks(doc, {
     includeFormattedValue: true,
   });
+  const messageCodeBlockProps = formattedValue
+    ? { language: 'json', children: formattedValue }
+    : { language: 'txt', dangerouslySetInnerHTML: { __html: value ?? '' } };
   const hasBadges = hasTimestamp || hasLogLevel;
   const hasMessageField = field && value;
   const hasFlyoutHeader = hasMessageField || hasBadges;
@@ -93,10 +96,8 @@ export function LogsOverviewHeader({ doc }: { doc: LogDocumentOverview }) {
           overflowHeight={100}
           paddingSize="s"
           isCopyable
-          language={formattedValue ? 'json' : 'txt'}
           fontSize="s"
-          children={formattedValue}
-          dangerouslySetInnerHTML={formattedValue ? undefined : { __html: value }}
+          {...messageCodeBlockProps}
         />
       </HoverActionPopover>
     </EuiFlexGroup>

@@ -108,6 +108,9 @@ export const SummaryCellPopover = (props: AllSummaryColumnProps) => {
   const { field, value, formattedValue } = getMessageFieldWithFallbacks(documentOverview, {
     includeFormattedValue: true,
   });
+  const messageCodeBlockProps = formattedValue
+    ? { language: 'json', children: formattedValue }
+    : { language: 'txt', dangerouslySetInnerHTML: { __html: value ?? '' } };
   const shouldRenderContent = Boolean(field && value);
 
   const shouldRenderSource = !shouldRenderContent;
@@ -144,10 +147,8 @@ export const SummaryCellPopover = (props: AllSummaryColumnProps) => {
               overflowHeight={100}
               paddingSize="s"
               isCopyable
-              language={formattedValue ? 'json' : 'txt'}
               fontSize="s"
-              children={formattedValue}
-              dangerouslySetInnerHTML={formattedValue ? undefined : { __html: value ?? '' }}
+              {...messageCodeBlockProps}
             />
           </EuiFlexGroup>
         )}
