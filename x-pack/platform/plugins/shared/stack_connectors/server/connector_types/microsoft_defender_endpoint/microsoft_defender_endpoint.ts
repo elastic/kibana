@@ -18,6 +18,7 @@ import {
   MicrosoftDefenderEndpointDoNotValidateResponseSchema,
   GetActionsParamsSchema,
   AgentDetailsParamsSchema,
+  AgentListParamsSchema,
 } from '../../../common/microsoft_defender_endpoint/schema';
 import {
   MicrosoftDefenderEndpointAgentDetailsParams,
@@ -32,6 +33,8 @@ import {
   MicrosoftDefenderEndpointTestConnector,
   MicrosoftDefenderEndpointGetActionsParams,
   MicrosoftDefenderEndpointGetActionsResponse,
+  MicrosoftDefenderEndpointAgentListParams,
+  MicrosoftDefenderEndpointAgentListResponse,
 } from '../../../common/microsoft_defender_endpoint/types';
 
 export class MicrosoftDefenderEndpointConnector extends SubActionConnector<
@@ -69,6 +72,11 @@ export class MicrosoftDefenderEndpointConnector extends SubActionConnector<
       name: MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.GET_AGENT_DETAILS,
       method: 'getAgentDetails',
       schema: AgentDetailsParamsSchema,
+    });
+    this.registerSubAction({
+      name: MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.GET_AGENT_LIST,
+      method: 'getAgentList',
+      schema: AgentListParamsSchema,
     });
 
     this.registerSubAction({
@@ -241,6 +249,30 @@ export class MicrosoftDefenderEndpointConnector extends SubActionConnector<
       { url: `${this.urls.machines}/${id}` },
       connectorUsageCollector
     );
+  }
+
+  public async getAgentList(
+    { page = 1, pageSize = 20, ...filter }: MicrosoftDefenderEndpointAgentListParams,
+    connectorUsageCollector: ConnectorUsageCollector
+  ): Promise<MicrosoftDefenderEndpointAgentListResponse> {
+    // API Reference: https://learn.microsoft.com/en-us/defender-endpoint/api/get-machines
+    // OData usage reference: https://learn.microsoft.com/en-us/defender-endpoint/api/exposed-apis-odata-samples
+
+    const response = await this.fetchFromMicrosoft<MicrosoftDefenderEndpointAgentListResponse>(
+      {
+        url: `${this.urls.machines}`,
+        method: 'GET',
+        params: this.buildODataUrlParams({ filter, page, pageSize }),
+      },
+      connectorUsageCollector
+    );
+
+    return {
+      ...response,
+      page,
+      pageSize,
+      total: response['@odata.count'] ?? -1,
+    };
   }
 
   public async isolateHost(
