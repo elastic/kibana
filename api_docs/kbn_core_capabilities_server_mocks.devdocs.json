@@ -23,21 +23,9 @@
         "description": [],
         "signature": [
           "{ start: () => ",
-          {
-            "pluginId": "@kbn/core-capabilities-server",
-            "scope": "server",
-            "docId": "kibKbnCoreCapabilitiesServerPluginApi",
-            "section": "def-server.CapabilitiesStart",
-            "text": "CapabilitiesStart"
-          },
+          "CapabilitiesStart",
           "; setup: (setupDeps: SetupDeps) => ",
-          {
-            "pluginId": "@kbn/core-capabilities-server",
-            "scope": "server",
-            "docId": "kibKbnCoreCapabilitiesServerPluginApi",
-            "section": "def-server.CapabilitiesSetup",
-            "text": "CapabilitiesSetup"
-          },
+          "CapabilitiesSetup",
           "; preboot: (prebootDeps: PrebootSetupDeps) => void; }"
         ],
         "path": "packages/core/capabilities/core-capabilities-server-mocks/src/capabilities_service.mock.ts",
@@ -91,13 +79,7 @@
             "description": [],
             "signature": [
               "() => jest.Mocked<",
-              {
-                "pluginId": "@kbn/core-capabilities-server",
-                "scope": "server",
-                "docId": "kibKbnCoreCapabilitiesServerPluginApi",
-                "section": "def-server.CapabilitiesSetup",
-                "text": "CapabilitiesSetup"
-              },
+              "CapabilitiesSetup",
               ">"
             ],
             "path": "packages/core/capabilities/core-capabilities-server-mocks/src/capabilities_service.mock.ts",
@@ -115,13 +97,7 @@
             "description": [],
             "signature": [
               "() => jest.Mocked<",
-              {
-                "pluginId": "@kbn/core-capabilities-server",
-                "scope": "server",
-                "docId": "kibKbnCoreCapabilitiesServerPluginApi",
-                "section": "def-server.CapabilitiesStart",
-                "text": "CapabilitiesStart"
-              },
+              "CapabilitiesStart",
               ">"
             ],
             "path": "packages/core/capabilities/core-capabilities-server-mocks/src/capabilities_service.mock.ts",
@@ -139,13 +115,7 @@
             "description": [],
             "signature": [
               "() => ",
-              {
-                "pluginId": "@kbn/core-capabilities-common",
-                "scope": "common",
-                "docId": "kibKbnCoreCapabilitiesCommonPluginApi",
-                "section": "def-common.Capabilities",
-                "text": "Capabilities"
-              }
+              "Capabilities"
             ],
             "path": "packages/core/capabilities/core-capabilities-server-mocks/src/capabilities_service.mock.ts",
             "deprecated": false,

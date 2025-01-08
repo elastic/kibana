@@ -16,7 +16,16 @@ export function registerListRoute({
   config,
 }: RouteDependencies) {
   router.get(
-    { path: addBasePath('/indices'), validate: false },
+    {
+      path: addBasePath('/indices'),
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Relies on es client for authorization',
+        },
+      },
+      validate: false,
+    },
     async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
       try {
