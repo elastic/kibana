@@ -5,7 +5,6 @@
  * 2.0.
  */
 import React, { useState } from 'react';
-import { css } from '@emotion/react';
 import {
   EuiButton,
   EuiCallOut,
@@ -99,7 +98,7 @@ export const AgentPolicyDebugger: React.FunctionComponent = () => {
       <EuiFlexGroup alignItems="center" justifyContent="flexStart">
         <EuiFlexItem
           grow={false}
-          css={css`
+          css={`
             min-width: 600px;
           `}
         >
