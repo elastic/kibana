@@ -150,7 +150,7 @@ describe('useFetchAgentsData', () => {
       },
     });
     expect(result?.current.kuery).toEqual(
-      'status:online or (status:error or status:degraded) or (status:updating or status:unenrolling or status:enrolling) or status:offline'
+      'status:online or (status:error or status:degraded) or status:offline or (status:updating or status:unenrolling or status:enrolling)'
     );
     expect(result?.current.currentRequestRef).toEqual({ current: 2 });
     expect(result?.current.pagination).toEqual({ currentPage: 1, pageSize: 5 });
