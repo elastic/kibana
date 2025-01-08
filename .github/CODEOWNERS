@@ -498,8 +498,8 @@ src/platform/packages/shared/kbn-management/settings/components/field_row @elast
 src/platform/packages/shared/kbn-management/settings/field_definition @elastic/kibana-management
 src/platform/packages/shared/kbn-management/settings/types @elastic/kibana-management
 src/platform/packages/shared/kbn-management/settings/utilities @elastic/kibana-management
-src/platform/packages/shared/kbn-object-utils @elastic/kibana-core
 src/platform/packages/shared/kbn-monaco @elastic/appex-sharedux
+src/platform/packages/shared/kbn-object-utils @elastic/kibana-core
 src/platform/packages/shared/kbn-object-versioning @elastic/appex-sharedux
 src/platform/packages/shared/kbn-object-versioning-utils @elastic/appex-sharedux
 src/platform/packages/shared/kbn-openapi-common @elastic/security-detection-rule-management
