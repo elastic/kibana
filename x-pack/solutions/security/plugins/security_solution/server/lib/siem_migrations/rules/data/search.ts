@@ -6,11 +6,17 @@
  */
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import { RuleTranslationResult } from '../../../../../common/siem_migrations/constants';
+import {
+  RuleTranslationResult,
+  SiemMigrationStatus,
+} from '../../../../../common/siem_migrations/constants';
 
 export const conditions = {
   isFullyTranslated(): QueryDslQueryContainer {
     return { term: { translation_result: RuleTranslationResult.FULL } };
+  },
+  isNotFullyTranslated(): QueryDslQueryContainer {
+    return { bool: { must_not: conditions.isFullyTranslated() } };
   },
   isNotInstalled(): QueryDslQueryContainer {
     return {
@@ -38,5 +44,8 @@ export const conditions = {
   },
   isInstallable(): QueryDslQueryContainer[] {
     return [this.isFullyTranslated(), this.isNotInstalled()];
+  },
+  isFailed(): QueryDslQueryContainer {
+    return { term: { status: SiemMigrationStatus.FAILED } };
   },
 };

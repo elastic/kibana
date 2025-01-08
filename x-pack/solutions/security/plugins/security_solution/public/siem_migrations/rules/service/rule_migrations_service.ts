@@ -19,8 +19,9 @@ import type {
 } from '../../../../common/siem_migrations/model/rule_migration.gen';
 import type {
   CreateRuleMigrationRequestBody,
-  GetAllStatsRuleMigrationResponse,
   GetRuleMigrationStatsResponse,
+  RetryRuleMigrationResponse,
+  StartRuleMigrationResponse,
   UpsertRuleMigrationResourcesRequestBody,
 } from '../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
 import { SiemMigrationTaskStatus } from '../../../../common/siem_migrations/constants';
@@ -35,8 +36,9 @@ import {
   type GetRuleMigrationsStatsAllParams,
   getMissingResources,
   upsertMigrationResources,
+  retryRuleMigration,
 } from '../api';
-import type { RuleMigrationStats } from '../types';
+import type { RetryRuleMigrationFilter, RuleMigrationStats } from '../types';
 import { getSuccessToast } from './success_notification';
 import { RuleMigrationsStorage } from './storage';
 import * as i18n from './translations';
@@ -119,7 +121,7 @@ export class SiemRulesMigrationsService {
     }
   }
 
-  public async startRuleMigration(migrationId: string): Promise<GetAllStatsRuleMigrationResponse> {
+  public async startRuleMigration(migrationId: string): Promise<StartRuleMigrationResponse> {
     const connectorId = this.connectorIdStorage.get();
     if (!connectorId) {
       throw new Error(i18n.MISSING_CONNECTOR_ERROR);
@@ -135,6 +137,34 @@ export class SiemRulesMigrationsService {
     }
 
     const result = await startRuleMigration({ migrationId, connectorId, langSmithOptions });
+    this.startPolling();
+    return result;
+  }
+
+  public async retryRuleMigration(
+    migrationId: string,
+    filter?: RetryRuleMigrationFilter
+  ): Promise<RetryRuleMigrationResponse> {
+    const connectorId = this.connectorIdStorage.get();
+    if (!connectorId) {
+      throw new Error(i18n.MISSING_CONNECTOR_ERROR);
+    }
+
+    const langSmithSettings = this.traceOptionsStorage.get();
+    let langSmithOptions: LangSmithOptions | undefined;
+    if (langSmithSettings) {
+      langSmithOptions = {
+        project_name: langSmithSettings.langSmithProject,
+        api_key: langSmithSettings.langSmithApiKey,
+      };
+    }
+
+    const result = await retryRuleMigration({
+      migrationId,
+      connectorId,
+      langSmithOptions,
+      ...filter,
+    });
     this.startPolling();
     return result;
   }
@@ -213,7 +243,12 @@ export class SiemRulesMigrationsService {
         }
       }
 
-      await new Promise((resolve) => setTimeout(resolve, REQUEST_POLLING_INTERVAL_SECONDS * 1000));
+      // Do not wait if there are no more pending migrations
+      if (pendingMigrationIds.length > 0) {
+        await new Promise((resolve) =>
+          setTimeout(resolve, REQUEST_POLLING_INTERVAL_SECONDS * 1000)
+        );
+      }
     } while (pendingMigrationIds.length > 0);
   }
 }
