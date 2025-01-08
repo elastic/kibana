@@ -17,6 +17,8 @@ on:
 
 permissions:
   contents: read
+  # if you listen for PRs, use this to use some comment reactions
+  pull-requests: write
 
 jobs:
   trim-github-comment:
@@ -25,19 +27,25 @@ jobs:
     outputs:
       comment: ${{ steps.trim.outputs.result }}
     steps:
+      - uses: elastic/oblt-actions/github/comment-reaction@v1
+        with:
+          repository: ${{ github.repository }}
+          comment-id: ${{ github.event.comment.id }}
+          github-token: ${{ github.token }}
+          emoji: 'eyes'
+
       - id: trim
         uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
         with:
-          script: |
-            core.setOutput("result", `${{ github.event.comment.body }}`.trim());
+          result-encoding: string
+          script: return `${{ github.event.comment.body }}`.trim()
+
+      - run: echo "processed comment - ${{ steps.trim.outputs.result }}"
 
   deploy-my-kibana:
     runs-on: ubuntu-latest
     needs: [ trim-github-comment ]
     if: ${{ needs.trim-github-comment.outputs.comment == '/oblt-deploy' }}
-    permissions:
-      # if you listen for PRs, use this to use some comment reactions
-      pull-requests: write
     steps:
       - uses: elastic/oblt-actions/oblt-cli/deploy-my-kibana@v1
         with:
