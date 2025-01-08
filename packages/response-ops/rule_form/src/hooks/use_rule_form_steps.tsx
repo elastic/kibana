@@ -159,7 +159,11 @@ const useCommonRuleFormSteps = ({ touchedSteps, currentStep }: UseRuleFormStepsO
   return { steps, stepOrder };
 };
 
-export const useRuleFormSteps = () => {
+interface RuleFormVerticalSteps {
+  steps: EuiStepsProps['steps'];
+}
+
+export const useRuleFormSteps: () => RuleFormVerticalSteps = () => {
   // Track steps that the user has interacted with and then focused away from
   const [touchedSteps, setTouchedSteps] = useState<Record<RuleFormStepId, boolean>>(
     STEP_ORDER.reduce(
@@ -204,7 +208,15 @@ export const useRuleFormSteps = () => {
   return { steps: mappedSteps };
 };
 
-export const useRuleFormHorizontalSteps = () => {
+interface RuleFormHorizontalSteps {
+  steps: EuiStepsHorizontalProps['steps'];
+  currentStepComponent: React.ReactNode;
+  goToNextStep: () => void;
+  goToPreviousStep: () => void;
+  hasNextStep: boolean;
+  hasPreviousStep: boolean;
+}
+export const useRuleFormHorizontalSteps: () => RuleFormHorizontalSteps = () => {
   const [currentStep, setCurrentStep] = useState<RuleFormStepId>(STEP_ORDER[0]);
   const [touchedSteps, setTouchedSteps] = useState<Record<RuleFormStepId, boolean>>(
     STEP_ORDER.reduce(
