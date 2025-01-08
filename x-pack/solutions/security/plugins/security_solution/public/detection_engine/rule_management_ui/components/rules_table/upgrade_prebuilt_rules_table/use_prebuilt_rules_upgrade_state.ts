@@ -45,13 +45,22 @@ export function usePrebuiltRulesUpgradeState(
   ruleUpgradeInfos: RuleUpgradeInfoForReview[]
 ): UseRulesUpgradeStateResult {
   const isPrebuiltRulesCustomizationEnabled = useIsPrebuiltRulesCustomizationEnabled();
-  const [rulesResolvedConflicts, setRulesResolvedConflicts] = useState<RulesResolvedConflicts>({});
+  const [rulesResolvedValues, setRulesResolvedValues] = useState<RulesResolvedConflicts>({});
+  const resetRuleResolvedValues = useCallback(
+    (ruleId: RuleSignatureId) => {
+      setRulesResolvedValues((prevRulesResolvedConflicts) => ({
+        ...prevRulesResolvedConflicts,
+        [ruleId]: {},
+      }));
+    },
+    [setRulesResolvedValues]
+  );
   const concurrencyControl = useRef<RulesConcurrencyControl>({});
   const { addWarning } = useAppToasts();
 
   const setRuleFieldResolvedValue = useCallback(
     (...[params]: Parameters<SetRuleFieldResolvedValueFn>) => {
-      setRulesResolvedConflicts((prevRulesResolvedConflicts) => ({
+      setRulesResolvedValues((prevRulesResolvedConflicts) => ({
         ...prevRulesResolvedConflicts,
         [params.ruleId]: {
           ...(prevRulesResolvedConflicts[params.ruleId] ?? {}),
@@ -76,7 +85,7 @@ export function usePrebuiltRulesUpgradeState(
       const cc = concurrencyControl.current[ruleId];
       const hasNewerRevision = cc ? nextRevision > cc.revision : false;
       const hasNewerVersion = cc ? nextVersion > cc.version : false;
-      const hasResolvedValues = Object.keys(rulesResolvedConflicts[ruleId] ?? {}).length > 0;
+      const hasResolvedValues = Object.keys(rulesResolvedValues[ruleId] ?? {}).length > 0;
 
       if (hasNewerRevision && hasResolvedValues) {
         addWarning({
@@ -92,12 +101,8 @@ export function usePrebuiltRulesUpgradeState(
         });
       }
 
-      // Reset rule's resolved conflicts
       if ((hasNewerRevision || hasNewerVersion) && hasResolvedValues) {
-        setRulesResolvedConflicts((prevRulesResolvedConflicts) => ({
-          ...prevRulesResolvedConflicts,
-          [ruleId]: {},
-        }));
+        resetRuleResolvedValues(ruleId);
       }
 
       concurrencyControl.current[ruleId] = {
@@ -108,8 +113,9 @@ export function usePrebuiltRulesUpgradeState(
   }, [
     ruleUpgradeInfos,
     concurrencyControl,
-    rulesResolvedConflicts,
-    setRulesResolvedConflicts,
+    rulesResolvedValues,
+    setRulesResolvedValues,
+    resetRuleResolvedValues,
     addWarning,
   ]);
 
@@ -119,7 +125,7 @@ export function usePrebuiltRulesUpgradeState(
     for (const ruleUpgradeInfo of ruleUpgradeInfos) {
       const fieldsUpgradeState = calcFieldsState(
         ruleUpgradeInfo.diff.fields,
-        rulesResolvedConflicts[ruleUpgradeInfo.rule_id] ?? {}
+        rulesResolvedValues[ruleUpgradeInfo.rule_id] ?? {}
       );
 
       const hasRuleTypeChange = Boolean(ruleUpgradeInfo.diff.fields.type);
@@ -139,7 +145,7 @@ export function usePrebuiltRulesUpgradeState(
     }
 
     return state;
-  }, [ruleUpgradeInfos, rulesResolvedConflicts, isPrebuiltRulesCustomizationEnabled]);
+  }, [ruleUpgradeInfos, rulesResolvedValues, isPrebuiltRulesCustomizationEnabled]);
 
   return {
     rulesUpgradeState,
