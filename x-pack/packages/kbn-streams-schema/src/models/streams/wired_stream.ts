@@ -14,6 +14,7 @@ export const wiredStreamDefinitonSchema = z
     name: z.string(),
     elasticsearch_assets: z.optional(elasticsearchAssetSchema),
     stream: wiredStreamConfigDefinitonSchema,
+    dashboards: z.optional(z.array(z.string())),
   })
   .strict();
 

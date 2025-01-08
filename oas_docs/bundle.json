@@ -15715,6 +15715,9 @@
                             ],
                             "type": "object"
                           },
+                          "audit_unenrolled_reason": {
+                            "type": "string"
+                          },
                           "components": {
                             "items": {
                               "additionalProperties": false,
@@ -17725,6 +17728,9 @@
                           ],
                           "type": "object"
                         },
+                        "audit_unenrolled_reason": {
+                          "type": "string"
+                        },
                         "components": {
                           "items": {
                             "additionalProperties": false,
@@ -18201,6 +18207,9 @@
                             "version"
                           ],
                           "type": "object"
+                        },
+                        "audit_unenrolled_reason": {
+                          "type": "string"
                         },
                         "components": {
                           "items": {
