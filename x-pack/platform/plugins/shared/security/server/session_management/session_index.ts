@@ -482,23 +482,28 @@ export class SessionIndex {
     logger.debug('Running cleanup routine.');
 
     const indexStats = await this.options.elasticsearchClient.indices.stats();
+    console.log({ indexStats });
     const securityIndexShardsExist = indexStats._shards.total > 0;
 
     let error: Error | undefined;
     let indexNeedsRefresh = false;
 
     if (!securityIndexShardsExist) {
-      const shardMissingCounter = taskInstance.state?.shardMissingCounter
-        ? taskInstance.state?.shardMissingCounter + 1
-        : 0;
-      if (shardMissingCounter > 10) {
-        logger.error('Failed to clean sessions due to missing shards. ');
-        return;
+      let shardMissingCounter = taskInstance.state?.shardMissingCounter ?? 0;
+      shardMissingCounter = shardMissingCounter + 1;
+
+      if (shardMissingCounter >= 10) {
+        error = new Error(
+          'Failed to clean up sessions: Shards for session index are missing. Cleanup routine has failed 10 times.'
+        );
+        logger.error(error.message);
+        throw error;
       }
 
       logger.debug(
         `No shards found for session index, skipping session cleanup. This operation has failed ${shardMissingCounter} time(s)`
       );
+
       return {
         state: {
           shardMissingCounter,

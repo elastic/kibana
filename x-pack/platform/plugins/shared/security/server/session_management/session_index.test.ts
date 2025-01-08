@@ -1021,6 +1021,33 @@ describe('Session index', () => {
       );
     });
 
+    it('should fail silently if shards are missing', async () => {
+      mockElasticsearchClient.indices.stats.mockResolvedValue({
+        _shards: { total: 0, failed: 1, successful: 0 },
+        _all: {},
+      });
+      const runResult = await sessionIndex.cleanUp(mockRunContext);
+
+      expect(runResult?.state).toBeTruthy();
+      expect(runResult?.state.shardMissingCounter).toBe(1);
+    });
+
+    it('should throw error if shards are missing for more than 10 times', async () => {
+      mockElasticsearchClient.indices.stats.mockResolvedValue({
+        _shards: { total: 0, failed: 1, successful: 0 },
+        _all: {},
+      });
+
+      const runContext = {
+        taskInstance: {
+          ...mockRunContext.taskInstance,
+          state: { shardMissingCounter: 9 },
+        },
+      };
+
+      await expect(sessionIndex.cleanUp(runContext)).rejects.toBe('');
+    });
+
     describe('concurrent session limit', () => {
       const expectedSearchParameters = () => ({
         index: '.kibana_some_tenant_security_session',
