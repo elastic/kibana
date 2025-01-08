@@ -122,7 +122,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const searchInput = await testSubjects.find('selectableColumnSearch');
       await searchInput.type('geo.dest');
       const option = await find.byCssSelector('.euiSelectableListItem');
-      option.click();
+      await option.click();
 
       await common.sleep(1000);
 
