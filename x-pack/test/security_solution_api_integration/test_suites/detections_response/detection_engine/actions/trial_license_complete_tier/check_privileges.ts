@@ -16,7 +16,6 @@ import {
   deleteAllAlerts,
   createAlertsIndex,
   waitForRulePartialFailure,
-  // waitForRuleSuccess,
   getRuleForAlertTesting,
 } from '../../../../../../common/utils/security_solution';
 import {
