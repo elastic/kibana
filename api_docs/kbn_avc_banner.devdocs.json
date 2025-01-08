@@ -5,10 +5,10 @@
     "functions": [
       {
         "parentPluginId": "@kbn/avc-banner",
-        "id": "def-public.AVCResultsBanner2024",
+        "id": "def-public.AVCResultsBanner",
         "type": "Function",
         "tags": [],
-        "label": "AVCResultsBanner2024",
+        "label": "AVCResultsBanner",
         "description": [],
         "signature": [
           "({ onDismiss }: { onDismiss: () => void; }) => React.JSX.Element"
@@ -19,7 +19,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/avc-banner",
-            "id": "def-public.AVCResultsBanner2024.$1",
+            "id": "def-public.AVCResultsBanner.$1",
             "type": "Object",
             "tags": [],
             "label": "{ onDismiss }",
@@ -38,10 +38,10 @@
       },
       {
         "parentPluginId": "@kbn/avc-banner",
-        "id": "def-public.useIsStillYear2024",
+        "id": "def-public.useIsStillYear2025",
         "type": "Function",
         "tags": [],
-        "label": "useIsStillYear2024",
+        "label": "useIsStillYear2025",
         "description": [],
         "signature": [
           "() => boolean"
