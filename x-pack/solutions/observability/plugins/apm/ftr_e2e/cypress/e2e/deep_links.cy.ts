@@ -15,6 +15,8 @@ describe('Applications deep links', () => {
       it('contains all the expected deep links', () => {
         // navigates to home page
         cy.visitKibana('/');
+        // Wait until the page content is fully loaded
+        // otherwise, the search results may disappear before all checks are completed, making this test flaky
         cy.waitUntilPageContentIsLoaded();
         cy.getByTestSubj('nav-search-input').should('be.visible').type(keyword, { force: true });
 
@@ -87,10 +89,7 @@ function assertDeepLink(
   if (scroll) {
     scrollToPositionResults(scroll);
   }
-  // cy.getByTestSubj('euiSelectableList')
-  //   .find('div > div > ul > li')
-  //   .contains(title)
-  //   .click({ force: true });
+
   // Force click because welcome screen changes
   // https://github.com/elastic/kibana/pull/108193
   cy.contains(title).click({ force: true });
@@ -98,6 +97,7 @@ function assertDeepLink(
 }
 
 function scrollToPositionResults(position: Cypress.PositionType) {
+  // Make sure the search results are visible and we can scroll
   cy.getByTestSubj('euiSelectableList')
     .should('be.visible')
     .find('div > div')
