@@ -30,11 +30,11 @@ const params: RuleParams = {
   ],
 };
 
-const paramsWithReferenceName = {
+const paramsWithReferenceName: RuleParams = {
   ...params,
   logView: {
-    ...params.logView,
     logViewId: 'log-view-reference-0',
+    type: 'log-view-reference',
   },
 };
 
