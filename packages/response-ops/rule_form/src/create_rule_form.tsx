@@ -31,7 +31,6 @@ import {
   parseRuleCircuitBreakerErrorMessage,
 } from './utils';
 import { RULE_CREATE_SUCCESS_TEXT, RULE_CREATE_ERROR_TEXT } from './translations';
-import { RuleFlyout } from './rule_flyout';
 
 export interface CreateRuleFormProps {
   ruleTypeId: string;
@@ -199,7 +198,7 @@ export const CreateRuleForm = (props: CreateRuleFormProps) => {
           }),
         }}
       >
-        <RuleFlyout isEdit={false} isSaving={isSaving} onCancel={onCancel} onSave={onSave} />
+        <RulePage isEdit={false} isSaving={isSaving} onCancel={onCancel} onSave={onSave} />
       </RuleFormStateProvider>
     </div>
   );

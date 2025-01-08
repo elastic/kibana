@@ -24,7 +24,6 @@ import type { RuleFormData } from '../types';
 import { hasRuleErrors } from '../validation';
 import { RuleFlyoutCreateFooter } from './rule_flyout_create_footer';
 import { RuleFlyoutEditFooter } from './rule_flyout_edit_footer';
-
 import { RuleFlyoutEditTabs } from './rule_flyout_edit_tabs';
 
 export interface RuleFlyoutProps {
@@ -102,7 +101,14 @@ export const RuleFlyout = (props: RuleFlyoutProps) => {
 
   return (
     <EuiPortal>
-      <EuiFlyout ownFocus onClose={onCancel} aria-labelledby="flyoutTitle" size="m" maxWidth={620}>
+      <EuiFlyout
+        ownFocus
+        onClose={onCancel}
+        aria-labelledby="flyoutTitle"
+        size="m"
+        maxWidth={500}
+        className="ruleFormFlyout__container"
+      >
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="s" data-test-subj={isEdit ? 'editRuleFlyoutTitle' : 'addRuleFlyoutTitle'}>
             <h3 id="flyoutTitle">
