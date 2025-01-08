@@ -7,7 +7,8 @@
 
 import { EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import React, { useState } from 'react';
+import { AddInferenceFlyoutWrapper } from '../../../../../add_inference_endpoints/add_inference_flyout_wrapper';
 import { InferenceEndpointUI } from '../../../../types';
 
 interface ViewActionProps {
@@ -15,6 +16,7 @@ interface ViewActionProps {
 }
 
 export const ViewAction: React.FC<ViewActionProps> = ({ selectedEndpoint }) => {
+  const [isViewInferenceFlyoutOpen, setIsViewInferenceFlyoutOpen] = useState<boolean>(false);
   return (
     <>
       <EuiButtonEmpty
@@ -26,12 +28,15 @@ export const ViewAction: React.FC<ViewActionProps> = ({ selectedEndpoint }) => {
         iconType="eye"
         color="text"
         size="s"
-        onClick={() => {}}
+        onClick={() => setIsViewInferenceFlyoutOpen(true)}
       >
         {i18n.translate('xpack.searchInferenceEndpoints.actions.viewEndpoint.menuLabel', {
           defaultMessage: 'View endpoint',
         })}
       </EuiButtonEmpty>
+      {isViewInferenceFlyoutOpen && (
+        <AddInferenceFlyoutWrapper onClose={setIsViewInferenceFlyoutOpen} />
+      )}
     </>
   );
 };
