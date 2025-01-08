@@ -722,7 +722,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
               defaultMessage: 'View details',
             }
           ),
-          icon: 'iInCircle',
+          icon: 'controlsVertical',
           type: 'icon',
           onClick: inspectItem,
           'data-test-subj': `inspect-action`,
