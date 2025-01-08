@@ -67,7 +67,7 @@ export const errorToErrorStackAdapter = (error: unknown): Error => {
  * See this file, we are not allowed to import files such as es_error.
  * So instead we say maybe err is on there so that we can unwrap it and get
  * our status code from it if possible within the error in our function.
- * src/plugins/data/public/search/errors/es_error.tsx
+ * src/platform/plugins/shared/data/public/search/errors/es_error.tsx
  */
 export type MaybeESError = IEsError & { err?: Record<string, unknown> };
 
@@ -80,7 +80,7 @@ export type MaybeESError = IEsError & { err?: Record<string, unknown> };
  * supported in the future. However, for now, this is _hopefully_ temporary.
  *
  * Also see the file:
- * x-pack/plugins/security_solution/public/app/home/setup.tsx
+ * x-pack/solutions/security/plugins/security_solution/public/app/home/setup.tsx
  *
  * Where this same technique of overriding and changing the stack is occurring.
  */

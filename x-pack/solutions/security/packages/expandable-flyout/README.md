@@ -19,7 +19,7 @@ The expandable-flyout is making some strict UI design decisions:
   - if the window is smaller than 1600px, the flyout takes the entire browser window (minus 48px of padding on the left)
   - for windows bigger than 1600px, the flyout's width is 80% of the entire browser window (with a max width of 1500px for the left section, and 750px for the right section)
 
-> While the expandable-flyout will work on very small screens, having both the right and left sections visible at the same time will not be a good experience to the user. We recommend only showing the right panel, and therefore handling this situation when you build your panels by considering hiding the actions that could open the left panel (like the expand details button in the [FlyoutNavigation](https://github.com/elastic/kibana/tree/main/x-pack/plugins/security_solution/public/flyout/shared/components/flyout_navigation.tsx)).
+> While the expandable-flyout will work on very small screens, having both the right and left sections visible at the same time will not be a good experience to the user. We recommend only showing the right panel, and therefore handling this situation when you build your panels by considering hiding the actions that could open the left panel (like the expand details button in the [FlyoutNavigation](https://github.com/elastic/kibana/tree/main/x-pack/solutions/security/plugins/security_solution/public/flyout/shared/components/flyout_navigation.tsx)).
 
 ## State persistence
 
@@ -35,7 +35,7 @@ The second way (done by setting the `urlKey` prop to a string value) saves the s
 
 **_Note: the word `memory` cannot be used as an `urlKey` as it is reserved for the memory storage behavior. You can use any other string value, try to use something that should be unique._**
 
-> We highly recommend NOT nesting flyouts in your code, as it would cause conflicts for the url keys. We recommend instead to build multiple panels, with each their own context to manage their data (for example, take a look at the Security Solution [setup](https://github.com/elastic/kibana/tree/main/x-pack/plugins/security_solution/public/flyout)).
+> We highly recommend NOT nesting flyouts in your code, as it would cause conflicts for the url keys. We recommend instead to build multiple panels, with each their own context to manage their data (for example, take a look at the Security Solution [setup](https://github.com/elastic/kibana/tree/main/x-pack/solutions/security/plugins/security_solution/public/flyout)).
 >
 > A good solution is for example to have one instance of a flyout at a page level, and then have multiple panels that can be opened in that flyout.
 

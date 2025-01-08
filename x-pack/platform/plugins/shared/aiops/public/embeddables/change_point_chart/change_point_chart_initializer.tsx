@@ -70,7 +70,15 @@ export const ChangePointChartInitializer: FC<AnomalyChartsInitializerProps> = ({
   } = appContextValue;
 
   const datePickerDeps: DatePickerDependencies = {
-    ...pick(appContextValue, ['data', 'http', 'notifications', 'theme', 'uiSettings', 'i18n']),
+    ...pick(appContextValue, [
+      'data',
+      'http',
+      'notifications',
+      'theme',
+      'uiSettings',
+      'userProfile',
+      'i18n',
+    ]),
     uiSettingsKeys: UI_SETTINGS,
   };
 
@@ -211,7 +219,7 @@ export const FormControls: FC<{
   onChange: (update: FormControlsProps) => void;
   onValidationChange: (isValid: boolean) => void;
 }> = ({ formInput, onChange, onValidationChange }) => {
-  const { charts, data, fieldFormats, theme, uiSettings } = useAiopsAppContext();
+  const { charts, data, fieldFormats, uiSettings } = useAiopsAppContext();
   const { dataView } = useDataSource();
   const { combinedQuery } = useChangePointDetectionContext();
   const { metricFieldOptions, splitFieldsOptions } = useChangePointDetectionControlsContext();
@@ -290,7 +298,6 @@ export const FormControls: FC<{
             }
           : undefined
       }
-      theme={theme}
     >
       <EuiFormRow
         fullWidth

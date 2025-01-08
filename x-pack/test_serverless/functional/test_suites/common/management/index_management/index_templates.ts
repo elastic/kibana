@@ -86,7 +86,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     describe('Create index template', () => {
       const TEST_TEMPLATE_NAME = `test_template_${Date.now()}`;
 
-      after(async () => {
+      afterEach(async () => {
         await es.indices.deleteIndexTemplate({ name: TEST_TEMPLATE_NAME }, { ignore: [404] });
       });
 
@@ -103,6 +103,30 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await retry.try(async () => {
           expect(await testSubjects.getVisibleText('title')).to.contain(TEST_TEMPLATE_NAME);
         });
+        await testSubjects.click('closeDetailsButton');
+      });
+
+      it('can create an index template with logsdb index mode', async () => {
+        await testSubjects.click('createTemplateButton');
+        // Fill out required fields
+        await testSubjects.setValue('nameField', TEST_TEMPLATE_NAME);
+        await testSubjects.setValue('indexPatternsField', INDEX_PATTERN);
+
+        await testSubjects.click('indexModeField');
+        await testSubjects.click('index_mode_logsdb');
+
+        // Click form summary step and then the submit button
+        await testSubjects.click('formWizardStep-5');
+        await pageObjects.header.waitUntilLoadingHasFinished();
+        expect(await testSubjects.getVisibleText('indexModeValue')).to.be('LogsDB');
+
+        // Click update template
+        await pageObjects.indexManagement.clickNextButton();
+        await pageObjects.header.waitUntilLoadingHasFinished();
+
+        // Close detail tab
+        expect(await testSubjects.getVisibleText('indexModeValue')).to.be('LogsDB');
+        await testSubjects.click('closeDetailsButton');
       });
     });
   });

@@ -79,8 +79,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       monitors = _monitors;
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/204069
-    describe.skip('get many monitors', () => {
+    describe('get many monitors', () => {
       it('without params', async () => {
         const uuid = uuidv4();
         const [mon1, mon2] = await Promise.all(
