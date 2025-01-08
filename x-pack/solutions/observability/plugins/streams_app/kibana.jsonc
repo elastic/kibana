@@ -16,6 +16,7 @@
       "dataViews",
       "unifiedSearch",
       "share",
+      "savedObjectsTagging",
       "navigation"
     ],
     "requiredBundles": [

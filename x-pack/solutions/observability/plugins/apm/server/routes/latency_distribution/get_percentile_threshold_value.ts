@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { CommonCorrelationsQueryParams } from '../../../common/correlations/types';
-import { LatencyDistributionChartType } from '../../../common/latency_distribution_chart_types';
-import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
+import type { CommonCorrelationsQueryParams } from '../../../common/correlations/types';
+import type { LatencyDistributionChartType } from '../../../common/latency_distribution_chart_types';
+import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 import { fetchDurationPercentiles } from '../correlations/queries/fetch_duration_percentiles';
 
 export async function getPercentileThresholdValue({

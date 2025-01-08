@@ -20,13 +20,7 @@
         "description": [],
         "signature": [
           "() => jest.Mocked<",
-          {
-            "pluginId": "@kbn/core-saved-objects-server",
-            "scope": "server",
-            "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-            "section": "def-server.SavedObjectsMigrationLogger",
-            "text": "SavedObjectsMigrationLogger"
-          },
+          "SavedObjectsMigrationLogger",
           ">"
         ],
         "path": "packages/core/saved-objects/core-saved-objects-migration-server-mocks/src/migration.mocks.ts",
@@ -129,13 +123,7 @@
             "description": [],
             "signature": [
               "({ migrationVersion, convertToMultiNamespaceTypeVersion, isSingleNamespaceType, }?: { migrationVersion?: string | undefined; convertToMultiNamespaceTypeVersion?: string | undefined; isSingleNamespaceType?: boolean | undefined; }) => jest.Mocked<",
-              {
-                "pluginId": "@kbn/core-saved-objects-server",
-                "scope": "server",
-                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-                "section": "def-server.SavedObjectMigrationContext",
-                "text": "SavedObjectMigrationContext"
-              },
+              "SavedObjectMigrationContext",
               ">"
             ],
             "path": "packages/core/saved-objects/core-saved-objects-migration-server-mocks/src/migration.mocks.ts",
@@ -182,13 +170,7 @@
             "description": [],
             "signature": [
               "({ types, }?: { types: ",
-              {
-                "pluginId": "@kbn/core-saved-objects-server",
-                "scope": "server",
-                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-                "section": "def-server.SavedObjectsType",
-                "text": "SavedObjectsType"
-              },
+              "SavedObjectsType",
               "<any>[]; }) => jest.Mocked<",
               "IKibanaMigrator",
               ">"
@@ -207,13 +189,7 @@
                 "description": [],
                 "signature": [
                   "{ types: ",
-                  {
-                    "pluginId": "@kbn/core-saved-objects-server",
-                    "scope": "server",
-                    "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-                    "section": "def-server.SavedObjectsType",
-                    "text": "SavedObjectsType"
-                  },
+                  "SavedObjectsType",
                   "<any>[]; }"
                 ],
                 "path": "packages/core/saved-objects/core-saved-objects-migration-server-mocks/src/kibana_migrator.mock.ts",
