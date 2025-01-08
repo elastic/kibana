@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { render, renderHook } from '@testing-library/react';
+import { render } from '@testing-library/react';
+import { renderHook } from '@testing-library/react-hooks';
 import { AssistantNavLink } from './assistant_nav_link';
 import { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
 import { ChromeNavControl } from '@kbn/core/public';
