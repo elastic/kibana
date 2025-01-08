@@ -29,7 +29,10 @@ export function FieldFinalSideContent(): JSX.Element {
               {i18n.EDIT}
             </EuiButtonEmpty>
           </EuiFlexGroup>
-          <KibanaSectionErrorBoundary key="readonly" sectionName={i18n.READONLY_MODE}>
+          <KibanaSectionErrorBoundary
+            key="rule-field-readonly-view"
+            sectionName={i18n.READONLY_MODE}
+          >
             <FieldFinalReadOnly />
           </KibanaSectionErrorBoundary>
         </>
@@ -42,7 +45,7 @@ export function FieldFinalSideContent(): JSX.Element {
               {i18n.CANCEL}
             </EuiButtonEmpty>
           </EuiFlexGroup>
-          <KibanaSectionErrorBoundary key="edit" sectionName={i18n.EDIT_MODE}>
+          <KibanaSectionErrorBoundary key="rule-field-editing-view" sectionName={i18n.EDIT_MODE}>
             <FieldFinalEdit />
           </KibanaSectionErrorBoundary>
         </>
