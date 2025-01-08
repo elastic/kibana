@@ -13,6 +13,8 @@ export const INSTANCE_SEARCH_PARAM = 'instanceId';
 export const REMOTE_NAME_PARAM = 'remoteName';
 export const DELETE_SLO = 'delete';
 export const RESET_SLO = 'reset';
+export const ENABLE_SLO = 'enable';
+export const DISABLE_SLO = 'disable';
 
 export function useGetQueryParams() {
   const { search, pathname } = useLocation();
@@ -23,6 +25,8 @@ export function useGetQueryParams() {
   const remoteName = searchParams.get(REMOTE_NAME_PARAM);
   const deleteSlo = searchParams.get(DELETE_SLO);
   const resetSlo = searchParams.get(RESET_SLO);
+  const enableSlo = searchParams.get(ENABLE_SLO);
+  const disableSlo = searchParams.get(DISABLE_SLO);
 
   const removeDeleteQueryParam = useCallback(() => {
     const qParams = new URLSearchParams(search);
@@ -50,6 +54,32 @@ export function useGetQueryParams() {
     }
   }, [resetSlo, history, pathname, search]);
 
+  const removeEnableQueryParam = useCallback(() => {
+    const qParams = new URLSearchParams(search);
+
+    // remote enable param from url after initial load
+    if (enableSlo === 'true') {
+      qParams.delete(ENABLE_SLO);
+      history.replace({
+        pathname,
+        search: qParams.toString(),
+      });
+    }
+  }, [enableSlo, history, pathname, search]);
+
+  const removeDisableQueryParam = useCallback(() => {
+    const qParams = new URLSearchParams(search);
+
+    // remote disable param from url after initial load
+    if (disableSlo === 'true') {
+      qParams.delete(DISABLE_SLO);
+      history.replace({
+        pathname,
+        search: qParams.toString(),
+      });
+    }
+  }, [disableSlo, history, pathname, search]);
+
   return {
     instanceId: !!instanceId && instanceId !== ALL_VALUE ? instanceId : undefined,
     remoteName: remoteName !== null ? remoteName : undefined,
@@ -57,5 +87,9 @@ export function useGetQueryParams() {
     removeDeleteQueryParam,
     isResettingSlo: resetSlo === 'true',
     removeResetQueryParam,
+    isEnablingSlo: enableSlo === 'true',
+    removeEnableQueryParam,
+    isDisablingSlo: disableSlo === 'true',
+    removeDisableQueryParam,
   };
 }
