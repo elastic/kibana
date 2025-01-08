@@ -408,7 +408,7 @@ describe('useUserProfileForm', () => {
           <UserProfile user={nonCloudUser} data={data} />
         </Providers>
       );
-      expect(testWrapper.exists('span[data-test-subj="userRoles"]')).toBeTruthy();
+      expect(testWrapper.exists('div[data-test-subj="userRoles"]')).toBeTruthy();
 
       expect(testWrapper.exists('EuiButtonEmpty[data-test-subj="userRolesExpand"]')).toBeFalsy();
       expect(testWrapper.exists('EuiBadgeGroup[data-test-subj="remainingRoles"]')).toBeFalsy();
@@ -443,7 +443,7 @@ describe('useUserProfileForm', () => {
       );
 
       expect(userRolesExpandButton).toBeTruthy();
-      expect(userRolesExpandButton.text()).toEqual(`+${extraRoles.length} more`);
+      expect(userRolesExpandButton.text()).toEqual(`+${extraRoles.length}`);
     });
   });
 });

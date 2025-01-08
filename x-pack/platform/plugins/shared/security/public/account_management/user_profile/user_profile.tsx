@@ -768,7 +768,6 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
                       <UserRoles user={user} />
                     </EuiFlexItem>
                   </EuiFlexGroup>,
-                  ,
                 ]}
               >
                 <EuiPageHeaderSection>
