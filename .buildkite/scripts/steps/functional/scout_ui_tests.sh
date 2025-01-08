@@ -30,7 +30,7 @@ for run_mode in "--stateful" "--serverless=es" "--serverless=oblt" "--serverless
 done
 
 # Observability Onboarding
-for run_mode in "--serverless=oblt"; do
+for run_mode in "--stateful" "--serverless=oblt"; do
   run_tests "Observability Onboarding" "x-pack/solutions/observability/plugins/observability_onboarding/ui_tests/playwright.config.ts" "$run_mode"
 done
 
