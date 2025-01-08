@@ -8,6 +8,7 @@
  */
 
 import React from 'react';
+import { EuiProvider } from '@elastic/eui';
 import { BehaviorSubject, of } from 'rxjs';
 import { EuiPageSidebar } from '@elastic/eui';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
@@ -123,7 +124,9 @@ async function mountComponent(
   const component = mountWithIntl(
     <KibanaContextProvider services={services}>
       <DiscoverMainProvider value={stateContainer}>
-        <DiscoverLayout {...props} />
+        <EuiProvider>
+          <DiscoverLayout {...props} />
+        </EuiProvider>
       </DiscoverMainProvider>
     </KibanaContextProvider>,
     mountOptions

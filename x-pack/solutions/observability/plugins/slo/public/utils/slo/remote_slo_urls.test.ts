@@ -10,7 +10,9 @@ import {
   createRemoteSloCloneUrl,
   createRemoteSloDeleteUrl,
   createRemoteSloDetailsUrl,
+  createRemoteSloDisableUrl,
   createRemoteSloEditUrl,
+  createRemoteSloEnableUrl,
 } from './remote_slo_urls';
 
 describe('remote SLO URLs Utils', () => {
@@ -19,6 +21,8 @@ describe('remote SLO URLs Utils', () => {
 
     expect(createRemoteSloDetailsUrl(localSlo)).toMatchInlineSnapshot(`undefined`);
     expect(createRemoteSloDeleteUrl(localSlo)).toMatchInlineSnapshot(`undefined`);
+    expect(createRemoteSloEnableUrl(localSlo)).toMatchInlineSnapshot(`undefined`);
+    expect(createRemoteSloDisableUrl(localSlo)).toMatchInlineSnapshot(`undefined`);
     expect(createRemoteSloEditUrl(localSlo)).toMatchInlineSnapshot(`undefined`);
     expect(createRemoteSloCloneUrl(localSlo)).toMatchInlineSnapshot(`undefined`);
   });
@@ -31,6 +35,8 @@ describe('remote SLO URLs Utils', () => {
 
     expect(createRemoteSloDetailsUrl(remoteSloWithoutKibanaUrl)).toMatchInlineSnapshot(`undefined`);
     expect(createRemoteSloDeleteUrl(remoteSloWithoutKibanaUrl)).toMatchInlineSnapshot(`undefined`);
+    expect(createRemoteSloEnableUrl(remoteSloWithoutKibanaUrl)).toMatchInlineSnapshot(`undefined`);
+    expect(createRemoteSloDisableUrl(remoteSloWithoutKibanaUrl)).toMatchInlineSnapshot(`undefined`);
     expect(createRemoteSloEditUrl(remoteSloWithoutKibanaUrl)).toMatchInlineSnapshot(`undefined`);
     expect(createRemoteSloCloneUrl(remoteSloWithoutKibanaUrl)).toMatchInlineSnapshot(`undefined`);
   });
@@ -46,6 +52,12 @@ describe('remote SLO URLs Utils', () => {
     );
     expect(createRemoteSloDeleteUrl(remoteSlo)).toMatchInlineSnapshot(
       `"https://cloud.elast.co/app/slos/fixed-id?delete=true"`
+    );
+    expect(createRemoteSloEnableUrl(remoteSlo)).toMatchInlineSnapshot(
+      `"https://cloud.elast.co/app/slos/fixed-id?enable=true"`
+    );
+    expect(createRemoteSloDisableUrl(remoteSlo)).toMatchInlineSnapshot(
+      `"https://cloud.elast.co/app/slos/fixed-id?disable=true"`
     );
     expect(createRemoteSloEditUrl(remoteSlo)).toMatchInlineSnapshot(
       `"https://cloud.elast.co/app/slos/edit/fixed-id"`
@@ -66,6 +78,12 @@ describe('remote SLO URLs Utils', () => {
     );
     expect(createRemoteSloDeleteUrl(remoteSlo, 'my-custom-space')).toMatchInlineSnapshot(
       `"https://cloud.elast.co/s/my-custom-space/app/slos/fixed-id?delete=true"`
+    );
+    expect(createRemoteSloEnableUrl(remoteSlo, 'my-custom-space')).toMatchInlineSnapshot(
+      `"https://cloud.elast.co/s/my-custom-space/app/slos/fixed-id?enable=true"`
+    );
+    expect(createRemoteSloDisableUrl(remoteSlo, 'my-custom-space')).toMatchInlineSnapshot(
+      `"https://cloud.elast.co/s/my-custom-space/app/slos/fixed-id?disable=true"`
     );
     expect(createRemoteSloEditUrl(remoteSlo, 'my-custom-space')).toMatchInlineSnapshot(
       `"https://cloud.elast.co/s/my-custom-space/app/slos/edit/fixed-id"`
