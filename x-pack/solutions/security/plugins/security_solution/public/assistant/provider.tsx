@@ -145,6 +145,16 @@ export const AssistantProvider: FC<PropsWithChildren<unknown>> = ({ children }) 
     userProfile,
     chrome,
   } = useKibana().services;
+
+  let inferenceEnabled = false;
+  try {
+    actionTypeRegistry.get('.inference');
+    inferenceEnabled = true;
+  } catch (e) {
+    // swallow error
+    // inferenceEnabled will be false
+  }
+
   const basePath = useBasePath();
 
   const baseConversations = useBaseConversations();
@@ -223,6 +233,7 @@ export const AssistantProvider: FC<PropsWithChildren<unknown>> = ({ children }) 
       baseConversations={baseConversations}
       getComments={getComments}
       http={http}
+      inferenceEnabled={inferenceEnabled}
       navigateToApp={navigateToApp}
       title={ASSISTANT_TITLE}
       toasts={toasts}
