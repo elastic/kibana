@@ -17,6 +17,7 @@ import {
   SavedObjectsRawDoc,
   SavedObjectsRawDocSource,
   SavedObjectSanitizedDoc,
+  WithAuditName,
 } from '@kbn/core-saved-objects-server';
 import { ALL_NAMESPACES_STRING, SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
 import { encodeVersion } from '@kbn/core-saved-objects-base-server-internal';
@@ -183,15 +184,20 @@ export const performBulkUpdate = async <T>(
     throw SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError();
   }
 
-  const authObjects: AuthorizeUpdateObject[] = validObjects.map((element) => {
-    const { type, id, objectNamespace, esRequestIndex: index } = element.value;
+  const authObjects: Array<WithAuditName<AuthorizeUpdateObject>> = validObjects.map((element) => {
+    const { type, id, objectNamespace, esRequestIndex: index, documentToSave } = element.value;
     const preflightResult = bulkGetResponse!.body.docs[index];
+    const name = SavedObjectsUtils.getName(
+      documentToSave[type] as SavedObject<T>,
+      registry.getNameAttribute(type)
+    );
 
     if (registry.isMultiNamespace(type)) {
       return {
         type,
         id,
         objectNamespace,
+        name,
         // @ts-expect-error MultiGetHit._source is optional
         existingNamespaces: preflightResult._source?.namespaces ?? [],
       };
@@ -200,6 +206,7 @@ export const performBulkUpdate = async <T>(
         type,
         id,
         objectNamespace,
+        name,
         existingNamespaces: [],
       };
     }

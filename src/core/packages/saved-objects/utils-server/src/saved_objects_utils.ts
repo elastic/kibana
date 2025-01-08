@@ -13,7 +13,11 @@ import type {
   SavedObjectsFindOptions,
   SavedObjectsFindResponse,
 } from '@kbn/core-saved-objects-api-server';
-import type { SavedObjectMigration, SavedObjectMigrationFn } from '@kbn/core-saved-objects-server';
+import type {
+  SavedObjectMigration,
+  SavedObjectMigrationFn,
+  SavedObject,
+} from '@kbn/core-saved-objects-server';
 
 export const DEFAULT_NAMESPACE_STRING = 'default';
 export const ALL_NAMESPACES_STRING = '*';
@@ -108,5 +112,26 @@ export class SavedObjectsUtils {
     migration: SavedObjectMigration<InputAttributes, MigratedAttributes>
   ): SavedObjectMigrationFn<InputAttributes, MigratedAttributes> {
     return isFunction(migration) ? migration : migration.transform;
+  }
+
+  public static getName(
+    savedObject: Pick<SavedObject<unknown>, 'attributes'>,
+    nameAttribute?: string
+  ): string {
+    const attributes = savedObject?.attributes as Record<string, unknown> & {
+      name?: string;
+      title?: string;
+    };
+
+    const fallbackTitle = attributes?.name ?? attributes?.title ?? '';
+
+    if (nameAttribute) {
+      return (
+        (attributes[nameAttribute as keyof (typeof savedObject)['attributes']] as string) ??
+        fallbackTitle
+      );
+    }
+
+    return fallbackTitle;
   }
 }

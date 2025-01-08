@@ -66,6 +66,8 @@ export interface AuthorizeObject {
   type: string;
   /** The id of the object */
   id: string;
+  /** The name of the object */
+  name?: string;
 }
 
 /**
@@ -321,6 +323,8 @@ export interface RedactNamespacesParams<T, A extends string> {
    */
   typeMap: AuthorizationTypeMap<A>;
 }
+
+export type WithAuditName<T> = T & { name?: string };
 
 /**
  * The ISavedObjectsSecurityExtension interface defines the functions of a saved objects repository security extension.

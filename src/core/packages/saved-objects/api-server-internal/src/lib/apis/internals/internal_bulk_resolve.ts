@@ -17,6 +17,7 @@ import type {
   SavedObjectsIncrementCounterField,
   SavedObjectsIncrementCounterOptions,
 } from '@kbn/core-saved-objects-api-server';
+import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
 import {
   type SavedObjectsRawDocSource,
   type SavedObject,
@@ -262,8 +263,26 @@ export async function internalBulkResolve<T>(
 
   const redactedObjects = await securityExtension.authorizeAndRedactInternalBulkResolve({
     namespace,
-    objects: resolvedObjects,
+    objects: resolvedObjects.map((value) => {
+      if (!isBulkResolveError(value)) {
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        const { saved_object, ...rest } = value;
+        return {
+          saved_object: {
+            ...saved_object,
+            name: SavedObjectsUtils.getName(
+              saved_object,
+              registry.getNameAttribute(saved_object.type)
+            ),
+          },
+          ...rest,
+        };
+      }
+
+      return value;
+    }),
   });
+
   return { resolved_objects: redactedObjects };
 }
 
