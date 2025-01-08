@@ -17,9 +17,11 @@ import type { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-p
 import type { StreamsAppKibanaContext } from '../public/hooks/use_kibana';
 
 export function getMockStreamsAppContext(): StreamsAppKibanaContext {
+  const appParams = coreMock.createAppMountParameters();
   const core = coreMock.createStart();
 
   return {
+    appParams,
     core,
     dependencies: {
       start: {
