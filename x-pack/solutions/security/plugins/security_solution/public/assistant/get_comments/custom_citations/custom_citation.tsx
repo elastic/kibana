@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { EuiButtonEmpty, EuiLink, EuiLoadingSpinner, EuiPopover } from '@elastic/eui';
+import { EuiButtonEmpty, EuiLink, EuiPopover } from '@elastic/eui';
 import React, { useState } from 'react';
 import { CustomCitationNode } from './custom_citation_parser';
 
 type CustomCitationProps = Pick<CustomCitationNode, "citationLable" | 'citationLink' | 'citationNumber' | 'incomplete'>
 
-export const CustomCitation: React.FC<CustomCitationProps> = React.memo(({
+export const CustomCitation: React.FC<CustomCitationProps> = ({
     citationLable,
     citationLink,
     citationNumber,
@@ -70,6 +70,4 @@ export const CustomCitation: React.FC<CustomCitationProps> = React.memo(({
             </EuiLink>
         </EuiPopover>
     );
-}, (prevProps, nextProps) => {
-    return prevProps.incomplete === nextProps.incomplete;
-});
+};
