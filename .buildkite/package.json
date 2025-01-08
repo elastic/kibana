@@ -26,8 +26,8 @@
     "chai": "^4.3.10",
     "mocha": "^11.0.1",
     "nock": "^12.0.2",
-    "ts-node": "^10.9.2",
-    "typescript": "^5.1.6"
+    "ts-node": "10.9.2",
+    "typescript": "5.1.6"
   },
   "imports": {
     "#pipeline-utils": "./pipeline-utils/index.ts",
