@@ -16,8 +16,7 @@ import {
   EuiButtonEmpty,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useBoolean } from '@kbn/react-hooks';
-import { DiscardChangesModal } from '../discard_changes_modal';
+import { useDiscardConfirm } from '../../../hooks/use_discard_confirm';
 
 interface ProcessorFlyoutTemplateProps {
   banner?: React.ReactNode;
@@ -35,14 +34,9 @@ export function ProcessorFlyoutTemplate({
   shouldConfirm = false,
   title,
 }: PropsWithChildren<ProcessorFlyoutTemplateProps>) {
-  const [isDiscardModalOpen, { on: openDiscardModal, off: closeDiscardModal }] = useBoolean();
+  const handleClose = useDiscardConfirm(onClose);
 
-  const discardChanges = () => {
-    closeDiscardModal();
-    onClose();
-  };
-
-  const closeHandler = shouldConfirm ? openDiscardModal : onClose;
+  const closeHandler = shouldConfirm ? handleClose : onClose;
 
   return (
     <EuiFlyoutResizable onClose={closeHandler}>
@@ -63,9 +57,6 @@ export function ProcessorFlyoutTemplate({
           {confirmButton}
         </EuiFlexGroup>
       </EuiFlyoutFooter>
-      {shouldConfirm && isDiscardModalOpen && (
-        <DiscardChangesModal onCancel={closeDiscardModal} onConfirm={discardChanges} />
-      )}
     </EuiFlyoutResizable>
   );
 }

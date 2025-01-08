@@ -8,15 +8,14 @@
 import React from 'react';
 import { EuiBottomBar, EuiButton, EuiButtonEmpty, EuiFlexGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useBoolean } from '@kbn/react-hooks';
-import { DiscardChangesModal } from '../stream_detail_enrichment/discard_changes_modal';
+import { useDiscardConfirm } from '../../hooks/use_discard_confirm';
 
 interface ManagementBottomBarProps {
   confirmButtonText?: string;
   disabled?: boolean;
   isLoading?: boolean;
-  onCancel?: () => void;
-  onConfirm?: () => void;
+  onCancel: () => void;
+  onConfirm: () => void;
 }
 
 export function ManagementBottomBar({
@@ -26,48 +25,30 @@ export function ManagementBottomBar({
   onCancel,
   onConfirm,
 }: ManagementBottomBarProps) {
-  const [isDiscardModalOpen, { on: openDiscardModal, off: closeDiscardModal }] = useBoolean();
-
-  const discardChanges = () => {
-    closeDiscardModal();
-    if (onCancel) onCancel();
-  };
+  const handleCancel = useDiscardConfirm(onCancel);
 
   return (
-    <>
-      <EuiBottomBar>
-        <EuiFlexGroup
-          justifyContent="flexEnd"
-          alignItems="center"
-          responsive={false}
-          gutterSize="s"
+    <EuiBottomBar>
+      <EuiFlexGroup justifyContent="flexEnd" alignItems="center" responsive={false} gutterSize="s">
+        <EuiButtonEmpty color="text" size="s" iconType="cross" onClick={handleCancel}>
+          {i18n.translate('xpack.streams.streamDetailView.managementTab.bottomBar.cancel', {
+            defaultMessage: 'Cancel changes',
+          })}
+        </EuiButtonEmpty>
+
+        <EuiButton
+          disabled={disabled}
+          color="primary"
+          fill
+          size="s"
+          iconType="check"
+          onClick={onConfirm}
+          isLoading={isLoading}
         >
-          {onCancel && (
-            <EuiButtonEmpty color="text" size="s" iconType="cross" onClick={openDiscardModal}>
-              {i18n.translate('xpack.streams.streamDetailView.managementTab.bottomBar.cancel', {
-                defaultMessage: 'Cancel changes',
-              })}
-            </EuiButtonEmpty>
-          )}
-          {onConfirm && (
-            <EuiButton
-              disabled={disabled}
-              color="primary"
-              fill
-              size="s"
-              iconType="check"
-              onClick={onConfirm}
-              isLoading={isLoading}
-            >
-              {confirmButtonText}
-            </EuiButton>
-          )}
-        </EuiFlexGroup>
-      </EuiBottomBar>
-      {isDiscardModalOpen && (
-        <DiscardChangesModal onCancel={closeDiscardModal} onConfirm={discardChanges} />
-      )}
-    </>
+          {confirmButtonText}
+        </EuiButton>
+      </EuiFlexGroup>
+    </EuiBottomBar>
   );
 }
 
