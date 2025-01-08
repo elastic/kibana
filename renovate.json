@@ -114,6 +114,7 @@
         "@smithy/protocol-http",
         "@smithy/signature-v4",
         "@smithy/types",
+        "@types/aws4",
         "ajv",
         "aws4",
         "eventsource-parser",
@@ -147,6 +148,7 @@
         "@types/pixelmatch",
         "@types/pngjs",
         "@types/supertest",
+        "@types/react-test-renderer",
         "babel-plugin-istanbul",
         "nyc",
         "oboe",
@@ -161,6 +163,25 @@
         "superagent",
         "supertest",
         "xmlbuilder"
+      ],
+      "reviewers": [
+        "team:appex-qa"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "Team:QA",
+        "release_note:skip",
+        "backport:all-open"
+      ],
+      "enabled": true
+    },
+    {
+      "groupName": "sinon",
+      "matchDepNames": [
+        "sinon",
+        "@types/sinon"
       ],
       "reviewers": [
         "team:appex-qa"
@@ -381,8 +402,28 @@
       "enabled": true
     },
     {
+      "groupName": "@reduxjs/toolkit",
+      "matchDepNames": [
+        "@reduxjs/toolkit"
+      ],
+      "reviewers": [
+        "team:ml-ui",
+        "team:kibana-visualizations",
+        "team:security-solution"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "release_note:skip",
+        "backport:all-open"
+      ],
+      "enabled": true
+    },
+    {
       "groupName": "@elastic/ml-ui dependencies",
       "matchDepNames": [
+        "@types/async",
         "@types/he",
         "async",
         "he",
@@ -422,6 +463,61 @@
       ],
       "labels": [
         "Team:Fleet",
+        "release_note:skip",
+        "backport:all-open"
+      ],
+      "enabled": true
+    },
+    {
+      "groupName": "tar",
+      "matchDepNames": [
+        "tar",
+        "@types/tar"
+      ],
+      "reviewers": [
+        "team:fleet",
+        "team:kibana-operations"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "release_note:skip",
+        "backport:all-open"
+      ],
+      "enabled": true
+    },
+    {
+      "groupName": "unified",
+      "matchDepNames": [
+        "unified"
+      ],
+      "reviewers": [
+        "team:response-ops",
+        "team:security-solution"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "release_note:skip",
+        "backport:all-open"
+      ],
+      "enabled": true
+    },
+    {
+      "groupName": "use-resize-observer",
+      "matchDepNames": [
+        "use-resize-observer"
+      ],
+      "reviewers": [
+        "team:kibana-presentation",
+        "team:security-solution"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
         "release_note:skip",
         "backport:all-open"
       ],
@@ -561,7 +657,8 @@
     {
       "groupName": "semver",
       "matchDepNames": [
-        "semver"
+        "semver",
+        "@types/semver"
       ],
       "reviewers": [
         "team:kibana-core"
@@ -609,7 +706,8 @@
         "cronstrue",
         "file-saver",
         "immer",
-        "@types/mapbox__vector-tile"
+        "@types/mapbox__vector-tile",
+        "@types/file-saver"
       ],
       "reviewers": [
         "team:kibana-management"
@@ -650,7 +748,8 @@
     {
       "groupName": "react-virtualized",
       "matchDepNames": [
-        "react-virtualized"
+        "react-virtualized",
+        "@types/react-virtualized"
       ],
       "reviewers": [
         "team:kibana-management",
@@ -671,7 +770,8 @@
     {
       "groupName": "react-window",
       "matchDepNames": [
-        "react-window"
+        "react-window",
+        "@types/react-window"
       ],
       "reviewers": [
         "team:kibana-management",
@@ -1473,6 +1573,25 @@
       "enabled": true
     },
     {
+      "groupName": "simple-git",
+      "matchDepNames": [
+        "simple-git"
+      ],
+      "reviewers": [
+        "team:kibana-operations"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "Team:Operations",
+        "backport:all-open",
+        "release_note:skip"
+      ],
+      "minimumReleaseAge": "7 days",
+      "enabled": true
+    },
+    {
       "groupName": "source-map",
       "matchDepNames": [
         "source-map",
@@ -1514,6 +1633,25 @@
       "enabled": true
     },
     {
+      "groupName": "whatwg-fetch",
+      "matchDepNames": [
+        "whatwg-fetch"
+      ],
+      "reviewers": [
+        "team:kibana-operations"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "Team:Operations",
+        "backport:all-open",
+        "release_note:skip"
+      ],
+      "minimumReleaseAge": "7 days",
+      "enabled": true
+    },
+    {
       "groupName": "xml2js",
       "matchDepNames": [
         "xml2js",
@@ -1536,7 +1674,8 @@
     {
       "groupName": "jquery",
       "matchDepNames": [
-        "jquery"
+        "jquery",
+        "@types/jquery"
       ],
       "reviewers": [
         "team:kibana-visualizations"
@@ -1596,7 +1735,8 @@
         "tinycolor2",
         "tinygradient",
         "@types/chroma-js",
-        "@types/color"
+        "@types/color",
+        "@types/tinycolor2"
       ],
       "reviewers": [
         "team:kibana-visualizations"
@@ -2072,7 +2212,8 @@
         "@mapbox/mapbox-gl-rtl-text",
         "@mapbox/mapbox-gl-supported",
         "mapbox-gl-draw-rectangle-mode",
-        "maplibre-gl"
+        "maplibre-gl",
+        "@types/geojson"
       ],
       "reviewers": [
         "team:kibana-presentation"
@@ -2716,7 +2857,8 @@
     {
       "groupName": "papaparse",
       "matchDepNames": [
-        "papaparse"
+        "papaparse",
+        "@types/papaparse"
       ],
       "reviewers": [
         "team:security-solution",
@@ -2796,7 +2938,8 @@
     {
       "groupName": "redux-actions",
       "matchDepNames": [
-        "redux-actions"
+        "redux-actions",
+        "@types/redux-actions"
       ],
       "reviewers": [
         "team:kibana-management",
@@ -2882,6 +3025,7 @@
         "require-in-the-middle",
         "tape",
         "tough-cookie",
+        "uuid",
         "xml-crypto",
         "@elastic/node-crypto",
         "@kayahr/text-encoding",
@@ -2891,6 +3035,7 @@
         "@types/node-forge",
         "@types/object-hash",
         "@types/tough-cookie",
+        "@types/uuid",
         "@types/xml-crypto"
       ],
       "reviewers": [
@@ -3488,7 +3633,8 @@
     {
       "groupName": "seedrandom",
       "matchDepNames": [
-        "seedrandom"
+        "seedrandom",
+        "@types/seedrandom"
       ],
       "reviewers": [
         "team:security-scalability"
@@ -3798,7 +3944,8 @@
     {
       "groupName": "set-value",
       "matchDepNames": [
-        "set-value"
+        "set-value",
+        "@types/set-value"
       ],
       "reviewers": [
         "team:visualizations"
