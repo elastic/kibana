@@ -19,7 +19,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type {
-  RuleMigrationResourceData,
+  RuleMigrationResourceBase,
   RuleMigrationTaskStats,
 } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import { RulesDataInput } from './steps/rules/rules_data_input';
@@ -60,12 +60,12 @@ export const MigrationDataInputFlyout = React.memo<MigrationDataInputFlyoutProps
     }, []);
 
     const onMissingResourcesFetched = useCallback(
-      (missingResources: RuleMigrationResourceData[]) => {
+      (missingResources: RuleMigrationResourceBase[]) => {
         const newMissingResourcesIndexed = missingResources.reduce<MissingResourcesIndexed>(
           (acc, { type, name }) => {
             if (type === 'macro') {
               acc.macros.push(name);
-            } else if (type === 'list') {
+            } else if (type === 'lookup') {
               acc.lookups.push(name);
             }
             return acc;
