@@ -34,9 +34,9 @@ const InvestigateInTimelineActionComponent: React.FC<InvestigateInTimelineAction
     onInvestigateInTimelineAlertClick,
   });
   const {
-    timelinePrivileges: { crud, read },
+    timelinePrivileges: { read },
   } = useUserPrivileges();
-  const cannotReadNorWriteTimeline = !crud && !read;
+  const cannotReadTimeline = !read;
 
   return (
     <ActionIconItem
@@ -45,7 +45,7 @@ const InvestigateInTimelineActionComponent: React.FC<InvestigateInTimelineAction
       dataTestSubj="send-alert-to-timeline"
       iconType="timeline"
       onClick={investigateInTimelineAlertClick}
-      isDisabled={cannotReadNorWriteTimeline}
+      isDisabled={cannotReadTimeline}
       buttonType={buttonType}
     />
   );

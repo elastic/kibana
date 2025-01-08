@@ -90,7 +90,6 @@ describe('use investigate in timeline hook', () => {
   test('it disables the button when the user does not have access to timeline', () => {
     (useUserPrivileges as jest.Mock).mockReturnValue({
       timelinePrivileges: {
-        crud: false,
         read: false,
       },
     });
