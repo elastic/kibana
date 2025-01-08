@@ -1914,7 +1914,7 @@
           },
           "<Context>"
         ],
-        "path": "packages/kbn-ui-actions-browser/src/types/presentable.ts",
+        "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/types/presentable.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1927,7 +1927,7 @@
             "description": [
               "\nID that uniquely identifies this object."
             ],
-            "path": "packages/kbn-ui-actions-browser/src/types/presentable.ts",
+            "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/types/presentable.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1940,7 +1940,7 @@
             "description": [
               "\nDetermines the display order in relation to other items. Higher numbers are\ndisplayed first."
             ],
-            "path": "packages/kbn-ui-actions-browser/src/types/presentable.ts",
+            "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/types/presentable.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1956,7 +1956,7 @@
             "signature": [
               "React.FC<{ context: Context; }> | undefined"
             ],
-            "path": "packages/kbn-ui-actions-browser/src/types/presentable.ts",
+            "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/types/presentable.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1972,7 +1972,7 @@
             "signature": [
               "(context: Context) => string | undefined"
             ],
-            "path": "packages/kbn-ui-actions-browser/src/types/presentable.ts",
+            "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/types/presentable.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1986,7 +1986,7 @@
                 "signature": [
                   "Context"
                 ],
-                "path": "packages/kbn-ui-actions-browser/src/types/presentable.ts",
+                "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/types/presentable.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2006,7 +2006,7 @@
             "signature": [
               "(context: Context) => string"
             ],
-            "path": "packages/kbn-ui-actions-browser/src/types/presentable.ts",
+            "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/types/presentable.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2020,7 +2020,7 @@
                 "signature": [
                   "Context"
                 ],
-                "path": "packages/kbn-ui-actions-browser/src/types/presentable.ts",
+                "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/types/presentable.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2040,7 +2040,7 @@
             "signature": [
               "((context: Context) => string) | undefined"
             ],
-            "path": "packages/kbn-ui-actions-browser/src/types/presentable.ts",
+            "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/types/presentable.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2054,7 +2054,7 @@
                 "signature": [
                   "Context"
                 ],
-                "path": "packages/kbn-ui-actions-browser/src/types/presentable.ts",
+                "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/types/presentable.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2074,7 +2074,7 @@
             "signature": [
               "((context: Context) => Promise<string | undefined>) | undefined"
             ],
-            "path": "packages/kbn-ui-actions-browser/src/types/presentable.ts",
+            "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/types/presentable.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2088,7 +2088,7 @@
                 "signature": [
                   "Context"
                 ],
-                "path": "packages/kbn-ui-actions-browser/src/types/presentable.ts",
+                "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/types/presentable.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2108,7 +2108,7 @@
             "signature": [
               "(context: Context) => Promise<boolean>"
             ],
-            "path": "packages/kbn-ui-actions-browser/src/types/presentable.ts",
+            "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/types/presentable.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2122,7 +2122,7 @@
                 "signature": [
                   "Context"
                 ],
-                "path": "packages/kbn-ui-actions-browser/src/types/presentable.ts",
+                "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/types/presentable.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2149,7 +2149,7 @@
               },
               "<Context> | undefined"
             ],
-            "path": "packages/kbn-ui-actions-browser/src/types/presentable.ts",
+            "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/types/presentable.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2181,7 +2181,7 @@
           },
           "<Context>, \"order\" | \"getIconType\" | \"getDisplayName\" | \"getDisplayNameTooltip\">>"
         ],
-        "path": "packages/kbn-ui-actions-browser/src/types/presentable.ts",
+        "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/types/presentable.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2192,7 +2192,7 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "path": "packages/kbn-ui-actions-browser/src/types/presentable.ts",
+            "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/types/presentable.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2208,7 +2208,7 @@
         "description": [
           "\nThis is a convenience interface used to register a *trigger*.\n\n`Trigger` specifies a named anchor to which `Action` can be attached. When\n`Trigger` is being *called* it creates a `Context` object and passes it to\nthe `execute` method of an `Action`.\n\nMore than one action can be attached to a single trigger, in which case when\ntrigger is *called* it first displays a context menu for user to pick a\nsingle action to execute."
         ],
-        "path": "packages/kbn-ui-actions-browser/src/triggers/trigger.ts",
+        "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/triggers/trigger.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2221,7 +2221,7 @@
             "description": [
               "\nUnique name of the trigger as identified in `ui_actions` plugin trigger registry."
             ],
-            "path": "packages/kbn-ui-actions-browser/src/triggers/trigger.ts",
+            "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/triggers/trigger.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2237,7 +2237,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/kbn-ui-actions-browser/src/triggers/trigger.ts",
+            "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/triggers/trigger.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2253,7 +2253,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/kbn-ui-actions-browser/src/triggers/trigger.ts",
+            "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/triggers/trigger.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2562,7 +2562,7 @@
         "signature": [
           "\"ADD_PANEL_TRIGGER\""
         ],
-        "path": "packages/kbn-ui-actions-browser/src/triggers/dashboard_app_panel_trigger.ts",
+        "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/triggers/dashboard_app_panel_trigger.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2614,7 +2614,7 @@
           },
           "<Context>[]"
         ],
-        "path": "packages/kbn-ui-actions-browser/src/types/presentable.ts",
+        "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/types/presentable.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2629,7 +2629,7 @@
         "signature": [
           "\"ROW_CLICK_TRIGGER\""
         ],
-        "path": "packages/kbn-ui-actions-browser/src/triggers/row_click_trigger.ts",
+        "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/triggers/row_click_trigger.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2660,7 +2660,7 @@
           },
           "; columns?: string[] | undefined; }; }"
         ],
-        "path": "packages/kbn-ui-actions-browser/src/triggers/row_click_trigger.ts",
+        "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/triggers/row_click_trigger.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2675,7 +2675,7 @@
         "signature": [
           "\"VISUALIZE_FIELD_TRIGGER\""
         ],
-        "path": "packages/kbn-ui-actions-browser/src/triggers/visualize_field_trigger.ts",
+        "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/triggers/visualize_field_trigger.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2690,7 +2690,7 @@
         "signature": [
           "\"VISUALIZE_GEO_FIELD_TRIGGER\""
         ],
-        "path": "packages/kbn-ui-actions-browser/src/triggers/visualize_geo_field_trigger.ts",
+        "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/triggers/visualize_geo_field_trigger.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2704,7 +2704,7 @@
         "tags": [],
         "label": "addPanelMenuTrigger",
         "description": [],
-        "path": "packages/kbn-ui-actions-browser/src/triggers/dashboard_app_panel_trigger.ts",
+        "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/triggers/dashboard_app_panel_trigger.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2715,7 +2715,7 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "path": "packages/kbn-ui-actions-browser/src/triggers/dashboard_app_panel_trigger.ts",
+            "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/triggers/dashboard_app_panel_trigger.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2726,7 +2726,7 @@
             "tags": [],
             "label": "title",
             "description": [],
-            "path": "packages/kbn-ui-actions-browser/src/triggers/dashboard_app_panel_trigger.ts",
+            "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/triggers/dashboard_app_panel_trigger.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2737,7 +2737,7 @@
             "tags": [],
             "label": "description",
             "description": [],
-            "path": "packages/kbn-ui-actions-browser/src/triggers/dashboard_app_panel_trigger.ts",
+            "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/triggers/dashboard_app_panel_trigger.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2751,7 +2751,7 @@
         "tags": [],
         "label": "rowClickTrigger",
         "description": [],
-        "path": "packages/kbn-ui-actions-browser/src/triggers/row_click_trigger.ts",
+        "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/triggers/row_click_trigger.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2762,7 +2762,7 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "path": "packages/kbn-ui-actions-browser/src/triggers/row_click_trigger.ts",
+            "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/triggers/row_click_trigger.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2773,7 +2773,7 @@
             "tags": [],
             "label": "title",
             "description": [],
-            "path": "packages/kbn-ui-actions-browser/src/triggers/row_click_trigger.ts",
+            "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/triggers/row_click_trigger.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2784,7 +2784,7 @@
             "tags": [],
             "label": "description",
             "description": [],
-            "path": "packages/kbn-ui-actions-browser/src/triggers/row_click_trigger.ts",
+            "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/triggers/row_click_trigger.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2798,7 +2798,7 @@
         "tags": [],
         "label": "visualizeFieldTrigger",
         "description": [],
-        "path": "packages/kbn-ui-actions-browser/src/triggers/visualize_field_trigger.ts",
+        "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/triggers/visualize_field_trigger.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2809,7 +2809,7 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "path": "packages/kbn-ui-actions-browser/src/triggers/visualize_field_trigger.ts",
+            "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/triggers/visualize_field_trigger.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2820,7 +2820,7 @@
             "tags": [],
             "label": "title",
             "description": [],
-            "path": "packages/kbn-ui-actions-browser/src/triggers/visualize_field_trigger.ts",
+            "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/triggers/visualize_field_trigger.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2831,7 +2831,7 @@
             "tags": [],
             "label": "description",
             "description": [],
-            "path": "packages/kbn-ui-actions-browser/src/triggers/visualize_field_trigger.ts",
+            "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/triggers/visualize_field_trigger.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2845,7 +2845,7 @@
         "tags": [],
         "label": "visualizeGeoFieldTrigger",
         "description": [],
-        "path": "packages/kbn-ui-actions-browser/src/triggers/visualize_geo_field_trigger.ts",
+        "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/triggers/visualize_geo_field_trigger.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2856,7 +2856,7 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "path": "packages/kbn-ui-actions-browser/src/triggers/visualize_geo_field_trigger.ts",
+            "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/triggers/visualize_geo_field_trigger.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2867,7 +2867,7 @@
             "tags": [],
             "label": "title",
             "description": [],
-            "path": "packages/kbn-ui-actions-browser/src/triggers/visualize_geo_field_trigger.ts",
+            "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/triggers/visualize_geo_field_trigger.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2878,7 +2878,7 @@
             "tags": [],
             "label": "description",
             "description": [],
-            "path": "packages/kbn-ui-actions-browser/src/triggers/visualize_geo_field_trigger.ts",
+            "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/triggers/visualize_geo_field_trigger.ts",
             "deprecated": false,
             "trackAdoption": false
           }

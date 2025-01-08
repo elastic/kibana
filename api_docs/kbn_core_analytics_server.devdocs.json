@@ -620,11 +620,11 @@
               },
               {
                 "plugin": "@kbn/shared-ux-chrome-navigation",
-                "path": "packages/shared-ux/chrome/navigation/src/analytics/event_tracker.ts"
+                "path": "src/platform/packages/shared/shared-ux/chrome/navigation/src/analytics/event_tracker.ts"
               },
               {
                 "plugin": "@kbn/shared-ux-chrome-navigation",
-                "path": "packages/shared-ux/chrome/navigation/src/services.tsx"
+                "path": "src/platform/packages/shared/shared-ux/chrome/navigation/src/services.tsx"
               },
               {
                 "plugin": "spaces",
@@ -1068,7 +1068,7 @@
               },
               {
                 "plugin": "@kbn/shared-ux-chrome-navigation",
-                "path": "packages/shared-ux/chrome/navigation/mocks/storybook.ts"
+                "path": "src/platform/packages/shared/shared-ux/chrome/navigation/mocks/storybook.ts"
               },
               {
                 "plugin": "@kbn/core-analytics-browser-mocks",
@@ -1817,8 +1817,8 @@
                 "path": "src/core/packages/analytics/browser-internal/src/analytics_service.ts"
               },
               {
-                "plugin": "@kbn/core-chrome-browser-internal",
-                "path": "packages/core/chrome/core-chrome-browser-internal/src/register_analytics_context_provider.ts"
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/chrome/browser-internal/src/register_analytics_context_provider.ts"
               },
               {
                 "plugin": "cloud",
@@ -1970,23 +1970,23 @@
               },
               {
                 "plugin": "@kbn/core",
-                "path": "src/core/packages/execution-context/browser-internal/src/execution_context_service.test.ts"
+                "path": "src/core/packages/chrome/browser-internal/src/register_analytics_context_provider.test.ts"
+              },
+              {
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/chrome/browser-internal/src/register_analytics_context_provider.test.ts"
+              },
+              {
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/chrome/browser-internal/src/register_analytics_context_provider.test.ts"
               },
               {
                 "plugin": "@kbn/core",
                 "path": "src/core/packages/execution-context/browser-internal/src/execution_context_service.test.ts"
               },
               {
-                "plugin": "@kbn/core-chrome-browser-internal",
-                "path": "packages/core/chrome/core-chrome-browser-internal/src/register_analytics_context_provider.test.ts"
-              },
-              {
-                "plugin": "@kbn/core-chrome-browser-internal",
-                "path": "packages/core/chrome/core-chrome-browser-internal/src/register_analytics_context_provider.test.ts"
-              },
-              {
-                "plugin": "@kbn/core-chrome-browser-internal",
-                "path": "packages/core/chrome/core-chrome-browser-internal/src/register_analytics_context_provider.test.ts"
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/execution-context/browser-internal/src/execution_context_service.test.ts"
               },
               {
                 "plugin": "@kbn/core-analytics-server-mocks",

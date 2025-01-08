@@ -19,7 +19,7 @@
           },
           " implements ",
           "Plugin",
-          "<void, void, object, object>"
+          "<void, void, never, never>"
         ],
         "path": "x-pack/solutions/observability/plugins/observability_shared/public/plugin.ts",
         "deprecated": false,
@@ -51,7 +51,7 @@
             "signature": [
               "(coreSetup: ",
               "CoreSetup",
-              "<object, unknown>, pluginsSetup: ",
+              "<{}, unknown>, pluginsSetup: ",
               "ObservabilitySharedSetup",
               ") => { registerProfilingComponent: <T>(key: string, component: React.FC<T>) => void; locators: ObservabilitySharedLocators; navigation: { registerSections: (sections$: ",
               "Observable",
@@ -78,7 +78,7 @@
                 "description": [],
                 "signature": [
                   "CoreSetup",
-                  "<object, unknown>"
+                  "<{}, unknown>"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability_shared/public/plugin.ts",
                 "deprecated": false,
@@ -1759,13 +1759,7 @@
             "text": "FieldDefinition"
           },
           "<",
-          {
-            "pluginId": "@kbn/core-ui-settings-common",
-            "scope": "common",
-            "docId": "kibKbnCoreUiSettingsCommonPluginApi",
-            "section": "def-common.UiSettingsType",
-            "text": "UiSettingsType"
-          },
+          "UiSettingsType",
           ", string | number | boolean | (string | number)[] | null | undefined>>; unsavedChanges: Record<string, ",
           {
             "pluginId": "@kbn/management-settings-types",
@@ -1775,13 +1769,7 @@
             "text": "UnsavedFieldChange"
           },
           "<",
-          {
-            "pluginId": "@kbn/core-ui-settings-common",
-            "scope": "common",
-            "docId": "kibKbnCoreUiSettingsCommonPluginApi",
-            "section": "def-common.UiSettingsType",
-            "text": "UiSettingsType"
-          },
+          "UiSettingsType",
           ">>; handleFieldChange: ",
           {
             "pluginId": "@kbn/management-settings-types",
@@ -1791,13 +1779,7 @@
             "text": "OnFieldChangeFn"
           },
           "<",
-          {
-            "pluginId": "@kbn/core-ui-settings-common",
-            "scope": "common",
-            "docId": "kibKbnCoreUiSettingsCommonPluginApi",
-            "section": "def-common.UiSettingsType",
-            "text": "UiSettingsType"
-          },
+          "UiSettingsType",
           ">; saveAll: () => Promise<void>; isSaving: boolean; cleanUnsavedChanges: () => void; saveSingleSetting: (id: string, change: string | number | boolean | (string | number)[] | null | undefined) => Promise<void>; }"
         ],
         "path": "x-pack/solutions/observability/plugins/observability_shared/public/hooks/use_editable_settings.tsx",

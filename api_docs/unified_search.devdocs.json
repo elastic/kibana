@@ -29,7 +29,7 @@
           },
           ", core: ",
           "CoreSetup",
-          "<object, unknown>, id: string, type: string) => ",
+          "<{}, unknown>, id: string, type: string) => ",
           {
             "pluginId": "uiActions",
             "scope": "public",
@@ -102,7 +102,7 @@
             "description": [],
             "signature": [
               "CoreSetup",
-              "<object, unknown>"
+              "<{}, unknown>"
             ],
             "path": "src/plugins/unified_search/public/actions/apply_filter_action.ts",
             "deprecated": false,
@@ -1425,13 +1425,7 @@
             "label": "uiSettings",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-ui-settings-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
-                "section": "def-public.IUiSettingsClient",
-                "text": "IUiSettingsClient"
-              }
+              "IUiSettingsClient"
             ],
             "path": "src/plugins/unified_search/public/types.ts",
             "deprecated": false,
@@ -2478,7 +2472,19 @@
             "section": "def-server.UnifiedSearchServerPluginSetup",
             "text": "UnifiedSearchServerPluginSetup"
           },
-          ", void, object, object>"
+          ", ",
+          {
+            "pluginId": "unifiedSearch",
+            "scope": "server",
+            "docId": "kibUnifiedSearchPluginApi",
+            "section": "def-server.UnifiedSearchServerPluginStart",
+            "text": "UnifiedSearchServerPluginStart"
+          },
+          ", ",
+          "UnifiedSearchServerPluginSetupDependencies",
+          ", ",
+          "UnifiedSearchServerPluginStartDependencies",
+          ">"
         ],
         "path": "src/plugins/unified_search/server/plugin.ts",
         "deprecated": false,
@@ -2717,21 +2723,7 @@
       }
     ],
     "functions": [],
-    "interfaces": [
-      {
-        "parentPluginId": "unifiedSearch",
-        "id": "def-server.UnifiedSearchServerPluginStart",
-        "type": "Interface",
-        "tags": [],
-        "label": "UnifiedSearchServerPluginStart",
-        "description": [],
-        "path": "src/plugins/unified_search/server/plugin.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [],
-        "initialIsOpen": false
-      }
-    ],
+    "interfaces": [],
     "enums": [],
     "misc": [],
     "objects": [],
@@ -2818,6 +2810,20 @@
         }
       ],
       "lifecycle": "setup",
+      "initialIsOpen": true
+    },
+    "start": {
+      "parentPluginId": "unifiedSearch",
+      "id": "def-server.UnifiedSearchServerPluginStart",
+      "type": "Interface",
+      "tags": [],
+      "label": "UnifiedSearchServerPluginStart",
+      "description": [],
+      "path": "src/plugins/unified_search/server/plugin.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [],
+      "lifecycle": "start",
       "initialIsOpen": true
     }
   },

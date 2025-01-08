@@ -27,7 +27,7 @@
             "section": "def-public.ActionsPublicPluginSetup",
             "text": "ActionsPublicPluginSetup"
           },
-          ", void, object, object>"
+          ", void, never, never>"
         ],
         "path": "x-pack/platform/plugins/shared/actions/public/plugin.ts",
         "deprecated": false,

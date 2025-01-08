@@ -83,13 +83,7 @@
               "\n{@link UiSettingsRequestHandlerContext}"
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/core-ui-settings-server",
-                "scope": "server",
-                "docId": "kibKbnCoreUiSettingsServerPluginApi",
-                "section": "def-server.UiSettingsRequestHandlerContext",
-                "text": "UiSettingsRequestHandlerContext"
-              }
+              "UiSettingsRequestHandlerContext"
             ],
             "path": "src/core/packages/http/request-handler-context-server/src/request_handler_context.ts",
             "deprecated": false,
@@ -240,13 +234,7 @@
               "\nThe {@link IUiSettingsClient | UI Settings client}."
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/core-ui-settings-server",
-                "scope": "server",
-                "docId": "kibKbnCoreUiSettingsServerPluginApi",
-                "section": "def-server.IUiSettingsClient",
-                "text": "IUiSettingsClient"
-              }
+              "IUiSettingsClient"
             ],
             "path": "src/core/packages/http/request-handler-context-server/src/preboot_request_handler_context.ts",
             "deprecated": false,

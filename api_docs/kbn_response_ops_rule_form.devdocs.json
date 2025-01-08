@@ -1352,13 +1352,7 @@
             "label": "settings",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-ui-settings-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
-                "section": "def-public.SettingsStart",
-                "text": "SettingsStart"
-              }
+              "SettingsStart"
             ],
             "path": "packages/response-ops/rule_form/src/types.ts",
             "deprecated": false,

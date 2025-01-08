@@ -100,53 +100,6 @@
     "functions": [
       {
         "parentPluginId": "observabilityAIAssistant",
-        "id": "def-public.AssistantAvatar",
-        "type": "Function",
-        "tags": [
-          "deprecated"
-        ],
-        "label": "AssistantAvatar",
-        "description": [],
-        "signature": [
-          "({ size = 's', css, className }: ",
-          "AssistantAvatarProps",
-          ") => React.JSX.Element"
-        ],
-        "path": "x-pack/platform/plugins/shared/observability_solution/observability_ai_assistant/public/components/assistant_avatar.tsx",
-        "deprecated": true,
-        "trackAdoption": false,
-        "references": [
-          {
-            "plugin": "observabilityAIAssistantApp",
-            "path": "x-pack/solutions/observability/plugins/observability_ai_assistant_app/public/components/rca/rca_callout/index.tsx"
-          },
-          {
-            "plugin": "observabilityAIAssistantApp",
-            "path": "x-pack/solutions/observability/plugins/observability_ai_assistant_app/public/components/rca/rca_callout/index.tsx"
-          }
-        ],
-        "children": [
-          {
-            "parentPluginId": "observabilityAIAssistant",
-            "id": "def-public.AssistantAvatar.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "{ size = 's', css, className }",
-            "description": [],
-            "signature": [
-              "AssistantAvatarProps"
-            ],
-            "path": "x-pack/platform/plugins/shared/observability_solution/observability_ai_assistant/public/components/assistant_avatar.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "observabilityAIAssistant",
         "id": "def-public.ChatItemControls",
         "type": "Function",
         "tags": [],
@@ -7876,13 +7829,7 @@
                     "label": "uiSettingsClient",
                     "description": [],
                     "signature": [
-                      {
-                        "pluginId": "@kbn/core-ui-settings-server",
-                        "scope": "server",
-                        "docId": "kibKbnCoreUiSettingsServerPluginApi",
-                        "section": "def-server.IUiSettingsClient",
-                        "text": "IUiSettingsClient"
-                      }
+                      "IUiSettingsClient"
                     ],
                     "path": "x-pack/platform/plugins/shared/observability_solution/observability_ai_assistant/server/service/client/index.ts",
                     "deprecated": false,

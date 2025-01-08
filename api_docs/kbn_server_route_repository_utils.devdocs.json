@@ -486,7 +486,7 @@
         "label": "EndpointOf",
         "description": [],
         "signature": [
-          "keyof TServerRouteRepository"
+          "keyof TServerRouteRepository & string"
         ],
         "path": "src/platform/packages/shared/kbn-server-route-repository-utils/src/typings.ts",
         "deprecated": false,

@@ -43,7 +43,11 @@
             "section": "def-server.TaskManagerStartContract",
             "text": "TaskManagerStartContract"
           },
-          ", object, object>"
+          ", ",
+          "TaskManagerPluginsSetup",
+          ", ",
+          "TaskManagerPluginsStart",
+          ">"
         ],
         "path": "x-pack/platform/plugins/shared/task_manager/server/plugin.ts",
         "deprecated": false,
@@ -109,6 +113,8 @@
               "(core: ",
               "CoreSetup",
               "<",
+              "TaskManagerPluginsStart",
+              ", ",
               {
                 "pluginId": "taskManager",
                 "scope": "server",
@@ -116,15 +122,9 @@
                 "section": "def-server.TaskManagerStartContract",
                 "text": "TaskManagerStartContract"
               },
-              ", unknown>, plugins: { usageCollection?: ",
-              {
-                "pluginId": "usageCollection",
-                "scope": "server",
-                "docId": "kibUsageCollectionPluginApi",
-                "section": "def-server.UsageCollectionSetup",
-                "text": "UsageCollectionSetup"
-              },
-              " | undefined; }) => ",
+              ">, plugins: ",
+              "TaskManagerPluginsSetup",
+              ") => ",
               {
                 "pluginId": "taskManager",
                 "scope": "server",
@@ -147,6 +147,8 @@
                 "signature": [
                   "CoreSetup",
                   "<",
+                  "TaskManagerPluginsStart",
+                  ", ",
                   {
                     "pluginId": "taskManager",
                     "scope": "server",
@@ -154,7 +156,7 @@
                     "section": "def-server.TaskManagerStartContract",
                     "text": "TaskManagerStartContract"
                   },
-                  ", unknown>"
+                  ">"
                 ],
                 "path": "x-pack/platform/plugins/shared/task_manager/server/plugin.ts",
                 "deprecated": false,
@@ -168,32 +170,13 @@
                 "tags": [],
                 "label": "plugins",
                 "description": [],
+                "signature": [
+                  "TaskManagerPluginsSetup"
+                ],
                 "path": "x-pack/platform/plugins/shared/task_manager/server/plugin.ts",
                 "deprecated": false,
                 "trackAdoption": false,
-                "children": [
-                  {
-                    "parentPluginId": "taskManager",
-                    "id": "def-server.TaskManagerPlugin.setup.$2.usageCollection",
-                    "type": "CompoundType",
-                    "tags": [],
-                    "label": "usageCollection",
-                    "description": [],
-                    "signature": [
-                      {
-                        "pluginId": "usageCollection",
-                        "scope": "server",
-                        "docId": "kibUsageCollectionPluginApi",
-                        "section": "def-server.UsageCollectionSetup",
-                        "text": "UsageCollectionSetup"
-                      },
-                      " | undefined"
-                    ],
-                    "path": "x-pack/platform/plugins/shared/task_manager/server/plugin.ts",
-                    "deprecated": false,
-                    "trackAdoption": false
-                  }
-                ]
+                "isRequired": true
               }
             ],
             "returnComment": []
@@ -209,7 +192,7 @@
               "({ savedObjects, elasticsearch, executionContext, docLinks }: ",
               "CoreStart",
               ", { cloud }: ",
-              "TaskManagerPluginStart",
+              "TaskManagerPluginsStart",
               ") => ",
               {
                 "pluginId": "taskManager",
@@ -246,7 +229,7 @@
                 "label": "{ cloud }",
                 "description": [],
                 "signature": [
-                  "TaskManagerPluginStart"
+                  "TaskManagerPluginsStart"
                 ],
                 "path": "x-pack/platform/plugins/shared/task_manager/server/plugin.ts",
                 "deprecated": false,

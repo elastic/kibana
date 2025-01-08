@@ -3993,7 +3993,7 @@
             "section": "def-public.ExpressionsStart",
             "text": "ExpressionsStart"
           },
-          ", object, object>"
+          ", never, never>"
         ],
         "path": "src/plugins/expressions/public/plugin.ts",
         "deprecated": false,
@@ -4042,7 +4042,7 @@
             "signature": [
               "(core: ",
               "CoreSetup",
-              "<object, unknown>) => ",
+              "<{}, unknown>) => ",
               {
                 "pluginId": "expressions",
                 "scope": "common",
@@ -4064,7 +4064,7 @@
                 "description": [],
                 "signature": [
                   "CoreSetup",
-                  "<object, unknown>"
+                  "<{}, unknown>"
                 ],
                 "path": "src/plugins/expressions/public/plugin.ts",
                 "deprecated": false,
@@ -16678,7 +16678,7 @@
             "section": "def-common.ExpressionsServiceStart",
             "text": "ExpressionsServiceStart"
           },
-          ", object, object>"
+          ", {}, {}>"
         ],
         "path": "src/plugins/expressions/server/plugin.ts",
         "deprecated": false,
@@ -16747,7 +16747,7 @@
             "signature": [
               "(core: ",
               "CoreSetup",
-              "<object, unknown>) => ",
+              "<{}, unknown>) => ",
               {
                 "pluginId": "expressions",
                 "scope": "common",
@@ -16769,7 +16769,7 @@
                 "description": [],
                 "signature": [
                   "CoreSetup",
-                  "<object, unknown>"
+                  "<{}, unknown>"
                 ],
                 "path": "src/plugins/expressions/server/plugin.ts",
                 "deprecated": false,

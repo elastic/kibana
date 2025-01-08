@@ -237,13 +237,7 @@
         ],
         "signature": [
           "(uiSettings: ",
-          {
-            "pluginId": "@kbn/core-ui-settings-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
-            "section": "def-public.IUiSettingsClient",
-            "text": "IUiSettingsClient"
-          },
+          "IUiSettingsClient",
           ") => string"
         ],
         "path": "packages/kbn-visualization-utils/src/get_timezone.ts",
@@ -258,13 +252,7 @@
             "label": "uiSettings",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-ui-settings-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
-                "section": "def-public.IUiSettingsClient",
-                "text": "IUiSettingsClient"
-              }
+              "IUiSettingsClient"
             ],
             "path": "packages/kbn-visualization-utils/src/get_timezone.ts",
             "deprecated": false,

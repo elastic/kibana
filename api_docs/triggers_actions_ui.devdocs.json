@@ -98,7 +98,7 @@
             "signature": [
               "(core: ",
               "CoreSetup",
-              "<object, unknown>, plugins: PluginsSetup) => ",
+              "<{}, unknown>, plugins: PluginsSetup) => ",
               {
                 "pluginId": "triggersActionsUi",
                 "scope": "public",
@@ -120,7 +120,7 @@
                 "description": [],
                 "signature": [
                   "CoreSetup",
-                  "<object, unknown>"
+                  "<{}, unknown>"
                 ],
                 "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/plugin.ts",
                 "deprecated": false,

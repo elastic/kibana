@@ -1181,15 +1181,15 @@
           },
           {
             "plugin": "savedObjectsTagging",
-            "path": "x-pack/platform/plugins/private/saved_objects_tagging/public/ui_api/get_table_column_definition.tsx"
+            "path": "x-pack/platform/plugins/shared/saved_objects_tagging/public/ui_api/get_table_column_definition.tsx"
           },
           {
             "plugin": "savedObjectsTagging",
-            "path": "x-pack/platform/plugins/private/saved_objects_tagging/public/ui_api/get_table_column_definition.tsx"
+            "path": "x-pack/platform/plugins/shared/saved_objects_tagging/public/ui_api/get_table_column_definition.tsx"
           },
           {
             "plugin": "savedObjectsTagging",
-            "path": "x-pack/platform/plugins/private/saved_objects_tagging/public/ui_api/get_table_column_definition.tsx"
+            "path": "x-pack/platform/plugins/shared/saved_objects_tagging/public/ui_api/get_table_column_definition.tsx"
           },
           {
             "plugin": "canvas",
@@ -1233,31 +1233,19 @@
           },
           {
             "plugin": "savedObjectsTagging",
-            "path": "x-pack/platform/plugins/private/saved_objects_tagging/common/types.ts"
+            "path": "x-pack/platform/plugins/shared/saved_objects_tagging/common/types.ts"
           },
           {
             "plugin": "savedObjectsTagging",
-            "path": "x-pack/platform/plugins/private/saved_objects_tagging/common/types.ts"
+            "path": "x-pack/platform/plugins/shared/saved_objects_tagging/common/types.ts"
           },
           {
             "plugin": "savedObjectsTagging",
-            "path": "x-pack/platform/plugins/private/saved_objects_tagging/public/utils.ts"
+            "path": "x-pack/platform/plugins/shared/saved_objects_tagging/public/utils.ts"
           },
           {
             "plugin": "savedObjectsTagging",
-            "path": "x-pack/platform/plugins/private/saved_objects_tagging/public/utils.ts"
-          },
-          {
-            "plugin": "savedObjectsTagging",
-            "path": "x-pack/platform/plugins/private/saved_objects_tagging/public/utils.test.ts"
-          },
-          {
-            "plugin": "savedObjectsTagging",
-            "path": "x-pack/platform/plugins/private/saved_objects_tagging/public/utils.test.ts"
-          },
-          {
-            "plugin": "savedObjectsTagging",
-            "path": "x-pack/platform/plugins/private/saved_objects_tagging/public/utils.test.ts"
+            "path": "x-pack/platform/plugins/shared/saved_objects_tagging/public/utils.ts"
           },
           {
             "plugin": "upgradeAssistant",
@@ -1285,15 +1273,27 @@
           },
           {
             "plugin": "savedObjectsTagging",
-            "path": "x-pack/platform/plugins/private/saved_objects_tagging/common/test_utils/index.ts"
+            "path": "x-pack/platform/plugins/shared/saved_objects_tagging/public/utils.test.ts"
           },
           {
             "plugin": "savedObjectsTagging",
-            "path": "x-pack/platform/plugins/private/saved_objects_tagging/common/test_utils/index.ts"
+            "path": "x-pack/platform/plugins/shared/saved_objects_tagging/public/utils.test.ts"
           },
           {
             "plugin": "savedObjectsTagging",
-            "path": "x-pack/platform/plugins/private/saved_objects_tagging/common/test_utils/index.ts"
+            "path": "x-pack/platform/plugins/shared/saved_objects_tagging/public/utils.test.ts"
+          },
+          {
+            "plugin": "savedObjectsTagging",
+            "path": "x-pack/platform/plugins/shared/saved_objects_tagging/common/test_utils/index.ts"
+          },
+          {
+            "plugin": "savedObjectsTagging",
+            "path": "x-pack/platform/plugins/shared/saved_objects_tagging/common/test_utils/index.ts"
+          },
+          {
+            "plugin": "savedObjectsTagging",
+            "path": "x-pack/platform/plugins/shared/saved_objects_tagging/common/test_utils/index.ts"
           },
           {
             "plugin": "lists",
@@ -1432,16 +1432,16 @@
             "path": "src/core/packages/saved-objects/browser-internal/src/simple_saved_object.test.ts"
           },
           {
-            "plugin": "@kbn/core-ui-settings-server-internal",
-            "path": "packages/core/ui-settings/core-ui-settings-server-internal/src/saved_objects/transforms.test.ts"
+            "plugin": "@kbn/core",
+            "path": "src/core/packages/ui-settings/server-internal/src/saved_objects/transforms.test.ts"
           },
           {
-            "plugin": "@kbn/core-ui-settings-server-internal",
-            "path": "packages/core/ui-settings/core-ui-settings-server-internal/src/saved_objects/transforms.test.ts"
+            "plugin": "@kbn/core",
+            "path": "src/core/packages/ui-settings/server-internal/src/saved_objects/transforms.test.ts"
           },
           {
-            "plugin": "@kbn/core-ui-settings-server-internal",
-            "path": "packages/core/ui-settings/core-ui-settings-server-internal/src/saved_objects/transforms.test.ts"
+            "plugin": "@kbn/core",
+            "path": "src/core/packages/ui-settings/server-internal/src/saved_objects/transforms.test.ts"
           }
         ],
         "initialIsOpen": false
@@ -1824,11 +1824,11 @@
           },
           {
             "plugin": "savedObjectsTagging",
-            "path": "x-pack/platform/plugins/private/saved_objects_tagging/public/ui_api/get_table_column_definition.tsx"
+            "path": "x-pack/platform/plugins/shared/saved_objects_tagging/public/ui_api/get_table_column_definition.tsx"
           },
           {
             "plugin": "savedObjectsTagging",
-            "path": "x-pack/platform/plugins/private/saved_objects_tagging/public/ui_api/get_table_column_definition.tsx"
+            "path": "x-pack/platform/plugins/shared/saved_objects_tagging/public/ui_api/get_table_column_definition.tsx"
           },
           {
             "plugin": "eventAnnotation",
@@ -2049,6 +2049,14 @@
           {
             "plugin": "maps",
             "path": "x-pack/platform/plugins/shared/maps/public/routes/map_page/saved_map/save_to_library.ts"
+          },
+          {
+            "plugin": "streamsApp",
+            "path": "x-pack/solutions/observability/plugins/streams_app/public/components/stream_detail_dashboards_view/to_reference_list.ts"
+          },
+          {
+            "plugin": "streamsApp",
+            "path": "x-pack/solutions/observability/plugins/streams_app/public/components/stream_detail_dashboards_view/to_reference_list.ts"
           },
           {
             "plugin": "dashboard",
@@ -2236,55 +2244,55 @@
           },
           {
             "plugin": "savedObjectsTagging",
-            "path": "x-pack/platform/plugins/private/saved_objects_tagging/common/references.ts"
+            "path": "x-pack/platform/plugins/shared/saved_objects_tagging/common/references.ts"
           },
           {
             "plugin": "savedObjectsTagging",
-            "path": "x-pack/platform/plugins/private/saved_objects_tagging/common/references.ts"
+            "path": "x-pack/platform/plugins/shared/saved_objects_tagging/common/references.ts"
           },
           {
             "plugin": "savedObjectsTagging",
-            "path": "x-pack/platform/plugins/private/saved_objects_tagging/common/references.ts"
+            "path": "x-pack/platform/plugins/shared/saved_objects_tagging/common/references.ts"
           },
           {
             "plugin": "savedObjectsTagging",
-            "path": "x-pack/platform/plugins/private/saved_objects_tagging/common/references.ts"
+            "path": "x-pack/platform/plugins/shared/saved_objects_tagging/common/references.ts"
           },
           {
             "plugin": "savedObjectsTagging",
-            "path": "x-pack/platform/plugins/private/saved_objects_tagging/common/references.ts"
+            "path": "x-pack/platform/plugins/shared/saved_objects_tagging/common/references.ts"
           },
           {
             "plugin": "savedObjectsTagging",
-            "path": "x-pack/platform/plugins/private/saved_objects_tagging/common/references.ts"
+            "path": "x-pack/platform/plugins/shared/saved_objects_tagging/common/references.ts"
           },
           {
             "plugin": "savedObjectsTagging",
-            "path": "x-pack/platform/plugins/private/saved_objects_tagging/common/references.ts"
+            "path": "x-pack/platform/plugins/shared/saved_objects_tagging/common/references.ts"
           },
           {
             "plugin": "savedObjectsTagging",
-            "path": "x-pack/platform/plugins/private/saved_objects_tagging/public/utils.ts"
+            "path": "x-pack/platform/plugins/shared/saved_objects_tagging/public/utils.ts"
           },
           {
             "plugin": "savedObjectsTagging",
-            "path": "x-pack/platform/plugins/private/saved_objects_tagging/public/utils.ts"
+            "path": "x-pack/platform/plugins/shared/saved_objects_tagging/public/utils.ts"
           },
           {
             "plugin": "savedObjectsTagging",
-            "path": "x-pack/platform/plugins/private/saved_objects_tagging/public/utils.ts"
+            "path": "x-pack/platform/plugins/shared/saved_objects_tagging/public/utils.ts"
           },
           {
             "plugin": "savedObjectsTagging",
-            "path": "x-pack/platform/plugins/private/saved_objects_tagging/public/utils.ts"
+            "path": "x-pack/platform/plugins/shared/saved_objects_tagging/public/utils.ts"
           },
           {
             "plugin": "savedObjectsTagging",
-            "path": "x-pack/platform/plugins/private/saved_objects_tagging/public/components/connected/tag_list.tsx"
+            "path": "x-pack/platform/plugins/shared/saved_objects_tagging/public/components/connected/tag_list.tsx"
           },
           {
             "plugin": "savedObjectsTagging",
-            "path": "x-pack/platform/plugins/private/saved_objects_tagging/public/components/connected/tag_list.tsx"
+            "path": "x-pack/platform/plugins/shared/saved_objects_tagging/public/components/connected/tag_list.tsx"
           },
           {
             "plugin": "lens",
@@ -2427,26 +2435,6 @@
             "path": "x-pack/platform/plugins/private/canvas/canvas_plugin_src/functions/external/embeddable.ts"
           },
           {
-            "plugin": "savedObjectsTagging",
-            "path": "x-pack/platform/plugins/private/saved_objects_tagging/common/references.test.ts"
-          },
-          {
-            "plugin": "savedObjectsTagging",
-            "path": "x-pack/platform/plugins/private/saved_objects_tagging/common/references.test.ts"
-          },
-          {
-            "plugin": "savedObjectsTagging",
-            "path": "x-pack/platform/plugins/private/saved_objects_tagging/public/utils.test.ts"
-          },
-          {
-            "plugin": "savedObjectsTagging",
-            "path": "x-pack/platform/plugins/private/saved_objects_tagging/public/utils.test.ts"
-          },
-          {
-            "plugin": "savedObjectsTagging",
-            "path": "x-pack/platform/plugins/private/saved_objects_tagging/public/utils.test.ts"
-          },
-          {
             "plugin": "dashboardEnhanced",
             "path": "x-pack/platform/plugins/shared/dashboard_enhanced/common/drilldowns/dashboard_drilldown/dashboard_drilldown_persistable_state.ts"
           },
@@ -2472,11 +2460,31 @@
           },
           {
             "plugin": "savedObjectsTagging",
-            "path": "x-pack/platform/plugins/private/saved_objects_tagging/common/test_utils/index.ts"
+            "path": "x-pack/platform/plugins/shared/saved_objects_tagging/common/references.test.ts"
           },
           {
             "plugin": "savedObjectsTagging",
-            "path": "x-pack/platform/plugins/private/saved_objects_tagging/common/test_utils/index.ts"
+            "path": "x-pack/platform/plugins/shared/saved_objects_tagging/common/references.test.ts"
+          },
+          {
+            "plugin": "savedObjectsTagging",
+            "path": "x-pack/platform/plugins/shared/saved_objects_tagging/public/utils.test.ts"
+          },
+          {
+            "plugin": "savedObjectsTagging",
+            "path": "x-pack/platform/plugins/shared/saved_objects_tagging/public/utils.test.ts"
+          },
+          {
+            "plugin": "savedObjectsTagging",
+            "path": "x-pack/platform/plugins/shared/saved_objects_tagging/public/utils.test.ts"
+          },
+          {
+            "plugin": "savedObjectsTagging",
+            "path": "x-pack/platform/plugins/shared/saved_objects_tagging/common/test_utils/index.ts"
+          },
+          {
+            "plugin": "savedObjectsTagging",
+            "path": "x-pack/platform/plugins/shared/saved_objects_tagging/common/test_utils/index.ts"
           },
           {
             "plugin": "globalSearchProviders",

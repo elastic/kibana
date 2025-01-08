@@ -79,13 +79,7 @@
               "{@link CustomBrandingSetup}"
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/core-custom-branding-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreCustomBrandingBrowserPluginApi",
-                "section": "def-public.CustomBrandingSetup",
-                "text": "CustomBrandingSetup"
-              }
+              "CustomBrandingSetup"
             ],
             "path": "src/core/packages/lifecycle/browser/src/core_setup.ts",
             "deprecated": false,
@@ -167,13 +161,7 @@
               "{@link IUiSettingsClient}\n"
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/core-ui-settings-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
-                "section": "def-public.IUiSettingsClient",
-                "text": "IUiSettingsClient"
-              }
+              "IUiSettingsClient"
             ],
             "path": "src/core/packages/lifecycle/browser/src/core_setup.ts",
             "deprecated": false,
@@ -189,13 +177,7 @@
               "{@link SettingsStart}"
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/core-ui-settings-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
-                "section": "def-public.SettingsStart",
-                "text": "SettingsStart"
-              }
+              "SettingsStart"
             ],
             "path": "src/core/packages/lifecycle/browser/src/core_setup.ts",
             "deprecated": false,
@@ -387,13 +369,7 @@
               "{@link CustomBrandingStart}"
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/core-custom-branding-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreCustomBrandingBrowserPluginApi",
-                "section": "def-public.CustomBrandingStart",
-                "text": "CustomBrandingStart"
-              }
+              "CustomBrandingStart"
             ],
             "path": "src/core/packages/lifecycle/browser/src/core_start.ts",
             "deprecated": false,
@@ -603,13 +579,7 @@
               "{@link IUiSettingsClient}\n"
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/core-ui-settings-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
-                "section": "def-public.IUiSettingsClient",
-                "text": "IUiSettingsClient"
-              }
+              "IUiSettingsClient"
             ],
             "path": "src/core/packages/lifecycle/browser/src/core_start.ts",
             "deprecated": false,
@@ -625,13 +595,7 @@
               "{@link SettingsStart}"
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/core-ui-settings-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
-                "section": "def-public.SettingsStart",
-                "text": "SettingsStart"
-              }
+              "SettingsStart"
             ],
             "path": "src/core/packages/lifecycle/browser/src/core_start.ts",
             "deprecated": false,

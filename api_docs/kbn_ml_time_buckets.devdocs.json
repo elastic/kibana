@@ -468,13 +468,7 @@
         ],
         "signature": [
           "(uiSettings: ",
-          {
-            "pluginId": "@kbn/core-ui-settings-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
-            "section": "def-public.IUiSettingsClient",
-            "text": "IUiSettingsClient"
-          },
+          "IUiSettingsClient",
           ") => ",
           {
             "pluginId": "@kbn/ml-time-buckets",
@@ -498,13 +492,7 @@
               "The UI settings client instance used to retrieve UI settings."
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/core-ui-settings-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
-                "section": "def-public.IUiSettingsClient",
-                "text": "IUiSettingsClient"
-              }
+              "IUiSettingsClient"
             ],
             "path": "x-pack/platform/packages/private/ml/time_buckets/use_time_buckets.ts",
             "deprecated": false,
