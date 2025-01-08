@@ -43,7 +43,7 @@
             "section": "def-public.AppSetupUIPluginDependencies",
             "text": "AppSetupUIPluginDependencies"
           },
-          ", object>"
+          ", never>"
         ],
         "path": "src/platform/plugins/shared/console/public/plugin.ts",
         "deprecated": false,
@@ -92,7 +92,7 @@
             "signature": [
               "({ notifications, getStartServices, http }: ",
               "CoreSetup",
-              "<object, unknown>, { devTools, home, share, usageCollection }: ",
+              "<{}, unknown>, { devTools, home, share, usageCollection }: ",
               {
                 "pluginId": "console",
                 "scope": "public",
@@ -122,7 +122,7 @@
                 "description": [],
                 "signature": [
                   "CoreSetup",
-                  "<object, unknown>"
+                  "<{}, unknown>"
                 ],
                 "path": "src/platform/plugins/shared/console/public/plugin.ts",
                 "deprecated": false,
