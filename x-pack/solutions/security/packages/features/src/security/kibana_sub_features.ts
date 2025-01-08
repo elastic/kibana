@@ -596,6 +596,58 @@ const scanActionSubFeature = (): SubFeatureConfig => ({
   ],
 });
 
+const workflowInsightsSubFeature = (): SubFeatureConfig => ({
+  requireAllSpaces: true,
+  privilegesTooltip: i18n.translate(
+    'securitySolutionPackages.features.featureRegistry.subFeatures.workflowInsights.privilegesTooltip',
+    {
+      defaultMessage: 'All Spaces is required for Endpoint Insights access.',
+    }
+  ),
+  name: i18n.translate(
+    'securitySolutionPackages.features.featureRegistry.subFeatures.workflowInsights',
+    {
+      defaultMessage: 'Endpoint Insights',
+    }
+  ),
+  description: i18n.translate(
+    'securitySolutionPackages.features.featureRegistry.subFeatures.workflowInsights.description',
+    {
+      defaultMessage: 'Access the endpoint insights.',
+    }
+  ),
+
+  privilegeGroups: [
+    {
+      groupType: 'mutually_exclusive',
+      privileges: [
+        {
+          api: [`${APP_ID}-writeWorkflowInsights`, `${APP_ID}-readWorkflowInsights`],
+          id: 'workflow_insights_all',
+          includeIn: 'none',
+          name: 'All',
+          savedObject: {
+            all: [],
+            read: [],
+          },
+          ui: ['writeWorkflowInsights', 'readWorkflowInsights'],
+        },
+        {
+          api: [`${APP_ID}-readWorkflowInsights`],
+          id: 'workflow_insights_read',
+          includeIn: 'none',
+          name: 'Read',
+          savedObject: {
+            all: [],
+            read: [],
+          },
+          ui: ['readWorkflowInsights'],
+        },
+      ],
+    },
+  ],
+});
+
 const endpointExceptionsSubFeature = (): SubFeatureConfig => ({
   requireAllSpaces: true,
   privilegesTooltip: i18n.translate(
@@ -708,6 +760,14 @@ export const getSecuritySubFeaturesMap = ({
   // if (experimentalFeatures.featureFlagName) {
   //   securitySubFeaturesList.push([SecuritySubFeatureId.featureId, featureSubFeature]);
   // }
+
+  if (experimentalFeatures.defendInsights) {
+    // place with other All/Read/None options
+    securitySubFeaturesList.splice(1, 0, [
+      SecuritySubFeatureId.workflowInsights,
+      enableSpaceAwarenessIfNeeded(workflowInsightsSubFeature()),
+    ]);
+  }
 
   const securitySubFeaturesMap = new Map<SecuritySubFeatureId, SubFeatureConfig>(
     securitySubFeaturesList

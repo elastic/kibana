@@ -5,15 +5,15 @@
  * 2.0.
  */
 import Boom from '@hapi/boom';
-import { Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
 import fetch from 'node-fetch';
-import {
+import type {
   ElasticApmAgentLatestVersion,
   OtelAgentLatestVersion,
 } from '../../../common/agent_explorer';
-import { AgentName } from '../../../typings/es_schemas/ui/fields/agent';
+import type { AgentName } from '../../../typings/es_schemas/ui/fields/agent';
 import { ErrorWithStatusCode } from './error_with_status_code';
 
 const MISSING_CONFIGURATION = i18n.translate(
