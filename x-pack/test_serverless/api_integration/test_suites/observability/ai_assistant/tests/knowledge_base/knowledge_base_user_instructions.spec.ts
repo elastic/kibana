@@ -22,6 +22,7 @@ import { getConversationCreatedEvent } from '@kbn/test-suites-xpack/observabilit
 import {
   LlmProxy,
   createLlmProxy,
+  isFunctionTitleRequest,
 } from '@kbn/test-suites-xpack/observability_ai_assistant_api_integration/common/create_llm_proxy';
 import { createProxyActionConnector, deleteActionConnector } from '../../common/action_connectors';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
@@ -248,12 +249,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           })
           .expect(200);
 
-        const interceptPromises = [
-          proxy.interceptConversationTitle('LLM-generated title').completeAfterIntercept(),
-          proxy
-            .interceptConversation({ name: 'conversation', response: 'I, the LLM, hear you!' })
-            .completeAfterIntercept(),
-        ];
+        const titleInterceptor = proxy.intercept('title', (body) => isFunctionTitleRequest(body));
+
+        const conversationInterceptor = proxy.intercept(
+          'conversation',
+          (body) => !isFunctionTitleRequest(body)
+        );
 
         const messages: Message[] = [
           {
@@ -272,7 +273,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           },
         ];
 
-        const createResponse = await observabilityAIAssistantAPIClient[user]({
+        const responsePromise = observabilityAIAssistantAPIClient[user]({
           endpoint: 'POST /internal/observability_ai_assistant/chat/complete',
           params: {
             body: {
@@ -283,9 +284,29 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               scopes: ['observability'],
             },
           },
-        }).expect(200);
+        });
 
-        await proxy.waitForAllInterceptorsSettled();
+        const [conversationSimulator, titleSimulator] = await Promise.race([
+          Promise.all([
+            conversationInterceptor.waitForIntercept(),
+            titleInterceptor.waitForIntercept(),
+          ]),
+          // make sure any request failures (like 400s) are properly propagated
+          responsePromise.then(() => []),
+        ]);
+
+        await titleSimulator.status(200);
+        await titleSimulator.next('LLM-generated title');
+        await titleSimulator.tokenCount({ completion: 5, prompt: 10, total: 15 });
+        await titleSimulator.complete();
+
+        await conversationSimulator.status(200);
+        await conversationSimulator.next('I, the LLM, hear you!');
+        await conversationSimulator.tokenCount({ completion: 0, prompt: 0, total: 0 });
+        await conversationSimulator.complete();
+
+        const createResponse = await responsePromise;
+
         const conversationCreatedEvent = getConversationCreatedEvent(createResponse.body);
         const conversationId = conversationCreatedEvent.conversation.id;
 
@@ -297,9 +318,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             },
           },
         });
-
-        // wait for all interceptors to be settled
-        await Promise.all(interceptPromises);
 
         const conversation = res.body;
         return conversation;
