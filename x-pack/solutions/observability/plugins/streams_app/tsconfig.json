@@ -50,6 +50,7 @@
     "@kbn/react-hooks",
     "@kbn/i18n-react",
     "@kbn/react-field",
-    "@kbn/shared-ux-utility"
+    "@kbn/shared-ux-utility",
+    "@kbn/unsaved-changes-prompt"
   ]
 }
