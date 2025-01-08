@@ -31,7 +31,7 @@
           "NoDataViewsPromptServices",
           ", {}, ServiceArguments>"
         ],
-        "path": "packages/shared-ux/prompt/no_data_views/mocks/src/storybook.ts",
+        "path": "src/platform/packages/shared/shared-ux/prompt/no_data_views/mocks/src/storybook.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -42,7 +42,7 @@
             "tags": [],
             "label": "propArguments",
             "description": [],
-            "path": "packages/shared-ux/prompt/no_data_views/mocks/src/storybook.ts",
+            "path": "src/platform/packages/shared/shared-ux/prompt/no_data_views/mocks/src/storybook.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": []
@@ -54,7 +54,7 @@
             "tags": [],
             "label": "serviceArguments",
             "description": [],
-            "path": "packages/shared-ux/prompt/no_data_views/mocks/src/storybook.ts",
+            "path": "src/platform/packages/shared/shared-ux/prompt/no_data_views/mocks/src/storybook.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -65,7 +65,7 @@
                 "tags": [],
                 "label": "canCreateNewDataView",
                 "description": [],
-                "path": "packages/shared-ux/prompt/no_data_views/mocks/src/storybook.ts",
+                "path": "src/platform/packages/shared/shared-ux/prompt/no_data_views/mocks/src/storybook.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -76,7 +76,7 @@
                     "tags": [],
                     "label": "control",
                     "description": [],
-                    "path": "packages/shared-ux/prompt/no_data_views/mocks/src/storybook.ts",
+                    "path": "src/platform/packages/shared/shared-ux/prompt/no_data_views/mocks/src/storybook.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -87,7 +87,7 @@
                     "tags": [],
                     "label": "defaultValue",
                     "description": [],
-                    "path": "packages/shared-ux/prompt/no_data_views/mocks/src/storybook.ts",
+                    "path": "src/platform/packages/shared/shared-ux/prompt/no_data_views/mocks/src/storybook.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -100,7 +100,7 @@
                 "tags": [],
                 "label": "dataViewsDocLink",
                 "description": [],
-                "path": "packages/shared-ux/prompt/no_data_views/mocks/src/storybook.ts",
+                "path": "src/platform/packages/shared/shared-ux/prompt/no_data_views/mocks/src/storybook.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -114,7 +114,7 @@
                     "signature": [
                       "(string | undefined)[]"
                     ],
-                    "path": "packages/shared-ux/prompt/no_data_views/mocks/src/storybook.ts",
+                    "path": "src/platform/packages/shared/shared-ux/prompt/no_data_views/mocks/src/storybook.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -125,7 +125,7 @@
                     "tags": [],
                     "label": "control",
                     "description": [],
-                    "path": "packages/shared-ux/prompt/no_data_views/mocks/src/storybook.ts",
+                    "path": "src/platform/packages/shared/shared-ux/prompt/no_data_views/mocks/src/storybook.ts",
                     "deprecated": false,
                     "trackAdoption": false,
                     "children": [
@@ -136,7 +136,7 @@
                         "tags": [],
                         "label": "type",
                         "description": [],
-                        "path": "packages/shared-ux/prompt/no_data_views/mocks/src/storybook.ts",
+                        "path": "src/platform/packages/shared/shared-ux/prompt/no_data_views/mocks/src/storybook.ts",
                         "deprecated": false,
                         "trackAdoption": false
                       }
@@ -149,7 +149,7 @@
                     "tags": [],
                     "label": "defaultValue",
                     "description": [],
-                    "path": "packages/shared-ux/prompt/no_data_views/mocks/src/storybook.ts",
+                    "path": "src/platform/packages/shared/shared-ux/prompt/no_data_views/mocks/src/storybook.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -162,7 +162,7 @@
                 "tags": [],
                 "label": "canTryEsql",
                 "description": [],
-                "path": "packages/shared-ux/prompt/no_data_views/mocks/src/storybook.ts",
+                "path": "src/platform/packages/shared/shared-ux/prompt/no_data_views/mocks/src/storybook.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -173,7 +173,7 @@
                     "tags": [],
                     "label": "control",
                     "description": [],
-                    "path": "packages/shared-ux/prompt/no_data_views/mocks/src/storybook.ts",
+                    "path": "src/platform/packages/shared/shared-ux/prompt/no_data_views/mocks/src/storybook.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -184,7 +184,7 @@
                     "tags": [],
                     "label": "defaultValue",
                     "description": [],
-                    "path": "packages/shared-ux/prompt/no_data_views/mocks/src/storybook.ts",
+                    "path": "src/platform/packages/shared/shared-ux/prompt/no_data_views/mocks/src/storybook.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -197,7 +197,7 @@
                 "tags": [],
                 "label": "esqlDocLink",
                 "description": [],
-                "path": "packages/shared-ux/prompt/no_data_views/mocks/src/storybook.ts",
+                "path": "src/platform/packages/shared/shared-ux/prompt/no_data_views/mocks/src/storybook.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -211,7 +211,7 @@
                     "signature": [
                       "(string | undefined)[]"
                     ],
-                    "path": "packages/shared-ux/prompt/no_data_views/mocks/src/storybook.ts",
+                    "path": "src/platform/packages/shared/shared-ux/prompt/no_data_views/mocks/src/storybook.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -222,7 +222,7 @@
                     "tags": [],
                     "label": "control",
                     "description": [],
-                    "path": "packages/shared-ux/prompt/no_data_views/mocks/src/storybook.ts",
+                    "path": "src/platform/packages/shared/shared-ux/prompt/no_data_views/mocks/src/storybook.ts",
                     "deprecated": false,
                     "trackAdoption": false,
                     "children": [
@@ -233,7 +233,7 @@
                         "tags": [],
                         "label": "type",
                         "description": [],
-                        "path": "packages/shared-ux/prompt/no_data_views/mocks/src/storybook.ts",
+                        "path": "src/platform/packages/shared/shared-ux/prompt/no_data_views/mocks/src/storybook.ts",
                         "deprecated": false,
                         "trackAdoption": false
                       }
@@ -246,7 +246,7 @@
                     "tags": [],
                     "label": "defaultValue",
                     "description": [],
-                    "path": "packages/shared-ux/prompt/no_data_views/mocks/src/storybook.ts",
+                    "path": "src/platform/packages/shared/shared-ux/prompt/no_data_views/mocks/src/storybook.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -264,7 +264,7 @@
             "signature": [
               "never[]"
             ],
-            "path": "packages/shared-ux/prompt/no_data_views/mocks/src/storybook.ts",
+            "path": "src/platform/packages/shared/shared-ux/prompt/no_data_views/mocks/src/storybook.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -280,7 +280,7 @@
               "HandlerFunction",
               "; }"
             ],
-            "path": "packages/shared-ux/prompt/no_data_views/mocks/src/storybook.ts",
+            "path": "src/platform/packages/shared/shared-ux/prompt/no_data_views/mocks/src/storybook.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -305,7 +305,7 @@
               ") => ",
               "NoDataViewsPromptServices"
             ],
-            "path": "packages/shared-ux/prompt/no_data_views/mocks/src/storybook.ts",
+            "path": "src/platform/packages/shared/shared-ux/prompt/no_data_views/mocks/src/storybook.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -325,7 +325,7 @@
                     "text": "Params"
                   }
                 ],
-                "path": "packages/shared-ux/prompt/no_data_views/mocks/src/storybook.ts",
+                "path": "src/platform/packages/shared/shared-ux/prompt/no_data_views/mocks/src/storybook.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -353,7 +353,7 @@
           ">) => ",
           "NoDataViewsPromptServices"
         ],
-        "path": "packages/shared-ux/prompt/no_data_views/mocks/src/jest.ts",
+        "path": "src/platform/packages/shared/shared-ux/prompt/no_data_views/mocks/src/jest.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -369,7 +369,7 @@
               "NoDataViewsPromptServices",
               ">"
             ],
-            "path": "packages/shared-ux/prompt/no_data_views/mocks/src/jest.ts",
+            "path": "src/platform/packages/shared/shared-ux/prompt/no_data_views/mocks/src/jest.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -392,7 +392,7 @@
         "signature": [
           "{ canCreateNewDataView: any; dataViewsDocLink: any; esqlDocLink: any; canTryEsql: any; }"
         ],
-        "path": "packages/shared-ux/prompt/no_data_views/mocks/src/storybook.ts",
+        "path": "src/platform/packages/shared/shared-ux/prompt/no_data_views/mocks/src/storybook.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
