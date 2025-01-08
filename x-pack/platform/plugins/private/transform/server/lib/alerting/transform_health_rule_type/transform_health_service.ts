@@ -47,6 +47,9 @@ const maxPathComponentLength = 2000;
 
 const TRANSFORM_PAGE_SIZE = 1000;
 
+/** Number of transforms IDs mentioned in the context message */
+const TRANSFORMS_IDS_MESSAGE_LIMIT = 10;
+
 export function transformHealthServiceProvider({
   esClient,
   rulesClient,
@@ -91,6 +94,28 @@ export function transformHealthServiceProvider({
         )
         .map((t) => t.id)
     );
+  };
+
+  /**
+   * Returns a string with transform IDs for the context message.
+   */
+  const getContextMessageTransformIds = (transformIds: string[]): string => {
+    const count = transformIds.length;
+    let transformsString = transformIds.join(', ');
+    if (transformIds.length > TRANSFORMS_IDS_MESSAGE_LIMIT) {
+      transformsString = i18n.translate(
+        'xpack.transform.alertTypes.transformHealth.truncatedTransformIdsMessage',
+        {
+          defaultMessage:
+            '{truncatedTransformIds} and {restCount, plural, one {# other} other {# others}}',
+          values: {
+            truncatedTransformIds: transformIds.slice(0, TRANSFORMS_IDS_MESSAGE_LIMIT).join(', '),
+            restCount: count - TRANSFORMS_IDS_MESSAGE_LIMIT,
+          },
+        }
+      );
+    }
+    return transformsString;
   };
 
   const getTransformStats = memoize(
@@ -300,9 +325,9 @@ export function transformHealthServiceProvider({
         // if healthy, mention transforms that were not started
         const count = isHealthy ? recoveredTransforms.length : notStartedTransform.length;
 
-        const transformsString = (isHealthy ? recoveredTransforms : notStartedTransform)
-          .map((t) => t.transform_id)
-          .join(', ');
+        const transformsString = getContextMessageTransformIds(
+          (isHealthy ? recoveredTransforms : notStartedTransform).map((t) => t.transform_id)
+        );
 
         result.push({
           isHealthy,
@@ -361,9 +386,11 @@ export function transformHealthServiceProvider({
         const response = await this.getUnhealthyTransformsReport(transformIds);
         const isHealthy = response.length === 0;
         const count: number = isHealthy ? previousState?.unhealthy?.length ?? 0 : response.length;
-        const transformsString = isHealthy
-          ? previousState?.unhealthy?.join(', ')
-          : response.map((t) => t.transform_id).join(', ');
+
+        const transformsString = getContextMessageTransformIds(
+          isHealthy ? previousState?.unhealthy ?? [] : response.map((t) => t.transform_id)
+        );
+
         result.push({
           isHealthy,
           name: TRANSFORM_HEALTH_CHECK_NAMES.healthCheck.name,
