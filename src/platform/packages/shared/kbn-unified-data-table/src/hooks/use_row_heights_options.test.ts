@@ -20,10 +20,10 @@ describe('useRowHeightsOptions', () => {
     expect(result.current.defaultHeight).toEqual('auto');
   });
 
-  it('should convert rowHeightLines 0 to undefined', () => {
+  it('should convert rowHeightLines 1 to undefined', () => {
     const { result } = renderHook(() => {
       return useRowHeightsOptions({
-        rowHeightLines: 0,
+        rowHeightLines: 1,
       });
     });
     expect(result.current.defaultHeight).toEqual(undefined);
