@@ -39,7 +39,7 @@
             "signature": [
               "(core: ",
               "CoreSetup",
-              "<object, unknown>, plugins: TPluginsSetup) => TSetup"
+              "<TPluginsStart, TStart>, plugins: TPluginsSetup) => TSetup"
             ],
             "path": "src/core/packages/plugins/server/src/types.ts",
             "deprecated": false,
@@ -54,7 +54,7 @@
                 "description": [],
                 "signature": [
                   "CoreSetup",
-                  "<object, unknown>"
+                  "<TPluginsStart, TStart>"
                 ],
                 "path": "src/core/packages/plugins/server/src/types.ts",
                 "deprecated": false,
