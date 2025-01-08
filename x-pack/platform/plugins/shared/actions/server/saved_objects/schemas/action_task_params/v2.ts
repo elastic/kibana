@@ -5,5 +5,9 @@
  * 2.0.
  */
 
-export { rawAdHocRunParamsSchema as rawAdHocRunParamsSchemaV1 } from './v1';
-export { rawAdHocRunParamsSchema as rawAdHocRunParamsSchemaV2 } from './v2';
+import { schema } from '@kbn/config-schema';
+import { actionTaskParamsSchema as actionTaskParamsSchemaV1 } from './v1';
+
+export const actionTaskParamsSchema = actionTaskParamsSchemaV1.extends({
+  apiKeyId: schema.maybe(schema.string()),
+});
