@@ -190,12 +190,6 @@ export const allowedExperimentalValues = Object.freeze({
    */
   timelineEsqlTabDisabled: false,
 
-  /*
-   * Disables date pickers and sourcerer in analyzer if needed.
-   *
-   */
-  analyzerDatePickersAndSourcererDisabled: false,
-
   /**
    * Enables graph visualization in alerts flyout
    */
@@ -267,6 +261,12 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables CrowdStrike's RunScript RTR command
    */
   crowdstrikeRunScriptEnabled: false,
+
+  /**
+   * Enables the Asset Inventory Entity Store feature.
+   * Allows initializing the Universal Entity Store via the API.
+   */
+  assetInventoryStoreEnabled: false,
 
   /**
    * Enables the Asset Inventory feature
