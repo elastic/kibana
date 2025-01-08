@@ -70,6 +70,7 @@ export interface AssistantProviderProps {
   children: React.ReactNode;
   getComments: GetAssistantMessages;
   http: HttpSetup;
+  inferenceEnabled?: boolean;
   baseConversations: Record<string, Conversation>;
   nameSpace?: string;
   navigateToApp: (appId: string, options?: NavigateToAppOptions | undefined) => Promise<void>;
@@ -102,6 +103,7 @@ export interface UseAssistantContext {
   currentUserAvatar?: UserAvatar;
   getComments: GetAssistantMessages;
   http: HttpSetup;
+  inferenceEnabled: boolean;
   knowledgeBase: KnowledgeBaseConfig;
   getLastConversationId: (conversationTitle?: string) => string;
   promptContexts: Record<string, PromptContext>;
@@ -144,6 +146,7 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
   children,
   getComments,
   http,
+  inferenceEnabled = false,
   baseConversations,
   navigateToApp,
   nameSpace = DEFAULT_ASSISTANT_NAMESPACE,
@@ -276,6 +279,7 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       docLinks,
       getComments,
       http,
+      inferenceEnabled,
       knowledgeBase: {
         ...DEFAULT_KNOWLEDGE_BASE_SETTINGS,
         ...localStorageKnowledgeBase,
@@ -317,6 +321,7 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       docLinks,
       getComments,
       http,
+      inferenceEnabled,
       localStorageKnowledgeBase,
       promptContexts,
       navigateToApp,
