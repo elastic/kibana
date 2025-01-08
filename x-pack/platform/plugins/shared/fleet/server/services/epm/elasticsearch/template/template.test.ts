@@ -819,7 +819,7 @@ describe('EPM template', () => {
         },
       },
     };
-    const fields: Field[] = load(objectFieldWithPropertyReversedLiteralYml);
+    const fields: Field[] = safeLoad(objectFieldWithPropertyReversedLiteralYml);
     const processedFields = processFields(fields);
     const mappings = generateMappings(processedFields);
     expect(mappings).toEqual(objectFieldWithPropertyReversedMapping);
@@ -858,7 +858,7 @@ describe('EPM template', () => {
         },
       },
     };
-    const fields: Field[] = load(objectFieldWithPropertyReversedLiteralYml);
+    const fields: Field[] = safeLoad(objectFieldWithPropertyReversedLiteralYml);
     const processedFields = processFields(fields);
     const mappings = generateMappings(processedFields);
     expect(mappings).toEqual(objectFieldWithPropertyReversedMapping);
