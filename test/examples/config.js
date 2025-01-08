@@ -18,6 +18,7 @@ export default async function ({ readConfigFile }) {
   return {
     rootTags: ['runOutsideOfCiGroups'],
     testFiles: [
+      require.resolve('./retries'),
       require.resolve('./hello_world'),
       require.resolve('./ui_actions'),
       require.resolve('./state_sync'),
