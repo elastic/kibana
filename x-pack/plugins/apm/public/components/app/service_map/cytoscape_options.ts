@@ -178,15 +178,12 @@ const getStyle = (theme: EuiTheme): cytoscape.Stylesheet[] => {
         'source-arrow-shape': isIE11 ? 'none' : 'triangle',
         'source-arrow-color': lineColor,
         'target-arrow-shape': isIE11 ? 'none' : 'triangle',
-        // @ts-expect-error
         'source-distance-from-node': isIE11 ? undefined : parseInt(theme.eui.paddingSizes.xs, 10),
         'target-distance-from-node': isIE11 ? undefined : parseInt(theme.eui.paddingSizes.xs, 10),
       },
     },
     {
       selector: 'edge[isInverseEdge]',
-      // @ts-expect-error DefinitelyTyped says visibility is "none" but it's
-      // actually "hidden"
       style: { visibility: 'hidden' },
     },
     {
