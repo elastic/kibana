@@ -60,7 +60,7 @@ export const useEntitiesListFilters = ({
       ? [
           {
             bool: {
-              should: enabledEntityTypes.flatMap((type) => ({
+              should: enabledEntityTypes.map((type) => ({
                 terms: {
                   [EntityTypeToLevelField[type]]: selectedSeverities,
                 },
