@@ -6,15 +6,18 @@
  */
 import { v4 as uuidv4 } from 'uuid';
 import type { GetLensAttributes } from '../../types';
+import { COUNT } from '../../translations';
 
 const layerId = uuidv4();
 // Exported for testing purposes
-export const stackByFieldAccessorId = '34919782-4546-43a5-b668-06ac934d3acd';
+export const stackByFieldAccessorId = uuidv4();
+export const columnTimestampId = uuidv4();
+export const columnCountOfRecordsId = uuidv4();
 
-export const getEventsHistogramLensAttributes: GetLensAttributes = (
+export const getEventsHistogramLensAttributes: GetLensAttributes = ({
   stackByField,
-  extraOptions = {}
-) => {
+  extraOptions = {},
+}) => {
   return {
     title: 'Events',
     description: '',
@@ -27,18 +30,19 @@ export const getEventsHistogramLensAttributes: GetLensAttributes = (
           position: 'right',
           legendSize: 'xlarge',
           legendStats: ['currentAndLastValue'],
+          showSingleSeries: true,
         },
         valueLabels: 'hide',
         preferredSeriesType: 'bar_stacked',
         layers: [
           {
             layerId,
-            accessors: ['e09e0380-0740-4105-becc-0a4ca12e3944'],
+            accessors: [columnCountOfRecordsId],
             position: 'top',
             seriesType: 'bar_stacked',
             showGridlines: false,
             layerType: 'data',
-            xAccessor: 'aac9d7d0-13a3-480a-892b-08207a787926',
+            xAccessor: columnTimestampId,
             splitAccessor: stackByField ? stackByFieldAccessorId : undefined,
           },
         ],
@@ -64,7 +68,7 @@ export const getEventsHistogramLensAttributes: GetLensAttributes = (
           layers: {
             [layerId]: {
               columns: {
-                'aac9d7d0-13a3-480a-892b-08207a787926': {
+                [columnTimestampId]: {
                   label: '@timestamp',
                   dataType: 'date',
                   operationType: 'date_histogram',
@@ -76,8 +80,8 @@ export const getEventsHistogramLensAttributes: GetLensAttributes = (
                     includeEmptyRows: true,
                   },
                 },
-                'e09e0380-0740-4105-becc-0a4ca12e3944': {
-                  label: 'Count of records',
+                [columnCountOfRecordsId]: {
+                  label: COUNT,
                   dataType: 'number',
                   operationType: 'count',
                   isBucketed: false,
@@ -97,7 +101,7 @@ export const getEventsHistogramLensAttributes: GetLensAttributes = (
                       size: 10,
                       orderBy: {
                         type: 'column',
-                        columnId: 'e09e0380-0740-4105-becc-0a4ca12e3944',
+                        columnId: columnCountOfRecordsId,
                       },
                       orderDirection: 'desc',
                       otherBucket: true,
@@ -111,8 +115,8 @@ export const getEventsHistogramLensAttributes: GetLensAttributes = (
               },
               columnOrder: [
                 ...(stackByField ? [stackByFieldAccessorId] : []),
-                'aac9d7d0-13a3-480a-892b-08207a787926',
-                'e09e0380-0740-4105-becc-0a4ca12e3944',
+                columnTimestampId,
+                columnCountOfRecordsId,
               ],
               incompleteColumns: {},
             },

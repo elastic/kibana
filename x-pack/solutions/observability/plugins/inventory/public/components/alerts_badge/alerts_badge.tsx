@@ -22,10 +22,7 @@ export function AlertsBadge({ entity }: { entity: InventoryEntity }) {
   const activeAlertsHref = basePath.prepend(
     `/app/observability/alerts?_a=${rison.encode({
       kuery: entityManager.entityClient.asKqlFilter({
-        entity: {
-          identity_fields: entity.entityIdentityFields,
-        },
-        ...entity,
+        entity,
       }),
       status: 'active',
     })}`
