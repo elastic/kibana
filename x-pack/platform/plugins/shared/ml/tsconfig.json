@@ -136,7 +136,6 @@
     "@kbn/core-ui-settings-server",
     "@kbn/core-security-server",
     "@kbn/charts-theme",
-    "@kbn/server-route-repository-client",
     "@kbn/response-ops-rule-params",
   ]
 }
