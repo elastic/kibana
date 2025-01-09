@@ -1,10 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the "Elastic License
- * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
- * Public License v 1"; you may not use this file except in compliance with, at
- * your election, the "Elastic License 2.0", the "GNU Affero General Public
- * License v3.0 only", or the "Server Side Public License, v 1".
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -12,7 +10,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['dashboard', 'header', 'visualize', 'settings', 'common']);
+  const { dashboard } = getPageObjects(['dashboard']);
   const testSubjects = getService('testSubjects');
   const kibanaServer = getService('kibanaServer');
   const dashboardAddPanel = getService('dashboardAddPanel');
@@ -34,9 +32,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('renders a panel with predefined order of panel groups and panels', async () => {
-      await PageObjects.dashboard.navigateToApp();
-      await PageObjects.dashboard.clickNewDashboard();
-      await PageObjects.dashboard.switchToEditMode();
+      await dashboard.navigateToApp();
+      await dashboard.clickNewDashboard();
+      await dashboard.switchToEditMode();
 
       await dashboardAddPanel.clickEditorMenuButton();
 
@@ -61,17 +59,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         panelGroupByOrder.set(order, panelGroupTitle);
       }
 
-      expect(panelGroupByOrder.size).to.eql(4);
+      expect(panelGroupByOrder.size).to.eql(5);
 
       expect([...panelGroupByOrder.values()]).to.eql([
         'visualizationsGroup',
         'annotation-and-navigationGroup',
+        'mlGroup',
         'observabilityGroup',
         'legacyGroup',
       ]);
 
       // Any changes to the number of panels needs to be audited by @elastic/kibana-presentation
-      expect(panelTypes.length).to.eql(11);
+      expect(panelTypes.length).to.eql(21);
     });
   });
 }
