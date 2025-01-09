@@ -30,7 +30,7 @@ const props = {
   isCardAvailable: jest.fn(),
 };
 
-describe('DashboardsCard', () => {
+describe('RulesCard', () => {
   beforeEach(() => {
     mockExperimentalFeatures.mockReturnValue({});
     jest.clearAllMocks();
@@ -48,21 +48,6 @@ describe('DashboardsCard', () => {
     expect(getByTestId('rulesCardDescription')).toBeInTheDocument();
   });
 
-  it('card callout should be rendered if integrations card is available but not complete', () => {
-    mockIsCardAvailable.mockReturnValueOnce(true);
-    mockIsCardComplete.mockReturnValueOnce(false);
-
-    const { getByText } = render(
-      <TestProviders>
-        <OnboardingContextProvider spaceId="default">
-          <RulesCard {...props} />
-        </OnboardingContextProvider>
-      </TestProviders>
-    );
-
-    expect(getByText('To add Elastic rules add integrations first.')).toBeInTheDocument();
-  });
-
   it('card callout should not be rendered if integrations card is not available', () => {
     mockIsCardAvailable.mockReturnValueOnce(false);
 
@@ -74,22 +59,7 @@ describe('DashboardsCard', () => {
       </TestProviders>
     );
 
-    expect(queryByText('To view dashboards add integrations first.')).not.toBeInTheDocument();
-  });
-
-  it('renders a disabled button if integrations card is not complete', () => {
-    mockIsCardAvailable.mockReturnValueOnce(true);
-    mockIsCardComplete.mockReturnValueOnce(false);
-
-    const { getByTestId } = render(
-      <TestProviders>
-        <OnboardingContextProvider spaceId="default">
-          <RulesCard {...props} />
-        </OnboardingContextProvider>
-      </TestProviders>
-    );
-
-    expect(getByTestId('rulesCardButton').querySelector('button')).toBeDisabled();
+    expect(queryByText('To add Elastic rules add integrations first.')).not.toBeInTheDocument();
   });
 
   it('renders an enabled button if integrations card is complete', () => {
@@ -105,23 +75,5 @@ describe('DashboardsCard', () => {
     );
 
     expect(getByTestId('rulesCardButton').querySelector('button')).not.toBeDisabled();
-  });
-
-  it('calls setExpandedCardId when the callout link is clicked', () => {
-    mockIsCardAvailable.mockReturnValueOnce(true);
-    mockIsCardComplete.mockReturnValueOnce(false);
-
-    const { getByText } = render(
-      <TestProviders>
-        <OnboardingContextProvider spaceId="default">
-          <RulesCard {...props} />
-        </OnboardingContextProvider>
-      </TestProviders>
-    );
-
-    const calloutLink = getByText('Add integrations step');
-    fireEvent.click(calloutLink);
-
-    expect(mockSetExpandedCardId).toHaveBeenCalledWith('integrations', { scroll: true });
   });
 });
