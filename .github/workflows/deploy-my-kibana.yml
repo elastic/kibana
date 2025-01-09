@@ -22,7 +22,8 @@ permissions:
 
 jobs:
   trim-github-comment:
-    if: ${{ github.event.issue.pull_request && contains(github.event.comment.body, '/oblt-deploy') }}
+    if: ${{ github.event.issue.pull_request && github.event.comment.user.type == 'User' 
+ && contains(github.event.comment.body, '/oblt-deploy') }}
     runs-on: ubuntu-latest
     outputs:
       comment: ${{ steps.trim.outputs.result }}
