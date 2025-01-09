@@ -106,7 +106,7 @@ paths:
               examples:
                 notFound:
                   value:
-                    message: list id: '\"foo\" not found'
+                    message: 'list id: \"foo\" not found'
                     status_code: 404
         500:
           description: Internal server error response
