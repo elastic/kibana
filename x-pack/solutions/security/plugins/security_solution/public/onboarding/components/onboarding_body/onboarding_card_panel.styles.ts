@@ -12,7 +12,7 @@ export const HEIGHT_ANIMATION_DURATION = 250;
 
 export const useCardPanelStyles = () => {
   const { euiTheme, colorMode } = useEuiTheme();
-  const successBackgroundColor = euiTheme.colors.backgroundBaseSuccess;
+  const successBackgroundColor = euiTheme.colors.backgroundLightSuccess;
   const isDarkMode = colorMode === COLOR_MODES_STANDARD.dark;
   const darkModeStyles = useDarkPanelStyles(isDarkMode);
 
@@ -24,7 +24,7 @@ export const useCardPanelStyles = () => {
     .onboardingCardIcon {
       padding: ${euiTheme.size.m};
       border-radius: 50%;
-      background-color: ${isDarkMode ? euiTheme.colors.body : euiTheme.colors.lightestShade};
+      background-color: ${euiTheme.colors.backgroundBaseSubdued};
     }
     .onboardingCardHeaderTitle {
       font-weight: ${euiTheme.font.weight.semiBold};
@@ -65,8 +65,8 @@ export const useCardPanelStyles = () => {
 export const useDarkPanelStyles = (isDarkMode: boolean) => {
   const { euiTheme } = useEuiTheme();
   const darkPanelStyles = css`
-    background-color: ${euiTheme.colors.lightestShade};
-    border-color: ${euiTheme.colors.mediumShade};
+    background-color: ${euiTheme.colors.backgroundBasePlain};
+    border-color: ${euiTheme.colors.borderBasePlain};
   `;
   return isDarkMode ? darkPanelStyles : '';
 };
