@@ -43,7 +43,7 @@ describe('esql query helpers', () => {
       const idxPattern8 = getIndexPatternFromESQLQuery('FROM foo-1,  foo-2');
       expect(idxPattern8).toBe('foo-1,foo-2');
 
-      const idxPattern9 = getIndexPatternFromESQLQuery('FROM foo-1, foo-2 [metadata _id]');
+      const idxPattern9 = getIndexPatternFromESQLQuery('FROM foo-1, foo-2 metadata _id');
       expect(idxPattern9).toBe('foo-1,foo-2');
 
       const idxPattern10 = getIndexPatternFromESQLQuery('FROM foo-1, remote_cluster:foo-2, foo-3');
