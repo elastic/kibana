@@ -10,10 +10,20 @@
 import { apiHasParentApi, apiHasUniqueId, PublishingSubject } from '@kbn/presentation-publishing';
 import { BehaviorSubject, combineLatest, isObservable, map, Observable, of, switchMap } from 'rxjs';
 import { apiCanAddNewPanel, CanAddNewPanel } from './can_add_new_panel';
+import { SerializedPanelState } from './serialized_state';
 
-export interface PanelPackage<SerializedState extends object = object> {
+export interface PanelPackage<SerializedStateType extends object = object> {
   panelType: string;
-  initialState?: SerializedState;
+
+  /**
+   * The serialized state of this panel.
+   */
+  serializedState?: SerializedPanelState<SerializedStateType>;
+
+  /**
+   * The runtime state of this panel. @deprecated Use `serializedState` instead.
+   */
+  initialState?: object;
 }
 
 export interface PresentationContainer extends CanAddNewPanel {

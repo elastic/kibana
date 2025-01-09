@@ -202,7 +202,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const panelCount = await dashboard.getPanelCount();
       expect(panelCount).to.eql(2);
 
-      await dashboardPanelActions.expectLinkedToLibrary('My Saved New Vis 2', false);
+      await dashboardPanelActions.expectLinkedToLibrary('My Saved New Vis 2');
     });
 
     it('adding a existing metric to an existing dashboard by value', async function () {

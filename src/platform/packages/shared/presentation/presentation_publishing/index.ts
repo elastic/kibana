@@ -64,11 +64,7 @@ export {
   type HasExecutionContext,
 } from './interfaces/has_execution_context';
 export {
-  apiHasInPlaceLibraryTransforms,
-  apiHasLegacyLibraryTransforms,
   apiHasLibraryTransforms,
-  type HasInPlaceLibraryTransforms,
-  type HasLegacyLibraryTransforms,
   type HasLibraryTransforms,
 } from './interfaces/has_library_transforms';
 export { apiHasParentApi, type HasParentApi } from './interfaces/has_parent_api';

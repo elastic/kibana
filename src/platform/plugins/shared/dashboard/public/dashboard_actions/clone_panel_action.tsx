@@ -7,7 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { apiCanDuplicatePanels, CanDuplicatePanels } from '@kbn/presentation-containers';
+import {
+  apiCanDuplicatePanels,
+  apiHasSerializableState,
+  CanDuplicatePanels,
+  HasSerializableState,
+} from '@kbn/presentation-containers';
 import {
   apiCanAccessViewMode,
   apiHasParentApi,
@@ -26,6 +31,7 @@ import { dashboardClonePanelActionStrings } from './_dashboard_actions_strings';
 export const ACTION_CLONE_PANEL = 'clonePanel';
 
 export type ClonePanelActionApi = CanAccessViewMode &
+  HasSerializableState &
   HasUniqueId &
   HasParentApi<CanDuplicatePanels> &
   Partial<PublishesBlockingError>;
@@ -33,6 +39,7 @@ export type ClonePanelActionApi = CanAccessViewMode &
 const isApiCompatible = (api: unknown | null): api is ClonePanelActionApi =>
   Boolean(
     apiHasUniqueId(api) &&
+      apiHasSerializableState(api) &&
       apiCanAccessViewMode(api) &&
       apiHasParentApi(api) &&
       apiCanDuplicatePanels(api.parentApi)
