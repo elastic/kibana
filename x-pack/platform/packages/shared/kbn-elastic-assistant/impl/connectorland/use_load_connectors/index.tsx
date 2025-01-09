@@ -13,6 +13,7 @@ import type { IHttpFetchError } from '@kbn/core-http-browser';
 import { HttpSetup } from '@kbn/core-http-browser';
 import { IToasts } from '@kbn/core-notifications-browser';
 import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/openai/constants';
+import { useAssistantContext } from '../../assistant_context';
 import { AIConnector } from '../connector_selector';
 import * as i18n from '../translations';
 
@@ -27,16 +28,17 @@ export interface Props {
   toasts?: IToasts;
 }
 
-const actionTypeKey = {
-  bedrock: '.bedrock',
-  openai: '.gen-ai',
-  gemini: '.gemini',
-};
+const actionTypes = ['.bedrock', '.gen-ai', '.gemini'];
 
 export const useLoadConnectors = ({
   http,
   toasts,
 }: Props): UseQueryResult<AIConnector[], IHttpFetchError> => {
+  const { inferenceEnabled } = useAssistantContext();
+  if (inferenceEnabled) {
+    actionTypes.push('.inference');
+  }
+
   return useQuery(
     QUERY_KEY,
     async () => {
@@ -45,9 +47,9 @@ export const useLoadConnectors = ({
         (acc: AIConnector[], connector) => [
           ...acc,
           ...(!connector.isMissingSecrets &&
-          [actionTypeKey.bedrock, actionTypeKey.openai, actionTypeKey.gemini].includes(
-            connector.actionTypeId
-          )
+          actionTypes.includes(connector.actionTypeId) &&
+          // only include preconfigured .inference connectors
+          (connector.actionTypeId !== '.inference' || connector.isPreconfigured)
             ? [
                 {
                   ...connector,
