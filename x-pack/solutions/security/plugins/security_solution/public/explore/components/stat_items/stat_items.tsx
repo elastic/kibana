@@ -29,8 +29,8 @@ export const StatItemsComponent = React.memo<StatItemsProps>(({ statItems, from,
     enableAreaChart,
     enableBarChart,
     fields,
-    barChartLensAttributes,
-    areaChartLensAttributes,
+    getBarChartLensAttributes,
+    getAreaChartLensAttributes,
   } = statItems;
 
   const { isToggleExpanded, onToggle } = useToggleStatus({ id });
@@ -59,7 +59,7 @@ export const StatItemsComponent = React.memo<StatItemsProps>(({ statItems, from,
                 <FlexItem>
                   <VisualizationEmbeddable
                     data-test-subj="embeddable-bar-chart"
-                    lensAttributes={barChartLensAttributes}
+                    getLensAttributes={getBarChartLensAttributes}
                     timerange={timerange}
                     id={`${id}-bar-embeddable`}
                     height={ChartHeight}
@@ -73,7 +73,7 @@ export const StatItemsComponent = React.memo<StatItemsProps>(({ statItems, from,
                   <FlexItem>
                     <VisualizationEmbeddable
                       data-test-subj="embeddable-area-chart"
-                      lensAttributes={areaChartLensAttributes}
+                      getLensAttributes={getAreaChartLensAttributes}
                       timerange={timerange}
                       id={`${id}-area-embeddable`}
                       height={ChartHeight}
