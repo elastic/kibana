@@ -22,6 +22,7 @@ import React, { useMemo } from 'react';
 import { css } from '@emotion/css';
 import { ReadStreamDefinition, isWiredReadStream, isWiredStream } from '@kbn/streams-schema';
 import { useDateRange } from '@kbn/observability-utils-browser/hooks/use_date_range';
+import type { SanitizedDashboardAsset } from '@kbn/streams-plugin/server/routes/dashboards/route';
 import illustration from '../assets/illustration.png';
 import { useKibana } from '../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
@@ -30,6 +31,8 @@ import { StreamsAppSearchBar } from '../streams_app_search_bar';
 import { getIndexPatterns } from '../../util/hierarchy_helpers';
 import { StreamsList } from '../streams_list';
 import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
+import { useDashboardsFetch } from '../../hooks/use_dashboards_fetch';
+import { DashboardsTable } from '../stream_detail_dashboards_view/dashboard_table';
 
 const formatNumber = (val: number) => {
   return Number(val).toLocaleString('en', {
@@ -162,7 +165,7 @@ export function StreamDetailOverview({ definition }: { definition?: ReadStreamDe
       name: i18n.translate('xpack.streams.entityDetailOverview.tabs.quicklinks', {
         defaultMessage: 'Quick Links',
       }),
-      content: <>TODO</>,
+      content: <QuickLinks stream={definition} />,
     },
   ];
 
@@ -261,6 +264,19 @@ export function StreamDetailOverview({ definition }: { definition?: ReadStreamDe
         </EuiFlexItem>
       </EuiFlexGroup>
     </>
+  );
+}
+
+const EMPTY_DASHBOARD_LIST: SanitizedDashboardAsset[] = [];
+
+function QuickLinks({ stream }: { stream?: ReadStreamDefinition }) {
+  const dashboardsFetch = useDashboardsFetch(stream?.name);
+
+  return (
+    <DashboardsTable
+      dashboards={dashboardsFetch.value?.dashboards ?? EMPTY_DASHBOARD_LIST}
+      loading={dashboardsFetch.loading}
+    />
   );
 }
 
