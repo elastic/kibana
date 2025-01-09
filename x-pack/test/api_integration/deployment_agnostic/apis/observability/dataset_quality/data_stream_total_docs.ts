@@ -8,8 +8,8 @@
 import { log, timerange } from '@kbn/apm-synthtrace-client';
 import expect from '@kbn/expect';
 
-import { LogsSynthtraceEsClient } from '@kbn/apm-synthtrace';
 import { APIClientRequestParamsOf } from '@kbn/dataset-quality-plugin/common/rest';
+import { LogsSynthtraceEsClient } from '@kbn/apm-synthtrace';
 import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import { RoleCredentials, SupertestWithRoleScopeType } from '../../../services';
 
@@ -53,6 +53,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     let synthtraceLogsEsClient: LogsSynthtraceEsClient;
 
     before(async () => {
+      synthtraceLogsEsClient = await synthtrace.createLogsSynthtraceEsClient();
       adminRoleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('admin');
       supertestAdminWithCookieCredentials = await roleScopedSupertest.getSupertestWithRoleScope(
         'admin',
@@ -62,7 +63,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         }
       );
 
-      synthtraceLogsEsClient = await synthtrace.createLogsSynthtraceEsClient();
       await synthtraceLogsEsClient.index([
         timerange(from, to)
           .interval('1m')

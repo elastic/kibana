@@ -78,18 +78,23 @@ export const getReindexProgressLabel = (
       percentsComplete = hasExistingAliases ? 85 : 90;
       break;
     }
-    case ReindexStep.aliasCreated: {
+    case ReindexStep.indexSettingsRestored: {
       // step 4 completed
+      percentsComplete = hasExistingAliases ? 87 : 92;
+      break;
+    }
+    case ReindexStep.aliasCreated: {
+      // step 5 completed
       percentsComplete = hasExistingAliases ? 90 : 95;
       break;
     }
     case ReindexStep.originalIndexDeleted: {
-      // step 5 completed
+      // step 6 completed
       percentsComplete = hasExistingAliases ? 95 : 100;
       break;
     }
     case ReindexStep.existingAliasesUpdated: {
-      // step 6 completed, 100% progress
+      // step 7 completed, 100% progress
       percentsComplete = 100;
       break;
     }
