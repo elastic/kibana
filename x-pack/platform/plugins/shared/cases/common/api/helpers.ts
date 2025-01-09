@@ -26,6 +26,7 @@ import {
   INTERNAL_CASE_OBSERVABLES_PATCH_URL,
   INTERNAL_CASE_SIMILAR_CASES_URL,
   INTERNAL_CASE_OBSERVABLES_DELETE_URL,
+  CASE_FIND_USER_ACTIONS_URL,
 } from '../constants';
 
 export const getCaseDetailsUrl = (id: string): string => {
@@ -57,7 +58,7 @@ export const getCaseUserActionStatsUrl = (id: string): string => {
 };
 
 export const getCaseFindUserActionsUrl = (id: string): string => {
-  return INTERNAL_CASE_FIND_USER_ACTIONS_URL.replace('{case_id}', id);
+  return CASE_FIND_USER_ACTIONS_URL.replace('{case_id}', id);
 };
 
 export const getCasePushUrl = (caseId: string, connectorId: string): string => {
@@ -115,4 +116,8 @@ export const getCaseDeleteObservableUrl = (id: string, observableId: string): st
 
 export const getCaseSimilarCasesUrl = (caseId: string) => {
   return INTERNAL_CASE_SIMILAR_CASES_URL.replace('{case_id}', caseId);
+};
+
+export const getInternalCaseFindUserActionsUrl = (id: string): string => {
+  return INTERNAL_CASE_FIND_USER_ACTIONS_URL.replace('{case_id}', id);
 };
