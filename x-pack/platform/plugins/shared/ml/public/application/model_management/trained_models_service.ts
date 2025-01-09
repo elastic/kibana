@@ -124,8 +124,6 @@ export class TrainedModelsService {
   }
 
   public async downloadModel(modelId: string) {
-    this.setLoading(true);
-
     this.addActiveOperation({
       modelId,
       type: 'downloading',
@@ -135,12 +133,10 @@ export class TrainedModelsService {
       await this.trainedModelsApiService.installElasticTrainedModelConfig(modelId);
     } catch (error) {
       this.removeActiveOperation(modelId, 'downloading');
-      this.setLoading(false);
       throw error;
     }
 
     await this.fetchModels();
-    this.setLoading(false);
   }
 
   public async startModelDeployment(

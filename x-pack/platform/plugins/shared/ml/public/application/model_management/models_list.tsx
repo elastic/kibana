@@ -285,6 +285,11 @@ export const ModelsList: FC<Props> = ({
 
   const onModelDownloadRequest = useCallback(
     async (modelId: string) => {
+      // Check if download operation is already scheduled
+      if (activeOperations.some((op) => op.type === 'downloading' && op.modelId === modelId)) {
+        return;
+      }
+
       try {
         await trainedModelsService.downloadModel(modelId);
       } catch (e) {
@@ -297,14 +302,13 @@ export const ModelsList: FC<Props> = ({
         );
       }
     },
-    [displayErrorToast, trainedModelsService]
+    [activeOperations, displayErrorToast, trainedModelsService]
   );
 
   /**
    * Table actions
    */
   const actions = useModelActions({
-    isLoading,
     onTestAction: setModelToTest,
     onDfaTestAction: setDfaModelToTest,
     onModelsDeleteRequest: setModelsToDelete,

@@ -17,6 +17,7 @@ import {
   type DataFrameAnalysisConfigType,
 } from '@kbn/ml-data-frame-analytics-utils';
 import useMountedState from 'react-use/lib/useMountedState';
+import useObservable from 'react-use/lib/useObservable';
 import type {
   DFAModelItem,
   NLPModelItem,
@@ -47,10 +48,8 @@ export function useModelActions({
   onModelsDeleteRequest,
   onModelDeployRequest,
   onModelDownloadRequest,
-  isLoading,
   modelAndDeploymentIds,
 }: {
-  isLoading: boolean;
   onDfaTestAction: (model: DFAModelItem) => void;
   onTestAction: (model: TrainedModelItem) => void;
   onModelsDeleteRequest: (models: TrainedModelUIItem[]) => void;
@@ -77,6 +76,7 @@ export function useModelActions({
   const cloudInfo = useCloudCheck();
 
   const trainedModelsService = useTrainedModelsService();
+  const isLoading = useObservable(trainedModelsService.isLoading$, trainedModelsService.isLoading);
 
   const [
     canCreateTrainedModels,
