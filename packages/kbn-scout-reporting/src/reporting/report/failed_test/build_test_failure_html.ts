@@ -8,11 +8,22 @@
  */
 
 import fs from 'fs';
-import { TestFailure } from '../../test_failure';
+import { TestFailure } from './test_failure';
 
 export const buildFailureHtml = (testFailure: TestFailure): string => {
-  const { suite, title, target, command, location, owner, plugin, duration, error, attachments } =
-    testFailure;
+  const {
+    suite,
+    title,
+    target,
+    command,
+    location,
+    owner,
+    plugin,
+    duration,
+    error,
+    stdout,
+    attachments,
+  } = testFailure;
 
   const testDuration = duration < 1000 ? `${duration}ms` : `${(duration / 1000).toFixed(2)}s`;
 
@@ -164,6 +175,25 @@ export const buildFailureHtml = (testFailure: TestFailure): string => {
         <div class="section">
             <h5>Error Details</h5>
             <pre>${error?.stack_trace || 'No stack trace available'}</pre>
+        </div>
+
+        <div>
+          <details>
+            <summary>
+              <strong>Failures in tracked branches</strong>:
+              <span class="badge rounded-pill bg-danger" id="failure-count">0</span>
+            </summary>
+              <div id="github-issue-section" style="display: none;">
+                <a id="github-issue-link" href="" target="_blank"></a>
+              </div>
+          </details>
+        </div>
+
+        <div class="section">
+         <h5>Output Logs</h5>
+          <details>
+            <pre>${stdout || 'No output available'}</pre>
+          </details>
         </div>
 
         <div class="section">

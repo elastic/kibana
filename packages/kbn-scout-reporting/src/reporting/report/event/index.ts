@@ -7,5 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { ScoutReport, ScoutReportEventAction } from './event';
-export { ScoutFailureReport, TestFailure } from './failed_test';
+export { ScoutReport } from './report';
+export { ScoutReportEventAction } from './event';

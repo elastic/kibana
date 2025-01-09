@@ -7,13 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import stripANSI from 'strip-ansi';
 import { REPO_ROOT } from '@kbn/repo-info';
 
-export const stripfilePath = (filePath: string): string => filePath.replaceAll(`${REPO_ROOT}/`, '');
+export const stripFilePath = (filePath: string): string =>
+  stripANSI(filePath.replaceAll(`${REPO_ROOT}/`, ''));
 
 export const stripRunCommand = (commandArgs: string[]): string => {
-  // "/Users/user/.nvm/versions/node/v20.15.1/bin/node /Users/dmle/github/kibana/node_modules/.bin/playwright test --config x-pack/plugins/discover_enhanced/ui_tests/playwright.config.ts --grep=svlSearch",
-  // "npx playwright test --config x-pack/plugins/discover_enhanced/ui_tests/playwright.config.ts --grep=svlSearch",
   if (!Array.isArray(commandArgs) || commandArgs.length < 3) {
     throw new Error(`Invalid command arguments: must include at least 'npx playwright test'`);
   }

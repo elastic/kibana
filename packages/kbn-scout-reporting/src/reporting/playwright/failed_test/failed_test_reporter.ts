@@ -19,19 +19,23 @@ import type {
 import path from 'node:path';
 import { ToolingLog } from '@kbn/tooling-log';
 import { SCOUT_REPORT_OUTPUT_ROOT } from '@kbn/scout-info';
-import stripANSI from 'strip-ansi';
 import { REPO_ROOT } from '@kbn/repo-info';
 import {
   type CodeOwnersEntry,
   getCodeOwnersEntries,
   getOwningTeamsForPath,
 } from '@kbn/code-owners';
-import { generateTestRunId, getTestIDForTitle } from '../..';
-import type { TestFailure } from '../../test_failure';
+import type { TestFailure } from '../../report';
 import type { ScoutPlaywrightReporterOptions } from '../../scout_playwright_reporter';
-import { stripRunCommand, stripfilePath } from '../common/strip_path';
-import { getPluginManifestData } from '../common/get_plugin_manifest_data';
-import { ScoutFailureReport } from './failure_report';
+import { stripRunCommand, stripFilePath } from '../common/strip_utils';
+import { ScoutFailureReport } from '../../report';
+import {
+  getRunTarget,
+  getPluginManifestData,
+  parseStdout,
+  generateTestRunId,
+  getTestIDForTitle,
+} from '../common';
 
 /**
  * Scout Failed Test reporter
@@ -82,16 +86,13 @@ export class ScoutFailedTestReporter implements Reporter {
         group: metadata.group,
       };
     }
-    // Get the target from the --grep argument, e.g. --grep=@svlSearch
-    const grepArg = process.argv.find((arg) => arg.includes('--grep'));
-    if (grepArg) {
-      this.target = grepArg.split('=')[1];
-    }
+
+    this.target = getRunTarget();
   }
 
   onTestEnd(test: TestCase, result: TestResult) {
     if (result.status === 'failed') {
-      this.report.logFailure({
+      this.report.logEvent({
         id: getTestIDForTitle(test.titlePath().join(' ')),
         suite: test.parent.title,
         title: test.title,
@@ -102,13 +103,10 @@ export class ScoutFailedTestReporter implements Reporter {
         plugin: this.plugin,
         duration: result.duration,
         error: {
-          message: result.error?.message
-            ? stripfilePath(stripANSI(result.error.message))
-            : undefined,
-          stack_trace: result.error?.stack
-            ? stripfilePath(stripANSI(result.error.stack))
-            : undefined,
+          message: result.error?.message ? stripFilePath(result.error.message) : undefined,
+          stack_trace: result.error?.stack ? stripFilePath(result.error.stack) : undefined,
         },
+        stdout: result.stdout ? parseStdout(result.stdout) : undefined,
         attachments: result.attachments.map((attachment) => ({
           name: attachment.name,
           path: attachment.path,
@@ -127,6 +125,3 @@ export class ScoutFailedTestReporter implements Reporter {
     }
   }
 }
-
-// eslint-disable-next-line import/no-default-export
-export default ScoutFailedTestReporter;

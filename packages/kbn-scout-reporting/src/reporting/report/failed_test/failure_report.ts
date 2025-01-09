@@ -7,29 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-// eslint-disable-next-line max-classes-per-file
 import os from 'node:os';
 import path from 'node:path';
 import fs from 'node:fs';
 import { ToolingLog } from '@kbn/tooling-log';
-import { TestFailure } from '../../test_failure';
 import { saveTestFailuresReport } from './save_test_failures';
 import { buildFailureHtml } from './build_test_failure_html';
+import { GenericReport, ScoutReportError } from '../generic_report';
+import { TestFailure } from './test_failure';
 
-/**
- * Generic error raised by a Scout report
- */
-export class ScoutReportError extends Error {}
-
-/**
- *
- */
-export class ScoutFailureReport {
+export class ScoutFailureReport extends GenericReport {
   log: ToolingLog;
   workDir: string;
   concluded = false;
 
   constructor(log?: ToolingLog) {
+    super();
     this.log = log || new ToolingLog();
     this.workDir = fs.mkdtempSync(path.join(os.tmpdir(), 'scout-failures-report-'));
   }
@@ -38,24 +31,12 @@ export class ScoutFailureReport {
     return path.join(this.workDir, `test-failures.ndjson`);
   }
 
-  private raiseIfConcluded(additionalInfo?: string) {
-    if (this.concluded) {
-      let message = `Report at ${this.workDir} was concluded`;
-
-      if (additionalInfo) {
-        message += `: ${additionalInfo}`;
-      }
-
-      throw new ScoutReportError(message);
-    }
-  }
-
   /**
    * Logs a failure to be processed by this reporter
    *
    * @param failure {TestFailure} - test failure to record
    */
-  logFailure(failure: TestFailure) {
+  logEvent(failure: TestFailure) {
     this.raiseIfConcluded('logging new failures is no longer allowed');
 
     fs.appendFileSync(this.testFailuresPath, JSON.stringify(failure) + '\n');
@@ -116,24 +97,9 @@ export class ScoutFailureReport {
   }
 
   /**
-   * Call this when you're done adding information to this report.
-   *
-   * ⚠️**This will delete all the contents of the report's working directory**
-   */
-  conclude() {
-    // Remove the working directory
-    this.log.info(`Removing Scout report working directory ${this.workDir}`);
-    fs.rmSync(this.workDir, { recursive: true, force: true });
-
-    // Mark this report as concluded
-    this.concluded = true;
-    this.log.success('Scout report has concluded.');
-  }
-
-  /**
    * Reads all failures from the NDJSON file and parses them as TestFailure[].
    */
-  readFailuresFromNDJSON(): TestFailure[] {
+  private readFailuresFromNDJSON(): TestFailure[] {
     if (!fs.existsSync(this.testFailuresPath)) {
       return [];
     }

@@ -28,9 +28,10 @@ import {
   getCodeOwnersEntries,
   getOwningTeamsForPath,
 } from '@kbn/code-owners';
-import { generateTestRunId, getTestIDForTitle, ScoutReport, ScoutReportEventAction } from '../..';
+import { ScoutReport, ScoutReportEventAction } from '../../report';
 import { environmentMetadata } from '../../../datasources';
 import type { ScoutPlaywrightReporterOptions } from '../../scout_playwright_reporter';
+import { generateTestRunId, getTestIDForTitle } from '../common';
 
 /**
  * Scout Playwright reporter
@@ -283,6 +284,3 @@ export class ScoutPlaywrightReporter implements Reporter {
     });
   }
 }
-
-// eslint-disable-next-line import/no-default-export
-export default ScoutPlaywrightReporter;

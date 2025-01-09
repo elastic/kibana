@@ -7,27 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export declare interface TestFailure {
-  id: string;
-  suite: string;
-  title: string;
-  target: string;
-  command: string;
-  location: string;
-  owner: string[];
-  plugin?: {
-    id: string;
-    visibility: string;
-    group: string;
-  };
-  duration: number;
-  error: {
-    message?: string;
-    stack_trace?: string;
-  };
-  attachments: Array<{
-    name: string;
-    path?: string;
-    contentType: string;
-  }>;
+import { createHash, randomBytes } from 'node:crypto';
+
+export function generateTestRunId() {
+  return randomBytes(8).toString('hex');
+}
+
+export function getTestIDForTitle(title: string) {
+  return createHash('sha256').update(title).digest('hex').slice(0, 31);
 }

@@ -8,4 +8,7 @@
  */
 
 export { getPluginManifestData, type PluginManifest } from './get_plugin_manifest_data';
-export { stripRunCommand, stripfilePath } from './strip_path';
+export { stripRunCommand, stripFilePath } from './strip_utils';
+export { parseStdout } from './parse_stdout';
+export { getRunTarget } from './get_run_target';
+export { getTestIDForTitle, generateTestRunId } from './test_id_generator';

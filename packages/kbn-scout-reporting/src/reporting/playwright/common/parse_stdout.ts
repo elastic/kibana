@@ -7,5 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { ScoutReport, ScoutReportEventAction } from './event';
-export { ScoutFailureReport, TestFailure } from './failed_test';
+import stripANSI from 'strip-ansi';
+
+export function parseStdout(stdout: Array<string | Buffer>): string {
+  const stdoutContent = stdout
+    .map((chunk) => (Buffer.isBuffer(chunk) ? chunk.toString() : chunk))
+    .join('');
+
+  // Escape special HTML characters
+  return stripANSI(stdoutContent);
+}
