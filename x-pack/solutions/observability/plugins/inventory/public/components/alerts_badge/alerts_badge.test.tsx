@@ -47,17 +47,12 @@ describe('AlertsBadge', () => {
   it('render alerts badge for a host entity', () => {
     const entity: InventoryEntity = {
       ...(commonEntityFields as InventoryEntity),
-      entityType: 'host',
+      entityType: 'built_in_hosts_from_ecs_data',
       entityDisplayName: 'foo',
-      entityIdentityFields: 'host.name',
-      entityDefinitionId: 'host',
+      entityIdentityFields: { source1: ['host.name'] },
       alertsCount: 1,
-      host: {
-        name: 'foo',
-      },
-      cloud: {
-        provider: null,
-      },
+      'host.name': 'foo',
+      'cloud.provider': null,
     };
     mockAsKqlFilter.mockReturnValue('host.name: "foo"');
 
@@ -70,20 +65,12 @@ describe('AlertsBadge', () => {
   it('render alerts badge for a service entity', () => {
     const entity: InventoryEntity = {
       ...(commonEntityFields as InventoryEntity),
-      entityType: 'service',
+      entityType: 'built_in_services_from_ecs_data',
       entityDisplayName: 'foo',
-      entityIdentityFields: 'service.name',
-      entityDefinitionId: 'service',
-      service: {
-        name: 'bar',
-      },
-      agent: {
-        name: 'node',
-      },
-      cloud: {
-        provider: null,
-      },
-
+      entityIdentityFields: { source1: ['service.name'] },
+      'service.name': 'bar',
+      'agent.name': 'node',
+      'cloud.provider': null,
       alertsCount: 5,
     };
     mockAsKqlFilter.mockReturnValue('service.name: "bar"');
@@ -97,20 +84,13 @@ describe('AlertsBadge', () => {
   it('render alerts badge for a service entity with multiple identity fields', () => {
     const entity: InventoryEntity = {
       ...(commonEntityFields as InventoryEntity),
-      entityType: 'service',
+      entityType: 'built_in_services_from_ecs_data',
       entityDisplayName: 'foo',
-      entityIdentityFields: ['service.name', 'service.environment'],
-      entityDefinitionId: 'service',
-      service: {
-        name: 'bar',
-        environment: 'prod',
-      },
-      agent: {
-        name: 'node',
-      },
-      cloud: {
-        provider: null,
-      },
+      entityIdentityFields: { source1: ['service.name', 'service.environment'] },
+      'service.name': 'bar',
+      'service.environment': 'prod',
+      'agent.name': 'node',
+      'cloud.provider': null,
       alertsCount: 2,
     };
 
