@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { render, screen, waitFor, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { useRuleFormHorizontalSteps, useRuleFormSteps } from './use_rule_form_steps';
 import {
   RULE_FORM_PAGE_RULE_DEFINITION_TITLE,
@@ -122,10 +122,10 @@ describe('useRuleFormSteps', () => {
     render(<TestComponent />);
 
     // Use screen reader text for testing
-    await waitFor(() => expect(screen.getByText('Step 1 is incomplete')).toBeInTheDocument());
+    expect(await screen.getByText('Step 1 is incomplete')).toBeInTheDocument();
     const step1 = screen.getByTestId('ruleFormStep-rule-definition-reportOnBlur');
     await fireEvent.blur(step1!);
-    await waitFor(() => expect(screen.getByText('Step 1 has errors')).toBeInTheDocument());
+    expect(await screen.getByText('Step 1 has errors')).toBeInTheDocument();
   });
 });
 
@@ -167,7 +167,7 @@ describe('useRuleFormHorizontalSteps', () => {
 
     render(<TestComponent />);
 
-    await waitFor(() => expect(screen.getByText('Current step is 1')).toBeInTheDocument());
+    expect(await screen.getByText('Current step is 1')).toBeInTheDocument();
 
     const nextButton = screen.getByText('Next');
     const previousButton = screen.getByText('Previous');
@@ -175,22 +175,22 @@ describe('useRuleFormHorizontalSteps', () => {
     fireEvent.click(nextButton);
     fireEvent.click(nextButton);
 
-    await waitFor(() => expect(screen.getByText('Current step is 3')).toBeInTheDocument());
+    expect(await screen.getByText('Current step is 3')).toBeInTheDocument();
 
     fireEvent.click(nextButton);
 
-    await waitFor(() => expect(screen.getByText('Current step is 3')).toBeInTheDocument());
+    expect(await screen.getByText('Current step is 3')).toBeInTheDocument();
 
     fireEvent.click(previousButton);
 
-    await waitFor(() => expect(screen.getByText('Current step is 2')).toBeInTheDocument());
+    expect(await screen.getByText('Current step is 2')).toBeInTheDocument();
 
     fireEvent.click(previousButton);
 
-    await waitFor(() => expect(screen.getByText('Current step is 1')).toBeInTheDocument());
+    expect(await screen.getByText('Current step is 1')).toBeInTheDocument();
 
     fireEvent.click(previousButton);
 
-    await waitFor(() => expect(screen.getByText('Current step is 1')).toBeInTheDocument());
+    expect(await screen.getByText('Current step is 1')).toBeInTheDocument();
   });
 });
