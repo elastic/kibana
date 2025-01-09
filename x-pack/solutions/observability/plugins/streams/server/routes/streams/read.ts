@@ -9,7 +9,7 @@ import { z } from '@kbn/zod';
 import { notFound, internal } from '@hapi/boom';
 import {
   FieldDefinitionConfig,
-  isWiredStream,
+  isWiredReadStream,
   ReadStreamDefinition,
   WiredReadStreamDefinition,
 } from '@kbn/streams-schema';
@@ -45,7 +45,7 @@ export const readStreamRoute = createServerRoute({
         assetType: 'dashboard',
       });
 
-      if (!isWiredStream(streamEntity)) {
+      if (!isWiredReadStream(streamEntity)) {
         return {
           ...streamEntity,
           dashboards,
