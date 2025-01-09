@@ -421,7 +421,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
         pageIndex: 0,
         totalItemCount: 0,
         pageSize: initialPageSize,
-        pageSizeOptions: uniq([10, 20, 50, initialPageSize]).sort(),
+        pageSizeOptions: uniq([10, 20, 50, initialPageSize]).sort((a, b) => Number(a) - Number(b)),
       },
       tableSort: initialSort.tableSort,
       sortColumnChanged: !initialSort.isDefault,
