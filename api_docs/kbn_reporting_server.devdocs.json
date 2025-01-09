@@ -27,7 +27,7 @@
           },
           "<JobParamsType, TaskPayloadType, SetupDepsType, StartDepsType>"
         ],
-        "path": "packages/kbn-reporting/server/export_type.ts",
+        "path": "src/platform/packages/private/kbn-reporting/server/export_type.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -38,7 +38,7 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "path": "packages/kbn-reporting/server/export_type.ts",
+            "path": "src/platform/packages/private/kbn-reporting/server/export_type.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -49,7 +49,7 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "path": "packages/kbn-reporting/server/export_type.ts",
+            "path": "src/platform/packages/private/kbn-reporting/server/export_type.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -60,7 +60,7 @@
             "tags": [],
             "label": "jobType",
             "description": [],
-            "path": "packages/kbn-reporting/server/export_type.ts",
+            "path": "src/platform/packages/private/kbn-reporting/server/export_type.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -74,7 +74,7 @@
             "signature": [
               "\"base64\" | \"csv\" | undefined"
             ],
-            "path": "packages/kbn-reporting/server/export_type.ts",
+            "path": "src/platform/packages/private/kbn-reporting/server/export_type.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -88,7 +88,7 @@
             "signature": [
               "\"csv\" | \"png\" | \"pdf\""
             ],
-            "path": "packages/kbn-reporting/server/export_type.ts",
+            "path": "src/platform/packages/private/kbn-reporting/server/export_type.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -114,7 +114,7 @@
               "KibanaRequest",
               "<unknown, unknown, unknown, any>) => Promise<Omit<TaskPayloadType, \"spaceId\" | \"headers\">>"
             ],
-            "path": "packages/kbn-reporting/server/export_type.ts",
+            "path": "src/platform/packages/private/kbn-reporting/server/export_type.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -129,7 +129,7 @@
                 "signature": [
                   "JobParamsType"
                 ],
-                "path": "packages/kbn-reporting/server/types.ts",
+                "path": "src/platform/packages/private/kbn-reporting/server/types.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -152,7 +152,7 @@
                   },
                   " | null>; }"
                 ],
-                "path": "packages/kbn-reporting/server/types.ts",
+                "path": "src/platform/packages/private/kbn-reporting/server/types.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -167,7 +167,7 @@
                   "KibanaRequest",
                   "<unknown, unknown, unknown, any>"
                 ],
-                "path": "packages/kbn-reporting/server/types.ts",
+                "path": "src/platform/packages/private/kbn-reporting/server/types.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -197,7 +197,7 @@
               "TaskRunResult",
               ">"
             ],
-            "path": "packages/kbn-reporting/server/export_type.ts",
+            "path": "src/platform/packages/private/kbn-reporting/server/export_type.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -209,7 +209,7 @@
                 "tags": [],
                 "label": "jobId",
                 "description": [],
-                "path": "packages/kbn-reporting/server/types.ts",
+                "path": "src/platform/packages/private/kbn-reporting/server/types.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -223,7 +223,7 @@
                 "signature": [
                   "TaskPayloadType"
                 ],
-                "path": "packages/kbn-reporting/server/types.ts",
+                "path": "src/platform/packages/private/kbn-reporting/server/types.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -237,7 +237,7 @@
                 "signature": [
                   "{ startedAt: Date | null; retryAt: Date | null; }"
                 ],
-                "path": "packages/kbn-reporting/server/types.ts",
+                "path": "src/platform/packages/private/kbn-reporting/server/types.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -257,7 +257,7 @@
                     "text": "CancellationToken"
                   }
                 ],
-                "path": "packages/kbn-reporting/server/types.ts",
+                "path": "src/platform/packages/private/kbn-reporting/server/types.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -271,7 +271,7 @@
                 "signature": [
                   "Writable"
                 ],
-                "path": "packages/kbn-reporting/server/types.ts",
+                "path": "src/platform/packages/private/kbn-reporting/server/types.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -287,7 +287,7 @@
             "signature": [
               "(\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\")[]"
             ],
-            "path": "packages/kbn-reporting/server/export_type.ts",
+            "path": "src/platform/packages/private/kbn-reporting/server/export_type.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -301,7 +301,7 @@
             "signature": [
               "SetupDepsType"
             ],
-            "path": "packages/kbn-reporting/server/export_type.ts",
+            "path": "src/platform/packages/private/kbn-reporting/server/export_type.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -315,7 +315,7 @@
             "signature": [
               "StartDepsType"
             ],
-            "path": "packages/kbn-reporting/server/export_type.ts",
+            "path": "src/platform/packages/private/kbn-reporting/server/export_type.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -332,7 +332,7 @@
               "RequestHandlerContextBase",
               ">"
             ],
-            "path": "packages/kbn-reporting/server/export_type.ts",
+            "path": "src/platform/packages/private/kbn-reporting/server/export_type.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -346,7 +346,7 @@
             "signature": [
               "any"
             ],
-            "path": "packages/kbn-reporting/server/export_type.ts",
+            "path": "src/platform/packages/private/kbn-reporting/server/export_type.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -359,9 +359,9 @@
                 "description": [],
                 "signature": [
                   "CoreSetup",
-                  "<object, unknown>"
+                  "<{}, unknown>"
                 ],
-                "path": "packages/kbn-reporting/server/export_type.ts",
+                "path": "src/platform/packages/private/kbn-reporting/server/export_type.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -384,7 +384,7 @@
                   },
                   "; useByteOrderMarkEncoding: boolean; maxConcurrentShardRequests: number; }>; capture: Readonly<{} & { maxAttempts: number; }>; kibanaServer: Readonly<{ hostname?: string | undefined; protocol?: string | undefined; port?: number | undefined; } & {}>; queue: Readonly<{} & { timeout: number | moment.Duration; pollInterval: number | moment.Duration; indexInterval: string; pollEnabled: boolean; pollIntervalErrorMultiplier: number; }>; poll: Readonly<{} & { jobCompletionNotifier: Readonly<{} & { interval: number; intervalErrorMultiplier: number; }>; jobsRefresh: Readonly<{} & { interval: number; intervalErrorMultiplier: number; }>; }>; export_types: Readonly<{} & { csv: Readonly<{} & { enabled: boolean; }>; png: Readonly<{} & { enabled: boolean; }>; pdf: Readonly<{} & { enabled: boolean; }>; }>; statefulSettings: Readonly<{} & { enabled: boolean; }>; }>"
                 ],
-                "path": "packages/kbn-reporting/server/export_type.ts",
+                "path": "src/platform/packages/private/kbn-reporting/server/export_type.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -405,7 +405,7 @@
                     "text": "Logger"
                   }
                 ],
-                "path": "packages/kbn-reporting/server/export_type.ts",
+                "path": "src/platform/packages/private/kbn-reporting/server/export_type.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -429,7 +429,7 @@
                   },
                   "; useByteOrderMarkEncoding: boolean; maxConcurrentShardRequests: number; }>; capture: Readonly<{} & { maxAttempts: number; }>; kibanaServer: Readonly<{ hostname?: string | undefined; protocol?: string | undefined; port?: number | undefined; } & {}>; queue: Readonly<{} & { timeout: number | moment.Duration; pollInterval: number | moment.Duration; indexInterval: string; pollEnabled: boolean; pollIntervalErrorMultiplier: number; }>; poll: Readonly<{} & { jobCompletionNotifier: Readonly<{} & { interval: number; intervalErrorMultiplier: number; }>; jobsRefresh: Readonly<{} & { interval: number; intervalErrorMultiplier: number; }>; }>; export_types: Readonly<{} & { csv: Readonly<{} & { enabled: boolean; }>; png: Readonly<{} & { enabled: boolean; }>; pdf: Readonly<{} & { enabled: boolean; }>; }>; statefulSettings: Readonly<{} & { enabled: boolean; }>; }>>"
                 ],
-                "path": "packages/kbn-reporting/server/export_type.ts",
+                "path": "src/platform/packages/private/kbn-reporting/server/export_type.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -447,7 +447,7 @@
             "signature": [
               "(setupDeps: SetupDepsType) => void"
             ],
-            "path": "packages/kbn-reporting/server/export_type.ts",
+            "path": "src/platform/packages/private/kbn-reporting/server/export_type.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -461,7 +461,7 @@
                 "signature": [
                   "SetupDepsType"
                 ],
-                "path": "packages/kbn-reporting/server/export_type.ts",
+                "path": "src/platform/packages/private/kbn-reporting/server/export_type.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -479,7 +479,7 @@
             "signature": [
               "(startDeps: StartDepsType) => void"
             ],
-            "path": "packages/kbn-reporting/server/export_type.ts",
+            "path": "src/platform/packages/private/kbn-reporting/server/export_type.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -493,7 +493,7 @@
                 "signature": [
                   "StartDepsType"
                 ],
-                "path": "packages/kbn-reporting/server/export_type.ts",
+                "path": "src/platform/packages/private/kbn-reporting/server/export_type.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -512,15 +512,9 @@
               "(savedObjectsClient: ",
               "SavedObjectsClientContract",
               ") => ",
-              {
-                "pluginId": "@kbn/core-ui-settings-server",
-                "scope": "server",
-                "docId": "kibKbnCoreUiSettingsServerPluginApi",
-                "section": "def-server.IUiSettingsClient",
-                "text": "IUiSettingsClient"
-              }
+              "IUiSettingsClient"
             ],
-            "path": "packages/kbn-reporting/server/export_type.ts",
+            "path": "src/platform/packages/private/kbn-reporting/server/export_type.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -534,7 +528,7 @@
                 "signature": [
                   "SavedObjectsClientContract"
                 ],
-                "path": "packages/kbn-reporting/server/export_type.ts",
+                "path": "src/platform/packages/private/kbn-reporting/server/export_type.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -561,16 +555,10 @@
                 "text": "Logger"
               },
               ") => Promise<",
-              {
-                "pluginId": "@kbn/core-ui-settings-server",
-                "scope": "server",
-                "docId": "kibKbnCoreUiSettingsServerPluginApi",
-                "section": "def-server.IUiSettingsClient",
-                "text": "IUiSettingsClient"
-              },
+              "IUiSettingsClient",
               ">"
             ],
-            "path": "packages/kbn-reporting/server/export_type.ts",
+            "path": "src/platform/packages/private/kbn-reporting/server/export_type.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -585,7 +573,7 @@
                   "KibanaRequest",
                   "<unknown, unknown, unknown, any>"
                 ],
-                "path": "packages/kbn-reporting/server/export_type.ts",
+                "path": "src/platform/packages/private/kbn-reporting/server/export_type.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -606,7 +594,7 @@
                     "text": "Logger"
                   }
                 ],
-                "path": "packages/kbn-reporting/server/export_type.ts",
+                "path": "src/platform/packages/private/kbn-reporting/server/export_type.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -636,7 +624,7 @@
               "KibanaRequest",
               "<unknown, unknown, unknown, any>"
             ],
-            "path": "packages/kbn-reporting/server/export_type.ts",
+            "path": "src/platform/packages/private/kbn-reporting/server/export_type.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -650,7 +638,7 @@
                 "signature": [
                   "Headers"
                 ],
-                "path": "packages/kbn-reporting/server/export_type.ts",
+                "path": "src/platform/packages/private/kbn-reporting/server/export_type.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -665,7 +653,7 @@
                 "signature": [
                   "string | undefined"
                 ],
-                "path": "packages/kbn-reporting/server/export_type.ts",
+                "path": "src/platform/packages/private/kbn-reporting/server/export_type.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -686,7 +674,7 @@
                     "text": "Logger"
                   }
                 ],
-                "path": "packages/kbn-reporting/server/export_type.ts",
+                "path": "src/platform/packages/private/kbn-reporting/server/export_type.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -705,7 +693,7 @@
               "() => ",
               "ReportingServerInfo"
             ],
-            "path": "packages/kbn-reporting/server/export_type.ts",
+            "path": "src/platform/packages/private/kbn-reporting/server/export_type.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -727,7 +715,7 @@
           "(encryptionKey: string | undefined) => ",
           "Crypto"
         ],
-        "path": "packages/kbn-reporting/server/crypto.ts",
+        "path": "src/platform/packages/private/kbn-reporting/server/crypto.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -741,7 +729,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/kbn-reporting/server/crypto.ts",
+            "path": "src/platform/packages/private/kbn-reporting/server/crypto.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -768,7 +756,7 @@
           },
           ") => Promise<Record<string, string>>"
         ],
-        "path": "packages/kbn-reporting/server/decrypt_job_headers.ts",
+        "path": "src/platform/packages/private/kbn-reporting/server/decrypt_job_headers.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -782,7 +770,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/kbn-reporting/server/decrypt_job_headers.ts",
+            "path": "src/platform/packages/private/kbn-reporting/server/decrypt_job_headers.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -797,7 +785,7 @@
             "signature": [
               "string"
             ],
-            "path": "packages/kbn-reporting/server/decrypt_job_headers.ts",
+            "path": "src/platform/packages/private/kbn-reporting/server/decrypt_job_headers.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -818,7 +806,7 @@
                 "text": "Logger"
               }
             ],
-            "path": "packages/kbn-reporting/server/decrypt_job_headers.ts",
+            "path": "src/platform/packages/private/kbn-reporting/server/decrypt_job_headers.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -844,7 +832,7 @@
             "text": "FieldFormatsStart"
           }
         ],
-        "path": "packages/kbn-reporting/server/services.ts",
+        "path": "src/platform/packages/private/kbn-reporting/server/services.ts",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -871,7 +859,7 @@
           "ReportingServerInfo",
           ", spaceId: string | undefined, forceNow: string | undefined) => string"
         ],
-        "path": "packages/kbn-reporting/server/get_full_redirect_app_url.ts",
+        "path": "src/platform/packages/private/kbn-reporting/server/get_full_redirect_app_url.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -893,7 +881,7 @@
               },
               "; useByteOrderMarkEncoding: boolean; maxConcurrentShardRequests: number; }>; capture: Readonly<{} & { maxAttempts: number; }>; kibanaServer: Readonly<{ hostname?: string | undefined; protocol?: string | undefined; port?: number | undefined; } & {}>; queue: Readonly<{} & { timeout: number | moment.Duration; pollInterval: number | moment.Duration; indexInterval: string; pollEnabled: boolean; pollIntervalErrorMultiplier: number; }>; poll: Readonly<{} & { jobCompletionNotifier: Readonly<{} & { interval: number; intervalErrorMultiplier: number; }>; jobsRefresh: Readonly<{} & { interval: number; intervalErrorMultiplier: number; }>; }>; export_types: Readonly<{} & { csv: Readonly<{} & { enabled: boolean; }>; png: Readonly<{} & { enabled: boolean; }>; pdf: Readonly<{} & { enabled: boolean; }>; }>; statefulSettings: Readonly<{} & { enabled: boolean; }>; }>"
             ],
-            "path": "packages/kbn-reporting/server/get_full_redirect_app_url.ts",
+            "path": "src/platform/packages/private/kbn-reporting/server/get_full_redirect_app_url.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -908,7 +896,7 @@
             "signature": [
               "ReportingServerInfo"
             ],
-            "path": "packages/kbn-reporting/server/get_full_redirect_app_url.ts",
+            "path": "src/platform/packages/private/kbn-reporting/server/get_full_redirect_app_url.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -923,7 +911,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/kbn-reporting/server/get_full_redirect_app_url.ts",
+            "path": "src/platform/packages/private/kbn-reporting/server/get_full_redirect_app_url.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -938,7 +926,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/kbn-reporting/server/get_full_redirect_app_url.ts",
+            "path": "src/platform/packages/private/kbn-reporting/server/get_full_redirect_app_url.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -965,7 +953,7 @@
           },
           ") => void"
         ],
-        "path": "packages/kbn-reporting/server/services.ts",
+        "path": "src/platform/packages/private/kbn-reporting/server/services.ts",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -996,7 +984,7 @@
         "tags": [],
         "label": "BaseExportTypeSetupDeps",
         "description": [],
-        "path": "packages/kbn-reporting/server/export_type.ts",
+        "path": "src/platform/packages/private/kbn-reporting/server/export_type.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1012,7 +1000,7 @@
               "KibanaRequest",
               "<unknown, unknown, unknown, any>, requestSpecificBasePath: string) => void; }"
             ],
-            "path": "packages/kbn-reporting/server/export_type.ts",
+            "path": "src/platform/packages/private/kbn-reporting/server/export_type.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1033,7 +1021,7 @@
               },
               " | undefined"
             ],
-            "path": "packages/kbn-reporting/server/export_type.ts",
+            "path": "src/platform/packages/private/kbn-reporting/server/export_type.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1047,7 +1035,7 @@
         "tags": [],
         "label": "BaseExportTypeStartDeps",
         "description": [],
-        "path": "packages/kbn-reporting/server/export_type.ts",
+        "path": "src/platform/packages/private/kbn-reporting/server/export_type.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1061,7 +1049,7 @@
             "signature": [
               "SavedObjectsServiceStart"
             ],
-            "path": "packages/kbn-reporting/server/export_type.ts",
+            "path": "src/platform/packages/private/kbn-reporting/server/export_type.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1073,15 +1061,9 @@
             "label": "uiSettings",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-ui-settings-server",
-                "scope": "server",
-                "docId": "kibKbnCoreUiSettingsServerPluginApi",
-                "section": "def-server.UiSettingsServiceStart",
-                "text": "UiSettingsServiceStart"
-              }
+              "UiSettingsServiceStart"
             ],
-            "path": "packages/kbn-reporting/server/export_type.ts",
+            "path": "src/platform/packages/private/kbn-reporting/server/export_type.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1095,7 +1077,7 @@
             "signature": [
               "IClusterClient"
             ],
-            "path": "packages/kbn-reporting/server/export_type.ts",
+            "path": "src/platform/packages/private/kbn-reporting/server/export_type.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1116,7 +1098,7 @@
               },
               " | undefined"
             ],
-            "path": "packages/kbn-reporting/server/export_type.ts",
+            "path": "src/platform/packages/private/kbn-reporting/server/export_type.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1130,7 +1112,7 @@
         "tags": [],
         "label": "ReportingServerPluginSetup",
         "description": [],
-        "path": "packages/kbn-reporting/server/types.ts",
+        "path": "src/platform/packages/private/kbn-reporting/server/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1168,7 +1150,7 @@
               },
               ">) => void"
             ],
-            "path": "packages/kbn-reporting/server/types.ts",
+            "path": "src/platform/packages/private/kbn-reporting/server/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1205,7 +1187,7 @@
                   },
                   ">"
                 ],
-                "path": "packages/kbn-reporting/server/types.ts",
+                "path": "src/platform/packages/private/kbn-reporting/server/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1223,7 +1205,7 @@
         "tags": [],
         "label": "TimeRangeParams",
         "description": [],
-        "path": "packages/kbn-reporting/server/types.ts",
+        "path": "src/platform/packages/private/kbn-reporting/server/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1237,7 +1219,7 @@
             "signature": [
               "string | number | Date | null | undefined"
             ],
-            "path": "packages/kbn-reporting/server/types.ts",
+            "path": "src/platform/packages/private/kbn-reporting/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1251,7 +1233,7 @@
             "signature": [
               "string | number | Date | null | undefined"
             ],
-            "path": "packages/kbn-reporting/server/types.ts",
+            "path": "src/platform/packages/private/kbn-reporting/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1267,7 +1249,7 @@
         "tags": [],
         "label": "EventType",
         "description": [],
-        "path": "packages/kbn-reporting/server/constants.ts",
+        "path": "src/platform/packages/private/kbn-reporting/server/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1279,7 +1261,7 @@
         "tags": [],
         "label": "FieldType",
         "description": [],
-        "path": "packages/kbn-reporting/server/constants.ts",
+        "path": "src/platform/packages/private/kbn-reporting/server/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1296,7 +1278,7 @@
         "signature": [
           "\"reportingApi\""
         ],
-        "path": "packages/kbn-reporting/server/constants.ts",
+        "path": "src/platform/packages/private/kbn-reporting/server/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1311,7 +1293,7 @@
         "signature": [
           "\"reportingApiError\""
         ],
-        "path": "packages/kbn-reporting/server/constants.ts",
+        "path": "src/platform/packages/private/kbn-reporting/server/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1338,7 +1320,7 @@
           "KibanaRequest",
           "<unknown, unknown, unknown, any>) => Promise<Omit<JobPayloadType, \"spaceId\" | \"headers\">>"
         ],
-        "path": "packages/kbn-reporting/server/types.ts",
+        "path": "src/platform/packages/private/kbn-reporting/server/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -1353,7 +1335,7 @@
             "signature": [
               "JobParamsType"
             ],
-            "path": "packages/kbn-reporting/server/types.ts",
+            "path": "src/platform/packages/private/kbn-reporting/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1376,7 +1358,7 @@
               },
               " | null>; }"
             ],
-            "path": "packages/kbn-reporting/server/types.ts",
+            "path": "src/platform/packages/private/kbn-reporting/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1391,7 +1373,7 @@
               "KibanaRequest",
               "<unknown, unknown, unknown, any>"
             ],
-            "path": "packages/kbn-reporting/server/types.ts",
+            "path": "src/platform/packages/private/kbn-reporting/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1408,7 +1390,7 @@
         "signature": [
           "\"reporting\""
         ],
-        "path": "packages/kbn-reporting/server/constants.ts",
+        "path": "src/platform/packages/private/kbn-reporting/server/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1423,7 +1405,7 @@
         "signature": [
           "\".kibana-reporting\""
         ],
-        "path": "packages/kbn-reporting/server/constants.ts",
+        "path": "src/platform/packages/private/kbn-reporting/server/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1438,7 +1420,7 @@
         "signature": [
           "\"kibana-reporting@custom\""
         ],
-        "path": "packages/kbn-reporting/server/constants.ts",
+        "path": "src/platform/packages/private/kbn-reporting/server/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1453,7 +1435,7 @@
         "signature": [
           "\".kibana-reporting*\""
         ],
-        "path": "packages/kbn-reporting/server/constants.ts",
+        "path": "src/platform/packages/private/kbn-reporting/server/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1468,7 +1450,7 @@
         "signature": [
           "\".reporting-*,.kibana-reporting*\""
         ],
-        "path": "packages/kbn-reporting/server/constants.ts",
+        "path": "src/platform/packages/private/kbn-reporting/server/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1483,7 +1465,7 @@
         "signature": [
           "\".reporting-*\""
         ],
-        "path": "packages/kbn-reporting/server/constants.ts",
+        "path": "src/platform/packages/private/kbn-reporting/server/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1498,7 +1480,7 @@
         "signature": [
           "\"reporting\""
         ],
-        "path": "packages/kbn-reporting/server/constants.ts",
+        "path": "src/platform/packages/private/kbn-reporting/server/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1521,7 +1503,7 @@
           },
           "; useByteOrderMarkEncoding: boolean; maxConcurrentShardRequests: number; }>; readonly capture: Readonly<{} & { maxAttempts: number; }>; readonly kibanaServer: Readonly<{ hostname?: string | undefined; protocol?: string | undefined; port?: number | undefined; } & {}>; readonly queue: Readonly<{} & { timeout: number | moment.Duration; pollInterval: number | moment.Duration; indexInterval: string; pollEnabled: boolean; pollIntervalErrorMultiplier: number; }>; readonly poll: Readonly<{} & { jobCompletionNotifier: Readonly<{} & { interval: number; intervalErrorMultiplier: number; }>; jobsRefresh: Readonly<{} & { interval: number; intervalErrorMultiplier: number; }>; }>; readonly export_types: Readonly<{} & { csv: Readonly<{} & { enabled: boolean; }>; png: Readonly<{} & { enabled: boolean; }>; pdf: Readonly<{} & { enabled: boolean; }>; }>; readonly statefulSettings: Readonly<{} & { enabled: boolean; }>; }"
         ],
-        "path": "packages/kbn-reporting/server/types.ts",
+        "path": "src/platform/packages/private/kbn-reporting/server/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1550,7 +1532,7 @@
           "TaskRunResult",
           ">"
         ],
-        "path": "packages/kbn-reporting/server/types.ts",
+        "path": "src/platform/packages/private/kbn-reporting/server/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -1562,7 +1544,7 @@
             "tags": [],
             "label": "jobId",
             "description": [],
-            "path": "packages/kbn-reporting/server/types.ts",
+            "path": "src/platform/packages/private/kbn-reporting/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1576,7 +1558,7 @@
             "signature": [
               "TaskPayloadType"
             ],
-            "path": "packages/kbn-reporting/server/types.ts",
+            "path": "src/platform/packages/private/kbn-reporting/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1590,7 +1572,7 @@
             "signature": [
               "{ startedAt: Date | null; retryAt: Date | null; }"
             ],
-            "path": "packages/kbn-reporting/server/types.ts",
+            "path": "src/platform/packages/private/kbn-reporting/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1610,7 +1592,7 @@
                 "text": "CancellationToken"
               }
             ],
-            "path": "packages/kbn-reporting/server/types.ts",
+            "path": "src/platform/packages/private/kbn-reporting/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1624,7 +1606,7 @@
             "signature": [
               "Writable"
             ],
-            "path": "packages/kbn-reporting/server/types.ts",
+            "path": "src/platform/packages/private/kbn-reporting/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1641,7 +1623,7 @@
         "signature": [
           "\"7.14.0\""
         ],
-        "path": "packages/kbn-reporting/server/constants.ts",
+        "path": "src/platform/packages/private/kbn-reporting/server/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2009,7 +1991,7 @@
           },
           "<true, boolean, boolean>; }>; }>"
         ],
-        "path": "packages/kbn-reporting/server/config_schema.ts",
+        "path": "src/platform/packages/private/kbn-reporting/server/config_schema.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
