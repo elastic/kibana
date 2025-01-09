@@ -8,7 +8,7 @@
 import React from 'react';
 import { mount } from 'enzyme';
 import { HttpStatusBadge } from '.';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { useEuiTheme } from '@elastic/eui';
 
 describe('HttpStatusBadge', () => {
