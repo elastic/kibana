@@ -20,8 +20,6 @@ jest.mock('./get_latest_entity', () => ({
   getLatestEntity: jest.fn(),
 }));
 
-type EntityType = 'host' | 'container';
-
 describe('getDataStreamTypes', () => {
   let infraMetricsClient: jest.Mocked<InfraMetricsClient>;
   let obsEsClient: jest.Mocked<ObservabilityElasticsearchClient>;
@@ -40,12 +38,15 @@ describe('getDataStreamTypes', () => {
 
     const params = {
       entityId: 'entity123',
-      entityType: 'host' as EntityType,
+      entityType: 'built_in_hosts_from_ecs_data',
+      entityFilterType: 'host',
       entityCentricExperienceEnabled: false,
       infraMetricsClient,
       obsEsClient,
       entityManagerClient,
       logger,
+      from: '2024-12-09T10:49:15Z',
+      to: '2024-12-10T10:49:15Z',
     };
 
     const result = await getDataStreamTypes(params);
@@ -63,12 +64,15 @@ describe('getDataStreamTypes', () => {
 
     const params = {
       entityId: 'entity123',
-      entityType: 'container' as EntityType,
+      entityFilterType: 'container',
+      entityType: 'built_in_containers_from_ecs_data',
       entityCentricExperienceEnabled: false,
       infraMetricsClient,
       obsEsClient,
       entityManagerClient,
       logger,
+      from: '2024-12-09T10:49:15Z',
+      to: '2024-12-10T10:49:15Z',
     };
 
     const result = await getDataStreamTypes(params);
@@ -83,12 +87,15 @@ describe('getDataStreamTypes', () => {
 
     const params = {
       entityId: 'entity123',
-      entityType: 'host' as EntityType,
+      entityType: 'built_in_hosts_from_ecs_data',
+      entityFilterType: 'host',
       entityCentricExperienceEnabled: true,
       infraMetricsClient,
       obsEsClient,
       entityManagerClient,
       logger,
+      from: '2024-12-09T10:49:15Z',
+      to: '2024-12-10T10:49:15Z',
     };
 
     const result = await getDataStreamTypes(params);
@@ -96,11 +103,12 @@ describe('getDataStreamTypes', () => {
     expect(result).toEqual(['metrics', 'logs']);
     expect(getHasMetricsData).toHaveBeenCalled();
     expect(getLatestEntity).toHaveBeenCalledWith({
-      inventoryEsClient: obsEsClient,
       entityId: 'entity123',
-      entityType: 'host',
+      entityType: 'built_in_hosts_from_ecs_data',
       entityManagerClient,
       logger,
+      from: '2024-12-09T10:49:15Z',
+      to: '2024-12-10T10:49:15Z',
     });
   });
 
@@ -110,12 +118,15 @@ describe('getDataStreamTypes', () => {
 
     const params = {
       entityId: 'entity123',
-      entityType: 'host' as EntityType,
+      entityType: 'built_in_hosts_from_ecs_data',
+      entityFilterType: 'host',
       entityCentricExperienceEnabled: true,
       infraMetricsClient,
       obsEsClient,
       entityManagerClient,
       logger,
+      from: '2024-12-09T10:49:15Z',
+      to: '2024-12-10T10:49:15Z',
     };
 
     const result = await getDataStreamTypes(params);
@@ -130,12 +141,15 @@ describe('getDataStreamTypes', () => {
 
     const params = {
       entityId: 'entity123',
-      entityType: 'host' as EntityType,
+      entityType: 'built_in_hosts_from_ecs_data',
+      entityFilterType: 'host',
       entityCentricExperienceEnabled: true,
       infraMetricsClient,
       obsEsClient,
       entityManagerClient,
       logger,
+      from: '2024-12-09T10:49:15Z',
+      to: '2024-12-10T10:49:15Z',
     };
 
     const result = await getDataStreamTypes(params);
