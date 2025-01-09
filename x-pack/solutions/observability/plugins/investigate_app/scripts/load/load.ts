@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import axios from 'axios';
 import { spawnSync } from 'child_process';
 import { run } from '@kbn/dev-cli-runner';
 import { ToolingLog } from '@kbn/tooling-log';
@@ -25,6 +25,25 @@ async function loadFixtureData({
 }) {
   const directory = `${__dirname}/fixtures`;
   const directories = getDirectories({ filePath: `${__dirname}/fixtures`, log });
+  await axios.post(
+    `${kibanaUrl}/internal/kibana/settings`,
+    {
+      changes: {
+        'observability:logSources': [
+          'remote_cluster:logs-*-*',
+          'remote_cluster:logs-*',
+          'remote_cluster:filebeat-*',
+        ],
+      },
+    },
+    {
+      headers: {
+        'kbn-xsrf': 'foo',
+        'x-elastic-internal-origin': 'observability-ai-assistant',
+      },
+    }
+  );
+  log.info('Logs sources updated');
   directories.forEach((dir) => {
     spawnSync(
       'node',
