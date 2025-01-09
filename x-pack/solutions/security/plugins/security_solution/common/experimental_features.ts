@@ -260,7 +260,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables CrowdStrike's RunScript RTR command
    */
-  crowdstrikeRunScriptEnabled: false,
+  crowdstrikeRunScriptEnabled: true,
 
   /**
    * Enables the Asset Inventory Entity Store feature.
