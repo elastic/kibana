@@ -65,6 +65,10 @@ function showPrivilege({
     return 'None';
   }
 
+  // If primary feature requires all spaces we cannot rely on primaryFeature.name.
+  // Example:
+  // primaryFeature: feature with requireAllSpaces in space-a has all privileges set to All
+  // globalPrimaryFeature: feature in *AllSpaces has privileges set to Read (this is the correct one to display)
   if (primaryFeature?.requireAllSpaces && allSpacesSelected) {
     return globalPrimaryFeature?.name ?? 'None';
   }
@@ -235,14 +239,9 @@ export const PrivilegeSummaryTable = (props: PrivilegeSummaryTableProps) => {
       </EuiFlexGroup>
     );
 
-    const categoryPrivileges = Object.keys(privileges).reduce((acc, key) => {
-      const [, featurePrivileges] = privileges[key];
-
-      return {
-        ...acc,
-        [key]: featurePrivileges,
-      };
-    }, {});
+    const categoryPrivileges = Object.fromEntries(
+      Object.entries(privileges).map(([key, [, featurePrivileges]]) => [key, featurePrivileges])
+    );
 
     const categoryItems = featuresInCategory.map((feature) => {
       return {
