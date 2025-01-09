@@ -56,7 +56,7 @@ export async function findUsedDependencies(
             // core entry
             'src/core/server/index.js',
             // entries that are loaded into the server with dynamic require() calls
-            'src/plugins/vis_types/timelion/server/**/*.js',
+            'src/platform/plugins/private/vis_types/timelion/server/**/*.js',
           ],
           {
             cwd: repoRoot,
