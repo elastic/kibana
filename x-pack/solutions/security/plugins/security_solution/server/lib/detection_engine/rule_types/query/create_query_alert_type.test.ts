@@ -114,7 +114,7 @@ describe('Custom Query Alerts', () => {
     expect(eventsTelemetry.queueTelemetryEvents).not.toHaveBeenCalled();
   });
 
-  it('does not execute if no indices are found', async () => {
+  it('executes but writes a warning if no indices are found', async () => {
     const queryAlertType = securityRuleTypeWrapper(
       createQueryAlertType({
         eventsTelemetry,
@@ -156,8 +156,15 @@ describe('Custom Query Alerts', () => {
 
     await executor({ params });
 
-    expect((await ruleDataClient.getWriter()).bulk).not.toHaveBeenCalled();
-    expect(eventsTelemetry.sendAsync).not.toHaveBeenCalled();
+    expect((await ruleDataClient.getWriter()).bulk).toHaveBeenCalled();
+    expect(eventsTelemetry.sendAsync).toHaveBeenCalled();
+    expect(mockedStatusLogger.logStatusChange).toHaveBeenCalledWith(
+      expect.objectContaining({
+        newStatus: RuleExecutionStatusEnum['partial failure'],
+        message:
+          'Indexes matching "auditbeat-*,filebeat-*,packetbeat-*,winlogbeat-*" were not found.',
+      })
+    );
   });
 
   it('sends an alert when events are found', async () => {
