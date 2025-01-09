@@ -49,10 +49,13 @@ export const validateKQLStringFilter = (value: string) => {
       ignoreFilterIfFieldNotInIndex: false,
     });
   } catch (e) {
-    return i18n.translate('xpack.responseOps.ruleParams.customThreshold.schema.invalidFilterQuery', {
-      defaultMessage: 'filterQuery must be a valid KQL filter (error: {errorMessage})',
-      values: { errorMessage: e?.message },
-    });
+    return i18n.translate(
+      'xpack.responseOps.ruleParams.customThreshold.schema.invalidFilterQuery',
+      {
+        defaultMessage: 'filterQuery must be a valid KQL filter (error: {errorMessage})',
+        values: { errorMessage: e?.message },
+      }
+    );
   }
 };
 
