@@ -277,7 +277,7 @@ export default function (providerContext: FtrProviderContext) {
       await new Promise((resolve, reject) => {
         let attempts = 0;
         const intervalId = setInterval(async () => {
-          if (attempts > 5) {
+          if (attempts > 10) {
             clearInterval(intervalId);
             reject(new Error('action timed out'));
           }
