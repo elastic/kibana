@@ -6,7 +6,6 @@
  */
 
 import expect from '@kbn/expect';
-import pRetry from 'p-retry';
 
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
@@ -18,6 +17,7 @@ export default function (providerContext: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const es = getService('es');
   const fleetAndAgents = getService('fleetAndAgents');
+  const retry = getService('retry');
 
   async function getLatestFleetPolicies(policyId: string): Promise<any> {
     const policyDocRes = await es.search({
@@ -163,7 +163,7 @@ export default function (providerContext: FtrProviderContext) {
 
         expect(fleetServerHost.name).to.eql('Test 123 updated');
 
-        await pRetry(
+        await retry.tryWithRetries(
           async () => {
             const fleetPolicyAfter = await getLatestFleetPolicies(policyId);
             if (fleetPolicyAfter.revision_idx === fleetPolicyBefore.revision_idx) {
@@ -178,7 +178,7 @@ export default function (providerContext: FtrProviderContext) {
             );
           },
           {
-            maxRetryTime: 30 * 1000, // 30s for the task to run
+            timeout: 30 * 1000, // 30s for the task to run
           }
         );
       });
