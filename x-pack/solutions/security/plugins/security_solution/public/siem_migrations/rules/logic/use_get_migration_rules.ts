@@ -23,9 +23,7 @@ export const useGetMigrationRules = (params: {
   searchTerm?: string;
   ids?: string[];
   isPrebuilt?: boolean;
-  isCustom?: boolean;
   isInstalled?: boolean;
-  isNotInstalled?: boolean;
   isFullyTranslated?: boolean;
   isPartiallyTranslated?: boolean;
   isUntranslatable?: boolean;

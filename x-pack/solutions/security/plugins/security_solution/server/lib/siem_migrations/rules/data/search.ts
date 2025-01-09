@@ -21,8 +21,14 @@ export const conditions = {
   isPartiallyTranslated(): QueryDslQueryContainer {
     return { term: { translation_result: RuleTranslationResult.PARTIAL } };
   },
+  isNotPartiallyTranslated(): QueryDslQueryContainer {
+    return { bool: { must_not: conditions.isPartiallyTranslated() } };
+  },
   isUntranslatable(): QueryDslQueryContainer {
     return { term: { translation_result: RuleTranslationResult.UNTRANSLATABLE } };
+  },
+  isNotUntranslatable(): QueryDslQueryContainer {
+    return { bool: { must_not: conditions.isUntranslatable() } };
   },
   isInstalled(): QueryDslQueryContainer {
     return {
@@ -67,7 +73,13 @@ export const conditions = {
   isInstallable(): QueryDslQueryContainer[] {
     return [this.isFullyTranslated(), this.isNotInstalled()];
   },
+  isNotInstallable(): QueryDslQueryContainer[] {
+    return [this.isNotFullyTranslated(), this.isInstalled()];
+  },
   isFailed(): QueryDslQueryContainer {
     return { term: { status: SiemMigrationStatus.FAILED } };
+  },
+  isNotFailed(): QueryDslQueryContainer {
+    return { bool: { must_not: conditions.isFailed() } };
   },
 };

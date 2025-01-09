@@ -42,13 +42,10 @@ export interface RuleMigrationFilters {
   status?: SiemMigrationStatus | SiemMigrationStatus[];
   ids?: string[];
   installed?: boolean;
-  notInstalled?: boolean;
   installable?: boolean;
   prebuilt?: boolean;
-  custom?: boolean;
   failed?: boolean;
   fullyTranslated?: boolean;
-  notFullyTranslated?: boolean;
   partiallyTranslated?: boolean;
   untranslatable?: boolean;
   searchTerm?: string;
@@ -409,14 +406,11 @@ export class RuleMigrationsDataRulesClient extends RuleMigrationsDataBaseClient 
       status,
       ids,
       installed,
-      notInstalled,
       installable,
       prebuilt,
-      custom,
       searchTerm,
       failed,
       fullyTranslated,
-      notFullyTranslated,
       partiallyTranslated,
       untranslatable,
     }: RuleMigrationFilters = {}
@@ -432,38 +426,43 @@ export class RuleMigrationsDataRulesClient extends RuleMigrationsDataBaseClient 
     if (ids) {
       filter.push({ terms: { _id: ids } });
     }
-    if (installed) {
-      filter.push(searchConditions.isInstalled());
-    }
-    if (notInstalled) {
-      filter.push(searchConditions.isNotInstalled());
-    }
-    if (installable) {
-      filter.push(...searchConditions.isInstallable());
-    }
-    if (prebuilt) {
-      filter.push(searchConditions.isPrebuilt());
-    }
-    if (custom) {
-      filter.push(searchConditions.isCustom());
-    }
     if (searchTerm?.length) {
       filter.push(searchConditions.matchTitle(searchTerm));
     }
-    if (failed) {
+    if (installed === true) {
+      filter.push(searchConditions.isInstalled());
+    } else if (installed === false) {
+      filter.push(searchConditions.isNotInstalled());
+    }
+    if (installable === true) {
+      filter.push(...searchConditions.isInstallable());
+    } else if (installable === false) {
+      filter.push(...searchConditions.isNotInstallable());
+    }
+    if (prebuilt === true) {
+      filter.push(searchConditions.isPrebuilt());
+    } else if (prebuilt === false) {
+      filter.push(searchConditions.isCustom());
+    }
+    if (failed === true) {
       filter.push(searchConditions.isFailed());
+    } else if (failed === false) {
+      filter.push(searchConditions.isNotFailed());
     }
-    if (fullyTranslated) {
+    if (fullyTranslated === true) {
       filter.push(searchConditions.isFullyTranslated());
-    }
-    if (notFullyTranslated) {
+    } else if (fullyTranslated === false) {
       filter.push(searchConditions.isNotFullyTranslated());
     }
-    if (partiallyTranslated) {
+    if (partiallyTranslated === true) {
       filter.push(searchConditions.isPartiallyTranslated());
+    } else if (partiallyTranslated === false) {
+      filter.push(searchConditions.isNotPartiallyTranslated());
     }
-    if (untranslatable) {
+    if (untranslatable === true) {
       filter.push(searchConditions.isUntranslatable());
+    } else if (untranslatable === false) {
+      filter.push(searchConditions.isNotUntranslatable());
     }
     return { bool: { filter } };
   }

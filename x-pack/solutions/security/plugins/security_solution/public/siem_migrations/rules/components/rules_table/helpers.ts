@@ -11,11 +11,11 @@ import type { FilterOptions } from './filters';
 export const convertFilterOptions = (filterOptions?: FilterOptions) => {
   return {
     ...(filterOptions?.author === AuthorFilter.ELASTIC ? { isPrebuilt: true } : {}),
-    ...(filterOptions?.author === AuthorFilter.CUSTOM ? { isCustom: true } : {}),
+    ...(filterOptions?.author === AuthorFilter.CUSTOM ? { isPrebuilt: false } : {}),
     ...(filterOptions?.status === StatusFilter.FAILED ? { isFailed: true } : {}),
     ...(filterOptions?.status === StatusFilter.INSTALLED ? { isInstalled: true } : {}),
     ...(filterOptions?.status === StatusFilter.TRANSLATED
-      ? { isNotInstalled: true, isFullyTranslated: true }
+      ? { isInstalled: false, isFullyTranslated: true }
       : {}),
     ...(filterOptions?.status === StatusFilter.PARTIALLY_TRANSLATED
       ? { isPartiallyTranslated: true }

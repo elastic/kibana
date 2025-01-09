@@ -169,17 +169,7 @@ paths:
           required: false
           schema:
             type: boolean
-        - name: is_custom
-          in: query
-          required: false
-          schema:
-            type: boolean
         - name: is_installed
-          in: query
-          required: false
-          schema:
-            type: boolean
-        - name: is_not_installed
           in: query
           required: false
           schema:

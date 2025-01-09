@@ -217,12 +217,8 @@ export interface GetRuleMigrationParams {
   ids?: string[];
   /** Optional attribute to retrieve prebuilt migration rules */
   isPrebuilt?: boolean;
-  /** Optional attribute to retrieve custom migration rules */
-  isCustom?: boolean;
   /** Optional attribute to retrieve installed migration rules */
   isInstalled?: boolean;
-  /** Optional attribute to retrieve not installed migration rules */
-  isNotInstalled?: boolean;
   /** Optional attribute to retrieve fully translated migration rules */
   isFullyTranslated?: boolean;
   /** Optional attribute to retrieve partially translated migration rules */
@@ -244,9 +240,7 @@ export const getRuleMigrations = async ({
   searchTerm,
   ids,
   isPrebuilt,
-  isCustom,
   isInstalled,
-  isNotInstalled,
   isFullyTranslated,
   isPartiallyTranslated,
   isUntranslatable,
@@ -265,9 +259,7 @@ export const getRuleMigrations = async ({
         search_term: searchTerm,
         ids,
         is_prebuilt: isPrebuilt,
-        is_custom: isCustom,
         is_installed: isInstalled,
-        is_not_installed: isNotInstalled,
         is_fully_translated: isFullyTranslated,
         is_partially_translated: isPartiallyTranslated,
         is_untranslatable: isUntranslatable,

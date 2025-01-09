@@ -65,7 +65,10 @@ export const registerSiemRuleMigrationsRetryRoute = (
               ],
             };
 
-            const filters: RuleMigrationFilters = { failed, notFullyTranslated };
+            const filters: RuleMigrationFilters = {
+              failed,
+              ...(notFullyTranslated ? { fullyTranslated: !notFullyTranslated } : {}),
+            };
             const { updated } = await ruleMigrationsClient.task.updateToRetry(migrationId, filters);
             if (!updated) {
               return res.ok({ body: { started: false } });
