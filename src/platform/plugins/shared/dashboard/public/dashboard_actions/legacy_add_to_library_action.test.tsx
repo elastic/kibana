@@ -28,8 +28,8 @@ describe('Add to library action', () => {
         unlinkFromLibrary: jest.fn(),
         canUnlinkFromLibrary: jest.fn().mockResolvedValue(true),
 
-        viewMode: new BehaviorSubject<ViewMode>('edit'),
-        panelTitle: new BehaviorSubject<string | undefined>('A very compatible API'),
+        viewMode$: new BehaviorSubject<ViewMode>('edit'),
+        title$: new BehaviorSubject<string | undefined>('A very compatible API'),
       },
     };
   });
@@ -46,7 +46,7 @@ describe('Add to library action', () => {
   });
 
   it('is incompatible when view mode is view', async () => {
-    (context.embeddable as PublishesViewMode).viewMode = new BehaviorSubject<ViewMode>('view');
+    (context.embeddable as PublishesViewMode).viewMode$ = new BehaviorSubject<ViewMode>('view');
     expect(await action.isCompatible(context)).toBe(false);
   });
 

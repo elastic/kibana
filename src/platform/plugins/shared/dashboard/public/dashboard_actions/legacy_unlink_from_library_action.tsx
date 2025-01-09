@@ -15,8 +15,8 @@ import {
   CanAccessViewMode,
   EmbeddableApiContext,
   getInheritedViewMode,
-  getPanelTitle,
-  PublishesPanelTitle,
+  getTitle,
+  PublishesTitle,
   HasLegacyLibraryTransforms,
 } from '@kbn/presentation-publishing';
 import { dashboardUnlinkFromLibraryActionStrings } from './_dashboard_actions_strings';
@@ -27,7 +27,7 @@ export const ACTION_LEGACY_UNLINK_FROM_LIBRARY = 'legacyUnlinkFromLibrary';
 
 export type LegacyUnlinkPanelFromLibraryActionApi = CanAccessViewMode &
   HasLegacyLibraryTransforms &
-  Partial<PublishesPanelTitle>;
+  Partial<PublishesTitle>;
 
 export const legacyUnlinkActionIsCompatible = (
   api: unknown | null
@@ -57,7 +57,7 @@ export class LegacyUnlinkFromLibraryAction implements Action<EmbeddableApiContex
 
   public async execute({ embeddable }: EmbeddableApiContext) {
     if (!legacyUnlinkActionIsCompatible(embeddable)) throw new IncompatibleActionError();
-    const title = getPanelTitle(embeddable);
+    const title = getTitle(embeddable);
     try {
       await embeddable.unlinkFromLibrary();
       coreServices.notifications.toasts.addSuccess({

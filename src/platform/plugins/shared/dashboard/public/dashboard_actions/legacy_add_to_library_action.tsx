@@ -11,8 +11,8 @@ import {
   apiCanAccessViewMode,
   apiHasLegacyLibraryTransforms,
   EmbeddableApiContext,
-  getPanelTitle,
-  PublishesPanelTitle,
+  getTitle,
+  PublishesTitle,
   CanAccessViewMode,
   getInheritedViewMode,
   HasLegacyLibraryTransforms,
@@ -27,7 +27,7 @@ export const ACTION_LEGACY_ADD_TO_LIBRARY = 'legacySaveToLibrary';
 
 export type LegacyAddPanelToLibraryActionApi = CanAccessViewMode &
   HasLegacyLibraryTransforms &
-  Partial<PublishesPanelTitle>;
+  Partial<PublishesTitle>;
 
 const isApiCompatible = (api: unknown | null): api is LegacyAddPanelToLibraryActionApi =>
   Boolean(apiCanAccessViewMode(api) && apiHasLegacyLibraryTransforms(api));
@@ -55,7 +55,7 @@ export class LegacyAddToLibraryAction implements Action<EmbeddableApiContext> {
 
   public async execute({ embeddable }: EmbeddableApiContext) {
     if (!isApiCompatible(embeddable)) throw new IncompatibleActionError();
-    const panelTitle = getPanelTitle(embeddable);
+    const panelTitle = getTitle(embeddable);
     try {
       await embeddable.linkToLibrary();
       coreServices.notifications.toasts.addSuccess({

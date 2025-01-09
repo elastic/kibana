@@ -15,14 +15,14 @@ import { PublishesWritableTitle } from './publishes_title';
 export interface SerializedTitles {
   title?: string;
   description?: string;
-  hideTitles?: boolean;
+  hidePanelTitles?: boolean;
 }
 
 export const stateHasTitles = (state: unknown): state is SerializedTitles => {
   return (
     (state as SerializedTitles)?.title !== undefined ||
     (state as SerializedTitles)?.description !== undefined ||
-    (state as SerializedTitles)?.hideTitles !== undefined
+    (state as SerializedTitles)?.hidePanelTitles !== undefined
   );
 };
 
@@ -37,7 +37,7 @@ export const initializeTitleManager = (
 } => {
   const title$ = new BehaviorSubject<string | undefined>(rawState.title);
   const description$ = new BehaviorSubject<string | undefined>(rawState.description);
-  const hideTitle$ = new BehaviorSubject<boolean | undefined>(rawState.hideTitles);
+  const hideTitle$ = new BehaviorSubject<boolean | undefined>(rawState.hidePanelTitles);
 
   const setTitle = (value: string | undefined) => {
     if (value !== title$.value) title$.next(value);
@@ -61,7 +61,7 @@ export const initializeTitleManager = (
     comparators: {
       title: [title$, setTitle],
       description: [description$, setDescription],
-      hideTitles: [hideTitle$, setHideTitle, (a, b) => Boolean(a) === Boolean(b)],
+      hidePanelTitles: [hideTitle$, setHideTitle, (a, b) => Boolean(a) === Boolean(b)],
     } as StateComparators<SerializedTitles>,
     serializeTitles: () => ({
       title: title$.value,

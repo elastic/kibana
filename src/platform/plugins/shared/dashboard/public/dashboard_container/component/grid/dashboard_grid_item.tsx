@@ -60,7 +60,7 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
       dashboardApi.highlightPanelId$,
       dashboardApi.scrollToPanelId$,
       dashboardApi.settings.useMargins$,
-      dashboardApi.viewMode
+      dashboardApi.viewMode$
     );
 
     const expandPanel = expandedPanelId !== undefined && expandedPanelId === id;
@@ -196,7 +196,7 @@ export const DashboardGridItem = React.forwardRef<HTMLDivElement, Props>((props,
   const dashboardApi = useDashboardApi();
   const [focusedPanelId, viewMode] = useBatchedPublishingSubjects(
     dashboardApi.focusedPanelId$,
-    dashboardApi.viewMode
+    dashboardApi.viewMode$
   );
 
   const deferBelowFoldEnabled = useMemo(

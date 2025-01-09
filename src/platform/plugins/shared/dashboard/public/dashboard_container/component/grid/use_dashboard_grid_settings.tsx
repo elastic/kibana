@@ -20,7 +20,7 @@ export const useDashboardGridSettings = (panelsInOrder: string[], panels: Dashbo
   const dashboardApi = useDashboardApi();
   const { euiTheme } = useEuiTheme();
 
-  const viewMode = useStateFromPublishingSubject(dashboardApi.viewMode);
+  const viewMode = useStateFromPublishingSubject(dashboardApi.viewMode$);
 
   const layouts = useMemo(() => {
     return {

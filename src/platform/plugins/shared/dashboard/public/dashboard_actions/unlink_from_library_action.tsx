@@ -16,7 +16,7 @@ import {
   HasParentApi,
   HasType,
   HasUniqueId,
-  PublishesPanelTitle,
+  PublishesTitle,
   apiCanAccessViewMode,
   apiHasInPlaceLibraryTransforms,
   apiHasLibraryTransforms,
@@ -24,7 +24,7 @@ import {
   apiHasType,
   apiHasUniqueId,
   getInheritedViewMode,
-  getPanelTitle,
+  getTitle,
 } from '@kbn/presentation-publishing';
 import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 
@@ -39,7 +39,7 @@ export type UnlinkPanelFromLibraryActionApi = CanAccessViewMode &
   HasType &
   HasUniqueId &
   HasParentApi<Pick<PresentationContainer, 'replacePanel'>> &
-  Partial<PublishesPanelTitle>;
+  Partial<PublishesTitle>;
 
 export const isApiCompatible = (api: unknown | null): api is UnlinkPanelFromLibraryActionApi =>
   Boolean(
@@ -89,7 +89,7 @@ export class UnlinkFromLibraryAction implements Action<EmbeddableApiContext> {
 
   public async execute({ embeddable }: EmbeddableApiContext) {
     if (!isApiCompatible(embeddable)) throw new IncompatibleActionError();
-    const title = getPanelTitle(embeddable);
+    const title = getTitle(embeddable);
     try {
       if (apiHasLibraryTransforms(embeddable)) {
         await embeddable.parentApi.replacePanel(embeddable.uuid, {

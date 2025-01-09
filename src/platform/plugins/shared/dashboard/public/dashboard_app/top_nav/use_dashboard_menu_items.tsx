@@ -44,11 +44,11 @@ export const useDashboardMenuItems = ({
 
   const [dashboardTitle, hasOverlays, hasUnsavedChanges, lastSavedId, viewMode] =
     useBatchedPublishingSubjects(
-      dashboardApi.panelTitle,
+      dashboardApi.title$,
       dashboardApi.hasOverlays$,
       dashboardApi.hasUnsavedChanges$,
-      dashboardApi.savedObjectId,
-      dashboardApi.viewMode
+      dashboardApi.savedObjectId$,
+      dashboardApi.viewMode$
     );
   const disableTopNav = isSaveInProgress || hasOverlays;
 

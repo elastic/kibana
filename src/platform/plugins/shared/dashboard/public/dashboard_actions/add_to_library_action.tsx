@@ -19,7 +19,7 @@ import {
   HasType,
   HasTypeDisplayName,
   HasUniqueId,
-  PublishesPanelTitle,
+  PublishesTitle,
   apiCanAccessViewMode,
   apiHasInPlaceLibraryTransforms,
   apiHasLibraryTransforms,
@@ -27,7 +27,7 @@ import {
   apiHasType,
   apiHasUniqueId,
   getInheritedViewMode,
-  getPanelTitle,
+  getTitle,
 } from '@kbn/presentation-publishing';
 import {
   OnSaveProps,
@@ -48,7 +48,7 @@ export type AddPanelToLibraryActionApi = CanAccessViewMode &
   HasUniqueId &
   (HasLibraryTransforms | HasInPlaceLibraryTransforms) &
   HasParentApi<Pick<PresentationContainer, 'replacePanel'>> &
-  Partial<PublishesPanelTitle & HasTypeDisplayName>;
+  Partial<PublishesTitle & HasTypeDisplayName>;
 
 const isApiCompatible = (api: unknown | null): api is AddPanelToLibraryActionApi =>
   Boolean(
@@ -83,7 +83,7 @@ export class AddToLibraryAction implements Action<EmbeddableApiContext> {
 
   public async execute({ embeddable }: EmbeddableApiContext) {
     if (!isApiCompatible(embeddable)) throw new IncompatibleActionError();
-    const title = getPanelTitle(embeddable);
+    const title = getTitle(embeddable);
 
     try {
       const byRefState = await new Promise<object | undefined>((resolve, reject) => {

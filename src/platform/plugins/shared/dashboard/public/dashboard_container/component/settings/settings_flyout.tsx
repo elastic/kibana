@@ -65,7 +65,7 @@ export const DashboardSettingsFlyout = ({ onClose }: DashboardSettingsProps) => 
       {
         title: localSettings.title,
         copyOnSave: false,
-        lastSavedTitle: dashboardApi.panelTitle.value ?? '',
+        lastSavedTitle: dashboardApi.title$.value ?? '',
         onTitleDuplicate,
         isTitleDuplicateConfirmed,
       }

@@ -23,9 +23,9 @@ import {
   StateComparators,
   apiHasInPlaceLibraryTransforms,
   apiHasLibraryTransforms,
-  apiPublishesPanelTitle,
+  apiPublishesTitle,
   apiPublishesUnsavedChanges,
-  getPanelTitle,
+  getTitle,
   stateHasTitles,
 } from '@kbn/presentation-publishing';
 import { apiHasSnapshottableState } from '@kbn/presentation-containers/interfaces/serialized_state';
@@ -168,7 +168,7 @@ export function initializePanelsManager(
     const titles: string[] = [];
     await asyncForEach(Object.keys(panels$.value), async (id) => {
       const childApi = await untilEmbeddableLoaded(id);
-      const title = apiPublishesPanelTitle(childApi) ? getPanelTitle(childApi) : '';
+      const title = apiPublishesTitle(childApi) ? getTitle(childApi) : '';
       if (title) titles.push(title);
     });
     return titles;
@@ -180,7 +180,7 @@ export function initializePanelsManager(
     panelTitles: string[]
   ) {
     const id = v4();
-    const lastTitle = apiPublishesPanelTitle(childApi) ? getPanelTitle(childApi) ?? '' : '';
+    const lastTitle = apiPublishesTitle(childApi) ? getTitle(childApi) ?? '' : '';
     const newTitle = getClonedPanelTitle(panelTitles, lastTitle);
 
     /**
@@ -274,7 +274,7 @@ export function initializePanelsManager(
         }
         return await untilEmbeddableLoaded<ApiType>(newId);
       },
-      canRemovePanels: () => trackPanel.expandedPanelId.value === undefined,
+      canRemovePanels: () => trackPanel.expandedPanelId$.value === undefined,
       children$,
       duplicatePanel: async (idToDuplicate: string) => {
         const panelToClone = getDashboardPanelFromId(idToDuplicate);
