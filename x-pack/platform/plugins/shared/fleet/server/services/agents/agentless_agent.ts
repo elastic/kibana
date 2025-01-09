@@ -110,6 +110,7 @@ class AgentlessAgentService {
         policy_id: policyId,
         fleet_url: fleetUrl,
         fleet_token: fleetToken,
+        resources: agentlessAgentPolicy.resources,
         labels,
       },
       method: 'POST',
