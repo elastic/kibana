@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiButton, EuiProvider } from '@elastic/eui';
+import { EuiButton, EuiProvider, EuiThemeAmsterdam } from '@elastic/eui';
 
 import React, { useState } from 'react';
 import ReactDOM from 'react-dom';
@@ -79,7 +79,7 @@ export class ErrorBoundaryExamplePlugin implements Plugin<void, void, SetupDeps>
         // Using the "EuiProvider" here rather than KibanaRenderContextProvider, because KibanaRenderContextProvider
         // wraps KibanaErrorBoundaryProvider and KibanaErrorBoundary and we want to test it directly, not a wrapper.
         ReactDOM.render(
-          <EuiProvider>
+          <EuiProvider theme={EuiThemeAmsterdam}>
             <KibanaErrorBoundaryProvider analytics={core.analytics}>
               <KibanaErrorBoundary>
                 <KibanaPageTemplate>
