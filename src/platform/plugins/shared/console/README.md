@@ -44,7 +44,7 @@ POST /_some_endpoint
 ```
 
 ## Architecture
-Console uses Monaco editor that is wrapped with [`kbn-monaco`](https://github.com/elastic/kibana/blob/main/packages/kbn-monaco/index.ts), so that if needed it can easily be replaced with another editor.
+Console uses Monaco editor that is wrapped with [`kbn-monaco`](https://github.com/elastic/kibana/blob/main/src/platform/packages/shared/kbn-monaco/index.ts), so that if needed it can easily be replaced with another editor.
 The autocomplete logic is located in [`autocomplete`](https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/console/public/lib/autocomplete) folder. Autocomplete rules are computed by classes in `components` sub-folder.
 
 ## Autocomplete definitions
