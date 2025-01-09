@@ -15,14 +15,11 @@ import { ScoutReportEvent } from './event';
 import { GenericReport, ScoutReportError } from '../generic_report';
 
 export class ScoutReport extends GenericReport {
-  log: ToolingLog;
-  workDir: string;
-  concluded = false;
-
   constructor(log?: ToolingLog) {
     super();
     this.log = log || new ToolingLog();
     this.workDir = fs.mkdtempSync(path.join(os.tmpdir(), 'scout-report-'));
+    this.reportName = 'Scout report';
   }
 
   public get eventLogPath(): string {
@@ -57,7 +54,7 @@ export class ScoutReport extends GenericReport {
     }
 
     // Create the destination directory
-    this.log.info(`Saving Scout report to ${destination}`);
+    this.log.info(`Saving ${this.reportName} to ${destination}`);
     fs.mkdirSync(destination, { recursive: true });
 
     // Copy the workdir data to the destination

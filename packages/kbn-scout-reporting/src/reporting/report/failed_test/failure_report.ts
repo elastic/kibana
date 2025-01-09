@@ -17,14 +17,11 @@ import { GenericReport, ScoutReportError } from '../generic_report';
 import { TestFailure } from './test_failure';
 
 export class ScoutFailureReport extends GenericReport {
-  log: ToolingLog;
-  workDir: string;
-  concluded = false;
-
   constructor(log?: ToolingLog) {
     super();
     this.log = log || new ToolingLog();
     this.workDir = fs.mkdtempSync(path.join(os.tmpdir(), 'scout-failures-report-'));
+    this.reportName = 'Scout Failure report';
   }
 
   public get testFailuresPath(): string {
@@ -63,7 +60,7 @@ export class ScoutFailureReport extends GenericReport {
 
     // Create the destination directory
     this.log.info(
-      `Saving Scout failures report to ${destination}: ${testFailures.length} failures reported`
+      `Saving ${this.reportName} to ${destination}: ${testFailures.length} failures reported`
     );
     fs.mkdirSync(destination, { recursive: true });
 

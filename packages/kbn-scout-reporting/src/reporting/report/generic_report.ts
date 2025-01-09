@@ -22,10 +22,12 @@ export abstract class GenericReport {
   log: ToolingLog;
   workDir: string;
   concluded = false;
+  reportName: string;
 
   constructor(log?: ToolingLog) {
     this.log = log || new ToolingLog();
     this.workDir = fs.mkdtempSync(path.join(os.tmpdir(), 'scout-report-'));
+    this.reportName = 'generic-report';
   }
 
   public get eventLogPath(): string {
@@ -34,7 +36,7 @@ export abstract class GenericReport {
 
   protected raiseIfConcluded(additionalInfo?: string) {
     if (this.concluded) {
-      let message = `Report at ${this.workDir} was concluded`;
+      let message = `${this.reportName} at ${this.workDir} was concluded`;
 
       if (additionalInfo) {
         message += `: ${additionalInfo}`;
@@ -60,11 +62,11 @@ export abstract class GenericReport {
    */
   conclude() {
     // Remove the working directory
-    this.log.info(`Removing Scout report working directory ${this.workDir}`);
+    this.log.info(`Removing ${this.reportName} working directory ${this.workDir}`);
     fs.rmSync(this.workDir, { recursive: true, force: true });
 
     // Mark this report as concluded
     this.concluded = true;
-    this.log.success('Scout report has concluded.');
+    this.log.success(`${this.reportName} has concluded.`);
   }
 }
