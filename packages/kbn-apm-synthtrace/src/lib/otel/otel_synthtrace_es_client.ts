@@ -42,8 +42,8 @@ function otelPipeline(includeSerialization: boolean = true) {
   const serializationTransform = includeSerialization ? [getSerializeTransform()] : [];
   return (base: Readable) => {
     return pipeline(
-      // @ts-expect-error see apm_pipeline.ts
       base,
+      // @ts-expect-error see apm_pipeline.ts
       ...serializationTransform,
       getRoutingTransform(),
       getDedotTransform(),
