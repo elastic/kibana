@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useMemo } from 'react';
 
 import { useValues } from 'kea';
 
@@ -17,7 +17,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiText,
-  EuiLink,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -32,6 +31,8 @@ import {
   connectorStatusToColor,
   connectorStatusToText,
 } from '../../utils/connector_status_helpers';
+
+import { ConnectorViewIndexLink } from '../shared/connector_view_search_indices_details/connector_view_search_indices_details';
 
 import { ConnectorType } from './connector_type';
 import { ConnectorViewItem } from './connectors_logic';
@@ -62,27 +63,6 @@ export const ConnectorsTable: React.FC<ConnectorsTableProps> = ({
   const searchIndicesLocator = useMemo(
     () => share?.url.locators.get('SEARCH_INDEX_DETAILS_LOCATOR_ID'),
     [share]
-  );
-
-  const SearchIndicesLinkProps = useCallback(
-    (indexName: string) => {
-      if (searchIndicesLocator) {
-        return {
-          href: searchIndicesLocator.getRedirectUrl({}),
-          onClick: async (event: React.MouseEvent<HTMLAnchorElement>) => {
-            event.preventDefault();
-            const url = await searchIndicesLocator.getUrl({ indexName });
-            navigateToUrl(url, {
-              shouldNotCreateHref: true,
-              shouldNotPrepend: true,
-            });
-          },
-        };
-      } else {
-        return null;
-      }
-    },
-    [navigateToUrl, searchIndicesLocator]
   );
 
   const columns: Array<EuiBasicTableColumn<ConnectorViewItem>> = [
@@ -116,9 +96,7 @@ export const ConnectorsTable: React.FC<ConnectorsTableProps> = ({
       render: (connector: ConnectorViewItem) =>
         connector.index_name ? (
           connector.indexExists && searchIndicesLocator ? (
-            <EuiLink {...SearchIndicesLinkProps(connector.index_name)}>
-              {connector.index_name}
-            </EuiLink>
+            <ConnectorViewIndexLink indexName={connector.index_name} />
           ) : (
             connector.index_name
           )

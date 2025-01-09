@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
-
-import { useValues } from 'kea';
+import React, { useState } from 'react';
 
 import {
   EuiButtonIcon,
@@ -30,11 +28,11 @@ import { Connector } from '@kbn/search-connectors';
 
 import { MANAGE_API_KEYS_URL } from '../../../../../../common/constants';
 import { generateEncodedPath } from '../../../../shared/encode_path_params';
-import { KibanaLogic } from '../../../../shared/kibana';
 import { EuiLinkTo } from '../../../../shared/react_router_helpers';
 
 import { ApiKey } from '../../../api/connector/generate_connector_api_key_api_logic';
 import { CONNECTOR_DETAIL_PATH } from '../../../routes';
+import { ConnectorViewIndexLink } from '../../shared/connector_view_search_indices_details/connector_view_search_indices_details';
 
 export interface GeneratedConfigFieldsProps {
   apiKey?: ApiKey;
@@ -87,7 +85,6 @@ export const GeneratedConfigFields: React.FC<GeneratedConfigFieldsProps> = ({
   isGenerateLoading,
 }) => {
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const { navigateToUrl, share } = useValues(KibanaLogic);
   const refreshButtonClick = () => {
     setIsModalVisible(true);
   };
@@ -99,33 +96,6 @@ export const GeneratedConfigFields: React.FC<GeneratedConfigFieldsProps> = ({
     if (generateApiKey) generateApiKey();
     setIsModalVisible(false);
   };
-  const searchIndexDetailsUrl = share?.url.locators
-    .get('SEARCH_INDEX_DETAILS_LOCATOR_ID')
-    ?.useUrl({ indexName: connector?.index_name });
-
-  const SearchIndicesLinkProps = useMemo(() => {
-    const props = {
-      target: '_blank',
-    };
-    if (searchIndexDetailsUrl) {
-      return {
-        ...props,
-        href: searchIndexDetailsUrl,
-        onClick: async (event: React.MouseEvent<HTMLAnchorElement>) => {
-          event.stopImmediatePropagation();
-          navigateToUrl(searchIndexDetailsUrl, {
-            shouldNotCreateHref: true,
-            shouldNotPrepend: true,
-          });
-        },
-      };
-    } else {
-      return {
-        ...props,
-        disabled: true,
-      };
-    }
-  }, [navigateToUrl, searchIndexDetailsUrl]);
 
   const showApiKeyInfoForSelfManagedConnector = !connector.is_native;
   const showApiKeyBanner = showApiKeyInfoForSelfManagedConnector && apiKey?.encoded;
@@ -214,7 +184,7 @@ export const GeneratedConfigFields: React.FC<GeneratedConfigFieldsProps> = ({
           </EuiFlexItem>
           <EuiFlexItem>
             {connector.index_name && (
-              <EuiLink {...SearchIndicesLinkProps}>{connector.index_name}</EuiLink>
+              <ConnectorViewIndexLink indexName={connector.index_name} target />
             )}
           </EuiFlexItem>
           <EuiFlexItem />

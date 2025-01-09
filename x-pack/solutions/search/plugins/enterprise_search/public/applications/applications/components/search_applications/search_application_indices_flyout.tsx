@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React from 'react';
 
 import { useValues, useActions } from 'kea';
 
@@ -16,7 +16,6 @@ import {
   EuiFlyoutBody,
   EuiFlyoutHeader,
   EuiIcon,
-  EuiLink,
   EuiSpacer,
   EuiText,
   EuiTitle,
@@ -30,7 +29,7 @@ import { EnterpriseSearchApplicationIndex } from '../../../../../common/types/se
 
 import { healthColorsMap } from '../../../shared/constants/health_colors';
 
-import { KibanaLogic } from '../../../shared/kibana';
+import { SearchApplicationViewIndexLink } from '../search_application/search_application_view_index_link';
 
 import { SearchApplicationIndicesFlyoutLogic } from './search_application_indices_flyout_logic';
 
@@ -42,36 +41,7 @@ export const SearchApplicationIndicesFlyout: React.FC = () => {
     isFlyoutVisible,
   } = useValues(SearchApplicationIndicesFlyoutLogic);
   const { closeFlyout } = useActions(SearchApplicationIndicesFlyoutLogic);
-  const { navigateToUrl, share } = useValues(KibanaLogic);
-  const searchIndicesLocator = useMemo(
-    () => share?.url.locators.get('SEARCH_INDEX_DETAILS_LOCATOR_ID'),
-    [share]
-  );
-  const SearchIndicesLinkProps = useCallback(
-    (indexName: string) => {
-      const viewIndicesLinkDefaultProps = {
-        'data-test-subj': 'search-application-index-link',
-        'data-telemetry-id': 'entSearchApplications-list-viewIndex',
-      };
-      if (searchIndicesLocator) {
-        return {
-          ...viewIndicesLinkDefaultProps,
-          href: searchIndicesLocator.getRedirectUrl({}),
-          onClick: async (event: React.MouseEvent<HTMLAnchorElement>) => {
-            event.preventDefault();
-            const url = await searchIndicesLocator.getUrl({ indexName });
-            navigateToUrl(url, {
-              shouldNotCreateHref: true,
-              shouldNotPrepend: true,
-            });
-          },
-        };
-      } else {
-        return { ...viewIndicesLinkDefaultProps, disabled: true };
-      }
-    },
-    [navigateToUrl, searchIndicesLocator]
-  );
+
   if (!searchApplicationData) return null;
   const { indices } = searchApplicationData;
 
@@ -85,7 +55,10 @@ export const SearchApplicationIndicesFlyout: React.FC = () => {
         }
       ),
       render: (indexName: string) => (
-        <EuiLink {...SearchIndicesLinkProps(indexName)}>{indexName}</EuiLink>
+        <SearchApplicationViewIndexLink
+          indexName={indexName}
+          dataTelemetryId={'entSearchApplications-list-viewIndex'}
+        />
       ),
       sortable: true,
       truncateText: true,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 
 import { useActions, useValues } from 'kea';
 
@@ -15,7 +15,6 @@ import {
   EuiConfirmModal,
   EuiIcon,
   EuiInMemoryTable,
-  EuiLink,
   EuiSpacer,
   EuiTableActionsColumnType,
   EuiText,
@@ -31,6 +30,7 @@ import { KibanaLogic } from '../../../shared/kibana';
 import { TelemetryLogic } from '../../../shared/telemetry/telemetry_logic';
 
 import { SearchApplicationIndicesLogic } from './search_application_indices_logic';
+import { SearchApplicationViewIndexLink } from './search_application_view_index_link';
 
 export const SearchApplicationIndices: React.FC = () => {
   const subduedBackground = useEuiBackgroundColor('subdued');
@@ -42,34 +42,6 @@ export const SearchApplicationIndices: React.FC = () => {
   const searchIndicesLocator = useMemo(
     () => share?.url.locators.get('SEARCH_INDEX_DETAILS_LOCATOR_ID'),
     [share]
-  );
-
-  const SearchIndicesLinkProps = useCallback(
-    (indexName: string) => {
-      const viewIndicesDefaultProps = {
-        'data-test-subj': 'search-application-index-link',
-      };
-      if (searchIndicesLocator) {
-        return {
-          ...viewIndicesDefaultProps,
-          href: searchIndicesLocator.getRedirectUrl({}),
-          onClick: async (event: React.MouseEvent<HTMLAnchorElement>) => {
-            event.preventDefault();
-            const url = await searchIndicesLocator.getUrl({ indexName });
-            navigateToUrl(url, {
-              shouldNotCreateHref: true,
-              shouldNotPrepend: true,
-            });
-          },
-        };
-      } else {
-        return {
-          ...viewIndicesDefaultProps,
-          disabled: true,
-        };
-      }
-    },
-    [navigateToUrl, searchIndicesLocator]
   );
 
   if (!searchApplicationData) return null;
@@ -120,7 +92,7 @@ export const SearchApplicationIndices: React.FC = () => {
         }
       ),
       render: ({ health, name }: EnterpriseSearchApplicationIndex) =>
-        health === 'unknown' ? name : <EuiLink {...SearchIndicesLinkProps(name)}>{name}</EuiLink>,
+        health === 'unknown' ? name : <SearchApplicationViewIndexLink indexName={name} />,
       sortable: ({ name }: EnterpriseSearchApplicationIndex) => name,
       truncateText: true,
       width: '40%',
