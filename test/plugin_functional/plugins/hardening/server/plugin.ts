@@ -21,6 +21,7 @@ export class HardeningPlugin implements Plugin {
           object: {},
           number: {},
           string: {},
+          boolean: {},
           fn: {},
           array: {},
         };
@@ -49,6 +50,15 @@ export class HardeningPlugin implements Plugin {
           result.number.error = e.message;
         } finally {
           result.number.prototype = { ...Object.keys(Object.getPrototypeOf(12)) };
+        }
+
+        // Attempt to pollute Boolean.prototype
+        try {
+          (true as any).__proto__.polluted = true;
+        } catch (e) {
+          result.boolean.error = e.message;
+        } finally {
+          result.boolean.prototype = { ...Object.keys(Object.getPrototypeOf(true)) };
         }
 
         // Attempt to pollute Function.prototype
