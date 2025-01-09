@@ -34,8 +34,9 @@ const CaseContainerComponent: React.FC = () => {
   const userCasesPermissions = cases.helpers.canUseCases([APP_ID]);
   const dispatch = useDispatch();
   const { openFlyout } = useExpandableFlyoutApi();
-  const { timelinePrivileges } = useUserPrivileges();
-  const canSeeTimeline = timelinePrivileges.read || timelinePrivileges.crud;
+  const {
+    timelinePrivileges: { read: canSeeTimeline },
+  } = useUserPrivileges();
 
   const interactionsUpsellingMessage = useUpsellingMessage('investigation_guide_interactions');
 

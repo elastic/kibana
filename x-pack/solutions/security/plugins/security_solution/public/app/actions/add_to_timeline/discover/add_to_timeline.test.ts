@@ -111,7 +111,6 @@ describe('createAddToTimelineDiscoverCellActionFactory', () => {
             capabilities: {
               ...services.application.capabilities,
               securitySolutionTimeline: {
-                crud: false,
                 read: true,
               },
             },
@@ -136,7 +135,6 @@ describe('createAddToTimelineDiscoverCellActionFactory', () => {
             capabilities: {
               ...services.application.capabilities,
               securitySolutionTimeline: {
-                crud: false,
                 read: false,
               },
             },

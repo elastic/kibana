@@ -55,7 +55,7 @@ export const createInvestigateInNewTimelineCellActionFactory = createCellActionF
         const field = data[0]?.field;
 
         return (
-          (timelineCapabilities.read || timelineCapabilities.crud) &&
+          timelineCapabilities.read &&
           data.length === 1 && // TODO Add support for multiple values
           fieldHasCellActions(field.name) &&
           isValidDataProviderField(field.name, field.type) &&

@@ -115,7 +115,6 @@ describe('createAddToTimelineCellAction', () => {
             capabilities: {
               ...services.application.capabilities,
               securitySolutionTimeline: {
-                crud: false,
                 read: true,
               },
             },
@@ -140,7 +139,6 @@ describe('createAddToTimelineCellAction', () => {
             capabilities: {
               ...services.application.capabilities,
               securitySolutionTimeline: {
-                crud: false,
                 read: false,
               },
             },

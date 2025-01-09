@@ -77,8 +77,9 @@ const MarkdownEditorComponent = forwardRef<MarkdownEditorRef, MarkdownEditorProp
 
     const insightsUpsellingMessage = useUpsellingMessage('investigation_guide');
     const interactionsUpsellingMessage = useUpsellingMessage('investigation_guide_interactions');
-    const { timelinePrivileges } = useUserPrivileges();
-    const canSeeTimeline = timelinePrivileges.read || timelinePrivileges.crud;
+    const {
+      timelinePrivileges: { read: canSeeTimeline },
+    } = useUserPrivileges();
     const uiPluginsWithState = useMemo(() => {
       return includePlugins
         ? uiPlugins({

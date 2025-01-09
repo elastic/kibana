@@ -311,11 +311,9 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
   );
 
   const {
-    notesPrivileges: { crud, read },
-    timelinePrivileges: { crud: timelineCrud, read: timelineRead },
+    notesPrivileges: { read: canSeeNotes },
+    timelinePrivileges: { read: canSeePinnedTab },
   } = useUserPrivileges();
-  const canSeeNotes = crud || read;
-  const canSeePinnedTab = timelineRead || timelineCrud;
 
   // new note system
   const fetchNotes = useCallback(

@@ -40,8 +40,9 @@ export const LeftPanel: FC<Partial<DocumentDetailsProps>> = memo(({ path }) => {
   const securitySolutionNotesDisabled = useIsExperimentalFeatureEnabled(
     'securitySolutionNotesDisabled'
   );
-  const { notesPrivileges } = useUserPrivileges();
-  const canSeeNotes = notesPrivileges.crud || notesPrivileges.read;
+  const {
+    notesPrivileges: { read: canSeeNotes },
+  } = useUserPrivileges();
 
   const [visualizationInFlyoutEnabled] = useUiSetting$<boolean>(
     ENABLE_VISUALIZATIONS_IN_FLYOUT_SETTING

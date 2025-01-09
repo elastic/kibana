@@ -62,7 +62,7 @@ const mockUiSettingsClient = uiSettingsServiceMock.createStartContract();
 describe('use show timeline', () => {
   beforeAll(() => {
     (useUserPrivileges as unknown as jest.Mock).mockReturnValue({
-      timelinePrivileges: { crud: true, read: true },
+      timelinePrivileges: { read: true },
     });
 
     // initialize all App links before running test
@@ -107,7 +107,7 @@ describe('use show timeline', () => {
   });
   it('hides timeline for users without timeline access', async () => {
     (useUserPrivileges as unknown as jest.Mock).mockReturnValue({
-      timelinePrivileges: { crud: false, read: false },
+      timelinePrivileges: { read: false },
     });
 
     const { result } = renderHook(() => useShowTimeline());
@@ -117,7 +117,7 @@ describe('use show timeline', () => {
 });
 it('shows timeline for users with timeline read access', async () => {
   (useUserPrivileges as unknown as jest.Mock).mockReturnValue({
-    timelinePrivileges: { crud: false, read: true },
+    timelinePrivileges: { read: true },
   });
 
   const { result } = renderHook(() => useShowTimeline());

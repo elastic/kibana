@@ -41,8 +41,7 @@ const ThreatIntelligence = memo(() => {
   } = useKibana().services;
   const ThreatIntelligencePlugin = threatIntelligence.getComponent();
 
-  const timelineCapabilities = extractTimelineCapabilities(capabilities);
-  const hasAccessToTimeline = timelineCapabilities.read || timelineCapabilities.crud;
+  const { read: hasAccessToTimeline } = extractTimelineCapabilities(capabilities);
 
   const sourcererDataView = useSourcererDataView();
 

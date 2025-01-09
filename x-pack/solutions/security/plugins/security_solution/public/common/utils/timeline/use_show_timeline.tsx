@@ -14,9 +14,8 @@ export const useShowTimeline = () => {
   const { pathname } = useLocation();
   const getIsTimelineVisible = useShowTimelineForGivenPath();
   const {
-    timelinePrivileges: { crud, read },
+    timelinePrivileges: { read: canSeeTimeline },
   } = useUserPrivileges();
-  const canSeeTimeline = crud || read;
 
   const showTimeline = useMemo(
     () => canSeeTimeline && getIsTimelineVisible(pathname),

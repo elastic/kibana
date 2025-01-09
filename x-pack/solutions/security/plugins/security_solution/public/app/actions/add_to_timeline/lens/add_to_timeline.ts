@@ -86,7 +86,7 @@ export const createAddToTimelineLensAction = ({
     getIconType: () => ADD_TO_TIMELINE_ICON,
     getDisplayName: () => ADD_TO_TIMELINE,
     isCompatible: async ({ embeddable, data }) =>
-      (timelineCapabilities.read || timelineCapabilities.crud) &&
+      timelineCapabilities.read &&
       !hasBlockingError(embeddable) &&
       isLensApi(embeddable) &&
       apiPublishesUnifiedSearch(embeddable) &&

@@ -33,7 +33,6 @@ export const createAddToTimelineDiscoverCellActionFactory = ({
   });
 
   return securityAddToTimelineActionFactory.combine<CellAction>({
-    isCompatible: async () =>
-      (timelineCapabilities.read || timelineCapabilities.crud) && isInSecurityApp(currentAppId),
+    isCompatible: async () => timelineCapabilities.read && isInSecurityApp(currentAppId),
   });
 };
