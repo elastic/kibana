@@ -59,6 +59,7 @@ exports[`SavedObjectsTable delete should show a confirm modal 1`] = `
 
 exports[`SavedObjectsTable export should allow the user to choose when exporting all 1`] = `
 <ExportModal
+  disabled={true}
   filteredItemCount={0}
   includeReferences={true}
   onCancel={[Function]}
@@ -109,6 +110,7 @@ exports[`SavedObjectsTable export should allow the user to choose when exporting
 exports[`SavedObjectsTable should render normally 1`] = `
 <div>
   <Header
+    disabled={true}
     filteredCount={0}
     onExportAll={[Function]}
     onImport={[Function]}

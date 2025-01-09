@@ -19,6 +19,7 @@ exports[`Header should render normally 1`] = `
     Array [
       <EuiButtonEmpty
         data-test-subj="exportAllObjects"
+        disabled={false}
         iconType="exportAction"
         onClick={[Function]}
         size="s"
