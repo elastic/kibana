@@ -86,7 +86,7 @@ function useDebugDownloadUrl(cy?: cytoscape.Core) {
 
     return () => {
       if (cy) {
-        cy.off('add remove', undefined, elementsHandler);
+        cy.off('add remove', elementsHandler);
       }
     };
   }, [cy, debug]);
@@ -131,7 +131,7 @@ export function Controls() {
 
     return () => {
       if (cy) {
-        cy.off('zoom', undefined, zoomHandler);
+        cy.off('zoom', zoomHandler);
       }
     };
   }, [cy]);
