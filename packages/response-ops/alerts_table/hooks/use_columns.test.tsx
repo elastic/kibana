@@ -69,7 +69,7 @@ const browserFields: BrowserFields = {
 };
 mockFetchAlertsFields.mockResolvedValue({ browserFields, fields: [] });
 
-describe(useColumns, () => {
+describe('useColumns', () => {
   const id = 'useColumnTest';
   const ruleTypeIds: string[] = ['apm', 'logs'];
   let storage = { current: new Storage(mockStorage) };

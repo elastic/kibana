@@ -53,7 +53,7 @@ const props = createPartialObjectMock<FlyoutProps>({
   onPaginate,
 });
 
-describe(AlertsFlyout, () => {
+describe('AlertsFlyout', () => {
   afterEach(() => {
     jest.clearAllMocks();
   });

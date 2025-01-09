@@ -42,7 +42,7 @@ const props = createPartialObjectMock<ComponentProps<typeof CellValueHost>>({
   pageSize: 10,
 });
 
-describe(CellValueHost, () => {
+describe('CellValueHost', () => {
   it.each([ALERT_STATUS, ALERT_CASE_IDS, ALERT_MAINTENANCE_WINDOW_IDS])(
     'should render a SystemCell for cases, maintenance windows, and alert status',
     (columnId) => {

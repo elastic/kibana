@@ -10,7 +10,7 @@
 import { coreMock } from '@kbn/core/public/mocks';
 import { bulkGetMaintenanceWindows } from './bulk_get_maintenance_windows';
 
-describe(bulkGetMaintenanceWindows, () => {
+describe('bulkGetMaintenanceWindows', () => {
   const mockCoreSetup = coreMock.createSetup();
   const http = mockCoreSetup.http;
 

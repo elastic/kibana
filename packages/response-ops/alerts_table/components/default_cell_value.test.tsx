@@ -27,7 +27,7 @@ const props = createPartialObjectMock<CellComponentProps>({
   alert: mockRenderContext.alerts[0],
 });
 
-describe(DefaultCellValue, () => {
+describe('DefaultCellValue', () => {
   it.each([TIMESTAMP, ALERT_START])('should format date fields', (columnId) => {
     render(<DefaultCellValue {...props} columnId={columnId} />);
     expect(props.services.fieldFormats.deserialize).toHaveBeenCalledWith(

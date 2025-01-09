@@ -68,7 +68,7 @@ const wrapper = ({ children }: PropsWithChildren) => {
   return <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>;
 };
 
-describe(useBulkGetMaintenanceWindowsQuery, () => {
+describe('useBulkGetMaintenanceWindowsQuery', () => {
   let addErrorMock: jest.Mock;
 
   beforeEach(async () => {

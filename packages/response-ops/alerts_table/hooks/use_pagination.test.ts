@@ -9,7 +9,7 @@
 import { renderHook, act } from '@testing-library/react';
 import { PaginationProps, usePagination } from './use_pagination';
 
-describe(usePagination, () => {
+describe('usePagination', () => {
   const onPageChange = jest.fn();
   const pageIndex = 0;
   const pageSize = 10;

@@ -36,7 +36,7 @@ const wrapper = ({ children }: PropsWithChildren) => {
   );
 };
 
-describe(useBulkGetCasesQuery, () => {
+describe('useBulkGetCasesQuery', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });

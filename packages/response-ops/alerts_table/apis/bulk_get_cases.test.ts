@@ -10,7 +10,7 @@
 import { bulkGetCases } from './bulk_get_cases';
 import { coreMock } from '@kbn/core/public/mocks';
 
-describe(bulkGetCases, () => {
+describe('bulkGetCases', () => {
   const abortCtrl = new AbortController();
   const mockCoreSetup = coreMock.createSetup();
   const http = mockCoreSetup.http;

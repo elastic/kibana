@@ -58,7 +58,7 @@ const props = createPartialObjectMock<AlertActionsProps>({
   },
 });
 
-describe(DefaultAlertActions, () => {
+describe('DefaultAlertActions', () => {
   it('should show "Mute" and "Marked as untracked" option', async () => {
     useLoadRuleTypesQuery.mockReturnValue({ authorizedToCreateAnyRules: true });
 
