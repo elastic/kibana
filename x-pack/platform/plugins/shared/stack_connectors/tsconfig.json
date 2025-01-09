@@ -44,6 +44,7 @@
     "@kbn/alerting-types",
     "@kbn/response-ops-rule-form",
     "@kbn/inference-endpoint-ui-common",
+    "@kbn/alerts-ui-shared",
   ],
   "exclude": [
     "target/**/*",
