@@ -15,12 +15,14 @@ import {
   EuiFormRow,
   EuiIcon,
   EuiIconTip,
+  EuiLink,
   EuiTitle,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
+import { CodeEditor } from './condition_editor';
 import { CreateSLOForm } from '../../../types';
 import { SyncFieldSelector } from './sync_field_selector';
 
@@ -165,6 +167,34 @@ export function AdvancedSettings() {
                 checked={Boolean(field.value)}
                 onChange={(event: any) => onChange(event.target.checked)}
               />
+            )}
+          />
+        </EuiFormRow>
+        <EuiFormRow
+          label={'Drop condition'}
+          helpText={i18n.translate('xpack.slo.sloEdit.settings.dropCondition.helpText', {
+            defaultMessage:
+              'The condition that determines whether data points are dropped from the SLO calculation. For example, you can use this to exclude certain data points from the SLO calculation.',
+          })}
+          labelAppend={
+            <EuiLink
+              external={true}
+              target="_blank"
+              href="https://www.elastic.co/guide/en/elasticsearch/reference/master/ingest.html#conditionally-run-processor"
+            >
+              {i18n.translate('xpack.slo.sloEdit.settings.dropCondition.docs', {
+                defaultMessage: 'Learn more',
+              })}
+            </EuiLink>
+          }
+          isInvalid={getFieldState('settings.dropCondition').invalid}
+          fullWidth
+        >
+          <Controller
+            name="settings.dropCondition"
+            control={control}
+            render={({ field: { ref, onChange, ...field } }) => (
+              <CodeEditor value={field.value ?? ''} onChange={(val: string) => onChange(val)} />
             )}
           />
         </EuiFormRow>

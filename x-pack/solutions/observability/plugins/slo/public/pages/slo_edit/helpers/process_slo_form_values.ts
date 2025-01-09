@@ -60,6 +60,7 @@ export function transformSloResponseToCreateSloForm(
         ? toMinutes(toDuration(values.settings.frequency))
         : SETTINGS_DEFAULT_VALUES.frequency,
       syncField: values.settings?.syncField ?? null,
+      ...(values.settings?.dropCondition && { dropCondition: values.settings.dropCondition }),
     },
   };
 }
@@ -92,6 +93,7 @@ export function transformCreateSLOFormToCreateSLOInput(values: CreateSLOForm): C
       syncDelay: `${values.settings.syncDelay ?? SETTINGS_DEFAULT_VALUES.syncDelay}m`,
       frequency: `${values.settings.frequency ?? SETTINGS_DEFAULT_VALUES.frequency}m`,
       syncField: values.settings.syncField,
+      dropCondition: values.settings.dropCondition,
     },
   };
 }
@@ -124,6 +126,7 @@ export function transformValuesToUpdateSLOInput(values: CreateSLOForm): UpdateSL
       syncDelay: `${values.settings.syncDelay ?? SETTINGS_DEFAULT_VALUES.syncDelay}m`,
       frequency: `${values.settings.frequency ?? SETTINGS_DEFAULT_VALUES.frequency}m`,
       syncField: values.settings.syncField,
+      dropCondition: values.settings.dropCondition,
     },
   };
 }

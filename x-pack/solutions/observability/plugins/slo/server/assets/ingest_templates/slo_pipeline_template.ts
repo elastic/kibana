@@ -77,6 +77,9 @@ export const getSLOPipelineTemplate = (slo: SLODefinition) => ({
         name: `slo-${slo.id}@custom`,
       },
     },
+    ...(slo.settings.dropCondition
+      ? [{ drop: { if: slo.settings.dropCondition, ignore_failure: true } }]
+      : []),
   ],
   _meta: {
     description: 'Ingest pipeline for SLO rollup data',

@@ -33,7 +33,7 @@ const settingsSchema = t.intersection([
     frequency: durationType,
     preventInitialBackfill: t.boolean,
   }),
-  t.partial({ syncField: t.union([t.string, t.null]) }),
+  t.partial({ syncField: t.union([t.string, t.null]), dropCondition: t.string }),
 ]);
 
 const groupBySchema = allOrAnyStringOrArray;
@@ -43,6 +43,7 @@ const optionalSettingsSchema = t.partial({
   frequency: durationType,
   preventInitialBackfill: t.boolean,
   syncField: t.union([t.string, t.null]),
+  dropCondition: t.string,
 });
 
 const tagsSchema = t.array(t.string);

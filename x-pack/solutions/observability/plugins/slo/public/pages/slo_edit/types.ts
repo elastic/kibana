@@ -28,5 +28,6 @@ export interface CreateSLOForm<IndicatorType = Indicator> {
     syncDelay: number; // in minutes
     frequency: number; // in minutes
     syncField: string | null;
+    dropCondition?: string;
   };
 }
