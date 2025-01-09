@@ -36,7 +36,8 @@ export function getESQLForLayer(
   const partialRows = true;
 
   const timeZone = getUserTimeZone((key) => uiSettings.get(key), true);
-  if (timeZone !== 'UTC') return;
+  const utcOffset = moment.tz(timeZone).utcOffset() / 60;
+  if (utcOffset !== 0) return;
   if (
     Object.values(layer.columns).find(
       (col) =>
