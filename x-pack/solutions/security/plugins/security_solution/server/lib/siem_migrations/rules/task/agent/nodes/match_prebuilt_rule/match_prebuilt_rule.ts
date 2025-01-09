@@ -12,6 +12,7 @@ import type { RuleMigrationsRetriever } from '../../../retrievers';
 import type { ChatModel } from '../../../util/actions_client_chat';
 import type { GraphNode } from '../../types';
 import { MATCH_PREBUILT_RULE_PROMPT } from './prompts';
+import { cleanMarkdown } from '../../../util/comments';
 
 interface GetMatchPrebuiltRuleNodeParams {
   model: ChatModel;
@@ -21,6 +22,7 @@ interface GetMatchPrebuiltRuleNodeParams {
 
 interface GetMatchedRuleResponse {
   match: string;
+  summary: string;
 }
 
 export const getMatchPrebuiltRuleNode = ({
@@ -35,6 +37,9 @@ export const getMatchPrebuiltRuleNode = ({
       query,
       techniqueIds.join(',')
     );
+    if (prebuiltRules.length === 0) {
+      return { comments: ['## Prebuilt Rule Matching Summary\nNo related prebuilt rule found.'] };
+    }
 
     const outputParser = new JsonOutputParser();
     const mostRelevantRule = MATCH_PREBUILT_RULE_PROMPT.pipe(model).pipe(outputParser);
@@ -58,30 +63,24 @@ export const getMatchPrebuiltRuleNode = ({
       rules: JSON.stringify(elasticSecurityRules, null, 2),
       splunk_rule: JSON.stringify(splunkRule, null, 2),
     })) as GetMatchedRuleResponse;
+
+    const comments = response.summary ? [cleanMarkdown(response.summary)] : undefined;
+
     if (response.match) {
       const matchedRule = prebuiltRules.find((r) => r.name === response.match);
       if (matchedRule) {
         return {
+          comments,
           elastic_rule: {
             title: matchedRule.name,
             description: matchedRule.description,
-            id: matchedRule.installedRuleId,
+            id: matchedRule.installed_rule_id,
             prebuilt_rule_id: matchedRule.rule_id,
           },
           translation_result: RuleTranslationResult.FULL,
         };
       }
     }
-    const lookupTypes = ['inputlookup', 'outputlookup'];
-    if (
-      state.original_rule?.query &&
-      lookupTypes.some((type) => state.original_rule.query.includes(type))
-    ) {
-      logger.debug(
-        `Rule: ${state.original_rule?.title} did not match any prebuilt rule, but contains inputlookup, dropping`
-      );
-      return { translation_result: RuleTranslationResult.UNTRANSLATABLE };
-    }
-    return {};
+    return { comments };
   };
 };
