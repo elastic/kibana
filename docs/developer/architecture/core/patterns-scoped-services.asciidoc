@@ -20,7 +20,7 @@ The {kib-repo}/blob/8.9/src/core/packages/http/server/src/router/request_handler
 
 * {kib-repo}/blob/8.9/src/core/packages/saved-objects/api-server/src/saved_objects_client.ts[`context.savedObjects.client`]
 * {kib-repo}/blob/8.9/src/core/packages/elasticsearch/server/src/client/scoped_cluster_client.ts[`context.elasticsearch.client`]
-* {kib-repo}/blob/8.9/packages/core/ui-settings/core-ui-settings-server/src/ui_settings_client.ts[`context.uiSettings.client`]
+* {kib-repo}/blob/8.9/src/core/packages/ui-settings/server/src/ui_settings_client.ts[`context.uiSettings.client`]
 
 ==== Declare a custom scoped service
 
