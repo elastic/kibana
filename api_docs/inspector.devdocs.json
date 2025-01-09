@@ -35,7 +35,7 @@
             "section": "def-public.Start",
             "text": "Start"
           },
-          ", object, object>"
+          ", never, never>"
         ],
         "path": "src/platform/plugins/shared/inspector/public/plugin.tsx",
         "deprecated": false,
@@ -99,7 +99,7 @@
             "signature": [
               "(_core: ",
               "CoreSetup",
-              "<object, unknown>) => { registerView: (view: ",
+              "<{}, unknown>) => { registerView: (view: ",
               {
                 "pluginId": "inspector",
                 "scope": "public",
@@ -124,7 +124,7 @@
                 "description": [],
                 "signature": [
                   "CoreSetup",
-                  "<object, unknown>"
+                  "<{}, unknown>"
                 ],
                 "path": "src/platform/plugins/shared/inspector/public/plugin.tsx",
                 "deprecated": false,

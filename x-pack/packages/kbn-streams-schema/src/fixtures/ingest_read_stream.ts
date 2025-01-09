@@ -9,6 +9,7 @@ import { ingestStream } from './ingest_stream';
 
 export const ingestReadStream = {
   ...ingestStream,
+  lifecycle: { type: 'dlm' },
   inherited_fields: {
     '@timestamp': {
       type: 'date',
