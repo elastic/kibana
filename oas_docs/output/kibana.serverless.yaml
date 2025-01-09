@@ -31776,7 +31776,11 @@ paths:
       operationId: DeleteList
       parameters:
         - description: List's `id` value
-          examples: ip_list
+          examples:
+            customId:
+              value: ip_list
+            uuid:
+              value: 330bdd28-eedf-40e1-bed0-f10176c7f9e0
           in: query
           name: id
           required: true
@@ -31806,10 +31810,8 @@ paths:
                   ipList:
                     value:
                       _version: WzIsMV0=
-                      '@timestamp': |
-                        2025-01-08T04:47:34.273Z
-                      created_at: |
-                        2025-01-08T04:47:34.273Z
+                      '@timestamp': '2025-01-08T04:47:34.273Z'
+                      created_at: '2025-01-08T04:47:34.273Z'
                       created_by: elastic
                       description: Some other description here for you
                       id: ip_list
@@ -31817,14 +31819,19 @@ paths:
                       name: Changed the name here to something else
                       tie_breaker_id: f5508188-b1e9-4e6e-9662-d039a7d89899
                       type: ip
-                      updated_at: |
-                        2025-01-08T05:39:39.292Z
+                      updated_at: '2025-01-08T05:39:39.292Z'
                       updated_by: elastic
                       version: 3
           description: Successful response
         '400':
           content:
             application/json; Elastic-Api-Version=2023-10-31:
+              examples:
+                badRequest:
+                  value:
+                    error: Bad Request
+                    message: '[request query]: id: Required'
+                    statusCode: 400
               schema:
                 oneOf:
                   - $ref: '#/components/schemas/Security_Lists_API_PlatformErrorResponse'
@@ -31833,6 +31840,13 @@ paths:
         '401':
           content:
             application/json; Elastic-Api-Version=2023-10-31:
+              examples:
+                unauthorized:
+                  value:
+                    error: Unauthorized
+                    message: |
+                      [security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]
+                    statusCode: 401
               schema:
                 $ref: '#/components/schemas/Security_Lists_API_PlatformErrorResponse'
           description: Unsuccessful authentication response
@@ -31845,12 +31859,22 @@ paths:
         '404':
           content:
             application/json; Elastic-Api-Version=2023-10-31:
+              examples:
+                notFound:
+                  value:
+                    message: 'list id: \"ip_list\" was not found'
+                    status_code: 404
               schema:
                 $ref: '#/components/schemas/Security_Lists_API_SiemErrorResponse'
           description: List not found response
         '500':
           content:
             application/json; Elastic-Api-Version=2023-10-31:
+              examples:
+                serverError:
+                  value:
+                    message: Internal Server Error
+                    status_code: 500
               schema:
                 $ref: '#/components/schemas/Security_Lists_API_SiemErrorResponse'
           description: Internal server error response
@@ -31876,13 +31900,11 @@ paths:
               schema:
                 $ref: '#/components/schemas/Security_Lists_API_List'
                 examples:
-                  ipList:
+                  ip:
                     value:
                       _version: WzEsMV0=
-                      '@timestamp': |
-                        2025-01-08T04:47:34.273Z
-                      created_at: |
-                        2025-01-08T04:47:34.273Z
+                      '@timestamp': '2025-01-08T04:47:34.273Z'
+                      created_at: '2025-01-08T04:47:34.273Z'
                       created_by: elastic
                       description: This list describes bad internet ip
                       id: ip_list
@@ -31890,14 +31912,19 @@ paths:
                       name: My bad ips
                       tie_breaker_id: f5508188-b1e9-4e6e-9662-d039a7d89899
                       type: ip
-                      updated_at: |
-                        2025-01-08T05:21:53.843Z
+                      updated_at: '2025-01-08T05:21:53.843Z'
                       updated_by: elastic
                       version: 1
           description: Successful response
         '400':
           content:
             application/json; Elastic-Api-Version=2023-10-31:
+              examples:
+                badRequest:
+                  value:
+                    error: Bad Request
+                    message: '[request query]: id: Required'
+                    statusCode: 400
               schema:
                 oneOf:
                   - $ref: '#/components/schemas/Security_Lists_API_PlatformErrorResponse'
@@ -31906,6 +31933,12 @@ paths:
         '401':
           content:
             application/json; Elastic-Api-Version=2023-10-31:
+              examples:
+                unauthorized:
+                  value:
+                    error: Unauthorized
+                    message: "[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]"
+                    statusCode: 401
               schema:
                 $ref: '#/components/schemas/Security_Lists_API_PlatformErrorResponse'
           description: Unsuccessful authentication response
@@ -31918,12 +31951,22 @@ paths:
         '404':
           content:
             application/json; Elastic-Api-Version=2023-10-31:
+              examples:
+                notFound:
+                  value:
+                    message: 'list id: \"foo\" not found'
+                    status_code: 404
               schema:
                 $ref: '#/components/schemas/Security_Lists_API_SiemErrorResponse'
           description: List not found response
         '500':
           content:
             application/json; Elastic-Api-Version=2023-10-31:
+              examples:
+                serverError:
+                  value:
+                    message: Internal Server Error
+                    status_code: 500
               schema:
                 $ref: '#/components/schemas/Security_Lists_API_SiemErrorResponse'
           description: Internal server error response
@@ -31967,13 +32010,11 @@ paths:
               schema:
                 $ref: '#/components/schemas/Security_Lists_API_List'
                 examples:
-                  ipList:
+                  ip:
                     value:
                       _version: WzEsMV0=
-                      '@timestamp': |
-                        2025-01-08T04:47:34.273Z
-                      created_at: |
-                        2025-01-08T04:47:34.273Z
+                      '@timestamp': '2025-01-08T04:47:34.273Z'
+                      created_at: '2025-01-08T04:47:34.273Z'
                       created_by: elastic
                       description: This list describes bad internet ip
                       id: ip_list
@@ -31981,14 +32022,19 @@ paths:
                       name: Changed the name here to something else
                       tie_breaker_id: f5508188-b1e9-4e6e-9662-d039a7d89899
                       type: ip
-                      updated_at: |
-                        2025-01-08T05:21:53.843Z
+                      updated_at: '2025-01-08T05:21:53.843Z'
                       updated_by: elastic
                       version: 2
           description: Successful response
         '400':
           content:
             application/json; Elastic-Api-Version=2023-10-31:
+              examples:
+                badRequest:
+                  value:
+                    error: Bad Request
+                    message: '[request body]: name: Expected string, received number'
+                    statusCode: 400
               schema:
                 oneOf:
                   - $ref: '#/components/schemas/Security_Lists_API_PlatformErrorResponse'
@@ -31997,6 +32043,13 @@ paths:
         '401':
           content:
             application/json; Elastic-Api-Version=2023-10-31:
+              examples:
+                unauthorized:
+                  value:
+                    error: Unauthorized
+                    message: |
+                      [security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]
+                    statusCode: 401
               schema:
                 $ref: '#/components/schemas/Security_Lists_API_PlatformErrorResponse'
           description: Unsuccessful authentication response
@@ -32009,12 +32062,22 @@ paths:
         '404':
           content:
             application/json; Elastic-Api-Version=2023-10-31:
+              examples:
+                notFound:
+                  value:
+                    message: 'list id: \"foo\" not found'
+                    status_code: 404
               schema:
                 $ref: '#/components/schemas/Security_Lists_API_SiemErrorResponse'
           description: List not found response
         '500':
           content:
             application/json; Elastic-Api-Version=2023-10-31:
+              examples:
+                serverError:
+                  value:
+                    message: Internal Server Error
+                    status_code: 500
               schema:
                 $ref: '#/components/schemas/Security_Lists_API_SiemErrorResponse'
           description: Internal server error response
@@ -32028,11 +32091,33 @@ paths:
       requestBody:
         content:
           application/json; Elastic-Api-Version=2023-10-31:
-            example:
-              description: This list describes bad internet ips
-              id: ip_list
-              name: Simple list with ips
-              type: ip
+            examples:
+              ip:
+                value:
+                  description: This list describes bad internet ips
+                  id: ip_list
+                  name: Simple list with ips
+                  type: ip
+              ip_range:
+                value:
+                  description: This list has ip ranges
+                  id: ip_range_list
+                  name: Simple list with ip ranges
+                  type: ip_range
+              keyword:
+                value:
+                  description: This list describes bad host names
+                  id: keyword_list
+                  name: Simple list with a keyword
+                  type: keyword
+              keyword_custom_format:
+                value:
+                  description: This parses the first found ipv4 only
+                  deserializer: '{{value}}'
+                  id: keyword_custom_format_list
+                  name: Simple list with a keyword using a custom format
+                  serializer: (?<value>((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?))
+                  type: keyword
             schema:
               type: object
               properties:
@@ -32065,13 +32150,11 @@ paths:
           content:
             application/json; Elastic-Api-Version=2023-10-31:
               examples:
-                successfulList:
+                ip:
                   value:
                     _version: WzAsMV0=
-                    '@timestamp': |
-                      2025-01-08T04:47:34.273Z
-                    created_at: |
-                      2025-01-08T04:47:34.273Z
+                    '@timestamp': '2025-01-08T04:47:34.273Z'
+                    created_at: '2025-01-08T04:47:34.273Z'
                     created_by: elastic
                     description: This list describes bad internet ips
                     id: ip_list
@@ -32079,8 +32162,54 @@ paths:
                     name: Simple list with ips
                     tie_breaker_id: f5508188-b1e9-4e6e-9662-d039a7d89899
                     type: ip
-                    updated_at: |
-                      2025-01-08T04:47:34.273Z
+                    updated_at: '2025-01-08T04:47:34.273Z'
+                    updated_by: elastic
+                    version: 1
+                ip_range:
+                  value:
+                    _version: WzAsMV0=
+                    '@timestamp': '2025-01-09T18:23:52.241Z'
+                    created_at: '2025-01-09T18:23:52.241Z'
+                    created_by: elastic
+                    description: This list has ip ranges
+                    id: ip_range_list
+                    immutable: false
+                    name: Simple list with ip ranges
+                    tie_breaker_id: 74aebdaf-601f-4940-b351-155728ff7003
+                    type: ip_range
+                    updated_at: '2025-01-09T18:23:52.241Z'
+                    updated_by: elastic
+                    version: 1
+                keyword:
+                  value:
+                    _version: WzEsMV0=
+                    '@timestamp': '2025-01-09T18:24:55.786Z'
+                    created_at: '2025-01-09T18:24:55.786Z'
+                    created_by: elastic
+                    description: This list describes bad host names
+                    id: keyword_list
+                    immutable: false
+                    name: Simple list with a keyword
+                    tie_breaker_id: f7e7dbaa-daf7-4c9a-a3dc-56643923ef68
+                    type: keyword
+                    updated_at: '2025-01-09T18:24:55.786Z'
+                    updated_by: elastic
+                    version: 1
+                keyword_custom_format:
+                  value:
+                    _version: WzIsMV0=
+                    '@timestamp': '2025-01-09T18:25:39.604Z'
+                    created_at: '2025-01-09T18:25:39.604Z'
+                    created_by: elastic
+                    description: This parses the first found ipv4 only
+                    deserializer: '{{value}}'
+                    id: keyword_custom_format_list
+                    immutable: false
+                    name: Simple list with a keyword using a custom format
+                    serializer: (?<value>((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?))
+                    tie_breaker_id: 8247ae63-b780-47b8-9a89-948b643e9ec2
+                    type: keyword
+                    updated_at: '2025-01-09T18:25:39.604Z'
                     updated_by: elastic
                     version: 1
               schema:
@@ -32090,7 +32219,7 @@ paths:
           content:
             application/json; Elastic-Api-Version=2023-10-31:
               examples:
-                dataStreamDoesNotExist:
+                notFound:
                   value:
                     message: To create a list, the data stream must exist first. Data stream \".lists-default\" does not exist
                     status_code: 400
@@ -32102,6 +32231,12 @@ paths:
         '401':
           content:
             application/json; Elastic-Api-Version=2023-10-31:
+              examples:
+                unauthorized:
+                  value:
+                    error: Unauthorized
+                    message: '[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]'
+                    statusCode: 401
               schema:
                 $ref: '#/components/schemas/Security_Lists_API_PlatformErrorResponse'
           description: Unsuccessful authentication response
@@ -32114,12 +32249,22 @@ paths:
         '409':
           content:
             application/json; Elastic-Api-Version=2023-10-31:
+              examples:
+                alreadyExists:
+                  value:
+                    message: 'list id: "keyword_custom_format_list" already exists'
+                    status_code: 409
               schema:
                 $ref: '#/components/schemas/Security_Lists_API_SiemErrorResponse'
           description: List already exists response
         '500':
           content:
             application/json; Elastic-Api-Version=2023-10-31:
+              examples:
+                serverError:
+                  value:
+                    message: Internal Server Error
+                    status_code: 500
               schema:
                 $ref: '#/components/schemas/Security_Lists_API_SiemErrorResponse'
           description: Internal server error response
@@ -32169,13 +32314,11 @@ paths:
               schema:
                 $ref: '#/components/schemas/Security_Lists_API_List'
                 examples:
-                  ipList:
+                  ip:
                     value:
                       _version: WzIsMV0=
-                      '@timestamp': |
-                        2025-01-08T04:47:34.273Z
-                      created_at: |
-                        2025-01-08T04:47:34.273Z
+                      '@timestamp': '2025-01-08T04:47:34.273Z'
+                      created_at: '2025-01-08T04:47:34.273Z'
                       created_by: elastic
                       description: Latest list of bad ips
                       id: ip_list
@@ -32183,14 +32326,19 @@ paths:
                       name: Bad ips - updated
                       tie_breaker_id: f5508188-b1e9-4e6e-9662-d039a7d89899
                       type: ip
-                      updated_at: |
-                        2025-01-08T05:39:39.292Z
+                      updated_at: '2025-01-08T05:39:39.292Z'
                       updated_by: elastic
                       version: 3
           description: Successful response
         '400':
           content:
             application/json; Elastic-Api-Version=2023-10-31:
+              examples:
+                badRequest:
+                  value:
+                    error: Bad Request
+                    message: '[request body]: id: Expected string, received number'
+                    statusCode: 400
               schema:
                 oneOf:
                   - $ref: '#/components/schemas/Security_Lists_API_PlatformErrorResponse'
@@ -32199,6 +32347,12 @@ paths:
         '401':
           content:
             application/json; Elastic-Api-Version=2023-10-31:
+              examples:
+                unauthorized:
+                  value:
+                    error: Unauthorized
+                    message: '[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]'
+                    statusCode: 401
               schema:
                 $ref: '#/components/schemas/Security_Lists_API_PlatformErrorResponse'
           description: Unsuccessful authentication response
@@ -32211,12 +32365,22 @@ paths:
         '404':
           content:
             application/json; Elastic-Api-Version=2023-10-31:
+              examples:
+                notFound:
+                  value:
+                    message: 'list id: \"foo\" not found'
+                    status_code: 404
               schema:
                 $ref: '#/components/schemas/Security_Lists_API_SiemErrorResponse'
           description: List not found response
         '500':
           content:
             application/json; Elastic-Api-Version=2023-10-31:
+              examples:
+                serverError:
+                  value:
+                    message: Internal Server Error
+                    status_code: 500
               schema:
                 $ref: '#/components/schemas/Security_Lists_API_SiemErrorResponse'
           description: Internal server error response
@@ -32336,6 +32500,12 @@ paths:
         '400':
           content:
             application/json; Elastic-Api-Version=2023-10-31:
+              examples:
+                badRequest:
+                  value:
+                    error: Bad Request
+                    message: '[request query]: page: Expected number, received nan'
+                    statusCode: 400
               schema:
                 oneOf:
                   - $ref: '#/components/schemas/Security_Lists_API_PlatformErrorResponse'
@@ -32344,6 +32514,13 @@ paths:
         '401':
           content:
             application/json; Elastic-Api-Version=2023-10-31:
+              examples:
+                unauthorized:
+                  value:
+                    error: Unauthorized
+                    message: |
+                      [security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]
+                    statusCode: 401
               schema:
                 $ref: '#/components/schemas/Security_Lists_API_PlatformErrorResponse'
           description: Unsuccessful authentication response
@@ -32356,6 +32533,11 @@ paths:
         '500':
           content:
             application/json; Elastic-Api-Version=2023-10-31:
+              examples:
+                serverError:
+                  value:
+                    message: Internal Server Error
+                    status_code: 500
               schema:
                 $ref: '#/components/schemas/Security_Lists_API_SiemErrorResponse'
           description: Internal server error response
@@ -32390,6 +32572,13 @@ paths:
         '401':
           content:
             application/json; Elastic-Api-Version=2023-10-31:
+              examples:
+                unauthorized:
+                  value:
+                    error: Unauthorized
+                    message: |
+                      [security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]
+                    statusCode: 401
               schema:
                 $ref: '#/components/schemas/Security_Lists_API_PlatformErrorResponse'
           description: Unsuccessful authentication response
@@ -32408,6 +32597,11 @@ paths:
         '500':
           content:
             application/json; Elastic-Api-Version=2023-10-31:
+              examples:
+                serverError:
+                  value:
+                    message: Internal Server Error
+                    status_code: 500
               schema:
                 $ref: '#/components/schemas/Security_Lists_API_SiemErrorResponse'
           description: Internal server error response
@@ -32444,6 +32638,13 @@ paths:
         '401':
           content:
             application/json; Elastic-Api-Version=2023-10-31:
+              examples:
+                unauthorized:
+                  value:
+                    error: Unauthorized
+                    message: |
+                      [security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]
+                    statusCode: 401
               schema:
                 $ref: '#/components/schemas/Security_Lists_API_PlatformErrorResponse'
           description: Unsuccessful authentication response
@@ -32462,6 +32663,11 @@ paths:
         '500':
           content:
             application/json; Elastic-Api-Version=2023-10-31:
+              examples:
+                serverError:
+                  value:
+                    message: Internal Server Error
+                    status_code: 500
               schema:
                 $ref: '#/components/schemas/Security_Lists_API_SiemErrorResponse'
           description: Internal server error response
@@ -32495,6 +32701,13 @@ paths:
         '401':
           content:
             application/json; Elastic-Api-Version=2023-10-31:
+              examples:
+                unauthorized:
+                  value:
+                    error: Unauthorized
+                    message: |
+                      [security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]
+                    statusCode: 401
               schema:
                 $ref: '#/components/schemas/Security_Lists_API_PlatformErrorResponse'
           description: Unsuccessful authentication response
@@ -32507,12 +32720,22 @@ paths:
         '409':
           content:
             application/json; Elastic-Api-Version=2023-10-31:
+              examples:
+                alreadyExists:
+                  value:
+                    message: 'data stream: \".lists-default\" and \".items-default\" already exists'
+                    status_code: 409
               schema:
                 $ref: '#/components/schemas/Security_Lists_API_SiemErrorResponse'
           description: List data stream exists response
         '500':
           content:
             application/json; Elastic-Api-Version=2023-10-31:
+              examples:
+                serverError:
+                  value:
+                    message: Internal Server Error
+                    status_code: 500
               schema:
                 $ref: '#/components/schemas/Security_Lists_API_SiemErrorResponse'
           description: Internal server error response
@@ -32562,24 +32785,24 @@ paths:
         '200':
           content:
             application/json; Elastic-Api-Version=2023-10-31:
+              examples:
+                ip:
+                  value:
+                    _version: WzIwLDFd
+                    '@timestamp': |
+                      2025-01-08T05:15:05.159Z
+                    created_at: |
+                      2025-01-08T05:15:05.159Z
+                    created_by: elastic
+                    id: pd1WRJQBs4HAK3VQeHFI
+                    list_id: ip_list
+                    tie_breaker_id: eee41dc7-1666-4876-982f-8b0f7b59eca3
+                    type: ip
+                    updated_at: |
+                      2025-01-08T05:44:14.009Z
+                    updated_by: elastic
+                    value: 255.255.255.255
               schema:
-                examples:
-                  ipItem:
-                    value:
-                      _version: WzIwLDFd
-                      '@timestamp': |
-                        2025-01-08T05:15:05.159Z
-                      created_at: |
-                        2025-01-08T05:15:05.159Z
-                      created_by: elastic
-                      id: pd1WRJQBs4HAK3VQeHFI
-                      list_id: ip_list
-                      tie_breaker_id: eee41dc7-1666-4876-982f-8b0f7b59eca3
-                      type: ip
-                      updated_at: |
-                        2025-01-08T05:44:14.009Z
-                      updated_by: elastic
-                      value: 255.255.255.255
                 oneOf:
                   - $ref: '#/components/schemas/Security_Lists_API_ListItem'
                   - items:
@@ -32589,6 +32812,11 @@ paths:
         '400':
           content:
             application/json; Elastic-Api-Version=2023-10-31:
+              examples:
+                badRequest:
+                  value:
+                    message: Either \"list_id\" or \"id\" needs to be defined in the request
+                    status_code: 400
               schema:
                 oneOf:
                   - $ref: '#/components/schemas/Security_Lists_API_PlatformErrorResponse'
@@ -32597,6 +32825,13 @@ paths:
         '401':
           content:
             application/json; Elastic-Api-Version=2023-10-31:
+              examples:
+                unauthorized:
+                  value:
+                    error: Unauthorized
+                    message: |
+                      [security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]
+                    statusCode: 401
               schema:
                 $ref: '#/components/schemas/Security_Lists_API_PlatformErrorResponse'
           description: Unsuccessful authentication response
@@ -32609,12 +32844,22 @@ paths:
         '404':
           content:
             application/json; Elastic-Api-Version=2023-10-31:
+              examples:
+                notFound:
+                  value:
+                    message: 'list item with id: \"pd1WRJQBs4HAK3VQeHFI\" not found'
+                    status_code: 404
               schema:
                 $ref: '#/components/schemas/Security_Lists_API_SiemErrorResponse'
           description: List item not found response
         '500':
           content:
             application/json; Elastic-Api-Version=2023-10-31:
+              examples:
+                serverError:
+                  value:
+                    message: Internal Server Error
+                    status_code: 500
               schema:
                 $ref: '#/components/schemas/Security_Lists_API_SiemErrorResponse'
           description: Internal server error response
@@ -32651,24 +32896,21 @@ paths:
         '200':
           content:
             application/json; Elastic-Api-Version=2023-10-31:
+              examples:
+                ip:
+                  value:
+                    _version: WzExLDFd
+                    '@timestamp': '2025-01-08T05:16:25.882Z'
+                    created_at: '2025-01-08T05:16:25.882Z'
+                    created_by: elastic
+                    id: qN1XRJQBs4HAK3VQs3Gc
+                    list_id: ip_list
+                    tie_breaker_id: a9a34c02-a385-436e-86a0-02a3942f3537
+                    type: ip
+                    updated_at: '2025-01-08T05:16:25.882Z'
+                    updated_by: elastic
+                    value: 127.0.0.2
               schema:
-                examples:
-                  ipItem:
-                    value:
-                      _version: WzExLDFd
-                      '@timestamp': |
-                        2025-01-08T05:16:25.882Z
-                      created_at: |
-                        2025-01-08T05:16:25.882Z
-                      created_by: elastic
-                      id: qN1XRJQBs4HAK3VQs3Gc
-                      list_id: ip_list
-                      tie_breaker_id: a9a34c02-a385-436e-86a0-02a3942f3537
-                      type: ip
-                      updated_at: |
-                        2025-01-08T05:16:25.882Z
-                      updated_by: elastic
-                      value: 127.0.0.2
                 oneOf:
                   - $ref: '#/components/schemas/Security_Lists_API_ListItem'
                   - items:
@@ -32678,6 +32920,11 @@ paths:
         '400':
           content:
             application/json; Elastic-Api-Version=2023-10-31:
+              example:
+                badRequest:
+                  value:
+                    message: Either \"list_id\" or \"id\" needs to be defined in the request
+                    status_code: 400
               schema:
                 oneOf:
                   - $ref: '#/components/schemas/Security_Lists_API_PlatformErrorResponse'
@@ -32686,6 +32933,13 @@ paths:
         '401':
           content:
             application/json; Elastic-Api-Version=2023-10-31:
+              examples:
+                unauthorized:
+                  value:
+                    error: Unauthorized
+                    message: |
+                      [security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]
+                    statusCode: 401
               schema:
                 $ref: '#/components/schemas/Security_Lists_API_PlatformErrorResponse'
           description: Unsuccessful authentication response
@@ -32698,12 +32952,22 @@ paths:
         '404':
           content:
             application/json; Elastic-Api-Version=2023-10-31:
+              examples:
+                notFound:
+                  value:
+                    message: 'list item id: \"foo\" not found'
+                    status_code: 404
               schema:
                 $ref: '#/components/schemas/Security_Lists_API_SiemErrorResponse'
           description: List item not found response
         '500':
           content:
             application/json; Elastic-Api-Version=2023-10-31:
+              examples:
+                serverError:
+                  value:
+                    message: Internal Server Error
+                    status_code: 500
               schema:
                 $ref: '#/components/schemas/Security_Lists_API_SiemErrorResponse'
           description: Internal server error response
@@ -32752,23 +33016,25 @@ paths:
                   ipItem:
                     value:
                       _version: WzE5LDFd
-                      '@timestamp': |
-                        2025-01-08T05:15:05.159Z
-                      created_at: |
-                        2025-01-08T05:15:05.159Z
+                      '@timestamp': '2025-01-08T05:15:05.159Z'
+                      created_at: '2025-01-08T05:15:05.159Z'
                       created_by: elastic
                       id: pd1WRJQBs4HAK3VQeHFI
                       list_id: ip_list
                       tie_breaker_id: eee41dc7-1666-4876-982f-8b0f7b59eca3
                       type: ip
-                      updated_at: |
-                        2025-01-08T05:23:37.602Z
+                      updated_at: '2025-01-08T05:23:37.602Z'
                       updated_by: elastic
                       value: 255.255.255.255
           description: Successful response
         '400':
           content:
             application/json; Elastic-Api-Version=2023-10-31:
+              examples:
+                badRequest:
+                  value:
+                    message: '{"took":15,"timed_out":false,"total":1,"updated":0,"deleted":0,"batches":1,"version_conflicts":0,"noops":0,"retries":{"bulk":0,"search":0},"throttled_millis":0,"requests_per_second":-1,"throttled_until_millis":0,"failures":[{"index":".ds-.items-default-2025.01.09-000001","id":"ip_item","cause":{"type":"document_parsing_exception","reason":"[1:107] failed to parse field [ip] of type [ip] in document with id ip_item. Preview of fields value: 2","caused_by":{"type":"illegal_argument_exception","reason":"2 is not an IP string literal."}},"status":400}]}'
+                    status_code: 400
               schema:
                 oneOf:
                   - $ref: '#/components/schemas/Security_Lists_API_PlatformErrorResponse'
@@ -32777,6 +33043,13 @@ paths:
         '401':
           content:
             application/json; Elastic-Api-Version=2023-10-31:
+              examples:
+                unauthorized:
+                  value:
+                    error: Unauthorized
+                    message: |
+                      [security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]
+                    statusCode: 401
               schema:
                 $ref: '#/components/schemas/Security_Lists_API_PlatformErrorResponse'
           description: Unsuccessful authentication response
@@ -32789,12 +33062,22 @@ paths:
         '404':
           content:
             application/json; Elastic-Api-Version=2023-10-31:
+              examples:
+                notFound:
+                  value:
+                    message: 'list item id: \"foo\" not found'
+                    status_code: 404
               schema:
                 $ref: '#/components/schemas/Security_Lists_API_SiemErrorResponse'
           description: List item not found response
         '500':
           content:
             application/json; Elastic-Api-Version=2023-10-31:
+              examples:
+                serverError:
+                  value:
+                    message: Internal Server Error
+                    status_code: 500
               schema:
                 $ref: '#/components/schemas/Security_Lists_API_SiemErrorResponse'
           description: Internal server error response
@@ -32844,28 +33127,57 @@ paths:
           content:
             application/json; Elastic-Api-Version=2023-10-31:
               examples:
-                ipItem:
+                ip:
                   value:
                     _version: WzAsMV0=
-                    '@timestamp': |
-                      2025-01-08T04:59:06.154Z
-                    created_at: |
-                      2025-01-08T04:59:06.154Z
+                    '@timestamp': '2025-01-08T04:59:06.154Z'
+                    created_at: '2025-01-08T04:59:06.154Z'
                     created_by: elastic
                     id: 21b01cfb-058d-44b9-838c-282be16c91cc
                     list_id: ip_list
                     tie_breaker_id: b57c762c-3036-465c-9bfb-7bfb5e6e515a
                     type: ip
-                    updated_at: |
-                      2025-01-08T04:59:06.154Z
+                    updated_at: '2025-01-08T04:59:06.154Z'
                     updated_by: elastic
                     value: 127.0.0.1
+                ip_range:
+                  value:
+                    _version: WzEsMV0=
+                    '@timestamp': '2025-01-09T18:33:08.202Z'
+                    created_at: '2025-01-09T18:33:08.202Z'
+                    created_by: elastic
+                    id: ip_range_item
+                    list_id: ip_range_list
+                    tie_breaker_id: ea1b4189-efda-4637-b8f9-74655a5ebb61
+                    type: ip_range
+                    updated_at: '2025-01-09T18:33:08.202Z'
+                    updated_by: elastic
+                    value: 192.168.0.0/16
+                keyword:
+                  value:
+                    _version: WzIsMV0=
+                    '@timestamp': '2025-01-09T18:34:29.422Z'
+                    created_at: '2025-01-09T18:34:29.422Z'
+                    created_by: elastic
+                    id: 7f24737d-1da8-4626-a568-33070591bb4e
+                    list_id: keyword_list
+                    tie_breaker_id: 2108ced2-5e5d-401e-a88e-4dd69fc5fa27
+                    type: keyword
+                    updated_at: '2025-01-09T18:34:29.422Z'
+                    updated_by: elastic
+                    value: zeek
               schema:
                 $ref: '#/components/schemas/Security_Lists_API_ListItem'
           description: Successful response
         '400':
           content:
             application/json; Elastic-Api-Version=2023-10-31:
+              examples:
+                badRequest:
+                  value:
+                    error: Bad Request
+                    message: uri [/api/lists/items] with method [post] exists but is not available with the current configuration
+                    statusCode: 400
               schema:
                 oneOf:
                   - $ref: '#/components/schemas/Security_Lists_API_PlatformErrorResponse'
@@ -32874,6 +33186,13 @@ paths:
         '401':
           content:
             application/json; Elastic-Api-Version=2023-10-31:
+              examples:
+                unauthorized:
+                  value:
+                    error: Unauthorized
+                    message: |
+                      [security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]
+                    statusCode: 401
               schema:
                 $ref: '#/components/schemas/Security_Lists_API_PlatformErrorResponse'
           description: Unsuccessful authentication response
@@ -32883,15 +33202,36 @@ paths:
               schema:
                 $ref: '#/components/schemas/Security_Lists_API_PlatformErrorResponse'
           description: Not enough privileges response
+        '404':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              examples:
+                listNotFound:
+                  value:
+                    message: 'list id: \"ip_list\" does not exist'
+                    status_code: 404
+              schema:
+                $ref: '#/components/schemas/Security_Lists_API_PlatformErrorResponse'
+          description: Not enough privileges response
         '409':
           content:
             application/json; Elastic-Api-Version=2023-10-31:
+              examples:
+                alreadyExists:
+                  value:
+                    message: 'list item id: \"ip_item\" already exists'
+                    status_code: 409
               schema:
                 $ref: '#/components/schemas/Security_Lists_API_SiemErrorResponse'
           description: List item already exists response
         '500':
           content:
             application/json; Elastic-Api-Version=2023-10-31:
+              examples:
+                serverError:
+                  value:
+                    message: Internal Server Error
+                    status_code: 500
               schema:
                 $ref: '#/components/schemas/Security_Lists_API_SiemErrorResponse'
           description: Internal server error response
@@ -32934,26 +33274,29 @@ paths:
               schema:
                 $ref: '#/components/schemas/Security_Lists_API_ListItem'
                 examples:
-                  ipItem:
+                  ip:
                     value:
                       _version: WzIwLDFd
-                      '@timestamp': |
-                        2025-01-08T05:15:05.159Z
-                      created_at: |
-                        2025-01-08T05:15:05.159Z
+                      '@timestamp': '2025-01-08T05:15:05.159Z'
+                      created_at: '2025-01-08T05:15:05.159Z'
                       created_by: elastic
                       id: pd1WRJQBs4HAK3VQeHFI
                       list_id: ip_list
                       tie_breaker_id: eee41dc7-1666-4876-982f-8b0f7b59eca3
                       type: ip
-                      updated_at: |
-                        2025-01-08T05:44:14.009Z
+                      updated_at: '2025-01-08T05:44:14.009Z'
                       updated_by: elastic
                       value: 255.255.255.255
           description: Successful response
         '400':
           content:
             application/json; Elastic-Api-Version=2023-10-31:
+              examples:
+                badRequest:
+                  value:
+                    error: Bad Request
+                    message: '[request body]: id: Expected string, received number'
+                    statusCode: 400
               schema:
                 oneOf:
                   - $ref: '#/components/schemas/Security_Lists_API_PlatformErrorResponse'
@@ -32962,6 +33305,12 @@ paths:
         '401':
           content:
             application/json; Elastic-Api-Version=2023-10-31:
+              examples:
+                unauthorized:
+                  value:
+                    error: Unauthorized
+                    message: '[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]'
+                    statusCode: 401
               schema:
                 $ref: '#/components/schemas/Security_Lists_API_PlatformErrorResponse'
           description: Unsuccessful authentication response
@@ -32974,12 +33323,22 @@ paths:
         '404':
           content:
             application/json; Elastic-Api-Version=2023-10-31:
+              examples:
+                notFound:
+                  value:
+                    message: 'list item id: \"foo\" not found'
+                    status_code: 404
               schema:
                 $ref: '#/components/schemas/Security_Lists_API_SiemErrorResponse'
           description: List item not found response
         '500':
           content:
             application/json; Elastic-Api-Version=2023-10-31:
+              examples:
+                serverError:
+                  value:
+                    message: Internal Server Error
+                    status_code: 500
               schema:
                 $ref: '#/components/schemas/Security_Lists_API_SiemErrorResponse'
           description: Internal server error response
@@ -33011,6 +33370,11 @@ paths:
         '400':
           content:
             application/json; Elastic-Api-Version=2023-10-31:
+              examples:
+                badRequest:
+                  value:
+                    error: 'Bad Request","message":"[request query]: list_id: Required'
+                    statusCode: 400
               schema:
                 oneOf:
                   - $ref: '#/components/schemas/Security_Lists_API_PlatformErrorResponse'
@@ -33019,6 +33383,13 @@ paths:
         '401':
           content:
             application/json; Elastic-Api-Version=2023-10-31:
+              examples:
+                unauthorized:
+                  value:
+                    error: Unauthorized
+                    message: |
+                      [security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]
+                    statusCode: 401
               schema:
                 $ref: '#/components/schemas/Security_Lists_API_PlatformErrorResponse'
           description: Unsuccessful authentication response
@@ -33037,6 +33408,11 @@ paths:
         '500':
           content:
             application/json; Elastic-Api-Version=2023-10-31:
+              examples:
+                serverError:
+                  value:
+                    message: Internal Server Error
+                    status_code: 500
               schema:
                 $ref: '#/components/schemas/Security_Lists_API_SiemErrorResponse'
           description: Internal server error response
@@ -33112,27 +33488,24 @@ paths:
           content:
             application/json; Elastic-Api-Version=2023-10-31:
               examples:
-                ipItems:
-                  cursor: WzIwLFsiYjU3Yzc2MmMtMzAzNi00NjVjLTliZmItN2JmYjVlNmU1MTVhIl1d
-                  page: 1
-                  per_page: 20
-                  total: 1
+                ip:
                   value:
+                    cursor: WzIwLFsiYjU3Yzc2MmMtMzAzNi00NjVjLTliZmItN2JmYjVlNmU1MTVhIl1d
                     data:
                       - _version: WzAsMV0=
-                        '@timestamp': |
-                          2025-01-08T04:59:06.154Z
-                        created_at: |
-                          2025-01-08T04:59:06.154Z
+                        '@timestamp': '2025-01-08T04:59:06.154Z'
+                        created_at: '2025-01-08T04:59:06.154Z'
                         created_by: elastic
                         id: 21b01cfb-058d-44b9-838c-282be16c91cc
                         list_id: ip_list
                         tie_breaker_id: b57c762c-3036-465c-9bfb-7bfb5e6e515a
                         type: ip
-                        updated_at: |
-                          2025-01-08T04:59:06.154Z
+                        updated_at: '2025-01-08T04:59:06.154Z'
                         updated_by: elastic
                         value: 127.0.0.1
+                    page: 1
+                    per_page: 20
+                    total: 1
               schema:
                 type: object
                 properties:
@@ -33161,6 +33534,12 @@ paths:
         '400':
           content:
             application/json; Elastic-Api-Version=2023-10-31:
+              examples:
+                badRequest:
+                  value:
+                    error: Bad Request,
+                    message: '[request query]: list_id: Required'
+                    statusCode: 400,
               schema:
                 oneOf:
                   - $ref: '#/components/schemas/Security_Lists_API_PlatformErrorResponse'
@@ -33169,6 +33548,13 @@ paths:
         '401':
           content:
             application/json; Elastic-Api-Version=2023-10-31:
+              examples:
+                unauthorized:
+                  value:
+                    error: Unauthorized
+                    message: |
+                      [security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]
+                    statusCode: 401
               schema:
                 $ref: '#/components/schemas/Security_Lists_API_PlatformErrorResponse'
           description: Unsuccessful authentication response
@@ -33181,6 +33567,11 @@ paths:
         '500':
           content:
             application/json; Elastic-Api-Version=2023-10-31:
+              examples:
+                serverError:
+                  value:
+                    message: Internal Server Error
+                    status_code: 500
               schema:
                 $ref: '#/components/schemas/Security_Lists_API_SiemErrorResponse'
           description: Internal server error response
@@ -33258,13 +33649,11 @@ paths:
               schema:
                 $ref: '#/components/schemas/Security_Lists_API_List'
                 examples:
-                  ipListItems:
+                  ip:
                     value:
                       _version: WzAsMV0=
-                      '@timestamp': |
-                        2025-01-08T04:47:34.273Z
-                      created_at: |
-                        2025-01-08T04:47:34.273Z
+                      '@timestamp': '2025-01-08T04:47:34.273Z'
+                      created_at: '2025-01-08T04:47:34.273Z'
                       created_by: elastic
                       description: This list describes bad internet ip
                       id: ip_list
@@ -33272,14 +33661,18 @@ paths:
                       name: Simple list with an ip
                       tie_breaker_id: f5508188-b1e9-4e6e-9662-d039a7d89899
                       type: ip
-                      updated_at: |
-                        2025-01-08T04:47:34.273Z
+                      updated_at: '2025-01-08T04:47:34.273Z'
                       updated_by: elastic
                       version: 1
           description: Successful response
         '400':
           content:
             application/json; Elastic-Api-Version=2023-10-31:
+              examples:
+                badRequest:
+                  value:
+                    message: Either type or list_id need to be defined in the query
+                    status_code: 400
               schema:
                 oneOf:
                   - $ref: '#/components/schemas/Security_Lists_API_PlatformErrorResponse'
@@ -33288,6 +33681,13 @@ paths:
         '401':
           content:
             application/json; Elastic-Api-Version=2023-10-31:
+              examples:
+                unauthorized:
+                  value:
+                    error: Unauthorized
+                    message: |
+                      [security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]
+                    statusCode: 401
               schema:
                 $ref: '#/components/schemas/Security_Lists_API_PlatformErrorResponse'
           description: Unsuccessful authentication response
@@ -33306,6 +33706,11 @@ paths:
         '500':
           content:
             application/json; Elastic-Api-Version=2023-10-31:
+              examples:
+                serverError:
+                  value:
+                    message: Internal Server Error
+                    status_code: 500
               schema:
                 $ref: '#/components/schemas/Security_Lists_API_SiemErrorResponse'
           description: Internal server error response
@@ -33413,6 +33818,13 @@ paths:
         '401':
           content:
             application/json; Elastic-Api-Version=2023-10-31:
+              examples:
+                unauthorized:
+                  value:
+                    error: Unauthorized
+                    message: |
+                      [security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]
+                    statusCode: 401
               schema:
                 $ref: '#/components/schemas/Security_Lists_API_PlatformErrorResponse'
           description: Unsuccessful authentication response
@@ -33425,6 +33837,11 @@ paths:
         '500':
           content:
             application/json; Elastic-Api-Version=2023-10-31:
+              examples:
+                serverError:
+                  value:
+                    message: Internal Server Error
+                    status_code: 500
               schema:
                 $ref: '#/components/schemas/Security_Lists_API_SiemErrorResponse'
           description: Internal server error response
