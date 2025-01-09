@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook, act } from '@testing-library/react';
 import { useDelayedVisibility } from './use_delayed_visibility';
 import { HEIGHT_ANIMATION_DURATION } from '../onboarding_card_panel.styles';
 
