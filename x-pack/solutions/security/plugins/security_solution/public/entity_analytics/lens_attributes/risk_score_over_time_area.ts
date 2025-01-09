@@ -10,10 +10,10 @@ import type { GetLensAttributes } from '../../common/components/visualization_ac
 
 const internalReferenceIdMapping: Record<string, string> = { host: uuidv4(), user: uuidv4() };
 
-export const getRiskScoreOverTimeAreaAttributes: GetLensAttributes = (
+export const getRiskScoreOverTimeAreaAttributes: GetLensAttributes = ({
   stackByField = 'host',
-  extraOptions = { spaceId: 'default' }
-) => {
+  extraOptions = { spaceId: 'default' },
+}) => {
   const layerIds = [uuidv4(), uuidv4()];
   const layer2ColumnId = uuidv4();
   const internalReferenceId = internalReferenceIdMapping[stackByField];
