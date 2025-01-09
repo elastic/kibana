@@ -11,6 +11,11 @@ node scripts/stylelint
 echo "stylelint ✅"
 
 echo '--- Lint: eslint'
+
+# cleanup old eslint cache
+echo "Cleaning up old eslint cache"
+find . -name ".eslintcache" -delete -print
+
 # disable "Exit immediately" mode so that we can run eslint, capture it's exit code, and respond appropriately
 # after possibly commiting fixed files to the repo
 set +e;
