@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import React, { useContext } from 'react';
 import { Routes, Route } from '@kbn/shared-ux-router';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { HeaderMenuPortal, useLinkProps } from '@kbn/observability-shared-plugin/public';
+import { HeaderMenuPortal } from '@kbn/observability-shared-plugin/public';
 import type { SharePublicStart } from '@kbn/share-plugin/public/plugin';
 import {
   type ObservabilityOnboardingLocatorParams,
@@ -46,11 +46,6 @@ export const LogsPageContent: React.FunctionComponent = () => {
 
   const routes = getLogsAppRoutes();
 
-  const settingsLinkProps = useLinkProps({
-    app: 'logs',
-    pathname: 'settings',
-  });
-
   return (
     <>
       <HelpCenterContent feedbackLink={feedbackLinkUrl} appName={pageTitle} />
@@ -60,9 +55,6 @@ export const LogsPageContent: React.FunctionComponent = () => {
           <EuiFlexGroup responsive={false} gutterSize="s">
             <EuiFlexItem>
               <EuiHeaderLinks gutterSize="xs">
-                <EuiHeaderLink color={'text'} {...settingsLinkProps}>
-                  {settingsTabTitle}
-                </EuiHeaderLink>
                 <LazyAlertDropdownWrapper />
                 <EuiHeaderLink
                   href={onboardingLocator?.useUrl({ category: 'logs' })}
@@ -101,10 +93,6 @@ export const LogsPageContent: React.FunctionComponent = () => {
 
 const pageTitle = i18n.translate('xpack.infra.header.logsTitle', {
   defaultMessage: 'Logs',
-});
-
-const settingsTabTitle = i18n.translate('xpack.infra.logs.index.settingsTabTitle', {
-  defaultMessage: 'Settings',
 });
 
 const feedbackLinkUrl = 'https://discuss.elastic.co/c/logs';
