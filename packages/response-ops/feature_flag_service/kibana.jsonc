@@ -1,5 +1,0 @@
-{
-  "type": "shared-common",
-  "id": "@kbn/response-ops-feature-flag-service",
-  "owner": "@elastic/response-ops"
-}
