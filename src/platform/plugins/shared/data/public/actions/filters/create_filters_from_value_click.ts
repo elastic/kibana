@@ -157,7 +157,7 @@ export const createFilterESQL = async (
     interval: number;
   };
 
-  const value: any = rowIndex > -1 ? table.rows[rowIndex][column.id] : null;
+  const value = rowIndex > -1 ? table.rows[rowIndex][column.id] : null;
   if (value === null || value === undefined) {
     return;
   }
