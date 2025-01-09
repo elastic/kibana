@@ -445,6 +445,11 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       remoteClustersOnPremSetupTrustWithCert: `${ELASTICSEARCH_DOCS}remote-clusters-cert.html`,
       remoteClustersOnPremSetupTrustWithApiKey: `${ELASTICSEARCH_DOCS}remote-clusters-api-key.html`,
       remoteClustersCloudSetupTrust: `${ELASTIC_WEBSITE_URL}guide/en/cloud/current/ec-enable-ccs.html`,
+      remoteClustersCreateCloudClusterApiKey: `${ELASTICSEARCH_DOCS}security-api-create-cross-cluster-api-key.html`,
+      remoteClustersOnPremPrerequisitesApiKey: `${ELASTICSEARCH_DOCS}remote-clusters-api-key.html#remote-clusters-prerequisites-api-key`,
+      remoteClustersOnPremSecurityApiKey: `${ELASTICSEARCH_DOCS}remote-clusters-api-key.html#remote-clusters-security-api-key`,
+      remoteClustersOnPremPrerequisitesCert: `${ELASTICSEARCH_DOCS}remote-clusters-cert.html#remote-clusters-prerequisites-cert`,
+      remoteClustersOnPremSecurityCert: `${ELASTICSEARCH_DOCS}remote-clusters-cert.html#remote-clusters-security-cert`,
       rollupMigratingToDownsampling: `${ELASTICSEARCH_DOCS}rollup-migrating-to-downsampling.html`,
       rrf: `${ELASTICSEARCH_DOCS}rrf.html`,
       scriptParameters: `${ELASTICSEARCH_DOCS}modules-scripting-using.html#prefer-params`,
@@ -469,9 +474,12 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       ruleApiOverview: `${SECURITY_SOLUTION_DOCS}rule-api-overview.html`,
       configureAlertSuppression: `${SECURITY_SOLUTION_DOCS}alert-suppression.html#_configure_alert_suppression`,
     },
+    server: {
+      protocol: `${KIBANA_DOCS}settings.html#server-protocol`,
+    },
     securitySolution: {
       artifactControl: `${SECURITY_SOLUTION_DOCS}artifact-control.html`,
-      avcResults: `${ELASTIC_WEBSITE_URL}blog/elastic-av-comparatives-business-security-test`,
+      avcResults: `${ELASTIC_WEBSITE_URL}blog/elastic-security-av-comparatives-business-test`,
       bidirectionalIntegrations: `${SECURITY_SOLUTION_DOCS}third-party-actions.html`,
       trustedApps: `${SECURITY_SOLUTION_DOCS}trusted-apps-ov.html`,
       eventFilters: `${SECURITY_SOLUTION_DOCS}event-filters.html`,
@@ -536,6 +544,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       timelionSettings: `${KIBANA_DOCS}advanced-options.html#kibana-timelion-settings`,
       generalSettings: `${KIBANA_DOCS}advanced-options.html#kibana-general-settings`,
       savedObjectsApiList: `${KIBANA_DOCS}saved-objects-api.html#saved-objects-api`,
+      apiKeys: `${KIBANA_DOCS}api-keys.html`,
     },
     ml: {
       guide: `${MACHINE_LEARNING_DOCS}index.html`,
@@ -901,7 +910,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       dataStreams: `${ELASTIC_WEBSITE_URL}guide/en/ecs/${ECS_VERSION}/ecs-data_stream.html`,
     },
     clients: {
-      /** Changes to these URLs must also be synched in src/plugins/custom_integrations/server/language_clients/index.ts */
+      /** Changes to these URLs must also be synched in src/platform/plugins/shared/custom_integrations/server/language_clients/index.ts */
       guide: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/client/index.html`,
       goConnecting: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/client/go-api/${DOC_LINK_VERSION}/connecting.html`,
       goGettingStarted: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/client/go-api/${DOC_LINK_VERSION}/getting-started-go.html`,
@@ -1010,6 +1019,9 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
     },
     cases: {
       legacyApiDeprecations: `${KIBANA_DOCS}breaking-changes-summary.html#breaking-201004`,
+    },
+    synonyms: {
+      synonymsAPIDocumentation: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/reference/current/synonyms-apis.html`,
     },
   });
 };

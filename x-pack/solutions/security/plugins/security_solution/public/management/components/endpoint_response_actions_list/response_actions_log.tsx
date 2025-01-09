@@ -70,6 +70,9 @@ export const ResponseActionsLog = memo<
     const isCrowdstrikeEnabled = useIsExperimentalFeatureEnabled(
       'responseActionsCrowdstrikeManualHostIsolationEnabled'
     );
+    const isMicrosoftDefenderEnabled = useIsExperimentalFeatureEnabled(
+      'responseActionsMSDefenderEndpointEnabled'
+    );
 
     // Used to decide if display global loader or not (only the fist time tha page loads)
     const [isFirstAttempt, setIsFirstAttempt] = useState(true);
@@ -92,7 +95,7 @@ export const ResponseActionsLog = memo<
         setQueryParams((prevState) => ({
           ...prevState,
           agentTypes:
-            isSentinelOneV1Enabled || isCrowdstrikeEnabled
+            isSentinelOneV1Enabled || isCrowdstrikeEnabled || isMicrosoftDefenderEnabled
               ? agentTypesFromUrl?.length
                 ? agentTypesFromUrl
                 : prevState.agentTypes
@@ -121,6 +124,7 @@ export const ResponseActionsLog = memo<
       isFlyout,
       isCrowdstrikeEnabled,
       isSentinelOneV1Enabled,
+      isMicrosoftDefenderEnabled,
       statusesFromUrl,
       setQueryParams,
       usersFromUrl,
