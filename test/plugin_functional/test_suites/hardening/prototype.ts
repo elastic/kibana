@@ -24,7 +24,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
         .set('kbn-xsrf', 'true')
         .expect(200);
 
-      await snapshots.compareAgainstBaseline('hardening/prototype-server', response.body);
+      await snapshots.compareAgainstBaseline('hardening/prototype_server', response.body);
     });
 
     it('does not allow polluting most prototypes on the client', async () => {
@@ -35,7 +35,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
       expect(await browser.getTitle()).eql(pageTitle);
 
       const resultText = await testSubjects.getVisibleText('pollution-result');
-      await snapshots.compareAgainstBaseline('hardening/prototype-client', JSON.parse(resultText));
+      await snapshots.compareAgainstBaseline('hardening/prototype_client', JSON.parse(resultText));
     });
   });
 }
