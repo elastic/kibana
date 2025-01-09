@@ -80,7 +80,6 @@ import {
   convertCaseToCamelCase,
   convertCasesToCamelCase,
   convertCaseResolveToCamelCase,
-  convertAttachmentsToCamelCase,
   convertSimilarCasesToCamel,
 } from '../api/utils';
 
