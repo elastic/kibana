@@ -16,8 +16,9 @@ import { css } from '@emotion/react';
 
 import { DragPreview } from '../drag_preview';
 import { GridPanel } from '../grid_panel';
-import { GridLayoutStateManager, PanelInteractionEvent } from '../types';
+import { GridLayoutStateManager, PanelInteractionEvent, UserInteractionEvent } from '../types';
 import { getKeysInOrder } from '../utils/resolve_grid_row';
+import { isMouseEvent, isTouchEvent } from '../utils/sensors';
 import { GridRowHeader } from './grid_row_header';
 
 export interface GridRowProps {
@@ -191,7 +192,6 @@ export const GridRow = forwardRef<HTMLDivElement, GridRowProps>(
                 const panelRef = gridLayoutStateManager.panelRefs.current[rowIndex][panelId];
                 if (!panelRef) return;
 
-                const panelRect = panelRef.getBoundingClientRect();
                 if (type === 'drop') {
                   setInteractionEvent(undefined);
                   /**
@@ -203,17 +203,15 @@ export const GridRow = forwardRef<HTMLDivElement, GridRowProps>(
                     getKeysInOrder(gridLayoutStateManager.gridLayout$.getValue()[rowIndex].panels)
                   );
                 } else {
+                  const panelRect = panelRef.getBoundingClientRect();
+                  const pointerOffsets = getPointerOffsets(e, panelRect);
+
                   setInteractionEvent({
                     type,
                     id: panelId,
                     panelDiv: panelRef,
                     targetRowIndex: rowIndex,
-                    mouseOffsets: {
-                      top: e.clientY - panelRect.top,
-                      left: e.clientX - panelRect.left,
-                      right: e.clientX - panelRect.right,
-                      bottom: e.clientY - panelRect.bottom,
-                    },
+                    pointerOffsets,
                   });
                 }
               }}
@@ -270,3 +268,32 @@ export const GridRow = forwardRef<HTMLDivElement, GridRowProps>(
     );
   }
 );
+
+const defaultPointerOffsets = {
+  top: 0,
+  left: 0,
+  right: 0,
+  bottom: 0,
+};
+
+function getPointerOffsets(e: UserInteractionEvent, panelRect: DOMRect) {
+  if (isTouchEvent(e)) {
+    if (e.touches.length > 1) return defaultPointerOffsets;
+    const touch = e.touches[0];
+    return {
+      top: touch.clientY - panelRect.top,
+      left: touch.clientX - panelRect.left,
+      right: touch.clientX - panelRect.right,
+      bottom: touch.clientY - panelRect.bottom,
+    };
+  }
+  if (isMouseEvent(e)) {
+    return {
+      top: e.clientY - panelRect.top,
+      left: e.clientX - panelRect.left,
+      right: e.clientX - panelRect.right,
+      bottom: e.clientY - panelRect.bottom,
+    };
+  }
+  throw new Error('Invalid event type');
+}

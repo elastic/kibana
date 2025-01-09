@@ -222,7 +222,6 @@ async function listManagedStreams({
 
   const streams = streamsSearchResponse.hits.hits.map((hit) => ({
     ...hit._source!,
-    managed: true,
   }));
 
   const privileges = await scopedClusterClient.asCurrentUser.security.hasPrivileges({

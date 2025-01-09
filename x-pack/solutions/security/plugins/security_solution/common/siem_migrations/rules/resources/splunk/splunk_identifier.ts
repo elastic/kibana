@@ -11,17 +11,17 @@
  * Please make sure to test all regular expressions them before using them.
  * At the time of writing, this tool can be used to test it: https://devina.io/redos-checker
  */
+import type { RuleMigrationResourceBase } from '../../../model/rule_migration.gen';
+import type { ResourceIdentifier } from '../types';
 
-import type { ResourceIdentifier, RuleResource } from '../types';
-
-const listRegex = /\b(?:lookup)\s+([\w-]+)\b/g; // Captures only the lookup name
+const lookupRegex = /\b(?:lookup)\s+([\w-]+)\b/g; // Captures only the lookup name
 const macrosRegex = /`([\w-]+)(?:\(([^`]*?)\))?`/g; // Captures only the macro name and arguments
 
 export const splResourceIdentifier: ResourceIdentifier = (input) => {
-  // sanitize the query to avoid mismatching macro and list names inside comments or literal strings
+  // sanitize the query to avoid mismatching macro and lookup names inside comments or literal strings
   const sanitizedInput = sanitizeInput(input);
 
-  const resources: RuleResource[] = [];
+  const resources: RuleMigrationResourceBase[] = [];
   let macroMatch;
   while ((macroMatch = macrosRegex.exec(sanitizedInput)) !== null) {
     const macroName = macroMatch[1] as string;
@@ -31,17 +31,17 @@ export const splResourceIdentifier: ResourceIdentifier = (input) => {
     resources.push({ type: 'macro', name: macroWithArgs });
   }
 
-  let listMatch;
-  while ((listMatch = listRegex.exec(sanitizedInput)) !== null) {
-    resources.push({ type: 'list', name: listMatch[1] });
+  let lookupMatch;
+  while ((lookupMatch = lookupRegex.exec(sanitizedInput)) !== null) {
+    resources.push({ type: 'lookup', name: lookupMatch[1].replace(/_lookup$/, '') });
   }
 
   return resources;
 };
 
-// Comments should be removed before processing the query to avoid matching macro and list names inside them
+// Comments should be removed before processing the query to avoid matching macro and lookup names inside them
 const commentRegex = /```.*?```/g;
-// Literal strings should be replaced with a placeholder to avoid matching macro and list names inside them
+// Literal strings should be replaced with a placeholder to avoid matching macro and lookup names inside them
 const doubleQuoteStrRegex = /".*?"/g;
 const singleQuoteStrRegex = /'.*?'/g;
 // lookup operator can have modifiers like local=true or update=false before the lookup name, we need to remove them
