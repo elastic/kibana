@@ -1892,7 +1892,7 @@ describe('Response actions history', () => {
         'Elastic Defend',
         'SentinelOne',
         'Crowdstrike',
-        'microsoft_defender_endpoint',
+        'Microsoft Defender for Endpoint',
         'Triggered by rule',
         'Triggered manually',
       ]);
