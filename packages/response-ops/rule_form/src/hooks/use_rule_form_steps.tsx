@@ -9,7 +9,7 @@
 
 import { omit } from 'lodash';
 import { EuiHorizontalRule, EuiSpacer, EuiStepsProps, EuiStepsHorizontalProps } from '@elastic/eui';
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, PropsWithChildren } from 'react';
 import { useRuleFormState } from './use_rule_form_state';
 import { RuleActions } from '../rule_actions';
 import { RuleDefinition } from '../rule_definition';
@@ -39,6 +39,35 @@ const isStepBefore = (step: RuleFormStepId, comparisonStep: RuleFormStepId) => {
   return STEP_ORDER.indexOf(step) < STEP_ORDER.indexOf(comparisonStep);
 };
 
+const getStepStatus = ({
+  step,
+  currentStep,
+  hasErrors,
+  touchedSteps,
+}: {
+  step: RuleFormStepId;
+  currentStep: RuleFormStepId;
+  hasErrors: boolean;
+  touchedSteps: Record<RuleFormStepId, boolean>;
+}) => {
+  // Only apply the current status if currentStep is being tracked
+  if (currentStep === step) return 'current';
+
+  if (hasErrors) {
+    // Only apply the danger status if the user has interacted with this step and then focused on something else
+    // Otherwise just mark it as incomplete
+    return touchedSteps[step] ? 'danger' : 'incomplete';
+  }
+  // Only mark this step complete or incomplete if the currentStep flag is being used, otherwise set no status
+  if (currentStep && isStepBefore(step, currentStep)) {
+    return 'complete';
+  } else if (currentStep) {
+    return 'incomplete';
+  }
+
+  return undefined;
+};
+
 // Create a common hook for both horizontal and vertical steps
 const useCommonRuleFormSteps = ({ touchedSteps, currentStep }: UseRuleFormStepsOptions) => {
   const {
@@ -64,57 +93,41 @@ const useCommonRuleFormSteps = ({ touchedSteps, currentStep }: UseRuleFormStepsO
   }, [actionsErrors, actionsParamsErrors]);
 
   const hasRuleDetailsError = useMemo(() => {
-    return baseErrors.name?.length || baseErrors.tags?.length;
+    return Boolean(baseErrors.name?.length || baseErrors.tags?.length);
   }, [baseErrors]);
 
-  const ruleDefinitionStatus = useMemo(() => {
-    // Only apply the current status if currentStep is being tracked
-    if (currentStep === RuleFormStepId.DEFINITION) return 'current';
+  const ruleDefinitionStatus = useMemo(
+    () =>
+      getStepStatus({
+        step: RuleFormStepId.DEFINITION,
+        currentStep,
+        hasErrors: hasRuleDefinitionErrors,
+        touchedSteps,
+      }),
+    [hasRuleDefinitionErrors, currentStep, touchedSteps]
+  );
 
-    if (hasRuleDefinitionErrors) {
-      // Only apply the danger status if the user has interacted with this step and then focused on something else
-      // Otherwise just mark it as incomplete
-      return touchedSteps[RuleFormStepId.DEFINITION] ? 'danger' : 'incomplete';
-    }
-    // Only mark this step complete or incomplete if the currentStep flag is being used, otherwise set no status
-    if (currentStep && isStepBefore(RuleFormStepId.DEFINITION, currentStep)) {
-      return 'complete';
-    } else if (currentStep) {
-      return 'incomplete';
-    }
+  const actionsStatus = useMemo(
+    () =>
+      getStepStatus({
+        step: RuleFormStepId.ACTIONS,
+        currentStep,
+        hasErrors: hasActionErrors,
+        touchedSteps,
+      }),
+    [hasActionErrors, currentStep, touchedSteps]
+  );
 
-    return undefined;
-  }, [hasRuleDefinitionErrors, currentStep, touchedSteps]);
-
-  const actionsStatus = useMemo(() => {
-    if (currentStep === RuleFormStepId.ACTIONS) return 'current';
-
-    if (hasActionErrors) {
-      return touchedSteps[RuleFormStepId.ACTIONS] ? 'danger' : 'incomplete';
-    }
-    if (currentStep && isStepBefore(RuleFormStepId.ACTIONS, currentStep)) {
-      return 'complete';
-    } else if (currentStep) {
-      return 'incomplete';
-    }
-
-    return undefined;
-  }, [hasActionErrors, currentStep, touchedSteps]);
-
-  const ruleDetailsStatus = useMemo(() => {
-    if (currentStep === RuleFormStepId.DETAILS) return 'current';
-
-    if (hasRuleDetailsError) {
-      return touchedSteps[RuleFormStepId.DETAILS] ? 'danger' : 'incomplete';
-    }
-    if (currentStep && isStepBefore(RuleFormStepId.DETAILS, currentStep)) {
-      return 'complete';
-    } else if (currentStep) {
-      return 'incomplete';
-    }
-
-    return undefined;
-  }, [hasRuleDetailsError, currentStep, touchedSteps]);
+  const ruleDetailsStatus = useMemo(
+    () =>
+      getStepStatus({
+        step: RuleFormStepId.DETAILS,
+        currentStep,
+        hasErrors: hasRuleDetailsError,
+        touchedSteps,
+      }),
+    [hasRuleDetailsError, currentStep, touchedSteps]
+  );
 
   const steps = useMemo(
     () => ({
@@ -172,21 +185,23 @@ export const useRuleFormSteps: () => RuleFormVerticalSteps = () => {
     )
   );
 
-  const reportOnBlur = useCallback(
-    (stepId: RuleFormStepId, element: React.JSX.Element) => (
-      <div
-        data-test-subj={`ruleFormStep-${stepId}-reportOnBlur`}
-        onBlur={() =>
-          !touchedSteps[stepId] &&
-          setTouchedSteps((prevTouchedSteps) => ({
-            ...prevTouchedSteps,
-            [stepId]: true,
-          }))
-        }
-      >
-        {element}
-      </div>
-    ),
+  const ReportOnBlur: React.FC<PropsWithChildren<{ stepId: RuleFormStepId }>> = useMemo(
+    () =>
+      ({ stepId, children }) =>
+        (
+          <div
+            data-test-subj={`ruleFormStep-${stepId}-reportOnBlur`}
+            onBlur={() =>
+              !touchedSteps[stepId] &&
+              setTouchedSteps((prevTouchedSteps) => ({
+                ...prevTouchedSteps,
+                [stepId]: true,
+              }))
+            }
+          >
+            {children}
+          </div>
+        ),
     [touchedSteps]
   );
 
@@ -199,12 +214,12 @@ export const useRuleFormSteps: () => RuleFormVerticalSteps = () => {
         return step
           ? {
               ...step,
-              children: reportOnBlur(stepId, step.children),
+              children: <ReportOnBlur stepId={stepId}>{step.children}</ReportOnBlur>,
             }
           : null;
       })
       .filter(Boolean) as EuiStepsProps['steps'];
-  }, [steps, stepOrder, reportOnBlur]);
+  }, [steps, stepOrder, ReportOnBlur]);
 
   return { steps: mappedSteps };
 };
