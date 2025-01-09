@@ -488,7 +488,6 @@ packages/kbn-find-used-node-modules @elastic/kibana-operations
 x-pack/platform/plugins/shared/fleet @elastic/fleet
 packages/kbn-flot-charts @elastic/kibana-operations
 x-pack/test/ui_capabilities/common/plugins/foo_plugin @elastic/kibana-security
-packages/kbn-formatters @elastic/obs-ux-logs-team
 src/platform/plugins/private/ftr_apis @elastic/kibana-core
 packages/kbn-ftr-common-functional-services @elastic/kibana-operations @elastic/appex-qa
 packages/kbn-ftr-common-functional-ui-services @elastic/appex-qa
@@ -748,7 +747,6 @@ src/platform/packages/private/kbn-reporting/server @elastic/appex-sharedux
 src/platform/packages/shared/kbn-resizable-layout @elastic/kibana-data-discovery
 examples/resizable_layout_examples @elastic/kibana-data-discovery
 x-pack/test/plugin_functional/plugins/resolver_test @elastic/security-solution
-packages/response-ops/feature_flag_service @elastic/response-ops
 packages/response-ops/rule_form @elastic/response-ops
 src/platform/packages/shared/response-ops/rule_params @elastic/response-ops
 examples/response_stream @elastic/ml-ui
@@ -776,7 +774,7 @@ src/platform/plugins/shared/saved_objects_management @elastic/kibana-core
 src/platform/plugins/shared/saved_objects @elastic/kibana-core
 packages/kbn-saved-objects-settings @elastic/appex-sharedux
 src/platform/plugins/shared/saved_objects_tagging_oss @elastic/appex-sharedux
-x-pack/platform/plugins/private/saved_objects_tagging @elastic/appex-sharedux
+x-pack/platform/plugins/shared/saved_objects_tagging @elastic/appex-sharedux
 packages/kbn-saved-search-component @elastic/obs-ux-logs-team
 src/platform/plugins/shared/saved_search @elastic/kibana-data-discovery
 packages/kbn-scout @elastic/appex-qa

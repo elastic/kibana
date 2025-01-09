@@ -110,8 +110,7 @@ const INTEGRATIONS_COLUMN: TableColumn = {
 const createInstallButtonColumn = (
   installOneRule: AddPrebuiltRulesTableActions['installOneRule'],
   loadingRules: RuleSignatureId[],
-  isDisabled: boolean,
-  isInstallingAllRules: boolean
+  isDisabled: boolean
 ): TableColumn => ({
   field: 'rule_id',
   name: <RulesTableEmptyColumnName name={i18n.INSTALL_RULE_BUTTON} />,
@@ -122,7 +121,6 @@ const createInstallButtonColumn = (
       installOneRule={installOneRule}
       loadingRules={loadingRules}
       isDisabled={isDisabled}
-      isInstallingAllRules={isInstallingAllRules}
     />
   ),
   width: '10%',
@@ -166,23 +164,9 @@ export const useAddPrebuiltRulesTableColumns = (): TableColumn[] => {
         width: '12%',
       },
       ...(hasCRUDPermissions
-        ? [
-            createInstallButtonColumn(
-              installOneRule,
-              loadingRules,
-              isDisabled,
-              isInstallingAllRules
-            ),
-          ]
+        ? [createInstallButtonColumn(installOneRule, loadingRules, isDisabled)]
         : []),
     ],
-    [
-      hasCRUDPermissions,
-      installOneRule,
-      loadingRules,
-      isDisabled,
-      showRelatedIntegrations,
-      isInstallingAllRules,
-    ]
+    [hasCRUDPermissions, installOneRule, loadingRules, isDisabled, showRelatedIntegrations]
   );
 };
