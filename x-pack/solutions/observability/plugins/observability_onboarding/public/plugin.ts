@@ -81,7 +81,6 @@ export class ObservabilityOnboardingPlugin
     const config = this.ctx.config.get<ObservabilityOnboardingConfig>();
     const isServerlessBuild = this.ctx.env.packageInfo.buildFlavor === 'serverless';
     const isDevEnvironment = this.ctx.env.mode.dev;
-    const kibanaBranch = this.ctx.env.packageInfo.branch;
     const pluginSetupDeps = plugins;
 
     core.application.register({
@@ -114,7 +113,6 @@ export class ObservabilityOnboardingPlugin
             isServerless: Boolean(pluginSetupDeps.cloud?.isServerlessEnabled) || isServerlessBuild,
             stackVersion,
             cloudServiceProvider: pluginSetupDeps.cloud?.csp,
-            kibanaBranch,
           },
         });
       },
