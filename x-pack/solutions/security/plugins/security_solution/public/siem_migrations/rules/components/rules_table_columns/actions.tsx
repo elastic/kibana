@@ -14,10 +14,7 @@ import {
 import { getRuleDetailsUrl } from '../../../../common/components/link_to';
 import { useKibana } from '../../../../common/lib/kibana';
 import { APP_UI_ID, SecurityPageName } from '../../../../../common';
-import {
-  RuleMigrationStatusEnum,
-  type RuleMigration,
-} from '../../../../../common/siem_migrations/model/rule_migration.gen';
+import { type RuleMigration } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import * as i18n from './translations';
 import { type TableColumn } from './constants';
 
@@ -60,6 +57,12 @@ const ActionName = ({
     [hrefRuleDetails, navigateToUrl]
   );
 
+  // Failed
+  if (migrationRule.status === SiemMigrationStatus.FAILED) {
+    return null;
+  }
+
+  // Installed
   if (migrationRule.elastic_rule?.id) {
     return (
       // eslint-disable-next-line @elastic/eui/href-or-on-click
@@ -69,14 +72,7 @@ const ActionName = ({
     );
   }
 
-  if (migrationRule.status === SiemMigrationStatus.FAILED) {
-    return (
-      <EuiLink disabled={disableActions} onClick={() => {}} data-test-subj="restartRule">
-        {i18n.ACTIONS_RESTART_LABEL}
-      </EuiLink>
-    );
-  }
-
+  // Installable
   if (migrationRule.translation_result === RuleTranslationResult.FULL) {
     return (
       <EuiLink
@@ -91,6 +87,7 @@ const ActionName = ({
     );
   }
 
+  // Partially translated or untranslated
   return (
     <EuiLink
       disabled={disableActions}
@@ -119,7 +116,7 @@ export const createActionsColumn = ({
     field: 'elastic_rule',
     name: i18n.COLUMN_ACTIONS,
     render: (_, rule: RuleMigration) => {
-      return rule.status === RuleMigrationStatusEnum.failed ? null : (
+      return (
         <ActionName
           disableActions={disableActions}
           migrationRule={rule}
