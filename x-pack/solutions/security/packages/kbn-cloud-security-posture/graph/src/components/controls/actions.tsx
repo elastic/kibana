@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   type CommonProps,
   EuiButtonIcon,
@@ -16,23 +16,40 @@ import {
   useEuiTheme,
   EuiNotificationBadge,
   EuiButton,
+  EuiTourStep,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
 import {
   GRAPH_ACTIONS_INVESTIGATE_IN_TIMELINE_ID,
   GRAPH_ACTIONS_TOGGLE_SEARCH_ID,
 } from '../test_ids';
+import { SHOW_SEARCH_BAR_BUTTON_TOUR_STORAGE_KEY } from '../../common/constants';
+
+const toggleSearchBarTourTitle = i18n.translate(
+  'securitySolutionPackages.csp.graph.controls.toggleSearchBar.tour.title',
+  {
+    defaultMessage: 'Adjust correlation with search',
+  }
+);
+
+const toggleSearchBarTourContent = i18n.translate(
+  'securitySolutionPackages.csp.graph.controls.toggleSearchBar.tour.content',
+  {
+    defaultMessage: 'You can view all your correlations in a familiar KQL form',
+  }
+);
 
 const toggleSearchBarTooltip = i18n.translate(
-  'securitySolutionPackages.csp.graph.controls.toggleSearchBar',
+  'securitySolutionPackages.csp.graph.controls.toggleSearchBar.tooltip',
   {
     defaultMessage: 'Toggle search bar',
   }
 );
 
 const investigateInTimelineTooltip = i18n.translate(
-  'securitySolutionPackages.csp.graph.controls.investigate',
+  'securitySolutionPackages.csp.graph.controls.investigateInTimeline.tooltip',
   {
     defaultMessage: 'Investigate in timeline',
   }
@@ -74,55 +91,95 @@ export const Actions = ({
   ...props
 }: ActionsProps) => {
   const { euiTheme } = useEuiTheme();
+  const [isSearchBarTourOpen, setIsSearchBarTourOpen] = useState(false);
+  const [shouldShowSearchBarButtonTour, setShouldShowSearchBarButtonTour] = useLocalStorage(
+    SHOW_SEARCH_BAR_BUTTON_TOUR_STORAGE_KEY,
+    true
+  );
   const [searchToggled, setSearchToggled] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (searchFilterCounter === 1 && shouldShowSearchBarButtonTour) {
+      setIsSearchBarTourOpen(true);
+      setShouldShowSearchBarButtonTour(false);
+    } else if ((searchFilterCounter > 0 && shouldShowSearchBarButtonTour) || searchToggled) {
+      // User already used the search bar, so we don't need to show the tour
+      setShouldShowSearchBarButtonTour(false);
+    }
+  }, [
+    searchFilterCounter,
+    shouldShowSearchBarButtonTour,
+    setShouldShowSearchBarButtonTour,
+    searchToggled,
+  ]);
 
   return (
     <EuiFlexGroup direction="column" gutterSize={'none'} {...props}>
       {showToggleSearch && (
         <EuiFlexItem grow={false}>
-          <EuiToolTip content={toggleSearchBarTooltip} position="left">
-            <EuiButton
-              iconType="search"
-              color={searchToggled ? 'primary' : 'text'}
-              fill={searchToggled}
-              css={[
-                css`
-                  position: relative;
-                  width: 40px;
-                `,
-                !searchToggled
-                  ? css`
-                      border: ${euiTheme.border.thin};
-                      background-color: ${euiTheme.colors.backgroundBasePlain};
-                    `
-                  : undefined,
-              ]}
-              minWidth={false}
-              size="m"
-              aria-label={toggleSearchBarTooltip}
-              data-test-subj={GRAPH_ACTIONS_TOGGLE_SEARCH_ID}
-              onClick={() => {
-                setSearchToggled((prev) => {
-                  onSearchToggle?.(!prev);
-                  return !prev;
-                });
-              }}
+          <EuiTourStep
+            anchorPosition="leftUp"
+            title={toggleSearchBarTourTitle}
+            content={toggleSearchBarTourContent}
+            isStepOpen={isSearchBarTourOpen}
+            onFinish={() => setIsSearchBarTourOpen(false)}
+            step={1}
+            stepsTotal={1}
+          >
+            <EuiToolTip
+              content={isSearchBarTourOpen ? undefined : toggleSearchBarTooltip}
+              position="left"
             >
-              {searchFilterCounter > 0 && (
-                <EuiNotificationBadge
-                  css={css`
-                    position: absolute;
-                    right: ${-4.5 + (searchToggled ? 1 : 0)}px;
-                    bottom: ${-4.5 + (searchToggled ? 1 : 0)}px;
-                    transition: all ${euiTheme.animation.fast} ease-in, right 0s linear,
-                      bottom 0s linear !important;
-                  `}
-                >
-                  {searchFilterCounter > 9 ? '9+' : searchFilterCounter}
-                </EuiNotificationBadge>
-              )}
-            </EuiButton>
-          </EuiToolTip>
+              <EuiButton
+                iconType="search"
+                color={searchToggled ? 'primary' : 'text'}
+                fill={searchToggled}
+                css={[
+                  css`
+                    position: relative;
+                    width: 40px;
+                  `,
+                  !searchToggled
+                    ? css`
+                        border: ${euiTheme.border.thin};
+                        background-color: ${euiTheme.colors.backgroundBasePlain};
+                      `
+                    : undefined,
+                ]}
+                minWidth={false}
+                size="m"
+                aria-label={toggleSearchBarTooltip}
+                data-test-subj={GRAPH_ACTIONS_TOGGLE_SEARCH_ID}
+                onClick={(event: React.MouseEvent<HTMLButtonElement>) => {
+                  setSearchToggled((prev) => {
+                    onSearchToggle?.(!prev);
+                    return !prev;
+                  });
+
+                  setIsSearchBarTourOpen(false);
+
+                  // After a button click we wish to remove the focus from the button so the tooltip won't appear
+                  // Since it causes the position of the button to shift,
+                  // the tooltip is hanging out there at the wrong position
+                  event.currentTarget?.blur();
+                }}
+              >
+                {searchFilterCounter > 0 && (
+                  <EuiNotificationBadge
+                    css={css`
+                      position: absolute;
+                      right: ${-4.5 + (searchToggled ? 1 : 0)}px;
+                      bottom: ${-4.5 + (searchToggled ? 1 : 0)}px;
+                      transition: all ${euiTheme.animation.fast} ease-in, right 0s linear,
+                        bottom 0s linear !important;
+                    `}
+                  >
+                    {searchFilterCounter > 99 ? '99+' : searchFilterCounter}
+                  </EuiNotificationBadge>
+                )}
+              </EuiButton>
+            </EuiToolTip>
+          </EuiTourStep>
         </EuiFlexItem>
       )}
       {showToggleSearch && showInvestigateInTimeline && <EuiHorizontalRule margin="xs" />}
@@ -135,8 +192,12 @@ export const Actions = ({
               size="m"
               aria-label={investigateInTimelineTooltip}
               data-test-subj={GRAPH_ACTIONS_INVESTIGATE_IN_TIMELINE_ID}
-              onClick={() => {
+              onClick={(event: React.MouseEvent<HTMLButtonElement>) => {
                 onInvestigateInTimeline?.();
+
+                // After a button click we wish to remove the focus from the button so the tooltip won't appear
+                // Since it causes a modal to be opened, the tooltip is hanging out there on top of the modal
+                event.currentTarget?.blur();
               }}
             />
           </EuiToolTip>

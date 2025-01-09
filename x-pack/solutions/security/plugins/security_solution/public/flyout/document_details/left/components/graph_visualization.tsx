@@ -98,6 +98,7 @@ export const GraphVisualization: React.FC = memo(() => {
               },
             }}
             showInvestigateInTimeline={true}
+            showToggleSearch={true}
             onInvestigateInTimeline={openTimelineCallback}
           />
         </React.Suspense>

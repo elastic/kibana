@@ -35,7 +35,8 @@ import {
   RELATED_ENTITY,
   TARGET_ENTITY_ID,
 } from '../../common/constants';
-import { Actions, type ActionsProps } from '../controls/actions';
+import { Actions } from '../controls/actions';
+import { AnimatedSearchBarContainer } from './styles';
 
 const CONTROLLED_BY_GRAPH_INVESTIGATION_FILTER = 'graph-investigation';
 
@@ -78,6 +79,7 @@ const addFilter = (dataViewId: string, prev: Filter[], key: string, value: strin
         ...firstFilter,
         meta: {
           ...firstFilter.meta,
+          controlledBy: CONTROLLED_BY_GRAPH_INVESTIGATION_FILTER,
           params: [
             ...(Array.isArray(firstFilter.meta.params) ? firstFilter.meta.params : []),
             buildPhraseFilter(key, value),
@@ -87,14 +89,21 @@ const addFilter = (dataViewId: string, prev: Filter[], key: string, value: strin
       ...otherFilters,
     ];
   } else if (isFilter(firstFilter) && firstFilter.meta?.type !== 'custom') {
+    const combinedFilter = buildCombinedFilter(
+      BooleanRelation.OR,
+      [firstFilter, buildPhraseFilter(key, value, dataViewId)],
+      {
+        id: dataViewId,
+      }
+    );
     return [
-      buildCombinedFilter(
-        BooleanRelation.OR,
-        [firstFilter, buildPhraseFilter(key, value, dataViewId)],
-        {
-          id: dataViewId,
-        }
-      ),
+      {
+        ...combinedFilter,
+        meta: {
+          ...combinedFilter.meta,
+          controlledBy: CONTROLLED_BY_GRAPH_INVESTIGATION_FILTER,
+        },
+      },
       ...otherFilters,
     ];
   } else {
@@ -211,8 +220,12 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
   }: GraphInvestigationProps) => {
     const [searchFilters, setSearchFilters] = useState<Filter[]>(() => []);
     const [timeRange, setTimeRange] = useState<TimeRange>(initialTimeRange);
+    const [searchToggled, setSearchToggled] = useState(!showToggleSearch);
     const lastValidEsQuery = useRef<EsQuery | undefined>();
     const [kquery, setKQuery] = useState<Query>(EMPTY_QUERY);
+    const controlledFilter = searchFilters.find(
+      (filter) => filter.meta.controlledBy === CONTROLLED_BY_GRAPH_INVESTIGATION_FILTER
+    );
 
     const onInvestigateInTimelineCallback = useCallback(() => {
       const query = { ...kquery };
@@ -228,15 +241,6 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
 
       onInvestigateInTimeline?.(query, filters, timeRange);
     }, [dataView?.id, onInvestigateInTimeline, originEventIds, kquery, searchFilters, timeRange]);
-
-    const actionsProps: ActionsProps = useMemo(
-      () => ({
-        showInvestigateInTimeline,
-        showToggleSearch,
-        onInvestigateInTimeline: onInvestigateInTimelineCallback,
-      }),
-      [onInvestigateInTimelineCallback, showInvestigateInTimeline, showToggleSearch]
-    );
 
     const {
       services: { uiSettings, notifications },
@@ -321,33 +325,35 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
         >
           {dataView && (
             <EuiFlexItem grow={false}>
-              <SearchBar<Query>
-                showFilterBar={true}
-                showDatePicker={true}
-                showAutoRefreshOnly={false}
-                showSaveQuery={false}
-                showQueryInput={true}
-                disableQueryLanguageSwitcher={true}
-                isLoading={isFetching}
-                isAutoRefreshDisabled={true}
-                dateRangeFrom={timeRange.from}
-                dateRangeTo={timeRange.to}
-                query={kquery}
-                indexPatterns={[dataView]}
-                filters={searchFilters}
-                submitButtonStyle={'iconOnly'}
-                onFiltersUpdated={(newFilters) => {
-                  setSearchFilters(newFilters);
-                }}
-                onQuerySubmit={(payload, isUpdate) => {
-                  if (isUpdate) {
-                    setTimeRange({ ...payload.dateRange });
-                    setKQuery(payload.query || EMPTY_QUERY);
-                  } else {
-                    refresh();
-                  }
-                }}
-              />
+              <AnimatedSearchBarContainer className={!searchToggled ? 'toggled-off' : undefined}>
+                <SearchBar<Query>
+                  showFilterBar={true}
+                  showDatePicker={true}
+                  showAutoRefreshOnly={false}
+                  showSaveQuery={false}
+                  showQueryInput={true}
+                  disableQueryLanguageSwitcher={true}
+                  isLoading={isFetching}
+                  isAutoRefreshDisabled={true}
+                  dateRangeFrom={timeRange.from}
+                  dateRangeTo={timeRange.to}
+                  query={kquery}
+                  indexPatterns={[dataView]}
+                  filters={searchFilters}
+                  submitButtonStyle={'iconOnly'}
+                  onFiltersUpdated={(newFilters) => {
+                    setSearchFilters(newFilters);
+                  }}
+                  onQuerySubmit={(payload, isUpdate) => {
+                    if (isUpdate) {
+                      setTimeRange({ ...payload.dateRange });
+                      setKQuery(payload.query || EMPTY_QUERY);
+                    } else {
+                      refresh();
+                    }
+                  }}
+                />
+              </AnimatedSearchBarContainer>
             </EuiFlexItem>
           )}
           <EuiFlexItem>
@@ -362,7 +368,19 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
               isLocked={isPopoverOpen}
             >
               <Panel position="top-right">
-                <Actions {...actionsProps} />
+                <Actions
+                  showInvestigateInTimeline={showInvestigateInTimeline}
+                  showToggleSearch={showToggleSearch}
+                  onInvestigateInTimeline={onInvestigateInTimelineCallback}
+                  onSearchToggle={(isSearchToggle) => setSearchToggled(isSearchToggle)}
+                  searchFilterCounter={
+                    controlledFilter && Array.isArray(controlledFilter.meta?.params)
+                      ? controlledFilter.meta.params.length
+                      : controlledFilter
+                      ? 1
+                      : 0
+                  }
+                />
               </Panel>
             </Graph>
           </EuiFlexItem>
