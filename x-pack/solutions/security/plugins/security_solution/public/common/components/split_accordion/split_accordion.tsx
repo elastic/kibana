@@ -32,7 +32,7 @@ export const SplitAccordion = ({
         initialIsOpen={initialIsOpen}
         className={css`
           .euiAccordion__triggerWrapper {
-            background: ${euiTheme.colors.lightestShade};
+            background: ${euiTheme.colors.backgroundBaseSubdued};
             padding: ${euiTheme.size.m};
           }
         `}
