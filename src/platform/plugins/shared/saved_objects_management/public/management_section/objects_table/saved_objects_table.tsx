@@ -20,6 +20,7 @@ import { DataViewsContract } from '@kbn/data-views-plugin/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { CustomBrandingStart } from '@kbn/core-custom-branding-browser';
 import { Subscription } from 'rxjs';
+import { ML_SAVED_OBJECT_TYPES } from '../../../common/constants/ml_saved_object_types';
 import type { SavedObjectManagementTypeInfo, FindQueryHTTP } from '../../../common/types/latest';
 import {
   parseQuery,
@@ -48,7 +49,6 @@ import {
   DeleteConfirmModal,
   ExportModal,
 } from './components';
-import { ML_SAVED_OBJECT_TYPES } from '../../../common/constants/ml_saved_object_types';
 
 // Saved objects for ML job are not importable/exportable because they are wrappers around ES objects
 const DISABLED_TYPES_FOR_EXPORT = ML_SAVED_OBJECT_TYPES;

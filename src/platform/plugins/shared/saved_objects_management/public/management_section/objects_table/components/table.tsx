@@ -31,7 +31,6 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
 import { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
-import { ML_SAVED_OBJECT_TYPES } from '../../../../common/constants/ml_saved_object_types';
 import type { SavedObjectManagementTypeInfo } from '../../../../common/types';
 import { getDefaultTitle, getSavedObjectLabel } from '../../../lib';
 import { SavedObjectWithMetadata } from '../../../types';
@@ -376,21 +375,44 @@ export class Table extends PureComponent<TableProps, TableState> {
     const activeActionContents = this.state.activeAction?.render() ?? null;
     const exceededResultCount = totalItemCount > MAX_PAGINATED_ITEM;
 
-    const hasMlObjects = selectedSavedObjects.some(({ type }) => ML_SAVED_OBJECT_TYPES.has(type));
+    const hasMLJobs = selectedSavedObjects.some(({ type }) => type === 'ml-job');
+    const hasMLModels = selectedSavedObjects.some(({ type }) => type === 'ml-trained-model');
+    const hasMlObjects = hasMLJobs || hasMLModels;
 
     const anySelected = selectedSavedObjects.length > 0;
     const allHidden =
       anySelected && selectedSavedObjects.every(({ meta: { hiddenType } }) => hiddenType);
 
     const deleteTooltip = () => {
-      if (hasMlObjects) {
-        return (
-          <FormattedMessage
-            id="savedObjectsManagement.objectsTable.table.hasMlObjects.deleteDisabledTooltip"
-            defaultMessage="Navigate to the Machine Learning management pages to delete machine learning jobs."
-          />
+      if (hasMLJobs && hasMLModels) {
+        return i18n.translate(
+          'savedObjectsManagement.objectsTable.table.deleteMLJobsAndModelsDisabledTooltip',
+          {
+            defaultMessage:
+              'Navigate to the Machine Learning management pages to delete machine learning jobs and trained models.',
+          }
         );
       }
+
+      if (hasMLJobs) {
+        return i18n.translate(
+          'savedObjectsManagement.objectsTable.table.deleteMLJobsDisabledTooltip',
+          {
+            defaultMessage:
+              'Navigate to the Machine Learning management pages to delete machine learning jobs.',
+          }
+        );
+      }
+      if (hasMLModels) {
+        return i18n.translate(
+          'savedObjectsManagement.objectsTable.table.deleteMLModelsDisabledTooltip',
+          {
+            defaultMessage:
+              'Navigate to the Machine Learning management pages to delete trained models.',
+          }
+        );
+      }
+
       if (allHidden) {
         return (
           <FormattedMessage
@@ -402,15 +424,15 @@ export class Table extends PureComponent<TableProps, TableState> {
     };
     const disabledExportTooltip = () => {
       const messages = [];
-      if (selectedSavedObjects.some(({ type }) => type === 'ml-job')) {
+      if (hasMLJobs) {
         messages.push(
           i18n.translate('savedObjectsManagement.objectsTable.table.mlJob.exportDisabledTooltip', {
             defaultMessage:
-              'Navigate to the Machine Learning managements pages to export machine learning jobs.',
+              'Navigate to the Machine Learning management pages to export machine learning jobs.',
           })
         );
       }
-      if (selectedSavedObjects.some(({ type }) => type === 'ml-trained-model')) {
+      if (hasMLModels) {
         messages.push(
           i18n.translate(
             'savedObjectsManagement.objectsTable.table.mlTrainedModel.exportDisabledTooltip',
