@@ -15,7 +15,7 @@ import {
   euiDragDropReorder,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ReadStreamDefinition } from '@kbn/streams-schema';
+import { ReadStreamDefinition, isRootStream } from '@kbn/streams-schema';
 import { useBoolean } from '@kbn/react-hooks';
 import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
 import { EnrichmentEmptyPrompt } from './enrichment_empty_prompt';
@@ -26,6 +26,7 @@ import { ManagementBottomBar } from '../management_bottom_bar';
 import { SortableList } from './sortable_list';
 import { useDefinition } from './hooks/use_definition';
 import { useKibana } from '../../hooks/use_kibana';
+import { RootStreamEmptyPrompt } from './root_stream_empty_prompt';
 
 interface StreamDetailEnrichmentContentProps {
   definition: ReadStreamDefinition;
@@ -101,6 +102,10 @@ export function StreamDetailEnrichmentContent({
   );
 
   const hasProcessors = processors.length > 0;
+
+  if (isRootStream(definition)) {
+    return <RootStreamEmptyPrompt streamName={definition.name} />;
+  }
 
   return (
     <>
