@@ -72,7 +72,7 @@ export const getCvsScoreColor = (score: number, euiTheme: EuiThemeComputed): str
     }
   }
 
-  if (score <= 4) {
+  if (score >= 0 && score <= 4) {
     return getSeverityStatusColor(VULNERABILITIES_SEVERITY.LOW, euiTheme);
   } else if (score >= 4 && score <= 7) {
     return getSeverityStatusColor(VULNERABILITIES_SEVERITY.MEDIUM, euiTheme);

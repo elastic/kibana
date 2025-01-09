@@ -5,51 +5,82 @@
  * 2.0.
  */
 
-import { euiThemeVars } from '@kbn/ui-theme';
 import { getCvsScoreColor, getSeverityStatusColor } from './get_finding_colors';
+import { EuiThemeComputed } from '@elastic/eui';
 
-// TODO: fix tests
+const mockEuiThemeBorealis = {
+  themeName: 'borialis',
+  colors: {
+    vis: {
+      euiColorVis0: 'low-severity-color',
+      euiColorSeverity7: 'medium-severity-color',
+      euiColorSeverity11: 'high-severity-color',
+      euiColorSeverity14: 'critical-severity-color',
+      euiColorSeverity0: 'unknown-severity-color',
+    },
+  },
+};
+
 describe('getSeverityStatusColor', () => {
   it('should return the correct color for LOW severity', () => {
-    expect(getSeverityStatusColor('LOW')).toBe(euiThemeVars.euiColorVis0);
+    expect(getSeverityStatusColor('LOW', mockEuiThemeBorealis as EuiThemeComputed)).toBe(
+      'low-severity-color'
+    );
   });
 
   it('should return the correct color for MEDIUM severity', () => {
-    expect(getSeverityStatusColor('MEDIUM')).toBe(euiThemeVars.euiColorVis5_behindText);
+    expect(getSeverityStatusColor('MEDIUM', mockEuiThemeBorealis as EuiThemeComputed)).toBe(
+      'medium-severity-color'
+    );
   });
 
   it('should return the correct color for HIGH severity', () => {
-    expect(getSeverityStatusColor('HIGH')).toBe(euiThemeVars.euiColorVis9_behindText);
+    expect(getSeverityStatusColor('HIGH', mockEuiThemeBorealis as EuiThemeComputed)).toBe(
+      'high-severity-color'
+    );
   });
 
   it('should return the correct color for CRITICAL severity', () => {
-    expect(getSeverityStatusColor('CRITICAL')).toBe(euiThemeVars.euiColorDanger);
+    expect(getSeverityStatusColor('CRITICAL', mockEuiThemeBorealis as EuiThemeComputed)).toBe(
+      'critical-severity-color'
+    );
   });
 
-  it('should return #aaa for an unknown severity', () => {
-    expect(getSeverityStatusColor('UNKNOWN')).toBe('#aaa');
+  it('should return the correct color for an unknown severity', () => {
+    expect(getSeverityStatusColor('UNKNOWN', mockEuiThemeBorealis as EuiThemeComputed)).toBe(
+      'unknown-severity-color'
+    );
   });
 });
 
-// TODO: fix tests
 describe('getCvsScoreColor', () => {
   it('returns correct color for low severity score', () => {
-    expect(getCvsScoreColor(1.5)).toBe(euiThemeVars.euiColorVis0);
+    expect(getCvsScoreColor(1.5, mockEuiThemeBorealis as EuiThemeComputed)).toBe(
+      'low-severity-color'
+    );
   });
 
   it('returns correct color for medium severity score', () => {
-    expect(getCvsScoreColor(5.5)).toBe(euiThemeVars.euiColorVis7);
+    expect(getCvsScoreColor(5.5, mockEuiThemeBorealis as EuiThemeComputed)).toBe(
+      'medium-severity-color'
+    );
   });
 
   it('returns correct color for high severity score', () => {
-    expect(getCvsScoreColor(7.9)).toBe(euiThemeVars.euiColorVis9);
+    expect(getCvsScoreColor(7.9, mockEuiThemeBorealis as EuiThemeComputed)).toBe(
+      'high-severity-color'
+    );
   });
 
   it('returns correct color for critical severity score', () => {
-    expect(getCvsScoreColor(10.0)).toBe(euiThemeVars.euiColorDanger);
+    expect(getCvsScoreColor(10.0, mockEuiThemeBorealis as EuiThemeComputed)).toBe(
+      'critical-severity-color'
+    );
   });
 
   it('returns correct color for low severity score for undefined value', () => {
-    expect(getCvsScoreColor(-0.2)).toBe(euiThemeVars.euiColorVis0);
+    expect(getCvsScoreColor(-0.2, mockEuiThemeBorealis as EuiThemeComputed)).toBe(
+      'unknown-severity-color'
+    );
   });
 });
