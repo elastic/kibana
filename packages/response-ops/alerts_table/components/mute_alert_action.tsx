@@ -11,8 +11,8 @@ import { EuiContextMenuItem } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { ALERT_STATUS, ALERT_STATUS_ACTIVE } from '@kbn/rule-data-utils';
-import { useMuteAlertInstanceMutation } from '@kbn/response-ops-alerts-apis/hooks/use_mute_alert_instance_mutation';
-import { useUnmuteAlertInstanceMutation } from '@kbn/response-ops-alerts-apis/hooks/use_unmute_alert_instance_mutation';
+import { useMuteAlertInstance } from '@kbn/response-ops-alerts-apis/hooks/use_mute_alert_instance';
+import { useUnmuteAlertInstance } from '@kbn/response-ops-alerts-apis/hooks/use_unmute_alert_instance';
 import type { AdditionalContext, AlertActionsProps } from '../types';
 import { MUTE, UNMUTE } from '../translations';
 import { useAlertMutedState } from '../hooks/use_alert_muted_state';
@@ -29,8 +29,8 @@ export const MuteAlertAction = typedMemo(
     services: { http, notifications },
   }: AlertActionsProps<AC>) => {
     const { isMuted, ruleId, rule, alertInstanceId } = useAlertMutedState(alert);
-    const { mutateAsync: muteAlert } = useMuteAlertInstanceMutation({ http, notifications });
-    const { mutateAsync: unmuteAlert } = useUnmuteAlertInstanceMutation({ http, notifications });
+    const { mutateAsync: muteAlert } = useMuteAlertInstance({ http, notifications });
+    const { mutateAsync: unmuteAlert } = useUnmuteAlertInstance({ http, notifications });
     const isAlertActive = useMemo(() => alert[ALERT_STATUS]?.[0] === ALERT_STATUS_ACTIVE, [alert]);
 
     const toggleAlert = useCallback(async () => {

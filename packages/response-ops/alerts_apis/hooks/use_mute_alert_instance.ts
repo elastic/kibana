@@ -19,15 +19,15 @@ const ERROR_TITLE = i18n.translate('alertsApis.muteAlert.error', {
   defaultMessage: 'Error muting alert',
 });
 
-export interface UseMuteAlertInstanceMutationParams {
+export interface UseMuteAlertInstanceParams {
   http: HttpStart;
   notifications: NotificationsStart;
 }
 
-export const useMuteAlertInstanceMutation = ({
+export const useMuteAlertInstance = ({
   http,
   notifications: { toasts },
-}: UseMuteAlertInstanceMutationParams) => {
+}: UseMuteAlertInstanceParams) => {
   return useMutation(
     ({ ruleId, alertInstanceId }: ToggleAlertParams) =>
       muteAlertInstance({ http, id: ruleId, instanceId: alertInstanceId }),

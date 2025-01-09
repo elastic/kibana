@@ -8,17 +8,17 @@
  */
 
 import { renderHook, waitFor } from '@testing-library/react';
+import { Wrapper } from '@kbn/alerts-ui-shared/src/common/test_utils/wrapper';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
-import { Wrapper } from '@kbn/alerts-ui-shared/src/common/test_utils/wrapper';
-import { useUnmuteAlertInstanceMutation } from './use_unmute_alert_instance_mutation';
-import * as api from '../apis/unmute_alert_instance';
+import * as api from '../apis/mute_alert_instance';
+import { useMuteAlertInstance } from './use_mute_alert_instance';
 
-jest.mock('../apis/unmute_alert_instance');
+jest.mock('../apis/mute_alert_instance');
 
 const params = { ruleId: '', alertInstanceId: '' };
 
-describe('useUnmuteAlertInstanceMutation', () => {
+describe('useMuteAlertInstance', () => {
   const http = httpServiceMock.createStartContract();
   const notifications = notificationServiceMock.createStartContract();
   const addErrorMock = notifications.toasts.addError;
@@ -28,9 +28,9 @@ describe('useUnmuteAlertInstanceMutation', () => {
   });
 
   it('calls the api when invoked with the correct parameters', async () => {
-    const muteAlertInstanceSpy = jest.spyOn(api, 'unmuteAlertInstance');
+    const muteAlertInstanceSpy = jest.spyOn(api, 'muteAlertInstance');
 
-    const { result } = renderHook(() => useUnmuteAlertInstanceMutation({ http, notifications }), {
+    const { result } = renderHook(() => useMuteAlertInstance({ http, notifications }), {
       wrapper: Wrapper,
     });
 
@@ -46,9 +46,9 @@ describe('useUnmuteAlertInstanceMutation', () => {
   });
 
   it('shows a toast error when the api returns an error', async () => {
-    const spy = jest.spyOn(api, 'unmuteAlertInstance').mockRejectedValue(new Error('An error'));
+    const spy = jest.spyOn(api, 'muteAlertInstance').mockRejectedValue(new Error('An error'));
 
-    const { result } = renderHook(() => useUnmuteAlertInstanceMutation({ http, notifications }), {
+    const { result } = renderHook(() => useMuteAlertInstance({ http, notifications }), {
       wrapper: Wrapper,
     });
 

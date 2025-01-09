@@ -19,15 +19,15 @@ const ERROR_TITLE = i18n.translate('alertsApis.unmuteAlert.error', {
   defaultMessage: 'Error unmuting alert',
 });
 
-export interface UseUnmuteAlertInstanceMutationParams {
+export interface UseUnmuteAlertInstanceParams {
   http: HttpStart;
   notifications: NotificationsStart;
 }
 
-export const useUnmuteAlertInstanceMutation = ({
+export const useUnmuteAlertInstance = ({
   http,
   notifications: { toasts },
-}: UseUnmuteAlertInstanceMutationParams) => {
+}: UseUnmuteAlertInstanceParams) => {
   return useMutation(
     ({ ruleId, alertInstanceId }: ToggleAlertParams) =>
       unmuteAlertInstance({ http, id: ruleId, instanceId: alertInstanceId }),
