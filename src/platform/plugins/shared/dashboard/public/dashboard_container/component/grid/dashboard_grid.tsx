@@ -124,7 +124,7 @@ export const DashboardGrid = () => {
         renderPanelContents={renderPanelContents}
         onLayoutChange={onLayoutChange}
         expandedPanelId={expandedPanelId}
-        accessMode={viewMode === 'view' ? 'VIEW' : 'EDIT'}
+        accessMode={viewMode === 'edit' ? 'EDIT' : 'VIEW'}
       />
     );
   }, [currentLayout, useMargins, renderPanelContents, onLayoutChange, expandedPanelId, viewMode]);
