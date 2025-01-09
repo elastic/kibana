@@ -36,8 +36,6 @@ import {
   ENTERPRISE_SEARCH_CONTENT_PLUGIN,
   ELASTICSEARCH_PLUGIN,
   ANALYTICS_PLUGIN,
-  APP_SEARCH_PLUGIN,
-  WORKPLACE_SEARCH_PLUGIN,
   SEARCH_EXPERIENCES_PLUGIN,
   ENTERPRISE_SEARCH_RELEVANCE_LOGS_SOURCE_ID,
   ENTERPRISE_SEARCH_AUDIT_LOGS_SOURCE_ID,
@@ -58,19 +56,13 @@ import {
   databaseSearchGuideConfig,
 } from '../common/guided_onboarding/search_guide_config';
 
-import {
-  AS_TELEMETRY_NAME,
-  registerTelemetryUsageCollector as registerASTelemetryUsageCollector,
-} from './collectors/app_search/telemetry';
+import { AS_TELEMETRY_NAME } from './collectors/app_search/telemetry';
 import { registerTelemetryUsageCollector as registerCNTelemetryUsageCollector } from './collectors/connectors/telemetry';
 import {
   ES_TELEMETRY_NAME,
   registerTelemetryUsageCollector as registerESTelemetryUsageCollector,
 } from './collectors/enterprise_search/telemetry';
-import {
-  WS_TELEMETRY_NAME,
-  registerTelemetryUsageCollector as registerWSTelemetryUsageCollector,
-} from './collectors/workplace_search/telemetry';
+import { WS_TELEMETRY_NAME } from './collectors/workplace_search/telemetry';
 import { registerEnterpriseSearchIntegrations } from './integrations';
 
 import { entSearchHttpAgent } from './lib/enterprise_search_http_agent';
@@ -169,8 +161,6 @@ export class EnterpriseSearchPlugin implements Plugin<void, void, PluginsSetup, 
       ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.ID,
       ENTERPRISE_SEARCH_CONTENT_PLUGIN.ID,
       ELASTICSEARCH_PLUGIN.ID,
-      APP_SEARCH_PLUGIN.ID,
-      WORKPLACE_SEARCH_PLUGIN.ID,
       SEARCH_EXPERIENCES_PLUGIN.ID,
       VECTOR_SEARCH_PLUGIN.ID,
       SEMANTIC_SEARCH_PLUGIN.ID,
@@ -330,8 +320,6 @@ export class EnterpriseSearchPlugin implements Plugin<void, void, PluginsSetup, 
       if (usageCollection) {
         registerESTelemetryUsageCollector(usageCollection, savedObjectsStarted, this.logger);
         registerCNTelemetryUsageCollector(usageCollection, this.logger);
-        registerASTelemetryUsageCollector(usageCollection, savedObjectsStarted, this.logger);
-        registerWSTelemetryUsageCollector(usageCollection, savedObjectsStarted, this.logger);
       }
     });
     registerTelemetryRoute({ ...dependencies, getSavedObjectsService: () => savedObjectsStarted });
