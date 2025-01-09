@@ -46558,10 +46558,12 @@ components:
         - minLength: 1
           type: string
     Security_Endpoint_Management_API_AgentTypes:
+      description: The host agent type (optional). Defaults to endpoint.
       enum:
         - endpoint
         - sentinel_one
         - crowdstrike
+        - microsoft_defender_endpoint
       type: string
     Security_Endpoint_Management_API_AlertIds:
       description: A list of alerts ids.
