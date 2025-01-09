@@ -20,6 +20,7 @@ import {
   EuiIcon,
   EuiPopover,
   EuiPopoverTitle,
+  EuiSpacer,
   EuiPopoverFooter,
 } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
@@ -209,6 +210,8 @@ export class HeaderHelpMenu extends Component<Props, State> {
     return (
       <Fragment>
         {defaultContentLinks.map(({ href, title, onClick: _onClick, dataTestSubj }, i) => {
+          const isLast = i === defaultContentLinks.length - 1;
+
           if (href && _onClick) {
             throw new Error(
               'Only one of `href` and `onClick` should be provided for the help menu link.'
@@ -233,6 +236,7 @@ export class HeaderHelpMenu extends Component<Props, State> {
               >
                 {title}
               </EuiButtonEmpty>
+              {!isLast && <EuiSpacer size="xs" />}
             </Fragment>
           );
         })}
@@ -248,7 +252,7 @@ export class HeaderHelpMenu extends Component<Props, State> {
       .sort((a, b) => b.priority - a.priority)
       .map((link, index) => {
         const { linkType, content: text, href, external, ...rest } = link;
-        return createCustomLink(index, text, {
+        return createCustomLink(index, text, true, {
           href,
           onClick: external ? undefined : this.createOnClickHandler(href, navigateToUrl),
           ...rest,
@@ -273,6 +277,7 @@ export class HeaderHelpMenu extends Component<Props, State> {
     const customLinks =
       links &&
       links.map((link, index) => {
+        const addSpacer = index < links.length - 1;
         switch (link.linkType) {
           case 'documentation': {
             const { linkType, ...rest } = link;
@@ -282,6 +287,7 @@ export class HeaderHelpMenu extends Component<Props, State> {
                 id="core.ui.chrome.headerGlobalNav.helpMenuDocumentation"
                 defaultMessage="Documentation"
               />,
+              addSpacer,
               {
                 target: '_blank',
                 rel: 'noopener',
@@ -291,7 +297,7 @@ export class HeaderHelpMenu extends Component<Props, State> {
           }
           case 'github': {
             const { linkType, labels, title, ...rest } = link;
-            return createCustomLink(index, getFeedbackText(), {
+            return createCustomLink(index, getFeedbackText(), addSpacer, {
               iconType: 'logoGithub',
               href: createGithubUrl(labels, title),
               target: '_blank',
@@ -301,7 +307,7 @@ export class HeaderHelpMenu extends Component<Props, State> {
           }
           case 'discuss': {
             const { linkType, ...rest } = link;
-            return createCustomLink(index, getFeedbackText(), {
+            return createCustomLink(index, getFeedbackText(), addSpacer, {
               iconType: 'editorComment',
               target: '_blank',
               rel: 'noopener',
@@ -310,7 +316,7 @@ export class HeaderHelpMenu extends Component<Props, State> {
           }
           case 'custom': {
             const { linkType, content: text, href, external, ...rest } = link;
-            return createCustomLink(index, text, {
+            return createCustomLink(index, text, addSpacer, {
               href,
               onClick: this.createOnClickHandler(href, navigateToUrl),
               ...rest,
@@ -329,6 +335,7 @@ export class HeaderHelpMenu extends Component<Props, State> {
         {customLinks}
         {content && (
           <>
+            {customLinks && <EuiSpacer size="xs" />}
             <HeaderExtension
               extension={(domNode) => content(domNode, { hideHelpMenu: this.closeMenu })}
             />
@@ -378,6 +385,7 @@ const createGithubUrl = (labels: string[], title?: string) => {
 const createCustomLink = (
   index: number,
   text: React.ReactNode,
+  addSpacer?: boolean,
   buttonProps?: EuiButtonEmptyProps
 ) => {
   return (
@@ -385,6 +393,7 @@ const createCustomLink = (
       <EuiButtonEmpty {...buttonProps} size="s" flush="left">
         {text}
       </EuiButtonEmpty>
+      {addSpacer && <EuiSpacer size="xs" />}
     </Fragment>
   );
 };
