@@ -18,6 +18,7 @@ import type {
   ResolvedLogViewField,
 } from '@kbn/logs-shared-plugin/common';
 import { decodeOrThrow } from '@kbn/io-ts-utils';
+import { timeUnitRT, Comparator } from '@kbn/response-ops-rule-params/log_threshold';
 import type {
   PartialCountRuleParams,
   PartialCriteria as PartialCriteriaType,
@@ -29,7 +30,6 @@ import {
   isOptimizableGroupedThreshold,
   isRatioRule,
 } from '../../../../../common/alerting/logs/log_threshold/types';
-import { timeUnitRT, Comparator } from '@kbn/response-ops-rule-params/log_threshold';
 import type { ObjectEntries } from '../../../../../common/utility_types';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { GroupByExpression } from '../../../common/group_by_expression/group_by_expression';

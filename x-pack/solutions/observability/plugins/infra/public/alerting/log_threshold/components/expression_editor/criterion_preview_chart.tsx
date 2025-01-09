@@ -25,6 +25,8 @@ import { EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { PersistedLogViewReference } from '@kbn/logs-shared-plugin/common';
 import { decodeOrThrow } from '@kbn/io-ts-utils';
+import type { Threshold } from '@kbn/response-ops-rule-params/log_threshold';
+import { Comparator } from '@kbn/response-ops-rule-params/log_threshold';
 import { useTimelineChartTheme } from '../../../../hooks/use_timeline_chart_theme';
 import type { ExecutionTimeRange } from '../../../../types';
 import {
@@ -43,7 +45,6 @@ import type {
   PartialRuleParams,
   Criterion,
 } from '../../../../../common/alerting/logs/log_threshold/types';
-import { Comparator, Threshold } from '@kbn/response-ops-rule-params/log_threshold';
 import { Color, colorTransformer } from '../../../../../common/color_palette';
 import type { GetLogAlertsChartPreviewDataAlertParamsSubset } from '../../../../../common/http_api';
 import { getLogAlertsChartPreviewDataAlertParamsSubsetRT } from '../../../../../common/http_api';

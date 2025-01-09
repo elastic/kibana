@@ -12,7 +12,7 @@ import {
   timeUnitRT,
   timeSizeRT,
   groupByRT,
-  ThresholdRT
+  ThresholdRT,
 } from '@kbn/response-ops-rule-params/log_threshold';
 
 export const LOG_ALERTS_CHART_PREVIEW_DATA_PATH = '/api/infra/log_alerts/chart_preview_data';
