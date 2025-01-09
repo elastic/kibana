@@ -7,7 +7,7 @@
 
 import { render } from '@testing-library/react';
 import { ReactElement, ElementType } from 'react';
-import { generateLinkedRulesMenuItems } from '.';
+import { LinkedRulesMenuItems } from '.';
 import { rules } from '../mocks/rule_references.mock';
 import {
   getSecurityLinkAction,
@@ -19,7 +19,7 @@ const linkedRules = rules;
 
 describe('generateLinedRulesMenuItems', () => {
   it('should not render if the linkedRules length is falsy', () => {
-    const result = generateLinkedRulesMenuItems({
+    const result = LinkedRulesMenuItems({
       dataTestSubj,
       linkedRules: [],
       securityLinkAnchorComponent: securityLinkAnchorComponentMock,
@@ -27,7 +27,7 @@ describe('generateLinedRulesMenuItems', () => {
     expect(result).toBeNull();
   });
   it('should not render if the securityLinkAnchorComponent length is falsy', () => {
-    const result = generateLinkedRulesMenuItems({
+    const result = LinkedRulesMenuItems({
       dataTestSubj,
       linkedRules,
       securityLinkAnchorComponent: null as unknown as ElementType,
@@ -35,7 +35,7 @@ describe('generateLinedRulesMenuItems', () => {
     expect(result).toBeNull();
   });
   it('should render the first linked rules with left icon and does not apply the css if the length is 1', () => {
-    const result: ReactElement[] = generateLinkedRulesMenuItems({
+    const result: ReactElement[] = LinkedRulesMenuItems({
       dataTestSubj,
       linkedRules,
       securityLinkAnchorComponent: securityLinkAnchorComponentMock,

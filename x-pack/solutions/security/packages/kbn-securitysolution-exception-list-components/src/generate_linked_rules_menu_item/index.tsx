@@ -6,9 +6,16 @@
  */
 
 import React, { ElementType, ReactElement } from 'react';
-import { EuiContextMenuItem, EuiFlexGroup, EuiFlexItem, EuiIcon, IconType } from '@elastic/eui';
+import { css } from '@emotion/css';
+import {
+  EuiContextMenuItem,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  IconType,
+  useEuiTheme,
+} from '@elastic/eui';
 import { Rule } from '../types';
-import { itemContentCss, containerCss } from './menu_link.styles';
 
 interface MenuItemLinkedRulesProps {
   leftIcon?: IconType;
@@ -17,12 +24,22 @@ interface MenuItemLinkedRulesProps {
   securityLinkAnchorComponent: ElementType; // This property needs to be removed to avoid the Prop Drilling, once we move all the common components from x-pack/security-solution/common
 }
 
-export const generateLinkedRulesMenuItems = ({
+export const LinkedRulesMenuItems = ({
   dataTestSubj,
   linkedRules,
   securityLinkAnchorComponent,
   leftIcon = '',
 }: MenuItemLinkedRulesProps): ReactElement[] | null => {
+  const { euiTheme } = useEuiTheme();
+  const containerCss = css`
+    border-bottom: ${euiTheme.border.thin};
+  `;
+
+  const itemContentCss = css`
+    color: ${euiTheme.colors.textPrimary};
+    flex-basis: content;
+  `;
+
   if (!linkedRules.length || securityLinkAnchorComponent === null) return null;
 
   const SecurityLinkAnchor = securityLinkAnchorComponent;
