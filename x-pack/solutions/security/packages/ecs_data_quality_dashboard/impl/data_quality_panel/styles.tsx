@@ -14,5 +14,5 @@ export const codeDangerCss = ({ euiTheme }: UseEuiTheme): CSSObject => ({
 });
 
 export const codeSuccessCss = ({ euiTheme }: UseEuiTheme): CSSObject => ({
-  color: euiTheme.colors.success,
+  color: euiTheme.colors.accentSecondary,
 });
