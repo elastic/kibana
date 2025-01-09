@@ -167,7 +167,7 @@ export const KibanaLogic = kea<MakeLogicType<KibanaValues>>({
   selectors: ({ selectors }) => ({
     isAgentlessEnabled: [
       () => [selectors.cloud, selectors.fleet],
-      (config: ClientConfigType, cloud?: CloudSetup & CloudStart, fleet?: FleetStart) =>
+      (cloud?: CloudSetup & CloudStart, fleet?: FleetStart) =>
         (cloud?.isCloudEnabled || cloud?.isServerlessEnabled) &&
         fleet?.config?.agentless?.enabled === true,
     ],
