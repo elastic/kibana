@@ -97,3 +97,10 @@ export const COLUMN_UPDATED = i18n.translate(
     defaultMessage: 'Updated',
   }
 );
+
+export const COLUMN_INTEGRATIONS = i18n.translate(
+  'xpack.securitySolution.siemMigrations.rules.tableColumn.integrationsLabel',
+  {
+    defaultMessage: 'Integrations',
+  }
+);
