@@ -22,6 +22,7 @@ import {
   uiMetricService,
 } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
 import { METRIC_TYPE } from '@kbn/analytics';
+import type { EntityIdentifierFields } from '../../../../common/entity_analytics/types';
 import { ExpandablePanel } from '../../../flyout/shared/components/expandable_panel';
 import type { EntityDetailsPath } from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
 import {
@@ -70,7 +71,7 @@ export const VulnerabilitiesPreview = ({
   openDetailsPanel,
 }: {
   value: string;
-  field: 'host.name' | 'user.name';
+  field: EntityIdentifierFields;
   isPreviewMode?: boolean;
   isLinkEnabled: boolean;
   openDetailsPanel: (path: EntityDetailsPath) => void;

@@ -19,6 +19,7 @@ import {
   ENTITY_FLYOUT_WITH_MISCONFIGURATION_VISIT,
   uiMetricService,
 } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
+import type { EntityIdentifierFields } from '../../../../common/entity_analytics/types';
 import { ExpandablePanel } from '../../../flyout/shared/components/expandable_panel';
 import type { EntityDetailsPath } from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
 import {
@@ -95,7 +96,7 @@ export const MisconfigurationsPreview = ({
   openDetailsPanel,
 }: {
   value: string;
-  field: 'host.name' | 'user.name';
+  field: EntityIdentifierFields;
   isPreviewMode?: boolean;
   isLinkEnabled: boolean;
   openDetailsPanel: (path: EntityDetailsPath) => void;

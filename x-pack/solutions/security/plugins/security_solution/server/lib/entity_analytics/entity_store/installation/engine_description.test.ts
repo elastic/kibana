@@ -629,6 +629,14 @@ describe('getUnitedEntityDefinition', () => {
             },
             Object {
               "aggregation": Object {
+                "limit": 10,
+                "type": "terms",
+              },
+              "destination": "service.node.role",
+              "source": "service.node.role",
+            },
+            Object {
+              "aggregation": Object {
                 "sort": Object {
                   "@timestamp": "desc",
                 },
