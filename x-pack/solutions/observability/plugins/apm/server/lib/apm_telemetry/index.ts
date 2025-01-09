@@ -5,25 +5,21 @@
  * 2.0.
  */
 
-import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
-import {
-  CoreSetup,
-  Logger,
-  SavedObjectsClientContract,
-  SavedObjectsErrorHelpers,
-} from '@kbn/core/server';
-import {
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import type { CoreSetup, Logger, SavedObjectsClientContract } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import { APMDataAccessConfig } from '@kbn/apm-data-access-plugin/server';
+import type { APMDataAccessConfig } from '@kbn/apm-data-access-plugin/server';
 import {
   APM_TELEMETRY_SAVED_OBJECT_ID,
   APM_TELEMETRY_SAVED_OBJECT_TYPE,
 } from '../../../common/apm_saved_object_constants';
 import { getInternalSavedObjectsClient } from '../helpers/get_internal_saved_objects_client';
 import { collectDataTelemetry } from './collect_data_telemetry';
-import { APMUsage } from './types';
+import type { APMUsage } from './types';
 import { apmSchema } from './schema';
 import { getTelemetryClient } from './telemetry_client';
 

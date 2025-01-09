@@ -53,13 +53,13 @@ window.scrollTo = jest.fn();
 const MockKibanaContextProvider = createKibanaContextProviderMock();
 
 /** A utility for wrapping children in the providers required to run most tests */
-export const TestProvidersComponent: React.FC<Props> = ({
+export const TestProvidersComponent = ({
   children,
   store = createMockStore(),
   startServices,
   onDragEnd = jest.fn(),
   cellActions = [],
-}) => {
+}: React.PropsWithChildren<Props>) => {
   const queryClient = new QueryClient({
     defaultOptions: {
       queries: {
@@ -74,8 +74,8 @@ export const TestProvidersComponent: React.FC<Props> = ({
   });
 
   return (
-    <I18nProvider>
-      <MockKibanaContextProvider startServices={startServices}>
+    <MockKibanaContextProvider startServices={startServices}>
+      <I18nProvider>
         <UpsellingProviderMock>
           <ReduxStoreProvider store={store}>
             <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
@@ -97,8 +97,8 @@ export const TestProvidersComponent: React.FC<Props> = ({
             </ThemeProvider>
           </ReduxStoreProvider>
         </UpsellingProviderMock>
-      </MockKibanaContextProvider>
-    </I18nProvider>
+      </I18nProvider>
+    </MockKibanaContextProvider>
   );
 };
 

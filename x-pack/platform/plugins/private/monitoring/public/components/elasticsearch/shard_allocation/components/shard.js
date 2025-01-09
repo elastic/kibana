@@ -6,11 +6,22 @@
  */
 
 import React from 'react';
+import { css } from '@emotion/react';
 import { get } from 'lodash';
+import { EuiToolTip, EuiBadge, euiFontSize, logicalCSS } from '@elastic/eui';
+
+import { i18n } from '@kbn/i18n';
+
 import { calculateClass } from '../lib/calculate_class';
 import { vents } from '../lib/vents';
-import { i18n } from '@kbn/i18n';
-import { EuiToolTip, EuiBadge } from '@elastic/eui';
+
+const shardStyle = (theme) => css`
+  ${logicalCSS('padding', `${theme.euiTheme.size.xs} ${theme.euiTheme.size.s}`)}
+  align-self: center;
+  font-size: ${euiFontSize(theme, 'xs').fontSize};
+  position: relative;
+  display: inline-block;
+`;
 
 function getColor(classes) {
   const classList = classes.split(' ');
@@ -117,6 +128,7 @@ export class Shard extends React.Component {
       <div
         onMouseEnter={this.toggle}
         onMouseLeave={this.toggle}
+        css={shard.type === 'shard' && shardStyle}
         className={classes}
         data-shard-tooltip={tooltipContent}
         data-shard-classification={classification}
