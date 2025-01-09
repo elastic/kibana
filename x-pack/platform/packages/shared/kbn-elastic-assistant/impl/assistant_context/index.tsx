@@ -14,7 +14,7 @@ import useLocalStorage from 'react-use/lib/useLocalStorage';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import { AssistantFeatures, defaultAssistantFeatures } from '@kbn/elastic-assistant-common';
-import { NavigateToAppOptions, UserProfileService } from '@kbn/core/public';
+import { ChromeStart, NavigateToAppOptions, UserProfileService } from '@kbn/core/public';
 import { useQuery } from '@tanstack/react-query';
 import { updatePromptContexts } from './helpers';
 import type {
@@ -43,6 +43,7 @@ import {
 import { useCapabilities } from '../assistant/api/capabilities/use_capabilities';
 import { WELCOME_CONVERSATION_TITLE } from '../assistant/use_conversation/translations';
 import { SettingsTabs } from '../assistant/settings/types';
+import { AssistantNavLink } from './assistant_nav_link';
 
 export interface ShowAssistantOverlayProps {
   showOverlay: boolean;
@@ -78,6 +79,7 @@ export interface AssistantProviderProps {
   toasts?: IToasts;
   currentAppId: string;
   userProfileService: UserProfileService;
+  chrome: ChromeStart;
 }
 
 export interface UserAvatar {
@@ -130,6 +132,7 @@ export interface UseAssistantContext {
   currentAppId: string;
   codeBlockRef: React.MutableRefObject<(codeBlock: string) => void>;
   userProfileService: UserProfileService;
+  chrome: ChromeStart;
 }
 
 const AssistantContext = React.createContext<UseAssistantContext | undefined>(undefined);
@@ -154,6 +157,7 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
   toasts,
   currentAppId,
   userProfileService,
+  chrome,
 }) => {
   /**
    * Session storage for traceOptions, including APM URL and LangSmith Project/API Key
@@ -307,6 +311,7 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       currentAppId,
       codeBlockRef,
       userProfileService,
+      chrome,
     }),
     [
       actionTypeRegistry,
@@ -343,10 +348,16 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       currentAppId,
       codeBlockRef,
       userProfileService,
+      chrome,
     ]
   );
 
-  return <AssistantContext.Provider value={value}>{children}</AssistantContext.Provider>;
+  return (
+    <AssistantContext.Provider value={value}>
+      <AssistantNavLink />
+      {children}
+    </AssistantContext.Provider>
+  );
 };
 
 export const useAssistantContext = () => {

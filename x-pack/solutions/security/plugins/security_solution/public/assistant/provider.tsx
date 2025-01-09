@@ -143,6 +143,7 @@ export const AssistantProvider: FC<PropsWithChildren<unknown>> = ({ children }) 
     triggersActionsUi: { actionTypeRegistry },
     docLinks: { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION },
     userProfile,
+    chrome,
   } = useKibana().services;
 
   let inferenceEnabled = false;
@@ -238,6 +239,7 @@ export const AssistantProvider: FC<PropsWithChildren<unknown>> = ({ children }) 
       toasts={toasts}
       currentAppId={currentAppId ?? 'securitySolutionUI'}
       userProfileService={userProfile}
+      chrome={chrome}
     >
       {children}
     </ElasticAssistantProvider>
