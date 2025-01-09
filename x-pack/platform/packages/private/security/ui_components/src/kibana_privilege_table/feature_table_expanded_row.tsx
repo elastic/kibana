@@ -132,6 +132,7 @@ export const FeatureTableExpandedRow = ({
               onChange={(updatedPrivileges) => onChange(feature.id, updatedPrivileges)}
               selectedFeaturePrivileges={selectedFeaturePrivileges}
               disabled={disabled || !isCustomizing || isDisabledDueToSpaceSelection}
+              allSpacesSelected={allSpacesSelected}
             />
           </EuiFlexItem>
         );

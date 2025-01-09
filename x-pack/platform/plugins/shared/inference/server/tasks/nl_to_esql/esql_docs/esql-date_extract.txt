@@ -10,7 +10,7 @@ The DATE_EXTRACT function is used to extract specific parts of a date.
 
 #### datePart
 
-This is the part of the date you want to extract, such as "year", "month" or ""hour_of_day".
+This is the part of the date you want to extract, such as "year", "month" or "hour_of_day".
 
 #### date
 
