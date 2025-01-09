@@ -5,14 +5,14 @@
  * 2.0.
  */
 import createContainer from 'constate';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { buildEsQuery, Filter, fromKueryExpression, TimeRange, type Query } from '@kbn/es-query';
 import { Subscription, map, tap } from 'rxjs';
 import deepEqual from 'fast-deep-equal';
 import useEffectOnce from 'react-use/lib/useEffectOnce';
-import { useSearchSessionContext } from '../../../../hooks/use_search_session';
-import { parseDateRange } from '../../../../utils/datemath';
 import { useKibanaQuerySettings } from '../../../../hooks/use_kibana_query_settings';
+import { useTimeRange } from '../../../../hooks/use_time_range';
+import { useSearchSessionContext } from '../../../../hooks/use_search_session';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { telemetryTimeRangeFormatter } from '../../../../../common/formatters/telemetry_time_range';
 import { useMetricsDataViewContext } from '../../../../containers/metrics_source';
@@ -38,17 +38,6 @@ const buildQuerySubmittedPayload = (
   };
 };
 
-const DEFAULT_FROM_IN_MILLISECONDS = 15 * 60000;
-
-const getDefaultTimestamps = () => {
-  const now = Date.now();
-
-  return {
-    from: new Date(now - DEFAULT_FROM_IN_MILLISECONDS).toISOString(),
-    to: new Date(now).toISOString(),
-  };
-};
-
 export const useUnifiedSearch = () => {
   const [error, setError] = useState<Error | null>(null);
   const [searchCriteria, setSearch] = useHostsUrlState();
@@ -56,6 +45,11 @@ export const useUnifiedSearch = () => {
   const { updateSearchSessionId } = useSearchSessionContext();
   const { services } = useKibanaContextForPlugin();
   const kibanaQuerySettings = useKibanaQuerySettings();
+
+  const parsedDateRange = useTimeRange({
+    rangeFrom: searchCriteria.dateRange.from,
+    rangeTo: searchCriteria.dateRange.to,
+  });
 
   const {
     data: {
@@ -119,14 +113,6 @@ export const useUnifiedSearch = () => {
     },
     [onDateRangeChange, updateSearchSessionId]
   );
-
-  const parsedDateRange = useMemo(() => {
-    const defaults = getDefaultTimestamps();
-
-    const { from = defaults.from, to = defaults.to } = parseDateRange(searchCriteria.dateRange);
-
-    return { from, to };
-  }, [searchCriteria.dateRange]);
 
   const getDateRangeAsTimestamp = useCallback(() => {
     const from = new Date(parsedDateRange.from).getTime();
