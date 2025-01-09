@@ -189,7 +189,7 @@ export const createFilterESQL = async (
         value
       )
     );
-  } else if (sourceField) {
+  } else {
     filters.push(buildSimpleExistFilter(sourceField, indexPattern));
   }
 
