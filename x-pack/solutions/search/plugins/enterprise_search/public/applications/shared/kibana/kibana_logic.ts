@@ -92,7 +92,9 @@ export interface KibanaValues {
   guidedOnboarding: GuidedOnboardingPluginStart | null;
   history: ScopedHistory;
   indexMappingComponent: React.FC<IndexMappingProps> | null;
+  isAgentlessEnabled: boolean;
   isCloud: boolean;
+  isServerless: boolean;
   isSidebarEnabled: boolean;
   kibanaVersion: string | null;
   lens: LensPublicStart | null;
@@ -163,9 +165,19 @@ export const KibanaLogic = kea<MakeLogicType<KibanaValues>>({
     ],
   }),
   selectors: ({ selectors }) => ({
+    isAgentlessEnabled: [
+      () => [selectors.cloud, selectors.fleet],
+      (config: ClientConfigType, cloud?: CloudSetup & CloudStart, fleet?: FleetStart) =>
+        (cloud?.isCloudEnabled || cloud?.isServerlessEnabled) &&
+        fleet?.config?.agentless?.enabled === true,
+    ],
     isCloud: [
       () => [selectors.cloud],
       (cloud?: CloudSetup & CloudStart) => Boolean(cloud?.isCloudEnabled),
+    ],
+    isServerless: [
+      () => [selectors.cloud],
+      (cloud?: CloudSetup & CloudStart) => Boolean(cloud?.isServerlessEnabled),
     ],
   }),
 });

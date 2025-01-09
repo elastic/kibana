@@ -56,7 +56,7 @@ export const CreateConnector: React.FC = () => {
   const { overlays } = useKibana().services;
 
   const { http } = useValues(HttpLogic);
-  const { application, history, fleet } = useValues(KibanaLogic);
+  const { application, history, isAgentlessEnabled } = useValues(KibanaLogic);
 
   const { error } = useValues(AddConnectorApiLogic);
   const { euiTheme } = useEuiTheme();
@@ -69,13 +69,6 @@ export const CreateConnector: React.FC = () => {
   const { config } = useValues(KibanaLogic);
   const isRunningLocally = (config.host ?? '').includes('localhost');
 
-  const configFleet = fleet?.config;
-  // const { cloud } = fleet?.services;
-  // const isServerless = !!cloud?.isServerlessEnabled;
-  // const isCloud = !!cloud?.isCloudEnabled;
-  // const isAgentlessEnabled = (isCloud || isServerless) && configFleet.agentless?.enabled === true;
-  const isAgentlessEnabled = configFleet?.agentless?.enabled === true;
-
   useEffect(() => {
     if (
       (selectedConnector && !selectedConnector.isNative && selfManagePreference === 'native') ||
@@ -84,7 +77,6 @@ export const CreateConnector: React.FC = () => {
       setSelfManagePreference('selfManaged');
     }
     console.log('isAgentlessEnabled', isAgentlessEnabled);
-    console.log('configFleet', fleet);
   }, [selectedConnector]);
 
   const getSteps = (selfManaged: boolean): EuiContainedStepProps[] => {
