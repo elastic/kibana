@@ -14,18 +14,17 @@ echo '--- Lint: eslint'
 
 export NODE_OPTIONS="--max-old-space-size=8192"
 
-# disable "Exit immediately" mode so that we can run eslint, capture it's exit code, and respond appropriately
-# after possibly commiting fixed files to the repo
-set +e;
 if is_pr && ! is_auto_commit_disabled; then
-  git ls-files | grep -E '\.(js|mjs|ts|tsx)$' | xargs -n 250 -P 8 node scripts/eslint --no-cache --fix --no-quiet
+  git ls-files | grep -E '\.(js|mjs|ts|tsx)$' | xargs -n 250 -P 8 node scripts/eslint --no-cache --fix || [ $? -eq 1 ]
 else
-  git ls-files | grep -E '\.(js|mjs|ts|tsx)$' | xargs -n 250 -P 8 node scripts/eslint --no-cache
+  git ls-files | grep -E '\.(js|mjs|ts|tsx)$' | xargs -n 250 -P 8 node scripts/eslint --no-cache || [ $? -eq 1 ]
 fi
 
-eslint_exit=$?
-# re-enable "Exit immediately" mode
-set -e;
+eslint_status=$?
+if [ $eslint_status -ne 0 ] && [ $eslint_status -ne 1 ]; then
+  echo "ESLint failed with system error (exit code: $eslint_status)"
+  exit $eslint_status
+fi
 
 desc="node scripts/eslint --no-cache"
 if is_pr && ! is_auto_commit_disabled; then
@@ -34,7 +33,7 @@ fi
 
 check_for_changed_files "$desc" true
 
-if [[ "${eslint_exit}" != "0" ]]; then
+if [[ "${eslint_status}" != "0" ]]; then
   exit 1
 fi
 
