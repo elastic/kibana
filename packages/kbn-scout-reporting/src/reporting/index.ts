@@ -26,4 +26,4 @@ export const scoutFailedTestsReporter = (
   return ['@kbn/scout-reporting/src/reporting/playwright/failed_test/index.ts', options];
 };
 
-export { generateTestRunId } from './playwright/common';
+export { generateTestRunId, getTestIDForTitle } from './playwright/common';

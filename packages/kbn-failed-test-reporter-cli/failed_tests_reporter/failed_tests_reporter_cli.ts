@@ -101,6 +101,9 @@ run(
         return;
       }
 
+      // Scout test failures reporting
+      await generateScoutTestFailureArtifacts({ log, bkMeta });
+
       if (reportPaths.length) {
         log.info('found', reportPaths.length, 'junit reports', reportPaths);
 
@@ -181,10 +184,9 @@ run(
 
           await reportFailuresToFile(log, failures, bkMeta, getRootMetadata(report));
         }
+      } else {
+        throw createFailError(`Unable to find any junit reports with patterns [${patterns}]`);
       }
-
-      // Scout test failures reporting
-      await generateScoutTestFailureArtifacts({ log, bkMeta });
     } finally {
       await CiStatsReporter.fromEnv(log).metrics([
         {
