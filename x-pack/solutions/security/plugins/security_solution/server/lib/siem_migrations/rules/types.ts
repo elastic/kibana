@@ -15,9 +15,9 @@ export type Stored<T extends object> = T & { id: string };
 export type StoredRuleMigration = Stored<RuleMigration>;
 export type StoredRuleMigrationResource = Stored<RuleMigrationResource>;
 
-export interface Integration {
-  title: string;
+export interface RuleMigrationIntegration {
   id: string;
+  title: string;
   description: string;
   data_streams: Array<{ dataset: string; title: string; index_pattern: string }>;
   elser_embedding: string;
@@ -25,7 +25,7 @@ export interface Integration {
 
 export interface RuleMigrationPrebuiltRule {
   rule_id: string;
-  installedRuleId?: string;
+  installed_rule_id?: string;
   name: string;
   description: string;
   elser_embedding: string;
