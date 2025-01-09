@@ -299,6 +299,7 @@ describe('Query roles', () => {
               must: [],
               must_not: [],
               should: [
+                { term: { 'metadata._reserved': true } },
                 {
                   term: {
                     'metadata._reserved': false,

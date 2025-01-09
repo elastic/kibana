@@ -32,6 +32,12 @@ export function defineQueryRolesRoutes({
         access: 'public',
         tags: ['oas-tags:roles'],
       },
+      security: {
+        authz: {
+          enabled: false,
+          reason: `This route delegates authorization to Core's scoped ES cluster client`,
+        },
+      },
       validate: {
         body: schema.object({
           query: schema.maybe(schema.string()),
