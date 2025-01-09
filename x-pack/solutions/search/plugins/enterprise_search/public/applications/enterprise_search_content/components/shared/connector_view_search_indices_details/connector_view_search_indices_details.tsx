@@ -25,7 +25,7 @@ export const ConnectorViewIndexLink: React.FC<{
   return searchIndexDetailsUrl ? (
     <EuiLink
       target={target ? '_blank' : undefined}
-      external={target ? true : false}
+      external={target ?? false}
       href={searchIndexDetailsUrl}
     >
       {indexName}

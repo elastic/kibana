@@ -57,7 +57,8 @@ export const SearchApplicationIndicesFlyout: React.FC = () => {
       render: (indexName: string) => (
         <SearchApplicationViewIndexLink
           indexName={indexName}
-          dataTelemetryId={'entSearchApplications-list-viewIndex'}
+          dataTestSubj="search-application-index-link"
+          dataTelemetryId="entSearchApplications-list-viewIndex"
         />
       ),
       sortable: true,

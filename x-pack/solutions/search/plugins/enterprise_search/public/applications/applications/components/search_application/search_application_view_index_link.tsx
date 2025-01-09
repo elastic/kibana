@@ -14,9 +14,9 @@ import { KibanaLogic } from '../../../shared/kibana';
 
 export const SearchApplicationViewIndexLink: React.FC<{
   indexName: string;
+  dataTestSubj?: string;
   dataTelemetryId?: string;
-  target?: boolean;
-}> = ({ indexName, dataTelemetryId }) => {
+}> = ({ indexName, dataTestSubj, dataTelemetryId }) => {
   const { share } = useValues(KibanaLogic);
 
   const searchIndexDetailsUrl: string =
@@ -25,7 +25,7 @@ export const SearchApplicationViewIndexLink: React.FC<{
   return searchIndexDetailsUrl ? (
     <EuiLink
       data-telemetry-id={dataTelemetryId}
-      data-test-subj={'search-application-index-link'}
+      data-test-subj={dataTestSubj}
       href={searchIndexDetailsUrl}
     >
       {indexName}

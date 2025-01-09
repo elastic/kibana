@@ -92,7 +92,14 @@ export const SearchApplicationIndices: React.FC = () => {
         }
       ),
       render: ({ health, name }: EnterpriseSearchApplicationIndex) =>
-        health === 'unknown' ? name : <SearchApplicationViewIndexLink indexName={name} />,
+        health === 'unknown' ? (
+          name
+        ) : (
+          <SearchApplicationViewIndexLink
+            indexName={name}
+            dataTestSubj="search-application-index-link"
+          />
+        ),
       sortable: ({ name }: EnterpriseSearchApplicationIndex) => name,
       truncateText: true,
       width: '40%',
