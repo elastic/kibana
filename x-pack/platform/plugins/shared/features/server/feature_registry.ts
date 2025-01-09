@@ -359,6 +359,7 @@ function applyAutomaticReadPrivilegeGrants(
         'telemetry',
         'url',
         'tag',
+        'cloud',
       ]);
     }
   });
