@@ -24,7 +24,7 @@ import type {
   CasesSimilarResponse,
   AddObservableRequest,
   UpdateObservableRequest,
-  UserActionInternalFindResponse,
+  UserActionFindResponse,
 } from '../../common/types/api';
 import type {
   CaseConnectors,
@@ -40,7 +40,7 @@ import type {
   CaseUICustomField,
   SimilarCasesProps,
   CasesSimilarResponseUI,
-  InternalFindCaseUserActions,
+  FindCaseUserActions,
 } from '../../common/ui/types';
 import { SortFieldCase } from '../../common/ui/types';
 import {
@@ -207,7 +207,7 @@ export const findCaseUserActions = async (
     perPage: number;
   },
   signal?: AbortSignal
-): Promise<InternalFindCaseUserActions> => {
+): Promise<FindCaseUserActions> => {
   const query = {
     types: params.type !== 'all' ? [params.type] : [],
     sortOrder: params.sortOrder,
@@ -215,7 +215,7 @@ export const findCaseUserActions = async (
     perPage: params.perPage,
   };
 
-  const response = await KibanaServices.get().http.fetch<UserActionInternalFindResponse>(
+  const response = await KibanaServices.get().http.fetch<UserActionFindResponse>(
     getCaseFindUserActionsUrl(caseId),
     {
       method: 'GET',
@@ -229,7 +229,6 @@ export const findCaseUserActions = async (
     userActions: convertUserActionsToCamelCase(
       decodeCaseUserActionsResponse(response.userActions)
     ) as UserActionUI[],
-    latestAttachments: convertAttachmentsToCamelCase(response.latestAttachments),
   };
 };
 
