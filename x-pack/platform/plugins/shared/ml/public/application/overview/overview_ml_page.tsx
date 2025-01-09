@@ -19,18 +19,16 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
-  useCurrentEuiBreakpoint,
   useIsWithinBreakpoints,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { usePermissionCheck } from '../capabilities/check_capabilities';
 import { UpgradeWarning } from '../components/upgrade';
 import { HelpMenu } from '../components/help_menu';
 import { useMlKibana, useNavigateToPath } from '../contexts/kibana';
 import { MlPageHeader } from '../components/page_header';
 import { PageTitle } from '../components/page_title';
-import { AnomalyDetectionEmptyState } from '../jobs/jobs_list/components/anomaly_detection_empty_state/anomaly_detection_empty_state';
-import { AnalyticsEmptyPrompt } from '../data_frame_analytics/pages/analytics_management/components/empty_prompt/empty_prompt';
+import { AnomalyDetectionOverviewCard } from './components/anomaly_detection_overview';
+import { DataFrameAnalyticsOverviewCard } from './components/data_frame_analytics_overview';
 
 export const overviewPanelDefaultState = Object.freeze({
   nodes: true,
@@ -94,15 +92,13 @@ export const MLOverviewCard = ({
 };
 
 export const OverviewPage: FC = () => {
-  const [canViewMlNodes, canCreateJob] = usePermissionCheck(['canViewMlNodes', 'canCreateJob']);
-
   const {
     services: { docLinks },
   } = useMlKibana();
   const helpLink = docLinks.links.ml.guide;
 
   const navigateToPath = useNavigateToPath();
-  const currentBreakpoint = useCurrentEuiBreakpoint();
+
   const isMobile = useIsWithinBreakpoints(['xs', 's', 'm', 'l']);
 
   return (
@@ -137,10 +133,10 @@ export const OverviewPage: FC = () => {
             </EuiFlexItem>
             <EuiFlexGrid gutterSize="m" responsive={false} columns={isMobile ? 1 : 2}>
               <EuiFlexItem>
-                <AnomalyDetectionEmptyState />
+                <AnomalyDetectionOverviewCard />
               </EuiFlexItem>
               <EuiFlexItem>
-                <AnalyticsEmptyPrompt />
+                <DataFrameAnalyticsOverviewCard />
               </EuiFlexItem>
             </EuiFlexGrid>
           </EuiFlexGroup>
